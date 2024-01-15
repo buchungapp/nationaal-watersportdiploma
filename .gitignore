@@ -10,7 +10,6 @@
 node_modules/
 out/
 coverage/
-generated/
 
 !.vscode/
 !.github/
