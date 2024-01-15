@@ -1,3 +1,5 @@
+import pg from "pg";
+
 export interface Context {
-  count: number;
+  pgPool: pg.Pool;
 }

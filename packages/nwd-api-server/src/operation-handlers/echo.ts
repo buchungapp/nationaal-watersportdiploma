@@ -5,9 +5,15 @@ export function createEchoHandler(
   context: application.Context,
 ): api.EchoOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
-    context.count += 1;
-
     const entity = await incomingRequest.entity();
+
+    await context.pgPool.query(
+      `
+        insert into echo_messages(message_value)
+        values($1);
+      `,
+      [entity.message],
+    );
 
     return {
       status: 200,

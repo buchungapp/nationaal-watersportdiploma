@@ -1,32 +1,37 @@
 import assert from "assert";
 import test from "node:test";
 import * as api from "nwd-api";
-import * as application from "../application/index.js";
-import { withServer } from "../testing/index.js";
+import { withDatabase, withServer } from "../testing/index.js";
 
-test("echo", async () => {
-  const context: application.Context = { count: 0 };
-  await withServer(context, async ({ baseUrl, server }) => {
-    assert.equal(context.count, 0);
+test("echo", () =>
+  withDatabase(async ({ pgPool }) =>
+    withServer({ pgPool }, async ({ baseUrl, server }) => {
+      const message = "hello";
+      const operationResult = await api.echo(
+        {
+          parameters: {},
+          contentType: "application/json",
+          entity: () => ({ message }),
+        },
+        {},
+        {
+          baseUrl,
+        },
+      );
 
-    const message = "hello";
-    const operationResult = await api.echo(
-      {
-        parameters: {},
-        contentType: "application/json",
-        entity: () => ({ message }),
-      },
-      {},
-      {
-        baseUrl,
-      },
-    );
+      assert.equal(operationResult.status, 200);
 
-    assert.equal(operationResult.status, 200);
+      const entity = await operationResult.entity();
+      assert.equal(entity.message, message);
 
-    const entity = await operationResult.entity();
-    assert.equal(entity.message, message);
-
-    assert.equal(context.count, 1);
-  });
-});
+      const pgResult = await pgPool.query(`
+        select message_value
+        from echo_messages
+      `);
+      assert.deepEqual(pgResult.rows, [
+        {
+          message_value: message,
+        },
+      ]);
+    }),
+  ));

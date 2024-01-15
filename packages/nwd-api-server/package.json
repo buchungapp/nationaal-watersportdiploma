@@ -31,10 +31,12 @@
   "keywords": [],
   "dependencies": {
     "@types/node": "^20.11.1",
+    "@types/pg": "^8.10.9",
+    "nwd-api": "*",
+    "pg": "^8.11.3",
     "tslib": "^2.6.2",
     "type-fest": "^4.9.0",
-    "yargs": "^17.7.2",
-    "nwd-api": "*"
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",

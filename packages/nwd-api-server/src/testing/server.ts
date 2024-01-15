@@ -2,15 +2,15 @@ import assert from "assert";
 import * as http from "http";
 import * as application from "../application/index.js";
 
-export interface ServerConfiguration {
+export interface ServerContext {
   server: application.Server;
   baseUrl: URL;
 }
 export async function withServer<T>(
-  context: application.Context,
-  job: (configuration: ServerConfiguration) => Promise<T>,
+  applicationContext: application.Context,
+  job: (context: ServerContext) => Promise<T>,
 ): Promise<T> {
-  const server = application.createApplicationServer(context);
+  const server = application.createApplicationServer(applicationContext);
 
   const httpServer = http.createServer();
   const onRequest = server.asRequestListener({
