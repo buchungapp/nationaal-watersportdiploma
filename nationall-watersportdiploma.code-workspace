@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "name": "specifications",
+      "path": "./specifications",
+    },
+    {
+      "name": "nwd-api-server",
+      "path": "./packages/nwd-api-server",
+    },
+    {
+      "name": "nwd-api (generated)",
+      "path": "./generated/nwd-api",
+    },
+  ],
+  "settings": {
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "window.title": "Nationaal Watersport Diploma",
+  },
+}

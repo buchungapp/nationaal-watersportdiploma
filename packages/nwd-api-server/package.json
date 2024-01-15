@@ -1,0 +1,43 @@
+{
+  "name": "nwd-api-server",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "bin": {
+    "nwd-api-server": "bin/nwd-api-server"
+  },
+  "main": "./out/main.js",
+  "types": "./out/main.d.ts",
+  "files": [
+    "./bin/**",
+    "./out/**",
+    "./src/**"
+  ],
+  "scripts": {
+    "prepare": "tsc --build",
+    "build": "tsc --build ",
+    "clean": "rm -rf out",
+    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:buchungapp/nationaal-watersportdiploma.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/buchungapp/nationaal-watersportdiploma/issues"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@types/node": "^20.11.1",
+    "tslib": "^2.6.2",
+    "type-fest": "^4.9.0",
+    "yargs": "^17.7.2",
+    "nwd-api": "*"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
+    "typescript": "^5.3.3"
+  }
+}
