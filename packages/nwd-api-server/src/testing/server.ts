@@ -7,9 +7,10 @@ export interface ServerConfiguration {
   baseUrl: URL;
 }
 export async function withServer<T>(
+  context: application.Context,
   job: (configuration: ServerConfiguration) => Promise<T>,
 ): Promise<T> {
-  const server = application.createApplicationServer();
+  const server = application.createApplicationServer(context);
 
   const httpServer = http.createServer();
   const onRequest = server.asRequestListener({

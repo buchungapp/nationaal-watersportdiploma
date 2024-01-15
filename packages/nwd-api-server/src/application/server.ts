@@ -1,13 +1,14 @@
 import * as api from "nwd-api";
 import * as operationHandlers from "../operation-handlers/index.js";
+import { Authentication } from "./authentication.js";
+import { Context } from "./context.js";
 
-export type ServerAuthentication = {};
-export type Server = api.Server<ServerAuthentication>;
+export type Server = api.Server<Authentication>;
 
-export function createApplicationServer() {
-  const server = new api.Server<ServerAuthentication>();
+export function createApplicationServer(context: Context) {
+  const server = new api.Server<Authentication>();
 
-  server.registerEchoOperation(operationHandlers.createEchoHandler());
+  server.registerEchoOperation(operationHandlers.createEchoHandler(context));
 
   return server;
 }

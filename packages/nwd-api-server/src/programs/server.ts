@@ -25,7 +25,8 @@ async function main(options: MainOptions) {
 
   const { port } = options;
 
-  const server = application.createApplicationServer();
+  const context: application.Context = { count: 0 };
+  const server = application.createApplicationServer(context);
 
   const httpServer = http.createServer();
   const onRequest = server.asRequestListener({
