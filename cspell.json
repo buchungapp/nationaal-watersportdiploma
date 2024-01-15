@@ -1,0 +1,6 @@
+{
+  "version": "0.2",
+  "words": ["Nationaal", "openapi", "Watersport"],
+  "useGitignore": true,
+  "files": ["packages/src/**", "specifications/**"]
+}

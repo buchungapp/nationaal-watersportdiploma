@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "generated/*"
+  ],
+  "scripts": {
+    "spelling": "cspell",
+    "formatting": "prettier --check *"
+  },
+  "devDependencies": {
+    "cspell": "^8.3.2",
+    "prettier": "^3.2.2",
+    "oa42-generator": "^0.1.1"
+  },
+  "dependencies": {}
+}
