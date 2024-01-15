@@ -13,6 +13,13 @@ jobs:
   unit:
     runs-on: ubuntu-latest
     container: node:21.5.0-alpine3.19
+    services:
+      postgres:
+        image: postgres:16.1
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+    env:
+      PGURI: "postgres://postgres@postgres:5432/postgres"
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
