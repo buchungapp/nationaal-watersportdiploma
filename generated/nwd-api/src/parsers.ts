@@ -12,6 +12,7 @@ export function parseResponsesSchema(value: unknown): unknown {
 return parseMessageContainer(value);
 }
 /**
+* @description Object that contains a message
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
 */
 export function parseMessageContainer(value: unknown): unknown {

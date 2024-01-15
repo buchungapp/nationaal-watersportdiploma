@@ -10,6 +10,7 @@
 */
 export type ResponsesSchema = (MessageContainer);
 /**
+* @description Object that contains a message
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
 */
 export type MessageContainer = (

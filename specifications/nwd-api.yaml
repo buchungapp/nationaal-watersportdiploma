@@ -31,6 +31,8 @@ paths:
 components:
   schemas:
     message-container:
+      description: |-
+        Object that contains a message
       type: object
       required:
         - message

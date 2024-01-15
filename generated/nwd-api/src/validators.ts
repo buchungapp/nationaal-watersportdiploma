@@ -13,6 +13,7 @@ export function isResponsesSchema(value: unknown): value is types.ResponsesSchem
 return ((isMessageContainer(value)));
 }
 /**
+* @description Object that contains a message
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
 */
 export function isMessageContainer(value: unknown): value is types.MessageContainer {

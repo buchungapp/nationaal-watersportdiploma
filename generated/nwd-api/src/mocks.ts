@@ -31,6 +31,7 @@ depthCounters["0"]--;
 }
 }
 /**
+* @description Object that contains a message
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
 */
 export function mockMessageContainer(options: MockGeneratorOptions = {}): types.MessageContainer {
