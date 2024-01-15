@@ -17,6 +17,7 @@ test("echo", () =>
         baseUrl,
       },
     );
+
     assert.equal(operationResult.status, 200);
     const entity = await operationResult.entity();
 
