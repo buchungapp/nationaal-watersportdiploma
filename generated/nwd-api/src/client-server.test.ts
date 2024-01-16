@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.3                                           -- www.OpenApi42.org
+//   v0.1.5                                           -- www.OpenApi42.org
 import assert from "assert/strict";
 import test from "node:test";
 import * as main from "./main.js";

@@ -6,19 +6,57 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.3                                           -- www.OpenApi42.org
+//   v0.1.5                                           -- www.OpenApi42.org
 import * as types from "./types.js";
 import * as validators from "./validators.js";
 import * as parsers from "./parsers.js";
+export interface ParameterValidationError {
+parameterName: string;
+path: string;
+rule: string;
+typeName?: string;
+}
+let lastParameterValidationError: ParameterValidationError | undefined;
+export function getLastParameterValidationError() {
+if(lastParameterValidationError == null) {
+throw new TypeError("no validation errors");
+}
+return lastParameterValidationError;
+}
+function recordError(
+parameterName: string,
+path: string,
+rule: string,
+typeName?: string
+) {
+lastParameterValidationError = {
+parameterName,
+path,
+rule,
+typeName,
+}
+}
 export function isEchoViaGetRequestParameters(
 parameters: Partial<Record<keyof EchoViaGetRequestParameters, unknown>>,
 ): parameters is EchoViaGetRequestParameters {
 if(parameters.message === undefined) {
+recordError(
+"message",
+"",
+"required"
+);
 return false;
 }
 if(!validators.isParametersSchema(
 parameters.message
 )) {
+const lastValidationError = validators.getLastValidationError();
+recordError(
+"message",
+lastValidationError.path,
+lastValidationError.rule,
+lastValidationError.typeName,
+);
 return false;
 }
 return true;

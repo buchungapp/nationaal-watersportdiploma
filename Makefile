@@ -1,16 +1,16 @@
 SHELL:=$(PREFIX)/bin/sh
 
+build: \
+	generated/nwd-api \
+
+	npm install
+
 rebuild: \
 	clean build
 
 clean: \
 
 	rm --recursive --force generated/nwd-api \
-
-build: \
-	generated/nwd-api \
-
-	npm install
 
 out/%: specifications/%.yaml
 	npx --yes oa42-generator package $^ \

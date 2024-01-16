@@ -3,33 +3,122 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.5                         -- www.JsonSchema42.org
+// v0.11.8                         -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
+export interface ValidationError {
+path: string;
+rule: string;
+typeName?: string;
+}
+const pathPartStack = new Array<string>();
+let currentPathPart: string | undefined = "";
+let currentTypeName: string | undefined;
+let errors = new Array<ValidationError>();
+export function getValidationErrors() {
+return errors;
+}
+export function getLastValidationError() {
+if(errors.length === 0) {
+throw new TypeError("no validation errors");
+}
+return errors[errors.length - 1];
+}
+function resetErrors() {
+errors = [];
+}
+function recordError(rule: string) {
+errors.push({
+path: pathPartStack.join("/"),
+typeName: currentTypeName,
+rule,
+})
+}
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
 */
 export function isParametersSchema(value: unknown): value is types.ParametersSchema {
-return ((typeof value === "string"));
+if(pathPartStack.length === 0) {
+resetErrors();
+}
+const typeName: string | undefined = currentTypeName;
+const pathPart = currentPathPart;
+try {
+currentTypeName = "ParametersSchema";
+if(pathPart != null) {
+pathPartStack.push(pathPart);
+}
+if(
+typeof value !== "string"
+) {
+recordError("string");
+return false;
+}
+return true;
+;
+}
+finally {
+currentTypeName = typeName;
+if(pathPart != null) {
+currentPathPart = pathPartStack.pop();
+}
+}
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
 */
 export function isGetSchema(value: unknown): value is types.GetSchema {
-return ((isMessageContainer(value)));
+if(pathPartStack.length === 0) {
+resetErrors();
+}
+const typeName: string | undefined = currentTypeName;
+const pathPart = currentPathPart;
+try {
+currentTypeName = "GetSchema";
+if(pathPart != null) {
+pathPartStack.push(pathPart);
+}
+currentPathPart = undefined;
+return (isMessageContainer(value));
+;
+}
+finally {
+currentTypeName = typeName;
+if(pathPart != null) {
+currentPathPart = pathPartStack.pop();
+}
+}
 }
 /**
 * @description Object that contains a message
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
 */
 export function isMessageContainer(value: unknown): value is types.MessageContainer {
-return ((value !== null) &&
-(typeof value === "object") &&
-(!Array.isArray(value)) &&
-("message" in value) &&
-(value["message"] !== undefined) &&
-(
-(()=>{
+if(pathPartStack.length === 0) {
+resetErrors();
+}
+const typeName: string | undefined = currentTypeName;
+const pathPart = currentPathPart;
+try {
+currentTypeName = "MessageContainer";
+if(pathPart != null) {
+pathPartStack.push(pathPart);
+}
+if(
+value === null ||
+typeof value !== "object" ||
+Array.isArray(value)
+) {
+recordError("object");
+return false;
+}
+if(
+!("message" in value) ||
+value["message"] === undefined
+) {
+recordError("required");
+return false;
+}
 for(const propertyName in value) {
 const propertyValue = value[propertyName as keyof typeof value];
 if(propertyValue === undefined) {
@@ -37,32 +126,107 @@ continue;
 }
 switch(propertyName) {
 case "message":
+currentPathPart = propertyName;
 if(!isMessage(propertyValue)) {
+recordError("propertyName");
 return false;
 }
 break;
 }
 }
 return true;
-})()
-));
+;
+}
+finally {
+currentTypeName = typeName;
+if(pathPart != null) {
+currentPathPart = pathPartStack.pop();
+}
+}
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
 */
 export function isMessage(value: unknown): value is types.Message {
-return ((typeof value === "string") &&
-(value.length >= 1));
+if(pathPartStack.length === 0) {
+resetErrors();
+}
+const typeName: string | undefined = currentTypeName;
+const pathPart = currentPathPart;
+try {
+currentTypeName = "Message";
+if(pathPart != null) {
+pathPartStack.push(pathPart);
+}
+if(
+typeof value !== "string"
+) {
+recordError("string");
+return false;
+}
+if(
+value.length < 1
+) {
+recordError("minimumLength");
+return false;
+}
+return true;
+;
+}
+finally {
+currentTypeName = typeName;
+if(pathPart != null) {
+currentPathPart = pathPartStack.pop();
+}
+}
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
 */
 export function isPostSchema(value: unknown): value is types.PostSchema {
-return ((isMessageContainer(value)));
+if(pathPartStack.length === 0) {
+resetErrors();
+}
+const typeName: string | undefined = currentTypeName;
+const pathPart = currentPathPart;
+try {
+currentTypeName = "PostSchema";
+if(pathPart != null) {
+pathPartStack.push(pathPart);
+}
+currentPathPart = undefined;
+return (isMessageContainer(value));
+;
+}
+finally {
+currentTypeName = typeName;
+if(pathPart != null) {
+currentPathPart = pathPartStack.pop();
+}
+}
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
 */
 export function isRequestBodySchema(value: unknown): value is types.RequestBodySchema {
-return ((isMessageContainer(value)));
+if(pathPartStack.length === 0) {
+resetErrors();
+}
+const typeName: string | undefined = currentTypeName;
+const pathPart = currentPathPart;
+try {
+currentTypeName = "RequestBodySchema";
+if(pathPart != null) {
+pathPartStack.push(pathPart);
+}
+currentPathPart = undefined;
+return (isMessageContainer(value));
+;
+}
+finally {
+currentTypeName = typeName;
+if(pathPart != null) {
+currentPathPart = pathPartStack.pop();
+}
+}
 }

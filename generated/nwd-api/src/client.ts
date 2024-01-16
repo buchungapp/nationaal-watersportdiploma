@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.3                                           -- www.OpenApi42.org
+//   v0.1.5                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -55,7 +55,12 @@ const requestHeaders = new Headers();
 const cookieParameters = {};
 if(validateOutgoingParameters) {
 if(!parameters.isEchoViaGetRequestParameters(outgoingRequest.parameters)) {
-throw new lib.ClientRequestParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientRequestParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
 }
 }
 lib.addParameter(
@@ -99,7 +104,12 @@ const responseParameters = {
 } as parameters.EchoViaGet200ResponseParameters;
 if(validateIncomingParameters) {
 if(!parameters.isEchoViaGet200ResponseParameters(responseParameters)) {
-throw new lib.ClientResponseParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
 }
 }
 if (responseContentType == null) {
@@ -118,7 +128,11 @@ signal
 );
 const mapAssertEntity = (entity: unknown) => {
 if(!validators.isGetSchema(entity)) {
-throw new lib.ClientResponseEntityValidationFailed();
+const lastError = validators.getLastValidationError();
+throw new lib.ClientResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
 }
 return entity;
 };
@@ -197,7 +211,12 @@ const requestHeaders = new Headers();
 const cookieParameters = {};
 if(validateOutgoingParameters) {
 if(!parameters.isEchoRequestParameters(outgoingRequest.parameters)) {
-throw new lib.ClientRequestParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientRequestParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
 }
 }
 const path =
@@ -223,7 +242,11 @@ case "application/json": {
 requestHeaders.append("content-type", outgoingRequest.contentType);
 const mapAssertEntity = (entity: unknown) => {
 if(!validators.isRequestBodySchema(entity)) {
-throw new lib.ClientResponseEntityValidationFailed();
+const lastError = validators.getLastValidationError();
+throw new lib.ClientResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
 }
 return entity;
 };
@@ -271,7 +294,12 @@ const responseParameters = {
 } as parameters.Echo200ResponseParameters;
 if(validateIncomingParameters) {
 if(!parameters.isEcho200ResponseParameters(responseParameters)) {
-throw new lib.ClientResponseParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
 }
 }
 if (responseContentType == null) {
@@ -290,7 +318,11 @@ signal
 );
 const mapAssertEntity = (entity: unknown) => {
 if(!validators.isPostSchema(entity)) {
-throw new lib.ClientResponseEntityValidationFailed();
+const lastError = validators.getLastValidationError();
+throw new lib.ClientResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
 }
 return entity;
 };

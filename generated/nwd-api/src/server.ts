@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.3                                           -- www.OpenApi42.org
+//   v0.1.5                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -105,7 +105,12 @@ parsers.parseParametersSchema(lib.getParameterValues(queryParameters, "message")
 } as parameters.EchoViaGetRequestParameters;
 if(validateIncomingParameters) {
 if(!parameters.isEchoViaGetRequestParameters(requestParameters)) {
-throw new lib.ServerRequestParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerRequestParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule
+);
 }
 }
 let incomingRequest: EchoViaGetIncomingRequest;
@@ -126,7 +131,12 @@ case 200:
 {
 if(validateOutgoingParameters) {
 if(!parameters.isEchoViaGet200ResponseParameters(outgoingResponse.parameters)) {
-throw new lib.ServerResponseParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
 }
 }
 const responseHeaders = {};
@@ -135,7 +145,11 @@ case "application/json":
 {
 const mapAssertEntity = (entity: unknown) => {
 if(!validators.isGetSchema(entity)) {
-throw new lib.ServerResponseEntityValidationFailed();
+const lastError = validators.getLastValidationError();
+throw new lib.ServerResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
 }
 return entity as types.GetSchema;
 }
@@ -215,7 +229,12 @@ const requestParameters = {
 } as parameters.EchoRequestParameters;
 if(validateIncomingParameters) {
 if(!parameters.isEchoRequestParameters(requestParameters)) {
-throw new lib.ServerRequestParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerRequestParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule
+);
 }
 }
 let incomingRequest: EchoIncomingRequest;
@@ -227,7 +246,11 @@ case "application/json":
 {
 const mapAssertEntity = (entity: unknown) => {
 if(!validators.isRequestBodySchema(entity)) {
-throw new lib.ServerRequestEntityValidationFailed();
+const lastError = validators.getLastValidationError();
+throw new lib.ServerRequestEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
 }
 return entity;
 };
@@ -276,7 +299,12 @@ case 200:
 {
 if(validateOutgoingParameters) {
 if(!parameters.isEcho200ResponseParameters(outgoingResponse.parameters)) {
-throw new lib.ServerResponseParameterValidationFailed();
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
 }
 }
 const responseHeaders = {};
@@ -285,7 +313,11 @@ case "application/json":
 {
 const mapAssertEntity = (entity: unknown) => {
 if(!validators.isPostSchema(entity)) {
-throw new lib.ServerResponseEntityValidationFailed();
+const lastError = validators.getLastValidationError();
+throw new lib.ServerResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
 }
 return entity as types.PostSchema;
 }
