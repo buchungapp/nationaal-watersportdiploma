@@ -1,12 +1,11 @@
 import * as api from "nwd-api";
 import * as application from "../application/index.js";
 
-export function createEchoHandler(
+export function createEchoViaGetHandler(
   context: application.Context,
-): api.EchoOperationHandler<application.Authentication> {
+): api.EchoViaGetOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
-    const entity = await incomingRequest.entity();
-    const { message } = entity;
+    const { message } = incomingRequest.parameters;
 
     await context.pgPool.query(
       `

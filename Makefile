@@ -1,5 +1,12 @@
 SHELL:=$(PREFIX)/bin/sh
 
+rebuild: \
+	clean build
+
+clean: \
+
+	rm --recursive --force generated/nwd-api \
+
 build: \
 	generated/nwd-api \
 

@@ -3,13 +3,19 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.4                         -- www.JsonSchema42.org
+// v0.11.5                         -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
 */
-export function isResponsesSchema(value: unknown): value is types.ResponsesSchema {
+export function isParametersSchema(value: unknown): value is types.ParametersSchema {
+return ((typeof value === "string"));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
+*/
+export function isGetSchema(value: unknown): value is types.GetSchema {
 return ((isMessageContainer(value)));
 }
 /**
@@ -47,6 +53,12 @@ return true;
 export function isMessage(value: unknown): value is types.Message {
 return ((typeof value === "string") &&
 (value.length >= 1));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+*/
+export function isPostSchema(value: unknown): value is types.PostSchema {
+return ((isMessageContainer(value)));
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}

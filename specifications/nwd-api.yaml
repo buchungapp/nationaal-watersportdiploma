@@ -8,6 +8,25 @@ info:
 
 paths:
   /echo:
+    get:
+      operationId: echo-via-get
+      summary: Send a message via GET and get your message back in a message-container
+      description: |-
+        Send a message and get the same message back!
+      parameters:
+        - name: message
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: |-
+            A response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message-container"
     post:
       operationId: echo
       summary: Send a message
