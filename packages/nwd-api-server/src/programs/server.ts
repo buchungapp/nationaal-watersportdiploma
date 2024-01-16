@@ -34,6 +34,9 @@ async function main(options: MainOptions) {
 
   const { port, pgUri } = options;
 
+  const onError = (error: unknown) => console.error(error);
+  const onWarn = (error: unknown) => console.warn(error);
+
   const pgPool = new pg.Pool({
     connectionString: pgUri,
   });
@@ -41,7 +44,7 @@ async function main(options: MainOptions) {
     const context = {
       pgPool,
     };
-    const server = application.createApplicationServer(context);
+    const server = application.createApplicationServer(context, onWarn);
 
     const httpServer = http.createServer();
     const onRequest = server.asRequestListener({
