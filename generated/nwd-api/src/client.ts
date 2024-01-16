@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.1                                           -- www.OpenApi42.org
+//   v0.1.3                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -30,6 +30,148 @@ const router = new Router({
 parameterValueDecoder: value => value,
 parameterValueEncoder: value => value,
 }).loadFromJson({"templatePairs":[[1,[["/echo",null]]]]});
+/**
+Send a message via GET and get your message back in a message-container
+Send a message and get the same message back!
+*/
+export async function echoViaGet(
+outgoingRequest: EchoViaGetOutgoingRequest,
+credentials: unknown,
+options: ClientOptions = defaultClientOptions,
+): Promise<EchoViaGetIncomingResponse> {
+const {
+baseUrl,
+validateIncomingEntity,
+validateIncomingParameters,
+validateOutgoingEntity,
+validateOutgoingParameters,
+} = options;
+if(baseUrl == null) {
+throw new Error("please set baseUrl");
+}
+const pathParameters = {};
+const queryParameters = {};
+const requestHeaders = new Headers();
+const cookieParameters = {};
+if(validateOutgoingParameters) {
+if(!parameters.isEchoViaGetRequestParameters(outgoingRequest.parameters)) {
+throw new lib.ClientRequestParameterValidationFailed();
+}
+}
+lib.addParameter(
+queryParameters,
+"message",
+outgoingRequest.parameters.message as unknown as string,
+);
+const path =
+router.stringifyRoute(
+1,
+pathParameters,
+) +
+lib.stringifyParameters(
+queryParameters,
+"?", "&", "=",
+);
+const cookie = lib.stringifyParameters(
+cookieParameters,
+"", "; ", "=",
+);
+if(cookie !== ""){
+requestHeaders.append("set-cookie", cookie);
+}
+const url = new URL(path, baseUrl);
+let body: BodyInit | null;
+body = null;
+const requestInit: RequestInit = {
+headers: requestHeaders,
+method: "GET",
+redirect: "manual",
+body,
+};
+const fetchResponse = await fetch(url, requestInit);
+const responseContentType =
+fetchResponse.headers.get("content-type");
+let incomingResponse: EchoViaGetIncomingResponse;
+switch(fetchResponse.status) {
+case 200:
+{
+const responseParameters = {
+} as parameters.EchoViaGet200ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isEchoViaGet200ResponseParameters(responseParameters)) {
+throw new lib.ClientResponseParameterValidationFailed();
+}
+}
+if (responseContentType == null) {
+throw new lib.MissingClientResponseContentType();
+}
+switch(responseContentType) {
+case "application/json":
+{
+const responseBody = fetchResponse.body;
+if (responseBody == null) {
+throw new Error("expected body");
+}
+const stream = (signal?: AbortSignal) => lib.fromReadableStream(
+responseBody,
+signal
+);
+const mapAssertEntity = (entity: unknown) => {
+if(!validators.isGetSchema(entity)) {
+throw new lib.ClientResponseEntityValidationFailed();
+}
+return entity;
+};
+incomingResponse = {
+status: fetchResponse.status,
+contentType: responseContentType,
+parameters: responseParameters,
+stream: (signal) => {
+return stream(signal)
+},
+entities(signal) {
+let entities = lib.deserializeJsonEntities(
+stream,
+signal,
+) as AsyncIterable<types.GetSchema>;
+if(validateIncomingEntity) {
+entities = lib.mapAsyncIterable(entities, mapAssertEntity);
+}
+return entities;
+},
+entity() {
+let entity = lib.deserializeJsonEntity(
+stream
+) as Promise<types.GetSchema>;
+if(validateIncomingEntity) {
+entity = lib.mapPromisable(entity, mapAssertEntity);
+}
+return entity;
+},
+}
+break;
+}
+default:
+throw new lib.Unreachable();
+}
+break;
+}
+default:
+throw new lib.Unreachable();
+}
+return incomingResponse;
+}
+export type EchoViaGetOutgoingRequest =
+lib.OutgoingEmptyRequest<parameters.EchoViaGetRequestParameters>
+;
+export type EchoViaGetIncomingResponse =
+lib.IncomingJsonResponse<
+200,
+parameters.EchoViaGet200ResponseParameters,
+"application/json",
+types.GetSchema
+>
+;
 /**
 Send a message
 Send a message and get the same message back!
@@ -147,7 +289,7 @@ responseBody,
 signal
 );
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isResponsesSchema(entity)) {
+if(!validators.isPostSchema(entity)) {
 throw new lib.ClientResponseEntityValidationFailed();
 }
 return entity;
@@ -163,7 +305,7 @@ entities(signal) {
 let entities = lib.deserializeJsonEntities(
 stream,
 signal,
-) as AsyncIterable<types.ResponsesSchema>;
+) as AsyncIterable<types.PostSchema>;
 if(validateIncomingEntity) {
 entities = lib.mapAsyncIterable(entities, mapAssertEntity);
 }
@@ -172,7 +314,7 @@ return entities;
 entity() {
 let entity = lib.deserializeJsonEntity(
 stream
-) as Promise<types.ResponsesSchema>;
+) as Promise<types.PostSchema>;
 if(validateIncomingEntity) {
 entity = lib.mapPromisable(entity, mapAssertEntity);
 }
@@ -203,6 +345,6 @@ lib.IncomingJsonResponse<
 200,
 parameters.Echo200ResponseParameters,
 "application/json",
-types.ResponsesSchema
+types.PostSchema
 >
 ;

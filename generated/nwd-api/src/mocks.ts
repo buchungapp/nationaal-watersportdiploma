@@ -3,20 +3,43 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.4                         -- www.JsonSchema42.org
+// v0.11.5                         -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
 const depthCounters: Record<string, number> = {};
+export const unknownValue = {};
+export const anyValue = {};
+export const neverValue = {};
 export interface MockGeneratorOptions {
 maximumDepth?: number;
+numberPrecision?: number;
+stringCharacters?: string;
+defaultMinimumValue?: number;
+defaultMaximumValue?: number;
+defaultMinimumItems?: number;
+defaultMaximumItems?: number;
+defaultMinimumProperties?: number;
+defaultMaximumProperties?: number;
+defaultMinimumStringLength?: number;
+defaultMaximumStringLength?: number;
 }
 const defaultMockGeneratorOptions = {
 maximumDepth: 1,
+numberPrecision: 1000,
+stringCharacters: "abcdefghijklmnopqrstuvwxyz",
+defaultMinimumValue: -1000,
+defaultMaximumValue: 1000,
+defaultMinimumItems: 1,
+defaultMaximumItems: 5,
+defaultMinimumProperties: 1,
+defaultMaximumProperties: 5,
+defaultMinimumStringLength: 5,
+defaultMaximumStringLength: 20,
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
 */
-export function mockResponsesSchema(options: MockGeneratorOptions = {}): types.ResponsesSchema {
+export function mockParametersSchema(options: MockGeneratorOptions = {}): types.ParametersSchema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
@@ -24,10 +47,34 @@ const configuration = {
 depthCounters["0"] ??= 0;
 try {
 depthCounters["0"]++;
-return (mockMessageContainer());
+return (
+new Array(
+configuration.defaultMinimumStringLength + nextSeed() % (configuration.defaultMaximumStringLength - configuration.defaultMinimumStringLength + 1)
+).
+fill(undefined).
+map(() => configuration.stringCharacters[nextSeed() % configuration.stringCharacters.length]).
+join("")
+);
 }
 finally {
 depthCounters["0"]--;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
+*/
+export function mockGetSchema(options: MockGeneratorOptions = {}): types.GetSchema {
+const configuration = {
+...defaultMockGeneratorOptions,
+...options,
+};
+depthCounters["1"] ??= 0;
+try {
+depthCounters["1"]++;
+return (mockMessageContainer());
+}
+finally {
+depthCounters["1"]--;
 }
 }
 /**
@@ -39,9 +86,9 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["1"] ??= 0;
+depthCounters["2"] ??= 0;
 try {
-depthCounters["1"]++;
+depthCounters["2"]++;
 return (
 {
 "message": mockMessage(),
@@ -49,7 +96,7 @@ return (
 );
 }
 finally {
-depthCounters["1"]--;
+depthCounters["2"]--;
 }
 }
 /**
@@ -60,13 +107,37 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["2"] ??= 0;
+depthCounters["3"] ??= 0;
 try {
-depthCounters["2"]++;
-return (randomString({"lengthOffset":1,"lengthRange":15,"chars":"abcdefghijklmnopqrstuvwxyz"}));
+depthCounters["3"]++;
+return (
+new Array(
+1 + nextSeed() % (configuration.defaultMaximumStringLength - 1 + 1)
+).
+fill(undefined).
+map(() => configuration.stringCharacters[nextSeed() % configuration.stringCharacters.length]).
+join("")
+);
 }
 finally {
-depthCounters["2"]--;
+depthCounters["3"]--;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+*/
+export function mockPostSchema(options: MockGeneratorOptions = {}): types.PostSchema {
+const configuration = {
+...defaultMockGeneratorOptions,
+...options,
+};
+depthCounters["4"] ??= 0;
+try {
+depthCounters["4"]++;
+return (mockMessageContainer());
+}
+finally {
+depthCounters["4"]--;
 }
 }
 /**
@@ -77,13 +148,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["3"] ??= 0;
+depthCounters["5"] ??= 0;
 try {
-depthCounters["3"]++;
+depthCounters["5"]++;
 return (mockMessageContainer());
 }
 finally {
-depthCounters["3"]--;
+depthCounters["5"]--;
 }
 }
 let seed = 1;
@@ -95,62 +166,4 @@ const a = 950706376;
 const b = 0;
 seed = (a * seed + b) % p;
 return seed;
-}
-interface RandomStringArguments {
-lengthOffset: number,
-lengthRange: number,
-chars: string,
-}
-function randomString({
-lengthOffset,
-lengthRange,
-chars,
-}: RandomStringArguments) {
-const length = lengthOffset + nextSeed() % lengthRange;
-let value = ""
-while(value.length < length) {
-value += chars[nextSeed() % chars.length];
-}
-return value;
-}
-interface RandomNumberArguments {
-isMinimumInclusive: boolean;
-isMaximumInclusive: boolean;
-minimumValue: number;
-maximumValue: number;
-precisionOffset: number,
-precisionRange: number,
-}
-function randomNumber({
-isMinimumInclusive,
-isMaximumInclusive,
-minimumValue,
-maximumValue,
-precisionOffset,
-precisionRange,
-}: RandomNumberArguments) {
-const precision = precisionOffset + nextSeed() % precisionRange;
-const inclusiveMinimumValue = isMinimumInclusive ? minimumValue : minimumValue + (1 / precision);
-const inclusiveMaximumValue = isMaximumInclusive ? maximumValue : maximumValue - (1 / precision);
-const valueOffset = inclusiveMinimumValue * precision;
-const valueRange = (inclusiveMaximumValue - inclusiveMinimumValue) * precision;
-const value = (valueOffset + nextSeed() % valueRange) / precision;
-return value;
-}
-interface RandomArrayArguments<T> {
-elementFactory: () => T;
-lengthOffset: number;
-lengthRange: number;
-}
-function randomArray<T>({
-elementFactory,
-lengthOffset,
-lengthRange,
-}: RandomArrayArguments<T>) {
-const length = lengthOffset + nextSeed() % lengthRange;
-const value = new Array<T>();
-while(value.length < length) {
-value.push(elementFactory());
-}
-return value;
 }

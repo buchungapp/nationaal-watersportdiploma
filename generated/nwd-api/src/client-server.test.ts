@@ -6,11 +6,77 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.1                                           -- www.OpenApi42.org
+//   v0.1.3                                           -- www.OpenApi42.org
 import assert from "assert/strict";
 import test from "node:test";
 import * as main from "./main.js";
 import * as http from "http";
+test("echo-via-get 200 application/json", async () => {
+const server = new main.Server({
+validateIncomingParameters: false,
+validateIncomingEntity: false,
+validateOutgoingParameters: false,
+validateOutgoingEntity: false,
+});
+server.registerEchoViaGetOperation(async (incomingRequest, authentication) => {
+{
+const parameterValue = incomingRequest.parameters.message;
+const valid = main.isParametersSchema(parameterValue);
+assert.equal(valid, true);
+}
+return {
+status: 200,
+parameters: {
+},
+contentType: "application/json",
+entity: () => main.mockGetSchema(),
+}
+});
+let lastError: unknown;
+const httpServer = http.createServer();
+httpServer.addListener(
+"request",
+server.asRequestListener({
+onError: (error) => lastError = error,
+}),
+);
+await new Promise<void>((resolve) => httpServer.listen(resolve));
+const address = httpServer.address();
+assert(address != null && typeof address === "object")
+const { port } = address;
+const baseUrl = new URL(`http://localhost:${port}`);
+try {
+const operationResult = await main.echoViaGet(
+{
+contentType: null,
+parameters: {
+message: main.mockParametersSchema(),
+},
+},
+{},
+{
+baseUrl,
+validateIncomingParameters: false,
+validateIncomingEntity: false,
+validateOutgoingParameters: false,
+validateOutgoingEntity: false,
+},
+);
+assert.ifError(lastError);
+assert(operationResult.status === 200)
+assert(operationResult.contentType === "application/json")
+{
+const entity = await operationResult.entity();
+const valid = main.isGetSchema(entity);
+assert.equal(valid, true);
+}
+}
+finally {
+await new Promise<void>((resolve, reject) =>
+httpServer.close((error) => (error == null ? resolve() : reject(error))),
+);
+}
+});
 test("echo application/json 200 application/json", async () => {
 const server = new main.Server({
 validateIncomingParameters: false,
@@ -30,7 +96,7 @@ status: 200,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockResponsesSchema(),
+entity: () => main.mockPostSchema(),
 }
 });
 let lastError: unknown;
@@ -67,7 +133,7 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isResponsesSchema(entity);
+const valid = main.isPostSchema(entity);
 assert.equal(valid, true);
 }
 }

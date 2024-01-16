@@ -6,10 +6,34 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.1                                           -- www.OpenApi42.org
+//   v0.1.3                                           -- www.OpenApi42.org
 import * as types from "./types.js";
 import * as validators from "./validators.js";
 import * as parsers from "./parsers.js";
+export function isEchoViaGetRequestParameters(
+parameters: Partial<Record<keyof EchoViaGetRequestParameters, unknown>>,
+): parameters is EchoViaGetRequestParameters {
+if(parameters.message === undefined) {
+return false;
+}
+if(!validators.isParametersSchema(
+parameters.message
+)) {
+return false;
+}
+return true;
+}
+export type EchoViaGetRequestParameters = {
+message:
+types.ParametersSchema
+};
+export function isEchoViaGet200ResponseParameters(
+parameters: Partial<Record<keyof EchoViaGet200ResponseParameters, unknown>>,
+): parameters is EchoViaGet200ResponseParameters {
+return true;
+}
+export type EchoViaGet200ResponseParameters = {
+};
 export function isEchoRequestParameters(
 parameters: Partial<Record<keyof EchoRequestParameters, unknown>>,
 ): parameters is EchoRequestParameters {

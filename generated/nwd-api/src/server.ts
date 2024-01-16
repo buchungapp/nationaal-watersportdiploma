@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.1                                           -- www.OpenApi42.org
+//   v0.1.3                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -49,6 +49,11 @@ router.parseRoute(serverIncomingRequest.path);
 switch(pathId) {
 case 1:
 switch(serverIncomingRequest.method) {
+case "GET":
+return this.echoViaGetRouteHandler(
+pathParameters,
+serverIncomingRequest,
+);
 case "POST":
 return this.echoRouteHandler(
 pathParameters,
@@ -60,6 +65,118 @@ throw new lib.MethodNotSupported()
 default:
 throw new lib.NoRouteFound()
 }
+}
+private echoViaGetOperationHandler?: EchoViaGetOperationHandler<A>;
+/**
+Send a message via GET and get your message back in a message-container
+Send a message and get the same message back!
+*/
+public registerEchoViaGetOperation(operationHandler: EchoViaGetOperationHandler<A>) {
+this.echoViaGetOperationHandler = operationHandler;
+}
+private async echoViaGetRouteHandler(
+pathParameters: Record<string, string>,
+serverIncomingRequest: lib.ServerIncomingRequest,
+): Promise<lib.ServerOutgoingResponse> {
+const {
+validateIncomingEntity,
+validateIncomingParameters,
+validateOutgoingEntity,
+validateOutgoingParameters,
+} = this.options;
+const cookie =
+lib.getParameterValues(serverIncomingRequest.headers, "cookie");
+const accept =
+lib.getParameterValues(serverIncomingRequest.headers, "accept");
+const requestContentType =
+lib.first(lib.getParameterValues(serverIncomingRequest.headers, "content-type"));
+const queryParameters =
+lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
+const cookieParameters =
+lib.parseParameters(cookie, "", "; ", "=");
+const authentication = {
+}
+if(!isEchoViaGetAuthentication(authentication)) {
+throw new lib.AuthenticationFailed();
+}
+const requestParameters = {
+message:
+parsers.parseParametersSchema(lib.getParameterValues(queryParameters, "message")),
+} as parameters.EchoViaGetRequestParameters;
+if(validateIncomingParameters) {
+if(!parameters.isEchoViaGetRequestParameters(requestParameters)) {
+throw new lib.ServerRequestParameterValidationFailed();
+}
+}
+let incomingRequest: EchoViaGetIncomingRequest;
+incomingRequest = {
+parameters: requestParameters,
+contentType: null,
+};
+const outgoingResponse = await this.echoViaGetOperationHandler?.(
+incomingRequest,
+authentication,
+);
+if (outgoingResponse == null) {
+throw new lib.OperationNotImplemented();
+}
+let serverOutgoingResponse: lib.ServerOutgoingResponse ;
+switch(outgoingResponse.status) {
+case 200:
+{
+if(validateOutgoingParameters) {
+if(!parameters.isEchoViaGet200ResponseParameters(outgoingResponse.parameters)) {
+throw new lib.ServerResponseParameterValidationFailed();
+}
+}
+const responseHeaders = {};
+switch(outgoingResponse.contentType) {
+case "application/json":
+{
+const mapAssertEntity = (entity: unknown) => {
+if(!validators.isGetSchema(entity)) {
+throw new lib.ServerResponseEntityValidationFailed();
+}
+return entity as types.GetSchema;
+}
+lib.addParameter(responseHeaders, "content-type", outgoingResponse.contentType);
+serverOutgoingResponse = {
+status: outgoingResponse.status,
+headers: responseHeaders,
+stream(signal) {
+if("stream" in outgoingResponse) {
+return outgoingResponse.stream(signal);
+}
+else if("entities" in outgoingResponse) {
+let entities = outgoingResponse.entities(signal);
+if(validateOutgoingEntity) {
+entities = lib.mapAsyncIterable(entities, mapAssertEntity);
+}
+return lib.serializeJsonEntities(outgoingResponse.entities(signal));
+}
+else if("entity" in outgoingResponse) {
+let entity = outgoingResponse.entity();
+if(validateOutgoingEntity) {
+entity = lib.mapPromisable(entity, mapAssertEntity);
+}
+return lib.serializeJsonEntity(entity);
+}
+else {
+throw new lib.Unreachable();
+}
+},
+}
+break;
+}
+default:
+throw new lib.Unreachable();
+}
+break;
+}
+default:
+throw new lib.Unreachable();
+}
+return serverOutgoingResponse
 }
 private echoOperationHandler?: EchoOperationHandler<A>;
 /**
@@ -80,15 +197,15 @@ validateOutgoingEntity,
 validateOutgoingParameters,
 } = this.options;
 const cookie =
-lib.getParameterValue(serverIncomingRequest.headers, "cookie");
+lib.getParameterValues(serverIncomingRequest.headers, "cookie");
 const accept =
-lib.getParameterValue(serverIncomingRequest.headers, "accept");
+lib.getParameterValues(serverIncomingRequest.headers, "accept");
 const requestContentType =
-lib.getParameterValue(serverIncomingRequest.headers, "content-type");
+lib.first(lib.getParameterValues(serverIncomingRequest.headers, "content-type"));
 const queryParameters =
-lib.parseParameters(serverIncomingRequest.query, "?", "&", "=");
+lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
-lib.parseParameters(cookie ?? "", "", "; ", "=");
+lib.parseParameters(cookie, "", "; ", "=");
 const authentication = {
 }
 if(!isEchoAuthentication(authentication)) {
@@ -167,10 +284,10 @@ switch(outgoingResponse.contentType) {
 case "application/json":
 {
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isResponsesSchema(entity)) {
+if(!validators.isPostSchema(entity)) {
 throw new lib.ServerResponseEntityValidationFailed();
 }
-return entity as types.ResponsesSchema;
+return entity as types.PostSchema;
 }
 lib.addParameter(responseHeaders, "content-type", outgoingResponse.contentType);
 serverOutgoingResponse = {
@@ -212,6 +329,31 @@ throw new lib.Unreachable();
 return serverOutgoingResponse
 }
 }
+export function isEchoViaGetAuthentication<A extends ServerAuthentication>(
+authentication: Partial<EchoViaGetAuthentication<A>>,
+): authentication is EchoViaGetAuthentication<A> {
+// TODO
+return true;
+}
+export type EchoViaGetAuthentication<A extends ServerAuthentication> =
+{}
+;
+export type EchoViaGetOperationHandler<A extends ServerAuthentication> =
+(
+incomingRequest: EchoViaGetIncomingRequest,
+authentication: EchoViaGetAuthentication<A>,
+) => EchoViaGetOutgoingResponse | Promise<EchoViaGetOutgoingResponse>
+export type EchoViaGetIncomingRequest =
+lib.IncomingEmptyRequest<parameters.EchoViaGetRequestParameters>
+;
+export type EchoViaGetOutgoingResponse =
+lib.OutgoingJsonResponse<
+200,
+parameters.EchoViaGet200ResponseParameters,
+"application/json",
+types.GetSchema
+>
+;
 export function isEchoAuthentication<A extends ServerAuthentication>(
 authentication: Partial<EchoAuthentication<A>>,
 ): authentication is EchoAuthentication<A> {
@@ -238,6 +380,6 @@ lib.OutgoingJsonResponse<
 200,
 parameters.Echo200ResponseParameters,
 "application/json",
-types.ResponsesSchema
+types.PostSchema
 >
 ;

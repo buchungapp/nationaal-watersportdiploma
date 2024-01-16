@@ -3,15 +3,20 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.4                         -- www.JsonSchema42.org
+// v0.11.5                         -- www.JsonSchema42.org
 //
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as validators from "./validators.js";
 import * as mocks from "./mocks.js";
-test("ResponsesSchema", () => {
-const mock = mocks.mockResponsesSchema();
-const valid = validators.isResponsesSchema(mock);
+test("ParametersSchema", () => {
+const mock = mocks.mockParametersSchema();
+const valid = validators.isParametersSchema(mock);
+assert.equal(valid, true);
+});
+test("GetSchema", () => {
+const mock = mocks.mockGetSchema();
+const valid = validators.isGetSchema(mock);
 assert.equal(valid, true);
 });
 test("MessageContainer", () => {
@@ -22,6 +27,11 @@ assert.equal(valid, true);
 test("Message", () => {
 const mock = mocks.mockMessage();
 const valid = validators.isMessage(mock);
+assert.equal(valid, true);
+});
+test("PostSchema", () => {
+const mock = mocks.mockPostSchema();
+const valid = validators.isPostSchema(mock);
 assert.equal(valid, true);
 });
 test("RequestBodySchema", () => {

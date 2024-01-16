@@ -3,29 +3,36 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.4                         -- www.JsonSchema42.org
+// v0.11.5                         -- www.JsonSchema42.org
 //
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
-*/
-export function parseResponsesSchema(value: unknown): unknown {
-return parseMessageContainer(value);
+import * as types from "./types.js";
+export interface ParserGeneratorOptions {
+trueStringValues?: string[];
+falseStringValues?: string[];
+}
+const defaultParserGeneratorOptions = {
+trueStringValues: ["", "true", "yes", "on", "1"],
+falseStringValues: ["false", "no", "off", "0"],
 }
 /**
-* @description Object that contains a message
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
 */
-export function parseMessageContainer(value: unknown): unknown {
-return (typeof value === "object" && value !== null && !Array.isArray(value)) ?
-{
-"message": parseMessage(value["message" as keyof typeof value]),
-} :
-undefined;
+export function parseParametersSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+((value: unknown) => {
+if(Array.isArray(value)) {
+switch(value.length) {
+case 1:
+[value] = value
+break;
+default:
+return undefined;
 }
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
-*/
-export function parseMessage(value: unknown): unknown {
+}
 switch(typeof value) {
 case "string":
 return value;
@@ -35,10 +42,84 @@ return String(value);
 default:
 return undefined;
 }
+})(value)
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
+*/
+export function parseGetSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseMessageContainer(value, configuration));
+}
+/**
+* @description Object that contains a message
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
+*/
+export function parseMessageContainer(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+(typeof value === "object" && value !== null && !Array.isArray(value)) ?
+{
+"message": parseMessage(value["message" as keyof typeof value], configuration),
+} :
+undefined
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
+*/
+export function parseMessage(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+((value: unknown) => {
+if(Array.isArray(value)) {
+switch(value.length) {
+case 1:
+[value] = value
+break;
+default:
+return undefined;
+}
+}
+switch(typeof value) {
+case "string":
+return value;
+case "number":
+case "boolean":
+return String(value);
+default:
+return undefined;
+}
+})(value)
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+*/
+export function parsePostSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseMessageContainer(value, configuration));
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
 */
-export function parseRequestBodySchema(value: unknown): unknown {
-return parseMessageContainer(value);
+export function parseRequestBodySchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseMessageContainer(value, configuration));
 }
