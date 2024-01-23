@@ -1,4 +1,5 @@
 import * as http from "http";
+import { createDatabase } from "nwd-db";
 import pg from "pg";
 import * as yargs from "yargs";
 import * as application from "../application/index.js";
@@ -41,8 +42,9 @@ async function main(options: MainOptions) {
     connectionString: pgUri,
   });
   try {
+    const db = createDatabase(pgPool);
     const context = {
-      pgPool,
+      db,
     };
     const server = application.createApplicationServer(context, onWarn);
 
