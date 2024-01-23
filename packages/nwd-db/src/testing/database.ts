@@ -12,15 +12,18 @@ export interface DatabaseContext {
 }
 
 export async function withDatabase<T>(job: (context: DatabaseContext) => Promise<T>) {
+  // a (semi) random database name
   const databaseName = `db_${new Date().valueOf()}`;
 
   const pgUriSuper = new URL(process.env.PGURI || "postgres://postgres@localhost:5432/postgres");
   const pgUri = new URL(databaseName, pgUriSuper);
 
+  // create a pool that will be used to create and destroy a database
   const pgPoolSuper = new pg.Pool({
     connectionString: pgUriSuper.toString(),
   });
   try {
+    // create a temporary database that we only use for testing
     await pgPoolSuper.query(`CREATE DATABASE ${databaseName};`);
     try {
       {
@@ -31,6 +34,7 @@ export async function withDatabase<T>(job: (context: DatabaseContext) => Promise
         });
         try {
           const db = drizzle(pgPool);
+          // migrate (set up) the database
           await migrate(db, { migrationsFolder: path.join(projectRoot, "migrations") });
         } finally {
           await pgPool.end();
@@ -43,6 +47,7 @@ export async function withDatabase<T>(job: (context: DatabaseContext) => Promise
         });
         try {
           const db = drizzle(pgPool, { schema });
+          // run the job with the database test context
           const result = await job({ pgPool, db });
           return result;
         } finally {
@@ -50,9 +55,11 @@ export async function withDatabase<T>(job: (context: DatabaseContext) => Promise
         }
       }
     } finally {
+      // finally drop the test-database
       await pgPoolSuper.query(`DROP DATABASE ${databaseName};`);
     }
   } finally {
+    // finally end the super pool
     await pgPoolSuper.end();
   }
 }
