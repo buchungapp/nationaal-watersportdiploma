@@ -1,12 +1,12 @@
 import assert from "assert";
 import test from "node:test";
 import * as api from "nwd-api";
-import { withDatabase } from "nwd-db";
+import { schema, withDatabase } from "nwd-db";
 import { withServer } from "../testing/index.js";
 
 test("echo", () =>
-  withDatabase(async ({ pgPool }) =>
-    withServer({ pgPool }, async ({ baseUrl, server }) => {
+  withDatabase(async ({ db }) =>
+    withServer({ db }, async ({ baseUrl, server }) => {
       const message = "hello";
       const operationResult = await api.echo(
         {
@@ -25,13 +25,14 @@ test("echo", () =>
       const entity = await operationResult.entity();
       assert.equal(entity.message, message);
 
-      const pgResult = await pgPool.query(`
-        select message_value
-        from echo_messages
-      `);
-      assert.deepEqual(pgResult.rows, [
+      const rows = await db
+        .select({
+          message: schema.echoMessages.messageValue,
+        })
+        .from(schema.echoMessages);
+      assert.deepEqual(rows, [
         {
-          message_value: message,
+          message,
         },
       ]);
     }),
