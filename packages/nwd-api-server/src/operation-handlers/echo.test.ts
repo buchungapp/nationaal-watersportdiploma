@@ -1,7 +1,8 @@
 import assert from "assert";
 import test from "node:test";
 import * as api from "nwd-api";
-import { withDatabase, withServer } from "../testing/index.js";
+import { withDatabase } from "nwd-db";
+import { withServer } from "../testing/index.js";
 
 test("echo", () =>
   withDatabase(async ({ pgPool }) =>

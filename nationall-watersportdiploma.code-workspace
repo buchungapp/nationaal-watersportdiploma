@@ -9,6 +9,10 @@
       "path": "./packages/nwd-api-server",
     },
     {
+      "name": "nwd-db",
+      "path": "./packages/nwd-db",
+    },
+    {
       "name": "nwd-api (generated)",
       "path": "./generated/nwd-api",
     },
