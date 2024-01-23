@@ -11,7 +11,9 @@ create table echo_messages (
 `;
 
 export async function withDatabase<T>(job: (context: DatabaseContext) => Promise<T>) {
-  const pgUri = new URL(process.env.PGURI || "postgres://postgres@localhost:5432/postgres");
+  const pgUri = new URL(
+    process.env.PGURI || "postgres://postgres:postgres@localhost:5432/postgres",
+  );
 
   const pgClient = new pg.Client({ connectionString: pgUri.toString() });
 
