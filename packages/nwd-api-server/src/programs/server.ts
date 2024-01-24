@@ -25,15 +25,15 @@ export function configureServerProgram(argv: yargs.Argv) {
   );
 }
 
-interface MainOptions {
+interface MainConfiguration {
   port: number;
   pgUri: string;
 }
 
-async function main(options: MainOptions) {
+async function main(configuration: MainConfiguration) {
   console.log("Starting server...");
 
-  const { port, pgUri } = options;
+  const { port, pgUri } = configuration;
 
   const onError = (error: unknown) => console.error(error);
   const onWarn = (error: unknown) => console.warn(error);
