@@ -7,6 +7,14 @@ export function createMainCategory(
   context: application.Context,
 ): api.CreateMainCategoryOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
+    // TODO remove cast once generator supports it
+    if (!authentication.apiToken.super) {
+      return {
+        status: 403,
+        parameters: {},
+      } as any;
+    }
+
     const entity = await incomingRequest.entity();
 
     const rows = await context.db

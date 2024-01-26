@@ -7,6 +7,14 @@ export function createSubCategory(
   context: application.Context,
 ): api.CreateSubCategoryOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
+    // TODO remove cast once generator supports it
+    if (!authentication.apiToken.super) {
+      return {
+        status: 403,
+        parameters: {},
+      } as any;
+    }
+
     const { mainCategoryId } = incomingRequest.parameters;
     const entity = await incomingRequest.entity();
 

@@ -38,6 +38,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/main-category"
+        "403":
+          $ref: "#/components/responses/forbidden"
 
   /sub-category/{main-category-id}:
     parameters:
@@ -73,6 +75,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/sub-category"
+        "403":
+          $ref: "#/components/responses/forbidden"
 
 components:
   schemas:
@@ -143,6 +147,10 @@ components:
       type: string
       minLength: 1
       maxLength: 100
+
+  responses:
+    forbidden:
+      description: Forbidden
 
   securitySchemes:
     api-token:

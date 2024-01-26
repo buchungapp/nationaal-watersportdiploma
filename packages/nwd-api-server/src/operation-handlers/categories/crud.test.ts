@@ -7,6 +7,7 @@ import { withServer } from "../../testing/index.js";
 test("categories crud", () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
+      const clientCredentials = { apiToken: "supersecret" };
       const clientConfiguration = { baseUrl };
       let mainCategoryId: number;
 
@@ -19,7 +20,7 @@ test("categories crud", () =>
               name: "main-category",
             }),
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
@@ -40,7 +41,7 @@ test("categories crud", () =>
             parameters: {},
             contentType: null,
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
@@ -67,7 +68,7 @@ test("categories crud", () =>
               name: "sub-category",
             }),
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
@@ -88,7 +89,7 @@ test("categories crud", () =>
             },
             contentType: null,
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
