@@ -1,4 +1,5 @@
 import * as api from "nwd-api";
+import { schema } from "nwd-db";
 import * as application from "../application/index.js";
 
 export function createEchoHandler(
@@ -8,13 +9,9 @@ export function createEchoHandler(
     const entity = await incomingRequest.entity();
     const { message } = entity;
 
-    await context.pgPool.query(
-      `
-        insert into echo_messages(message_value)
-        values($1);
-      `,
-      [message],
-    );
+    await context.db.insert(schema.echoMessages).values({
+      messageValue: message,
+    });
 
     return {
       status: 200,

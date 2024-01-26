@@ -9,12 +9,31 @@
       "path": "./packages/nwd-api-server",
     },
     {
+      "name": "nwd-db",
+      "path": "./packages/nwd-db",
+    },
+    {
       "name": "nwd-api (generated)",
       "path": "./generated/nwd-api",
     },
   ],
   "settings": {
-    "typescript.tsdk": "node_modules/typescript/lib",
     "window.title": "Nationaal Watersport Diploma",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "always",
+      "source.organizeImports": "always",
+    },
+    "editor.rulers": [100],
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+  },
+  "extensions": {
+    "recommendations": [
+      "ryanluker.vscode-coverage-gutters",
+      "esbenp.prettier-vscode",
+      "streetsidesoftware.code-spell-checker",
+    ],
+    "unwantedRecommendations": [],
   },
 }

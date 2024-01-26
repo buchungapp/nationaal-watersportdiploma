@@ -1,5 +1,5 @@
-import pg from "pg";
+import { Database } from "nwd-db";
 
 export interface Context {
-  pgPool: pg.Pool;
+  db: Database;
 }

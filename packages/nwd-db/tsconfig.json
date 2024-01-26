@@ -8,6 +8,5 @@
     "composite": true,
     "lib": ["ES2023"]
   },
-  "include": ["src"],
-  "references": [{ "path": "../../generated/nwd-api" }, { "path": "../nwd-db" }]
+  "include": ["src"]
 }
