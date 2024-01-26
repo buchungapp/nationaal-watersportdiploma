@@ -1,1 +1,5 @@
-export type Authentication = {};
+export type Authentication = {
+  apiKey: {
+    userKey: number;
+  };
+};

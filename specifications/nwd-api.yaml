@@ -140,3 +140,9 @@ components:
       type: string
       minLength: 1
       maxLength: 100
+
+  securitySchemes:
+    api-key:
+      type: apiKey
+      name: api-key
+      in: header

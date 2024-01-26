@@ -29,7 +29,7 @@ const router = new Router({
 parameterValueDecoder: value => value,
 parameterValueEncoder: value => value,
 }).loadFromJson({"rootNode":{"anchor":"","hasParameter":false,"routeKey":null,"children":[{"anchor":"/","hasParameter":false,"routeKey":null,"children":[{"anchor":"main-category","hasParameter":false,"routeKey":1,"children":[]},{"anchor":"sub-category/","hasParameter":false,"routeKey":null,"children":[{"anchor":"","hasParameter":true,"routeKey":2,"children":[]}]}]}]},"templatePairs":[[1,[["/main-category",null]]],[2,[["/sub-category/",null],["","main-category-id"]]]]});
-export type ServerAuthentication = Record<never, unknown>;
+export type ServerAuthentication = Record<"apiKey", unknown>;
 export class Server<A extends ServerAuthentication = ServerAuthentication>
 extends lib.ServerBase
 {
@@ -80,6 +80,10 @@ throw new lib.MethodNotSupported()
 default:
 throw new lib.NoRouteFound()
 }
+}
+private apiKeyAuthenticationHandler?: ApiKeyAuthenticationHandler<A>;
+public registerApiKeyAuthentication(authenticationHandler: ApiKeyAuthenticationHandler<A>) {
+this.apiKeyAuthenticationHandler = authenticationHandler;
 }
 private getMainCategoriesOperationHandler?: GetMainCategoriesOperationHandler<A>;
 /**
@@ -666,6 +670,8 @@ throw new lib.Unreachable();
 return serverOutgoingResponse
 }
 }
+export type ApiKeyAuthenticationHandler<A extends ServerAuthentication> =
+(credential: string) => A["apiKey"] | Promise<A["apiKey"]>;
 export function isGetMainCategoriesAuthentication<A extends ServerAuthentication>(
 authentication: Partial<GetMainCategoriesAuthentication<A>>,
 ): authentication is GetMainCategoriesAuthentication<A> {
