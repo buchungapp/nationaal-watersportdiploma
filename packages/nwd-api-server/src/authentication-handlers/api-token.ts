@@ -9,6 +9,7 @@ export function apiToken(
       case "supersecret":
         return {
           userId: 1,
+          super: true,
         };
 
       default:
