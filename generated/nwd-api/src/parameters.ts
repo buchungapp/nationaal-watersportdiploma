@@ -64,6 +64,13 @@ return true;
 }
 export type CreateMainCategory201ResponseParameters = {
 };
+export function isCreateMainCategory403ResponseParameters(
+parameters: Partial<Record<keyof CreateMainCategory403ResponseParameters, unknown>>,
+): parameters is CreateMainCategory403ResponseParameters {
+return true;
+}
+export type CreateMainCategory403ResponseParameters = {
+};
 export function isGetSubCategoriesRequestParameters(
 parameters: Partial<Record<keyof GetSubCategoriesRequestParameters, unknown>>,
 ): parameters is GetSubCategoriesRequestParameters {
@@ -135,4 +142,11 @@ parameters: Partial<Record<keyof CreateSubCategory201ResponseParameters, unknown
 return true;
 }
 export type CreateSubCategory201ResponseParameters = {
+};
+export function isCreateSubCategory403ResponseParameters(
+parameters: Partial<Record<keyof CreateSubCategory403ResponseParameters, unknown>>,
+): parameters is CreateSubCategory403ResponseParameters {
+return true;
+}
+export type CreateSubCategory403ResponseParameters = {
 };

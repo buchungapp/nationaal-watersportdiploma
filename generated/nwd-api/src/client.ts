@@ -358,6 +358,27 @@ throw new lib.ClientResponseUnexpectedContentType();
 }
 break;
 }
+case 403:
+{
+const responseParameters = {
+} as parameters.CreateMainCategory403ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateMainCategory403ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+incomingResponse = {
+status: fetchResponse.status,
+contentType: null,
+parameters: responseParameters,
+}
+break;
+}
 default:
 throw new lib.ClientResponseUnexpectedStatusCode();
 }
@@ -379,6 +400,11 @@ lib.IncomingJsonResponse<
 parameters.CreateMainCategory201ResponseParameters,
 "application/json",
 types.MainCategoryPost201Schema
+>
+|
+lib.IncomingEmptyResponse<
+403,
+parameters.CreateMainCategory403ResponseParameters
 >
 ;
 /**
@@ -719,6 +745,27 @@ throw new lib.ClientResponseUnexpectedContentType();
 }
 break;
 }
+case 403:
+{
+const responseParameters = {
+} as parameters.CreateSubCategory403ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateSubCategory403ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+incomingResponse = {
+status: fetchResponse.status,
+contentType: null,
+parameters: responseParameters,
+}
+break;
+}
 default:
 throw new lib.ClientResponseUnexpectedStatusCode();
 }
@@ -740,5 +787,10 @@ lib.IncomingJsonResponse<
 parameters.CreateSubCategory201ResponseParameters,
 "application/json",
 types.SubCategoryMainCategoryIdPost201Schema
+>
+|
+lib.IncomingEmptyResponse<
+403,
+parameters.CreateSubCategory403ResponseParameters
 >
 ;

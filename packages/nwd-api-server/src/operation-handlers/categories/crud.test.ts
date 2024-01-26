@@ -24,7 +24,7 @@ test("categories crud", () =>
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 201);
+        assert(operationResult.status === 201);
 
         const entity = await operationResult.entity();
         mainCategoryId = entity.id;
@@ -45,7 +45,7 @@ test("categories crud", () =>
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 200);
+        assert(operationResult.status === 200);
 
         const entity = await operationResult.entity();
 
@@ -72,7 +72,7 @@ test("categories crud", () =>
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 201);
+        assert(operationResult.status === 201);
 
         const entity = await operationResult.entity();
         assert.deepEqual(entity, {
@@ -93,7 +93,7 @@ test("categories crud", () =>
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 200);
+        assert(operationResult.status === 200);
 
         const entity = await operationResult.entity();
 

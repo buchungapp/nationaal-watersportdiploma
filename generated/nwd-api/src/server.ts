@@ -398,6 +398,25 @@ throw new lib.Unreachable();
 }
 break;
 }
+case 403:
+{
+if(validateOutgoingParameters) {
+if(!parameters.isCreateMainCategory403ResponseParameters(outgoingResponse.parameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+const responseHeaders = {};
+serverOutgoingResponse = {
+status: outgoingResponse.status,
+headers: responseHeaders,
+}
+break;
+}
 default:
 throw new lib.Unreachable();
 }
@@ -720,6 +739,25 @@ throw new lib.Unreachable();
 }
 break;
 }
+case 403:
+{
+if(validateOutgoingParameters) {
+if(!parameters.isCreateSubCategory403ResponseParameters(outgoingResponse.parameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+const responseHeaders = {};
+serverOutgoingResponse = {
+status: outgoingResponse.status,
+headers: responseHeaders,
+}
+break;
+}
 default:
 throw new lib.Unreachable();
 }
@@ -781,6 +819,11 @@ parameters.CreateMainCategory201ResponseParameters,
 "application/json",
 types.MainCategoryPost201Schema
 >
+|
+lib.OutgoingEmptyResponse<
+403,
+parameters.CreateMainCategory403ResponseParameters
+>
 ;
 export function isGetSubCategoriesAuthentication<A extends ServerAuthentication>(
 authentication: Partial<GetSubCategoriesAuthentication<A>>,
@@ -832,5 +875,10 @@ lib.OutgoingJsonResponse<
 parameters.CreateSubCategory201ResponseParameters,
 "application/json",
 types.SubCategoryMainCategoryIdPost201Schema
+>
+|
+lib.OutgoingEmptyResponse<
+403,
+parameters.CreateSubCategory403ResponseParameters
 >
 ;
