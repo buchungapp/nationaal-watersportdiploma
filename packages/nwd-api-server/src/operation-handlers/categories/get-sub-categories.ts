@@ -11,7 +11,7 @@ export function getSubCategories(
 
     const rows = await context.db
       .select()
-      .from(schema.mainCategories)
+      .from(schema.subCategories)
       .where(eq(schema.subCategories.mainCategoryId, mainCategoryId));
 
     return {
