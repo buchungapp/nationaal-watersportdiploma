@@ -1,0 +1,5 @@
+{
+  "out": "./migrations",
+  "schema": "./out/schema/index.js",
+  "breakpoints": false
+}

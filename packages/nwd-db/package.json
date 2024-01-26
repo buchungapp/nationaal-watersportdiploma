@@ -1,15 +1,11 @@
 {
-  "name": "nwd-api-server",
+  "name": "nwd-db",
   "version": "0.0.0",
   "description": "",
   "type": "module",
-  "bin": {
-    "nwd-api-server": "bin/nwd-api-server"
-  },
   "main": "./out/main.js",
   "types": "./out/main.d.ts",
   "files": [
-    "./bin/**",
     "./out/**",
     "./src/**"
   ],
@@ -33,14 +29,13 @@
     "@types/node": "^20.11.4",
     "@types/pg": "^8.10.9",
     "drizzle-orm": "^0.29.3",
-    "nwd-api": "^0.0.0",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
-    "type-fest": "^4.9.0",
-    "yargs": "^17.7.2"
+    "type-fest": "^4.9.0"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
+    "drizzle-kit": "^0.20.13",
     "typescript": "^5.3.3"
   }
 }
