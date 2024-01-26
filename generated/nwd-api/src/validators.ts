@@ -58,13 +58,13 @@ rule,
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
 */
-export function isParametersSchema(value: unknown): value is types.ParametersSchema {
+export function isEcho0ParametersSchema(value: unknown): value is types.Echo0ParametersSchema {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("ParametersSchema", () => {
+return withType("Echo0ParametersSchema", () => {
 if(!((typeof value === "string"))) {
 recordError("types");
 return false;
@@ -80,13 +80,13 @@ depth -= 1;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
 */
-export function isGetSchema(value: unknown): value is types.GetSchema {
+export function isGetEchoSchema(value: unknown): value is types.GetEchoSchema {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("GetSchema", () => {
+return withType("GetEchoSchema", () => {
 if(!isMessageContainer(value)) {
 recordError("reference");
 return false;
@@ -195,13 +195,13 @@ depth -= 1;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
 */
-export function isPostSchema(value: unknown): value is types.PostSchema {
+export function isPost200EchoSchema(value: unknown): value is types.Post200EchoSchema {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("PostSchema", () => {
+return withType("Post200EchoSchema", () => {
 if(!isMessageContainer(value)) {
 recordError("reference");
 return false;
@@ -217,14 +217,835 @@ depth -= 1;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
 */
-export function isRequestBodySchema(value: unknown): value is types.RequestBodySchema {
+export function isEchoRequestBodySchema(value: unknown): value is types.EchoRequestBodySchema {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("RequestBodySchema", () => {
+return withType("EchoRequestBodySchema", () => {
 if(!isMessageContainer(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
+*/
+export function isGetSchema(value: unknown): value is types.GetSchema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("GetSchema", () => {
+if(!((Array.isArray(value)))) {
+recordError("types");
+return false;
+}
+if(
+Array.isArray(value)
+) {
+for(let elementIndex = 0; elementIndex < value.length; elementIndex ++) {
+const elementValue = value[elementIndex];
+switch(elementIndex) {
+default:
+if(!withPath(String(elementIndex), () => {
+if(!isGetItems(elementValue)) {
+recordError("elementValue");
+return false;
+}
+return true;
+})) {
+return false;
+}
+break;
+break;
+}
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
+*/
+export function isGetItems(value: unknown): value is types.GetItems {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("GetItems", () => {
+if(!isMainCategory(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description Full main category entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category}
+*/
+export function isMainCategory(value: unknown): value is types.MainCategory {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategory", () => {
+if(
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+) {
+if(
+!("id" in value) ||
+value["id"] === undefined
+) {
+recordError("required");
+return false;
+}
+for(const propertyName in value) {
+const propertyValue = value[propertyName as keyof typeof value];
+if(propertyValue === undefined) {
+continue;
+}
+switch(propertyName) {
+case "id":
+if(!withPath(propertyName, () => {
+if(!isMainCategoryId(propertyValue)) {
+recordError("objectProperties");
+return false;
+}
+return true;
+})) {
+return false
+}
+break;
+default:
+break;
+}
+}
+}
+if(!isMainCategoryFields(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category/properties/id}
+*/
+export function isMainCategoryId(value: unknown): value is types.MainCategoryId {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategoryId", () => {
+if(!isEntityId(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description Main category editable fields
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields}
+*/
+export function isMainCategoryFields(value: unknown): value is types.MainCategoryFields {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategoryFields", () => {
+if(!((
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+))) {
+recordError("types");
+return false;
+}
+if(
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+) {
+if(
+!("name" in value) ||
+value["name"] === undefined
+) {
+recordError("required");
+return false;
+}
+for(const propertyName in value) {
+const propertyValue = value[propertyName as keyof typeof value];
+if(propertyValue === undefined) {
+continue;
+}
+switch(propertyName) {
+case "name":
+if(!withPath(propertyName, () => {
+if(!isMainCategoryFieldsName(propertyValue)) {
+recordError("objectProperties");
+return false;
+}
+return true;
+})) {
+return false
+}
+break;
+case "description":
+if(!withPath(propertyName, () => {
+if(!isMainCategoryFieldsDescription(propertyValue)) {
+recordError("objectProperties");
+return false;
+}
+return true;
+})) {
+return false
+}
+break;
+default:
+break;
+}
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields/properties/name}
+*/
+export function isMainCategoryFieldsName(value: unknown): value is types.MainCategoryFieldsName {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategoryFieldsName", () => {
+if(!isEntityName(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields/properties/description}
+*/
+export function isMainCategoryFieldsDescription(value: unknown): value is types.MainCategoryFieldsDescription {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategoryFieldsDescription", () => {
+if(!isEntityDescription(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description The name of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-name}
+*/
+export function isEntityName(value: unknown): value is types.EntityName {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("EntityName", () => {
+if(!((typeof value === "string"))) {
+recordError("types");
+return false;
+}
+if(
+typeof value === "string"
+) {
+if(
+value.length < 1
+) {
+recordError("minimumLength");
+return false;
+}
+if(
+value.length > 100
+) {
+recordError("maximumLength");
+return false;
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description Description of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-description}
+*/
+export function isEntityDescription(value: unknown): value is types.EntityDescription {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("EntityDescription", () => {
+if(!((typeof value === "string"))) {
+recordError("types");
+return false;
+}
+if(
+typeof value === "string"
+) {
+if(
+value.length < 1
+) {
+recordError("minimumLength");
+return false;
+}
+if(
+value.length > 100
+) {
+recordError("maximumLength");
+return false;
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description Key of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-id}
+*/
+export function isEntityId(value: unknown): value is types.EntityId {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("EntityId", () => {
+if(!((
+typeof value === "number" &&
+!isNaN(value) &&
+value % 1 === 0
+))) {
+recordError("types");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema}
+*/
+export function isMainCategory201Schema(value: unknown): value is types.MainCategory201Schema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategory201Schema", () => {
+if(!((Array.isArray(value)))) {
+recordError("types");
+return false;
+}
+if(
+Array.isArray(value)
+) {
+for(let elementIndex = 0; elementIndex < value.length; elementIndex ++) {
+const elementValue = value[elementIndex];
+switch(elementIndex) {
+default:
+if(!withPath(String(elementIndex), () => {
+if(!isMainCategory201Items(elementValue)) {
+recordError("elementValue");
+return false;
+}
+return true;
+})) {
+return false;
+}
+break;
+break;
+}
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema/items}
+*/
+export function isMainCategory201Items(value: unknown): value is types.MainCategory201Items {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategory201Items", () => {
+if(!isMainCategory(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/requestBody/content/application%2Fjson/schema}
+*/
+export function isMainCategoryRequestBodySchema(value: unknown): value is types.MainCategoryRequestBodySchema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("MainCategoryRequestBodySchema", () => {
+if(!isMainCategoryFields(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/parameters/0/schema}
+*/
+export function isSubCategoryMainCategoryId0ParametersSchema(value: unknown): value is types.SubCategoryMainCategoryId0ParametersSchema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryMainCategoryId0ParametersSchema", () => {
+if(!isEntityId(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema}
+*/
+export function isSubCategoryMainCategoryIdSchema(value: unknown): value is types.SubCategoryMainCategoryIdSchema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryMainCategoryIdSchema", () => {
+if(!((Array.isArray(value)))) {
+recordError("types");
+return false;
+}
+if(
+Array.isArray(value)
+) {
+for(let elementIndex = 0; elementIndex < value.length; elementIndex ++) {
+const elementValue = value[elementIndex];
+switch(elementIndex) {
+default:
+if(!withPath(String(elementIndex), () => {
+if(!isSubCategoryMainCategoryIdItems(elementValue)) {
+recordError("elementValue");
+return false;
+}
+return true;
+})) {
+return false;
+}
+break;
+break;
+}
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema/items}
+*/
+export function isSubCategoryMainCategoryIdItems(value: unknown): value is types.SubCategoryMainCategoryIdItems {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryMainCategoryIdItems", () => {
+if(!isMainCategory(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema}
+*/
+export function isSubCategoryMainCategoryId201Schema(value: unknown): value is types.SubCategoryMainCategoryId201Schema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryMainCategoryId201Schema", () => {
+if(!((Array.isArray(value)))) {
+recordError("types");
+return false;
+}
+if(
+Array.isArray(value)
+) {
+for(let elementIndex = 0; elementIndex < value.length; elementIndex ++) {
+const elementValue = value[elementIndex];
+switch(elementIndex) {
+default:
+if(!withPath(String(elementIndex), () => {
+if(!isSubCategoryMainCategoryId201Items(elementValue)) {
+recordError("elementValue");
+return false;
+}
+return true;
+})) {
+return false;
+}
+break;
+break;
+}
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema/items}
+*/
+export function isSubCategoryMainCategoryId201Items(value: unknown): value is types.SubCategoryMainCategoryId201Items {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryMainCategoryId201Items", () => {
+if(!isSubCategory(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description Full sub category entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category}
+*/
+export function isSubCategory(value: unknown): value is types.SubCategory {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategory", () => {
+if(
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+) {
+if(
+!("id" in value) ||
+value["id"] === undefined
+) {
+recordError("required");
+return false;
+}
+for(const propertyName in value) {
+const propertyValue = value[propertyName as keyof typeof value];
+if(propertyValue === undefined) {
+continue;
+}
+switch(propertyName) {
+case "id":
+if(!withPath(propertyName, () => {
+if(!isSubCategoryId(propertyValue)) {
+recordError("objectProperties");
+return false;
+}
+return true;
+})) {
+return false
+}
+break;
+default:
+break;
+}
+}
+}
+if(!isSubCategoryFields(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category/properties/id}
+*/
+export function isSubCategoryId(value: unknown): value is types.SubCategoryId {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryId", () => {
+if(!isEntityId(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @description Sub category entity editable fields
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields}
+*/
+export function isSubCategoryFields(value: unknown): value is types.SubCategoryFields {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryFields", () => {
+if(!((
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+))) {
+recordError("types");
+return false;
+}
+if(
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+) {
+if(
+!("name" in value) ||
+value["name"] === undefined
+) {
+recordError("required");
+return false;
+}
+for(const propertyName in value) {
+const propertyValue = value[propertyName as keyof typeof value];
+if(propertyValue === undefined) {
+continue;
+}
+switch(propertyName) {
+case "name":
+if(!withPath(propertyName, () => {
+if(!isSubCategoryFieldsName(propertyValue)) {
+recordError("objectProperties");
+return false;
+}
+return true;
+})) {
+return false
+}
+break;
+case "description":
+if(!withPath(propertyName, () => {
+if(!isSubCategoryFieldsDescription(propertyValue)) {
+recordError("objectProperties");
+return false;
+}
+return true;
+})) {
+return false
+}
+break;
+default:
+break;
+}
+}
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields/properties/name}
+*/
+export function isSubCategoryFieldsName(value: unknown): value is types.SubCategoryFieldsName {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryFieldsName", () => {
+if(!isEntityName(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields/properties/description}
+*/
+export function isSubCategoryFieldsDescription(value: unknown): value is types.SubCategoryFieldsDescription {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryFieldsDescription", () => {
+if(!isEntityDescription(value)) {
+recordError("reference");
+return false;
+}
+return true;
+;
+});
+}
+finally {
+depth -= 1;
+}
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/requestBody/content/application%2Fjson/schema}
+*/
+export function isSubCategoryMainCategoryIdRequestBodySchema(value: unknown): value is types.SubCategoryMainCategoryIdRequestBodySchema {
+if(depth === 0) {
+resetErrors();
+}
+depth += 1;
+try{
+return withType("SubCategoryMainCategoryIdRequestBodySchema", () => {
+if(!isSubCategoryFields(value)) {
 recordError("reference");
 return false;
 }
