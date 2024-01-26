@@ -1,5 +1,5 @@
 export type Authentication = {
-  apiKey: {
-    userKey: number;
+  apiToken: {
+    userId: number;
   };
 };

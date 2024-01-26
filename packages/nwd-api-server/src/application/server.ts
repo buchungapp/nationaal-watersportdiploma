@@ -1,4 +1,5 @@
 import * as api from "nwd-api";
+import * as authenticationHandlers from "../authentication-handlers/index.js";
 import * as operationHandlers from "../operation-handlers/index.js";
 import { Authentication } from "./authentication.js";
 import { Context } from "./context.js";
@@ -15,6 +16,10 @@ export function createApplicationServer(context: Context, onError?: (error: unkn
 
   server.registerGetSubCategoriesOperation(operationHandlers.getSubCategories(context));
   server.registerCreateSubCategoryOperation(operationHandlers.createSubCategory(context));
+
+  // authentication
+
+  server.registerApiTokenAuthentication(authenticationHandlers.apiToken(context));
 
   // middleware!
 

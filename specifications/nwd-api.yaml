@@ -6,6 +6,9 @@ info:
     Nationaal Watersport Diploma API
   version: 0.1.0
 
+security:
+  - api-token: []
+
 paths:
   /main-category:
     get:
@@ -142,7 +145,7 @@ components:
       maxLength: 100
 
   securitySchemes:
-    api-key:
+    api-token:
       type: apiKey
-      name: api-key
+      name: api-token
       in: header

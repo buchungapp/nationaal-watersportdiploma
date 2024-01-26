@@ -29,7 +29,7 @@ const router = new Router({
 parameterValueDecoder: value => value,
 parameterValueEncoder: value => value,
 }).loadFromJson({"rootNode":{"anchor":"","hasParameter":false,"routeKey":null,"children":[{"anchor":"/","hasParameter":false,"routeKey":null,"children":[{"anchor":"main-category","hasParameter":false,"routeKey":1,"children":[]},{"anchor":"sub-category/","hasParameter":false,"routeKey":null,"children":[{"anchor":"","hasParameter":true,"routeKey":2,"children":[]}]}]}]},"templatePairs":[[1,[["/main-category",null]]],[2,[["/sub-category/",null],["","main-category-id"]]]]});
-export type ServerAuthentication = Record<"apiKey", unknown>;
+export type ServerAuthentication = Record<"apiToken", unknown>;
 export class Server<A extends ServerAuthentication = ServerAuthentication>
 extends lib.ServerBase
 {
@@ -81,9 +81,9 @@ default:
 throw new lib.NoRouteFound()
 }
 }
-private apiKeyAuthenticationHandler?: ApiKeyAuthenticationHandler<A>;
-public registerApiKeyAuthentication(authenticationHandler: ApiKeyAuthenticationHandler<A>) {
-this.apiKeyAuthenticationHandler = authenticationHandler;
+private apiTokenAuthenticationHandler?: ApiTokenAuthenticationHandler<A>;
+public registerApiTokenAuthentication(authenticationHandler: ApiTokenAuthenticationHandler<A>) {
+this.apiTokenAuthenticationHandler = authenticationHandler;
 }
 private getMainCategoriesOperationHandler?: GetMainCategoriesOperationHandler<A>;
 /**
@@ -113,6 +113,7 @@ lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
 const authentication = {
+apiToken: this.apiTokenAuthenticationHandler?.(""),
 }
 if(!isGetMainCategoriesAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
@@ -236,6 +237,7 @@ lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
 const authentication = {
+apiToken: this.apiTokenAuthenticationHandler?.(""),
 }
 if(!isCreateMainCategoryAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
@@ -403,6 +405,7 @@ lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
 const authentication = {
+apiToken: this.apiTokenAuthenticationHandler?.(""),
 }
 if(!isGetSubCategoriesAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
@@ -528,6 +531,7 @@ lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
 const authentication = {
+apiToken: this.apiTokenAuthenticationHandler?.(""),
 }
 if(!isCreateSubCategoryAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
@@ -670,8 +674,8 @@ throw new lib.Unreachable();
 return serverOutgoingResponse
 }
 }
-export type ApiKeyAuthenticationHandler<A extends ServerAuthentication> =
-(credential: string) => A["apiKey"] | Promise<A["apiKey"]>;
+export type ApiTokenAuthenticationHandler<A extends ServerAuthentication> =
+(credential: string) => A["apiToken"] | Promise<A["apiToken"]>;
 export function isGetMainCategoriesAuthentication<A extends ServerAuthentication>(
 authentication: Partial<GetMainCategoriesAuthentication<A>>,
 ): authentication is GetMainCategoriesAuthentication<A> {
@@ -679,7 +683,7 @@ authentication: Partial<GetMainCategoriesAuthentication<A>>,
 return true;
 }
 export type GetMainCategoriesAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type GetMainCategoriesOperationHandler<A extends ServerAuthentication> =
 (
@@ -704,7 +708,7 @@ authentication: Partial<CreateMainCategoryAuthentication<A>>,
 return true;
 }
 export type CreateMainCategoryAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type CreateMainCategoryOperationHandler<A extends ServerAuthentication> =
 (
@@ -733,7 +737,7 @@ authentication: Partial<GetSubCategoriesAuthentication<A>>,
 return true;
 }
 export type GetSubCategoriesAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type GetSubCategoriesOperationHandler<A extends ServerAuthentication> =
 (
@@ -758,7 +762,7 @@ authentication: Partial<CreateSubCategoryAuthentication<A>>,
 return true;
 }
 export type CreateSubCategoryAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type CreateSubCategoryOperationHandler<A extends ServerAuthentication> =
 (
