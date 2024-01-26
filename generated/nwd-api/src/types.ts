@@ -6,49 +6,17 @@
 // v0.12.10                        -- www.JsonSchema42.org
 //
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
-*/
-export type Echo0ParametersSchema = (string);
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
-*/
-export type GetEchoSchema = (MessageContainer);
-/**
-* @description Object that contains a message
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
-*/
-export type MessageContainer = (
-{
-"message": Message,
-[
-name: string
-]: any
-}
-);
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
-*/
-export type Message = (string);
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
-*/
-export type PostEchoSchema = (MessageContainer);
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
-*/
-export type EchoRequestBodySchema = (MessageContainer);
-/**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
 */
-export type MainCategorySchema = (
+export type MainCategory200GetSchema = (
 [
-...(MainCategoryItems)[]
+...(MainCategory200GetItems)[]
 ]
 );
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
 */
-export type MainCategoryItems = (MainCategory);
+export type MainCategory200GetItems = (MainCategory);
 /**
 * @description Full main category entity
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category}
@@ -106,31 +74,31 @@ export type EntityId = (number);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema}
 */
-export type MainCategory201Schema = (MainCategory);
+export type MainCategoryPost201Schema = (MainCategory);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/requestBody/content/application%2Fjson/schema}
 */
-export type MainCategoryRequestBodySchema = (MainCategoryFields);
+export type MainCategoryPostRequestBodySchema = (MainCategoryFields);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/parameters/0/schema}
 */
-export type SubCategoryMainCategoryId0ParametersSchema = (EntityId);
+export type ParametersSchema = (EntityId);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema}
 */
-export type SubCategoryMainCategoryIdSchema = (
+export type SubCategoryMainCategoryId200GetSchema = (
 [
-...(SubCategoryMainCategoryIdItems)[]
+...(SubCategoryMainCategoryId200GetItems)[]
 ]
 );
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema/items}
 */
-export type SubCategoryMainCategoryIdItems = (MainCategory);
+export type SubCategoryMainCategoryId200GetItems = (MainCategory);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema}
 */
-export type SubCategoryMainCategoryId201Schema = (SubCategory);
+export type SubCategoryMainCategoryIdPost201Schema = (SubCategory);
 /**
 * @description Full sub category entity
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category}
@@ -173,4 +141,4 @@ export type SubCategoryFieldsDescription = (EntityDescription);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/requestBody/content/application%2Fjson/schema}
 */
-export type SubCategoryMainCategoryIdRequestBodySchema = (SubCategoryFields);
+export type SubCategoryMainCategoryIdPostRequestBodySchema = (SubCategoryFields);

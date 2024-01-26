@@ -16,10 +16,7 @@ export function createApplicationServer(context: Context, onError?: (error: unkn
   server.registerGetSubCategoriesOperation(operationHandlers.getSubCategories(context));
   server.registerCreateSubCategoryOperation(operationHandlers.createSubCategory(context));
 
-  //old
-
-  server.registerEchoOperation(operationHandlers.echo(context));
-  server.registerEchoViaGetOperation(operationHandlers.echoViaGet(context));
+  // middleware!
 
   server.registerMiddleware(api.createErrorMiddleware(onError));
 

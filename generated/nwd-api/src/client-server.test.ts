@@ -11,138 +11,6 @@ import assert from "assert/strict";
 import test from "node:test";
 import * as main from "./main.js";
 import * as http from "http";
-test("echo-via-get 200 application/json", async () => {
-const server = new main.Server({
-validateIncomingParameters: false,
-validateIncomingEntity: false,
-validateOutgoingParameters: false,
-validateOutgoingEntity: false,
-});
-server.registerEchoViaGetOperation(async (incomingRequest, authentication) => {
-{
-const parameterValue = incomingRequest.parameters.message;
-const valid = main.isEcho0ParametersSchema(parameterValue);
-assert.equal(valid, true);
-}
-return {
-status: 200,
-parameters: {
-},
-contentType: "application/json",
-entity: () => main.mockGetEchoSchema(),
-}
-});
-let lastError: unknown;
-const httpServer = http.createServer();
-httpServer.addListener(
-"request",
-server.asRequestListener({
-onError: (error) => lastError = error,
-}),
-);
-await new Promise<void>((resolve) => httpServer.listen(resolve));
-const address = httpServer.address();
-assert(address != null && typeof address === "object")
-const { port } = address;
-const baseUrl = new URL(`http://localhost:${port}`);
-try {
-const operationResult = await main.echoViaGet(
-{
-contentType: null,
-parameters: {
-message: main.mockEcho0ParametersSchema(),
-},
-},
-{},
-{
-baseUrl,
-validateIncomingParameters: false,
-validateIncomingEntity: false,
-validateOutgoingParameters: false,
-validateOutgoingEntity: false,
-},
-);
-assert.ifError(lastError);
-assert(operationResult.status === 200)
-assert(operationResult.contentType === "application/json")
-{
-const entity = await operationResult.entity();
-const valid = main.isGetEchoSchema(entity);
-assert.equal(valid, true);
-}
-}
-finally {
-await new Promise<void>((resolve, reject) =>
-httpServer.close((error) => (error == null ? resolve() : reject(error))),
-);
-}
-});
-test("echo application/json 200 application/json", async () => {
-const server = new main.Server({
-validateIncomingParameters: false,
-validateIncomingEntity: false,
-validateOutgoingParameters: false,
-validateOutgoingEntity: false,
-});
-server.registerEchoOperation(async (incomingRequest, authentication) => {
-assert.equal(incomingRequest.contentType, "application/json")
-{
-const entity = await incomingRequest.entity();
-const valid = main.isEchoRequestBodySchema(entity);
-assert.equal(valid, true);
-}
-return {
-status: 200,
-parameters: {
-},
-contentType: "application/json",
-entity: () => main.mockPostEchoSchema(),
-}
-});
-let lastError: unknown;
-const httpServer = http.createServer();
-httpServer.addListener(
-"request",
-server.asRequestListener({
-onError: (error) => lastError = error,
-}),
-);
-await new Promise<void>((resolve) => httpServer.listen(resolve));
-const address = httpServer.address();
-assert(address != null && typeof address === "object")
-const { port } = address;
-const baseUrl = new URL(`http://localhost:${port}`);
-try {
-const operationResult = await main.echo(
-{
-contentType: "application/json",
-parameters: {},
-entity: () => main.mockEchoRequestBodySchema(),
-},
-{},
-{
-baseUrl,
-validateIncomingParameters: false,
-validateIncomingEntity: false,
-validateOutgoingParameters: false,
-validateOutgoingEntity: false,
-},
-);
-assert.ifError(lastError);
-assert(operationResult.status === 200)
-assert(operationResult.contentType === "application/json")
-{
-const entity = await operationResult.entity();
-const valid = main.isPostEchoSchema(entity);
-assert.equal(valid, true);
-}
-}
-finally {
-await new Promise<void>((resolve, reject) =>
-httpServer.close((error) => (error == null ? resolve() : reject(error))),
-);
-}
-});
 test("get-main-categories 200 application/json", async () => {
 const server = new main.Server({
 validateIncomingParameters: false,
@@ -156,7 +24,7 @@ status: 200,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockMainCategorySchema(),
+entity: () => main.mockMainCategory200GetSchema(),
 }
 });
 let lastError: unknown;
@@ -192,7 +60,7 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isMainCategorySchema(entity);
+const valid = main.isMainCategory200GetSchema(entity);
 assert.equal(valid, true);
 }
 }
@@ -213,7 +81,7 @@ server.registerCreateMainCategoryOperation(async (incomingRequest, authenticatio
 assert.equal(incomingRequest.contentType, "application/json")
 {
 const entity = await incomingRequest.entity();
-const valid = main.isMainCategoryRequestBodySchema(entity);
+const valid = main.isMainCategoryPostRequestBodySchema(entity);
 assert.equal(valid, true);
 }
 return {
@@ -221,7 +89,7 @@ status: 201,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockMainCategory201Schema(),
+entity: () => main.mockMainCategoryPost201Schema(),
 }
 });
 let lastError: unknown;
@@ -242,7 +110,7 @@ const operationResult = await main.createMainCategory(
 {
 contentType: "application/json",
 parameters: {},
-entity: () => main.mockMainCategoryRequestBodySchema(),
+entity: () => main.mockMainCategoryPostRequestBodySchema(),
 },
 {},
 {
@@ -258,7 +126,7 @@ assert(operationResult.status === 201)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isMainCategory201Schema(entity);
+const valid = main.isMainCategoryPost201Schema(entity);
 assert.equal(valid, true);
 }
 }
@@ -278,7 +146,7 @@ validateOutgoingEntity: false,
 server.registerGetSubCategoriesOperation(async (incomingRequest, authentication) => {
 {
 const parameterValue = incomingRequest.parameters.mainCategoryId;
-const valid = main.isSubCategoryMainCategoryId0ParametersSchema(parameterValue);
+const valid = main.isParametersSchema(parameterValue);
 assert.equal(valid, true);
 }
 return {
@@ -286,7 +154,7 @@ status: 200,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockSubCategoryMainCategoryIdSchema(),
+entity: () => main.mockSubCategoryMainCategoryId200GetSchema(),
 }
 });
 let lastError: unknown;
@@ -307,7 +175,7 @@ const operationResult = await main.getSubCategories(
 {
 contentType: null,
 parameters: {
-mainCategoryId: main.mockSubCategoryMainCategoryId0ParametersSchema(),
+mainCategoryId: main.mockParametersSchema(),
 },
 },
 {},
@@ -324,7 +192,7 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isSubCategoryMainCategoryIdSchema(entity);
+const valid = main.isSubCategoryMainCategoryId200GetSchema(entity);
 assert.equal(valid, true);
 }
 }
@@ -344,13 +212,13 @@ validateOutgoingEntity: false,
 server.registerCreateSubCategoryOperation(async (incomingRequest, authentication) => {
 {
 const parameterValue = incomingRequest.parameters.mainCategoryId;
-const valid = main.isSubCategoryMainCategoryId0ParametersSchema(parameterValue);
+const valid = main.isParametersSchema(parameterValue);
 assert.equal(valid, true);
 }
 assert.equal(incomingRequest.contentType, "application/json")
 {
 const entity = await incomingRequest.entity();
-const valid = main.isSubCategoryMainCategoryIdRequestBodySchema(entity);
+const valid = main.isSubCategoryMainCategoryIdPostRequestBodySchema(entity);
 assert.equal(valid, true);
 }
 return {
@@ -358,7 +226,7 @@ status: 201,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockSubCategoryMainCategoryId201Schema(),
+entity: () => main.mockSubCategoryMainCategoryIdPost201Schema(),
 }
 });
 let lastError: unknown;
@@ -379,9 +247,9 @@ const operationResult = await main.createSubCategory(
 {
 contentType: "application/json",
 parameters: {
-mainCategoryId: main.mockSubCategoryMainCategoryId0ParametersSchema(),
+mainCategoryId: main.mockParametersSchema(),
 },
-entity: () => main.mockSubCategoryMainCategoryIdRequestBodySchema(),
+entity: () => main.mockSubCategoryMainCategoryIdPostRequestBodySchema(),
 },
 {},
 {
@@ -397,7 +265,7 @@ assert(operationResult.status === 201)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isSubCategoryMainCategoryId201Schema(entity);
+const valid = main.isSubCategoryMainCategoryIdPost201Schema(entity);
 assert.equal(valid, true);
 }
 }

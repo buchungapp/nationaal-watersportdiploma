@@ -7,46 +7,6 @@ info:
   version: 0.1.0
 
 paths:
-  /echo:
-    get:
-      operationId: echo-via-get
-      summary: Send a message via GET and get your message back in a message-container
-      description: |-
-        Send a message and get the same message back!
-      parameters:
-        - name: message
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: |-
-            A response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/message-container"
-    post:
-      operationId: echo
-      summary: Send a message
-      description: |-
-        Send a message and get the same message back!
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/message-container"
-      responses:
-        "200":
-          description: |-
-            A response
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/message-container"
-
   /main-category:
     get:
       operationId: get-main-categories
@@ -113,17 +73,6 @@ paths:
 
 components:
   schemas:
-    message-container:
-      description: |-
-        Object that contains a message
-      type: object
-      required:
-        - message
-      properties:
-        message:
-          type: string
-          minLength: 1
-
     #entity schemas
 
     main-category:

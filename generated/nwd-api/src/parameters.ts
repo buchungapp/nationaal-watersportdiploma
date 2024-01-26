@@ -36,56 +36,6 @@ rule,
 typeName,
 }
 }
-export function isEchoViaGetRequestParameters(
-parameters: Partial<Record<keyof EchoViaGetRequestParameters, unknown>>,
-): parameters is EchoViaGetRequestParameters {
-if(parameters.message === undefined) {
-recordError(
-"message",
-"",
-"required"
-);
-return false;
-}
-if(!validators.isEcho0ParametersSchema(
-parameters.message
-)) {
-const lastValidationError = validators.getLastValidationError();
-recordError(
-"message",
-lastValidationError.path,
-lastValidationError.rule,
-lastValidationError.typeName,
-);
-return false;
-}
-return true;
-}
-export type EchoViaGetRequestParameters = {
-message:
-types.Echo0ParametersSchema
-};
-export function isEchoViaGet200ResponseParameters(
-parameters: Partial<Record<keyof EchoViaGet200ResponseParameters, unknown>>,
-): parameters is EchoViaGet200ResponseParameters {
-return true;
-}
-export type EchoViaGet200ResponseParameters = {
-};
-export function isEchoRequestParameters(
-parameters: Partial<Record<keyof EchoRequestParameters, unknown>>,
-): parameters is EchoRequestParameters {
-return true;
-}
-export type EchoRequestParameters = {
-};
-export function isEcho200ResponseParameters(
-parameters: Partial<Record<keyof Echo200ResponseParameters, unknown>>,
-): parameters is Echo200ResponseParameters {
-return true;
-}
-export type Echo200ResponseParameters = {
-};
 export function isGetMainCategoriesRequestParameters(
 parameters: Partial<Record<keyof GetMainCategoriesRequestParameters, unknown>>,
 ): parameters is GetMainCategoriesRequestParameters {
@@ -125,7 +75,7 @@ recordError(
 );
 return false;
 }
-if(!validators.isSubCategoryMainCategoryId0ParametersSchema(
+if(!validators.isParametersSchema(
 parameters.mainCategoryId
 )) {
 const lastValidationError = validators.getLastValidationError();
@@ -141,7 +91,7 @@ return true;
 }
 export type GetSubCategoriesRequestParameters = {
 mainCategoryId:
-types.SubCategoryMainCategoryId0ParametersSchema
+types.ParametersSchema
 };
 export function isGetSubCategories200ResponseParameters(
 parameters: Partial<Record<keyof GetSubCategories200ResponseParameters, unknown>>,
@@ -161,7 +111,7 @@ recordError(
 );
 return false;
 }
-if(!validators.isSubCategoryMainCategoryId0ParametersSchema(
+if(!validators.isParametersSchema(
 parameters.mainCategoryId
 )) {
 const lastValidationError = validators.getLastValidationError();
@@ -177,7 +127,7 @@ return true;
 }
 export type CreateSubCategoryRequestParameters = {
 mainCategoryId:
-types.SubCategoryMainCategoryId0ParametersSchema
+types.ParametersSchema
 };
 export function isCreateSubCategory201ResponseParameters(
 parameters: Partial<Record<keyof CreateSubCategory201ResponseParameters, unknown>>,

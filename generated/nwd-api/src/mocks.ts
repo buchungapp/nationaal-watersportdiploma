@@ -37,9 +37,9 @@ defaultMinimumStringLength: 5,
 defaultMaximumStringLength: 20,
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
 */
-export function mockEcho0ParametersSchema(options: MockGeneratorOptions = {}): types.Echo0ParametersSchema {
+export function mockMainCategory200GetSchema(options: MockGeneratorOptions = {}): types.MainCategory200GetSchema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
@@ -47,133 +47,6 @@ const configuration = {
 depthCounters[0] ??= 0;
 try {
 depthCounters[0]++;
-return (
-new Array(
-configuration.defaultMinimumStringLength +
-nextSeed() % (
-configuration.defaultMaximumStringLength - configuration.defaultMinimumStringLength + 1
-)
-).
-fill(undefined).
-map(() => configuration.stringCharacters[nextSeed() % configuration.stringCharacters.length]).
-join("")
-);
-}
-finally {
-depthCounters[0]--;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
-*/
-export function mockGetEchoSchema(options: MockGeneratorOptions = {}): types.GetEchoSchema {
-const configuration = {
-...defaultMockGeneratorOptions,
-...options,
-};
-depthCounters[1] ??= 0;
-try {
-depthCounters[1]++;
-return (mockMessageContainer());
-}
-finally {
-depthCounters[1]--;
-}
-}
-/**
-* @description Object that contains a message
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
-*/
-export function mockMessageContainer(options: MockGeneratorOptions = {}): types.MessageContainer {
-const configuration = {
-...defaultMockGeneratorOptions,
-...options,
-};
-depthCounters[2] ??= 0;
-try {
-depthCounters[2]++;
-return (
-{
-["message"]: mockMessage(),
-}
-);
-}
-finally {
-depthCounters[2]--;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
-*/
-export function mockMessage(options: MockGeneratorOptions = {}): types.Message {
-const configuration = {
-...defaultMockGeneratorOptions,
-...options,
-};
-depthCounters[3] ??= 0;
-try {
-depthCounters[3]++;
-return (
-new Array(
-1 +
-nextSeed() % (
-configuration.defaultMaximumStringLength - 1 + 1
-)
-).
-fill(undefined).
-map(() => configuration.stringCharacters[nextSeed() % configuration.stringCharacters.length]).
-join("")
-);
-}
-finally {
-depthCounters[3]--;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
-*/
-export function mockPostEchoSchema(options: MockGeneratorOptions = {}): types.PostEchoSchema {
-const configuration = {
-...defaultMockGeneratorOptions,
-...options,
-};
-depthCounters[4] ??= 0;
-try {
-depthCounters[4]++;
-return (mockMessageContainer());
-}
-finally {
-depthCounters[4]--;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
-*/
-export function mockEchoRequestBodySchema(options: MockGeneratorOptions = {}): types.EchoRequestBodySchema {
-const configuration = {
-...defaultMockGeneratorOptions,
-...options,
-};
-depthCounters[5] ??= 0;
-try {
-depthCounters[5]++;
-return (mockMessageContainer());
-}
-finally {
-depthCounters[5]--;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
-*/
-export function mockMainCategorySchema(options: MockGeneratorOptions = {}): types.MainCategorySchema {
-const configuration = {
-...defaultMockGeneratorOptions,
-...options,
-};
-depthCounters[6] ??= 0;
-try {
-depthCounters[6]++;
 return (
 [
 ...new Array(
@@ -185,29 +58,29 @@ Math.max(0, configuration.defaultMinimumItems - 0) +
 )
 )
 .fill(undefined)
-.map(() => mockMainCategoryItems())
+.map(() => mockMainCategory200GetItems())
 ]
 );
 }
 finally {
-depthCounters[6]--;
+depthCounters[0]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
 */
-export function mockMainCategoryItems(options: MockGeneratorOptions = {}): types.MainCategoryItems {
+export function mockMainCategory200GetItems(options: MockGeneratorOptions = {}): types.MainCategory200GetItems {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[7] ??= 0;
+depthCounters[1] ??= 0;
 try {
-depthCounters[7]++;
+depthCounters[1]++;
 return (mockMainCategory());
 }
 finally {
-depthCounters[7]--;
+depthCounters[1]--;
 }
 }
 /**
@@ -219,14 +92,14 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[8] ??= 0;
+depthCounters[2] ??= 0;
 try {
-depthCounters[8]++;
+depthCounters[2]++;
 return (
 {
 ["name"]: mockMainCategoryFieldsName(),
 ["description"]:
-(depthCounters[14] ?? 0) < configuration.maximumDepth ?
+(depthCounters[8] ?? 0) < configuration.maximumDepth ?
 mockMainCategoryFieldsDescription() :
 undefined,
 ["id"]: mockMainCategoryId(),
@@ -234,7 +107,7 @@ undefined,
 );
 }
 finally {
-depthCounters[8]--;
+depthCounters[2]--;
 }
 }
 /**
@@ -245,13 +118,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[9] ??= 0;
+depthCounters[3] ??= 0;
 try {
-depthCounters[9]++;
+depthCounters[3]++;
 return (mockEntityId());
 }
 finally {
-depthCounters[9]--;
+depthCounters[3]--;
 }
 }
 /**
@@ -263,21 +136,21 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[10] ??= 0;
+depthCounters[4] ??= 0;
 try {
-depthCounters[10]++;
+depthCounters[4]++;
 return (
 {
 ["name"]: mockMainCategoryFieldsName(),
 ["description"]:
-(depthCounters[14] ?? 0) < configuration.maximumDepth ?
+(depthCounters[8] ?? 0) < configuration.maximumDepth ?
 mockMainCategoryFieldsDescription() :
 undefined,
 }
 );
 }
 finally {
-depthCounters[10]--;
+depthCounters[4]--;
 }
 }
 /**
@@ -288,13 +161,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[11] ??= 0;
+depthCounters[5] ??= 0;
 try {
-depthCounters[11]++;
+depthCounters[5]++;
 return (mockEntityName());
 }
 finally {
-depthCounters[11]--;
+depthCounters[5]--;
 }
 }
 /**
@@ -305,13 +178,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[12] ??= 0;
+depthCounters[6] ??= 0;
 try {
-depthCounters[12]++;
+depthCounters[6]++;
 return (mockEntityDescription());
 }
 finally {
-depthCounters[12]--;
+depthCounters[6]--;
 }
 }
 /**
@@ -323,9 +196,9 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[13] ??= 0;
+depthCounters[7] ??= 0;
 try {
-depthCounters[13]++;
+depthCounters[7]++;
 return (
 new Array(
 1 +
@@ -339,7 +212,7 @@ join("")
 );
 }
 finally {
-depthCounters[13]--;
+depthCounters[7]--;
 }
 }
 /**
@@ -351,9 +224,9 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[14] ??= 0;
+depthCounters[8] ??= 0;
 try {
-depthCounters[14]++;
+depthCounters[8]++;
 return (
 new Array(
 1 +
@@ -367,7 +240,7 @@ join("")
 );
 }
 finally {
-depthCounters[14]--;
+depthCounters[8]--;
 }
 }
 /**
@@ -379,79 +252,79 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[15] ??= 0;
+depthCounters[9] ??= 0;
 try {
-depthCounters[15]++;
+depthCounters[9]++;
 return (
 (Math.ceil(configuration.defaultMinimumValue / 1) + nextSeed() % (Math.floor(configuration.defaultMaximumValue / 1) - Math.ceil(configuration.defaultMinimumValue / 1) + 1)) * 1
 );
 }
 finally {
-depthCounters[15]--;
+depthCounters[9]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema}
 */
-export function mockMainCategory201Schema(options: MockGeneratorOptions = {}): types.MainCategory201Schema {
+export function mockMainCategoryPost201Schema(options: MockGeneratorOptions = {}): types.MainCategoryPost201Schema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[16] ??= 0;
+depthCounters[10] ??= 0;
 try {
-depthCounters[16]++;
+depthCounters[10]++;
 return (mockMainCategory());
 }
 finally {
-depthCounters[16]--;
+depthCounters[10]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/requestBody/content/application%2Fjson/schema}
 */
-export function mockMainCategoryRequestBodySchema(options: MockGeneratorOptions = {}): types.MainCategoryRequestBodySchema {
+export function mockMainCategoryPostRequestBodySchema(options: MockGeneratorOptions = {}): types.MainCategoryPostRequestBodySchema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[17] ??= 0;
+depthCounters[11] ??= 0;
 try {
-depthCounters[17]++;
+depthCounters[11]++;
 return (mockMainCategoryFields());
 }
 finally {
-depthCounters[17]--;
+depthCounters[11]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/parameters/0/schema}
 */
-export function mockSubCategoryMainCategoryId0ParametersSchema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryId0ParametersSchema {
+export function mockParametersSchema(options: MockGeneratorOptions = {}): types.ParametersSchema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[18] ??= 0;
+depthCounters[12] ??= 0;
 try {
-depthCounters[18]++;
+depthCounters[12]++;
 return (mockEntityId());
 }
 finally {
-depthCounters[18]--;
+depthCounters[12]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema}
 */
-export function mockSubCategoryMainCategoryIdSchema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryIdSchema {
+export function mockSubCategoryMainCategoryId200GetSchema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryId200GetSchema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[19] ??= 0;
+depthCounters[13] ??= 0;
 try {
-depthCounters[19]++;
+depthCounters[13]++;
 return (
 [
 ...new Array(
@@ -463,46 +336,46 @@ Math.max(0, configuration.defaultMinimumItems - 0) +
 )
 )
 .fill(undefined)
-.map(() => mockSubCategoryMainCategoryIdItems())
+.map(() => mockSubCategoryMainCategoryId200GetItems())
 ]
 );
 }
 finally {
-depthCounters[19]--;
+depthCounters[13]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema/items}
 */
-export function mockSubCategoryMainCategoryIdItems(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryIdItems {
+export function mockSubCategoryMainCategoryId200GetItems(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryId200GetItems {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[20] ??= 0;
+depthCounters[14] ??= 0;
 try {
-depthCounters[20]++;
+depthCounters[14]++;
 return (mockMainCategory());
 }
 finally {
-depthCounters[20]--;
+depthCounters[14]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema}
 */
-export function mockSubCategoryMainCategoryId201Schema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryId201Schema {
+export function mockSubCategoryMainCategoryIdPost201Schema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryIdPost201Schema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[21] ??= 0;
+depthCounters[15] ??= 0;
 try {
-depthCounters[21]++;
+depthCounters[15]++;
 return (mockSubCategory());
 }
 finally {
-depthCounters[21]--;
+depthCounters[15]--;
 }
 }
 /**
@@ -514,14 +387,14 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[22] ??= 0;
+depthCounters[16] ??= 0;
 try {
-depthCounters[22]++;
+depthCounters[16]++;
 return (
 {
 ["name"]: mockSubCategoryFieldsName(),
 ["description"]:
-(depthCounters[14] ?? 0) < configuration.maximumDepth ?
+(depthCounters[8] ?? 0) < configuration.maximumDepth ?
 mockSubCategoryFieldsDescription() :
 undefined,
 ["id"]: mockSubCategoryId(),
@@ -529,7 +402,7 @@ undefined,
 );
 }
 finally {
-depthCounters[22]--;
+depthCounters[16]--;
 }
 }
 /**
@@ -540,13 +413,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[23] ??= 0;
+depthCounters[17] ??= 0;
 try {
-depthCounters[23]++;
+depthCounters[17]++;
 return (mockEntityId());
 }
 finally {
-depthCounters[23]--;
+depthCounters[17]--;
 }
 }
 /**
@@ -558,21 +431,21 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[24] ??= 0;
+depthCounters[18] ??= 0;
 try {
-depthCounters[24]++;
+depthCounters[18]++;
 return (
 {
 ["name"]: mockSubCategoryFieldsName(),
 ["description"]:
-(depthCounters[14] ?? 0) < configuration.maximumDepth ?
+(depthCounters[8] ?? 0) < configuration.maximumDepth ?
 mockSubCategoryFieldsDescription() :
 undefined,
 }
 );
 }
 finally {
-depthCounters[24]--;
+depthCounters[18]--;
 }
 }
 /**
@@ -583,13 +456,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[25] ??= 0;
+depthCounters[19] ??= 0;
 try {
-depthCounters[25]++;
+depthCounters[19]++;
 return (mockEntityName());
 }
 finally {
-depthCounters[25]--;
+depthCounters[19]--;
 }
 }
 /**
@@ -600,30 +473,30 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[26] ??= 0;
+depthCounters[20] ??= 0;
 try {
-depthCounters[26]++;
+depthCounters[20]++;
 return (mockEntityDescription());
 }
 finally {
-depthCounters[26]--;
+depthCounters[20]--;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/requestBody/content/application%2Fjson/schema}
 */
-export function mockSubCategoryMainCategoryIdRequestBodySchema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryIdRequestBodySchema {
+export function mockSubCategoryMainCategoryIdPostRequestBodySchema(options: MockGeneratorOptions = {}): types.SubCategoryMainCategoryIdPostRequestBodySchema {
 const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters[27] ??= 0;
+depthCounters[21] ??= 0;
 try {
-depthCounters[27]++;
+depthCounters[21]++;
 return (mockSubCategoryFields());
 }
 finally {
-depthCounters[27]--;
+depthCounters[21]--;
 }
 }
 let seed = 1;
