@@ -6,6 +6,9 @@ info:
     Nationaal Watersport Diploma API
   version: 0.1.0
 
+security:
+  - api-token: []
+
 paths:
   /main-category:
     get:
@@ -35,6 +38,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/main-category"
+        "403":
+          $ref: "#/components/responses/forbidden"
 
   /sub-category/{main-category-id}:
     parameters:
@@ -70,6 +75,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/sub-category"
+        "403":
+          $ref: "#/components/responses/forbidden"
 
 components:
   schemas:
@@ -140,3 +147,13 @@ components:
       type: string
       minLength: 1
       maxLength: 100
+
+  responses:
+    forbidden:
+      description: Forbidden
+
+  securitySchemes:
+    api-token:
+      type: apiKey
+      name: api-token
+      in: header

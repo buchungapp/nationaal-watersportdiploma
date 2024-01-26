@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.6                                           -- www.OpenApi42.org
+//   v0.2.1                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -29,7 +29,7 @@ const router = new Router({
 parameterValueDecoder: value => value,
 parameterValueEncoder: value => value,
 }).loadFromJson({"rootNode":{"anchor":"","hasParameter":false,"routeKey":null,"children":[{"anchor":"/","hasParameter":false,"routeKey":null,"children":[{"anchor":"main-category","hasParameter":false,"routeKey":1,"children":[]},{"anchor":"sub-category/","hasParameter":false,"routeKey":null,"children":[{"anchor":"","hasParameter":true,"routeKey":2,"children":[]}]}]}]},"templatePairs":[[1,[["/main-category",null]]],[2,[["/sub-category/",null],["","main-category-id"]]]]});
-export type ServerAuthentication = Record<never, unknown>;
+export type ServerAuthentication = Record<"apiToken", unknown>;
 export class Server<A extends ServerAuthentication = ServerAuthentication>
 extends lib.ServerBase
 {
@@ -81,6 +81,10 @@ default:
 throw new lib.NoRouteFound()
 }
 }
+private apiTokenAuthenticationHandler?: ApiTokenAuthenticationHandler<A>;
+public registerApiTokenAuthentication(authenticationHandler: ApiTokenAuthenticationHandler<A>) {
+this.apiTokenAuthenticationHandler = authenticationHandler;
+}
 private getMainCategoriesOperationHandler?: GetMainCategoriesOperationHandler<A>;
 /**
 Get main get-main-categories
@@ -108,8 +112,22 @@ const queryParameters =
 lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
-const authentication = {
+const credentials = {
+apiToken:
+lib.first(lib.getParameterValues(serverIncomingRequest.headers, "api-token")),
 }
+const authentication: A = Object.fromEntries(
+await Promise.all([
+(
+async () => [
+"apiToken",
+credentials.apiToken == null ?
+undefined :
+await this.apiTokenAuthenticationHandler?.(credentials.apiToken)
+]
+)(),
+]),
+);
 if(!isGetMainCategoriesAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
 }
@@ -231,8 +249,22 @@ const queryParameters =
 lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
-const authentication = {
+const credentials = {
+apiToken:
+lib.first(lib.getParameterValues(serverIncomingRequest.headers, "api-token")),
 }
+const authentication: A = Object.fromEntries(
+await Promise.all([
+(
+async () => [
+"apiToken",
+credentials.apiToken == null ?
+undefined :
+await this.apiTokenAuthenticationHandler?.(credentials.apiToken)
+]
+)(),
+]),
+);
 if(!isCreateMainCategoryAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
 }
@@ -250,7 +282,7 @@ lastError.rule
 }
 let incomingRequest: CreateMainCategoryIncomingRequest;
 if(requestContentType == null) {
-throw new lib.MissingServerRequestContentType();
+throw new lib.ServerRequestMissingContentType();
 }
 switch(requestContentType) {
 case "application/json":
@@ -294,7 +326,7 @@ return entity;
 break;
 }
 default:
-throw new lib.UnexpectedServerRequestContentType();
+throw new lib.ServerRequestUnexpectedContentType();
 ;
 }
 const outgoingResponse = await this.createMainCategoryOperationHandler?.(
@@ -366,6 +398,25 @@ throw new lib.Unreachable();
 }
 break;
 }
+case 403:
+{
+if(validateOutgoingParameters) {
+if(!parameters.isCreateMainCategory403ResponseParameters(outgoingResponse.parameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+const responseHeaders = {};
+serverOutgoingResponse = {
+status: outgoingResponse.status,
+headers: responseHeaders,
+}
+break;
+}
 default:
 throw new lib.Unreachable();
 }
@@ -398,8 +449,22 @@ const queryParameters =
 lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
-const authentication = {
+const credentials = {
+apiToken:
+lib.first(lib.getParameterValues(serverIncomingRequest.headers, "api-token")),
 }
+const authentication: A = Object.fromEntries(
+await Promise.all([
+(
+async () => [
+"apiToken",
+credentials.apiToken == null ?
+undefined :
+await this.apiTokenAuthenticationHandler?.(credentials.apiToken)
+]
+)(),
+]),
+);
 if(!isGetSubCategoriesAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
 }
@@ -523,8 +588,22 @@ const queryParameters =
 lib.parseParameters([serverIncomingRequest.query], "?", "&", "=");
 const cookieParameters =
 lib.parseParameters(cookie, "", "; ", "=");
-const authentication = {
+const credentials = {
+apiToken:
+lib.first(lib.getParameterValues(serverIncomingRequest.headers, "api-token")),
 }
+const authentication: A = Object.fromEntries(
+await Promise.all([
+(
+async () => [
+"apiToken",
+credentials.apiToken == null ?
+undefined :
+await this.apiTokenAuthenticationHandler?.(credentials.apiToken)
+]
+)(),
+]),
+);
 if(!isCreateSubCategoryAuthentication(authentication)) {
 throw new lib.AuthenticationFailed();
 }
@@ -544,7 +623,7 @@ lastError.rule
 }
 let incomingRequest: CreateSubCategoryIncomingRequest;
 if(requestContentType == null) {
-throw new lib.MissingServerRequestContentType();
+throw new lib.ServerRequestMissingContentType();
 }
 switch(requestContentType) {
 case "application/json":
@@ -588,7 +667,7 @@ return entity;
 break;
 }
 default:
-throw new lib.UnexpectedServerRequestContentType();
+throw new lib.ServerRequestUnexpectedContentType();
 ;
 }
 const outgoingResponse = await this.createSubCategoryOperationHandler?.(
@@ -660,20 +739,42 @@ throw new lib.Unreachable();
 }
 break;
 }
+case 403:
+{
+if(validateOutgoingParameters) {
+if(!parameters.isCreateSubCategory403ResponseParameters(outgoingResponse.parameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ServerResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+const responseHeaders = {};
+serverOutgoingResponse = {
+status: outgoingResponse.status,
+headers: responseHeaders,
+}
+break;
+}
 default:
 throw new lib.Unreachable();
 }
 return serverOutgoingResponse
 }
 }
+export type ApiTokenAuthenticationHandler<A extends ServerAuthentication> =
+(credential: string) =>
+A["apiToken"] | undefined |
+Promise<A["apiToken"] | undefined>;
 export function isGetMainCategoriesAuthentication<A extends ServerAuthentication>(
 authentication: Partial<GetMainCategoriesAuthentication<A>>,
 ): authentication is GetMainCategoriesAuthentication<A> {
-// TODO
-return true;
+return authentication.apiToken !== undefined
 }
 export type GetMainCategoriesAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type GetMainCategoriesOperationHandler<A extends ServerAuthentication> =
 (
@@ -694,11 +795,10 @@ types.MainCategory200GetSchema
 export function isCreateMainCategoryAuthentication<A extends ServerAuthentication>(
 authentication: Partial<CreateMainCategoryAuthentication<A>>,
 ): authentication is CreateMainCategoryAuthentication<A> {
-// TODO
-return true;
+return authentication.apiToken !== undefined
 }
 export type CreateMainCategoryAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type CreateMainCategoryOperationHandler<A extends ServerAuthentication> =
 (
@@ -719,15 +819,19 @@ parameters.CreateMainCategory201ResponseParameters,
 "application/json",
 types.MainCategoryPost201Schema
 >
+|
+lib.OutgoingEmptyResponse<
+403,
+parameters.CreateMainCategory403ResponseParameters
+>
 ;
 export function isGetSubCategoriesAuthentication<A extends ServerAuthentication>(
 authentication: Partial<GetSubCategoriesAuthentication<A>>,
 ): authentication is GetSubCategoriesAuthentication<A> {
-// TODO
-return true;
+return authentication.apiToken !== undefined
 }
 export type GetSubCategoriesAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type GetSubCategoriesOperationHandler<A extends ServerAuthentication> =
 (
@@ -748,11 +852,10 @@ types.SubCategoryMainCategoryId200GetSchema
 export function isCreateSubCategoryAuthentication<A extends ServerAuthentication>(
 authentication: Partial<CreateSubCategoryAuthentication<A>>,
 ): authentication is CreateSubCategoryAuthentication<A> {
-// TODO
-return true;
+return authentication.apiToken !== undefined
 }
 export type CreateSubCategoryAuthentication<A extends ServerAuthentication> =
-{}
+Pick<A, "apiToken">
 ;
 export type CreateSubCategoryOperationHandler<A extends ServerAuthentication> =
 (
@@ -772,5 +875,10 @@ lib.OutgoingJsonResponse<
 parameters.CreateSubCategory201ResponseParameters,
 "application/json",
 types.SubCategoryMainCategoryIdPost201Schema
+>
+|
+lib.OutgoingEmptyResponse<
+403,
+parameters.CreateSubCategory403ResponseParameters
 >
 ;

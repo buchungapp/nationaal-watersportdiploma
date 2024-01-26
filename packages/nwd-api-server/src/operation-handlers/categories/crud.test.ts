@@ -7,6 +7,7 @@ import { withServer } from "../../testing/index.js";
 test("categories crud", () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
+      const clientCredentials = { apiToken: "supersecret" };
       const clientConfiguration = { baseUrl };
       let mainCategoryId: number;
 
@@ -19,11 +20,11 @@ test("categories crud", () =>
               name: "main-category",
             }),
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 201);
+        assert(operationResult.status === 201);
 
         const entity = await operationResult.entity();
         mainCategoryId = entity.id;
@@ -40,11 +41,11 @@ test("categories crud", () =>
             parameters: {},
             contentType: null,
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 200);
+        assert(operationResult.status === 200);
 
         const entity = await operationResult.entity();
 
@@ -67,11 +68,11 @@ test("categories crud", () =>
               name: "sub-category",
             }),
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 201);
+        assert(operationResult.status === 201);
 
         const entity = await operationResult.entity();
         assert.deepEqual(entity, {
@@ -88,11 +89,11 @@ test("categories crud", () =>
             },
             contentType: null,
           },
-          {},
+          clientCredentials,
           clientConfiguration,
         );
 
-        assert.equal(operationResult.status, 200);
+        assert(operationResult.status === 200);
 
         const entity = await operationResult.entity();
 

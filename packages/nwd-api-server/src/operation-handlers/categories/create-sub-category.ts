@@ -7,6 +7,14 @@ export function createSubCategory(
   context: application.Context,
 ): api.CreateSubCategoryOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
+    if (!authentication.apiToken.super) {
+      return {
+        status: 403,
+        parameters: {},
+        contentType: null,
+      };
+    }
+
     const { mainCategoryId } = incomingRequest.parameters;
     const entity = await incomingRequest.entity();
 

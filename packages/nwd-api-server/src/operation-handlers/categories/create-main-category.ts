@@ -7,6 +7,14 @@ export function createMainCategory(
   context: application.Context,
 ): api.CreateMainCategoryOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
+    if (!authentication.apiToken.super) {
+      return {
+        status: 403,
+        parameters: {},
+        contentType: null,
+      };
+    }
+
     const entity = await incomingRequest.entity();
 
     const rows = await context.db

@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.6                                           -- www.OpenApi42.org
+//   v0.2.1                                           -- www.OpenApi42.org
 import * as types from "./types.js";
 import * as validators from "./validators.js";
 import * as parsers from "./parsers.js";
@@ -63,6 +63,13 @@ parameters: Partial<Record<keyof CreateMainCategory201ResponseParameters, unknow
 return true;
 }
 export type CreateMainCategory201ResponseParameters = {
+};
+export function isCreateMainCategory403ResponseParameters(
+parameters: Partial<Record<keyof CreateMainCategory403ResponseParameters, unknown>>,
+): parameters is CreateMainCategory403ResponseParameters {
+return true;
+}
+export type CreateMainCategory403ResponseParameters = {
 };
 export function isGetSubCategoriesRequestParameters(
 parameters: Partial<Record<keyof GetSubCategoriesRequestParameters, unknown>>,
@@ -135,4 +142,11 @@ parameters: Partial<Record<keyof CreateSubCategory201ResponseParameters, unknown
 return true;
 }
 export type CreateSubCategory201ResponseParameters = {
+};
+export function isCreateSubCategory403ResponseParameters(
+parameters: Partial<Record<keyof CreateSubCategory403ResponseParameters, unknown>>,
+): parameters is CreateSubCategory403ResponseParameters {
+return true;
+}
+export type CreateSubCategory403ResponseParameters = {
 };

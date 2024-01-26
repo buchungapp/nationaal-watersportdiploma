@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.6                                           -- www.OpenApi42.org
+//   v0.2.1                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -35,7 +35,7 @@ Get main get-main-categories
 */
 export async function getMainCategories(
 outgoingRequest: GetMainCategoriesOutgoingRequest,
-credentials: unknown,
+credentials: GetMainCategoriesCredentials,
 options: ClientOptions = defaultClientOptions,
 ): Promise<GetMainCategoriesIncomingResponse> {
 const {
@@ -62,6 +62,7 @@ lastError.rule,
 );
 }
 }
+requestHeaders.append("api-token", credentials.apiToken);
 const path =
 router.stringifyRoute(
 1,
@@ -107,7 +108,7 @@ lastError.rule,
 }
 }
 if (responseContentType == null) {
-throw new lib.MissingClientResponseContentType();
+throw new lib.ClientResponseMissingContentType();
 }
 switch(responseContentType) {
 case "application/json":
@@ -160,15 +161,18 @@ return entity;
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedContentType();
 }
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedStatusCode();
 }
 return incomingResponse;
 }
+export type GetMainCategoriesCredentials = {
+apiToken: string,
+};
 export type GetMainCategoriesOutgoingRequest =
 lib.OutgoingEmptyRequest<parameters.GetMainCategoriesRequestParameters>
 ;
@@ -185,7 +189,7 @@ Create an new main category
 */
 export async function createMainCategory(
 outgoingRequest: CreateMainCategoryOutgoingRequest,
-credentials: unknown,
+credentials: CreateMainCategoryCredentials,
 options: ClientOptions = defaultClientOptions,
 ): Promise<CreateMainCategoryIncomingResponse> {
 const {
@@ -212,6 +216,7 @@ lastError.rule,
 );
 }
 }
+requestHeaders.append("api-token", credentials.apiToken);
 const path =
 router.stringifyRoute(
 1,
@@ -296,7 +301,7 @@ lastError.rule,
 }
 }
 if (responseContentType == null) {
-throw new lib.MissingClientResponseContentType();
+throw new lib.ClientResponseMissingContentType();
 }
 switch(responseContentType) {
 case "application/json":
@@ -349,15 +354,39 @@ return entity;
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedContentType();
+}
+break;
+}
+case 403:
+{
+const responseParameters = {
+} as parameters.CreateMainCategory403ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateMainCategory403ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+incomingResponse = {
+status: fetchResponse.status,
+contentType: null,
+parameters: responseParameters,
 }
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedStatusCode();
 }
 return incomingResponse;
 }
+export type CreateMainCategoryCredentials = {
+apiToken: string,
+};
 export type CreateMainCategoryOutgoingRequest =
 lib.OutgoingJsonRequest<
 parameters.CreateMainCategoryRequestParameters,
@@ -372,13 +401,18 @@ parameters.CreateMainCategory201ResponseParameters,
 "application/json",
 types.MainCategoryPost201Schema
 >
+|
+lib.IncomingEmptyResponse<
+403,
+parameters.CreateMainCategory403ResponseParameters
+>
 ;
 /**
 Get sub categories in a main category
 */
 export async function getSubCategories(
 outgoingRequest: GetSubCategoriesOutgoingRequest,
-credentials: unknown,
+credentials: GetSubCategoriesCredentials,
 options: ClientOptions = defaultClientOptions,
 ): Promise<GetSubCategoriesIncomingResponse> {
 const {
@@ -408,8 +442,9 @@ lastError.rule,
 lib.addParameter(
 pathParameters,
 "main-category-id",
-outgoingRequest.parameters.mainCategoryId as unknown as string,
+outgoingRequest.parameters.mainCategoryId == null ? "" : String(outgoingRequest.parameters.mainCategoryId),
 );
+requestHeaders.append("api-token", credentials.apiToken);
 const path =
 router.stringifyRoute(
 2,
@@ -455,7 +490,7 @@ lastError.rule,
 }
 }
 if (responseContentType == null) {
-throw new lib.MissingClientResponseContentType();
+throw new lib.ClientResponseMissingContentType();
 }
 switch(responseContentType) {
 case "application/json":
@@ -508,15 +543,18 @@ return entity;
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedContentType();
 }
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedStatusCode();
 }
 return incomingResponse;
 }
+export type GetSubCategoriesCredentials = {
+apiToken: string,
+};
 export type GetSubCategoriesOutgoingRequest =
 lib.OutgoingEmptyRequest<parameters.GetSubCategoriesRequestParameters>
 ;
@@ -533,7 +571,7 @@ Create an new sub category in a main category
 */
 export async function createSubCategory(
 outgoingRequest: CreateSubCategoryOutgoingRequest,
-credentials: unknown,
+credentials: CreateSubCategoryCredentials,
 options: ClientOptions = defaultClientOptions,
 ): Promise<CreateSubCategoryIncomingResponse> {
 const {
@@ -563,8 +601,9 @@ lastError.rule,
 lib.addParameter(
 pathParameters,
 "main-category-id",
-outgoingRequest.parameters.mainCategoryId as unknown as string,
+outgoingRequest.parameters.mainCategoryId == null ? "" : String(outgoingRequest.parameters.mainCategoryId),
 );
+requestHeaders.append("api-token", credentials.apiToken);
 const path =
 router.stringifyRoute(
 2,
@@ -649,7 +688,7 @@ lastError.rule,
 }
 }
 if (responseContentType == null) {
-throw new lib.MissingClientResponseContentType();
+throw new lib.ClientResponseMissingContentType();
 }
 switch(responseContentType) {
 case "application/json":
@@ -702,15 +741,39 @@ return entity;
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedContentType();
+}
+break;
+}
+case 403:
+{
+const responseParameters = {
+} as parameters.CreateSubCategory403ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateSubCategory403ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+incomingResponse = {
+status: fetchResponse.status,
+contentType: null,
+parameters: responseParameters,
 }
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedStatusCode();
 }
 return incomingResponse;
 }
+export type CreateSubCategoryCredentials = {
+apiToken: string,
+};
 export type CreateSubCategoryOutgoingRequest =
 lib.OutgoingJsonRequest<
 parameters.CreateSubCategoryRequestParameters,
@@ -724,5 +787,10 @@ lib.IncomingJsonResponse<
 parameters.CreateSubCategory201ResponseParameters,
 "application/json",
 types.SubCategoryMainCategoryIdPost201Schema
+>
+|
+lib.IncomingEmptyResponse<
+403,
+parameters.CreateSubCategory403ResponseParameters
 >
 ;
