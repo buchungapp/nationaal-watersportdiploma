@@ -74,9 +74,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/main-category"
+                $ref: "#/components/schemas/main-category"
 
   /sub-category/{main-category-id}:
     parameters:
@@ -111,9 +109,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/sub-category"
+                $ref: "#/components/schemas/sub-category"
 
 components:
   schemas:

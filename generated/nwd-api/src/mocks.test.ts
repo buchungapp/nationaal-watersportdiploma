@@ -45,9 +45,9 @@ assert.equal(valid, true);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
 */
-test("Post200EchoSchema", () => {
-const mock = mocks.mockPost200EchoSchema();
-const valid = validators.isPost200EchoSchema(mock);
+test("PostEchoSchema", () => {
+const mock = mocks.mockPostEchoSchema();
+const valid = validators.isPostEchoSchema(mock);
 assert.equal(valid, true);
 });
 /**
@@ -61,17 +61,17 @@ assert.equal(valid, true);
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
 */
-test("GetSchema", () => {
-const mock = mocks.mockGetSchema();
-const valid = validators.isGetSchema(mock);
+test("MainCategorySchema", () => {
+const mock = mocks.mockMainCategorySchema();
+const valid = validators.isMainCategorySchema(mock);
 assert.equal(valid, true);
 });
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
 */
-test("GetItems", () => {
-const mock = mocks.mockGetItems();
-const valid = validators.isGetItems(mock);
+test("MainCategoryItems", () => {
+const mock = mocks.mockMainCategoryItems();
+const valid = validators.isMainCategoryItems(mock);
 assert.equal(valid, true);
 });
 /**
@@ -152,14 +152,6 @@ const valid = validators.isMainCategory201Schema(mock);
 assert.equal(valid, true);
 });
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema/items}
-*/
-test("MainCategory201Items", () => {
-const mock = mocks.mockMainCategory201Items();
-const valid = validators.isMainCategory201Items(mock);
-assert.equal(valid, true);
-});
-/**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/requestBody/content/application%2Fjson/schema}
 */
 test("MainCategoryRequestBodySchema", () => {
@@ -197,14 +189,6 @@ assert.equal(valid, true);
 test("SubCategoryMainCategoryId201Schema", () => {
 const mock = mocks.mockSubCategoryMainCategoryId201Schema();
 const valid = validators.isSubCategoryMainCategoryId201Schema(mock);
-assert.equal(valid, true);
-});
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema/items}
-*/
-test("SubCategoryMainCategoryId201Items", () => {
-const mock = mocks.mockSubCategoryMainCategoryId201Items();
-const valid = validators.isSubCategoryMainCategoryId201Items(mock);
 assert.equal(valid, true);
 });
 /**

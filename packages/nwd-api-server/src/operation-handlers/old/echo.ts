@@ -1,8 +1,8 @@
 import * as api from "nwd-api";
 import { schema } from "nwd-db";
-import * as application from "../application/index.js";
+import * as application from "../../application/index.js";
 
-export function createEchoHandler(
+export function echo(
   context: application.Context,
 ): api.EchoOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {

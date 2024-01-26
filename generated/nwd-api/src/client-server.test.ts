@@ -96,7 +96,7 @@ status: 200,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockPost200EchoSchema(),
+entity: () => main.mockPostEchoSchema(),
 }
 });
 let lastError: unknown;
@@ -133,7 +133,7 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isPost200EchoSchema(entity);
+const valid = main.isPostEchoSchema(entity);
 assert.equal(valid, true);
 }
 }
@@ -156,7 +156,7 @@ status: 200,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockGetSchema(),
+entity: () => main.mockMainCategorySchema(),
 }
 });
 let lastError: unknown;
@@ -192,7 +192,7 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isGetSchema(entity);
+const valid = main.isMainCategorySchema(entity);
 assert.equal(valid, true);
 }
 }

@@ -1,2 +1,2 @@
-export * from "./echo-via-get.js";
-export * from "./echo.js";
+export * from "./categories/index.js";
+export * from "./old/index.js";

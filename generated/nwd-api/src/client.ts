@@ -317,7 +317,7 @@ responseBody,
 signal
 );
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isPost200EchoSchema(entity)) {
+if(!validators.isPostEchoSchema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ClientResponseEntityValidationFailed(
 lastError.path,
@@ -337,7 +337,7 @@ entities(signal) {
 let entities = lib.deserializeJsonEntities(
 stream,
 signal,
-) as AsyncIterable<types.Post200EchoSchema>;
+) as AsyncIterable<types.PostEchoSchema>;
 if(validateIncomingEntity) {
 entities = lib.mapAsyncIterable(entities, mapAssertEntity);
 }
@@ -346,7 +346,7 @@ return entities;
 entity() {
 let entity = lib.deserializeJsonEntity(
 stream
-) as Promise<types.Post200EchoSchema>;
+) as Promise<types.PostEchoSchema>;
 if(validateIncomingEntity) {
 entity = lib.mapPromisable(entity, mapAssertEntity);
 }
@@ -377,7 +377,7 @@ lib.IncomingJsonResponse<
 200,
 parameters.Echo200ResponseParameters,
 "application/json",
-types.Post200EchoSchema
+types.PostEchoSchema
 >
 ;
 /**
@@ -471,7 +471,7 @@ responseBody,
 signal
 );
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isGetSchema(entity)) {
+if(!validators.isMainCategorySchema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ClientResponseEntityValidationFailed(
 lastError.path,
@@ -491,7 +491,7 @@ entities(signal) {
 let entities = lib.deserializeJsonEntities(
 stream,
 signal,
-) as AsyncIterable<types.GetSchema>;
+) as AsyncIterable<types.MainCategorySchema>;
 if(validateIncomingEntity) {
 entities = lib.mapAsyncIterable(entities, mapAssertEntity);
 }
@@ -500,7 +500,7 @@ return entities;
 entity() {
 let entity = lib.deserializeJsonEntity(
 stream
-) as Promise<types.GetSchema>;
+) as Promise<types.MainCategorySchema>;
 if(validateIncomingEntity) {
 entity = lib.mapPromisable(entity, mapAssertEntity);
 }
@@ -527,7 +527,7 @@ lib.IncomingJsonResponse<
 200,
 parameters.GetMainCategories200ResponseParameters,
 "application/json",
-types.GetSchema
+types.MainCategorySchema
 >
 ;
 /**

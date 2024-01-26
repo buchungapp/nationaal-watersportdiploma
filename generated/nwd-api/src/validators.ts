@@ -195,13 +195,13 @@ depth -= 1;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
 */
-export function isPost200EchoSchema(value: unknown): value is types.Post200EchoSchema {
+export function isPostEchoSchema(value: unknown): value is types.PostEchoSchema {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("Post200EchoSchema", () => {
+return withType("PostEchoSchema", () => {
 if(!isMessageContainer(value)) {
 recordError("reference");
 return false;
@@ -239,13 +239,13 @@ depth -= 1;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
 */
-export function isGetSchema(value: unknown): value is types.GetSchema {
+export function isMainCategorySchema(value: unknown): value is types.MainCategorySchema {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("GetSchema", () => {
+return withType("MainCategorySchema", () => {
 if(!((Array.isArray(value)))) {
 recordError("types");
 return false;
@@ -258,7 +258,7 @@ const elementValue = value[elementIndex];
 switch(elementIndex) {
 default:
 if(!withPath(String(elementIndex), () => {
-if(!isGetItems(elementValue)) {
+if(!isMainCategoryItems(elementValue)) {
 recordError("elementValue");
 return false;
 }
@@ -282,13 +282,13 @@ depth -= 1;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
 */
-export function isGetItems(value: unknown): value is types.GetItems {
+export function isMainCategoryItems(value: unknown): value is types.MainCategoryItems {
 if(depth === 0) {
 resetErrors();
 }
 depth += 1;
 try{
-return withType("GetItems", () => {
+return withType("MainCategoryItems", () => {
 if(!isMainCategory(value)) {
 recordError("reference");
 return false;
@@ -611,49 +611,6 @@ resetErrors();
 depth += 1;
 try{
 return withType("MainCategory201Schema", () => {
-if(!((Array.isArray(value)))) {
-recordError("types");
-return false;
-}
-if(
-Array.isArray(value)
-) {
-for(let elementIndex = 0; elementIndex < value.length; elementIndex ++) {
-const elementValue = value[elementIndex];
-switch(elementIndex) {
-default:
-if(!withPath(String(elementIndex), () => {
-if(!isMainCategory201Items(elementValue)) {
-recordError("elementValue");
-return false;
-}
-return true;
-})) {
-return false;
-}
-break;
-break;
-}
-}
-}
-return true;
-;
-});
-}
-finally {
-depth -= 1;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema/items}
-*/
-export function isMainCategory201Items(value: unknown): value is types.MainCategory201Items {
-if(depth === 0) {
-resetErrors();
-}
-depth += 1;
-try{
-return withType("MainCategory201Items", () => {
 if(!isMainCategory(value)) {
 recordError("reference");
 return false;
@@ -785,49 +742,6 @@ resetErrors();
 depth += 1;
 try{
 return withType("SubCategoryMainCategoryId201Schema", () => {
-if(!((Array.isArray(value)))) {
-recordError("types");
-return false;
-}
-if(
-Array.isArray(value)
-) {
-for(let elementIndex = 0; elementIndex < value.length; elementIndex ++) {
-const elementValue = value[elementIndex];
-switch(elementIndex) {
-default:
-if(!withPath(String(elementIndex), () => {
-if(!isSubCategoryMainCategoryId201Items(elementValue)) {
-recordError("elementValue");
-return false;
-}
-return true;
-})) {
-return false;
-}
-break;
-break;
-}
-}
-}
-return true;
-;
-});
-}
-finally {
-depth -= 1;
-}
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema/items}
-*/
-export function isSubCategoryMainCategoryId201Items(value: unknown): value is types.SubCategoryMainCategoryId201Items {
-if(depth === 0) {
-resetErrors();
-}
-depth += 1;
-try{
-return withType("SubCategoryMainCategoryId201Items", () => {
 if(!isSubCategory(value)) {
 recordError("reference");
 return false;

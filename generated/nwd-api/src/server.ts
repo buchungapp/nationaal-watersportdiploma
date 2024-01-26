@@ -342,14 +342,14 @@ switch(outgoingResponse.contentType) {
 case "application/json":
 {
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isPost200EchoSchema(entity)) {
+if(!validators.isPostEchoSchema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ServerResponseEntityValidationFailed(
 lastError.path,
 lastError.rule,
 );
 }
-return entity as types.Post200EchoSchema;
+return entity as types.PostEchoSchema;
 }
 lib.addParameter(responseHeaders, "content-type", outgoingResponse.contentType);
 serverOutgoingResponse = {
@@ -465,14 +465,14 @@ switch(outgoingResponse.contentType) {
 case "application/json":
 {
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isGetSchema(entity)) {
+if(!validators.isMainCategorySchema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ServerResponseEntityValidationFailed(
 lastError.path,
 lastError.rule,
 );
 }
-return entity as types.GetSchema;
+return entity as types.MainCategorySchema;
 }
 lib.addParameter(responseHeaders, "content-type", outgoingResponse.contentType);
 serverOutgoingResponse = {
@@ -1026,7 +1026,7 @@ lib.OutgoingJsonResponse<
 200,
 parameters.Echo200ResponseParameters,
 "application/json",
-types.Post200EchoSchema
+types.PostEchoSchema
 >
 ;
 export function isGetMainCategoriesAuthentication<A extends ServerAuthentication>(
@@ -1051,7 +1051,7 @@ lib.OutgoingJsonResponse<
 200,
 parameters.GetMainCategories200ResponseParameters,
 "application/json",
-types.GetSchema
+types.MainCategorySchema
 >
 ;
 export function isCreateMainCategoryAuthentication<A extends ServerAuthentication>(

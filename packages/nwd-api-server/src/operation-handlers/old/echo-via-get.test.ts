@@ -2,17 +2,18 @@ import assert from "assert";
 import test from "node:test";
 import * as api from "nwd-api";
 import { schema, withDatabase } from "nwd-db";
-import { withServer } from "../testing/index.js";
+import { withServer } from "../../testing/index.js";
 
-test("echo", () =>
+test("echo-via-get", () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
       const message = "hello";
-      const operationResult = await api.echo(
+      const operationResult = await api.echoViaGet(
         {
-          parameters: {},
-          contentType: "application/json",
-          entity: () => ({ message }),
+          parameters: {
+            message,
+          },
+          contentType: null,
         },
         {},
         {

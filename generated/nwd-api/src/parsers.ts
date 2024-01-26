@@ -116,7 +116,7 @@ return undefined;
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
 */
-export function parsePost200EchoSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parsePostEchoSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
@@ -136,7 +136,7 @@ return (parseMessageContainer(value, configuration));
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
 */
-export function parseGetSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseMainCategorySchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
@@ -146,7 +146,7 @@ Array.isArray(value) ?
 value.map((value, index) => {
 switch(index) {
 default:
-return parseGetItems(value, configuration)
+return parseMainCategoryItems(value, configuration)
 }
 }) :
 undefined
@@ -155,7 +155,7 @@ undefined
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
 */
-export function parseGetItems(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseMainCategoryItems(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
@@ -365,25 +365,6 @@ const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
 };
-return (
-Array.isArray(value) ?
-value.map((value, index) => {
-switch(index) {
-default:
-return parseMainCategory201Items(value, configuration)
-}
-}) :
-undefined
-);
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema/items}
-*/
-export function parseMainCategory201Items(value: unknown, options: ParserGeneratorOptions = {}): unknown {
-const configuration = {
-...defaultParserGeneratorOptions,
-...options,
-};
 return (parseMainCategory(value, configuration));
 }
 /**
@@ -439,25 +420,6 @@ return (parseMainCategory(value, configuration));
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema}
 */
 export function parseSubCategoryMainCategoryId201Schema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
-const configuration = {
-...defaultParserGeneratorOptions,
-...options,
-};
-return (
-Array.isArray(value) ?
-value.map((value, index) => {
-switch(index) {
-default:
-return parseSubCategoryMainCategoryId201Items(value, configuration)
-}
-}) :
-undefined
-);
-}
-/**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema/items}
-*/
-export function parseSubCategoryMainCategoryId201Items(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
