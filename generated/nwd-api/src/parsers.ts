@@ -3,7 +3,7 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.8                         -- www.JsonSchema42.org
+// v0.12.10                        -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
 export interface ParserGeneratorOptions {
@@ -66,9 +66,19 @@ const configuration = {
 };
 return (
 (typeof value === "object" && value !== null && !Array.isArray(value)) ?
-{
-"message": parseMessage(value["message" as keyof typeof value], configuration),
-} :
+Object.fromEntries(
+Object.entries(value).map(([name, value]) => {
+switch(name) {
+case "message":
+return [
+name,
+parseMessage(value, configuration),
+]
+default:
+return value;
+}
+})
+) :
 undefined
 );
 }

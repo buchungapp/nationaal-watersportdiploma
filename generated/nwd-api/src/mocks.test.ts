@@ -3,37 +3,56 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.8                         -- www.JsonSchema42.org
+// v0.12.10                        -- www.JsonSchema42.org
 //
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as validators from "./validators.js";
 import * as mocks from "./mocks.js";
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
+*/
 test("ParametersSchema", () => {
 const mock = mocks.mockParametersSchema();
 const valid = validators.isParametersSchema(mock);
 assert.equal(valid, true);
 });
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
+*/
 test("GetSchema", () => {
 const mock = mocks.mockGetSchema();
 const valid = validators.isGetSchema(mock);
 assert.equal(valid, true);
 });
+/**
+* @description Object that contains a message
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
+*/
 test("MessageContainer", () => {
 const mock = mocks.mockMessageContainer();
 const valid = validators.isMessageContainer(mock);
 assert.equal(valid, true);
 });
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
+*/
 test("Message", () => {
 const mock = mocks.mockMessage();
 const valid = validators.isMessage(mock);
 assert.equal(valid, true);
 });
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+*/
 test("PostSchema", () => {
 const mock = mocks.mockPostSchema();
 const valid = validators.isPostSchema(mock);
 assert.equal(valid, true);
 });
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
+*/
 test("RequestBodySchema", () => {
 const mock = mocks.mockRequestBodySchema();
 const valid = validators.isRequestBodySchema(mock);

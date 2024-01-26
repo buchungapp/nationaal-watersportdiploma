@@ -3,13 +3,13 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.8                         -- www.JsonSchema42.org
+// v0.12.10                        -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
 const depthCounters: Record<string, number> = {};
-export const unknownValue = {};
-export const anyValue = {};
-export const neverValue = {};
+export const unknownValue: any = {};
+export const anyValue: any = {};
+export const neverValue: any = {};
 export interface MockGeneratorOptions {
 maximumDepth?: number;
 numberPrecision?: number;
@@ -44,12 +44,15 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["0"] ??= 0;
+depthCounters[0] ??= 0;
 try {
-depthCounters["0"]++;
+depthCounters[0]++;
 return (
 new Array(
-configuration.defaultMinimumStringLength + nextSeed() % (configuration.defaultMaximumStringLength - configuration.defaultMinimumStringLength + 1)
+configuration.defaultMinimumStringLength +
+nextSeed() % (
+configuration.defaultMaximumStringLength - configuration.defaultMinimumStringLength + 1
+)
 ).
 fill(undefined).
 map(() => configuration.stringCharacters[nextSeed() % configuration.stringCharacters.length]).
@@ -57,7 +60,7 @@ join("")
 );
 }
 finally {
-depthCounters["0"]--;
+depthCounters[0]--;
 }
 }
 /**
@@ -68,13 +71,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["1"] ??= 0;
+depthCounters[1] ??= 0;
 try {
-depthCounters["1"]++;
+depthCounters[1]++;
 return (mockMessageContainer());
 }
 finally {
-depthCounters["1"]--;
+depthCounters[1]--;
 }
 }
 /**
@@ -86,17 +89,17 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["2"] ??= 0;
+depthCounters[2] ??= 0;
 try {
-depthCounters["2"]++;
+depthCounters[2]++;
 return (
 {
-"message": mockMessage(),
+["message"]: mockMessage(),
 }
 );
 }
 finally {
-depthCounters["2"]--;
+depthCounters[2]--;
 }
 }
 /**
@@ -107,12 +110,15 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["3"] ??= 0;
+depthCounters[3] ??= 0;
 try {
-depthCounters["3"]++;
+depthCounters[3]++;
 return (
 new Array(
-1 + nextSeed() % (configuration.defaultMaximumStringLength - 1 + 1)
+1 +
+nextSeed() % (
+configuration.defaultMaximumStringLength - 1 + 1
+)
 ).
 fill(undefined).
 map(() => configuration.stringCharacters[nextSeed() % configuration.stringCharacters.length]).
@@ -120,7 +126,7 @@ join("")
 );
 }
 finally {
-depthCounters["3"]--;
+depthCounters[3]--;
 }
 }
 /**
@@ -131,13 +137,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["4"] ??= 0;
+depthCounters[4] ??= 0;
 try {
-depthCounters["4"]++;
+depthCounters[4]++;
 return (mockMessageContainer());
 }
 finally {
-depthCounters["4"]--;
+depthCounters[4]--;
 }
 }
 /**
@@ -148,13 +154,13 @@ const configuration = {
 ...defaultMockGeneratorOptions,
 ...options,
 };
-depthCounters["5"] ??= 0;
+depthCounters[5] ??= 0;
 try {
-depthCounters["5"]++;
+depthCounters[5]++;
 return (mockMessageContainer());
 }
 finally {
-depthCounters["5"]--;
+depthCounters[5]--;
 }
 }
 let seed = 1;

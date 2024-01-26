@@ -3,7 +3,7 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.8                         -- www.JsonSchema42.org
+// v0.12.10                        -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
 export interface ValidationError {
@@ -12,9 +12,9 @@ rule: string;
 typeName?: string;
 }
 const pathPartStack = new Array<string>();
-let currentPathPart: string | undefined = "";
-let currentTypeName: string | undefined;
+const typeNameStack = new Array<string>();
 let errors = new Array<ValidationError>();
+let depth = 0;
 export function getValidationErrors() {
 return errors;
 }
@@ -24,13 +24,34 @@ throw new TypeError("no validation errors");
 }
 return errors[errors.length - 1];
 }
+function withPath<T>(pathPart: string, job: () => T): T {
+pathPartStack.push(pathPart);
+try {
+return job();
+}
+finally {
+pathPartStack.pop();
+}
+}
+function withType<T>(typeName: string, job: () => T): T {
+if(typeNameStack.length === 0) {
+resetErrors();
+}
+typeNameStack.push(typeName);
+try {
+return job();
+}
+finally {
+typeNameStack.pop();
+}
+}
 function resetErrors() {
 errors = [];
 }
 function recordError(rule: string) {
 errors.push({
 path: pathPartStack.join("/"),
-typeName: currentTypeName,
+typeName: typeNameStack[typeNameStack.length - 1],
 rule,
 })
 }
@@ -38,55 +59,44 @@ rule,
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
 */
 export function isParametersSchema(value: unknown): value is types.ParametersSchema {
-if(pathPartStack.length === 0) {
+if(depth === 0) {
 resetErrors();
 }
-const typeName: string | undefined = currentTypeName;
-const pathPart = currentPathPart;
-try {
-currentTypeName = "ParametersSchema";
-if(pathPart != null) {
-pathPartStack.push(pathPart);
-}
-if(
-typeof value !== "string"
-) {
-recordError("string");
+depth += 1;
+try{
+return withType("ParametersSchema", () => {
+if(!((typeof value === "string"))) {
+recordError("types");
 return false;
 }
 return true;
 ;
+});
 }
 finally {
-currentTypeName = typeName;
-if(pathPart != null) {
-currentPathPart = pathPartStack.pop();
-}
+depth -= 1;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
 */
 export function isGetSchema(value: unknown): value is types.GetSchema {
-if(pathPartStack.length === 0) {
+if(depth === 0) {
 resetErrors();
 }
-const typeName: string | undefined = currentTypeName;
-const pathPart = currentPathPart;
-try {
-currentTypeName = "GetSchema";
-if(pathPart != null) {
-pathPartStack.push(pathPart);
+depth += 1;
+try{
+return withType("GetSchema", () => {
+if(!isMessageContainer(value)) {
+recordError("reference");
+return false;
 }
-currentPathPart = undefined;
-return (isMessageContainer(value));
+return true;
 ;
+});
 }
 finally {
-currentTypeName = typeName;
-if(pathPart != null) {
-currentPathPart = pathPartStack.pop();
-}
+depth -= 1;
 }
 }
 /**
@@ -94,24 +104,25 @@ currentPathPart = pathPartStack.pop();
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
 */
 export function isMessageContainer(value: unknown): value is types.MessageContainer {
-if(pathPartStack.length === 0) {
+if(depth === 0) {
 resetErrors();
 }
-const typeName: string | undefined = currentTypeName;
-const pathPart = currentPathPart;
-try {
-currentTypeName = "MessageContainer";
-if(pathPart != null) {
-pathPartStack.push(pathPart);
-}
-if(
-value === null ||
-typeof value !== "object" ||
-Array.isArray(value)
-) {
-recordError("object");
+depth += 1;
+try{
+return withType("MessageContainer", () => {
+if(!((
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+))) {
+recordError("types");
 return false;
 }
+if(
+value !== null &&
+typeof value === "object" &&
+!Array.isArray(value)
+) {
 if(
 !("message" in value) ||
 value["message"] === undefined
@@ -126,107 +137,102 @@ continue;
 }
 switch(propertyName) {
 case "message":
-currentPathPart = propertyName;
+if(!withPath(propertyName, () => {
 if(!isMessage(propertyValue)) {
-recordError("propertyName");
+recordError("objectProperties");
 return false;
 }
+return true;
+})) {
+return false
+}
 break;
+default:
+break;
+}
 }
 }
 return true;
 ;
+});
 }
 finally {
-currentTypeName = typeName;
-if(pathPart != null) {
-currentPathPart = pathPartStack.pop();
-}
+depth -= 1;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
 */
 export function isMessage(value: unknown): value is types.Message {
-if(pathPartStack.length === 0) {
+if(depth === 0) {
 resetErrors();
 }
-const typeName: string | undefined = currentTypeName;
-const pathPart = currentPathPart;
-try {
-currentTypeName = "Message";
-if(pathPart != null) {
-pathPartStack.push(pathPart);
-}
-if(
-typeof value !== "string"
-) {
-recordError("string");
+depth += 1;
+try{
+return withType("Message", () => {
+if(!((typeof value === "string"))) {
+recordError("types");
 return false;
 }
+if(
+typeof value === "string"
+) {
 if(
 value.length < 1
 ) {
 recordError("minimumLength");
 return false;
 }
+}
 return true;
 ;
+});
 }
 finally {
-currentTypeName = typeName;
-if(pathPart != null) {
-currentPathPart = pathPartStack.pop();
-}
+depth -= 1;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
 */
 export function isPostSchema(value: unknown): value is types.PostSchema {
-if(pathPartStack.length === 0) {
+if(depth === 0) {
 resetErrors();
 }
-const typeName: string | undefined = currentTypeName;
-const pathPart = currentPathPart;
-try {
-currentTypeName = "PostSchema";
-if(pathPart != null) {
-pathPartStack.push(pathPart);
+depth += 1;
+try{
+return withType("PostSchema", () => {
+if(!isMessageContainer(value)) {
+recordError("reference");
+return false;
 }
-currentPathPart = undefined;
-return (isMessageContainer(value));
+return true;
 ;
+});
 }
 finally {
-currentTypeName = typeName;
-if(pathPart != null) {
-currentPathPart = pathPartStack.pop();
-}
+depth -= 1;
 }
 }
 /**
 * @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
 */
 export function isRequestBodySchema(value: unknown): value is types.RequestBodySchema {
-if(pathPartStack.length === 0) {
+if(depth === 0) {
 resetErrors();
 }
-const typeName: string | undefined = currentTypeName;
-const pathPart = currentPathPart;
-try {
-currentTypeName = "RequestBodySchema";
-if(pathPart != null) {
-pathPartStack.push(pathPart);
+depth += 1;
+try{
+return withType("RequestBodySchema", () => {
+if(!isMessageContainer(value)) {
+recordError("reference");
+return false;
 }
-currentPathPart = undefined;
-return (isMessageContainer(value));
+return true;
 ;
+});
 }
 finally {
-currentTypeName = typeName;
-if(pathPart != null) {
-currentPathPart = pathPartStack.pop();
-}
+depth -= 1;
 }
 }
