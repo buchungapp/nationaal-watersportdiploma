@@ -67,12 +67,8 @@
           "name": "sub_category_main_category_id_main_category_id_fk",
           "tableFrom": "sub_category",
           "tableTo": "main_category",
-          "columnsFrom": [
-            "main_category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["main_category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -80,10 +76,7 @@
       "compositePrimaryKeys": {
         "sub_category_main_category_id_id_pk": {
           "name": "sub_category_main_category_id_id_pk",
-          "columns": [
-            "main_category_id",
-            "id"
-          ]
+          "columns": ["main_category_id", "id"]
         }
       },
       "uniqueConstraints": {}
