@@ -42,7 +42,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^20.11.4",
+    "@types/node": "^20.11.7",
     "goodrouter": "^2.1.2",
     "oa42-lib": "^0.6.4"
   },
