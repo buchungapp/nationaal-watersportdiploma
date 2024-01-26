@@ -15,7 +15,9 @@ export async function withDatabase<T>(job: (context: DatabaseContext) => Promise
   // a (semi) random database name
   const databaseName = `db_${new Date().valueOf()}`;
 
-  const pgUriSuper = new URL(process.env.PGURI || "postgres://postgres@localhost:5432/postgres");
+  const pgUriSuper = new URL(
+    process.env.PGURI || "postgres://postgres:postgres@localhost:5432/postgres",
+  );
   const pgUri = new URL(databaseName, pgUriSuper);
 
   // create a pool that will be used to create and destroy a database

@@ -15,11 +15,11 @@ jobs:
     container: node:21.5.0-alpine3.19
     services:
       postgres:
-        image: postgres:16.1
+        image: supabase/postgres:15.1.1.5
         env:
-          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_PASSWORD: postgres
     env:
-      PGURI: "postgres://postgres@postgres:5432/postgres"
+      PGURI: "postgres://postgres:postgres@postgres:5432/postgres"
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
