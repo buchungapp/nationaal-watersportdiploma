@@ -7,55 +7,136 @@ info:
   version: 0.1.0
 
 paths:
-  /echo:
+  /main-category:
     get:
-      operationId: echo-via-get
-      summary: Send a message via GET and get your message back in a message-container
-      description: |-
-        Send a message and get the same message back!
-      parameters:
-        - name: message
-          in: query
-          required: true
-          schema:
-            type: string
+      operationId: get-main-categories
+      summary: Get main get-main-categories
       responses:
         "200":
-          description: |-
-            A response
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/message-container"
+                type: array
+                items:
+                  $ref: "#/components/schemas/main-category"
     post:
-      operationId: echo
-      summary: Send a message
-      description: |-
-        Send a message and get the same message back!
+      operationId: create-main-category
+      summary: Create an new main category
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/message-container"
+              $ref: "#/components/schemas/main-category-fields"
       responses:
-        "200":
-          description: |-
-            A response
+        "201":
+          description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/message-container"
+                $ref: "#/components/schemas/main-category"
+
+  /sub-category/{main-category-id}:
+    parameters:
+      - name: main-category-id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/entity-id"
+    get:
+      operationId: get-sub-categories
+      summary: Get sub categories in a main category
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/main-category"
+    post:
+      operationId: create-sub-category
+      summary: Create an new sub category in a main category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sub-category-fields"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sub-category"
 
 components:
   schemas:
-    message-container:
+    #entity schemas
+
+    main-category:
       description: |-
-        Object that contains a message
+        Full main category entity
+      $ref: "#/components/schemas/main-category-fields"
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/entity-id"
+
+    main-category-fields:
+      description: |-
+        Main category editable fields
       type: object
       required:
-        - message
+        - name
       properties:
-        message:
-          type: string
-          minLength: 1
+        name:
+          $ref: "#/components/schemas/entity-name"
+        description:
+          $ref: "#/components/schemas/entity-description"
+
+    sub-category:
+      description: |-
+        Full sub category entity
+      $ref: "#/components/schemas/sub-category-fields"
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/entity-id"
+
+    sub-category-fields:
+      description: |-
+        Sub category entity editable fields
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/entity-name"
+        description:
+          $ref: "#/components/schemas/entity-description"
+
+    # field schemas
+
+    entity-id:
+      description: |-
+        Key of an entity
+      type: integer
+      # exclusiveMinimum: 0
+
+    entity-name:
+      description: |-
+        The name of an entity
+      type: string
+      minLength: 1
+      maxLength: 100
+
+    entity-description:
+      description: |-
+        Description of an entity
+      type: string
+      minLength: 1
+      maxLength: 100

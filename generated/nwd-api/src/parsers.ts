@@ -3,7 +3,7 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.8                         -- www.JsonSchema42.org
+// v0.12.10                        -- www.JsonSchema42.org
 //
 import * as types from "./types.js";
 export interface ParserGeneratorOptions {
@@ -15,67 +15,138 @@ trueStringValues: ["", "true", "yes", "on", "1"],
 falseStringValues: ["false", "no", "off", "0"],
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/parameters/0/schema}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
 */
-export function parseParametersSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseMainCategory200GetSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
 };
 return (
-((value: unknown) => {
-if(Array.isArray(value)) {
-switch(value.length) {
-case 1:
-[value] = value
-break;
+Array.isArray(value) ?
+value.map((value, index) => {
+switch(index) {
 default:
-return undefined;
+return parseMainCategory200GetItems(value, configuration)
 }
-}
-switch(typeof value) {
-case "string":
-return value;
-case "number":
-case "boolean":
-return String(value);
-default:
-return undefined;
-}
-})(value)
+}) :
+undefined
 );
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/get/responses/200/content/application%2Fjson/schema}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
 */
-export function parseGetSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseMainCategory200GetItems(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
 };
-return (parseMessageContainer(value, configuration));
+return (parseMainCategory(value, configuration));
 }
 /**
-* @description Object that contains a message
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container}
+* @description Full main category entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category}
 */
-export function parseMessageContainer(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseMainCategory(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
 };
 return (
 (typeof value === "object" && value !== null && !Array.isArray(value)) ?
-{
-"message": parseMessage(value["message" as keyof typeof value], configuration),
-} :
+Object.fromEntries(
+Object.entries(value).map(([name, value]) => {
+switch(name) {
+case "name":
+return [
+name,
+parseMainCategoryFieldsName(value, configuration),
+]
+case "description":
+return [
+name,
+parseMainCategoryFieldsDescription(value, configuration),
+]
+case "id":
+return [
+name,
+parseMainCategoryId(value, configuration),
+]
+default:
+return value;
+}
+})
+) :
 undefined
 );
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/message-container/properties/message}
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category/properties/id}
 */
-export function parseMessage(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseMainCategoryId(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityId(value, configuration));
+}
+/**
+* @description Main category editable fields
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields}
+*/
+export function parseMainCategoryFields(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+(typeof value === "object" && value !== null && !Array.isArray(value)) ?
+Object.fromEntries(
+Object.entries(value).map(([name, value]) => {
+switch(name) {
+case "name":
+return [
+name,
+parseMainCategoryFieldsName(value, configuration),
+]
+case "description":
+return [
+name,
+parseMainCategoryFieldsDescription(value, configuration),
+]
+default:
+return value;
+}
+})
+) :
+undefined
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields/properties/name}
+*/
+export function parseMainCategoryFieldsName(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityName(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields/properties/description}
+*/
+export function parseMainCategoryFieldsDescription(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityDescription(value, configuration));
+}
+/**
+* @description The name of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-name}
+*/
+export function parseEntityName(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
@@ -104,22 +175,244 @@ return undefined;
 );
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/responses/200/content/application%2Fjson/schema}
+* @description Description of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-description}
 */
-export function parsePostSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseEntityDescription(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
 };
-return (parseMessageContainer(value, configuration));
+return (
+((value: unknown) => {
+if(Array.isArray(value)) {
+switch(value.length) {
+case 1:
+[value] = value
+break;
+default:
+return undefined;
+}
+}
+switch(typeof value) {
+case "string":
+return value;
+case "number":
+case "boolean":
+return String(value);
+default:
+return undefined;
+}
+})(value)
+);
 }
 /**
-* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fecho/post/requestBody/content/application%2Fjson/schema}
+* @description Key of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-id}
 */
-export function parseRequestBodySchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+export function parseEntityId(value: unknown, options: ParserGeneratorOptions = {}): unknown {
 const configuration = {
 ...defaultParserGeneratorOptions,
 ...options,
 };
-return (parseMessageContainer(value, configuration));
+return (
+((value: unknown) => {
+if(Array.isArray(value)) {
+switch(value.length) {
+case 1:
+[value] = value
+break;
+default:
+return undefined;
+}
+}
+switch(typeof value) {
+case "string":
+return Number(value);
+case "number":
+return value;
+case "boolean":
+return value ? 1 : 0;
+}
+return undefined;
+})(value)
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema}
+*/
+export function parseMainCategoryPost201Schema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseMainCategory(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/requestBody/content/application%2Fjson/schema}
+*/
+export function parseMainCategoryPostRequestBodySchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseMainCategoryFields(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/parameters/0/schema}
+*/
+export function parseParametersSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityId(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema}
+*/
+export function parseSubCategoryMainCategoryId200GetSchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+Array.isArray(value) ?
+value.map((value, index) => {
+switch(index) {
+default:
+return parseSubCategoryMainCategoryId200GetItems(value, configuration)
+}
+}) :
+undefined
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema/items}
+*/
+export function parseSubCategoryMainCategoryId200GetItems(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseMainCategory(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema}
+*/
+export function parseSubCategoryMainCategoryIdPost201Schema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseSubCategory(value, configuration));
+}
+/**
+* @description Full sub category entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category}
+*/
+export function parseSubCategory(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+(typeof value === "object" && value !== null && !Array.isArray(value)) ?
+Object.fromEntries(
+Object.entries(value).map(([name, value]) => {
+switch(name) {
+case "name":
+return [
+name,
+parseSubCategoryFieldsName(value, configuration),
+]
+case "description":
+return [
+name,
+parseSubCategoryFieldsDescription(value, configuration),
+]
+case "id":
+return [
+name,
+parseSubCategoryId(value, configuration),
+]
+default:
+return value;
+}
+})
+) :
+undefined
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category/properties/id}
+*/
+export function parseSubCategoryId(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityId(value, configuration));
+}
+/**
+* @description Sub category entity editable fields
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields}
+*/
+export function parseSubCategoryFields(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (
+(typeof value === "object" && value !== null && !Array.isArray(value)) ?
+Object.fromEntries(
+Object.entries(value).map(([name, value]) => {
+switch(name) {
+case "name":
+return [
+name,
+parseSubCategoryFieldsName(value, configuration),
+]
+case "description":
+return [
+name,
+parseSubCategoryFieldsDescription(value, configuration),
+]
+default:
+return value;
+}
+})
+) :
+undefined
+);
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields/properties/name}
+*/
+export function parseSubCategoryFieldsName(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityName(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields/properties/description}
+*/
+export function parseSubCategoryFieldsDescription(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseEntityDescription(value, configuration));
+}
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/requestBody/content/application%2Fjson/schema}
+*/
+export function parseSubCategoryMainCategoryIdPostRequestBodySchema(value: unknown, options: ParserGeneratorOptions = {}): unknown {
+const configuration = {
+...defaultParserGeneratorOptions,
+...options,
+};
+return (parseSubCategoryFields(value, configuration));
 }

@@ -8,6 +8,20 @@
       "when": 1706013310541,
       "tag": "0000_strong_skreet",
       "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1706266898609,
+      "tag": "0001_powerful_rogue",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1706269157971,
+      "tag": "0002_shallow_mentor",
+      "breakpoints": false
     }
   ]
 }

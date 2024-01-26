@@ -26,12 +26,12 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.11.4",
-    "@types/pg": "^8.10.9",
+    "@types/node": "^20.11.7",
+    "@types/pg": "^8.11.0",
     "drizzle-orm": "^0.29.3",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
-    "type-fest": "^4.9.0"
+    "type-fest": "^4.10.1"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",

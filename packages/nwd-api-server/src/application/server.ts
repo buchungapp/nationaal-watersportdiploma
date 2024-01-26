@@ -8,8 +8,15 @@ export type Server = api.Server<Authentication>;
 export function createApplicationServer(context: Context, onError?: (error: unknown) => void) {
   const server = new api.Server<Authentication>();
 
-  server.registerEchoOperation(operationHandlers.createEchoHandler(context));
-  server.registerEchoViaGetOperation(operationHandlers.createEchoViaGetHandler(context));
+  //categories
+
+  server.registerCreateMainCategoryOperation(operationHandlers.createMainCategory(context));
+  server.registerGetMainCategoriesOperation(operationHandlers.getMainCategories(context));
+
+  server.registerGetSubCategoriesOperation(operationHandlers.getSubCategories(context));
+  server.registerCreateSubCategoryOperation(operationHandlers.createSubCategory(context));
+
+  // middleware!
 
   server.registerMiddleware(api.createErrorMiddleware(onError));
 
