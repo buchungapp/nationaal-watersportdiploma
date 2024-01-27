@@ -8,7 +8,6 @@ COPY generated /root/generated
 COPY package.json \
   pnpm-workspace.yaml \
   pnpm-lock.yaml \
-  resolve-links \
   /root/
 
 RUN pnpm install \
