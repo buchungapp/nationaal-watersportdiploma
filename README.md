@@ -2,7 +2,7 @@
 
 ## setting up
 
-Just run `npm install` from the root folder and you're good to go!
+Just run `pnpm install` from the root folder and you're good to go!
 
 ## regenerating code
 
