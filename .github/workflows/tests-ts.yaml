@@ -21,6 +21,7 @@ jobs:
     env:
       PGURI: "postgres://postgres:postgres@postgres:5432/postgres"
     steps:
+      - run: corepack enable
       - uses: actions/checkout@v3
       - run: pnpm install --frozen-lockfile
       - run: pnpm --recursive run build
@@ -30,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:21.5.0-alpine3.19
     steps:
+      - run: corepack enable
       - uses: actions/checkout@v3
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit
