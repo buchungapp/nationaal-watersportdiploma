@@ -47,6 +47,7 @@
     "typescript": "^5.3.3"
   },
   "bundledDependencies": [
-    "nwd-api"
+    "nwd-api",
+    "nwd-db"
   ]
 }
