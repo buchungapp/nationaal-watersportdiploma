@@ -20,6 +20,7 @@ RUN pnpm deploy \
   --production \
   deployed
 
+
 FROM node:21.5.0-alpine3.19
 WORKDIR /root
 ENV NODE_ENV=production
