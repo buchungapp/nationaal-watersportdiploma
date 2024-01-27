@@ -2,6 +2,7 @@
   "version": "0.2",
   "words": [
     "buchungapp",
+    "corepack",
     "esbenp",
     "Nationaal",
     "notdir",
@@ -15,8 +16,17 @@
     "watersportdiploma"
   ],
   "useGitignore": true,
-  "ignorePaths": ["pnpm-lock.yaml", "generated/"],
-  "files": ["**"],
-  "enableFiletypes": ["*"],
-  "dictionaries": ["sql"]
+  "ignorePaths": [
+    "pnpm-lock.yaml",
+    "generated/"
+  ],
+  "files": [
+    "**"
+  ],
+  "enableFiletypes": [
+    "*"
+  ],
+  "dictionaries": [
+    "sql"
+  ]
 }
