@@ -3,7 +3,7 @@ SHELL:=$(PREFIX)/bin/sh
 build: \
 	generated/nwd-api \
 
-	npm install
+	pnpm install
 
 rebuild: \
 	clean build
@@ -13,7 +13,7 @@ clean: \
 	rm --recursive --force generated/nwd-api \
 
 out/%: specifications/%.yaml
-	npx --yes oa42-generator package $^ \
+	pnpx oa42-generator package $^ \
 		--package-directory $@ \
 		--package-name $(notdir $(basename $@)) \
 		--package-version 0.0.0 \
@@ -21,9 +21,6 @@ out/%: specifications/%.yaml
 generated/%: out/%
 	rm -rf $@
 	mv $< $@
-
-	npm install --workspace $(notdir $(basename $@))
-	npm run build --workspace $(notdir $(basename $@))
 
 .PHONY: \
 	build \

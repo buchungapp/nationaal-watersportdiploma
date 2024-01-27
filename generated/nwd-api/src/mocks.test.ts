@@ -3,39 +3,192 @@
 //  _ |  |___ ___ ___|   __|___| |_ ___ _____  __| | |_  |
 // | |_| |_ -| . |   |__   |  _|   | -_|     ||. |_  |  _|
 // |_____|___|___|_|_|_____|___|_|_|___|_|_|_|___| |_|___|
-// v0.11.8                         -- www.JsonSchema42.org
+// v0.12.10                        -- www.JsonSchema42.org
 //
 import assert from "node:assert/strict";
 import test from "node:test";
 import * as validators from "./validators.js";
 import * as mocks from "./mocks.js";
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema}
+*/
+test("MainCategory200GetSchema", () => {
+const mock = mocks.mockMainCategory200GetSchema();
+const valid = validators.isMainCategory200GetSchema(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/get/responses/200/content/application%2Fjson/schema/items}
+*/
+test("MainCategory200GetItems", () => {
+const mock = mocks.mockMainCategory200GetItems();
+const valid = validators.isMainCategory200GetItems(mock);
+assert.equal(valid, true);
+});
+/**
+* @description Full main category entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category}
+*/
+test("MainCategory", () => {
+const mock = mocks.mockMainCategory();
+const valid = validators.isMainCategory(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category/properties/id}
+*/
+test("MainCategoryId", () => {
+const mock = mocks.mockMainCategoryId();
+const valid = validators.isMainCategoryId(mock);
+assert.equal(valid, true);
+});
+/**
+* @description Main category editable fields
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields}
+*/
+test("MainCategoryFields", () => {
+const mock = mocks.mockMainCategoryFields();
+const valid = validators.isMainCategoryFields(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields/properties/name}
+*/
+test("MainCategoryFieldsName", () => {
+const mock = mocks.mockMainCategoryFieldsName();
+const valid = validators.isMainCategoryFieldsName(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/main-category-fields/properties/description}
+*/
+test("MainCategoryFieldsDescription", () => {
+const mock = mocks.mockMainCategoryFieldsDescription();
+const valid = validators.isMainCategoryFieldsDescription(mock);
+assert.equal(valid, true);
+});
+/**
+* @description The name of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-name}
+*/
+test("EntityName", () => {
+const mock = mocks.mockEntityName();
+const valid = validators.isEntityName(mock);
+assert.equal(valid, true);
+});
+/**
+* @description Description of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-description}
+*/
+test("EntityDescription", () => {
+const mock = mocks.mockEntityDescription();
+const valid = validators.isEntityDescription(mock);
+assert.equal(valid, true);
+});
+/**
+* @description Key of an entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/entity-id}
+*/
+test("EntityId", () => {
+const mock = mocks.mockEntityId();
+const valid = validators.isEntityId(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/responses/201/content/application%2Fjson/schema}
+*/
+test("MainCategoryPost201Schema", () => {
+const mock = mocks.mockMainCategoryPost201Schema();
+const valid = validators.isMainCategoryPost201Schema(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fmain-category/post/requestBody/content/application%2Fjson/schema}
+*/
+test("MainCategoryPostRequestBodySchema", () => {
+const mock = mocks.mockMainCategoryPostRequestBodySchema();
+const valid = validators.isMainCategoryPostRequestBodySchema(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/parameters/0/schema}
+*/
 test("ParametersSchema", () => {
 const mock = mocks.mockParametersSchema();
 const valid = validators.isParametersSchema(mock);
 assert.equal(valid, true);
 });
-test("GetSchema", () => {
-const mock = mocks.mockGetSchema();
-const valid = validators.isGetSchema(mock);
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema}
+*/
+test("SubCategoryMainCategoryId200GetSchema", () => {
+const mock = mocks.mockSubCategoryMainCategoryId200GetSchema();
+const valid = validators.isSubCategoryMainCategoryId200GetSchema(mock);
 assert.equal(valid, true);
 });
-test("MessageContainer", () => {
-const mock = mocks.mockMessageContainer();
-const valid = validators.isMessageContainer(mock);
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/get/responses/200/content/application%2Fjson/schema/items}
+*/
+test("SubCategoryMainCategoryId200GetItems", () => {
+const mock = mocks.mockSubCategoryMainCategoryId200GetItems();
+const valid = validators.isSubCategoryMainCategoryId200GetItems(mock);
 assert.equal(valid, true);
 });
-test("Message", () => {
-const mock = mocks.mockMessage();
-const valid = validators.isMessage(mock);
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/responses/201/content/application%2Fjson/schema}
+*/
+test("SubCategoryMainCategoryIdPost201Schema", () => {
+const mock = mocks.mockSubCategoryMainCategoryIdPost201Schema();
+const valid = validators.isSubCategoryMainCategoryIdPost201Schema(mock);
 assert.equal(valid, true);
 });
-test("PostSchema", () => {
-const mock = mocks.mockPostSchema();
-const valid = validators.isPostSchema(mock);
+/**
+* @description Full sub category entity
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category}
+*/
+test("SubCategory", () => {
+const mock = mocks.mockSubCategory();
+const valid = validators.isSubCategory(mock);
 assert.equal(valid, true);
 });
-test("RequestBodySchema", () => {
-const mock = mocks.mockRequestBodySchema();
-const valid = validators.isRequestBodySchema(mock);
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category/properties/id}
+*/
+test("SubCategoryId", () => {
+const mock = mocks.mockSubCategoryId();
+const valid = validators.isSubCategoryId(mock);
+assert.equal(valid, true);
+});
+/**
+* @description Sub category entity editable fields
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields}
+*/
+test("SubCategoryFields", () => {
+const mock = mocks.mockSubCategoryFields();
+const valid = validators.isSubCategoryFields(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields/properties/name}
+*/
+test("SubCategoryFieldsName", () => {
+const mock = mocks.mockSubCategoryFieldsName();
+const valid = validators.isSubCategoryFieldsName(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/components/schemas/sub-category-fields/properties/description}
+*/
+test("SubCategoryFieldsDescription", () => {
+const mock = mocks.mockSubCategoryFieldsDescription();
+const valid = validators.isSubCategoryFieldsDescription(mock);
+assert.equal(valid, true);
+});
+/**
+* @see {@link file:///home/elmerbulthuis/workspace/nationaal-watersportdiploma/specifications/nwd-api.yaml#/paths/%2Fsub-category%2F{main-category-id}/post/requestBody/content/application%2Fjson/schema}
+*/
+test("SubCategoryMainCategoryIdPostRequestBodySchema", () => {
+const mock = mocks.mockSubCategoryMainCategoryIdPostRequestBodySchema();
+const valid = validators.isSubCategoryMainCategoryIdPostRequestBodySchema(mock);
 assert.equal(valid, true);
 });

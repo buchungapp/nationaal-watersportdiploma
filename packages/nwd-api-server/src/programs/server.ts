@@ -1,4 +1,5 @@
 import * as http from "http";
+import { createDatabase } from "nwd-db";
 import pg from "pg";
 import * as yargs from "yargs";
 import * as application from "../application/index.js";
@@ -24,15 +25,15 @@ export function configureServerProgram(argv: yargs.Argv) {
   );
 }
 
-interface MainOptions {
+interface MainConfiguration {
   port: number;
   pgUri: string;
 }
 
-async function main(options: MainOptions) {
+async function main(configuration: MainConfiguration) {
   console.log("Starting server...");
 
-  const { port, pgUri } = options;
+  const { port, pgUri } = configuration;
 
   const onError = (error: unknown) => console.error(error);
   const onWarn = (error: unknown) => console.warn(error);
@@ -41,8 +42,9 @@ async function main(options: MainOptions) {
     connectionString: pgUri,
   });
   try {
+    const db = createDatabase(pgPool);
     const context = {
-      pgPool,
+      db,
     };
     const server = application.createApplicationServer(context, onWarn);
 

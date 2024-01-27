@@ -6,32 +6,31 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.5                                           -- www.OpenApi42.org
+//   v0.2.1                                           -- www.OpenApi42.org
 import assert from "assert/strict";
 import test from "node:test";
 import * as main from "./main.js";
 import * as http from "http";
-test("echo-via-get 200 application/json", async () => {
-const server = new main.Server({
+type ServerAuthentication = {
+apiToken: boolean,
+};
+test("get-main-categories 200 application/json", async () => {
+const server = new main.Server<ServerAuthentication>({
 validateIncomingParameters: false,
 validateIncomingEntity: false,
 validateOutgoingParameters: false,
 validateOutgoingEntity: false,
 });
-server.registerEchoViaGetOperation(async (incomingRequest, authentication) => {
-{
-const parameterValue = incomingRequest.parameters.message;
-const valid = main.isParametersSchema(parameterValue);
-assert.equal(valid, true);
-}
+server.registerGetMainCategoriesOperation(async (incomingRequest, authentication) => {
 return {
 status: 200,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockGetSchema(),
+entity: () => main.mockMainCategory200GetSchema(),
 }
 });
+server.registerApiTokenAuthentication((credential) => credential === "super-secret-api-key")
 let lastError: unknown;
 const httpServer = http.createServer();
 httpServer.addListener(
@@ -46,14 +45,14 @@ assert(address != null && typeof address === "object")
 const { port } = address;
 const baseUrl = new URL(`http://localhost:${port}`);
 try {
-const operationResult = await main.echoViaGet(
+const operationResult = await main.getMainCategories(
 {
 contentType: null,
-parameters: {
-message: main.mockParametersSchema(),
+parameters: {},
 },
+{
+apiToken: "super-secret-api-key",
 },
-{},
 {
 baseUrl,
 validateIncomingParameters: false,
@@ -67,7 +66,7 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isGetSchema(entity);
+const valid = main.isMainCategory200GetSchema(entity);
 assert.equal(valid, true);
 }
 }
@@ -77,28 +76,29 @@ httpServer.close((error) => (error == null ? resolve() : reject(error))),
 );
 }
 });
-test("echo application/json 200 application/json", async () => {
-const server = new main.Server({
+test("create-main-category application/json 201 application/json", async () => {
+const server = new main.Server<ServerAuthentication>({
 validateIncomingParameters: false,
 validateIncomingEntity: false,
 validateOutgoingParameters: false,
 validateOutgoingEntity: false,
 });
-server.registerEchoOperation(async (incomingRequest, authentication) => {
+server.registerCreateMainCategoryOperation(async (incomingRequest, authentication) => {
 assert.equal(incomingRequest.contentType, "application/json")
 {
 const entity = await incomingRequest.entity();
-const valid = main.isRequestBodySchema(entity);
+const valid = main.isMainCategoryPostRequestBodySchema(entity);
 assert.equal(valid, true);
 }
 return {
-status: 200,
+status: 201,
 parameters: {
 },
 contentType: "application/json",
-entity: () => main.mockPostSchema(),
+entity: () => main.mockMainCategoryPost201Schema(),
 }
 });
+server.registerApiTokenAuthentication((credential) => credential === "super-secret-api-key")
 let lastError: unknown;
 const httpServer = http.createServer();
 httpServer.addListener(
@@ -113,13 +113,84 @@ assert(address != null && typeof address === "object")
 const { port } = address;
 const baseUrl = new URL(`http://localhost:${port}`);
 try {
-const operationResult = await main.echo(
+const operationResult = await main.createMainCategory(
 {
 contentType: "application/json",
 parameters: {},
-entity: () => main.mockRequestBodySchema(),
+entity: () => main.mockMainCategoryPostRequestBodySchema(),
 },
-{},
+{
+apiToken: "super-secret-api-key",
+},
+{
+baseUrl,
+validateIncomingParameters: false,
+validateIncomingEntity: false,
+validateOutgoingParameters: false,
+validateOutgoingEntity: false,
+},
+);
+assert.ifError(lastError);
+assert(operationResult.status === 201)
+assert(operationResult.contentType === "application/json")
+{
+const entity = await operationResult.entity();
+const valid = main.isMainCategoryPost201Schema(entity);
+assert.equal(valid, true);
+}
+}
+finally {
+await new Promise<void>((resolve, reject) =>
+httpServer.close((error) => (error == null ? resolve() : reject(error))),
+);
+}
+});
+test("get-sub-categories 200 application/json", async () => {
+const server = new main.Server<ServerAuthentication>({
+validateIncomingParameters: false,
+validateIncomingEntity: false,
+validateOutgoingParameters: false,
+validateOutgoingEntity: false,
+});
+server.registerGetSubCategoriesOperation(async (incomingRequest, authentication) => {
+{
+const parameterValue = incomingRequest.parameters.mainCategoryId;
+const valid = main.isParametersSchema(parameterValue);
+assert.equal(valid, true);
+}
+return {
+status: 200,
+parameters: {
+},
+contentType: "application/json",
+entity: () => main.mockSubCategoryMainCategoryId200GetSchema(),
+}
+});
+server.registerApiTokenAuthentication((credential) => credential === "super-secret-api-key")
+let lastError: unknown;
+const httpServer = http.createServer();
+httpServer.addListener(
+"request",
+server.asRequestListener({
+onError: (error) => lastError = error,
+}),
+);
+await new Promise<void>((resolve) => httpServer.listen(resolve));
+const address = httpServer.address();
+assert(address != null && typeof address === "object")
+const { port } = address;
+const baseUrl = new URL(`http://localhost:${port}`);
+try {
+const operationResult = await main.getSubCategories(
+{
+contentType: null,
+parameters: {
+mainCategoryId: main.mockParametersSchema(),
+},
+},
+{
+apiToken: "super-secret-api-key",
+},
 {
 baseUrl,
 validateIncomingParameters: false,
@@ -133,7 +204,83 @@ assert(operationResult.status === 200)
 assert(operationResult.contentType === "application/json")
 {
 const entity = await operationResult.entity();
-const valid = main.isPostSchema(entity);
+const valid = main.isSubCategoryMainCategoryId200GetSchema(entity);
+assert.equal(valid, true);
+}
+}
+finally {
+await new Promise<void>((resolve, reject) =>
+httpServer.close((error) => (error == null ? resolve() : reject(error))),
+);
+}
+});
+test("create-sub-category application/json 201 application/json", async () => {
+const server = new main.Server<ServerAuthentication>({
+validateIncomingParameters: false,
+validateIncomingEntity: false,
+validateOutgoingParameters: false,
+validateOutgoingEntity: false,
+});
+server.registerCreateSubCategoryOperation(async (incomingRequest, authentication) => {
+{
+const parameterValue = incomingRequest.parameters.mainCategoryId;
+const valid = main.isParametersSchema(parameterValue);
+assert.equal(valid, true);
+}
+assert.equal(incomingRequest.contentType, "application/json")
+{
+const entity = await incomingRequest.entity();
+const valid = main.isSubCategoryMainCategoryIdPostRequestBodySchema(entity);
+assert.equal(valid, true);
+}
+return {
+status: 201,
+parameters: {
+},
+contentType: "application/json",
+entity: () => main.mockSubCategoryMainCategoryIdPost201Schema(),
+}
+});
+server.registerApiTokenAuthentication((credential) => credential === "super-secret-api-key")
+let lastError: unknown;
+const httpServer = http.createServer();
+httpServer.addListener(
+"request",
+server.asRequestListener({
+onError: (error) => lastError = error,
+}),
+);
+await new Promise<void>((resolve) => httpServer.listen(resolve));
+const address = httpServer.address();
+assert(address != null && typeof address === "object")
+const { port } = address;
+const baseUrl = new URL(`http://localhost:${port}`);
+try {
+const operationResult = await main.createSubCategory(
+{
+contentType: "application/json",
+parameters: {
+mainCategoryId: main.mockParametersSchema(),
+},
+entity: () => main.mockSubCategoryMainCategoryIdPostRequestBodySchema(),
+},
+{
+apiToken: "super-secret-api-key",
+},
+{
+baseUrl,
+validateIncomingParameters: false,
+validateIncomingEntity: false,
+validateOutgoingParameters: false,
+validateOutgoingEntity: false,
+},
+);
+assert.ifError(lastError);
+assert(operationResult.status === 201)
+assert(operationResult.contentType === "application/json")
+{
+const entity = await operationResult.entity();
+const valid = main.isSubCategoryMainCategoryIdPost201Schema(entity);
 assert.equal(valid, true);
 }
 }

@@ -1,0 +1,41 @@
+{
+  "name": "nwd-db",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./out/main.js",
+  "types": "./out/main.d.ts",
+  "files": [
+    "./out/**",
+    "./src/**"
+  ],
+  "scripts": {
+    "prepare": "tsc --build",
+    "build": "tsc --build ",
+    "clean": "rm -rf out",
+    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:buchungapp/nationaal-watersportdiploma.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/buchungapp/nationaal-watersportdiploma/issues"
+  },
+  "keywords": [],
+  "dependencies": {
+    "@types/node": "^20.11.7",
+    "@types/pg": "^8.11.0",
+    "drizzle-orm": "^0.29.3",
+    "pg": "^8.11.3",
+    "tslib": "^2.6.2",
+    "type-fest": "^4.10.1"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
+    "drizzle-kit": "^0.20.13",
+    "typescript": "^5.3.3"
+  }
+}

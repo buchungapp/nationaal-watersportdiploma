@@ -1,15 +1,17 @@
-#!/usr/bin/env node
-
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
 import * as programs from "./programs/index.js";
+import { packageInfo } from "./utils/index.js";
 
-main();
+await main();
 
 async function main() {
   const program = yargs(hideBin(process.argv));
 
   programs.configureServerProgram(program);
 
-  program.parse();
+  program.version(packageInfo.version!);
+  program.demandCommand();
+
+  await program.parseAsync();
 }

@@ -6,7 +6,7 @@
 //  ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██╔══██║██╔═══╝ ██║╚════██║██╔═══╝
 //  ╚██████╔╝██║     ███████╗██║ ╚████║██║  ██║██║     ██║     ██║███████╗
 //   ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝     ╚═╝╚══════╝
-//   v0.1.5                                           -- www.OpenApi42.org
+//   v0.2.1                                           -- www.OpenApi42.org
 import { Router } from "goodrouter";
 import * as parameters from "./parameters.js";
 import * as types from "./types.js";
@@ -29,16 +29,15 @@ validateOutgoingParameters: false,
 const router = new Router({
 parameterValueDecoder: value => value,
 parameterValueEncoder: value => value,
-}).loadFromJson({"templatePairs":[[1,[["/echo",null]]]]});
+}).loadFromJson({"templatePairs":[[1,[["/main-category",null]]],[2,[["/sub-category/",null],["","main-category-id"]]]]});
 /**
-Send a message via GET and get your message back in a message-container
-Send a message and get the same message back!
+Get main get-main-categories
 */
-export async function echoViaGet(
-outgoingRequest: EchoViaGetOutgoingRequest,
-credentials: unknown,
+export async function getMainCategories(
+outgoingRequest: GetMainCategoriesOutgoingRequest,
+credentials: GetMainCategoriesCredentials,
 options: ClientOptions = defaultClientOptions,
-): Promise<EchoViaGetIncomingResponse> {
+): Promise<GetMainCategoriesIncomingResponse> {
 const {
 baseUrl,
 validateIncomingEntity,
@@ -54,7 +53,7 @@ const queryParameters = {};
 const requestHeaders = new Headers();
 const cookieParameters = {};
 if(validateOutgoingParameters) {
-if(!parameters.isEchoViaGetRequestParameters(outgoingRequest.parameters)) {
+if(!parameters.isGetMainCategoriesRequestParameters(outgoingRequest.parameters)) {
 const lastError = parameters.getLastParameterValidationError();
 throw new lib.ClientRequestParameterValidationFailed(
 lastError.parameterName,
@@ -63,11 +62,7 @@ lastError.rule,
 );
 }
 }
-lib.addParameter(
-queryParameters,
-"message",
-outgoingRequest.parameters.message as unknown as string,
-);
+requestHeaders.append("api-token", credentials.apiToken);
 const path =
 router.stringifyRoute(
 1,
@@ -96,14 +91,14 @@ body,
 const fetchResponse = await fetch(url, requestInit);
 const responseContentType =
 fetchResponse.headers.get("content-type");
-let incomingResponse: EchoViaGetIncomingResponse;
+let incomingResponse: GetMainCategoriesIncomingResponse;
 switch(fetchResponse.status) {
 case 200:
 {
 const responseParameters = {
-} as parameters.EchoViaGet200ResponseParameters;
+} as parameters.GetMainCategories200ResponseParameters;
 if(validateIncomingParameters) {
-if(!parameters.isEchoViaGet200ResponseParameters(responseParameters)) {
+if(!parameters.isGetMainCategories200ResponseParameters(responseParameters)) {
 const lastError = parameters.getLastParameterValidationError();
 throw new lib.ClientResponseParameterValidationFailed(
 lastError.parameterName,
@@ -113,7 +108,7 @@ lastError.rule,
 }
 }
 if (responseContentType == null) {
-throw new lib.MissingClientResponseContentType();
+throw new lib.ClientResponseMissingContentType();
 }
 switch(responseContentType) {
 case "application/json":
@@ -127,7 +122,7 @@ responseBody,
 signal
 );
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isGetSchema(entity)) {
+if(!validators.isMainCategory200GetSchema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ClientResponseEntityValidationFailed(
 lastError.path,
@@ -147,7 +142,7 @@ entities(signal) {
 let entities = lib.deserializeJsonEntities(
 stream,
 signal,
-) as AsyncIterable<types.GetSchema>;
+) as AsyncIterable<types.MainCategory200GetSchema>;
 if(validateIncomingEntity) {
 entities = lib.mapAsyncIterable(entities, mapAssertEntity);
 }
@@ -156,7 +151,7 @@ return entities;
 entity() {
 let entity = lib.deserializeJsonEntity(
 stream
-) as Promise<types.GetSchema>;
+) as Promise<types.MainCategory200GetSchema>;
 if(validateIncomingEntity) {
 entity = lib.mapPromisable(entity, mapAssertEntity);
 }
@@ -166,35 +161,37 @@ return entity;
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedContentType();
 }
 break;
 }
 default:
-throw new lib.Unreachable();
+throw new lib.ClientResponseUnexpectedStatusCode();
 }
 return incomingResponse;
 }
-export type EchoViaGetOutgoingRequest =
-lib.OutgoingEmptyRequest<parameters.EchoViaGetRequestParameters>
+export type GetMainCategoriesCredentials = {
+apiToken: string,
+};
+export type GetMainCategoriesOutgoingRequest =
+lib.OutgoingEmptyRequest<parameters.GetMainCategoriesRequestParameters>
 ;
-export type EchoViaGetIncomingResponse =
+export type GetMainCategoriesIncomingResponse =
 lib.IncomingJsonResponse<
 200,
-parameters.EchoViaGet200ResponseParameters,
+parameters.GetMainCategories200ResponseParameters,
 "application/json",
-types.GetSchema
+types.MainCategory200GetSchema
 >
 ;
 /**
-Send a message
-Send a message and get the same message back!
+Create an new main category
 */
-export async function echo(
-outgoingRequest: EchoOutgoingRequest,
-credentials: unknown,
+export async function createMainCategory(
+outgoingRequest: CreateMainCategoryOutgoingRequest,
+credentials: CreateMainCategoryCredentials,
 options: ClientOptions = defaultClientOptions,
-): Promise<EchoIncomingResponse> {
+): Promise<CreateMainCategoryIncomingResponse> {
 const {
 baseUrl,
 validateIncomingEntity,
@@ -210,7 +207,7 @@ const queryParameters = {};
 const requestHeaders = new Headers();
 const cookieParameters = {};
 if(validateOutgoingParameters) {
-if(!parameters.isEchoRequestParameters(outgoingRequest.parameters)) {
+if(!parameters.isCreateMainCategoryRequestParameters(outgoingRequest.parameters)) {
 const lastError = parameters.getLastParameterValidationError();
 throw new lib.ClientRequestParameterValidationFailed(
 lastError.parameterName,
@@ -219,6 +216,7 @@ lastError.rule,
 );
 }
 }
+requestHeaders.append("api-token", credentials.apiToken);
 const path =
 router.stringifyRoute(
 1,
@@ -241,7 +239,7 @@ switch(outgoingRequest.contentType){
 case "application/json": {
 requestHeaders.append("content-type", outgoingRequest.contentType);
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isRequestBodySchema(entity)) {
+if(!validators.isMainCategoryPostRequestBodySchema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ClientResponseEntityValidationFailed(
 lastError.path,
@@ -286,14 +284,14 @@ body,
 const fetchResponse = await fetch(url, requestInit);
 const responseContentType =
 fetchResponse.headers.get("content-type");
-let incomingResponse: EchoIncomingResponse;
+let incomingResponse: CreateMainCategoryIncomingResponse;
 switch(fetchResponse.status) {
-case 200:
+case 201:
 {
 const responseParameters = {
-} as parameters.Echo200ResponseParameters;
+} as parameters.CreateMainCategory201ResponseParameters;
 if(validateIncomingParameters) {
-if(!parameters.isEcho200ResponseParameters(responseParameters)) {
+if(!parameters.isCreateMainCategory201ResponseParameters(responseParameters)) {
 const lastError = parameters.getLastParameterValidationError();
 throw new lib.ClientResponseParameterValidationFailed(
 lastError.parameterName,
@@ -303,7 +301,7 @@ lastError.rule,
 }
 }
 if (responseContentType == null) {
-throw new lib.MissingClientResponseContentType();
+throw new lib.ClientResponseMissingContentType();
 }
 switch(responseContentType) {
 case "application/json":
@@ -317,7 +315,7 @@ responseBody,
 signal
 );
 const mapAssertEntity = (entity: unknown) => {
-if(!validators.isPostSchema(entity)) {
+if(!validators.isMainCategoryPost201Schema(entity)) {
 const lastError = validators.getLastValidationError();
 throw new lib.ClientResponseEntityValidationFailed(
 lastError.path,
@@ -337,7 +335,7 @@ entities(signal) {
 let entities = lib.deserializeJsonEntities(
 stream,
 signal,
-) as AsyncIterable<types.PostSchema>;
+) as AsyncIterable<types.MainCategoryPost201Schema>;
 if(validateIncomingEntity) {
 entities = lib.mapAsyncIterable(entities, mapAssertEntity);
 }
@@ -346,7 +344,7 @@ return entities;
 entity() {
 let entity = lib.deserializeJsonEntity(
 stream
-) as Promise<types.PostSchema>;
+) as Promise<types.MainCategoryPost201Schema>;
 if(validateIncomingEntity) {
 entity = lib.mapPromisable(entity, mapAssertEntity);
 }
@@ -356,27 +354,443 @@ return entity;
 break;
 }
 default:
+throw new lib.ClientResponseUnexpectedContentType();
+}
+break;
+}
+case 403:
+{
+const responseParameters = {
+} as parameters.CreateMainCategory403ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateMainCategory403ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+incomingResponse = {
+status: fetchResponse.status,
+contentType: null,
+parameters: responseParameters,
+}
+break;
+}
+default:
+throw new lib.ClientResponseUnexpectedStatusCode();
+}
+return incomingResponse;
+}
+export type CreateMainCategoryCredentials = {
+apiToken: string,
+};
+export type CreateMainCategoryOutgoingRequest =
+lib.OutgoingJsonRequest<
+parameters.CreateMainCategoryRequestParameters,
+"application/json",
+types.MainCategoryPostRequestBodySchema
+>
+;
+export type CreateMainCategoryIncomingResponse =
+lib.IncomingJsonResponse<
+201,
+parameters.CreateMainCategory201ResponseParameters,
+"application/json",
+types.MainCategoryPost201Schema
+>
+|
+lib.IncomingEmptyResponse<
+403,
+parameters.CreateMainCategory403ResponseParameters
+>
+;
+/**
+Get sub categories in a main category
+*/
+export async function getSubCategories(
+outgoingRequest: GetSubCategoriesOutgoingRequest,
+credentials: GetSubCategoriesCredentials,
+options: ClientOptions = defaultClientOptions,
+): Promise<GetSubCategoriesIncomingResponse> {
+const {
+baseUrl,
+validateIncomingEntity,
+validateIncomingParameters,
+validateOutgoingEntity,
+validateOutgoingParameters,
+} = options;
+if(baseUrl == null) {
+throw new Error("please set baseUrl");
+}
+const pathParameters = {};
+const queryParameters = {};
+const requestHeaders = new Headers();
+const cookieParameters = {};
+if(validateOutgoingParameters) {
+if(!parameters.isGetSubCategoriesRequestParameters(outgoingRequest.parameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientRequestParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+lib.addParameter(
+pathParameters,
+"main-category-id",
+outgoingRequest.parameters.mainCategoryId == null ? "" : String(outgoingRequest.parameters.mainCategoryId),
+);
+requestHeaders.append("api-token", credentials.apiToken);
+const path =
+router.stringifyRoute(
+2,
+pathParameters,
+) +
+lib.stringifyParameters(
+queryParameters,
+"?", "&", "=",
+);
+const cookie = lib.stringifyParameters(
+cookieParameters,
+"", "; ", "=",
+);
+if(cookie !== ""){
+requestHeaders.append("set-cookie", cookie);
+}
+const url = new URL(path, baseUrl);
+let body: BodyInit | null;
+body = null;
+const requestInit: RequestInit = {
+headers: requestHeaders,
+method: "GET",
+redirect: "manual",
+body,
+};
+const fetchResponse = await fetch(url, requestInit);
+const responseContentType =
+fetchResponse.headers.get("content-type");
+let incomingResponse: GetSubCategoriesIncomingResponse;
+switch(fetchResponse.status) {
+case 200:
+{
+const responseParameters = {
+} as parameters.GetSubCategories200ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isGetSubCategories200ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+if (responseContentType == null) {
+throw new lib.ClientResponseMissingContentType();
+}
+switch(responseContentType) {
+case "application/json":
+{
+const responseBody = fetchResponse.body;
+if (responseBody == null) {
+throw new Error("expected body");
+}
+const stream = (signal?: AbortSignal) => lib.fromReadableStream(
+responseBody,
+signal
+);
+const mapAssertEntity = (entity: unknown) => {
+if(!validators.isSubCategoryMainCategoryId200GetSchema(entity)) {
+const lastError = validators.getLastValidationError();
+throw new lib.ClientResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
+}
+return entity;
+};
+incomingResponse = {
+status: fetchResponse.status,
+contentType: responseContentType,
+parameters: responseParameters,
+stream: (signal) => {
+return stream(signal)
+},
+entities(signal) {
+let entities = lib.deserializeJsonEntities(
+stream,
+signal,
+) as AsyncIterable<types.SubCategoryMainCategoryId200GetSchema>;
+if(validateIncomingEntity) {
+entities = lib.mapAsyncIterable(entities, mapAssertEntity);
+}
+return entities;
+},
+entity() {
+let entity = lib.deserializeJsonEntity(
+stream
+) as Promise<types.SubCategoryMainCategoryId200GetSchema>;
+if(validateIncomingEntity) {
+entity = lib.mapPromisable(entity, mapAssertEntity);
+}
+return entity;
+},
+}
+break;
+}
+default:
+throw new lib.ClientResponseUnexpectedContentType();
+}
+break;
+}
+default:
+throw new lib.ClientResponseUnexpectedStatusCode();
+}
+return incomingResponse;
+}
+export type GetSubCategoriesCredentials = {
+apiToken: string,
+};
+export type GetSubCategoriesOutgoingRequest =
+lib.OutgoingEmptyRequest<parameters.GetSubCategoriesRequestParameters>
+;
+export type GetSubCategoriesIncomingResponse =
+lib.IncomingJsonResponse<
+200,
+parameters.GetSubCategories200ResponseParameters,
+"application/json",
+types.SubCategoryMainCategoryId200GetSchema
+>
+;
+/**
+Create an new sub category in a main category
+*/
+export async function createSubCategory(
+outgoingRequest: CreateSubCategoryOutgoingRequest,
+credentials: CreateSubCategoryCredentials,
+options: ClientOptions = defaultClientOptions,
+): Promise<CreateSubCategoryIncomingResponse> {
+const {
+baseUrl,
+validateIncomingEntity,
+validateIncomingParameters,
+validateOutgoingEntity,
+validateOutgoingParameters,
+} = options;
+if(baseUrl == null) {
+throw new Error("please set baseUrl");
+}
+const pathParameters = {};
+const queryParameters = {};
+const requestHeaders = new Headers();
+const cookieParameters = {};
+if(validateOutgoingParameters) {
+if(!parameters.isCreateSubCategoryRequestParameters(outgoingRequest.parameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientRequestParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+lib.addParameter(
+pathParameters,
+"main-category-id",
+outgoingRequest.parameters.mainCategoryId == null ? "" : String(outgoingRequest.parameters.mainCategoryId),
+);
+requestHeaders.append("api-token", credentials.apiToken);
+const path =
+router.stringifyRoute(
+2,
+pathParameters,
+) +
+lib.stringifyParameters(
+queryParameters,
+"?", "&", "=",
+);
+const cookie = lib.stringifyParameters(
+cookieParameters,
+"", "; ", "=",
+);
+if(cookie !== ""){
+requestHeaders.append("set-cookie", cookie);
+}
+const url = new URL(path, baseUrl);
+let body: BodyInit | null;
+switch(outgoingRequest.contentType){
+case "application/json": {
+requestHeaders.append("content-type", outgoingRequest.contentType);
+const mapAssertEntity = (entity: unknown) => {
+if(!validators.isSubCategoryMainCategoryIdPostRequestBodySchema(entity)) {
+const lastError = validators.getLastValidationError();
+throw new lib.ClientResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
+}
+return entity;
+};
+let stream: AsyncIterable<Uint8Array>;
+if("stream" in outgoingRequest) {
+stream = outgoingRequest.stream(undefined);
+}
+else if("entities" in outgoingRequest) {
+let entities = outgoingRequest.entities(undefined);
+if(validateOutgoingEntity) {
+entities = lib.mapAsyncIterable(entities, mapAssertEntity);
+}
+stream = lib.serializeJsonEntities(entities);
+}
+else if("entity" in outgoingRequest) {
+let entity = outgoingRequest.entity();
+if(validateOutgoingEntity) {
+entity = lib.mapPromisable(entity, mapAssertEntity);
+}
+stream = lib.serializeJsonEntity(entity);
+}
+else {
 throw new lib.Unreachable();
 }
+body = await lib.collectStream(stream);
 break;
 }
 default:
 throw new lib.Unreachable();
 }
+const requestInit: RequestInit = {
+headers: requestHeaders,
+method: "POST",
+redirect: "manual",
+body,
+};
+const fetchResponse = await fetch(url, requestInit);
+const responseContentType =
+fetchResponse.headers.get("content-type");
+let incomingResponse: CreateSubCategoryIncomingResponse;
+switch(fetchResponse.status) {
+case 201:
+{
+const responseParameters = {
+} as parameters.CreateSubCategory201ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateSubCategory201ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+if (responseContentType == null) {
+throw new lib.ClientResponseMissingContentType();
+}
+switch(responseContentType) {
+case "application/json":
+{
+const responseBody = fetchResponse.body;
+if (responseBody == null) {
+throw new Error("expected body");
+}
+const stream = (signal?: AbortSignal) => lib.fromReadableStream(
+responseBody,
+signal
+);
+const mapAssertEntity = (entity: unknown) => {
+if(!validators.isSubCategoryMainCategoryIdPost201Schema(entity)) {
+const lastError = validators.getLastValidationError();
+throw new lib.ClientResponseEntityValidationFailed(
+lastError.path,
+lastError.rule,
+);
+}
+return entity;
+};
+incomingResponse = {
+status: fetchResponse.status,
+contentType: responseContentType,
+parameters: responseParameters,
+stream: (signal) => {
+return stream(signal)
+},
+entities(signal) {
+let entities = lib.deserializeJsonEntities(
+stream,
+signal,
+) as AsyncIterable<types.SubCategoryMainCategoryIdPost201Schema>;
+if(validateIncomingEntity) {
+entities = lib.mapAsyncIterable(entities, mapAssertEntity);
+}
+return entities;
+},
+entity() {
+let entity = lib.deserializeJsonEntity(
+stream
+) as Promise<types.SubCategoryMainCategoryIdPost201Schema>;
+if(validateIncomingEntity) {
+entity = lib.mapPromisable(entity, mapAssertEntity);
+}
+return entity;
+},
+}
+break;
+}
+default:
+throw new lib.ClientResponseUnexpectedContentType();
+}
+break;
+}
+case 403:
+{
+const responseParameters = {
+} as parameters.CreateSubCategory403ResponseParameters;
+if(validateIncomingParameters) {
+if(!parameters.isCreateSubCategory403ResponseParameters(responseParameters)) {
+const lastError = parameters.getLastParameterValidationError();
+throw new lib.ClientResponseParameterValidationFailed(
+lastError.parameterName,
+lastError.path,
+lastError.rule,
+);
+}
+}
+incomingResponse = {
+status: fetchResponse.status,
+contentType: null,
+parameters: responseParameters,
+}
+break;
+}
+default:
+throw new lib.ClientResponseUnexpectedStatusCode();
+}
 return incomingResponse;
 }
-export type EchoOutgoingRequest =
+export type CreateSubCategoryCredentials = {
+apiToken: string,
+};
+export type CreateSubCategoryOutgoingRequest =
 lib.OutgoingJsonRequest<
-parameters.EchoRequestParameters,
+parameters.CreateSubCategoryRequestParameters,
 "application/json",
-types.RequestBodySchema
+types.SubCategoryMainCategoryIdPostRequestBodySchema
 >
 ;
-export type EchoIncomingResponse =
+export type CreateSubCategoryIncomingResponse =
 lib.IncomingJsonResponse<
-200,
-parameters.Echo200ResponseParameters,
+201,
+parameters.CreateSubCategory201ResponseParameters,
 "application/json",
-types.PostSchema
+types.SubCategoryMainCategoryIdPost201Schema
+>
+|
+lib.IncomingEmptyResponse<
+403,
+parameters.CreateSubCategory403ResponseParameters
 >
 ;
