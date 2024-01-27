@@ -1,9 +1,6 @@
 {
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "generated/*"
-  ],
+  "packageManager": "pnpm@8.14.3",
   "scripts": {
     "spelling": "cspell",
     "formatting": "prettier --check *"
