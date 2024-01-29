@@ -2,7 +2,7 @@
 
 ## setting up
 
-Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed and you are good to go!
+Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed. Then run `pnpm --recursive build` to build everything.
 
 ## regenerating code
 
@@ -11,7 +11,7 @@ code, simple run `make` form the root of this repository.
 
 ## testing
 
-Make sure docker is running, then start docker compose from the root of this repo. Then do your testing!
+Make sure docker is running, then start docker compose from the root of this repo. Then run `pnpm --recursive test` to run all tests.
 
 ## docker
 
