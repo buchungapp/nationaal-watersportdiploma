@@ -26,7 +26,7 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.11.7",
+    "@types/node": "^20.11.10",
     "@types/pg": "^8.11.0",
     "drizzle-orm": "^0.29.3",
     "pg": "^8.11.3",
