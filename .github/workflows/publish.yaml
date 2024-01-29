@@ -29,5 +29,4 @@ jobs:
           context: .
           file: ${{ env.IMAGE_NAME }}.dockerfile
           push: true
-          tags: latest
-          labels: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
