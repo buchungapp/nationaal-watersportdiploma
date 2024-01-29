@@ -18,15 +18,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: docker/login-action@v3.0.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: >
+          docker login
+          --username "${{ github.actor }}"
+          --password "${{ secrets.GITHUB_TOKEN }}"
+          ${{ env.REGISTRY }}
 
-      - uses: docker/build-push-action@v5.1.0
-        with:
-          context: .
-          file: ${{ env.IMAGE_NAME }}.dockerfile
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - run: >
+          docker build
+          --file nwd-api-server.dockerfile
+          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          .
+
+      - run: >
+          docker push
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
