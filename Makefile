@@ -4,6 +4,7 @@ build: \
 	generated/nwd-api \
 
 	pnpm install
+	pnpm --recursive build
 
 rebuild: \
 	clean build
@@ -12,15 +13,11 @@ clean: \
 
 	rm --recursive --force generated/nwd-api \
 
-out/%: specifications/%.yaml
+generated/%: specifications/%.yaml
 	pnpx oa42-generator package $^ \
 		--package-directory $@ \
 		--package-name $(notdir $(basename $@)) \
 		--package-version 0.0.0 \
-
-generated/%: out/%
-	rm -rf $@
-	mv $< $@
 
 .PHONY: \
 	build \

@@ -10,13 +10,18 @@ COPY package.json \
   pnpm-lock.yaml \
   /root/
 
-RUN pnpm install \
+RUN pnpm \
   --filter nwd-api-server \
+  install \
   --frozen-lockfile
 
-RUN pnpm deploy \
+RUN pnpm \
   --filter nwd-api-server \
-  --frozen-lockfile \
+  run build
+
+RUN pnpm \
+  --filter nwd-api-server \
+   deploy \
   --production \
   deployed
 

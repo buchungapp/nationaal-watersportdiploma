@@ -14,8 +14,8 @@
     "./src/**"
   ],
   "scripts": {
-    "prepack": "./prepack",
-    "prepare": "tsc --build",
+    "prepack": "tsc --build",
+    "pretest": "tsc --build",
     "build": "tsc --build ",
     "clean": "rm -rf out",
     "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
@@ -31,7 +31,7 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.11.7",
+    "@types/node": "^20.11.10",
     "@types/pg": "^8.11.0",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.29.3",
