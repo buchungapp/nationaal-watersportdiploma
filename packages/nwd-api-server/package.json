@@ -14,7 +14,8 @@
     "./src/**"
   ],
   "scripts": {
-    "build": "tsc --build ",
+    "prepack": "tsc --build",
+    "pretest": "tsc --build",
     "clean": "rm -rf out",
     "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
   },
