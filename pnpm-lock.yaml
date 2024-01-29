@@ -12,8 +12,8 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
       oa42-generator:
-        specifier: ^0.2.2
-        version: 0.2.2
+        specifier: ^0.2.3
+        version: 0.2.3
       prettier:
         specifier: ^3.2.4
         version: 3.2.4
@@ -118,7 +118,7 @@ packages:
       '@cspell/dict-aws': 4.0.1
       '@cspell/dict-bash': 4.1.3
       '@cspell/dict-companies': 3.0.31
-      '@cspell/dict-cpp': 5.1.1
+      '@cspell/dict-cpp': 5.1.2
       '@cspell/dict-cryptocurrencies': 5.0.0
       '@cspell/dict-csharp': 4.0.2
       '@cspell/dict-css': 4.0.12
@@ -129,7 +129,7 @@ packages:
       '@cspell/dict-elixir': 4.0.3
       '@cspell/dict-en-common-misspellings': 2.0.0
       '@cspell/dict-en-gb': 1.1.33
-      '@cspell/dict-en_us': 4.3.14
+      '@cspell/dict-en_us': 4.3.15
       '@cspell/dict-filetypes': 3.0.3
       '@cspell/dict-fonts': 4.0.0
       '@cspell/dict-fsharp': 1.0.1
@@ -156,7 +156,7 @@ packages:
       '@cspell/dict-ruby': 5.0.2
       '@cspell/dict-rust': 4.0.2
       '@cspell/dict-scala': 5.0.0
-      '@cspell/dict-software-terms': 3.3.16
+      '@cspell/dict-software-terms': 3.3.17
       '@cspell/dict-sql': 2.1.3
       '@cspell/dict-svelte': 1.0.2
       '@cspell/dict-swift': 2.0.1
@@ -209,8 +209,8 @@ packages:
     resolution: {integrity: sha512-hKVpV/lcGKP4/DpEPS8P4osPvFH/YVLJaDn9cBIOH6/HSmL5LbFgJNKpMGaYRbhm2FEX56MKE3yn/MNeNYuesQ==}
     dev: true
 
-  /@cspell/dict-cpp@5.1.1:
-    resolution: {integrity: sha512-Qy9fNsR/5RcQ6G85gDKFjvzh0AdgAilLQeSXPtqY21Fx1kCjUqdVVJYMmHUREgcxH6ptAxtn5knTWU4PIhQtOw==}
+  /@cspell/dict-cpp@5.1.2:
+    resolution: {integrity: sha512-ym6Yf5e0+7pL/rVCf6vD3hUwrCow60Ugc4FGhzCzHyb9eLnXVmHHqbQnVj3cqBkKFYLR3WoVwzU+zKZH8YFFPQ==}
     dev: true
 
   /@cspell/dict-cryptocurrencies@5.0.0:
@@ -257,8 +257,8 @@ packages:
     resolution: {integrity: sha512-tKSSUf9BJEV+GJQAYGw5e+ouhEe2ZXE620S7BLKe3ZmpnjlNG9JqlnaBhkIMxKnNFkLY2BP/EARzw31AZnOv4g==}
     dev: true
 
-  /@cspell/dict-en_us@4.3.14:
-    resolution: {integrity: sha512-Od7vPVNN4td0Fild5BcCPikx+lBJ2L809zWeO3lThYHqtZXqsbaBNzfv9qlB1bXW199Ru461vu02CrklU1oD+Q==}
+  /@cspell/dict-en_us@4.3.15:
+    resolution: {integrity: sha512-h1kwvU2w/e4ngXAbesU3z3GnK9kAUJVGRUcQJiBHGg4cY7+hsAD506JezoBD+kus2+cuYVkoeSKdi0FyqS7xyg==}
     dev: true
 
   /@cspell/dict-filetypes@3.0.3:
@@ -367,8 +367,8 @@ packages:
     resolution: {integrity: sha512-ph0twaRoV+ylui022clEO1dZ35QbeEQaKTaV2sPOsdwIokABPIiK09oWwGK9qg7jRGQwVaRPEq0Vp+IG1GpqSQ==}
     dev: true
 
-  /@cspell/dict-software-terms@3.3.16:
-    resolution: {integrity: sha512-ixorEP80LGxAU+ODVSn/CYIDjV0XAlZ2VrBu7CT+PwUFJ7h8o3JX1ywKB4qnt0hHru3JjWFtBoBThmZdrXnREQ==}
+  /@cspell/dict-software-terms@3.3.17:
+    resolution: {integrity: sha512-IspxnhSbriGNME+jE/vveC0lK/0K/a0JSLa6ANvE+W1SuBwYPJqAChWjTgvWWYWC1ZEmnXdwfaNzB6fJNkc85w==}
     dev: true
 
   /@cspell/dict-sql@2.1.3:
@@ -840,38 +840,44 @@ packages:
       wrap-ansi-cjs: /wrap-ansi@7.0.0
     dev: true
 
-  /@jns42/schema-draft-04@0.3.1:
-    resolution: {integrity: sha512-umyebMFY4onS0dIooP1ESS1wCKItpgPrSJ52MDNjfvtSRpHbNodNQ+yeLsrQarOrkhqqds2W3y8ybUzt51hUsg==}
+  /@jns42/oas-v3-0@0.4.0:
+    resolution: {integrity: sha512-b6WaPzvlCF6PyBXwbah22EgPk4/MM6eXccbX+pYMrappj/gDMfMYF4IhaOIUe93mpNR+DaGZCAP4k9QRTiX72Q==}
     dependencies:
       '@types/node': 20.11.10
     dev: true
 
-  /@jns42/schema-draft-2020-12@0.3.1:
-    resolution: {integrity: sha512-tmu1wpkOlXqaZl1MnYVs0VtU+XOET5Ryj61VeCOeVzRHOM7wl7zBEZrlJp2QE+jLzqdOpbU9WLv/PYN7FYxxGg==}
+  /@jns42/oas-v3-1@0.4.0:
+    resolution: {integrity: sha512-uXSXMh6t0F68UUTBWjc8GuS4BZsLdGSHbbgUFxGY/cWhwvmf3dkSBAltuVJQvT0prl59XthVQsU8ztD33nZXUA==}
     dependencies:
       '@types/node': 20.11.10
     dev: true
 
-  /@jns42/schema-intermediate@0.3.1:
-    resolution: {integrity: sha512-CNxTZ6F+BaMpMI05GAcylBrdIcQVsozFsvks1h1iauRssxDnWO/mX6mRU8ZFGQxB6HZnv4Ki4OG3NPHqH2c4RA==}
+  /@jns42/schema-draft-04@0.4.0:
+    resolution: {integrity: sha512-5Tx0cCfWMAyCpm9mJ/YMAxz9fZyqazGj7Of1tP0H4Bf2bDz9aGC4wNeHZbPhfBcAlcejvgJDnsTBeApUUmWoaw==}
     dependencies:
       '@types/node': 20.11.10
     dev: true
 
-  /@jns42/schema-oas-v3-0@0.3.1:
-    resolution: {integrity: sha512-PwpWWOnBpkx5LB9UV3oFuSF3YnJ4wt2R0MoJHyJQ4w2Kqpj63+rpGmgopfHpDf18QR/uKXr+TK8M2uSv7nc+ow==}
+  /@jns42/schema-draft-2020-12@0.4.0:
+    resolution: {integrity: sha512-4tc+XTQ0w3fs29Df7NtqiN7Wb2PoolLWU8M4PxoN0Jnoh7/s8wwYcVFpqUQ06Yqy3uJ/nyU/WyDQPWyou8cvBg==}
     dependencies:
       '@types/node': 20.11.10
     dev: true
 
-  /@jns42/schema-oas-v3-1@0.3.1:
-    resolution: {integrity: sha512-WBMmyqNXboLQOqGjjyjFCX2ES1iVMxeDTvaAZWOkty+Gy1ojGvCCTmEgzBq0dSOz5N7nRUuDnd5OHHtGqMo+Fw==}
+  /@jns42/schema-intermediate@0.4.0:
+    resolution: {integrity: sha512-LDduGX6+N8HdLa0paM2xJ7/RTeFMXhcPUAVzUc/W3QxDCNIfXSmpNszN9AOTnwfJGoPgVSxbrpLlOrkorOf/1Q==}
     dependencies:
       '@types/node': 20.11.10
     dev: true
 
-  /@jns42/schema-swagger-v2@0.3.1:
-    resolution: {integrity: sha512-vDaP7PYommAeKiJXB+sPcolWmtkyoEssmyWDLx1NfUUMlNOxWxcJkmZtofTFrTSMmaPms4PKMfSECk+39sOngg==}
+  /@jns42/schema-oas-v3-1@0.4.0:
+    resolution: {integrity: sha512-kxN+UrqjNm/ejdOp505aUBAeDYMAwaBf12mhrIyn6+Rk5x9KxpO5alhVPe1YFksJCUsC4hf8svpw9rQ2r82hMg==}
+    dependencies:
+      '@types/node': 20.11.10
+    dev: true
+
+  /@jns42/swagger-v2@0.4.0:
+    resolution: {integrity: sha512-dAE3Psg1VIZPbMNXNpIREVYa0bZAtSWVKdNFydTiRkLse2t+O98oCQze5uIg+PrPKrGzswz0yKscl7UBlNCj6A==}
     dependencies:
       '@types/node': 20.11.10
     dev: true
@@ -1745,13 +1751,17 @@ packages:
       '@pkgjs/parseargs': 0.11.0
     dev: true
 
-  /jns42-generator@0.12.11:
-    resolution: {integrity: sha512-uShN7DM5+2tHNVc+Mzy7DkSPQLh+uPd7b8UuItsFMLkc2N3eNmBBiSI2Q/CnNYTN1M/CnKALG0EkZmFwPM3yrQ==}
+  /jns42-generator@0.13.2:
+    resolution: {integrity: sha512-SECRUK1/SgpomzuSmDryxqD+pdClJe8phJbM5rNFuyfEhqgKmTfD2/ZBDoCgj3XxEqDzq70qHiNtydYns6Mc4w==}
     hasBin: true
     dependencies:
-      '@jns42/schema-draft-04': 0.3.1
-      '@jns42/schema-draft-2020-12': 0.3.1
-      '@jns42/schema-intermediate': 0.3.1
+      '@jns42/oas-v3-0': 0.4.0
+      '@jns42/oas-v3-1': 0.4.0
+      '@jns42/schema-draft-04': 0.4.0
+      '@jns42/schema-draft-2020-12': 0.4.0
+      '@jns42/schema-intermediate': 0.4.0
+      '@jns42/schema-oas-v3-1': 0.4.0
+      '@jns42/swagger-v2': 0.4.0
       '@types/node': 20.11.10
       '@types/yargs': 17.0.32
       camelcase: 8.0.0
@@ -1868,18 +1878,18 @@ packages:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
     dev: true
 
-  /oa42-generator@0.2.2:
-    resolution: {integrity: sha512-+05LNX9JLekGz7MYAgo6djddudMxp7wi78FEH60SOHPEjyT0Jlt5xk2dete5LLAU1n5EBuyqaEMuv9Y2lIBNmw==}
+  /oa42-generator@0.2.3:
+    resolution: {integrity: sha512-2Rw4ACcDj61BnVfeeRvvoCGWti1NUNOreNTkoJvpuB7c06hYQlVuKPMCfsCkB6sL468wFkmb39Z35dMi65IIeA==}
     hasBin: true
     dependencies:
-      '@jns42/schema-oas-v3-0': 0.3.1
-      '@jns42/schema-oas-v3-1': 0.3.1
-      '@jns42/schema-swagger-v2': 0.3.1
+      '@jns42/oas-v3-0': 0.4.0
+      '@jns42/oas-v3-1': 0.4.0
+      '@jns42/swagger-v2': 0.4.0
       '@types/node': 20.11.10
       '@types/yargs': 17.0.32
       camelcase: 8.0.0
       goodrouter: 2.1.2
-      jns42-generator: 0.12.11
+      jns42-generator: 0.13.2
       oa42-lib: 0.7.0
       tslib: 2.6.2
       type-fest: 4.10.1
