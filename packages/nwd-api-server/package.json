@@ -16,6 +16,7 @@
   "scripts": {
     "prepack": "tsc --build",
     "pretest": "tsc --build",
+    "build": "tsc --build ",
     "clean": "rm -rf out",
     "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
   },
@@ -32,8 +33,10 @@
   "dependencies": {
     "@types/node": "^20.11.10",
     "@types/pg": "^8.11.0",
+    "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.29.3",
-    "nwd-api": "^0.0.0",
+    "nwd-api": "workspace:*",
+    "nwd-db": "workspace:*",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.1",
@@ -42,5 +45,9 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "typescript": "^5.3.3"
-  }
+  },
+  "bundledDependencies": [
+    "nwd-api",
+    "nwd-db"
+  ]
 }

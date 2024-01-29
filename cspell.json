@@ -1,6 +1,32 @@
 {
   "version": "0.2",
-  "words": ["Nationaal", "openapi", "Watersport"],
+  "words": [
+    "buchungapp",
+    "corepack",
+    "esbenp",
+    "Nationaal",
+    "notdir",
+    "openapi",
+    "PGURI",
+    "pnpx",
+    "ryanluker",
+    "skreet",
+    "supabase",
+    "Watersport",
+    "watersportdiploma"
+  ],
   "useGitignore": true,
-  "files": ["packages/src/**", "specifications/**"]
+  "ignorePaths": [
+    "pnpm-lock.yaml",
+    "generated/"
+  ],
+  "files": [
+    "**"
+  ],
+  "enableFiletypes": [
+    "*"
+  ],
+  "dictionaries": [
+    "sql"
+  ]
 }

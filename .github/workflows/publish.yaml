@@ -1,0 +1,35 @@
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: nwd-api-server
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5.1.0
+        with:
+          context: .
+          file: ${{ env.IMAGE_NAME }}.dockerfile
+          push: true
+          tags:
+            - latest
+          labels:
+            - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
