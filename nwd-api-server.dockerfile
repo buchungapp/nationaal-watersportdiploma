@@ -1,23 +1,18 @@
 FROM node:21.5.0-alpine3.19 AS builder
 WORKDIR /root
 
+RUN apk add make
 RUN corepack enable
 
+COPY specifications /root/specifications
 COPY packages /root/packages
-COPY generated /root/generated
 COPY package.json \
   pnpm-workspace.yaml \
   pnpm-lock.yaml \
+  Makefile \
   /root/
 
-RUN pnpm \
-  --filter nwd-api-server \
-  install \
-  --frozen-lockfile
-
-RUN pnpm \
-  --filter nwd-api-server \
-  run build
+RUN make
 
 RUN pnpm \
   --filter nwd-api-server \
