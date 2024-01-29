@@ -25,11 +25,11 @@ jobs:
           ${{ env.REGISTRY }}
 
       - run: >
-          docker build
+          docker image build
           --file nwd-api-server.dockerfile
-          --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          --tag ${{ env.REGISTRY }}/${{ env.GITHUB_REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:latest
           .
 
       - run: >
-          docker push
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker image push
+          ${{ env.REGISTRY }}/${{ env.GITHUB_REPOSITORY_OWNER }}/${{ env.IMAGE_NAME }}:latest
