@@ -13,12 +13,11 @@ export function configureServerProgram(argv: yargs.Argv) {
         .option("port", {
           description: "port for the server to listen to",
           type: "number",
-          default: process.env.PORT,
+          demandOption: true,
         })
         .option("pg-uri", {
           description: "connection string for postgres",
           type: "string",
-          default: process.env.PGURI,
           demandOption: true,
         }),
     (argv) => main(argv),
