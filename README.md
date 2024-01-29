@@ -2,7 +2,7 @@
 
 ## setting up
 
-Just run `pnpm install` from the root folder and you're good to go!
+Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed and you are good to go!
 
 ## regenerating code
 
