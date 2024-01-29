@@ -4,6 +4,7 @@ build: \
 	generated/nwd-api \
 
 	pnpm install
+	pnpm --recursive build
 
 rebuild: \
 	clean build

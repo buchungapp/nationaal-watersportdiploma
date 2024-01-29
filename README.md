@@ -2,12 +2,7 @@
 
 ## setting up
 
-Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed. Then run `pnpm --recursive build` to build everything.
-
-## regenerating code
-
-Some code in this repository is generated. Please don't touch it! If you want to regenerate the
-code, simple run `make` form the root of this repository.
+Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed and it will run `pnpm --recursive build` for you to build everything.
 
 ## testing
 
