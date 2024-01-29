@@ -21,10 +21,10 @@ jobs:
     env:
       PGURI: "postgres://postgres:postgres@postgres:5432/postgres"
     steps:
+      - run: apk add make
       - run: corepack enable
       - uses: actions/checkout@v3
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --recursive run build
+      - run: make
       - run: pnpm --recursive test
 
   audit:
@@ -33,5 +33,4 @@ jobs:
     steps:
       - run: corepack enable
       - uses: actions/checkout@v3
-      - run: pnpm install --frozen-lockfile
       - run: pnpm audit
