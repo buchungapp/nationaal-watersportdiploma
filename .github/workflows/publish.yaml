@@ -33,3 +33,7 @@ jobs:
       - run: >
           docker image push
           ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+
+      - run: >
+          curl ${{ secrets.DEPLOY_HOOK }}
+          
