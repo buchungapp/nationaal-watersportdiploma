@@ -2,20 +2,16 @@
   "folders": [
     {
       "name": "specifications",
-      "path": "./specifications",
+      "path": "./specifications"
     },
     {
       "name": "nwd-api-server",
-      "path": "./packages/nwd-api-server",
+      "path": "./packages/nwd-api-server"
     },
     {
       "name": "nwd-db",
-      "path": "./packages/nwd-db",
-    },
-    {
-      "name": "nwd-api (generated)",
-      "path": "./generated/nwd-api",
-    },
+      "path": "./packages/nwd-db"
+    }
   ],
   "settings": {
     "window.title": "Nationaal Watersport Diploma",
