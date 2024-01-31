@@ -4,8 +4,9 @@ on:
       - main
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: nwd-api-server
+  DOCKER_REGISTRY: ghcr.io
+  DOCKER_IMAGE_NAME: nwd-api-server
+  PGURI: postgres://get_this_from_secrets
 
 jobs:
   build-and-push-image:
@@ -22,18 +23,26 @@ jobs:
           docker login
           --username "${{ github.actor }}"
           --password "${{ secrets.GITHUB_TOKEN }}"
-          ${{ env.REGISTRY }}
+          ${{ env.DOCKER_REGISTRY }}
 
       - run: >
           docker image build
           --file nwd-api-server.dockerfile
-          --tag ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+          --tag ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:latest
           .
 
       - run: >
           docker image push
-          ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.DOCKER_REGISTRY }}/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:latest
 
       - run: >
           curl ${{ secrets.DEPLOY_HOOK }}
-          
+
+  migrate-database:
+    runs-on: ubuntu-latest
+    container: node:21.5.0-alpine3.19
+    steps:
+      - run: corepack enable
+      - uses: actions/checkout@v3
+      - run: pnpm install --frozen-lockfile --workspace-root
+      - run: pnpm run --filter nwd-db migrate
