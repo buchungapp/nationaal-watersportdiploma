@@ -21,8 +21,8 @@ importers:
   generated/nwd-api:
     dependencies:
       '@types/node':
-        specifier: ^20.11.10
-        version: 20.11.10
+        specifier: ^20.11.13
+        version: 20.11.13
       goodrouter:
         specifier: ^2.1.2
         version: 2.1.2
@@ -918,17 +918,17 @@ packages:
     resolution: {integrity: sha512-rZEfe/hJSGYmdfX9tvcPMYeYPW2sNl50nsw4jZmRcaG0HIAb0WYEpsB05GOb53vjqpyE9GUhlDQ4jLSoB5q9kg==}
     dependencies:
       undici-types: 5.26.5
+    dev: false
 
   /@types/node@20.11.13:
     resolution: {integrity: sha512-5G4zQwdiQBSWYTDAH1ctw2eidqdhMJaNsiIDKHFr55ihz5Trl2qqR8fdrT732yPBho5gkNxXm67OxWFBqX9aPg==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
 
   /@types/pg@8.11.0:
     resolution: {integrity: sha512-sDAlRiBNthGjNFfvt0k6mtotoVYVQ63pA8R4EMWka7crawSR60waVYR0HAgmPRs/e2YaeJTD/43OoZ3PFw80pw==}
     dependencies:
-      '@types/node': 20.11.10
+      '@types/node': 20.11.13
       pg-protocol: 1.6.0
       pg-types: 4.0.2
     dev: false
@@ -1642,7 +1642,7 @@ packages:
   /goodrouter@2.1.2:
     resolution: {integrity: sha512-xxl2qUfEEz13Hb6Uxcd5ePsmVlBQc4BNIvi0O8BFzg47Pqg00UN7GQCvvnoQw5arFysCQ5mDYYGlpkLQc2Qrvg==}
     dependencies:
-      '@types/node': 20.11.10
+      '@types/node': 20.11.13
       tslib: 2.6.2
 
   /graceful-fs@4.2.11:
@@ -1910,7 +1910,7 @@ packages:
   /oa42-lib@0.8.0:
     resolution: {integrity: sha512-agrykx2NrGP5RTvl8qtk7Uw6U2NEFjo1GL7zci+FXI06cN26R7Yzjdthj/khf0yRb/GJf8CdIlVIBlfuQmb73A==}
     dependencies:
-      '@types/node': 20.11.10
+      '@types/node': 20.11.13
       js-base64: 3.7.6
       tslib: 2.6.2
       type-fest: 4.10.2
