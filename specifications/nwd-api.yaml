@@ -132,7 +132,8 @@ components:
       description: |-
         Key of an entity
       type: integer
-      # exclusiveMinimum: 0
+      minimum: 0
+      exclusiveMinimum: true
 
     entity-name:
       description: |-
