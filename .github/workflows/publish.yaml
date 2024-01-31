@@ -6,7 +6,7 @@ on:
 env:
   DOCKER_REGISTRY: ghcr.io
   DOCKER_IMAGE_NAME: nwd-api-server
-  PGURI: postgres://get_this_from_secrets
+  PGURI: ${{ secrets.PGURI }}
 
 jobs:
   build-and-push-image:
