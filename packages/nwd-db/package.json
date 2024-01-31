@@ -15,7 +15,8 @@
     "pretest": "tsc --build",
     "build": "tsc --build ",
     "clean": "rm -rf out",
-    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
+    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js",
+    "migrate": "drizzle-kit push:pg --driver pg --schema migrations/ --connectionString $PGURI"
   },
   "repository": {
     "type": "git",
