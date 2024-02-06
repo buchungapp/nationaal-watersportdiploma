@@ -21,13 +21,13 @@ importers:
   generated/nwd-api:
     dependencies:
       '@types/node':
-        specifier: ^20.11.10
+        specifier: ^20.11.14
         version: 20.11.14
       goodrouter:
         specifier: ^2.1.2
         version: 2.1.2
       oa42-lib:
-        specifier: ^0.8.0
+        specifier: ^0.8.2
         version: 0.8.2
     devDependencies:
       '@tsconfig/node20':
