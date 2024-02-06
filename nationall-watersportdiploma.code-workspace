@@ -12,10 +12,6 @@
       "name": "nwd-db",
       "path": "./packages/nwd-db",
     },
-    {
-      "name": "nwd-api (generated)",
-      "path": "./generated/nwd-api",
-    },
   ],
   "settings": {
     "window.title": "Nationaal Watersport Diploma",

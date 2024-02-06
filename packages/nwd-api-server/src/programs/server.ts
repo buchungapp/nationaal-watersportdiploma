@@ -1,3 +1,4 @@
+import { Appsignal } from "@appsignal/nodejs";
 import * as http from "http";
 import { createDatabase } from "nwd-db";
 import pg from "pg";
@@ -30,6 +31,8 @@ interface MainConfiguration {
 }
 
 async function main(configuration: MainConfiguration) {
+  const appsignal = new Appsignal({});
+
   console.log("Starting server...");
 
   const { port, pgUri } = configuration;
