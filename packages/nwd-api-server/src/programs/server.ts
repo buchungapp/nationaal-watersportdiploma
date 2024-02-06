@@ -1,3 +1,4 @@
+import { Appsignal } from "@appsignal/nodejs";
 import * as http from "http";
 import { createDatabase } from "nwd-db";
 import pg from "pg";
@@ -19,6 +20,10 @@ export function configureServerProgram(argv: yargs.Argv) {
           description: "connection string for postgres",
           type: "string",
           demandOption: true,
+        })
+        .option("appsignal-push-api-key", {
+          description: "push api key for appsignal",
+          type: "string",
         }),
     (argv) => main(argv),
   );
@@ -27,12 +32,21 @@ export function configureServerProgram(argv: yargs.Argv) {
 interface MainConfiguration {
   port: number;
   pgUri: string;
+  appsignalPushApiKey?: string;
 }
 
 async function main(configuration: MainConfiguration) {
-  console.log("Starting server...");
+  const { port, pgUri, appsignalPushApiKey } = configuration;
 
-  const { port, pgUri } = configuration;
+  const appsignal = new Appsignal({
+    active: appsignalPushApiKey != null,
+    environment: process.env.NODE_ENV,
+    name: "nwd-api-server",
+    pushApiKey: appsignalPushApiKey ?? "",
+  });
+  const logger = appsignal.logger("server");
+
+  logger.info("Starting server...");
 
   const onError = (error: unknown) => console.error(error);
   const onWarn = (error: unknown) => console.warn(error);
@@ -55,7 +69,7 @@ async function main(configuration: MainConfiguration) {
 
     await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
 
-    console.log("Server started");
+    logger.info("Server started");
     try {
       await new Promise<void>((resolve) => {
         const abort = () => {
@@ -68,7 +82,7 @@ async function main(configuration: MainConfiguration) {
         process.addListener("SIGTERM", abort);
       });
 
-      console.log("Stopping server...");
+      logger.info("Stopping server...");
     } finally {
       httpServer.removeListener("request", onRequest);
 
@@ -82,5 +96,5 @@ async function main(configuration: MainConfiguration) {
     await pgPool.end();
   }
 
-  console.log("Server stopped");
+  logger.info("Server stopped");
 }

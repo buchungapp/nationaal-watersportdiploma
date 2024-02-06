@@ -1,7 +1,7 @@
 FROM node:21.5.0-alpine3.19 AS builder
 WORKDIR /root
 
-RUN apk add make
+RUN apk add make g++ python3
 RUN corepack enable
 
 COPY specifications /root/specifications

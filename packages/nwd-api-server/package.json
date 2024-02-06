@@ -31,6 +31,7 @@
   },
   "keywords": [],
   "dependencies": {
+    "@appsignal/nodejs": "^3.0.30",
     "@types/node": "^20.11.10",
     "@types/pg": "^8.11.0",
     "@types/yargs": "^17.0.32",
