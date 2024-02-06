@@ -18,9 +18,15 @@
       "request": "launch",
       "name": "start server",
       "program": "${workspaceFolder}/src/program.ts",
-      "args": ["server", "--port", "8080"],
+      "args": [
+        "server",
+        "--port",
+        "8080",
+        "--pg-uri",
+        "postgres://postgres:postgres@localhost:5432/postgres"
+      ],
       "env": {
-        "NODE_ENV": "development"
+        "NODE_ENV": "local"
       },
       "cwd": "${workspaceFolder}",
       "sourceMaps": true,
