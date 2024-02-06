@@ -1,6 +1,7 @@
-FROM node:21.5.0 AS builder
+FROM node:21.5.0-alpine3.19 AS builder
 WORKDIR /root
 
+RUN apk add make g++ python3
 RUN corepack enable
 
 COPY specifications /root/specifications
@@ -20,7 +21,7 @@ RUN pnpm \
   deployed
 
 
-FROM node:21.5.0
+FROM node:21.5.0-alpine3.19
 WORKDIR /root
 ENV NODE_ENV=production
 
