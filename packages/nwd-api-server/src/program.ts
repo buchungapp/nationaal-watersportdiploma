@@ -1,5 +1,6 @@
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
+import "./appsignal.js";
 import * as programs from "./programs/index.js";
 import { packageInfo } from "./utils/index.js";
 
