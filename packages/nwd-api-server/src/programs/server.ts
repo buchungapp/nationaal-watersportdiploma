@@ -27,11 +27,10 @@ export function configureServerProgram(argv: yargs.Argv) {
 interface MainConfiguration {
   port: number;
   pgUri: string;
-  appsignalPushApiKey?: string;
 }
 
 async function main(configuration: MainConfiguration) {
-  const { port, pgUri, appsignalPushApiKey } = configuration;
+  const { port, pgUri } = configuration;
 
   console.info("Starting server...");
 
