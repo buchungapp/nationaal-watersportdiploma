@@ -2,7 +2,7 @@
   "name": "nwd-db",
   "version": "0.0.0",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
   "main": "./out/main.js",
   "types": "./out/main.d.ts",
   "files": [

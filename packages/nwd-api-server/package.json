@@ -2,7 +2,7 @@
   "name": "nwd-api-server",
   "version": "0.0.0",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
   "bin": {
     "nwd-api-server": "bin/nwd-api-server"
   },
