@@ -10,5 +10,5 @@
     "moduleResolution": "Node10"
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../../generated/nwd-api" }, { "path": "../nwd-db" }]
+  "references": [{ "path": "../nwd-db" }]
 }
