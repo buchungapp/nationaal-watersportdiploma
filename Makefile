@@ -4,6 +4,7 @@ build: \
 	generated/nwd-api \
 
 	pnpm install --frozen-lockfile
+	pnpm --recursive prepack
 	pnpm --recursive build
 
 rebuild: \

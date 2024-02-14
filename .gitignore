@@ -9,6 +9,7 @@
 
 node_modules/
 out/
+out-*/
 generated/
 coverage/
 

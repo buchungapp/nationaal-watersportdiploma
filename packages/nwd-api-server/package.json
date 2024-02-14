@@ -2,23 +2,29 @@
   "name": "nwd-api-server",
   "version": "0.0.0",
   "description": "",
-  "type": "module",
+  "type": "commonjs",
+  "main": "./out/main.js",
+  "types": "./out/main.d.ts",
+  "exports": {
+    ".": {
+      "require": "./out/main.js",
+      "types": "./out/main.d.ts",
+      "browser": "./out/browser.js"
+    }
+  },
+  "files": [
+    "./out/**",
+    "./bin/**"
+  ],
   "bin": {
     "nwd-api-server": "bin/nwd-api-server"
   },
-  "main": "./out/main.js",
-  "types": "./out/main.d.ts",
-  "files": [
-    "./bin/**",
-    "./out/**",
-    "./src/**"
-  ],
   "scripts": {
-    "prepack": "tsc --build",
+    "prepack": "tsc --composite false",
     "pretest": "tsc --build",
-    "build": "tsc --build ",
-    "clean": "rm -rf out",
-    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
+    "build": "tsc --build",
+    "clean": "rm -rf out out-* ; tsc --build --clean",
+    "test": "node --test ./out/**/*.test.js"
   },
   "repository": {
     "type": "git",

@@ -1,13 +1,14 @@
 {
   "extends": "@tsconfig/node20",
   "compilerOptions": {
-    "outDir": "./out",
     "rootDir": "./src",
+    "outDir": "./out",
     "sourceMap": true,
     "declaration": true,
     "composite": true,
-    "lib": ["ES2023"],
+    "module": "CommonJS",
+    "moduleResolution": "Node10"
   },
-  "include": ["src"],
-  "references": [{ "path": "../../generated/nwd-api" }, { "path": "../nwd-db" }],
+  "include": ["src/**/*"],
+  "references": [{ "path": "../nwd-db" }]
 }
