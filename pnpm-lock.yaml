@@ -24,11 +24,11 @@ importers:
         specifier: ^20.11.17
         version: 20.11.17
       goodrouter:
-        specifier: ^2.1.2
-        version: 2.1.2
+        specifier: ^2.1.3
+        version: 2.1.3
       oa42-lib:
-        specifier: ^0.8.3
-        version: 0.8.3
+        specifier: ^0.8.5
+        version: 0.8.5
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2
@@ -1756,7 +1756,7 @@ packages:
   /@types/ioredis@4.28.10:
     resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
     dependencies:
-      '@types/node': 20.11.10
+      '@types/node': 20.11.17
     dev: false
 
   /@types/keygrip@1.0.6:
@@ -2717,19 +2717,11 @@ packages:
       ini: 4.1.1
     dev: true
 
-  /goodrouter@2.1.2:
-    resolution: {integrity: sha512-xxl2qUfEEz13Hb6Uxcd5ePsmVlBQc4BNIvi0O8BFzg47Pqg00UN7GQCvvnoQw5arFysCQ5mDYYGlpkLQc2Qrvg==}
-    dependencies:
-      '@types/node': 20.11.17
-      tslib: 2.6.2
-    dev: false
-
   /goodrouter@2.1.3:
     resolution: {integrity: sha512-AUpuEyBPffNJU6B3PTjFG4I5tfbGMWVPN3hGuNYKr0dpNNGON4n+4Ik1ZhqTuUjPiKIrldhvnxwCPfSi1gIJ1g==}
     dependencies:
       '@types/node': 20.11.17
       tslib: 2.6.2
-    dev: true
 
   /graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
@@ -3226,15 +3218,6 @@ packages:
       yargs: 17.7.2
     dev: true
 
-  /oa42-lib@0.8.3:
-    resolution: {integrity: sha512-SQlpsCxU+k6fQ2uOP1M5JKlVVRugYfKHCZx3IhX4xAKRx7qlub/VZUiWIIFYBFovAN2FUVzLDWNk3PNWwhbpJQ==}
-    dependencies:
-      '@types/node': 20.11.17
-      js-base64: 3.7.6
-      tslib: 2.6.2
-      type-fest: 4.10.2
-    dev: false
-
   /oa42-lib@0.8.5:
     resolution: {integrity: sha512-80Jt/SoGReJV+KV7Hu+dJN7OLvab4wO3lBEjMOCHdLZNP6H02SK+CnP6FAsvJUAoe1qD5ofXYZK3/o9MaqPNQw==}
     dependencies:
@@ -3242,7 +3225,6 @@ packages:
       js-base64: 3.7.6
       tslib: 2.6.2
       type-fest: 4.10.2
-    dev: true
 
   /obuf@1.1.2:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
