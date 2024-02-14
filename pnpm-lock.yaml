@@ -12,8 +12,8 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
       oa42-generator:
-        specifier: ^0.8.5
-        version: 0.8.5
+        specifier: ^0.8.6
+        version: 0.8.6
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -1756,7 +1756,7 @@ packages:
   /@types/ioredis@4.28.10:
     resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
     dependencies:
-      '@types/node': 20.11.17
+      '@types/node': 20.11.10
     dev: false
 
   /@types/keygrip@1.0.6:
@@ -3198,8 +3198,8 @@ packages:
       abbrev: 2.0.0
     dev: false
 
-  /oa42-generator@0.8.5:
-    resolution: {integrity: sha512-zJu567L2y+RUQxjhv5z3DTAjCgacTE6cnrtFb4zQcxX7/xqm56qDSoAY8+//3tfybhAX9BeGT4/AccvSB8VEjQ==}
+  /oa42-generator@0.8.6:
+    resolution: {integrity: sha512-Q6aYwLCnV/MkulNehrcky2zVeRutJ8GYhSdyNEpJcIHmb3kf0laX6akuK23M1YnfnRQnWQc/P42/y4xTcyaj6A==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.13.6
@@ -3210,7 +3210,7 @@ packages:
       camelcase: 8.0.0
       goodrouter: 2.1.3
       jns42-generator: 0.13.6
-      oa42-lib: 0.8.5
+      oa42-lib: 0.8.6
       tslib: 2.6.2
       type-fest: 4.10.2
       typescript: 5.3.3
@@ -3225,6 +3225,16 @@ packages:
       js-base64: 3.7.6
       tslib: 2.6.2
       type-fest: 4.10.2
+    dev: false
+
+  /oa42-lib@0.8.6:
+    resolution: {integrity: sha512-9RJIspFPpKaPt8DH504CjoCQtewJgnIjtzew1Z6YT1JmwvMSj217Y6qaO1nrJBDu09HjtGuD7k8+3IrDjuQBXw==}
+    dependencies:
+      '@types/node': 20.11.17
+      js-base64: 3.7.6
+      tslib: 2.6.2
+      type-fest: 4.10.2
+    dev: true
 
   /obuf@1.1.2:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
