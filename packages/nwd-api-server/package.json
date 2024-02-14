@@ -2,17 +2,26 @@
   "name": "nwd-api-server",
   "version": "0.0.0",
   "description": "",
-  "type": "commonjs",
-  "bin": {
-    "nwd-api-server": "bin/nwd-api-server"
-  },
-  "main": "./out/main.js",
+  "type": "module",
+  "main": "./out-commonjs/main.js",
+  "module": "./out/main.js",
   "types": "./out/main.d.ts",
+  "exports": {
+    ".": {
+      "require": "./out-commonjs/main.js",
+      "import": "./out/main.js",
+      "types": "./out/main.d.ts",
+      "browser": "./out/browser.js"
+    }
+  },
   "files": [
     "./out/**",
     "./out-commonjs/**",
     "./bin/**"
   ],
+  "bin": {
+    "nwd-api-server": "bin/nwd-api-server"
+  },
   "scripts": {
     "prepack": "tsc --composite false; tsc --composite false --outDir out-commonjs --declaration false --module commonjs --moduleResolution Node10 ; echo '{\"type\":\"commonjs\"}' > out-commonjs/package.json",
     "pretest": "tsc --build",

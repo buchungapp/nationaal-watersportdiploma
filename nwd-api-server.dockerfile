@@ -28,5 +28,5 @@ ENV NODE_ENV=production
 COPY --from=builder /root/deployed /root
 
 ENTRYPOINT [ \
-  "/root/bin/nwd-api-server" \
+  "/root/bin/nwd-api-server.cjs" \
   ]
