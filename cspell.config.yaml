@@ -1,0 +1,27 @@
+version: "0.2"
+words:
+  - appsignal
+  - buchungapp
+  - corepack
+  - esbenp
+  - Nationaal
+  - notdir
+  - openapi
+  - opentelemetry
+  - PGURI
+  - pnpx
+  - ryanluker
+  - skreet
+  - supabase
+  - Watersport
+  - watersportdiploma
+useGitignore: true
+ignorePaths:
+  - pnpm-lock.yaml
+  - generated/
+files:
+  - "**"
+enableFiletypes:
+  - "*"
+dictionaries:
+  - sql
