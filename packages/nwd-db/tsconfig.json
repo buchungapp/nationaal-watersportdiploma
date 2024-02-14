@@ -5,7 +5,9 @@
     "outDir": "./out",
     "sourceMap": true,
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node10"
   },
   "include": ["src/**/*"]
 }

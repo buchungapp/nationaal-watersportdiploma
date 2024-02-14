@@ -2,24 +2,21 @@
   "name": "nwd-db",
   "version": "0.0.0",
   "description": "",
-  "type": "module",
-  "main": "./out-commonjs/main.js",
-  "module": "./out/main.js",
+  "type": "commonjs",
+  "main": "./out/main.js",
   "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "require": "./out-commonjs/main.js",
-      "import": "./out/main.js",
+      "require": "./out/main.js",
       "types": "./out/main.d.ts"
     }
   },
   "files": [
     "./out/**",
-    "./out-commonjs/**",
     "./migrations/**"
   ],
   "scripts": {
-    "prepack": "tsc --composite false; tsc --composite false --outDir out-commonjs --declaration false --module commonjs --moduleResolution Node10 ; echo '{\"type\":\"commonjs\"}' > out-commonjs/package.json",
+    "prepack": "tsc --composite false",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out out-* ; tsc --build --clean",
