@@ -10,9 +10,9 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          orange: '#f07f1a',
-          ['light-blue']: '#8ad2f6',
-          ['dark-blue']: '#1d4c9c',
+          orange: '#ff8000',
+          ['light-blue']: '#87d3f8',
+          ['dark-blue']: '#0047ab',
         }
       },
       backgroundImage: {
