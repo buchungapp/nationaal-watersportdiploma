@@ -6,7 +6,7 @@ import { Context } from "./context.js";
 
 export type Server = api.Server<Authentication>;
 
-export function createApplicationServer(context: Context, onError?: (error: unknown) => void) {
+export function createApplicationServer(context: Context) {
   const server = new api.Server<Authentication>();
 
   //categories
@@ -23,7 +23,7 @@ export function createApplicationServer(context: Context, onError?: (error: unkn
 
   // middleware!
 
-  server.registerMiddleware(api.createErrorMiddleware(onError));
+  server.registerMiddleware(api.createErrorMiddleware());
 
   return server;
 }

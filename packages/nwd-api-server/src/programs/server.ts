@@ -34,9 +34,6 @@ async function main(configuration: MainConfiguration) {
 
   console.info("Starting server...");
 
-  const onError = (error: unknown) => console.error(error);
-  const onWarn = (error: unknown) => console.warn(error);
-
   const pgPool = new pg.Pool({
     connectionString: pgUri,
   });
@@ -45,12 +42,10 @@ async function main(configuration: MainConfiguration) {
     const context = {
       db,
     };
-    const server = application.createApplicationServer(context, onWarn);
+    const server = application.createApplicationServer(context);
 
     const httpServer = http.createServer();
-    const onRequest = server.asRequestListener({
-      onError: (error) => console.error(error),
-    });
+    const onRequest = server.asHttpRequestListener();
     httpServer.addListener("request", onRequest);
 
     await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
