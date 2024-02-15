@@ -16,6 +16,7 @@
     "./migrations/**"
   ],
   "scripts": {
+    "prepare": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out ; tsc --build --clean",

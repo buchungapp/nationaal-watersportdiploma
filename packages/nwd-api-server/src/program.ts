@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import "./appsignal.js";
 
 import { hideBin } from "yargs/helpers";

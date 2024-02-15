@@ -13,13 +13,13 @@
     }
   },
   "files": [
-    "./out/**",
-    "./bin/**"
+    "./out/**"
   ],
   "bin": {
-    "nwd-api-server": "bin/nwd-api-server"
+    "nwd-api-server": "out/program.js"
   },
   "scripts": {
+    "prepare": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out ; tsc --build --clean",
