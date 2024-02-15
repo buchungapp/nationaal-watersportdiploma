@@ -16,10 +16,9 @@
     "./migrations/**"
   ],
   "scripts": {
-    "prepack": "tsc --composite false",
     "pretest": "tsc --build",
     "build": "tsc --build",
-    "clean": "rm -rf out out-* ; tsc --build --clean",
+    "clean": "rm -rf out ; tsc --build --clean",
     "test": "node --test ./out/**/*.test.js"
   },
   "repository": {
@@ -33,16 +32,16 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.11.10",
+    "@types/node": "^20.11.19",
     "@types/pg": "^8.11.0",
     "drizzle-orm": "^0.29.3",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
-    "type-fest": "^4.10.1"
+    "type-fest": "^4.10.2"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "drizzle-kit": "^0.20.13",
+    "drizzle-kit": "^0.20.14",
     "typescript": "^5.3.3"
   }
 }
