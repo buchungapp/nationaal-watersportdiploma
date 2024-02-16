@@ -11,6 +11,9 @@ importers:
       cspell:
         specifier: ^8.3.2
         version: 8.3.2
+      drizzle-kit:
+        specifier: ^0.20.14
+        version: 0.20.14
       oa42-generator:
         specifier: ^0.8.11
         version: 0.8.11
@@ -107,9 +110,6 @@ importers:
       '@tsconfig/node20':
         specifier: ^20.1.2
         version: 20.1.2
-      drizzle-kit:
-        specifier: ^0.20.14
-        version: 0.20.14
       typescript:
         specifier: ^5.3.3
         version: 5.3.3

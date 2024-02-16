@@ -49,3 +49,7 @@ docker image push ghcr.io/buchungapp/nwd-api-server:latest
 ```
 
 Then go to render.com and find the `nwd-api-server` service, in the `Manual Deploy` dropdown choose `Deploy latest reference`.
+
+### nwd-db
+
+The `nwd-db` database is hosted on supabase. We use drizzle as an orm and migration tool. To do a database migration we need drizzle-kit, this is installed as a dev dependency.
