@@ -9,7 +9,7 @@
       "args": [],
       "cwd": "${workspaceFolder}",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/../*/out/**/*.js"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "build",
       "outputCapture": "std"
     },
@@ -24,7 +24,7 @@
       },
       "cwd": "${workspaceFolder}",
       "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/../*/out/**/*.js"],
+      "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "preLaunchTask": "build",
       "outputCapture": "std"
     }

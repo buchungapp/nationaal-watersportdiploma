@@ -5,6 +5,7 @@ RUN apk add make g++ python3
 RUN corepack enable
 
 COPY specifications /root/specifications
+COPY packages /root/apps
 COPY packages /root/packages
 COPY package.json \
   pnpm-workspace.yaml \

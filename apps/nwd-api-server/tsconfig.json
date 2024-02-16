@@ -10,5 +10,5 @@
     "moduleResolution": "Node10"
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../nwd-db" }]
+  "references": [{ "path": "../../packages/nwd-db" }]
 }

@@ -21,6 +21,52 @@ importers:
         specifier: ^3.2.5
         version: 3.2.5
 
+  apps/nwd-api-server:
+    dependencies:
+      '@appsignal/nodejs':
+        specifier: ^3.1.0
+        version: 3.1.0
+      '@types/node':
+        specifier: ^20.11.19
+        version: 20.11.19
+      '@types/pg':
+        specifier: ^8.11.0
+        version: 8.11.0
+      '@types/yargs':
+        specifier: ^17.0.32
+        version: 17.0.32
+      drizzle-orm:
+        specifier: ^0.29.3
+        version: 0.29.3(@opentelemetry/api@1.7.0)(@types/pg@8.11.0)(pg@8.11.3)
+      nwd-api:
+        specifier: workspace:*
+        version: link:../../generated/nwd-api
+      nwd-db:
+        specifier: workspace:*
+        version: link:../../packages/nwd-db
+      oa42-appsignal:
+        specifier: ^0.1.10
+        version: 0.1.10
+      pg:
+        specifier: ^8.11.3
+        version: 8.11.3
+      tslib:
+        specifier: ^2.6.2
+        version: 2.6.2
+      type-fest:
+        specifier: ^4.10.2
+        version: 4.10.2
+      yargs:
+        specifier: ^17.7.2
+        version: 17.7.2
+    devDependencies:
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
   apps/nwd-web:
     dependencies:
       '@headlessui/react':
@@ -93,52 +139,6 @@ importers:
       oa42-lib:
         specifier: ^0.8.11
         version: 0.8.15
-    devDependencies:
-      '@tsconfig/node20':
-        specifier: ^20.1.2
-        version: 20.1.2
-      typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
-
-  packages/nwd-api-server:
-    dependencies:
-      '@appsignal/nodejs':
-        specifier: ^3.1.0
-        version: 3.1.0
-      '@types/node':
-        specifier: ^20.11.19
-        version: 20.11.19
-      '@types/pg':
-        specifier: ^8.11.0
-        version: 8.11.0
-      '@types/yargs':
-        specifier: ^17.0.32
-        version: 17.0.32
-      drizzle-orm:
-        specifier: ^0.29.3
-        version: 0.29.3(@opentelemetry/api@1.7.0)(@types/pg@8.11.0)(pg@8.11.3)
-      nwd-api:
-        specifier: workspace:*
-        version: link:../../generated/nwd-api
-      nwd-db:
-        specifier: workspace:*
-        version: link:../nwd-db
-      oa42-appsignal:
-        specifier: ^0.1.10
-        version: 0.1.10
-      pg:
-        specifier: ^8.11.3
-        version: 8.11.3
-      tslib:
-        specifier: ^2.6.2
-        version: 2.6.2
-      type-fest:
-        specifier: ^4.10.2
-        version: 4.10.2
-      yargs:
-        specifier: ^17.7.2
-        version: 17.7.2
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2

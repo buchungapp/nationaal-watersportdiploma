@@ -5,16 +5,16 @@
       "path": "./specifications",
     },
     {
+      "name": "nwd-web",
+      "path": "./apps/nwd-web",
+    },
+    {
       "name": "nwd-api-server",
-      "path": "./packages/nwd-api-server",
+      "path": "./apps/nwd-api-server",
     },
     {
       "name": "nwd-db",
       "path": "./packages/nwd-db",
-    },
-    {
-      "name": "nwd-web",
-      "path": "./apps/nwd-web",
     },
   ],
   "settings": {
