@@ -98,13 +98,13 @@ function Features() {
     {
       name: "Veiligheid voorop.",
       description:
-        "Een veilige omgeving voor iedereen, met zowel aandacht voor persoonlijke als sociale veiligheid.",
+        "Een veilige omgeving voor iedereen, met zowel aandacht voor fysieke en sociale veiligheid.",
       color: "bg-brand-dark-blue",
     },
     {
       name: "Kwaliteit als basis.",
       description:
-        "Moderne materialen, hooggekwalificeerde instructeurs en elkaar beter maken door samen te werken.",
+        "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitseisen en verbeteren door samenwerken.",
       color: "bg-brand-light-blue",
     },
     {
