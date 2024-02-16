@@ -12,8 +12,8 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
       oa42-generator:
-        specifier: ^0.8.11
-        version: 0.8.11
+        specifier: ^0.8.12
+        version: 0.8.12
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -61,8 +61,8 @@ importers:
         specifier: workspace:*
         version: link:../nwd-db
       oa42-appsignal:
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.2
+        version: 0.1.2
       pg:
         specifier: ^8.11.3
         version: 8.11.3
@@ -3225,8 +3225,8 @@ packages:
       abbrev: 2.0.0
     dev: false
 
-  /oa42-appsignal@0.1.0:
-    resolution: {integrity: sha512-tTM3xyp+Wz/PnvzaIBMd2mw1eXrNhCXsuB+gpmPq4iCqnxdYZYpBoGekmoizyIowDGnG5rZUHHBTREAEONuDjA==}
+  /oa42-appsignal@0.1.2:
+    resolution: {integrity: sha512-6rHYchTa9E0fK53fQQriSgWE1DTxPUiyQggaSZVwUOkAA6IBswNYVslRYQBmTPeMxLSGu1ltwCxcnBXgTPCjPg==}
     dependencies:
       '@appsignal/nodejs': 3.1.0
       '@opentelemetry/api': 1.7.0
@@ -3238,8 +3238,8 @@ packages:
       - supports-color
     dev: false
 
-  /oa42-generator@0.8.11:
-    resolution: {integrity: sha512-5Eg0CqeRBVmLeUxnNEziaOoinR50ia3S+zfo2NJ11YIcqMvuJdKnqTIeQ/Hjtq2NdYHOBVvXq8o3y57BJh6S1Q==}
+  /oa42-generator@0.8.12:
+    resolution: {integrity: sha512-q8SX2MxDfxNVfTX3zujZ4Z4P/jT2OKM9NgGfyZ78VBJwW80TMCyNm/D5BbSjAltIadeMFpPkKgPzUbQkqZv+Pg==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.13.6
