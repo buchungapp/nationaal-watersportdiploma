@@ -1,8 +1,8 @@
-import * as path from "path";
+import path from "path";
 
-export const projectRoot = makeProjectRoot();
+export const projectRoot = getProjectRoot();
 
-function makeProjectRoot() {
-  const dirname = __dirname;
+function getProjectRoot() {
+  const dirname = typeof __dirname === "undefined" ? eval("import.meta.dirname") : __dirname;
   return path.resolve(dirname, "..", "..");
 }
