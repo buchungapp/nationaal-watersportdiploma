@@ -43,7 +43,7 @@
     "drizzle-orm": "^0.29.3",
     "nwd-api": "workspace:*",
     "nwd-db": "workspace:*",
-    "oa42-appsignal": "^0.1.10",
+    "oa42-appsignal": "^0.1.11",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.2",
