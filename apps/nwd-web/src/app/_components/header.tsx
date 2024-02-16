@@ -20,14 +20,9 @@ export default function Header() {
         {/* <MenuProvider> */}
         {/* Logo */}
         <div className="flex items-center">
-          <Image
-            src={nwdIcon}
-            alt="Nationaal Watersportdiploma"
-            className="h-14 w-auto mr-4"
-          />
-          <p className="hidden sm:block uppercase text-brand-orange leading-tight">
-            <span className="">Nationaal</span>{" "}
-            <span className="font-bold">Watersportdiploma</span>
+          <Image src={nwdIcon} alt="Nationaal Watersportdiploma" className="mr-4 h-14 w-auto" />
+          <p className="hidden uppercase leading-tight text-brand-orange sm:block">
+            <span className="">Nationaal</span> <span className="font-bold">Watersportdiploma</span>
           </p>
         </div>
         {/* <div className="flex lg:hidden">

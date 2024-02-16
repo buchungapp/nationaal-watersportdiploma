@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@cspell/dict-nl-nl':
+        specifier: ^2.3.0
+        version: 2.3.0
       cspell:
         specifier: ^8.3.2
         version: 8.3.2
@@ -449,6 +452,10 @@ packages:
 
   /@cspell/dict-makefile@1.0.0:
     resolution: {integrity: sha512-3W9tHPcSbJa6s0bcqWo6VisEDTSN5zOtDbnPabF7rbyjRpNo0uHXHRJQF8gAbFzoTzBBhgkTmrfSiuyQm7vBUQ==}
+    dev: true
+
+  /@cspell/dict-nl-nl@2.3.0:
+    resolution: {integrity: sha512-gcSWcNv9xC4dqT/Xf2gUNwzRrt0bTcR0GET3fPUQqTyDJRS72LBGDsx0AY0zyfS1S2MwEOAjdKAnDGm0LCR11Q==}
     dev: true
 
   /@cspell/dict-node@4.0.3:

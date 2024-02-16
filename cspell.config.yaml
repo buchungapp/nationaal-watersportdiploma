@@ -2,20 +2,31 @@ version: "0.2"
 words:
   - appsignal
   - buchungapp
+  - clsx
   - corepack
+  - Dropcap
   - esbenp
+  - headlessui
+  - Initatiefnemers
+  - miterlimit
   - Nationaal
   - notdir
   - openapi
   - opentelemetry
+  - Perskit
   - PGURI
   - pnpx
   - ryanluker
   - skreet
   - supabase
+  - tailwindcss
   - Watersport
+  - watersportavontuur
   - watersportdiploma
+  - watersportgemeenschap
+  - watersportwereld
 useGitignore: true
+flagWords: []
 ignorePaths:
   - pnpm-lock.yaml
   - generated/
@@ -25,3 +36,6 @@ enableFiletypes:
   - "*"
 dictionaries:
   - sql
+  - nl-nl
+import:
+  - "@cspell/dict-nl-nl/cspell-ext.json"
