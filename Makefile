@@ -3,9 +3,6 @@ SHELL:=$(PREFIX)/bin/sh
 build: \
 	generated/nwd-api \
 
-	pnpm install --frozen-lockfile
-	pnpm run --filter nwd-api build
-
 rebuild: \
 	clean build
 
@@ -18,6 +15,9 @@ generated/%: specifications/%.yaml
 		--package-directory $@ \
 		--package-name $(notdir $(basename $@)) \
 		--package-version 0.0.0 \
+
+	pnpm --filter {$@} install --frozen-lockfile
+	pnpm --filter {$@} run build
 
 .PHONY: \
 	build \
