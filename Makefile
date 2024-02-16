@@ -17,7 +17,7 @@ generated/%: specifications/%.yaml
 		--package-version 0.0.0 \
 
 	pnpm --filter {$@} install --frozen-lockfile
-	pnpm --filter {$@} run build
+	pnpm --filter {$@} build
 
 .PHONY: \
 	build \
