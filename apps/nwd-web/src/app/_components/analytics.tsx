@@ -9,7 +9,10 @@ function TrackPageView() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_VERCEL_ENV === "production" && !!process.env.NEXT_PUBLIC_FATHOM_ID) {
+    if (
+      process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
+      !!process.env.NEXT_PUBLIC_FATHOM_ID
+    ) {
       load(process.env.NEXT_PUBLIC_FATHOM_ID, {
         auto: false,
       });
@@ -30,9 +33,9 @@ function TrackPageView() {
 }
 
 export default function Analytics() {
-    return (
-        <Suspense>
-            <TrackPageView />
-        </Suspense>
-    )
+  return (
+    <Suspense>
+      <TrackPageView />
+    </Suspense>
+  );
 }

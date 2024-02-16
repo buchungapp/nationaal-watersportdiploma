@@ -1,12 +1,11 @@
-import { clsx } from 'clsx';
+import { clsx } from "clsx";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Analytics from "~/app/_components/analytics";
-import Footer from '~/app/_components/footer';
+import Footer from "~/app/_components/footer";
 import Header from "~/app/_components/header";
 import "./globals.css";
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter",
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "Nationaal Watersportdiploma",
@@ -21,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="nl">
       <Analytics />
-      <body className={clsx(inter.variable, 'bg-white')}>
+      <body className={clsx(inter.variable, "bg-white")}>
         <Header />
         {children}
         <Footer />
