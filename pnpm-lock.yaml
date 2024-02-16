@@ -61,8 +61,8 @@ importers:
         specifier: workspace:*
         version: link:../nwd-db
       oa42-appsignal:
-        specifier: ^0.1.9
-        version: 0.1.9
+        specifier: ^0.1.10
+        version: 0.1.10
       pg:
         specifier: ^8.11.3
         version: 8.11.3
@@ -3225,8 +3225,8 @@ packages:
       abbrev: 2.0.0
     dev: false
 
-  /oa42-appsignal@0.1.9:
-    resolution: {integrity: sha512-45jFVtUi3KgpsCOMEVoMTQ5078uI9VyS+3jEikExFlenvQcispyygDa0n5F0Uz3qJpHh1MLQ0LUjLkWh9YHRsg==}
+  /oa42-appsignal@0.1.10:
+    resolution: {integrity: sha512-PBsbnGWViLUVKhDeItXOh7r7/KZiqLB/pRHjJyWflaUfG33Yo+s60wDQPjyMGaNWiUAZ8pv6/9JbmoQ2mKXHpQ==}
     dependencies:
       '@appsignal/nodejs': 3.1.0
       '@opentelemetry/api': 1.7.0
