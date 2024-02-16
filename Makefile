@@ -3,6 +3,8 @@ SHELL:=$(PREFIX)/bin/sh
 build: \
 	generated/nwd-api \
 
+	pnpm run build --filter nwd-api
+
 rebuild: \
 	clean build
 
