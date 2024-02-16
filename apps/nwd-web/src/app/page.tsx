@@ -6,7 +6,7 @@ import { H3 } from "~/app/_components/typography";
 import Wave from "~/app/_components/wave";
 import nwdIcon from "./_assets/nwd-icon-fine.svg";
 import nwdFlag from "./_assets/nwd_flag.svg";
-import headerImage from "./_assets/nwd_hero_cover.jpg";
+import headerImage from "./_assets/nwd_hero_cover-2.jpg";
 
 function Hero() {
   return (
