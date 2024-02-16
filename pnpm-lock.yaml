@@ -94,6 +94,9 @@ importers:
       '@types/pg':
         specifier: ^8.11.0
         version: 8.11.0
+      '@types/yargs':
+        specifier: ^17.0.32
+        version: 17.0.32
       drizzle-orm:
         specifier: ^0.29.3
         version: 0.29.3(@opentelemetry/api@1.7.0)(@types/pg@8.11.0)(pg@8.11.3)
@@ -106,6 +109,9 @@ importers:
       type-fest:
         specifier: ^4.10.2
         version: 4.10.2
+      yargs:
+        specifier: ^17.7.2
+        version: 17.7.2
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2

@@ -12,6 +12,21 @@
       "outFiles": ["${workspaceFolder}/../*/out/**/*.js"],
       "preLaunchTask": "build",
       "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "migrate",
+      "program": "${workspaceFolder}/src/program.ts",
+      "args": ["migrate", "--pg-uri", "postgres://postgres:postgres@localhost:5432/postgres"],
+      "env": {
+        "NODE_ENV": "local"
+      },
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/../*/out/**/*.js"],
+      "preLaunchTask": "build",
+      "outputCapture": "std"
     }
   ]
 }

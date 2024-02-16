@@ -52,4 +52,16 @@ Then go to render.com and find the `nwd-api-server` service, in the `Manual Depl
 
 ### nwd-db
 
-The `nwd-db` database is hosted on supabase. We use drizzle as an orm and migration tool. To do a database migration we need drizzle-kit, this is installed as a dev dependency.
+The `nwd-db` database is hosted on supabase. We use drizzle as an orm and migration tool. To do a database migration we need drizzle-kit, this is installed as a dev dependency. We are going to use drizzle-kit via an npm script.
+
+First, you might want to generate migrations scripts. Be sure to check these in into git after they are generated. Generate migration scripts (and metadata) via:
+
+```sh
+pnpm --filter nwd-db run generate-migration
+```
+
+In order to run the migration in a production environment you first need to get a connection string to the database server in this environment. Then use the following command, replacing the connection string.
+
+```sh
+pnpm --filter nwd-db run execute-migration -- --pg-uri postgres://postgres:postgres@localhost:5432/postgres
+```

@@ -16,8 +16,8 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "start server",
-      "program": "${workspaceFolder}/bin/nwd-api-server",
+      "name": "server",
+      "program": "${workspaceFolder}/src/program.ts",
       "args": [
         "server",
         "--port",

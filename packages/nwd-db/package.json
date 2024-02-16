@@ -15,12 +15,17 @@
     "./out/**",
     "./migrations/**"
   ],
+  "bin": {
+    "nwd-api-server": "out/program.js"
+  },
   "scripts": {
     "prepare": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out ; tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js"
+    "test": "node --test ./out/**/*.test.js",
+    "generate-migration": "drizzle-kit generate:pg",
+    "execute-migration": "node ./out/program.js migrate"
   },
   "repository": {
     "type": "git",
@@ -35,10 +40,12 @@
   "dependencies": {
     "@types/node": "^20.11.19",
     "@types/pg": "^8.11.0",
+    "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.29.3",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
-    "type-fest": "^4.10.2"
+    "type-fest": "^4.10.2",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
