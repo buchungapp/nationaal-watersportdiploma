@@ -13,9 +13,7 @@ export async function withServer<T>(
   const server = application.createApplicationServer(applicationContext);
 
   const httpServer = http.createServer();
-  const onRequest = server.asRequestListener({
-    onError: (error) => console.error(error),
-  });
+  const onRequest = server.asHttpRequestListener();
   httpServer.addListener("request", onRequest);
 
   await new Promise<void>((resolve) => httpServer.listen(resolve));

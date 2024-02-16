@@ -14,6 +14,8 @@ COPY package.json \
 
 RUN make
 
+RUN pnpm install --no-lockfile
+
 RUN pnpm \
   --filter nwd-api-server \
    deploy \
@@ -28,5 +30,5 @@ ENV NODE_ENV=production
 COPY --from=builder /root/deployed /root
 
 ENTRYPOINT [ \
-  "/root/bin/nwd-api-server" \
+  "/root/out/program.js" \
   ]

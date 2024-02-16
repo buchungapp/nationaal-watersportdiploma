@@ -13,17 +13,16 @@
     }
   },
   "files": [
-    "./out/**",
-    "./bin/**"
+    "./out/**"
   ],
   "bin": {
-    "nwd-api-server": "bin/nwd-api-server"
+    "nwd-api-server": "out/program.js"
   },
   "scripts": {
-    "prepack": "tsc --composite false",
+    "prepare": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
-    "clean": "rm -rf out out-* ; tsc --build --clean",
+    "clean": "rm -rf out ; tsc --build --clean",
     "test": "node --test ./out/**/*.test.js"
   },
   "repository": {
@@ -37,24 +36,21 @@
   },
   "keywords": [],
   "dependencies": {
-    "@appsignal/nodejs": "^3.0.30",
-    "@types/node": "^20.11.10",
+    "@appsignal/nodejs": "^3.1.0",
+    "@types/node": "^20.11.19",
     "@types/pg": "^8.11.0",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.29.3",
     "nwd-api": "workspace:*",
     "nwd-db": "workspace:*",
+    "oa42-appsignal": "^0.1.10",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
-    "type-fest": "^4.10.1",
+    "type-fest": "^4.10.2",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "typescript": "^5.3.3"
-  },
-  "bundledDependencies": [
-    "nwd-api",
-    "nwd-db"
-  ]
+  }
 }
