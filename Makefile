@@ -3,7 +3,8 @@ SHELL:=$(PREFIX)/bin/sh
 build: \
 	generated/nwd-api \
 
-	pnpm run build --filter nwd-api
+	pnpm install --frozen-lockfile
+	pnpm run --filter nwd-api build
 
 rebuild: \
 	clean build
