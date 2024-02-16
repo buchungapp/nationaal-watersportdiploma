@@ -43,7 +43,7 @@ function Hero() {
           src={headerImage}
           alt=""
           priority
-          className="object-cover h-full object-bottom"
+          className="object-cover h-full object-center"
         />
       </div>
 
