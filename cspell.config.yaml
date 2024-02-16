@@ -1,35 +1,22 @@
 version: "0.2"
 words:
-  - appsignal
   - buchungapp
   - clsx
-  - corepack
-  - Dropcap
   - esbenp
   - headlessui
   - Initatiefnemers
-  - miterlimit
-  - Nationaal
-  - notdir
-  - openapi
-  - opentelemetry
-  - Perskit
   - PGURI
   - pnpx
   - ryanluker
   - skreet
   - supabase
   - tailwindcss
-  - Watersport
-  - watersportavontuur
-  - watersportdiploma
-  - watersportgemeenschap
-  - watersportwereld
 ignoreWords:
   - TERMS
   - transform
   - BUT
   - LOSS
+allowCompoundWords: true
 useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
