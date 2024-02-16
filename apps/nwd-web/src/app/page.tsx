@@ -98,13 +98,13 @@ function Features() {
     {
       name: "Veiligheid voorop.",
       description:
-        "Een veilige omgeving voor iedereen, met zowel aandacht voor fysieke en sociale veiligheid.",
+        "Een veilige omgeving voor iedereen, met aandacht voor fysieke en sociale veiligheid.",
       color: "bg-brand-dark-blue",
     },
     {
       name: "Kwaliteit als basis.",
       description:
-        "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen ",
+        "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen.",
       color: "bg-brand-light-blue",
     },
     {
@@ -243,7 +243,7 @@ function Manifest() {
             veiligheid en plezier centraal staan.
           </p>
 
-          <h4 className="text-xl pt-6 font-bold text-center">
+          <h4 className="text-base md:text-lg lg:text-xl pt-6 font-bold text-center">
             <Balancer>
               Wij zijn het Nationaal Watersportdiploma. Ontwikkel je
               vaardigheden op het water, veilig en vol plezier!
@@ -255,6 +255,19 @@ function Manifest() {
   );
 }
 
+function Contact() {
+  return (
+    <div className="flex flex-col items-center justify-center bg-brand-light-blue/15 py-16">
+      <h2 className="text-3xl font-bold text-brand-dark-blue leading-tight text-center">
+        Contact
+      </h2>
+      <p className="mt-2.5 text-center text-lg text-neutral-900">
+        Heb je vragen of wil je meer informatie? Neem dan contact met ons op.
+      </p>
+    </div>
+  );
+}
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between bg-brand-light-blue/15">
@@ -262,6 +275,7 @@ export default function Home() {
         <Hero />
         <Features />
         <Manifest />
+        {/* <Contact /> */}
       </div>
     </main>
   );
