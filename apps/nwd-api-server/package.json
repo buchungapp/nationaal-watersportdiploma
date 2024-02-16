@@ -13,13 +13,14 @@
     }
   },
   "files": [
+    "./bin/**",
     "./out/**"
   ],
   "bin": {
-    "nwd-api-server": "out/program.js"
+    "nwd-api-server": "bin/program.js"
   },
   "scripts": {
-    "prepare": "tsc --build",
+    "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out ; tsc --build --clean",
@@ -43,7 +44,7 @@
     "drizzle-orm": "^0.29.3",
     "nwd-api": "workspace:*",
     "nwd-db": "workspace:*",
-    "oa42-appsignal": "^0.1.10",
+    "oa42-appsignal": "^0.1.11",
     "pg": "^8.11.3",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.2",

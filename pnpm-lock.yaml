@@ -15,8 +15,8 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
       oa42-generator:
-        specifier: ^0.8.20
-        version: 0.8.20
+        specifier: ^0.8.21
+        version: 0.8.21
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -45,8 +45,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/nwd-db
       oa42-appsignal:
-        specifier: ^0.1.10
-        version: 0.1.10
+        specifier: ^0.1.11
+        version: 0.1.11
       pg:
         specifier: ^8.11.3
         version: 8.11.3
@@ -137,8 +137,8 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3
       oa42-lib:
-        specifier: ^0.8.11
-        version: 0.8.15
+        specifier: ^0.8.16
+        version: 0.8.16
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2
@@ -2127,7 +2127,7 @@ packages:
     hasBin: true
     dependencies:
       caniuse-lite: 1.0.30001587
-      electron-to-chromium: 1.4.672
+      electron-to-chromium: 1.4.673
       node-releases: 2.0.14
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
     dev: true
@@ -2651,8 +2651,8 @@ packages:
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  /electron-to-chromium@1.4.672:
-    resolution: {integrity: sha512-YYCy+goe3UqZqa3MOQCI5Mx/6HdBLzXL/mkbGCEWL3sP3Z1BP9zqAzeD3YEmLZlespYGFtyM8tRp5i2vfaUGCA==}
+  /electron-to-chromium@1.4.673:
+    resolution: {integrity: sha512-zjqzx4N7xGdl5468G+vcgzDhaHkaYgVcf9MqgexcTqsl2UHSCmOj/Bi3HAprg4BZCpC7HyD8a6nZl6QAZf72gw==}
     dev: true
 
   /emoji-regex@8.0.0:
@@ -4179,21 +4179,21 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: true
 
-  /oa42-appsignal@0.1.10:
-    resolution: {integrity: sha512-PBsbnGWViLUVKhDeItXOh7r7/KZiqLB/pRHjJyWflaUfG33Yo+s60wDQPjyMGaNWiUAZ8pv6/9JbmoQ2mKXHpQ==}
+  /oa42-appsignal@0.1.11:
+    resolution: {integrity: sha512-VFlAWvEXVm5ldMR7zwnLghg4jBm3Y0RukZemjtl/jkdd3w2fzeBRC9hznBB0ZqxAA8kbg7TnLwMzRtwtBITZJA==}
     dependencies:
       '@appsignal/nodejs': 3.1.0
       '@opentelemetry/api': 1.7.0
       '@types/node': 20.11.19
-      oa42-lib: 0.8.15
+      oa42-lib: 0.8.16
       tslib: 2.6.2
       type-fest: 4.10.2
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /oa42-generator@0.8.20:
-    resolution: {integrity: sha512-qpc44ELspqVOEkCb9DJQRiIoRaRSf7rGzsO51x+Zm/iA+WFATeBdNphiSXYvRE7NCAQNf5Yd7CvOM4KLClrUyw==}
+  /oa42-generator@0.8.21:
+    resolution: {integrity: sha512-Hgpzp1kcdBZ492/Ukt/cMTcBkM/3ia055GdtV0kmK0Od3bMHYYTlvQNsWsQNH2fanYfDLvWchT88UuqoEf7vLg==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.13.6
@@ -4204,15 +4204,15 @@ packages:
       camelcase: 8.0.0
       goodrouter: 2.1.3
       jns42-generator: 0.13.6
-      oa42-lib: 0.8.15
+      oa42-lib: 0.8.16
       tslib: 2.6.2
       type-fest: 4.10.2
       yaml: 2.3.4
       yargs: 17.7.2
     dev: true
 
-  /oa42-lib@0.8.15:
-    resolution: {integrity: sha512-F6txGNtILcpWPkyiQyV0hd6k49PfaxqcbTPSaiyMLYEwnBpfWtebO153SK1aijbVkSXRByj6/VBDcrLEoyLUAQ==}
+  /oa42-lib@0.8.16:
+    resolution: {integrity: sha512-nzNonvVb6rMI015u/fnEH4zrKGlVbtic1zmQS5qQ8ML5SmSw97A0Rh9a+APjtOdlpBo6B6D4JMuOjedAHLnbAg==}
     dependencies:
       '@types/node': 20.11.19
       js-base64: 3.7.6
