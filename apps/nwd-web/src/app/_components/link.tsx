@@ -8,10 +8,10 @@ export default function Link({
   ...props
 }: React.ComponentPropsWithoutRef<typeof NextLink>) {
   return (
-    <NextLink className={clsx(className, "relative group")} {...props}>
+    <NextLink className={clsx(className, "group relative")} {...props}>
       {children}
 
-      <Wave className="h-1.5 hidden group-hover:block absolute -bottom-1 text-brand-light-blue" />
+      <Wave className="absolute -bottom-1 hidden h-1.5 text-brand-light-blue group-hover:block" />
     </NextLink>
   );
 }

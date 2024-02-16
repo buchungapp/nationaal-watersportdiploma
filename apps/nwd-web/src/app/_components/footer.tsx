@@ -69,8 +69,8 @@ export default function Footer() {
               </Link>
             ))}
           </div>
-          <div className="border-t w-fit mx-auto border-gray-300 mt-3 pt-3">
-            <p className="leading-none text-gray-700 text-center">
+          <div className="mx-auto mt-3 w-fit border-t border-gray-300 pt-3">
+            <p className="text-center leading-none text-gray-700">
               info@nationaalwatersportdiploma.nl
             </p>
           </div>

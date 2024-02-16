@@ -10,15 +10,14 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          orange: '#ff8000',
-          ['light-blue']: '#87d3f8',
-          ['dark-blue']: '#0047ab',
-        }
+          orange: "#ff8000",
+          ["light-blue"]: "#87d3f8",
+          ["dark-blue"]: "#0047ab",
+        },
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
   },
