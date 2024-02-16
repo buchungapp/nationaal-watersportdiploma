@@ -16,11 +16,7 @@
     {
       "type": "node",
       "request": "launch",
-<<<<<<< HEAD
       "name": "server",
-=======
-      "name": "start server",
->>>>>>> main
       "program": "${workspaceFolder}/src/program.ts",
       "args": [
         "server",
