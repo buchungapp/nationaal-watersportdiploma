@@ -245,10 +245,16 @@ function Manifest() {
 
           <h4 className="text-xl pt-6 font-bold text-center">
             <Balancer>
-              Wij zijn het Nationaal Watersportdiploma. Voor elke watersporter,
-              veilig en vol plezier!
+              Wij zijn het Nationaal Watersportdiploma. Ontwikkel je
+              vaardigheden op het water, veilig en vol plezier!
             </Balancer>
           </h4>
+
+          <p>
+            Ken je dat gevoel wanneer je een diploma haalt? Je bent trots, blij,
+            voelt je erkent, zit vol zelfvertrouwen en staat klaar voor de
+            volgende uitdaging.
+          </p>
         </div>
       </div>
     </div>
