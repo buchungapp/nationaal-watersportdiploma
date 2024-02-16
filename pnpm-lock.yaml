@@ -63,9 +63,9 @@ importers:
       nwd-db:
         specifier: workspace:*
         version: link:../nwd-db
-      oa42-opentelemetry:
-        specifier: ^0.1.4
-        version: 0.1.4
+      oa42-appsignal:
+        specifier: ^0.1.0
+        version: 0.1.0
       pg:
         specifier: ^8.11.3
         version: 8.11.3
@@ -3231,6 +3231,19 @@ packages:
       abbrev: 2.0.0
     dev: false
 
+  /oa42-appsignal@0.1.0:
+    resolution: {integrity: sha512-tTM3xyp+Wz/PnvzaIBMd2mw1eXrNhCXsuB+gpmPq4iCqnxdYZYpBoGekmoizyIowDGnG5rZUHHBTREAEONuDjA==}
+    dependencies:
+      '@appsignal/nodejs': 3.1.0
+      '@opentelemetry/api': 1.7.0
+      '@types/node': 20.11.19
+      oa42-lib: 0.8.10
+      tslib: 2.6.2
+      type-fest: 4.10.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /oa42-generator@0.8.11:
     resolution: {integrity: sha512-5Eg0CqeRBVmLeUxnNEziaOoinR50ia3S+zfo2NJ11YIcqMvuJdKnqTIeQ/Hjtq2NdYHOBVvXq8o3y57BJh6S1Q==}
     hasBin: true
@@ -3258,19 +3271,6 @@ packages:
       js-base64: 3.7.6
       tslib: 2.6.2
       type-fest: 4.10.2
-
-  /oa42-opentelemetry@0.1.4:
-    resolution: {integrity: sha512-KQhZ45BaXHHfgk+KugOpWTaOn9eW82Z3Il+E2DYnE2z9scsodGOEJ+iRQt77yIoBMZle/GwXzjwx4p+sv2nMOQ==}
-    dependencies:
-      '@opentelemetry/api': 1.7.0
-      '@opentelemetry/instrumentation': 0.48.0(@opentelemetry/api@1.7.0)
-      '@types/node': 20.11.19
-      oa42-lib: 0.8.10
-      tslib: 2.6.2
-      type-fest: 4.10.2
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
 
   /obuf@1.1.2:
     resolution: {integrity: sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==}
