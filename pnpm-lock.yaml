@@ -12,8 +12,8 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
       oa42-generator:
-        specifier: ^0.8.12
-        version: 0.8.12
+        specifier: ^0.8.13
+        version: 0.8.13
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -3238,8 +3238,8 @@ packages:
       - supports-color
     dev: false
 
-  /oa42-generator@0.8.12:
-    resolution: {integrity: sha512-q8SX2MxDfxNVfTX3zujZ4Z4P/jT2OKM9NgGfyZ78VBJwW80TMCyNm/D5BbSjAltIadeMFpPkKgPzUbQkqZv+Pg==}
+  /oa42-generator@0.8.13:
+    resolution: {integrity: sha512-ECJF8EZj2w8ROscqb5WO731sXyNPppPhQqMOmGmM7aX70K0jmsKcx5Ze2gpvcz2jmUlmjkwxc/r7dhLIuXoS1g==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.13.6

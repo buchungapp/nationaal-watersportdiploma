@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "cspell": "^8.3.2",
-    "oa42-generator": "^0.8.12",
+    "oa42-generator": "^0.8.13",
     "prettier": "^3.2.5"
   }
 }
