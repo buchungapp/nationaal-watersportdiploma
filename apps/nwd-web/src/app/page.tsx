@@ -104,7 +104,7 @@ function Features() {
     {
       name: "Kwaliteit als basis.",
       description:
-        "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitseisen en verbeteren door samenwerken.",
+        "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen ",
       color: "bg-brand-light-blue",
     },
     {
@@ -249,12 +249,6 @@ function Manifest() {
               vaardigheden op het water, veilig en vol plezier!
             </Balancer>
           </h4>
-
-          <p>
-            Ken je dat gevoel wanneer je een diploma haalt? Je bent trots, blij,
-            voelt je erkent, zit vol zelfvertrouwen en staat klaar voor de
-            volgende uitdaging.
-          </p>
         </div>
       </div>
     </div>
