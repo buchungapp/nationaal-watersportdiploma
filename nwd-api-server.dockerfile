@@ -15,8 +15,8 @@ COPY package.json \
 
 RUN make
 
-RUN pnpm install --frozen-lockfile
-RUN pnpm run --recursive build
+RUN pnpm install --filter nwd-api-server --frozen-lockfile
+RUN pnpm run --filter nwd-api-server build
 
 RUN pnpm \
   --filter nwd-api-server \
