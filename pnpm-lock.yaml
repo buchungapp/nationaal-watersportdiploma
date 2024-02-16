@@ -12,8 +12,8 @@ importers:
         specifier: ^8.3.2
         version: 8.3.2
       oa42-generator:
-        specifier: ^0.8.13
-        version: 0.8.13
+        specifier: ^0.8.19
+        version: 0.8.19
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -27,8 +27,8 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3
       oa42-lib:
-        specifier: ^0.8.10
-        version: 0.8.10
+        specifier: ^0.8.11
+        version: 0.8.15
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2
@@ -61,8 +61,8 @@ importers:
         specifier: workspace:*
         version: link:../nwd-db
       oa42-appsignal:
-        specifier: ^0.1.2
-        version: 0.1.2
+        specifier: ^0.1.8
+        version: 0.1.8
       pg:
         specifier: ^8.11.3
         version: 8.11.3
@@ -2509,21 +2509,21 @@ packages:
       abbrev: 2.0.0
     dev: false
 
-  /oa42-appsignal@0.1.2:
-    resolution: {integrity: sha512-6rHYchTa9E0fK53fQQriSgWE1DTxPUiyQggaSZVwUOkAA6IBswNYVslRYQBmTPeMxLSGu1ltwCxcnBXgTPCjPg==}
+  /oa42-appsignal@0.1.8:
+    resolution: {integrity: sha512-06dpv1XmaNokk7UQ7sNh2FPH1KbBxYXge0bcOFS4r5GluGALKttxtnV1/En4f8GHng6BbjiBUAbkpP7M+9wsrg==}
     dependencies:
       '@appsignal/nodejs': 3.1.0
       '@opentelemetry/api': 1.7.0
       '@types/node': 20.11.19
-      oa42-lib: 0.8.10
+      oa42-lib: 0.8.15
       tslib: 2.6.2
       type-fest: 4.10.2
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /oa42-generator@0.8.13:
-    resolution: {integrity: sha512-ECJF8EZj2w8ROscqb5WO731sXyNPppPhQqMOmGmM7aX70K0jmsKcx5Ze2gpvcz2jmUlmjkwxc/r7dhLIuXoS1g==}
+  /oa42-generator@0.8.19:
+    resolution: {integrity: sha512-m860Hd4vnCwvOc7JCar/cE3MCn2/SoMwEUm0e7PX9SM8JGIXPNspUM/YZNSWwvY+IBdOmqex8aDARfWQj936Mw==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.13.6
@@ -2534,16 +2534,15 @@ packages:
       camelcase: 8.0.0
       goodrouter: 2.1.3
       jns42-generator: 0.13.6
-      oa42-lib: 0.8.10
+      oa42-lib: 0.8.15
       tslib: 2.6.2
       type-fest: 4.10.2
-      typescript: 5.3.3
       yaml: 2.3.4
       yargs: 17.7.2
     dev: true
 
-  /oa42-lib@0.8.10:
-    resolution: {integrity: sha512-hbSl8BQV3gvXMbY+/+IFzRCYNN7TVkhG7SOLAFaHkkud0E32T4oXKRxIG8YcZPBN9HbyVNkI7kF7qC2ZxdMzEw==}
+  /oa42-lib@0.8.15:
+    resolution: {integrity: sha512-F6txGNtILcpWPkyiQyV0hd6k49PfaxqcbTPSaiyMLYEwnBpfWtebO153SK1aijbVkSXRByj6/VBDcrLEoyLUAQ==}
     dependencies:
       '@types/node': 20.11.19
       js-base64: 3.7.6
