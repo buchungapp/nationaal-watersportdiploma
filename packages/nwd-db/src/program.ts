@@ -1,4 +1,4 @@
-import "./appsignal.js";
+#!/usr/bin/env node
 
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs/yargs";
@@ -10,7 +10,7 @@ main();
 async function main() {
   const program = yargs(hideBin(process.argv));
 
-  programs.configureServerProgram(program);
+  programs.configureMigrateProgram(program);
 
   program.version(packageInfo.version!);
   program.demandCommand();
