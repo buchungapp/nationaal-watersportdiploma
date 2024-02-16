@@ -19,7 +19,7 @@
     "nwd-api-server": "out/program.js"
   },
   "scripts": {
-    "prepare": "tsc --build",
+    "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out ; tsc --build --clean",
