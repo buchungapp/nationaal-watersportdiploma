@@ -37,13 +37,13 @@ function Hero() {
         De nieuwe standaard in veiligheid, kwaliteit en plezier.
         </Balancer>
       </h2>
-      <Wave className="text-brand-light-blue h-3.5 lg:h-6 mt-2.5 lg:mt-1.5 mx-auto md:ml-0" />
+      <Wave className="text-brand-light-blue h-3.5 lg:h-6 mt-2.5 mx-auto md:ml-0" />
       </div>
         <Image src={nwdIcon} priority alt="" className="rounded-full -order-1 md:order-none shadow-xl w-52 md:w-60 aspect-square" />
       </div>
 
       <div className="flex justify-center mt-12 sm:mt-16">
-        <Link href="#" className="rounded-full flex items-center bg-brand-dark-blue text-white py-2 px-4 font-medium">
+        <Link href="#manifest" className="rounded-full flex items-center bg-brand-dark-blue text-white py-2 px-4 font-medium">
         Lees ons manifest
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 ml-2.5">
   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -104,7 +104,7 @@ function Manifest() {
   const classNameParagraph = "text-justify"
   
   return (
-    <div className="relative w-fit mt-16 bg-white rounded-sm mx-2.5 shadow lg:px-28 py-8 md:py-14 lg:py-20 sm:mx-auto">
+    <div id="manifest" className="relative w-fit mt-16 bg-white rounded-sm mx-2.5 shadow lg:px-28 py-8 md:py-14 lg:py-20 sm:mx-auto">
        <div className="absolute left-6 md:left-8 lg:left-12 xl:left-16 -top-[2px] w-20 md:w-24 lg:w-32 h-auto">
       <Image src={nwdFlag} alt="" className="object-contain" />
         </div>

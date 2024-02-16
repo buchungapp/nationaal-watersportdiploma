@@ -3,7 +3,7 @@ import Link from "next/link";
 import nwdIcon from '../_assets/nwd_icon.svg';
 
 const navigation = [
-    { name: 'Merkmanifest', href: '#' },
+    { name: 'Merkmanifest', href: '#manifest' },
     // { name: 'Initatiefnemers', href: '#' },
     // { name: 'Veelgestelde vragen', href: '#' },
     // { name: 'Perskit', href: '#' },
