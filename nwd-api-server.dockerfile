@@ -14,6 +14,8 @@ COPY package.json \
 
 RUN make
 
+RUN pnpm install --no-lockfile
+
 RUN pnpm \
   --filter nwd-api-server \
    deploy \
