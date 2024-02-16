@@ -5,7 +5,7 @@ RUN apk add make g++ python3
 RUN corepack enable
 
 COPY specifications /root/specifications
-COPY packages /root/apps
+COPY apps /root/apps
 COPY packages /root/packages
 COPY package.json \
   pnpm-workspace.yaml \
@@ -15,7 +15,8 @@ COPY package.json \
 
 RUN make
 
-RUN pnpm install --no-lockfile
+RUN pnpm install --frozen-lockfile
+RUN pnpm run --recursive build
 
 RUN pnpm \
   --filter nwd-api-server \
