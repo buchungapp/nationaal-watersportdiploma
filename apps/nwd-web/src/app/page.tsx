@@ -255,13 +255,40 @@ function Manifest() {
   );
 }
 
+function CTA() {
+  return (
+    <div>
+      <div className="px-6 py-24 sm:px-6 sm:py-28 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            Benieuwd naar meer informatie?
+          </h2>
+          <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-neutral-700">
+            Schrijf je als vaarschooleigenaar in voor onze volgende digitale
+            informatiebijeenkomst op vrijdag 1 maart 2024.
+          </p>
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <a
+              href="https://forms.gle/rgU8H9qHuiEb4dm48"
+              target="_blank"
+              className="rounded-full flex items-center bg-brand-dark-blue text-white py-2 px-4 font-medium"
+            >
+              Meld je locatie aan
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Contact() {
   return (
     <div className="flex flex-col items-center justify-center bg-brand-light-blue/15 py-16">
       <h2 className="text-3xl font-bold text-brand-dark-blue leading-tight text-center">
         Contact
       </h2>
-      <p className="mt-2.5 text-center text-lg text-neutral-900">
+      <p className="mt-1.5 text-center leading-tight text-lg text-neutral-900">
         Heb je vragen of wil je meer informatie? Neem dan contact met ons op.
       </p>
     </div>
@@ -271,10 +298,11 @@ function Contact() {
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between bg-brand-light-blue/15">
-      <div className="max-w-7xl mx-auto pb-12">
+      <div className="max-w-7xl mx-auto">
         <Hero />
         <Features />
         <Manifest />
+        <CTA />
         {/* <Contact /> */}
       </div>
     </main>
