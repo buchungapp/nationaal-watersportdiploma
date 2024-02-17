@@ -12,14 +12,15 @@
     }
   },
   "files": [
+    "./bin/**",
     "./out/**",
     "./migrations/**"
   ],
   "bin": {
-    "nwd-api-server": "out/program.js"
+    "nwd-api-server": "bin/program.js"
   },
   "scripts": {
-    "prepare": "tsc --build",
+    "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out ; tsc --build --clean",

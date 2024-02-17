@@ -6,6 +6,7 @@
 !.prettierignore
 !.editorconfig
 !.npmrc
+!.eslintrc.json
 
 node_modules/
 out/
@@ -16,3 +17,4 @@ coverage/
 !.vscode/
 !.github/
 
+.vercel
