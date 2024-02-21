@@ -73,6 +73,7 @@ export default function Footer() {
             <p className="text-center leading-none text-gray-700">
               info@nationaalwatersportdiploma.nl
             </p>
+            <p className="mt-1.5 text-center leading-none text-gray-700">085 - 782 27 777</p>
           </div>
         </div>
         <div className="mt-8 md:order-1 md:mt-0">
