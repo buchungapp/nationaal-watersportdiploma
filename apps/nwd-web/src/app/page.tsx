@@ -4,7 +4,7 @@ import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import { H3 } from "~/app/_components/typography";
 import Wave from "~/app/_components/wave";
-import nwdIcon from "./_assets/nwd-icon-fine.svg";
+import nwdIcon from "./_assets/nwd-s.png";
 import nwdFlag from "./_assets/nwd_flag.svg";
 import headerImage from "./_assets/nwd_hero_cover-2.jpg";
 
@@ -15,7 +15,7 @@ function Hero() {
         <div className="absolute inset-0">
           <div className="relative h-full w-full">
             <svg
-              className="absolute inset-x-0 -bottom-[45px] text-white sm:-bottom-[60px] md:-bottom-[75px] lg:-bottom-[110px] xl:-bottom-[140px]"
+              className="absolute inset-x-0 -bottom-[45px] text-[#fdfaf8] sm:-bottom-[60px] md:-bottom-[75px] lg:-bottom-[110px] xl:-bottom-[140px]"
               viewBox="0 0 1512 434"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -26,7 +26,7 @@ function Hero() {
               />
             </svg>
             <svg
-              className="absolute inset-x-0 bottom-[10px] translate-y-20 text-brand-light-blue/15 sm:bottom-0 md:-bottom-[20px] lg:-bottom-[55px] xl:-bottom-[90px]"
+              className="absolute inset-x-0 bottom-[10px] translate-y-20 text-[#fdfaf8] sm:bottom-0 md:-bottom-[20px] lg:-bottom-[55px] xl:-bottom-[90px]"
               viewBox="0 0 1512 434"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +39,12 @@ function Hero() {
           </div>
         </div>
 
-        <Image src={headerImage} alt="" priority className="h-full object-cover object-center" />
+        <Image
+          src={headerImage}
+          alt=""
+          priority
+          className="h-full object-cover object-center rounded-t-2xl"
+        />
       </div>
 
       <div className="relative flex flex-col items-center justify-between gap-y-4 px-6 pt-20 sm:pt-32 md:flex-row md:items-end md:pt-40 lg:px-24 lg:pt-64">
@@ -63,7 +68,7 @@ function Hero() {
       <div className="mt-12 flex justify-center sm:mt-16">
         <Link
           href="#manifest"
-          className="flex items-center rounded-full bg-brand-dark-blue px-4 py-2 font-medium text-white"
+          className="flex items-center rounded-full bg-brand-light-blue hover:bg-brand-dark-blue px-4 py-2 font-medium text-white"
         >
           Lees ons manifest
           <svg
@@ -89,18 +94,21 @@ function Features() {
       description:
         "Een veilige omgeving voor iedereen, met aandacht voor fysieke en sociale veiligheid.",
       color: "bg-brand-dark-blue",
+      border: "border-brand-dark-blue",
     },
     {
       name: "Kwaliteit als basis.",
       description:
         "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen.",
       color: "bg-brand-light-blue",
+      border: "border-brand-light-blue",
     },
     {
       name: "Plezier staat centraal.",
       description:
         "Leren watersporten moet leuk zijn, met heldere stappen naar je volgende diploma en vele succesmomenten.",
       color: "bg-brand-orange",
+      border: "border-brand-orange",
     },
   ];
 
@@ -109,12 +117,15 @@ function Features() {
       {features.map((feature) => (
         <div
           key={feature.name}
-          className="flex flex-col overflow-hidden rounded-2xl border-0 bg-white p-4 shadow-lg"
+          className={clsx(
+            "flex flex-col overflow-hidden rounded-lg border-2 bg-white p-4 shadow-inner",
+            feature.border,
+          )}
         >
           {/* <div className="absolute -inset-1 bg-white rounded-sm" /> */}
 
           <dt className="text-base font-semibold leading-7 text-gray-900">
-            <div className={clsx("mb-4 h-6 w-6 rounded-full", feature.color)} aria-hidden="true" />
+            <div className={clsx("mb-4 h-5 w-5 rounded-full", feature.color)} aria-hidden="true" />
             {feature.name}
           </dt>
           <dd className="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-600">
@@ -244,7 +255,7 @@ function CTA() {
             <a
               href="https://forms.gle/rgU8H9qHuiEb4dm48"
               target="_blank"
-              className="flex items-center rounded-full bg-brand-dark-blue px-4 py-2 font-medium text-white"
+              className="flex items-center rounded-full bg-brand-light-blue hover:bg-brand-dark-blue px-4 py-2 font-medium text-white"
             >
               Meld je locatie aan
             </a>
@@ -268,7 +279,7 @@ function Contact() {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between bg-brand-light-blue/15">
+    <main className="flex min-h-screen flex-col items-center justify-between">
       <div className="mx-auto max-w-7xl">
         <Hero />
         <Features />

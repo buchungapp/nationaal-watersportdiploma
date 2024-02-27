@@ -11,7 +11,7 @@ const config: Config = {
       colors: {
         brand: {
           orange: "#ff8000",
-          ["light-blue"]: "#87d3f8",
+          ["light-blue"]: "#007FFF",
           ["dark-blue"]: "#0047ab",
         },
       },
