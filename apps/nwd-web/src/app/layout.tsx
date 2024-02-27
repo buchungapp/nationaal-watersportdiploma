@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="nl">
       <Analytics />
-      <body className={clsx(inter.variable, "bg-white")}>
+      <body className={clsx(inter.variable, "bg-[#fdfaf8]")}>
         <Header />
         {children}
         <Footer />

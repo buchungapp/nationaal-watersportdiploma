@@ -53,7 +53,7 @@ const navigation: {
 
 export default function Footer() {
   return (
-    <footer id="contact" className="bg-white">
+    <footer id="contact" className="bg-[#fdfaf8]">
       <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
         <div className="md:order-2">
           <div className="flex justify-center space-x-6">
@@ -69,11 +69,11 @@ export default function Footer() {
               </Link>
             ))}
           </div>
-          <div className="mx-auto mt-3 w-fit border-t border-gray-300 pt-3">
-            <p className="text-center leading-none text-gray-700">
-              info@nationaalwatersportdiploma.nl
-            </p>
-            <p className="mt-1.5 text-center leading-none text-gray-700">085 - 782 27 777</p>
+          <div className="mx-auto mt-3 text-center w-fit border-t border-gray-300 pt-3">
+            <p className="leading-none text-gray-700">info@nationaalwatersportdiploma.nl</p>
+            <a className="mt-1.5 leading-none text-gray-700" href="tel:+31857822777">
+              085 - 782 27 77
+            </a>
           </div>
         </div>
         <div className="mt-8 md:order-1 md:mt-0">

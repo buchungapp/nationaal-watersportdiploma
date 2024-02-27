@@ -12,7 +12,7 @@ const navigation = [
 
 export default function Header() {
   return (
-    <header className="bg-white">
+    <header className="bg-[#fdfaf8]">
       <nav
         className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3 lg:px-8 lg:py-4"
         aria-label="Global"
