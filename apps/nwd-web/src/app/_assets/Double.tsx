@@ -1,0 +1,30 @@
+export default function Double({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="100%"
+      height="11"
+      fill="none"
+      className={className}
+    >
+      <line
+        x1="0"
+        y1="1"
+        x2="100%"
+        y2="1"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <line
+        x1="0"
+        y1="8"
+        x2="100%"
+        y2="8"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+    </svg>
+  );
+}
