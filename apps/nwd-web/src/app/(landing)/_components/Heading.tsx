@@ -4,7 +4,7 @@ import WaveAnimation from "./WaveAnimation";
 
 export default function Heading() {
   return (
-    <section className=" w-full py-12 bg-branding-light rounded-b-3xl grid gap-12">
+    <section className=" w-full py-12 bg-branding-light rounded-b-[3rem] grid gap-12">
       <div className="items-center grid gap-8 grid-cols-1 lg:grid-cols-2 px-4 lg:px-16">
         <div className="grid gap-10 justify-center lg:justify-start">
           <div className="text-white grid gap-6">

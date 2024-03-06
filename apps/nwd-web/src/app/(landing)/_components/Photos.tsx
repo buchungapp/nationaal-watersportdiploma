@@ -9,14 +9,7 @@ import image5 from "./_content/photo-5.png";
 import image6 from "./_content/photo-6.png";
 
 export default function Photos() {
-  let rotations = [
-    "rotate-2",
-    "-rotate-2",
-    "rotate-2",
-    "rotate-2",
-    "-rotate-2",
-    "rotate-2",
-  ];
+  let rotations = ["rotate-2", "-rotate-2", "rotate-2"];
 
   return (
     <section className="flex w-full justify-center gap-5 overflow-hidden py-4 sm:gap-8">

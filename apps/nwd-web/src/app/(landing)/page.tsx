@@ -1,5 +1,6 @@
 import About from "./_components/About";
 import Heading from "./_components/Heading";
+import Locations from "./_components/Locations";
 import Photos from "./_components/Photos";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
         <Heading />
         <Photos />
         <About />
+        <Locations />
       </div>
       <div className="min-h-screen"></div>
     </main>
