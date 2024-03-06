@@ -13,8 +13,8 @@ export default function Double({ className }: { className?: string }) {
         x2="100%"
         y2="1"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
       <line
         x1="0"
@@ -22,8 +22,8 @@ export default function Double({ className }: { className?: string }) {
         x2="100%"
         y2="8"
         stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </svg>
   );
