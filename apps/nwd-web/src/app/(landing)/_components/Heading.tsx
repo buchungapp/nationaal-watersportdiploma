@@ -41,7 +41,7 @@ export default function Heading() {
           allowFullScreen
         />
       </div>
-      <WaveAnimation />
+      <WaveAnimation begin={128} end={600} />
     </section>
   );
 }

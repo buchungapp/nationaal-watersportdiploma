@@ -3,9 +3,15 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Line, Wave } from "~/app/_assets/Wave";
 
-export default function WaveAnimation() {
+export default function WaveAnimation({
+  begin,
+  end,
+}: {
+  begin: number;
+  end: number;
+}) {
   const { scrollY } = useScroll();
-  const left = useTransform(scrollY, [128, 600], ["70%", "10%"]);
+  const left = useTransform(scrollY, [begin, end], ["70%", "10%"]);
 
   return (
     <div className="text-white w-full relative group py-3 overflow-x-hidden">
