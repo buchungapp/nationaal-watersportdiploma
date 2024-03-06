@@ -30,7 +30,7 @@ export default function StickyNavItems({ items }: { items: NavItem[] }) {
 
   return (
     <div className={"absolute flex w-full px-4 lg:px-16"}>
-      <StickyNavDiv className="bg-white  w-full flex text-branding-dark justify-between uppercase font-medium text-sm tracking-widest rounded-full">
+      <StickyNavDiv className="bg-white  w-full flex text-branding-dark justify-between uppercase font-medium text-sm rounded-full">
         <Link href="/" className="flex shrink-0">
           <Logo className="h-24 p-2 w-24 text-white" />
           <Hero className="h-24" />

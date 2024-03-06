@@ -17,7 +17,10 @@ export default function StickyNavItemList({
       {itemsMore && itemsMore.length > 0 && <MoreNav items={itemsMore} />}
       {items.map(({ label, href, icon }) => (
         <li key={label}>
-          <Link href={href} className="group relative flex flex-nowrap gap-1 py-0.5">
+          <Link
+            href={href}
+            className="group relative flex flex-nowrap gap-1 py-0.5 tracking-widest"
+          >
             {icon}
             {label}
             <Double className="w-full bottom-0 translate-y-full absolute text-transparent transition-colors group-hover:text-branding-dark" />

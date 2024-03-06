@@ -9,18 +9,18 @@ export default function Double({ className }: { className?: string }) {
     >
       <line
         x1="0"
-        y1="1"
+        y1="2"
         x2="100%"
-        y2="1"
+        y2="2"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
       />
       <line
         x1="0"
-        y1="8"
+        y1="9"
         x2="100%"
-        y2="8"
+        y2="9"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"

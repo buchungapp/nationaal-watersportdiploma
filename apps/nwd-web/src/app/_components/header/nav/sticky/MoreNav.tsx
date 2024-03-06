@@ -15,14 +15,18 @@ export default function MoreNav({ items }: { items: NavItem[] }) {
       {({ open }) => (
         <>
           <Menu.Button
-            className={"relative z-10 flex flex-nowrap items-center gap-1 py-0.5 uppercase group"}
+            className={
+              "relative z-10 flex flex-nowrap items-center gap-1 py-0.5 uppercase group"
+            }
           >
             <span>Overig</span>
             {/* <ChevronDownIcon className="h-6 w-6" aria-hidden="true" /> */}{" "}
             <Double
               className={clsx(
                 "w-full bottom-0 translate-y-full absolute transition-colors",
-                open ? "text-branding-dark" : "group-hover:text-branding-dark text-transparent",
+                open
+                  ? "text-branding-dark"
+                  : "group-hover:text-branding-dark text-transparent",
               )}
             />
           </Menu.Button>
@@ -37,7 +41,7 @@ export default function MoreNav({ items }: { items: NavItem[] }) {
           >
             <Menu.Items
               className={clsx(
-                "absolute w-96 left-1/2 z-10 mt-5  origin-top rounded-3xl -translate-x-1/2 overflow-hidden bg-white p-4 shadow-lg",
+                "absolute w-96 left-1/2 z-10 mt-12  origin-top rounded-3xl -translate-x-1/2 overflow-hidden bg-white p-4 shadow-lg",
               )}
             >
               {items.map((item) => (
@@ -51,7 +55,7 @@ export default function MoreNav({ items }: { items: NavItem[] }) {
                           active ? "bg-slate-100" : "",
                         )}
                       >
-                        <div className="flex flex-nowrap gap-1 font-semibold text-branding-dark">
+                        <div className="flex flex-nowrap gap-1 font-semibold text-branding-dark tracking-widest">
                           {item.icon}
                           {item.label}
                         </div>

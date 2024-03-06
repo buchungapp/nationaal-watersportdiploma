@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="nl">
       <Analytics />
-      <body className={clsx(inter.variable, "bg-[#fdfaf8]")}>
+      <body className={clsx(inter.variable, "text-slate-900")}>
         <Providers>
           <Header />
           <div id="content">{children}</div>

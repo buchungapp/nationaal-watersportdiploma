@@ -1,4 +1,4 @@
-import { ArrowLongRightIcon } from "@heroicons/react/24/solid";
+import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import WaveAnimation from "./WaveAnimation";
 
@@ -18,15 +18,23 @@ export default function Heading() {
           <div className="flex flex-col sm:flex-row gap-6">
             <Link
               href="/locaties"
-              className="bg-white text-branding-dark text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
+              className="bg-white group text-branding-dark text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
             >
-              Vindt een NWD locatie <ArrowLongRightIcon className="w-5 h-5" />
+              Vindt een NWD locatie{" "}
+              <ArrowLongRightIcon
+                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                strokeWidth={2.5}
+              />
             </Link>
             <Link
               href="/over"
-              className="bg-branding-light text-white text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
+              className="bg-branding-light group text-white text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
             >
-              Waarom het NWD <ArrowLongRightIcon className="w-5 h-5" />
+              Waarom het NWD{" "}
+              <ArrowLongRightIcon
+                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
+                strokeWidth={2.5}
+              />
             </Link>
           </div>
         </div>
