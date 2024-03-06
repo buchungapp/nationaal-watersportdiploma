@@ -9,10 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
+        branding: {
           orange: "#ff8000",
-          ["light-blue"]: "#007FFF",
-          ["dark-blue"]: "#0047ab",
+          light: "#007FFF",
+          dark: "#0047ab",
         },
       },
       backgroundImage: {
