@@ -10,7 +10,7 @@ on:
       - packages/**
 
 jobs:
-  unit:
+  test:
     runs-on: ubuntu-latest
     container: node:21.5.0-alpine3.19
     services:
@@ -23,7 +23,17 @@ jobs:
     steps:
       - run: apk add make
       - run: corepack enable
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - run: make
+      - run: pnpm --recursive test
+
+  test-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21.5.0
       - run: make
       - run: pnpm --recursive test
 
@@ -32,5 +42,5 @@ jobs:
     container: node:21.5.0-alpine3.19
     steps:
       - run: corepack enable
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: pnpm audit

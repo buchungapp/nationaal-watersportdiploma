@@ -14,7 +14,7 @@ jobs:
     container: node:21.5.0-alpine3.19
     steps:
       - run: corepack enable
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run formatting
 
@@ -23,6 +23,6 @@ jobs:
     container: node:21.5.0-alpine3.19
     steps:
       - run: corepack enable
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run spelling
