@@ -30,10 +30,11 @@ jobs:
   test-windows:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 21.5.0
+      - run: corepack enable
+      - uses: actions/checkout@v4
       - run: make
       - run: pnpm --recursive test
 
