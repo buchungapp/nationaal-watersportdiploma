@@ -27,8 +27,23 @@ jobs:
       - run: make
       - run: pnpm --recursive test
 
+  # test on windows to make sure that the develpoment environment
+  # works on windows
   test-windows:
     runs-on: windows-2022
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21.5.0
+      - run: corepack enable
+      - uses: actions/checkout@v4
+      - run: make
+      - run: pnpm --recursive test
+
+  # test on mac to make sure that the develpoment environment
+  # works on mac
+  test-mac:
+    runs-on: macos-12
     steps:
       - uses: actions/setup-node@v4
         with:
