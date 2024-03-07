@@ -9,7 +9,7 @@ import locations from "./_assets/locations.png";
 export default function Locations() {
   return (
     <section className="w-full bg-branding-orange rounded-[3rem] grid items-center lg:grid-cols-2 overflow-hidden">
-      <div className="grid gap-10 p-4 lg:p-16 text-white">
+      <div className="grid gap-10 p-4 py-12 lg:p-16 text-white">
         <div className="grid gap-2">
           <div className={"flex gap-3 items-center"}>
             <span className="uppercase font-bold">Locaties</span>
@@ -26,7 +26,7 @@ export default function Locations() {
             NWD-diploma uit te geven.
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-6">
+        <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
           <Link
             href="/locaties"
             className="bg-white text-slate-900 group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"

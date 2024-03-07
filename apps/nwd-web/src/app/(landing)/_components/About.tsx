@@ -20,9 +20,11 @@ export default function About() {
           </Balancer>
         </p>
       </div>
-      <div className="grid lg:grid-cols-2 items-center">
+      <div className="grid lg:grid-cols-2 gap-12 justify-center lg:gap-0 items-center">
         <div className="w-full justify-center flex">
-          <Logo className="w-96 h-96 text-white" />
+          <div className="p-4 group rounded-full">
+            <Logo className="max-w-[24rem] max-h-[24rem] w-full h-full text-white group-hover:shadow-2xl duration-500 transition-shadow rounded-full" />
+          </div>
         </div>
         <div className="grid gap-16 max-w-lg">
           <AboutSection

@@ -12,7 +12,7 @@ export default function Photos() {
   let rotations = ["rotate-2", "-rotate-2", "rotate-2"];
 
   return (
-    <section className="flex w-full justify-center gap-5 overflow-hidden py-4 sm:gap-8">
+    <section className="flex w-full -my-4 justify-center gap-5 overflow-hidden py-4 sm:gap-8">
       {[image1, image2, image3, image4, image5, image6].map(
         (image, imageIndex) => (
           <div

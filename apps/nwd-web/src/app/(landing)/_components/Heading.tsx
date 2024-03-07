@@ -15,7 +15,7 @@ export default function Heading() {
               Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-6">
+          <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
             <Link
               href="/locaties"
               className="bg-white group text-branding-dark text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
