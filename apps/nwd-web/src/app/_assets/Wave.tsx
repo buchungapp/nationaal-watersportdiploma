@@ -28,7 +28,7 @@ export function Wave({
   );
 }
 
-export function Line({
+export function DoubleLine({
   className = "h-5 w-5 text-white",
 }: {
   className?: string;
@@ -60,5 +60,61 @@ export function Line({
         strokeLinecap="round"
       />
     </svg>
+  );
+}
+
+export function Line({
+  className = "h-5 w-5 text-white",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      width="100%"
+      height="3"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <line
+        x1="0"
+        y1="1.5"
+        x2="100%"
+        y2="1.5"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function LineWave({ progress }: { progress: string }) {
+  return (
+    <div className="text-branding-light/20 w-full relative group py-3 overflow-x-hidden">
+      <div
+        style={{
+          width: progress,
+        }}
+      >
+        <DoubleLine className="w-full" />
+      </div>
+      <div
+        className="absolute top-0"
+        style={{
+          left: progress,
+        }}
+      >
+        <Wave className="h-full" />
+      </div>
+      <div
+        className="absolute top-[12px] translate-x-[240px] right-0"
+        style={{
+          left: progress,
+        }}
+      >
+        <DoubleLine className="w-full" />
+      </div>
+    </div>
   );
 }

@@ -2,6 +2,7 @@ import { clsx } from "clsx";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Analytics from "~/app/_components/analytics";
+import Footer from "./_components/footer/Footer";
 import Header from "./_components/header/Header";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -24,6 +25,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           <div id="content">{children}</div>
+          <Footer />
         </Providers>
       </body>
     </html>

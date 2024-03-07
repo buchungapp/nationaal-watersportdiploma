@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { Line, Wave } from "~/app/_assets/Wave";
+import { DoubleLine, Wave } from "~/app/_assets/Wave";
 import useWindowDimensions from "~/app/_components/useWindowDimensions";
 
 export default function WaveAnimation({
@@ -42,7 +42,7 @@ export default function WaveAnimation({
           width: inverseProgress,
         }}
       >
-        <Line className="w-full" />
+        <DoubleLine className="w-full" />
       </motion.div>
       <motion.div
         className="absolute top-0"
@@ -58,7 +58,7 @@ export default function WaveAnimation({
           left: inverseProgress,
         }}
       >
-        <Line className="w-full" />
+        <DoubleLine className="w-full" />
       </motion.div>
     </div>
   );
