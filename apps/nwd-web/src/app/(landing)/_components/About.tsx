@@ -6,7 +6,7 @@ export default function About() {
   return (
     <section className="gap-12 flex flex-col px-4 lg:px-16">
       <div className="grid gap-4 text-center self-center max-w-screen-lg">
-        <h2 className="font-bold text-4xl">
+        <h2 className="font-bold  text-3xl sm:text-4xl">
           <Balancer>
             Dé nieuwe standaard in veiligheid, kwaliteit en plezier op het
             water.
@@ -22,9 +22,7 @@ export default function About() {
       </div>
       <div className="grid lg:grid-cols-2 gap-12 justify-center lg:gap-0 items-center">
         <div className="w-full justify-center flex">
-          <div className="p-4 group rounded-full">
-            <Logo className="max-w-[24rem] max-h-[24rem] w-full h-full text-white group-hover:shadow-2xl duration-500 transition-shadow rounded-full" />
-          </div>
+          <Logo className="max-w-[24rem] max-h-[24rem] w-full h-full text-white" />
         </div>
         <div className="grid gap-16 max-w-lg">
           <AboutSection
