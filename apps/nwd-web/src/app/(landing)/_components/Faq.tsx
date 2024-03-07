@@ -94,7 +94,7 @@ export default function Faq() {
             <h4 className="font-semibold text-branding-dark text-lg">
               {question}
             </h4>
-            <p>{answer}</p>
+            <p className="text-justify">{answer}</p>
           </div>
         ))}
       </div>
