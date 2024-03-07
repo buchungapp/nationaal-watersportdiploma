@@ -24,7 +24,7 @@ export default function AboutSection({
         ? "text-branding-dark"
         : "text-branding-orange";
   return (
-    <div className="grid gap-2">
+    <article className="grid gap-2">
       <div className={clsx("flex gap-3 items-center", colorClass)}>
         <span className="uppercase whitespace-nowrap font-bold">{label}</span>
         <Double />
@@ -46,6 +46,6 @@ export default function AboutSection({
           strokeWidth={2.5}
         />
       </Link>
-    </div>
+    </article>
   );
 }

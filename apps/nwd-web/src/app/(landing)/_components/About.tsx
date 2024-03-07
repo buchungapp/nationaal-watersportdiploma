@@ -22,7 +22,7 @@ export default function About() {
       </div>
       <div className="grid lg:grid-cols-2 gap-12 justify-center lg:gap-0 items-center">
         <div className="w-full justify-center flex">
-          <Logo className="max-w-[24rem] max-h-[24rem] w-full h-full text-white" />
+          <Logo className="max-w-[24rem] max-h-[24rem] w-full h-full text-white rounded-full shadow-[0px_10px_40px_0px_#0000000D]" />
         </div>
         <div className="grid gap-16 max-w-lg">
           <AboutSection

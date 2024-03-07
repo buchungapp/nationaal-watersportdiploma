@@ -6,7 +6,7 @@ import Double from "~/app/_assets/Double";
 export default function Faq() {
   return (
     <section className="grid gap-20 px-4 lg:px-16">
-      <div className="grid gap-10">
+      <article className="grid gap-10">
         <div className="grid gap-2">
           <div className={"flex gap-3 items-center text-branding-dark"}>
             <span className="uppercase whitespace-nowrap font-bold">
@@ -45,7 +45,7 @@ export default function Faq() {
             />
           </Link>
         </div>
-      </div>
+      </article>
       <div
         className="columns-1 lg:columns-3 space-y-10"
         style={{
@@ -94,7 +94,7 @@ export default function Faq() {
             <h4 className="font-semibold text-branding-dark text-lg">
               {question}
             </h4>
-            <p className="text-justify">{answer}</p>
+            <p className="text-justify text-slate-700">{answer}</p>
           </div>
         ))}
       </div>
