@@ -26,7 +26,7 @@ export default function AboutSection({
   return (
     <div className="grid gap-2">
       <div className={clsx("flex gap-3 items-center", colorClass)}>
-        <span className="uppercase font-bold">{label}</span>
+        <span className="uppercase whitespace-nowrap font-bold">{label}</span>
         <Double />
       </div>
       <h3 className="font-bold text-2xl">
