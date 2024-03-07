@@ -8,7 +8,7 @@ export default function Heading() {
       <div className="items-center grid gap-8 grid-cols-1 lg:grid-cols-2 px-4 lg:px-16">
         <div className="grid gap-10 justify-center lg:justify-start">
           <div className="text-white grid gap-6">
-            <h1 className="font-bold text-4xl lg:text-5xl max-w-lg">
+            <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">
               Welkom bij het Nationaal Watersportdiploma.
             </h1>
             <p className="text-xl">
@@ -49,7 +49,7 @@ export default function Heading() {
           allowFullScreen
         />
       </div>
-      <WaveAnimation begin={128} end={600} />
+      <WaveAnimation begin={-600} end={-100} />
     </section>
   );
 }

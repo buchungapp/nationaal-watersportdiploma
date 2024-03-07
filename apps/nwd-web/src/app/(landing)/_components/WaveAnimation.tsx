@@ -1,7 +1,9 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Line, Wave } from "~/app/_assets/Wave";
+import useWindowDimensions from "~/app/_components/useWindowDimensions";
 
 export default function WaveAnimation({
   begin,
@@ -10,21 +12,54 @@ export default function WaveAnimation({
   begin: number;
   end: number;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
-  const left = useTransform(scrollY, [begin, end], ["70%", "10%"]);
+  const [beginOffset, setBeginOffset] = useState(begin);
+  const [endOffset, setEndOffset] = useState(end);
+  const inverseProgress = useTransform(
+    scrollY,
+    [beginOffset, endOffset],
+    ["70%", "10%"],
+  );
+
+  const { width } = useWindowDimensions();
+
+  useEffect(() => {
+    if (!ref.current || typeof window === "undefined") return;
+
+    const { top } = ref.current.getBoundingClientRect();
+    setBeginOffset(begin + top + window.scrollY);
+    setEndOffset(end + top + window.scrollY);
+  }, [ref, begin, end, typeof window, width]);
 
   return (
-    <div className="text-white w-full relative group py-3 overflow-x-hidden">
-      <Line className="w-full" />
+    <div
+      className="text-white w-full relative group py-3 overflow-x-hidden"
+      ref={ref}
+    >
       <motion.div
-        className="absolute top-0 bg-branding-light"
         style={{
-          left,
+          width: inverseProgress,
+        }}
+      >
+        <Line className="w-full" />
+      </motion.div>
+      <motion.div
+        className="absolute top-0"
+        style={{
+          left: inverseProgress,
         }}
       >
         <Wave className="h-full" />
       </motion.div>
-      {/* duration-700 transition-transform translate-x-1/2 group-hover:translate-x-[calc(100vw-240px-240px)] */}
+      <motion.div
+        className="absolute top-[12px] translate-x-[240px] right-0"
+        style={{
+          left: inverseProgress,
+        }}
+      >
+        <Line className="w-full" />
+      </motion.div>
     </div>
   );
 }

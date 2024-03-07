@@ -3,6 +3,7 @@ import Faq from "./_components/Faq";
 import Heading from "./_components/Heading";
 import Locations from "./_components/Locations";
 import Photos from "./_components/Photos";
+import Seperator from "./_components/Seperator";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
         <About />
         <Locations />
         <Faq />
+        <Seperator />
       </div>
       <div className="min-h-screen"></div>
     </main>
