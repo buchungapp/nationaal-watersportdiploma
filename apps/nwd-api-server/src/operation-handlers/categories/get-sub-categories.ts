@@ -12,7 +12,7 @@ export function getSubCategories(
     const rows = await context.db
       .select()
       .from(schema.subCategories)
-      .where(eq(schema.subCategories.mainCategoryId, mainCategoryId));
+      .where(eq(schema.subCategories.mainCategoryId, mainCategoryId as any)); // TODO fixme
 
     return {
       status: 200,
