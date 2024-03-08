@@ -131,8 +131,8 @@ importers:
   generated/nwd-api:
     dependencies:
       '@types/node':
-        specifier: ^20.11.19
-        version: 20.11.19
+        specifier: ^20.11.25
+        version: 20.11.25
       goodrouter:
         specifier: ^2.1.3
         version: 2.1.3
@@ -144,8 +144,8 @@ importers:
         specifier: ^20.1.2
         version: 20.1.2
       typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
+        specifier: ^5.4.2
+        version: 5.4.2
 
   packages/nwd-db:
     dependencies:
@@ -586,7 +586,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.7.10
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@grpc/proto-loader@0.7.10:
@@ -1585,20 +1585,20 @@ packages:
   /@types/accepts@1.3.7:
     resolution: {integrity: sha512-Pay9fq2lM2wXPWbteBsRAGiWH2hig4ZE2asK+mm7kUzlxRTfL961rj89I6zV/E3PcIkDqyuBEcMxFT7rccugeQ==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/body-parser@1.19.5:
     resolution: {integrity: sha512-fB3Zu92ucau0iQ0JMCFQE7b/dv8Ot07NI3KaZIkIUNXq82k4eBAqUaneXfleGY9JWskeS9y+u0nXMyspcuQrCg==}
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/content-disposition@0.5.8:
@@ -1611,13 +1611,13 @@ packages:
       '@types/connect': 3.4.38
       '@types/express': 4.17.21
       '@types/keygrip': 1.0.6
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/express-serve-static-core@4.17.43:
     resolution: {integrity: sha512-oaYtiBirUOPQGSWNGPWnzyAFJ0BP3cwvN4oWZQY+zUBwpVIGsKUkpBpSztp74drYcjavs7SKFZ4DX1V2QeN8rg==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
       '@types/qs': 6.9.11
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -1652,7 +1652,7 @@ packages:
   /@types/ioredis@4.28.10:
     resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/json5@0.0.29:
@@ -1679,7 +1679,7 @@ packages:
       '@types/http-errors': 2.0.4
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/koa__router@12.0.3:
@@ -1699,7 +1699,7 @@ packages:
   /@types/mysql@2.15.22:
     resolution: {integrity: sha512-wK1pzsJVVAjYCSZWQoWHziQZbNggXFDUEIGf54g4ZM/ERuP86uGdWeKZWMYlqTPMZfHJJvLPyogXGvCOg87yLQ==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/node@20.11.19:
@@ -1711,7 +1711,6 @@ packages:
     resolution: {integrity: sha512-TBHyJxk2b7HceLVGFcpAUjsa5zIdsPWlR6XHfyGzd0SFu+/NFgQgMAl96MSDZgQDvJAvV6BKsFOrt6zIL09JDw==}
     dependencies:
       undici-types: 5.26.5
-    dev: true
 
   /@types/pg-pool@2.0.4:
     resolution: {integrity: sha512-qZAvkv1K3QbmHHFYSNRYPkRjOWRLBYrL4B9c+wG0GSVGBw0NtJwPcgx/DSddeDJvRGMHCEQ4VMEVfuJ/0gZ3XQ==}
@@ -1730,7 +1729,7 @@ packages:
   /@types/pg@8.6.1:
     resolution: {integrity: sha512-1Kc4oAGzAl7uqUStZCDvaLFqZrW9qWSjXOmBfdgyBP5La7Us6Mg4GBvRlSoaZMhQF/zSj1C8CtKMBkoiT8eL8w==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
       pg-protocol: 1.6.0
       pg-types: 2.2.0
     dev: false
@@ -1769,7 +1768,7 @@ packages:
     resolution: {integrity: sha512-x2EM6TJOybec7c52BX0ZspPodMsQUd5L6PRwOunVyVUhXiBSKf3AezDL8Dgvgt5o0UfKNfuA0eMLr2wLT4AiBA==}
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/serve-static@1.15.5:
@@ -1777,7 +1776,7 @@ packages:
     dependencies:
       '@types/http-errors': 2.0.4
       '@types/mime': 3.0.4
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
     dev: false
 
   /@types/shimmer@1.0.5:
@@ -3394,7 +3393,7 @@ packages:
   /goodrouter@2.1.3:
     resolution: {integrity: sha512-AUpuEyBPffNJU6B3PTjFG4I5tfbGMWVPN3hGuNYKr0dpNNGON4n+4Ik1ZhqTuUjPiKIrldhvnxwCPfSi1gIJ1g==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
       tslib: 2.6.2
 
   /gopd@1.0.1:
@@ -4228,7 +4227,7 @@ packages:
   /oa42-lib@0.8.16:
     resolution: {integrity: sha512-nzNonvVb6rMI015u/fnEH4zrKGlVbtic1zmQS5qQ8ML5SmSw97A0Rh9a+APjtOdlpBo6B6D4JMuOjedAHLnbAg==}
     dependencies:
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
       js-base64: 3.7.6
       tslib: 2.6.2
       type-fest: 4.10.2
@@ -4728,7 +4727,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 20.11.19
+      '@types/node': 20.11.25
       long: 5.2.3
     dev: false
 
@@ -5365,6 +5364,12 @@ packages:
 
   /typescript@5.3.3:
     resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: true
+
+  /typescript@5.4.2:
+    resolution: {integrity: sha512-+2/g0Fds1ERlP6JsakQQDXjZdZMM+rqpamFZJEKh4kwTIn3iDkgKtby0CeNd5ATNZ4Ry1ax15TMx0W2V+miizQ==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: true
