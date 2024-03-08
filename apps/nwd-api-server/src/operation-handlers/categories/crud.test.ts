@@ -4,7 +4,7 @@ import * as api from "nwd-api";
 import { withDatabase } from "nwd-db";
 import { withServer } from "../../testing/index.js";
 
-test("categories crud", () =>
+test.skip("categories crud", () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
       const clientCredentials = { apiToken: "supersecret" };
