@@ -28,19 +28,13 @@ jobs:
         node-version: [21.5.0]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
-    services:
-      postgres:
-        image: supabase/postgres:15.1.1.5
-        env:
-          POSTGRES_PASSWORD: postgres
-    env:
-      PGURI: "postgres://postgres:postgres@postgres:5432/postgres"
     steps:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
       - run: corepack enable
       - uses: actions/checkout@v4
+      - run: docker-compose up -d
       - run: make
       - run: pnpm --recursive test
 
