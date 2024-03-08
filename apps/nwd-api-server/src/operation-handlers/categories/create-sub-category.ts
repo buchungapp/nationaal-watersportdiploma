@@ -15,8 +15,8 @@ export function createSubCategory(
       };
     }
 
-    const { mainCategoryId } = incomingRequest.parameters;
-    const entity = await incomingRequest.entity();
+    const { mainCategoryId } = incomingRequest.parameters as any; // FIXME
+    const entity = (await incomingRequest.entity()) as any; // FIXME
 
     const rows = await context.db
       .insert(schema.subCategories)

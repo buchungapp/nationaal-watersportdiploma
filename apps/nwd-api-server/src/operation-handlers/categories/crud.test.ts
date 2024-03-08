@@ -26,7 +26,7 @@ test("categories crud", () =>
 
         assert(operationResult.status === 201);
 
-        const entity = await operationResult.entity();
+        const entity = (await operationResult.entity()) as any;
         mainCategoryId = entity.id;
 
         assert.deepEqual(entity, {

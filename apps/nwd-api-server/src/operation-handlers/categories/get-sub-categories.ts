@@ -7,13 +7,12 @@ export function getSubCategories(
   context: application.Context,
 ): api.GetSubCategoriesOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
-    const { mainCategoryId } = incomingRequest.parameters;
+    const { mainCategoryId } = incomingRequest.parameters as any; // FIXME
 
     const rows = await context.db
       .select()
       .from(schema.subCategories)
-      .where(eq(schema.subCategories.mainCategoryId, mainCategoryId as any)); // TODO fixme
-
+      .where(eq(schema.subCategories.mainCategoryId, mainCategoryId));
     return {
       status: 200,
       parameters: {},
