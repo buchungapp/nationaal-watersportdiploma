@@ -15,18 +15,15 @@ export default function News() {
         <div className="flex flex-col gap-2 w-full">
           <div className={"flex gap-3 items-center text-branding-orange"}>
             <Double />
-            <span className="uppercase whitespace-nowrap font-bold">
-              Nieuws
-            </span>
+            <span className="uppercase whitespace-nowrap font-bold">Nieuws</span>
             <Double />
           </div>
           <h2 className="font-bold text-2xl text-center">
             <Balancer>De laatste ontwikkelingen.</Balancer>
           </h2>
           <p className="text-center max-w-lg self-center">
-            We doen super leuke dingen bij het NWD, dus we houden je via deze
-            mega leuk blog op de hoogte van alle verhaaltjes en ditjes en datjes
-            die er zijn! Super leuk zeker lezen.
+            We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de
+            hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
           </p>
         </div>
         <Link
@@ -56,8 +53,8 @@ export default function News() {
                 <Balancer>Aankondiging Nationaal Watersportdiploma.</Balancer>
               </h3>
               <p className="text-slate-700">
-                A simple rule to calculate line height is 1.5x font size.
-                However, this is not cast in stone and you are free to titrate.
+                A simple rule to calculate line height is 1.5x font size. However, this is not cast
+                in stone and you are free to titrate.
               </p>
             </div>
           </article>
@@ -74,13 +71,11 @@ export default function News() {
             <div className="py-4 grid gap-2">
               <span className="text-branding-dark text-sm">9 maart 2024</span>
               <h3 className="font-bold text-xl">
-                <Balancer>
-                  Werk aan de diplomalijnen nagenoeg afgerond.
-                </Balancer>
+                <Balancer>Werk aan de diplomalijnen nagenoeg afgerond.</Balancer>
               </h3>
               <p className="text-slate-700">
-                A simple rule to calculate line height is 1.5x font size.
-                However, this is not cast in stone and you are free to titrate.
+                A simple rule to calculate line height is 1.5x font size. However, this is not cast
+                in stone and you are free to titrate.
               </p>
             </div>
           </article>
@@ -100,8 +95,8 @@ export default function News() {
                 <Balancer>Zwemvesten, niet hip maar wel noodzakelijk!</Balancer>
               </h3>
               <p className="text-slate-700">
-                A simple rule to calculate line height is 1.5x font size.
-                However, this is not cast in stone and you are free to titrate.
+                A simple rule to calculate line height is 1.5x font size. However, this is not cast
+                in stone and you are free to titrate.
               </p>
             </div>
           </article>

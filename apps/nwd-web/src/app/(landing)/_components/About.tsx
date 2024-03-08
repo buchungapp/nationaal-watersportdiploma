@@ -7,16 +7,13 @@ export default function About() {
     <section className="gap-12 flex flex-col px-4 lg:px-16">
       <div className="grid gap-4 text-center self-center max-w-screen-lg">
         <h2 className="font-bold  text-3xl sm:text-4xl">
-          <Balancer>
-            Dé nieuwe standaard in veiligheid, kwaliteit en plezier op het
-            water.
-          </Balancer>
+          <Balancer>Dé nieuwe standaard in veiligheid, kwaliteit en plezier op het water.</Balancer>
         </h2>
         <p className="text-lg">
           <Balancer>
-            Nu is het moment is om de lat hoger te leggen als het aankomt op
-            kwaliteitseisen en diplomalijnen binnen de Nederlandse watersport.
-            Het resultaat is het Nationaal Watersportdiploma (NWD).
+            Nu is het moment is om de lat hoger te leggen als het aankomt op kwaliteitseisen en
+            diplomalijnen binnen de Nederlandse watersport. Het resultaat is het Nationaal
+            Watersportdiploma (NWD).
           </Balancer>
         </p>
       </div>

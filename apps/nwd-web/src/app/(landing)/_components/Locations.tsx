@@ -12,20 +12,17 @@ export default function Locations() {
       <article className="grid gap-10 px-4 py-12 lg:p-16 text-white">
         <div className="grid gap-2">
           <div className={"flex gap-3 items-center"}>
-            <span className="uppercase whitespace-nowrap font-bold">
-              Locaties
-            </span>
+            <span className="uppercase whitespace-nowrap font-bold">Locaties</span>
             <Double />
           </div>
           <h2 className="font-bold text-2xl">
             <Balancer>Vind jouw NWD-vaarlocatie.</Balancer>
           </h2>
           <p>
-            NWD-locaties voldoen aan strenge kwaliteitseisen op gebied van
-            persoonlijke- en sociale veiligheid. Verder hebben zij zich
-            gecommitteerd aan de visie van het NWD: veiligheid, kwaliteit en
-            plezier op het water. Daarom zijn zij gelicenseerd om het
-            NWD-diploma uit te geven.
+            NWD-locaties voldoen aan strenge kwaliteitseisen op gebied van persoonlijke- en sociale
+            veiligheid. Verder hebben zij zich gecommitteerd aan de visie van het NWD: veiligheid,
+            kwaliteit en plezier op het water. Daarom zijn zij gelicenseerd om het NWD-diploma uit
+            te geven.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">

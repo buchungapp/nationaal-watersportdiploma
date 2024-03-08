@@ -13,9 +13,7 @@ export default function Footer() {
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-2">
         <div className="grid gap-6">
           <Hero className="w-48 h-12 text-white" />
-          <p className="text-slate-200 text-sm">
-            Veiligheid, kwaliteit en plezier op het water.
-          </p>
+          <p className="text-slate-200 text-sm">Veiligheid, kwaliteit en plezier op het water.</p>
         </div>
         <div className="grid gap-12 lg:gap-0 items-start grid-cols-1 lg:grid-cols-3 text-sm">
           <div className="grid gap-6">
@@ -75,9 +73,7 @@ export default function Footer() {
 
       <div className="flex justify-between flex-col gap-4 lg:flex-row lg:items-center">
         <div className="grid gap-2 text-sm">
-          <p className="text-white font-semibold">
-            Schrijf je in voor de NWD-nieuwsbrief
-          </p>
+          <p className="text-white font-semibold">Schrijf je in voor de NWD-nieuwsbrief</p>
           <p className="text-slate-200">
             Ontvang nieuws, updates en leuk beeldmateriaal in je inbox.
           </p>

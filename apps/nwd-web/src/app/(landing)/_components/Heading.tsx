@@ -11,9 +11,7 @@ export default function Heading() {
             <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">
               Welkom bij het Nationaal Watersportdiploma.
             </h1>
-            <p className="text-xl">
-              Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?
-            </p>
+            <p className="text-xl">Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
             <Link

@@ -33,13 +33,7 @@ export default function AboutSection({
         <Balancer>{title}</Balancer>
       </h3>
       <p>{description}</p>
-      <Link
-        href={href}
-        className={clsx(
-          "flex gap-1 items-center font-semibold group",
-          colorClass,
-        )}
-      >
+      <Link href={href} className={clsx("flex gap-1 items-center font-semibold group", colorClass)}>
         Lees meer{" "}
         <ArrowRightIcon
           className="w-4 h-4 group-hover:translate-x-1 transition-transform"

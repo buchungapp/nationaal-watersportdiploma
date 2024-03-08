@@ -5,22 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { DoubleLine, Wave } from "~/app/_assets/Wave";
 import useWindowDimensions from "~/app/_components/useWindowDimensions";
 
-export default function WaveAnimation({
-  begin,
-  end,
-}: {
-  begin: number;
-  end: number;
-}) {
+export default function WaveAnimation({ begin, end }: { begin: number; end: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const [beginOffset, setBeginOffset] = useState(begin);
   const [endOffset, setEndOffset] = useState(end);
-  const inverseProgress = useTransform(
-    scrollY,
-    [beginOffset, endOffset],
-    ["70%", "10%"],
-  );
+  const inverseProgress = useTransform(scrollY, [beginOffset, endOffset], ["70%", "10%"]);
 
   const { width } = useWindowDimensions();
 
@@ -33,10 +23,7 @@ export default function WaveAnimation({
   }, [ref, begin, end, typeof window, width]);
 
   return (
-    <div
-      className="text-white w-full relative group py-3 overflow-x-hidden"
-      ref={ref}
-    >
+    <div className="text-white w-full relative group py-3 overflow-x-hidden" ref={ref}>
       <motion.div
         style={{
           width: inverseProgress,

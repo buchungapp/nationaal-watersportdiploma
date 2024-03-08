@@ -9,18 +9,15 @@ export default function Faq() {
       <article className="grid gap-10">
         <div className="grid gap-2">
           <div className={"flex gap-3 items-center text-branding-dark"}>
-            <span className="uppercase whitespace-nowrap font-bold">
-              Hoe zit het
-            </span>
+            <span className="uppercase whitespace-nowrap font-bold">Hoe zit het</span>
             <Double />
           </div>
           <h2 className="font-bold text-2xl">
             <Balancer>Veelgestelde vragen.</Balancer>
           </h2>
           <p>
-            Het NWD is nieuw, dus het is niet gek dat dit wat vragen bij je
-            oproept. Daarom zetten wij alvast een aantal van de meestgestelde
-            vragen voor je op een rijtje.
+            Het NWD is nieuw, dus het is niet gek dat dit wat vragen bij je oproept. Daarom zetten
+            wij alvast een aantal van de meestgestelde vragen voor je op een rijtje.
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
@@ -91,9 +88,7 @@ export default function Faq() {
           },
         ].map(({ question, answer }) => (
           <div key={question} className="break-inside-avoid-column grid gap-4">
-            <h4 className="font-semibold text-branding-dark text-lg">
-              {question}
-            </h4>
+            <h4 className="font-semibold text-branding-dark text-lg">{question}</h4>
             <p className="text-justify text-slate-700">{answer}</p>
           </div>
         ))}

@@ -15,18 +15,14 @@ export default function MoreNav({ items }: { items: NavItem[] }) {
       {({ open }) => (
         <>
           <Menu.Button
-            className={
-              "relative z-10 flex flex-nowrap items-center gap-1 py-0.5 uppercase group"
-            }
+            className={"relative z-10 flex flex-nowrap items-center gap-1 py-0.5 uppercase group"}
           >
             <span>Overig</span>
             {/* <ChevronDownIcon className="h-6 w-6" aria-hidden="true" /> */}{" "}
             <Double
               className={clsx(
                 "w-full bottom-0 translate-y-full absolute transition-colors",
-                open
-                  ? "text-branding-dark"
-                  : "group-hover:text-branding-dark text-transparent",
+                open ? "text-branding-dark" : "group-hover:text-branding-dark text-transparent",
               )}
             />
           </Menu.Button>
