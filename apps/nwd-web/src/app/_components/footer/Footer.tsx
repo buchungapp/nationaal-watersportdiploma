@@ -10,7 +10,7 @@ import Youtube from "~/app/_assets/social/Youtube";
 export default function Footer() {
   return (
     <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 lg:px-16 pt-20 pb-12">
-      <div className="grid items-start grid-cols-1 lg:grid-cols-2">
+      <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-2">
         <div className="grid gap-6">
           <Hero className="w-48 h-12 text-white" />
           <p className="text-slate-200 text-sm">

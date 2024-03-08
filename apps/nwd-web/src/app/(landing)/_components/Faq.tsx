@@ -47,7 +47,7 @@ export default function Faq() {
         </div>
       </article>
       <div
-        className="columns-1 lg:columns-3 space-y-10"
+        className="columns-1 lg:columns-3 space-y-12 xl:space-y-12 gap-12 xl:gap-24"
         style={{
           columnFill: "balance",
         }}

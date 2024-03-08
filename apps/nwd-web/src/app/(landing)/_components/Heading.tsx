@@ -4,7 +4,7 @@ import WaveAnimation from "./WaveAnimation";
 
 export default function Heading() {
   return (
-    <section className=" w-full py-12 bg-branding-light rounded-b-[3rem] grid gap-12">
+    <section className="w-full py-12 bg-branding-light rounded-b-[3rem] grid gap-12">
       <div className="items-center grid gap-8 grid-cols-1 lg:grid-cols-2 px-4 lg:px-16">
         <div className="grid gap-10 justify-center lg:justify-start">
           <div className="text-white grid gap-6">
@@ -38,18 +38,21 @@ export default function Heading() {
             </Link>
           </div>
         </div>
-        <iframe
-          width="100%"
-          height="100%"
-          src={`https://www.youtube.com/embed/IWuNoqaOv4M?autoplay=1&mute=1&playsinline=1`}
-          title="YouTube video player"
-          frameBorder="0"
-          className="aspect-[4/3] w-full rounded-3xl"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="aspect-[4/3] w-full rounded-3xl overflow-hidden">
+          <iframe
+            width="100%"
+            height="100%"
+            src={`https://www.youtube.com/embed/IWuNoqaOv4M?autoplay=1&mute=1&playsinline=1`}
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
       </div>
-      <WaveAnimation begin={-600} end={-100} />
+      <div className="w-full">
+        <WaveAnimation begin={-600} end={-100} />
+      </div>
     </section>
   );
 }

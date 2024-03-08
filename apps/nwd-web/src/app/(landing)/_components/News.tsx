@@ -41,63 +41,71 @@ export default function News() {
         </Link>
       </article>
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-3">
-        <article className="grid">
-          <Image
-            src={aankondiging}
-            alt="Aankondiging Nationaal Watersportdiploma."
-            width={aankondiging.width}
-            height={aankondiging.height}
-            className="rounded-2xl aspect-video object-cover"
-          />
-          <div className="py-4 grid gap-2">
-            <span className="text-branding-dark text-sm">11 maart 2024</span>
-            <h3 className="font-bold text-xl">
-              <Balancer>Aankondiging Nationaal Watersportdiploma.</Balancer>
-            </h3>
-            <p className="text-slate-700">
-              A simple rule to calculate line height is 1.5x font size. However,
-              this is not cast in stone and you are free to titrate.
-            </p>
-          </div>
-        </article>
-        <article className="grid">
-          <Image
-            src={diplomalijn}
-            alt="Werk aan de diplomalijnen nagenoeg afgerond."
-            width={diplomalijn.width}
-            height={diplomalijn.height}
-            className="rounded-2xl aspect-video object-cover"
-          />
-          <div className="py-4 grid gap-2">
-            <span className="text-branding-dark text-sm">9 maart 2024</span>
-            <h3 className="font-bold text-xl">
-              <Balancer>Werk aan de diplomalijnen nagenoeg afgerond.</Balancer>
-            </h3>
-            <p className="text-slate-700">
-              A simple rule to calculate line height is 1.5x font size. However,
-              this is not cast in stone and you are free to titrate.
-            </p>
-          </div>
-        </article>
-        <article className="grid">
-          <Image
-            src={zwemvest}
-            alt="Zwemvesten, niet hip maar wel noodzakelijk!"
-            width={zwemvest.width}
-            height={zwemvest.height}
-            className="rounded-2xl aspect-video object-cover"
-          />
-          <div className="py-4 grid gap-2">
-            <span className="text-branding-dark text-sm">8 maart 2024</span>
-            <h3 className="font-bold text-xl">
-              <Balancer>Zwemvesten, niet hip maar wel noodzakelijk!</Balancer>
-            </h3>
-            <p className="text-slate-700">
-              A simple rule to calculate line height is 1.5x font size. However,
-              this is not cast in stone and you are free to titrate.
-            </p>
-          </div>
-        </article>
+        <Link href="/nieuws/1">
+          <article className="grid">
+            <Image
+              src={aankondiging}
+              alt="Aankondiging Nationaal Watersportdiploma."
+              width={aankondiging.width}
+              height={aankondiging.height}
+              className="rounded-2xl aspect-video object-cover"
+            />
+            <div className="py-4 grid gap-2">
+              <span className="text-branding-dark text-sm">11 maart 2024</span>
+              <h3 className="font-bold text-xl">
+                <Balancer>Aankondiging Nationaal Watersportdiploma.</Balancer>
+              </h3>
+              <p className="text-slate-700">
+                A simple rule to calculate line height is 1.5x font size.
+                However, this is not cast in stone and you are free to titrate.
+              </p>
+            </div>
+          </article>
+        </Link>
+        <Link href="/nieuws/2">
+          <article className="grid">
+            <Image
+              src={diplomalijn}
+              alt="Werk aan de diplomalijnen nagenoeg afgerond."
+              width={diplomalijn.width}
+              height={diplomalijn.height}
+              className="rounded-2xl aspect-video object-cover"
+            />
+            <div className="py-4 grid gap-2">
+              <span className="text-branding-dark text-sm">9 maart 2024</span>
+              <h3 className="font-bold text-xl">
+                <Balancer>
+                  Werk aan de diplomalijnen nagenoeg afgerond.
+                </Balancer>
+              </h3>
+              <p className="text-slate-700">
+                A simple rule to calculate line height is 1.5x font size.
+                However, this is not cast in stone and you are free to titrate.
+              </p>
+            </div>
+          </article>
+        </Link>
+        <Link href="/nieuws/3">
+          <article className="grid">
+            <Image
+              src={zwemvest}
+              alt="Zwemvesten, niet hip maar wel noodzakelijk!"
+              width={zwemvest.width}
+              height={zwemvest.height}
+              className="rounded-2xl aspect-video object-cover"
+            />
+            <div className="py-4 grid gap-2">
+              <span className="text-branding-dark text-sm">8 maart 2024</span>
+              <h3 className="font-bold text-xl">
+                <Balancer>Zwemvesten, niet hip maar wel noodzakelijk!</Balancer>
+              </h3>
+              <p className="text-slate-700">
+                A simple rule to calculate line height is 1.5x font size.
+                However, this is not cast in stone and you are free to titrate.
+              </p>
+            </div>
+          </article>
+        </Link>
       </div>
     </section>
   );
