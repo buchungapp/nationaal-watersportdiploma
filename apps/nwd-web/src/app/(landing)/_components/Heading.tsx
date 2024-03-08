@@ -1,5 +1,4 @@
-import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
+import { BoxedButton } from "~/app/_components/style/Buttons";
 import WaveAnimation from "./WaveAnimation";
 
 export default function Heading() {
@@ -14,26 +13,12 @@ export default function Heading() {
             <p className="text-xl">Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
-            <Link
-              href="/locaties"
-              className="bg-white group text-branding-dark text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-            >
-              Vindt een NWD locatie{" "}
-              <ArrowLongRightIcon
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                strokeWidth={2.5}
-              />
-            </Link>
-            <Link
-              href="/over"
-              className="bg-branding-light group text-white text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-            >
-              Waarom het NWD{" "}
-              <ArrowLongRightIcon
-                className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-                strokeWidth={2.5}
-              />
-            </Link>
+            <BoxedButton href="/locaties" className="bg-white text-branding-dark">
+              Vindt een NWD locatie
+            </BoxedButton>
+            <BoxedButton href="/over" className="bg-branding-light text-white">
+              Waarom het NWD
+            </BoxedButton>
           </div>
         </div>
         <div className="aspect-[4/3] w-full rounded-3xl overflow-hidden">

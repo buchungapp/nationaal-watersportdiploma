@@ -1,9 +1,9 @@
-import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import Double from "~/app/_assets/Double";
 
+import { BoxedButton } from "~/app/_components/style/Buttons";
 import aankondiging from "./_assets/aankondiging.jpg";
 import diplomalijn from "./_assets/diplomalijn.jpg";
 import zwemvest from "./_assets/zwemvest.png";
@@ -26,16 +26,9 @@ export default function News() {
             hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
           </p>
         </div>
-        <Link
-          href="/nieuws"
-          className="text-white bg-branding-orange group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-        >
-          Meer nieuws{" "}
-          <ArrowLongRightIcon
-            className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-            strokeWidth={2.5}
-          />
-        </Link>
+        <BoxedButton href="/nieuws" className="bg-branding-orange text-white">
+          Meer nieuws
+        </BoxedButton>
       </article>
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-3">
         <Link href="/nieuws/1">

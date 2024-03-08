@@ -1,9 +1,8 @@
-import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import Double from "~/app/_assets/Double";
 
+import { BoxedButton } from "~/app/_components/style/Buttons";
 import locations from "./_assets/locations.png";
 
 export default function Locations() {
@@ -26,26 +25,12 @@ export default function Locations() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
-          <Link
-            href="/locaties"
-            className="bg-white text-slate-900 group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-          >
-            Bekijk NWD locaties{" "}
-            <ArrowLongRightIcon
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              strokeWidth={2.5}
-            />
-          </Link>
-          <Link
-            href="/kwaliteitseisen-locaties"
-            className="group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-          >
-            Kwaliteitseisen voor locaties{" "}
-            <ArrowLongRightIcon
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              strokeWidth={2.5}
-            />
-          </Link>
+          <BoxedButton href="/locaties" className="bg-white text-slate-900">
+            Bekijk NWD locaties
+          </BoxedButton>
+          <BoxedButton href="/kwaliteitseisen-locaties" className="bg-branding-orange text-white">
+            Kwaliteitseisen voor locaties
+          </BoxedButton>
         </div>
       </article>
       <Image

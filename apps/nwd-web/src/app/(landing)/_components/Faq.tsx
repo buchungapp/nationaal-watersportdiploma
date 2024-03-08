@@ -1,7 +1,6 @@
-import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import Double from "~/app/_assets/Double";
+import { BoxedButton } from "~/app/_components/style/Buttons";
 
 export default function Faq() {
   return (
@@ -21,26 +20,12 @@ export default function Faq() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
-          <Link
-            href="/faq"
-            className="text-white bg-branding-dark group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-          >
-            Bekijk alle vragen{" "}
-            <ArrowLongRightIcon
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              strokeWidth={2.5}
-            />
-          </Link>
-          <Link
-            href="/faq#instructeurs-en-vaarlocaties"
-            className="group text-branding-dark text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-          >
-            Voor instructeurs en vaarlocaties{" "}
-            <ArrowLongRightIcon
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              strokeWidth={2.5}
-            />
-          </Link>
+          <BoxedButton href="/faq" className="bg-branding-dark text-white">
+            Bekijk alle vragen
+          </BoxedButton>
+          <BoxedButton href="/faq#instructeurs-en-vaarlocaties" className="text-branding-dark">
+            Voor instructeurs en vaarlocaties
+          </BoxedButton>
         </div>
       </article>
       <div
