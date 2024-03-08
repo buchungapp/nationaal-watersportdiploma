@@ -1,5 +1,7 @@
 # Nationaal-Watersportdiploma
 
+\o/
+
 ## Setting up
 
 Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed and it will run `pnpm --recursive build` for you to build everything.
