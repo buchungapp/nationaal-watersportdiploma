@@ -12,12 +12,15 @@ export interface DatabaseContext {
 }
 
 export async function withDatabase<T>(job: (context: DatabaseContext) => Promise<T>) {
+  // run only if configured
+  if (process.env.PGURI == null) {
+    return;
+  }
+
   // a (semi) random database name
   const databaseName = `db_${new Date().valueOf()}`;
 
-  const pgUriSuper = new URL(
-    process.env.PGURI || "postgres://postgres:postgres@localhost:5432/postgres",
-  );
+  const pgUriSuper = new URL(process.env.PGURI);
   const pgUri = new URL(databaseName, pgUriSuper);
 
   // create a pool that will be used to create and destroy a database
