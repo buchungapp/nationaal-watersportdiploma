@@ -23,8 +23,8 @@
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
-    "clean": "rm -rf out ; tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js"
+    "clean": "rm -rf out && tsc --build --clean",
+    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js"
   },
   "repository": {
     "type": "git",

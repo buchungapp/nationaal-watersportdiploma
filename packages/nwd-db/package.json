@@ -23,8 +23,8 @@
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
-    "clean": "rm -rf out ; tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js",
+    "clean": "rm -rf out && tsc --build --clean",
+    "test": "node --test ./out/*.test.js ./out/*/*.test.js ./out/*/*/*.test.js",
     "generate-migration": "drizzle-kit generate:pg",
     "execute-migration": "node ./out/program.js migrate"
   },
