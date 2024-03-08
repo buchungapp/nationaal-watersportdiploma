@@ -34,7 +34,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: corepack enable
       - uses: actions/checkout@v4
-      - uses: isbang/compose-action@v1.5.1
       - run: make
       - run: pnpm --recursive test
 
