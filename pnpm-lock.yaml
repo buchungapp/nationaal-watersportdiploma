@@ -15,8 +15,8 @@ importers:
         specifier: ^8.6.0
         version: 8.6.0
       oa42-generator:
-        specifier: ^0.9.1
-        version: 0.9.1
+        specifier: ^0.9.2
+        version: 0.9.2
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -644,44 +644,44 @@ packages:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: /wrap-ansi@7.0.0
 
-  /@jns42/oas-v3-0@0.13.7:
-    resolution: {integrity: sha512-5W9tXlCwKoeaoPYE1pBtpoAYPQGY27R2UJ9TmVp84CUPjnlJ5nYbQnz03fY+F2QoIg7vPMXg9LjnLjYfN5uK8A==}
+  /@jns42/oas-v3-0@0.14.1:
+    resolution: {integrity: sha512-oVaaFUeefJGW2o34PxmKwprpz1Wbo4rodq/aABq2keZv5MrKvZsfKWPPWEAz2DKVGLNGBLEF72IR4+V8Vpf81Q==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
 
-  /@jns42/oas-v3-1@0.13.7:
-    resolution: {integrity: sha512-mN1uLWDchlOfMT4j6j6kPSPg3TPLde3PFQ10rTBXTsR2dRCgjgieXaDlwSSI0QSE0MDxhfAF4oz80gzC+wABgQ==}
+  /@jns42/oas-v3-1@0.14.1:
+    resolution: {integrity: sha512-p7rmMxBnP2TwfU+ETSIFJ59SPv5HdTn/3WeY7MolCamJYramKExpMAV//HtwuT5Tj72eJLXSruapyy2OIEiwQA==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
 
-  /@jns42/schema-draft-04@0.13.7:
-    resolution: {integrity: sha512-BrDhJtN1yzQHwh1TaNRzQLMjSC4Sx1E5SwotLD/7ZunViHyJrhvc1oMuq6S5zow1AkwCvTIx7NNvowBeI5QlVQ==}
+  /@jns42/schema-draft-04@0.14.1:
+    resolution: {integrity: sha512-Ln8vd1hhZ/8O/qC10m46DkDRvRE7XeUfkiLX84jIYKDfWRY9m0n9e0cJHZn2nsPUIRRd9RMtwVs915lXdU9k0g==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
 
-  /@jns42/schema-draft-2020-12@0.13.7:
-    resolution: {integrity: sha512-ZFCIomZoAw/VRXrgdUMz1yHbWWxG2QzqOMxWkeWDrC7R9nCYTxYJdN5Ke1KNnoeU/jd4N31CLgODRocLOB/Imw==}
+  /@jns42/schema-draft-2020-12@0.14.1:
+    resolution: {integrity: sha512-scdyOuEjgPnY/XU12f02dWvDktnO5CYlJ63wUBZnYc1fFHrX/EimT8XC0LRRYj+OSO3lSEFO/Ps7wFF9q8Ltow==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
 
-  /@jns42/schema-intermediate@0.13.7:
-    resolution: {integrity: sha512-0+KoPYCgXyJP9aDEaiYlgkI/gL+oFbzgLc/vjasfXn4G9ynJKjQ3lWAHikVz11xNaey+Sw7XJC6/4ou4/lbB+Q==}
+  /@jns42/schema-intermediate@0.14.1:
+    resolution: {integrity: sha512-K5NZ8ELKiuo1rUvoJpDVP/sknNNsSWBWc+2oQOP1cDqarrNaze1lwTENGwbBYdDjvZcV4fhfQ12TeQRSGDJhCw==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
 
-  /@jns42/schema-oas-v3-1@0.13.7:
-    resolution: {integrity: sha512-gnLYj52j7daI/p69jzKO9t8eJhzqY3r6hZxXJegFbbkCOXaDS83jAkou2lY25UcitmFCplOOe8Mh4ovhCk1Y1w==}
+  /@jns42/schema-oas-v3-1@0.14.1:
+    resolution: {integrity: sha512-dNG3iLNmlRbDDESCG0s8gdriUvQ1QLZMkukEVF8N7NKx49fbpTVGAyefWsjTZXRXufn2UldXCnhWWc8JkzQPig==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
 
-  /@jns42/swagger-v2@0.13.7:
-    resolution: {integrity: sha512-iq8/lKqkZipUwqpPpQntHTUmFsNGYJM9gLpP32gv2PuP86sgB8c2LL8b1aDXi6alRhEFr5oUmhRg9ESk6D51Bw==}
+  /@jns42/swagger-v2@0.14.1:
+    resolution: {integrity: sha512-ChCEv8yyXO7tLwY/hImPV9gMJEmGFULuXmvjgSuR5QJlLToy2GHHQXhp4rKwxscj7K5WvB5HaHF/poWwaMPvhA==}
     dependencies:
       '@types/node': 20.11.25
     dev: true
@@ -1652,7 +1652,7 @@ packages:
   /@types/ioredis@4.28.10:
     resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
     dependencies:
-      '@types/node': 20.11.25
+      '@types/node': 20.11.19
     dev: false
 
   /@types/json5@0.0.29:
@@ -3395,6 +3395,14 @@ packages:
     dependencies:
       '@types/node': 20.11.25
       tslib: 2.6.2
+    dev: false
+
+  /goodrouter@2.1.4:
+    resolution: {integrity: sha512-dALprlSQkwdRPmbkQZT5PVma3s/h41lOalGITdjOXBymEA2lZWfwF9OCY04kBcAYvRdO8hSJ0mXq5NG6sW9C6g==}
+    dependencies:
+      '@types/node': 20.11.25
+      tslib: 2.6.2
+    dev: true
 
   /gopd@1.0.1:
     resolution: {integrity: sha512-d65bNlIadxvpb/A2abVdlqKqV563juRnZ1Wtk6s1sIR8uNsXR70xqIzVqxVf1eTqDunwT2MkczEeaezCKTZhwA==}
@@ -3798,17 +3806,17 @@ packages:
     hasBin: true
     dev: true
 
-  /jns42-generator@0.14.0:
-    resolution: {integrity: sha512-kc8ktM7AoteaDdce+UFiwcb8EH6HYgfIXOxy7emLoFnxNY+k2fRUshP4NoAfDMxlVvSIP3cjESXHnFviO7MBUA==}
+  /jns42-generator@0.14.2:
+    resolution: {integrity: sha512-5WuWylEG1SA34UIu7dcxFiCLTdP7nrkc3mLCMMDDSgnnrgv1bHjFLn+ElRDID6an4rwS/3xjPPRzOJwLscxjrQ==}
     hasBin: true
     dependencies:
-      '@jns42/oas-v3-0': 0.13.7
-      '@jns42/oas-v3-1': 0.13.7
-      '@jns42/schema-draft-04': 0.13.7
-      '@jns42/schema-draft-2020-12': 0.13.7
-      '@jns42/schema-intermediate': 0.13.7
-      '@jns42/schema-oas-v3-1': 0.13.7
-      '@jns42/swagger-v2': 0.13.7
+      '@jns42/oas-v3-0': 0.14.1
+      '@jns42/oas-v3-1': 0.14.1
+      '@jns42/schema-draft-04': 0.14.1
+      '@jns42/schema-draft-2020-12': 0.14.1
+      '@jns42/schema-intermediate': 0.14.1
+      '@jns42/schema-oas-v3-1': 0.14.1
+      '@jns42/swagger-v2': 0.14.1
       '@types/node': 20.11.25
       '@types/yargs': 17.0.32
       camelcase: 8.0.0
@@ -4205,18 +4213,18 @@ packages:
       - supports-color
     dev: false
 
-  /oa42-generator@0.9.1:
-    resolution: {integrity: sha512-VQgtsxtKWqgmEjiR/aDS9nukU4gL+5CtBmNhhkFmzw/wuA77fwOYHXuk/d4n4sV6qFdWCNK62w5/EkIZqtqXOA==}
+  /oa42-generator@0.9.2:
+    resolution: {integrity: sha512-SjMrXKVAhogT/vRNWF94hM21Rrt0gLAccSrI3pfjIzcKnnLEW/G+u1fQ4O06k2n1Bgx7pgUcQKWxxyKGVDlwnA==}
     hasBin: true
     dependencies:
-      '@jns42/oas-v3-0': 0.13.7
-      '@jns42/oas-v3-1': 0.13.7
-      '@jns42/swagger-v2': 0.13.7
+      '@jns42/oas-v3-0': 0.14.1
+      '@jns42/oas-v3-1': 0.14.1
+      '@jns42/swagger-v2': 0.14.1
       '@types/node': 20.11.25
       '@types/yargs': 17.0.32
       camelcase: 8.0.0
-      goodrouter: 2.1.3
-      jns42-generator: 0.14.0
+      goodrouter: 2.1.4
+      jns42-generator: 0.14.2
       oa42-lib: 0.8.16
       tslib: 2.6.2
       type-fest: 4.11.1
