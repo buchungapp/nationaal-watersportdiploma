@@ -37,6 +37,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: make
       - run: pnpm --recursive run build
+      - run: cat generated/nwd-api/out-commonjs/package.json
       - run: pnpm --recursive test
 
   audit:
