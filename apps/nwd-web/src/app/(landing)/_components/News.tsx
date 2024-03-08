@@ -11,18 +11,14 @@ import zwemvest from "./_assets/zwemvest.png";
 export default function News() {
   return (
     <section className="grid gap-20 px-4 lg:px-16">
-      <Article>
-        <Article.Heading className="text-branding-orange" justify="center">
-          nieuws
-        </Article.Heading>
-        <Article.Title as="h2" justify="center">
-          De laatste ontwikkelingen.
-        </Article.Title>
-        <Article.Paragraph justify="center" className="max-w-lg">
+      <Article justify="center">
+        <Article.Heading className="text-branding-orange">nieuws</Article.Heading>
+        <Article.Title as="h2">De laatste ontwikkelingen.</Article.Title>
+        <Article.Paragraph className="max-w-lg">
           We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de
           hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
         </Article.Paragraph>
-        <Article.ButtonSection className="mt-8" justify="center">
+        <Article.ButtonSection className="mt-8">
           <BoxedButton href="/nieuws" className="bg-branding-orange text-white">
             Meer nieuws
           </BoxedButton>

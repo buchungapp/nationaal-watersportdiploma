@@ -1,12 +1,25 @@
-import { ComponentProps } from "react";
+import { Children, ComponentProps, ReactElement, cloneElement, isValidElement } from "react";
 import Balancer from "react-wrap-balancer";
 import { twMerge } from "tailwind-merge";
 import Double from "~/app/_assets/Double";
 
-export default function Article({ children, className, ...props }: ComponentProps<"article">) {
+export default function Article({
+  children,
+  className,
+  justify,
+  ...props
+}: ComponentProps<"article"> & {
+  justify?: "center" | "start" | "end";
+}) {
+  const childrenWithProps = Children.map(children, (child) =>
+    isValidElement(child)
+      ? cloneElement(child as ReactElement<any>, { justify, ...child.props })
+      : child,
+  );
+
   return (
     <article {...props} className={twMerge("flex flex-col gap-2", className)}>
-      {children}
+      {childrenWithProps}
     </article>
   );
 }
