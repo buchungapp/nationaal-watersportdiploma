@@ -6,7 +6,9 @@ Start by generating packages via `make`. This will also tun `pnpm install` so ev
 
 ## testing
 
-Make sure docker is running, then start docker compose from the root of this repo. Then run `pnpm --recursive test` to run all tests.
+Make sure docker is running, then start docker compose from the root of this repo. Set the `PGURI` environment variable to `postgres://postgres:postgres@localhost:5432/postgres`. Then run `pnpm --recursive test` to run all tests.
+
+If `PGURI` is not set then the database tests will not run!
 
 ## docker
 
