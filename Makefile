@@ -16,7 +16,7 @@ generated/%: specifications/%.yaml
 		--package-name $(notdir $(basename $@)) \
 		--package-version 0.0.0 \
 
-	pnpm --filter {$@} install
+	pnpm --filter {$@} install --no-frozen-lockfile
 	pnpm --filter {$@} build
 
 .PHONY: \
