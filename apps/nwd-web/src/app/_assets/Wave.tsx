@@ -1,8 +1,4 @@
-export function Wave({
-  className = "h-5 w-5 text-white",
-}: {
-  className?: string;
-}) {
+export function Wave({ className = "h-5 w-5 text-white" }: { className?: string }) {
   return (
     <svg
       fill="none"
@@ -28,11 +24,7 @@ export function Wave({
   );
 }
 
-export function DoubleLine({
-  className = "h-5 w-5 text-white",
-}: {
-  className?: string;
-}) {
+export function DoubleLine({ className = "h-5 w-5 text-white" }: { className?: string }) {
   return (
     <svg
       width="100%"
@@ -63,11 +55,7 @@ export function DoubleLine({
   );
 }
 
-export function Line({
-  className = "h-5 w-5 text-white",
-}: {
-  className?: string;
-}) {
+export function Line({ className = "h-5 w-5 text-white" }: { className?: string }) {
   return (
     <svg
       width="100%"
