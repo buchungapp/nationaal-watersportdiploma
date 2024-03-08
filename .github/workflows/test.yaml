@@ -34,9 +34,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: corepack enable
       - uses: actions/checkout@v4
-      - run: docker-compose up -d
+      - run: docker-compose up --wait
       - run: make
       - run: pnpm --recursive test
+      - run: docker-compose down
 
   audit:
     runs-on: ubuntu-latest
