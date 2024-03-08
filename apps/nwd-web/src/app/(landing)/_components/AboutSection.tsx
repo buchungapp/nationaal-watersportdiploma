@@ -1,6 +1,4 @@
-import clsx from "clsx";
-import Balancer from "react-wrap-balancer";
-import Double from "~/app/_assets/Double";
+import Article from "~/app/_components/style/Article";
 import { TekstButton } from "~/app/_components/style/Buttons";
 
 export default function AboutSection({
@@ -23,18 +21,17 @@ export default function AboutSection({
         ? "text-branding-dark"
         : "text-branding-orange";
   return (
-    <article className="grid gap-2">
-      <div className={clsx("flex gap-3 items-center", colorClass)}>
-        <span className="uppercase whitespace-nowrap font-bold">{label}</span>
-        <Double />
-      </div>
-      <h3 className="font-bold text-2xl">
-        <Balancer>{title}</Balancer>
-      </h3>
-      <p>{description}</p>
-      <TekstButton href={href} className={colorClass}>
-        Lees meer
-      </TekstButton>
-    </article>
+    <Article>
+      <Article.Heading className={colorClass}>{label}</Article.Heading>
+      <Article.Title as="h3" balance={false}>
+        {title}
+      </Article.Title>
+      <Article.Paragraph>{description}</Article.Paragraph>
+      <Article.ButtonSection>
+        <TekstButton href={href} className={colorClass}>
+          Lees meer
+        </TekstButton>
+      </Article.ButtonSection>
+    </Article>
   );
 }

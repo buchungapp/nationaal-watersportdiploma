@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
-import Double from "~/app/_assets/Double";
 
+import Article from "~/app/_components/style/Article";
 import { BoxedButton } from "~/app/_components/style/Buttons";
 import aankondiging from "./_assets/aankondiging.jpg";
 import diplomalijn from "./_assets/diplomalijn.jpg";
@@ -11,25 +11,23 @@ import zwemvest from "./_assets/zwemvest.png";
 export default function News() {
   return (
     <section className="grid gap-20 px-4 lg:px-16">
-      <article className="flex flex-col items-center gap-10">
-        <div className="flex flex-col gap-2 w-full">
-          <div className={"flex gap-3 items-center text-branding-orange"}>
-            <Double />
-            <span className="uppercase whitespace-nowrap font-bold">Nieuws</span>
-            <Double />
-          </div>
-          <h2 className="font-bold text-2xl text-center">
-            <Balancer>De laatste ontwikkelingen.</Balancer>
-          </h2>
-          <p className="text-center max-w-lg self-center">
-            We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de
-            hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
-          </p>
-        </div>
-        <BoxedButton href="/nieuws" className="bg-branding-orange text-white">
-          Meer nieuws
-        </BoxedButton>
-      </article>
+      <Article>
+        <Article.Heading className="text-branding-orange" justify="center">
+          nieuws
+        </Article.Heading>
+        <Article.Title as="h2" justify="center">
+          De laatste ontwikkelingen.
+        </Article.Title>
+        <Article.Paragraph justify="center" className="max-w-lg">
+          We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de
+          hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
+        </Article.Paragraph>
+        <Article.ButtonSection className="mt-8" justify="center">
+          <BoxedButton href="/nieuws" className="bg-branding-orange text-white">
+            Meer nieuws
+          </BoxedButton>
+        </Article.ButtonSection>
+      </Article>
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-3">
         <Link href="/nieuws/1">
           <article className="grid">
