@@ -15,7 +15,7 @@ export function createMainCategory(
       };
     }
 
-    const entity = await incomingRequest.entity();
+    const entity = (await incomingRequest.entity()) as any;
 
     const rows = await context.db
       .insert(schema.mainCategories)
