@@ -12,7 +12,7 @@ clean: \
 
 generated/%: specifications/%.yaml
 	pnpx oa42-generator package $^ \
-		--package-directory file://$(abspath $@) \
+		--package-directory $@ \
 		--package-name $(notdir $(basename $@)) \
 		--package-version 0.0.0 \
 
