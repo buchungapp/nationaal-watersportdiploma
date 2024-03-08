@@ -37,11 +37,11 @@ export function useMobileMenuState() {
   return [isMobileMenuOpen, setMobileMenuOpen] as const;
 }
 
-export const trusbarHeight = 32 - 16;
+export const trustbarHeight = 32 - 16;
 
 export function useIsSticky() {
   const { scrollPosition } = useContext(AppContext);
-  return scrollPosition > trusbarHeight;
+  return scrollPosition > trustbarHeight;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
