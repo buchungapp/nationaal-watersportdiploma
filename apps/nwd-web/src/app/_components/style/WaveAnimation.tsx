@@ -5,7 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { DoubleLine, Wave } from "~/app/_assets/Wave";
 import useWindowDimensions from "~/app/_components/useWindowDimensions";
 
-export default function WaveAnimation({ begin, end }: { begin: number; end: number }) {
+export default function WaveAnimation({
+  begin,
+  end,
+  id,
+}: {
+  begin: number;
+  end: number;
+  id?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const [beginOffset, setBeginOffset] = useState(begin);
@@ -18,6 +26,17 @@ export default function WaveAnimation({ begin, end }: { begin: number; end: numb
     if (!ref.current || typeof window === "undefined") return;
 
     const { top } = ref.current.getBoundingClientRect();
+
+    if (id) {
+      const el = document.getElementById(id);
+      if (el) {
+        const { height } = el.getBoundingClientRect();
+        setBeginOffset(begin + top - height + window.scrollY);
+        setEndOffset(end + top + window.scrollY);
+        return;
+      }
+    }
+
     setBeginOffset(begin + top + window.scrollY);
     setEndOffset(end + top + window.scrollY);
   }, [ref, begin, end, typeof window, width]);
