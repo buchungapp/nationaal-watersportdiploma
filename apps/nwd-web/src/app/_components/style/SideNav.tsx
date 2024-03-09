@@ -16,7 +16,7 @@ export default function SideNav({
   const pathname = usePathname();
 
   return (
-    <div className={twMerge("flex flex-col gap-2", className)}>
+    <div className={twMerge("flex flex-col gap-2 text-sm", className)}>
       <span className="font-semibold text-sm ml-4">{label}</span>
       <ul className="gap-3 flex flex-col">
         {items.map(({ href, label }) => (

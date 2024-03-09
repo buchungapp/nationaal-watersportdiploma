@@ -31,9 +31,7 @@ export default function StickyNavItems({ items }: { items: NavItems }) {
                 >
                   {item.icon}
                   {item.label}
-                  <div className="w-full absolute transition-transform group-hover:translate-x-0 translate-x-[50%] bottom-0 translate-y-full">
-                    <Double className="group-hover:w-full w-0 transition-width text-branding-dark" />
-                  </div>
+                  <Double className="bottom-0 translate-y-full absolute transition-width group-hover:w-full w-0 text-branding-dark" />
                 </Link>
               </li>
             ),
