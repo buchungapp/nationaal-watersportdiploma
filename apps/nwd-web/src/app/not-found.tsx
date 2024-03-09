@@ -1,4 +1,4 @@
-import { BoxedButton } from "./_components/style/Buttons";
+import { BoxedBackButton, BoxedButton } from "./_components/style/Buttons";
 import Heading from "./_components/style/Heading";
 
 export default function NotFound() {
@@ -15,6 +15,7 @@ export default function NotFound() {
               <BoxedButton href="/" className="bg-white text-branding-dark">
                 Naar NWD
               </BoxedButton>
+              <BoxedBackButton className="text-white">Terug</BoxedBackButton>
             </div>
           </div>
         </div>
