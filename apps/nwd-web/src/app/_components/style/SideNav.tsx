@@ -20,7 +20,7 @@ export default function SideNav({
       <span className="font-semibold text-sm ml-4">{label}</span>
       <ul className="gap-3 flex flex-col">
         {items.map(({ href, label }) => (
-          <li>
+          <li key={href}>
             <Link
               href={href}
               className={clsx(

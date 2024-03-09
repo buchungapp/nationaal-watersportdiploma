@@ -39,10 +39,10 @@ export default function Manifest() {
       <h4>Plezier staat centraal.</h4>
       <p>
         Plezier staat centraal in alles wat we doen. We geloven dat succes in de watersport niet
-        alleen wordt gemeten aan je behaalde vaardigheden of diploma's, maar vooral aan het plezier
-        dat je ervaart. Onze diplomalijn is ontworpen om duidelijke stappen en realistische doelen
-        te bieden, waarbij ondersteuning altijd binnen handbereik is en elk succesmoment wordt
-        gevierd.
+        alleen wordt gemeten aan je behaalde vaardigheden of diploma&apos;s, maar vooral aan het
+        plezier dat je ervaart. Onze diplomalijn is ontworpen om duidelijke stappen en realistische
+        doelen te bieden, waarbij ondersteuning altijd binnen handbereik is en elk succesmoment
+        wordt gevierd.
       </p>
 
       <h4>Technologie als ruggengraat.</h4>
