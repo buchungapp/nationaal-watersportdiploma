@@ -9,7 +9,7 @@ import Welcome from "./_components/Welcome";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center">
+    <main className="flex flex-col items-center">
       <Heading className="bg-branding-light">
         <Welcome />
       </Heading>
