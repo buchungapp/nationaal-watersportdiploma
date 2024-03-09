@@ -1,10 +1,11 @@
 import Image from "next/image";
-import { TekstButton } from "../_components/style/Buttons";
+import { InlineButton, TekstButton } from "../_components/style/Buttons";
 import Heading from "../_components/style/Heading";
 
 import { AtSymbolIcon, EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Article from "../_components/style/Article";
+import CopyToClipboard from "../_components/style/CopyToClipboard";
 import contact from "./_assets/contact.jpg";
 
 export default function Contact() {
@@ -75,20 +76,20 @@ export default function Contact() {
               </Article.Paragraph>
             </Article>
             <ul className="text-slate-700 flex flex-col gap-4">
-              <li>
-                <Link
-                  href={"mailto:info@nationaalwatersportdiploma.nl"}
+              <li className="w-fit">
+                <CopyToClipboard
+                  value={"info@nationaalwatersportdiploma.nl"}
                   className="flex gap-4 items-center underline"
                 >
                   <AtSymbolIcon className="w-5 h-5" />
                   info@nationaalwatersportdiploma.nl
-                </Link>
+                </CopyToClipboard>
               </li>
-              <li>
-                <Link href="tel:0857822777" className="flex gap-4 items-center underline">
+              <li className="w-fit">
+                <InlineButton href="tel:0857822777" className="flex gap-4 items-center underline">
                   <PhoneIcon className="w-5 h-5" />
                   085 - 782 27 77
-                </Link>
+                </InlineButton>
               </li>
               <li className="flex gap-4 items-center">
                 <EnvelopeIcon className="w-5 h-5" />

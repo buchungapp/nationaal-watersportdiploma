@@ -37,6 +37,20 @@ export function TekstButton({ className, children, ...props }: ComponentProps<ty
   );
 }
 
+export function InlineButton({ className, children, ...props }: ComponentProps<typeof Link>) {
+  return (
+    <Link
+      {...props}
+      className={clsx(
+        "rounded-lg hover:-mx-2 hover:px-2 transition-[padding,margin,background-color] hover:bg-slate-100",
+        className,
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
 export function BoxedBackButton({ className, children, ...props }: ComponentProps<"button">) {
   return (
     <BackButton

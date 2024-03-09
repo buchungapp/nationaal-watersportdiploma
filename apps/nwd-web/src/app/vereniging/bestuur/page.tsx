@@ -1,4 +1,4 @@
-import Link from "next/link";
+import CopyToClipboard from "~/app/_components/style/CopyToClipboard";
 
 export default function Bestuur() {
   return (
@@ -23,11 +23,14 @@ export default function Bestuur() {
         Voorzitter
         <br />
         Contact via{" "}
-        <Link href="mailto:voorzitter@nationaalwatersportdiploma.nl">
+        <CopyToClipboard
+          value="voorzitter@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
           voorzitter
           <wbr />
           @nationaalwatersportdiploma.nl
-        </Link>
+        </CopyToClipboard>
       </p>
 
       <p>
@@ -36,11 +39,14 @@ export default function Bestuur() {
         Secretaris
         <br />
         Contact via{" "}
-        <Link href="mailto:secretaris@nationaalwatersportdiploma.nl" className="break-words">
+        <CopyToClipboard
+          value="secretaris@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
           secretaris
           <wbr />
           @nationaalwatersportdiploma.nl
-        </Link>
+        </CopyToClipboard>
       </p>
 
       <p>
@@ -49,11 +55,14 @@ export default function Bestuur() {
         Penningmeester
         <br />
         Contact via{" "}
-        <Link href="mailto:penningmeester@nationaalwatersportdiploma.nl" className="break-words">
+        <CopyToClipboard
+          value="penningmeester@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
           penningmeester
           <wbr />
           @nationaalwatersportdiploma.nl
-        </Link>
+        </CopyToClipboard>
       </p>
 
       <p>
@@ -62,11 +71,14 @@ export default function Bestuur() {
         Algemeen bestuurslid & vicevoorzitter
         <br />
         Contact via{" "}
-        <Link href="mailto:vicevoorzitter@nationaalwatersportdiploma.nl" className="break-words">
+        <CopyToClipboard
+          value="vicevoorzitter@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
           vicevoorzitter
           <wbr />
           @nationaalwatersportdiploma.nl
-        </Link>
+        </CopyToClipboard>
       </p>
 
       <p>
@@ -75,14 +87,14 @@ export default function Bestuur() {
         Algemeen bestuurslid
         <br />
         Contact via{" "}
-        <Link
-          href="mailto:algemeen.bestuurslid@nationaalwatersportdiploma.nl"
-          className="break-words"
+        <CopyToClipboard
+          value="algemeen.bestuurslid@nationaalwatersportdiploma.nl"
+          className="break-words underline"
         >
           algemeen.bestuurslid
           <wbr />
           @nationaalwatersportdiploma.nl
-        </Link>
+        </CopyToClipboard>
       </p>
     </article>
   );

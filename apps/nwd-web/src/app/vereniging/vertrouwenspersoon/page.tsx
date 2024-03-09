@@ -1,6 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
+import { InlineButton } from "~/app/_components/style/Buttons";
+import CopyToClipboard from "~/app/_components/style/CopyToClipboard";
 import vertrouwenspersoon from "./_assets/vertrouwenspersoon.jpg";
 
 export default function Vertrouwenspersoon() {
@@ -14,8 +15,8 @@ export default function Vertrouwenspersoon() {
           en seksuele intimidatie.
         </p>
       </div>
-      <p>
-        De vertrouwenspersoon:
+      <div>
+        <p>De vertrouwenspersoon:</p>
         <ul>
           <li>Zorgt voor adequate opvang van personen die te maken hebben met ongewenst gedrag</li>
           <li>Biedt een luisterend oor</li>
@@ -25,24 +26,26 @@ export default function Vertrouwenspersoon() {
           <li>Kan je ook wijzen op andere hulpverlenende instanties of zorgprofessionals</li>
           <li>Heeft geheimhoudingsplicht</li>
         </ul>
-        Ervaar je ongewenst gedrag tijdens je werkzaamheden bij een vaarlocatie aangesloten bij het
-        NWD? Dit nemen we serieus. Het Nationaal Watersportdiploma biedt alle vrijwilligers,
-        opdrachtnemers, instructeurs, en medewerkers toegang tot een vertrouwenspersoon. Voor hulp
-        en begeleiding in dit proces kun je terecht bij de Vertrouwenscontactpersoon (VCP) van jouw
-        vaarlocatie. Je staat er niet alleen voor.
-      </p>
+        <p>
+          Ervaar je ongewenst gedrag tijdens je werkzaamheden bij een vaarlocatie aangesloten bij
+          het NWD? Dit nemen we serieus. Het Nationaal Watersportdiploma biedt alle vrijwilligers,
+          opdrachtnemers, instructeurs, en medewerkers toegang tot een vertrouwenspersoon. Voor hulp
+          en begeleiding in dit proces kun je terecht bij de Vertrouwenscontactpersoon (VCP) van
+          jouw vaarlocatie. Je staat er niet alleen voor.
+        </p>
+      </div>
 
       <p>
         Op dit moment is <strong>Evert-Jan van den Brink</strong> de vertrouwenspersoon voor het
         Nationaal Watersportdiploma. <br />
         Mailadres:{" "}
-        <Link href="mailto:vandenbrink@solvebv.nl">
+        <CopyToClipboard value="vandenbrink@solvebv.nl" className="font-medium underline">
           vandenbrink
           <wbr />
           @solvebv.nl
-        </Link>
+        </CopyToClipboard>
         <br />
-        Telefoon: <Link href="tel:0653816890">06-53816890</Link>
+        Telefoon: <InlineButton href="tel:0653816890">06-53816890</InlineButton>
       </p>
       <Image
         src={vertrouwenspersoon}
