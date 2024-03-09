@@ -92,7 +92,8 @@ export default function Contact() {
               </li>
               <li className="flex gap-4 items-center">
                 <EnvelopeIcon className="w-5 h-5" />
-                Wilhelmina van Pruisenweg 35 2595AN Den Haag
+                Wilhelmina van Pruisenweg 35 <br />
+                2595AN Den Haag
               </li>
             </ul>
             <p>
