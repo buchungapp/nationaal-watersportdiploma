@@ -21,8 +21,23 @@ export default async function Header() {
           },
           {
             label: "Diplomeringslijn",
-            description: "",
-            href: "/diplomeringslijn",
+            items: [
+              {
+                label: "Leeftijdscategorieën",
+                description: "",
+                href: "/diplomeringslijn/leeftijdscategorieen",
+              },
+              {
+                label: "Disciplines",
+                description: "",
+                href: "/diplomeringslijn/disciplines",
+              },
+              {
+                label: "Accreditatie",
+                description: "",
+                href: "/diplomeringslijn/accreditatie",
+              },
+            ],
           },
           {
             label: "FAQ",
@@ -31,22 +46,44 @@ export default async function Header() {
           },
 
           {
-            label: "Veiligheid",
-            description:
-              "Een veilige omgeving voor iedereen, met aandacht voor fysieke en sociale veiligheid.",
-            href: "/veiligheid",
-          },
-          {
-            label: "Kwaliteit",
-            description:
-              "Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen.",
-            href: "/kwaliteit",
-          },
-          {
-            label: "Plezier",
-            description:
-              "Leren watersporten moet leuk zijn, met heldere stappen naar je volgende diploma en vele succesmomenten.",
-            href: "/plezier",
+            label: "Vereniging",
+            items: [
+              {
+                label: "Manifest",
+                description: "",
+                href: "/vereniging/manifest",
+              },
+              {
+                label: "Vertrouwenspersoon",
+                description: "",
+                href: "/vereniging/vertrouwenspersoon",
+              },
+              {
+                label: "Gedragscode",
+                description: "",
+                href: "/vereniging/gedragscode",
+              },
+              {
+                label: "Bestuur",
+                description: "",
+                href: "/vereniging/bestuur",
+              },
+              {
+                label: "Secretariaat",
+                description: "",
+                href: "/vereniging/secretariaat",
+              },
+              {
+                label: "Kwaliteitscommissie",
+                description: "",
+                href: "/vereniging/kwaliteitscommissie",
+              },
+              {
+                label: "Statuten en reglementen",
+                description: "",
+                href: "/vereniging/statuten-en-reglementen",
+              },
+            ],
           },
 
           {

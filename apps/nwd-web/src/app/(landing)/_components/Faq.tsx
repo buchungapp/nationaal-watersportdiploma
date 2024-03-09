@@ -1,48 +1,25 @@
-import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import Balancer from "react-wrap-balancer";
-import Double from "~/app/_assets/Double";
+import Article from "~/app/_components/style/Article";
+import { BoxedButton } from "~/app/_components/style/Buttons";
 
 export default function Faq() {
   return (
     <section className="grid gap-20 px-4 lg:px-16">
-      <article className="grid gap-10">
-        <div className="grid gap-2">
-          <div className={"flex gap-3 items-center text-branding-dark"}>
-            <span className="uppercase whitespace-nowrap font-bold">Hoe zit het</span>
-            <Double />
-          </div>
-          <h2 className="font-bold text-2xl">
-            <Balancer>Veelgestelde vragen.</Balancer>
-          </h2>
-          <p>
-            Het NWD is nieuw, dus het is niet gek dat dit wat vragen bij je oproept. Daarom zetten
-            wij alvast een aantal van de meestgestelde vragen voor je op een rijtje.
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
-          <Link
-            href="/faq"
-            className="text-white bg-branding-dark group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-          >
-            Bekijk alle vragen{" "}
-            <ArrowLongRightIcon
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              strokeWidth={2.5}
-            />
-          </Link>
-          <Link
-            href="/faq#instructeurs-en-vaarlocaties"
-            className="group text-branding-dark text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
-          >
-            Voor instructeurs en vaarlocaties{" "}
-            <ArrowLongRightIcon
-              className="w-5 h-5 group-hover:translate-x-1 transition-transform"
-              strokeWidth={2.5}
-            />
-          </Link>
-        </div>
-      </article>
+      <Article>
+        <Article.Heading className="text-branding-dark">Hoe zit het</Article.Heading>
+        <Article.Title as="h2">Veelgestelde vragen.</Article.Title>
+        <Article.Paragraph>
+          Het NWD is nieuw, dus het is niet gek dat dit wat vragen bij je oproept. Daarom zetten wij
+          alvast een aantal van de meestgestelde vragen voor je op een rijtje.
+        </Article.Paragraph>
+        <Article.ButtonSection className="mt-8">
+          <BoxedButton href="/faq" className="bg-branding-dark text-white">
+            Bekijk alle vragen
+          </BoxedButton>
+          <BoxedButton href="/faq#instructeurs-en-vaarlocaties" className="text-branding-dark">
+            Voor instructeurs en vaarlocaties
+          </BoxedButton>
+        </Article.ButtonSection>
+      </Article>
       <div
         className="columns-1 lg:columns-3 space-y-12 xl:space-y-12 gap-12 xl:gap-24"
         style={{

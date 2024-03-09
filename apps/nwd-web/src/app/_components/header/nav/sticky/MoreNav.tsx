@@ -6,23 +6,26 @@ import { Menu, Transition } from "@headlessui/react";
 import clsx from "clsx";
 import Link from "next/link";
 
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import Double from "~/app/_assets/Double";
 import { type NavItem } from "../Nav";
 
-export default function MoreNav({ items }: { items: NavItem[] }) {
+export default function MoreNav({ items, label }: { items: NavItem[]; label: string }) {
   return (
     <Menu as="div" className="relative inline-block">
       {({ open }) => (
         <>
           <Menu.Button
-            className={"relative z-10 flex flex-nowrap items-center gap-1 py-0.5 uppercase group"}
+            className={
+              "relative z-10 flex flex-nowrap tracking-widest items-center gap-1 py-0.5 uppercase group"
+            }
           >
-            <span>Overig</span>
-            {/* <ChevronDownIcon className="h-6 w-6" aria-hidden="true" /> */}{" "}
+            <span>{label}</span>
+            <ChevronDownIcon className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
             <Double
               className={clsx(
-                "w-full bottom-0 translate-y-full absolute transition-colors",
-                open ? "text-branding-dark" : "group-hover:text-branding-dark text-transparent",
+                "bottom-0 translate-y-full absolute transition-width text-branding-dark",
+                open ? "w-full" : "group-hover:w-full w-0",
               )}
             />
           </Menu.Button>
