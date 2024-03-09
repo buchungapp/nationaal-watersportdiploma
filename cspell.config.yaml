@@ -23,6 +23,7 @@ useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
   - generated/
+  - apps/nwd-web/src/app/
 files:
   - "**"
 enableFiletypes:
