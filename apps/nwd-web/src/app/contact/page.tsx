@@ -41,7 +41,10 @@ export default function Contact() {
               href: "/locaties",
             },
           ].map((item) => (
-            <article className="bg-slate-100 rounded-2xl p-10 break-inside-avoid grid gap-2">
+            <article
+              key={item.href}
+              className="bg-slate-100 rounded-2xl p-10 break-inside-avoid grid gap-2"
+            >
               <h2 className="font-semibold text-lg">{item.title}</h2>
               <p>{item.description}</p>
               <TekstButton href={item.href} className="mt-2 text-branding-dark">
