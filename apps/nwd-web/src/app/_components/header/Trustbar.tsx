@@ -7,7 +7,7 @@ import Youtube from "~/app/_assets/social/Youtube";
 
 export default async function Trustbar() {
   return (
-    <section className="text-white py-2 bg-branding-light sm:px-28 flex items-center justify-center lg:justify-between gap-2">
+    <section className="text-white py-2 sm:px-28 flex items-center justify-center lg:justify-between gap-2">
       <div className="xl:block hidden flex-1"></div>
       <p className="xl:text-center lg:text-start text-center flex-1 text-sm font-semibold uppercase">
         veiligheid, kwaliteit & plezier op het water.
