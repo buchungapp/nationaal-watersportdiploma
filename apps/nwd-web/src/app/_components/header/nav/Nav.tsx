@@ -12,7 +12,15 @@ export interface NavItem {
   icon?: React.ReactNode;
 }
 
-export default function Nav({ items }: { items: NavItem[] }) {
+export type NavItems = (
+  | NavItem
+  | {
+      label: string;
+      items: NavItem[];
+    }
+)[];
+
+export default function Nav({ items }: { items: NavItems }) {
   return (
     <>
       <MobileNav>
