@@ -57,7 +57,7 @@ export default function Footer() {
                 <Link href="/organisatie">Organisatie</Link>
               </li>
               <li>
-                <Link href="/perskit">Perskit</Link>
+                <Link href="/mediakit">Mediakit</Link>
               </li>
               <li>
                 <Link href="/vertrouwenspersoon">Vertrouwenspersoon</Link>
