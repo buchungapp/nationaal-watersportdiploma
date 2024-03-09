@@ -23,13 +23,15 @@ export default function Gedragscode() {
         blijven.
       </p>
 
-      <Link
-        href="/gedragscode.pdf"
-        target="_blank"
-        className="flex gap-2 font-medium items-center text-white w-fit bg-branding-light rounded-full px-3.5 py-1.5 not-prose"
-      >
-        <ArrowDownTrayIcon className="w-5 h-5" strokeWidth={2} /> Download Model Gedragscode
-      </Link>
+      <div className="not-prose flex justify-center w-full sm:justify-start">
+        <Link
+          href="/gedragscode.pdf"
+          target="_blank"
+          className="flex gap-2 font-medium items-center text-white w-fit bg-branding-light rounded-full px-3.5 py-1.5"
+        >
+          <ArrowDownTrayIcon className="w-5 h-5" strokeWidth={2} /> Download Model Gedragscode
+        </Link>
+      </div>
     </article>
   );
 }

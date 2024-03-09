@@ -24,7 +24,9 @@ export default function Bestuur() {
         <br />
         Contact via{" "}
         <Link href="mailto:voorzitter@nationaalwatersportdiploma.nl">
-          voorzitter@nationaalwatersportdiploma.nl
+          voorzitter
+          <wbr />
+          @nationaalwatersportdiploma.nl
         </Link>
       </p>
 
@@ -34,8 +36,10 @@ export default function Bestuur() {
         Secretaris
         <br />
         Contact via{" "}
-        <Link href="mailto:secretaris@nationaalwatersportdiploma.nl">
-          secretaris@nationaalwatersportdiploma.nl
+        <Link href="mailto:secretaris@nationaalwatersportdiploma.nl" className="break-words">
+          secretaris
+          <wbr />
+          @nationaalwatersportdiploma.nl
         </Link>
       </p>
 
@@ -45,8 +49,10 @@ export default function Bestuur() {
         Penningmeester
         <br />
         Contact via{" "}
-        <Link href="mailto:penningmeester@nationaalwatersportdiploma.nl">
-          penningmeester@nationaalwatersportdiploma.nl
+        <Link href="mailto:penningmeester@nationaalwatersportdiploma.nl" className="break-words">
+          penningmeester
+          <wbr />
+          @nationaalwatersportdiploma.nl
         </Link>
       </p>
 
@@ -56,8 +62,10 @@ export default function Bestuur() {
         Algemeen bestuurslid & vicevoorzitter
         <br />
         Contact via{" "}
-        <Link href="mailto:vicevoorzitter@nationaalwatersportdiploma.nl">
-          vicevoorzitter@nationaalwatersportdiploma.nl
+        <Link href="mailto:vicevoorzitter@nationaalwatersportdiploma.nl" className="break-words">
+          vicevoorzitter
+          <wbr />
+          @nationaalwatersportdiploma.nl
         </Link>
       </p>
 
@@ -67,8 +75,13 @@ export default function Bestuur() {
         Algemeen bestuurslid
         <br />
         Contact via{" "}
-        <Link href="mailto:algemeen.bestuurslid@nationaalwatersportdiploma.nl">
-          algemeen.bestuurslid@nationaalwatersportdiploma.nl
+        <Link
+          href="mailto:algemeen.bestuurslid@nationaalwatersportdiploma.nl"
+          className="break-words"
+        >
+          algemeen.bestuurslid
+          <wbr />
+          @nationaalwatersportdiploma.nl
         </Link>
       </p>
     </article>

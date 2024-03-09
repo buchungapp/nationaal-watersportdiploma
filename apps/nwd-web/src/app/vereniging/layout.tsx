@@ -55,7 +55,7 @@ export default function Layout({
             className="w-full sm:w-[18rem]"
           />
         </div>
-        <div className="grid items-start justify-center">{children}</div>
+        <div className="flex flex-col justify-center">{children}</div>
       </div>
     </main>
   );

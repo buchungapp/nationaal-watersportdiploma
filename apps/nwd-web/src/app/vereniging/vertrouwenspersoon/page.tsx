@@ -35,7 +35,12 @@ export default function Vertrouwenspersoon() {
       <p>
         Op dit moment is <strong>Evert-Jan van den Brink</strong> de vertrouwenspersoon voor het
         Nationaal Watersportdiploma. <br />
-        Mailadres: <Link href="mailto:vandenbrink@solvebv.nl">vandenbrink@solvebv.nl</Link>
+        Mailadres:{" "}
+        <Link href="mailto:vandenbrink@solvebv.nl">
+          vandenbrink
+          <wbr />
+          @solvebv.nl
+        </Link>
         <br />
         Telefoon: <Link href="tel:0653816890">06-53816890</Link>
       </p>
