@@ -22,7 +22,7 @@ export default function StickyNavItems({ items }: { items: NavItems }) {
         <ul className="hidden w-full items-center justify-end gap-x-12 gap-y-2 lg:flex pr-8">
           {items.map((item) =>
             "items" in item ? (
-              <MoreNav items={item.items} label={item.label} />
+              <MoreNav key={item.label} items={item.items} label={item.label} />
             ) : (
               <li key={item.label}>
                 <Link
