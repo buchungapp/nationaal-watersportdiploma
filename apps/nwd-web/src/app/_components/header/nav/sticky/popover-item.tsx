@@ -15,7 +15,7 @@ export default function PopoverNavItem({
   label: string;
 }>) {
   return (
-    <Popover className="relative">
+    <Popover className="relative group">
       <Popover.Button className="flex uppercase items-center gap-x-1 text-sm font-medium leading-6">
         {label}
         <ChevronDownIcon className="h-5 w-5 flex-none" aria-hidden="true" />
