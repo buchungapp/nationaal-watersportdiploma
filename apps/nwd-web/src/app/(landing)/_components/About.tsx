@@ -6,10 +6,10 @@ export default function About() {
   return (
     <section className="gap-12 flex flex-col px-4 lg:px-16">
       <div className="grid gap-4 text-center self-center max-w-screen-lg">
-        <h2 className="font-bold  text-3xl sm:text-4xl">
+        <h2 className="font-bold text-3xl sm:text-4xl text-gray-900">
           <Balancer>Dé nieuwe standaard in veiligheid, kwaliteit en plezier op het water.</Balancer>
         </h2>
-        <p className="text-lg">
+        <p className="text-lg text-gray-600">
           <Balancer>
             Nu is het moment is om de lat hoger te leggen als het aankomt op kwaliteitseisen en
             diplomalijnen binnen de Nederlandse watersport. Het resultaat is het Nationaal
@@ -27,21 +27,21 @@ export default function About() {
             label="Veiligheid"
             title="Veiligheid voorop."
             description="Een veilige omgeving voor iedereen, met aandacht voor fysieke en sociale veiligheid."
-            color="branding-dark"
+            color="dark"
           />
           <AboutSection
             href="/kwaliteit"
             label="Kwaliteit"
             title="Kwaliteit als basis."
             description="Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen."
-            color="branding-light"
+            color="light"
           />
           <AboutSection
             href="/plezier"
             label="Plezier"
             title="Plezier staat centraal."
             description="Leren watersporten moet leuk zijn, met heldere stappen naar je volgende diploma en vele succesmomenten."
-            color="branding-orange"
+            color="orange"
           />
         </div>
       </div>

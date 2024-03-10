@@ -26,7 +26,10 @@ export function TekstButton({ className, children, ...props }: ComponentProps<ty
   return (
     <Link
       {...props}
-      className={clsx("flex gap-1 items-center w-fit font-semibold group", className)}
+      className={clsx(
+        "flex gap-1 px-2.5 py-1.5 -mx-2.5 -my-1.5 items-center text-sm transition-colors rounded-lg w-fit font-semibold group",
+        className,
+      )}
     >
       {children}
       <ArrowRightIcon
