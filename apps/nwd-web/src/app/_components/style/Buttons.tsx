@@ -9,7 +9,7 @@ export function BoxedButton({ className, children, ...props }: ComponentProps<ty
     <Link
       {...props}
       className={clsx(
-        "group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center",
+        "group transition-colors text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center",
         className,
       )}
     >
