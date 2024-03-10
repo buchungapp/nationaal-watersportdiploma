@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -14,7 +14,7 @@
     "clsx": "^2.1.0",
     "fathom-client": "^3.6.0",
     "framer-motion": "^11.0.8",
-    "next": "14.2.0-canary.4",
+    "next": "14.2.0-canary.12",
     "react": "^18",
     "react-dom": "^18",
     "react-wrap-balancer": "^1.1.0",
