@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 
-import Article from "~/app/_components/style/Article";
+import Double from "~/app/_components/brand/double-line";
 import { BoxedButton } from "~/app/_components/style/Buttons";
 import aankondiging from "./_assets/aankondiging.jpg";
 import diplomalijn from "./_assets/diplomalijn.jpg";
@@ -11,19 +11,22 @@ import zwemvest from "./_assets/zwemvest.png";
 export default function News() {
   return (
     <section className="container mx-auto grid gap-20 px-4 lg:px-16">
-      <Article justify="center">
-        <Article.Heading className="text-branding-orange">Actueel</Article.Heading>
-        <Article.Title as="h2">De laatste ontwikkelingen.</Article.Title>
-        <Article.Paragraph className="max-w-lg">
+      <div className="flex flex-col text-center items-center w-full">
+        <div className="flex w-full font-bold text-branding-orange uppercase items-center gap-x-3">
+          <Double />
+          Actueel
+          <Double />
+        </div>
+        <h3 className="text-gray-900 mt-1.5 font-bold text-2xl">De laatste ontwikkelingen.</h3>
+        <p className="text-gray-700 mt-2.5 mx-auto max-w-prose">
           We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de
           hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
-        </Article.Paragraph>
-        <Article.ButtonSection className="mt-8">
-          <BoxedButton href="/nieuws" className="bg-branding-orange text-white">
-            Meer nieuws
-          </BoxedButton>
-        </Article.ButtonSection>
-      </Article>
+        </p>
+
+        <BoxedButton href="/nieuws" className="bg-branding-orange text-white mt-8">
+          Meer nieuws
+        </BoxedButton>
+      </div>
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-3">
         {[
           {
@@ -51,7 +54,7 @@ export default function News() {
               "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
           },
         ].map((news) => (
-          <Link key={news.href} href={news.href}>
+          <Link key={news.href} href={news.href} className="p-4 rounded-3xl -m-4 hover:bg-gray-100">
             <article className="grid">
               <Image
                 src={news.image}
