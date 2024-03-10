@@ -15,7 +15,7 @@ export default function Welcome() {
           <BoxedButton href="/locaties" className="bg-white text-branding-dark">
             Vindt een NWD locatie
           </BoxedButton>
-          <BoxedButton href="/over" className="bg-branding-light text-white">
+          <BoxedButton href="/over" className="text-white hover:bg-white/10">
             Waarom het NWD
           </BoxedButton>
         </div>
