@@ -1,10 +1,10 @@
 import { BoxedBackButton, BoxedButton } from "./_components/style/Buttons";
-import Heading from "./_components/style/Heading";
+import PageHero from "./_components/style/page-hero";
 
 export default function NotFound() {
   return (
     <main className="flex flex-col items-center">
-      <Heading className="bg-branding-light">
+      <PageHero>
         <div className="px-4 lg:px-16">
           <div className="grid gap-10 justify-center lg:justify-start">
             <div className="text-white grid gap-6">
@@ -19,7 +19,7 @@ export default function NotFound() {
             </div>
           </div>
         </div>
-      </Heading>
+      </PageHero>
     </main>
   );
 }

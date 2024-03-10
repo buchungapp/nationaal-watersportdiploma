@@ -1,4 +1,4 @@
-import Heading from "../_components/style/Heading";
+import PageHero from "../_components/style/page-hero";
 import About from "./_components/About";
 import Faq from "./_components/Faq";
 import Locations from "./_components/Locations";
@@ -10,9 +10,9 @@ import Welcome from "./_components/Welcome";
 export default function Home() {
   return (
     <main className="flex flex-col items-center">
-      <Heading className="bg-branding-light">
+      <PageHero>
         <Welcome />
-      </Heading>
+      </PageHero>
       <div className="flex flex-col gap-36 w-full mt-12">
         <Photos />
         <About />

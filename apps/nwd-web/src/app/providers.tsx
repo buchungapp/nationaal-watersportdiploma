@@ -37,11 +37,13 @@ export function useMobileMenuState() {
   return [isMobileMenuOpen, setMobileMenuOpen] as const;
 }
 
-export const trustbarHeight = 32 - 16;
+// @TODO see if we can move these to CSS-variables
+export const TRUSTBAR_HEIGHT = 36;
+const STICKY_NAV_OFFSET = 16;
 
 export function useIsSticky() {
   const { scrollPosition } = useContext(AppContext);
-  return scrollPosition > trustbarHeight;
+  return scrollPosition > TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -51,7 +53,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   const [scrollPosition, setScrollPosition] = useState(0);
   const handleScroll = () => {
-    const position = window.pageYOffset;
+    const position = window.scrollY;
     setScrollPosition(position);
   };
 

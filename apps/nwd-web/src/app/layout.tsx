@@ -22,11 +22,14 @@ export default function RootLayout({
     <html lang="nl">
       <Analytics />
       <body className={clsx(inter.variable, "text-slate-900")}>
-        <Providers>
-          <Header />
-          <div id="content">{children}</div>
-          <Footer />
-        </Providers>
+        {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
+        <div>
+          <Providers>
+            <Header />
+            <div id="content">{children}</div>
+            <Footer />
+          </Providers>
+        </div>
       </body>
     </html>
   );
