@@ -4,7 +4,7 @@ import AboutSection from "./AboutSection";
 
 export default function About() {
   return (
-    <section className="gap-12 flex flex-col px-4 lg:px-16">
+    <section className="container mx-auto gap-12 flex flex-col px-4 lg:px-16">
       <div className="grid gap-4 text-center self-center max-w-screen-lg">
         <h2 className="font-bold text-3xl sm:text-4xl text-gray-900">
           <Balancer>Dé nieuwe standaard in veiligheid, kwaliteit en plezier op het water.</Balancer>

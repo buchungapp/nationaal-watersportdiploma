@@ -10,7 +10,7 @@ import zwemvest from "./_assets/zwemvest.png";
 
 export default function News() {
   return (
-    <section className="grid gap-20 px-4 lg:px-16">
+    <section className="container mx-auto grid gap-20 px-4 lg:px-16">
       <Article justify="center">
         <Article.Heading className="text-branding-orange">Actueel</Article.Heading>
         <Article.Title as="h2">De laatste ontwikkelingen.</Article.Title>
