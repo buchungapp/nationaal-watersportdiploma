@@ -1,19 +1,52 @@
 import Link from "next/link";
+import {
+  APP_NAME,
+  APP_SLOGAN,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
+  LINKEDIN_URL,
+  TIKTOK_URL,
+  YOUTUBE_URL,
+} from "nwd-lib/constants";
 import { Line, LineWave } from "~/app/_assets/Wave";
-import Facebook from "~/app/_assets/social/Facebook";
-import Instagram from "~/app/_assets/social/Instagram";
-import Linkedin from "~/app/_assets/social/Linkedin";
-import Tiktok from "~/app/_assets/social/Tiktok";
-import Youtube from "~/app/_assets/social/Youtube";
-import Hero from "~/app/_components/brand/wordmark";
+import Wordmark from "~/app/_components/brand/wordmark";
+import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "~/app/_components/socials";
 
 export default function Footer() {
+  const socials = [
+    {
+      name: "Facebook",
+      icon: Facebook,
+      link: FACEBOOK_URL,
+    },
+    {
+      name: "Instagram",
+      icon: Instagram,
+      link: INSTAGRAM_URL,
+    },
+    {
+      name: "LinkedIn",
+      icon: LinkedIn,
+      link: LINKEDIN_URL,
+    },
+    {
+      name: "TikTok",
+      icon: TikTok,
+      link: TIKTOK_URL,
+    },
+    {
+      name: "YouTube",
+      icon: YouTube,
+      link: YOUTUBE_URL,
+    },
+  ];
+
   return (
     <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 lg:px-16 pt-20 pb-12">
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-2">
         <div className="grid gap-6">
-          <Hero className="w-48 h-12 text-white" />
-          <p className="text-slate-200 text-sm">Veiligheid, kwaliteit en plezier op het water.</p>
+          <Wordmark className="w-48 h-12 text-white" />
+          <p className="text-slate-200 text-sm">{APP_SLOGAN}</p>
         </div>
         <div className="grid gap-12 lg:gap-0 items-start grid-cols-1 lg:grid-cols-3 text-sm">
           <div className="grid gap-6">
@@ -97,54 +130,21 @@ export default function Footer() {
 
       <div className="text-slate-200 flex flex-col lg:flex-row gap-4">
         <p className="lg:text-start text-center flex-1 text-sm">
-          © 2024 Nationaal Watersportdiploma.
+          {`© ${new Date().getFullYear()} ${APP_NAME}`}
         </p>
         <ul className="items-center flex-1 gap-6 justify-center lg:justify-end flex">
-          <li>
-            <Link
-              href={`https://facebook.com/nationaalwatersportdiploma`}
-              target="_blank"
-              referrerPolicy="no-referrer"
-            >
-              <Facebook className="h-4 w-4" />
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={`https://www.instagram.com/nationaalwatersportdiploma`}
-              target="_blank"
-              referrerPolicy="no-referrer"
-            >
-              <Instagram className="h-4 w-4" />
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={`https://www.linkedin.com/company/nationaal-watersportdiploma/`}
-              target="_blank"
-              referrerPolicy="no-referrer"
-            >
-              <Linkedin className="h-4 w-4" />
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={`https://www.tiktok.com/@nwdiploma`}
-              target="_blank"
-              referrerPolicy="no-referrer"
-            >
-              <Tiktok className="h-4 w-4" />
-            </Link>
-          </li>
-          <li>
-            <Link
-              href={`https://www.youtube.com/@nationaalwatersportdiploma`}
-              target="_blank"
-              referrerPolicy="no-referrer"
-            >
-              <Youtube className="h-4 w-4" />
-            </Link>
-          </li>
+          {socials.map((social, i) => (
+            <li key={i}>
+              <Link
+                href={social.link}
+                className="hover:text-white"
+                target="_blank"
+                referrerPolicy="no-referrer"
+              >
+                <social.icon className="h-4 w-4" />
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
     </footer>
