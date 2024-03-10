@@ -13,7 +13,7 @@ export default function NotFound() {
             </div>
             <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
               <BoxedButton href="/" className="bg-white text-branding-dark">
-                Naar de homepage
+                Naar de homepagina
               </BoxedButton>
               <BoxedBackButton className="text-white">Terug</BoxedBackButton>
             </div>
