@@ -114,7 +114,7 @@ export default function Footer() {
         <form className="flex gap-2 text-sm">
           <input
             type="email"
-            className="placeholder:text-slate-400 rounded py-1.5 px-3 bg-[#003580] border border-[#004099] text-white"
+            className="placeholder:text-slate-400 min-w-[200px] rounded py-1.5 px-3 bg-[#003580] border border-[#004099] text-white"
             placeholder="Je e-mailadres"
           />
           <button
