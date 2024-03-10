@@ -1,4 +1,4 @@
-import Logo from "~/app/_assets/Logo";
+import Logo from "~/app/_components/brand/logo";
 import WaveAnimation from "../../_components/style/WaveAnimation";
 
 export default function Seperator() {

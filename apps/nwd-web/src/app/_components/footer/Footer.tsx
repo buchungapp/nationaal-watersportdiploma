@@ -1,11 +1,11 @@
 import Link from "next/link";
-import Hero from "~/app/_assets/Hero";
 import { Line, LineWave } from "~/app/_assets/Wave";
 import Facebook from "~/app/_assets/social/Facebook";
 import Instagram from "~/app/_assets/social/Instagram";
 import Linkedin from "~/app/_assets/social/Linkedin";
 import Tiktok from "~/app/_assets/social/Tiktok";
 import Youtube from "~/app/_assets/social/Youtube";
+import Hero from "~/app/_components/brand/wordmark";
 
 export default function Footer() {
   return (

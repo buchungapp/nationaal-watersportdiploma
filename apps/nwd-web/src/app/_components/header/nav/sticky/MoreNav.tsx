@@ -7,7 +7,7 @@ import clsx from "clsx";
 import Link from "next/link";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import Double from "~/app/_assets/Double";
+import Double from "~/app/_components/brand/double-line";
 import { type NavItem } from "../Nav";
 
 export default function MoreNav({ items, label }: { items: NavItem[]; label: string }) {
@@ -17,7 +17,7 @@ export default function MoreNav({ items, label }: { items: NavItem[]; label: str
         <>
           <Menu.Button
             className={
-              "relative z-10 flex flex-nowrap tracking-widest items-center gap-1 py-0.5 uppercase group"
+              "relative z-10 text-sm flex uppercase flex-nowrap items-center gap-1 py-0.5 group"
             }
           >
             <span>{label}</span>

@@ -1,7 +1,7 @@
 import { Children, ComponentProps, ReactElement, cloneElement, isValidElement } from "react";
 import Balancer from "react-wrap-balancer";
 import { twMerge } from "tailwind-merge";
-import Double from "~/app/_assets/Double";
+import Double from "~/app/_components/brand/double-line";
 
 export default function Article({
   children,

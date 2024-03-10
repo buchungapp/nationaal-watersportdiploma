@@ -3,7 +3,7 @@ export default function Double({ className }: { className?: string }) {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="100%"
-      height="11"
+      height="9.5"
       fill="none"
       className={className}
     >
@@ -13,16 +13,16 @@ export default function Double({ className }: { className?: string }) {
         x2="100%"
         y2="2"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
       <line
         x1="0"
-        y1="9"
+        y1="8"
         x2="100%"
-        y2="9"
+        y2="8"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </svg>

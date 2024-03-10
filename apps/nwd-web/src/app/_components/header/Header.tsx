@@ -40,9 +40,9 @@ export default async function Header() {
             ],
           },
           {
-            label: "FAQ",
+            label: "Actueel",
             description: "",
-            href: "/faq",
+            href: "/actueel",
           },
 
           {
