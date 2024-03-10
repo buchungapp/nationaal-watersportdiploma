@@ -4,15 +4,21 @@ import { PropsWithChildren } from "react";
 
 import clsx from "clsx";
 
+import { Popover } from "@headlessui/react";
 import { useIsSticky } from "~/app/providers";
 
-export default function StickyNav({ children }: PropsWithChildren) {
+export function StickyNavContainer({
+  children,
+  className,
+}: PropsWithChildren<{ className?: string }>) {
   const isSticky = useIsSticky();
 
   return (
-    <div className={"relative"}>
-      <nav className={clsx(isSticky && "fixed top-0 z-40", "w-full")}>{children}</nav>
-    </div>
+    <>
+      <nav className={clsx(isSticky && "top-4 fixed z-30", "", className)}>{children}</nav>
+      {/* Component that replaces the height of the sticky nav when it becomes sticky */}
+      <div className={clsx(isSticky ? "h-24" : "hidden")} />
+    </>
   );
 }
 
@@ -24,5 +30,16 @@ export function StickyNavDiv({
 }>) {
   const isSticky = useIsSticky();
 
-  return <div className={clsx(isSticky && "shadow mt-4", className)}>{children}</div>;
+  return <div className={clsx(isSticky && "shadow", className)}>{children}</div>;
+}
+
+export function StickyNavItemsContainer({
+  children,
+  className,
+}: PropsWithChildren<{ className?: string }>) {
+  return (
+    <Popover.Group as="ul" className={className}>
+      {children}
+    </Popover.Group>
+  );
 }

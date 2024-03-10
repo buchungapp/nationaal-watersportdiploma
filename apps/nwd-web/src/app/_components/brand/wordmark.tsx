@@ -1,4 +1,4 @@
-export default function Hero({ className = "h-5 w-5 text-white" }: { className?: string }) {
+export default function Hero({ className = "" }: { className?: string }) {
   return (
     <svg
       width="149"

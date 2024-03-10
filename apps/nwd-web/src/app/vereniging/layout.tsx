@@ -1,4 +1,4 @@
-import Heading from "../_components/style/Heading";
+import PageHero from "../_components/style/page-hero";
 import SideNav from "../_components/style/SideNav";
 
 export default function Layout({
@@ -8,7 +8,7 @@ export default function Layout({
 }>) {
   return (
     <main>
-      <Heading className="bg-branding-light">
+      <PageHero>
         <div className="px-4 lg:px-16">
           <div className="text-white grid gap-6">
             <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">
@@ -17,7 +17,7 @@ export default function Layout({
             <p className="text-xl">Waar we in geloven bij het Nationaal Watersportdiploma.</p>
           </div>
         </div>
-      </Heading>
+      </PageHero>
       <div className="grid grid-cols-1 sm:grid-cols-[1fr,3fr] gap-12 mt-12 px-4 lg:px-16">
         <div className="flex justify-end">
           <SideNav

@@ -1,5 +1,5 @@
 export default function Logo({
-  className = "h-5 w-5 text-white",
+  className = "",
   plainColor,
 }: {
   className?: string;

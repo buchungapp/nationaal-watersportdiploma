@@ -12,7 +12,7 @@ export default function News() {
   return (
     <section className="grid gap-20 px-4 lg:px-16">
       <Article justify="center">
-        <Article.Heading className="text-branding-orange">nieuws</Article.Heading>
+        <Article.Heading className="text-branding-orange">Actueel</Article.Heading>
         <Article.Title as="h2">De laatste ontwikkelingen.</Article.Title>
         <Article.Paragraph className="max-w-lg">
           We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de

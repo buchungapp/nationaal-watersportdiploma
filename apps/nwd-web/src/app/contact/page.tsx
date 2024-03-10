@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { InlineButton, TekstButton } from "../_components/style/Buttons";
-import Heading from "../_components/style/Heading";
+import PageHero from "../_components/style/page-hero";
 
 import { AtSymbolIcon, EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -11,14 +11,14 @@ import contact from "./_assets/contact.jpg";
 export default function Contact() {
   return (
     <main className="flex flex-col items-center">
-      <Heading className="bg-branding-light">
+      <PageHero>
         <div className="px-4 lg:px-16">
           <div className="text-white grid gap-6">
             <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">Contact</h1>
             <p className="text-xl">Een vraag? Wij staan klaar om je te helpen!</p>
           </div>
         </div>
-      </Heading>
+      </PageHero>
       <div className="flex flex-col gap-12 w-full mt-12 px-4 lg:px-16">
         <div className="columns-1 lg:columns-3 space-y-8 gap-8">
           {[
