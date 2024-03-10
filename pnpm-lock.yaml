@@ -81,6 +81,9 @@ importers:
       eslint-config-prettier:
         specifier: ^9.1.0
         version: 9.1.0(eslint@8.0.0)
+      nwd-lib:
+        specifier: workspace:*
+        version: link:../../packages/nwd-lib
       postcss:
         specifier: ^8.4.35
         version: 8.4.35
@@ -123,6 +126,15 @@ importers:
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
+    devDependencies:
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.2
+      typescript:
+        specifier: ^5.3.3
+        version: 5.3.3
+
+  packages/nwd-lib:
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.2
