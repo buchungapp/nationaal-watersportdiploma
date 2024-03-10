@@ -8,9 +8,23 @@ import {
   TIKTOK_URL,
   YOUTUBE_URL,
 } from "nwd-lib/constants";
+import { PropsWithChildren } from "react";
 import { Line, LineWave } from "~/app/_assets/Wave";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "~/app/_components/socials";
+
+function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className="px-2.5 py-1.5 -mx-2.5 -my-1.5 transition-colors rounded-lg w-fit hover:bg-white/10"
+      >
+        {children}
+      </Link>
+    </li>
+  );
+}
 
 export default function Footer() {
   const socials = [
@@ -52,52 +66,28 @@ export default function Footer() {
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Diplomalijn</h3>
             <ul className="grid gap-6 text-slate-200">
-              <li>
-                <Link href="/consumenten">Consumenten</Link>
-              </li>
-              <li>
-                <Link href="/instructeurs">Instructeurs</Link>
-              </li>
-              <li>
-                <Link href="/watersportverbond">Watersportverbond</Link>
-              </li>
+              <FooterLink href="/consumenten">Consumenten</FooterLink>
+              <FooterLink href="/instructeurs">Instructeurs</FooterLink>
+              <FooterLink href="/watersportverbond">Watersportverbond</FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Locaties</h3>
             <ul className="grid gap-6 text-slate-200">
-              <li>
-                <Link href="/locaties">Aangesloten vaarlocaties</Link>
-              </li>
-              <li>
-                <Link href="/kwaliteitseisen">Kwaliteitseisen</Link>
-              </li>
-              <li>
-                <Link href="/procedures">Procedures</Link>
-              </li>
+              <FooterLink href="/locaties">Aangesloten vaarlocaties</FooterLink>
+              <FooterLink href="/kwaliteitseisen">Kwaliteitseisen</FooterLink>
+              <FooterLink href="/procedures">Procedures</FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
             <ul className="grid gap-6 text-slate-200">
-              <li>
-                <Link href="/manifest">Manifest</Link>
-              </li>
-              <li>
-                <Link href="/faq">Veelgestelde vragen</Link>
-              </li>
-              <li>
-                <Link href="/organisatie">Organisatie</Link>
-              </li>
-              <li>
-                <Link href="/mediakit">Mediakit</Link>
-              </li>
-              <li>
-                <Link href="/vertrouwenspersoon">Vertrouwenspersoon</Link>
-              </li>
-              <li>
-                <Link href="/contact">Contact</Link>
-              </li>
+              <FooterLink href="/manifest">Manifest</FooterLink>
+              <FooterLink href="/faq">Veelgestelde vragen</FooterLink>
+              <FooterLink href="/organisatie">Organisatie</FooterLink>
+              <FooterLink href="/mediakit">Mediakit</FooterLink>
+              <FooterLink href="/vertrouwenspersoon">Vertrouwenspersoon</FooterLink>
+              <FooterLink href="/contact">Contact</FooterLink>
             </ul>
           </div>
         </div>
@@ -119,7 +109,7 @@ export default function Footer() {
           />
           <button
             type="submit"
-            className="text-white bg-branding-light group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
+            className="text-white bg-branding-light hover:bg-white hover:text-branding-dark transition-colors group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
           >
             Aanmelden
           </button>

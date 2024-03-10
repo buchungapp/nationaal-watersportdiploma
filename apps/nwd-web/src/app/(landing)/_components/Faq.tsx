@@ -3,7 +3,7 @@ import { BoxedButton } from "~/app/_components/style/Buttons";
 
 export default function Faq() {
   return (
-    <section className="grid gap-20 px-4 lg:px-16">
+    <section className="container mx-auto grid gap-20 px-4 lg:px-16">
       <Article>
         <Article.Heading className="text-branding-dark">Hoe zit het</Article.Heading>
         <Article.Title as="h2">Veelgestelde vragen.</Article.Title>
@@ -15,13 +15,22 @@ export default function Faq() {
           <BoxedButton href="/faq" className="bg-branding-dark text-white">
             Bekijk alle vragen
           </BoxedButton>
-          <BoxedButton href="/faq#instructeurs-en-vaarlocaties" className="text-branding-dark">
-            Voor instructeurs en vaarlocaties
+          <BoxedButton
+            href="/faq#instructeurs-en-vaarlocaties"
+            className="hover:bg-branding-dark/10 text-branding-dark"
+          >
+            Voor instructeurs
+          </BoxedButton>
+          <BoxedButton
+            href="/faq#instructeurs-en-vaarlocaties"
+            className="hover:bg-branding-dark/10 text-branding-dark"
+          >
+            Voor vaarlocaties
           </BoxedButton>
         </Article.ButtonSection>
       </Article>
       <div
-        className="columns-1 lg:columns-3 space-y-12 xl:space-y-12 gap-12 xl:gap-24"
+        className="columns-1 lg:columns-3 space-y-12 xl:space-y-12 gap-8"
         style={{
           columnFill: "balance",
         }}
