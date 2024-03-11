@@ -1,5 +1,11 @@
 import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Bestuur",
+};
+
 export default function Bestuur() {
   return (
     <article className="prose">

@@ -8,6 +8,12 @@ import Article from "../_components/style/article";
 import CopyToClipboard from "../_components/style/copy-to-clipboard";
 import contact from "./_assets/contact.jpg";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact",
+};
+
 export default function Contact() {
   return (
     <main className="flex flex-col items-center">

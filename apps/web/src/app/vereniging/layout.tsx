@@ -1,5 +1,15 @@
+import { APP_NAME } from "@nawadi/lib/constants";
 import PageHero from "../_components/style/page-hero";
 import SideNav from "../_components/style/side-nav";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: {
+    template: `%s | Verenigingszaken | ${APP_NAME}`,
+    default: "Verenigingszaken",
+  },
+};
 
 export default function Layout({
   children,
