@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: `%s | ${APP_NAME}`,
   },
   applicationName: APP_NAME,
-  description: `Nationaal Watersportdiploma: dé standaard voor veiligheid, kwaliteit en plezier op het water. Geaccrediteerd door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+  description: `Nationaal Watersportdiploma: dé standaard voor veiligheid, kwaliteit en plezier op het water. Erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
   metadataBase: process.env.VERCEL_ENV === "production" ? new URL(WEBSITE_URL) : undefined,
   robots: {
     index: true,
