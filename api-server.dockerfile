@@ -7,6 +7,7 @@ RUN corepack enable
 COPY specifications /root/specifications
 COPY apps /root/apps
 COPY packages /root/packages
+COPY scripts /root/scripts
 COPY package.json \
   pnpm-workspace.yaml \
   pnpm-lock.yaml \
