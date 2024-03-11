@@ -1,3 +1,4 @@
+import { APP_NAME, APP_SLOGAN, WEBSITE_URL } from "@nawadi/lib/constants";
 import { clsx } from "clsx";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -9,8 +10,20 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Nationaal Watersportdiploma",
-  description: "Jouw watersportavontuur begint bij ons, veilig en vol plezier!",
+  title: {
+    default: `${APP_NAME} | ${APP_SLOGAN}`,
+    template: `%s | ${APP_NAME}`,
+  },
+  applicationName: APP_NAME,
+  description: `Nationaal Watersportdiploma: dé standaard voor veiligheid, kwaliteit en plezier op het water. Geaccrediteerd door het Watersportverbond en hoge kwaliteitseisen aan vaarlocaties.`,
+  metadataBase: process.env.VERCEL_ENV === "production" ? new URL(WEBSITE_URL) : undefined,
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
