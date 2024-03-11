@@ -1,5 +1,5 @@
 {
-  "name": "nwd-db",
+  "name": "@nawadi/db",
   "version": "0.0.0",
   "description": "",
   "type": "commonjs",
@@ -50,6 +50,6 @@
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   }
 }

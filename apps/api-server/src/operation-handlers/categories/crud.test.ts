@@ -1,7 +1,7 @@
 import assert from "assert";
 import test from "node:test";
 import * as api from "nwd-api";
-import { withDatabase } from "nwd-db";
+import { withDatabase } from "../../../../../packages/db/src/main.js";
 import { withServer } from "../../testing/index.js";
 
 test("categories crud", () =>

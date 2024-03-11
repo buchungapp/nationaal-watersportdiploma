@@ -1,11 +1,11 @@
 import assert from "assert";
 import * as api from "nwd-api";
-import { schema } from "nwd-db";
+import { schema } from "../../../../../packages/db/src/main.js";
 import * as application from "../../application/index.js";
 
-export function createMainCategory(
+export function createSubCategory(
   context: application.Context,
-): api.CreateMainCategoryOperationHandler<application.Authentication> {
+): api.CreateSubCategoryOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
     if (!authentication.apiToken.super) {
       return {
@@ -15,13 +15,15 @@ export function createMainCategory(
       };
     }
 
+    const { mainCategoryId } = incomingRequest.parameters as any;
     const entity = (await incomingRequest.entity()) as any;
 
     const rows = await context.db
-      .insert(schema.mainCategories)
+      .insert(schema.subCategories)
       .values({
         name: entity.name,
         description: entity.description ?? null,
+        mainCategoryId,
       })
       .returning();
 

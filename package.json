@@ -1,4 +1,5 @@
 {
+  "name": "@nawadi/nationaal-watersportdiploma",
   "private": true,
   "packageManager": "pnpm@8.14.3",
   "scripts": {
