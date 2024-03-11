@@ -3,8 +3,8 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "path";
 import pg from "pg";
 import { Database } from "../database.js";
+import { projectRoot } from "../root.js";
 import * as schema from "../schema/index.js";
-import { projectRoot } from "../utils/index.js";
 
 export interface DatabaseContext {
   pgPool: pg.Pool;

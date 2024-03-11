@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { PackageJson } from "type-fest";
-import { projectRoot } from "./root.js";
+import { projectRoot } from "../root.js";
 
 export const packageInfo = readPackageInfo();
 

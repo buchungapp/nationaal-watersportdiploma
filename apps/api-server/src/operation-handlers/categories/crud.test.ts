@@ -1,7 +1,7 @@
 import * as api from "@nawadi/api";
+import { withDatabase } from "@nawadi/db";
 import assert from "assert";
 import test from "node:test";
-import { withDatabase } from "../../../../../packages/db/src/main.js";
 import { withServer } from "../../testing/index.js";
 
 test.skip("categories crud", () =>
