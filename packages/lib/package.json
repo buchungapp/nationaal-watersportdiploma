@@ -30,9 +30,8 @@
     "url": "https://github.com/buchungapp/nationaal-watersportdiploma/issues"
   },
   "keywords": [],
-  "dependencies": {},
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   }
 }
