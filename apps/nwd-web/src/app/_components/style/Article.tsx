@@ -33,9 +33,15 @@ Article.Heading = function ArticleHeading({
   justify?: "center" | "start" | "end";
 }) {
   return (
-    <div {...props} className={twMerge("flex gap-3 items-center", className)}>
+    <div
+      {...props}
+      className={twMerge(
+        "flex gap-3 items-center uppercase whitespace-nowrap font-bold",
+        className,
+      )}
+    >
       {justify !== "start" ? <Double /> : null}
-      <span className="uppercase whitespace-nowrap font-bold">{children}</span>
+      <span>{children}</span>
       {justify !== "end" ? <Double /> : null}
     </div>
   );
