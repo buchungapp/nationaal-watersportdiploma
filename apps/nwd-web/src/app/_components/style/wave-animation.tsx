@@ -2,8 +2,8 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { DoubleLine, Wave } from "~/app/_assets/Wave";
-import useWindowDimensions from "~/app/_components/useWindowDimensions";
+import { DoubleLine, Wave } from "~/app/_assets/wave";
+import useWindowDimensions from "~/app/_hooks/use-window-dimensions";
 
 export default function WaveAnimation({
   begin,
@@ -22,8 +22,10 @@ export default function WaveAnimation({
 
   const { width } = useWindowDimensions();
 
+  const isClient = typeof window !== "undefined";
+
   useEffect(() => {
-    if (!ref.current || typeof window === "undefined") return;
+    if (!ref.current || !isClient) return;
 
     const { top } = ref.current.getBoundingClientRect();
 
@@ -39,7 +41,7 @@ export default function WaveAnimation({
 
     setBeginOffset(begin + top + window.scrollY);
     setEndOffset(end + top + window.scrollY);
-  }, [ref, begin, end, typeof window, width]);
+  }, [id, ref, begin, end, isClient, width]);
 
   return (
     <div className="text-white w-full relative group py-3 overflow-x-hidden" ref={ref}>

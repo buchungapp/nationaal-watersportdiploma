@@ -4,9 +4,9 @@ import Double from "~/app/_components/brand/double-line";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 
-import MobileNav, { MobileNavButton } from "./mobile/MobileNav";
+import MobileNav, { MobileNavButton } from "./mobile/mobile-nav";
 import PopoverNavItem from "./sticky/popover-item";
-import { StickyNavContainer, StickyNavDiv, StickyNavItemsContainer } from "./sticky/StickyNav";
+import { StickyNavContainer, StickyNavDiv, StickyNavItemsContainer } from "./sticky/sticky-nav";
 
 export type NavItem =
   | {

@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/_components/style/Buttons";
+import { BoxedButton } from "~/app/_components/style/buttons";
 import locations from "./_assets/locations.png";
 
 export default function Locations() {

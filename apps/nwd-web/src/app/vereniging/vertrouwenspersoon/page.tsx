@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import { InlineButton } from "~/app/_components/style/Buttons";
-import CopyToClipboard from "~/app/_components/style/CopyToClipboard";
+import { InlineButton } from "~/app/_components/style/buttons";
+import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 import vertrouwenspersoon from "./_assets/vertrouwenspersoon.jpg";
 
 export default function Vertrouwenspersoon() {

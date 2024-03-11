@@ -3,7 +3,7 @@ import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/_components/style/Buttons";
+import { BoxedButton } from "~/app/_components/style/buttons";
 import aankondiging from "./_assets/aankondiging.jpg";
 import diplomalijn from "./_assets/diplomalijn.jpg";
 import zwemvest from "./_assets/zwemvest.png";

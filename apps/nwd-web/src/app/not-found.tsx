@@ -1,4 +1,4 @@
-import { BoxedBackButton, BoxedButton } from "./_components/style/Buttons";
+import { BoxedBackButton, BoxedButton } from "./_components/style/buttons";
 import PageHero from "./_components/style/page-hero";
 
 export default function NotFound() {

@@ -57,6 +57,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setScrollPosition(position);
   };
 
+  const isClient = typeof window !== "undefined";
+
   useEffect(() => {
     if (pathname !== previousPathname && mobileMenuOpen) {
       setMobileMenuOpen(false);
@@ -64,14 +66,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [pathname, previousPathname, mobileMenuOpen]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isClient) return;
 
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [typeof window !== "undefined"]);
+  }, [isClient]);
 
   return (
     <AppContext.Provider

@@ -1,11 +1,11 @@
 import Image from "next/image";
-import { InlineButton, TekstButton } from "../_components/style/Buttons";
+import { InlineButton, TekstButton } from "../_components/style/buttons";
 import PageHero from "../_components/style/page-hero";
 
 import { AtSymbolIcon, EnvelopeIcon, PhoneIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import Article from "../_components/style/Article";
-import CopyToClipboard from "../_components/style/CopyToClipboard";
+import Article from "../_components/style/article";
+import CopyToClipboard from "../_components/style/copy-to-clipboard";
 import contact from "./_assets/contact.jpg";
 
 export default function Contact() {

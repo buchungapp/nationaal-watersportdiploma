@@ -1,5 +1,5 @@
 import PageHero from "../_components/style/page-hero";
-import SideNav from "../_components/style/SideNav";
+import SideNav from "../_components/style/side-nav";
 
 export default function Layout({
   children,
