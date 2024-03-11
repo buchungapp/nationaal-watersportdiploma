@@ -1,25 +1,24 @@
 FROM node:21.5.0-alpine3.19 AS builder
 WORKDIR /root
 
-RUN apk add make g++ python3
+RUN apk add g++ python3
 RUN corepack enable
 
 COPY specifications /root/specifications
 COPY apps /root/apps
 COPY packages /root/packages
+COPY scripts /root/scripts
 COPY package.json \
   pnpm-workspace.yaml \
   pnpm-lock.yaml \
-  Makefile \
   /root/
 
-RUN make
-
-RUN pnpm install --filter nwd-api-server --frozen-lockfile
-RUN pnpm run --filter nwd-api-server build
+RUN pnpm initialize
+RUN pnpm install --filter api-server --frozen-lockfile
+RUN pnpm run --filter api-server build
 
 RUN pnpm \
-  --filter nwd-api-server \
+  --filter api-server \
    deploy \
   --production \
   deployed

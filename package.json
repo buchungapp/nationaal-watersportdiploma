@@ -4,7 +4,8 @@
   "packageManager": "pnpm@8.14.3",
   "scripts": {
     "spelling": "cspell",
-    "formatting": "prettier --check *"
+    "formatting": "prettier --check *",
+    "initialize": "node ./scripts/initialize.js"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",

@@ -1,5 +1,5 @@
 packages:
-  - generated/api
+  - generated/*
   - packages/lib
   - packages/db
   - apps/api-server
