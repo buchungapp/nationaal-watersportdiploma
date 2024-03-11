@@ -2,7 +2,7 @@
 
 # Nationaal Watersportdiploma (NWD / NaWaDi)
 
-The Dutch 'Nationaal Watersportdiploma' organization oversees a comprehensive diploma system designed to standardize and enhance the quality and safety of water sports education across the Netherlands. This initiative brings together leading sailing schools and other water sports entities to foster a unified approach to training and certification. 
+The Dutch 'Nationaal Watersportdiploma' organization oversees a comprehensive diploma system designed to standardize and enhance the quality and safety of water sports education across the Netherlands. This initiative brings together leading sailing schools and other water sports entities to foster a unified approach to training and certification.
 
 This monorepo includes the source code for our official website and a sophisticated system for tracking and managing diplomas.
 
@@ -18,7 +18,7 @@ Please note that the primary language for communication, documentation, and code
 
 - [GitHub Issues](https://github.com/buchungapp/nationaal-watersportdiploma/issues). Best for: bugs, errors and future requests.
 - [Discord](https://discord.gg/tuCtEQZryd). Best for: seeking (development) help and hanging out with the community.
-  
+
 ### License
 
 This project is proudly open source, licensed under the GNU Affero General Public License v3.0. While we encourage the free distribution and modification of our work, it's important to note that any derivative work must also be open and available under the same license. For detailed information, please refer to the [LICENSE](https://github.com/buchungapp/nationaal-watersportdiploma/blob/main/LICENSE) file included in this repository.
@@ -33,7 +33,9 @@ Start by generating packages via `make`. This will also tun `pnpm install` so ev
 
 ### testing
 
-Make sure docker is running, then start docker compose from the root of this repo. Then run `pnpm --recursive test` to run all tests.
+Make sure docker is running, then start docker compose from the root of this repo. Set the `PGURI` environment variable to `postgres://postgres:postgres@localhost:5432/postgres`. Then run `pnpm --recursive test` to run all tests.
+
+If `PGURI` is not set then the database tests will not run!
 
 ### docker
 

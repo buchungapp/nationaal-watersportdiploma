@@ -1,6 +1,6 @@
+import * as api from "@nawadi/api";
+import { schema } from "@nawadi/db";
 import assert from "assert";
-import * as api from "nwd-api";
-import { schema } from "../../../../../packages/db/src/main.js";
 import * as application from "../../application/index.js";
 
 export function createSubCategory(
