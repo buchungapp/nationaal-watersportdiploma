@@ -13,7 +13,7 @@ clean: \
 generated/%: specifications/%.yaml
 	pnpm --package oa42-generator@0.9.5 dlx oa42-generator package $^ \
 		--package-directory $@ \
-		--package-name $(notdir $(basename $@)) \
+		--package-name @nawadi/$(notdir $(basename $@)) \
 		--package-version 0.0.0 \
 
 	pnpm --filter {$@} install --no-lockfile

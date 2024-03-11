@@ -1,5 +1,5 @@
-import assert from "assert";
-import * as api from "nwd-api";
+import * as api from "@nawadi/api";
+import * as assert from "assert";
 import { schema } from "../../../../../packages/db/src/main.js";
 import * as application from "../../application/index.js";
 

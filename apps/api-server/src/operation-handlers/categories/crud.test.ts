@@ -1,6 +1,6 @@
-import assert from "assert";
+import * as api from "@nawadi/api";
+import * as assert from "assert";
 import test from "node:test";
-import * as api from "nwd-api";
 import { withDatabase } from "../../../../../packages/db/src/main.js";
 import { withServer } from "../../testing/index.js";
 
