@@ -24,5 +24,5 @@ cp.execFileSync(
   options,
 );
 
-cp.execFileSync("pnpm", ["--filter", "@nawadi/api", "install", "--no-lockfile"], options);
+cp.execFileSync("pnpm", ["--filter", "@nawadi/api", "install"], options);
 cp.execFileSync("pnpm", ["--filter", "@nawadi/api", "build"], options);
