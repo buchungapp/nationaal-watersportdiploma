@@ -4,5 +4,5 @@ export const projectRoot = getProjectRoot();
 
 function getProjectRoot() {
   const dirname = __dirname;
-  return path.resolve(dirname, "..", "..");
+  return path.resolve(dirname, "..");
 }

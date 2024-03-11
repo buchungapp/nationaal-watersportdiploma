@@ -1,4 +1,4 @@
-import { ApiTokenAuthenticationHandler } from "nwd-api";
+import { ApiTokenAuthenticationHandler } from "@nawadi/api";
 import * as application from "../application/index.js";
 
 export function apiToken(
