@@ -101,12 +101,15 @@ export default function Footer() {
             Ontvang nieuws, updates en leuk beeldmateriaal in je inbox.
           </p>
         </div>
-        <form className="flex gap-2 text-sm">
+        <form className="flex gap-2 text-sm" method="post" action={process.env.LOOPS_API_URL}>
           <input
             type="email"
+            name="email"
+            required
             className="placeholder:text-slate-400 min-w-[200px] rounded py-1.5 px-3 bg-[#003580] border border-[#004099] text-white"
             placeholder="Je e-mailadres"
           />
+          <input type="hidden" name="userGroup" value="Website footer"></input>
           <button
             type="submit"
             className="text-white bg-branding-light hover:bg-white hover:text-branding-dark transition-colors group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
