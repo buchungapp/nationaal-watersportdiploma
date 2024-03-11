@@ -5,20 +5,20 @@
       "path": "./specifications",
     },
     {
-      "name": "apps/nwd-web",
-      "path": "./apps/nwd-web",
+      "name": "apps/web",
+      "path": "./apps/web",
     },
     {
-      "name": "apps/nwd-api-server",
-      "path": "./apps/nwd-api-server",
+      "name": "apps/api-server",
+      "path": "./apps/api-server",
     },
     {
-      "name": "packages/nwd-db",
-      "path": "./packages/nwd-db",
+      "name": "packages/db",
+      "path": "./packages/db",
     },
   ],
   "settings": {
-    "window.title": "Nationaal Watersport Diploma",
+    "window.title": "Nationaal Watersportdiploma",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll": "always",

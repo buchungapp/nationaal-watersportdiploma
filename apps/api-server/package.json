@@ -1,5 +1,5 @@
 {
-  "name": "nwd-api-server",
+  "name": "@nawadi/api-server",
   "version": "0.0.0",
   "description": "",
   "type": "commonjs",

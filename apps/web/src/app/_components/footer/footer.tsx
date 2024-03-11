@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   APP_NAME,
   APP_SLOGAN,
@@ -7,7 +6,8 @@ import {
   LINKEDIN_URL,
   TIKTOK_URL,
   YOUTUBE_URL,
-} from "nwd-lib/constants";
+} from "@nawadi/lib/constants";
+import Link from "next/link";
 import { PropsWithChildren } from "react";
 import { Line, LineWave } from "~/app/_assets/wave";
 import Wordmark from "~/app/_components/brand/wordmark";

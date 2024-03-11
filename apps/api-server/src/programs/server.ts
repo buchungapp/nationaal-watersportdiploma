@@ -1,7 +1,7 @@
 import * as http from "http";
-import { createDatabase } from "nwd-db";
 import pg from "pg";
 import * as yargs from "yargs";
+import { createDatabase } from "../../../../packages/db/src/main.js";
 import * as application from "../application/index.js";
 
 export function configureServerProgram(argv: yargs.Argv) {

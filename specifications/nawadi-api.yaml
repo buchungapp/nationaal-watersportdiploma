@@ -1,9 +1,9 @@
 openapi: 3.0.2
 
 info:
-  title: Nationaal Watersport Diploma API
+  title: Nationaal Watersportdiploma API
   description: |-
-    Nationaal Watersport Diploma API
+    Nationaal Watersportdiploma API
   version: 0.1.0
 
 security:
