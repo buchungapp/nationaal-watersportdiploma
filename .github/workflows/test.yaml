@@ -16,10 +16,10 @@ jobs:
     env:
       PGURI: "postgres://postgres:postgres@postgres:5432/postgres"
     steps:
-      - run: apk add make
       - run: corepack enable
       - uses: actions/checkout@v4
-      - run: make
+      - run: pnpm run initialize
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --recursive run build
       - run: pnpm --recursive test
 
@@ -35,7 +35,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: corepack enable
       - uses: actions/checkout@v4
-      - run: make
+      - run: pnpm run initialize
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --recursive run build
       - run: pnpm --recursive test
 
