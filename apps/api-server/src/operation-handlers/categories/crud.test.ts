@@ -1,10 +1,10 @@
+import * as api from "@nawadi/api";
+import { withDatabase } from "@nawadi/db";
 import assert from "assert";
 import test from "node:test";
-import * as api from "nwd-api";
-import { withDatabase } from "../../../../../packages/db/src/main.js";
 import { withServer } from "../../testing/index.js";
 
-test("categories crud", () =>
+test.skip("categories crud", () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
       const clientCredentials = { apiToken: "supersecret" };

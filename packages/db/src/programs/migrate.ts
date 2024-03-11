@@ -3,7 +3,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import path from "path";
 import pg from "pg";
 import * as yargs from "yargs";
-import { projectRoot } from "../utils/index.js";
+import { projectRoot } from "../root.js";
 
 export function configureMigrateProgram(argv: yargs.Argv) {
   return argv.command(

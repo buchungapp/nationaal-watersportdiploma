@@ -1,6 +1,6 @@
+import * as api from "@nawadi/api";
+import { schema } from "@nawadi/db";
 import { eq } from "drizzle-orm";
-import * as api from "nwd-api";
-import { schema } from "../../../../../packages/db/src/main.js";
 import * as application from "../../application/index.js";
 
 export function getSubCategories(
@@ -12,8 +12,7 @@ export function getSubCategories(
     const rows = await context.db
       .select()
       .from(schema.subCategories)
-      .where(eq(schema.subCategories.mainCategoryId, mainCategoryId as any));
-
+      .where(eq(schema.subCategories.mainCategoryId, mainCategoryId));
     return {
       status: 200,
       parameters: {},

@@ -1,4 +1,4 @@
-import { Database } from "../../../../packages/db/src/main";
+import { Database } from "@nawadi/db";
 
 export interface Context {
   db: Database;

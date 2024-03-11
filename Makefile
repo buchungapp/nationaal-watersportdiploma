@@ -11,12 +11,12 @@ clean: \
 	rm --recursive --force generated/api \
 
 generated/%: specifications/%.yaml
-	pnpm dlx oa42-generator package $^ \
+	pnpm --package oa42-generator@0.9.5 dlx oa42-generator package $^ \
 		--package-directory $@ \
-		--package-name $(notdir $(basename $@)) \
+		--package-name @nawadi/$(notdir $(basename $@)) \
 		--package-version 0.0.0 \
 
-	pnpm --filter {$@} install --no-frozen-lockfile
+	pnpm --filter {$@} install --no-lockfile
 	pnpm --filter {$@} build
 
 .PHONY: \
