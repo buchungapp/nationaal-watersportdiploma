@@ -15,8 +15,8 @@ importers:
         specifier: ^8.6.0
         version: 8.6.0
       oa42-generator:
-        specifier: ^0.9.3
-        version: 0.9.3
+        specifier: ^0.9.4
+        version: 0.9.4
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
@@ -3913,8 +3913,8 @@ packages:
     hasBin: true
     dev: true
 
-  /jns42-generator@0.15.1:
-    resolution: {integrity: sha512-ejHnaSraJpzhKsge3TS/LBR3Br3nISW9KZ2SYzVUukfL6kOsyR2ZEB2ZS3Oa8sIdY6U6R1G8W8VIt8VNAYyvYQ==}
+  /jns42-generator@0.15.3:
+    resolution: {integrity: sha512-fnW1vvCgtd2lNkNESuEPZaSxAZXMjMQjvAkvx1xrrKqjC/hAYvZfyTuggssPGtpMEyTQ7Q3619rYkUWxxrlHvg==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.15.0
@@ -4321,8 +4321,8 @@ packages:
       - supports-color
     dev: false
 
-  /oa42-generator@0.9.3:
-    resolution: {integrity: sha512-6eQbneoN6ThWDLqVT3NVHFkViLg4ygwWUv7FEuSVujeHxKjjWdTAy98BbmHCfTGmzv6j5phKznDNT5TKlDOjXA==}
+  /oa42-generator@0.9.4:
+    resolution: {integrity: sha512-66y9yz5MJiLQD4oNMjWh2R5efOJnGOerNGY4MY3yrUTypRjAnWUUvwiwUzGV3pu6Os2kQWvqdwBhdzy15J/J3g==}
     hasBin: true
     dependencies:
       '@jns42/oas-v3-0': 0.15.0
@@ -4332,7 +4332,7 @@ packages:
       '@types/yargs': 17.0.32
       camelcase: 8.0.0
       goodrouter: 2.1.6
-      jns42-generator: 0.15.1
+      jns42-generator: 0.15.3
       oa42-lib: 0.8.16
       tslib: 2.6.2
       type-fest: 4.12.0

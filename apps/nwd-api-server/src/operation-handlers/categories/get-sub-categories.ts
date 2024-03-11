@@ -7,7 +7,7 @@ export function getSubCategories(
   context: application.Context,
 ): api.GetSubCategoriesOperationHandler<application.Authentication> {
   return async (incomingRequest, authentication) => {
-    const { mainCategoryId } = incomingRequest.parameters as any; // FIXME
+    const { mainCategoryId } = incomingRequest.parameters;
 
     const rows = await context.db
       .select()

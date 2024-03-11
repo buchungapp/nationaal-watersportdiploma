@@ -11,7 +11,7 @@ clean: \
 	rm --recursive --force generated/nwd-api \
 
 generated/%: specifications/%.yaml
-	pnpx oa42-generator package $^ \
+	pnpm --package oa42-generator@0.9.4 dlx oa42-generator package $^ \
 		--package-directory $@ \
 		--package-name $(notdir $(basename $@)) \
 		--package-version 0.0.0 \
