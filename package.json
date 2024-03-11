@@ -5,7 +5,7 @@
   "scripts": {
     "spelling": "cspell",
     "formatting": "prettier --check *",
-    "install": "node ./scripts/install.js"
+    "initialize": "node ./scripts/initialize.js"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",

@@ -4,7 +4,9 @@
 
 ## Setting up
 
-Start by generating packages via `make`. This will also tun `pnpm install` so everything is installed and it will run `pnpm --recursive build` for you to build everything.
+Start by running `pnpm run initialize`. Do this before installing! This command will generate somde dependencies. After this is done you probably wan to run `pnpm install`.
+
+**Everytime you change something in the specifications folder you want to run `pnpm run initialize` to regenerate code!**
 
 ## testing
 
