@@ -9,7 +9,7 @@ import {
   YOUTUBE_URL,
 } from "nwd-lib/constants";
 import { PropsWithChildren } from "react";
-import { Line, LineWave } from "~/app/_assets/Wave";
+import { Line, LineWave } from "~/app/_assets/wave";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "~/app/_components/socials";
 

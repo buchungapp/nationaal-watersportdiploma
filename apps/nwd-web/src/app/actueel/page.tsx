@@ -1,7 +1,7 @@
-import Article from "../_components/style/Article";
-import { TekstButton } from "../_components/style/Buttons";
-import SideNav from "../_components/style/SideNav";
+import Article from "../_components/style/article";
+import { TekstButton } from "../_components/style/buttons";
 import PageHero from "../_components/style/page-hero";
+import SideNav from "../_components/style/side-nav";
 
 export default function Actueel() {
   return (

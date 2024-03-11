@@ -1,11 +1,11 @@
 import PageHero from "../_components/style/page-hero";
-import About from "./_components/About";
-import Faq from "./_components/Faq";
-import Locations from "./_components/Locations";
-import News from "./_components/News";
-import Photos from "./_components/Photos";
-import Seperator from "./_components/Seperator";
-import Welcome from "./_components/Welcome";
+import About from "./_components/about";
+import Faq from "./_components/faq";
+import Locations from "./_components/locations";
+import News from "./_components/news";
+import Photos from "./_components/photos";
+import Seperator from "./_components/seperator";
+import Welcome from "./_components/welcome";
 
 export default function Home() {
   return (

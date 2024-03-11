@@ -2,7 +2,7 @@ import { ArrowLongRightIcon, ArrowRightIcon } from "@heroicons/react/24/outline"
 import clsx from "clsx";
 import Link from "next/link";
 import { ComponentProps } from "react";
-import BackButton from "../BackButton";
+import BackButton from "../back-button";
 
 export function BoxedButton({ className, children, ...props }: ComponentProps<typeof Link>) {
   return (

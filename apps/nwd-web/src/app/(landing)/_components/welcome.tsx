@@ -1,4 +1,4 @@
-import { BoxedButton } from "~/app/_components/style/Buttons";
+import { BoxedButton } from "~/app/_components/style/buttons";
 import MuxVideo from "./mux-video";
 
 export default function Welcome() {

@@ -1,5 +1,5 @@
-import Article from "~/app/_components/style/Article";
-import { BoxedButton } from "~/app/_components/style/Buttons";
+import Article from "~/app/_components/style/article";
+import { BoxedButton } from "~/app/_components/style/buttons";
 
 export default function Faq() {
   return (

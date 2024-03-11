@@ -1,4 +1,4 @@
-import CopyToClipboard from "~/app/_components/style/CopyToClipboard";
+import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 
 export default function Bestuur() {
   return (

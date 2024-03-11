@@ -1,5 +1,5 @@
-import Trustbar from "./Trustbar";
-import Nav from "./nav/Nav";
+import Nav from "./nav/nav";
+import Trustbar from "./trustbar";
 
 export default async function Header() {
   return (
