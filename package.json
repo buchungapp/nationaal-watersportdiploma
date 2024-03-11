@@ -8,7 +8,6 @@
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",
     "cspell": "^8.6.0",
-    "oa42-generator": "^0.9.4",
     "prettier": "^3.2.5"
   }
 }
