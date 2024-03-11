@@ -1,14 +1,14 @@
 SHELL:=$(PREFIX)/bin/sh
 
 build: \
-	generated/nwd-api \
+	generated/api \
 
 rebuild: \
 	clean build
 
 clean: \
 
-	rm --recursive --force generated/nwd-api \
+	rm --recursive --force generated/api \
 
 generated/%: specifications/%.yaml
 	pnpm --package oa42-generator@0.9.5 dlx oa42-generator package $^ \
