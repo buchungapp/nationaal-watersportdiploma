@@ -2,15 +2,22 @@ version: "0.2"
 words:
   - buchungapp
   - clsx
+  - diplomeringslijn
   - esbenp
   - headlessui
+  - INGB
+  - INGBNL
   - Initatiefnemers
+  - nawadi
   - PGURI
   - pnpx
   - ryanluker
   - skreet
+  - solvebv
   - supabase
   - tailwindcss
+  - trivago
+  - Wytse
 ignoreWords:
   - TERMS
   - transform
@@ -21,6 +28,7 @@ useGitignore: true
 ignorePaths:
   - pnpm-lock.yaml
   - generated/
+  - apps/nwd-web/src/app/
 files:
   - "**"
 enableFiletypes:

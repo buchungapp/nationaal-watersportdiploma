@@ -1,0 +1,160 @@
+openapi: 3.0.2
+
+info:
+  title: Nationaal Watersportdiploma API
+  description: |-
+    Nationaal Watersportdiploma API
+  version: 0.1.0
+
+security:
+  - api-token: []
+
+paths:
+  /main-category:
+    get:
+      operationId: get-main-categories
+      summary: Get main get-main-categories
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/main-category"
+    post:
+      operationId: create-main-category
+      summary: Create an new main category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/main-category-fields"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/main-category"
+        "403":
+          $ref: "#/components/responses/forbidden"
+
+  /sub-category/{main-category-id}:
+    parameters:
+      - name: main-category-id
+        in: path
+        required: true
+        schema:
+          $ref: "#/components/schemas/entity-id"
+    get:
+      operationId: get-sub-categories
+      summary: Get sub categories in a main category
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/main-category"
+    post:
+      operationId: create-sub-category
+      summary: Create an new sub category in a main category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sub-category-fields"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sub-category"
+        "403":
+          $ref: "#/components/responses/forbidden"
+
+components:
+  schemas:
+    #entity schemas
+
+    main-category:
+      description: |-
+        Full main category entity
+      $ref: "#/components/schemas/main-category-fields"
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/entity-id"
+
+    main-category-fields:
+      description: |-
+        Main category editable fields
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/entity-name"
+        description:
+          $ref: "#/components/schemas/entity-description"
+
+    sub-category:
+      description: |-
+        Full sub category entity
+      $ref: "#/components/schemas/sub-category-fields"
+      required:
+        - id
+      properties:
+        id:
+          $ref: "#/components/schemas/entity-id"
+
+    sub-category-fields:
+      description: |-
+        Sub category entity editable fields
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/entity-name"
+        description:
+          $ref: "#/components/schemas/entity-description"
+
+    # field schemas
+
+    entity-id:
+      description: |-
+        Key of an entity
+      type: integer
+      minimum: 0
+      exclusiveMinimum: true
+
+    entity-name:
+      description: |-
+        The name of an entity
+      type: string
+      minLength: 1
+      maxLength: 100
+
+    entity-description:
+      description: |-
+        Description of an entity
+      type: string
+      minLength: 1
+      maxLength: 100
+
+  responses:
+    forbidden:
+      description: Forbidden
+
+  securitySchemes:
+    api-token:
+      type: apiKey
+      name: api-token
+      in: header
