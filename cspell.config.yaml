@@ -1,19 +1,23 @@
 version: "0.2"
 words:
   - buchungapp
-  - nawadi
   - clsx
+  - diplomeringslijn
   - esbenp
   - headlessui
+  - INGB
+  - INGBNL
   - Initatiefnemers
+  - nawadi
   - PGURI
   - pnpx
   - ryanluker
   - skreet
+  - solvebv
   - supabase
   - tailwindcss
   - trivago
-  - diplomeringslijn
+  - Wytse
 ignoreWords:
   - TERMS
   - transform

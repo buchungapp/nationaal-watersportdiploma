@@ -30,7 +30,7 @@ export default function Actueel() {
                 href: "/actueel?filter=consumenten",
               },
               {
-                label: "Instruteurs",
+                label: "Instructeurs",
                 href: "/actueel?filter=instructeurs",
               },
               {
