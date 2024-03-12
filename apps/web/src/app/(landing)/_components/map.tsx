@@ -8,7 +8,7 @@ const markers = [
     id: 1,
     name: "Zeilschool De Veenhoop",
     position: { lat: 53.0956873, lng: 5.9414746 },
-    url: "https://www.zeilschoolfriesland.nl/",
+    url: "https://zeilschoolfriesland.nl/",
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const markers = [
     id: 4,
     name: "Zeilschool Wavie",
     position: { lat: 52.0013379, lng: 4.5502541 },
-    url: "http://www.wavie.nl/",
+    url: "https://www.wavie.nl/",
   },
   {
     id: 5,
@@ -38,13 +38,13 @@ const markers = [
     id: 6,
     name: "Zeil- en Surfschool Neptunus",
     position: { lat: 52.9294325, lng: 5.7085266 },
-    url: "http://www.zeilschoolneptunus.nl/",
+    url: "https://www.zeilschoolneptunus.nl/",
   },
   {
     id: 7,
     name: "Zeilschool Aalsmeer",
     position: { lat: 52.2504869, lng: 4.7556987 },
-    url: "http://www.zeilschoolaalsmeer.nl/",
+    url: "https://www.zeilschoolaalsmeer.nl/",
   },
   {
     id: 8,
@@ -56,7 +56,7 @@ const markers = [
     id: 9,
     name: "Zeilschool Vinkeveen",
     position: { lat: 52.2176868, lng: 4.9307842 },
-    url: "http://www.zeilschoolvinkeveen.nl/",
+    url: "https://www.vinkeveenhaven.nl/pages/zeilschool",
   },
 ];
 
