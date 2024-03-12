@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="nl">
       <Analytics />
-      <body className={clsx(inter.variable, "text-slate-900 overflow-x-hidden")}>
+      <body className={clsx(inter.variable, "text-gray-900 overflow-x-hidden")}>
         {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
         <div>
           <Providers>

@@ -21,7 +21,7 @@ export default function Locations() {
         </p>
 
         <div className="mt-8 flex items-center gap-x-6">
-          <BoxedButton href="/locaties" className="bg-white text-slate-900">
+          <BoxedButton href="/locaties" className="bg-white text-gray-900">
             Bekijk NWD locaties
           </BoxedButton>
           <BoxedButton href="/kwaliteitseisen-locaties" className="hover:bg-white/10 text-white">

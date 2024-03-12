@@ -44,7 +44,7 @@ export default function Contact() {
           ].map((item) => (
             <article
               key={item.href}
-              className="bg-slate-100 rounded-2xl p-10 break-inside-avoid grid gap-2"
+              className="bg-gray-100 rounded-2xl p-10 break-inside-avoid grid gap-2"
             >
               <h2 className="font-semibold text-lg">{item.title}</h2>
               <p>{item.description}</p>
@@ -66,7 +66,7 @@ export default function Contact() {
             <Article>
               <Article.Heading className="text-branding-dark">Secretariaat</Article.Heading>
               <Article.Title>Neem contact op</Article.Title>
-              <Article.Paragraph className="text-slate-700">
+              <Article.Paragraph className="text-gray-700">
                 Het{" "}
                 <Link href={"/vereniging/secretariaat"} className="underline">
                   secretariaat
@@ -75,7 +75,7 @@ export default function Contact() {
                 beantwoorden je vraag of verwijzen je door binnen het Nationaal Watersportdiploma.
               </Article.Paragraph>
             </Article>
-            <ul className="text-slate-700 flex flex-col gap-4">
+            <ul className="text-gray-700 flex flex-col gap-4">
               <li className="w-fit">
                 <CopyToClipboard
                   value={"info@nationaalwatersportdiploma.nl"}

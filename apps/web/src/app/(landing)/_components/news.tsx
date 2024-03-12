@@ -54,7 +54,11 @@ export default function News() {
               "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
           },
         ].map((news) => (
-          <Link key={news.href} href={news.href} className="p-4 rounded-3xl -m-4 hover:bg-gray-100">
+          <Link
+            key={news.href}
+            href={news.href}
+            className="p-4 rounded-3xl -m-4 hover:bg-gray-100 transition-colors"
+          >
             <article className="grid">
               <Image
                 src={news.image}
@@ -68,7 +72,7 @@ export default function News() {
                 <h3 className="font-bold text-xl">
                   <Balancer>{news.title}</Balancer>
                 </h3>
-                <p className="text-slate-700">{news.description}</p>
+                <p className="text-gray-700">{news.description}</p>
               </div>
             </article>
           </Link>
