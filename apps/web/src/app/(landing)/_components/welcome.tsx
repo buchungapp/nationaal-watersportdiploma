@@ -14,7 +14,7 @@ export default function Welcome() {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
-          <BoxedButton href="/locaties" className="bg-white text-branding-dark">
+          <BoxedButton href="/vaarlocaties" className="bg-white text-branding-dark">
             Vindt een NWD locatie
           </BoxedButton>
           <BoxedButton href="/over" className="text-white hover:bg-white/10">

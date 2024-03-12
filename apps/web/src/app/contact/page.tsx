@@ -45,7 +45,7 @@ export default function Contact() {
               title: "Contacteer jouw vaarlocatie",
               description: "Vragen over diploma's en opleidingen? Start bij je eigen vaarlocatie.",
               label: "Bekijk NWD-vaarlocaties",
-              href: "/locaties",
+              href: "/vaarlocaties",
             },
           ].map((item) => (
             <article

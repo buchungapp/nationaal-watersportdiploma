@@ -23,14 +23,14 @@ export default function News() {
           hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
         </p>
 
-        <BoxedButton href="/nieuws" className="bg-branding-orange text-white mt-8">
+        <BoxedButton href="/actueel" className="bg-branding-orange text-white mt-8">
           Meer nieuws
         </BoxedButton>
       </div>
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-3">
         {[
           {
-            href: "/nieuws/1",
+            href: "/actueel/1",
             image: aankondiging,
             title: "Aankondiging Nationaal Watersportdiploma.",
             date: "11 maart 2024",
@@ -38,7 +38,7 @@ export default function News() {
               "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
           },
           {
-            href: "/nieuws/2",
+            href: "/actueel/2",
             image: diplomalijn,
             title: "Werk aan de diplomalijnen nagenoeg afgerond.",
             date: "9 maart 2024",
@@ -46,7 +46,7 @@ export default function News() {
               "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
           },
           {
-            href: "/nieuws/3",
+            href: "/actueel/3",
             image: zwemvest,
             title: "Zwemvesten, niet hip maar wel noodzakelijk!",
             date: "8 maart 2024",

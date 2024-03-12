@@ -50,7 +50,7 @@ export default function Actueel() {
         <div className="flex flex-col gap-16 justify-center">
           {[
             {
-              href: "/nieuws/1",
+              href: "/actueel/1",
               title: "Aankondiging Nationaal Watersportdiploma.",
               type: "vereniging",
               date: "11 maart 2024",
@@ -58,7 +58,7 @@ export default function Actueel() {
                 "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
             },
             {
-              href: "/nieuws/2",
+              href: "/actueel/2",
               title: "Werk aan de diplomalijnen nagenoeg afgerond.",
               type: "vereniging",
               date: "9 maart 2024",
@@ -66,7 +66,7 @@ export default function Actueel() {
                 "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
             },
             {
-              href: "/nieuws/3",
+              href: "/actueel/3",
               title: "Zwemvesten, niet hip maar wel noodzakelijk!",
               type: "vereniging",
               date: "8 maart 2024",

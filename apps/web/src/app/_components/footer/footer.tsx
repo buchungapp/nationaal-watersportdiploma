@@ -64,17 +64,18 @@ export default function Footer() {
         </div>
         <div className="grid gap-12 lg:gap-0 items-start grid-cols-1 lg:grid-cols-3 text-sm">
           <div className="grid gap-6">
-            <h3 className="font-semibold uppercase text-white">Diplomalijn</h3>
+            <h3 className="font-semibold uppercase text-white">Diplomeringslijn</h3>
             <ul className="grid gap-6 text-slate-200">
-              <FooterLink href="/consumenten">Consumenten</FooterLink>
-              <FooterLink href="/instructeurs">Instructeurs</FooterLink>
-              <FooterLink href="/watersportverbond">Watersportverbond</FooterLink>
+              <FooterLink href="/diplomalijn/consumenten">Consumenten</FooterLink>
+              <FooterLink href="/diplomalijn/instructeurs">Instructeurs</FooterLink>
+              <FooterLink href="/diplomalijn">Filosofie</FooterLink>
+              <FooterLink href="/diplomalijn/accreditatie">Accreditatie</FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Locaties</h3>
             <ul className="grid gap-6 text-slate-200">
-              <FooterLink href="/locaties">Aangesloten vaarlocaties</FooterLink>
+              <FooterLink href="/vaarlocaties">Aangesloten vaarlocaties</FooterLink>
               <FooterLink href="/kwaliteitseisen">Kwaliteitseisen</FooterLink>
               <FooterLink href="/procedures">Procedures</FooterLink>
             </ul>
@@ -82,11 +83,11 @@ export default function Footer() {
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
             <ul className="grid gap-6 text-slate-200">
-              <FooterLink href="/manifest">Manifest</FooterLink>
+              <FooterLink href="/vereniging/manifest">Manifest</FooterLink>
               <FooterLink href="/faq">Veelgestelde vragen</FooterLink>
-              <FooterLink href="/organisatie">Organisatie</FooterLink>
+              <FooterLink href="/#TODO">Organisatie</FooterLink>
               <FooterLink href="/mediakit">Mediakit</FooterLink>
-              <FooterLink href="/vertrouwenspersoon">Vertrouwenspersoon</FooterLink>
+              <FooterLink href="/vereniging/vertrouwenspersoon">Vertrouwenspersoon</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </ul>
           </div>
