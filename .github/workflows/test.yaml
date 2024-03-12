@@ -20,10 +20,10 @@ jobs:
       - run: pnpm --recursive run build
       - run: pnpm --recursive test
 
-  test-matrix:
+  test-lts:
     strategy:
       matrix:
-        node-version: [21.5.0]
+        node-version: [18, 20]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
@@ -35,7 +35,9 @@ jobs:
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --recursive run build
-      - run: pnpm --recursive test
+      # node test runner seems to support globs since v21
+      - if: ${{ matrix.node-version >= 21 }}
+        run: pnpm --recursive test
 
   audit:
     runs-on: ubuntu-latest
