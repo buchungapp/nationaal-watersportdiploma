@@ -8,11 +8,9 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    colors: {
-      gray: slate,
-    },
     extend: {
       colors: {
+        gray: slate,
         branding: {
           orange: "#ff8000",
           light: "#007FFF",
