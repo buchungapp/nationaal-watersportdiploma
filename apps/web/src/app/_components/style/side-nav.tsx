@@ -25,7 +25,7 @@ export default function SideNav({
               href={href}
               className={clsx(
                 "px-4 py-1.5 block transition-colors rounded-lg text-branding-dark",
-                pathname === href ? "bg-slate-100 font-semibold" : "hover:bg-slate-100",
+                pathname === href ? "bg-gray-100 font-semibold" : "hover:bg-gray-100",
               )}
             >
               {label}

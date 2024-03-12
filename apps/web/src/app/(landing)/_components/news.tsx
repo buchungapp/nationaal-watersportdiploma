@@ -72,7 +72,7 @@ export default function News() {
                 <h3 className="font-bold text-xl">
                   <Balancer>{news.title}</Balancer>
                 </h3>
-                <p className="text-slate-700">{news.description}</p>
+                <p className="text-gray-700">{news.description}</p>
               </div>
             </article>
           </Link>

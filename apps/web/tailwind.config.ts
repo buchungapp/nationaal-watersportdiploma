@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { slate } from "tailwindcss/colors";
 
 const config: Config = {
   content: [
@@ -7,6 +8,9 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    colors: {
+      gray: slate,
+    },
     extend: {
       colors: {
         branding: {
