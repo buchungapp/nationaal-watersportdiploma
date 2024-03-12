@@ -27,7 +27,7 @@ export default function Locations() {
           </BoxedButton>
         </div>
       </div>
-      <div className="h-full w-full">
+      <div className="h-full min-h-[24rem] w-full">
         <Map />
       </div>
     </section>
