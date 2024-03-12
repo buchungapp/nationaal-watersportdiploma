@@ -15,8 +15,8 @@ export function createSubCategory(
       };
     }
 
-    const { mainCategoryId } = incomingRequest.parameters as any;
-    const entity = (await incomingRequest.entity()) as any;
+    const { mainCategoryId } = incomingRequest.parameters;
+    const entity = await incomingRequest.entity();
 
     const rows = await context.db
       .insert(schema.subCategories)
