@@ -13,6 +13,7 @@
     "@headlessui/tailwindcss": "^0.2.0",
     "@heroicons/react": "^2.1.1",
     "@mux/mux-player-react": "^2.3.3",
+    "@react-google-maps/api": "^2.19.3",
     "clsx": "^2.1.0",
     "fathom-client": "^3.6.0",
     "framer-motion": "^11.0.8",

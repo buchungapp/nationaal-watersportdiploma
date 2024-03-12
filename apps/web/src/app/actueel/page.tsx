@@ -69,13 +69,13 @@ export default function Actueel() {
             },
           ].map((news) => (
             <div key={news.href} className="grid sm:grid-cols-[12rem,1fr] gap-2">
-              <p className="text-slate-400 text-xs">{news.date}</p>
+              <p className="text-gray-400 text-xs">{news.date}</p>
               <Article className="max-w-xl">
-                <Article.Heading className="text-slate-400 text-xs font-normal">
+                <Article.Heading className="text-gray-400 text-xs font-normal">
                   {news.type}
                 </Article.Heading>
                 <Article.Title>{news.title}</Article.Title>
-                <Article.Paragraph className="text-slate-700">{news.description}</Article.Paragraph>
+                <Article.Paragraph className="text-gray-700">{news.description}</Article.Paragraph>
 
                 <TekstButton href={news.href} className={"mt-4 text-branding-orange"}>
                   Lees meer

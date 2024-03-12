@@ -60,12 +60,12 @@ export default function Footer() {
       <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-2">
         <div className="grid gap-6">
           <Wordmark className="w-48 h-12 text-white" />
-          <p className="text-slate-200 text-sm">{APP_SLOGAN}</p>
+          <p className="text-gray-200 text-sm">{APP_SLOGAN}</p>
         </div>
         <div className="grid gap-12 lg:gap-0 items-start grid-cols-1 lg:grid-cols-3 text-sm">
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Diplomalijn</h3>
-            <ul className="grid gap-6 text-slate-200">
+            <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/consumenten">Consumenten</FooterLink>
               <FooterLink href="/instructeurs">Instructeurs</FooterLink>
               <FooterLink href="/watersportverbond">Watersportverbond</FooterLink>
@@ -73,7 +73,7 @@ export default function Footer() {
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Locaties</h3>
-            <ul className="grid gap-6 text-slate-200">
+            <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/locaties">Aangesloten vaarlocaties</FooterLink>
               <FooterLink href="/kwaliteitseisen">Kwaliteitseisen</FooterLink>
               <FooterLink href="/procedures">Procedures</FooterLink>
@@ -81,7 +81,7 @@ export default function Footer() {
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
-            <ul className="grid gap-6 text-slate-200">
+            <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/manifest">Manifest</FooterLink>
               <FooterLink href="/faq">Veelgestelde vragen</FooterLink>
               <FooterLink href="/organisatie">Organisatie</FooterLink>
@@ -97,7 +97,7 @@ export default function Footer() {
       <div className="flex justify-between flex-col gap-4 lg:flex-row lg:items-center">
         <div className="grid gap-2 text-sm">
           <p className="text-white font-semibold">Schrijf je in voor de NWD-nieuwsbrief</p>
-          <p className="text-slate-200">
+          <p className="text-gray-200">
             Ontvang nieuws, updates en leuk beeldmateriaal in je inbox.
           </p>
         </div>
@@ -106,7 +106,7 @@ export default function Footer() {
             type="email"
             name="email"
             required
-            className="placeholder:text-slate-400 min-w-[200px] rounded py-1.5 px-3 bg-[#003580] border border-[#004099] text-white"
+            className="placeholder:text-gray-400 min-w-[200px] rounded py-1.5 px-3 bg-[#003580] border border-[#004099] text-white"
             placeholder="Je e-mailadres"
           />
           <input type="hidden" name="userGroup" value="Website footer"></input>
@@ -121,7 +121,7 @@ export default function Footer() {
 
       <LineWave progress="60%" />
 
-      <div className="text-slate-200 flex flex-col lg:flex-row gap-4">
+      <div className="text-gray-200 flex flex-col lg:flex-row gap-4">
         <p className="lg:text-start text-center flex-1 text-sm">
           {`© ${new Date().getFullYear()} ${APP_NAME}`}
         </p>

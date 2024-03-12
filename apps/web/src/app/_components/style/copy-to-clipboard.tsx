@@ -24,7 +24,7 @@ export default function CopyToClipboard({
           setTimeout(() => setShowing(false), 400);
         }}
         className={twMerge(
-          "rounded-lg hover:-mx-2 hover:px-2 transition-[padding,margin,background-color] hover:bg-slate-100",
+          "rounded-lg hover:-mx-2 hover:px-2 transition-[padding,margin,background-color] hover:bg-gray-100",
           className,
         )}
       >

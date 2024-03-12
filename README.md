@@ -8,7 +8,7 @@ This monorepo includes the source code for our official website and a sophistica
 
 ## Governance
 
-[BuchungApp](https://www.buchungapp.com/) proudly leads the development efforts on behalf of the Nationaal Watersportdiploma organization. Our commitment extends beyond our team; we actively involve the broader community in shaping the future of this project, as reflected in our decision to maintain this repository publicly. We believe that collective input is crucial for fostering innovation and ensuring the system meets the diverse needs of all stakeholders involved in water sports education.
+[BuchungApp](https://www.buchungapp.com/) leads the development efforts on behalf of the Nationaal Watersportdiploma organization. Our commitment extends beyond our team; we actively involve the broader community in shaping the future of this project, as reflected in our decision to maintain this repository publicly. We believe that collective input is crucial for fostering innovation and ensuring the system meets the diverse needs of all stakeholders involved in water sports education.
 
 ### Language
 
@@ -29,7 +29,7 @@ We encourage contributions from everyone interested in enhancing the quality and
 
 ### Setting up
 
-Start by running `pnpm run initialize`. Do this before installing! This command will generate somde dependencies. After this is done you probably wan to run `pnpm install`.
+Start by running `pnpm run initialize`. Do this before installing! This command will generate some dependencies. After this is done you probably wan to run `pnpm install`.
 
 **Everytime you change something in the specifications folder you want to run `pnpm run initialize` to regenerate code!**
 

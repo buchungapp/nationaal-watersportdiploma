@@ -1,8 +1,6 @@
-import Image from "next/image";
-
 import Double from "~/app/_components/brand/double-line";
 import { BoxedButton } from "~/app/_components/style/buttons";
-import locations from "./_assets/locations.png";
+import Map from "./map";
 
 export default function Locations() {
   return (
@@ -21,7 +19,7 @@ export default function Locations() {
         </p>
 
         <div className="mt-8 flex items-center gap-x-6">
-          <BoxedButton href="/locaties" className="bg-white text-slate-900">
+          <BoxedButton href="/locaties" className="bg-white text-gray-900">
             Bekijk NWD locaties
           </BoxedButton>
           <BoxedButton href="/kwaliteitseisen-locaties" className="hover:bg-white/10 text-white">
@@ -29,13 +27,9 @@ export default function Locations() {
           </BoxedButton>
         </div>
       </div>
-      <Image
-        src={locations}
-        alt="NWD-locaties"
-        width={locations.width}
-        height={locations.height}
-        className="mix-blend-luminosity"
-      />
+      <div className="h-full min-h-[24rem] w-full">
+        <Map />
+      </div>
     </section>
   );
 }

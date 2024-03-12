@@ -75,7 +75,7 @@ export default function Faq() {
         ].map(({ question, answer }) => (
           <div key={question} className="break-inside-avoid-column grid gap-4">
             <h4 className="font-semibold text-branding-dark text-lg">{question}</h4>
-            <p className="text-justify text-slate-700">{answer}</p>
+            <p className="text-justify text-gray-700">{answer}</p>
           </div>
         ))}
       </div>
