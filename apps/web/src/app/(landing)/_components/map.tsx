@@ -64,10 +64,11 @@ export default function Map() {
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.GOOGLE_API_KEY ?? "",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
     language: "nl",
     region: "nl",
   });
+
   if (!isLoaded) {
     return null;
   }
