@@ -91,20 +91,21 @@ export default function Contact() {
                   085 - 782 27 77
                 </InlineButton>
               </li>
-              <li className="flex gap-4 items-center">
-                <EnvelopeIcon className="w-5 h-5" />
+              <li className="flex gap-4 items-start">
+                <EnvelopeIcon className="w-5 h-6 flex-shrink-0" />
                 Wilhelmina van Pruisenweg 35 <br />
                 2595AN Den Haag
               </li>
             </ul>
             <p>
               <strong>KvK</strong> 92327249
-              <br />
+              {/* TODO: these are not known yet */}
+              {/* <br />
               <strong>IBAN</strong> NL 01 INGB 0003 123 456
               <br />
               <strong>BIC</strong> INGBNL2A
               <br />
-              <strong>BTW</strong> NL123456789B01
+              <strong>BTW</strong> NL123456789B01 */}
             </p>
           </div>
         </div>
