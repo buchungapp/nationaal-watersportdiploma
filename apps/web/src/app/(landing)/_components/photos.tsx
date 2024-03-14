@@ -1,11 +1,11 @@
 import Image from "next/image";
 
 import clsx from "clsx";
-import image1 from "./_assets/photo-1.png";
-import image2 from "./_assets/photo-2.png";
-import image3 from "./_assets/photo-3.png";
-import image4 from "./_assets/photo-4.png";
-import image5 from "./_assets/photo-5.png";
+import image1 from "./_assets/1.jpg";
+import image2 from "./_assets/2.jpg";
+import image3 from "./_assets/3.jpg";
+import image4 from "./_assets/4.jpg";
+import image5 from "./_assets/5.jpg";
 import image6 from "./_assets/photo-6.png";
 
 export default function Photos() {
@@ -13,7 +13,7 @@ export default function Photos() {
 
   return (
     <section className="flex w-full -my-2 justify-center gap-5 overflow-hidden py-4 sm:gap-8">
-      {[image1, image2, image3, image4, image5, image6].map((image, imageIndex) => (
+      {[image6, image3, image4, image2, image5, image1].map((image, imageIndex) => (
         <div
           key={image.src}
           className={clsx(
@@ -24,6 +24,7 @@ export default function Photos() {
           <Image
             src={image}
             alt=""
+            placeholder="blur"
             sizes="(min-width: 640px) 18rem, 11rem"
             className="absolute inset-0 h-full w-full object-cover"
           />
