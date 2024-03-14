@@ -15,7 +15,7 @@ export default function BackButton({
   if (!hasPrevious) return null;
 
   return (
-    <button onClick={() => router.back()} {...props}>
+    <button type="button" onClick={() => router.back()} {...props}>
       {children}
     </button>
   );

@@ -8,9 +8,9 @@ export default function PageHero({
   className,
   animated = true,
   ...props
-}: ComponentProps<"section"> & { animated?: boolean }) {
+}: ComponentProps<"header"> & { animated?: boolean }) {
   return (
-    <section
+    <header
       {...props}
       id="heading"
       className={twMerge("w-full bg-branding-light py-12 rounded-b-[3rem] grid gap-12", className)}
@@ -23,6 +23,6 @@ export default function PageHero({
           <LineWave progress={"70%"} />
         )}
       </div>
-    </section>
+    </header>
   );
 }

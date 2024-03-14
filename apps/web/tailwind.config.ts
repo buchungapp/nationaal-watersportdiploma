@@ -1,7 +1,8 @@
 import type { Config } from "tailwindcss";
 import { slate } from "tailwindcss/colors";
+import typographyStyles from "./typography";
 
-const config: Config = {
+export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -25,7 +26,7 @@ const config: Config = {
         width: "width",
       },
     },
+    typography: typographyStyles,
   },
   plugins: [require("@tailwindcss/typography"), require("@headlessui/tailwindcss")],
-};
-export default config;
+} satisfies Config;
