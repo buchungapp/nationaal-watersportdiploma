@@ -1,7 +1,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-
 import { usePathname } from 'next/navigation'
 import { Provider as BalancerProvider } from 'react-wrap-balancer'
 

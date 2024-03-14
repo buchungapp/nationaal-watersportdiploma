@@ -1,11 +1,15 @@
-import { clsx } from 'clsx'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { clsx } from 'clsx'
+
 import Analytics from '~/app/_components/analytics'
 import Footer from './_components/footer/footer'
 import Header from './_components/header/header'
+
 import './globals.css'
+
 import { Providers } from './providers'
+
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {

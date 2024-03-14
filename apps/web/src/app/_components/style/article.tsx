@@ -1,12 +1,13 @@
 import {
   Children,
-  ComponentProps,
-  ReactElement,
   cloneElement,
+  ComponentProps,
   isValidElement,
+  ReactElement,
 } from 'react'
 import Balancer from 'react-wrap-balancer'
 import { twMerge } from 'tailwind-merge'
+
 import Double from '~/app/_components/brand/double-line'
 
 export default function Article({

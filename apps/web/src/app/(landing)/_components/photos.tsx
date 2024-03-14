@@ -1,6 +1,6 @@
 import Image from 'next/image'
-
 import clsx from 'clsx'
+
 import image1 from './_assets/1.jpg'
 import image2 from './_assets/2.jpg'
 import image3 from './_assets/3.jpg'

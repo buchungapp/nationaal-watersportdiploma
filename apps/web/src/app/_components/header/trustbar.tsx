@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import {
   APP_SLOGAN,
   FACEBOOK_URL,
@@ -6,7 +8,7 @@ import {
   TIKTOK_URL,
   YOUTUBE_URL,
 } from '@nawadi/lib/constants'
-import Link from 'next/link'
+
 import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from '../socials'
 
 export default function Trustbar() {

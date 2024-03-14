@@ -1,10 +1,9 @@
 'use client'
 
 import { PropsWithChildren } from 'react'
-
+import { Popover } from '@headlessui/react'
 import clsx from 'clsx'
 
-import { Popover } from '@headlessui/react'
 import { useIsSticky } from '~/app/providers'
 
 export function StickyNavContainer({

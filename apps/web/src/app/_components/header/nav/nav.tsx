@@ -3,7 +3,6 @@ import Link from 'next/link'
 import Double from '~/app/_components/brand/double-line'
 import Logo from '~/app/_components/brand/logo'
 import Wordmark from '~/app/_components/brand/wordmark'
-
 import MobileNav, { MobileNavButton } from './mobile/mobile-nav'
 import PopoverNavItem from './sticky/popover-item'
 import {

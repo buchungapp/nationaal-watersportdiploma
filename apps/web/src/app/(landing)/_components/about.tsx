@@ -1,4 +1,5 @@
 import Balancer from 'react-wrap-balancer'
+
 import Logo from '~/app/_components/brand/logo'
 import AboutSection from './about-section'
 

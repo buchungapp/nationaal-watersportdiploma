@@ -1,12 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import {
   GoogleMap,
   InfoWindow,
   Marker,
   useJsApiLoader,
 } from '@react-google-maps/api'
-import { useState } from 'react'
 
 const markers = [
   {

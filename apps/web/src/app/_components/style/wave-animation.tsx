@@ -1,7 +1,8 @@
 'use client'
 
-import { motion, useScroll, useTransform } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import { motion, useScroll, useTransform } from 'framer-motion'
+
 import { DoubleLine, Wave } from '~/app/_assets/wave'
 import useWindowDimensions from '~/app/_hooks/use-window-dimensions'
 

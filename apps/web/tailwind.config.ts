@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import { slate } from 'tailwindcss/colors'
+
 import typographyStyles from './typography'
 
 export default {

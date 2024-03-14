@@ -1,11 +1,10 @@
 'use client'
 
 import { Fragment, PropsWithChildren } from 'react'
-
 import { Popover, Transition } from '@headlessui/react'
+import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 
-import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import Double from '~/app/_components/brand/double-line'
 
 export default function PopoverNavItem({
