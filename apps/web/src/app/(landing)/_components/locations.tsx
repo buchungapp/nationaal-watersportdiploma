@@ -1,21 +1,24 @@
-import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/_components/style/buttons";
-import Map from "./map";
+import Double from '~/app/_components/brand/double-line'
+import { BoxedButton } from '~/app/_components/style/buttons'
+import Map from './map'
 
 export default function Locations() {
   return (
-    <section className="w-full bg-branding-orange rounded-[3rem] grid items-center lg:grid-cols-2 overflow-hidden">
-      <div className="px-4 py-12 lg:p-16 text-white">
-        <div className="flex font-bold uppercase items-center gap-x-3 text-white">
+    <section className="grid w-full items-center overflow-hidden rounded-[3rem] bg-branding-orange lg:grid-cols-2">
+      <div className="px-4 py-12 text-white lg:p-16">
+        <div className="flex items-center gap-x-3 font-bold uppercase text-white">
           Locaties
           <Double />
         </div>
-        <h3 className="text-white mt-1.5 font-bold text-2xl">Vind jouw NWD-vaarlocatie.</h3>
-        <p className="text-orange-100 mt-2.5">
-          NWD-locaties voldoen aan strenge kwaliteitseisen op gebied van persoonlijke- en sociale
-          veiligheid. Verder hebben zij zich gecommitteerd aan de visie van het NWD: veiligheid,
-          kwaliteit en plezier op het water. Daarom zijn zij gelicenseerd om het NWD-diploma uit te
-          geven.
+        <h3 className="mt-1.5 text-2xl font-bold text-white">
+          Vind jouw NWD-vaarlocatie.
+        </h3>
+        <p className="mt-2.5 text-orange-100">
+          NWD-locaties voldoen aan strenge kwaliteitseisen op gebied van
+          persoonlijke- en sociale veiligheid. Verder hebben zij zich
+          gecommitteerd aan de visie van het NWD: veiligheid, kwaliteit en
+          plezier op het water. Daarom zijn zij gelicenseerd om het NWD-diploma
+          uit te geven.
         </p>
 
         <div className="mt-8 flex items-center gap-x-6">
@@ -32,5 +35,5 @@ export default function Locations() {
         <Map />
       </div>
     </section>
-  );
+  )
 }

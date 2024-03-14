@@ -1,4 +1,4 @@
-import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
+import CopyToClipboard from '~/app/_components/style/copy-to-clipboard'
 
 export default function Bestuur() {
   return (
@@ -6,15 +6,17 @@ export default function Bestuur() {
       <div className="prose-lg">
         <h3>Bestuur</h3>
         <p>
-          Het bestuur van de vereniging Nationaal Watersportdiploma bestaat uit vijf natuurlijke
-          personen. Het verenigingsbestuur bestaat uit een voorzitter, een vicevoorzitter, een
-          secretaris, een penningmeester en een algemeen bestuurslid. Het bestuur verdeelt in
-          onderling overleg de functie en de werkzaamheden.
+          Het bestuur van de vereniging Nationaal Watersportdiploma bestaat uit
+          vijf natuurlijke personen. Het verenigingsbestuur bestaat uit een
+          voorzitter, een vicevoorzitter, een secretaris, een penningmeester en
+          een algemeen bestuurslid. Het bestuur verdeelt in onderling overleg de
+          functie en de werkzaamheden.
         </p>
       </div>
       <p>
-        Alle bestuursfuncties bij het Nationaal Watersportdiploma betreffen vrijwilligersfuncties en
-        zijn naast een eventuele onkostenvergoeding onbezoldigd.
+        Alle bestuursfuncties bij het Nationaal Watersportdiploma betreffen
+        vrijwilligersfuncties en zijn naast een eventuele onkostenvergoeding
+        onbezoldigd.
       </p>
 
       <p>
@@ -22,7 +24,7 @@ export default function Bestuur() {
         <br />
         Voorzitter
         <br />
-        Contact via{" "}
+        Contact via{' '}
         <CopyToClipboard
           value="voorzitter@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -38,7 +40,7 @@ export default function Bestuur() {
         <br />
         Secretaris
         <br />
-        Contact via{" "}
+        Contact via{' '}
         <CopyToClipboard
           value="secretaris@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -54,7 +56,7 @@ export default function Bestuur() {
         <br />
         Penningmeester
         <br />
-        Contact via{" "}
+        Contact via{' '}
         <CopyToClipboard
           value="penningmeester@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -70,7 +72,7 @@ export default function Bestuur() {
         <br />
         Algemeen bestuurslid & vicevoorzitter
         <br />
-        Contact via{" "}
+        Contact via{' '}
         <CopyToClipboard
           value="vicevoorzitter@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -86,7 +88,7 @@ export default function Bestuur() {
         <br />
         Algemeen bestuurslid
         <br />
-        Contact via{" "}
+        Contact via{' '}
         <CopyToClipboard
           value="algemeen.bestuurslid@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -97,5 +99,5 @@ export default function Bestuur() {
         </CopyToClipboard>
       </p>
     </article>
-  );
+  )
 }

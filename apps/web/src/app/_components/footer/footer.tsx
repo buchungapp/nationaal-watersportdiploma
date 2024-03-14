@@ -6,69 +6,77 @@ import {
   LINKEDIN_URL,
   TIKTOK_URL,
   YOUTUBE_URL,
-} from "@nawadi/lib/constants";
-import Link from "next/link";
-import { PropsWithChildren } from "react";
-import { Line, LineWave } from "~/app/_assets/wave";
-import Wordmark from "~/app/_components/brand/wordmark";
-import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "~/app/_components/socials";
+} from '@nawadi/lib/constants'
+import Link from 'next/link'
+import { PropsWithChildren } from 'react'
+import { Line, LineWave } from '~/app/_assets/wave'
+import Wordmark from '~/app/_components/brand/wordmark'
+import {
+  Facebook,
+  Instagram,
+  LinkedIn,
+  TikTok,
+  YouTube,
+} from '~/app/_components/socials'
 
 function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
     <li>
       <Link
         href={href}
-        className="px-2.5 py-1.5 -mx-2.5 -my-1.5 transition-colors rounded-lg w-fit hover:bg-white/10"
+        className="-mx-2.5 -my-1.5 w-fit rounded-lg px-2.5 py-1.5 transition-colors hover:bg-white/10"
       >
         {children}
       </Link>
     </li>
-  );
+  )
 }
 
 export default function Footer() {
   const socials = [
     {
-      name: "Facebook",
+      name: 'Facebook',
       icon: Facebook,
       link: FACEBOOK_URL,
     },
     {
-      name: "Instagram",
+      name: 'Instagram',
       icon: Instagram,
       link: INSTAGRAM_URL,
     },
     {
-      name: "LinkedIn",
+      name: 'LinkedIn',
       icon: LinkedIn,
       link: LINKEDIN_URL,
     },
     {
-      name: "TikTok",
+      name: 'TikTok',
       icon: TikTok,
       link: TIKTOK_URL,
     },
     {
-      name: "YouTube",
+      name: 'YouTube',
       icon: YouTube,
       link: YOUTUBE_URL,
     },
-  ];
+  ]
 
   return (
-    <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 lg:px-16 pt-20 pb-12">
-      <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-2">
+    <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 pb-12 pt-20 lg:px-16">
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
         <div className="grid gap-6">
-          <Wordmark className="w-48 h-12 text-white" />
-          <p className="text-gray-200 text-sm">{APP_SLOGAN}</p>
+          <Wordmark className="h-12 w-48 text-white" />
+          <p className="text-sm text-gray-200">{APP_SLOGAN}</p>
         </div>
-        <div className="grid gap-12 lg:gap-0 items-start grid-cols-1 lg:grid-cols-3 text-sm">
+        <div className="grid grid-cols-1 items-start gap-12 text-sm lg:grid-cols-3 lg:gap-0">
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Diplomalijn</h3>
             <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/consumenten">Consumenten</FooterLink>
               <FooterLink href="/instructeurs">Instructeurs</FooterLink>
-              <FooterLink href="/watersportverbond">Watersportverbond</FooterLink>
+              <FooterLink href="/watersportverbond">
+                Watersportverbond
+              </FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
@@ -86,7 +94,9 @@ export default function Footer() {
               <FooterLink href="/faq">Veelgestelde vragen</FooterLink>
               <FooterLink href="/organisatie">Organisatie</FooterLink>
               <FooterLink href="/mediakit">Mediakit</FooterLink>
-              <FooterLink href="/vertrouwenspersoon">Vertrouwenspersoon</FooterLink>
+              <FooterLink href="/vertrouwenspersoon">
+                Vertrouwenspersoon
+              </FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </ul>
           </div>
@@ -94,25 +104,31 @@ export default function Footer() {
       </div>
       <Line className="w-full text-branding-light/20" />
 
-      <div className="flex justify-between flex-col gap-4 lg:flex-row lg:items-center">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
         <div className="grid gap-2 text-sm">
-          <p className="text-white font-semibold">Schrijf je in voor de NWD-nieuwsbrief</p>
+          <p className="font-semibold text-white">
+            Schrijf je in voor de NWD-nieuwsbrief
+          </p>
           <p className="text-gray-200">
             Ontvang nieuws, updates en leuk beeldmateriaal in je inbox.
           </p>
         </div>
-        <form className="flex gap-2 text-sm" method="post" action={process.env.LOOPS_API_URL}>
+        <form
+          className="flex gap-2 text-sm"
+          method="post"
+          action={process.env.LOOPS_API_URL}
+        >
           <input
             type="email"
             name="email"
             required
-            className="placeholder:text-gray-400 min-w-[200px] rounded py-1.5 px-3 bg-[#003580] border border-[#004099] text-white"
+            className="min-w-[200px] rounded border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-gray-400"
             placeholder="Je e-mailadres"
           />
           <input type="hidden" name="userGroup" value="Website footer"></input>
           <button
             type="submit"
-            className="text-white bg-branding-light hover:bg-white hover:text-branding-dark transition-colors group text-sm font-semibold px-4 py-2 flex gap-1 w-fit rounded-lg items-center"
+            className="group flex w-fit items-center gap-1 rounded-lg bg-branding-light px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-branding-dark"
           >
             Aanmelden
           </button>
@@ -121,11 +137,11 @@ export default function Footer() {
 
       <LineWave progress="60%" />
 
-      <div className="text-gray-200 flex flex-col lg:flex-row gap-4">
-        <p className="lg:text-start text-center flex-1 text-sm">
+      <div className="flex flex-col gap-4 text-gray-200 lg:flex-row">
+        <p className="flex-1 text-center text-sm lg:text-start">
           {`© ${new Date().getFullYear()} ${APP_NAME}`}
         </p>
-        <ul className="items-center flex-1 gap-6 justify-center lg:justify-end flex">
+        <ul className="flex flex-1 items-center justify-center gap-6 lg:justify-end">
           {socials.map((social, i) => (
             <li key={i}>
               <Link
@@ -141,5 +157,5 @@ export default function Footer() {
         </ul>
       </div>
     </footer>
-  );
+  )
 }

@@ -1,19 +1,19 @@
-import { BoxedButton } from "~/app/_components/style/buttons";
-import MuxVideo from "./mux-video";
+import { BoxedButton } from '~/app/_components/style/buttons'
+import MuxVideo from './mux-video'
 
 export default function Welcome() {
   return (
-    <div className="items-center grid gap-8 grid-cols-1 lg:grid-cols-2 px-4 lg:px-16">
-      <div className="grid gap-10 justify-center lg:justify-start">
-        <div className="text-white grid gap-6">
-          <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">
+    <div className="grid grid-cols-1 items-center gap-8 px-4 lg:grid-cols-2 lg:px-16">
+      <div className="grid justify-center gap-10 lg:justify-start">
+        <div className="grid gap-6 text-white">
+          <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
             Welkom bij het Nationaal Watersportdiploma.
           </h1>
           <p className="text-xl text-gray-100">
             Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
+        <div className="flex flex-col gap-x-6 gap-y-2 sm:flex-row">
           <BoxedButton href="/locaties" className="bg-white text-branding-dark">
             Vindt een NWD locatie
           </BoxedButton>
@@ -22,7 +22,7 @@ export default function Welcome() {
           </BoxedButton>
         </div>
       </div>
-      <div className="aspect-[4/3] relative w-full rounded-3xl overflow-hidden">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
         {/* <iframe
           width="100%"
           height="100%"
@@ -34,12 +34,16 @@ export default function Welcome() {
           allowFullScreen
         /> */}
         <MuxVideo
-          style={{ ["--media-object-fit" as string]: "cover", position: "absolute", inset: 0 }}
+          style={{
+            ['--media-object-fit' as string]: 'cover',
+            position: 'absolute',
+            inset: 0,
+          }}
           playbackId="DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
           metadata={{
-            video_id: "video-id-123456",
-            video_title: "Super Interesting Video",
-            viewer_user_id: "user-id-bc-789",
+            video_id: 'video-id-123456',
+            video_title: 'Super Interesting Video',
+            viewer_user_id: 'user-id-bc-789',
           }}
           streamType="on-demand"
           preload="auto"
@@ -49,5 +53,5 @@ export default function Welcome() {
         />
       </div>
     </div>
-  );
+  )
 }

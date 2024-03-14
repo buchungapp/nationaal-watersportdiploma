@@ -11,15 +11,25 @@ export function createApplicationServer(context: Context) {
 
   //categories
 
-  server.registerCreateMainCategoryOperation(operationHandlers.createMainCategory(context));
-  server.registerGetMainCategoriesOperation(operationHandlers.getMainCategories(context));
+  server.registerCreateMainCategoryOperation(
+    operationHandlers.createMainCategory(context),
+  );
+  server.registerGetMainCategoriesOperation(
+    operationHandlers.getMainCategories(context),
+  );
 
-  server.registerGetSubCategoriesOperation(operationHandlers.getSubCategories(context));
-  server.registerCreateSubCategoryOperation(operationHandlers.createSubCategory(context));
+  server.registerGetSubCategoriesOperation(
+    operationHandlers.getSubCategories(context),
+  );
+  server.registerCreateSubCategoryOperation(
+    operationHandlers.createSubCategory(context),
+  );
 
   // authentication
 
-  server.registerApiTokenAuthentication(authenticationHandlers.apiToken(context));
+  server.registerApiTokenAuthentication(
+    authenticationHandlers.apiToken(context),
+  );
 
   // middleware!
 

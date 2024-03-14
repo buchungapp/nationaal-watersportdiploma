@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import React, { Fragment } from "react";
+import React, { Fragment } from 'react'
 
-import { Dialog, Transition } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
-import Link from "next/link";
+import { Dialog, Transition } from '@headlessui/react'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
+import Link from 'next/link'
 
-import { useMobileMenuState } from "~/app/providers";
+import { useMobileMenuState } from '~/app/providers'
 
 export default function MobileNav({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useMobileMenuState();
+  const [open, setOpen] = useMobileMenuState()
 
   return (
     <Transition.Root show={open} as={Fragment}>
@@ -66,15 +66,15 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
         </div>
       </Dialog>
     </Transition.Root>
-  );
+  )
 }
 
 export function MobileNavButton() {
-  const [_, setOpen] = useMobileMenuState();
+  const [_, setOpen] = useMobileMenuState()
 
   return (
     <button onClick={() => setOpen(true)}>
       <Bars3Icon className="h-7 w-7" />
     </button>
-  );
+  )
 }

@@ -1,50 +1,57 @@
-"use client";
+'use client'
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { DoubleLine, Wave } from "~/app/_assets/wave";
-import useWindowDimensions from "~/app/_hooks/use-window-dimensions";
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { DoubleLine, Wave } from '~/app/_assets/wave'
+import useWindowDimensions from '~/app/_hooks/use-window-dimensions'
 
 export default function WaveAnimation({
   begin,
   end,
   id,
 }: {
-  begin: number;
-  end: number;
-  id?: string;
+  begin: number
+  end: number
+  id?: string
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll();
-  const [beginOffset, setBeginOffset] = useState(begin);
-  const [endOffset, setEndOffset] = useState(end);
-  const inverseProgress = useTransform(scrollY, [beginOffset, endOffset], ["70%", "10%"]);
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollY } = useScroll()
+  const [beginOffset, setBeginOffset] = useState(begin)
+  const [endOffset, setEndOffset] = useState(end)
+  const inverseProgress = useTransform(
+    scrollY,
+    [beginOffset, endOffset],
+    ['70%', '10%'],
+  )
 
-  const { width } = useWindowDimensions();
+  const { width } = useWindowDimensions()
 
-  const isClient = typeof window !== "undefined";
+  const isClient = typeof window !== 'undefined'
 
   useEffect(() => {
-    if (!ref.current || !isClient) return;
+    if (!ref.current || !isClient) return
 
-    const { top } = ref.current.getBoundingClientRect();
+    const { top } = ref.current.getBoundingClientRect()
 
     if (id) {
-      const el = document.getElementById(id);
+      const el = document.getElementById(id)
       if (el) {
-        const { height } = el.getBoundingClientRect();
-        setBeginOffset(begin + top - height + window.scrollY);
-        setEndOffset(end + top + window.scrollY);
-        return;
+        const { height } = el.getBoundingClientRect()
+        setBeginOffset(begin + top - height + window.scrollY)
+        setEndOffset(end + top + window.scrollY)
+        return
       }
     }
 
-    setBeginOffset(begin + top + window.scrollY);
-    setEndOffset(end + top + window.scrollY);
-  }, [id, ref, begin, end, isClient, width]);
+    setBeginOffset(begin + top + window.scrollY)
+    setEndOffset(end + top + window.scrollY)
+  }, [id, ref, begin, end, isClient, width])
 
   return (
-    <div className="text-white w-full relative group py-3 overflow-x-hidden" ref={ref}>
+    <div
+      className="group relative w-full overflow-x-hidden py-3 text-white"
+      ref={ref}
+    >
       <motion.div
         style={{
           width: inverseProgress,
@@ -61,7 +68,7 @@ export default function WaveAnimation({
         <Wave className="h-full" />
       </motion.div>
       <motion.div
-        className="absolute top-[12px] translate-x-[240px] right-0"
+        className="absolute right-0 top-[12px] translate-x-[240px]"
         style={{
           left: inverseProgress,
         }}
@@ -69,5 +76,5 @@ export default function WaveAnimation({
         <DoubleLine className="w-full" />
       </motion.div>
     </div>
-  );
+  )
 }

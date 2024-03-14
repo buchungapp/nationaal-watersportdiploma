@@ -70,7 +70,9 @@ async function main(configuration: MainConfiguration) {
       httpServer.closeAllConnections();
 
       await new Promise<void>((resolve, reject) =>
-        httpServer.close((error) => (error == null ? resolve() : reject(error))),
+        httpServer.close((error) =>
+          error == null ? resolve() : reject(error),
+        ),
       );
     }
   } finally {

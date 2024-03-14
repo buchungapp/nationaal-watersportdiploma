@@ -11,7 +11,9 @@ export interface DatabaseContext {
   db: Database;
 }
 
-export async function withDatabase<T>(job: (context: DatabaseContext) => Promise<T>) {
+export async function withDatabase<T>(
+  job: (context: DatabaseContext) => Promise<T>,
+) {
   // run only if configured
   if (process.env.PGURI == null) {
     return;
@@ -40,7 +42,9 @@ export async function withDatabase<T>(job: (context: DatabaseContext) => Promise
         try {
           const db = drizzle(pgPool);
           // migrate (set up) the database
-          await migrate(db, { migrationsFolder: path.join(projectRoot, "migrations") });
+          await migrate(db, {
+            migrationsFolder: path.join(projectRoot, "migrations"),
+          });
         } finally {
           await pgPool.end();
         }

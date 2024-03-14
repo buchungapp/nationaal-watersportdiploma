@@ -1,121 +1,127 @@
-import { Children, ComponentProps, ReactElement, cloneElement, isValidElement } from "react";
-import Balancer from "react-wrap-balancer";
-import { twMerge } from "tailwind-merge";
-import Double from "~/app/_components/brand/double-line";
+import {
+  Children,
+  ComponentProps,
+  ReactElement,
+  cloneElement,
+  isValidElement,
+} from 'react'
+import Balancer from 'react-wrap-balancer'
+import { twMerge } from 'tailwind-merge'
+import Double from '~/app/_components/brand/double-line'
 
 export default function Article({
   children,
   className,
   justify,
   ...props
-}: ComponentProps<"article"> & {
-  justify?: "center" | "start" | "end";
+}: ComponentProps<'article'> & {
+  justify?: 'center' | 'start' | 'end'
 }) {
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
       ? cloneElement(child as ReactElement<any>, { justify, ...child.props })
       : child,
-  );
+  )
 
   return (
-    <article {...props} className={twMerge("flex flex-col gap-2", className)}>
+    <article {...props} className={twMerge('flex flex-col gap-2', className)}>
       {childrenWithProps}
     </article>
-  );
+  )
 }
 
 Article.Heading = function ArticleHeading({
   className,
-  justify = "start",
+  justify = 'start',
   children,
   ...props
-}: ComponentProps<"div"> & {
-  justify?: "center" | "start" | "end";
+}: ComponentProps<'div'> & {
+  justify?: 'center' | 'start' | 'end'
 }) {
   return (
     <div
       {...props}
       className={twMerge(
-        "flex gap-3 items-center uppercase whitespace-nowrap font-bold",
+        'flex items-center gap-3 whitespace-nowrap font-bold uppercase',
         className,
       )}
     >
-      {justify !== "start" ? <Double /> : null}
+      {justify !== 'start' ? <Double /> : null}
       <span>{children}</span>
-      {justify !== "end" ? <Double /> : null}
+      {justify !== 'end' ? <Double /> : null}
     </div>
-  );
-};
+  )
+}
 
 Article.Title = function ArticleTitle({
   children,
   className,
-  as = "h2",
+  as = 'h2',
   balance = true,
-  justify = "start",
+  justify = 'start',
   ...props
-}: ComponentProps<"h1"> & {
-  as?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  balance?: boolean;
-  justify?: "center" | "start" | "end";
+}: ComponentProps<'h1'> & {
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  balance?: boolean
+  justify?: 'center' | 'start' | 'end'
 }) {
-  const Component = as;
+  const Component = as
   return (
     <Component
       {...props}
       className={twMerge(
-        "font-bold text-2xl",
-        justify === "center" && "text-center",
-        justify === "end" && "text-end",
+        'text-2xl font-bold',
+        justify === 'center' && 'text-center',
+        justify === 'end' && 'text-end',
         className,
       )}
     >
       {balance ? <Balancer>{children}</Balancer> : children}
     </Component>
-  );
-};
+  )
+}
 
 Article.Paragraph = function ArticleParagraph({
   children,
   className,
-  justify = "start",
+  justify = 'start',
   ...props
-}: ComponentProps<"p"> & {
-  justify?: "center" | "start" | "end";
+}: ComponentProps<'p'> & {
+  justify?: 'center' | 'start' | 'end'
 }) {
   return (
     <p
       {...props}
       className={twMerge(
-        justify === "center" && "text-center self-center",
-        justify === "end" && "text-end self-end",
+        justify === 'center' && 'self-center text-center',
+        justify === 'end' && 'self-end text-end',
         className,
       )}
     >
       {children}
     </p>
-  );
-};
+  )
+}
 
 Article.ButtonSection = function ArticleButtonSection({
   children,
   className,
-  justify = "start",
+  justify = 'start',
   ...props
-}: ComponentProps<"div"> & {
-  justify?: "center" | "start" | "end";
+}: ComponentProps<'div'> & {
+  justify?: 'center' | 'start' | 'end'
 }) {
   return (
     <div
       {...props}
       className={twMerge(
-        "flex flex-col sm:flex-row gap-x-6 gap-y-2",
-        justify === "center" && "items-center sm:justify-center",
-        justify === "end" && "items-end sm:justify-end",
+        'flex flex-col gap-x-6 gap-y-2 sm:flex-row',
+        justify === 'center' && 'items-center sm:justify-center',
+        justify === 'end' && 'items-end sm:justify-end',
         className,
       )}
     >
       {children}
     </div>
-  );
-};
+  )
+}

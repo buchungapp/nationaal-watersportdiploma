@@ -35,7 +35,9 @@ async function main(configuration: MainConfiguration) {
   try {
     const db = drizzle(pgPool);
     // migrate the database
-    await migrate(db, { migrationsFolder: path.join(projectRoot, "migrations") });
+    await migrate(db, {
+      migrationsFolder: path.join(projectRoot, "migrations"),
+    });
   } finally {
     await pgPool.end();
   }
