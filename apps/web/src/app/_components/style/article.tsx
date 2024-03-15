@@ -1,10 +1,9 @@
-import type {
-  ComponentProps,
-  ReactElement} from 'react';
 import {
   Children,
   cloneElement,
-  isValidElement
+  isValidElement,
+  type ComponentProps,
+  type ReactElement,
 } from 'react'
 import Balancer from 'react-wrap-balancer'
 import { twMerge } from 'tailwind-merge'
@@ -21,7 +20,8 @@ export default function Article({
 }) {
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
-      ? cloneElement(child as ReactElement<any>, { justify, ...child.props })
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        cloneElement(child as ReactElement<any>, { justify, ...child.props })
       : child,
   )
 

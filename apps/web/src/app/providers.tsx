@@ -22,6 +22,7 @@ const AppContext = createContext<{
 }>({
   isMobileMenuOpen: false,
   previousPathname: undefined,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setMobileMenuOpen: () => {},
   scrollPosition: 0,
 })

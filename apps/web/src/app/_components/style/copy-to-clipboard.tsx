@@ -1,7 +1,6 @@
 'use client'
 
-import type { ComponentPropsWithoutRef} from 'react';
-import { Fragment, useState } from 'react'
+import { Fragment, useState, type ComponentPropsWithoutRef } from 'react'
 import { Transition } from '@headlessui/react'
 import { twMerge } from 'tailwind-merge'
 
@@ -16,13 +15,14 @@ export default function CopyToClipboard({
     <span className="relative">
       <button
         {...props}
-        onClick={(e) => {
+        onClick={async (e) => {
           if (typeof navigator.clipboard === 'undefined') return
-          navigator.clipboard.writeText(value)
+          await navigator.clipboard.writeText(value)
           props.onClick?.(e)
 
           setShowing(true)
           setTimeout(() => setShowing(false), 400)
+          return
         }}
         className={twMerge(
           'rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2',

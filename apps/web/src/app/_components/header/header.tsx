@@ -1,7 +1,7 @@
 import Nav from './nav/nav'
 import Trustbar from './trustbar'
 
-export default async function Header() {
+export default function Header() {
   return (
     <header className="bg-branding-light">
       <a
