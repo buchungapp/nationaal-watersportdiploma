@@ -1,7 +1,6 @@
 {
   "root": true,
   "extends": [
-    "turbo",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
     "plugin:@next/next/recommended",
