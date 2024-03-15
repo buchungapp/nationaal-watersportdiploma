@@ -1,15 +1,15 @@
-import { Prose } from '~/app/_components/prose'
-import PageHero from '~/app/_components/style/page-hero'
-import type { ArticleWithSlug } from '~/lib/articles'
-import { formatDate } from '../_utils/format-date'
-import { Container } from './container'
+import { Prose } from "~/app/_components/prose";
+import PageHero from "~/app/_components/style/page-hero";
+import type { ArticleWithSlug } from "~/lib/articles";
+import { formatDate } from "../_utils/format-date";
+import { Container } from "./container";
 
 export function ArticleLayout({
   article,
   children,
 }: {
-  article: ArticleWithSlug
-  children: React.ReactNode
+  article: ArticleWithSlug;
+  children: React.ReactNode;
 }) {
   return (
     <>
@@ -36,5 +36,5 @@ export function ArticleLayout({
         </div>
       </Container>
     </>
-  )
+  );
 }
