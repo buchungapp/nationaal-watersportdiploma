@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react'
+import type { ComponentProps } from 'react'
 import { twMerge } from 'tailwind-merge'
 
 import { LineWave } from '~/app/_assets/wave'

@@ -1,6 +1,6 @@
 'use client'
 
-import { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { useHasPreviousPathname } from '../providers'

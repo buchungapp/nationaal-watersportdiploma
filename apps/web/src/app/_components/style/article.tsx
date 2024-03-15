@@ -1,9 +1,10 @@
+import type {
+  ComponentProps,
+  ReactElement} from 'react';
 import {
   Children,
   cloneElement,
-  ComponentProps,
-  isValidElement,
-  ReactElement,
+  isValidElement
 } from 'react'
 import Balancer from 'react-wrap-balancer'
 import { twMerge } from 'tailwind-merge'

@@ -1,6 +1,6 @@
 'use client'
 
-import { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react'
 import { Popover } from '@headlessui/react'
 import clsx from 'clsx'
 

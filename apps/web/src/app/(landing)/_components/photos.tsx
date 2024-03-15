@@ -9,7 +9,7 @@ import image5 from './_assets/5.jpg'
 import image6 from './_assets/photo-6.png'
 
 export default function Photos() {
-  let rotations = ['rotate-2', '-rotate-2', 'rotate-2']
+  const rotations = ['rotate-2', '-rotate-2', 'rotate-2']
 
   return (
     <section className="-my-2 flex w-full justify-center gap-5 overflow-hidden py-4 sm:gap-8">

@@ -1,6 +1,6 @@
 import { Prose } from '~/app/_components/prose'
 import PageHero from '~/app/_components/style/page-hero'
-import { ArticleWithSlug } from '~/lib/articles'
+import type { ArticleWithSlug } from '~/lib/articles'
 import { formatDate } from '../_utils/format-date'
 import { Container } from './container'
 

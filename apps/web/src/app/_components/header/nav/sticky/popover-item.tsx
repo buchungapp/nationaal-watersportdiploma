@@ -1,6 +1,7 @@
 'use client'
 
-import { Fragment, PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react';
+import { Fragment } from 'react'
 import { Popover, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
