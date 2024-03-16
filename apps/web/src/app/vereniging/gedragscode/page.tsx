@@ -1,11 +1,10 @@
-import Link from 'next/link'
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export default function Gedragscode() {
   return (
-    <article className="prose">
+    <article className="prose max-w-prose">
       <div className="prose-lg">
-        <h3>Gedragscode</h3>
         <p>
           Deze gedragscode stelt de minimale eisen vast aan gedrag, interacties
           en verantwoordelijkheden binnen onze aangesloten locaties. Het dient
@@ -26,14 +25,14 @@ export default function Gedragscode() {
 
       <div className="not-prose flex w-full justify-center sm:justify-start">
         <Link
-          href="/gedragscode.pdf"
+          href="/20240315-nwd-gedragscode-2401.pdf"
           target="_blank"
-          className="flex w-fit items-center gap-2 rounded-full bg-branding-light px-3.5 py-1.5 font-medium text-white"
+          className="flex w-fit text-sm items-center gap-2 transition-colors rounded-full bg-branding-light hover:bg-branding-dark px-3.5 py-1.5 text-white"
         >
-          <ArrowDownTrayIcon className="h-5 w-5" strokeWidth={2} /> Download
-          Model Gedragscode
+          <ArrowDownTrayIcon className="h-4 w-4" strokeWidth={2} />
+          Download Model Gedragscode
         </Link>
       </div>
     </article>
-  )
+  );
 }

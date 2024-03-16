@@ -1,8 +1,7 @@
 export default function Manifest() {
   return (
-    <article className="prose">
+    <article className="prose max-w-prose">
       <div className="prose-lg">
-        <h3>Manifest</h3>
         <p>
           De afgelopen jaren hebben de leidende zeilscholen van Nederland,
           verenigd door een gedeelde visie op vooruitgang, elkaar steeds vaker
@@ -19,7 +18,7 @@ export default function Manifest() {
         diplomalijn.
       </p>
 
-      <h4>Veiligheid voorop.</h4>
+      <h2>Veiligheid voorop.</h2>
       <p>
         Veiligheid is allesomvattend binnen het NWD: van de standaarduitrusting,
         tot een breed spectrum aan persoonlijke en sociale veiligheid. Elke
@@ -30,7 +29,7 @@ export default function Manifest() {
         toewijding aan een veilige, respectvolle watersportgemeenschap.
       </p>
 
-      <h4>Kwaliteit als basis.</h4>
+      <h2>Kwaliteit als basis.</h2>
       <p>
         Kwaliteit toont zich in verschillende facetten: van het gebruik van goed
         onderhouden en moderne materialen, tot de aanwezigheid van
@@ -40,7 +39,7 @@ export default function Manifest() {
         elkaar uitdagen om de beste in de branche te zijn.
       </p>
 
-      <h4>Plezier staat centraal.</h4>
+      <h2>Plezier staat centraal.</h2>
       <p>
         Plezier staat centraal in alles wat we doen. We geloven dat succes in de
         watersport niet alleen wordt gemeten aan je behaalde vaardigheden of
@@ -50,7 +49,7 @@ export default function Manifest() {
         succesmoment wordt gevierd.
       </p>
 
-      <h4>Technologie als ruggengraat.</h4>
+      <h2>Technologie als ruggengraat.</h2>
       <p>
         Technologie is de ruggengraat die zorgt voor een vlekkeloze ervaring op
         en naast het water, zowel voor watersporters als voor instructeurs en
@@ -67,9 +66,11 @@ export default function Manifest() {
       </p>
 
       <p>
-        Wij zijn het Nationaal Watersportdiploma. Ontwikkel je vaardigheden op
-        het water, veilig en vol plezier!
+        <strong>
+          Wij zijn het Nationaal Watersportdiploma. Ontwikkel je vaardigheden op
+          het water, veilig en vol plezier!
+        </strong>
       </p>
     </article>
-  )
+  );
 }

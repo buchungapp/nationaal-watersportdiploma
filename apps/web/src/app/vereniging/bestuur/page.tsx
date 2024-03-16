@@ -1,10 +1,9 @@
-import CopyToClipboard from '~/app/_components/style/copy-to-clipboard'
+import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 
 export default function Bestuur() {
   return (
-    <article className="prose">
+    <article className="prose max-w-prose">
       <div className="prose-lg">
-        <h3>Bestuur</h3>
         <p>
           Het bestuur van de vereniging Nationaal Watersportdiploma bestaat uit
           vijf natuurlijke personen. Het verenigingsbestuur bestaat uit een
@@ -24,7 +23,7 @@ export default function Bestuur() {
         <br />
         Voorzitter
         <br />
-        Contact via{' '}
+        Contact via{" "}
         <CopyToClipboard
           value="voorzitter@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -40,7 +39,7 @@ export default function Bestuur() {
         <br />
         Secretaris
         <br />
-        Contact via{' '}
+        Contact via{" "}
         <CopyToClipboard
           value="secretaris@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -56,7 +55,7 @@ export default function Bestuur() {
         <br />
         Penningmeester
         <br />
-        Contact via{' '}
+        Contact via{" "}
         <CopyToClipboard
           value="penningmeester@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -72,7 +71,7 @@ export default function Bestuur() {
         <br />
         Algemeen bestuurslid & vicevoorzitter
         <br />
-        Contact via{' '}
+        Contact via{" "}
         <CopyToClipboard
           value="vicevoorzitter@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -88,7 +87,7 @@ export default function Bestuur() {
         <br />
         Algemeen bestuurslid
         <br />
-        Contact via{' '}
+        Contact via{" "}
         <CopyToClipboard
           value="algemeen.bestuurslid@nationaalwatersportdiploma.nl"
           className="break-words underline"
@@ -99,5 +98,5 @@ export default function Bestuur() {
         </CopyToClipboard>
       </p>
     </article>
-  )
+  );
 }
