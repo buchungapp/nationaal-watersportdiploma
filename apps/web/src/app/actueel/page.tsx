@@ -1,9 +1,12 @@
-import Article from '../_components/style/article'
-import { TekstButton } from '../_components/style/buttons'
-import PageHero from '../_components/style/page-hero'
-import SideNav from '../_components/style/side-nav'
+import { getAllArticles } from "~/lib/articles";
+import Article from "../_components/style/article";
+import { TekstButton } from "../_components/style/buttons";
+import PageHero from "../_components/style/page-hero";
+import SideNav from "../_components/style/side-nav";
 
-export default function Actueel() {
+export default async function Actueel() {
+  const articles = await getAllArticles();
+
   return (
     <main>
       <PageHero>
@@ -24,69 +27,44 @@ export default function Actueel() {
             label="Filter"
             items={[
               {
-                label: 'Vereniging',
-                href: '/actueel?filter=vereniging',
+                label: "Vereniging",
+                href: "/actueel?filter=vereniging",
               },
               {
-                label: 'Consumenten',
-                href: '/actueel?filter=consumenten',
+                label: "Consumenten",
+                href: "/actueel?filter=consumenten",
               },
               {
-                label: 'Instructeurs',
-                href: '/actueel?filter=instructeurs',
+                label: "Instructeurs",
+                href: "/actueel?filter=instructeurs",
               },
               {
-                label: 'Techniek',
-                href: '/actueel?filter=techniek',
+                label: "Techniek",
+                href: "/actueel?filter=techniek",
               },
             ]}
             className="w-full sm:w-[18rem]"
           />
         </div>
         <div className="flex flex-col justify-center gap-16">
-          {[
-            {
-              href: '/nieuws/1',
-              title: 'Aankondiging Nationaal Watersportdiploma.',
-              type: 'vereniging',
-              date: '11 maart 2024',
-              description:
-                'A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.',
-            },
-            {
-              href: '/nieuws/2',
-              title: 'Werk aan de diplomalijnen nagenoeg afgerond.',
-              type: 'vereniging',
-              date: '9 maart 2024',
-              description:
-                'A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.',
-            },
-            {
-              href: '/nieuws/3',
-              title: 'Zwemvesten, niet hip maar wel noodzakelijk!',
-              type: 'vereniging',
-              date: '8 maart 2024',
-              description:
-                'A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.',
-            },
-          ].map((news) => (
+          {articles.map((article) => (
             <div
-              key={news.href}
+              key={article.slug}
               className="grid gap-2 sm:grid-cols-[12rem,1fr]"
             >
-              <p className="text-xs text-gray-400">{news.date}</p>
+              <p className="text-xs text-gray-400">{article.date}</p>
               <Article className="max-w-xl">
                 <Article.Heading className="text-xs font-normal text-gray-400">
-                  {news.type}
+                  TODO
                 </Article.Heading>
-                <Article.Title>{news.title}</Article.Title>
+                <Article.Title>{article.title}</Article.Title>
                 <Article.Paragraph className="text-gray-700">
-                  {news.description}
+                  {article.description}
                 </Article.Paragraph>
 
                 <TekstButton
-                  href={news.href}
-                  className={'mt-4 text-branding-orange'}
+                  href={`/actueel/${article.slug}`}
+                  className={"mt-4 text-branding-orange"}
                 >
                   Lees meer
                 </TekstButton>
@@ -96,5 +74,5 @@ export default function Actueel() {
         </div>
       </div>
     </main>
-  )
+  );
 }

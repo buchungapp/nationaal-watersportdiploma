@@ -10,7 +10,7 @@ export interface ArticleWithSlug extends Article {
   id: string;
   slug: string;
 }
-
+// YBIkPIk2-persbericht-aankondiging-nationaal-watersportdiploma
 async function importArticle(
   articleFilename: string,
 ): Promise<ArticleWithSlug> {
