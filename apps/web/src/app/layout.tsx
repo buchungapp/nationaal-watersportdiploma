@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Jouw watersportavontuur begint bij ons, veilig en vol plezier!",
 };
 
+export const runtime = "nodejs";
+
 export default function RootLayout({
   children,
 }: Readonly<{

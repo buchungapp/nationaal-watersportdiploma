@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import Article from "~/app/_components/style/article";
 import { BoxedButton } from "~/app/_components/style/buttons";
 import { listFaqs } from "~/lib/faqs";
 
 export default async function Faq() {
-  const questions = await listFaqs({ filter: { featured: true } });
+  const questions = listFaqs({ filter: { featured: true } });
 
   return (
     <section className="container mx-auto grid gap-20 px-4 lg:px-16">
@@ -26,24 +27,29 @@ export default async function Faq() {
           </BoxedButton>
         </Article.ButtonSection>
       </Article>
-      <div
-        className="columns-1 gap-8 space-y-12 lg:columns-3 xl:space-y-12"
-        style={{
-          columnFill: "balance",
-        }}
-      >
-        {questions.map(({ question, answer }) => (
-          <div key={question} className="grid break-inside-avoid-column gap-4">
-            <h4 className="text-lg font-semibold text-branding-dark">
-              {question}
-            </h4>
-            <p
-              className="text-justify text-gray-700"
-              dangerouslySetInnerHTML={{ __html: answer }}
-            />
-          </div>
-        ))}
-      </div>
+      <Suspense>
+        <div
+          className="columns-1 gap-8 space-y-12 lg:columns-3 xl:space-y-12"
+          style={{
+            columnFill: "balance",
+          }}
+        >
+          {(await questions).map(({ question, answer }) => (
+            <div
+              key={question}
+              className="grid break-inside-avoid-column gap-4"
+            >
+              <h4 className="text-lg font-semibold text-branding-dark">
+                {question}
+              </h4>
+              <div
+                className="text-justify text-gray-700"
+                dangerouslySetInnerHTML={{ __html: answer }}
+              />
+            </div>
+          ))}
+        </div>
+      </Suspense>
     </section>
   );
 }
