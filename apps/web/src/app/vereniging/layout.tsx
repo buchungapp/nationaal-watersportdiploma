@@ -1,10 +1,10 @@
-import PageHero from '../_components/style/page-hero'
-import SideNav from '../_components/style/side-nav'
+import PageHero from "../_components/style/page-hero";
+import SideNav from "../_components/style/side-nav";
 
 export default function Layout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <main>
@@ -26,32 +26,32 @@ export default function Layout({
             label="Verenigingszaken"
             items={[
               {
-                label: 'Manifest',
-                href: '/vereniging/manifest',
+                label: "Manifest",
+                href: "/vereniging/manifest",
               },
               {
-                label: 'Vertrouwenspersoon',
-                href: '/vereniging/vertrouwenspersoon',
+                label: "Vertrouwenspersoon",
+                href: "/vereniging/vertrouwenspersoon",
               },
               {
-                label: 'Gedragscode',
-                href: '/vereniging/gedragscode',
+                label: "Gedragscode",
+                href: "/vereniging/gedragscode",
               },
               {
-                label: 'Bestuur',
-                href: '/vereniging/bestuur',
+                label: "Bestuur",
+                href: "/vereniging/bestuur",
               },
               {
-                label: 'Secretariaat',
-                href: '/vereniging/secretariaat',
+                label: "Secretariaat",
+                href: "/vereniging/secretariaat",
               },
               {
-                label: 'Kwaliteitscommissie',
-                href: '/vereniging/kwaliteitscommissie',
+                label: "Kwaliteitscommissie",
+                href: "/vereniging/kwaliteitscommissie",
               },
               {
-                label: 'Statuten en reglementen',
-                href: '/vereniging/statuten-en-reglementen',
+                label: "Statuten en reglementen",
+                href: "/vereniging/statuten-en-reglementen",
               },
             ]}
             className="w-full sm:w-[18rem]"
@@ -60,5 +60,5 @@ export default function Layout({
         <div className="flex flex-col justify-center">{children}</div>
       </div>
     </main>
-  )
+  );
 }

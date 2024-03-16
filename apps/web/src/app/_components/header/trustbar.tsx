@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 import {
   APP_SLOGAN,
@@ -7,38 +7,38 @@ import {
   LINKEDIN_URL,
   TIKTOK_URL,
   YOUTUBE_URL,
-} from '@nawadi/lib/constants'
+} from "@nawadi/lib/constants";
 
-import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from '../socials'
+import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "../socials";
 
 export default function Trustbar() {
   const socials = [
     {
-      name: 'Facebook',
+      name: "Facebook",
       icon: Facebook,
       link: FACEBOOK_URL,
     },
     {
-      name: 'Instagram',
+      name: "Instagram",
       icon: Instagram,
       link: INSTAGRAM_URL,
     },
     {
-      name: 'LinkedIn',
+      name: "LinkedIn",
       icon: LinkedIn,
       link: LINKEDIN_URL,
     },
     {
-      name: 'TikTok',
+      name: "TikTok",
       icon: TikTok,
       link: TIKTOK_URL,
     },
     {
-      name: 'YouTube',
+      name: "YouTube",
       icon: YouTube,
       link: YOUTUBE_URL,
     },
-  ]
+  ];
 
   return (
     <section className="flex items-center justify-center gap-2 py-2 text-white sm:px-28 lg:justify-between">
@@ -64,5 +64,5 @@ export default function Trustbar() {
         ))}
       </ul>
     </section>
-  )
+  );
 }

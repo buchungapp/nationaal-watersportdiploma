@@ -1,31 +1,31 @@
-'use client'
+"use client";
 
-import { Fragment, useState, type ComponentPropsWithoutRef } from 'react'
-import { Transition } from '@headlessui/react'
-import { twMerge } from 'tailwind-merge'
+import { Fragment, useState, type ComponentPropsWithoutRef } from "react";
+import { Transition } from "@headlessui/react";
+import { twMerge } from "tailwind-merge";
 
 export default function CopyToClipboard({
   children,
   value,
   className,
   ...props
-}: ComponentPropsWithoutRef<'button'> & { value: string }) {
-  const [showing, setShowing] = useState(false)
+}: ComponentPropsWithoutRef<"button"> & { value: string }) {
+  const [showing, setShowing] = useState(false);
   return (
     <span className="relative">
       <button
         {...props}
         onClick={async (e) => {
-          if (typeof navigator.clipboard === 'undefined') return
-          await navigator.clipboard.writeText(value)
-          props.onClick?.(e)
+          if (typeof navigator.clipboard === "undefined") return;
+          await navigator.clipboard.writeText(value);
+          props.onClick?.(e);
 
-          setShowing(true)
-          setTimeout(() => setShowing(false), 400)
-          return
+          setShowing(true);
+          setTimeout(() => setShowing(false), 400);
+          return;
         }}
         className={twMerge(
-          'rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2',
+          "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2",
           className,
         )}
       >
@@ -48,5 +48,5 @@ export default function CopyToClipboard({
         </span>
       </Transition>
     </span>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import type { PropsWithChildren } from 'react'
-import Link from 'next/link'
+import type { PropsWithChildren } from "react";
+import Link from "next/link";
 
 import {
   APP_NAME,
@@ -9,17 +9,17 @@ import {
   LINKEDIN_URL,
   TIKTOK_URL,
   YOUTUBE_URL,
-} from '@nawadi/lib/constants'
+} from "@nawadi/lib/constants";
 
-import { Line, LineWave } from '~/app/_assets/wave'
-import Wordmark from '~/app/_components/brand/wordmark'
+import { Line, LineWave } from "~/app/_assets/wave";
+import Wordmark from "~/app/_components/brand/wordmark";
 import {
   Facebook,
   Instagram,
   LinkedIn,
   TikTok,
   YouTube,
-} from '~/app/_components/socials'
+} from "~/app/_components/socials";
 
 function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
@@ -31,37 +31,37 @@ function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
         {children}
       </Link>
     </li>
-  )
+  );
 }
 
 export default function Footer() {
   const socials = [
     {
-      name: 'Facebook',
+      name: "Facebook",
       icon: Facebook,
       link: FACEBOOK_URL,
     },
     {
-      name: 'Instagram',
+      name: "Instagram",
       icon: Instagram,
       link: INSTAGRAM_URL,
     },
     {
-      name: 'LinkedIn',
+      name: "LinkedIn",
       icon: LinkedIn,
       link: LINKEDIN_URL,
     },
     {
-      name: 'TikTok',
+      name: "TikTok",
       icon: TikTok,
       link: TIKTOK_URL,
     },
     {
-      name: 'YouTube',
+      name: "YouTube",
       icon: YouTube,
       link: YOUTUBE_URL,
     },
-  ]
+  ];
 
   return (
     <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 pb-12 pt-20 lg:px-16">
@@ -159,5 +159,5 @@ export default function Footer() {
         </ul>
       </div>
     </footer>
-  )
+  );
 }

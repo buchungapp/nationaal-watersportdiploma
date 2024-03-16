@@ -1,18 +1,18 @@
-'use client'
+"use client";
 
-import type { PropsWithChildren } from 'react';
-import { Fragment } from 'react'
-import { Popover, Transition } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/24/outline'
-import clsx from 'clsx'
+import type { PropsWithChildren } from "react";
+import { Fragment } from "react";
+import { Popover, Transition } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 
-import Double from '~/app/_components/brand/double-line'
+import Double from "~/app/_components/brand/double-line";
 
 export default function PopoverNavItem({
   children,
   label,
 }: PropsWithChildren<{
-  label: string
+  label: string;
 }>) {
   return (
     <Popover className="group relative">
@@ -21,7 +21,7 @@ export default function PopoverNavItem({
         <ChevronDownIcon className="h-5 w-5 flex-none" aria-hidden="true" />
         <Double
           className={clsx(
-            'absolute bottom-0 w-0 translate-y-full text-branding-dark transition-width group-hover:w-full ui-open:w-full',
+            "absolute bottom-0 w-0 translate-y-full text-branding-dark transition-width group-hover:w-full ui-open:w-full",
           )}
         />
       </Popover.Button>
@@ -39,5 +39,5 @@ export default function PopoverNavItem({
         </Popover.Panel>
       </Transition>
     </Popover>
-  )
+  );
 }

@@ -1,23 +1,23 @@
-'use client'
+"use client";
 
-import { Suspense, useEffect } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { load, trackPageview } from 'fathom-client'
+import { Suspense, useEffect } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { load, trackPageview } from "fathom-client";
 
 function TrackPageView() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (
-      process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' &&
+      process.env.NEXT_PUBLIC_VERCEL_ENV === "production" &&
       !!process.env.NEXT_PUBLIC_FATHOM_ID
     ) {
       load(process.env.NEXT_PUBLIC_FATHOM_ID, {
         auto: false,
-      })
+      });
     }
-  }, [])
+  }, []);
 
   // Record a pageview when route changes
   useEffect(() => {
@@ -25,11 +25,11 @@ function TrackPageView() {
       trackPageview({
         url: pathname + `?${searchParams.toString()}`,
         referrer: document.referrer,
-      })
+      });
     }
-  }, [pathname, searchParams])
+  }, [pathname, searchParams]);
 
-  return null
+  return null;
 }
 
 export default function Analytics() {
@@ -37,5 +37,5 @@ export default function Analytics() {
     <Suspense>
       <TrackPageView />
     </Suspense>
-  )
+  );
 }

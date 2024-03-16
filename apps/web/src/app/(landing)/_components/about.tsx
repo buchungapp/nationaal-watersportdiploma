@@ -1,7 +1,7 @@
-import Balancer from 'react-wrap-balancer'
+import Balancer from "react-wrap-balancer";
 
-import Logo from '~/app/_components/brand/logo'
-import AboutSection from './about-section'
+import Logo from "~/app/_components/brand/logo";
+import AboutSection from "./about-section";
 
 export default function About() {
   return (
@@ -50,5 +50,5 @@ export default function About() {
         </div>
       </div>
     </section>
-  )
+  );
 }

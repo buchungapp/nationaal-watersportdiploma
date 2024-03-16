@@ -1,15 +1,15 @@
-import Image from 'next/image'
-import clsx from 'clsx'
+import Image from "next/image";
+import clsx from "clsx";
 
-import image1 from './_assets/1.jpg'
-import image2 from './_assets/2.jpg'
-import image3 from './_assets/3.jpg'
-import image4 from './_assets/4.jpg'
-import image5 from './_assets/5.jpg'
-import image6 from './_assets/photo-6.png'
+import image1 from "./_assets/1.jpg";
+import image2 from "./_assets/2.jpg";
+import image3 from "./_assets/3.jpg";
+import image4 from "./_assets/4.jpg";
+import image5 from "./_assets/5.jpg";
+import image6 from "./_assets/photo-6.png";
 
 export default function Photos() {
-  const rotations = ['rotate-2', '-rotate-2', 'rotate-2']
+  const rotations = ["rotate-2", "-rotate-2", "rotate-2"];
 
   return (
     <section className="-my-2 flex w-full justify-center gap-5 overflow-hidden py-4 sm:gap-8">
@@ -18,7 +18,7 @@ export default function Photos() {
           <div
             key={image.src}
             className={clsx(
-              'relative aspect-[9/10] w-32 flex-none overflow-hidden rounded-xl bg-zinc-100 sm:w-56 sm:rounded-2xl dark:bg-zinc-800',
+              "relative aspect-[9/10] w-32 flex-none overflow-hidden rounded-xl bg-zinc-100 sm:w-56 sm:rounded-2xl dark:bg-zinc-800",
               rotations[imageIndex % rotations.length],
             )}
           >
@@ -33,5 +33,5 @@ export default function Photos() {
         ),
       )}
     </section>
-  )
+  );
 }

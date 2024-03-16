@@ -15,14 +15,14 @@ paths:
       operationId: get-main-categories
       summary: Get main get-main-categories
       responses:
-        "200":
+        '200':
           description: Ok
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/main-category"
+                  $ref: '#/components/schemas/main-category'
     post:
       operationId: create-main-category
       summary: Create an new main category
@@ -30,16 +30,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/main-category-fields"
+              $ref: '#/components/schemas/main-category-fields'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/main-category"
-        "403":
-          $ref: "#/components/responses/forbidden"
+                $ref: '#/components/schemas/main-category'
+        '403':
+          $ref: '#/components/responses/forbidden'
 
   /sub-category/{main-category-id}:
     parameters:
@@ -47,19 +47,19 @@ paths:
         in: path
         required: true
         schema:
-          $ref: "#/components/schemas/entity-id"
+          $ref: '#/components/schemas/entity-id'
     get:
       operationId: get-sub-categories
       summary: Get sub categories in a main category
       responses:
-        "200":
+        '200':
           description: Ok
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/main-category"
+                  $ref: '#/components/schemas/main-category'
     post:
       operationId: create-sub-category
       summary: Create an new sub category in a main category
@@ -67,16 +67,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/sub-category-fields"
+              $ref: '#/components/schemas/sub-category-fields'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/sub-category"
-        "403":
-          $ref: "#/components/responses/forbidden"
+                $ref: '#/components/schemas/sub-category'
+        '403':
+          $ref: '#/components/responses/forbidden'
 
 components:
   schemas:
@@ -85,12 +85,12 @@ components:
     main-category:
       description: |-
         Full main category entity
-      $ref: "#/components/schemas/main-category-fields"
+      $ref: '#/components/schemas/main-category-fields'
       required:
         - id
       properties:
         id:
-          $ref: "#/components/schemas/entity-id"
+          $ref: '#/components/schemas/entity-id'
 
     main-category-fields:
       description: |-
@@ -100,19 +100,19 @@ components:
         - name
       properties:
         name:
-          $ref: "#/components/schemas/entity-name"
+          $ref: '#/components/schemas/entity-name'
         description:
-          $ref: "#/components/schemas/entity-description"
+          $ref: '#/components/schemas/entity-description'
 
     sub-category:
       description: |-
         Full sub category entity
-      $ref: "#/components/schemas/sub-category-fields"
+      $ref: '#/components/schemas/sub-category-fields'
       required:
         - id
       properties:
         id:
-          $ref: "#/components/schemas/entity-id"
+          $ref: '#/components/schemas/entity-id'
 
     sub-category-fields:
       description: |-
@@ -122,9 +122,9 @@ components:
         - name
       properties:
         name:
-          $ref: "#/components/schemas/entity-name"
+          $ref: '#/components/schemas/entity-name'
         description:
-          $ref: "#/components/schemas/entity-description"
+          $ref: '#/components/schemas/entity-description'
 
     # field schemas
 

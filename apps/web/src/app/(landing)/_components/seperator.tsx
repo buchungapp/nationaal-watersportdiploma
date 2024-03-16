@@ -1,5 +1,5 @@
-import Logo from '~/app/_components/brand/logo'
-import WaveAnimation from '../../_components/style/wave-animation'
+import Logo from "~/app/_components/brand/logo";
+import WaveAnimation from "../../_components/style/wave-animation";
 
 export default function Seperator() {
   return (
@@ -13,5 +13,5 @@ export default function Seperator() {
       />
       <WaveAnimation begin={-600} end={-100} />
     </section>
-  )
+  );
 }

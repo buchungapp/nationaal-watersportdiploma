@@ -1,52 +1,52 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
-import { DoubleLine, Wave } from '~/app/_assets/wave'
-import useWindowDimensions from '~/app/_hooks/use-window-dimensions'
+import { DoubleLine, Wave } from "~/app/_assets/wave";
+import useWindowDimensions from "~/app/_hooks/use-window-dimensions";
 
 export default function WaveAnimation({
   begin,
   end,
   id,
 }: {
-  begin: number
-  end: number
-  id?: string
+  begin: number;
+  end: number;
+  id?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollY } = useScroll()
-  const [beginOffset, setBeginOffset] = useState(begin)
-  const [endOffset, setEndOffset] = useState(end)
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const [beginOffset, setBeginOffset] = useState(begin);
+  const [endOffset, setEndOffset] = useState(end);
   const inverseProgress = useTransform(
     scrollY,
     [beginOffset, endOffset],
-    ['70%', '10%'],
-  )
+    ["70%", "10%"],
+  );
 
-  const { width } = useWindowDimensions()
+  const { width } = useWindowDimensions();
 
-  const isClient = typeof window !== 'undefined'
+  const isClient = typeof window !== "undefined";
 
   useEffect(() => {
-    if (!ref.current || !isClient) return
+    if (!ref.current || !isClient) return;
 
-    const { top } = ref.current.getBoundingClientRect()
+    const { top } = ref.current.getBoundingClientRect();
 
     if (id) {
-      const el = document.getElementById(id)
+      const el = document.getElementById(id);
       if (el) {
-        const { height } = el.getBoundingClientRect()
-        setBeginOffset(begin + top - height + window.scrollY)
-        setEndOffset(end + top + window.scrollY)
-        return
+        const { height } = el.getBoundingClientRect();
+        setBeginOffset(begin + top - height + window.scrollY);
+        setEndOffset(end + top + window.scrollY);
+        return;
       }
     }
 
-    setBeginOffset(begin + top + window.scrollY)
-    setEndOffset(end + top + window.scrollY)
-  }, [id, ref, begin, end, isClient, width])
+    setBeginOffset(begin + top + window.scrollY);
+    setEndOffset(end + top + window.scrollY);
+  }, [id, ref, begin, end, isClient, width]);
 
   return (
     <div
@@ -77,5 +77,5 @@ export default function WaveAnimation({
         <DoubleLine className="w-full" />
       </motion.div>
     </div>
-  )
+  );
 }

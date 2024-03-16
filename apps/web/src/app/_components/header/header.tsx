@@ -1,5 +1,5 @@
-import Nav from './nav/nav'
-import Trustbar from './trustbar'
+import Nav from "./nav/nav";
+import Trustbar from "./trustbar";
 
 export default function Header() {
   return (
@@ -14,35 +14,35 @@ export default function Header() {
       <Nav
         items={[
           {
-            label: 'Vaarlocaties',
-            href: '/vaarlocaties',
+            label: "Vaarlocaties",
+            href: "/vaarlocaties",
           },
           {
-            label: 'Diplomeringslijn',
+            label: "Diplomeringslijn",
             component: (
               <div className="p-4">
                 {[
                   {
-                    name: 'Consumenten',
-                    href: '/diplomalijn/consumenten',
-                    description: 'De consumentenlijn van het NWD',
+                    name: "Consumenten",
+                    href: "/diplomalijn/consumenten",
+                    description: "De consumentenlijn van het NWD",
                   },
                   {
-                    name: 'Instructeurs',
-                    href: '/diplomalijn/instructeurs',
-                    description: 'De instructeurslijn van het NWD',
+                    name: "Instructeurs",
+                    href: "/diplomalijn/instructeurs",
+                    description: "De instructeurslijn van het NWD",
                   },
                   {
-                    name: 'Filosofie',
-                    href: '/diplomalijn',
+                    name: "Filosofie",
+                    href: "/diplomalijn",
                     description:
-                      'De filosofie achter de diplomalijn van het NWD',
+                      "De filosofie achter de diplomalijn van het NWD",
                   },
                   {
-                    name: 'Accreditatie',
-                    href: '/diplomalijn/accreditatie',
+                    name: "Accreditatie",
+                    href: "/diplomalijn/accreditatie",
                     description:
-                      'Leer meer over de accreditatie vanuit het Watersportverbond',
+                      "Leer meer over de accreditatie vanuit het Watersportverbond",
                   },
                 ].map((item) => (
                   <div
@@ -68,50 +68,50 @@ export default function Header() {
             ),
           },
           {
-            label: 'Actueel',
-            href: '/actueel',
+            label: "Actueel",
+            href: "/actueel",
           },
 
           {
-            label: 'Vereniging',
+            label: "Vereniging",
             component: (
               <div className="p-4">
                 {[
                   {
-                    name: 'Manifest',
-                    href: '/vereniging/manifest',
-                    description: 'Waar we voor staan bij het NWD',
+                    name: "Manifest",
+                    href: "/vereniging/manifest",
+                    description: "Waar we voor staan bij het NWD",
                   },
                   {
-                    name: 'Vertrouwenspersoon',
-                    href: '/vereniging/vertrouwenspersoon',
-                    description: 'Hulp bij ongewenst gedrag',
+                    name: "Vertrouwenspersoon",
+                    href: "/vereniging/vertrouwenspersoon",
+                    description: "Hulp bij ongewenst gedrag",
                   },
                   {
-                    name: 'Gedragscode',
-                    href: '/vereniging/gedragscode',
+                    name: "Gedragscode",
+                    href: "/vereniging/gedragscode",
                     description:
-                      'Gedragscode voor alle betrokkenen bij het NWD',
+                      "Gedragscode voor alle betrokkenen bij het NWD",
                   },
                   {
-                    name: 'Bestuur',
-                    href: '/vereniging/bestuur',
-                    description: 'Verenigingsbestuur',
+                    name: "Bestuur",
+                    href: "/vereniging/bestuur",
+                    description: "Verenigingsbestuur",
                   },
                   {
-                    name: 'Secretariaat',
-                    href: '/vereniging/secretariaat',
-                    description: 'Ondersteuning vanuit het secretariaat',
+                    name: "Secretariaat",
+                    href: "/vereniging/secretariaat",
+                    description: "Ondersteuning vanuit het secretariaat",
                   },
                   {
-                    name: 'Kwaliteitscommissie',
-                    href: '/vereniging/kwaliteitscommissie',
-                    description: 'De kwaliteitscommissie van het NWD',
+                    name: "Kwaliteitscommissie",
+                    href: "/vereniging/kwaliteitscommissie",
+                    description: "De kwaliteitscommissie van het NWD",
                   },
                   {
-                    name: 'Statuten en reglementen',
-                    href: '/vereniging/statuten-en-reglementen',
-                    description: 'De statuten en reglementen van het NWD',
+                    name: "Statuten en reglementen",
+                    href: "/vereniging/statuten-en-reglementen",
+                    description: "De statuten en reglementen van het NWD",
                   },
                 ].map((item) => (
                   <div
@@ -138,11 +138,11 @@ export default function Header() {
           },
 
           {
-            label: 'Contact',
-            href: '/contact',
+            label: "Contact",
+            href: "/contact",
           },
         ]}
       />
     </header>
-  )
+  );
 }

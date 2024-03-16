@@ -26,5 +26,5 @@ export default function Double({ className }: { className?: string }) {
         strokeLinecap="round"
       />
     </svg>
-  )
+  );
 }

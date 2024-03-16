@@ -1,9 +1,12 @@
-import type { ComponentProps } from 'react'
-import Link from 'next/link'
-import { ArrowLongRightIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
-import clsx from 'clsx'
+import type { ComponentProps } from "react";
+import Link from "next/link";
+import {
+  ArrowLongRightIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
+import clsx from "clsx";
 
-import BackButton from '../back-button'
+import BackButton from "../back-button";
 
 export function BoxedButton({
   className,
@@ -14,7 +17,7 @@ export function BoxedButton({
     <Link
       {...props}
       className={clsx(
-        'group flex w-fit items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
+        "group flex w-fit items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
         className,
       )}
     >
@@ -24,7 +27,7 @@ export function BoxedButton({
         strokeWidth={2.5}
       />
     </Link>
-  )
+  );
 }
 
 export function TekstButton({
@@ -36,7 +39,7 @@ export function TekstButton({
     <Link
       {...props}
       className={clsx(
-        'group -mx-2.5 -my-1.5 flex w-fit items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors',
+        "group -mx-2.5 -my-1.5 flex w-fit items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors",
         className,
       )}
     >
@@ -46,7 +49,7 @@ export function TekstButton({
         strokeWidth={2.5}
       />
     </Link>
-  )
+  );
 }
 
 export function InlineButton({
@@ -58,25 +61,25 @@ export function InlineButton({
     <Link
       {...props}
       className={clsx(
-        'rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2',
+        "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2",
         className,
       )}
     >
       {children}
     </Link>
-  )
+  );
 }
 
 export function BoxedBackButton({
   className,
   children,
   ...props
-}: ComponentProps<'button'>) {
+}: ComponentProps<"button">) {
   return (
     <BackButton
       {...props}
       className={clsx(
-        'group flex w-fit items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold',
+        "group flex w-fit items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold",
         className,
       )}
     >
@@ -86,19 +89,19 @@ export function BoxedBackButton({
         strokeWidth={2.5}
       />
     </BackButton>
-  )
+  );
 }
 
 export function TekstBackButton({
   className,
   children,
   ...props
-}: ComponentProps<'button'>) {
+}: ComponentProps<"button">) {
   return (
     <BackButton
       {...props}
       className={clsx(
-        'group flex w-fit items-center gap-1 font-semibold',
+        "group flex w-fit items-center gap-1 font-semibold",
         className,
       )}
     >
@@ -108,5 +111,5 @@ export function TekstBackButton({
         strokeWidth={2.5}
       />
     </BackButton>
-  )
+  );
 }

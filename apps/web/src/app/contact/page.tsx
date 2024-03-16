@@ -1,16 +1,16 @@
-import Image from 'next/image'
-import Link from 'next/link'
 import {
   AtSymbolIcon,
   EnvelopeIcon,
   PhoneIcon,
-} from '@heroicons/react/24/outline'
+} from "@heroicons/react/24/outline";
+import Image from "next/image";
+import Link from "next/link";
 
-import Article from '../_components/style/article'
-import { InlineButton, TekstButton } from '../_components/style/buttons'
-import CopyToClipboard from '../_components/style/copy-to-clipboard'
-import PageHero from '../_components/style/page-hero'
-import contact from './_assets/contact.jpg'
+import Article from "../_components/style/article";
+import { InlineButton, TekstButton } from "../_components/style/buttons";
+import CopyToClipboard from "../_components/style/copy-to-clipboard";
+import PageHero from "../_components/style/page-hero";
+import contact from "./_assets/contact.jpg";
 
 export default function Contact() {
   return (
@@ -31,25 +31,25 @@ export default function Contact() {
         <div className="columns-1 gap-8 space-y-8 lg:columns-3">
           {[
             {
-              title: 'Helpcentrum',
+              title: "Helpcentrum",
               description:
-                'Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.',
-              label: 'Naar het helpcentrum',
-              href: '/faq',
+                "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
+              label: "Naar het helpcentrum",
+              href: "/faq",
             },
             {
-              title: 'Mediakit',
+              title: "Mediakit",
               description:
                 "Alle NWD-merkmaterialen, zoals logo's en kleuren, overzichtelijk bij elkaar.",
-              label: 'Open de mediakit',
-              href: '/mediakit',
+              label: "Open de mediakit",
+              href: "/mediakit",
             },
             {
-              title: 'Contacteer jouw vaarlocatie',
+              title: "Contacteer jouw vaarlocatie",
               description:
                 "Vragen over diploma's en opleidingen? Start bij je eigen vaarlocatie.",
-              label: 'Bekijk NWD-vaarlocaties',
-              href: '/locaties',
+              label: "Bekijk NWD-vaarlocaties",
+              href: "/locaties",
             },
           ].map((item) => (
             <article
@@ -79,10 +79,10 @@ export default function Contact() {
               </Article.Heading>
               <Article.Title>Neem contact op</Article.Title>
               <Article.Paragraph className="text-gray-700">
-                Het{' '}
-                <Link href={'/vereniging/secretariaat'} className="underline">
+                Het{" "}
+                <Link href={"/vereniging/secretariaat"} className="underline">
                   secretariaat
-                </Link>{' '}
+                </Link>{" "}
                 helpt met vragen van consumenten, instructeurs, vaarlocaties, de
                 pers en meer. Zij beantwoorden je vraag of verwijzen je door
                 binnen het Nationaal Watersportdiploma.
@@ -91,7 +91,7 @@ export default function Contact() {
             <ul className="flex flex-col gap-4 text-gray-700">
               <li className="w-fit">
                 <CopyToClipboard
-                  value={'info@nationaalwatersportdiploma.nl'}
+                  value={"info@nationaalwatersportdiploma.nl"}
                   className="flex items-center gap-4 underline"
                 >
                   <AtSymbolIcon className="h-5 w-5" />
@@ -127,5 +127,5 @@ export default function Contact() {
         </div>
       </div>
     </main>
-  )
+  );
 }

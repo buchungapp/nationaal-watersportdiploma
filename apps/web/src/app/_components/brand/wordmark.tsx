@@ -1,4 +1,4 @@
-export default function Hero({ className = '' }: { className?: string }) {
+export default function Hero({ className = "" }: { className?: string }) {
   return (
     <svg
       width="149"
@@ -121,5 +121,5 @@ export default function Hero({ className = '' }: { className?: string }) {
         fill="currentColor"
       />
     </svg>
-  )
+  );
 }
