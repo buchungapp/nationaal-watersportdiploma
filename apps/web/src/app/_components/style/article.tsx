@@ -1,6 +1,13 @@
-import { Children, ComponentProps, ReactElement, cloneElement, isValidElement } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  type ComponentProps,
+  type ReactElement,
+} from "react";
 import Balancer from "react-wrap-balancer";
 import { twMerge } from "tailwind-merge";
+
 import Double from "~/app/_components/brand/double-line";
 
 export default function Article({
@@ -13,7 +20,8 @@ export default function Article({
 }) {
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
-      ? cloneElement(child as ReactElement<any>, { justify, ...child.props })
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+        cloneElement(child as ReactElement<any>, { justify, ...child.props })
       : child,
   );
 
@@ -36,7 +44,7 @@ Article.Heading = function ArticleHeading({
     <div
       {...props}
       className={twMerge(
-        "flex gap-3 items-center uppercase whitespace-nowrap font-bold",
+        "flex items-center gap-3 whitespace-nowrap font-bold uppercase",
         className,
       )}
     >
@@ -64,7 +72,7 @@ Article.Title = function ArticleTitle({
     <Component
       {...props}
       className={twMerge(
-        "font-bold text-2xl",
+        "text-2xl font-bold",
         justify === "center" && "text-center",
         justify === "end" && "text-end",
         className,
@@ -87,8 +95,8 @@ Article.Paragraph = function ArticleParagraph({
     <p
       {...props}
       className={twMerge(
-        justify === "center" && "text-center self-center",
-        justify === "end" && "text-end self-end",
+        justify === "center" && "self-center text-center",
+        justify === "end" && "self-end text-end",
         className,
       )}
     >
@@ -109,7 +117,7 @@ Article.ButtonSection = function ArticleButtonSection({
     <div
       {...props}
       className={twMerge(
-        "flex flex-col sm:flex-row gap-x-6 gap-y-2",
+        "flex flex-col gap-x-6 gap-y-2 sm:flex-row",
         justify === "center" && "items-center sm:justify-center",
         justify === "end" && "items-end sm:justify-end",
         className,

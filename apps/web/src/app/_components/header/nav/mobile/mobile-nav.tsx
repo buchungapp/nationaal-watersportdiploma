@@ -1,11 +1,10 @@
 "use client";
 
 import React, { Fragment } from "react";
-
-import { Dialog, Transition } from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
+import { Dialog, Transition } from "@headlessui/react";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 import { useMobileMenuState } from "~/app/providers";
 

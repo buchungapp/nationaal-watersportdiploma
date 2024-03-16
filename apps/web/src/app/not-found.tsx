@@ -6,12 +6,14 @@ export default function NotFound() {
     <main className="flex flex-col items-center">
       <PageHero>
         <div className="px-4 lg:px-16">
-          <div className="grid gap-10 justify-center lg:justify-start">
-            <div className="text-white grid gap-6">
-              <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">404</h1>
+          <div className="grid justify-center gap-10 lg:justify-start">
+            <div className="grid gap-6 text-white">
+              <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
+                404
+              </h1>
               <p className="text-xl">We konden de pagina niet vinden.</p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-x-6 gap-y-2">
+            <div className="flex flex-col gap-x-6 gap-y-2 sm:flex-row">
               <BoxedButton href="/" className="bg-white text-branding-dark">
                 Naar de homepage
               </BoxedButton>

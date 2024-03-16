@@ -2,19 +2,20 @@ import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 
 export default function Bestuur() {
   return (
-    <article className="prose">
+    <article className="prose max-w-prose">
       <div className="prose-lg">
-        <h3>Bestuur</h3>
         <p>
-          Het bestuur van de vereniging Nationaal Watersportdiploma bestaat uit vijf natuurlijke
-          personen. Het verenigingsbestuur bestaat uit een voorzitter, een vicevoorzitter, een
-          secretaris, een penningmeester en een algemeen bestuurslid. Het bestuur verdeelt in
-          onderling overleg de functie en de werkzaamheden.
+          Het bestuur van de vereniging Nationaal Watersportdiploma bestaat uit
+          vijf natuurlijke personen. Het verenigingsbestuur bestaat uit een
+          voorzitter, een vicevoorzitter, een secretaris, een penningmeester en
+          een algemeen bestuurslid. Het bestuur verdeelt in onderling overleg de
+          functie en de werkzaamheden.
         </p>
       </div>
       <p>
-        Alle bestuursfuncties bij het Nationaal Watersportdiploma betreffen vrijwilligersfuncties en
-        zijn naast een eventuele onkostenvergoeding onbezoldigd.
+        Alle bestuursfuncties bij het Nationaal Watersportdiploma betreffen
+        vrijwilligersfuncties en zijn naast een eventuele onkostenvergoeding
+        onbezoldigd.
       </p>
 
       <p>

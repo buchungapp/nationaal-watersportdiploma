@@ -1,7 +1,7 @@
 "use client";
 
+import { Fragment, useState, type ComponentPropsWithoutRef } from "react";
 import { Transition } from "@headlessui/react";
-import { ComponentPropsWithoutRef, Fragment, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export default function CopyToClipboard({
@@ -15,16 +15,17 @@ export default function CopyToClipboard({
     <span className="relative">
       <button
         {...props}
-        onClick={(e) => {
+        onClick={async (e) => {
           if (typeof navigator.clipboard === "undefined") return;
-          navigator.clipboard.writeText(value);
+          await navigator.clipboard.writeText(value);
           props.onClick?.(e);
 
           setShowing(true);
           setTimeout(() => setShowing(false), 400);
+          return;
         }}
         className={twMerge(
-          "rounded-lg hover:-mx-2 hover:px-2 transition-[padding,margin,background-color] hover:bg-gray-100",
+          "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2",
           className,
         )}
       >
@@ -40,9 +41,9 @@ export default function CopyToClipboard({
         leaveTo="opacity-0 translate-y-1"
         show={showing}
       >
-        <span className="absolute left-1/2 z-10 top-0 -translate-y-full -mt-2 -translate-x-1/2">
-          <span className="bg-branding-dark shadow-lg rounded-lg px-2 py-1">
-            <span className="text-white font-semibold text-sm">Gekopieerd</span>
+        <span className="absolute left-1/2 top-0 z-10 -mt-2 -translate-x-1/2 -translate-y-full">
+          <span className="rounded-lg bg-branding-dark px-2 py-1 shadow-lg">
+            <span className="text-sm font-semibold text-white">Gekopieerd</span>
           </span>
         </span>
       </Transition>

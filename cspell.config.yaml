@@ -1,15 +1,16 @@
-version: "0.2"
+version: '0.2'
 words:
   - buchungapp
   - clsx
   - diplomeringslijn
   - esbenp
   - headlessui
+  - ianvs
   - INGB
   - INGBNL
-  - Initatiefnemers
   - Krekt
   - nawadi
+  - Outro
   - PGURI
   - pnpx
   - ryanluker
@@ -18,6 +19,7 @@ words:
   - supabase
   - tailwindcss
   - trivago
+  - veiligheids
   - Wavie
   - Wytse
 ignoreWords:
@@ -32,11 +34,11 @@ ignorePaths:
   - generated/
   - apps/nwd-web/src/app/
 files:
-  - "**"
+  - '**'
 enableFiletypes:
-  - "*"
+  - '*'
 dictionaries:
   - sql
   - nl-nl
 import:
-  - "@cspell/dict-nl-nl/cspell-ext.json"
+  - '@cspell/dict-nl-nl/cspell-ext.json'

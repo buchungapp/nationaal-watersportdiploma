@@ -18,7 +18,11 @@
       "request": "launch",
       "name": "migrate",
       "program": "${workspaceFolder}/src/program.ts",
-      "args": ["migrate", "--pg-uri", "postgres://postgres:postgres@localhost:5432/postgres"],
+      "args": [
+        "migrate",
+        "--pg-uri",
+        "postgres://postgres:postgres@localhost:5432/postgres"
+      ],
       "env": {
         "NODE_ENV": "local"
       },

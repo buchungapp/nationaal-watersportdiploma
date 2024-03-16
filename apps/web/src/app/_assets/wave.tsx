@@ -1,4 +1,8 @@
-export function Wave({ className = "h-5 w-5 text-white" }: { className?: string }) {
+export function Wave({
+  className = "h-5 w-5 text-white",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       fill="none"
@@ -24,7 +28,11 @@ export function Wave({ className = "h-5 w-5 text-white" }: { className?: string 
   );
 }
 
-export function DoubleLine({ className = "h-5 w-5 text-white" }: { className?: string }) {
+export function DoubleLine({
+  className = "h-5 w-5 text-white",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       width="100%"
@@ -55,7 +63,11 @@ export function DoubleLine({ className = "h-5 w-5 text-white" }: { className?: s
   );
 }
 
-export function Line({ className = "h-5 w-5 text-white" }: { className?: string }) {
+export function Line({
+  className = "h-5 w-5 text-white",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       width="100%"
@@ -79,7 +91,7 @@ export function Line({ className = "h-5 w-5 text-white" }: { className?: string 
 
 export function LineWave({ progress }: { progress: string }) {
   return (
-    <div className="text-branding-light/20 w-full relative group py-3 overflow-x-hidden">
+    <div className="group relative w-full overflow-x-hidden py-3 text-branding-light/20">
       <div
         style={{
           width: progress,
@@ -96,7 +108,7 @@ export function LineWave({ progress }: { progress: string }) {
         <Wave className="h-full" />
       </div>
       <div
-        className="absolute top-[12px] translate-x-[240px] right-0"
+        className="absolute right-0 top-[12px] translate-x-[240px]"
         style={{
           left: progress,
         }}

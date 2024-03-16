@@ -1,12 +1,12 @@
 import Nav from "./nav/nav";
 import Trustbar from "./trustbar";
 
-export default async function Header() {
+export default function Header() {
   return (
     <header className="bg-branding-light">
       <a
         href="#content"
-        className="fixed left-4 top-4 z-50 -translate-x-[calc(100%+2rem)] border-2 border-branding bg-white p-4 text-branding shadow-lg transition-transform focus:translate-x-0"
+        className="border-branding text-branding fixed left-4 top-4 z-50 -translate-x-[calc(100%+2rem)] border-2 bg-white p-4 shadow-lg transition-transform focus:translate-x-0"
       >
         Naar de inhoud gaan
       </a>
@@ -35,12 +35,14 @@ export default async function Header() {
                   {
                     name: "Filosofie",
                     href: "/diplomalijn",
-                    description: "De filosofie achter de diplomalijn van het NWD",
+                    description:
+                      "De filosofie achter de diplomalijn van het NWD",
                   },
                   {
                     name: "Accreditatie",
                     href: "/diplomalijn/accreditatie",
-                    description: "Leer meer over de accreditatie vanuit het Watersportverbond",
+                    description:
+                      "Leer meer over de accreditatie vanuit het Watersportverbond",
                   },
                 ].map((item) => (
                   <div
@@ -51,7 +53,10 @@ export default async function Header() {
                         <item.icon className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" aria-hidden="true" />
                       </div> */}
                     <div className="flex-auto">
-                      <a href={item.href} className="block font-semibold text-gray-900">
+                      <a
+                        href={item.href}
+                        className="block font-semibold text-gray-900"
+                      >
                         {item.name}
                         <span className="absolute inset-0" />
                       </a>
@@ -85,7 +90,8 @@ export default async function Header() {
                   {
                     name: "Gedragscode",
                     href: "/vereniging/gedragscode",
-                    description: "Gedragscode voor alle betrokkenen bij het NWD",
+                    description:
+                      "Gedragscode voor alle betrokkenen bij het NWD",
                   },
                   {
                     name: "Bestuur",
@@ -116,7 +122,10 @@ export default async function Header() {
                         <item.icon className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" aria-hidden="true" />
                       </div> */}
                     <div className="flex-auto">
-                      <a href={item.href} className="block font-semibold text-gray-900">
+                      <a
+                        href={item.href}
+                        className="block font-semibold text-gray-900"
+                      >
                         {item.name}
                         <span className="absolute inset-0" />
                       </a>

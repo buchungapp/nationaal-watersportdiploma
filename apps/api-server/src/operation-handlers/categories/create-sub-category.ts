@@ -1,7 +1,7 @@
-import * as api from "@nawadi/api";
-import { schema } from "@nawadi/db";
-import assert from "assert";
-import * as application from "../../application/index.js";
+import * as api from '@nawadi/api'
+import { schema } from '@nawadi/db'
+import assert from 'assert'
+import * as application from '../../application/index.js'
 
 export function createSubCategory(
   context: application.Context,
@@ -12,11 +12,11 @@ export function createSubCategory(
         status: 403,
         parameters: {},
         contentType: null,
-      };
+      }
     }
 
-    const { mainCategoryId } = incomingRequest.parameters;
-    const entity = await incomingRequest.entity();
+    const { mainCategoryId } = incomingRequest.parameters
+    const entity = await incomingRequest.entity()
 
     const rows = await context.db
       .insert(schema.subCategories)
@@ -25,20 +25,20 @@ export function createSubCategory(
         description: entity.description ?? null,
         mainCategoryId,
       })
-      .returning();
+      .returning()
 
-    assert(rows.length === 1);
-    const [row] = rows;
+    assert(rows.length === 1)
+    const [row] = rows
 
     return {
       status: 201,
       parameters: {},
-      contentType: "application/json",
+      contentType: 'application/json',
       entity: () => ({
         id: row.id,
         name: row.name,
         description: row.description ?? undefined,
       }),
-    };
-  };
+    }
+  }
 }

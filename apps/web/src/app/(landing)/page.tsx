@@ -13,7 +13,7 @@ export default function Home() {
       <PageHero>
         <Welcome />
       </PageHero>
-      <div className="flex flex-col gap-36 w-full mt-12">
+      <div className="mt-12 flex w-full flex-col gap-36">
         <Photos />
         <About />
         <Locations />

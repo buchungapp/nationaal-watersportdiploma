@@ -1,5 +1,6 @@
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 import { twMerge } from "tailwind-merge";
+
 import { LineWave } from "~/app/_assets/wave";
 import WaveAnimation from "./wave-animation";
 
@@ -8,12 +9,15 @@ export default function PageHero({
   className,
   animated = true,
   ...props
-}: ComponentProps<"section"> & { animated?: boolean }) {
+}: ComponentProps<"header"> & { animated?: boolean }) {
   return (
-    <section
+    <header
       {...props}
       id="heading"
-      className={twMerge("w-full bg-branding-light py-12 rounded-b-[3rem] grid gap-12", className)}
+      className={twMerge(
+        "grid w-full gap-12 rounded-b-[3rem] bg-branding-light py-12",
+        className,
+      )}
     >
       {children}
       <div className="w-full">
@@ -23,6 +27,6 @@ export default function PageHero({
           <LineWave progress={"70%"} />
         )}
       </div>
-    </section>
+    </header>
   );
 }

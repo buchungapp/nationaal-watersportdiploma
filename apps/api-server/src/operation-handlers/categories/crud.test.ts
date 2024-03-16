@@ -1,41 +1,41 @@
-import * as api from "@nawadi/api";
-import { withDatabase } from "@nawadi/db";
-import assert from "assert";
-import test from "node:test";
-import { withServer } from "../../testing/index.js";
+import * as api from '@nawadi/api'
+import { withDatabase } from '@nawadi/db'
+import assert from 'assert'
+import test from 'node:test'
+import { withServer } from '../../testing/index.js'
 
-test.skip("categories crud", () =>
+test.skip('categories crud', () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
-      const clientCredentials = { apiToken: "supersecret" };
-      const clientConfiguration = { baseUrl };
-      let mainCategoryId: number;
+      const clientCredentials = { apiToken: 'supersecret' }
+      const clientConfiguration = { baseUrl }
+      let mainCategoryId: number
 
-      await test("create main category", async () => {
+      await test('create main category', async () => {
         const operationResult = await api.createMainCategory(
           {
             parameters: {},
-            contentType: "application/json",
+            contentType: 'application/json',
             entity: () => ({
-              name: "main-category",
+              name: 'main-category',
             }),
           },
           clientCredentials,
           clientConfiguration,
-        );
+        )
 
-        assert(operationResult.status === 201);
+        assert(operationResult.status === 201)
 
-        const entity = (await operationResult.entity()) as any;
-        mainCategoryId = entity.id;
+        const entity = (await operationResult.entity()) as any
+        mainCategoryId = entity.id
 
         assert.deepEqual(entity, {
           id: 1,
-          name: "main-category",
-        });
-      });
+          name: 'main-category',
+        })
+      })
 
-      await test("list main categories", async () => {
+      await test('list main categories', async () => {
         const operationResult = await api.getMainCategories(
           {
             parameters: {},
@@ -43,45 +43,45 @@ test.skip("categories crud", () =>
           },
           clientCredentials,
           clientConfiguration,
-        );
+        )
 
-        assert(operationResult.status === 200);
+        assert(operationResult.status === 200)
 
-        const entity = await operationResult.entity();
+        const entity = await operationResult.entity()
 
         assert.deepEqual(entity, [
           {
             id: 1,
-            name: "main-category",
+            name: 'main-category',
           },
-        ]);
-      });
+        ])
+      })
 
-      await test("create sub category", async () => {
+      await test('create sub category', async () => {
         const operationResult = await api.createSubCategory(
           {
             parameters: {
               mainCategoryId,
             },
-            contentType: "application/json",
+            contentType: 'application/json',
             entity: () => ({
-              name: "sub-category",
+              name: 'sub-category',
             }),
           },
           clientCredentials,
           clientConfiguration,
-        );
+        )
 
-        assert(operationResult.status === 201);
+        assert(operationResult.status === 201)
 
-        const entity = await operationResult.entity();
+        const entity = await operationResult.entity()
         assert.deepEqual(entity, {
           id: 1,
-          name: "sub-category",
-        });
-      });
+          name: 'sub-category',
+        })
+      })
 
-      await test("list sub categories", async () => {
+      await test('list sub categories', async () => {
         const operationResult = await api.getSubCategories(
           {
             parameters: {
@@ -91,18 +91,18 @@ test.skip("categories crud", () =>
           },
           clientCredentials,
           clientConfiguration,
-        );
+        )
 
-        assert(operationResult.status === 200);
+        assert(operationResult.status === 200)
 
-        const entity = await operationResult.entity();
+        const entity = await operationResult.entity()
 
         assert.deepEqual(entity, [
           {
             id: 1,
-            name: "sub-category",
+            name: 'sub-category',
           },
-        ]);
-      });
+        ])
+      })
     }),
-  ));
+  ))

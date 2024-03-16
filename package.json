@@ -5,6 +5,7 @@
   "scripts": {
     "spelling": "cspell",
     "formatting": "prettier --check *",
+    "formatting:fix": "prettier --write *",
     "initialize": "node ./scripts/initialize.js"
   },
   "devDependencies": {

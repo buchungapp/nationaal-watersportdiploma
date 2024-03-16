@@ -1,8 +1,8 @@
 "use client";
 
-import { PropsWithChildren } from "react";
-
+import type { PropsWithChildren } from "react";
 import { useRouter } from "next/navigation";
+
 import { useHasPreviousPathname } from "../providers";
 
 export default function BackButton({
@@ -15,7 +15,7 @@ export default function BackButton({
   if (!hasPrevious) return null;
 
   return (
-    <button onClick={() => router.back()} {...props}>
+    <button type="button" onClick={() => router.back()} {...props}>
       {children}
     </button>
   );

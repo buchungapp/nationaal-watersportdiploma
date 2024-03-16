@@ -1,5 +1,5 @@
-import { Database } from "@nawadi/db";
+import { Database } from '@nawadi/db'
 
 export interface Context {
-  db: Database;
+  db: Database
 }

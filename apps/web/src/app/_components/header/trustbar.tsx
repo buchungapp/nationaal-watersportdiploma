@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   APP_SLOGAN,
   FACEBOOK_URL,
@@ -6,7 +8,7 @@ import {
   TIKTOK_URL,
   YOUTUBE_URL,
 } from "@nawadi/lib/constants";
-import Link from "next/link";
+
 import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "../socials";
 
 export default function Trustbar() {
@@ -39,23 +41,23 @@ export default function Trustbar() {
   ];
 
   return (
-    <section className="text-white py-2 sm:px-28 flex items-center justify-center lg:justify-between gap-2">
-      <div className="xl:block hidden flex-1"></div>
-      <p className="xl:text-center lg:text-start text-center flex-1 text-sm font-semibold uppercase">
+    <section className="flex items-center justify-center gap-2 py-2 text-white sm:px-28 lg:justify-between">
+      <div className="hidden flex-1 xl:block"></div>
+      <p className="flex-1 text-center text-sm font-semibold uppercase lg:text-start xl:text-center">
         {APP_SLOGAN}
       </p>
 
-      <ul className="items-center flex-1 gap-6 justify-end lg:flex hidden">
+      <ul className="hidden flex-1 items-center justify-end gap-6 lg:flex">
         {socials.map((social, i) => (
           <li key={i}>
             <Link
-              className="relative group"
+              className="group relative"
               href={social.link}
               target="_blank"
               referrerPolicy="no-referrer"
             >
               {/* Background on hover */}
-              <div className="absolute inset-0 scale-150 bg-white rounded bg-opacity-0 group-hover:bg-opacity-100 transition-opacity" />
+              <div className="absolute inset-0 scale-150 rounded bg-white bg-opacity-0 transition-opacity group-hover:bg-opacity-100" />
               <social.icon className="relative h-4 w-4 group-hover:text-[--brand-color]" />
             </Link>
           </li>

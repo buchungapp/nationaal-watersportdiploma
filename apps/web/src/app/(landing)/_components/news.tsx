@@ -4,72 +4,66 @@ import Balancer from "react-wrap-balancer";
 
 import Double from "~/app/_components/brand/double-line";
 import { BoxedButton } from "~/app/_components/style/buttons";
-import aankondiging from "./_assets/aankondiging.jpg";
-import diplomalijn from "./_assets/diplomalijn.jpg";
-import zwemvest from "./_assets/zwemvest.png";
+import { formatDate } from "~/app/_utils/format-date";
+import { getAllArticles } from "~/lib/articles";
 
-export default function News() {
+export default async function News() {
+  const articles = await getAllArticles();
+
+  const featuredArticles = articles.slice(0, 3);
+
   return (
     <section className="container mx-auto grid gap-20 px-4 lg:px-16">
-      <div className="flex flex-col text-center items-center w-full">
-        <div className="flex w-full font-bold text-branding-orange uppercase items-center gap-x-3">
+      <div className="flex w-full flex-col items-center text-center">
+        <div className="flex w-full items-center gap-x-3 font-bold uppercase text-branding-orange">
           <Double />
           Actueel
           <Double />
         </div>
-        <h3 className="text-gray-900 mt-1.5 font-bold text-2xl">De laatste ontwikkelingen.</h3>
-        <p className="text-gray-700 mt-2.5 mx-auto max-w-prose">
-          We doen super leuke dingen bij het NWD, dus we houden je via deze mega leuk blog op de
-          hoogte van alle verhaaltjes en ditjes en datjes die er zijn! Super leuk zeker lezen.
+        <h3 className="mt-1.5 text-2xl font-bold text-gray-900">
+          De laatste ontwikkelingen.
+        </h3>
+        <p className="mx-auto mt-2.5 max-w-prose text-gray-700">
+          Lees aankondingen, updates en nieuws over het Nationaal
+          Watersportdiploma. Of je nou consument, instructeur of
+          vaarschoolhouder bent, hier vind je het laatste ontwikkelingen.
         </p>
 
-        <BoxedButton href="/nieuws" className="bg-branding-orange text-white mt-8">
+        <BoxedButton
+          href="/nieuws"
+          className="mt-8 bg-branding-orange text-white"
+        >
           Meer nieuws
         </BoxedButton>
       </div>
-      <div className="grid items-start gap-12 grid-cols-1 lg:grid-cols-3">
-        {[
-          {
-            href: "/nieuws/1",
-            image: aankondiging,
-            title: "Aankondiging Nationaal Watersportdiploma.",
-            date: "11 maart 2024",
-            description:
-              "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
-          },
-          {
-            href: "/nieuws/2",
-            image: diplomalijn,
-            title: "Werk aan de diplomalijnen nagenoeg afgerond.",
-            date: "9 maart 2024",
-            description:
-              "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
-          },
-          {
-            href: "/nieuws/3",
-            image: zwemvest,
-            title: "Zwemvesten, niet hip maar wel noodzakelijk!",
-            date: "8 maart 2024",
-            description:
-              "A simple rule to calculate line height is 1.5x font size. However, this is not cast in stone and you are free to titrate.",
-          },
-        ].map((news) => (
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
+        {featuredArticles.map((news) => (
           <Link
-            key={news.href}
-            href={news.href}
-            className="p-4 rounded-3xl -m-4 hover:bg-gray-100 transition-colors"
+            key={news.slug}
+            href={`/actueel/${news.slug}`}
+            className="-m-4 rounded-3xl p-4 transition-colors hover:bg-gray-100"
           >
             <article className="grid">
-              <Image
-                src={news.image}
-                alt={news.title}
-                width={news.image.width}
-                height={news.image.height}
-                className="rounded-2xl aspect-video object-cover"
-              />
-              <div className="py-4 grid gap-2">
-                <span className="text-branding-dark text-sm">{news.date}</span>
-                <h3 className="font-bold text-xl">
+              {news.featuredImage ? (
+                <Image
+                  src={news.featuredImage}
+                  alt={""}
+                  width={news.featuredImage.width}
+                  height={news.featuredImage.height}
+                  placeholder="blur"
+                  className="aspect-video rounded-2xl object-cover"
+                />
+              ) : null}
+              <div className="grid gap-2 py-4">
+                <div className="flex items-center gap-x-4">
+                  <span className="text-sm text-branding-dark">
+                    {formatDate(news.date)}
+                  </span>
+                  <span className="text-sm text-gray-400 capitalize">
+                    {news.category}
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold">
                   <Balancer>{news.title}</Balancer>
                 </h3>
                 <p className="text-gray-700">{news.description}</p>

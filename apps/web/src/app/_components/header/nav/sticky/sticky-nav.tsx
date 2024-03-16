@@ -1,10 +1,9 @@
 "use client";
 
-import { PropsWithChildren } from "react";
-
+import type { PropsWithChildren } from "react";
+import { Popover } from "@headlessui/react";
 import clsx from "clsx";
 
-import { Popover } from "@headlessui/react";
 import { useIsSticky } from "~/app/providers";
 
 export function StickyNavContainer({
@@ -15,7 +14,9 @@ export function StickyNavContainer({
 
   return (
     <>
-      <nav className={clsx(isSticky && "top-4 fixed z-30", "", className)}>{children}</nav>
+      <nav className={clsx(isSticky && "fixed top-4 z-30", "", className)}>
+        {children}
+      </nav>
       {/* Component that replaces the height of the sticky nav when it becomes sticky */}
       <div className={clsx(isSticky ? "h-24" : "hidden")} />
     </>
@@ -30,7 +31,9 @@ export function StickyNavDiv({
 }>) {
   const isSticky = useIsSticky();
 
-  return <div className={clsx(isSticky && "shadow", className)}>{children}</div>;
+  return (
+    <div className={clsx(isSticky && "shadow", className)}>{children}</div>
+  );
 }
 
 export function StickyNavItemsContainer({

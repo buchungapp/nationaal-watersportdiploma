@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+
 import { DoubleLine, Wave } from "~/app/_assets/wave";
 import useWindowDimensions from "~/app/_hooks/use-window-dimensions";
 
@@ -18,7 +19,11 @@ export default function WaveAnimation({
   const { scrollY } = useScroll();
   const [beginOffset, setBeginOffset] = useState(begin);
   const [endOffset, setEndOffset] = useState(end);
-  const inverseProgress = useTransform(scrollY, [beginOffset, endOffset], ["70%", "10%"]);
+  const inverseProgress = useTransform(
+    scrollY,
+    [beginOffset, endOffset],
+    ["70%", "10%"],
+  );
 
   const { width } = useWindowDimensions();
 
@@ -44,7 +49,10 @@ export default function WaveAnimation({
   }, [id, ref, begin, end, isClient, width]);
 
   return (
-    <div className="text-white w-full relative group py-3 overflow-x-hidden" ref={ref}>
+    <div
+      className="group relative w-full overflow-x-hidden py-3 text-white"
+      ref={ref}
+    >
       <motion.div
         style={{
           width: inverseProgress,
@@ -61,7 +69,7 @@ export default function WaveAnimation({
         <Wave className="h-full" />
       </motion.div>
       <motion.div
-        className="absolute top-[12px] translate-x-[240px] right-0"
+        className="absolute right-0 top-[12px] translate-x-[240px]"
         style={{
           left: inverseProgress,
         }}

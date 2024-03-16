@@ -1,7 +1,12 @@
 "use client";
 
-import { GoogleMap, InfoWindow, Marker, useJsApiLoader } from "@react-google-maps/api";
 import { useState } from "react";
+import {
+  GoogleMap,
+  InfoWindow,
+  Marker,
+  useJsApiLoader,
+} from "@react-google-maps/api";
 
 const markers = [
   {
@@ -64,10 +69,11 @@ export default function Map() {
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.GOOGLE_API_KEY ?? "",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
     language: "nl",
     region: "nl",
   });
+
   if (!isLoaded) {
     return null;
   }
@@ -94,13 +100,22 @@ export default function Map() {
       zoom={7}
     >
       {markers.map(({ id, name, position, url }) => (
-        <Marker key={id} position={position} onClick={() => handleActiveMarker(id)}>
+        <Marker
+          key={id}
+          position={position}
+          onClick={() => handleActiveMarker(id)}
+        >
           {activeMarker === id ? (
             <InfoWindow onCloseClick={() => setActiveMarker(null)}>
               <div>
                 {name}
                 <br />
-                <a href={url} target="_blank" rel="noreferrer" className="text-branding-light">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-branding-light"
+                >
                   {url}
                 </a>
               </div>

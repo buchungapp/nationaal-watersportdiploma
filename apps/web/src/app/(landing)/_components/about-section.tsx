@@ -1,4 +1,5 @@
 import clsx from "clsx";
+
 import Double from "~/app/_components/brand/double-line";
 import { TekstButton } from "~/app/_components/style/buttons";
 
@@ -36,12 +37,14 @@ export default function AboutSection({
 
   return (
     <div>
-      <div className={clsx(text, "flex font-bold uppercase items-center gap-x-3")}>
+      <div
+        className={clsx(text, "flex items-center gap-x-3 font-bold uppercase")}
+      >
         {label}
         <Double />
       </div>
-      <h3 className="text-gray-900 mt-1.5 font-bold text-2xl">{title}</h3>
-      <p className="text-gray-700 mt-2.5">{description}</p>
+      <h3 className="mt-1.5 text-2xl font-bold text-gray-900">{title}</h3>
+      <p className="mt-2.5 text-gray-700">{description}</p>
       <TekstButton href={href} className={clsx(background, text, "mt-4")}>
         Lees meer
       </TekstButton>

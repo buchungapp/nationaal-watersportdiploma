@@ -10,15 +10,17 @@ export default function Layout({
     <main>
       <PageHero>
         <div className="px-4 lg:px-16">
-          <div className="text-white grid gap-6">
-            <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl max-w-lg">
+          <div className="grid gap-6 text-white">
+            <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
               Verenigingszaken
             </h1>
-            <p className="text-xl">Waar we in geloven bij het Nationaal Watersportdiploma.</p>
+            <p className="text-xl">
+              Waar we in geloven bij het Nationaal Watersportdiploma.
+            </p>
           </div>
         </div>
       </PageHero>
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr,3fr] gap-12 mt-12 px-4 lg:px-16">
+      <div className="mt-12 grid grid-cols-1 gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
         <div className="flex justify-end">
           <SideNav
             label="Verenigingszaken"
