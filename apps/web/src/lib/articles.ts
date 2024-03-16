@@ -1,16 +1,21 @@
 import glob from "fast-glob";
+import type { StaticImageData } from "next/image";
+
+export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";
 
 interface Article {
   title: string;
-  description: string;
+  category: ArticleCategory;
   date: string;
+  description: string;
+  featuredImage?: StaticImageData;
 }
 
 export interface ArticleWithSlug extends Article {
   id: string;
   slug: string;
 }
-// YBIkPIk2-persbericht-aankondiging-nationaal-watersportdiploma
+
 async function importArticle(
   articleFilename: string,
 ): Promise<ArticleWithSlug> {

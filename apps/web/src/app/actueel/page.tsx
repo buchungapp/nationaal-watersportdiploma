@@ -3,9 +3,20 @@ import Article from "../_components/style/article";
 import { TekstButton } from "../_components/style/buttons";
 import PageHero from "../_components/style/page-hero";
 import SideNav from "../_components/style/side-nav";
+import { formatDate } from "../_utils/format-date";
 
-export default async function Actueel() {
-  const articles = await getAllArticles();
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
+  let articles = await getAllArticles();
+
+  if (searchParams.filter) {
+    articles = articles.filter(
+      (article) => article.category === searchParams.filter,
+    );
+  }
 
   return (
     <main>
@@ -27,20 +38,20 @@ export default async function Actueel() {
             label="Filter"
             items={[
               {
+                label: "Consument",
+                href: "/actueel?filter=consument",
+              },
+              {
+                label: "Achterban",
+                href: "/actueel?filter=achterban",
+              },
+              {
                 label: "Vereniging",
                 href: "/actueel?filter=vereniging",
               },
               {
-                label: "Consumenten",
-                href: "/actueel?filter=consumenten",
-              },
-              {
-                label: "Instructeurs",
-                href: "/actueel?filter=instructeurs",
-              },
-              {
-                label: "Techniek",
-                href: "/actueel?filter=techniek",
+                label: "Persberichten",
+                href: "/actueel?filter=pers",
               },
             ]}
             className="w-full sm:w-[18rem]"
@@ -52,10 +63,12 @@ export default async function Actueel() {
               key={article.slug}
               className="grid gap-2 sm:grid-cols-[12rem,1fr]"
             >
-              <p className="text-xs text-gray-400">{article.date}</p>
+              <p className="text-xs text-gray-400">
+                {formatDate(article.date)}
+              </p>
               <Article className="max-w-xl">
                 <Article.Heading className="text-xs font-normal text-gray-400">
-                  TODO
+                  {article.category}
                 </Article.Heading>
                 <Article.Title>{article.title}</Article.Title>
                 <Article.Paragraph className="text-gray-700">

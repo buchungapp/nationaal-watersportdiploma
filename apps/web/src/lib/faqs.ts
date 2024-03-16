@@ -29,21 +29,28 @@ export interface Faq {
   question: string;
   answer: string;
 }
+
+interface FaqFilters {
+  category?: FaqCategory | [FaqCategory, ...FaqCategory[]];
+  featured?: true;
+}
+
 async function retrieveQuestions({
   filter,
 }: {
-  filter?: FaqCategory | [FaqCategory, ...FaqCategory[]];
+  filter?: FaqFilters;
 } = {}) {
   try {
     const result = await service.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_FAQ_SPREADSHEET_ID,
-      range: "A2:C",
+      range: "A2:D",
     });
 
     const rowSchema = z.tuple([
       faqCategory,
       z.string().trim(),
       z.string().trim(),
+      z.union([z.literal("TRUE"), z.literal("FALSE")]),
     ]);
 
     const validQuestions: z.infer<typeof rowSchema>[] = [];
@@ -53,15 +60,21 @@ async function retrieveQuestions({
       try {
         const parsed = rowSchema.parse(row);
 
-        if (filter) {
+        if (filter?.category) {
           if (Array.isArray(filter)) {
             if (!filter.includes(parsed[0])) {
               continue;
             }
           } else {
-            if (parsed[0] !== filter) {
+            if (parsed[0] !== filter.category) {
               continue;
             }
+          }
+        }
+
+        if (!!filter?.featured) {
+          if (parsed[3] !== "TRUE") {
+            continue;
           }
         }
 
@@ -84,7 +97,7 @@ async function retrieveQuestions({
 export function listFaqs({
   filter,
 }: {
-  filter?: FaqCategory | [FaqCategory, ...FaqCategory[]];
+  filter?: FaqFilters;
 } = {}) {
   return unstable_cache(
     () => retrieveQuestions({ filter }),

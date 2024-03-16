@@ -1,5 +1,5 @@
-import { BoxedButton } from '~/app/_components/style/buttons'
-import MuxVideo from './mux-video'
+import { BoxedButton } from "~/app/_components/style/buttons";
+import MuxVideo from "./mux-video";
 
 export default function Welcome() {
   return (
@@ -23,28 +23,13 @@ export default function Welcome() {
         </div>
       </div>
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
-        {/* <iframe
-          width="100%"
-          height="100%"
-          src={`https://www.youtube.com/embed/IWuNoqaOv4M?autoplay=1&mute=1&playsinline=1`}
-          title="YouTube video player"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          className="border-0"
-          allowFullScreen
-        /> */}
         <MuxVideo
           style={{
-            ['--media-object-fit' as string]: 'cover',
-            position: 'absolute',
+            ["--media-object-fit" as string]: "cover",
+            position: "absolute",
             inset: 0,
           }}
           playbackId="DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
-          metadata={{
-            video_id: 'video-id-123456',
-            video_title: 'Super Interesting Video',
-            viewer_user_id: 'user-id-bc-789',
-          }}
           streamType="on-demand"
           preload="auto"
           loop
@@ -53,5 +38,5 @@ export default function Welcome() {
         />
       </div>
     </div>
-  )
+  );
 }
