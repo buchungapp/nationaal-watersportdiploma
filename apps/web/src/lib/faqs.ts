@@ -1,6 +1,7 @@
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { micromark } from "micromark";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 const auth = new GoogleAuth({
@@ -28,8 +29,7 @@ export interface Faq {
   question: string;
   answer: string;
 }
-
-export async function listFaqs({
+async function retrieveQuestions({
   filter,
 }: {
   filter?: FaqCategory | [FaqCategory, ...FaqCategory[]];
@@ -79,4 +79,15 @@ export async function listFaqs({
   } catch (err) {
     return [];
   }
+}
+
+export function listFaqs({
+  filter,
+}: {
+  filter?: FaqCategory | [FaqCategory, ...FaqCategory[]];
+} = {}) {
+  return unstable_cache(
+    () => retrieveQuestions({ filter }),
+    [`faq`, `faq-${JSON.stringify(filter)}`],
+  )();
 }

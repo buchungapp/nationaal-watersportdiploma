@@ -9,8 +9,6 @@ export default async function LaunchFaq({
 }) {
   const questions = await listFaqs({ filter: category });
 
-  console.log("questions", questions.slice(0, 5));
-
   return (
     <>
       <FaqGroup faqs={questions} />
