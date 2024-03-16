@@ -14,11 +14,17 @@ export default function Welcome() {
           </p>
         </div>
         <div className="flex flex-col gap-x-6 gap-y-2 sm:flex-row">
-          <BoxedButton href="/locaties" className="bg-white text-branding-dark">
-            Vindt een NWD locatie
+          <BoxedButton
+            href="/actueel/RLjvQDiv-lancering-nationaal-watersportdiploma"
+            className="bg-white text-branding-dark"
+          >
+            Lees de aankondiging
           </BoxedButton>
-          <BoxedButton href="/over" className="text-white hover:bg-white/10">
-            Waarom het NWD
+          <BoxedButton
+            href="/vaarlocaties"
+            className="text-white hover:bg-white/10"
+          >
+            Vindt een NWD vaarschool
           </BoxedButton>
         </div>
       </div>

@@ -24,9 +24,9 @@ export default async function News() {
           De laatste ontwikkelingen.
         </h3>
         <p className="mx-auto mt-2.5 max-w-prose text-gray-700">
-          We doen super leuke dingen bij het NWD, dus we houden je via deze mega
-          leuk blog op de hoogte van alle verhaaltjes en ditjes en datjes die er
-          zijn! Super leuk zeker lezen.
+          Lees aankondingen, updates en nieuws over het Nationaal
+          Watersportdiploma. Of je nou consument, instructeur of
+          vaarschoolhouder bent, hier vind je het laatste ontwikkelingen.
         </p>
 
         <BoxedButton
@@ -55,9 +55,14 @@ export default async function News() {
                 />
               ) : null}
               <div className="grid gap-2 py-4">
-                <span className="text-sm text-branding-dark">
-                  {formatDate(news.date)}
-                </span>
+                <div className="flex items-center gap-x-4">
+                  <span className="text-sm text-branding-dark">
+                    {formatDate(news.date)}
+                  </span>
+                  <span className="text-sm text-gray-400 capitalize">
+                    {news.category}
+                  </span>
+                </div>
                 <h3 className="text-xl font-bold">
                   <Balancer>{news.title}</Balancer>
                 </h3>
