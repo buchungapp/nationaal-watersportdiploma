@@ -36,6 +36,7 @@ export default async function Page({
         <div className="flex justify-end">
           <SideNav
             label="Filter"
+            clear="/actueel"
             items={[
               {
                 label: "Consument",
