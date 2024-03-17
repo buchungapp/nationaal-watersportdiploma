@@ -51,7 +51,7 @@ export default function Layout({
               },
               {
                 label: "Statuten en reglementen",
-                href: "/vereniging/statuten-en-reglementen",
+                href: "/vereniging/statuten-reglementen",
               },
             ]}
             className="w-full sm:w-[18rem]"
