@@ -1,7 +1,7 @@
 import SideNav from "../_components/style/side-nav";
 import PageHeader from "./_components/page-header";
 
-export const verenigingsPages = [
+const verenigingsPages = [
   {
     label: "Manifest",
     slug: "manifest",
