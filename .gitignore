@@ -4,6 +4,7 @@
 
 !.gitignore
 !.prettierignore
+!.prettierrc
 !.editorconfig
 !.npmrc
 !.eslintrc.json

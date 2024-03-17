@@ -1,6 +1,6 @@
 import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 
-export default function Bestuur() {
+export default function Page() {
   return (
     <article className="prose max-w-prose">
       <div className="prose-lg">

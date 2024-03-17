@@ -35,7 +35,7 @@ export default function Contact() {
               description:
                 "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
               label: "Naar het helpcentrum",
-              href: "/faq",
+              href: "/helpcentrum",
             },
             {
               title: "Mediakit",
@@ -49,7 +49,7 @@ export default function Contact() {
               description:
                 "Vragen over diploma's en opleidingen? Start bij je eigen vaarlocatie.",
               label: "Bekijk NWD-vaarlocaties",
-              href: "/locaties",
+              href: "/vaarlocaties",
             },
           ].map((item) => (
             <article
@@ -58,7 +58,10 @@ export default function Contact() {
             >
               <h2 className="text-lg font-semibold">{item.title}</h2>
               <p>{item.description}</p>
-              <TekstButton href={item.href} className="mt-2 text-branding-dark">
+              <TekstButton
+                href={item.href}
+                className="mt-2 text-branding-dark hover:bg-branding-dark/10"
+              >
                 {item.label}
               </TekstButton>
             </article>
@@ -70,6 +73,7 @@ export default function Contact() {
             alt="Contact"
             width={contact.width}
             height={contact.height}
+            placeholder="blur"
             className="h-full rounded-3xl object-cover"
           />
           <div className="flex flex-col gap-8">
@@ -80,7 +84,10 @@ export default function Contact() {
               <Article.Title>Neem contact op</Article.Title>
               <Article.Paragraph className="text-gray-700">
                 Het{" "}
-                <Link href={"/vereniging/secretariaat"} className="underline">
+                <Link
+                  href={"/vereniging/secretariaat"}
+                  className="underline text-branding-light hover:text-branding-dark"
+                >
                   secretariaat
                 </Link>{" "}
                 helpt met vragen van consumenten, instructeurs, vaarlocaties, de

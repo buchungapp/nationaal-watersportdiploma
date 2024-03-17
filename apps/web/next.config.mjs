@@ -5,6 +5,9 @@ import remarkGfm from "remark-gfm";
 const nextConfig = {
   // Configure `pageExtensions` to include MDX files
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
+  experimental: {
+    mdxRs: true,
+  },
 };
 
 const withMDX = nextMDX({
