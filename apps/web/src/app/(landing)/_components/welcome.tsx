@@ -31,7 +31,6 @@ export default function Welcome() {
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
         <MuxVideo
           style={{
-            ["--media-object-fit" as string]: "cover",
             position: "absolute",
             inset: 0,
           }}
