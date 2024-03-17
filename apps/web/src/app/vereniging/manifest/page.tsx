@@ -1,4 +1,4 @@
-export default function Manifest() {
+export default function Page() {
   return (
     <article className="prose max-w-prose">
       <div className="prose-lg">
