@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import Double from "~/app/_components/brand/double-line";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 import MobileNav, { MobileNavButton } from "./mobile/mobile-nav";
+import ActiveHover from "./sticky/active-hover";
 import PopoverNavItem from "./sticky/popover-item";
 import {
   StickyNavContainer,
@@ -16,11 +16,13 @@ export type NavItem =
       label: string;
       href: string;
       component?: never;
+      active?: never;
     }
   | {
       label: string;
       component: React.ReactNode;
       href?: never;
+      active: string;
     };
 
 export default function Nav({ items }: { items: NavItem[] }) {
@@ -39,7 +41,11 @@ export default function Nav({ items }: { items: NavItem[] }) {
           <StickyNavItemsContainer className="hidden pr-[48px] lg:flex lg:items-center lg:justify-end lg:gap-x-12">
             {items.map((item) =>
               "component" in item ? (
-                <PopoverNavItem key={item.label} label={item.label}>
+                <PopoverNavItem
+                  key={item.label}
+                  label={item.label}
+                  active={item.active}
+                >
                   {item.component}
                 </PopoverNavItem>
               ) : (
@@ -49,7 +55,7 @@ export default function Nav({ items }: { items: NavItem[] }) {
                     className="group relative flex flex-nowrap gap-1 py-0.5 text-sm uppercase"
                   >
                     {item.label}
-                    <Double className="absolute bottom-0 w-0 translate-y-full text-branding-dark transition-width group-hover:w-full" />
+                    <ActiveHover active={item.href} />
                   </Link>
                 </li>
               ),
