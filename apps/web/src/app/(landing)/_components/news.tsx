@@ -30,7 +30,7 @@ export default async function News() {
         </p>
 
         <BoxedButton
-          href="/nieuws"
+          href="/actueel"
           className="mt-8 bg-branding-orange text-white"
         >
           Meer nieuws
