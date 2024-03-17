@@ -39,6 +39,7 @@ export default async function Page({
           <SideNav
             label="Filter"
             clear="/actueel"
+            params
             items={[
               {
                 label: "Consument",

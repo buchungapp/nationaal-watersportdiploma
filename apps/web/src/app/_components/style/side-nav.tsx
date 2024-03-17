@@ -11,28 +11,43 @@ export default function SideNav({
   items,
   className,
   clear,
+  params = false,
 }: {
   label: string;
   items: { label: string; href: string }[];
   className?: string;
   clear?: string;
+  params?: boolean;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const searchParamsList = Array.from(searchParams.entries());
-  const active = items.map(({ href }) => {
-    const url = new URL(href, "http://localhost");
-    const currentPathname = url.pathname;
-    const currentSearchParams = url.searchParams;
-    const currentSearchParamsList = Array.from(currentSearchParams.entries());
 
-    const matchesPathname = pathname === currentPathname;
-    const matchesSearchParams = currentSearchParamsList.every(([key, value]) =>
-      searchParamsList.some(([k, v]) => k === key && v === value),
-    );
+  let active: { active: boolean; href: string }[] = [];
+  if (params) {
+    const searchParams = useSearchParams();
+    const searchParamsList = Array.from(searchParams.entries());
+    active = items.map(({ href }) => {
+      const url = new URL(href, "http://localhost");
+      const currentPathname = url.pathname;
+      const currentSearchParams = url.searchParams;
+      const currentSearchParamsList = Array.from(currentSearchParams.entries());
 
-    return { href, active: matchesPathname && matchesSearchParams };
-  });
+      const matchesPathname = pathname === currentPathname;
+      const matchesSearchParams = currentSearchParamsList.every(
+        ([key, value]) =>
+          searchParamsList.some(([k, v]) => k === key && v === value),
+      );
+
+      return { href, active: matchesPathname && matchesSearchParams };
+    });
+  } else {
+    active = items.map(({ href }) => {
+      const url = new URL(href, "http://localhost");
+      const currentPathname = url.pathname;
+      const matchesPathname = pathname === currentPathname;
+
+      return { href, active: matchesPathname };
+    });
+  }
 
   return (
     <div className={twMerge("flex flex-col gap-2 text-sm", className)}>
@@ -42,7 +57,7 @@ export default function SideNav({
           <Link
             href={clear}
             className={
-              "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors hover:bg-gray-100"
+              "block rounded-lg -my-1.5 px-4 py-1.5 text-branding-dark transition-colors hover:bg-gray-100"
             }
           >
             <XMarkIcon className="w-4 h-4" />
