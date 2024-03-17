@@ -1,3 +1,9 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Manifest",
+};
+
 export default function Page() {
   return (
     <article className="prose max-w-prose">
