@@ -1,10 +1,10 @@
-import type { ComponentProps } from "react";
-import Link from "next/link";
 import {
   ArrowLongRightIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import Link from "next/link";
+import type { ComponentProps } from "react";
 
 import BackButton from "../back-button";
 

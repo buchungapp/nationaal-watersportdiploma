@@ -1,6 +1,8 @@
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
+import Link from "next/link";
 import { getAllArticles } from "~/lib/articles";
 import Article from "../_components/style/article";
-import { TekstButton } from "../_components/style/buttons";
 import PageHero from "../_components/style/page-hero";
 import SideNav from "../_components/style/side-nav";
 import { formatDate } from "../_utils/format-date";
@@ -67,22 +69,33 @@ export default async function Page({
               <p className="text-xs text-gray-400">
                 {formatDate(article.date)}
               </p>
-              <Article className="max-w-xl">
-                <Article.Heading className="text-xs font-normal text-gray-400">
-                  {article.category}
-                </Article.Heading>
-                <Article.Title>{article.title}</Article.Title>
-                <Article.Paragraph className="text-gray-700">
-                  {article.description}
-                </Article.Paragraph>
 
-                <TekstButton
-                  href={`/actueel/${article.slug}`}
-                  className={"mt-4 text-branding-orange"}
-                >
-                  Lees meer
-                </TekstButton>
-              </Article>
+              <Link
+                href={`/actueel/${article.slug}`}
+                className="-m-4 rounded-3xl p-4 transition-colors hover:bg-gray-100 max-w-xl"
+              >
+                <Article>
+                  <Article.Heading className="text-xs text-gray-400">
+                    {article.category}
+                  </Article.Heading>
+                  <Article.Title>{article.title}</Article.Title>
+                  <Article.Paragraph className="text-gray-700">
+                    {article.description}
+                  </Article.Paragraph>
+                  <div
+                    className={clsx(
+                      "group -mx-2.5 -my-1.5 flex w-fit items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors",
+                      "mt-4 text-branding-orange",
+                    )}
+                  >
+                    Lees meer
+                    <ArrowRightIcon
+                      className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                      strokeWidth={2.5}
+                    />
+                  </div>
+                </Article>
+              </Link>
             </div>
           ))}
         </div>
