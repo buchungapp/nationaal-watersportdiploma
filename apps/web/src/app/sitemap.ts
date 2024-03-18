@@ -102,7 +102,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
 
     {
-      url: `${BASE_URL}/mediakit`,
+      url: `${BASE_URL}/merk`,
       changeFrequency: "monthly",
       priority: 0.6,
     },
