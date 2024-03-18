@@ -90,6 +90,7 @@ async function retrieveQuestions({
       answer: micromark(answer),
     }));
   } catch (err) {
+    console.error("error fetching faq", err);
     return [];
   }
 }
