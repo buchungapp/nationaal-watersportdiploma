@@ -1,5 +1,6 @@
 import glob from "fast-glob";
 import type { StaticImageData } from "next/image";
+import path from "path";
 
 export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";
 
@@ -36,17 +37,13 @@ async function importArticle(
 }
 
 export async function getAllArticles() {
-  console.log("cwd", process.cwd());
-
+  const workingPath = process.cwd();
+  const contentPath = "./src/app/actueel/(article)";
   const articleFilenames = await glob("*/page.mdx", {
-    cwd: "./src/app/actueel/(article)",
+    cwd: path.join(workingPath, contentPath),
   });
 
-  console.log("articleFilenames", articleFilenames);
-
   const articles = await Promise.all(articleFilenames.map(importArticle));
-
-  console.log("articles", articles);
 
   return articles.sort((a, z) => +new Date(z.date) - +new Date(a.date));
 }
