@@ -42,8 +42,12 @@ export async function getAllArticles() {
   const articleFilenames = await glob("*/page.mdx", {
     cwd: path.join(workingPath, contentPath),
   });
+  console.log("path", path.join(workingPath, contentPath));
+
+  console.log("articleFilenames", articleFilenames);
 
   const articles = await Promise.all(articleFilenames.map(importArticle));
+  console.log("articles", articles);
 
   return articles.sort((a, z) => +new Date(z.date) - +new Date(a.date));
 }
