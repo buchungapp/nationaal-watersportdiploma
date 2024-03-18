@@ -1,5 +1,11 @@
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Secretariaat",
+};
+
 export default function Page() {
   return (
     <article className="prose max-w-prose">

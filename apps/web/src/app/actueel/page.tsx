@@ -5,6 +5,12 @@ import PageHero from "../_components/style/page-hero";
 import SideNav from "../_components/style/side-nav";
 import { formatDate } from "../_utils/format-date";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Actueel",
+};
+
 export default async function Page({
   searchParams,
 }: {

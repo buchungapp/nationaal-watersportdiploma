@@ -1,6 +1,12 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Statuten en reglementen",
+};
+
 export default function Page() {
   return (
     <article className="prose max-w-prose">
