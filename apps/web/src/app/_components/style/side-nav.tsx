@@ -2,78 +2,81 @@
 
 import clsx from "clsx";
 import Link from "next/link";
-// import { usePathname, useSearchParams } from "next/navigation";
+import type { ReadonlyURLSearchParams } from "next/navigation";
+import { useSearchParams, useSelectedLayoutSegment } from "next/navigation";
+import React, { Suspense } from "react";
 import { twMerge } from "tailwind-merge";
 
-export default function SideNav({
+interface SideNavProps {
+  label: string;
+  items: {
+    isActive?: (ctx: {
+      selectedLayoutSegment: string | null;
+      searchParams: ReadonlyURLSearchParams;
+    }) => boolean;
+    label:
+      | React.ReactNode
+      | ((ctx: {
+          isActive: boolean;
+          searchParams: ReadonlyURLSearchParams;
+        }) => React.ReactNode);
+    href:
+      | string
+      | ((ctx: {
+          isActive: boolean;
+          searchParams: ReadonlyURLSearchParams;
+        }) => string);
+  }[];
+  className?: string;
+  shouldScroll?: boolean;
+}
+
+function SideNavInner({
   label,
   items,
   className,
-  clear: _c,
-  params: _p,
-}: {
-  label: string;
-  items: { label: string; href: string }[];
-  className?: string;
-  clear?: string;
-  params?: boolean;
-}) {
-  // const pathname = usePathname();
-
-  // let active: { active: boolean; href: string }[] = [];
-  // if (params) {
-  //   const searchParams = useSearchParams();
-  //   const searchParamsList = Array.from(searchParams.entries());
-  //   active = items.map(({ href }) => {
-  //     const url = new URL(href, "http://localhost");
-  //     const currentPathname = url.pathname;
-  //     const currentSearchParams = url.searchParams;
-  //     const currentSearchParamsList = Array.from(currentSearchParams.entries());
-
-  //     const matchesPathname = pathname === currentPathname;
-  //     const matchesSearchParams = currentSearchParamsList.every(
-  //       ([key, value]) =>
-  //         searchParamsList.some(([k, v]) => k === key && v === value),
-  //     );
-
-  //     return { href, active: matchesPathname && matchesSearchParams };
-  //   });
-  // } else {
-  //   active = items.map(({ href }) => {
-  //     const url = new URL(href, "http://localhost");
-  //     const currentPathname = url.pathname;
-  //     const matchesPathname = pathname === currentPathname;
-
-  //     return { href, active: matchesPathname };
-  //   });
-  // }
+  shouldScroll = true,
+  searchParams,
+}: SideNavProps & { searchParams: ReadonlyURLSearchParams }) {
+  const segment = useSelectedLayoutSegment();
 
   return (
-    <div className={twMerge("flex flex-col gap-2 text-sm", className)}>
-      <div className="flex pl-4 justify-between gap-1">
-        <span className="text-sm font-semibold">{label}</span>
-        {/* {clear && active.some((x) => x.active) ? (
-          <Link
-            href={clear}
-            className={
-              "block rounded-lg -my-1.5 px-4 py-1.5 text-branding-dark transition-colors hover:bg-gray-100"
-            }
-          >
-            <XMarkIcon className="w-4 h-4" />
-          </Link>
-        ) : null} */}
-      </div>
+    <div
+      className={twMerge(
+        "flex flex-col gap-2 text-sm sticky h-fit top-[160px]",
+        className,
+      )}
+    >
+      <div className="pl-4 text-sm font-semibold">{label}</div>
       <ul className="flex flex-col gap-3">
-        {items.map(({ href, label }) => {
-          // const isActive = active.find((item) => item.href === href)?.active;
+        {items.map(({ href: _href, label: _label, isActive: _isActive }) => {
+          const isActive = _isActive
+            ? _isActive({
+                selectedLayoutSegment: segment,
+                searchParams,
+              })
+            : false;
+
+          const href =
+            typeof _href === "function"
+              ? _href({ isActive, searchParams })
+              : _href;
+
+          const label =
+            typeof _label === "function"
+              ? _label({ isActive, searchParams })
+              : _label;
 
           return (
             <li key={href}>
               <Link
                 href={href}
+                scroll={shouldScroll}
                 className={clsx(
-                  "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors hover:bg-gray-100",
-                  // isActive ? "bg-gray-100 font-semibold" : "hover:bg-gray-100",
+                  "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors",
+                  isActive
+                    ? "bg-branding-dark/10 font-semibold"
+                    : "hover:bg-gray-100",
                 )}
               >
                 {label}
@@ -83,5 +86,27 @@ export default function SideNav({
         })}
       </ul>
     </div>
+  );
+}
+
+function SideNavWithRegularSearchParams(props: SideNavProps) {
+  return <SideNavInner {...props} searchParams={useSearchParams()} />;
+}
+
+function SideNavWithFallbackSearchParams(props: SideNavProps) {
+  return (
+    <SideNavInner
+      {...props}
+      searchParams={new URLSearchParams() as ReadonlyURLSearchParams}
+    />
+  );
+}
+
+export default function SideNav(props: SideNavProps) {
+  return (
+    // https://nextjs.org/docs/app/api-reference/functions/use-search-params#static-rendering
+    <Suspense fallback={<SideNavWithFallbackSearchParams {...props} />}>
+      <SideNavWithRegularSearchParams {...props} />
+    </Suspense>
   );
 }

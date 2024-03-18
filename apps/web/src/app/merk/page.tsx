@@ -18,7 +18,7 @@ export default function Page() {
         </div>
       </PageHero>
       <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
-        <div className="flex justify-end">
+        <div className="flex h-full justify-end">
           <SideNav
             label="Merk"
             items={[
@@ -44,7 +44,7 @@ export default function Page() {
         </div>
         <div className="flex flex-col justify-center">
           <div className="prose max-w-prose">
-            <section id="naam">
+            <section id="naam" className="scroll-mt-[140px]">
               <h2>Naam</h2>
               <p>
                 "Nationaal Watersportdiploma" zijn twee woorden, altijd met een
@@ -55,7 +55,7 @@ export default function Page() {
               </p>
             </section>
 
-            <section id="logo">
+            <section id="logo" className="scroll-mt-[140px]">
               <h2>Logo</h2>
               <p>
                 Het logo van het Nationaal Watersportdiploma bestaat uit een
@@ -79,7 +79,7 @@ export default function Page() {
               <Image className="rounded-none" src={lint} alt="" width={300} />
             </section>
 
-            <section id="kleuren">
+            <section id="kleuren" className="scroll-mt-[140px]">
               <h2>Kleuren</h2>
               <p>
                 De kleuren van het Nationaal Watersportdiploma zijn oranje,
@@ -90,38 +90,44 @@ export default function Page() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div>
                   <h3>Oranje</h3>
-                  <CopyToClipboard
-                    className="flex items-center gap-2"
-                    value="#FF8000"
-                  >
-                    <div className="w-10 h-10 bg-branding-orange rounded-full" />
-                    <span className="text-gray-700">#FF8000</span>
-                  </CopyToClipboard>
+                  <div className="w-fit">
+                    <CopyToClipboard
+                      className="flex items-center gap-2"
+                      value="#FF8000"
+                    >
+                      <div className="w-10 h-10 bg-branding-orange rounded-full" />
+                      <span className="text-gray-700 font-medium">#FF8000</span>
+                    </CopyToClipboard>
+                  </div>
                 </div>
                 <div>
                   <h3>Lichtblauw</h3>
-                  <CopyToClipboard
-                    className="flex items-center gap-2"
-                    value="#007FFF"
-                  >
-                    <div className="w-10 h-10 bg-branding-light rounded-full" />
-                    <span className="text-gray-700">#007FFF</span>
-                  </CopyToClipboard>
+                  <div className="w-fit">
+                    <CopyToClipboard
+                      className="flex items-center gap-2"
+                      value="#007FFF"
+                    >
+                      <div className="w-10 h-10 bg-branding-light rounded-full" />
+                      <span className="text-gray-700 font-medium">#007FFF</span>
+                    </CopyToClipboard>
+                  </div>
                 </div>
                 <div>
                   <h3>Donkerblauw</h3>
-                  <CopyToClipboard
-                    className="flex items-center gap-2"
-                    value="#0047AB"
-                  >
-                    <div className="w-10 h-10 bg-branding-dark rounded-full" />
-                    <span className="text-gray-700">#0047AB</span>
-                  </CopyToClipboard>
+                  <div className="w-fit">
+                    <CopyToClipboard
+                      className="flex items-center gap-2"
+                      value="#0047AB"
+                    >
+                      <div className="w-10 h-10 bg-branding-dark rounded-full" />
+                      <span className="text-gray-700 font-medium">#0047AB</span>
+                    </CopyToClipboard>
+                  </div>
                 </div>
               </div>
             </section>
 
-            <section id="lettertype">
+            <section id="lettertype" className="scroll-mt-[140px]">
               <h2>Lettertype</h2>
               <p>
                 Het lettertype van het Nationaal Watersportdiploma is{" "}

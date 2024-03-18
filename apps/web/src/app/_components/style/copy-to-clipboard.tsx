@@ -1,7 +1,7 @@
 "use client";
 
-import { Fragment, useState, type ComponentPropsWithoutRef } from "react";
 import { Transition } from "@headlessui/react";
+import { Fragment, useState, type ComponentPropsWithoutRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 export default function CopyToClipboard({
@@ -21,7 +21,7 @@ export default function CopyToClipboard({
           props.onClick?.(e);
 
           setShowing(true);
-          setTimeout(() => setShowing(false), 400);
+          setTimeout(() => setShowing(false), 800);
           return;
         }}
         className={twMerge(
@@ -34,11 +34,11 @@ export default function CopyToClipboard({
       <Transition
         as={Fragment}
         enter="transition ease-out duration-150"
-        enterFrom="opacity-0 translate-y-1"
-        enterTo="opacity-100 translate-y-0"
+        enterFrom="opacity-0"
+        enterTo="opacity-100"
         leave="transition ease-in duration-150"
-        leaveFrom="opacity-100 translate-y-0"
-        leaveTo="opacity-0 translate-y-1"
+        leaveFrom="opacity-100"
+        leaveTo="opacity-0"
         show={showing}
       >
         <span className="absolute left-1/2 top-0 z-10 -mt-2 -translate-x-1/2 -translate-y-full">
