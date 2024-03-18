@@ -2,28 +2,25 @@
 
 import { Popover, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
 import type { PropsWithChildren } from "react";
 import { Fragment } from "react";
 
-import Double from "~/app/_components/brand/double-line";
+import ActiveHover from "./active-hover";
 
 export default function PopoverNavItem({
   children,
   label,
+  active,
 }: PropsWithChildren<{
   label: string;
+  active?: string;
 }>) {
   return (
     <Popover className="group relative">
       <Popover.Button className="flex items-center gap-x-1 text-sm font-medium uppercase leading-6">
         {label}
         <ChevronDownIcon className="h-5 w-5 flex-none" aria-hidden="true" />
-        <Double
-          className={clsx(
-            "absolute bottom-0 w-0 translate-y-full text-branding-dark transition-width group-hover:w-full ui-open:w-full",
-          )}
-        />
+        <ActiveHover active={active} />
       </Popover.Button>
       <Transition
         as={Fragment}

@@ -48,7 +48,7 @@ export default function Contact() {
               description:
                 "Alle NWD-merkmaterialen, zoals logo's en kleuren, overzichtelijk bij elkaar.",
               label: "Open de mediakit",
-              href: "/mediakit",
+              href: "/merk",
             },
             {
               title: "Contacteer jouw vaarlocatie",

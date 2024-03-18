@@ -19,6 +19,7 @@ export default function Header() {
           },
           {
             label: "Diplomeringslijn",
+            active: "/diplomalijn",
             component: (
               <div className="p-4">
                 {[
@@ -74,6 +75,7 @@ export default function Header() {
 
           {
             label: "Vereniging",
+            active: "/vereniging",
             component: (
               <div className="p-4">
                 {[

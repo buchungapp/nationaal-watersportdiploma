@@ -1,10 +1,11 @@
-import type { ComponentProps } from "react";
-import Link from "next/link";
 import {
+  ArrowLeftIcon,
   ArrowLongRightIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import Link from "next/link";
+import type { ComponentProps } from "react";
 
 import BackButton from "../back-button";
 
@@ -33,8 +34,9 @@ export function BoxedButton({
 export function TekstButton({
   className,
   children,
+  backwards = false,
   ...props
-}: ComponentProps<typeof Link>) {
+}: ComponentProps<typeof Link> & { backwards?: boolean }) {
   return (
     <Link
       {...props}
@@ -43,11 +45,19 @@ export function TekstButton({
         className,
       )}
     >
+      {backwards ? (
+        <ArrowLeftIcon
+          className="h-4 w-4 transition-transform group-hover:-translate-x-1"
+          strokeWidth={2.5}
+        />
+      ) : null}
       {children}
-      <ArrowRightIcon
-        className="h-4 w-4 transition-transform group-hover:translate-x-1"
-        strokeWidth={2.5}
-      />
+      {!backwards ? (
+        <ArrowRightIcon
+          className="h-4 w-4 transition-transform group-hover:translate-x-1"
+          strokeWidth={2.5}
+        />
+      ) : null}
     </Link>
   );
 }
