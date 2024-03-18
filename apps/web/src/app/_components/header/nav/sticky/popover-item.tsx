@@ -1,10 +1,10 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
-import { Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import type { PropsWithChildren } from "react";
+import { Fragment } from "react";
 
 import Double from "~/app/_components/brand/double-line";
 
@@ -34,7 +34,7 @@ export default function PopoverNavItem({
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <Popover.Panel className="absolute -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
+        <Popover.Panel className="absolute -translate-x-[9.5rem] -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5">
           {children}
         </Popover.Panel>
       </Transition>
