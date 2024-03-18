@@ -36,11 +36,17 @@ async function importArticle(
 }
 
 export async function getAllArticles() {
+  console.log("cwd", process.cwd());
+
   const articleFilenames = await glob("*/page.mdx", {
     cwd: "./src/app/actueel/(article)",
   });
 
+  console.log("articleFilenames", articleFilenames);
+
   const articles = await Promise.all(articleFilenames.map(importArticle));
+
+  console.log("articles", articles);
 
   return articles.sort((a, z) => +new Date(z.date) - +new Date(a.date));
 }
