@@ -4,10 +4,10 @@ import Link from "next/link";
 import { getAllArticles } from "~/lib/articles";
 import Article from "../_components/style/article";
 import PageHero from "../_components/style/page-hero";
-import SideNav from "../_components/style/side-nav";
 import { formatDate } from "../_utils/format-date";
 
 import type { Metadata } from "next";
+import SideNavActueel from "./_components/side-nav";
 
 export const metadata: Metadata = {
   title: "Actueel",
@@ -21,9 +21,11 @@ export default async function Page({
   let articles = await getAllArticles();
 
   if (searchParams.filter) {
-    articles = articles.filter(
-      (article) => article.category === searchParams.filter,
-    );
+    articles = articles.filter((article) => {
+      return Array.isArray(searchParams.filter)
+        ? searchParams.filter.includes(article.category)
+        : searchParams.filter === article.category;
+    });
   }
 
   return (
@@ -42,30 +44,7 @@ export default async function Page({
       </PageHero>
       <div className="mt-12 grid grid-cols-1 gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
         <div className="flex justify-end">
-          <SideNav
-            label="Filter"
-            clear="/actueel"
-            params
-            items={[
-              {
-                label: "Consument",
-                href: "/actueel?filter=consument",
-              },
-              {
-                label: "Achterban",
-                href: "/actueel?filter=achterban",
-              },
-              {
-                label: "Vereniging",
-                href: "/actueel?filter=vereniging",
-              },
-              {
-                label: "Persberichten",
-                href: "/actueel?filter=pers",
-              },
-            ]}
-            className="w-full sm:w-[18rem]"
-          />
+          <SideNavActueel />
         </div>
         <div className="flex flex-col justify-center gap-16">
           {articles.map((article) => (
