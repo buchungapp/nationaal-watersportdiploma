@@ -1,5 +1,5 @@
-import type { PropsWithChildren } from "react";
 import Link from "next/link";
+import type { PropsWithChildren } from "react";
 
 import {
   APP_NAME,
@@ -76,27 +76,22 @@ export default function Footer() {
             <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/consumenten">Consumenten</FooterLink>
               <FooterLink href="/instructeurs">Instructeurs</FooterLink>
-              <FooterLink href="/watersportverbond">
-                Watersportverbond
-              </FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Locaties</h3>
             <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/locaties">Aangesloten vaarlocaties</FooterLink>
-              <FooterLink href="/kwaliteitseisen">Kwaliteitseisen</FooterLink>
-              <FooterLink href="/procedures">Procedures</FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
             <ul className="grid gap-6 text-gray-200">
-              <FooterLink href="/manifest">Manifest</FooterLink>
-              <FooterLink href="/faq">Veelgestelde vragen</FooterLink>
-              <FooterLink href="/organisatie">Organisatie</FooterLink>
-              <FooterLink href="/mediakit">Mediakit</FooterLink>
-              <FooterLink href="/vertrouwenspersoon">
+              <FooterLink href="/vereniging/manifest">Manifest</FooterLink>
+              <FooterLink href="/helpcentrum">Veelgestelde vragen</FooterLink>
+              <FooterLink href="/vereniging/bestuur">Bestuur</FooterLink>
+              <FooterLink href="/merk">Merkkit</FooterLink>
+              <FooterLink href="/vereniging/vertrouwenspersoon">
                 Vertrouwenspersoon
               </FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>

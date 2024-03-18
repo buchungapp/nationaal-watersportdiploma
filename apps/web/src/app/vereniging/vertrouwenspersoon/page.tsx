@@ -4,6 +4,12 @@ import { InlineButton } from "~/app/_components/style/buttons";
 import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 import vertrouwenspersoon from "./_assets/IMG_3314.jpg";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Vertrouwenspersoon",
+};
+
 export default function Page() {
   return (
     <article className="prose max-w-prose">

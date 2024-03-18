@@ -31,11 +31,10 @@ export default function Welcome() {
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
         <MuxVideo
           style={{
-            ["--media-object-fit" as string]: "cover",
             position: "absolute",
             inset: 0,
           }}
-          playbackId="DS00Spx1CV902MCtPj5WknGlR102V5HFkDe"
+          playbackId="7lX3InLCH2hfWQGRJnXtOybImuqggOzkPgHEgHi9isY"
           streamType="on-demand"
           preload="auto"
           loop
