@@ -82,7 +82,7 @@ export default function Header() {
                   {
                     name: "Manifest",
                     href: "/vereniging/manifest",
-                    description: "Waar we voor staan bij het NWD",
+                    description: "Waar we voor staan en in geloven",
                   },
                   {
                     name: "Vertrouwenspersoon",
@@ -92,28 +92,23 @@ export default function Header() {
                   {
                     name: "Gedragscode",
                     href: "/vereniging/gedragscode",
-                    description:
-                      "Gedragscode voor alle betrokkenen bij het NWD",
+                    description: "Gedragsregels voor een prettige omgeving",
                   },
                   {
                     name: "Bestuur",
                     href: "/vereniging/bestuur",
-                    description: "Verenigingsbestuur",
                   },
                   {
                     name: "Secretariaat",
                     href: "/vereniging/secretariaat",
-                    description: "Ondersteuning vanuit het secretariaat",
                   },
                   {
                     name: "Kwaliteitscommissie",
                     href: "/vereniging/kwaliteitscommissie",
-                    description: "De kwaliteitscommissie van het NWD",
                   },
                   {
                     name: "Statuten en reglementen",
                     href: "/vereniging/statuten-en-reglementen",
-                    description: "De statuten en reglementen van het NWD",
                   },
                 ].map((item) => (
                   <div
@@ -131,7 +126,11 @@ export default function Header() {
                         {item.name}
                         <span className="absolute inset-0" />
                       </a>
-                      <p className="mt-1 text-gray-600">{item.description}</p>
+                      {item.description ? (
+                        <p className="mt-1 font-normal text-gray-600">
+                          {item.description}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 ))}
