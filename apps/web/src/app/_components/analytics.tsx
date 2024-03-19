@@ -1,12 +1,14 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
 import { load, trackPageview } from "fathom-client";
+import { usePathname, useSearchParams } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
+import { Suspense, useEffect } from "react";
 
 function TrackPageView() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const posthog = usePostHog();
 
   useEffect(() => {
     if (
@@ -22,12 +24,22 @@ function TrackPageView() {
   // Record a pageview when route changes
   useEffect(() => {
     if (pathname) {
+      if (posthog) {
+        let url = window.origin + pathname;
+        if (searchParams.toString()) {
+          url = url + `?${searchParams.toString()}`;
+        }
+        posthog.capture("$pageview", {
+          $current_url: url,
+        });
+      }
+
       trackPageview({
         url: pathname + `?${searchParams.toString()}`,
         referrer: document.referrer,
       });
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, posthog]);
 
   return null;
 }
