@@ -40,19 +40,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl" className="scroll-smooth">
-      <Providers>
-        <Analytics />
-        <body
-          className={clsx(inter.variable, "overflow-x-hidden text-gray-900")}
-        >
+      <body className={clsx(inter.variable, "overflow-x-hidden text-gray-900")}>
+        <Providers>
+          <Analytics />
           {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
           <div>
             <Header />
             <div id="content">{children}</div>
             <Footer />
           </div>
-        </body>
-      </Providers>
+        </Providers>
+      </body>
     </html>
   );
 }

@@ -22,6 +22,7 @@ if (typeof window !== "undefined") {
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     api_host: `${BASE_URL.toString()}/ingest`,
     capture_pageview: false, // Disable automatic pageview capture, as we capture manually
+    persistence: "memory", // Don't use cookies so we avoid the cookie consent banner
   });
 }
 
