@@ -1,6 +1,7 @@
 import glob from "fast-glob";
 import type { StaticImageData } from "next/image";
 import path from "path";
+import { HAVE_WE_LAUNCHED } from "../../launch-control";
 
 export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";
 
@@ -37,6 +38,9 @@ async function importArticle(
 }
 
 export async function getAllArticles() {
+  // 🚀 launch control
+  if (!HAVE_WE_LAUNCHED) return [];
+
   const workingPath = process.cwd();
   const contentPath = "./src/app/actueel/(article)";
   const articleFilenames = await glob("*/page.mdx", {

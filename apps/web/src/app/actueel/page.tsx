@@ -47,6 +47,11 @@ export default async function Page({
           <SideNavActueel />
         </div>
         <div className="flex flex-col justify-center gap-16">
+          {articles.length < 1 ? (
+            <p className="text-2xl text-gray-500">
+              Er zijn geen artikelen gevonden.
+            </p>
+          ) : null}
           {articles.map((article) => (
             <div
               key={article.slug}
