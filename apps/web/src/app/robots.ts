@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       //   🚀 launch control
-      disallow: !HAVE_WE_LAUNCHED && ["/actueel/", "/helpcentrum/"],
+      disallow: HAVE_WE_LAUNCHED ? undefined : ["/actueel/", "/helpcentrum/"],
     },
     sitemap: `${WEBSITE_URL}/sitemap.xml`,
   };
