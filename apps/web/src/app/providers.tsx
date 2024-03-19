@@ -1,8 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import posthog from "posthog-js";
+import { PostHogProvider } from "posthog-js/react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
+import { BASE_URL } from "~/constants";
 
 function usePrevious<T>(value: T) {
   const ref = useRef<T>();
@@ -12,6 +15,19 @@ function usePrevious<T>(value: T) {
   }, [value]);
 
   return ref.current;
+}
+
+if (typeof window !== "undefined") {
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    api_host: `${BASE_URL.toString()}/ingest`,
+    capture_pageview: false, // Disable automatic pageview capture, as we capture manually
+    persistence: "memory", // Don't use cookies so we avoid the cookie consent banner
+  });
+}
+
+function PHProvider({ children }: { children: React.ReactNode }) {
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }
 
 const AppContext = createContext<{
@@ -76,23 +92,25 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, [isClient]);
 
   return (
-    <AppContext.Provider
-      value={{
-        previousPathname,
-        isMobileMenuOpen: mobileMenuOpen,
-        setMobileMenuOpen: (newState) => {
-          if (newState === undefined) {
-            setMobileMenuOpen((curr) => !curr);
-            return;
-          }
+    <PHProvider>
+      <AppContext.Provider
+        value={{
+          previousPathname,
+          isMobileMenuOpen: mobileMenuOpen,
+          setMobileMenuOpen: (newState) => {
+            if (newState === undefined) {
+              setMobileMenuOpen((curr) => !curr);
+              return;
+            }
 
-          setMobileMenuOpen(newState);
-          return;
-        },
-        scrollPosition,
-      }}
-    >
-      <BalancerProvider>{children}</BalancerProvider>
-    </AppContext.Provider>
+            setMobileMenuOpen(newState);
+            return;
+          },
+          scrollPosition,
+        }}
+      >
+        <BalancerProvider>{children}</BalancerProvider>
+      </AppContext.Provider>
+    </PHProvider>
   );
 }

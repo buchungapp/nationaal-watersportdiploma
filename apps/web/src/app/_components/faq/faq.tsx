@@ -19,7 +19,10 @@ export default function FaqDisclosure({
   return (
     <Disclosure as="div" className={className} defaultOpen={defaultOpen}>
       <dt>
-        <Disclosure.Button className="flex p-4 hover:bg-gray-100 w-full items-start justify-start text-left">
+        <Disclosure.Button
+          className="flex p-4 hover:bg-gray-100 w-full items-start justify-start text-left"
+          data-attr="faq"
+        >
           <div className="mr-6 flex h-6 items-center justify-center">
             <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 transition-transform ui-open:rotate-90" />
           </div>

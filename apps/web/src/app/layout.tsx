@@ -8,7 +8,8 @@ import Header from "./_components/header/header";
 
 import "./globals.css";
 
-import { APP_NAME, APP_SLOGAN, WEBSITE_URL } from "@nawadi/lib/constants";
+import { APP_NAME, APP_SLOGAN } from "@nawadi/lib/constants";
+import { BASE_URL } from "~/constants";
 import { HAVE_WE_LAUNCHED } from "../../launch-control";
 import { Providers } from "./providers";
 
@@ -24,8 +25,7 @@ export const metadata: Metadata = {
   description: HAVE_WE_LAUNCHED
     ? `Nationaal Watersportdiploma: dé standaard voor veiligheid, kwaliteit en plezier op het water. Erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`
     : `Nationaal Watersportdiploma: dé standaard voor veiligheid, kwaliteit en plezier op het water. Met een moderne diplomalijn, en hoge kwaliteitseisen aan vaarlocaties.`,
-  metadataBase:
-    process.env.VERCEL_ENV === "production" ? new URL(WEBSITE_URL) : undefined,
+  metadataBase: BASE_URL,
   icons: {
     shortcut: "/favicon.ico",
   },
@@ -40,16 +40,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="nl" className="scroll-smooth">
-      <Analytics />
       <body className={clsx(inter.variable, "overflow-x-hidden text-gray-900")}>
-        {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
-        <div>
-          <Providers>
+        <Providers>
+          <Analytics />
+          {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
+          <div>
             <Header />
             <div id="content">{children}</div>
             <Footer />
-          </Providers>
-        </div>
+          </div>
+        </Providers>
       </body>
     </html>
   );
