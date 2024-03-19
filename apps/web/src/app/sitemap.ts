@@ -44,26 +44,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     ...articleMaps,
-    // {
-    //   url: `${BASE_URL}/diplomalijn`,
-    //   changeFrequency: "monthly",
-    //   priority: 0.7,
-    // },
-    // {
-    //   url: `${BASE_URL}/diplomalijn/consumenten`,
-    //   changeFrequency: "monthly",
-    //   priority: 0.7,
-    // },
-    // {
-    //   url: `${BASE_URL}/diplomalijn/instructeurs`,
-    //   changeFrequency: "monthly",
-    //   priority: 0.7,
-    // },
-    // {
-    //   url: `${BASE_URL}/diplomalijn/accreditatie`,
-    //   changeFrequency: "monthly",
-    //   priority: 0.7,
-    // },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten`,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/overgang-cwo`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/erkenningen`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/veelgestelde-vragen`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/catamaran`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/jachtzeilen`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/kielboot`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/windsurfen`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/zwaardboot-1mans`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/zwaardboot-2mans`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
     {
       url: `${BASE_URL}/vereniging/manifest`,
       changeFrequency: "monthly",

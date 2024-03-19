@@ -25,25 +25,13 @@ export default function Header() {
                 {[
                   {
                     name: "Consumenten",
-                    href: "/diplomalijn/consumenten",
+                    href: "/diplomalijn/consument",
                     description: "De consumentenlijn van het NWD",
                   },
                   {
                     name: "Instructeurs",
-                    href: "/diplomalijn/instructeurs",
+                    href: "/diplomalijn/instructeur",
                     description: "De instructeurslijn van het NWD",
-                  },
-                  {
-                    name: "Filosofie",
-                    href: "/diplomalijn",
-                    description:
-                      "De filosofie achter de diplomalijn van het NWD",
-                  },
-                  {
-                    name: "Accreditatie",
-                    href: "/diplomalijn/accreditatie",
-                    description:
-                      "Leer meer over de accreditatie vanuit het Watersportverbond",
                   },
                 ].map((item) => (
                   <div

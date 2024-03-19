@@ -47,14 +47,18 @@ export const verenigingsPages = [
 export default function SideNavVereniging() {
   return (
     <SideNav
-      label="Verenigingszaken"
-      items={verenigingsPages.map((page) => ({
-        isActive(ctx) {
-          return ctx.selectedLayoutSegment === page.slug;
+      sections={[
+        {
+          label: "Verenigingszaken",
+          items: verenigingsPages.map((page) => ({
+            isActive(ctx) {
+              return ctx.selectedLayoutSegments[0] === page.slug;
+            },
+            label: page.label,
+            href: `/vereniging/${page.slug}`,
+          })),
         },
-        label: page.label,
-        href: `/vereniging/${page.slug}`,
-      }))}
+      ]}
       className="w-full sm:w-[18rem]"
     />
   );
