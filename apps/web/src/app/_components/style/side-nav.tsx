@@ -84,7 +84,7 @@ function SideNavInner({
                         href={href}
                         scroll={scroll ?? true}
                         className={clsx(
-                          "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors",
+                          "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors tabular-nums",
                           isActive
                             ? "bg-branding-dark/10 font-semibold"
                             : "hover:bg-gray-100",
