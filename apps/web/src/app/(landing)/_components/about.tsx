@@ -27,21 +27,21 @@ export default function About() {
         </div>
         <div className="grid max-w-lg gap-16">
           <AboutSection
-            href="/veiligheid"
+            href="/vaarlocaties/kwaliteitseisen"
             label="Veiligheid"
             title="Veiligheid voorop."
             description="Een veilige omgeving voor iedereen, met aandacht voor fysieke en sociale veiligheid."
             color="dark"
           />
           <AboutSection
-            href="/kwaliteit"
+            href="/vaarlocaties/kwaliteitseisen"
             label="Kwaliteit"
             title="Kwaliteit als basis."
             description="Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen."
             color="light"
           />
           <AboutSection
-            href="/plezier"
+            href="/vaarlocaties/kwaliteitseisen"
             label="Plezier"
             title="Plezier staat centraal."
             description="Leren watersporten moet leuk zijn, met heldere stappen naar je volgende diploma en vele succesmomenten."
