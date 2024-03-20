@@ -1,62 +1,72 @@
 "use client";
 
 import SideNav from "~/app/_components/style/side-nav";
+import type { LayoutSegment, Page } from "~/app/types";
 
-const generalPages = [
+const generalPages: Page[] = [
   {
-    label: "Introductie",
+    title: "Introductie",
     description:
       "Als je wilt leren varen, vind je hier alle informatie over de diplomalijn van het Nationaal Watersportdiploma.",
     slug: null,
   },
   {
-    label: "Overgang CWO",
+    title: "Overgang CWO",
     description:
       "Als je al een CWO-diploma hebt, vind je hier informatie over de overstap naar het Nationaal Watersportdiploma.",
     slug: "overgang-cwo",
   },
   {
-    label: "Erkenningen",
+    title: "Erkenningen",
     description:
       "Leer meer over de erkenning van het Nationaal Watersportdiploma.",
     slug: "erkenningen",
   },
   {
-    label: "Veelgestelde vragen",
+    title: "Veelgestelde vragen",
     description:
       "Vind hier antwoorden op veelgestelde vragen over het Nationaal Watersportdiploma.",
     slug: "veelgestelde-vragen",
   },
 ];
 
-const disciplinePages = [
+const disciplinePages: Page[] = [
   {
-    label: "Catamaran",
+    title: "Catamaran",
     slug: "catamaran",
   },
   {
-    label: "Jachtzeilen",
+    title: "Jachtzeilen",
     slug: "jachtzeilen",
   },
   {
-    label: "Kielboot",
+    title: "Kielboot",
     slug: "kielboot",
   },
   {
-    label: "Windsurfen",
+    title: "Windsurfen",
     slug: "windsurfen",
   },
   {
-    label: "Zwaardboot 1-mans",
+    title: "Zwaardboot 1-mans",
     slug: "zwaardboot-1mans",
   },
   {
-    label: "Zwaardboot 2-mans",
+    title: "Zwaardboot 2-mans",
     slug: "zwaardboot-2mans",
   },
 ];
 
-export const consumentenPages = [...generalPages, ...disciplinePages];
+export const segments: LayoutSegment[] = [
+  {
+    parentSegments: [],
+    pages: generalPages,
+  },
+  {
+    parentSegments: ["disciplines"],
+    pages: disciplinePages,
+  },
+];
 
 export default function SideNavVereniging() {
   return (
@@ -70,7 +80,7 @@ export default function SideNavVereniging() {
 
               return ctx.selectedLayoutSegments[0] === page.slug;
             },
-            label: page.label,
+            label: page.title,
             href: `/diplomalijn/consument/${page.slug ? page.slug : ""}`,
           })),
         },
@@ -80,7 +90,7 @@ export default function SideNavVereniging() {
             isActive(ctx) {
               return ctx.selectedLayoutSegments[1] === page.slug;
             },
-            label: page.label,
+            label: page.title,
             href: `/diplomalijn/consument/disciplines/${page.slug}`,
           })),
         },

@@ -1,46 +1,54 @@
 "use client";
 
 import SideNav from "~/app/_components/style/side-nav";
+import type { LayoutSegment, Page } from "~/app/types";
 
-export const verenigingsPages = [
+const verenigingsPages: Page[] = [
   {
-    label: "Manifest",
+    title: "Manifest",
     slug: "manifest",
     description: "Waar we in geloven bij het Nationaal Watersportdiploma.",
   },
   {
-    label: "Vertrouwenspersoon",
+    title: "Vertrouwenspersoon",
     slug: "vertrouwenspersoon",
     description: "Ondersteuning en advies bij ongewenst gedrag.",
   },
   {
-    label: "Gedragscode",
+    title: "Gedragscode",
     slug: "gedragscode",
     description:
       "Gezamenlijke afspraken tussen alle betrokkenen bij NWD-vaarlocaties.",
   },
   {
-    label: "Bestuur",
+    title: "Bestuur",
     slug: "bestuur",
     description:
       "Maak kennis met het bestuur van de vereniging Nationaal Watersportdiploma.",
   },
   {
-    label: "Secretariaat",
+    title: "Secretariaat",
     slug: "secretariaat",
     description: "Eerste aanspreekpunt voor het Nationaal Watersportdiploma.",
   },
   {
-    label: "Kwaliteitscommissie",
+    title: "Kwaliteitscommissie",
     slug: "kwaliteitscommissie",
     description:
       "De kwaliteitscommissie bewaakt de kwaliteit van aangesloten locaties bij het Nationaal Watersportdiploma.",
   },
   {
-    label: "Statuten en reglementen",
+    title: "Statuten en reglementen",
     slug: "statuten-reglementen",
     description:
       "De statuten en reglementen van het Nationaal Watersportdiploma.",
+  },
+];
+
+export const segments: LayoutSegment[] = [
+  {
+    parentSegments: [],
+    pages: verenigingsPages,
   },
 ];
 
@@ -54,7 +62,7 @@ export default function SideNavVereniging() {
             isActive(ctx) {
               return ctx.selectedLayoutSegments[0] === page.slug;
             },
-            label: page.label,
+            label: page.title,
             href: `/vereniging/${page.slug}`,
           })),
         },
