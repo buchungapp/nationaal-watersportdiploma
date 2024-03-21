@@ -59,7 +59,7 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
 
-              {children}
+              <div className="overflow-y-auto">{children}</div>
             </Dialog.Panel>
           </Transition.Child>
         </div>

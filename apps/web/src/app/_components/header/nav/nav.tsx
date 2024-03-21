@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
+import MobileDisclosure from "./mobile/mobile-disclosure";
+import MobileItem from "./mobile/mobile-item";
 import MobileNav, { MobileNavButton } from "./mobile/mobile-nav";
 import ActiveHover from "./sticky/active-hover";
 import PopoverNavItem from "./sticky/popover-item";
@@ -28,7 +30,23 @@ export type NavItem =
 export default function Nav({ items }: { items: NavItem[] }) {
   return (
     <>
-      <MobileNav>TODO!</MobileNav>
+      <MobileNav>
+        <ul role="list" className="flex flex-1 flex-col px-4 py-2.5 gap-6">
+          <li>
+            <ul role="list" className="-mx-2 space-y-1">
+              {items.map((item) => (
+                <li key={item.label}>
+                  {!item.component ? (
+                    <MobileItem item={item} />
+                  ) : (
+                    <MobileDisclosure item={item} />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </li>
+        </ul>
+      </MobileNav>
       <StickyNavContainer className="flex w-full px-4 lg:px-16">
         <StickyNavDiv className="flex w-full justify-between rounded-full bg-white font-medium text-branding-dark">
           <Link href="/" className="flex shrink-0">
