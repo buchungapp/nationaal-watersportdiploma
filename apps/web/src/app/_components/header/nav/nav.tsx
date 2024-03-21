@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
+import MobileDisclosure from "./mobile/mobile-disclosure";
+import MobileItem from "./mobile/mobile-item";
 import MobileNav, { MobileNavButton } from "./mobile/mobile-nav";
 import ActiveHover from "./sticky/active-hover";
 import PopoverNavItem from "./sticky/popover-item";
@@ -20,7 +22,11 @@ export type NavItem =
     }
   | {
       label: string;
-      component: React.ReactNode;
+      component: {
+        label: string;
+        href: string;
+        description?: string;
+      }[];
       href?: never;
       active: string;
     };
@@ -28,7 +34,23 @@ export type NavItem =
 export default function Nav({ items }: { items: NavItem[] }) {
   return (
     <>
-      <MobileNav>TODO!</MobileNav>
+      <MobileNav>
+        <ul role="list" className="flex flex-1 flex-col px-4 py-2.5 gap-6">
+          <li>
+            <ul role="list" className="-mx-2 space-y-1">
+              {items.map((item) => (
+                <li key={item.label}>
+                  {!item.component ? (
+                    <MobileItem item={item} />
+                  ) : (
+                    <MobileDisclosure item={item} />
+                  )}
+                </li>
+              ))}
+            </ul>
+          </li>
+        </ul>
+      </MobileNav>
       <StickyNavContainer className="flex w-full px-4 lg:px-16">
         <StickyNavDiv className="flex w-full justify-between rounded-full bg-white font-medium text-branding-dark">
           <Link href="/" className="flex shrink-0">
@@ -46,7 +68,32 @@ export default function Nav({ items }: { items: NavItem[] }) {
                   label={item.label}
                   active={item.active}
                 >
-                  {item.component}
+                  <div className="p-4">
+                    {item.component?.map((item) => (
+                      <div
+                        key={item.label}
+                        className="group relative flex gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-gray-50"
+                      >
+                        {/* <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                        <item.icon className="h-6 w-6 text-gray-600 group-hover:text-indigo-600" aria-hidden="true" />
+                      </div> */}
+                        <div className="flex-auto">
+                          <a
+                            href={item.href}
+                            className="block font-semibold text-gray-900"
+                          >
+                            {item.label}
+                            <span className="absolute inset-0" />
+                          </a>
+                          {item.description ? (
+                            <p className="mt-1 font-normal text-gray-600">
+                              {item.description}
+                            </p>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </PopoverNavItem>
               ) : (
                 <li key={item.label}>

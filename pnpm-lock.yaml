@@ -213,7 +213,7 @@ importers:
     dependencies:
       '@types/node':
         specifier: ^20.11.26
-        version: 20.11.28
+        version: 20.11.30
       goodrouter:
         specifier: ^2.1.6
         version: 2.1.6
@@ -2335,7 +2335,7 @@ packages:
       '@types/http-errors': 2.0.4
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
-      '@types/node': 20.11.28
+      '@types/node': 20.11.30
     dev: false
 
   /@types/koa__router@12.0.3:
@@ -2369,19 +2369,13 @@ packages:
   /@types/mysql@2.15.22:
     resolution: {integrity: sha512-wK1pzsJVVAjYCSZWQoWHziQZbNggXFDUEIGf54g4ZM/ERuP86uGdWeKZWMYlqTPMZfHJJvLPyogXGvCOg87yLQ==}
     dependencies:
-      '@types/node': 20.11.28
+      '@types/node': 20.11.30
     dev: false
 
   /@types/node@20.11.26:
     resolution: {integrity: sha512-YwOMmyhNnAWijOBQweOJnQPl068Oqd4K3OFbTc6AHJwzweUwwWG3GIFY74OKks2PJUDkQPeddOQES9mLn1CTEQ==}
     dependencies:
       undici-types: 5.26.5
-
-  /@types/node@20.11.28:
-    resolution: {integrity: sha512-M/GPWVS2wLkSkNHVeLkrF2fD5Lx5UC4PxA0uZcKc6QqbIQUJyW1jVjueJYi1z8n0I5PxYrtpnPnWglE+y9A0KA==}
-    dependencies:
-      undici-types: 5.26.5
-    dev: false
 
   /@types/node@20.11.30:
     resolution: {integrity: sha512-dHM6ZxwlmuZaRmUPfv1p+KrdD1Dci04FbdEm/9wEMouFqxYoFl5aMkt0VMAUtYRQDyYvD41WJLukhq/ha3YuTw==}
@@ -2406,7 +2400,7 @@ packages:
   /@types/pg@8.6.1:
     resolution: {integrity: sha512-1Kc4oAGzAl7uqUStZCDvaLFqZrW9qWSjXOmBfdgyBP5La7Us6Mg4GBvRlSoaZMhQF/zSj1C8CtKMBkoiT8eL8w==}
     dependencies:
-      '@types/node': 20.11.28
+      '@types/node': 20.11.30
       pg-protocol: 1.6.0
       pg-types: 2.2.0
     dev: false
@@ -4708,7 +4702,7 @@ packages:
   /goodrouter@2.1.6:
     resolution: {integrity: sha512-RznZ6pFbEQ+w2xc29B8I4VOfh1ZR4VGT8o+oHrLK5XSLazeOXfH1ACFqWgVLVt+EFNrjqOr6VQ75CE4gJBT8vA==}
     dependencies:
-      '@types/node': 20.11.28
+      '@types/node': 20.11.30
       tslib: 2.6.2
     dev: false
 
@@ -6293,7 +6287,7 @@ packages:
     resolution: {integrity: sha512-JLlGDDW19oU0DlAaDrZBcOTChyJnO8FoY8DvdMxXSWd65mSp7XUi8JwoQ50NI0O/JQ0KzNOxBLlMS1411Eb6iA==}
     engines: {node: '>=18'}
     dependencies:
-      '@types/node': 20.11.28
+      '@types/node': 20.11.30
       js-base64: 3.7.7
       tslib: 2.6.2
       type-fest: 4.12.0
