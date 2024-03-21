@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import {
   GoogleMap,
   InfoWindow,
   Marker,
   useJsApiLoader,
 } from "@react-google-maps/api";
+import { useState } from "react";
 
 const markers = [
   {
@@ -65,7 +65,7 @@ const markers = [
   },
 ];
 
-export default function Map() {
+export default function LocationsMap() {
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
 
   const { isLoaded } = useJsApiLoader({

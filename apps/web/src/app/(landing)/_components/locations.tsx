@@ -1,6 +1,6 @@
 import Double from "~/app/_components/brand/double-line";
 import { BoxedButton } from "~/app/_components/style/buttons";
-import Map from "./map";
+import LocationsMap from "../../_components/locations-map";
 
 export default function Locations() {
   return (
@@ -32,7 +32,7 @@ export default function Locations() {
         </div>
       </div>
       <div className="h-full min-h-[24rem] w-full">
-        <Map />
+        <LocationsMap />
       </div>
     </section>
   );
