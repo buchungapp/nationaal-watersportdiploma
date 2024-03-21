@@ -1,6 +1,9 @@
 import { WEBSITE_URL } from "@nawadi/lib/constants";
 import { type MetadataRoute } from "next";
 import { getAllArticles } from "~/lib/articles";
+import { consumentSegments } from "./diplomalijn/consument/_components/segments";
+import { instructeurSegments } from "./diplomalijn/instructeur/_components/segments";
+import { verenigingsSegments } from "./vereniging/_components/segments";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = WEBSITE_URL;
@@ -11,6 +14,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "monthly",
     priority: 0.8,
   }));
+
+  const consument: MetadataRoute.Sitemap[] = consumentSegments.map((segment) =>
+    segment.pages.map((page) => ({
+      url: `${BASE_URL}/diplomalijn/consument/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+      changeFrequency: "monthly",
+      priority: page.weight ?? 0.7,
+    })),
+  );
+
+  const instructeur: MetadataRoute.Sitemap[] = instructeurSegments.map(
+    (segment) =>
+      segment.pages.map((page) => ({
+        url: `${BASE_URL}/diplomalijn/instructeur/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+        changeFrequency: "monthly",
+        priority: page.weight ?? 0.7,
+      })),
+  );
+
+  const vereniging: MetadataRoute.Sitemap[] = verenigingsSegments.map(
+    (segment) =>
+      segment.pages.map((page) => ({
+        url: `${BASE_URL}/vereniging/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+        changeFrequency: "monthly",
+        priority: page.weight ?? 0.7,
+      })),
+  );
 
   return [
     {
@@ -44,91 +73,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     ...articleMaps,
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/overgang-cwo`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/erkenningen`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/veelgestelde-vragen`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/catamaran`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/jachtzeilen`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/kielboot`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/windsurfen`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/zwaardboot-1mans`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/diplomalijn/consumenten/disciplines/zwaardboot-2mans`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/manifest`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/vertrouwenspersoon`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/gedragscode`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/bestuur`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/secretariaat`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/kwaliteitscommissie`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/vereniging/statuten-en-reglementen`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
+    ...consument.flat(),
+    ...instructeur.flat(),
+    ...vereniging.flat(),
     {
       url: `${BASE_URL}/merk`,
       changeFrequency: "monthly",
