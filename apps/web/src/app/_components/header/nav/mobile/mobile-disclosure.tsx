@@ -35,24 +35,20 @@ export default function MobileDisclosure({ item }: { item: NavItem }) {
             />
           </Disclosure.Button>
           <Disclosure.Panel as="ul" className="mt-1 px-2">
-            {item.component}
-            {/* 
-                            {item.children.map((subItem) => (
-                              <li key={subItem.name}>
-                                <Disclosure.Button
-                                  as="a"
-                                  href={subItem.href}
-                                  className={clsx(
-                                    subItem.current
-                                      ? "bg-gray-50"
-                                      : "hover:bg-gray-50",
-                                    "block rounded-md py-2 pr-2 pl-9 text-sm leading-6 text-gray-700",
-                                  )}
-                                >
-                                  {subItem.name}
-                                </Disclosure.Button>
-                              </li>
-                            ))} */}
+            {item.component.map((subItem) => (
+              <li key={subItem.label}>
+                <Disclosure.Button
+                  as="a"
+                  href={subItem.href}
+                  className={clsx(
+                    "hover:bg-gray-50",
+                    "block rounded-md py-2 px-2 text-sm leading-6 text-branding-dark font-semibold",
+                  )}
+                >
+                  {subItem.label}
+                </Disclosure.Button>
+              </li>
+            ))}
           </Disclosure.Panel>
         </>
       )}
