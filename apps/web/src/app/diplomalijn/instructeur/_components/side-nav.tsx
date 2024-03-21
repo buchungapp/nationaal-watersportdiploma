@@ -38,7 +38,10 @@ export default function SideNavVereniging() {
           label: "Leercoach",
           items: leercoachPages.map((page) => ({
             isActive(ctx) {
-              return ctx.selectedLayoutSegments[1] === page.slug;
+              return (
+                ctx.selectedLayoutSegments[0] === "leercoach" &&
+                ctx.selectedLayoutSegments[1] === page.slug
+              );
             },
             label: page.title,
             href: `/diplomalijn/instructeur/leercoach/${page.slug}`,
@@ -48,7 +51,10 @@ export default function SideNavVereniging() {
           label: "PvB-beoordelaar",
           items: beoordelaarPages.map((page) => ({
             isActive(ctx) {
-              return ctx.selectedLayoutSegments[1] === page.slug;
+              return (
+                ctx.selectedLayoutSegments[0] === "pvb-beoordelaar" &&
+                ctx.selectedLayoutSegments[1] === page.slug
+              );
             },
             label: page.title,
             href: `/diplomalijn/instructeur/pvb-beoordelaar/${page.slug}`,

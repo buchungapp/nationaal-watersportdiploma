@@ -11,19 +11,17 @@ export default function MdxPageHeader({
 }) {
   const currentSegments = useSelectedLayoutSegments();
 
-  const activePage = layoutSegments
-    .flatMap(({ parentSegments, pages }) =>
-      pages.map((page) => ({
-        title: page.title,
-        segments: [...parentSegments, page.slug].filter(Boolean) as string[],
-        description: page.description,
-      })),
-    )
-    .find((page) =>
-      currentSegments.every(
-        (segment, index) => page.segments[index] === segment,
-      ),
-    );
+  const normalizedPages = layoutSegments.flatMap(({ parentSegments, pages }) =>
+    pages.map((page) => ({
+      title: page.title,
+      segments: [...parentSegments, page.slug].filter(Boolean) as string[],
+      description: page.description,
+    })),
+  );
+
+  const activePage = normalizedPages.find((page) =>
+    currentSegments.every((segment, index) => page.segments[index] === segment),
+  );
 
   if (!activePage) {
     throw new Error("No active page found");

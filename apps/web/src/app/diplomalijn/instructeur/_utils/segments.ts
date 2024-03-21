@@ -96,7 +96,7 @@ export const instructeurSegments: LayoutSegment[] = [
     pages: eigenvaardigheidPages,
   },
   {
-    parentSegments: ["instructeur"],
+    parentSegments: [],
     pages: instructeurPages,
   },
   {
