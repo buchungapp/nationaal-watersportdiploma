@@ -1,5 +1,4 @@
 import { BoxedButton } from "~/app/_components/style/buttons";
-import { HAVE_WE_LAUNCHED } from "../../../../launch-control";
 import MuxVideo from "./mux-video";
 
 export default function Welcome() {
@@ -15,22 +14,12 @@ export default function Welcome() {
           </p>
         </div>
         <div className="flex flex-col items-center sm:items-start gap-x-6 gap-y-4 sm:flex-row">
-          {/* 🚀 launch control */}
-          {HAVE_WE_LAUNCHED ? (
-            <BoxedButton
-              href="/actueel/RLjvQDiv-lancering-nationaal-watersportdiploma"
-              className="bg-white text-branding-dark"
-            >
-              Lees de aankondiging
-            </BoxedButton>
-          ) : (
-            <BoxedButton
-              href="/vereniging/manifest"
-              className="bg-white text-branding-dark"
-            >
-              Ons manifest
-            </BoxedButton>
-          )}
+          <BoxedButton
+            href="/actueel/RLjvQDiv-lancering-nationaal-watersportdiploma"
+            className="bg-white text-branding-dark"
+          >
+            Lees de aankondiging
+          </BoxedButton>
           <BoxedButton
             href="/vaarlocaties"
             className="text-white hover:bg-white/10"
@@ -39,23 +28,20 @@ export default function Welcome() {
           </BoxedButton>
         </div>
       </div>
-      {/* 🚀 launch control */}
-      {HAVE_WE_LAUNCHED ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
-          <MuxVideo
-            style={{
-              position: "absolute",
-              inset: 0,
-            }}
-            playbackId="7lX3InLCH2hfWQGRJnXtOybImuqggOzkPgHEgHi9isY"
-            streamType="on-demand"
-            preload="auto"
-            loop
-            muted
-            autoPlay
-          />
-        </div>
-      ) : null}
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
+        <MuxVideo
+          style={{
+            position: "absolute",
+            inset: 0,
+          }}
+          playbackId="7lX3InLCH2hfWQGRJnXtOybImuqggOzkPgHEgHi9isY"
+          streamType="on-demand"
+          preload="auto"
+          loop
+          muted
+          autoPlay
+        />
+      </div>
     </div>
   );
 }
