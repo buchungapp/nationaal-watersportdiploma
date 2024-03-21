@@ -1,6 +1,6 @@
 import type { Page, PageWithMeta } from "~/app/types";
 
-export const verenigingsPages: Page[] = [
+export const verenigingsPages: (Page & { slug: string })[] = [
   {
     title: "Manifest",
     slug: "manifest",
@@ -42,9 +42,9 @@ export const verenigingsPages: Page[] = [
   },
 ];
 
-export const verenigingSegments: PageWithMeta[] = [
-  {
-    parentSegments: [],
-    pages: verenigingsPages,
-  },
-];
+export const verenigingSegments: PageWithMeta[] = verenigingsPages.map(
+  (page) => ({
+    ...page,
+    pathSegments: ["vereniging"],
+  }),
+);

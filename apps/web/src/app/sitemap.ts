@@ -1,45 +1,44 @@
 import { WEBSITE_URL } from "@nawadi/lib/constants";
 import { type MetadataRoute } from "next";
 import { getAllArticles } from "~/lib/articles";
-import { consumentSegments } from "./diplomalijn/consument/_utils/segments";
-import { instructeurSegments } from "./diplomalijn/instructeur/_utils/segments";
+
+import {
+  getAllDiplomalijnConsumentenPages,
+  getAllDiplomalijnInstructeurPages,
+} from "~/lib/mdx-pages";
 import { verenigingSegments } from "./vereniging/_utils/segments";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = WEBSITE_URL;
 
-  const articles = await getAllArticles();
+  const [articles, dcPages, diPages] = await Promise.all([
+    getAllArticles(),
+    getAllDiplomalijnConsumentenPages(),
+    getAllDiplomalijnInstructeurPages(),
+  ]);
   const articleMaps: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${BASE_URL}/actueel/${article.slug}`,
     changeFrequency: "monthly",
     priority: 0.8,
   }));
 
-  const consument: MetadataRoute.Sitemap[] = consumentSegments.map((segment) =>
-    segment.pages.map((page) => ({
-      url: `${BASE_URL}/diplomalijn/consument/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    })),
-  );
+  const consument: MetadataRoute.Sitemap = dcPages.map((page) => ({
+    url: `${BASE_URL}/diplomalijn/consument/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
 
-  const instructeur: MetadataRoute.Sitemap[] = instructeurSegments.map(
-    (segment) =>
-      segment.pages.map((page) => ({
-        url: `${BASE_URL}/diplomalijn/instructeur/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
-        changeFrequency: "monthly",
-        priority: 0.7,
-      })),
-  );
+  const instructeur: MetadataRoute.Sitemap = diPages.map((page) => ({
+    url: `${BASE_URL}/diplomalijn/consument/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
 
-  const vereniging: MetadataRoute.Sitemap[] = verenigingSegments.map(
-    (segment) =>
-      segment.pages.map((page) => ({
-        url: `${BASE_URL}/vereniging/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
-        changeFrequency: "monthly",
-        priority: 0.7,
-      })),
-  );
+  const vereniging: MetadataRoute.Sitemap = verenigingSegments.map((page) => ({
+    url: `${BASE_URL}/diplomalijn/consument/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
 
   return [
     {
@@ -73,9 +72,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     ...articleMaps,
-    ...consument.flat(),
-    ...instructeur.flat(),
-    ...vereniging.flat(),
+    ...consument,
+    ...instructeur,
+    ...vereniging,
     {
       url: `${BASE_URL}/merk`,
       changeFrequency: "monthly",
