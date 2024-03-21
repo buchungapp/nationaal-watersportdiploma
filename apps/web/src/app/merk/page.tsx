@@ -6,6 +6,14 @@ import icon from "./_assets/NWD-logo-final.svg";
 import lint from "./_assets/combined-lint-final.png";
 import wordmark from "./_assets/wordmark-final.svg";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Merk",
+  description:
+    "Alles over het logo, de kleuren en de huisstijl van het Nationaal Watersportdiploma.",
+};
+
 export default function Page() {
   return (
     <main>
