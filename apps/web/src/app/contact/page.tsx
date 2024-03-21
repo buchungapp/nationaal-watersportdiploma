@@ -128,12 +128,12 @@ export default function Contact() {
             </ul>
             <p>
               <strong>KvK</strong> 92327249
-              {/* TODO: these are not known yet */}
-              {/* <br />
-              <strong>IBAN</strong> NL 01 INGB 0003 123 456
+              <br />
+              <strong>IBAN</strong> NL22 INGB 0106 2450 82
               <br />
               <strong>BIC</strong> INGBNL2A
-              <br />
+              {/* TODO: This is not known yet */}
+              {/* <br />
               <strong>BTW</strong> NL123456789B01 */}
             </p>
           </div>
