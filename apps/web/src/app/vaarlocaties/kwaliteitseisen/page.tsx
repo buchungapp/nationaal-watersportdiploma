@@ -89,8 +89,10 @@ export default function Page() {
                 alcohol wordt geschonken is er een geldige vergunning hiervoor.
               </li>
               <li>
-                De accommodatie beschikt over een brandmeldinstallatie die
-                voldoet aan de accommodatie specifieke eisen.
+                De accommodatie beschikt over een brandmeldinstallatie (BMI). De
+                BMI wordt jaarlijks onderhouden middels een onderhoudscontract
+                en is in het bezit van een (wettelijk verplicht)
+                inspectiecertificaat.
               </li>
               <li>
                 Alle medewerkers, vrijwilligers en opdrachtnemers zijn voor
@@ -132,7 +134,7 @@ export default function Page() {
                 theoretisch als praktijk) jaarrond aan.
               </li>
               <li>
-                Vaarlocatie heeft altijd minimaal één gekwalificeerde ZI-4 of
+                Vaarlocatie heeft altijd minimaal één gekwalificeerde I4 of
                 hoger aanwezig tijdens de uitvoer van NWD-gerelateerde
                 activiteiten.
               </li>
