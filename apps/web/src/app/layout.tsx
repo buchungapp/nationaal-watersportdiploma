@@ -6,13 +6,12 @@ import Analytics from "~/app/_components/analytics";
 import Footer from "./_components/footer/footer";
 import Header from "./_components/header/header";
 
-import "./globals.css";
-
 import { APP_NAME, APP_SLOGAN } from "@nawadi/lib/constants";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { BASE_URL } from "~/constants";
 import { HAVE_WE_LAUNCHED } from "../../launch-control";
+import "./globals.css";
 import { Providers } from "./providers";
-
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
@@ -50,6 +49,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
