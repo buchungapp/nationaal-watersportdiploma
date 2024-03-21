@@ -1,11 +1,10 @@
 export interface Page {
-  slug: string | null;
   title: string;
   description?: React.ReactNode;
-  weight?: number;
+  order?: number;
 }
 
-export interface LayoutSegment {
-  parentSegments: string[];
-  pages: Page[];
-}
+export type PageWithMeta = Page & {
+  slug: string | null;
+  pathSegments: string[];
+};

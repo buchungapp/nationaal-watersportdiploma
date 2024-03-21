@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     segment.pages.map((page) => ({
       url: `${BASE_URL}/diplomalijn/consument/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
       changeFrequency: "monthly",
-      priority: page.weight ?? 0.7,
+      priority: 0.7,
     })),
   );
 
@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       segment.pages.map((page) => ({
         url: `${BASE_URL}/diplomalijn/instructeur/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
         changeFrequency: "monthly",
-        priority: page.weight ?? 0.7,
+        priority: 0.7,
       })),
   );
 
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       segment.pages.map((page) => ({
         url: `${BASE_URL}/vereniging/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
         changeFrequency: "monthly",
-        priority: page.weight ?? 0.7,
+        priority: 0.7,
       })),
   );
 

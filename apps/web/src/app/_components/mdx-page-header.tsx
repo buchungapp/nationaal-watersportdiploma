@@ -2,25 +2,23 @@
 
 import { useSelectedLayoutSegments } from "next/navigation";
 import PageHero from "~/app/_components/style/page-hero";
-import type { LayoutSegment } from "../types";
+import type { PageWithMeta } from "../types";
 
-export default function MdxPageHeader({
-  layoutSegments,
-}: {
-  layoutSegments: LayoutSegment[];
-}) {
+export default function MdxPageHeader({ pages }: { pages: PageWithMeta[] }) {
   const currentSegments = useSelectedLayoutSegments();
 
-  const normalizedPages = layoutSegments.flatMap(({ parentSegments, pages }) =>
-    pages.map((page) => ({
-      title: page.title,
-      segments: [...parentSegments, page.slug].filter(Boolean) as string[],
-      description: page.description,
-    })),
-  );
+  const normalizedPages = pages.map((page) => ({
+    title: page.title,
+    segments: [...page.pathSegments, page.slug].filter(Boolean),
+    description: page.description,
+  }));
 
-  const activePage = normalizedPages.find((page) =>
-    currentSegments.every((segment, index) => page.segments[index] === segment),
+  const activePage = normalizedPages.find(
+    (page) =>
+      currentSegments.length === page.segments.length &&
+      currentSegments.every(
+        (segment, index) => page.segments[index] === segment,
+      ),
   );
 
   if (!activePage) {

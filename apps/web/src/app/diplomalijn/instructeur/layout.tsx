@@ -1,29 +1,54 @@
 import { APP_NAME } from "@nawadi/lib/constants";
-import MdxPageHeader from "~/app/_components/mdx-page-header";
 
 import type { Metadata } from "next";
+import MdxPageHeader from "~/app/_components/mdx-page-header";
 import { Prose } from "~/app/_components/prose";
+import { getAllDiplomalijnInstructeurPages } from "~/lib/mdx-pages";
 import SideNavVereniging from "./_components/side-nav";
-import { instructeurSegments } from "./_utils/segments";
 
 export const metadata: Metadata = {
   title: {
-    template: `%s | Diplomalijn | ${APP_NAME}`,
-    default: "Diplomalijn Instructeurs",
+    template: `%s | Diplomalijn Instructeurs | ${APP_NAME}`,
+    default: `Diplomalijn Instructeurs | ${APP_NAME}`,
   },
 };
 
-export default function Layout({
+export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pages = await getAllDiplomalijnInstructeurPages();
+
   return (
     <main>
-      <MdxPageHeader layoutSegments={instructeurSegments} />
+      <MdxPageHeader pages={pages} />
       <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
         <div className="flex justify-end h-full">
-          <SideNavVereniging />
+          <SideNavVereniging
+            pages={{
+              general: pages.filter(
+                (page) =>
+                  page.pathSegments.length === 0 &&
+                  !page.title.startsWith("Instructeur"),
+              ),
+              instructeur: pages.filter(
+                (page) =>
+                  page.pathSegments.length === 0 &&
+                  page.title.startsWith("Instructeur"),
+              ),
+              leercoach: pages.filter(
+                (page) =>
+                  page.pathSegments.length > 0 &&
+                  page.pathSegments.includes("leercoach"),
+              ),
+              beoordelaar: pages.filter(
+                (page) =>
+                  page.pathSegments.length > 0 &&
+                  page.pathSegments.includes("pvb-beoordelaar"),
+              ),
+            }}
+          />
         </div>
         <Prose className="max-w-prose" data-mdx-content>
           {children}

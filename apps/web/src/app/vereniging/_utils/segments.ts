@@ -1,4 +1,4 @@
-import type { LayoutSegment, Page } from "~/app/types";
+import type { Page, PageWithMeta } from "~/app/types";
 
 export const verenigingsPages: Page[] = [
   {
@@ -42,7 +42,7 @@ export const verenigingsPages: Page[] = [
   },
 ];
 
-export const verenigingSegments: LayoutSegment[] = [
+export const verenigingSegments: PageWithMeta[] = [
   {
     parentSegments: [],
     pages: verenigingsPages,

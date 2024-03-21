@@ -1,14 +1,21 @@
 "use client";
 
 import SideNav from "~/app/_components/style/side-nav";
-import { disciplinePages, generalPages } from "../_utils/segments";
+import type { PageWithMeta } from "~/app/types";
 
-export default function SideNavVereniging() {
+export default function SideNavVereniging({
+  pages: { general, disciplines },
+}: {
+  pages: {
+    general: PageWithMeta[];
+    disciplines: PageWithMeta[];
+  };
+}) {
   return (
     <SideNav
       sections={[
         {
-          items: generalPages.map((page) => ({
+          items: general.map((page) => ({
             isActive(ctx) {
               if (page.slug === null)
                 return ctx.selectedLayoutSegments.length < 1;
@@ -21,7 +28,7 @@ export default function SideNavVereniging() {
         },
         {
           label: "Disciplines",
-          items: disciplinePages.map((page) => ({
+          items: disciplines.map((page) => ({
             isActive(ctx) {
               return ctx.selectedLayoutSegments[1] === page.slug;
             },

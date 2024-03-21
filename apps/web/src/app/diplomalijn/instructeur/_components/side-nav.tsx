@@ -1,19 +1,23 @@
 "use client";
 
 import SideNav from "~/app/_components/style/side-nav";
-import {
-  beoordelaarPages,
-  generalPages,
-  instructeurPages,
-  leercoachPages,
-} from "../_utils/segments";
+import type { PageWithMeta } from "~/app/types";
 
-export default function SideNavVereniging() {
+export default function SideNavVereniging({
+  pages: { general, instructeur, leercoach, beoordelaar },
+}: {
+  pages: {
+    general: PageWithMeta[];
+    instructeur: PageWithMeta[];
+    leercoach: PageWithMeta[];
+    beoordelaar: PageWithMeta[];
+  };
+}) {
   return (
     <SideNav
       sections={[
         {
-          items: generalPages.map((page) => ({
+          items: general.map((page) => ({
             isActive(ctx) {
               if (page.slug === null)
                 return ctx.selectedLayoutSegments.length < 1;
@@ -26,7 +30,7 @@ export default function SideNavVereniging() {
         },
         {
           label: "Instructeur",
-          items: instructeurPages.map((page) => ({
+          items: instructeur.map((page) => ({
             isActive(ctx) {
               return ctx.selectedLayoutSegments[0] === page.slug;
             },
@@ -36,7 +40,7 @@ export default function SideNavVereniging() {
         },
         {
           label: "Leercoach",
-          items: leercoachPages.map((page) => ({
+          items: leercoach.map((page) => ({
             isActive(ctx) {
               return (
                 ctx.selectedLayoutSegments[0] === "leercoach" &&
@@ -49,7 +53,7 @@ export default function SideNavVereniging() {
         },
         {
           label: "PvB-beoordelaar",
-          items: beoordelaarPages.map((page) => ({
+          items: beoordelaar.map((page) => ({
             isActive(ctx) {
               return (
                 ctx.selectedLayoutSegments[0] === "pvb-beoordelaar" &&
