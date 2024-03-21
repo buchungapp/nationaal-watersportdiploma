@@ -1,4 +1,3 @@
-import { HAVE_WE_LAUNCHED } from "../../../launch-control";
 import PageHero from "../_components/style/page-hero";
 import About from "./_components/about";
 import Faq from "./_components/faq";
@@ -18,11 +17,9 @@ export default function Home() {
         <Photos />
         <About />
         <Locations />
-        {/* 🚀 launch control */}
-        {HAVE_WE_LAUNCHED ? <Faq /> : null}
+        <Faq />
         <Seperator />
-        {/* 🚀 launch control */}
-        {HAVE_WE_LAUNCHED ? <News /> : null}
+        <News />
       </div>
     </main>
   );
