@@ -15,6 +15,21 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/faq-consument",
+        destination: "/actueel/RLjvQDiv-lancering-nationaal-watersportdiploma",
+        permanent: true,
+      },
+      {
+        source: "/faq-instructeur",
+        destination:
+          "/actueel/3yHwZSTf-een-nieuw-tijdperk-voor-jou-als-instructeur-met-het-nwd",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {
