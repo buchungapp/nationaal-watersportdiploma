@@ -1,10 +1,10 @@
 "use client";
 
-import React, { Fragment } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { Dialog, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
+import Link from "next/link";
+import React, { Fragment } from "react";
 
 import { useMobileMenuState } from "~/app/providers";
 
@@ -30,13 +30,13 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
           <Transition.Child
             as={Fragment}
             enter="transition ease-in-out duration-300 transform"
-            enterFrom="-translate-x-full"
+            enterFrom="translate-x-full"
             enterTo="translate-x-0"
             leave="transition ease-in-out duration-300 transform"
             leaveFrom="translate-x-0"
-            leaveTo="-translate-x-full"
+            leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="relative mr-10 flex w-full max-w-sm flex-col bg-white shadow-xl">
+            <Dialog.Panel className="relative ml-10 flex w-full max-w-sm flex-col bg-white shadow-xl">
               <div className="relative flex items-center justify-center bg-branding-light p-4">
                 <Link href="/">
                   <Image

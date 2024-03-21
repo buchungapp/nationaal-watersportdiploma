@@ -1,91 +1,176 @@
 "use client";
 
+import { Menu, Transition } from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
 import type { ReadonlyURLSearchParams } from "next/navigation";
-import { useSearchParams, useSelectedLayoutSegment } from "next/navigation";
-import React, { Suspense } from "react";
+import { useSearchParams, useSelectedLayoutSegments } from "next/navigation";
+import React, { Fragment, Suspense } from "react";
 import { twMerge } from "tailwind-merge";
 
 interface SideNavProps {
-  label: string;
-  items: {
-    isActive?: (ctx: {
-      selectedLayoutSegment: string | null;
-      searchParams: ReadonlyURLSearchParams;
-    }) => boolean;
-    label:
-      | React.ReactNode
-      | ((ctx: {
-          isActive: boolean;
-          searchParams: ReadonlyURLSearchParams;
-        }) => React.ReactNode);
-    href:
-      | string
-      | ((ctx: {
-          isActive: boolean;
-          searchParams: ReadonlyURLSearchParams;
-        }) => string);
+  sections: {
+    label?: string;
+    items: {
+      isActive?: (ctx: {
+        selectedLayoutSegments: string[];
+        searchParams: ReadonlyURLSearchParams;
+      }) => boolean;
+      label:
+        | React.ReactNode
+        | ((ctx: {
+            isActive: boolean;
+            searchParams: ReadonlyURLSearchParams;
+          }) => React.ReactNode);
+      href:
+        | string
+        | ((ctx: {
+            isActive: boolean;
+            searchParams: ReadonlyURLSearchParams;
+          }) => string);
+      scroll?: boolean;
+    }[];
   }[];
   className?: string;
-  shouldScroll?: boolean;
 }
 
 function SideNavInner({
-  label,
-  items,
+  sections,
   className,
-  shouldScroll = true,
   searchParams,
 }: SideNavProps & { searchParams: ReadonlyURLSearchParams }) {
-  const segment = useSelectedLayoutSegment();
+  const segments = useSelectedLayoutSegments();
+  const computedSections = sections.map(({ items, label }) => ({
+    label,
+    items: items.map(
+      ({ href: _href, label: _label, isActive: _isActive, ...item }) => {
+        const isActive = _isActive
+          ? _isActive({
+              selectedLayoutSegments: segments,
+              searchParams,
+            })
+          : false;
+
+        const href =
+          typeof _href === "function"
+            ? _href({ isActive, searchParams })
+            : _href;
+
+        const label =
+          typeof _label === "function"
+            ? _label({ isActive, searchParams })
+            : _label;
+
+        return {
+          href,
+          label,
+          isActive,
+          ...item,
+        };
+      },
+    ),
+  }));
+
+  const active =
+    computedSections
+      .flatMap(({ items }) => items)
+      .find(({ isActive }) => isActive) ?? null;
 
   return (
-    <div
-      className={twMerge(
-        "flex flex-col gap-2 text-sm sticky h-fit top-[160px]",
-        className,
-      )}
-    >
-      <div className="pl-4 text-sm font-semibold">{label}</div>
-      <ul className="flex flex-col gap-3">
-        {items.map(({ href: _href, label: _label, isActive: _isActive }) => {
-          const isActive = _isActive
-            ? _isActive({
-                selectedLayoutSegment: segment,
-                searchParams,
-              })
-            : false;
-
-          const href =
-            typeof _href === "function"
-              ? _href({ isActive, searchParams })
-              : _href;
-
-          const label =
-            typeof _label === "function"
-              ? _label({ isActive, searchParams })
-              : _label;
-
+    <>
+      <Menu
+        as="div"
+        className="relative inline-block sm:hidden text-left w-full"
+      >
+        <div>
+          <Menu.Button className="inline-flex w-full truncate justify-between rounded-xl bg-branding-dark/10 px-4 py-2 text-sm font-medium text-branding-dark group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+            {active?.label ?? "Menu"}
+            <ChevronDownIcon
+              className="-mr-1 ml-2 h-5 w-5 group-hover:translate-y-0.5 transition-transform"
+              aria-hidden="true"
+            />
+          </Menu.Button>
+        </div>
+        <Transition
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="transform opacity-0 scale-95"
+          enterTo="transform opacity-100 scale-100"
+          leave="transition ease-in duration-75"
+          leaveFrom="transform opacity-100 scale-100"
+          leaveTo="transform opacity-0 scale-95"
+        >
+          <Menu.Items className="absolute right-0 mt-2 text-sm px-2 py-2.5 w-full gap-6 flex flex-col origin-top rounded-xl bg-white shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
+            {computedSections.map(({ items, label }) => {
+              return (
+                <div key={`${label}`} className="flex flex-col gap-2">
+                  {label ? (
+                    <div className="pl-4 text-sm font-semibold">{label}</div>
+                  ) : null}
+                  <ul className="flex flex-col gap-3">
+                    {items.map(({ href, label, isActive, scroll }) => (
+                      <li key={href}>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <Link
+                              href={href}
+                              scroll={scroll ?? true}
+                              className={clsx(
+                                "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors tabular-nums",
+                                isActive
+                                  ? "bg-branding-dark/10 font-semibold"
+                                  : active && "bg-gray-100",
+                              )}
+                            >
+                              {label}
+                            </Link>
+                          )}
+                        </Menu.Item>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </Menu.Items>
+        </Transition>
+      </Menu>
+      <div
+        className={twMerge(
+          "text-sm sticky h-fit top-[160px] hidden sm:flex flex-col gap-y-12",
+          className,
+        )}
+      >
+        {computedSections.map(({ items, label }) => {
           return (
-            <li key={href}>
-              <Link
-                href={href}
-                scroll={shouldScroll}
-                className={clsx(
-                  "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors",
-                  isActive
-                    ? "bg-branding-dark/10 font-semibold"
-                    : "hover:bg-gray-100",
-                )}
-              >
-                {label}
-              </Link>
-            </li>
+            <div key={`${label}`} className="flex flex-col gap-2">
+              {label ? (
+                <div className="pl-4 text-sm font-semibold">{label}</div>
+              ) : null}
+              <ul className="flex flex-col gap-3">
+                {items.map(({ href, label, isActive, scroll }) => (
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      scroll={scroll ?? true}
+                      className={clsx(
+                        "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors tabular-nums",
+                        isActive
+                          ? "bg-branding-dark/10 font-semibold"
+                          : "hover:bg-gray-100",
+                      )}
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           );
         })}
-      </ul>
-    </div>
+      </div>
+    </>
   );
 }
 

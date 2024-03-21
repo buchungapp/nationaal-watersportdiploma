@@ -4,6 +4,7 @@ words:
   - clsx
   - diplomeringslijn
   - esbenp
+  - HACCP
   - headlessui
   - ianvs
   - Imuqgg
@@ -12,6 +13,7 @@ words:
   - Krekt
   - kwaliteitspeilers
   - nawadi
+  - nums
   - Outro
   - PGURI
   - pnpx
@@ -30,6 +32,7 @@ ignoreWords:
   - transform
   - BUT
   - LOSS
+  - spandiensten
 allowCompoundWords: true
 useGitignore: true
 ignorePaths:

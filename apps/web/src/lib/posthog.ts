@@ -1,6 +1,6 @@
 import { PostHog } from "posthog-node";
 
-export default function PostHogClient() {
+function PostHogClient() {
   if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
     throw new Error("NEXT_PUBLIC_POSTHOG_KEY is not set");
   }
@@ -12,3 +12,5 @@ export default function PostHogClient() {
   });
   return posthogClient;
 }
+
+export default PostHogClient();

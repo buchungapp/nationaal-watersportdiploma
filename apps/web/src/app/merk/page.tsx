@@ -20,23 +20,27 @@ export default function Page() {
       <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
         <div className="flex h-full justify-end">
           <SideNav
-            label="Merk"
-            items={[
+            sections={[
               {
-                label: "Naam",
-                href: "#naam",
-              },
-              {
-                label: "Logo",
-                href: "#logo",
-              },
-              {
-                label: "Kleuren",
-                href: "#kleuren",
-              },
-              {
-                label: "Lettertype",
-                href: "#lettertype",
+                label: "Merk",
+                items: [
+                  {
+                    label: "Naam",
+                    href: "#naam",
+                  },
+                  {
+                    label: "Logo",
+                    href: "#logo",
+                  },
+                  {
+                    label: "Kleuren",
+                    href: "#kleuren",
+                  },
+                  {
+                    label: "Lettertype",
+                    href: "#lettertype",
+                  },
+                ],
               },
             ]}
             className="w-full sm:w-[18rem]"
