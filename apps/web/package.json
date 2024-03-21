@@ -26,7 +26,7 @@
     "google-auth-library": "^9.7.0",
     "googleapis": "^134.0.0",
     "micromark": "^4.0.0",
-    "next": "14.2.0-canary.27",
+    "next": "14.2.0-canary.34",
     "posthog-js": "^1.116.2",
     "posthog-node": "^4.0.0",
     "react": "^18",
