@@ -20,7 +20,6 @@ export default function Page() {
   //         params: {
   //           latlng: `${location.position.lat},${location.position.lng}`,
   //           language: Language.nl,
-  //           key: "AIzaSyCs5rv9Lk_yirBQWGcJOtaFY0H05SoofaA",
   //         },
   //       })
   //       .catch((error) => {
