@@ -35,9 +35,14 @@ export default function Page() {
             waarborgt als autoriteit en licentiehouder binnen de
             watersportsector de kwaliteit van alle watersportopleidingen in
             Nederland, onder andere voor consumenten en instructeurs maar ook
-            voor trainers en officials. Met ingang van 2024 werkt
-            Watersportverbond samenwerken met het Nationaal Watersportdiploma
-            (NWD).
+            voor trainers en officials. Met ingang van 2024 werkt het
+            Watersportverbond samen met het Nationaal Watersportdiploma (NWD).
+          </p>
+          <p>
+            Het Watersportverbond verzorgt hierbij de licentie en erkenning voor
+            de opleidingen van het NWD. Andersom werkt het NWD mee aan het
+            verder ontwikkelen van het landschap van watersportopleidingen in
+            Nederland.
           </p>
           <p>
             Lees meer op:{" "}
