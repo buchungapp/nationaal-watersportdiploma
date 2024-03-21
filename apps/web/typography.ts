@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type PluginUtils } from "tailwindcss/types/config";
 
 export default function typographyStyles({ theme }: PluginUtils) {
@@ -64,13 +65,13 @@ export default function typographyStyles({ theme }: PluginUtils) {
         h2: {
           fontSize: theme("fontSize.xl")[0],
           lineHeight: theme("lineHeight.7"),
-          marginTop: theme("spacing.16"),
+          marginTop: theme("spacing.12"),
           marginBottom: theme("spacing.4"),
         },
         h3: {
           fontSize: theme("fontSize.base")[0],
           lineHeight: theme("lineHeight.7"),
-          marginTop: theme("spacing.12"),
+          marginTop: theme("spacing.8"),
           marginBottom: theme("spacing.4"),
         },
         ":is(h2, h3) + *": {
