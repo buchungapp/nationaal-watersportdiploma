@@ -25,9 +25,9 @@ export default function Layout({
         <div className="flex justify-end h-full">
           <SideNavVereniging />
         </div>
-        <div className="flex flex-col justify-center">
-          <Prose data-mdx-content>{children}</Prose>
-        </div>
+        <Prose className="max-w-prose" data-mdx-content>
+          {children}
+        </Prose>
       </div>
     </main>
   );
