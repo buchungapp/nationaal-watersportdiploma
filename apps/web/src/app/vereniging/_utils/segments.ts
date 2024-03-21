@@ -42,7 +42,7 @@ export const verenigingsPages: Page[] = [
   },
 ];
 
-export const verenigingsSegments: LayoutSegment[] = [
+export const verenigingSegments: LayoutSegment[] = [
   {
     parentSegments: [],
     pages: verenigingsPages,

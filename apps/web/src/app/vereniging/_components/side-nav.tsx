@@ -1,7 +1,7 @@
 "use client";
 
 import SideNav from "~/app/_components/style/side-nav";
-import { verenigingsPages } from "./segments";
+import { verenigingsPages } from "../_utils/segments";
 
 export default function SideNavVereniging() {
   return (

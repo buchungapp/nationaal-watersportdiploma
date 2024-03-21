@@ -1,9 +1,10 @@
-version: '0.2'
+version: "0.2"
 words:
   - buchungapp
   - clsx
   - diplomeringslijn
   - esbenp
+  - HACCP
   - headlessui
   - ianvs
   - Imuqgg
@@ -12,6 +13,7 @@ words:
   - Krekt
   - kwaliteitspeilers
   - nawadi
+  - nums
   - Outro
   - PGURI
   - pnpx
@@ -36,13 +38,13 @@ ignorePaths:
   - pnpm-lock.yaml
   - generated/
   - apps/nwd-web/src/app/
-  - '*.svg'
+  - "*.svg"
 files:
-  - '**'
+  - "**"
 enableFiletypes:
-  - '*'
+  - "*"
 dictionaries:
   - sql
   - nl-nl
 import:
-  - '@cspell/dict-nl-nl/cspell-ext.json'
+  - "@cspell/dict-nl-nl/cspell-ext.json"

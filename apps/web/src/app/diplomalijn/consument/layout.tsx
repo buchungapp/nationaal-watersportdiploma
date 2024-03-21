@@ -3,8 +3,8 @@ import { APP_NAME } from "@nawadi/lib/constants";
 import type { Metadata } from "next";
 import MdxPageHeader from "~/app/_components/mdx-page-header";
 import { Prose } from "~/app/_components/prose";
-import { consumentSegments } from "./_components/segments";
 import SideNavVereniging from "./_components/side-nav";
+import { consumentSegments } from "./_utils/segments";
 
 export const metadata: Metadata = {
   title: {

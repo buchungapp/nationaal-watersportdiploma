@@ -6,7 +6,7 @@ import {
   generalPages,
   instructeurPages,
   leercoachPages,
-} from "./segments";
+} from "../_utils/segments";
 
 export default function SideNavVereniging() {
   return (

@@ -3,8 +3,8 @@ import MdxPageHeader from "~/app/_components/mdx-page-header";
 
 import type { Metadata } from "next";
 import { Prose } from "~/app/_components/prose";
-import { instructeurSegments } from "./_components/segments";
 import SideNavVereniging from "./_components/side-nav";
+import { instructeurSegments } from "./_utils/segments";
 
 export const metadata: Metadata = {
   title: {

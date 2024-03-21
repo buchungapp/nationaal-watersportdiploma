@@ -1,7 +1,7 @@
 "use client";
 
 import SideNav from "~/app/_components/style/side-nav";
-import { disciplinePages, generalPages } from "./segments";
+import { disciplinePages, generalPages } from "../_utils/segments";
 
 export default function SideNavVereniging() {
   return (

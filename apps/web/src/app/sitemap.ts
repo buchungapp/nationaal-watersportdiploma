@@ -1,9 +1,9 @@
 import { WEBSITE_URL } from "@nawadi/lib/constants";
 import { type MetadataRoute } from "next";
 import { getAllArticles } from "~/lib/articles";
-import { consumentSegments } from "./diplomalijn/consument/_components/segments";
-import { instructeurSegments } from "./diplomalijn/instructeur/_components/segments";
-import { verenigingsSegments } from "./vereniging/_components/segments";
+import { consumentSegments } from "./diplomalijn/consument/_utils/segments";
+import { instructeurSegments } from "./diplomalijn/instructeur/_utils/segments";
+import { verenigingSegments } from "./vereniging/_utils/segments";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = WEBSITE_URL;
@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })),
   );
 
-  const vereniging: MetadataRoute.Sitemap[] = verenigingsSegments.map(
+  const vereniging: MetadataRoute.Sitemap[] = verenigingSegments.map(
     (segment) =>
       segment.pages.map((page) => ({
         url: `${BASE_URL}/vereniging/${segment.parentSegments.join("/")}${segment.parentSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
