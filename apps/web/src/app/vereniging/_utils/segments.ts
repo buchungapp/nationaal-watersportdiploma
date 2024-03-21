@@ -45,6 +45,6 @@ export const verenigingsPages: (Page & { slug: string })[] = [
 export const verenigingSegments: PageWithMeta[] = verenigingsPages.map(
   (page) => ({
     ...page,
-    pathSegments: ["vereniging"],
+    pathSegments: [],
   }),
 );
