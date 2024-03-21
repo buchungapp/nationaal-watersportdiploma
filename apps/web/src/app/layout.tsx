@@ -2,16 +2,14 @@ import { clsx } from "clsx";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { APP_NAME, APP_SLOGAN } from "@nawadi/lib/constants";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import Analytics from "~/app/_components/analytics";
+import { BASE_URL } from "~/constants";
 import Footer from "./_components/footer/footer";
 import Header from "./_components/header/header";
-
 import "./globals.css";
-
-import { APP_NAME, APP_SLOGAN } from "@nawadi/lib/constants";
-import { BASE_URL } from "~/constants";
 import { Providers } from "./providers";
-
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
@@ -46,6 +44,7 @@ export default function RootLayout({
             <Footer />
           </div>
         </Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
