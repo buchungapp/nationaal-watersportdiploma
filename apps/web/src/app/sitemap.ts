@@ -2,6 +2,7 @@ import { WEBSITE_URL } from "@nawadi/lib/constants";
 import { type MetadataRoute } from "next";
 import { getAllArticles } from "~/lib/articles";
 
+import { listFaqs } from "~/lib/faqs";
 import {
   getAllDiplomalijnConsumentenPages,
   getAllDiplomalijnInstructeurPages,
@@ -11,10 +12,11 @@ import { verenigingSegments } from "./vereniging/_utils/segments";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = WEBSITE_URL;
 
-  const [articles, dcPages, diPages] = await Promise.all([
+  const [articles, dcPages, diPages, faqs] = await Promise.all([
     getAllArticles(),
     getAllDiplomalijnConsumentenPages(),
     getAllDiplomalijnInstructeurPages(),
+    listFaqs(),
   ]);
   const articleMaps: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${BASE_URL}/actueel/${article.slug}`,
@@ -36,6 +38,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const vereniging: MetadataRoute.Sitemap = verenigingSegments.map((page) => ({
     url: `${BASE_URL}/diplomalijn/consument/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  const faqPages: MetadataRoute.Sitemap = faqs.map((faq) => ({
+    url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/${faq.category}/${faq.slug}`,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
@@ -75,6 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...consument,
     ...instructeur,
     ...vereniging,
+    ...faqPages,
     {
       url: `${BASE_URL}/merk`,
       changeFrequency: "monthly",

@@ -1,4 +1,5 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Prose } from "~/app/_components/prose";
@@ -11,13 +12,22 @@ async function findQuestion(category: string, slug: string) {
   return allQuestions.find((q) => q.category === category && q.slug === slug);
 }
 
-export default async function Page({
-  params,
-}: {
-  params: {
-    faq: string[];
+interface Props {
+  params: { faq: string[] };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const question = await findQuestion(params.faq[0], params.faq[1]);
+
+  if (!question) {
+    notFound();
+  }
+
+  return {
+    title: `${question.question} | NWD Helpcentrum`,
   };
-}) {
+}
+export default async function Page({ params }: Props) {
   const question = await findQuestion(params.faq[0], params.faq[1]);
 
   if (!question) {

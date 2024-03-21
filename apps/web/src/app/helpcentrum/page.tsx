@@ -3,6 +3,14 @@ import { listFaqs } from "~/lib/faqs";
 import PageHero from "../_components/style/page-hero";
 import Search from "./_components/search";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Helpcentrum",
+  description:
+    "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
+};
+
 export default async function Page() {
   const questions = await listFaqs({});
 
