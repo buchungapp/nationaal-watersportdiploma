@@ -2,6 +2,7 @@ import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { micromark } from "micromark";
 import { unstable_cache } from "next/cache";
+import slugify from "slugify";
 import { z } from "zod";
 
 const auth = new GoogleAuth({
@@ -84,8 +85,10 @@ async function retrieveQuestions({
       }
     }
 
-    return validQuestions.map(([category, question, answer]) => ({
+    return validQuestions.map(([category, question, answer, featured]) => ({
       category,
+      slug: slugify(question, { strict: true }),
+      featured: featured === "TRUE",
       question,
       answer: micromark(answer),
     }));
