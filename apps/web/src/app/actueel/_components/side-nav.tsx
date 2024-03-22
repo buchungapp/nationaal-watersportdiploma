@@ -12,10 +12,10 @@ export const newsCategories = [
     label: "Achterban",
     param: "achterban",
   },
-  {
-    label: "Vereniging",
-    param: "vereniging",
-  },
+  // {
+  //   label: "Vereniging",
+  //   param: "vereniging",
+  // },
   {
     label: "Persberichten",
     param: "pers",
