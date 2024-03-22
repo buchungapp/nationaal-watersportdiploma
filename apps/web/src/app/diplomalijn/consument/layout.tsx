@@ -28,11 +28,6 @@ export default async function Layout({
           <SideNavVereniging
             pages={{
               general: pages.filter((page) => page.pathSegments.length === 0),
-              disciplines: pages.filter(
-                (page) =>
-                  page.pathSegments.length > 0 &&
-                  page.pathSegments.includes("disciplines"),
-              ),
             }}
           />
         </div>

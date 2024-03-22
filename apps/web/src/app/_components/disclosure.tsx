@@ -10,10 +10,10 @@ export default function Disclosure({
   children,
 }: PropsWithChildren<{ button: React.ReactNode }>) {
   return (
-    <HeadlessDisclosure as="div" className="pt-6">
+    <HeadlessDisclosure as="div" className="pt-6 w-full">
       {({ open }) => (
         <>
-          <HeadlessDisclosure.Button className="">
+          <HeadlessDisclosure.Button className="w-full flex items-center justify-between">
             {button}
             <span className="ml-6 flex h-7 items-center">
               {open ? (
@@ -23,7 +23,7 @@ export default function Disclosure({
               )}
             </span>
           </HeadlessDisclosure.Button>
-          <HeadlessDisclosure.Panel as={React.Fragment}>
+          <HeadlessDisclosure.Panel as="div">
             {children}
           </HeadlessDisclosure.Panel>
         </>
