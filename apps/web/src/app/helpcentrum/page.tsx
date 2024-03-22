@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { listFaqs } from "~/lib/faqs";
+import { listFaqs as listFaqsGeneral } from "~/lib/faqs";
+import { listFaqs as listFaqsDiplomalijn } from "~/lib/faqs-diplomalijn";
 import PageHero from "../_components/style/page-hero";
 import Search from "./_components/search";
 
 import type { Metadata } from "next";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "Helpcentrum",
@@ -12,7 +14,12 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const questions = await listFaqs({});
+  const [generalQuestions, diplomalijnQuestions] = await Promise.all([
+    listFaqsGeneral({}),
+    listFaqsDiplomalijn({}),
+  ]);
+
+  const combined = [...generalQuestions, ...diplomalijnQuestions];
 
   return (
     <main className="flex flex-col items-center">
@@ -33,23 +40,22 @@ export default async function Page() {
         <h2 className="text-2xl font-bold lg:text-3xl xl:text-4xl text-gray-900">
           Hoe kunnen we helpen?
         </h2>
-        <Search questions={questions} />
+        <Search questions={combined} />
         <p className="text-center mt-4 max-w-prose">
           <span className="font-semibold text-gray-600">Populaire vragen:</span>{" "}
-          {questions
+          {generalQuestions
             .filter((q) => !!q.featured)
             .slice(0, 3)
             .map((q, idx) => (
-              <>
+              <React.Fragment key={`${q.categories.join("-")}-${q.slug}`}>
                 <Link
-                  key={`${q.category}-${q.slug}`}
-                  href={`/helpcentrum/veelgestelde-vragen/${q.category}/${q.slug}`}
+                  href={`/helpcentrum/veelgestelde-vragen/${q.categories.join("/")}/${q.slug}`}
                   className="text-gray-500 hover:text-gray-900 underline"
                 >
                   {q.question}
                 </Link>
                 {idx < 2 ? ", " : ""}
-              </>
+              </React.Fragment>
             ))}
         </p>
       </div>

@@ -26,7 +26,7 @@ const faqCategory = z.union([
 
 type FaqCategory = z.infer<typeof faqCategory>;
 export interface Faq {
-  category: FaqCategory;
+  categories: string[];
   question: string;
   answer: string;
 }
@@ -86,7 +86,7 @@ async function retrieveQuestions({
     }
 
     return validQuestions.map(([category, question, answer, featured]) => ({
-      category,
+      categories: ["algemeen", category],
       slug: slugify(question, { strict: true }),
       featured: featured === "TRUE",
       question,

@@ -1,39 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import { Combobox } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import Fuse from "fuse.js";
 import { useRouter } from "next/navigation";
-import type { listFaqs } from "~/lib/faqs";
+import { usePostHog } from "posthog-js/react";
+import type { Faq } from "~/lib/faqs";
 
 export default function Search({
   questions,
 }: {
-  questions: Awaited<ReturnType<typeof listFaqs>>;
+  questions: (Faq & { slug: string })[];
 }) {
   const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const router = useRouter();
+  const posthog = usePostHog();
 
-  const fuse = new Fuse(questions, {
-    includeMatches: true,
-    keys: ["question"],
-    minMatchCharLength: 2,
-    ignoreLocation: true,
-  });
+  const fuse = useMemo(
+    () =>
+      new Fuse(questions, {
+        includeMatches: true,
+        keys: ["question"],
+        minMatchCharLength: 2,
+        ignoreLocation: true,
+      }),
+    [questions],
+  );
 
-  const filteredQuestions = query === "" ? [] : fuse.search(query);
+  useEffect(() => {
+    posthog.capture("searched_faq", {
+      query: deferredQuery,
+    });
+  }, [deferredQuery]);
+
+  const filteredQuestions = query === "" ? [] : fuse.search(deferredQuery);
 
   return (
     <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded bg-white ring-1 ring-branding-light ring-opacity-95 transition-all md:max-w-xl">
       <Combobox
         onChange={(question: (typeof questions)[number]) => {
-          const primaryCategory = question.category;
-
           router.push(
-            `/helpcentrum/veelgestelde-vragen/${primaryCategory}/${question.slug}`,
+            `/helpcentrum/veelgestelde-vragen/${question.categories.join("/")}/${question.slug}`,
           );
         }}
       >

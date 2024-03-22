@@ -22,7 +22,7 @@ const faqCategory = z.union([z.literal("consument"), z.literal("instructeur")]);
 
 type FaqCategory = z.infer<typeof faqCategory>;
 export interface Faq {
-  category: FaqCategory;
+  categories: string[];
   question: string;
   answer: string;
 }
@@ -74,7 +74,7 @@ async function retrieveQuestions({
     }
 
     return validQuestions.map(([category, question, answer]) => ({
-      category,
+      categories: ["diplomalijn", category],
       slug: slugify(question, { strict: true }),
       question,
       answer: micromark(answer),
