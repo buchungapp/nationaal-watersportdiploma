@@ -90,8 +90,10 @@ export default function Footer() {
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Diplomalijn</h3>
             <ul className="grid gap-6 text-gray-200">
-              <FooterLink href="/consumenten">Consumenten</FooterLink>
-              <FooterLink href="/instructeurs">Instructeurs</FooterLink>
+              <FooterLink href="/diplomalijn/consument">Consumenten</FooterLink>
+              <FooterLink href="/diplomalijn/instructeur">
+                Instructeurs
+              </FooterLink>
             </ul>
           </div>
           <div className="grid gap-6">
