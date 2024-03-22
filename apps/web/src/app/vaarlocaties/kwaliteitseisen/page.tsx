@@ -81,7 +81,7 @@ export default function Page() {
             <ul>
               <li>
                 Consumenten zijn verzekerd tegen een faillissement van de
-                vaarlocatie middels een insolventieverzekering
+                vaarlocatie middels een insolventieverzekering.
               </li>
               <li>
                 Alcohol, drugs en rookwetgeving wordt nageleefd en indien
