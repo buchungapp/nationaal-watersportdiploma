@@ -21,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       listFaqsGeneral(),
       listFaqsDiplomalijn(),
     ]);
+
   const articleMaps: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${BASE_URL}/actueel/${article.slug}`,
     changeFrequency: "monthly",
@@ -53,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const faqDiplomalijnPages: MetadataRoute.Sitemap = faqsDiplomalijn.map(
     (faq) => ({
-      url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/algemeen/${faq.categories.join("/")}/${faq.slug}`,
+      url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
       changeFrequency: "monthly",
       priority: 0.7,
     }),
