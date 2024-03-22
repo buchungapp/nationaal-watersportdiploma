@@ -15,7 +15,7 @@ export default function About() {
         </h2>
         <p className="text-lg text-gray-600">
           <Balancer>
-            Nu is het moment is om de lat hoger te leggen als het aankomt op
+            Nu is het moment om de lat hoger te leggen als het aankomt op
             kwaliteitseisen en diplomalijnen binnen de Nederlandse watersport.
             Het resultaat is het Nationaal Watersportdiploma (NWD).
           </Balancer>
