@@ -76,7 +76,7 @@ export default function Header() {
               },
               {
                 label: "Statuten en reglementen",
-                href: "/vereniging/statuten-en-reglementen",
+                href: "/vereniging/statuten-reglementen",
               },
             ],
           },

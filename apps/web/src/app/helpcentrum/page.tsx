@@ -21,6 +21,11 @@ export default async function Page() {
 
   const combined = [...generalQuestions, ...diplomalijnQuestions];
 
+  // Filter duplicate questions
+  const uniqueQuestions = combined.filter(
+    (q, idx, arr) => arr.findIndex((q2) => q2.question === q.question) === idx,
+  );
+
   return (
     <main className="flex flex-col items-center">
       <PageHero>
@@ -40,7 +45,7 @@ export default async function Page() {
         <h2 className="text-2xl font-bold lg:text-3xl xl:text-4xl text-gray-900">
           Hoe kunnen we helpen?
         </h2>
-        <Search questions={combined} />
+        <Search questions={uniqueQuestions} />
         <p className="text-center mt-4 max-w-prose">
           <span className="font-semibold text-gray-600">Populaire vragen:</span>{" "}
           {generalQuestions

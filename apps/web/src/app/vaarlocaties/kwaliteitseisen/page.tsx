@@ -52,8 +52,7 @@ export default function Page() {
                 De vaarlocatie hanteert een strikt rookvrij beleid (inclusief
                 e-sigaretten en vapes). Dit betekent dat er niet wordt gerookt
                 door, of in het zicht van, minderjarigen, ook niet buiten op het
-                terrein van de vaarlocatie. In binnenruimten wordt überhaupt
-                niet gerookt.
+                terrein van de vaarlocatie. In binnenruimten is roken verboden.
               </li>
               <li>Gebruik van soft- en harddrugs zijn strikt verboden.</li>
               <li>
@@ -90,9 +89,9 @@ export default function Page() {
               </li>
               <li>
                 De accommodatie beschikt over een brandmeldinstallatie (BMI). De
-                BMI wordt jaarlijks onderhouden middels een onderhoudscontract
-                en is in het bezit van een (wettelijk verplicht)
-                inspectiecertificaat.
+                installatie wordt jaarlijks onderhouden middels een
+                onderhoudscontract en is in het bezit van een (wettelijk
+                verplicht) inspectiecertificaat.
               </li>
               <li>
                 Alle medewerkers, vrijwilligers en opdrachtnemers zijn voor
@@ -113,14 +112,13 @@ export default function Page() {
             <h2>Kwaliteit</h2>
             <ul>
               <li>
-                Vaarlocatie respecteert de gestelde ratio's instructeur/lesboten
+                Vaarlocatie handhaaft de gestelde ratio's instructeur/lesboten
               </li>
               <li>
-                Vaarlocatie respecteert de gestelde ratio's
-                instructeur/cursisten
+                Vaarlocatie handhaaft de gestelde ratio's instructeur/cursisten
               </li>
               <li>
-                Vaarlocatie respecteert de gestelde ratio's lesboten/volgboten
+                Vaarlocatie handhaaft de gestelde ratio's lesboten/volgboten
               </li>
               <li>
                 Vaarlocatie is in het bezit van een rescue vloot die recht doet

@@ -37,13 +37,13 @@ export default async function Faq() {
           {(await questions).map(({ question, answer }) => (
             <div
               key={question}
-              className="grid break-inside-avoid-column gap-4"
+              className="grid break-inside-avoid-column gap-0"
             >
               <h4 className="text-lg font-semibold text-branding-dark">
                 {question}
               </h4>
               <div
-                className="text-justify text-gray-700"
+                className="text-justify text-gray-700 prose prose-p:mt-4"
                 dangerouslySetInnerHTML={{ __html: answer }}
               />
             </div>
