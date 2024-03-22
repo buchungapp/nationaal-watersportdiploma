@@ -31,6 +31,11 @@ export default function Header() {
                 href: "/diplomalijn/instructeur",
                 description: "De instructeurslijn van het NWD",
               },
+              {
+                label: "Erkenningen",
+                href: "/partners",
+                description: "Hoe wordt de NWD-diplomalijn erkend?",
+              },
             ],
           },
           {
