@@ -23,7 +23,7 @@ if (typeof window !== "undefined") {
 
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    api_host: `${currentUrl.toString()}`,
+    api_host: `${currentUrl.toString().replace(/\/$/, "")}`,
     capture_pageview: false, // Disable automatic pageview capture, as we capture manually
     persistence: "memory", // Don't use cookies so we avoid the cookie consent banner
   });
