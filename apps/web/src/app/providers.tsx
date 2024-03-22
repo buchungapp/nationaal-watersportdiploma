@@ -18,9 +18,12 @@ function usePrevious<T>(value: T) {
 }
 
 if (typeof window !== "undefined") {
+  const currentUrl = BASE_URL;
+  currentUrl.pathname = "/ingest";
+
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    api_host: `${BASE_URL.toString()}/ingest`,
+    api_host: `${currentUrl.toString()}`,
     capture_pageview: false, // Disable automatic pageview capture, as we capture manually
     persistence: "memory", // Don't use cookies so we avoid the cookie consent banner
   });
