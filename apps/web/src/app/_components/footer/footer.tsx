@@ -99,6 +99,7 @@ export default function Footer() {
               <FooterLink href="/vereniging/vertrouwenspersoon">
                 Vertrouwenspersoon
               </FooterLink>
+              <FooterLink href="/partners">Partners</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </ul>
           </div>

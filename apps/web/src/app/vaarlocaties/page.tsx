@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { locations } from "~/locations";
 import { normalizeUrl } from "~/utils/normalize-url";
@@ -11,6 +12,10 @@ import PageHero from "../_components/style/page-hero";
 // } from "@googlemaps/google-maps-services-js";
 
 // const mapsClient = new Client({});
+
+export const metadata: Metadata = {
+  title: "Vaarlocaties",
+};
 
 export default function Page() {
   // const locationsWithCity = await Promise.all(

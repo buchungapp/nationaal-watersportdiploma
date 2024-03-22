@@ -24,7 +24,7 @@ export default function Welcome() {
             href="/vaarlocaties"
             className="text-white hover:bg-white/10"
           >
-            Vindt een NWD vaarschool
+            Vind een NWD vaarschool
           </BoxedButton>
         </div>
       </div>
