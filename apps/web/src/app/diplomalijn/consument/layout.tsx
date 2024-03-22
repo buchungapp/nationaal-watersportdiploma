@@ -28,16 +28,13 @@ export default async function Layout({
           <SideNavVereniging
             pages={{
               general: pages.filter((page) => page.pathSegments.length === 0),
-              disciplines: pages.filter(
-                (page) =>
-                  page.pathSegments.length > 0 &&
-                  page.pathSegments.includes("disciplines"),
-              ),
             }}
           />
         </div>
         <div className="flex flex-col justify-center">
-          <Prose data-mdx-content>{children}</Prose>
+          <Prose className="max-w-prose mr-auto" data-mdx-content>
+            {children}
+          </Prose>
         </div>
       </div>
     </main>

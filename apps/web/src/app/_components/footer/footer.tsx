@@ -1,6 +1,3 @@
-import Link from "next/link";
-import type { PropsWithChildren } from "react";
-
 import {
   APP_NAME,
   APP_SLOGAN,
@@ -10,7 +7,11 @@ import {
   TIKTOK_URL,
   YOUTUBE_URL,
 } from "@nawadi/lib/constants";
+import Link from "next/link";
+import type { PropsWithChildren } from "react";
+import watersportverbondWhite from "~/app/_assets/watersportverbond-white.png";
 
+import Image from "next/image";
 import { Line, LineWave } from "~/app/_assets/wave";
 import Wordmark from "~/app/_components/brand/wordmark";
 import {
@@ -66,9 +67,24 @@ export default function Footer() {
   return (
     <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 pb-12 pt-20 lg:px-16">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
-        <div className="grid gap-6">
-          <Wordmark className="h-12 w-48 text-white" />
-          <p className="text-sm text-gray-200">{APP_SLOGAN}</p>
+        <div>
+          <div className="grid gap-6">
+            <Wordmark className="h-12 w-48 text-white" />
+            <p className="text-sm text-gray-200">{APP_SLOGAN}</p>
+          </div>
+
+          <div className="mt-12">
+            <p className="text-sm uppercase font-semibold text-white/55">
+              Powered by
+            </p>
+            <Link href="/partners">
+              <Image
+                src={watersportverbondWhite}
+                className="h-14 w-auto mt-3.5"
+                alt="Watersportverbond"
+              />
+            </Link>
+          </div>
         </div>
         <div className="grid grid-cols-1 items-start gap-12 text-sm lg:grid-cols-3 lg:gap-0">
           <div className="grid gap-6">

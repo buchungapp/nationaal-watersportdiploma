@@ -31,6 +31,11 @@ export default function Header() {
                 href: "/diplomalijn/instructeur",
                 description: "De instructeurslijn van het NWD",
               },
+              {
+                label: "Erkenningen",
+                href: "/partners",
+                description: "Hoe wordt de NWD-diplomalijn erkend?",
+              },
             ],
           },
           {
@@ -71,7 +76,7 @@ export default function Header() {
               },
               {
                 label: "Statuten en reglementen",
-                href: "/vereniging/statuten-en-reglementen",
+                href: "/vereniging/statuten-reglementen",
               },
             ],
           },

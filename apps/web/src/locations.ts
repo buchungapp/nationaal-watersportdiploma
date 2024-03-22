@@ -51,6 +51,6 @@ export const locations = [
     id: 9,
     name: "Zeilschool Vinkeveen",
     position: { lat: 52.2176868, lng: 4.9307842 },
-    url: "https://www.vinkeveenhaven.nl/pages/zeilschool",
+    url: "https://www.zeilschoolvinkeveen.nl",
   },
 ] as const;

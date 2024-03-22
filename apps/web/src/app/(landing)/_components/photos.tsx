@@ -1,12 +1,12 @@
-import Image from "next/image";
 import clsx from "clsx";
+import Image from "next/image";
 
 import image1 from "./_assets/1.jpg";
 import image2 from "./_assets/2.jpg";
-import image3 from "./_assets/3.jpg";
 import image4 from "./_assets/4.jpg";
 import image5 from "./_assets/5.jpg";
-import image6 from "./_assets/photo-6.png";
+import image6 from "./_assets/jacht.jpg";
+import image3 from "./_assets/photo-6.png";
 
 export default function Photos() {
   const rotations = ["rotate-2", "-rotate-2", "rotate-2"];

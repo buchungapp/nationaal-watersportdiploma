@@ -1,5 +1,5 @@
 import FaqGroup from "~/app/_components/faq/faq-group";
-import { listFaqs } from "~/lib/faqs";
+import { listFaqs } from "~/lib/faqs-diplomalijn";
 
 export default async function LaunchFaq({ category }: { category: string }) {
   const questions = await listFaqs({

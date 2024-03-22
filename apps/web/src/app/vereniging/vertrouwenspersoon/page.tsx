@@ -65,14 +65,14 @@ export default function Page() {
       </div>
 
       <p>
-        Op dit moment is <strong>Evert-Jan van den Brink</strong> de
-        vertrouwenspersoon voor het Nationaal Watersportdiploma. Evert-Jan heeft
-        veel ervaring opgedaan als advocaat en mediator bij het oplossen van
-        problemen en neemt deze kennis en kunde mee in zijn rol als
-        vertrouwenspersoon. Daarnaast is Evert-Jan toegankelijk en empathisch en
-        kan hij als strategisch denker jou ondersteunen bij het vinden van een
-        oplossing die het beste bij jou past en jou optimale bescherming biedt
-        om een veilige en plezierige werkomgeving voor jou te behouden.
+        De vertrouwenspersoon van het Nationaal Watersportdiploma is{" "}
+        <strong>Evert-Jan van den Brink</strong>. Evert-Jan heeft veel ervaring
+        opgedaan als advocaat en mediator bij het oplossen van problemen en
+        neemt deze kennis en kunde mee in zijn rol als vertrouwenspersoon.
+        Daarnaast is Evert-Jan toegankelijk en empathisch en kan hij als
+        strategisch denker jou ondersteunen bij het vinden van een oplossing die
+        het beste bij jou past en jou optimale bescherming biedt om een veilige
+        en plezierige werkomgeving voor jou te behouden.
       </p>
       <p>
         Evert-Jan is telefonisch bereikbaar onder nummer:{" "}

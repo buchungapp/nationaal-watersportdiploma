@@ -18,11 +18,7 @@ const auth = new GoogleAuth({
 });
 
 const service = google.sheets({ version: "v4", auth });
-const faqCategory = z.union([
-  z.literal("consument"),
-  z.literal("instructeur"),
-  z.literal("vaarlocatie"),
-]);
+const faqCategory = z.union([z.literal("consument"), z.literal("instructeur")]);
 
 export interface Faq {
   categories: string[];
@@ -32,7 +28,6 @@ export interface Faq {
 
 interface FaqFilters {
   category?: string;
-  featured?: true;
 }
 
 async function retrieveQuestions({
@@ -43,14 +38,13 @@ async function retrieveQuestions({
   try {
     const result = await service.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_FAQ_SPREADSHEET_ID,
-      range: "A2:D",
+      range: "diplomalijn-vragen!A2:C",
     });
 
     const rowSchema = z.tuple([
       faqCategory,
       z.string().trim(),
       z.string().trim(),
-      z.union([z.literal("TRUE"), z.literal("FALSE")]),
     ]);
 
     const validQuestions: z.infer<typeof rowSchema>[] = [];
@@ -72,22 +66,15 @@ async function retrieveQuestions({
           }
         }
 
-        if (!!filter?.featured) {
-          if (parsed[3] !== "TRUE") {
-            continue;
-          }
-        }
-
         validQuestions.push(parsed);
       } catch (err) {
         continue;
       }
     }
 
-    return validQuestions.map(([category, question, answer, featured]) => ({
-      categories: ["algemeen", category],
+    return validQuestions.map(([category, question, answer]) => ({
+      categories: ["diplomalijn", category],
       slug: slugify(question, { strict: true }),
-      featured: featured === "TRUE",
       question,
       answer: micromark(answer),
     }));
@@ -104,6 +91,6 @@ export function listFaqs({
 } = {}) {
   return unstable_cache(
     () => retrieveQuestions({ filter }),
-    [`faq`, `faq-${JSON.stringify(filter)}`],
+    [`faq-diplomalijn`, `faq-diplomalijn-${JSON.stringify(filter)}`],
   )();
 }
