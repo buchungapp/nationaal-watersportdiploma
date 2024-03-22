@@ -20,7 +20,6 @@ const auth = new GoogleAuth({
 const service = google.sheets({ version: "v4", auth });
 const faqCategory = z.union([z.literal("consument"), z.literal("instructeur")]);
 
-type FaqCategory = z.infer<typeof faqCategory>;
 export interface Faq {
   categories: string[];
   question: string;
@@ -28,7 +27,7 @@ export interface Faq {
 }
 
 interface FaqFilters {
-  category?: FaqCategory | [FaqCategory, ...FaqCategory[]];
+  category?: string;
 }
 
 async function retrieveQuestions({

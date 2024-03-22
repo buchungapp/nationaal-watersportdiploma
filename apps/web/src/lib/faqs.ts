@@ -24,7 +24,6 @@ const faqCategory = z.union([
   z.literal("vaarlocatie"),
 ]);
 
-type FaqCategory = z.infer<typeof faqCategory>;
 export interface Faq {
   categories: string[];
   question: string;
@@ -32,7 +31,7 @@ export interface Faq {
 }
 
 interface FaqFilters {
-  category?: FaqCategory | [FaqCategory, ...FaqCategory[]];
+  category?: string;
   featured?: true;
 }
 

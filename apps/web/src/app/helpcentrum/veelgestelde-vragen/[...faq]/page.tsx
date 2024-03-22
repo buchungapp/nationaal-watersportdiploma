@@ -4,12 +4,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Prose } from "~/app/_components/prose";
 import PageHero from "~/app/_components/style/page-hero";
-import { listFaqs } from "~/lib/faqs";
+import { listFaqs as listFaqsGeneral } from "~/lib/faqs";
+import { listFaqs as listFaqsDiplomalijn } from "~/lib/faqs-diplomalijn";
 
-async function findQuestion(category: string, slug: string) {
-  const allQuestions = await listFaqs({});
+async function findQuestion(type: string, category: string, slug: string) {
+  const allQuestions = await Promise.all([
+    listFaqsGeneral(),
+    listFaqsDiplomalijn(),
+  ]).then(([general, diplomalijn]) => [...general, ...diplomalijn]);
 
-  return allQuestions.find((q) => q.category === category && q.slug === slug);
+  return allQuestions.find(
+    (q) =>
+      q.categories[0] === type &&
+      q.categories[1] === category &&
+      q.slug === slug,
+  );
 }
 
 interface Props {
@@ -17,7 +26,11 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const question = await findQuestion(params.faq[0], params.faq[1]);
+  const question = await findQuestion(
+    params.faq[0],
+    params.faq[1],
+    params.faq[2],
+  );
 
   if (!question) {
     notFound();
@@ -28,7 +41,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 export default async function Page({ params }: Props) {
-  const question = await findQuestion(params.faq[0], params.faq[1]);
+  const question = await findQuestion(
+    params.faq[0],
+    params.faq[1],
+    params.faq[2],
+  );
 
   if (!question) {
     notFound();
