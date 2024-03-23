@@ -24,7 +24,7 @@ export default async function News() {
           De laatste ontwikkelingen.
         </h3>
         <p className="mx-auto mt-2.5 max-w-prose text-gray-700">
-          Lees aankondingen, updates en nieuws over het Nationaal
+          Lees aankondigingen, updates en nieuws over het Nationaal
           Watersportdiploma. Of je nou consument, instructeur of
           vaarschoolhouder bent, hier vind je het laatste ontwikkelingen.
         </p>
