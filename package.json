@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",
-    "cspell": "^8.6.0",
+    "cspell": "^8.6.1",
     "prettier": "^3.2.5"
   }
 }
