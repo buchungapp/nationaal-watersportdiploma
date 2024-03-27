@@ -4,7 +4,7 @@ import assert from 'assert'
 import test from 'node:test'
 import { withServer } from '../../testing/index.js'
 
-test.skip('categories crud', () =>
+test('categories crud', () =>
   withDatabase(async ({ db }) =>
     withServer({ db }, async ({ baseUrl, server }) => {
       const clientCredentials = { apiToken: 'supersecret' }
