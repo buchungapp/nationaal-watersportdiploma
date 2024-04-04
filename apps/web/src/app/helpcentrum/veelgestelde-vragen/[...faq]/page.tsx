@@ -7,6 +7,18 @@ import PageHero from "~/app/_components/style/page-hero";
 import { listFaqs as listFaqsGeneral } from "~/lib/faqs";
 import { listFaqs as listFaqsDiplomalijn } from "~/lib/faqs-diplomalijn";
 
+// Return a list of `params` to populate the [slug] dynamic segment
+export async function generateStaticParams() {
+  const [faqsGeneral, faqsDiplomalijn] = await Promise.all([
+    listFaqsGeneral(),
+    listFaqsDiplomalijn(),
+  ]);
+
+  return [...faqsGeneral, ...faqsDiplomalijn].map((faq) => ({
+    faq: [...faq.categories, faq.slug],
+  }));
+}
+
 async function findQuestion(type: string, category: string, slug: string) {
   const allQuestions = await Promise.all([
     listFaqsGeneral(),
