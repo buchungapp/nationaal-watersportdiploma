@@ -6,12 +6,28 @@ import Article from "../_components/style/article";
 import PageHero from "../_components/style/page-hero";
 import { formatDate } from "../_utils/format-date";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import SideNavActueel from "./_components/side-nav";
 
-export const metadata: Metadata = {
-  title: "Actueel",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent?: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent)?.openGraph;
+
+  return {
+    title: "Actueel",
+    description:
+      "Blijf op de hoogte van het laatste nieuws en vereniging updates.",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Actueel",
+      description:
+        "Blijf op de hoogte van het laatste nieuws en vereniging updates.",
+      url: "/actueel",
+    },
+  };
+}
 
 export default async function Page({
   searchParams,

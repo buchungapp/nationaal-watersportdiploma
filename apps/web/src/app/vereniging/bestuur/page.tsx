@@ -1,10 +1,22 @@
 import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Bestuur",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent?: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent)?.openGraph;
+
+  return {
+    title: "Bestuur",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Bestuur",
+      url: "/vereniging/bestuur",
+    },
+  };
+}
 
 export default function Page() {
   return (

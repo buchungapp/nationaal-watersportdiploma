@@ -13,6 +13,12 @@ export const article = {
 export const metadata = {
   title: article.title,
   description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/YBIkPIk2-persbericht-aankondiging-nationaal-watersportdiploma",
+    type: "article",
+  },
 };
 
 export default (props) => <ArticleLayout article={article} {...props} />;

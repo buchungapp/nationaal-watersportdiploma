@@ -23,6 +23,17 @@ export const metadata: Metadata = {
   icons: {
     shortcut: "/favicon.ico",
   },
+  openGraph: {
+    title: {
+      default: `${APP_NAME} | ${APP_SLOGAN}`,
+      template: `%s | ${APP_NAME}`,
+    },
+    description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+    url: "/",
+    siteName: APP_NAME,
+    locale: "nl_NL",
+    type: "website",
+  },
 };
 
 export const runtime = "nodejs";

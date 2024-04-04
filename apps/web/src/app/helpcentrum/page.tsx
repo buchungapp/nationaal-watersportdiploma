@@ -4,14 +4,28 @@ import { listFaqs as listFaqsDiplomalijn } from "~/lib/faqs-diplomalijn";
 import PageHero from "../_components/style/page-hero";
 import Search from "./_components/search";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import React from "react";
 
-export const metadata: Metadata = {
-  title: "Helpcentrum",
-  description:
-    "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent?: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent)?.openGraph;
+
+  return {
+    title: "Helpcentrum",
+    description:
+      "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Helpcentrum",
+      description:
+        "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
+      url: "/helpcentrum",
+    },
+  };
+}
 
 export default async function Page() {
   const [generalQuestions, diplomalijnQuestions] = await Promise.all([

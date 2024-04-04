@@ -4,11 +4,23 @@ import { InlineButton } from "~/app/_components/style/buttons";
 import CopyToClipboard from "~/app/_components/style/copy-to-clipboard";
 import vertrouwenspersoon from "./_assets/IMG_3314.jpg";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Vertrouwenspersoon",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent?: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent)?.openGraph;
+
+  return {
+    title: "Vertrouwenspersoon",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Vertrouwenspersoon",
+      url: "/vereniging/vertrouwenspersoon",
+    },
+  };
+}
 
 export default function Page() {
   return (

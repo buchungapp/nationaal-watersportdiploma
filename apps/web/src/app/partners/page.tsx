@@ -1,13 +1,29 @@
 import PageHero from "~/app/_components/style/page-hero";
 
-import type { Metadata } from "next";
 import Image from "next/image";
 import { Prose } from "../_components/prose";
 import watersportverbond from "./_assets/watersportverbond.png";
-export const metadata: Metadata = {
-  title: "Partners",
-  description: "Partijen waarmee het Nationaal Watersportdiploma samenwerkt.",
-};
+
+import type { Metadata, ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  _props: unknown,
+  parent?: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent)?.openGraph;
+
+  return {
+    title: "Partners",
+    description: "Partijen waarmee het Nationaal Watersportdiploma samenwerkt.",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Partners",
+      description:
+        "Partijen waarmee het Nationaal Watersportdiploma samenwerkt.",
+      url: "/partners",
+    },
+  };
+}
 
 export default function Page() {
   return (

@@ -12,11 +12,27 @@ import CopyToClipboard from "../_components/style/copy-to-clipboard";
 import PageHero from "../_components/style/page-hero";
 import contact from "./_assets/contact.jpg";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Contact",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent?: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent)?.openGraph;
+
+  return {
+    title: "Contact",
+    description:
+      "Bezoek het helpcentrum, download de mediakit of neem contact op.",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Contact",
+      description:
+        "Bezoek het helpcentrum, download de mediakit of neem contact op.",
+      url: "/contact",
+    },
+  };
+}
 
 export default function Contact() {
   return (
@@ -28,7 +44,7 @@ export default function Contact() {
               Contact
             </h1>
             <p className="text-xl">
-              Een vraag? Wij staan klaar om je te helpen!
+              Bezoek het helpcentrum, download de mediakit of neem contact op.
             </p>
           </div>
         </div>
