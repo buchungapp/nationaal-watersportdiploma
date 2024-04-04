@@ -8,8 +8,8 @@ import SideNavVereniging from "./_components/side-nav";
 
 export const metadata: Metadata = {
   title: {
-    template: `%s | Diplomalijn Instructeurs | ${APP_NAME}`,
-    default: `Diplomalijn Instructeurs | ${APP_NAME}`,
+    template: `%s - Diplomalijn instructeurs | ${APP_NAME}`,
+    default: `Diplomalijn instructeurs | ${APP_NAME}`,
   },
 };
 

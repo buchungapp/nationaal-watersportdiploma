@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${question.question} | NWD Helpcentrum`,
+    title: `${question.question} - Helpcentrum`,
   };
 }
 export default async function Page({ params }: Props) {
