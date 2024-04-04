@@ -35,13 +35,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const instructeur: MetadataRoute.Sitemap = diPages.map((page) => ({
-    url: `${BASE_URL}/diplomalijn/consument/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+    url: `${BASE_URL}/diplomalijn/instructeur/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   const vereniging: MetadataRoute.Sitemap = verenigingSegments.map((page) => ({
-    url: `${BASE_URL}/diplomalijn/consument/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
+    url: `${BASE_URL}/vereniging/${page.pathSegments.join("/")}${page.pathSegments.length > 0 ? "/" : ""}${page.slug ?? ""}`,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
