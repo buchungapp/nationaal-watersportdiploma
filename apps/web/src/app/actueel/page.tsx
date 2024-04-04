@@ -11,9 +11,9 @@ import SideNavActueel from "./_components/side-nav";
 
 export async function generateMetadata(
   _props: unknown,
-  parent?: ResolvingMetadata,
+  parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const parentOpenGraph = (await parent)?.openGraph;
+  const parentOpenGraph = (await parent).openGraph;
 
   return {
     title: "Actueel",

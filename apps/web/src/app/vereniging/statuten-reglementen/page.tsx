@@ -5,9 +5,9 @@ import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
   _props: unknown,
-  parent?: ResolvingMetadata,
+  parent: ResolvingMetadata,
 ): Promise<Metadata> {
-  const parentOpenGraph = (await parent)?.openGraph;
+  const parentOpenGraph = (await parent).openGraph;
 
   return {
     title: "Statuten en Reglementen",
