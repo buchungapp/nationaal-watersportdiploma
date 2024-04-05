@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS "program_module_competency" (
 	"competency_id" uuid NOT NULL,
 	"is_required" boolean NOT NULL,
 	"requirement" text,
-	CONSTRAINT "program_module_competency_program_module_id_competency_id_unique" UNIQUE("program_module_id","competency_id")
+	CONSTRAINT "program_module_competency_unq_competence" UNIQUE("program_module_id","competency_id")
 );
 
 DO $$ BEGIN

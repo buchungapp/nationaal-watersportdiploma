@@ -1,12 +1,10 @@
 import { sql } from 'drizzle-orm'
 import {
-  boolean,
   foreignKey,
   pgEnum,
   pgTable,
   smallint,
   text,
-  timestamp,
   unique,
   uuid,
 } from 'drizzle-orm/pg-core'
@@ -161,90 +159,6 @@ export const programCategory = pgTable(
         name: 'program_category_category_id_fk',
       }),
       unqCategoryProgram: unique().on(table.categoryId, table.programId),
-    }
-  },
-)
-
-export const programRevision = pgTable(
-  'program_revision',
-  {
-    id: uuid('id')
-      .default(sql`extensions.uuid_generate_v4()`)
-      .primaryKey()
-      .notNull(),
-    programId: uuid('program_id').notNull(),
-    revision: text('revision').notNull(),
-    publishedAt: timestamp('published_at', {
-      withTimezone: true,
-      mode: 'string',
-    }),
-  },
-  (table) => {
-    return {
-      programReference: foreignKey({
-        columns: [table.programId],
-        foreignColumns: [program.id],
-        name: 'program_revision_program_id_fk',
-      }),
-      unqProgramRevision: unique().on(table.programId, table.revision),
-    }
-  },
-)
-
-export const programModule = pgTable(
-  'program_module',
-  {
-    id: uuid('id')
-      .default(sql`extensions.uuid_generate_v4()`)
-      .primaryKey()
-      .notNull(),
-    programRevisionId: uuid('program_revision_id').notNull(),
-    moduleId: uuid('module_id').notNull(),
-  },
-  (table) => {
-    return {
-      programRevisionReference: foreignKey({
-        columns: [table.programRevisionId],
-        foreignColumns: [programRevision.id],
-        name: 'program_module_program_revision_id_fk',
-      }),
-      moduleReference: foreignKey({
-        columns: [table.moduleId],
-        foreignColumns: [module.id],
-        name: 'program_module_module_id_fk',
-      }),
-      unqProgramModule: unique().on(table.programRevisionId, table.moduleId),
-    }
-  },
-)
-
-export const programModuleCompetency = pgTable(
-  'program_module_competency',
-  {
-    id: uuid('id')
-      .default(sql`extensions.uuid_generate_v4()`)
-      .primaryKey()
-      .notNull(),
-    programModuleId: uuid('program_module_id').notNull(),
-    competencyId: uuid('competency_id').notNull(),
-    isRequired: boolean('is_required').notNull(),
-    requirement: text('requirement'),
-  },
-  (table) => {
-    return {
-      programModuleReference: foreignKey({
-        columns: [table.programModuleId],
-        foreignColumns: [programModule.id],
-        name: 'module_competency_program_module_id_fk',
-      }),
-      competencyReference: foreignKey({
-        columns: [table.competencyId],
-        foreignColumns: [competency.id],
-        name: 'module_competency_competency_id_fk',
-      }),
-      unqModuleCompetency: unique(
-        'program_module_competency_unq_competence',
-      ).on(table.programModuleId, table.competencyId),
     }
   },
 )

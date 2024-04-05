@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1712319508601,
-      "tag": "0000_illegal_wraith",
-      "breakpoints": false
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1712319670292,
-      "tag": "0001_fat_maximus",
+      "when": 1712323067282,
+      "tag": "0000_thick_terrax",
       "breakpoints": false
     }
   ]
