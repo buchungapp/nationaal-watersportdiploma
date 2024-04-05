@@ -35,15 +35,15 @@ EXCEPTION
 END $$;
 
 CREATE TABLE IF NOT EXISTS "student_curriculum" (
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"identity_id" uuid NOT NULL,
 	"curriculum_id" uuid NOT NULL,
 	"gear_type_id" uuid NOT NULL,
-	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "student_curriculum_identity_id_curriculum_id_gear_type_id_pk" PRIMARY KEY("identity_id","curriculum_id","gear_type_id")
+	"started_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS "certificate" (
-	"id" uuid PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"student_curriculum_id" uuid NOT NULL,
 	"location_id" uuid NOT NULL,
 	"issued_at" timestamp with time zone,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "student_completed_competency" (
 	"student_curriculum_id" uuid NOT NULL,
 	"curriculum_module_competency_id" uuid NOT NULL,
 	"certificate_id" uuid NOT NULL,
-	CONSTRAINT "student_completed_competency_student_curriculum_id_curriculum_module_competency_id_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id")
+	CONSTRAINT "student_completed_competency_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id")
 );
 
 CREATE TABLE IF NOT EXISTS "curriculum" (
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS "student_competency_progress" (
 	"location_id" uuid NOT NULL,
 	"progress" numeric NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "student_competency_progress_student_curriculum_id_curriculum_module_competency_id_location_id_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id","location_id")
+	CONSTRAINT "student_competency_progress_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id","location_id")
 );
 
 CREATE TABLE IF NOT EXISTS "user" (
@@ -247,6 +247,7 @@ CREATE TABLE IF NOT EXISTS "identity_location_link" (
 	CONSTRAINT "identity_location_link_identity_id_location_id_pk" PRIMARY KEY("identity_id","location_id")
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS "student_curriculum_unq_identity_gear_curriculum" ON "student_curriculum" ("identity_id","curriculum_id","gear_type_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "unique_handle_for_location" ON "location" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_2_is_unique" ON "country" ("alpha_2");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_3_is_unique" ON "country" ("alpha_3");
@@ -260,19 +261,19 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "curriculum_gear_link"("curriculum_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "curriculum"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_gear_type_id_fk" FOREIGN KEY ("gear_type_id") REFERENCES "curriculum_gear_link"("gear_type_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_gear_type_id_fk" FOREIGN KEY ("gear_type_id") REFERENCES "gear_type"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "certificate" ADD CONSTRAINT "certificate_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("identity_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "certificate" ADD CONSTRAINT "certificate_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -284,13 +285,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_completed_competency" ADD CONSTRAINT "student_completed_competency_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("identity_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_completed_competency" ADD CONSTRAINT "student_completed_competency_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_completed_competency" ADD CONSTRAINT "student_completed_competency_competency_id_fk" FOREIGN KEY ("curriculum_module_competency_id") REFERENCES "curriculum_competency"("competency_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_completed_competency" ADD CONSTRAINT "curriculum_competency_competency_id_fk" FOREIGN KEY ("curriculum_module_competency_id") REFERENCES "curriculum_competency"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -404,13 +405,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_competency_progress" ADD CONSTRAINT "student_curriculum_progress_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("identity_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_competency_progress" ADD CONSTRAINT "student_curriculum_progress_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_competency_progress" ADD CONSTRAINT "student_curriculum_progress_competency_id_fk" FOREIGN KEY ("curriculum_module_competency_id") REFERENCES "curriculum_competency"("competency_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_competency_progress" ADD CONSTRAINT "curriculum_competency_competency_id_fk" FOREIGN KEY ("curriculum_module_competency_id") REFERENCES "curriculum_competency"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

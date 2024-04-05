@@ -1,16 +1,27 @@
+import { sql } from 'drizzle-orm'
 import {
   foreignKey,
   pgTable,
   primaryKey,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { curriculumCompetency, curriculumGearLink } from './curriculum'
+import {
+  curriculum,
+  curriculumCompetency,
+  curriculumGearLink,
+} from './curriculum'
 import { location } from './location'
+import { gearType } from './program'
 
 export const studentCurriculum = pgTable(
   'student_curriculum',
   {
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
     identityId: uuid('identity_id').notNull(),
     curriculumId: uuid('curriculum_id').notNull(),
     gearTypeId: uuid('gear_type_id').notNull(),
@@ -23,9 +34,9 @@ export const studentCurriculum = pgTable(
   },
   (table) => {
     return {
-      pk: primaryKey({
-        columns: [table.identityId, table.curriculumId, table.gearTypeId],
-      }),
+      unqIdentityCurriculumGear: uniqueIndex(
+        'student_curriculum_unq_identity_gear_curriculum',
+      ).on(table.identityId, table.curriculumId, table.gearTypeId),
       curriculumGearTypeReference: foreignKey({
         columns: [table.curriculumId, table.gearTypeId],
         foreignColumns: [
@@ -36,12 +47,12 @@ export const studentCurriculum = pgTable(
       }),
       curriculumReference: foreignKey({
         columns: [table.curriculumId],
-        foreignColumns: [curriculumGearLink.curriculumId],
+        foreignColumns: [curriculum.id],
         name: 'student_curriculum_link_curriculum_id_fk',
       }),
       gearTypeReference: foreignKey({
         columns: [table.gearTypeId],
-        foreignColumns: [curriculumGearLink.gearTypeId],
+        foreignColumns: [gearType.id],
         name: 'student_curriculum_link_gear_type_id_fk',
       }),
     }
@@ -51,7 +62,10 @@ export const studentCurriculum = pgTable(
 export const certificate = pgTable(
   'certificate',
   {
-    id: uuid('id').primaryKey().notNull(),
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
     studentCurriculumId: uuid('student_curriculum_id').notNull(),
     locationId: uuid('location_id').notNull(),
     issuedAt: timestamp('issued_at', {
@@ -67,7 +81,7 @@ export const certificate = pgTable(
     return {
       studentCurriculumReference: foreignKey({
         columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.identityId],
+        foreignColumns: [studentCurriculum.id],
         name: 'certificate_student_curriculum_link_id_fk',
       }),
       locationReference: foreignKey({
@@ -90,16 +104,17 @@ export const studentCompletedCompetency = pgTable(
     return {
       pk: primaryKey({
         columns: [table.studentCurriculumId, table.competencyId],
+        name: 'student_completed_competency_pk',
       }),
       studentCurriculumLinkReference: foreignKey({
         columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.identityId],
+        foreignColumns: [studentCurriculum.id],
         name: 'student_completed_competency_student_curriculum_link_id_fk',
       }),
       competencyReference: foreignKey({
         columns: [table.competencyId],
-        foreignColumns: [curriculumCompetency.competencyId],
-        name: 'student_completed_competency_competency_id_fk',
+        foreignColumns: [curriculumCompetency.id],
+        name: 'curriculum_competency_competency_id_fk',
       }),
       certificateReference: foreignKey({
         columns: [table.certificateId],

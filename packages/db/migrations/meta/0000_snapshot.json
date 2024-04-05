@@ -1,5 +1,5 @@
 {
-  "id": "5064d24f-b93b-4af6-8f62-0cd80260b66e",
+  "id": "4d298ee8-12cc-4709-a9f7-e8ead623d66c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -8,6 +8,13 @@
       "name": "student_curriculum",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
         "identity_id": {
           "name": "identity_id",
           "type": "uuid",
@@ -34,7 +41,17 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "student_curriculum_unq_identity_gear_curriculum": {
+          "name": "student_curriculum_unq_identity_gear_curriculum",
+          "columns": [
+            "identity_id",
+            "curriculum_id",
+            "gear_type_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "student_curriculum_link_curriculum_id_gear_type_id_fk": {
           "name": "student_curriculum_link_curriculum_id_gear_type_id_fk",
@@ -54,12 +71,12 @@
         "student_curriculum_link_curriculum_id_fk": {
           "name": "student_curriculum_link_curriculum_id_fk",
           "tableFrom": "student_curriculum",
-          "tableTo": "curriculum_gear_link",
+          "tableTo": "curriculum",
           "columnsFrom": [
             "curriculum_id"
           ],
           "columnsTo": [
-            "curriculum_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -67,27 +84,18 @@
         "student_curriculum_link_gear_type_id_fk": {
           "name": "student_curriculum_link_gear_type_id_fk",
           "tableFrom": "student_curriculum",
-          "tableTo": "curriculum_gear_link",
+          "tableTo": "gear_type",
           "columnsFrom": [
             "gear_type_id"
           ],
           "columnsTo": [
-            "gear_type_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "student_curriculum_identity_id_curriculum_id_gear_type_id_pk": {
-          "name": "student_curriculum_identity_id_curriculum_id_gear_type_id_pk",
-          "columns": [
-            "identity_id",
-            "curriculum_id",
-            "gear_type_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "certificate": {
@@ -98,7 +106,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
         },
         "student_curriculum_id": {
           "name": "student_curriculum_id",
@@ -135,7 +144,7 @@
             "student_curriculum_id"
           ],
           "columnsTo": [
-            "identity_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -190,20 +199,20 @@
             "student_curriculum_id"
           ],
           "columnsTo": [
-            "identity_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "student_completed_competency_competency_id_fk": {
-          "name": "student_completed_competency_competency_id_fk",
+        "curriculum_competency_competency_id_fk": {
+          "name": "curriculum_competency_competency_id_fk",
           "tableFrom": "student_completed_competency",
           "tableTo": "curriculum_competency",
           "columnsFrom": [
             "curriculum_module_competency_id"
           ],
           "columnsTo": [
-            "competency_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -223,8 +232,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "student_completed_competency_student_curriculum_id_curriculum_module_competency_id_pk": {
-          "name": "student_completed_competency_student_curriculum_id_curriculum_module_competency_id_pk",
+        "student_completed_competency_pk": {
+          "name": "student_completed_competency_pk",
           "columns": [
             "student_curriculum_id",
             "curriculum_module_competency_id"
@@ -1388,20 +1397,20 @@
             "student_curriculum_id"
           ],
           "columnsTo": [
-            "identity_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "student_curriculum_progress_competency_id_fk": {
-          "name": "student_curriculum_progress_competency_id_fk",
+        "curriculum_competency_competency_id_fk": {
+          "name": "curriculum_competency_competency_id_fk",
           "tableFrom": "student_competency_progress",
           "tableTo": "curriculum_competency",
           "columnsFrom": [
             "curriculum_module_competency_id"
           ],
           "columnsTo": [
-            "competency_id"
+            "id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -1421,8 +1430,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "student_competency_progress_student_curriculum_id_curriculum_module_competency_id_location_id_pk": {
-          "name": "student_competency_progress_student_curriculum_id_curriculum_module_competency_id_location_id_pk",
+        "student_competency_progress_pk": {
+          "name": "student_competency_progress_pk",
           "columns": [
             "student_curriculum_id",
             "curriculum_module_competency_id",

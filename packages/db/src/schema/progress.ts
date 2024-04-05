@@ -32,16 +32,17 @@ export const studentCompetencyProgress = pgTable(
           table.competencyId,
           table.locationId,
         ],
+        name: 'student_competency_progress_pk',
       }),
       studentCurriculumLinkReference: foreignKey({
         columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.identityId],
+        foreignColumns: [studentCurriculum.id],
         name: 'student_curriculum_progress_student_curriculum_link_id_fk',
       }),
       competencyReference: foreignKey({
         columns: [table.competencyId],
-        foreignColumns: [curriculumCompetency.competencyId],
-        name: 'student_curriculum_progress_competency_id_fk',
+        foreignColumns: [curriculumCompetency.id],
+        name: 'curriculum_competency_competency_id_fk',
       }),
       locationReference: foreignKey({
         columns: [table.locationId],
