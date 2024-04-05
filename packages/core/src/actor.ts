@@ -10,13 +10,35 @@ export type PublicActor = z.infer<typeof PublicActor>
 export const AccountActor = z.object({
   type: z.literal('account'),
   properties: z.object({
-    accountID: z.string().uuid(),
+    accountId: z.string().uuid(),
     email: z.string().email(),
   }),
 })
 export type AccountActor = z.infer<typeof AccountActor>
 
-export const Actor = z.discriminatedUnion('type', [AccountActor, PublicActor])
+export const UserActor = z.object({
+  type: z.literal('user'),
+  properties: z.object({
+    userId: z.string().uuid(),
+    locationId: z.string().uuid().optional(),
+  }),
+})
+export type UserActor = z.infer<typeof UserActor>
+
+export const SystemActor = z.object({
+  type: z.literal('system'),
+  properties: z.object({
+    locationId: z.string().uuid().optional(),
+  }),
+})
+export type SystemActor = z.infer<typeof SystemActor>
+
+export const Actor = z.discriminatedUnion('type', [
+  UserActor,
+  AccountActor,
+  PublicActor,
+  SystemActor,
+])
 export type Actor = z.infer<typeof Actor>
 
 const ActorContext = Context.create<Actor>('actor')

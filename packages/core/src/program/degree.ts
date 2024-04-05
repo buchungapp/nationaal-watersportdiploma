@@ -5,9 +5,11 @@ import { z } from 'zod'
 import { useTransaction } from '../util/transaction'
 import { zod } from '../util/zod'
 
-export * as Competency from './competency'
+export * as Degree from './module'
 
-export const Info = createSelectSchema(schema.competency, {
+const degree = schema.degree
+
+export const Info = createSelectSchema(degree, {
   handle(schema) {
     return schema.handle
       .trim()
@@ -15,26 +17,29 @@ export const Info = createSelectSchema(schema.competency, {
       .min(3)
       .regex(/^[a-z0-9\-]+$/)
   },
+  rang(schema) {
+    return schema.rang.int()
+  },
 })
-export type Info = typeof schema.competency.$inferSelect
+export type Info = typeof degree.$inferSelect
 
 export const create = zod(
-  Info.pick({ title: true, type: true, handle: true }).partial({
+  Info.pick({ title: true, handle: true, rang: true }).partial({
     title: true,
   }),
   (input) =>
     useTransaction(async (tx) => {
       const [insert] = await tx
-        .insert(schema.competency)
+        .insert(degree)
         .values({
           handle: input.handle,
-          type: input.type,
           title: input.title,
+          rang: input.rang,
         })
-        .returning({ id: schema.competency.id })
+        .returning({ id: degree.id })
 
       if (!insert) {
-        throw new Error('Failed to insert competency')
+        throw new Error('Failed to insert degree')
       }
 
       return insert.id
@@ -43,7 +48,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () =>
   useTransaction(async (tx) => {
-    return tx.select().from(schema.competency)
+    return tx.select().from(degree)
   }),
 )
 
@@ -51,8 +56,8 @@ export const fromId = zod(Info.shape.id, async (id) =>
   useTransaction(async (tx) => {
     return tx
       .select()
-      .from(schema.competency)
-      .where(eq(schema.competency.id, id))
+      .from(degree)
+      .where(eq(degree.id, id))
       .then((rows) => rows[0])
   }),
 )
@@ -61,8 +66,8 @@ export const fromHandle = zod(Info.shape.handle, async (handle) =>
   useTransaction(async (tx) => {
     return tx
       .select()
-      .from(schema.competency)
-      .where(eq(schema.competency.handle, handle))
+      .from(degree)
+      .where(eq(degree.handle, handle))
       .then((rows) => rows[0])
   }),
 )
