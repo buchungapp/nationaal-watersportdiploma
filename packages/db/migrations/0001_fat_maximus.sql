@@ -1,0 +1,2 @@
+ALTER TABLE "program_module_competency" DROP CONSTRAINT "program_module_competency_program_module_id_competency_id_unique";
+ALTER TABLE "program_module_competency" ADD CONSTRAINT "program_module_competency_unq_competence" UNIQUE("program_module_id","competency_id");

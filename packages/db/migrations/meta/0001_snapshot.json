@@ -1,6 +1,6 @@
 {
-  "id": "7263cc52-d782-4001-9e1b-fc068cb74092",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "cdb9e0df-a965-4ebb-9638-182038ef055e",
+  "prevId": "7263cc52-d782-4001-9e1b-fc068cb74092",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -566,8 +566,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "program_module_competency_program_module_id_competency_id_unique": {
-          "name": "program_module_competency_program_module_id_competency_id_unique",
+        "program_module_competency_unq_competence": {
+          "name": "program_module_competency_unq_competence",
           "nullsNotDistinct": false,
           "columns": [
             "program_module_id",

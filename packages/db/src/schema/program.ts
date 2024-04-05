@@ -242,10 +242,9 @@ export const programModuleCompetency = pgTable(
         foreignColumns: [competency.id],
         name: 'module_competency_competency_id_fk',
       }),
-      unqModuleCompetency: unique().on(
-        table.programModuleId,
-        table.competencyId,
-      ),
+      unqModuleCompetency: unique(
+        'program_module_competency_unq_competence',
+      ).on(table.programModuleId, table.competencyId),
     }
   },
 )
