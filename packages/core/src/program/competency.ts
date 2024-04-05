@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { useTransaction } from '../util/transaction'
 import { zod } from '../util/zod'
 
+export * as Competency from './competency'
+
 export const Info = createSelectSchema(schema.competency, {})
 export type Info = typeof schema.competency.$inferSelect
 
@@ -33,10 +35,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () =>
   useTransaction(async (tx) => {
-    return tx
-      .select()
-      .from(schema.competency)
-      .then((rows) => rows[0])
+    return tx.select().from(schema.competency)
   }),
 )
 

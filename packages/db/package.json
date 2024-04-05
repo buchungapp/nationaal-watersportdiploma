@@ -8,6 +8,7 @@
   "exports": {
     ".": {
       "require": "./out/main.js",
+      "import": "./out/main.js",
       "types": "./out/main.d.ts"
     }
   },
