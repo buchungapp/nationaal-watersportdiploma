@@ -6,8 +6,9 @@
     "sourceMap": true,
     "declaration": true,
     "composite": true,
-    "module": "CommonJS",
-    "moduleResolution": "Node10"
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"]
 }

@@ -9,12 +9,14 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "@types/node": "^20.12.4",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.30.7",
     "typescript": "^5.4.4"
   },
   "dependencies": {
     "@nawadi/db": "workspace:^",
     "@nawadi/lib": "workspace:^",
+    "drizzle-zod": "^0.5.1",
+    "postgres": "^3.4.4",
     "zod": "^3.22.4"
   }
 }

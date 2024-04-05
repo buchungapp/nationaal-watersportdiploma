@@ -41,7 +41,7 @@
   "dependencies": {
     "@types/node": "^20.11.19",
     "@types/yargs": "^17.0.32",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.30.7",
     "postgres": "^3.4.4",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.2",

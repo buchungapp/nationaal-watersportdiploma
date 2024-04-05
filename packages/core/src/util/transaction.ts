@@ -2,8 +2,9 @@ import { type ExtractTablesWithRelations } from 'drizzle-orm'
 import { type PgTransaction } from 'drizzle-orm/pg-core'
 import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
 
-import type { DatabaseContext, schema } from '@nawadi/db'
+import type { Database, schema } from '@nawadi/db'
 import { Context } from '@nawadi/lib/node'
+import { db } from '../drizzle'
 
 export type Transaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -11,16 +12,13 @@ export type Transaction = PgTransaction<
   ExtractTablesWithRelations<typeof schema>
 >
 
-export type TxOrDb = DatabaseContext['db'] | Transaction
+export type TxOrDb = Database | Transaction
 
 const TransactionContext = Context.create<{
   tx: TxOrDb
 }>('TransactionContext')
 
-export async function useTransaction<T>(
-  db: DatabaseContext['db'],
-  callback: (trx: TxOrDb) => Promise<T>,
-) {
+export async function useTransaction<T>(callback: (trx: TxOrDb) => Promise<T>) {
   try {
     const { tx } = TransactionContext.use()
     return callback(tx)
@@ -30,7 +28,6 @@ export async function useTransaction<T>(
 }
 
 export async function createTransaction<T>(
-  db: DatabaseContext['db'],
   callback: (tx: TxOrDb) => Promise<T>,
 ) {
   try {

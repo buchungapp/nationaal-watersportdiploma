@@ -203,7 +203,10 @@ export const programRevision = pgTable(
       .notNull(),
     programId: uuid('program_id').notNull(),
     revision: text('revision').notNull(),
-    validFrom: timestamp('valid_from', { withTimezone: true, mode: 'string' }),
+    publishedAt: timestamp('published_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
   },
   (table) => {
     return {
