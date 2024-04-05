@@ -19,7 +19,7 @@ export const curriculum = pgTable(
       .notNull(),
     programId: uuid('program_id').notNull(),
     revision: text('revision').notNull(),
-    publishedAt: timestamp('published_at', {
+    startedAt: timestamp('started_at', {
       withTimezone: true,
       mode: 'string',
     }),
