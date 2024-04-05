@@ -1,2 +1,1 @@
-export * from './main-category.js'
-export * from './sub-category.js'
+export * from './program.js'
