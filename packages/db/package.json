@@ -40,17 +40,16 @@
   "keywords": [],
   "dependencies": {
     "@types/node": "^20.11.19",
-    "@types/pg": "^8.11.0",
     "@types/yargs": "^17.0.32",
-    "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.29.3",
-    "pg": "^8.11.3",
+    "postgres": "^3.4.4",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.2",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
+    "drizzle-kit": "^0.20.14",
     "typescript": "^5.4.2"
   }
 }

@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1712301478866,
+      "tag": "0000_clumsy_garia",
+      "breakpoints": false
+    }
+  ]
+}
