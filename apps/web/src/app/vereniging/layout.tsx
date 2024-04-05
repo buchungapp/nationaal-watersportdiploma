@@ -10,6 +10,18 @@ export const metadata: Metadata = {
     template: `%s | Verenigingszaken | ${APP_NAME}`,
     default: "Verenigingszaken",
   },
+  description: "Opzet en werking van de vereniging.",
+  openGraph: {
+    title: {
+      template: `%s | Verenigingszaken | ${APP_NAME}`,
+      default: "Verenigingszaken",
+    },
+    description: `Opzet en werking van de vereniging.`,
+    url: "/vereniging",
+    siteName: APP_NAME,
+    locale: "nl_NL",
+    type: "website",
+  },
 };
 
 export default function Layout({

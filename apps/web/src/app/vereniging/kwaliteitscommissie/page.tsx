@@ -1,9 +1,22 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Kwaliteitscommissie",
-};
+import type { Metadata, ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent).openGraph;
+
+  return {
+    title: "Kwaliteitscommissie",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Kwaliteitscommissie",
+      url: "/vereniging/kwaliteitscommissie",
+    },
+  };
+}
 
 export default function Page() {
   return (

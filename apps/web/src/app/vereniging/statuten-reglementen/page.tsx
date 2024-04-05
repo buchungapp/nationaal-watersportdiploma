@@ -1,12 +1,23 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Statuten en reglementen",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent).openGraph;
 
+  return {
+    title: "Statuten en Reglementen",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Statuten en Reglementen",
+      url: "/vereniging/statuten-reglementen",
+    },
+  };
+}
 export default function Page() {
   return (
     <article className="prose max-w-prose">

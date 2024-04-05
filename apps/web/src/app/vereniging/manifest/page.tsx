@@ -1,9 +1,20 @@
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Manifest",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent).openGraph;
 
+  return {
+    title: "Manifest",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Manifest",
+      url: "/vereniging/manifest",
+    },
+  };
+}
 export default function Page() {
   return (
     <article className="prose max-w-prose">

@@ -1,9 +1,9 @@
 import { clsx } from "clsx";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 
 import { APP_NAME, APP_SLOGAN } from "@nawadi/lib/constants";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import Analytics from "~/app/_components/analytics";
 import { BASE_URL } from "~/constants";
 import Footer from "./_components/footer/footer";
@@ -18,10 +18,21 @@ export const metadata: Metadata = {
     template: `%s | ${APP_NAME}`,
   },
   applicationName: APP_NAME,
-  description: `Nationaal Watersportdiploma: dé standaard voor veiligheid, kwaliteit en plezier op het water. Erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+  description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
   metadataBase: BASE_URL,
   icons: {
     shortcut: "/favicon.ico",
+  },
+  openGraph: {
+    title: {
+      default: `${APP_NAME} | ${APP_SLOGAN}`,
+      template: `%s | ${APP_NAME}`,
+    },
+    description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+    url: "/",
+    siteName: APP_NAME,
+    locale: "nl_NL",
+    type: "website",
   },
 };
 

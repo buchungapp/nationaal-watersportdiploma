@@ -1,10 +1,22 @@
 import Link from "next/link";
 
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Secretariaat",
-};
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent).openGraph;
+
+  return {
+    title: "Secretariaat",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Secretariaat",
+      url: "/vereniging/secretariaat",
+    },
+  };
+}
 
 export default function Page() {
   return (

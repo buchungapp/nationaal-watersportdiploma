@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { locations } from "~/locations";
 import { normalizeUrl } from "~/utils/normalize-url";
@@ -13,9 +12,25 @@ import PageHero from "../_components/style/page-hero";
 
 // const mapsClient = new Client({});
 
-export const metadata: Metadata = {
-  title: "Vaarlocaties",
-};
+import type { Metadata, ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent).openGraph;
+
+  return {
+    title: "Vaarlocaties",
+    description: "Vind een NWD vaarlocatie bij jou in de buurt.",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Vaarlocaties",
+      description: "Vind een NWD vaarlocatie bij jou in de buurt.",
+      url: "/vaarlocaties",
+    },
+  };
+}
 
 export default function Page() {
   // const locationsWithCity = await Promise.all(

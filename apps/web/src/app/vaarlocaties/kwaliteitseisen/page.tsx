@@ -1,6 +1,28 @@
 import { Prose } from "~/app/_components/prose";
 import PageHero from "~/app/_components/style/page-hero";
 
+import type { Metadata, ResolvingMetadata } from "next";
+
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const parentOpenGraph = (await parent).openGraph;
+
+  return {
+    title: "Kwaliteitseisen",
+    description:
+      "De eisen voor deelnemende vaarlocaties die de drie pijlers veiligheid, kwaliteit en plezier moeten waarborgen.",
+    openGraph: {
+      ...parentOpenGraph,
+      title: "Kwaliteitseisen",
+      description:
+        "De eisen voor deelnemende vaarlocaties die de drie pijlers veiligheid, kwaliteit en plezier moeten waarborgen.",
+      url: "/vaarlocaties/kwaliteitseisen",
+    },
+  };
+}
+
 export default function Page() {
   return (
     <>
