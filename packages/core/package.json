@@ -1,0 +1,20 @@
+{
+  "name": "@nawadi/core",
+  "version": "0.0.0",
+  "type": "commonjs",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit --incremental"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
+    "@types/node": "^20.12.4",
+    "drizzle-orm": "^0.29.3",
+    "typescript": "^5.4.4"
+  },
+  "dependencies": {
+    "@nawadi/db": "workspace:^",
+    "@nawadi/lib": "workspace:^",
+    "zod": "^3.22.4"
+  }
+}

@@ -1,0 +1,53 @@
+import { type ExtractTablesWithRelations } from 'drizzle-orm'
+import { type PgTransaction } from 'drizzle-orm/pg-core'
+import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
+
+import type { DatabaseContext, schema } from '@nawadi/db'
+import { Context } from '@nawadi/lib/node'
+
+export type Transaction = PgTransaction<
+  PostgresJsQueryResultHKT,
+  typeof schema,
+  ExtractTablesWithRelations<typeof schema>
+>
+
+export type TxOrDb = DatabaseContext['db'] | Transaction
+
+const TransactionContext = Context.create<{
+  tx: TxOrDb
+}>('TransactionContext')
+
+export async function useTransaction<T>(
+  db: DatabaseContext['db'],
+  callback: (trx: TxOrDb) => Promise<T>,
+) {
+  try {
+    const { tx } = TransactionContext.use()
+    return callback(tx)
+  } catch {
+    return callback(db)
+  }
+}
+
+export async function createTransaction<T>(
+  db: DatabaseContext['db'],
+  callback: (tx: TxOrDb) => Promise<T>,
+) {
+  try {
+    const { tx } = TransactionContext.use()
+    return callback(tx)
+  } catch {
+    const result = await db.transaction(
+      async (tx) => {
+        const result = await TransactionContext.with({ tx }, async () => {
+          return callback(tx)
+        })
+        return result
+      },
+      {
+        isolationLevel: 'serializable',
+      },
+    )
+    return result
+  }
+}

@@ -273,9 +273,9 @@ importers:
 
   packages/lib:
     devDependencies:
-      '@tsconfig/node20':
-        specifier: ^20.1.2
-        version: 20.1.2
+      '@types/node':
+        specifier: ^20.12.4
+        version: 20.12.4
       typescript:
         specifier: ^5.4.2
         version: 5.4.2
@@ -2858,6 +2858,11 @@ packages:
     dependencies:
       undici-types: 5.26.5
     dev: false
+
+  /@types/node@20.12.4:
+    resolution: {integrity: sha512-E+Fa9z3wSQpzgYQdYmme5X3OTuejnnTx88A6p6vkkJosR3KBz+HpE3kqNm98VE6cfLFcISx7zW7MsJkH6KwbTw==}
+    dependencies:
+      undici-types: 5.26.5
 
   /@types/pg-pool@2.0.4:
     resolution: {integrity: sha512-qZAvkv1K3QbmHHFYSNRYPkRjOWRLBYrL4B9c+wG0GSVGBw0NtJwPcgx/DSddeDJvRGMHCEQ4VMEVfuJ/0gZ3XQ==}
