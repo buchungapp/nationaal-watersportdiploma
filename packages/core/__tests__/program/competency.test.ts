@@ -8,5 +8,7 @@ it('create competency', async () => {
     handle: 'test-competency',
   })
 
-  expect(competencyID).not.toBeNull()
+  expect(await Competency.fromID(competencyID).then((x) => x?.id)).toBe(
+    competencyID,
+  )
 })
