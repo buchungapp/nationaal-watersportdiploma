@@ -3,12 +3,13 @@ import {
   boolean,
   foreignKey,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { competency, module, program } from './program'
+import { competency, gearType, module, program } from './program'
 
 export const curriculum = pgTable(
   'curriculum',
@@ -63,8 +64,8 @@ export const curriculumModule = pgTable(
   },
 )
 
-export const curriculumModuleCompetency = pgTable(
-  'curriculum_module_competency',
+export const curriculumCompetency = pgTable(
+  'curriculum_competency',
   {
     id: uuid('id')
       .default(sql`extensions.uuid_generate_v4()`)
@@ -80,16 +81,39 @@ export const curriculumModuleCompetency = pgTable(
       curriculumModuleReference: foreignKey({
         columns: [table.curriculumModuleId],
         foreignColumns: [curriculumModule.id],
-        name: 'module_competency_curriculum_module_id_fk',
+        name: 'curriculum_competency_curriculum_module_id_fk',
       }),
       competencyReference: foreignKey({
         columns: [table.competencyId],
         foreignColumns: [competency.id],
-        name: 'module_competency_competency_id_fk',
+        name: 'curriculum_competency_competency_id_fk',
       }),
       unqModuleCompetency: unique(
-        'curriculum_module_competency_unq_module_competency',
+        'curriculum_competency_curriculum_module_id_competency_id_unq',
       ).on(table.curriculumModuleId, table.competencyId),
+    }
+  },
+)
+
+export const curriculumGearLink = pgTable(
+  'curriculum_gear_link',
+  {
+    curriculumId: uuid('curriculum_id').notNull(),
+    gearTypeId: uuid('gear_type_id').notNull(),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.curriculumId, table.gearTypeId] }),
+      curriculumReference: foreignKey({
+        columns: [table.curriculumId],
+        foreignColumns: [curriculum.id],
+        name: 'curriculum_gear_link_curriculum_id_fk',
+      }),
+      gearTypeReference: foreignKey({
+        columns: [table.gearTypeId],
+        foreignColumns: [gearType.id],
+        name: 'curriculum_gear_link_gear_type_id_fk',
+      }),
     }
   },
 )

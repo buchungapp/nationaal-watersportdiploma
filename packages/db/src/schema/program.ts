@@ -162,3 +162,20 @@ export const programCategory = pgTable(
     }
   },
 )
+
+export const gearType = pgTable(
+  'gear_type',
+  {
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    handle: text('handle').notNull(),
+    title: text('title'),
+  },
+  (table) => {
+    return {
+      unqHandle: unique().on(table.handle),
+    }
+  },
+)
