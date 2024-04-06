@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 
-import Double from "~/app/(public)/_components/brand/double-line";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
+import Double from "~/app/_components/brand/double-line";
 import { getAllArticles } from "~/lib/articles";
 
 export default async function News() {

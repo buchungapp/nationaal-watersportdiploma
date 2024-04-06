@@ -13,7 +13,6 @@ import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-whi
 
 import Image from "next/image";
 import { Line, LineWave } from "~/app/(public)/_assets/wave";
-import Wordmark from "~/app/(public)/_components/brand/wordmark";
 import {
   Facebook,
   Instagram,
@@ -21,6 +20,7 @@ import {
   TikTok,
   YouTube,
 } from "~/app/(public)/_components/socials";
+import Wordmark from "~/app/_components/brand/wordmark";
 
 function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (

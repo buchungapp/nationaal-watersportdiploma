@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import Logo from "~/app/(public)/_components/brand/logo";
-import Wordmark from "~/app/(public)/_components/brand/wordmark";
+import Logo from "~/app/_components/brand/logo";
+import Wordmark from "~/app/_components/brand/wordmark";
 import MobileDisclosure from "./mobile/mobile-disclosure";
 import MobileItem from "./mobile/mobile-item";
 import MobileNav, { MobileNavButton } from "./mobile/mobile-nav";

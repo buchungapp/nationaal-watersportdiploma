@@ -49,9 +49,12 @@ export default function RootLayout({
   return (
     <html
       lang="nl"
-      className={clsx(inter.variable, "scroll-smooth text-gray-900")}
+      className={clsx(
+        inter.variable,
+        "h-full scroll-smooth text-gray-900 bg-white",
+      )}
     >
-      <body>
+      <body className="h-full">
         <CommonProviders>{children}</CommonProviders>
         <SpeedInsights />
       </body>

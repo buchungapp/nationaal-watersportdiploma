@@ -1,6 +1,6 @@
 import Balancer from "react-wrap-balancer";
 
-import Logo from "~/app/(public)/_components/brand/logo";
+import Logo from "~/app/_components/brand/logo";
 import AboutSection from "./about-section";
 
 export default function About() {

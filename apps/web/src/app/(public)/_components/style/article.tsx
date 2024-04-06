@@ -8,7 +8,7 @@ import {
 import Balancer from "react-wrap-balancer";
 import { twMerge } from "tailwind-merge";
 
-import Double from "~/app/(public)/_components/brand/double-line";
+import Double from "~/app/_components/brand/double-line";
 
 export default function Article({
   children,

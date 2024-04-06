@@ -1,7 +1,7 @@
 import clsx from "clsx";
 
-import Double from "~/app/(public)/_components/brand/double-line";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
+import Double from "~/app/_components/brand/double-line";
 
 export default function AboutSection({
   label,

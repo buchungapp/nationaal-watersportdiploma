@@ -1,5 +1,5 @@
-import Double from "~/app/(public)/_components/brand/double-line";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
+import Double from "~/app/_components/brand/double-line";
 import LocationsMap from "../../_components/locations-map";
 
 export default function Locations() {

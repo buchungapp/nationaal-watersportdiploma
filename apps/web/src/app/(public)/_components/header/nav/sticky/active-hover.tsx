@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { useSelectedLayoutSegment } from "next/navigation";
-import Double from "~/app/(public)/_components/brand/double-line";
+import Double from "~/app/_components/brand/double-line";
 
 export default function ActiveHover({ active }: { active?: string }) {
   const segment = useSelectedLayoutSegment();
