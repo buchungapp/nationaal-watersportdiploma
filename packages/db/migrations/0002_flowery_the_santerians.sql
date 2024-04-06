@@ -1,0 +1,1 @@
+ALTER TABLE "program" DROP CONSTRAINT "program_degree_id_discipline_id_unique";

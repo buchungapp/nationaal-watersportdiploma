@@ -1,0 +1,12 @@
+{
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "noUncheckedIndexedAccess": true,
+    // "module": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "@nawadi/core/*": ["../core/src/*"]
+    }
+  }
+}

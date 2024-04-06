@@ -131,7 +131,6 @@ export const program = pgTable(
         foreignColumns: [degree.id],
         name: 'program_degree_id_fk',
       }),
-      unqDegreeDiscipline: unique().on(table.degreeId, table.disciplineId),
     }
   },
 )

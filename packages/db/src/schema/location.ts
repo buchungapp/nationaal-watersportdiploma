@@ -16,14 +16,14 @@ export const location = pgTable(
       .primaryKey()
       .notNull(),
     handle: text('handle').notNull(),
-    name: text('name').notNull(),
+    name: text('name'),
     // To prevent a circular dependency, we use a function to reference the media table
     logoMediaId: uuid('logo_media_id').references((): AnyPgColumn => media.id),
     squareLogoMediaId: uuid('square_logo_media_id').references(
       // To prevent a circular dependency, we use a function to reference the media table
       (): AnyPgColumn => media.id,
     ),
-    website_url: text('website_url'),
+    websiteUrl: text('website_url'),
   },
   (table) => {
     return {

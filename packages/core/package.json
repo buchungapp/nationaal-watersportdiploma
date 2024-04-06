@@ -1,10 +1,15 @@
 {
   "name": "@nawadi/core",
   "version": "0.0.0",
-  "type": "commonjs",
+  "type": "module",
   "sideEffects": false,
+  "exports": {
+    "./program": "./src/program/index.ts",
+    "./location": "./src/location/index.ts",
+    "./actor": "./src/actor.ts"
+  },
   "scripts": {
-    "test": "bun test",
+    "test": "bun test --preload ./__tests__/setup.ts",
     "typecheck": "tsc --noEmit --incremental"
   },
   "devDependencies": {

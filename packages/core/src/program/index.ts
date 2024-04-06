@@ -2,7 +2,7 @@ import { schema } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { useTransaction } from '../util/transaction'
+import { createTransaction, useTransaction } from '../util/transaction'
 import { zod } from '../util/zod'
 
 export * as Program from './'
@@ -32,11 +32,15 @@ export const create = zod(
     handle: true,
     disciplineId: true,
     degreeId: true,
-  }).partial({
-    title: true,
-  }),
+  })
+    .partial({
+      title: true,
+    })
+    .extend({
+      categoryIds: z.array(z.string()).optional(),
+    }),
   (input) =>
-    useTransaction(async (tx) => {
+    createTransaction(async (tx) => {
       const [insert] = await tx
         .insert(program)
         .values({
@@ -49,6 +53,15 @@ export const create = zod(
 
       if (!insert) {
         throw new Error('Failed to insert program')
+      }
+
+      if (input.categoryIds) {
+        await tx.insert(schema.programCategory).values(
+          input.categoryIds.map((categoryId) => ({
+            programId: insert.id,
+            categoryId,
+          })),
+        )
       }
 
       return insert.id

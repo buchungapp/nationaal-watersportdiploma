@@ -3,6 +3,7 @@ packages:
   - packages/lib
   - packages/db
   - packages/core
+  - packages/scripts
   - apps/api-server
   - apps/web
   - supabase
