@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import { slate } from "tailwindcss/colors";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 import typographyStyles from "./typography";
 
@@ -11,6 +12,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
+      },
       colors: {
         gray: slate,
         branding: {
