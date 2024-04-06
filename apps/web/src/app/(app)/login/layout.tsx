@@ -1,5 +1,6 @@
 import Image from "next/image";
 import coverImage from "./_assets/zeilen-4.jpg";
+import SessionCheck from "./_components/session-check";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           />
         </div>
       </div>
+      <SessionCheck />
     </>
   );
 }

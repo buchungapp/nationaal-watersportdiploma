@@ -62,3 +62,25 @@ export async function verify(
   revalidatePath("/", "layout");
   redirect(`/`);
 }
+
+export async function logout() {
+  try {
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { error: error.message };
+    }
+
+    console.error(error);
+
+    return { error: "Er ging iets niet goed" };
+  }
+
+  revalidatePath("/", "layout");
+  redirect(`/`);
+}

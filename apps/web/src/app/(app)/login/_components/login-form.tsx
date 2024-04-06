@@ -4,8 +4,8 @@ import clsx from "clsx";
 import { OTPInput } from "input-otp";
 import { useRef, type PropsWithChildren } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { login, verify } from "../../_actions/auth";
 import { Button } from "../../_components/button";
-import { login, verify } from "../_actions/login";
 
 export function SubmitButton({ children }: PropsWithChildren) {
   const { pending } = useFormStatus();
