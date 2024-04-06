@@ -1,7 +1,7 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { migrate } from 'drizzle-orm/node-postgres/migrator'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import path from 'path'
-import pg from 'pg'
+import postgres from 'postgres'
 import * as yargs from 'yargs'
 import { projectRoot } from '../root.js'
 
@@ -28,10 +28,10 @@ async function main(configuration: MainConfiguration) {
 
   console.info('Migration start')
 
-  const pgPool = new pg.Pool({
-    connectionString: pgUri,
+  const pgPool = postgres(pgUri, {
     max: 1,
   })
+
   try {
     const db = drizzle(pgPool)
     // migrate the database

@@ -2,5 +2,7 @@ packages:
   - generated/*
   - packages/lib
   - packages/db
-  - apps/api-server
+  - packages/core
+  - packages/scripts
   - apps/web
+  - supabase

@@ -15,6 +15,7 @@ words:
   - kwaliteitspeilers
   - nawadi
   - nums
+  - onnotice
   - Outro
   - PGURI
   - pnpx
@@ -42,6 +43,7 @@ ignorePaths:
   - generated/
   - apps/nwd-web/src/app/
   - '*.svg'
+  - supabase/config.toml
 files:
   - '**'
 enableFiletypes:

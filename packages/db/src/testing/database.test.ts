@@ -6,5 +6,6 @@ import { withDatabase } from './database.js'
 test('with-database', () =>
   withDatabase(async ({ db }) => {
     const result = await db.execute(sql`SELECT 1 as one;`)
-    assert.deepEqual(result.rows, [{ one: 1 }])
+
+    assert.deepEqual(result, [{ one: 1 }])
   }))

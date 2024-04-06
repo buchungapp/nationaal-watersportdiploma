@@ -1,13 +1,13 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
-import { migrate } from 'drizzle-orm/node-postgres/migrator'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import path from 'path'
-import pg from 'pg'
+import postgres from 'postgres'
 import { Database } from '../database.js'
 import { projectRoot } from '../root.js'
 import * as schema from '../schema/index.js'
 
 export interface DatabaseContext {
-  pgPool: pg.Pool
+  pgPool: postgres.Sql<{}>
   db: Database
 }
 
@@ -26,17 +26,16 @@ export async function withDatabase<T>(
   const pgUri = new URL(databaseName, pgUriSuper)
 
   // create a pool that will be used to create and destroy a database
-  const pgPoolSuper = new pg.Pool({
-    connectionString: pgUriSuper.toString(),
-  })
+  const pgPoolSuper = postgres(pgUriSuper.toString())
+
   try {
     // create a temporary database that we only use for testing
-    await pgPoolSuper.query(`CREATE DATABASE ${databaseName};`)
+    await pgPoolSuper.unsafe(`CREATE DATABASE ${databaseName}`)
+
     try {
       {
         // use a single connection pool for the migration
-        const pgPool = new pg.Pool({
-          connectionString: pgUri.toString(),
+        const pgPool = postgres(pgUri.toString(), {
           max: 1,
         })
         try {
@@ -51,9 +50,7 @@ export async function withDatabase<T>(
       }
       {
         // use a normal pool for the queries
-        const pgPool = new pg.Pool({
-          connectionString: pgUri.toString(),
-        })
+        const pgPool = postgres(pgUri.toString())
         try {
           const db = drizzle(pgPool, { schema })
           // run the job with the database test context
@@ -65,7 +62,7 @@ export async function withDatabase<T>(
       }
     } finally {
       // finally drop the test-database
-      await pgPoolSuper.query(`DROP DATABASE ${databaseName};`)
+      await pgPoolSuper.unsafe(`DROP DATABASE ${databaseName}`)
     }
   } finally {
     // finally end the super pool

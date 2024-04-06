@@ -1,0 +1,29 @@
+{
+  "name": "@nawadi/core",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./program": "./src/program/index.ts",
+    "./location": "./src/location/index.ts",
+    "./actor": "./src/actor.ts"
+  },
+  "scripts": {
+    "test": "bun test --preload ./__tests__/setup.ts",
+    "typecheck": "tsc --noEmit --incremental"
+  },
+  "devDependencies": {
+    "@tsconfig/node20": "^20.1.2",
+    "@types/bun": "^1.0.12",
+    "@types/node": "^20.12.4",
+    "drizzle-orm": "^0.30.7",
+    "typescript": "^5.4.4"
+  },
+  "dependencies": {
+    "@nawadi/db": "workspace:*",
+    "@nawadi/lib": "workspace:*",
+    "drizzle-zod": "^0.5.1",
+    "postgres": "^3.4.4",
+    "zod": "^3.22.4"
+  }
+}

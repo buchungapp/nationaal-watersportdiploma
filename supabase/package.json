@@ -1,0 +1,12 @@
+{
+  "name": "@nawadi/supabase",
+  "scripts": {
+    "start": "supabase start",
+    "reset": "supabase db reset",
+    "lint": "supabase db lint",
+    "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
+  },
+  "devDependencies": {
+    "supabase": "^1.153.4"
+  }
+}

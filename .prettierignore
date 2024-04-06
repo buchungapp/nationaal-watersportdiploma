@@ -1,4 +1,5 @@
 out/
 generated/
+migrations/
 
 pnpm-lock.yaml
