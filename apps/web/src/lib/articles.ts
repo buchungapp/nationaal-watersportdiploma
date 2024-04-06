@@ -21,7 +21,7 @@ async function importArticle(
   articleFilename: string,
 ): Promise<ArticleWithSlug> {
   const { article } = (await import(
-    `../app/actueel/(article)/${articleFilename}`
+    `../app/(public)/actueel/(article)/${articleFilename}`
   )) as {
     default: React.ComponentType;
     article: Article;
@@ -38,7 +38,7 @@ async function importArticle(
 
 export async function getAllArticles() {
   const workingPath = process.cwd();
-  const contentPath = "./src/app/actueel/(article)";
+  const contentPath = "./src/app/(public)/actueel/(article)";
   const articleFilenames = await glob("*/page.mdx", {
     cwd: path.join(workingPath, contentPath),
   });

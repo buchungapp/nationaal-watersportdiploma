@@ -1,6 +1,6 @@
 import glob from "fast-glob";
 import path from "path";
-import type { Page } from "~/app/types";
+import type { Page } from "~/types";
 
 // Maurits: I know this is ugly, but need to move fast
 // and we get build errors when we try to give this
@@ -9,7 +9,7 @@ import type { Page } from "~/app/types";
 
 export async function getAllDiplomalijnInstructeurPages() {
   const workingPath = process.cwd();
-  const contentPath = `./src/app/`;
+  const contentPath = `./src/app/(public)`;
 
   const pageFilenames = await glob("**/page.mdx", {
     cwd: path.join(workingPath, contentPath, "diplomalijn/instructeur"),
@@ -18,7 +18,7 @@ export async function getAllDiplomalijnInstructeurPages() {
   const pages = await Promise.all(
     pageFilenames.map(async (pageFilename) => {
       const { page } = (await import(
-        `../app/${"diplomalijn/instructeur"}/${pageFilename}`
+        `../app/(public)/${"diplomalijn/instructeur"}/${pageFilename}`
       )) as {
         default: React.ComponentType;
         page: Page;
@@ -47,7 +47,7 @@ export async function getAllDiplomalijnInstructeurPages() {
 
 export async function getAllDiplomalijnConsumentenPages() {
   const workingPath = process.cwd();
-  const contentPath = `./src/app/`;
+  const contentPath = `./src/app/(public)`;
 
   const pageFilenames = await glob("**/page.mdx", {
     cwd: path.join(workingPath, contentPath, "diplomalijn/consument"),
@@ -56,7 +56,7 @@ export async function getAllDiplomalijnConsumentenPages() {
   const pages = await Promise.all(
     pageFilenames.map(async (pageFilename) => {
       const { page } = (await import(
-        `../app/${"diplomalijn/consument"}/${pageFilename}`
+        `../app/(public)/${"diplomalijn/consument"}/${pageFilename}`
       )) as {
         default: React.ComponentType;
         page: Page;
