@@ -3,7 +3,6 @@
   "scripts": {
     "start": "supabase start",
     "reset": "supabase db reset",
-    "test": "supabase db test",
     "lint": "supabase db lint",
     "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
   },
