@@ -218,23 +218,23 @@ importers:
   generated/api:
     dependencies:
       '@types/node':
-        specifier: ^20.11.26
+        specifier: ^20.12.4
         version: 20.12.4
       goodrouter:
         specifier: ^2.1.6
         version: 2.1.6
       oa42-lib:
-        specifier: ^0.8.17
+        specifier: ^0.8.20
         version: 0.8.20
     devDependencies:
       '@tsconfig/node20':
-        specifier: ^20.1.2
+        specifier: ^20.1.4
         version: 20.1.4
       rollup:
-        specifier: ^4.13.0
+        specifier: ^4.14.0
         version: 4.14.0
       typescript:
-        specifier: ^5.4.2
+        specifier: ^5.4.4
         version: 5.4.4
 
   packages/core:
