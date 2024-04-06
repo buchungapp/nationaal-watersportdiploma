@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "description": "",
-  "type": "commonjs",
+  "type": "module",
   "exports": {
     "./constants": "./src/constants.ts",
     "./node": "./src/node/index.ts"

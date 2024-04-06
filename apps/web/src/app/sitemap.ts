@@ -8,7 +8,7 @@ import {
   getAllDiplomalijnConsumentenPages,
   getAllDiplomalijnInstructeurPages,
 } from "~/lib/mdx-pages";
-import { verenigingSegments } from "./vereniging/_utils/segments";
+import { verenigingSegments } from "./(public)/vereniging/_utils/segments";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = WEBSITE_URL;
