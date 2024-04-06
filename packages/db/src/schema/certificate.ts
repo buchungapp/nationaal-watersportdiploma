@@ -3,6 +3,7 @@ import {
   foreignKey,
   pgTable,
   primaryKey,
+  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -66,6 +67,7 @@ export const certificate = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
+    handle: text('handle').notNull(),
     studentCurriculumId: uuid('student_curriculum_id').notNull(),
     locationId: uuid('location_id').notNull(),
     issuedAt: timestamp('issued_at', {
@@ -79,6 +81,7 @@ export const certificate = pgTable(
   },
   (table) => {
     return {
+      unqHandle: uniqueIndex('certificate_unq_handle').on(table.handle),
       studentCurriculumReference: foreignKey({
         columns: [table.studentCurriculumId],
         foreignColumns: [studentCurriculum.id],
