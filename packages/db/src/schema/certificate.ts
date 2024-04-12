@@ -15,6 +15,7 @@ import {
 } from './curriculum'
 import { location } from './location'
 import { gearType } from './program'
+import { identity } from './user'
 
 export const studentCurriculum = pgTable(
   'student_curriculum',
@@ -55,6 +56,11 @@ export const studentCurriculum = pgTable(
         columns: [table.gearTypeId],
         foreignColumns: [gearType.id],
         name: 'student_curriculum_link_gear_type_id_fk',
+      }),
+      identityReference: foreignKey({
+        columns: [table.identityId],
+        foreignColumns: [identity.id],
+        name: 'student_curriculum_link_identity_id_fk',
       }),
     }
   },

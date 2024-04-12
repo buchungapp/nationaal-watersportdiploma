@@ -7,6 +7,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { competency, gearType, module, program } from './program'
@@ -40,15 +41,12 @@ export const curriculum = pgTable(
 export const curriculumModule = pgTable(
   'curriculum_module',
   {
-    id: uuid('id')
-      .default(sql`extensions.uuid_generate_v4()`)
-      .primaryKey()
-      .notNull(),
-    curriculumId: uuid('curriculum_revision_id').notNull(),
+    curriculumId: uuid('curriculum_id').notNull(),
     moduleId: uuid('module_id').notNull(),
   },
   (table) => {
     return {
+      pk: primaryKey({ columns: [table.curriculumId, table.moduleId] }),
       curriculumReference: foreignKey({
         columns: [table.curriculumId],
         foreignColumns: [curriculum.id],
@@ -71,16 +69,25 @@ export const curriculumCompetency = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    curriculumModuleId: uuid('curriculum_module_id').notNull(),
+    curriculumId: uuid('curriculum_id').notNull(),
+    moduleId: uuid('module_id').notNull(),
     competencyId: uuid('competency_id').notNull(),
     isRequired: boolean('is_required').notNull(),
     requirement: text('requirement'),
   },
   (table) => {
     return {
+      unq: uniqueIndex('curriculum_competency_unq_set').on(
+        table.curriculumId,
+        table.moduleId,
+        table.competencyId,
+      ),
       curriculumModuleReference: foreignKey({
-        columns: [table.curriculumModuleId],
-        foreignColumns: [curriculumModule.id],
+        columns: [table.curriculumId, table.moduleId],
+        foreignColumns: [
+          curriculumModule.curriculumId,
+          curriculumModule.moduleId,
+        ],
         name: 'curriculum_competency_curriculum_module_id_fk',
       }),
       competencyReference: foreignKey({
@@ -88,9 +95,6 @@ export const curriculumCompetency = pgTable(
         foreignColumns: [competency.id],
         name: 'curriculum_competency_competency_id_fk',
       }),
-      unqModuleCompetency: unique(
-        'curriculum_competency_curriculum_module_id_competency_id_unq',
-      ).on(table.curriculumModuleId, table.competencyId),
     }
   },
 )

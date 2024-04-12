@@ -5,9 +5,11 @@ import { z } from 'zod'
 import { useTransaction } from '../util/transaction'
 import { zod } from '../util/zod'
 
-export * as Degree from './module'
+export * as Degree from './degree'
 
 const degree = schema.degree
+
+export const test = 1
 
 export const Info = createSelectSchema(degree, {
   handle(schema) {

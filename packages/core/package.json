@@ -5,6 +5,7 @@
   "sideEffects": false,
   "exports": {
     "./program": "./src/program/index.ts",
+    "./curriculum": "./src/curriculum/index.ts",
     "./location": "./src/location/index.ts",
     "./actor": "./src/actor.ts"
   },
@@ -13,7 +14,7 @@
     "typecheck": "tsc --noEmit --incremental"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.2",
+    "@tsconfig/node16": "^16.1.3",
     "@types/bun": "^1.0.12",
     "@types/node": "^20.12.4",
     "drizzle-orm": "^0.30.7",

@@ -1,13 +1,15 @@
 {
-  "extends": "@tsconfig/node20",
+  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./out",
     "sourceMap": true,
     "declaration": true,
     "composite": true,
-    "module": "CommonJS",
-    "moduleResolution": "Node10"
+    "declarationMap": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"]
 }
