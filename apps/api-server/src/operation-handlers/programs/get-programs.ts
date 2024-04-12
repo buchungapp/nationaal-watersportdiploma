@@ -12,7 +12,7 @@ export function getPrograms(
       status: 200,
       parameters: {},
       contentType: 'application/json',
-      entity: () => programs,
+      entity: () => [],
     }
   }
 }

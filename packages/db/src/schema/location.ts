@@ -6,7 +6,7 @@ import {
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
-import { media } from './media'
+import { media } from './media.js'
 
 export const location = pgTable(
   'location',

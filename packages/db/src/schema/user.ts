@@ -13,9 +13,9 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { _usersTable } from './_sb_controlled/auth'
-import { location } from './location'
-import { country } from './platform'
+import { _usersTable } from './_sb_controlled/auth.js'
+import { location } from './location.js'
+import { country } from './platform.js'
 
 export const user = pgTable(
   'user',

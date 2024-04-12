@@ -6,9 +6,9 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { studentCurriculum } from './certificate'
-import { curriculumCompetency } from './curriculum'
-import { location } from './location'
+import { studentCurriculum } from './certificate.js'
+import { curriculumCompetency } from './curriculum.js'
+import { location } from './location.js'
 
 export const studentCompetencyProgress = pgTable(
   'student_competency_progress',

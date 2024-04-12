@@ -1,6 +1,6 @@
 import { ZodOpenApiOperationObject } from 'zod-openapi'
-import { ProgramSchema } from '../../schemas/program'
-import { openApiZ as z } from '../../util/zod'
+import { ProgramSchema } from '../../schemas/program.js'
+import { openApiZ as z } from '../../util/zod.js'
 
 export const getPrograms: ZodOpenApiOperationObject = {
   operationId: 'get-programs',

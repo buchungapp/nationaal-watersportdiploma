@@ -2,7 +2,7 @@
   "name": "@nawadi/api-server",
   "version": "0.0.0",
   "description": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "./out/main.js",
   "types": "./out/main.d.ts",
   "exports": {

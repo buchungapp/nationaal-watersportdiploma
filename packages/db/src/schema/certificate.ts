@@ -12,10 +12,10 @@ import {
   curriculum,
   curriculumCompetency,
   curriculumGearLink,
-} from './curriculum'
-import { location } from './location'
-import { gearType } from './program'
-import { identity } from './user'
+} from './curriculum.js'
+import { location } from './location.js'
+import { gearType } from './program.js'
+import { identity } from './user.js'
 
 export const studentCurriculum = pgTable(
   'student_curriculum',

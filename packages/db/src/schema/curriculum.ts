@@ -10,7 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { competency, gearType, module, program } from './program'
+import { competency, gearType, module, program } from './program.js'
 
 export const curriculum = pgTable(
   'curriculum',

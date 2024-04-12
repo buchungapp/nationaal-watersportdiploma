@@ -2,10 +2,10 @@ import { schema } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { useTransaction } from '../util/transaction'
-import { zod } from '../util/zod'
+import { useTransaction } from '../util/transaction.js'
+import { zod } from '../util/zod.js'
 
-export * as Degree from './degree'
+export * as Degree from './degree.js'
 
 const degree = schema.degree
 

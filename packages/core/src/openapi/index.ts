@@ -1,6 +1,6 @@
 import { ZodOpenApiObject } from 'zod-openapi'
-import { ProgramSchema } from '../schemas/program'
-import { programPaths } from './programs'
+import { ProgramSchema } from '../schemas/program.js'
+import { programPaths } from './programs/index.js'
 
 export const openApiObject: ZodOpenApiObject = {
   openapi: '3.0.2',
