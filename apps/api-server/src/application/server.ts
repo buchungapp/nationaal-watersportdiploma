@@ -1,6 +1,6 @@
 import * as api from '@nawadi/api'
 import * as authenticationHandlers from '../authentication-handlers/index.js'
-// import * as operationHandlers from '../operation-handlers/index.js'
+import * as operationHandlers from '../operation-handlers/index.js'
 import { Authentication } from './authentication.js'
 import { Context } from './context.js'
 
@@ -14,6 +14,11 @@ export function createApplicationServer(context: Context) {
   server.registerApiTokenAuthentication(
     authenticationHandlers.apiToken(context),
   )
+  server.registerTokenAuthentication(authenticationHandlers.token(context))
+
+  // operations
+
+  server.registerGetProgramsOperation(operationHandlers.getPrograms(context))
 
   // middleware!
 

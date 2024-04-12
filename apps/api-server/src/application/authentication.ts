@@ -3,4 +3,7 @@ export type Authentication = {
     userId: number
     super: boolean
   }
+  token: {
+    userId: number
+  }
 }
