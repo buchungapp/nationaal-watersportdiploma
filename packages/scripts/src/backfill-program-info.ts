@@ -84,7 +84,7 @@ const rowSchema = z.tuple([
   z.string().trim(),
 ])
 
-const slufifyOpts = {
+const slugifyOpts = {
   lower: true,
   strict: true,
   locale: 'nl',
@@ -129,14 +129,14 @@ async function getOrCreateCachedItem<T extends { id: string }>(
 async function processRow(row: z.infer<typeof rowSchema>) {
   try {
     // Discipline
-    const displineTitle = row[0].startsWith('Jacht/kajuitzeilen ')
+    const disciplineTitle = row[0].startsWith('Jacht/kajuitzeilen ')
       ? 'Jachtzeilen'
       : row[0]
-    const disciplineHandle = slugify(displineTitle.trim(), slufifyOpts)
+    const disciplineHandle = slugify(disciplineTitle.trim(), slugifyOpts)
     const disciplinePromise = getOrCreateCachedItem(
       Discipline,
       disciplineHandle,
-      displineTitle.trim(),
+      disciplineTitle.trim(),
       `discipline-${disciplineHandle}`,
     )
 
@@ -160,7 +160,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       ]
         .filter((cat): cat is string => Boolean(cat))
         .map(async (category, index) => {
-          const categoryHandle = slugify(category, slufifyOpts)
+          const categoryHandle = slugify(category, slugifyOpts)
           return getOrCreateCachedItem(
             Category,
             categoryHandle,
@@ -186,7 +186,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     )
 
     // Module
-    const moduleHandle = slugify(row[3], slufifyOpts)
+    const moduleHandle = slugify(row[3], slugifyOpts)
     const modulePromise = getOrCreateCachedItem(
       Module,
       moduleHandle,
@@ -195,7 +195,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     )
 
     // Competency
-    const competencyHandle = slugify(row[5], slufifyOpts)
+    const competencyHandle = slugify(row[5], slugifyOpts)
     const competencyPromise = getOrCreateCachedItem(
       Competency,
       competencyHandle,
@@ -216,7 +216,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       ])
 
     const programName = `${row[0]} ${row[1]} ${row[2]}`
-    const programHandle = slugify(programName, slufifyOpts)
+    const programHandle = slugify(programName, slugifyOpts)
 
     const programId = await getOrCreateCachedItem(
       Program,
