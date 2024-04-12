@@ -2,23 +2,10 @@
   "name": "@nawadi/db",
   "version": "0.0.0",
   "description": "",
-  "type": "commonjs",
-  "main": "./out/main.js",
-  "types": "./out/main.d.ts",
+  "type": "module",
+  "types": "./src/main.ts",
   "exports": {
-    ".": {
-      "require": "./out/main.js",
-      "import": "./out/main.js",
-      "types": "./out/main.d.ts"
-    }
-  },
-  "files": [
-    "./bin/**",
-    "./out/**",
-    "./migrations/**"
-  ],
-  "bin": {
-    "nwd-api-server": "bin/program.js"
+    ".": "./src/main.ts"
   },
   "scripts": {
     "prepack": "tsc --build",
@@ -26,6 +13,7 @@
     "build": "tsc --build",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test ./out/**/*.test.js",
+    "reset": "supabase db reset && pnpm execute-migration --pg-uri postgresql://postgres:postgres@127.0.0.1:54322/postgres",
     "generate-migration": "drizzle-kit generate:pg",
     "execute-migration": "node ./out/program.js migrate"
   },
@@ -42,15 +30,16 @@
   "dependencies": {
     "@types/node": "^20.11.19",
     "@types/yargs": "^17.0.32",
-    "drizzle-orm": "^0.30.7",
+    "drizzle-orm": "^0.30.8",
     "postgres": "^3.4.4",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.2",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@tsconfig/node16": "^16.1.3",
     "@tsconfig/node20": "^20.1.2",
     "drizzle-kit": "^0.20.14",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.5"
   }
 }

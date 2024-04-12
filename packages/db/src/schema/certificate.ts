@@ -3,6 +3,7 @@ import {
   foreignKey,
   pgTable,
   primaryKey,
+  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -11,9 +12,10 @@ import {
   curriculum,
   curriculumCompetency,
   curriculumGearLink,
-} from './curriculum'
-import { location } from './location'
-import { gearType } from './program'
+} from './curriculum.js'
+import { location } from './location.js'
+import { gearType } from './program.js'
+import { identity } from './user.js'
 
 export const studentCurriculum = pgTable(
   'student_curriculum',
@@ -55,6 +57,11 @@ export const studentCurriculum = pgTable(
         foreignColumns: [gearType.id],
         name: 'student_curriculum_link_gear_type_id_fk',
       }),
+      identityReference: foreignKey({
+        columns: [table.identityId],
+        foreignColumns: [identity.id],
+        name: 'student_curriculum_link_identity_id_fk',
+      }),
     }
   },
 )
@@ -66,6 +73,7 @@ export const certificate = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
+    handle: text('handle').notNull(),
     studentCurriculumId: uuid('student_curriculum_id').notNull(),
     locationId: uuid('location_id').notNull(),
     issuedAt: timestamp('issued_at', {
@@ -79,6 +87,7 @@ export const certificate = pgTable(
   },
   (table) => {
     return {
+      unqHandle: uniqueIndex('certificate_unq_handle').on(table.handle),
       studentCurriculumReference: foreignKey({
         columns: [table.studentCurriculumId],
         foreignColumns: [studentCurriculum.id],

@@ -2,10 +2,10 @@ import { schema } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { useTransaction } from '../util/transaction'
-import { zod } from '../util/zod'
+import { useTransaction } from '../util/transaction.js'
+import { zod } from '../util/zod.js'
 
-export * as Competency from './competency'
+export * as Competency from './competency.js'
 
 export const Info = createSelectSchema(schema.competency, {
   handle(schema) {

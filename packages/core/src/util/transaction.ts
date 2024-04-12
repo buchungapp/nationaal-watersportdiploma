@@ -4,7 +4,7 @@ import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
 
 import type { Database, schema } from '@nawadi/db'
 import { Context } from '@nawadi/lib/node'
-import { db } from '../drizzle'
+import { getDatabase } from './db.js'
 
 export type Transaction = PgTransaction<
   PostgresJsQueryResultHKT,
@@ -23,7 +23,7 @@ export async function useTransaction<T>(callback: (trx: TxOrDb) => Promise<T>) {
     const { tx } = TransactionContext.use()
     return callback(tx)
   } catch {
-    return callback(db)
+    return callback(getDatabase())
   }
 }
 
@@ -34,6 +34,8 @@ export async function createTransaction<T>(
     const { tx } = TransactionContext.use()
     return callback(tx)
   } catch {
+    const db = getDatabase()
+
     const result = await db.transaction(
       async (tx) => {
         const result = await TransactionContext.with({ tx }, async () => {

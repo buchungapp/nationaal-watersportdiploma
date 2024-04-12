@@ -1,5 +1,6 @@
 import assert from 'assert'
 import * as http from 'http'
+import { URL } from 'node:url'
 import * as application from '../application/index.js'
 
 export interface ServerContext {

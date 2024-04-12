@@ -8,9 +8,9 @@ import {
   text,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { _objectTable } from './_sb_controlled/storage'
-import { location } from './location'
-import { identity } from './user'
+import { _objectTable } from './_sb_controlled/storage.js'
+import { location } from './location.js'
+import { identity } from './user.js'
 
 export const media_status = pgEnum('media_status', [
   'failed',

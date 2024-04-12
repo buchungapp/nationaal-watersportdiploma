@@ -2,14 +2,15 @@ import { schema } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { createTransaction, useTransaction } from '../util/transaction'
-import { zod } from '../util/zod'
+import { createTransaction, useTransaction } from '../util/transaction.js'
+import { zod } from '../util/zod.js'
 
-export * as Program from './'
-export { Competency } from './competency'
-export { Degree } from './degree'
-export { Discipline } from './discipline'
-export { Module } from './module'
+export { Category } from './category.js'
+export { Competency } from './competency.js'
+export { Degree } from './degree.js'
+export { Discipline } from './discipline.js'
+export * as Program from './index.js'
+export { Module } from './module.js'
 
 const program = schema.program
 

@@ -17,13 +17,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- CREATE TYPE "identity_type" AS ENUM('student', 'instructor', 'location_admin');
+ CREATE TYPE "identity_link_status" AS ENUM('pending', 'accepted', 'rejected', 'revoked');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- CREATE TYPE "identity_link_status" AS ENUM('pending', 'accepted', 'rejected', 'revoked');
+ CREATE TYPE "identity_type" AS ENUM('student', 'instructor', 'location_admin');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -34,16 +34,9 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
-CREATE TABLE IF NOT EXISTS "student_curriculum" (
-	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"identity_id" uuid NOT NULL,
-	"curriculum_id" uuid NOT NULL,
-	"gear_type_id" uuid NOT NULL,
-	"started_at" timestamp with time zone DEFAULT now() NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS "certificate" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"handle" text NOT NULL,
 	"student_curriculum_id" uuid NOT NULL,
 	"location_id" uuid NOT NULL,
 	"issued_at" timestamp with time zone,
@@ -57,6 +50,14 @@ CREATE TABLE IF NOT EXISTS "student_completed_competency" (
 	CONSTRAINT "student_completed_competency_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id")
 );
 
+CREATE TABLE IF NOT EXISTS "student_curriculum" (
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"identity_id" uuid NOT NULL,
+	"curriculum_id" uuid NOT NULL,
+	"gear_type_id" uuid NOT NULL,
+	"started_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS "curriculum" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"program_id" uuid NOT NULL,
@@ -65,20 +66,13 @@ CREATE TABLE IF NOT EXISTS "curriculum" (
 	CONSTRAINT "curriculum_program_id_revision_unique" UNIQUE("program_id","revision")
 );
 
-CREATE TABLE IF NOT EXISTS "curriculum_module" (
-	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"curriculum_revision_id" uuid NOT NULL,
-	"module_id" uuid NOT NULL,
-	CONSTRAINT "curriculum_module_curriculum_revision_id_module_id_unique" UNIQUE("curriculum_revision_id","module_id")
-);
-
 CREATE TABLE IF NOT EXISTS "curriculum_competency" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"curriculum_module_id" uuid NOT NULL,
+	"curriculum_id" uuid NOT NULL,
+	"module_id" uuid NOT NULL,
 	"competency_id" uuid NOT NULL,
 	"is_required" boolean NOT NULL,
-	"requirement" text,
-	CONSTRAINT "curriculum_competency_curriculum_module_id_competency_id_unq" UNIQUE("curriculum_module_id","competency_id")
+	"requirement" text
 );
 
 CREATE TABLE IF NOT EXISTS "curriculum_gear_link" (
@@ -87,10 +81,17 @@ CREATE TABLE IF NOT EXISTS "curriculum_gear_link" (
 	CONSTRAINT "curriculum_gear_link_curriculum_id_gear_type_id_pk" PRIMARY KEY("curriculum_id","gear_type_id")
 );
 
+CREATE TABLE IF NOT EXISTS "curriculum_module" (
+	"curriculum_id" uuid NOT NULL,
+	"module_id" uuid NOT NULL,
+	CONSTRAINT "curriculum_module_curriculum_id_module_id_pk" PRIMARY KEY("curriculum_id","module_id"),
+	CONSTRAINT "curriculum_module_curriculum_id_module_id_unique" UNIQUE("curriculum_id","module_id")
+);
+
 CREATE TABLE IF NOT EXISTS "location" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"handle" text NOT NULL,
-	"name" text NOT NULL,
+	"name" text,
 	"logo_media_id" uuid,
 	"square_logo_media_id" uuid,
 	"website_url" text
@@ -144,26 +145,21 @@ CREATE TABLE IF NOT EXISTS "country" (
 	"alpha_3" char(3) DEFAULT '' NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS "category" (
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"parent_category_id" uuid,
+	"handle" text NOT NULL,
+	"title" text,
+	"description" text,
+	CONSTRAINT "category_handle_unique" UNIQUE("handle")
+);
+
 CREATE TABLE IF NOT EXISTS "competency" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"handle" text NOT NULL,
 	"title" text,
 	"type" "competency_type" NOT NULL,
 	CONSTRAINT "competency_handle_unique" UNIQUE("handle")
-);
-
-CREATE TABLE IF NOT EXISTS "module" (
-	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"handle" text NOT NULL,
-	"title" text,
-	CONSTRAINT "module_handle_unique" UNIQUE("handle")
-);
-
-CREATE TABLE IF NOT EXISTS "discipline" (
-	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"handle" text NOT NULL,
-	"title" text,
-	CONSTRAINT "discipline_handle_unique" UNIQUE("handle")
 );
 
 CREATE TABLE IF NOT EXISTS "degree" (
@@ -174,13 +170,25 @@ CREATE TABLE IF NOT EXISTS "degree" (
 	CONSTRAINT "degree_handle_unique" UNIQUE("handle")
 );
 
-CREATE TABLE IF NOT EXISTS "category" (
+CREATE TABLE IF NOT EXISTS "discipline" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"parent_category_id" uuid,
 	"handle" text NOT NULL,
 	"title" text,
-	"description" text,
-	CONSTRAINT "category_handle_unique" UNIQUE("handle")
+	CONSTRAINT "discipline_handle_unique" UNIQUE("handle")
+);
+
+CREATE TABLE IF NOT EXISTS "gear_type" (
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"handle" text NOT NULL,
+	"title" text,
+	CONSTRAINT "gear_type_handle_unique" UNIQUE("handle")
+);
+
+CREATE TABLE IF NOT EXISTS "module" (
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"handle" text NOT NULL,
+	"title" text,
+	CONSTRAINT "module_handle_unique" UNIQUE("handle")
 );
 
 CREATE TABLE IF NOT EXISTS "program" (
@@ -189,8 +197,7 @@ CREATE TABLE IF NOT EXISTS "program" (
 	"title" text,
 	"discipline_id" uuid NOT NULL,
 	"degree_id" uuid NOT NULL,
-	CONSTRAINT "program_handle_unique" UNIQUE("handle"),
-	CONSTRAINT "program_degree_id_discipline_id_unique" UNIQUE("degree_id","discipline_id")
+	CONSTRAINT "program_handle_unique" UNIQUE("handle")
 );
 
 CREATE TABLE IF NOT EXISTS "program_category" (
@@ -198,13 +205,6 @@ CREATE TABLE IF NOT EXISTS "program_category" (
 	"program_id" uuid NOT NULL,
 	"category_id" uuid NOT NULL,
 	CONSTRAINT "program_category_category_id_program_id_unique" UNIQUE("category_id","program_id")
-);
-
-CREATE TABLE IF NOT EXISTS "gear_type" (
-	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"handle" text NOT NULL,
-	"title" text,
-	CONSTRAINT "gear_type_handle_unique" UNIQUE("handle")
 );
 
 CREATE TABLE IF NOT EXISTS "student_competency_progress" (
@@ -216,14 +216,9 @@ CREATE TABLE IF NOT EXISTS "student_competency_progress" (
 	CONSTRAINT "student_competency_progress_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id","location_id")
 );
 
-CREATE TABLE IF NOT EXISTS "user" (
-	"auth_user_id" uuid PRIMARY KEY NOT NULL,
-	"display_name" text,
-	"_metadata" jsonb
-);
-
 CREATE TABLE IF NOT EXISTS "identity" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"handle" text NOT NULL,
 	"type" "identity_type" NOT NULL,
 	"user_id" uuid,
 	"first_name" text,
@@ -247,31 +242,22 @@ CREATE TABLE IF NOT EXISTS "identity_location_link" (
 	CONSTRAINT "identity_location_link_identity_id_location_id_pk" PRIMARY KEY("identity_id","location_id")
 );
 
+CREATE TABLE IF NOT EXISTS "user" (
+	"auth_user_id" uuid PRIMARY KEY NOT NULL,
+	"display_name" text,
+	"_metadata" jsonb
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS "certificate_unq_handle" ON "certificate" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "student_curriculum_unq_identity_gear_curriculum" ON "student_curriculum" ("identity_id","curriculum_id","gear_type_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "curriculum_competency_unq_set" ON "curriculum_competency" ("curriculum_id","module_id","competency_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "unique_handle_for_location" ON "location" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_2_is_unique" ON "country" ("alpha_2");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_3_is_unique" ON "country" ("alpha_3");
+CREATE UNIQUE INDEX IF NOT EXISTS "unq_handle" ON "identity" ("handle");
 CREATE INDEX IF NOT EXISTS "user_global" ON "identity" ("user_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "one_instructor_per_auth_user" ON "identity" ("user_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "one_location_admin_per_auth_user" ON "identity" ("user_id");
-DO $$ BEGIN
- ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_gear_type_id_fk" FOREIGN KEY ("curriculum_id","gear_type_id") REFERENCES "curriculum_gear_link"("curriculum_id","gear_type_id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "curriculum"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_gear_type_id_fk" FOREIGN KEY ("gear_type_id") REFERENCES "gear_type"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
 DO $$ BEGIN
  ALTER TABLE "certificate" ADD CONSTRAINT "certificate_student_curriculum_link_id_fk" FOREIGN KEY ("student_curriculum_id") REFERENCES "student_curriculum"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
@@ -303,25 +289,37 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_gear_type_id_fk" FOREIGN KEY ("curriculum_id","gear_type_id") REFERENCES "curriculum_gear_link"("curriculum_id","gear_type_id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "curriculum"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_gear_type_id_fk" FOREIGN KEY ("gear_type_id") REFERENCES "gear_type"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_identity_id_fk" FOREIGN KEY ("identity_id") REFERENCES "identity"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
  ALTER TABLE "curriculum" ADD CONSTRAINT "curriculum_program_id_fk" FOREIGN KEY ("program_id") REFERENCES "program"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "curriculum_module" ADD CONSTRAINT "curriculum_module_curriculum_id_fk" FOREIGN KEY ("curriculum_revision_id") REFERENCES "curriculum"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "curriculum_module" ADD CONSTRAINT "curriculum_module_module_id_fk" FOREIGN KEY ("module_id") REFERENCES "module"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
- ALTER TABLE "curriculum_competency" ADD CONSTRAINT "curriculum_competency_curriculum_module_id_fk" FOREIGN KEY ("curriculum_module_id") REFERENCES "curriculum_module"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "curriculum_competency" ADD CONSTRAINT "curriculum_competency_curriculum_module_id_fk" FOREIGN KEY ("curriculum_id","module_id") REFERENCES "curriculum_module"("curriculum_id","module_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -340,6 +338,18 @@ END $$;
 
 DO $$ BEGIN
  ALTER TABLE "curriculum_gear_link" ADD CONSTRAINT "curriculum_gear_link_gear_type_id_fk" FOREIGN KEY ("gear_type_id") REFERENCES "gear_type"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "curriculum_module" ADD CONSTRAINT "curriculum_module_curriculum_id_fk" FOREIGN KEY ("curriculum_id") REFERENCES "curriculum"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "curriculum_module" ADD CONSTRAINT "curriculum_module_module_id_fk" FOREIGN KEY ("module_id") REFERENCES "module"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -423,12 +433,6 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "user" ADD CONSTRAINT "user_auth_user_id_fk" FOREIGN KEY ("auth_user_id") REFERENCES "auth"."users"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
-
-DO $$ BEGIN
  ALTER TABLE "identity" ADD CONSTRAINT "identity_birth_country_country_alpha_2_fk" FOREIGN KEY ("birth_country") REFERENCES "country"("alpha_2") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
@@ -448,6 +452,12 @@ END $$;
 
 DO $$ BEGIN
  ALTER TABLE "identity_location_link" ADD CONSTRAINT "identity_location_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "location"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "user" ADD CONSTRAINT "user_auth_user_id_fk" FOREIGN KEY ("auth_user_id") REFERENCES "auth"."users"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

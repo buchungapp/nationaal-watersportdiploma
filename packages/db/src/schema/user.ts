@@ -13,9 +13,9 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { _usersTable } from './_sb_controlled/auth'
-import { location } from './location'
-import { country } from './platform'
+import { _usersTable } from './_sb_controlled/auth.js'
+import { location } from './location.js'
+import { country } from './platform.js'
 
 export const user = pgTable(
   'user',
@@ -48,6 +48,7 @@ export const identity = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
+    handle: text('handle').notNull(),
     type: identityType('type').notNull(),
     userId: uuid('user_id'),
     firstName: text('first_name'),
@@ -67,6 +68,7 @@ export const identity = pgTable(
         foreignColumns: [user.authUserId],
         name: 'identity_user_id_fk',
       }),
+      unqHandle: uniqueIndex('unq_handle').on(table.handle),
       userGlobal: index('user_global').on(table.userId),
       oneInstructorPerAuthUser: uniqueIndex('one_instructor_per_auth_user')
         .on(table.userId)

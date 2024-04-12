@@ -1,103 +1,9 @@
 {
-  "id": "4d298ee8-12cc-4709-a9f7-e8ead623d66c",
+  "id": "29bab061-0cda-41bd-8ede-e275d86344b7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
   "tables": {
-    "student_curriculum": {
-      "name": "student_curriculum",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "identity_id": {
-          "name": "identity_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "curriculum_id": {
-          "name": "curriculum_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "gear_type_id": {
-          "name": "gear_type_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "started_at": {
-          "name": "started_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "student_curriculum_unq_identity_gear_curriculum": {
-          "name": "student_curriculum_unq_identity_gear_curriculum",
-          "columns": [
-            "identity_id",
-            "curriculum_id",
-            "gear_type_id"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "student_curriculum_link_curriculum_id_gear_type_id_fk": {
-          "name": "student_curriculum_link_curriculum_id_gear_type_id_fk",
-          "tableFrom": "student_curriculum",
-          "tableTo": "curriculum_gear_link",
-          "columnsFrom": [
-            "curriculum_id",
-            "gear_type_id"
-          ],
-          "columnsTo": [
-            "curriculum_id",
-            "gear_type_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "student_curriculum_link_curriculum_id_fk": {
-          "name": "student_curriculum_link_curriculum_id_fk",
-          "tableFrom": "student_curriculum",
-          "tableTo": "curriculum",
-          "columnsFrom": [
-            "curriculum_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "student_curriculum_link_gear_type_id_fk": {
-          "name": "student_curriculum_link_gear_type_id_fk",
-          "tableFrom": "student_curriculum",
-          "tableTo": "gear_type",
-          "columnsFrom": [
-            "gear_type_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "certificate": {
       "name": "certificate",
       "schema": "",
@@ -108,6 +14,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "student_curriculum_id": {
           "name": "student_curriculum_id",
@@ -134,7 +46,15 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "certificate_unq_handle": {
+          "name": "certificate_unq_handle",
+          "columns": [
+            "handle"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "certificate_student_curriculum_link_id_fk": {
           "name": "certificate_student_curriculum_link_id_fk",
@@ -242,6 +162,113 @@
       },
       "uniqueConstraints": {}
     },
+    "student_curriculum": {
+      "name": "student_curriculum",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "identity_id": {
+          "name": "identity_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "curriculum_id": {
+          "name": "curriculum_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gear_type_id": {
+          "name": "gear_type_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "student_curriculum_unq_identity_gear_curriculum": {
+          "name": "student_curriculum_unq_identity_gear_curriculum",
+          "columns": [
+            "identity_id",
+            "curriculum_id",
+            "gear_type_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "student_curriculum_link_curriculum_id_gear_type_id_fk": {
+          "name": "student_curriculum_link_curriculum_id_gear_type_id_fk",
+          "tableFrom": "student_curriculum",
+          "tableTo": "curriculum_gear_link",
+          "columnsFrom": [
+            "curriculum_id",
+            "gear_type_id"
+          ],
+          "columnsTo": [
+            "curriculum_id",
+            "gear_type_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "student_curriculum_link_curriculum_id_fk": {
+          "name": "student_curriculum_link_curriculum_id_fk",
+          "tableFrom": "student_curriculum",
+          "tableTo": "curriculum",
+          "columnsFrom": [
+            "curriculum_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "student_curriculum_link_gear_type_id_fk": {
+          "name": "student_curriculum_link_gear_type_id_fk",
+          "tableFrom": "student_curriculum",
+          "tableTo": "gear_type",
+          "columnsFrom": [
+            "gear_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "student_curriculum_link_identity_id_fk": {
+          "name": "student_curriculum_link_identity_id_fk",
+          "tableFrom": "student_curriculum",
+          "tableTo": "identity",
+          "columnsFrom": [
+            "identity_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "curriculum": {
       "name": "curriculum",
       "schema": "",
@@ -300,71 +327,6 @@
         }
       }
     },
-    "curriculum_module": {
-      "name": "curriculum_module",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "curriculum_revision_id": {
-          "name": "curriculum_revision_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "module_id": {
-          "name": "module_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "curriculum_module_curriculum_id_fk": {
-          "name": "curriculum_module_curriculum_id_fk",
-          "tableFrom": "curriculum_module",
-          "tableTo": "curriculum",
-          "columnsFrom": [
-            "curriculum_revision_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "curriculum_module_module_id_fk": {
-          "name": "curriculum_module_module_id_fk",
-          "tableFrom": "curriculum_module",
-          "tableTo": "module",
-          "columnsFrom": [
-            "module_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "curriculum_module_curriculum_revision_id_module_id_unique": {
-          "name": "curriculum_module_curriculum_revision_id_module_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "curriculum_revision_id",
-            "module_id"
-          ]
-        }
-      }
-    },
     "curriculum_competency": {
       "name": "curriculum_competency",
       "schema": "",
@@ -376,8 +338,14 @@
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
         },
-        "curriculum_module_id": {
-          "name": "curriculum_module_id",
+        "curriculum_id": {
+          "name": "curriculum_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "module_id": {
+          "name": "module_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -401,17 +369,29 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "curriculum_competency_unq_set": {
+          "name": "curriculum_competency_unq_set",
+          "columns": [
+            "curriculum_id",
+            "module_id",
+            "competency_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "curriculum_competency_curriculum_module_id_fk": {
           "name": "curriculum_competency_curriculum_module_id_fk",
           "tableFrom": "curriculum_competency",
           "tableTo": "curriculum_module",
           "columnsFrom": [
-            "curriculum_module_id"
+            "curriculum_id",
+            "module_id"
           ],
           "columnsTo": [
-            "id"
+            "curriculum_id",
+            "module_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -431,16 +411,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "curriculum_competency_curriculum_module_id_competency_id_unq": {
-          "name": "curriculum_competency_curriculum_module_id_competency_id_unq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "curriculum_module_id",
-            "competency_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "curriculum_gear_link": {
       "name": "curriculum_gear_link",
@@ -499,6 +470,72 @@
       },
       "uniqueConstraints": {}
     },
+    "curriculum_module": {
+      "name": "curriculum_module",
+      "schema": "",
+      "columns": {
+        "curriculum_id": {
+          "name": "curriculum_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "module_id": {
+          "name": "module_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "curriculum_module_curriculum_id_fk": {
+          "name": "curriculum_module_curriculum_id_fk",
+          "tableFrom": "curriculum_module",
+          "tableTo": "curriculum",
+          "columnsFrom": [
+            "curriculum_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "curriculum_module_module_id_fk": {
+          "name": "curriculum_module_module_id_fk",
+          "tableFrom": "curriculum_module",
+          "tableTo": "module",
+          "columnsFrom": [
+            "module_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "curriculum_module_curriculum_id_module_id_pk": {
+          "name": "curriculum_module_curriculum_id_module_id_pk",
+          "columns": [
+            "curriculum_id",
+            "module_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "curriculum_module_curriculum_id_module_id_unique": {
+          "name": "curriculum_module_curriculum_id_module_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "curriculum_id",
+            "module_id"
+          ]
+        }
+      }
+    },
     "location": {
       "name": "location",
       "schema": "",
@@ -520,7 +557,7 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "logo_media_id": {
           "name": "logo_media_id",
@@ -942,166 +979,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "competency": {
-      "name": "competency",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "handle": {
-          "name": "handle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "type": {
-          "name": "type",
-          "type": "competency_type",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "competency_handle_unique": {
-          "name": "competency_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
-        }
-      }
-    },
-    "module": {
-      "name": "module",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "handle": {
-          "name": "handle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "module_handle_unique": {
-          "name": "module_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
-        }
-      }
-    },
-    "discipline": {
-      "name": "discipline",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "handle": {
-          "name": "handle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "discipline_handle_unique": {
-          "name": "discipline_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
-        }
-      }
-    },
-    "degree": {
-      "name": "degree",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "handle": {
-          "name": "handle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "rang": {
-          "name": "rang",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "degree_handle_unique": {
-          "name": "degree_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
-        }
-      }
-    },
     "category": {
       "name": "category",
       "schema": "",
@@ -1158,6 +1035,203 @@
       "uniqueConstraints": {
         "category_handle_unique": {
           "name": "category_handle_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "handle"
+          ]
+        }
+      }
+    },
+    "competency": {
+      "name": "competency",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "competency_type",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "competency_handle_unique": {
+          "name": "competency_handle_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "handle"
+          ]
+        }
+      }
+    },
+    "degree": {
+      "name": "degree",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rang": {
+          "name": "rang",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "degree_handle_unique": {
+          "name": "degree_handle_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "handle"
+          ]
+        }
+      }
+    },
+    "discipline": {
+      "name": "discipline",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "discipline_handle_unique": {
+          "name": "discipline_handle_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "handle"
+          ]
+        }
+      }
+    },
+    "gear_type": {
+      "name": "gear_type",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "gear_type_handle_unique": {
+          "name": "gear_type_handle_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "handle"
+          ]
+        }
+      }
+    },
+    "module": {
+      "name": "module",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "module_handle_unique": {
+          "name": "module_handle_unique",
           "nullsNotDistinct": false,
           "columns": [
             "handle"
@@ -1238,14 +1312,6 @@
           "columns": [
             "handle"
           ]
-        },
-        "program_degree_id_discipline_id_unique": {
-          "name": "program_degree_id_discipline_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "degree_id",
-            "discipline_id"
-          ]
         }
       }
     },
@@ -1310,43 +1376,6 @@
           "columns": [
             "category_id",
             "program_id"
-          ]
-        }
-      }
-    },
-    "gear_type": {
-      "name": "gear_type",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "handle": {
-          "name": "handle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "gear_type_handle_unique": {
-          "name": "gear_type_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
           ]
         }
       }
@@ -1441,49 +1470,6 @@
       },
       "uniqueConstraints": {}
     },
-    "user": {
-      "name": "user",
-      "schema": "",
-      "columns": {
-        "auth_user_id": {
-          "name": "auth_user_id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "display_name": {
-          "name": "display_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "_metadata": {
-          "name": "_metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "user_auth_user_id_fk": {
-          "name": "user_auth_user_id_fk",
-          "tableFrom": "user",
-          "tableTo": "users",
-          "schemaTo": "auth",
-          "columnsFrom": [
-            "auth_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "identity": {
       "name": "identity",
       "schema": "",
@@ -1494,6 +1480,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
+        },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "type": {
           "name": "type",
@@ -1551,6 +1543,13 @@
         }
       },
       "indexes": {
+        "unq_handle": {
+          "name": "unq_handle",
+          "columns": [
+            "handle"
+          ],
+          "isUnique": true
+        },
         "user_global": {
           "name": "user_global",
           "columns": [
@@ -1697,6 +1696,49 @@
         }
       },
       "uniqueConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "auth_user_id": {
+          "name": "auth_user_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "display_name": {
+          "name": "display_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_metadata": {
+          "name": "_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "user_auth_user_id_fk": {
+          "name": "user_auth_user_id_fk",
+          "tableFrom": "user",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "auth_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     }
   },
   "enums": {
@@ -1724,14 +1766,6 @@
         "skill": "skill"
       }
     },
-    "identity_type": {
-      "name": "identity_type",
-      "values": {
-        "student": "student",
-        "instructor": "instructor",
-        "location_admin": "location_admin"
-      }
-    },
     "identity_link_status": {
       "name": "identity_link_status",
       "values": {
@@ -1739,6 +1773,14 @@
         "accepted": "accepted",
         "rejected": "rejected",
         "revoked": "revoked"
+      }
+    },
+    "identity_type": {
+      "name": "identity_type",
+      "values": {
+        "student": "student",
+        "instructor": "instructor",
+        "location_admin": "location_admin"
       }
     },
     "location_link_permission_level": {

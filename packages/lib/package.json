@@ -23,6 +23,6 @@
   "keywords": [],
   "devDependencies": {
     "@types/node": "^20.12.4",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.5"
   }
 }

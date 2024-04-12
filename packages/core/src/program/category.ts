@@ -5,11 +5,13 @@ import { z } from 'zod'
 import { useTransaction } from '../util/transaction.js'
 import { zod } from '../util/zod.js'
 
-export * as Discipline from './discipline.js'
+export * as Category from './category.js'
 
-const discipline = schema.discipline
+const category = schema.category
 
-export const Info = createSelectSchema(discipline, {
+export const test = 1
+
+export const Info = createSelectSchema(category, {
   handle(schema) {
     return schema.handle
       .trim()
@@ -17,25 +19,35 @@ export const Info = createSelectSchema(discipline, {
       .min(3)
       .regex(/^[a-z0-9\-]+$/)
   },
+  parentCategoryId: (schema) => schema.parentCategoryId.uuid(),
 })
-export type Info = typeof discipline.$inferSelect
+export type Info = typeof category.$inferSelect
 
 export const create = zod(
-  Info.pick({ title: true, handle: true }).partial({
+  Info.pick({
     title: true,
+    handle: true,
+    parentCategoryId: true,
+    description: true,
+  }).partial({
+    title: true,
+    parentCategoryId: true,
+    description: true,
   }),
   (input) =>
     useTransaction(async (tx) => {
       const [insert] = await tx
-        .insert(discipline)
+        .insert(category)
         .values({
           handle: input.handle,
           title: input.title,
+          parentCategoryId: input.parentCategoryId,
+          description: input.description,
         })
-        .returning({ id: discipline.id })
+        .returning({ id: category.id })
 
       if (!insert) {
-        throw new Error('Failed to insert discipline')
+        throw new Error('Failed to insert category')
       }
 
       return insert.id
@@ -44,7 +56,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () =>
   useTransaction(async (tx) => {
-    return tx.select().from(discipline)
+    return tx.select().from(category)
   }),
 )
 
@@ -52,8 +64,8 @@ export const fromId = zod(Info.shape.id, async (id) =>
   useTransaction(async (tx) => {
     return tx
       .select()
-      .from(discipline)
-      .where(eq(discipline.id, id))
+      .from(category)
+      .where(eq(category.id, id))
       .then((rows) => rows[0])
   }),
 )
@@ -62,8 +74,8 @@ export const fromHandle = zod(Info.shape.handle, async (handle) =>
   useTransaction(async (tx) => {
     return tx
       .select()
-      .from(discipline)
-      .where(eq(discipline.handle, handle))
+      .from(category)
+      .where(eq(category.handle, handle))
       .then((rows) => rows[0])
   }),
 )
