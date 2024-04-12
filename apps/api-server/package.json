@@ -38,19 +38,17 @@
   "keywords": [],
   "dependencies": {
     "@appsignal/nodejs": "^3.1.0",
-    "@nawadi/api": "workspace:*",
-    "@nawadi/db": "workspace:*",
     "@types/node": "^20.11.19",
-    "@types/pg": "^8.11.0",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.30.7",
     "oa42-appsignal": "^0.1.11",
-    "pg": "^8.11.3",
     "tslib": "^2.6.2",
     "type-fest": "^4.10.2",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@nawadi/api": "workspace:*",
+    "@nawadi/core": "workspace:^",
     "@tsconfig/node20": "^20.1.2",
     "typescript": "^5.4.5"
   }

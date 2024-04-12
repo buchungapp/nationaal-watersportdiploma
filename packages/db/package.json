@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "type": "module",
+  "types": "./src/main.ts",
   "exports": {
     ".": "./src/main.ts"
   },

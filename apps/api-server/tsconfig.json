@@ -7,7 +7,7 @@
     "declaration": true,
     "composite": true,
     "module": "CommonJS",
-    "moduleResolution": "Node10"
+    "moduleResolution": "Node"
   },
   "include": ["src/**/*"]
 }

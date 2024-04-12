@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "sideEffects": false,
+  "types": "./src/index.ts",
   "exports": {
+    ".": "./src/index.ts",
     "./program": "./src/program/index.ts",
     "./curriculum": "./src/curriculum/index.ts",
     "./location": "./src/location/index.ts",
@@ -11,7 +13,7 @@
   },
   "scripts": {
     "test": "bun test --preload ./__tests__/setup.ts",
-    "generate:openapi": "PGURI='http://localhost:3000' bun ./src/openapi/generator/specs.ts",
+    "generate:openapi": "bun ./src/openapi/generator/specs.ts",
     "typecheck": "tsc --noEmit --incremental"
   },
   "devDependencies": {

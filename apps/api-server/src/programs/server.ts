@@ -1,6 +1,5 @@
-import { createDatabase } from '@nawadi/db'
 import * as http from 'http'
-import pg from 'pg'
+
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
 
@@ -26,22 +25,15 @@ export function configureServerProgram(argv: yargs.Argv) {
 
 interface MainConfiguration {
   port: number
-  pgUri: string
 }
 
 async function main(configuration: MainConfiguration) {
-  const { port, pgUri } = configuration
+  const { port } = configuration
 
   console.info('Starting server...')
 
-  const pgPool = new pg.Pool({
-    connectionString: pgUri,
-  })
   try {
-    const db = createDatabase(pgPool)
-    const context = {
-      db,
-    }
+    const context = {}
     const server = application.createApplicationServer(context)
 
     const httpServer = http.createServer()
@@ -76,7 +68,6 @@ async function main(configuration: MainConfiguration) {
       )
     }
   } finally {
-    await pgPool.end()
   }
 
   console.info('Server stopped')

@@ -1,5 +1,1 @@
-import { Database } from '@nawadi/db'
-
-export interface Context {
-  db: Database
-}
+export interface Context {}
