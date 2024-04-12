@@ -1,9 +1,8 @@
+import type { Database, schema } from '@nawadi/db'
+import { node } from '@nawadi/lib'
 import { type ExtractTablesWithRelations } from 'drizzle-orm'
 import { type PgTransaction } from 'drizzle-orm/pg-core'
 import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
-
-import type { Database, schema } from '@nawadi/db'
-import { Context } from '@nawadi/lib/node'
 import { getDatabase } from './db.js'
 
 export type Transaction = PgTransaction<
@@ -14,7 +13,7 @@ export type Transaction = PgTransaction<
 
 export type TxOrDb = Database | Transaction
 
-const TransactionContext = Context.create<{
+const TransactionContext = node.Context.create<{
   tx: TxOrDb
 }>('TransactionContext')
 

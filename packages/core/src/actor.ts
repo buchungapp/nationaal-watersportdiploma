@@ -1,4 +1,4 @@
-import { Context } from '@nawadi/lib/node'
+import { node } from '@nawadi/lib'
 import { z } from 'zod'
 
 export const PublicActor = z.object({
@@ -41,7 +41,7 @@ export const Actor = z.discriminatedUnion('type', [
 ])
 export type Actor = z.infer<typeof Actor>
 
-const ActorContext = Context.create<Actor>('actor')
+const ActorContext = node.Context.create<Actor>('actor')
 
 export const useActor = ActorContext.use
 export const withActor = ActorContext.with

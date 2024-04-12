@@ -4,10 +4,8 @@
   "private": true,
   "description": "",
   "type": "commonjs",
-  "exports": {
-    "./constants": "./src/constants.ts",
-    "./node": "./src/node/index.ts"
-  },
+  "main": "./out/main.js",
+  "types": "./out/main.d.ts",
   "repository": {
     "type": "git",
     "url": "git@github.com:buchungapp/nationaal-watersportdiploma.git"
@@ -29,7 +27,7 @@
     "@types/node": "^20.11.19"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^16.1.3",
+    "@tsconfig/node20": "^20.1.2",
     "typescript": "^5.4.5"
   }
 }

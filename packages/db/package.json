@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "description": "",
   "type": "commonjs",
-  "types": "./out/main.d.ts",
   "main": "./out/main.js",
+  "types": "./out/main.d.ts",
   "scripts": {
     "prepack": "tsc --build",
     "pretest": "tsc --build",
@@ -35,7 +35,7 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^16.1.3",
+    "@tsconfig/node20": "^20.1.2",
     "drizzle-kit": "^0.20.14",
     "typescript": "^5.4.5"
   }

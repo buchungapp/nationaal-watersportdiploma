@@ -1,6 +1,8 @@
 {
-  "extends": "@tsconfig/node16",
+  "extends": "@tsconfig/node20",
   "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "rootDir": "./src",
     "outDir": "./out",
     "sourceMap": true,
