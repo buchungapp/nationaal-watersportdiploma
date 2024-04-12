@@ -1,7 +1,7 @@
 import { withDatabase } from '@nawadi/db'
+import assert from 'assert'
 import test from 'node:test'
 import { Competency } from './competency.js'
-import assert = require('assert')
 
 test('create competency', () =>
   withDatabase(async () => {
