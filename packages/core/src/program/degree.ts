@@ -9,8 +9,6 @@ export * as Degree from './degree'
 
 const degree = schema.degree
 
-export const test = 1
-
 export const Info = createSelectSchema(degree, {
   handle(schema) {
     return schema.handle

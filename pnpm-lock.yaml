@@ -210,7 +210,7 @@ importers:
         version: link:../lib
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.30.7)(zod@3.22.4)
+        version: 0.5.1(drizzle-orm@0.30.8)(zod@3.22.4)
       postgres:
         specifier: ^3.4.4
         version: 3.4.4
@@ -234,8 +234,8 @@ importers:
         specifier: ^20.12.4
         version: 20.12.4
       drizzle-orm:
-        specifier: ^0.30.7
-        version: 0.30.7(postgres@3.4.4)
+        specifier: ^0.30.8
+        version: 0.30.8(postgres@3.4.4)
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -252,8 +252,8 @@ importers:
         specifier: ^17.0.32
         version: 17.0.32
       drizzle-orm:
-        specifier: ^0.30.7
-        version: 0.30.7(postgres@3.4.4)
+        specifier: ^0.30.8
+        version: 0.30.8(postgres@3.4.4)
       postgres:
         specifier: ^3.4.4
         version: 3.4.4
@@ -3592,8 +3592,8 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.30.7(postgres@3.4.4):
-    resolution: {integrity: sha512-9qefSZQlu2fO2qv24piHyWFWcxcOY15//0v4j8qomMqaxzipNoG+fUBrQ7Ftk7PY7APRbRdn/nkEXWxiI4a8mw==}
+  /drizzle-orm@0.30.8(postgres@3.4.4):
+    resolution: {integrity: sha512-9pBJA0IjnpPpzZ6s9jlS1CQAbKoBmbn2GJesPhXaVblAA/joOJ4AWWevYcqvLGj9SvThBAl7WscN8Zwgg5mnTw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
       '@cloudflare/workers-types': '>=3'
@@ -3674,13 +3674,13 @@ packages:
     dependencies:
       postgres: 3.4.4
 
-  /drizzle-zod@0.5.1(drizzle-orm@0.30.7)(zod@3.22.4):
+  /drizzle-zod@0.5.1(drizzle-orm@0.30.8)(zod@3.22.4):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
     peerDependencies:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.30.7(postgres@3.4.4)
+      drizzle-orm: 0.30.8(postgres@3.4.4)
       zod: 3.22.4
     dev: false
 
