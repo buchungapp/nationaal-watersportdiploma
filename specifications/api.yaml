@@ -10,6 +10,27 @@ security:
   - api-token: []
 
 paths:
+  /programs:
+    get:
+      operationId: get-programs
+      summary: Retrieve a list of programs
+      description: >-
+        Retrieve a list of programs. The list will be paginated and the provided
+        query parameters allow filtering the returned programs.
+      tags:
+        - Programs
+      security:
+        - token: []
+      responses:
+        '200':
+          description: A list of programs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProgramSchema'
+
   /main-category:
     get:
       operationId: get-main-categories
@@ -81,6 +102,27 @@ paths:
 components:
   schemas:
     #entity schemas
+
+    ProgramSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The unique identifier of the program
+        handle:
+          type: string
+          pattern: ^[a-z0-9\-]+$
+          minLength: 3
+          description: The unique handle of the program
+        title:
+          type: string
+          nullable: true
+          description: The title of the program
+      required:
+        - id
+        - handle
+        - title
 
     main-category:
       description: |-
@@ -154,6 +196,11 @@ components:
       description: Forbidden
 
   securitySchemes:
+    token:
+      type: http
+      description: Default authentication mechanism
+      scheme: bearer
+
     api-token:
       type: apiKey
       name: api-token
