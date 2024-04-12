@@ -16,6 +16,18 @@
       "name": "packages/db",
       "path": "./packages/db",
     },
+    {
+      "name": "packages/core",
+      "path": "./packages/core",
+    },
+    {
+      "name": "packages/lib",
+      "path": "./packages/lib",
+    },
+    {
+      "name": "packages/scripts",
+      "path": "./packages/scripts",
+    },
   ],
   "settings": {
     "window.title": "Nationaal Watersportdiploma",
