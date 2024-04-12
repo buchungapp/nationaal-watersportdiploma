@@ -13,7 +13,7 @@ cp.execFileSync(
     'dlx',
     'oa42-generator',
     'package',
-    path.resolve('specifications', 'api-gen.yaml'),
+    path.resolve('specifications', 'api.yaml'),
     '--package-directory',
     path.resolve('generated', 'api'),
     '--package-name',
