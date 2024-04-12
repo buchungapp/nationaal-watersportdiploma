@@ -1,4 +1,9 @@
-import { z } from 'zod'
+import * as z from 'zod'
+import { extendZodWithOpenApi } from 'zod-openapi'
+
+extendZodWithOpenApi(z)
+
+export { z as openApiZ }
 
 export function zod<
   Schema extends z.ZodSchema<any, any, any>,

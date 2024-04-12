@@ -4,7 +4,7 @@ import { type PostgresJsQueryResultHKT } from 'drizzle-orm/postgres-js'
 
 import type { Database, schema } from '@nawadi/db'
 import { Context } from '@nawadi/lib/node'
-import { db } from '../drizzle'
+import { db } from '../drizzle.js'
 
 export type Transaction = PgTransaction<
   PostgresJsQueryResultHKT,

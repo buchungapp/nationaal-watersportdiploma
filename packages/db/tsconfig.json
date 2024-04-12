@@ -1,15 +1,14 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./out",
-    "sourceMap": true,
-    "declaration": true,
-    "composite": true,
-    "declarationMap": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "noUncheckedIndexedAccess": true
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "preserveWatchOutput": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": true
   },
-  "include": ["src/**/*"]
+  "exclude": ["node_modules"]
 }
