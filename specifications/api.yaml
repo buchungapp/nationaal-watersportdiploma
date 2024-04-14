@@ -117,7 +117,7 @@ components:
           description: The unique handle of the program
         title:
           type: string
-          nullable: true
+          nullable: true # needs support from generator
           description: The title of the program
       required:
         - id
