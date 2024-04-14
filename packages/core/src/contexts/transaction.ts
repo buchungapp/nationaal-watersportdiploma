@@ -13,7 +13,7 @@ export async function withTransaction<T>(job: () => Promise<T>): Promise<T> {
   return result
 }
 
-export function useTransaction(): {} {
+export function useTransaction(): db.Transaction {
   const storage = new AsyncLocalStorage<db.Transaction>()
   const context = storage.getStore()
   if (context == null) {

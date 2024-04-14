@@ -1,3 +1,4 @@
+import { withDatabase } from '@nawadi/core'
 import * as http from 'http'
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
@@ -32,41 +33,41 @@ async function main(configuration: MainConfiguration) {
 
   console.info('Starting server...')
 
-  await using context = application.createContext({
-    pgUri,
+  await withDatabase({ pgUri }, async () => {
+    const server = application.createApplicationServer()
+
+    const httpServer = http.createServer()
+    const onRequest = server.asHttpRequestListener()
+    httpServer.addListener('request', onRequest)
+
+    await new Promise<void>((resolve) => httpServer.listen({ port }, resolve))
+
+    console.info('Server started')
+    try {
+      await new Promise<void>((resolve) => {
+        const abort = () => {
+          process.removeListener('SIGINT', abort)
+          process.removeListener('SIGTERM', abort)
+
+          resolve()
+        }
+        process.addListener('SIGINT', abort)
+        process.addListener('SIGTERM', abort)
+      })
+
+      console.info('Stopping server...')
+    } finally {
+      httpServer.removeListener('request', onRequest)
+
+      httpServer.closeAllConnections()
+
+      await new Promise<void>((resolve, reject) =>
+        httpServer.close((error) =>
+          error == null ? resolve() : reject(error),
+        ),
+      )
+    }
   })
-
-  const server = application.createApplicationServer(context)
-
-  const httpServer = http.createServer()
-  const onRequest = server.asHttpRequestListener()
-  httpServer.addListener('request', onRequest)
-
-  await new Promise<void>((resolve) => httpServer.listen({ port }, resolve))
-
-  console.info('Server started')
-  try {
-    await new Promise<void>((resolve) => {
-      const abort = () => {
-        process.removeListener('SIGINT', abort)
-        process.removeListener('SIGTERM', abort)
-
-        resolve()
-      }
-      process.addListener('SIGINT', abort)
-      process.addListener('SIGTERM', abort)
-    })
-
-    console.info('Stopping server...')
-  } finally {
-    httpServer.removeListener('request', onRequest)
-
-    httpServer.closeAllConnections()
-
-    await new Promise<void>((resolve, reject) =>
-      httpServer.close((error) => (error == null ? resolve() : reject(error))),
-    )
-  }
 
   console.info('Server stopped')
 }

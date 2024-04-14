@@ -1,9 +1,7 @@
 import { TokenAuthenticationHandler } from '@nawadi/api'
 import * as application from '../application/index.js'
 
-export function token(
-  context: application.Context,
-): TokenAuthenticationHandler<application.Authentication> {
+export function token(): TokenAuthenticationHandler<application.Authentication> {
   return (credential) => {
     switch (credential) {
       case 'supersecret':

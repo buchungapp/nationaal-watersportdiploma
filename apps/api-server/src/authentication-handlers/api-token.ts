@@ -1,9 +1,7 @@
 import { ApiTokenAuthenticationHandler } from '@nawadi/api'
 import * as application from '../application/index.js'
 
-export function apiToken(
-  context: application.Context,
-): ApiTokenAuthenticationHandler<application.Authentication> {
+export function apiToken(): ApiTokenAuthenticationHandler<application.Authentication> {
   return (credential) => {
     switch (credential) {
       case 'supersecret':
