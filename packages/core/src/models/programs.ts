@@ -4,8 +4,6 @@ import { useQuery } from '../contexts/index.js'
 export async function listPrograms() {
   const query = useQuery()
 
-  // we don't need a transaction here, but this illustrates one way of
-  // putting the entire operation in a transaction
   const rows = await query
     .select({
       id: schema.program.id,
