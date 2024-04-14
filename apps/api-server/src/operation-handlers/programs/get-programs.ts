@@ -14,6 +14,7 @@ export function getPrograms({
       })
       .from(schema.program)
 
+    // programsRows could be used directly when the generator properly supports nulls.
     const programsEntity = programsRows.map((row) => ({
       id: row.id,
       title: row.title ?? '', // TODO this need support from the generator
