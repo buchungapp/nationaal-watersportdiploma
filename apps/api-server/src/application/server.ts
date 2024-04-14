@@ -11,12 +11,12 @@ export function createApplicationServer() {
 
   // authentication
 
-  server.registerApiTokenAuthentication(authenticationHandlers.apiToken())
-  server.registerTokenAuthentication(authenticationHandlers.token())
+  server.registerApiTokenAuthentication(authenticationHandlers.apiToken)
+  server.registerTokenAuthentication(authenticationHandlers.token)
 
   // operations
 
-  server.registerGetProgramsOperation(operationHandlers.getPrograms())
+  server.registerGetProgramsOperation(operationHandlers.getPrograms)
 
   // middleware!
 
