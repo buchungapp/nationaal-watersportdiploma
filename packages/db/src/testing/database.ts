@@ -16,6 +16,7 @@ export async function withDatabase<T>(
 ) {
   // run only if configured
   if (process.env.PGURI == null) {
+    // TODO emit some kind of warning that this test won't run
     return
   }
 
