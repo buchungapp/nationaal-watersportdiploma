@@ -5,7 +5,14 @@
   "description": "",
   "type": "commonjs",
   "main": "./out/main.js",
+  "browser": "./out/browser.js",
   "types": "./out/main.d.ts",
+  "exports": {
+    "./constants": {
+      "default": "./out/constants.js",
+      "types": "./out/constants.d.ts"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:buchungapp/nationaal-watersportdiploma.git"
