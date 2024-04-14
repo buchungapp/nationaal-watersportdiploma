@@ -9,13 +9,13 @@
   "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "default": "./out/main.js",
       "types": "./out/main.d.ts",
-      "browser": "./out/browser.js"
+      "browser": "./out/browser.js",
+      "default": "./out/main.js"
     },
     "./constants": {
-      "default": "./out/constants.js",
-      "types": "./out/constants.d.ts"
+      "types": "./out/constants.d.ts",
+      "default": "./out/constants.js"
     }
   },
   "repository": {

@@ -7,8 +7,8 @@
   "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "default": "./out/main.js",
-      "types": "./out/main.d.ts"
+      "types": "./out/main.d.ts",
+      "default": "./out/main.js"
     }
   },
   "scripts": {
