@@ -8,6 +8,11 @@
   "browser": "./out/browser.js",
   "types": "./out/main.d.ts",
   "exports": {
+    ".": {
+      "default": "./out/main.js",
+      "types": "./out/main.d.ts",
+      "browser": "./out/browser.js"
+    },
     "./constants": {
       "default": "./out/constants.js",
       "types": "./out/constants.d.ts"
