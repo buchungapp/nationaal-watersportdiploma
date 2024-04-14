@@ -11,5 +11,9 @@
     "lib": ["es2023"]
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../../packages/core" }]
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/lib" },
+    { "path": "../../packages/db" }
+  ]
 }

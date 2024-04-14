@@ -23,6 +23,15 @@ importers:
       '@appsignal/nodejs':
         specifier: ^3.1.0
         version: 3.3.2
+      '@nawadi/api':
+        specifier: workspace:*
+        version: link:../../generated/api
+      '@nawadi/core':
+        specifier: workspace:^
+        version: link:../../packages/core
+      '@nawadi/db':
+        specifier: workspace:^
+        version: link:../../packages/db
       '@types/node':
         specifier: ^20.11.19
         version: 20.12.7
@@ -31,10 +40,13 @@ importers:
         version: 17.0.32
       drizzle-orm:
         specifier: ^0.30.7
-        version: 0.30.8(@opentelemetry/api@1.7.0)
+        version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       oa42-appsignal:
         specifier: ^0.1.11
         version: 0.1.15
+      postgres:
+        specifier: ^3.4.4
+        version: 3.4.4
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
@@ -45,12 +57,6 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
-      '@nawadi/api':
-        specifier: workspace:*
-        version: link:../../generated/api
-      '@nawadi/core':
-        specifier: workspace:^
-        version: link:../../packages/core
       '@tsconfig/node20':
         specifier: ^20.1.2
         version: 20.1.4
@@ -272,7 +278,7 @@ importers:
         version: 4.0.9
       drizzle-orm:
         specifier: ^0.30.8
-        version: 0.30.8(postgres@3.4.4)
+        version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -290,7 +296,7 @@ importers:
         version: 17.0.32
       drizzle-orm:
         specifier: ^0.30.8
-        version: 0.30.8(postgres@3.4.4)
+        version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       postgres:
         specifier: ^3.4.4
         version: 3.4.4
@@ -1836,7 +1842,6 @@ packages:
   /@opentelemetry/api@1.7.0:
     resolution: {integrity: sha512-AdY5wvN0P2vXBi3b29hxZgSFvdhdxPB9+f0B6s//P9Q8nibRWeA3cHm8UmLpio9ABigkVHJ5NMPk+Mz8VCCyrw==}
     engines: {node: '>=8.0.0'}
-    dev: false
 
   /@opentelemetry/api@1.8.0:
     resolution: {integrity: sha512-I/s6F7yKUDdtMsoBWXJe8Qz40Tui5vsuKCWJEWVL+5q9sSWRzzx6v2KeNsOBEwd94j0eWkpWCH4yB6rZg9Mf0w==}
@@ -4675,7 +4680,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.30.8(@opentelemetry/api@1.7.0):
+  /drizzle-orm@0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4):
     resolution: {integrity: sha512-9pBJA0IjnpPpzZ6s9jlS1CQAbKoBmbn2GJesPhXaVblAA/joOJ4AWWevYcqvLGj9SvThBAl7WscN8Zwgg5mnTw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -4756,88 +4761,6 @@ packages:
         optional: true
     dependencies:
       '@opentelemetry/api': 1.7.0
-    dev: false
-
-  /drizzle-orm@0.30.8(postgres@3.4.4):
-    resolution: {integrity: sha512-9pBJA0IjnpPpzZ6s9jlS1CQAbKoBmbn2GJesPhXaVblAA/joOJ4AWWevYcqvLGj9SvThBAl7WscN8Zwgg5mnTw==}
-    peerDependencies:
-      '@aws-sdk/client-rds-data': '>=3'
-      '@cloudflare/workers-types': '>=3'
-      '@electric-sql/pglite': '>=0.1.1'
-      '@libsql/client': '*'
-      '@neondatabase/serverless': '>=0.1'
-      '@op-engineering/op-sqlite': '>=2'
-      '@opentelemetry/api': ^1.4.1
-      '@planetscale/database': '>=1'
-      '@types/better-sqlite3': '*'
-      '@types/pg': '*'
-      '@types/react': '>=18'
-      '@types/sql.js': '*'
-      '@vercel/postgres': '>=0.8.0'
-      '@xata.io/client': '*'
-      better-sqlite3: '>=7'
-      bun-types: '*'
-      expo-sqlite: '>=13.2.0'
-      knex: '*'
-      kysely: '*'
-      mysql2: '>=2'
-      pg: '>=8'
-      postgres: '>=3'
-      react: '>=18'
-      sql.js: '>=1'
-      sqlite3: '>=5'
-    peerDependenciesMeta:
-      '@aws-sdk/client-rds-data':
-        optional: true
-      '@cloudflare/workers-types':
-        optional: true
-      '@electric-sql/pglite':
-        optional: true
-      '@libsql/client':
-        optional: true
-      '@neondatabase/serverless':
-        optional: true
-      '@op-engineering/op-sqlite':
-        optional: true
-      '@opentelemetry/api':
-        optional: true
-      '@planetscale/database':
-        optional: true
-      '@types/better-sqlite3':
-        optional: true
-      '@types/pg':
-        optional: true
-      '@types/react':
-        optional: true
-      '@types/sql.js':
-        optional: true
-      '@vercel/postgres':
-        optional: true
-      '@xata.io/client':
-        optional: true
-      better-sqlite3:
-        optional: true
-      bun-types:
-        optional: true
-      expo-sqlite:
-        optional: true
-      knex:
-        optional: true
-      kysely:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      postgres:
-        optional: true
-      react:
-        optional: true
-      sql.js:
-        optional: true
-      sqlite3:
-        optional: true
-    dependencies:
       postgres: 3.4.4
 
   /drizzle-zod@0.5.1(drizzle-orm@0.30.8)(zod@3.22.4):
@@ -4846,7 +4769,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.30.8(postgres@3.4.4)
+      drizzle-orm: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       zod: 3.22.4
     dev: false
 
