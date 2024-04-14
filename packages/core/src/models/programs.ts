@@ -1,12 +1,12 @@
 import { schema } from '@nawadi/db'
-import { useDatabase, useTransaction } from '../contexts/index.js'
+import { useQuery } from '../contexts/index.js'
 
 export async function listPrograms() {
-  const transaction = useTransaction() ?? useDatabase()
+  const query = useQuery()
 
   // we don't need a transaction here, but this illustrates one way of
   // putting the entire operation in a transaction
-  const rows = await transaction
+  const rows = await query
     .select({
       id: schema.program.id,
       title: schema.program.title,
