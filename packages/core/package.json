@@ -4,6 +4,12 @@
   "type": "commonjs",
   "main": "./out/main.js",
   "types": "./out/main.d.ts",
+  "exports": {
+    ".": {
+      "default": "./out/main.js",
+      "types": "./out/main.d.ts"
+    }
+  },
   "scripts": {
     "prepack": "tsc --build",
     "pretest": "tsc --build",
