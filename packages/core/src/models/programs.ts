@@ -1,8 +1,8 @@
 import { schema } from '@nawadi/db'
-import { useTransaction } from '../contexts/index.js'
+import { useDatabase, useTransaction } from '../contexts/index.js'
 
 export async function listPrograms() {
-  const transaction = useTransaction()
+  const transaction = useTransaction() ?? useDatabase()
 
   // we don't need a transaction here, but this illustrates one way of
   // putting the entire operation in a transaction
