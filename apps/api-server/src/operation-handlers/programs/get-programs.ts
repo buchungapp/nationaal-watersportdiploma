@@ -4,7 +4,7 @@ import * as application from '../../application/index.js'
 
 export const getPrograms: api.GetProgramsOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) =>
+> = (incomingRequest, authentication) =>
   withTransaction(async () => {
     const programsEntity = await listPrograms()
 
