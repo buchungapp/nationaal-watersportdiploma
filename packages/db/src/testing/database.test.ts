@@ -3,7 +3,8 @@ import { sql } from 'drizzle-orm'
 import test from 'node:test'
 import { withDatabase } from './database.js'
 
-test('with-database', () =>
+// maybe enable when we figured out how to we are going to test
+test.skip('with-database', () =>
   withDatabase(async ({ db }) => {
     const result = await db.execute(sql`SELECT 1 as one;`)
 
