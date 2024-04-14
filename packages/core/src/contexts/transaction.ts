@@ -14,7 +14,6 @@ export async function withTransaction<T>(job: () => Promise<T>): Promise<T> {
 }
 
 export function useTransaction(): db.Transaction | undefined {
-  const storage = new AsyncLocalStorage<db.Transaction>()
   const context = storage.getStore()
   return context
 }
