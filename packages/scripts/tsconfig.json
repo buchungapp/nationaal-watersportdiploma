@@ -9,6 +9,8 @@
     "moduleDetection": "force",
     "isolatedModules": true,
 
+    "jsx": "react",
+
     /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
