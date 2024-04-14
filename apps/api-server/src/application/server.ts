@@ -20,6 +20,8 @@ export function createApplicationServer() {
   // middleware!
 
   server.registerMiddleware(api.createErrorMiddleware())
+  // we could also make one transaction per request, via middleware.
+  //
   // server.registerMiddleware((request, next) =>
   //   withTransaction(async () => {
   //     const respone = await next(request)
