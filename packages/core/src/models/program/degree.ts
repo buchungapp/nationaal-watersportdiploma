@@ -2,6 +2,7 @@ import { schema } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import { useQuery } from '../../contexts/index.js'
 import { useTransaction } from '../../util/transaction.js'
 import { zod } from '../../util/zod.js'
 
@@ -29,6 +30,7 @@ export const create = zod(
   }),
   (input) =>
     useTransaction(async (tx) => {
+      const query = useQuery()
       const [insert] = await tx
         .insert(degree)
         .values({
@@ -48,12 +50,14 @@ export const create = zod(
 
 export const list = zod(z.void(), async () =>
   useTransaction(async (tx) => {
+    const query = useQuery()
     return tx.select().from(degree)
   }),
 )
 
 export const fromId = zod(Info.shape.id, async (id) =>
   useTransaction(async (tx) => {
+    const query = useQuery()
     return tx
       .select()
       .from(degree)
@@ -64,6 +68,7 @@ export const fromId = zod(Info.shape.id, async (id) =>
 
 export const fromHandle = zod(Info.shape.handle, async (handle) =>
   useTransaction(async (tx) => {
+    const query = useQuery()
     return tx
       .select()
       .from(degree)

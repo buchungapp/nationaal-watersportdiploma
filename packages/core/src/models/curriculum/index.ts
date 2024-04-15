@@ -2,6 +2,7 @@ import { schema } from '@nawadi/db'
 import { SQL, and, desc, eq, isNotNull } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
+import { useQuery } from '../../contexts/index.js'
 import { createTransaction, useTransaction } from '../../util/transaction.js'
 import { zod } from '../../util/zod.js'
 import { Module } from '../program/module.js'
@@ -28,6 +29,8 @@ export const create = zod(
   }),
   (input) =>
     createTransaction(async (tx) => {
+      const query = useQuery()
+
       const [insert] = await tx
         .insert(curriculum)
         .values({
@@ -47,6 +50,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () =>
   useTransaction(async (tx) => {
+    const query = useQuery()
     return tx.select().from(curriculum)
   }),
 )
@@ -58,6 +62,7 @@ export const fromProgramId = zod(
   }).partial({ revision: true }),
   async ({ programId, revision }) =>
     useTransaction(async (tx) => {
+      const query = useQuery()
       const whereClausules: SQL[] = [eq(curriculum.programId, programId)]
 
       if (revision) {
@@ -83,6 +88,7 @@ export const linkModule = zod(
   }),
   async ({ curriculumId, moduleId }) =>
     useTransaction(async (tx) => {
+      const query = useQuery()
       await tx.insert(schema.curriculumModule).values({
         moduleId,
         curriculumId,
