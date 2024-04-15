@@ -2,14 +2,14 @@ import { schema } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { useTransaction } from '../util/transaction.js'
-import { zod } from '../util/zod.js'
+import { useTransaction } from '../../util/transaction.js'
+import { zod } from '../../util/zod.js'
 
-export * as Discipline from './discipline.js'
+export * as Degree from './degree.js'
 
-const discipline = schema.discipline
+const degree = schema.degree
 
-export const Info = createSelectSchema(discipline, {
+export const Info = createSelectSchema(degree, {
   handle(schema) {
     return schema.handle
       .trim()
@@ -17,25 +17,29 @@ export const Info = createSelectSchema(discipline, {
       .min(3)
       .regex(/^[a-z0-9\-]+$/)
   },
+  rang(schema) {
+    return schema.rang.int()
+  },
 })
-export type Info = typeof discipline.$inferSelect
+export type Info = typeof degree.$inferSelect
 
 export const create = zod(
-  Info.pick({ title: true, handle: true }).partial({
+  Info.pick({ title: true, handle: true, rang: true }).partial({
     title: true,
   }),
   (input) =>
     useTransaction(async (tx) => {
       const [insert] = await tx
-        .insert(discipline)
+        .insert(degree)
         .values({
           handle: input.handle,
           title: input.title,
+          rang: input.rang,
         })
-        .returning({ id: discipline.id })
+        .returning({ id: degree.id })
 
       if (!insert) {
-        throw new Error('Failed to insert discipline')
+        throw new Error('Failed to insert degree')
       }
 
       return insert.id
@@ -44,7 +48,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () =>
   useTransaction(async (tx) => {
-    return tx.select().from(discipline)
+    return tx.select().from(degree)
   }),
 )
 
@@ -52,8 +56,8 @@ export const fromId = zod(Info.shape.id, async (id) =>
   useTransaction(async (tx) => {
     return tx
       .select()
-      .from(discipline)
-      .where(eq(discipline.id, id))
+      .from(degree)
+      .where(eq(degree.id, id))
       .then((rows) => rows[0])
   }),
 )
@@ -62,8 +66,8 @@ export const fromHandle = zod(Info.shape.handle, async (handle) =>
   useTransaction(async (tx) => {
     return tx
       .select()
-      .from(discipline)
-      .where(eq(discipline.handle, handle))
+      .from(degree)
+      .where(eq(degree.handle, handle))
       .then((rows) => rows[0])
   }),
 )

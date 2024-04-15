@@ -1,7 +1,3 @@
-export * as Actor from './actor.js'
 export * from './contexts/index.js'
-export * as Curriculum from './curriculum/index.js'
-export * as Location from './location/index.js'
 export * from './models/index.js'
-export * as Program from './program/index.js'
 export * from './root.js'
