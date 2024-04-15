@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm'
 import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { useTransaction } from '../../util/transaction.js'
 import { zod } from '../../util/zod.js'
 
 export * as Location from './index.js'
@@ -34,49 +33,42 @@ export const create = zod(
     name: true,
     websiteUrl: true,
   }),
-  (input) =>
-    useTransaction(async () => {
-      const query = useQuery()
-      const [insert] = await query
-        .insert(location)
-        .values({
-          ...input,
-        })
-        .returning({ id: location.id })
-
-      if (!insert) {
-        throw new Error('Failed to insert location')
-      }
-
-      return insert.id
-    }),
-)
-
-export const list = zod(z.void(), async () =>
-  useTransaction(async () => {
+  async (input) => {
     const query = useQuery()
-    return query.select().from(location)
-  }),
+    const [insert] = await query
+      .insert(location)
+      .values({
+        ...input,
+      })
+      .returning({ id: location.id })
+
+    if (!insert) {
+      throw new Error('Failed to insert location')
+    }
+
+    return insert.id
+  },
 )
 
-export const fromId = zod(Info.shape.id, async (id) =>
-  useTransaction(async () => {
-    const query = useQuery()
-    return await query
-      .select()
-      .from(location)
-      .where(eq(location.id, id))
-      .then((rows) => rows[0])
-  }),
-)
+export const list = zod(z.void(), async () => {
+  const query = useQuery()
+  return query.select().from(location)
+})
 
-export const fromHandle = zod(Info.shape.handle, async (handle) =>
-  useTransaction(async () => {
-    const query = useQuery()
-    return await query
-      .select()
-      .from(location)
-      .where(eq(location.handle, handle))
-      .then((rows) => rows[0])
-  }),
-)
+export const fromId = zod(Info.shape.id, async (id) => {
+  const query = useQuery()
+  return await query
+    .select()
+    .from(location)
+    .where(eq(location.id, id))
+    .then((rows) => rows[0])
+})
+
+export const fromHandle = zod(Info.shape.handle, async (handle) => {
+  const query = useQuery()
+  return await query
+    .select()
+    .from(location)
+    .where(eq(location.handle, handle))
+    .then((rows) => rows[0])
+})
