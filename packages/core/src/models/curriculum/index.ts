@@ -28,10 +28,10 @@ export const create = zod(
     startedAt: true,
   }),
   (input) =>
-    createTransaction(async (tx) => {
+    createTransaction(async () => {
       const query = useQuery()
 
-      const [insert] = await tx
+      const [insert] = await query
         .insert(curriculum)
         .values({
           programId: input.programId,
@@ -49,9 +49,9 @@ export const create = zod(
 )
 
 export const list = zod(z.void(), async () =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx.select().from(curriculum)
+    return query.select().from(curriculum)
   }),
 )
 
@@ -61,7 +61,7 @@ export const fromProgramId = zod(
     revision: true,
   }).partial({ revision: true }),
   async ({ programId, revision }) =>
-    useTransaction(async (tx) => {
+    useTransaction(async () => {
       const query = useQuery()
       const whereClausules: SQL[] = [eq(curriculum.programId, programId)]
 
@@ -71,7 +71,7 @@ export const fromProgramId = zod(
         whereClausules.push(isNotNull(curriculum.startedAt))
       }
 
-      return tx
+      return await query
         .select()
         .from(curriculum)
         .where(and(...whereClausules))
@@ -87,9 +87,9 @@ export const linkModule = zod(
     moduleId: Module.Info.shape.id,
   }),
   async ({ curriculumId, moduleId }) =>
-    useTransaction(async (tx) => {
+    useTransaction(async () => {
       const query = useQuery()
-      await tx.insert(schema.curriculumModule).values({
+      await query.insert(schema.curriculumModule).values({
         moduleId,
         curriculumId,
       })

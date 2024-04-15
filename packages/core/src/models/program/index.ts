@@ -42,10 +42,10 @@ export const create = zod(
       categoryIds: z.array(z.string()).optional(),
     }),
   (input) =>
-    createTransaction(async (tx) => {
+    createTransaction(async () => {
       const query = useQuery()
 
-      const [insert] = await tx
+      const [insert] = await query
         .insert(program)
         .values({
           handle: input.handle,
@@ -60,7 +60,7 @@ export const create = zod(
       }
 
       if (input.categoryIds) {
-        await tx.insert(schema.programCategory).values(
+        await query.insert(schema.programCategory).values(
           input.categoryIds.map((categoryId) => ({
             programId: insert.id,
             categoryId,
@@ -73,16 +73,16 @@ export const create = zod(
 )
 
 export const list = zod(z.void(), async () =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx.select().from(program)
+    return query.select().from(program)
   }),
 )
 
 export const fromId = zod(Info.shape.id, async (id) =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx
+    return await query
       .select()
       .from(program)
       .where(eq(program.id, id))
@@ -91,9 +91,9 @@ export const fromId = zod(Info.shape.id, async (id) =>
 )
 
 export const fromHandle = zod(Info.shape.handle, async (handle) =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx
+    return await query
       .select()
       .from(program)
       .where(eq(program.handle, handle))

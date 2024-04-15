@@ -30,9 +30,9 @@ export const create = zod(
     requirement: true,
   }),
   (input) =>
-    useTransaction(async (tx) => {
+    useTransaction(async () => {
       const query = useQuery()
-      const [insert] = await tx
+      const [insert] = await query
         .insert(curriculumCompetency)
         .values({
           competencyId: input.competencyId,
@@ -52,16 +52,16 @@ export const create = zod(
 )
 
 export const list = zod(z.void(), async () =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx.select().from(curriculumCompetency)
+    return query.select().from(curriculumCompetency)
   }),
 )
 
 export const fromId = zod(Info.shape.id, async (id) =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx
+    return await query
       .select()
       .from(curriculumCompetency)
       .where(eq(curriculumCompetency.id, id))

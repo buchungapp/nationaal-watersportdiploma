@@ -36,9 +36,9 @@ export const create = zod(
     description: true,
   }),
   (input) =>
-    useTransaction(async (tx) => {
+    useTransaction(async () => {
       const query = useQuery()
-      const [insert] = await tx
+      const [insert] = await query
         .insert(category)
         .values({
           handle: input.handle,
@@ -57,16 +57,16 @@ export const create = zod(
 )
 
 export const list = zod(z.void(), async () =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx.select().from(category)
+    return query.select().from(category)
   }),
 )
 
 export const fromId = zod(Info.shape.id, async (id) =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx
+    return await query
       .select()
       .from(category)
       .where(eq(category.id, id))
@@ -75,9 +75,9 @@ export const fromId = zod(Info.shape.id, async (id) =>
 )
 
 export const fromHandle = zod(Info.shape.handle, async (handle) =>
-  useTransaction(async (tx) => {
+  useTransaction(async () => {
     const query = useQuery()
-    return tx
+    return await query
       .select()
       .from(category)
       .where(eq(category.handle, handle))
