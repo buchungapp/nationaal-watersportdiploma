@@ -12,10 +12,6 @@
       "types": "./out/main.d.ts",
       "browser": "./out/browser.js",
       "default": "./out/main.js"
-    },
-    "./constants": {
-      "types": "./out/constants.d.ts",
-      "default": "./out/constants.js"
     }
   },
   "repository": {

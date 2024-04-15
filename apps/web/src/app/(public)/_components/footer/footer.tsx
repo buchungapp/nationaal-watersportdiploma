@@ -1,12 +1,4 @@
-import {
-  APP_NAME,
-  APP_SLOGAN,
-  FACEBOOK_URL,
-  INSTAGRAM_URL,
-  LINKEDIN_URL,
-  TIKTOK_URL,
-  YOUTUBE_URL,
-} from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-white.png";
@@ -40,27 +32,27 @@ export default function Footer() {
     {
       name: "Facebook",
       icon: Facebook,
-      link: FACEBOOK_URL,
+      link: constants.FACEBOOK_URL,
     },
     {
       name: "Instagram",
       icon: Instagram,
-      link: INSTAGRAM_URL,
+      link: constants.INSTAGRAM_URL,
     },
     {
       name: "LinkedIn",
       icon: LinkedIn,
-      link: LINKEDIN_URL,
+      link: constants.LINKEDIN_URL,
     },
     {
       name: "TikTok",
       icon: TikTok,
-      link: TIKTOK_URL,
+      link: constants.TIKTOK_URL,
     },
     {
       name: "YouTube",
       icon: YouTube,
-      link: YOUTUBE_URL,
+      link: constants.YOUTUBE_URL,
     },
   ];
 
@@ -70,7 +62,7 @@ export default function Footer() {
         <div>
           <div className="grid gap-6">
             <Wordmark className="h-12 w-48 text-white" />
-            <p className="text-sm text-gray-200">{APP_SLOGAN}</p>
+            <p className="text-sm text-gray-200">{constants.APP_SLOGAN}</p>
           </div>
 
           <div className="mt-12">
@@ -160,7 +152,7 @@ export default function Footer() {
 
       <div className="flex flex-col gap-4 text-gray-200 lg:flex-row">
         <p className="flex-1 text-center text-sm lg:text-start">
-          {`© ${new Date().getFullYear()} ${APP_NAME}`}
+          {`© ${new Date().getFullYear()} ${constants.APP_NAME}`}
         </p>
         <ul className="flex flex-1 items-center justify-center gap-6 lg:justify-end">
           {socials.map((social, i) => (
