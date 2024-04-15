@@ -48,7 +48,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () => {
   const query = useQuery()
-  return query.select().from(curriculum)
+  return await query.select().from(curriculum)
 })
 
 export const fromProgramId = zod(

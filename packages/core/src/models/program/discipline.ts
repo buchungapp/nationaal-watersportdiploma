@@ -44,7 +44,7 @@ export const create = zod(
 
 export const list = zod(z.void(), async () => {
   const query = useQuery()
-  return query.select().from(discipline)
+  return await query.select().from(discipline)
 })
 
 export const fromId = zod(Info.shape.id, async (id) => {
