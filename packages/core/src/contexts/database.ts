@@ -14,6 +14,29 @@ export interface DatabaseConfiguration {
 const storage = new AsyncLocalStorage<db.Database>()
 
 /**
+ * Initializes a database connection using the provided configuration, and returns an object that can be used to manage the lifecycle of the connection.
+ *
+ * @param {DatabaseConfiguration} configuration - The database configuration containing the PostgreSQL connection URI.
+ * @returns {Promise<{ [Symbol.asyncDispose](): Promise<void> }>} An object with an `asyncDispose` method that can be used to close the database connection when it's no longer needed.
+ */
+export async function initializeDatabase(
+  configuration: DatabaseConfiguration,
+): Promise<{
+  [Symbol.asyncDispose](): Promise<void>
+}> {
+  const { pgUri } = configuration
+
+  const sql = postgres(pgUri)
+  const database = db.createDatabase(sql)
+  storage.enterWith(database)
+  return {
+    async [Symbol.asyncDispose]() {
+      await sql.end()
+      storage.disable()
+    },
+  }
+}
+/**
  * Executes a given job with a database connection.
  * This function initializes a database connection using the provided configuration,
  * runs the provided job within the context of that database connection, and then
