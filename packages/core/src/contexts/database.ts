@@ -1,5 +1,6 @@
 import * as db from '@nawadi/db'
 import { AsyncLocalStorage } from 'async_hooks'
+import cp from 'child_process'
 import postgres from 'postgres'
 
 /**
@@ -54,4 +55,35 @@ export function useDatabase(): db.Database {
     throw new TypeError('Database not in context')
   }
   return database
+}
+
+export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
+  const pgUri =
+    process.env.PGURI ??
+    'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
+
+  {
+    // reset database
+    const options = { shell: true, stdio: 'inherit' } as const
+    cp.execFileSync('pnpm', ['--filter', 'supabase', 'reset'], options)
+  }
+
+  {
+    // use a single connection pool for the migration
+    const pgSql = postgres(pgUri.toString(), {
+      max: 1,
+      onnotice: () => {},
+    })
+    try {
+      const database = db.createDatabase(pgSql)
+      // migrate (set up) the database
+      await db.migrateDatabase(database)
+    } finally {
+      await pgSql.end()
+    }
+  }
+
+  const result = await withDatabase({ pgUri }, job)
+
+  return result
 }
