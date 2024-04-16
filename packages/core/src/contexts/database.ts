@@ -1,7 +1,6 @@
 import * as db from '@nawadi/db'
 import { AsyncLocalStorage } from 'async_hooks'
 import postgres from 'postgres'
-import { useTransaction, withTransaction } from './transaction.js'
 
 /**
  * Interface representing the configuration required for setting up the database connection.
@@ -55,53 +54,4 @@ export function useDatabase(): db.Database {
     throw new TypeError('Database not in context')
   }
   return database
-}
-
-/**
- *
- * Migrates the local supabase database to the latest version and then runs the job
- * with a database context that points to the local supabase database. The job is run
- * in a transaction that is rolled back at the end of the job so that the database
- * is kept clean
- *
- * @param job async test job to run
- * @returns whatever the job returns
- */
-export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
-  const pgUri =
-    process.env.PGURI ??
-    'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
-
-  {
-    // use a single connection pool for the migration
-    const pgSql = postgres(pgUri.toString(), {
-      max: 1,
-    })
-    try {
-      const database = db.createDatabase(pgSql)
-      // migrate (set up) the database
-      await db.migrateDatabase(database)
-    } finally {
-      await pgSql.end()
-    }
-  }
-
-  const result = await withDatabase({ pgUri }, async () =>
-    withTransaction(async () => {
-      try {
-        const result = await job()
-        return result
-      } finally {
-        const transaction = useTransaction()
-        try {
-          transaction!.rollback()
-        } catch (error) {
-          // rollback will throw a Rollback error this is expected behavior and
-          // therefore should not throw
-        }
-      }
-    }),
-  )
-
-  return result
 }

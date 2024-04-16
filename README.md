@@ -35,7 +35,7 @@ Start by running `pnpm run initialize`. Do this before installing! This command 
 
 ### Testing
 
-Before running tests, first start the supabase development environment via `pnpm --focus supabase start`. You need to have docker installed and running for this. Then run `pnpm --recursive test` to run the tests. This assumes that the database can be reached via `postgresql://postgres:postgres@127.0.0.1:54322/postgres`. If this is not the case, set the `PGURI` environment variable.
+Before running tests, first start the supabase development environment via `pnpm --filter supabase start`. You need to have docker installed and running for this. Then run `pnpm --recursive test` to run the tests. This assumes that the database can be reached via `postgresql://postgres:postgres@127.0.0.1:54322/postgres`. If this is not the case, set the `PGURI` environment variable.
 
 ### Docker
 

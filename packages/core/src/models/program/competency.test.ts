@@ -1,10 +1,10 @@
 import assert from 'assert'
 import test from 'node:test'
-import { withTestDatabase } from '../../contexts/index.js'
+import { withTestTransaction } from '../../contexts/index.js'
 import { Competency } from './competency.js'
 
 test('create competency', () =>
-  withTestDatabase(async () => {
+  withTestTransaction(async () => {
     const competencyId = await Competency.create({
       type: 'knowledge',
       title: 'test competency',
