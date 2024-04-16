@@ -7,6 +7,10 @@ test('with-database', () =>
   withTestDatabase(async () => {
     const database = useDatabase()
 
-    const result = database.execute(sql`SELECT 1`)
-    assert.deepEqual(result, [])
+    const result = await database.execute(sql`SELECT 1 as one`)
+    assert.deepEqual(result, [
+      {
+        one: 1,
+      },
+    ])
   }))

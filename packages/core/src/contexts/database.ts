@@ -1,6 +1,7 @@
 import * as db from '@nawadi/db'
 import { AsyncLocalStorage } from 'async_hooks'
 import postgres from 'postgres'
+import { useTransaction, withTransaction } from './transaction.js'
 
 /**
  * Interface representing the configuration required for setting up the database connection.
@@ -56,53 +57,51 @@ export function useDatabase(): db.Database {
   return database
 }
 
+/**
+ *
+ * Migrates the local supabase database to the latest version and then runs the job
+ * with a database context that points to the local supabase database. The job is run
+ * in a transaction that is rolled back at the end of the job so that the database
+ * is kept clean
+ *
+ * @param job async test job to run
+ * @returns whatever the job returns
+ */
 export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
-  // a (semi) random database name
-  const databaseName = `db_${new Date().valueOf()}`
-
-  const pgUriSuper = new URL(
+  const pgUri =
     process.env.PGURI ??
-      'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
-  )
-  const pgUri = new URL(databaseName, pgUriSuper)
+    'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 
-  // create a pool that will be used to create and destroy a database
-  const pgSqlSuper = postgres(pgUriSuper.toString())
-
-  try {
-    // create a temporary database that we only use for testing
-    await pgSqlSuper.unsafe(`CREATE DATABASE ${databaseName}`)
+  {
+    // use a single connection pool for the migration
+    const pgSql = postgres(pgUri.toString(), {
+      max: 1,
+    })
     try {
-      {
-        // use a single connection pool for the migration
-        const pgSql = postgres(pgUri.toString(), {
-          max: 1,
-        })
-        try {
-          const database = db.createDatabase(pgSql)
-          // migrate (set up) the database
-          await db.migrateDatabase(database)
-        } finally {
-          await pgSql.end()
-        }
-      }
-      {
-        // use a normal pool for the queries
-        const pgSql = postgres(pgUri.toString())
-        try {
-          const database = db.createDatabase(pgSql)
-          const result = await storage.run(database, job)
-          return result
-        } finally {
-          await pgSql.end()
-        }
-      }
+      const database = db.createDatabase(pgSql)
+      // migrate (set up) the database
+      await db.migrateDatabase(database)
     } finally {
-      // finally drop the test-database
-      await pgSqlSuper.unsafe(`DROP DATABASE ${databaseName}`)
+      await pgSql.end()
     }
-  } finally {
-    // finally end the super pool
-    await pgSqlSuper.end()
   }
+
+  const result = await withDatabase({ pgUri }, async () =>
+    withTransaction(async () => {
+      try {
+        const result = await job()
+        return result
+      } finally {
+        const transaction = useTransaction()
+        try {
+          transaction!.rollback()
+        } catch (error) {
+          // rollback will throw a Rollback error this is expected behavior and
+          // therefore should not throw
+        }
+      }
+    }),
+  )
+
+  return result
 }
