@@ -9,6 +9,8 @@
  * Note: This script requires the necessary environment variables to be set for Google authentication and the spreadsheet ID.
  */
 
+import 'dotenv/config'
+
 import { Curriculum } from '@nawadi/core/curriculum'
 import {
   Category,

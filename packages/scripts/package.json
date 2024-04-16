@@ -8,6 +8,7 @@
   "dependencies": {
     "@nawadi/core": "workspace:^",
     "@react-pdf/renderer": "^3.4.2",
+    "dotenv": "^16.4.5",
     "google-auth-library": "^9.7.0",
     "googleapis": "^134.0.0",
     "react": "^18.2.0",
@@ -17,8 +18,8 @@
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "@types/react": "^18.2.64",
     "@types/inquirer": "^9.0.7",
+    "@types/react": "^18.2.64",
     "inquirer": "^9.2.17"
   }
 }

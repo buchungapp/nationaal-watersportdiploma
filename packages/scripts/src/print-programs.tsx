@@ -1,3 +1,5 @@
+import 'dotenv/config'
+
 import { Curriculum } from '@nawadi/core'
 import {
   Document,
@@ -308,7 +310,7 @@ function ProgramsSummary({ programs }: { programs: typeof allPrograms }) {
   return (
     <View style={programSummaryStyles.container}>
       <Text style={{ marginBottom: 5, textDecoration: 'underline' }}>
-        Programma's
+        Programmaoverzicht
       </Text>
       <View style={programSummaryStyles.row}>
         <Text
@@ -556,7 +558,13 @@ const createDocumentPromises = perStudy.map((study) => {
         <Program key={program.id} program={program} />
       ))}
     </Document>,
-    path.join(__dirname, '..', 'generated', `${documentName}.pdf`),
+    path.join(
+      __dirname,
+      '..',
+      'generated',
+      'opleidingsoverzicht',
+      `${documentName}.pdf`,
+    ),
   )
 })
 
