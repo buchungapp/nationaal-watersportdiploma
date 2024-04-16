@@ -2,7 +2,7 @@ on:
   pull_request: {}
 
 jobs:
-  test-build-lts:
+  build-lts:
     strategy:
       matrix:
         node-version: [18, 20]
