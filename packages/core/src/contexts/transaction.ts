@@ -63,6 +63,7 @@ export async function withTestTransaction<T>(
     // use a single connection pool for the migration
     const pgSql = postgres(pgUri.toString(), {
       max: 1,
+      onnotice: () => {},
     })
     try {
       const database = db.createDatabase(pgSql)
