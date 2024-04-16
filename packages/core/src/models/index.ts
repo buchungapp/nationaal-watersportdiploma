@@ -3,7 +3,4 @@ export * as Curriculum from './curriculum/index.js'
 export * as Location from './location/index.js'
 export * as Program from './program/index.js'
 
-export * from './degree.js'
-export * from './discipline.js'
-export * from './normalize.js'
-export * from './program.js'
+export * from './programs2/index.js'

@@ -1,7 +1,11 @@
 import { schema } from '@nawadi/db'
-import { useQuery } from '../contexts/index.js'
-import { normalizeHandle, normalizeRang, normalizeTitle } from './normalize.js'
-import { singleRow } from './row.js'
+import { useQuery } from '../../contexts/index.js'
+import {
+  normalizeHandle,
+  normalizeRang,
+  normalizeTitle,
+  singleRow,
+} from '../../util/index.js'
 
 export async function listDegrees() {
   const query = useQuery()

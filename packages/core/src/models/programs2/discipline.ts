@@ -1,7 +1,6 @@
 import { schema } from '@nawadi/db'
-import { useQuery } from '../contexts/index.js'
-import { normalizeHandle, normalizeTitle } from './normalize.js'
-import { singleRow } from './row.js'
+import { useQuery } from '../../contexts/index.js'
+import { normalizeHandle, normalizeTitle, singleRow } from '../../util/index.js'
 
 export async function listDisciplines() {
   const query = useQuery()

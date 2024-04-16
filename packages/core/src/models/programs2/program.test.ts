@@ -1,6 +1,6 @@
 import assert from 'assert'
 import test from 'node:test'
-import { withTestTransaction } from '../contexts/index.js'
+import { withTestTransaction } from '../../contexts/index.js'
 import { createDegree } from './degree.js'
 import { createDiscipline } from './discipline.js'
 import { createProgram, listPrograms } from './program.js'

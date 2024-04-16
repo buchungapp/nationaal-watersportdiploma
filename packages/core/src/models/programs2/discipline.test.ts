@@ -1,6 +1,6 @@
 import assert from 'assert'
 import test from 'node:test'
-import { withTestTransaction } from '../contexts/index.js'
+import { withTestTransaction } from '../../contexts/index.js'
 import { createDiscipline, listDisciplines } from './discipline.js'
 
 test('discipline crud', () =>
