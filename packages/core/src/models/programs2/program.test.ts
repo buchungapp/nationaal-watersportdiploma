@@ -8,19 +8,19 @@ import { createProgram, listPrograms } from './program.js'
 test('program crud', () =>
   withTestTransaction(async () => {
     const { id: disciplineId } = await createDiscipline({
-      title: 'title-1',
-      handle: 'handle-1',
+      title: 'discipline-1',
+      handle: 'dc1',
     })
 
     const { id: degreeId } = await createDegree({
-      title: 'title-1',
-      handle: 'handle-1',
+      title: 'degree-1',
+      handle: 'dg1',
       rang: 1,
     })
 
     const { id } = await createProgram({
-      title: 'title-1',
-      handle: 'handle-1',
+      title: 'program-1',
+      handle: 'pr1',
       degreeId,
       disciplineId,
     })
@@ -32,7 +32,13 @@ test('program crud', () =>
 
     assert.deepEqual(item, {
       id,
-      title: 'title-1',
-      handle: 'handle-1',
+      title: 'program-1',
+      handle: 'pr1',
+
+      disciplineId,
+      disciplineTitle: 'discipline-1',
+
+      degreeId,
+      degreeTitle: 'degree-1',
     })
   }))
