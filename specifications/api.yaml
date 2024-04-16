@@ -107,19 +107,39 @@ components:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-          description: The unique identifier of the program
+          $ref: '#/components/schemas/Id'
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          type: string
-          nullable: true # needs support from generator
-          description: The title of the program
+          $ref: '#/components/schemas/Title'
+        degreeId:
+          $ref: '#/components/schemas/Id'
+        degreeTitle:
+          $ref: '#/components/schemas/Title'
+        disciplineId:
+          $ref: '#/components/schemas/Id'
+        disciplineTitle:
+          $ref: '#/components/schemas/Title'
+
       required:
         - id
         - handle
         - title
+        - degreeId
+        - degreeTitle
+        - disciplineId
+        - disciplineTitle
+
+    Id:
+      type: string
+      format: uuid
+      description: A unique identifier
+
+    Title:
+      type: string
+      minLength: 1
+      nullable: true # needs support from generator
+      description: A title (may be null)
 
     Handle:
       type: string

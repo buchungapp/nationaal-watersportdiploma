@@ -1,4 +1,5 @@
 import { schema } from '@nawadi/db'
+import { eq } from 'drizzle-orm'
 import { useQuery } from '../contexts/index.js'
 import { normalizeHandle, normalizeTitle } from './normalize.js'
 import { singleRow } from './row.js'
@@ -11,8 +12,19 @@ export async function listPrograms() {
       id: schema.program.id,
       title: schema.program.title,
       handle: schema.program.handle,
+
+      disciplineId: schema.discipline.id,
+      disciplineTitle: schema.discipline.title,
+
+      degreeId: schema.degree.id,
+      degreeTitle: schema.degree.title,
     })
     .from(schema.program)
+    .innerJoin(
+      schema.discipline,
+      eq(schema.program.disciplineId, schema.discipline.id),
+    )
+    .innerJoin(schema.degree, eq(schema.program.degreeId, schema.degree.id))
 
   return rows
 }
