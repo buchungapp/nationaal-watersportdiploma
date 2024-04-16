@@ -17,9 +17,6 @@ importers:
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
-      supabase:
-        specifier: ^1.153.4
-        version: 1.153.4
 
   apps/api-server:
     dependencies:

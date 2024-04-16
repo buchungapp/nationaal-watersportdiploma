@@ -28,6 +28,10 @@
       "name": "packages/scripts",
       "path": "./packages/scripts",
     },
+    {
+      "name": "supabase",
+      "path": "./supabase",
+    },
   ],
   "settings": {
     "window.title": "Nationaal Watersportdiploma",
