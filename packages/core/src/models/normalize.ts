@@ -1,10 +1,10 @@
-import { isHandle } from '@nawadi/api'
+import { isComponentsHandle } from '@nawadi/api'
 import assert from 'assert'
 
 export function normalizeHandle(value: string) {
   value = value.trim()
 
-  assert(isHandle(value))
+  assert(isComponentsHandle(value))
 
   return value
 }
