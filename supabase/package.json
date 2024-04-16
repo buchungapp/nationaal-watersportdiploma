@@ -2,7 +2,7 @@
   "name": "@nawadi/supabase",
   "scripts": {
     "start": "supabase db start",
-    "stop": "supabase db stop",
+    "stop": "supabase stop",
     "reset": "supabase db reset",
     "lint": "supabase db lint",
     "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
