@@ -14,29 +14,6 @@ export interface DatabaseConfiguration {
 const storage = new AsyncLocalStorage<db.Database>()
 
 /**
- * Initializes a database connection using the provided configuration, and returns an object that can be used to manage the lifecycle of the connection.
- *
- * @param {DatabaseConfiguration} configuration - The database configuration containing the PostgreSQL connection URI.
- * @returns {Promise<{ [Symbol.asyncDispose](): Promise<void> }>} An object with an `asyncDispose` method that can be used to close the database connection when it's no longer needed.
- */
-export async function initializeDatabase(
-  configuration: DatabaseConfiguration,
-): Promise<{
-  [Symbol.asyncDispose](): Promise<void>
-}> {
-  const { pgUri } = configuration
-
-  const sql = postgres(pgUri)
-  const database = db.createDatabase(sql)
-  storage.enterWith(database)
-  return {
-    async [Symbol.asyncDispose]() {
-      await sql.end()
-      storage.disable()
-    },
-  }
-}
-/**
  * Executes a given job with a database connection.
  * This function initializes a database connection using the provided configuration,
  * runs the provided job within the context of that database connection, and then
@@ -53,13 +30,13 @@ export async function withDatabase<T>(
 ): Promise<T> {
   const { pgUri } = configuration
 
-  const sql = postgres(pgUri)
+  const pgSql = postgres(pgUri)
   try {
-    const database = db.createDatabase(sql)
+    const database = db.createDatabase(pgSql)
     const result = await storage.run(database, job)
     return result
   } finally {
-    await sql.end()
+    await pgSql.end()
   }
 }
 
@@ -77,4 +54,55 @@ export function useDatabase(): db.Database {
     throw new TypeError('Database not in context')
   }
   return database
+}
+
+export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
+  // a (semi) random database name
+  const databaseName = `db_${new Date().valueOf()}`
+
+  const pgUriSuper = new URL(
+    process.env.PGURI ??
+      'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+  )
+  const pgUri = new URL(databaseName, pgUriSuper)
+
+  // create a pool that will be used to create and destroy a database
+  const pgSqlSuper = postgres(pgUriSuper.toString())
+
+  try {
+    // create a temporary database that we only use for testing
+    await pgSqlSuper.unsafe(`CREATE DATABASE ${databaseName}`)
+    try {
+      {
+        // use a single connection pool for the migration
+        const pgSql = postgres(pgUri.toString(), {
+          max: 1,
+        })
+        try {
+          const database = db.createDatabase(pgSql)
+          // migrate (set up) the database
+          await db.migrateDatabase(database)
+        } finally {
+          await pgSql.end()
+        }
+      }
+      {
+        // use a normal pool for the queries
+        const pgSql = postgres(pgUri.toString())
+        try {
+          const database = db.createDatabase(pgSql)
+          const result = await storage.run(database, job)
+          return result
+        } finally {
+          await pgSql.end()
+        }
+      }
+    } finally {
+      // finally drop the test-database
+      await pgSqlSuper.unsafe(`DROP DATABASE ${databaseName}`)
+    }
+  } finally {
+    // finally end the super pool
+    await pgSqlSuper.end()
+  }
 }

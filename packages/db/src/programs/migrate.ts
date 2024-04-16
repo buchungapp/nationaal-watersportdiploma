@@ -1,9 +1,8 @@
 import { drizzle } from 'drizzle-orm/postgres-js'
-import { migrate } from 'drizzle-orm/postgres-js/migrator'
-import path from 'path'
 import postgres from 'postgres'
 import * as yargs from 'yargs'
-import { projectRoot } from '../root.js'
+import { migrateDatabase } from '../database.js'
+import * as schema from '../schema/index.js'
 
 export function configureMigrateProgram(argv: yargs.Argv) {
   return argv.command(
@@ -28,18 +27,19 @@ async function main(configuration: MainConfiguration) {
 
   console.info('Migration start')
 
-  const pgPool = postgres(pgUri, {
+  const pgSql = postgres(pgUri, {
     max: 1,
   })
 
   try {
-    const db = drizzle(pgPool)
-    // migrate the database
-    await migrate(db, {
-      migrationsFolder: path.join(projectRoot, 'migrations'),
+    const db = drizzle(pgSql, {
+      schema,
+      logger: process.env.DRIZZLE_LOG === 'true',
     })
+    // migrate the database
+    await migrateDatabase(db)
   } finally {
-    await pgPool.end()
+    await pgSql.end()
   }
 
   console.info('Migration end')

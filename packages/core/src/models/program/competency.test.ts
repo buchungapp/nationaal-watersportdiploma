@@ -1,10 +1,10 @@
-import { withDatabase } from '@nawadi/db'
 import assert from 'assert'
 import test from 'node:test'
+import { withTestDatabase } from '../../contexts/index.js'
 import { Competency } from './competency.js'
 
-test.skip('create competency', () =>
-  withDatabase(async () => {
+test('create competency', () =>
+  withTestDatabase(async () => {
     const competencyId = await Competency.create({
       type: 'knowledge',
       title: 'test competency',
