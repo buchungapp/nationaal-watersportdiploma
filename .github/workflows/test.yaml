@@ -5,7 +5,7 @@ jobs:
   build-lts:
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [18]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
