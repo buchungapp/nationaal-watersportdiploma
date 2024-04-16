@@ -2,21 +2,10 @@ on:
   pull_request: {}
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    container: node:21.5.0-alpine3.19
-    steps:
-      - run: corepack enable
-      - uses: actions/checkout@v4
-      - run: pnpm run initialize
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --recursive run build
-      - run: pnpm --recursive test
-
   test-lts:
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [18, 21]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
@@ -28,9 +17,11 @@ jobs:
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --recursive run build
+      - run: pnpm --filter supabase run start
       # node test runner seems to support globs since v21
       - if: ${{ matrix.node-version >= 21 }}
         run: pnpm --recursive test
+      - run: pnpm --filter supabase run stop
 
   audit:
     runs-on: ubuntu-latest
