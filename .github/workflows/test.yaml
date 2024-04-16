@@ -2,10 +2,10 @@ on:
   pull_request: {}
 
 jobs:
-  test-lts:
+  test-build-lts:
     strategy:
       matrix:
-        node-version: [18, 21]
+        node-version: [18, 20]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
@@ -17,6 +17,21 @@ jobs:
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --recursive run build
+
+  test:
+    strategy:
+      matrix:
+        node-version: [21]
+        runs-on: [ubuntu-latest]
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: corepack enable
+      - uses: actions/checkout@v4
+      - run: pnpm run initialize
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
       # node test runner seems to support globs since v21
       - if: ${{ matrix.node-version >= 21 }}
