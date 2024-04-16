@@ -111,10 +111,7 @@ components:
           format: uuid
           description: The unique identifier of the program
         handle:
-          type: string
-          pattern: ^[a-z0-9\-]+$
-          minLength: 3
-          description: The unique handle of the program
+          $ref: '#/components/schemas/Handle'
         title:
           type: string
           nullable: true # needs support from generator
@@ -123,6 +120,12 @@ components:
         - id
         - handle
         - title
+
+    Handle:
+      type: string
+      pattern: ^[a-z0-9\-]+$
+      minLength: 3
+      description: The unique handle of an item
 
     main-category:
       description: |-

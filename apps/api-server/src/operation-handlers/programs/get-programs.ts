@@ -6,7 +6,11 @@ export const getPrograms: api.GetProgramsOperationHandler<
   application.Authentication
 > = (incomingRequest, authentication) =>
   withTransaction(async () => {
-    const programsEntity = await listPrograms()
+    const programsEntity = (await listPrograms()).map((item) => ({
+      id: item.id,
+      handle: item.handle,
+      title: item.title ?? '', // TODO remove once nulls are properly supported
+    }))
 
     return {
       status: 200,

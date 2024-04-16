@@ -248,6 +248,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@nawadi/api':
+        specifier: workspace:*
+        version: link:../../generated/api
       '@nawadi/db':
         specifier: workspace:*
         version: link:../db
