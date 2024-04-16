@@ -1,16 +1,17 @@
 import assert from 'assert'
 import test from 'node:test'
-import { withTestTransaction } from '../../contexts/index.js'
-import { createDiscipline, listDisciplines } from './discipline.js'
+import { withTestTransaction } from '../contexts/index.js'
+import * as Degree from './degree.js'
 
-test('discipline crud', () =>
+test('degree crud', () =>
   withTestTransaction(async () => {
-    const { id } = await createDiscipline({
+    const { id } = await Degree.create({
       title: 'title-1',
       handle: 'handle-1',
+      rang: 1,
     })
 
-    const list = await listDisciplines()
+    const list = await Degree.list()
 
     assert.equal(list.length, 1)
     const [item] = list
@@ -19,5 +20,6 @@ test('discipline crud', () =>
       id,
       title: 'title-1',
       handle: 'handle-1',
+      rang: 1,
     })
   }))

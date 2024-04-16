@@ -1,13 +1,13 @@
 import { schema } from '@nawadi/db'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery } from '../contexts/index.js'
 import {
   normalizeHandle,
   normalizeRang,
   normalizeTitle,
   singleRow,
-} from '../../util/index.js'
+} from '../util/index.js'
 
-export async function listDegrees() {
+export async function list() {
   const query = useQuery()
 
   const rows = await query
@@ -22,7 +22,7 @@ export async function listDegrees() {
   return rows
 }
 
-export async function createDegree(item: {
+export async function create(item: {
   title: string
   handle: string
   rang: number
