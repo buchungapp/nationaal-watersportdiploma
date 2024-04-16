@@ -20,10 +20,15 @@ const storage = new AsyncLocalStorage<db.Transaction>()
  */
 export async function withTransaction<T>(job: () => Promise<T>): Promise<T> {
   const database = useDatabase()
-  const result = await database.transaction(async (transaction) => {
-    const result = await storage.run(transaction, job)
-    return result
-  })
+  const result = await database.transaction(
+    async (transaction) => {
+      const result = await storage.run(transaction, job)
+      return result
+    },
+    {
+      isolationLevel: 'serializable',
+    },
+  )
   return result
 }
 
@@ -74,22 +79,25 @@ export async function withTestTransaction<T>(
     }
   }
 
-  const result = await withDatabase({ pgUri }, async () =>
-    withTransaction(async () => {
-      try {
-        const result = await job()
-        return result
-      } finally {
-        const transaction = useTransaction()
-        try {
-          transaction!.rollback()
-        } catch (error) {
-          // rollback will throw a Rollback error this is expected behavior and
-          // therefore should not throw
-        }
+  const result = await withDatabase({ pgUri }, async () => {
+    const rollback = Symbol()
+    let result: T
+    try {
+      await withTransaction(async () => {
+        result = await job()
+        // the transaction is aborted when an error is thrown! There is also a rollback
+        // method on the transaction. This will not rollback the transaction, this method will
+        // throw.
+        // We throw our own symbol so we can easily recognize it in the catch block
+        throw rollback
+      })
+    } catch (error) {
+      if (error !== rollback) {
+        throw error
       }
-    }),
-  )
+    }
+    return result!
+  })
 
   return result
 }
