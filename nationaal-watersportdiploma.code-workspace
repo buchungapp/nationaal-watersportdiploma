@@ -49,6 +49,7 @@
       "ryanluker.vscode-coverage-gutters",
       "esbenp.prettier-vscode",
       "streetsidesoftware.code-spell-checker",
+      "42crunch.vscode-openapi",
     ],
     "unwantedRecommendations": [],
   },
