@@ -23,6 +23,15 @@ importers:
       '@appsignal/nodejs':
         specifier: ^3.1.0
         version: 3.3.2
+      '@nawadi/api':
+        specifier: workspace:*
+        version: link:../../generated/api
+      '@nawadi/core':
+        specifier: workspace:^
+        version: link:../../packages/core
+      '@nawadi/db':
+        specifier: workspace:^
+        version: link:../../packages/db
       '@types/node':
         specifier: ^20.11.19
         version: 20.12.7
@@ -31,10 +40,13 @@ importers:
         version: 17.0.32
       drizzle-orm:
         specifier: ^0.30.7
-        version: 0.30.8(@opentelemetry/api@1.7.0)
+        version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       oa42-appsignal:
         specifier: ^0.1.11
         version: 0.1.15
+      postgres:
+        specifier: ^3.4.4
+        version: 3.4.4
       tslib:
         specifier: ^2.6.2
         version: 2.6.2
@@ -45,12 +57,6 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
-      '@nawadi/api':
-        specifier: workspace:*
-        version: link:../../generated/api
-      '@nawadi/core':
-        specifier: workspace:^
-        version: link:../../packages/core
       '@tsconfig/node20':
         specifier: ^20.1.2
         version: 20.1.4
@@ -242,12 +248,18 @@ importers:
 
   packages/core:
     dependencies:
+      '@nawadi/api':
+        specifier: workspace:*
+        version: link:../../generated/api
       '@nawadi/db':
         specifier: workspace:*
         version: link:../db
       '@nawadi/lib':
         specifier: workspace:*
         version: link:../lib
+      '@types/node':
+        specifier: ^20.11.19
+        version: 20.12.7
       drizzle-zod:
         specifier: ^0.5.1
         version: 0.5.1(drizzle-orm@0.30.8)(zod@3.22.4)
@@ -261,21 +273,15 @@ importers:
         specifier: ^2.15.0
         version: 2.15.0(zod@3.22.4)
     devDependencies:
-      '@tsconfig/node16':
-        specifier: ^16.1.3
-        version: 16.1.3
-      '@types/bun':
-        specifier: ^1.0.12
-        version: 1.0.12
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.4
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
-      '@types/node':
-        specifier: ^20.12.4
-        version: 20.12.4
       drizzle-orm:
         specifier: ^0.30.8
-        version: 0.30.8(postgres@3.4.4)
+        version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
@@ -293,7 +299,7 @@ importers:
         version: 17.0.32
       drizzle-orm:
         specifier: ^0.30.8
-        version: 0.30.8(postgres@3.4.4)
+        version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       postgres:
         specifier: ^3.4.4
         version: 3.4.4
@@ -307,12 +313,9 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
-      '@tsconfig/node16':
-        specifier: ^16.1.3
-        version: 16.1.3
       '@tsconfig/node20':
         specifier: ^20.1.2
-        version: 20.1.2
+        version: 20.1.4
       drizzle-kit:
         specifier: ^0.20.14
         version: 0.20.14
@@ -321,10 +324,14 @@ importers:
         version: 5.4.5
 
   packages/lib:
-    devDependencies:
+    dependencies:
       '@types/node':
-        specifier: ^20.12.4
-        version: 20.12.4
+        specifier: ^20.11.19
+        version: 20.12.7
+    devDependencies:
+      '@tsconfig/node20':
+        specifier: ^20.1.2
+        version: 20.1.4
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -1849,7 +1856,6 @@ packages:
   /@opentelemetry/api@1.7.0:
     resolution: {integrity: sha512-AdY5wvN0P2vXBi3b29hxZgSFvdhdxPB9+f0B6s//P9Q8nibRWeA3cHm8UmLpio9ABigkVHJ5NMPk+Mz8VCCyrw==}
     engines: {node: '>=8.0.0'}
-    dev: false
 
   /@opentelemetry/api@1.8.0:
     resolution: {integrity: sha512-I/s6F7yKUDdtMsoBWXJe8Qz40Tui5vsuKCWJEWVL+5q9sSWRzzx6v2KeNsOBEwd94j0eWkpWCH4yB6rZg9Mf0w==}
@@ -3102,14 +3108,6 @@ packages:
     resolution: {integrity: sha512-QlCdhsV1+JIf0c0U6ge6SQmpwsyAT0oQaOSZk50AtEeAyQl9tQrd6qCHAslxQpgphrfe945abvKG8uYvw3hIGA==}
     dev: false
 
-  /@tsconfig/node16@16.1.3:
-    resolution: {integrity: sha512-9nTOUBn+EMKO6rtSZJk+DcqsfgtlERGT9XPJ5PRj/HNENPCBY1yu/JEj5wT6GLtbCLBO2k46SeXDaY0pjMqypw==}
-    dev: true
-
-  /@tsconfig/node20@20.1.2:
-    resolution: {integrity: sha512-madaWq2k+LYMEhmcp0fs+OGaLFk0OenpHa4gmI4VEmCKX4PJntQ6fnnGADVFrVkBj0wIdAlQnK/MrlYTHsa1gQ==}
-    dev: true
-
   /@tsconfig/node20@20.1.4:
     resolution: {integrity: sha512-sqgsT69YFeLWf5NtJ4Xq/xAF8p4ZQHlmGW74Nu2tD4+g5fAsposc4ZfaaPixVu4y01BEiDCWLRDCvDM5JOsRxg==}
     dev: true
@@ -3132,12 +3130,6 @@ packages:
       '@types/connect': 3.4.38
       '@types/node': 20.12.7
     dev: false
-
-  /@types/bun@1.0.12:
-    resolution: {integrity: sha512-qPb5FcygbpSS1NDBjWyQCWeI9kKXwSYSR1Enu7yb+gMXgFwGMhlyOvgV/7FGrdvAjlSXWRY6IDepos7k8WzAtQ==}
-    dependencies:
-      bun-types: 1.0.36
-    dev: true
 
   /@types/connect@3.4.38:
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
@@ -3331,6 +3323,7 @@ packages:
     resolution: {integrity: sha512-E+Fa9z3wSQpzgYQdYmme5X3OTuejnnTx88A6p6vkkJosR3KBz+HpE3kqNm98VE6cfLFcISx7zW7MsJkH6KwbTw==}
     dependencies:
       undici-types: 5.26.5
+    dev: false
 
   /@types/node@20.12.7:
     resolution: {integrity: sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==}
@@ -3434,6 +3427,7 @@ packages:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
     dependencies:
       '@types/node': 20.12.7
+    dev: false
 
   /@types/yargs-parser@21.0.3:
     resolution: {integrity: sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==}
@@ -3822,6 +3816,7 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
+    dev: false
 
   /agent-base@7.1.1:
     resolution: {integrity: sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==}
@@ -3830,7 +3825,6 @@ packages:
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /agentkeepalive@4.5.0:
     resolution: {integrity: sha512-5GG/5IbQQpC9FpkRGsSvZI5QYeSCzlJHdpBQntCsuTOxhKD8lqKhrleg2Yi7yvMIf82Ycmmqln9U8V9qwEiJew==}
@@ -4199,13 +4193,6 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
-    dev: true
-
-  /bun-types@1.0.36:
-    resolution: {integrity: sha512-gaIb1SyhB0JZfIEg73/kSFhqolUqJXC68peguhXGwqr27HuvI8nkD0LTIHp/1DY4cNadfXHYgYrZIWX7oEoXlg==}
-    dependencies:
-      '@types/node': 20.11.26
-      '@types/ws': 8.5.10
     dev: true
 
   /busboy@1.6.0:
@@ -4898,7 +4885,7 @@ packages:
       - supports-color
     dev: true
 
-  /drizzle-orm@0.30.8(@opentelemetry/api@1.7.0):
+  /drizzle-orm@0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4):
     resolution: {integrity: sha512-9pBJA0IjnpPpzZ6s9jlS1CQAbKoBmbn2GJesPhXaVblAA/joOJ4AWWevYcqvLGj9SvThBAl7WscN8Zwgg5mnTw==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -4979,88 +4966,6 @@ packages:
         optional: true
     dependencies:
       '@opentelemetry/api': 1.7.0
-    dev: false
-
-  /drizzle-orm@0.30.8(postgres@3.4.4):
-    resolution: {integrity: sha512-9pBJA0IjnpPpzZ6s9jlS1CQAbKoBmbn2GJesPhXaVblAA/joOJ4AWWevYcqvLGj9SvThBAl7WscN8Zwgg5mnTw==}
-    peerDependencies:
-      '@aws-sdk/client-rds-data': '>=3'
-      '@cloudflare/workers-types': '>=3'
-      '@electric-sql/pglite': '>=0.1.1'
-      '@libsql/client': '*'
-      '@neondatabase/serverless': '>=0.1'
-      '@op-engineering/op-sqlite': '>=2'
-      '@opentelemetry/api': ^1.4.1
-      '@planetscale/database': '>=1'
-      '@types/better-sqlite3': '*'
-      '@types/pg': '*'
-      '@types/react': '>=18'
-      '@types/sql.js': '*'
-      '@vercel/postgres': '>=0.8.0'
-      '@xata.io/client': '*'
-      better-sqlite3: '>=7'
-      bun-types: '*'
-      expo-sqlite: '>=13.2.0'
-      knex: '*'
-      kysely: '*'
-      mysql2: '>=2'
-      pg: '>=8'
-      postgres: '>=3'
-      react: '>=18'
-      sql.js: '>=1'
-      sqlite3: '>=5'
-    peerDependenciesMeta:
-      '@aws-sdk/client-rds-data':
-        optional: true
-      '@cloudflare/workers-types':
-        optional: true
-      '@electric-sql/pglite':
-        optional: true
-      '@libsql/client':
-        optional: true
-      '@neondatabase/serverless':
-        optional: true
-      '@op-engineering/op-sqlite':
-        optional: true
-      '@opentelemetry/api':
-        optional: true
-      '@planetscale/database':
-        optional: true
-      '@types/better-sqlite3':
-        optional: true
-      '@types/pg':
-        optional: true
-      '@types/react':
-        optional: true
-      '@types/sql.js':
-        optional: true
-      '@vercel/postgres':
-        optional: true
-      '@xata.io/client':
-        optional: true
-      better-sqlite3:
-        optional: true
-      bun-types:
-        optional: true
-      expo-sqlite:
-        optional: true
-      knex:
-        optional: true
-      kysely:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      postgres:
-        optional: true
-      react:
-        optional: true
-      sql.js:
-        optional: true
-      sqlite3:
-        optional: true
-    dependencies:
       postgres: 3.4.4
 
   /drizzle-zod@0.5.1(drizzle-orm@0.30.8)(zod@3.22.4):
@@ -5069,7 +4974,7 @@ packages:
       drizzle-orm: '>=0.23.13'
       zod: '*'
     dependencies:
-      drizzle-orm: 0.30.8(postgres@3.4.4)
+      drizzle-orm: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
       zod: 3.22.4
     dev: false
 
@@ -6466,7 +6371,7 @@ packages:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
     dependencies:
-      agent-base: 7.1.0
+      agent-base: 7.1.1
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
@@ -6476,7 +6381,7 @@ packages:
     resolution: {integrity: sha512-wlwpilI7YdjSkWaQ/7omYBMTliDcmCN8OLihO6I9B86g06lMyAoqgoDpV0XqoaPOKj+0DIdAvnsWfyAAhmimcg==}
     engines: {node: '>= 14'}
     dependencies:
-      agent-base: 7.1.0
+      agent-base: 7.1.1
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color

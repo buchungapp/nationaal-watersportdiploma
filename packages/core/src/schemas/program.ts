@@ -5,7 +5,7 @@ import {
   Degree,
   Discipline,
   Program,
-} from '../program/index.js'
+} from '../models/program/index.js'
 import { openApiZ as z } from '../util/zod.js'
 
 const categorySchema = Category.Info.pick({

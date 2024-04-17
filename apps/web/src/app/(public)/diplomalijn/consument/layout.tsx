@@ -1,4 +1,4 @@
-import { APP_NAME } from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 
 import type { Metadata } from "next";
 import MdxPageHeader from "~/app/(public)/_components/mdx-page-header";
@@ -8,8 +8,8 @@ import SideNavVereniging from "./_components/side-nav";
 
 export const metadata: Metadata = {
   title: {
-    template: `%s - Diplomalijn consumenten | ${APP_NAME}`,
-    default: `Diplomalijn consumenten | ${APP_NAME}`,
+    template: `%s - Diplomalijn consumenten | ${constants.APP_NAME}`,
+    default: `Diplomalijn consumenten | ${constants.APP_NAME}`,
   },
 };
 

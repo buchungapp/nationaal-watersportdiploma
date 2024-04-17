@@ -1,4 +1,4 @@
-import { APP_NAME } from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 import Logo from "~/app/_components/brand/logo";
 import { Field, Label } from "../_components/fieldset";
 import { Input } from "../_components/input";
@@ -10,7 +10,7 @@ export default function Page() {
       <div>
         <Logo className="h-20 w-auto text-white" />
         <h2 className="mt-8 text-2xl font-bold leading-8 tracking-tight text-gray-900">
-          Welkom bij het {APP_NAME}
+          Welkom bij het {constants.APP_NAME}
         </h2>
         <p className="mt-2 text-sm leading-6 text-gray-500">
           Log in met je e-mailadres om verder te gaan.

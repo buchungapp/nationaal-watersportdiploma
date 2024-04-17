@@ -1,5 +1,5 @@
+import { withDatabase } from '@nawadi/core'
 import * as http from 'http'
-
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
 
@@ -25,16 +25,16 @@ export function configureServerProgram(argv: yargs.Argv) {
 
 interface MainConfiguration {
   port: number
+  pgUri: string
 }
 
 async function main(configuration: MainConfiguration) {
-  const { port } = configuration
+  const { port, pgUri } = configuration
 
   console.info('Starting server...')
 
-  try {
-    const context = {}
-    const server = application.createApplicationServer(context)
+  await withDatabase({ pgUri }, async () => {
+    const server = application.createApplicationServer()
 
     const httpServer = http.createServer()
     const onRequest = server.asHttpRequestListener()
@@ -67,8 +67,7 @@ async function main(configuration: MainConfiguration) {
         ),
       )
     }
-  } finally {
-  }
+  })
 
   console.info('Server stopped')
 }

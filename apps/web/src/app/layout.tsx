@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 
-import { APP_NAME, APP_SLOGAN } from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -17,10 +17,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: `${APP_NAME} | ${APP_SLOGAN}`,
-    template: `%s | ${APP_NAME}`,
+    default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,
+    template: `%s | ${constants.APP_NAME}`,
   },
-  applicationName: APP_NAME,
+  applicationName: constants.APP_NAME,
   description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
   metadataBase: BASE_URL,
   icons: {
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: {
-      default: `${APP_NAME} | ${APP_SLOGAN}`,
-      template: `%s | ${APP_NAME}`,
+      default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,
+      template: `%s | ${constants.APP_NAME}`,
     },
     description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
     url: "/",
-    siteName: APP_NAME,
+    siteName: constants.APP_NAME,
     locale: "nl_NL",
     type: "website",
   },

@@ -1,4 +1,4 @@
-import { APP_NAME } from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 
 import type { Metadata } from "next";
 import MdxPageHeader from "../_components/mdx-page-header";
@@ -7,18 +7,18 @@ import { verenigingSegments } from "./_utils/segments";
 
 export const metadata: Metadata = {
   title: {
-    template: `%s | Verenigingszaken | ${APP_NAME}`,
+    template: `%s | Verenigingszaken | ${constants.APP_NAME}`,
     default: "Verenigingszaken",
   },
   description: "Opzet en werking van de vereniging.",
   openGraph: {
     title: {
-      template: `%s | Verenigingszaken | ${APP_NAME}`,
+      template: `%s | Verenigingszaken | ${constants.APP_NAME}`,
       default: "Verenigingszaken",
     },
     description: `Opzet en werking van de vereniging.`,
     url: "/vereniging",
-    siteName: APP_NAME,
+    siteName: constants.APP_NAME,
     locale: "nl_NL",
     type: "website",
   },

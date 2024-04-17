@@ -16,6 +16,22 @@
       "name": "packages/db",
       "path": "./packages/db",
     },
+    {
+      "name": "packages/core",
+      "path": "./packages/core",
+    },
+    {
+      "name": "packages/lib",
+      "path": "./packages/lib",
+    },
+    {
+      "name": "packages/scripts",
+      "path": "./packages/scripts",
+    },
+    {
+      "name": "supabase",
+      "path": "./supabase",
+    },
   ],
   "settings": {
     "window.title": "Nationaal Watersportdiploma",
@@ -33,6 +49,7 @@
       "ryanluker.vscode-coverage-gutters",
       "esbenp.prettier-vscode",
       "streetsidesoftware.code-spell-checker",
+      "42crunch.vscode-openapi",
     ],
     "unwantedRecommendations": [],
   },
