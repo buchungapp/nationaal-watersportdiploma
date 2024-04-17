@@ -1,4 +1,4 @@
-import { WEBSITE_URL } from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: `${WEBSITE_URL}/sitemap.xml`,
+    sitemap: `${constants.WEBSITE_URL}/sitemap.xml`,
   };
 }

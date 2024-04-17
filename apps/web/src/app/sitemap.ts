@@ -1,7 +1,6 @@
-import { WEBSITE_URL } from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 import { type MetadataRoute } from "next";
 import { getAllArticles } from "~/lib/articles";
-
 import { listFaqs as listFaqsGeneral } from "~/lib/faqs";
 import { listFaqs as listFaqsDiplomalijn } from "~/lib/faqs-diplomalijn";
 import {
@@ -11,7 +10,7 @@ import {
 import { verenigingSegments } from "./(public)/vereniging/_utils/segments";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const BASE_URL = WEBSITE_URL;
+  const BASE_URL = constants.WEBSITE_URL;
 
   const [articles, dcPages, diPages, faqsGeneral, faqsDiplomalijn] =
     await Promise.all([

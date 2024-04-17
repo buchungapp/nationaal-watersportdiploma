@@ -8,10 +8,9 @@ export interface ServerContext {
   baseUrl: URL
 }
 export async function withServer<T>(
-  applicationContext: application.Context,
   job: (context: ServerContext) => Promise<T>,
 ): Promise<T> {
-  const server = application.createApplicationServer(applicationContext)
+  const server = application.createApplicationServer()
 
   const httpServer = http.createServer()
   const onRequest = server.asHttpRequestListener()

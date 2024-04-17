@@ -1,13 +1,6 @@
 import Link from "next/link";
 
-import {
-  APP_SLOGAN,
-  FACEBOOK_URL,
-  INSTAGRAM_URL,
-  LINKEDIN_URL,
-  TIKTOK_URL,
-  YOUTUBE_URL,
-} from "@nawadi/lib/constants";
+import { constants } from "@nawadi/lib";
 
 import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "../socials";
 
@@ -16,27 +9,27 @@ export default function Trustbar() {
     {
       name: "Facebook",
       icon: Facebook,
-      link: FACEBOOK_URL,
+      link: constants.FACEBOOK_URL,
     },
     {
       name: "Instagram",
       icon: Instagram,
-      link: INSTAGRAM_URL,
+      link: constants.INSTAGRAM_URL,
     },
     {
       name: "LinkedIn",
       icon: LinkedIn,
-      link: LINKEDIN_URL,
+      link: constants.LINKEDIN_URL,
     },
     {
       name: "TikTok",
       icon: TikTok,
-      link: TIKTOK_URL,
+      link: constants.TIKTOK_URL,
     },
     {
       name: "YouTube",
       icon: YouTube,
-      link: YOUTUBE_URL,
+      link: constants.YOUTUBE_URL,
     },
   ];
 
@@ -44,7 +37,7 @@ export default function Trustbar() {
     <section className="flex items-center justify-center gap-2 py-2 text-white sm:px-28 lg:justify-between">
       <div className="hidden flex-1 xl:block"></div>
       <p className="flex-1 text-center text-sm font-semibold uppercase lg:text-start xl:text-center">
-        {APP_SLOGAN}
+        {constants.APP_SLOGAN}
       </p>
 
       <ul className="hidden flex-1 items-center justify-end gap-6 lg:flex">

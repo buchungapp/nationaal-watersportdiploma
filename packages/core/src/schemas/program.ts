@@ -1,4 +1,4 @@
-import { Program } from '../program/index.js'
+import { Program } from '../models/program/index.js'
 import { openApiZ as z } from '../util/zod.js'
 
 export const ProgramSchema = z.object({
