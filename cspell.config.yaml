@@ -1,4 +1,4 @@
-version: '0.2'
+version: "0.2"
 words:
   - buchungapp
   - clsx
@@ -25,6 +25,7 @@ words:
   - skreet
   - solvebv
   - supabase
+  - svgs
   - tailwindcss
   - trivago
   - veiligheids
@@ -43,14 +44,14 @@ ignorePaths:
   - pnpm-lock.yaml
   - generated/
   - apps/nwd-web/src/app/
-  - '*.svg'
+  - "*.svg"
   - supabase/config.toml
 files:
-  - '**'
+  - "**"
 enableFiletypes:
-  - '*'
+  - "*"
 dictionaries:
   - sql
   - nl-nl
 import:
-  - '@cspell/dict-nl-nl/cspell-ext.json'
+  - "@cspell/dict-nl-nl/cspell-ext.json"
