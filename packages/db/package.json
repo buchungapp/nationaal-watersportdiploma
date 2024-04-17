@@ -17,9 +17,8 @@
     "build": "tsc --build",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test ./out/**/*.test.js",
-    "reset": "supabase db reset && pnpm execute-migration --pg-uri postgresql://postgres:postgres@127.0.0.1:54322/postgres",
     "generate-migration": "drizzle-kit generate:pg",
-    "execute-migration": "pnpm dlx tsx ./src/program.ts migrate"
+    "execute-migration": "node ./out/program.js migrate"
   },
   "repository": {
     "type": "git",
