@@ -1,7 +1,7 @@
 {
   "name": "@nawadi/supabase",
   "scripts": {
-    "start": "supabase db start",
+    "start": "supabase start -x realtime,pgadmin-schema-diff,migra,edge-runtime,vector",
     "stop": "supabase stop",
     "reset": "supabase db reset",
     "lint": "supabase db lint",
