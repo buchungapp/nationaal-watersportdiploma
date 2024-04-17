@@ -1,0 +1,24 @@
+import Link from "next/link";
+import LaunchFaq from "../_components/launch-faq";
+import { ArticleLayout } from "../_components/news-article";
+
+export const article = {
+  date: "2024-03-22T07:00:00Z",
+  title: "Een test artikel!",
+  description: "Een test beschrijving van een test artikel.",
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/helpcentrum/artikels/3yHwZSTf-test",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Groot nieuws! Dit is een test artikel

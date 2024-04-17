@@ -6,6 +6,7 @@ import Search from "./_components/search";
 
 import type { Metadata, ResolvingMetadata } from "next";
 import React from "react";
+import { getAllHelpArticles } from "~/lib/help-articles";
 
 export async function generateMetadata(
   _props: unknown,
@@ -28,10 +29,12 @@ export async function generateMetadata(
 }
 
 export default async function Page() {
-  const [generalQuestions, diplomalijnQuestions] = await Promise.all([
-    listFaqsGeneral({}),
-    listFaqsDiplomalijn({}),
-  ]);
+  const [generalQuestions, diplomalijnQuestions, helpArticles] =
+    await Promise.all([
+      listFaqsGeneral({}),
+      listFaqsDiplomalijn({}),
+      getAllHelpArticles(),
+    ]);
 
   const combined = [...generalQuestions, ...diplomalijnQuestions];
 
@@ -59,7 +62,7 @@ export default async function Page() {
         <h2 className="text-2xl font-bold lg:text-3xl xl:text-4xl text-gray-900">
           Hoe kunnen we helpen?
         </h2>
-        <Search questions={uniqueQuestions} />
+        <Search questions={uniqueQuestions} articles={helpArticles} />
         <p className="text-center mt-4 max-w-prose">
           <span className="font-semibold text-gray-600">Populaire vragen:</span>{" "}
           {generalQuestions
