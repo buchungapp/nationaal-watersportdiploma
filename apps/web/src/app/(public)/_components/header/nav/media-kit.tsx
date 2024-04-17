@@ -36,28 +36,41 @@ export default function MediaKit() {
       >
         <Popover.Panel className="absolute -left-4 top-full z-10 mt-3 w-screen max-w-xs rounded-xl px-2.5 py-4 bg-white shadow-lg ring-1 ring-gray-900/5">
           <CopyButton
-            label={
+            label={(active) => (
               <div className="flex items-center gap-x-2.5">
-                <span className="border-gray-600 border-2 block h-4 w-4 rounded-full" />
+                <span
+                  className={clsx(
+                    "border-2 block h-4 w-4 rounded-full transition-colors",
+                    active ? "border-white" : "border-gray-600",
+                  )}
+                />
                 <p>Kopieer logo als SVG</p>
               </div>
-            }
+            )}
             value={logo}
           />
           <CopyButton
-            label={
+            label={(active) => (
               <div className="flex items-center gap-x-2.5">
-                <span className="font-serif text-gray-600 leading-5 w-4 text-center">
+                <span
+                  className={clsx(
+                    "font-serif leading-5 w-4 text-center transition-colors",
+                    active ? "text-white" : "text-gray-600",
+                  )}
+                >
                   N
                 </span>
                 <p>Kopieer woordmerk als SVG</p>
               </div>
-            }
+            )}
             value={wordmark}
           />
           <Link
             href="/merk"
             className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-gray-50"
+            onClick={(e) => {
+              ref.current?.click();
+            }}
           >
             <SparklesIcon
               className="h-4 w-4 text-gray-600"
@@ -70,6 +83,9 @@ export default function MediaKit() {
           <Link
             href="/"
             className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-gray-50"
+            onClick={(e) => {
+              ref.current?.click();
+            }}
           >
             <HomeIcon className="h-4 w-4 text-gray-600" aria-hidden={true} />
             <p className="block font-semibold text-gray-900">Homepagina</p>
@@ -85,7 +101,7 @@ function CopyButton({
   label,
 }: {
   value: string;
-  label: React.ReactNode;
+  label: ((active: boolean) => React.ReactNode) | React.ReactNode;
 }) {
   const [showing, setShowing] = useState(false);
 
@@ -108,7 +124,7 @@ function CopyButton({
         }}
         className="font-semibold text-left w-full"
       >
-        {label}
+        {typeof label === "function" ? label(showing) : label}
       </button>
     </div>
   );
