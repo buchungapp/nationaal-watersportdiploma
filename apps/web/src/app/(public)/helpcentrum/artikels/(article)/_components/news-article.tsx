@@ -2,7 +2,7 @@ import { Prose } from "~/app/(public)/_components/prose";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import PageHero from "~/app/(public)/_components/style/page-hero";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import { HelpArticleWithSlug } from "~/lib/help-articles";
+import type { HelpArticleWithSlug } from "~/lib/help-articles";
 import { Container } from "./container";
 
 export function ArticleLayout({

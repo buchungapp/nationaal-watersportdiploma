@@ -13,7 +13,7 @@ import Fuse from "fuse.js";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import type { Faq } from "~/lib/faqs";
-import { HelpArticleWithSlug } from "~/lib/help-articles";
+import type { HelpArticleWithSlug } from "~/lib/help-articles";
 
 export default function Search({
   questions,
