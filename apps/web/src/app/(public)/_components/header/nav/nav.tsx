@@ -1,7 +1,6 @@
 import Link from "next/link";
 
-import Logo from "~/app/_components/brand/logo";
-import Wordmark from "~/app/_components/brand/wordmark";
+import MediaKit from "./media-kit";
 import MobileDisclosure from "./mobile/mobile-disclosure";
 import MobileItem from "./mobile/mobile-item";
 import MobileNav, { MobileNavButton } from "./mobile/mobile-nav";
@@ -53,10 +52,7 @@ export default function Nav({ items }: { items: NavItem[] }) {
       </MobileNav>
       <StickyNavContainer className="flex w-full px-4 lg:px-16">
         <StickyNavDiv className="flex w-full justify-between rounded-full bg-white font-medium text-branding-dark">
-          <Link href="/" className="flex shrink-0">
-            <Logo className="h-24 w-24 p-2 text-white" />
-            <Wordmark className="block h-24 lg:hidden xl:block" />
-          </Link>
+          <MediaKit />
           <div className="flex items-center pr-8 lg:hidden">
             <MobileNavButton />
           </div>
