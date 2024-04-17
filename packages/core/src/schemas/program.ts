@@ -1,4 +1,4 @@
-import { Curriculum } from '../curriculum/index.js'
+import { Curriculum } from '../models/curriculum/index.js'
 import {
   Category,
   Competency,
