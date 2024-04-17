@@ -68,7 +68,7 @@ export default function MediaKit() {
           <Link
             href="/merk"
             className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-gray-50"
-            onClick={(e) => {
+            onClick={() => {
               ref.current?.click();
             }}
           >
@@ -83,7 +83,7 @@ export default function MediaKit() {
           <Link
             href="/"
             className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-gray-50"
-            onClick={(e) => {
+            onClick={() => {
               ref.current?.click();
             }}
           >
