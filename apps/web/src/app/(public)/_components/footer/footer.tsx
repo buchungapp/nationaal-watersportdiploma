@@ -67,7 +67,7 @@ export default function Footer() {
 
           <div className="mt-12">
             <p className="text-sm uppercase font-semibold text-white/55">
-              Powered by
+              Gelicentieerd door
             </p>
             <Link href="/partners">
               <Image
