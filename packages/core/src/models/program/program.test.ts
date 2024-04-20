@@ -52,10 +52,12 @@ test('program crud', () =>
 
     const list = await Program.list()
 
+    const byHandle = await Program.fromHandle('pr1')
+
     assert.equal(list.length, 1)
     const [item] = list
 
-    assert.deepStrictEqual(item, {
+    const expected = {
       id,
       title: 'program-1',
       handle: 'pr1',
@@ -87,5 +89,8 @@ test('program crud', () =>
           },
         },
       ],
-    })
+    }
+
+    assert.deepStrictEqual(item, expected)
+    assert.deepStrictEqual(byHandle, expected)
   }))

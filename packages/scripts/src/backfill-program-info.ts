@@ -82,7 +82,7 @@ const dedupeCache = new Map<string, Promise<string>>()
 async function getOrCreateCachedItem<T extends { id: string }>(
   entityType: {
     fromHandle: (handle: string) => Promise<T | undefined>
-    create: (opts: any) => Promise<string>
+    create: (opts: any) => Promise<{ id: string }>
   },
   handle: string,
   title: string,
@@ -93,11 +93,13 @@ async function getOrCreateCachedItem<T extends { id: string }>(
   if (!promise) {
     promise = entityType.fromHandle(handle).then(async (item) => {
       if (!item?.id) {
-        const newItem = entityType.create({
-          handle,
-          title,
-          ...extraOpts,
-        })
+        const newItem = entityType
+          .create({
+            handle,
+            title,
+            ...extraOpts,
+          })
+          .then((newItem) => newItem.id)
         dedupeCache.set(cacheKey, newItem)
         return newItem
       }
@@ -175,7 +177,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Module
     const moduleHandle = slugify(row[3], slugifyOpts)
     const modulePromise = getOrCreateCachedItem(
-      Program.Module2,
+      Program.Module,
       moduleHandle,
       row[3],
       `module-${moduleHandle}`,
@@ -219,14 +221,16 @@ async function processRow(row: z.infer<typeof rowSchema>) {
 
     let curriculumPromise = dedupeCache.get(`curriculum-${programId}`)
     if (!curriculumPromise) {
-      curriculumPromise = Curriculum.fromProgramId({ programId }).then(
-        (curriculum) => {
+      curriculumPromise = Curriculum.list({ filter: { programId } }).then(
+        (curricula) => {
+          const curriculum = curricula[0]
+
           if (!curriculum) {
             const newItem = Curriculum.create({
               programId,
               revision: '2401',
               startedAt: new Date('2024-04-01').toISOString(),
-            })
+            }).then((newItem) => newItem.id)
 
             dedupeCache.set(`curriculum-${programId}`, newItem)
             return newItem

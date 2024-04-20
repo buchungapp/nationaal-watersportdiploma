@@ -1,4 +1,5 @@
 import { schema as s } from '@nawadi/db'
+import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -45,3 +46,19 @@ export const create = withZod(
     return row
   },
 )
+
+export const fromHandle = withZod(handleSchema, async (handle) => {
+  const query = useQuery()
+
+  const rows = await query
+    .select({
+      id: s.competency.id,
+      title: s.competency.title,
+      handle: s.competency.handle,
+      type: s.competency.type,
+    })
+    .from(s.competency)
+    .where(eq(s.competency.handle, handle))
+
+  return singleRow(rows)
+})

@@ -121,3 +121,49 @@ export const create = withZod(
       return row
     }),
 )
+
+export const fromHandle = withZod(handleSchema, async (handle) => {
+  const query = useQuery()
+
+  const program = await query
+    .select()
+    .from(s.program)
+    .leftJoin(s.programCategory, eq(s.programCategory.programId, s.program.id))
+    .where(eq(s.program.handle, handle))
+    .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
+    .then((rows) => singleRow(rows))
+
+  const [categories, degree, discipline] = await Promise.all([
+    Category.list(),
+    Degree.fromId(program.degreeId),
+    Discipline.fromId(program.disciplineId),
+  ])
+
+  const { program_category, degreeId, disciplineId, ...programProperties } =
+    program
+
+  return {
+    ...programProperties,
+    degree,
+    discipline,
+    categories: categories
+      .filter((category) =>
+        program_category.some((pc) => pc.categoryId === category.id),
+      )
+      .map(({ parentCategoryId, ...categoryKeys }) => {
+        const parentCategory = categories.find((c) => c.id === parentCategoryId)
+
+        return {
+          ...categoryKeys,
+          parent: parentCategory
+            ? {
+                id: parentCategory.id,
+                title: parentCategory.title,
+                handle: parentCategory.handle,
+                description: parentCategory.description,
+              }
+            : null,
+        }
+      }),
+  }
+})

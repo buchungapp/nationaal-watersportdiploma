@@ -1,10 +1,12 @@
 import { schema as s } from '@nawadi/db'
+import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   handleSchema,
   singleRow,
   titleSchema,
+  uuidSchema,
   withZod,
 } from '../../util/index.js'
 
@@ -42,3 +44,33 @@ export const create = withZod(
     return row
   },
 )
+
+export const fromHandle = withZod(handleSchema, async (handle) => {
+  const query = useQuery()
+
+  const rows = await query
+    .select({
+      id: s.discipline.id,
+      title: s.discipline.title,
+      handle: s.discipline.handle,
+    })
+    .from(s.discipline)
+    .where(eq(s.discipline.handle, handle))
+
+  return singleRow(rows)
+})
+
+export const fromId = withZod(uuidSchema, async (id) => {
+  const query = useQuery()
+
+  const rows = await query
+    .select({
+      id: s.discipline.id,
+      title: s.discipline.title,
+      handle: s.discipline.handle,
+    })
+    .from(s.discipline)
+    .where(eq(s.discipline.id, id))
+
+  return singleRow(rows)
+})

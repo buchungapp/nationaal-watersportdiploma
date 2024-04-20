@@ -131,39 +131,53 @@ export const list = withZod(
             ? dayjs(curriculum.startedAt).toISOString()
             : null,
           programId,
-          modules: moduleLinks.map(({ curriculum_competency, moduleId }) => {
-            const module = findItem({
-              items: modules,
-              predicate(item) {
-                return item.id === moduleId
-              },
-              enforce: true,
-            })
-
-            return {
-              ...module,
-              competencies: curriculum_competency.map(
-                ({ id, isRequired, requirement }) => {
-                  const competency = findItem({
-                    items: competencies,
-                    predicate(item) {
-                      return item.id === id
-                    },
-                    enforce: true,
-                  })
-
-                  return {
-                    id: competency.id,
-                    handle: competency.handle,
-                    title: competency.title,
-                    type: competency.type,
-                    isRequired,
-                    requirement,
-                  }
+          modules: moduleLinks
+            .map(({ curriculum_competency, moduleId }) => {
+              const module = findItem({
+                items: modules,
+                predicate(item) {
+                  return item.id === moduleId
                 },
-              ),
-            }
-          }),
+                enforce: true,
+              })
+
+              return {
+                ...module,
+                competencies: curriculum_competency.map(
+                  ({ id, isRequired, requirement }) => {
+                    const competency = findItem({
+                      items: competencies,
+                      predicate(item) {
+                        return item.id === id
+                      },
+                      enforce: true,
+                    })
+
+                    return {
+                      id: competency.id,
+                      handle: competency.handle,
+                      title: competency.title,
+                      type: competency.type,
+                      isRequired,
+                      requirement,
+                    }
+                  },
+                ),
+              }
+            })
+            // As for now, a module can only have one type of competencies
+            .map((item) => {
+              return {
+                ...item,
+                isRequired: item.competencies.every(
+                  (competency) => competency.isRequired,
+                ),
+                type:
+                  item.competencies.length > 0
+                    ? item.competencies[0]!.type
+                    : null,
+              }
+            }),
         }
       },
     )

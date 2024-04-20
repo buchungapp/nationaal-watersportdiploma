@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { Curriculum } from '@nawadi/core'
+import { Curriculum, Program } from '@nawadi/core'
 import {
   Document,
   Font,
@@ -14,10 +14,12 @@ import {
 } from '@react-pdf/renderer'
 import path from 'path'
 import React, { Fragment, PropsWithChildren } from 'react'
-import { fileURLToPath } from 'url'
 
 async function main() {
-  const allPrograms = await Curriculum.list()
+  const [allActiveCurricula, allPrograms] = await Promise.all([
+    Curriculum.list(),
+    Program.list(),
+  ])
 
   const perStudy = Object.values(
     allPrograms.reduce(
@@ -195,7 +197,11 @@ async function main() {
     )
   }
 
-  function Program({ program }: { program: (typeof allPrograms)[0] }) {
+  function ProgramPage({ program }: { program: (typeof allPrograms)[0] }) {
+    const curriculum = allActiveCurricula.find(
+      (c) => c.programId === program.id,
+    )
+
     return (
       <PageLayout bookmark="Modules" footerTitle={program.title ?? undefined}>
         <View>
@@ -203,7 +209,7 @@ async function main() {
         </View>
 
         <View>
-          {program.modules.map((module) => (
+          {curriculum?.modules.map((module) => (
             <View
               key={module.id}
               style={programStyles.moduleSection}
@@ -361,28 +367,34 @@ async function main() {
         </View>
         {programs
           .sort((a, b) => a.degree.rang - b.degree.rang)
-          .map((program, index) => (
-            <View
-              key={program.id}
-              style={{
-                ...programSummaryStyles.row,
-                backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
-              }}
-            >
-              <Text style={programSummaryStyles.title}>{program.title}</Text>
-              <Text style={programSummaryStyles.degree}>
-                {program.degree.title}
-              </Text>
-              <Text style={programSummaryStyles.revision}>
-                {program.curriculum.revision}
-              </Text>
-              <Text style={programSummaryStyles.startedAt}>
-                {program.curriculum.startedAt
-                  ? formatDate(program.curriculum.startedAt)
-                  : '-'}
-              </Text>
-            </View>
-          ))}
+          .map((program, index) => {
+            const curriculum = allActiveCurricula.find(
+              (c) => c.programId === program.id,
+            )
+
+            return (
+              <View
+                key={program.id}
+                style={{
+                  ...programSummaryStyles.row,
+                  backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
+                }}
+              >
+                <Text style={programSummaryStyles.title}>{program.title}</Text>
+                <Text style={programSummaryStyles.degree}>
+                  {program.degree.title}
+                </Text>
+                <Text style={programSummaryStyles.revision}>
+                  {curriculum?.revision}
+                </Text>
+                <Text style={programSummaryStyles.startedAt}>
+                  {curriculum?.startedAt
+                    ? formatDate(curriculum.startedAt)
+                    : '-'}
+                </Text>
+              </View>
+            )
+          })}
       </View>
     )
   }
@@ -413,7 +425,10 @@ async function main() {
 
   function ProgramMatrix({ programs }: { programs: typeof allPrograms }) {
     // Create a unique set of modules with the complete module object
-    const uniqueModules = programs
+    const uniqueModules = allActiveCurricula
+      .filter((curriculum) =>
+        programs.some((program) => program.id === curriculum.programId),
+      )
       .flatMap((program) => program.modules)
       .filter(
         (module, index, self) =>
@@ -489,7 +504,11 @@ async function main() {
               {module.type === 'skill' ? 'Praktijk' : 'Theorie'}
             </Text>
             {programs.map((program) => {
-              const programModule = program.modules.find(
+              const curriculum = allActiveCurricula.find(
+                (c) => c.programId === program.id,
+              )
+
+              const programModule = curriculum?.modules.find(
                 (m) => m.id === module.id,
               )
 
@@ -555,9 +574,6 @@ async function main() {
     )
   }
 
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
-
   const createDocumentPromises = perStudy.map((study) => {
     const documentName = `${study.discipline.title} ${study.categories.map((c) => c.title).join(' ')}`
 
@@ -567,7 +583,7 @@ async function main() {
         <CoverPage study={study} />
 
         {study.programs.map((program) => (
-          <Program key={program.id} program={program} />
+          <ProgramPage key={program.id} program={program} />
         ))}
       </Document>,
       path.join(

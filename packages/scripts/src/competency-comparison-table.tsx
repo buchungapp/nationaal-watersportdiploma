@@ -1,4 +1,4 @@
-import { Curriculum } from '@nawadi/core'
+import { Curriculum, Program } from '@nawadi/core'
 import {
   Document,
   Font,
@@ -13,17 +13,23 @@ import 'dotenv/config'
 import path from 'path'
 import React from 'react'
 import slugify from 'slugify'
-import { fileURLToPath } from 'url'
 
 async function main() {
-  const allPrograms = await Curriculum.list()
+  const [allPrograms, allActiveCurricula] = await Promise.all([
+    Program.list(),
+    Curriculum.list({ filter: { onlyCurrentActive: true } }),
+  ])
 
   const perCompetency = Object.values(
     allPrograms
       .filter((program) => program.discipline.handle !== 'jachtzeilen')
       .reduce(
         (acc, program) => {
-          program.modules.forEach((module) => {
+          const curriculum = allActiveCurricula.find(
+            (curriculum) => curriculum.programId === program.id,
+          )
+
+          curriculum?.modules.forEach((module) => {
             module.competencies.forEach((competency) => {
               if (!acc[competency.handle]) {
                 acc[competency.handle] = {
@@ -54,7 +60,7 @@ async function main() {
         {} as Record<
           string,
           Omit<
-            (typeof allPrograms)[number]['modules'][number]['competencies'][number],
+            (typeof allActiveCurricula)[number]['modules'][number]['competencies'][number],
             'requirement'
           > & {
             programs: {
@@ -89,15 +95,6 @@ async function main() {
           }
         >,
       ),
-  )
-
-  console.log(
-    'perCompetency',
-    perCompetency.filter((c) =>
-      c.programs.some((p) =>
-        p.requirement?.includes('assistentie in geval van nood'),
-      ),
-    ),
   )
 
   Font.register({
@@ -306,9 +303,6 @@ async function main() {
       </Document>
     )
   }
-
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
 
   const createDocumentPromises = perCompetency.map((competency) => {
     const documentName = `${competency.title}`
