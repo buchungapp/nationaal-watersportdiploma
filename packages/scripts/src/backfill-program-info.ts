@@ -11,15 +11,9 @@
 
 import 'dotenv/config'
 
-import {
-  Curriculum,
-  Program,
-  withDatabase,
-  withTransaction,
-} from '@nawadi/core'
+import { Curriculum, Program, withDatabase } from '@nawadi/core'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
-import { PostgresError } from 'postgres'
 import slugify from 'slugify'
 import { z } from 'zod'
 
@@ -262,16 +256,9 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       moduleId,
       isRequired: !!(row[4] === 'Verplicht'),
       requirement: row[6],
-    }).catch((error) => {
-      // console.error('Error creating competency:', {
-      //   row,
-      //   error,
-      // })
-
-      throw error
     })
   } catch (error) {
-    // console.error('Error processing row:', row)
+    console.error('Error processing row:', row)
     throw error
   }
 }
@@ -298,25 +285,7 @@ async function main() {
     }
   }
 
-  const res = await Promise.allSettled(promises)
-
-  console.log('res.length', res.length)
-
-  const errors = res.filter((r) => r.status === 'rejected')
-
-  if (errors.length > 0) {
-    console.log('!@#errors.length', errors.length)
-
-    const notPostgres = errors.filter(
-      (e) => e.status === 'rejected' && !(e.reason instanceof PostgresError),
-    )
-
-    console.log('notPostgres.length', notPostgres.length)
-
-    throw new Error('Some rows failed')
-  }
-
-  return res
+  return Promise.all(promises)
 }
 
 const pgUri = process.env.PGURI
@@ -330,19 +299,14 @@ withDatabase(
     pgUri,
   },
   async () => {
-    return withTransaction(async () => {
-      try {
-        await main()
-        console.log('Done')
-        process.exit(0)
-      } catch (error) {
-        console.error('Error:', error)
+    try {
+      await main()
+      console.log('Done')
+      process.exit(0)
+    } catch (error) {
+      console.error('Error:', error)
 
-        throw error
-      }
-    }).catch(() => {
-      console.error('Error in transaction')
-      process.exit(1)
-    })
+      throw error
+    }
   },
 )

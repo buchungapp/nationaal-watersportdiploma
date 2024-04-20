@@ -144,11 +144,11 @@ export const list = withZod(
               return {
                 ...module,
                 competencies: curriculum_competency.map(
-                  ({ id, isRequired, requirement }) => {
+                  ({ id, isRequired, requirement, competencyId }) => {
                     const competency = findItem({
                       items: competencies,
                       predicate(item) {
-                        return item.id === id
+                        return item.id === competencyId
                       },
                       enforce: true,
                     })
