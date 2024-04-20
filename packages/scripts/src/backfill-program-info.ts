@@ -11,15 +11,7 @@
 
 import 'dotenv/config'
 
-import { Curriculum } from '@nawadi/core/curriculum'
-import {
-  Category,
-  Competency,
-  Degree,
-  Discipline,
-  Module,
-  Program,
-} from '@nawadi/core/program'
+import { Curriculum, Program } from '@nawadi/core'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
 import slugify from 'slugify'
@@ -54,13 +46,6 @@ async function retrieveSheets() {
     }) ?? []
   )
 }
-
-const sheets = await retrieveSheets()
-
-const rows = await service.spreadsheets.values.batchGet({
-  spreadsheetId,
-  ranges: sheets.map((sheet) => `${sheet.properties?.title!}!A2:G`),
-})
 
 const rowSchema = z.tuple([
   z.string().trim(),
@@ -136,7 +121,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       : row[0]
     const disciplineHandle = slugify(disciplineTitle.trim(), slugifyOpts)
     const disciplinePromise = getOrCreateCachedItem(
-      Discipline,
+      Program.Discipline,
       disciplineHandle,
       disciplineTitle.trim(),
       `discipline-${disciplineHandle}`,
@@ -145,7 +130,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Degree
     const degreeHandle = `niveau-${row[2]}`
     const degreePromise = getOrCreateCachedItem(
-      Degree,
+      Program.Degree,
       degreeHandle,
       `Niveau ${row[2]}`,
       `degree-${degreeHandle}`,
@@ -164,20 +149,20 @@ async function processRow(row: z.infer<typeof rowSchema>) {
         .map(async (category, index) => {
           const categoryHandle = slugify(category, slugifyOpts)
           return getOrCreateCachedItem(
-            Category,
+            Program.Category,
             categoryHandle,
             category,
             `category-${categoryHandle}`,
             {
               parentCategoryId: await (index === 0
                 ? getOrCreateCachedItem(
-                    Category,
+                    Program.Category,
                     'leeftijdsgroep',
                     'Leeftijdsgroep',
                     `category-leeftijdsgroep`,
                   )
                 : getOrCreateCachedItem(
-                    Category,
+                    Program.Category,
                     'vaarwater',
                     'Vaarwater',
                     `category-vaarwater`,
@@ -190,7 +175,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Module
     const moduleHandle = slugify(row[3], slugifyOpts)
     const modulePromise = getOrCreateCachedItem(
-      Module,
+      Program.Module2,
       moduleHandle,
       row[3],
       `module-${moduleHandle}`,
@@ -199,7 +184,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Competency
     const competencyHandle = slugify(row[5], slugifyOpts)
     const competencyPromise = getOrCreateCachedItem(
-      Competency,
+      Program.Competency,
       competencyHandle,
       row[5],
       `competency-${competencyHandle}`,
@@ -281,21 +266,37 @@ async function processRow(row: z.infer<typeof rowSchema>) {
   }
 }
 
-const promises = []
-for (const sheet of rows.data.valueRanges ?? []) {
-  for (const row of sheet.values ?? []) {
-    try {
-      const competence = rowSchema.parse(row)
-      promises.push(processRow(competence))
-    } catch (error) {
-      console.error('Invalid row:', row)
-      // Stop both loops
-      throw error
+async function main() {
+  const sheets = await retrieveSheets()
+
+  const rows = await service.spreadsheets.values.batchGet({
+    spreadsheetId,
+    ranges: sheets.map((sheet) => `${sheet.properties?.title!}!A2:G`),
+  })
+
+  const promises = []
+  for (const sheet of rows.data.valueRanges ?? []) {
+    for (const row of sheet.values ?? []) {
+      try {
+        const competence = rowSchema.parse(row)
+        promises.push(processRow(competence))
+      } catch (error) {
+        console.error('Invalid row:', row)
+        // Stop both loops
+        throw error
+      }
     }
   }
+
+  await Promise.all(promises)
 }
 
-await Promise.all(promises)
-
-console.log('Done')
-process.exit(0)
+main()
+  .then(() => {
+    console.log('Done')
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error('Error:', error)
+    process.exit(1)
+  })

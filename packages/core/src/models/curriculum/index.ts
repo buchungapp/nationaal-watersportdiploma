@@ -56,25 +56,24 @@ export const fromProgramId = zod(
     programId: true,
     revision: true,
   }).partial({ revision: true }),
-  async ({ programId, revision }) =>
-    async () => {
-      const query = useQuery()
-      const whereClausules: SQL[] = [eq(curriculum.programId, programId)]
+  async ({ programId, revision }) => {
+    const query = useQuery()
+    const whereClausules: SQL[] = [eq(curriculum.programId, programId)]
 
-      if (revision) {
-        whereClausules.push(eq(curriculum.revision, revision))
-      } else {
-        whereClausules.push(isNotNull(curriculum.startedAt))
-      }
+    if (revision) {
+      whereClausules.push(eq(curriculum.revision, revision))
+    } else {
+      whereClausules.push(isNotNull(curriculum.startedAt))
+    }
 
-      return await query
-        .select()
-        .from(curriculum)
-        .where(and(...whereClausules))
-        .orderBy(desc(curriculum.startedAt))
-        .limit(1)
-        .then((rows) => rows[0])
-    },
+    return await query
+      .select()
+      .from(curriculum)
+      .where(and(...whereClausules))
+      .orderBy(desc(curriculum.startedAt))
+      .limit(1)
+      .then((rows) => rows[0])
+  },
 )
 
 export const linkModule = zod(

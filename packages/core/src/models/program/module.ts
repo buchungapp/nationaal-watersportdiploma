@@ -7,9 +7,9 @@ import { zod } from '../../util/zod.js'
 
 export * as Module from './module.js'
 
-const module = schema.module
+const moduleSchema = schema.module
 
-export const Info = createSelectSchema(module, {
+export const Info = createSelectSchema(moduleSchema, {
   handle(schema) {
     return schema.handle
       .trim()
@@ -18,7 +18,7 @@ export const Info = createSelectSchema(module, {
       .regex(/^[a-z0-9\-]+$/)
   },
 })
-export type Info = typeof module.$inferSelect
+export type Info = typeof moduleSchema.$inferSelect
 
 export const create = zod(
   Info.pick({ title: true, handle: true }).partial({
@@ -27,12 +27,12 @@ export const create = zod(
   async (input) => {
     const query = useQuery()
     const [insert] = await query
-      .insert(module)
+      .insert(moduleSchema)
       .values({
         handle: input.handle,
         title: input.title,
       })
-      .returning({ id: module.id })
+      .returning({ id: moduleSchema.id })
 
     if (!insert) {
       throw new Error('Failed to insert module')
@@ -44,15 +44,15 @@ export const create = zod(
 
 export const list = zod(z.void(), async () => {
   const query = useQuery()
-  return await query.select().from(module)
+  return await query.select().from(moduleSchema)
 })
 
 export const fromId = zod(Info.shape.id, async (id) => {
   const query = useQuery()
   return await query
     .select()
-    .from(module)
-    .where(eq(module.id, id))
+    .from(moduleSchema)
+    .where(eq(moduleSchema.id, id))
     .then((rows) => rows[0])
 })
 
@@ -60,7 +60,7 @@ export const fromHandle = zod(Info.shape.handle, async (handle) => {
   const query = useQuery()
   return await query
     .select()
-    .from(module)
-    .where(eq(module.handle, handle))
+    .from(moduleSchema)
+    .where(eq(moduleSchema.handle, handle))
     .then((rows) => rows[0])
 })

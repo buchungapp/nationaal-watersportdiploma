@@ -10,7 +10,7 @@ export { Competency } from './competency.js'
 export { Degree } from './degree.js'
 export { Discipline } from './discipline.js'
 export * as Program from './index.js'
-export { Module } from './module.js'
+export { Module as Module2 } from './module.js'
 
 const program = schema.program
 
