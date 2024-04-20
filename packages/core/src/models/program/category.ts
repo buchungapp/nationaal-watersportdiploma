@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   handleSchema,
+  possibleSingleRow,
   singleRow,
   titleSchema,
   uuidSchema,
@@ -63,7 +64,11 @@ export const fromHandle = withZod(handleSchema, async (handle) => {
     .leftJoin(self, eq(s.category.id, self.id))
     .where(eq(s.category.handle, handle))
 
-  const row = singleRow(rows)
+  const row = possibleSingleRow(rows)
+
+  if (!row) {
+    return null
+  }
 
   return {
     id: row.category.id,

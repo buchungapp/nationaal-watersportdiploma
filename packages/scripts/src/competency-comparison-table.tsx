@@ -1,4 +1,4 @@
-import { Curriculum, Program } from '@nawadi/core'
+import { Curriculum, Program, withDatabase } from '@nawadi/core'
 import {
   Document,
   Font,
@@ -322,12 +322,24 @@ async function main() {
   await Promise.all(createDocumentPromises)
 }
 
-main()
-  .then(() => {
-    console.log('Documents created')
-    process.exit(0)
-  })
-  .catch((error) => {
-    console.error('Error:', error)
-    process.exit(1)
-  })
+const pgUri = process.env.PGURI
+
+if (!pgUri) {
+  throw new Error('PGURI environment variable is required')
+}
+
+withDatabase(
+  {
+    pgUri,
+  },
+  async () => {
+    try {
+      await main()
+      console.log('Done')
+      process.exit(0)
+    } catch (error) {
+      console.error('Error:', error)
+      process.exit(1)
+    }
+  },
+)

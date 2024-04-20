@@ -31,6 +31,15 @@ export function singleRow<T>(rows: T[]): T {
   return row
 }
 
+export function possibleSingleRow<T>(rows: T[]): T | undefined {
+  if (!hasAtLeastOneElement(rows) && rows.length > 1) {
+    throw new TypeError(`Expected 0 or 1 rows, got ${rows.length}`)
+  }
+  const [row] = rows
+
+  return row ?? undefined
+}
+
 export function hasAtLeastOneElement<T>(array: T[]): array is [T, ...T[]] {
   return !!array && array.length > 0
 }

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   handleSchema,
+  possibleSingleRow,
   singleRow,
   titleSchema,
   uuidSchema,
@@ -57,7 +58,7 @@ export const fromHandle = withZod(handleSchema, async (handle) => {
     .from(s.discipline)
     .where(eq(s.discipline.handle, handle))
 
-  return singleRow(rows)
+  return possibleSingleRow(rows) ?? null
 })
 
 export const fromId = withZod(uuidSchema, async (id) => {
@@ -72,5 +73,5 @@ export const fromId = withZod(uuidSchema, async (id) => {
     .from(s.discipline)
     .where(eq(s.discipline.id, id))
 
-  return singleRow(rows)
+  return possibleSingleRow(rows) ?? null
 })

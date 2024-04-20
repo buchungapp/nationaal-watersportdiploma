@@ -6,6 +6,7 @@ import {
   aggregateOneToMany,
   findItem,
   handleSchema,
+  possibleSingleRow,
   singleRow,
   titleSchema,
   uuidSchema,
@@ -131,7 +132,11 @@ export const fromHandle = withZod(handleSchema, async (handle) => {
     .leftJoin(s.programCategory, eq(s.programCategory.programId, s.program.id))
     .where(eq(s.program.handle, handle))
     .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
-    .then((rows) => singleRow(rows))
+    .then((rows) => possibleSingleRow(rows))
+
+  if (!program) {
+    return null
+  }
 
   const [categories, degree, discipline] = await Promise.all([
     Category.list(),

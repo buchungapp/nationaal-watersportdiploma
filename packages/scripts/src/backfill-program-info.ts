@@ -11,9 +11,15 @@
 
 import 'dotenv/config'
 
-import { Curriculum, Program } from '@nawadi/core'
+import {
+  Curriculum,
+  Program,
+  withDatabase,
+  withTransaction,
+} from '@nawadi/core'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
+import { PostgresError } from 'postgres'
 import slugify from 'slugify'
 import { z } from 'zod'
 
@@ -81,7 +87,7 @@ const dedupeCache = new Map<string, Promise<string>>()
 
 async function getOrCreateCachedItem<T extends { id: string }>(
   entityType: {
-    fromHandle: (handle: string) => Promise<T | undefined>
+    fromHandle: (handle: string) => Promise<T | null>
     create: (opts: any) => Promise<{ id: string }>
   },
   handle: string,
@@ -257,10 +263,10 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       isRequired: !!(row[4] === 'Verplicht'),
       requirement: row[6],
     }).catch((error) => {
-      console.error('Error creating competency:', {
-        row,
-        error,
-      })
+      // console.error('Error creating competency:', {
+      //   row,
+      //   error,
+      // })
 
       throw error
     })
@@ -292,15 +298,51 @@ async function main() {
     }
   }
 
-  await Promise.all(promises)
+  const res = await Promise.allSettled(promises)
+
+  console.log('res.length', res.length)
+
+  const errors = res.filter((r) => r.status === 'rejected')
+
+  if (errors.length > 0) {
+    console.log('!@#errors.length', errors.length)
+
+    const notPostgres = errors.filter(
+      (e) => e.status === 'rejected' && !(e.reason instanceof PostgresError),
+    )
+
+    console.log('notPostgres.length', notPostgres.length)
+
+    throw new Error('Some rows failed')
+  }
+
+  return res
 }
 
-main()
-  .then(() => {
-    console.log('Done')
-    process.exit(0)
-  })
-  .catch((error) => {
-    console.error('Error:', error)
-    process.exit(1)
-  })
+const pgUri = process.env.PGURI
+
+if (!pgUri) {
+  throw new Error('PGURI environment variable is required')
+}
+
+withDatabase(
+  {
+    pgUri,
+  },
+  async () => {
+    return withTransaction(async () => {
+      try {
+        await main()
+        console.log('Done')
+        process.exit(0)
+      } catch (error) {
+        console.error('Error:', error)
+
+        throw error
+      }
+    }).catch(() => {
+      console.error('Error in transaction')
+      process.exit(1)
+    })
+  },
+)

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   handleSchema,
+  possibleSingleRow,
   singleRow,
   titleSchema,
   withZod,
@@ -60,5 +61,5 @@ export const fromHandle = withZod(handleSchema, async (handle) => {
     .from(s.competency)
     .where(eq(s.competency.handle, handle))
 
-  return singleRow(rows)
+  return possibleSingleRow(rows) ?? null
 })
