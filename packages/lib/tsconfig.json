@@ -8,7 +8,9 @@
     "sourceMap": true,
     "declaration": true,
     "composite": true,
-    "lib": ["es2023"]
+    "lib": ["es2023"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"]
 }

@@ -1,37 +1,23 @@
-import { schema } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
-import { createSelectSchema } from 'drizzle-zod'
+import { schema as s } from '@nawadi/db'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { zod } from '../../util/zod.js'
+import { uuidSchema, withZod } from '../../util/zod.js'
 
 export * as Competency from './competency.js'
 
-const { curriculumCompetency } = schema
-
-export const Info = createSelectSchema(curriculumCompetency, {
-  id: (schema) => schema.id.uuid(),
-  competencyId: (schema) => schema.competencyId.uuid(),
-  curriculumId: (schema) => schema.curriculumId.uuid(),
-  moduleId: (schema) => schema.moduleId.uuid(),
-  requirement: (schema) => schema.requirement.trim(),
-})
-export type Info = typeof curriculumCompetency.$inferSelect
-
-export const create = zod(
-  Info.pick({
-    curriculumId: true,
-    moduleId: true,
-    competencyId: true,
-    isRequired: true,
-    requirement: true,
-  }).partial({
-    requirement: true,
+export const create = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+    moduleId: uuidSchema,
+    competencyId: uuidSchema,
+    isRequired: z.boolean(),
+    requirement: z.string().trim().optional(),
   }),
   async (input) => {
     const query = useQuery()
+
     const [insert] = await query
-      .insert(curriculumCompetency)
+      .insert(s.curriculumCompetency)
       .values({
         competencyId: input.competencyId,
         curriculumId: input.curriculumId,
@@ -39,26 +25,18 @@ export const create = zod(
         isRequired: input.isRequired,
         requirement: input.requirement,
       })
-      .returning({ id: curriculumCompetency.id })
+      .returning({ id: s.curriculumCompetency.id })
 
     if (!insert) {
       throw new Error('Failed to insert curriculumCompetency')
     }
 
-    return insert.id
+    return insert
   },
 )
 
-export const list = zod(z.void(), async () => {
+export const list = withZod(z.void(), async () => {
   const query = useQuery()
-  return await query.select().from(curriculumCompetency)
-})
 
-export const fromId = zod(Info.shape.id, async (id) => {
-  const query = useQuery()
-  return await query
-    .select()
-    .from(curriculumCompetency)
-    .where(eq(curriculumCompetency.id, id))
-    .then((rows) => rows[0])
+  return await query.select().from(s.curriculumCompetency)
 })

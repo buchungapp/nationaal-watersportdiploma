@@ -1,66 +1,44 @@
-import { schema } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
-import { createSelectSchema } from 'drizzle-zod'
+import { schema as s } from '@nawadi/db'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { zod } from '../../util/zod.js'
+import {
+  handleSchema,
+  singleRow,
+  titleSchema,
+  withZod,
+} from '../../util/index.js'
 
-export * as Discipline from './discipline.js'
+export const list = withZod(z.void(), async () => {
+  const query = useQuery()
 
-const discipline = schema.discipline
+  const rows = await query
+    .select({
+      id: s.discipline.id,
+      title: s.discipline.title,
+      handle: s.discipline.handle,
+    })
+    .from(s.discipline)
 
-export const Info = createSelectSchema(discipline, {
-  handle(schema) {
-    return schema.handle
-      .trim()
-      .toLowerCase()
-      .min(3)
-      .regex(/^[a-z0-9\-]+$/)
-  },
+  return rows
 })
-export type Info = typeof discipline.$inferSelect
 
-export const create = zod(
-  Info.pick({ title: true, handle: true }).partial({
-    title: true,
+export const create = withZod(
+  z.object({
+    title: titleSchema,
+    handle: handleSchema,
   }),
-  async (input) => {
+  async (item) => {
     const query = useQuery()
-    const [insert] = await query
-      .insert(discipline)
+
+    const rows = await query
+      .insert(s.discipline)
       .values({
-        handle: input.handle,
-        title: input.title,
+        title: item.title,
+        handle: item.handle,
       })
-      .returning({ id: discipline.id })
+      .returning({ id: s.discipline.id })
 
-    if (!insert) {
-      throw new Error('Failed to insert discipline')
-    }
-
-    return insert.id
+    const row = singleRow(rows)
+    return row
   },
 )
-
-export const list = zod(z.void(), async () => {
-  const query = useQuery()
-  return await query.select().from(discipline)
-})
-
-export const fromId = zod(Info.shape.id, async (id) => {
-  const query = useQuery()
-  return await query
-    .select()
-    .from(discipline)
-    .where(eq(discipline.id, id))
-    .then((rows) => rows[0])
-})
-
-export const fromHandle = zod(Info.shape.handle, async (handle) => {
-  const query = useQuery()
-  return await query
-    .select()
-    .from(discipline)
-    .where(eq(discipline.handle, handle))
-    .then((rows) => rows[0])
-})

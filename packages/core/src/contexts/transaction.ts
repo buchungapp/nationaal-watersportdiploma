@@ -9,27 +9,40 @@ const storage = new AsyncLocalStorage<db.Transaction>()
 /**
  * Executes a given job within a database transaction.
  *
- * This function automatically manages the lifecycle of a database transaction. It starts a new
- * transaction, executes the provided job within this transaction, and then commits the transaction
- * if the job completes successfully, or rolls it back if an error occurs.
+ * This function automatically manages the lifecycle of a database transaction. It looks for an
+ * existing transaction in the current AsyncLocalStorage context, and if one is found, it executes
+ * the provided job within this transaction. If no transaction is found, it creates a new transaction
+ * and executes the job within it. The transaction is committed if the job completes successfully,
+ * or rolled back if an error occurs.
  *
  * @param job A function that performs operations within a transaction and returns a promise.
  * @returns Returns a promise that resolves with the result of the job function if the transaction
  *          is successfully committed, or rejects with an error if the transaction fails or the job
  *          throws an error.
  */
-export async function withTransaction<T>(job: () => Promise<T>): Promise<T> {
-  const database = useDatabase()
-  const result = await database.transaction(
-    async (transaction) => {
-      const result = await storage.run(transaction, job)
-      return result
-    },
-    {
-      isolationLevel: 'serializable',
-    },
-  )
-  return result
+export async function withTransaction<T>(
+  job: (tx: db.Transaction) => Promise<T>,
+): Promise<T> {
+  try {
+    const transaction = useTransaction()
+    if (transaction) {
+      return await job(transaction)
+    }
+
+    throw new Error('No transaction found')
+  } catch {
+    const database = useDatabase()
+    const result = await database.transaction(
+      async (transaction) => {
+        const result = await storage.run(transaction, () => job(transaction))
+        return result
+      },
+      {
+        isolationLevel: 'serializable',
+      },
+    )
+    return result
+  }
 }
 
 /**

@@ -9,7 +9,8 @@ test('with-test-transaction', () =>
     const query = useQuery()
 
     const result = await query.execute(sql`SELECT 1 as one`)
-    assert.deepEqual(result, [
+
+    assert.deepStrictEqual(Array.from(result), [
       {
         one: 1,
       },
