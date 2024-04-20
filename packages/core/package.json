@@ -18,9 +18,10 @@
     "test": "node --test './out/**/*.test.js'"
   },
   "dependencies": {
-    "@types/node": "^20.11.19",
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
+    "@types/node": "^20.11.19",
+    "dayjs": "^1.11.10",
     "postgres": "^3.4.4",
     "zod": "^3.22.4"
   },

@@ -20,11 +20,18 @@ export type UUID = z.infer<typeof uuidSchema>
 export const dateTimeSchema = z.string().datetime({ offset: true })
 export type DateTime = z.infer<typeof dateTimeSchema>
 
+export const singleOrArray = <T extends z.ZodTypeAny>(schema: T) =>
+  z.union([schema, schema.array()])
+
 export function withZod<
   Schema extends z.ZodSchema<any, any, any>,
   Return extends any,
->(schema: Schema, func: (value: z.infer<Schema>) => Return) {
-  const result = (input: z.infer<Schema>) => {
+>(schema: Schema, func: (value: z.output<Schema>) => Return) {
+  const result = (
+    input: undefined extends z.input<Schema>
+      ? z.input<Schema> | void
+      : z.input<Schema>,
+  ) => {
     const parsed = schema.parse(input)
     return func(parsed)
   }

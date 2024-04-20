@@ -1,9 +1,15 @@
 import { schema as s } from '@nawadi/db'
-import { and, eq } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, lte } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { aggregateOneToMany, findItem } from '../../util/data-helpers.js'
-import { dateTimeSchema, uuidSchema, withZod } from '../../util/zod.js'
+import dayjs from '../../util/dayjs.js'
+import {
+  dateTimeSchema,
+  singleOrArray,
+  uuidSchema,
+  withZod,
+} from '../../util/zod.js'
 import { Program } from '../index.js'
 import { Module } from '../program/index.js'
 
@@ -35,101 +41,136 @@ export const create = withZod(
   },
 )
 
-export const list = withZod(z.void(), async () => {
-  const query = useQuery()
+export const list = withZod(
+  z
+    .object({
+      filter: z
+        .object({
+          programId: singleOrArray(uuidSchema).optional(),
+          onlyCurrentActive: z.boolean().optional(),
+        })
+        .default({}),
+    })
+    .default({}),
+  async ({ filter }) => {
+    const query = useQuery()
 
-  //   const latestCurriculumPerProgram = query
-  //     .selectDistinctOn([s.curriculum.programId])
-  //     .from(s.curriculum)
-  //     .where(isNotNull(s.curriculum.startedAt))
-  //     .orderBy(s.curriculum.programId, desc(s.curriculum.startedAt))
-  //     .as('latestCurriculumPerProgram')
-
-  //   .innerJoin(
-  //     latestCurriculumPerProgram,
-  //     eq(s.curriculum.id, latestCurriculumPerProgram.id),
-  //   )
-
-  const curriculaQuery = query
-    .select()
-    .from(s.curriculum)
-    .leftJoin(
-      s.curriculumModule,
-      eq(s.curriculum.id, s.curriculumModule.curriculumId),
-    )
-    .leftJoin(
-      s.curriculumCompetency,
-      and(
-        eq(s.curriculum.id, s.curriculumCompetency.curriculumId),
-        eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
-      ),
-    )
-
-  const [curricula, modules, competencies] = await Promise.all([
-    curriculaQuery,
-    Module.list(),
-    Program.Competency.list(),
-  ])
-
-  const curriculumWithModules = aggregateOneToMany(
-    curricula,
-    'curriculum',
-    'curriculum_module',
-  )
-  const modulesWithCompetencies = aggregateOneToMany(
-    curricula,
-    'curriculum_module',
-    'curriculum_competency',
-  )
-
-  const mapped = curriculumWithModules.map(
-    ({ curriculum_module, programId, ...curriculum }) => {
-      const moduleLinks = modulesWithCompetencies.filter(
-        (module) => module.curriculumId === curriculum.id,
+    let curriculaQuery = query
+      .select()
+      .from(s.curriculum)
+      .leftJoin(
+        s.curriculumModule,
+        eq(s.curriculum.id, s.curriculumModule.curriculumId),
       )
+      .leftJoin(
+        s.curriculumCompetency,
+        and(
+          eq(s.curriculum.id, s.curriculumCompetency.curriculumId),
+          eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
+        ),
+      )
+      .$dynamic()
 
-      return {
-        ...curriculum,
-        programId,
-        modules: moduleLinks.map(({ curriculum_competency, moduleId }) => {
-          const module = findItem({
-            items: modules,
-            predicate(item) {
-              return item.id === moduleId
-            },
-            enforce: true,
-          })
+    if (filter.onlyCurrentActive) {
+      const latestCurriculumPerProgram = query
+        .selectDistinctOn([s.curriculum.programId])
+        .from(s.curriculum)
+        .where(
+          and(
+            isNotNull(s.curriculum.startedAt),
+            lte(s.curriculum.startedAt, new Date().toISOString()),
+          ),
+        )
+        .orderBy(s.curriculum.programId, desc(s.curriculum.startedAt))
+        .as('latestCurriculumPerProgram')
 
-          return {
-            ...module,
-            competencies: curriculum_competency.map(
-              ({ id, isRequired, requirement }) => {
-                const competency = findItem({
-                  items: competencies,
-                  predicate(item) {
-                    return item.id === id
-                  },
-                  enforce: true,
-                })
+      curriculaQuery = curriculaQuery.innerJoin(
+        latestCurriculumPerProgram,
+        eq(s.curriculum.id, latestCurriculumPerProgram.id),
+      )
+    }
 
-                return {
-                  id: competency.id,
-                  handle: competency.handle,
-                  title: competency.title,
-                  type: competency.type,
-                  isRequired,
-                  requirement,
-                }
-              },
-            ),
-          }
-        }),
+    if (filter.programId) {
+      if (Array.isArray(filter.programId)) {
+        curriculaQuery = curriculaQuery.where(
+          inArray(s.curriculum.programId, filter.programId),
+        )
+      } else {
+        curriculaQuery = curriculaQuery.where(
+          eq(s.curriculum.programId, filter.programId),
+        )
       }
-    },
-  )
+    }
 
-  return mapped
-})
+    const [curricula, modules, competencies] = await Promise.all([
+      curriculaQuery,
+      Module.list(),
+      Program.Competency.list(),
+    ])
+
+    const curriculumWithModules = aggregateOneToMany(
+      curricula,
+      'curriculum',
+      'curriculum_module',
+    )
+    const modulesWithCompetencies = aggregateOneToMany(
+      curricula,
+      'curriculum_module',
+      'curriculum_competency',
+    )
+
+    const mapped = curriculumWithModules.map(
+      ({ curriculum_module, programId, ...curriculum }) => {
+        const moduleLinks = modulesWithCompetencies.filter(
+          (module) => module.curriculumId === curriculum.id,
+        )
+
+        return {
+          ...curriculum,
+          startedAt: curriculum.startedAt
+            ? dayjs(curriculum.startedAt).toISOString()
+            : null,
+          programId,
+          modules: moduleLinks.map(({ curriculum_competency, moduleId }) => {
+            const module = findItem({
+              items: modules,
+              predicate(item) {
+                return item.id === moduleId
+              },
+              enforce: true,
+            })
+
+            return {
+              ...module,
+              competencies: curriculum_competency.map(
+                ({ id, isRequired, requirement }) => {
+                  const competency = findItem({
+                    items: competencies,
+                    predicate(item) {
+                      return item.id === id
+                    },
+                    enforce: true,
+                  })
+
+                  return {
+                    id: competency.id,
+                    handle: competency.handle,
+                    title: competency.title,
+                    type: competency.type,
+                    isRequired,
+                    requirement,
+                  }
+                },
+              ),
+            }
+          }),
+        }
+      },
+    )
+
+    return mapped
+  },
+)
 
 // export const fromProgramId = withZod(
 //   Info.pick({
