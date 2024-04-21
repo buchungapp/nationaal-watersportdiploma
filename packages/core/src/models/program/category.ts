@@ -7,18 +7,19 @@ import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
-  uuidSchema,
+  successfulCreateResponse,
   withZod,
 } from '../../util/index.js'
+import { insertSchema, outputSchema } from './category.schema.js'
 
 export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-    parentCategoryId: uuidSchema.optional(),
-    description: z.string().trim().optional(),
+  insertSchema.pick({
+    title: true,
+    handle: true,
+    description: true,
+    parentCategoryId: true,
   }),
+  successfulCreateResponse,
   async (item) =>
     withTransaction(async (tx) => {
       const currentHeighestWeight = await tx
@@ -44,51 +45,40 @@ export const create = withZod(
     }),
 )
 
-export const list = withZod(z.void(), async () => {
+export const list = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.category.id,
-      title: s.category.title,
-      handle: s.category.handle,
-      description: s.category.description,
-      parentCategoryId: s.category.parentCategoryId,
-    })
-    .from(s.category)
+  const rows = await query.select().from(s.category)
 
-  return rows
+  return rows.map(({ parentCategoryId, ...row }) => ({
+    ...row,
+    parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
+  }))
 })
 
-export const fromHandle = withZod(handleSchema, async (handle) => {
-  const query = useQuery()
+export const fromHandle = withZod(
+  handleSchema,
+  outputSchema.nullable(),
+  async (handle) => {
+    const query = useQuery()
 
-  const self = alias(s.category, 'parent')
+    const self = alias(s.category, 'parent')
 
-  const rows = await query
-    .select()
-    .from(s.category)
-    .leftJoin(self, eq(s.category.id, self.id))
-    .where(eq(s.category.handle, handle))
+    const rows = await query
+      .select()
+      .from(s.category)
+      .leftJoin(self, eq(s.category.id, self.id))
+      .where(eq(s.category.handle, handle))
 
-  const row = possibleSingleRow(rows)
+    const row = possibleSingleRow(rows)
 
-  if (!row) {
-    return null
-  }
+    if (!row) {
+      return null
+    }
 
-  return {
-    id: row.category.id,
-    title: row.category.title,
-    handle: row.category.handle,
-    description: row.category.description,
-    parent: row.parent
-      ? {
-          id: row.parent.id,
-          title: row.parent.title,
-          handle: row.parent.handle,
-          description: row.parent.description,
-        }
-      : null,
-  }
-})
+    return {
+      ...row.category,
+      parent: row.parent,
+    }
+  },
+)

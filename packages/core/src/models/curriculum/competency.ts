@@ -1,22 +1,25 @@
 import { schema as s } from '@nawadi/db'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { uuidSchema, withZod } from '../../util/zod.js'
+import { singleRow } from '../../util/data-helpers.js'
+import { successfulCreateResponse, withZod } from '../../util/zod.js'
+import { insertSchema, selectSchema } from './competency.schema.js'
 
 export * as Competency from './competency.js'
 
 export const create = withZod(
-  z.object({
-    curriculumId: uuidSchema,
-    moduleId: uuidSchema,
-    competencyId: uuidSchema,
-    isRequired: z.boolean(),
-    requirement: z.string().trim().optional(),
+  insertSchema.pick({
+    curriculumId: true,
+    moduleId: true,
+    competencyId: true,
+    isRequired: true,
+    requirement: true,
   }),
+  successfulCreateResponse,
   async (input) => {
     const query = useQuery()
 
-    const [insert] = await query
+    const result = await query
       .insert(s.curriculumCompetency)
       .values({
         competencyId: input.competencyId,
@@ -27,15 +30,13 @@ export const create = withZod(
       })
       .returning({ id: s.curriculumCompetency.id })
 
-    if (!insert) {
-      throw new Error('Failed to insert curriculumCompetency')
-    }
+    const insert = singleRow(result)
 
     return insert
   },
 )
 
-export const list = withZod(z.void(), async () => {
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
   return await query.select().from(s.curriculumCompetency)

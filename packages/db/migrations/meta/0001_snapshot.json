@@ -1,6 +1,6 @@
 {
-  "id": "816fd99f-cf04-4d9e-9d64-965d1c20108f",
-  "prevId": "924fbd59-359f-4d18-b740-2965a9d1e901",
+  "id": "513a497b-ac93-46ef-8cbb-18a796d4b468",
+  "prevId": "f8ded68d-0640-43e1-a21e-8e50091f1421",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -1543,13 +1543,6 @@
           "name": "category_handle_index",
           "columns": [
             "handle"
-          ],
-          "isUnique": true
-        },
-        "category_weight_index": {
-          "name": "category_weight_index",
-          "columns": [
-            "weight"
           ],
           "isUnique": true
         }

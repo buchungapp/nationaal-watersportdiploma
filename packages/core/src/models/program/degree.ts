@@ -6,32 +6,19 @@ import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   uuidSchema,
   withZod,
 } from '../../util/index.js'
-
-export const list = withZod(z.void(), async () => {
-  const query = useQuery()
-
-  const rows = await query
-    .select({
-      id: s.degree.id,
-      title: s.degree.title,
-      handle: s.degree.handle,
-      rang: s.degree.rang,
-    })
-    .from(s.degree)
-
-  return rows
-})
+import { insertSchema, selectSchema } from './degree.schema.js'
 
 export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-    rang: z.number().int(),
+  insertSchema.pick({
+    title: true,
+    handle: true,
+    rang: true,
   }),
+  successfulCreateResponse,
   async (item) => {
     const query = useQuery()
 
@@ -49,34 +36,37 @@ export const create = withZod(
   },
 )
 
-export const fromHandle = withZod(handleSchema, async (handle) => {
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.degree.id,
-      title: s.degree.title,
-      handle: s.degree.handle,
-      rang: s.degree.rang,
-    })
-    .from(s.degree)
-    .where(eq(s.degree.handle, handle))
+  const rows = await query.select().from(s.degree)
 
-  return possibleSingleRow(rows) ?? null
+  return rows
 })
 
-export const fromId = withZod(uuidSchema, async (id) => {
-  const query = useQuery()
+export const fromHandle = withZod(
+  handleSchema,
+  selectSchema.nullable(),
+  async (handle) => {
+    const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.degree.id,
-      title: s.degree.title,
-      handle: s.degree.handle,
-      rang: s.degree.rang,
-    })
-    .from(s.degree)
-    .where(eq(s.degree.id, id))
+    const rows = await query
+      .select()
+      .from(s.degree)
+      .where(eq(s.degree.handle, handle))
 
-  return possibleSingleRow(rows) ?? null
-})
+    return possibleSingleRow(rows) ?? null
+  },
+)
+
+export const fromId = withZod(
+  uuidSchema,
+  selectSchema.nullable(),
+  async (id) => {
+    const query = useQuery()
+
+    const rows = await query.select().from(s.degree).where(eq(s.degree.id, id))
+
+    return possibleSingleRow(rows) ?? null
+  },
+)

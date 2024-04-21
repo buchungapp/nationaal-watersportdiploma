@@ -23,6 +23,10 @@ export type DateTime = z.infer<typeof dateTimeSchema>
 export const singleOrArray = <T extends z.ZodTypeAny>(schema: T) =>
   z.union([schema, schema.array()])
 
+export const successfulCreateResponse = z.object({
+  id: uuidSchema,
+})
+
 // Define function overloads
 export function withZod<
   InputSchema extends z.ZodSchema<any, any, any>,
@@ -61,9 +65,9 @@ export function withZod<
   const outputSchema: OutputSchema | undefined =
     typeof secondArgument === 'function' ? undefined : secondArgument
 
-  const result = (input: z.input<InputSchema> | void) => {
+  const result = async (input: z.input<InputSchema> | void) => {
     const parsed = inputSchema.parse(input)
-    const result = func(parsed)
+    const result = await func(parsed)
     if (outputSchema) {
       return outputSchema.parse(result) // Validate the result if outputSchema is defined
     }

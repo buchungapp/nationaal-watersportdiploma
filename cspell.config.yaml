@@ -50,6 +50,7 @@ ignorePaths:
   - apps/nwd-web/src/app/
   - '*.svg'
   - supabase/config.toml
+  - packages/db/migrations/
 files:
   - '**'
 enableFiletypes:

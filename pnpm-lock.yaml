@@ -260,6 +260,9 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
+      drizzle-zod:
+        specifier: ^0.5.1
+        version: 0.5.1(drizzle-orm@0.30.8)(zod@3.22.4)
       postgres:
         specifier: ^3.4.4
         version: 3.4.4
@@ -4965,6 +4968,16 @@ packages:
     dependencies:
       '@opentelemetry/api': 1.7.0
       postgres: 3.4.4
+
+  /drizzle-zod@0.5.1(drizzle-orm@0.30.8)(zod@3.22.4):
+    resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}
+    peerDependencies:
+      drizzle-orm: '>=0.23.13'
+      zod: '*'
+    dependencies:
+      drizzle-orm: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
+      zod: 3.22.4
+    dev: false
 
   /eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}

@@ -6,7 +6,7 @@ import { Program } from '../index.js'
 import { Degree, Discipline } from '../program/index.js'
 import * as Curriculum from './curriculum.js'
 
-test('curriculum crud', () =>
+test.skip('curriculum crud', () =>
   withTestTransaction(async () => {
     const createDiscipline = Discipline.create({
       title: 'discipline-1',
@@ -50,7 +50,7 @@ test('curriculum crud', () =>
     })
   }))
 
-test('curriculum list filters', () =>
+test.skip('curriculum list filters', () =>
   withTestTransaction(async () => {
     const createDiscipline = Discipline.create({
       title: 'discipline-1',

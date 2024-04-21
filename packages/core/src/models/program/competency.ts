@@ -6,31 +6,18 @@ import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   withZod,
 } from '../../util/index.js'
-
-export const list = withZod(z.void(), async () => {
-  const query = useQuery()
-
-  const rows = await query
-    .select({
-      id: s.competency.id,
-      title: s.competency.title,
-      handle: s.competency.handle,
-      type: s.competency.type,
-    })
-    .from(s.competency)
-
-  return rows
-})
+import { insertSchema, selectSchema } from './competency.schema.js'
 
 export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-    type: z.enum(['knowledge', 'skill']),
+  insertSchema.pick({
+    title: true,
+    handle: true,
+    type: true,
   }),
+  successfulCreateResponse,
   async (item) =>
     withTransaction(async (tx) => {
       const currentHeighestWeight = await tx
@@ -55,18 +42,25 @@ export const create = withZod(
     }),
 )
 
-export const fromHandle = withZod(handleSchema, async (handle) => {
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.competency.id,
-      title: s.competency.title,
-      handle: s.competency.handle,
-      type: s.competency.type,
-    })
-    .from(s.competency)
-    .where(eq(s.competency.handle, handle))
+  const rows = await query.select().from(s.competency)
 
-  return possibleSingleRow(rows) ?? null
+  return rows
 })
+
+export const fromHandle = withZod(
+  handleSchema,
+  selectSchema.nullable(),
+  async (handle) => {
+    const query = useQuery()
+
+    const rows = await query
+      .select()
+      .from(s.competency)
+      .where(eq(s.competency.handle, handle))
+
+    return possibleSingleRow(rows) ?? null
+  },
+)

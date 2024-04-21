@@ -1,4 +1,5 @@
 import { schema as s } from '@nawadi/db'
+import assert from 'assert'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
@@ -8,13 +9,46 @@ import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   uuidSchema,
   withZod,
 } from '../../util/index.js'
 import { Category, Degree, Discipline } from './index.js'
+import { insertSchema, outputSchema } from './program.schema.js'
 
-export const list = withZod(z.void(), async () => {
+export const create = withZod(
+  insertSchema.extend({
+    categories: uuidSchema.array().optional(),
+  }),
+  successfulCreateResponse,
+  async (item) =>
+    withTransaction(async (tx) => {
+      const rows = await tx
+        .insert(s.program)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          disciplineId: item.disciplineId,
+          degreeId: item.degreeId,
+        })
+        .returning({ id: s.program.id })
+
+      const row = singleRow(rows)
+
+      if (!!item.categories && item.categories.length > 0) {
+        await tx.insert(s.programCategory).values(
+          item.categories.map((categoryId) => ({
+            programId: row.id,
+            categoryId,
+          })),
+        )
+      }
+
+      return row
+    }),
+)
+
+export const list = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
 
   // Prepare a database query to fetch programs and their categories using joins.
@@ -91,115 +125,55 @@ export const list = withZod(z.void(), async () => {
       ...programProperties,
       degree,
       discipline,
-      categories: categories
-        .filter(
-          (
-            category, // Filter categories relevant to the current program.
-          ) => programCategories.some((pc) => pc.categoryId === category.id),
-        )
-        .map(({ parentCategoryId, ...categoryKeys }) => {
-          const parentCategory = categories.find(
-            // Find the possible parent category for each category.
-            (c) => c.id === parentCategoryId,
-          )
-
-          return {
-            ...categoryKeys,
-            parent: parentCategory
-              ? {
-                  id: parentCategory.id,
-                  title: parentCategory.title,
-                  handle: parentCategory.handle,
-                  description: parentCategory.description,
-                }
-              : null,
-          }
-        }),
+      categories: categories.filter(
+        (
+          category, // Filter categories relevant to the current program.
+        ) => programCategories.some((pc) => pc.categoryId === category.id),
+      ),
     }
   })
 })
 
-export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-    disciplineId: uuidSchema,
-    degreeId: uuidSchema,
-    categories: uuidSchema.array().optional(),
-  }),
-  async (item) =>
-    withTransaction(async (tx) => {
-      const rows = await tx
-        .insert(s.program)
-        .values({
-          title: item.title,
-          handle: item.handle,
-          disciplineId: item.disciplineId,
-          degreeId: item.degreeId,
-        })
-        .returning({ id: s.program.id })
+export const fromHandle = withZod(
+  handleSchema,
+  outputSchema.nullable(),
+  async (handle) => {
+    const query = useQuery()
 
-      const row = singleRow(rows)
-
-      if (!!item.categories && item.categories.length > 0) {
-        await tx.insert(s.programCategory).values(
-          item.categories.map((categoryId) => ({
-            programId: row.id,
-            categoryId,
-          })),
-        )
-      }
-
-      return row
-    }),
-)
-
-export const fromHandle = withZod(handleSchema, async (handle) => {
-  const query = useQuery()
-
-  const program = await query
-    .select()
-    .from(s.program)
-    .leftJoin(s.programCategory, eq(s.programCategory.programId, s.program.id))
-    .where(eq(s.program.handle, handle))
-    .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
-    .then((rows) => possibleSingleRow(rows))
-
-  if (!program) {
-    return null
-  }
-
-  const [categories, degree, discipline] = await Promise.all([
-    Category.list(),
-    Degree.fromId(program.degreeId),
-    Discipline.fromId(program.disciplineId),
-  ])
-
-  const { program_category, degreeId, disciplineId, ...programProperties } =
-    program
-
-  return {
-    ...programProperties,
-    degree,
-    discipline,
-    categories: categories
-      .filter((category) =>
-        program_category.some((pc) => pc.categoryId === category.id),
+    const program = await query
+      .select()
+      .from(s.program)
+      .leftJoin(
+        s.programCategory,
+        eq(s.programCategory.programId, s.program.id),
       )
-      .map(({ parentCategoryId, ...categoryKeys }) => {
-        const parentCategory = categories.find((c) => c.id === parentCategoryId)
+      .where(eq(s.program.handle, handle))
+      .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
+      .then((rows) => possibleSingleRow(rows))
 
-        return {
-          ...categoryKeys,
-          parent: parentCategory
-            ? {
-                id: parentCategory.id,
-                title: parentCategory.title,
-                handle: parentCategory.handle,
-                description: parentCategory.description,
-              }
-            : null,
-        }
-      }),
-  }
-})
+    if (!program) {
+      return null
+    }
+
+    const [categories, degree, discipline] = await Promise.all([
+      Category.list(),
+      Degree.fromId(program.degreeId),
+      Discipline.fromId(program.disciplineId),
+    ])
+
+    assert(degree, 'Degree not found')
+    assert(discipline, 'Discipline not found')
+
+    const { program_category, degreeId, disciplineId, ...programProperties } =
+      program
+
+    return {
+      ...programProperties,
+      degree,
+      discipline,
+      categories: categories.filter((category) =>
+        program_category.some((pc) => pc.categoryId === category.id),
+      ),
+    }
+  },
+)

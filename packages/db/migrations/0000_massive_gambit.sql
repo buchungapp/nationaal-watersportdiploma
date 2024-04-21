@@ -315,7 +315,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS "discipline_weight_index" ON "discipline" ("we
 CREATE UNIQUE INDEX IF NOT EXISTS "degree_handle_index" ON "degree" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "degree_rang_index" ON "degree" ("rang");
 CREATE UNIQUE INDEX IF NOT EXISTS "category_handle_index" ON "category" ("handle");
-CREATE UNIQUE INDEX IF NOT EXISTS "category_weight_index" ON "category" ("weight");
 CREATE UNIQUE INDEX IF NOT EXISTS "program_handle_index" ON "program" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "program_category_category_id_program_id_index" ON "program_category" ("category_id","program_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "gear_type_handle_index" ON "gear_type" ("handle");

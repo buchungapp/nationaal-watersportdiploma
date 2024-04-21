@@ -6,29 +6,17 @@ import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   withZod,
 } from '../../util/index.js'
-
-export const list = withZod(z.void(), async () => {
-  const query = useQuery()
-
-  const rows = await query
-    .select({
-      id: s.module.id,
-      title: s.module.title,
-      handle: s.module.handle,
-    })
-    .from(s.module)
-
-  return rows
-})
+import { insertSchema, selectSchema } from './module.schema.js'
 
 export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
+  insertSchema.pick({
+    title: true,
+    handle: true,
   }),
+  successfulCreateResponse,
   async (item) =>
     withTransaction(async (tx) => {
       const currentHeighestWeight = await tx
@@ -52,17 +40,25 @@ export const create = withZod(
     }),
 )
 
-export const fromHandle = withZod(handleSchema, async (handle) => {
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.module.id,
-      title: s.module.title,
-      handle: s.module.handle,
-    })
-    .from(s.module)
-    .where(eq(s.module.handle, handle))
+  const rows = await query.select().from(s.module)
 
-  return possibleSingleRow(rows) ?? null
+  return rows
 })
+
+export const fromHandle = withZod(
+  handleSchema,
+  selectSchema.nullable(),
+  async (handle) => {
+    const query = useQuery()
+
+    const rows = await query
+      .select()
+      .from(s.module)
+      .where(eq(s.module.handle, handle))
+
+    return possibleSingleRow(rows) ?? null
+  },
+)

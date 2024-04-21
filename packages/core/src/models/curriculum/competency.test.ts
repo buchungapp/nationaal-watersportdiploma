@@ -3,6 +3,7 @@ import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
 import { Program } from '../index.js'
 import * as Competency from './competency.js'
+import { Output } from './competency.schema.js'
 import { Curriculum } from './curriculum.js'
 
 test('competency crud', () =>
@@ -66,7 +67,7 @@ test('competency crud', () =>
 
     const list = await Competency.list()
 
-    assert.equal(list.length, 1)
+    assert.strictEqual(list.length, 1)
     const [item] = list
 
     assert.deepStrictEqual(item, {
@@ -76,5 +77,8 @@ test('competency crud', () =>
       moduleId,
       isRequired: false,
       requirement: 'You should be awesome!',
-    })
+      deletedAt: null,
+      createdAt: item!.createdAt,
+      updatedAt: item!.updatedAt,
+    } satisfies Output)
   }))

@@ -111,7 +111,6 @@ export const category = pgTable(
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-      unqWeight: uniqueIndex().on(table.weight),
       parentCategoryReference: foreignKey({
         columns: [table.parentCategoryId],
         foreignColumns: [table.id],
