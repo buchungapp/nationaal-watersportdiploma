@@ -1,4 +1,5 @@
 -- Custom SQL migration file, put you code below! --
+-- Custom SQL migration file, put you code below! --
 INSERT INTO "public"."country" ("id", "ar", "bg", "cs", "da", "de", "el", "en", "es", "et", "eu", "fi", "fr", "hu", "it", "ja", "ko", "lt", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sv", "th", "uk", "zh", "zh-tw", "alpha_2", "alpha_3") VALUES
 (4, 'أفغانستان', 'Афганистан', 'Afghánistán', 'Afghanistan', 'Afghanistan', 'Αφγανιστάν', 'Afghanistan', 'Afganistán', 'Afganistan', 'Afganistan', 'Afganistan', 'Afghanistan', 'Afganisztán', 'Afghanistan', 'アフガニスタン', '아프가니스탄', 'Afganistanas', 'Afghanistan', 'Afghanistan', 'Afganistan', 'Afeganistão', 'Afganistan', 'Афганистан', 'Afganistan', 'Afghanistan', 'อัฟกานิสถาน', 'Афганістан', '阿富汗', '阿富汗', 'af', 'afg'),
 (8, 'ألبانيا', 'Албания', 'Albánie', 'Albanien', 'Albanien', 'Αλβανία', 'Albania', 'Albania', 'Albaania', 'Albania', 'Albania', 'Albanie', 'Albánia', 'Albania', 'アルバニア', '알바니아', 'Albanija', 'Albanië', 'Albania', 'Albania', 'Albânia', 'Albania', 'Албания', 'Albánsko', 'Albanien', 'แอลเบเนีย', 'Албанія', '阿尔巴尼亚', '阿爾巴尼亞', 'al', 'alb'),

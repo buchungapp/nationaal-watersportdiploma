@@ -1,6 +1,6 @@
 {
-  "id": "410e83fb-4980-48c2-9f1c-53cc70179c65",
-  "prevId": "c8c65a64-0fc3-40e6-9b2f-970060f953bf",
+  "id": "e12de126-5b7e-4a18-a564-5e2006b53455",
+  "prevId": "f576b5a8-b738-4d90-80d8-83fd48275514",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -15,8 +15,8 @@
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
         },
-        "identity_id": {
-          "name": "identity_id",
+        "person_id": {
+          "name": "person_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -65,7 +65,7 @@
         "student_curriculum_unq_identity_gear_curriculum": {
           "name": "student_curriculum_unq_identity_gear_curriculum",
           "columns": [
-            "identity_id",
+            "person_id",
             "curriculum_id",
             "gear_type_id"
           ],
@@ -114,13 +114,13 @@
           "onUpdate": "no action",
           "onDelete": "no action"
         },
-        "student_curriculum_link_identity_id_fk": {
-          "name": "student_curriculum_link_identity_id_fk",
+        "student_curriculum_link_person_id_fk": {
+          "name": "student_curriculum_link_person_id_fk",
           "tableFrom": "student_curriculum",
           "columnsFrom": [
-            "identity_id"
+            "person_id"
           ],
-          "tableTo": "identity",
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
@@ -857,8 +857,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "identity_id": {
-          "name": "identity_id",
+        "actor_id": {
+          "name": "actor_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -912,13 +912,13 @@
           "onUpdate": "no action",
           "onDelete": "no action"
         },
-        "media_identity_id_fk": {
-          "name": "media_identity_id_fk",
+        "media_actor_id_fk": {
+          "name": "media_actor_id_fk",
           "tableFrom": "media",
           "columnsFrom": [
-            "identity_id"
+            "actor_id"
           ],
-          "tableTo": "identity",
+          "tableTo": "actor",
           "columnsTo": [
             "id"
           ],
@@ -1928,8 +1928,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "identity": {
-      "name": "identity",
+    "person": {
+      "name": "person",
       "schema": "",
       "columns": {
         "id": {
@@ -1938,18 +1938,6 @@
           "primaryKey": true,
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
-        },
-        "handle": {
-          "name": "handle",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "identity_type",
-          "primaryKey": false,
-          "notNull": true
         },
         "user_id": {
           "name": "user_id",
@@ -1961,7 +1949,7 @@
           "name": "first_name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "last_name_prefix": {
           "name": "last_name_prefix",
@@ -2000,40 +1988,11 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "unq_handle": {
-          "name": "unq_handle",
-          "columns": [
-            "handle"
-          ],
-          "isUnique": true
-        },
-        "user_global": {
-          "name": "user_global",
-          "columns": [
-            "user_id"
-          ],
-          "isUnique": false
-        },
-        "one_instructor_per_auth_user": {
-          "name": "one_instructor_per_auth_user",
-          "columns": [
-            "user_id"
-          ],
-          "isUnique": true
-        },
-        "one_location_admin_per_auth_user": {
-          "name": "one_location_admin_per_auth_user",
-          "columns": [
-            "user_id"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "identity_birth_country_country_alpha_2_fk": {
-          "name": "identity_birth_country_country_alpha_2_fk",
-          "tableFrom": "identity",
+        "person_birth_country_country_alpha_2_fk": {
+          "name": "person_birth_country_country_alpha_2_fk",
+          "tableFrom": "person",
           "columnsFrom": [
             "birth_country"
           ],
@@ -2044,9 +2003,9 @@
           "onUpdate": "no action",
           "onDelete": "no action"
         },
-        "identity_user_id_fk": {
-          "name": "identity_user_id_fk",
-          "tableFrom": "identity",
+        "person_user_id_fk": {
+          "name": "person_user_id_fk",
+          "tableFrom": "person",
           "columnsFrom": [
             "user_id"
           ],
@@ -2061,12 +2020,109 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "identity_location_link": {
-      "name": "identity_location_link",
+    "actor": {
+      "name": "actor",
       "schema": "",
       "columns": {
-        "identity_id": {
-          "name": "identity_id",
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "type": {
+          "name": "type",
+          "type": "actor_type",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_metadata": {
+          "name": "_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "unq_actor_type_person": {
+          "name": "unq_actor_type_person",
+          "columns": [
+            "type",
+            "person_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "actor_person_id_fk": {
+          "name": "actor_person_id_fk",
+          "tableFrom": "actor",
+          "columnsFrom": [
+            "person_id"
+          ],
+          "tableTo": "person",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "actor_location_link_location_id_fk": {
+          "name": "actor_location_link_location_id_fk",
+          "tableFrom": "actor",
+          "columnsFrom": [
+            "location_id"
+          ],
+          "tableTo": "location",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "person_location_link": {
+      "name": "person_location_link",
+      "schema": "",
+      "columns": {
+        "person_id": {
+          "name": "person_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -2079,7 +2135,7 @@
         },
         "status": {
           "name": "status",
-          "type": "identity_link_status",
+          "type": "person_location_link_status",
           "primaryKey": false,
           "notNull": true
         },
@@ -2117,22 +2173,22 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "identity_location_identity_id_fk": {
-          "name": "identity_location_identity_id_fk",
-          "tableFrom": "identity_location_link",
+        "person_location_link_person_id_fk": {
+          "name": "person_location_link_person_id_fk",
+          "tableFrom": "person_location_link",
           "columnsFrom": [
-            "identity_id"
+            "person_id"
           ],
-          "tableTo": "identity",
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
-        "identity_location_location_id_fk": {
-          "name": "identity_location_location_id_fk",
-          "tableFrom": "identity_location_link",
+        "person_location_link_location_id_fk": {
+          "name": "person_location_link_location_id_fk",
+          "tableFrom": "person_location_link",
           "columnsFrom": [
             "location_id"
           ],
@@ -2145,10 +2201,10 @@
         }
       },
       "compositePrimaryKeys": {
-        "identity_location_link_identity_id_location_id_pk": {
-          "name": "identity_location_link_identity_id_location_id_pk",
+        "person_location_link_pk": {
+          "name": "person_location_link_pk",
           "columns": [
-            "identity_id",
+            "person_id",
             "location_id"
           ]
         }
@@ -2181,16 +2237,18 @@
         "skill": "skill"
       }
     },
-    "identity_type": {
-      "name": "identity_type",
+    "actor_type": {
+      "name": "actor_type",
       "values": {
         "student": "student",
         "instructor": "instructor",
-        "location_admin": "location_admin"
+        "location_admin": "location_admin",
+        "application": "application",
+        "system": "system"
       }
     },
-    "identity_link_status": {
-      "name": "identity_link_status",
+    "person_location_link_status": {
+      "name": "person_location_link_status",
       "values": {
         "pending": "pending",
         "accepted": "accepted",

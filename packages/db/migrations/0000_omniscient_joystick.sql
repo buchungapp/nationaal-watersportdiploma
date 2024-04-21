@@ -17,13 +17,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- CREATE TYPE "identity_type" AS ENUM('student', 'instructor', 'location_admin');
+ CREATE TYPE "actor_type" AS ENUM('student', 'instructor', 'location_admin', 'application', 'system');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- CREATE TYPE "identity_link_status" AS ENUM('pending', 'accepted', 'rejected', 'revoked');
+ CREATE TYPE "person_location_link_status" AS ENUM('pending', 'accepted', 'rejected', 'revoked');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -36,7 +36,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS "student_curriculum" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"identity_id" uuid NOT NULL,
+	"person_id" uuid NOT NULL,
 	"curriculum_id" uuid NOT NULL,
 	"gear_type_id" uuid NOT NULL,
 	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS "media" (
 	"type" "media_type" NOT NULL,
 	"size" bigint DEFAULT 0 NOT NULL,
 	"object_id" uuid NOT NULL,
-	"identity_id" uuid,
+	"actor_id" uuid,
 	"location_id" uuid,
 	"_metadata" jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -272,12 +272,10 @@ CREATE TABLE IF NOT EXISTS "user" (
 	"_metadata" jsonb
 );
 
-CREATE TABLE IF NOT EXISTS "identity" (
+CREATE TABLE IF NOT EXISTS "person" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"handle" text NOT NULL,
-	"type" "identity_type" NOT NULL,
 	"user_id" uuid,
-	"first_name" text,
+	"first_name" text NOT NULL,
 	"last_name_prefix" text,
 	"last_name" text,
 	"date_of_birth" date,
@@ -286,19 +284,30 @@ CREATE TABLE IF NOT EXISTS "identity" (
 	"_metadata" jsonb
 );
 
-CREATE TABLE IF NOT EXISTS "identity_location_link" (
-	"identity_id" uuid NOT NULL,
+CREATE TABLE IF NOT EXISTS "actor" (
+	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"type" "actor_type" NOT NULL,
+	"person_id" uuid,
 	"location_id" uuid NOT NULL,
-	"status" "identity_link_status" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	"_metadata" jsonb
+);
+
+CREATE TABLE IF NOT EXISTS "person_location_link" (
+	"person_id" uuid NOT NULL,
+	"location_id" uuid NOT NULL,
+	"status" "person_location_link_status" NOT NULL,
 	"permission_level" "location_link_permission_level" NOT NULL,
 	"requested_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"accepted_at" timestamp with time zone,
 	"rejected_at" timestamp with time zone,
 	"revoked_at" timestamp with time zone,
-	CONSTRAINT "identity_location_link_identity_id_location_id_pk" PRIMARY KEY("identity_id","location_id")
+	CONSTRAINT "person_location_link_pk" PRIMARY KEY("person_id","location_id")
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS "student_curriculum_unq_identity_gear_curriculum" ON "student_curriculum" ("identity_id","curriculum_id","gear_type_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "student_curriculum_unq_identity_gear_curriculum" ON "student_curriculum" ("person_id","curriculum_id","gear_type_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "certificate_unq_handle" ON "certificate" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "curriculum_program_id_revision_index" ON "curriculum" ("program_id","revision");
 CREATE UNIQUE INDEX IF NOT EXISTS "curriculum_module_curriculum_id_module_id_index" ON "curriculum_module" ("curriculum_id","module_id");
@@ -315,10 +324,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "category_handle_index" ON "category" ("handle
 CREATE UNIQUE INDEX IF NOT EXISTS "program_handle_index" ON "program" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "program_category_category_id_program_id_index" ON "program_category" ("category_id","program_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "gear_type_handle_index" ON "gear_type" ("handle");
-CREATE UNIQUE INDEX IF NOT EXISTS "unq_handle" ON "identity" ("handle");
-CREATE INDEX IF NOT EXISTS "user_global" ON "identity" ("user_id");
-CREATE UNIQUE INDEX IF NOT EXISTS "one_instructor_per_auth_user" ON "identity" ("user_id");
-CREATE UNIQUE INDEX IF NOT EXISTS "one_location_admin_per_auth_user" ON "identity" ("user_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "unq_actor_type_person" ON "actor" ("type","person_id");
 DO $$ BEGIN
  ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_gear_type_id_fk" FOREIGN KEY ("curriculum_id","gear_type_id") REFERENCES "curriculum_gear_link"("curriculum_id","gear_type_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
@@ -338,7 +344,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_identity_id_fk" FOREIGN KEY ("identity_id") REFERENCES "identity"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "person"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -440,7 +446,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "media" ADD CONSTRAINT "media_identity_id_fk" FOREIGN KEY ("identity_id") REFERENCES "identity"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "media" ADD CONSTRAINT "media_actor_id_fk" FOREIGN KEY ("actor_id") REFERENCES "actor"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -506,25 +512,37 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "identity" ADD CONSTRAINT "identity_birth_country_country_alpha_2_fk" FOREIGN KEY ("birth_country") REFERENCES "country"("alpha_2") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "person" ADD CONSTRAINT "person_birth_country_country_alpha_2_fk" FOREIGN KEY ("birth_country") REFERENCES "country"("alpha_2") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "identity" ADD CONSTRAINT "identity_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("auth_user_id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "person" ADD CONSTRAINT "person_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("auth_user_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "identity_location_link" ADD CONSTRAINT "identity_location_identity_id_fk" FOREIGN KEY ("identity_id") REFERENCES "identity"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "actor" ADD CONSTRAINT "actor_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "person"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "identity_location_link" ADD CONSTRAINT "identity_location_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "location"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "actor" ADD CONSTRAINT "actor_location_link_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "location"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "person_location_link" ADD CONSTRAINT "person_location_link_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "person"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "person_location_link" ADD CONSTRAINT "person_location_link_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "location"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
