@@ -111,7 +111,7 @@ export default function Page() {
                     href={location.url}
                     target="_blank"
                   >
-                    {normalizeUrl(location.url).split("//")[1].split("/")[0]}
+                    {normalizeUrl(location.url).split("//")[1]?.split("/")[0]}
                   </Link>
                   {/* <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-gray-600">
                     <p>{location.city}</p>
