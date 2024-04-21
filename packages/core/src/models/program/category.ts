@@ -1,78 +1,87 @@
-import { schema } from '@nawadi/db'
+import { schema as s } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
-import { createSelectSchema } from 'drizzle-zod'
+import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { zod } from '../../util/zod.js'
+import {
+  handleSchema,
+  possibleSingleRow,
+  singleRow,
+  titleSchema,
+  uuidSchema,
+  withZod,
+} from '../../util/index.js'
 
-export * as Category from './category.js'
-
-const category = schema.category
-
-export const test = 1
-
-export const Info = createSelectSchema(category, {
-  handle(schema) {
-    return schema.handle
-      .trim()
-      .toLowerCase()
-      .min(3)
-      .regex(/^[a-z0-9\-]+$/)
-  },
-  parentCategoryId: (schema) => schema.parentCategoryId.uuid(),
-})
-export type Info = typeof category.$inferSelect
-
-export const create = zod(
-  Info.pick({
-    title: true,
-    handle: true,
-    parentCategoryId: true,
-    description: true,
-  }).partial({
-    title: true,
-    parentCategoryId: true,
-    description: true,
+export const create = withZod(
+  z.object({
+    title: titleSchema,
+    handle: handleSchema,
+    parentCategoryId: uuidSchema.optional(),
+    description: z.string().trim().optional(),
   }),
-  async (input) => {
+  async (item) => {
     const query = useQuery()
-    const [insert] = await query
-      .insert(category)
+
+    const rows = await query
+      .insert(s.category)
       .values({
-        handle: input.handle,
-        title: input.title,
-        parentCategoryId: input.parentCategoryId,
-        description: input.description,
+        title: item.title,
+        handle: item.handle,
+        description: item.description,
+        parentCategoryId: item.parentCategoryId,
       })
-      .returning({ id: category.id })
+      .returning({ id: s.category.id })
 
-    if (!insert) {
-      throw new Error('Failed to insert category')
-    }
-
-    return insert.id
+    const row = singleRow(rows)
+    return row
   },
 )
 
-export const list = zod(z.void(), async () => {
+export const list = withZod(z.void(), async () => {
   const query = useQuery()
-  return await query.select().from(category)
+
+  const rows = await query
+    .select({
+      id: s.category.id,
+      title: s.category.title,
+      handle: s.category.handle,
+      description: s.category.description,
+      parentCategoryId: s.category.parentCategoryId,
+    })
+    .from(s.category)
+
+  return rows
 })
 
-export const fromId = zod(Info.shape.id, async (id) => {
+export const fromHandle = withZod(handleSchema, async (handle) => {
   const query = useQuery()
-  return await query
-    .select()
-    .from(category)
-    .where(eq(category.id, id))
-    .then((rows) => rows[0])
-})
 
-export const fromHandle = zod(Info.shape.handle, async (handle) => {
-  const query = useQuery()
-  return await query
+  const self = alias(s.category, 'parent')
+
+  const rows = await query
     .select()
-    .from(category)
-    .where(eq(category.handle, handle))
-    .then((rows) => rows[0])
+    .from(s.category)
+    .leftJoin(self, eq(s.category.id, self.id))
+    .where(eq(s.category.handle, handle))
+
+  const row = possibleSingleRow(rows)
+
+  if (!row) {
+    return null
+  }
+
+  return {
+    id: row.category.id,
+    title: row.category.title,
+    handle: row.category.handle,
+    description: row.category.description,
+    parent: row.parent
+      ? {
+          id: row.parent.id,
+          title: row.parent.title,
+          handle: row.parent.handle,
+          description: row.parent.description,
+        }
+      : null,
+  }
 })

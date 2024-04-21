@@ -1,25 +1,25 @@
 import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
-import * as Competency from './competency.js'
+import * as Location from './location.js'
 
-test('competency crud', () =>
+test('location crud', () =>
   withTestTransaction(async () => {
-    const { id } = await Competency.create({
-      title: 'title-1',
+    const { id } = await Location.create({
       handle: 'handle-1',
-      type: 'knowledge',
+      name: 'title-1',
+      websiteUrl: 'https://example.com',
     })
 
-    const list = await Competency.list()
+    const list = await Location.list()
 
     assert.equal(list.length, 1)
     const [item] = list
 
     assert.deepStrictEqual(item, {
       id,
-      title: 'title-1',
       handle: 'handle-1',
-      type: 'knowledge',
+      name: 'title-1',
+      websiteUrl: 'https://example.com',
     })
   }))

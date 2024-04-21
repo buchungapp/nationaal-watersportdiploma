@@ -1,17 +1,16 @@
 import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
-import * as Competency from './competency.js'
+import * as Discipline from './discipline.js'
 
-test('competency crud', () =>
+test('discipline crud', () =>
   withTestTransaction(async () => {
-    const { id } = await Competency.create({
+    const { id } = await Discipline.create({
       title: 'title-1',
       handle: 'handle-1',
-      type: 'knowledge',
     })
 
-    const list = await Competency.list()
+    const list = await Discipline.list()
 
     assert.equal(list.length, 1)
     const [item] = list
@@ -20,6 +19,5 @@ test('competency crud', () =>
       id,
       title: 'title-1',
       handle: 'handle-1',
-      type: 'knowledge',
     })
   }))

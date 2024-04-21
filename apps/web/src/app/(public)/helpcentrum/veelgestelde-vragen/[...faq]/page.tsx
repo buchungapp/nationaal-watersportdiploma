@@ -39,9 +39,9 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const question = await findQuestion(
-    params.faq[0],
-    params.faq[1],
-    params.faq[2],
+    params.faq[0]!,
+    params.faq[1]!,
+    params.faq[2]!,
   );
 
   if (!question) {
@@ -54,9 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 export default async function Page({ params }: Props) {
   const question = await findQuestion(
-    params.faq[0],
-    params.faq[1],
-    params.faq[2],
+    params.faq[0]!,
+    params.faq[1]!,
+    params.faq[2]!,
   );
 
   if (!question) {

@@ -1,70 +1,82 @@
-import { schema } from '@nawadi/db'
+import { schema as s } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
-import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { zod } from '../../util/zod.js'
+import {
+  handleSchema,
+  possibleSingleRow,
+  singleRow,
+  titleSchema,
+  uuidSchema,
+  withZod,
+} from '../../util/index.js'
 
-export * as Degree from './degree.js'
+export const list = withZod(z.void(), async () => {
+  const query = useQuery()
 
-const degree = schema.degree
+  const rows = await query
+    .select({
+      id: s.degree.id,
+      title: s.degree.title,
+      handle: s.degree.handle,
+      rang: s.degree.rang,
+    })
+    .from(s.degree)
 
-export const Info = createSelectSchema(degree, {
-  handle(schema) {
-    return schema.handle
-      .trim()
-      .toLowerCase()
-      .min(3)
-      .regex(/^[a-z0-9\-]+$/)
-  },
-  rang(schema) {
-    return schema.rang.int()
-  },
+  return rows
 })
-export type Info = typeof degree.$inferSelect
 
-export const create = zod(
-  Info.pick({ title: true, handle: true, rang: true }).partial({
-    title: true,
+export const create = withZod(
+  z.object({
+    title: titleSchema,
+    handle: handleSchema,
+    rang: z.number().int(),
   }),
-  async (input) => {
+  async (item) => {
     const query = useQuery()
-    const [insert] = await query
-      .insert(degree)
+
+    const rows = await query
+      .insert(s.degree)
       .values({
-        handle: input.handle,
-        title: input.title,
-        rang: input.rang,
+        title: item.title,
+        handle: item.handle,
+        rang: item.rang,
       })
-      .returning({ id: degree.id })
+      .returning({ id: s.degree.id })
 
-    if (!insert) {
-      throw new Error('Failed to insert degree')
-    }
-
-    return insert.id
+    const row = singleRow(rows)
+    return row
   },
 )
 
-export const list = zod(z.void(), async () => {
+export const fromHandle = withZod(handleSchema, async (handle) => {
   const query = useQuery()
-  return await query.select().from(degree)
+
+  const rows = await query
+    .select({
+      id: s.degree.id,
+      title: s.degree.title,
+      handle: s.degree.handle,
+      rang: s.degree.rang,
+    })
+    .from(s.degree)
+    .where(eq(s.degree.handle, handle))
+
+  return possibleSingleRow(rows) ?? null
 })
 
-export const fromId = zod(Info.shape.id, async (id) => {
+export const fromId = withZod(uuidSchema, async (id) => {
   const query = useQuery()
-  return await query
-    .select()
-    .from(degree)
-    .where(eq(degree.id, id))
-    .then((rows) => rows[0])
-})
 
-export const fromHandle = zod(Info.shape.handle, async (handle) => {
-  const query = useQuery()
-  return await query
-    .select()
-    .from(degree)
-    .where(eq(degree.handle, handle))
-    .then((rows) => rows[0])
+  const rows = await query
+    .select({
+      id: s.degree.id,
+      title: s.degree.title,
+      handle: s.degree.handle,
+      rang: s.degree.rang,
+    })
+    .from(s.degree)
+    .where(eq(s.degree.id, id))
+
+  return possibleSingleRow(rows) ?? null
 })

@@ -15,23 +15,19 @@
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js"
+    "test": "node --test './out/**/*.test.js'"
   },
   "dependencies": {
-    "@types/node": "^20.11.19",
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
-    "drizzle-zod": "^0.5.1",
+    "@types/node": "^20.11.19",
+    "dayjs": "^1.11.10",
     "postgres": "^3.4.4",
-    "zod": "^3.22.4",
-    "zod-openapi": "^2.15.0",
-    "@nawadi/api": "workspace:*"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "@types/js-yaml": "^4.0.9",
     "drizzle-orm": "^0.30.8",
-    "js-yaml": "^4.1.0",
     "typescript": "^5.4.5"
   }
 }

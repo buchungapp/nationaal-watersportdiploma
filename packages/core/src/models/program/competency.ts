@@ -1,65 +1,65 @@
-import { schema } from '@nawadi/db'
+import { schema as s } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
-import { createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { zod } from '../../util/zod.js'
+import {
+  handleSchema,
+  possibleSingleRow,
+  singleRow,
+  titleSchema,
+  withZod,
+} from '../../util/index.js'
 
-export * as Competency from './competency.js'
+export const list = withZod(z.void(), async () => {
+  const query = useQuery()
 
-export const Info = createSelectSchema(schema.competency, {
-  handle(schema) {
-    return schema.handle
-      .trim()
-      .toLowerCase()
-      .min(3)
-      .regex(/^[a-z0-9\-]+$/)
-  },
+  const rows = await query
+    .select({
+      id: s.competency.id,
+      title: s.competency.title,
+      handle: s.competency.handle,
+      type: s.competency.type,
+    })
+    .from(s.competency)
+
+  return rows
 })
-export type Info = typeof schema.competency.$inferSelect
 
-export const create = zod(
-  Info.pick({ title: true, type: true, handle: true }).partial({
-    title: true,
+export const create = withZod(
+  z.object({
+    title: titleSchema,
+    handle: handleSchema,
+    type: z.enum(['knowledge', 'skill']),
   }),
-  async (input) => {
+  async (item) => {
     const query = useQuery()
-    const [insert] = await query
-      .insert(schema.competency)
+
+    const rows = await query
+      .insert(s.competency)
       .values({
-        handle: input.handle,
-        type: input.type,
-        title: input.title,
+        title: item.title,
+        handle: item.handle,
+        type: item.type,
       })
-      .returning({ id: schema.competency.id })
+      .returning({ id: s.competency.id })
 
-    if (!insert) {
-      throw new Error('Failed to insert competency')
-    }
-
-    return insert.id
+    const row = singleRow(rows)
+    return row
   },
 )
 
-export const list = zod(z.void(), async () => {
+export const fromHandle = withZod(handleSchema, async (handle) => {
   const query = useQuery()
-  return await query.select().from(schema.competency)
-})
 
-export const fromId = zod(Info.shape.id, async (id) => {
-  const query = useQuery()
-  return await query
-    .select()
-    .from(schema.competency)
-    .where(eq(schema.competency.id, id))
-    .then((rows) => rows[0])
-})
+  const rows = await query
+    .select({
+      id: s.competency.id,
+      title: s.competency.title,
+      handle: s.competency.handle,
+      type: s.competency.type,
+    })
+    .from(s.competency)
+    .where(eq(s.competency.handle, handle))
 
-export const fromHandle = zod(Info.shape.handle, async (handle) => {
-  const query = useQuery()
-  return await query
-    .select()
-    .from(schema.competency)
-    .where(eq(schema.competency.handle, handle))
-    .then((rows) => rows[0])
+  return possibleSingleRow(rows) ?? null
 })

@@ -11,15 +11,12 @@
 
 import 'dotenv/config'
 
-import { Curriculum } from '@nawadi/core/curriculum'
 import {
-  Category,
-  Competency,
-  Degree,
-  Discipline,
-  Module,
+  Curriculum,
   Program,
-} from '@nawadi/core/program'
+  withDatabase,
+  withTransaction,
+} from '@nawadi/core'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
 import slugify from 'slugify'
@@ -55,13 +52,6 @@ async function retrieveSheets() {
   )
 }
 
-const sheets = await retrieveSheets()
-
-const rows = await service.spreadsheets.values.batchGet({
-  spreadsheetId,
-  ranges: sheets.map((sheet) => `${sheet.properties?.title!}!A2:G`),
-})
-
 const rowSchema = z.tuple([
   z.string().trim(),
   z.preprocess(
@@ -96,8 +86,8 @@ const dedupeCache = new Map<string, Promise<string>>()
 
 async function getOrCreateCachedItem<T extends { id: string }>(
   entityType: {
-    fromHandle: (handle: string) => Promise<T | undefined>
-    create: (opts: any) => Promise<string>
+    fromHandle: (handle: string) => Promise<T | null>
+    create: (opts: any) => Promise<{ id: string }>
   },
   handle: string,
   title: string,
@@ -108,11 +98,13 @@ async function getOrCreateCachedItem<T extends { id: string }>(
   if (!promise) {
     promise = entityType.fromHandle(handle).then(async (item) => {
       if (!item?.id) {
-        const newItem = entityType.create({
-          handle,
-          title,
-          ...extraOpts,
-        })
+        const newItem = entityType
+          .create({
+            handle,
+            title,
+            ...extraOpts,
+          })
+          .then((newItem) => newItem.id)
         dedupeCache.set(cacheKey, newItem)
         return newItem
       }
@@ -136,7 +128,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       : row[0]
     const disciplineHandle = slugify(disciplineTitle.trim(), slugifyOpts)
     const disciplinePromise = getOrCreateCachedItem(
-      Discipline,
+      Program.Discipline,
       disciplineHandle,
       disciplineTitle.trim(),
       `discipline-${disciplineHandle}`,
@@ -145,7 +137,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Degree
     const degreeHandle = `niveau-${row[2]}`
     const degreePromise = getOrCreateCachedItem(
-      Degree,
+      Program.Degree,
       degreeHandle,
       `Niveau ${row[2]}`,
       `degree-${degreeHandle}`,
@@ -164,20 +156,20 @@ async function processRow(row: z.infer<typeof rowSchema>) {
         .map(async (category, index) => {
           const categoryHandle = slugify(category, slugifyOpts)
           return getOrCreateCachedItem(
-            Category,
+            Program.Category,
             categoryHandle,
             category,
             `category-${categoryHandle}`,
             {
               parentCategoryId: await (index === 0
                 ? getOrCreateCachedItem(
-                    Category,
+                    Program.Category,
                     'leeftijdsgroep',
                     'Leeftijdsgroep',
                     `category-leeftijdsgroep`,
                   )
                 : getOrCreateCachedItem(
-                    Category,
+                    Program.Category,
                     'vaarwater',
                     'Vaarwater',
                     `category-vaarwater`,
@@ -190,7 +182,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Module
     const moduleHandle = slugify(row[3], slugifyOpts)
     const modulePromise = getOrCreateCachedItem(
-      Module,
+      Program.Module,
       moduleHandle,
       row[3],
       `module-${moduleHandle}`,
@@ -199,7 +191,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     // Competency
     const competencyHandle = slugify(row[5], slugifyOpts)
     const competencyPromise = getOrCreateCachedItem(
-      Competency,
+      Program.Competency,
       competencyHandle,
       row[5],
       `competency-${competencyHandle}`,
@@ -228,20 +220,22 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       {
         degreeId,
         disciplineId,
-        categoryIds,
+        categories: categoryIds,
       },
     )
 
     let curriculumPromise = dedupeCache.get(`curriculum-${programId}`)
     if (!curriculumPromise) {
-      curriculumPromise = Curriculum.fromProgramId({ programId }).then(
-        (curriculum) => {
+      curriculumPromise = Curriculum.list({ filter: { programId } }).then(
+        (curricula) => {
+          const curriculum = curricula[0]
+
           if (!curriculum) {
             const newItem = Curriculum.create({
               programId,
               revision: '2401',
               startedAt: new Date('2024-04-01').toISOString(),
-            })
+            }).then((newItem) => newItem.id)
 
             dedupeCache.set(`curriculum-${programId}`, newItem)
             return newItem
@@ -267,35 +261,59 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       moduleId,
       isRequired: !!(row[4] === 'Verplicht'),
       requirement: row[6],
-    }).catch((error) => {
-      console.error('Error creating competency:', {
-        row,
-        error,
-      })
-
-      throw error
     })
   } catch (error) {
-    // console.error('Error processing row:', row)
+    console.error('Error processing row:', row)
     throw error
   }
 }
 
-const promises = []
-for (const sheet of rows.data.valueRanges ?? []) {
-  for (const row of sheet.values ?? []) {
-    try {
-      const competence = rowSchema.parse(row)
-      promises.push(processRow(competence))
-    } catch (error) {
-      console.error('Invalid row:', row)
-      // Stop both loops
-      throw error
+async function main() {
+  const sheets = await retrieveSheets()
+
+  const rows = await service.spreadsheets.values.batchGet({
+    spreadsheetId,
+    ranges: sheets.map((sheet) => `${sheet.properties?.title!}!A2:G`),
+  })
+
+  const promises = []
+  for (const sheet of rows.data.valueRanges ?? []) {
+    for (const row of sheet.values ?? []) {
+      try {
+        const competence = rowSchema.parse(row)
+        promises.push(processRow(competence))
+      } catch (error) {
+        console.error('Invalid row:', row)
+        // Stop both loops
+        throw error
+      }
     }
   }
+
+  return Promise.all(promises)
 }
 
-await Promise.all(promises)
+const pgUri = process.env.PGURI
 
-console.log('Done')
-process.exit(0)
+if (!pgUri) {
+  throw new Error('PGURI environment variable is required')
+}
+
+withDatabase(
+  {
+    pgUri,
+  },
+  async () => {
+    withTransaction(async () => {
+      await main()
+    })
+  },
+)
+  .then(() => {
+    console.log('Done!')
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error('Error:', error)
+    process.exit(1)
+  })

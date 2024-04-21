@@ -76,7 +76,8 @@ function SideNavInner({
     .flatMap(({ items }) => items)
     .filter(({ isActive }) => isActive);
 
-  const label = computedSections.length == 1 ? computedSections[0].label : null;
+  const label =
+    computedSections.length == 1 ? computedSections[0]!.label : null;
 
   return (
     <>
@@ -86,8 +87,8 @@ function SideNavInner({
       >
         <div>
           <Menu.Button className="inline-flex w-full truncate justify-between rounded-xl bg-branding-dark/10 px-4 py-2 text-sm font-medium text-branding-dark group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
-            {active.length == 1 && typeof active[0].label === "string"
-              ? active[0].label
+            {active.length == 1 && typeof active[0]!.label === "string"
+              ? active[0]!.label
               : label ?? "Menu"}
             <ChevronDownIcon
               className="-mr-1 ml-2 h-5 w-5 group-hover:translate-y-0.5 transition-transform"

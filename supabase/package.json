@@ -8,6 +8,6 @@
     "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
   },
   "devDependencies": {
-    "supabase": "^1.153.4"
+    "supabase": "^1.162.4"
   }
 }
