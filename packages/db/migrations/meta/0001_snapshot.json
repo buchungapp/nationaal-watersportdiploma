@@ -1,6 +1,6 @@
 {
-  "id": "513a497b-ac93-46ef-8cbb-18a796d4b468",
-  "prevId": "f8ded68d-0640-43e1-a21e-8e50091f1421",
+  "id": "c8c65a64-0fc3-40e6-9b2f-970060f953bf",
+  "prevId": "fcb93358-d5b9-40f6-a966-fe39e6de02a7",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -1253,13 +1253,6 @@
             "handle"
           ],
           "isUnique": true
-        },
-        "competency_weight_index": {
-          "name": "competency_weight_index",
-          "columns": [
-            "weight"
-          ],
-          "isUnique": true
         }
       },
       "foreignKeys": {},
@@ -1323,13 +1316,6 @@
             "handle"
           ],
           "isUnique": true
-        },
-        "module_weight_index": {
-          "name": "module_weight_index",
-          "columns": [
-            "weight"
-          ],
-          "isUnique": true
         }
       },
       "foreignKeys": {},
@@ -1391,13 +1377,6 @@
           "name": "discipline_handle_index",
           "columns": [
             "handle"
-          ],
-          "isUnique": true
-        },
-        "discipline_weight_index": {
-          "name": "discipline_weight_index",
-          "columns": [
-            "weight"
           ],
           "isUnique": true
         }

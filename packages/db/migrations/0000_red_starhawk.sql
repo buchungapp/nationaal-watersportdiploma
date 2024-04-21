@@ -307,11 +307,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS "unique_handle_for_location" ON "location" ("h
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_2_is_unique" ON "country" ("alpha_2");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_3_is_unique" ON "country" ("alpha_3");
 CREATE UNIQUE INDEX IF NOT EXISTS "competency_handle_index" ON "competency" ("handle");
-CREATE UNIQUE INDEX IF NOT EXISTS "competency_weight_index" ON "competency" ("weight");
 CREATE UNIQUE INDEX IF NOT EXISTS "module_handle_index" ON "module" ("handle");
-CREATE UNIQUE INDEX IF NOT EXISTS "module_weight_index" ON "module" ("weight");
 CREATE UNIQUE INDEX IF NOT EXISTS "discipline_handle_index" ON "discipline" ("handle");
-CREATE UNIQUE INDEX IF NOT EXISTS "discipline_weight_index" ON "discipline" ("weight");
 CREATE UNIQUE INDEX IF NOT EXISTS "degree_handle_index" ON "degree" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "degree_rang_index" ON "degree" ("rang");
 CREATE UNIQUE INDEX IF NOT EXISTS "category_handle_index" ON "category" ("handle");

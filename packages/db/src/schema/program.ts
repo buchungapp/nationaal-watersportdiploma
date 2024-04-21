@@ -28,7 +28,6 @@ export const competency = pgTable(
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-      unqWeight: uniqueIndex().on(table.weight),
     }
   },
 )
@@ -49,7 +48,6 @@ export const module = pgTable(
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-      unqWeight: uniqueIndex().on(table.weight),
     }
   },
 )
@@ -69,7 +67,6 @@ export const discipline = pgTable(
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-      unqWeight: uniqueIndex().on(table.weight),
     }
   },
 )
