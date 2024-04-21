@@ -8,6 +8,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import {
   curriculum,
   curriculumCompetency,
@@ -15,7 +16,7 @@ import {
 } from './curriculum.js'
 import { location } from './location.js'
 import { gearType } from './program.js'
-import { identity } from './user.js'
+import { person } from './user.js'
 
 export const studentCurriculum = pgTable(
   'student_curriculum',
@@ -24,7 +25,7 @@ export const studentCurriculum = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    identityId: uuid('identity_id').notNull(),
+    personId: uuid('person_id').notNull(),
     curriculumId: uuid('curriculum_id').notNull(),
     gearTypeId: uuid('gear_type_id').notNull(),
     startedAt: timestamp('started_at', {
@@ -33,12 +34,13 @@ export const studentCurriculum = pgTable(
     })
       .defaultNow()
       .notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
       unqIdentityCurriculumGear: uniqueIndex(
         'student_curriculum_unq_identity_gear_curriculum',
-      ).on(table.identityId, table.curriculumId, table.gearTypeId),
+      ).on(table.personId, table.curriculumId, table.gearTypeId),
       curriculumGearTypeReference: foreignKey({
         columns: [table.curriculumId, table.gearTypeId],
         foreignColumns: [
@@ -57,10 +59,10 @@ export const studentCurriculum = pgTable(
         foreignColumns: [gearType.id],
         name: 'student_curriculum_link_gear_type_id_fk',
       }),
-      identityReference: foreignKey({
-        columns: [table.identityId],
-        foreignColumns: [identity.id],
-        name: 'student_curriculum_link_identity_id_fk',
+      personReference: foreignKey({
+        columns: [table.personId],
+        foreignColumns: [person.id],
+        name: 'student_curriculum_link_person_id_fk',
       }),
     }
   },
@@ -84,6 +86,7 @@ export const certificate = pgTable(
       withTimezone: true,
       mode: 'string',
     }),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -108,6 +111,7 @@ export const studentCompletedCompetency = pgTable(
     studentCurriculumId: uuid('student_curriculum_id').notNull(),
     competencyId: uuid('curriculum_module_competency_id').notNull(),
     certificateId: uuid('certificate_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {

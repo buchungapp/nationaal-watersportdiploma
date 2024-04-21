@@ -6,10 +6,10 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import { competency, gearType, module, program } from './program.js'
 
 export const curriculum = pgTable(
@@ -25,6 +25,7 @@ export const curriculum = pgTable(
       withTimezone: true,
       mode: 'string',
     }),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -33,7 +34,7 @@ export const curriculum = pgTable(
         foreignColumns: [program.id],
         name: 'curriculum_program_id_fk',
       }),
-      unqProgramRevision: unique().on(table.programId, table.revision),
+      unqProgramRevision: uniqueIndex().on(table.programId, table.revision),
     }
   },
 )
@@ -43,6 +44,7 @@ export const curriculumModule = pgTable(
   {
     curriculumId: uuid('curriculum_id').notNull(),
     moduleId: uuid('module_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -57,7 +59,7 @@ export const curriculumModule = pgTable(
         foreignColumns: [module.id],
         name: 'curriculum_module_module_id_fk',
       }),
-      unqCurriculumModule: unique().on(table.curriculumId, table.moduleId),
+      unqCurriculumModule: uniqueIndex().on(table.curriculumId, table.moduleId),
     }
   },
 )
@@ -74,6 +76,7 @@ export const curriculumCompetency = pgTable(
     competencyId: uuid('competency_id').notNull(),
     isRequired: boolean('is_required').notNull(),
     requirement: text('requirement'),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -104,6 +107,7 @@ export const curriculumGearLink = pgTable(
   {
     curriculumId: uuid('curriculum_id').notNull(),
     gearTypeId: uuid('gear_type_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {

@@ -332,9 +332,7 @@ withDatabase(
   {
     pgUri,
   },
-  async () => {
-    await main()
-  },
+  async () => await main(),
 )
   .then(() => {
     console.log('Done!')

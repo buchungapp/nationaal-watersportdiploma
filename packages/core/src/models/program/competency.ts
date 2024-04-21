@@ -1,65 +1,66 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   withZod,
 } from '../../util/index.js'
+import { insertSchema, selectSchema } from './competency.schema.js'
 
-export const list = withZod(z.void(), async () => {
+export const create = withZod(
+  insertSchema.pick({
+    title: true,
+    handle: true,
+    type: true,
+  }),
+  successfulCreateResponse,
+  async (item) =>
+    withTransaction(async (tx) => {
+      const currentHeighestWeight = await tx
+        .select({ weight: s.competency.weight })
+        .from(s.competency)
+        .orderBy(desc(s.competency.weight))
+        .limit(1)
+        .then((rows) => rows[0]?.weight ?? 0)
+
+      const rows = await tx
+        .insert(s.competency)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          type: item.type,
+          weight: currentHeighestWeight + 1,
+        })
+        .returning({ id: s.competency.id })
+
+      const row = singleRow(rows)
+      return row
+    }),
+)
+
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.competency.id,
-      title: s.competency.title,
-      handle: s.competency.handle,
-      type: s.competency.type,
-    })
-    .from(s.competency)
+  const rows = await query.select().from(s.competency)
 
   return rows
 })
 
-export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-    type: z.enum(['knowledge', 'skill']),
-  }),
-  async (item) => {
+export const fromHandle = withZod(
+  handleSchema,
+  selectSchema.nullable(),
+  async (handle) => {
     const query = useQuery()
 
     const rows = await query
-      .insert(s.competency)
-      .values({
-        title: item.title,
-        handle: item.handle,
-        type: item.type,
-      })
-      .returning({ id: s.competency.id })
+      .select()
+      .from(s.competency)
+      .where(eq(s.competency.handle, handle))
 
-    const row = singleRow(rows)
-    return row
+    return possibleSingleRow(rows) ?? null
   },
 )
-
-export const fromHandle = withZod(handleSchema, async (handle) => {
-  const query = useQuery()
-
-  const rows = await query
-    .select({
-      id: s.competency.id,
-      title: s.competency.title,
-      handle: s.competency.handle,
-      type: s.competency.type,
-    })
-    .from(s.competency)
-    .where(eq(s.competency.handle, handle))
-
-  return possibleSingleRow(rows) ?? null
-})

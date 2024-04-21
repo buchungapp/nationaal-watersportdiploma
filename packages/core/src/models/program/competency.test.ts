@@ -2,6 +2,7 @@ import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
 import * as Competency from './competency.js'
+import { Output } from './competency.schema.js'
 
 test('competency crud', () =>
   withTestTransaction(async () => {
@@ -21,5 +22,9 @@ test('competency crud', () =>
       title: 'title-1',
       handle: 'handle-1',
       type: 'knowledge',
-    })
+      createdAt: item!.createdAt,
+      updatedAt: item!.updatedAt,
+      deletedAt: null,
+      weight: 1,
+    } satisfies Output)
   }))

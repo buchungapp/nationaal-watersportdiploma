@@ -263,7 +263,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       requirement: row[6],
     })
   } catch (error) {
-    console.error('Error processing row:', row)
+    console.error(error)
     throw error
   }
 }
@@ -290,7 +290,7 @@ async function main() {
     }
   }
 
-  return Promise.all(promises)
+  return await Promise.all(promises)
 }
 
 const pgUri = process.env.PGURI
@@ -303,11 +303,10 @@ withDatabase(
   {
     pgUri,
   },
-  async () => {
+  async () =>
     withTransaction(async () => {
       await main()
-    })
-  },
+    }),
 )
   .then(() => {
     console.log('Done!')

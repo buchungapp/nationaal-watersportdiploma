@@ -5,9 +5,10 @@ import {
   pgTable,
   smallint,
   text,
-  unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql'
 
 export const competencyType = pgEnum('competency_type', ['knowledge', 'skill'])
 
@@ -21,10 +22,12 @@ export const competency = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     type: competencyType('type').notNull(),
+    weight: smallint('weight').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
     }
   },
 )
@@ -38,11 +41,13 @@ export const module = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    weight: smallint('weight').notNull(),
+    ...timestamps,
   },
 
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
     }
   },
 )
@@ -56,10 +61,12 @@ export const discipline = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    weight: smallint('weight').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
     }
   },
 )
@@ -74,10 +81,12 @@ export const degree = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     rang: smallint('rang').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
+      unqRang: uniqueIndex().on(table.rang),
     }
   },
 )
@@ -93,10 +102,12 @@ export const category = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     description: text('description'),
+    weight: smallint('weight').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
       parentCategoryReference: foreignKey({
         columns: [table.parentCategoryId],
         foreignColumns: [table.id],
@@ -117,10 +128,11 @@ export const program = pgTable(
     title: text('title'),
     disciplineId: uuid('discipline_id').notNull(),
     degreeId: uuid('degree_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
       disciplineReference: foreignKey({
         columns: [table.disciplineId],
         foreignColumns: [discipline.id],
@@ -144,6 +156,7 @@ export const programCategory = pgTable(
       .notNull(),
     programId: uuid('program_id').notNull(),
     categoryId: uuid('category_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -157,7 +170,7 @@ export const programCategory = pgTable(
         foreignColumns: [category.id],
         name: 'program_category_category_id_fk',
       }),
-      unqCategoryProgram: unique().on(table.categoryId, table.programId),
+      unqCategoryProgram: uniqueIndex().on(table.categoryId, table.programId),
     }
   },
 )
@@ -171,10 +184,11 @@ export const gearType = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    ...timestamps,
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
     }
   },
 )

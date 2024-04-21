@@ -5,17 +5,19 @@ import { useQuery } from '../../contexts/index.js'
 import { singleRow } from '../../util/data-helpers.js'
 import {
   handleSchema,
-  titleSchema,
+  successfulCreateResponse,
   uuidSchema,
   withZod,
 } from '../../util/zod.js'
+import { insertSchema, outputSchema } from './location.schema.js'
 
 export const create = withZod(
-  z.object({
-    handle: handleSchema,
-    name: titleSchema.optional(),
-    websiteUrl: z.string().url().optional(),
+  insertSchema.pick({
+    handle: true,
+    name: true,
+    websiteUrl: true,
   }),
+  successfulCreateResponse,
   async (input) => {
     const query = useQuery()
     const [insert] = await query
@@ -33,42 +35,33 @@ export const create = withZod(
   },
 )
 
-export const list = withZod(z.void(), async () => {
+export const list = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
-  return await query
-    .select({
-      id: s.location.id,
-      handle: s.location.handle,
-      name: s.location.name,
-      websiteUrl: s.location.websiteUrl,
-    })
-    .from(s.location)
+  return await query.select().from(s.location)
 })
 
-export const fromId = withZod(uuidSchema, async (id) => {
-  const query = useQuery()
-  return await query
-    .select({
-      id: s.location.id,
-      handle: s.location.handle,
-      name: s.location.name,
-      websiteUrl: s.location.websiteUrl,
-    })
-    .from(s.location)
-    .where(eq(s.location.id, id))
-    .then((rows) => singleRow(rows))
-})
+export const fromId = withZod(
+  uuidSchema,
+  outputSchema.nullable(),
+  async (id) => {
+    const query = useQuery()
+    return await query
+      .select()
+      .from(s.location)
+      .where(eq(s.location.id, id))
+      .then((rows) => singleRow(rows))
+  },
+)
 
-export const fromHandle = withZod(handleSchema, async (handle) => {
-  const query = useQuery()
-  return await query
-    .select({
-      id: s.location.id,
-      handle: s.location.handle,
-      name: s.location.name,
-      websiteUrl: s.location.websiteUrl,
-    })
-    .from(s.location)
-    .where(eq(s.location.handle, handle))
-    .then((rows) => singleRow(rows))
-})
+export const fromHandle = withZod(
+  handleSchema,
+  outputSchema.nullable(),
+  async (handle) => {
+    const query = useQuery()
+    return await query
+      .select()
+      .from(s.location)
+      .where(eq(s.location.handle, handle))
+      .then((rows) => singleRow(rows))
+  },
+)

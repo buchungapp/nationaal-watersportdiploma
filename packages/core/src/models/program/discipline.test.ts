@@ -2,6 +2,7 @@ import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
 import * as Discipline from './discipline.js'
+import { Output } from './discipline.schema.js'
 
 test('discipline crud', () =>
   withTestTransaction(async () => {
@@ -19,5 +20,9 @@ test('discipline crud', () =>
       id,
       title: 'title-1',
       handle: 'handle-1',
-    })
+      createdAt: item!.createdAt,
+      updatedAt: item!.updatedAt,
+      deletedAt: null,
+      weight: 1,
+    } satisfies Output)
   }))

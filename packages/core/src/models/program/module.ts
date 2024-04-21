@@ -1,61 +1,64 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   withZod,
 } from '../../util/index.js'
+import { insertSchema, selectSchema } from './module.schema.js'
 
-export const list = withZod(z.void(), async () => {
+export const create = withZod(
+  insertSchema.pick({
+    title: true,
+    handle: true,
+  }),
+  successfulCreateResponse,
+  async (item) =>
+    withTransaction(async (tx) => {
+      const currentHeighestWeight = await tx
+        .select({ weight: s.module.weight })
+        .from(s.module)
+        .orderBy(desc(s.module.weight))
+        .limit(1)
+        .then((rows) => rows[0]?.weight ?? 0)
+
+      const rows = await tx
+        .insert(s.module)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          weight: currentHeighestWeight + 1,
+        })
+        .returning({ id: s.module.id })
+
+      const row = singleRow(rows)
+      return row
+    }),
+)
+
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.module.id,
-      title: s.module.title,
-      handle: s.module.handle,
-    })
-    .from(s.module)
+  const rows = await query.select().from(s.module)
 
   return rows
 })
 
-export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-  }),
-  async (item) => {
+export const fromHandle = withZod(
+  handleSchema,
+  selectSchema.nullable(),
+  async (handle) => {
     const query = useQuery()
 
     const rows = await query
-      .insert(s.module)
-      .values({
-        title: item.title,
-        handle: item.handle,
-      })
-      .returning({ id: s.module.id })
+      .select()
+      .from(s.module)
+      .where(eq(s.module.handle, handle))
 
-    const row = singleRow(rows)
-    return row
+    return possibleSingleRow(rows) ?? null
   },
 )
-
-export const fromHandle = withZod(handleSchema, async (handle) => {
-  const query = useQuery()
-
-  const rows = await query
-    .select({
-      id: s.module.id,
-      title: s.module.title,
-      handle: s.module.handle,
-    })
-    .from(s.module)
-    .where(eq(s.module.handle, handle))
-
-  return possibleSingleRow(rows) ?? null
-})

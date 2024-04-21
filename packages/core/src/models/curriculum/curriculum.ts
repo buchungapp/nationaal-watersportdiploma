@@ -6,22 +6,24 @@ import { useQuery } from '../../contexts/index.js'
 import { findItem } from '../../util/data-helpers.js'
 import dayjs from '../../util/dayjs.js'
 import {
-  dateTimeSchema,
   singleOrArray,
+  successfulCreateResponse,
   uuidSchema,
   withZod,
 } from '../../util/zod.js'
 import { Program } from '../index.js'
 import { Module } from '../program/index.js'
+import { insertSchema, outputSchema } from './curriculum.schema.js'
 
 export * as Curriculum from './curriculum.js'
 
 export const create = withZod(
-  z.object({
-    programId: uuidSchema,
-    revision: z.string(),
-    startedAt: dateTimeSchema.optional(),
+  insertSchema.pick({
+    programId: true,
+    revision: true,
+    startedAt: true,
   }),
+  successfulCreateResponse,
   async (input) => {
     const query = useQuery()
 
@@ -53,6 +55,7 @@ export const list = withZod(
         .default({}),
     })
     .default({}),
+  outputSchema.array(),
   async ({ filter }) => {
     const query = useQuery()
 
@@ -189,10 +192,7 @@ export const list = withZod(
               })
 
               return {
-                id: competency.id,
-                handle: competency.handle,
-                title: competency.title,
-                type: competency.type,
+                ...competency,
                 isRequired,
                 requirement,
               }
@@ -213,31 +213,6 @@ export const list = withZod(
     return mapped
   },
 )
-
-// export const fromProgramId = withZod(
-//   Info.pick({
-//     programId: true,
-//     revision: true,
-//   }).partial({ revision: true }),
-//   async ({ programId, revision }) => {
-//     const query = useQuery()
-//     const whereClausules: SQL[] = [eq(curriculum.programId, programId)]
-
-//     if (revision) {
-//       whereClausules.push(eq(curriculum.revision, revision))
-//     } else {
-//       whereClausules.push(isNotNull(curriculum.startedAt))
-//     }
-
-//     return await query
-//       .select()
-//       .from(curriculum)
-//       .where(and(...whereClausules))
-//       .orderBy(desc(curriculum.startedAt))
-//       .limit(1)
-//       .then((rows) => rows[0])
-//   },
-// )
 
 export const linkModule = withZod(
   z.object({

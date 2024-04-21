@@ -1,77 +1,80 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
   singleRow,
-  titleSchema,
+  successfulCreateResponse,
   uuidSchema,
   withZod,
 } from '../../util/index.js'
+import { insertSchema, selectSchema } from './discipline.schema.js'
 
-export const list = withZod(z.void(), async () => {
+export const create = withZod(
+  insertSchema.pick({
+    title: true,
+    handle: true,
+  }),
+  successfulCreateResponse,
+  async (item) =>
+    withTransaction(async (tx) => {
+      const currentHeighestWeight = await tx
+        .select({ weight: s.discipline.weight })
+        .from(s.discipline)
+        .orderBy(desc(s.discipline.weight))
+        .limit(1)
+        .then((rows) => rows[0]?.weight ?? 0)
+
+      const rows = await tx
+        .insert(s.discipline)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          weight: currentHeighestWeight + 1,
+        })
+        .returning({ id: s.discipline.id })
+
+      const row = singleRow(rows)
+      return row
+    }),
+)
+
+export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.discipline.id,
-      title: s.discipline.title,
-      handle: s.discipline.handle,
-    })
-    .from(s.discipline)
+  const rows = await query.select().from(s.discipline)
 
   return rows
 })
 
-export const create = withZod(
-  z.object({
-    title: titleSchema,
-    handle: handleSchema,
-  }),
-  async (item) => {
+export const fromHandle = withZod(
+  handleSchema,
+  selectSchema.nullable(),
+  async (handle) => {
     const query = useQuery()
 
     const rows = await query
-      .insert(s.discipline)
-      .values({
-        title: item.title,
-        handle: item.handle,
-      })
-      .returning({ id: s.discipline.id })
+      .select()
+      .from(s.discipline)
+      .where(eq(s.discipline.handle, handle))
 
-    const row = singleRow(rows)
-    return row
+    return possibleSingleRow(rows) ?? null
   },
 )
 
-export const fromHandle = withZod(handleSchema, async (handle) => {
-  const query = useQuery()
+export const fromId = withZod(
+  uuidSchema,
+  selectSchema.nullable(),
+  async (id) => {
+    const query = useQuery()
 
-  const rows = await query
-    .select({
-      id: s.discipline.id,
-      title: s.discipline.title,
-      handle: s.discipline.handle,
-    })
-    .from(s.discipline)
-    .where(eq(s.discipline.handle, handle))
+    const rows = await query
+      .select()
+      .from(s.discipline)
+      .where(eq(s.discipline.id, id))
 
-  return possibleSingleRow(rows) ?? null
-})
-
-export const fromId = withZod(uuidSchema, async (id) => {
-  const query = useQuery()
-
-  const rows = await query
-    .select({
-      id: s.discipline.id,
-      title: s.discipline.title,
-      handle: s.discipline.handle,
-    })
-    .from(s.discipline)
-    .where(eq(s.discipline.id, id))
-
-  return possibleSingleRow(rows) ?? null
-})
+    return possibleSingleRow(rows) ?? null
+  },
+)
