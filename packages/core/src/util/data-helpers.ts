@@ -12,6 +12,7 @@ export function aggregateOneToMany<
   const map: Record<string, { one: TRow[TOne]; many: TRow[TMany][] }> = {}
   for (const row of rows) {
     const id = row[one]
+
     if (!map[id]) {
       map[id] = { one: row[one], many: [] }
     }

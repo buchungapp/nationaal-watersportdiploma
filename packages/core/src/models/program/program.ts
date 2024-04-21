@@ -22,7 +22,34 @@ export const list = withZod(z.void(), async () => {
     .select()
     .from(s.program)
     .leftJoin(s.programCategory, eq(s.programCategory.programId, s.program.id))
-    .then((rows) => aggregateOneToMany(rows, 'program', 'program_category')) // Transform joined rows into a structured format with programs and their categories.
+    .then((rows) => {
+      return Object.values(
+        rows.reduce(
+          (acc, { program, program_category }) => {
+            if (!acc[program.id]) {
+              acc[program.id] = {
+                ...program,
+                categories: [],
+              }
+            }
+
+            if (!!program_category) {
+              acc[program.id]!.categories.push(program_category)
+            }
+
+            return acc
+          },
+          {} as Record<
+            string,
+            (typeof rows)[number]['program'] & {
+              categories: NonNullable<
+                (typeof rows)[number]['program_category']
+              >[]
+            }
+          >,
+        ),
+      )
+    }) // Transform joined rows into a structured format with programs and their categories.
 
   // Fetch additional lists of categories, degrees, and disciplines in parallel to optimize loading times.
   const [programs, categories, degrees, disciplines] = await Promise.all([
@@ -52,8 +79,12 @@ export const list = withZod(z.void(), async () => {
       enforce: true, // Enforce finding the discipline, throw error if not found.
     })
 
-    const { program_category, degreeId, disciplineId, ...programProperties } =
-      program
+    const {
+      categories: programCategories,
+      degreeId,
+      disciplineId,
+      ...programProperties
+    } = program
 
     // Construct the final program object with additional details.
     return {
@@ -64,7 +95,7 @@ export const list = withZod(z.void(), async () => {
         .filter(
           (
             category, // Filter categories relevant to the current program.
-          ) => program_category.some((pc) => pc.categoryId === category.id),
+          ) => programCategories.some((pc) => pc.categoryId === category.id),
         )
         .map(({ parentCategoryId, ...categoryKeys }) => {
           const parentCategory = categories.find(

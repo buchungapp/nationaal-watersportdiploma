@@ -11,7 +11,12 @@
 
 import 'dotenv/config'
 
-import { Curriculum, Program, withDatabase } from '@nawadi/core'
+import {
+  Curriculum,
+  Program,
+  withDatabase,
+  withTransaction,
+} from '@nawadi/core'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
 import slugify from 'slugify'
@@ -215,7 +220,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       {
         degreeId,
         disciplineId,
-        categoryIds,
+        categories: categoryIds,
       },
     )
 
@@ -299,14 +304,16 @@ withDatabase(
     pgUri,
   },
   async () => {
-    try {
+    withTransaction(async () => {
       await main()
-      console.log('Done')
-      process.exit(0)
-    } catch (error) {
-      console.error('Error:', error)
-
-      throw error
-    }
+    })
   },
 )
+  .then(() => {
+    console.log('Done!')
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error('Error:', error)
+    process.exit(1)
+  })

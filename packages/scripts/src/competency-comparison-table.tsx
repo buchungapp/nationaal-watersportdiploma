@@ -333,13 +333,14 @@ withDatabase(
     pgUri,
   },
   async () => {
-    try {
-      await main()
-      console.log('Done')
-      process.exit(0)
-    } catch (error) {
-      console.error('Error:', error)
-      process.exit(1)
-    }
+    await main()
   },
 )
+  .then(() => {
+    console.log('Done!')
+    process.exit(0)
+  })
+  .catch((error) => {
+    console.error('Error:', error)
+    process.exit(1)
+  })
