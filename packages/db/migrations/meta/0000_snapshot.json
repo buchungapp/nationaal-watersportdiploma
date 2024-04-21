@@ -1,5 +1,5 @@
 {
-  "id": "ad8272ce-0f6b-4e27-ac7a-5766e9025f01",
+  "id": "924fbd59-359f-4d18-b740-2965a9d1e901",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -39,6 +39,26 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -151,6 +171,26 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -214,6 +254,26 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -297,9 +357,38 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "curriculum_program_id_revision_index": {
+          "name": "curriculum_program_id_revision_index",
+          "columns": [
+            "program_id",
+            "revision"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "curriculum_program_id_fk": {
           "name": "curriculum_program_id_fk",
@@ -316,16 +405,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "curriculum_program_id_revision_unique": {
-          "name": "curriculum_program_id_revision_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "program_id",
-            "revision"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "curriculum_module": {
       "name": "curriculum_module",
@@ -342,9 +422,38 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "curriculum_module_curriculum_id_module_id_index": {
+          "name": "curriculum_module_curriculum_id_module_id_index",
+          "columns": [
+            "curriculum_id",
+            "module_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "curriculum_module_curriculum_id_fk": {
           "name": "curriculum_module_curriculum_id_fk",
@@ -382,16 +491,7 @@
           ]
         }
       },
-      "uniqueConstraints": {
-        "curriculum_module_curriculum_id_module_id_unique": {
-          "name": "curriculum_module_curriculum_id_module_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "curriculum_id",
-            "module_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "curriculum_competency": {
       "name": "curriculum_competency",
@@ -431,6 +531,26 @@
         "requirement": {
           "name": "requirement",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -494,6 +614,26 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -571,9 +711,47 @@
           "primaryKey": false,
           "notNull": false
         },
+        "certificate_media_id": {
+          "name": "certificate_media_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "website_url": {
           "name": "website_url",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "short_description": {
+          "name": "short_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_metadata": {
+          "name": "_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -607,6 +785,19 @@
           "tableTo": "media",
           "columnsFrom": [
             "square_logo_media_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "location_certificate_media_id_media_id_fk": {
+          "name": "location_certificate_media_id_media_id_fk",
+          "tableFrom": "location",
+          "tableTo": "media",
+          "columnsFrom": [
+            "certificate_media_id"
           ],
           "columnsTo": [
             "id"
@@ -681,6 +872,26 @@
         "_metadata": {
           "name": "_metadata",
           "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
@@ -1007,20 +1218,53 @@
           "type": "competency_type",
           "primaryKey": false,
           "notNull": true
+        },
+        "weight": {
+          "name": "weight",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "competency_handle_unique": {
-          "name": "competency_handle_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "competency_handle_index": {
+          "name": "competency_handle_index",
           "columns": [
             "handle"
-          ]
+          ],
+          "isUnique": true
+        },
+        "competency_weight_index": {
+          "name": "competency_weight_index",
+          "columns": [
+            "weight"
+          ],
+          "isUnique": true
         }
-      }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "module": {
       "name": "module",
@@ -1044,20 +1288,53 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "module_handle_unique": {
-          "name": "module_handle_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "module_handle_index": {
+          "name": "module_handle_index",
           "columns": [
             "handle"
-          ]
+          ],
+          "isUnique": true
+        },
+        "module_weight_index": {
+          "name": "module_weight_index",
+          "columns": [
+            "weight"
+          ],
+          "isUnique": true
         }
-      }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "discipline": {
       "name": "discipline",
@@ -1081,20 +1358,53 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "discipline_handle_unique": {
-          "name": "discipline_handle_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "discipline_handle_index": {
+          "name": "discipline_handle_index",
           "columns": [
             "handle"
-          ]
+          ],
+          "isUnique": true
+        },
+        "discipline_weight_index": {
+          "name": "discipline_weight_index",
+          "columns": [
+            "weight"
+          ],
+          "isUnique": true
         }
-      }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "degree": {
       "name": "degree",
@@ -1124,20 +1434,47 @@
           "type": "smallint",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "degree_handle_unique": {
-          "name": "degree_handle_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "degree_handle_index": {
+          "name": "degree_handle_index",
           "columns": [
             "handle"
-          ]
+          ],
+          "isUnique": true
+        },
+        "degree_rang_index": {
+          "name": "degree_rang_index",
+          "columns": [
+            "rang"
+          ],
+          "isUnique": true
         }
-      }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "category": {
       "name": "category",
@@ -1173,9 +1510,50 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "category_handle_index": {
+          "name": "category_handle_index",
+          "columns": [
+            "handle"
+          ],
+          "isUnique": true
+        },
+        "category_weight_index": {
+          "name": "category_weight_index",
+          "columns": [
+            "weight"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "category_parent_category_id_fk": {
           "name": "category_parent_category_id_fk",
@@ -1192,15 +1570,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "category_handle_unique": {
-          "name": "category_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "program": {
       "name": "program",
@@ -1236,9 +1606,37 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "program_handle_index": {
+          "name": "program_handle_index",
+          "columns": [
+            "handle"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "program_discipline_id_fk": {
           "name": "program_discipline_id_fk",
@@ -1268,15 +1666,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "program_handle_unique": {
-          "name": "program_handle_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "program_category": {
       "name": "program_category",
@@ -1300,9 +1690,38 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "program_category_category_id_program_id_index": {
+          "name": "program_category_category_id_program_id_index",
+          "columns": [
+            "category_id",
+            "program_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "program_category_program_id_fk": {
           "name": "program_category_program_id_fk",
@@ -1332,16 +1751,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "program_category_category_id_program_id_unique": {
-          "name": "program_category_category_id_program_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "category_id",
-            "program_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "gear_type": {
       "name": "gear_type",
@@ -1365,20 +1775,40 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "gear_type_handle_unique": {
-          "name": "gear_type_handle_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "gear_type_handle_index": {
+          "name": "gear_type_handle_index",
           "columns": [
             "handle"
-          ]
+          ],
+          "isUnique": true
         }
-      }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     },
     "student_competency_progress": {
       "name": "student_competency_progress",
@@ -1408,12 +1838,25 @@
           "primaryKey": false,
           "notNull": true
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},

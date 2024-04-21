@@ -39,7 +39,10 @@ CREATE TABLE IF NOT EXISTS "student_curriculum" (
 	"identity_id" uuid NOT NULL,
 	"curriculum_id" uuid NOT NULL,
 	"gear_type_id" uuid NOT NULL,
-	"started_at" timestamp with time zone DEFAULT now() NOT NULL
+	"started_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "certificate" (
@@ -48,13 +51,19 @@ CREATE TABLE IF NOT EXISTS "certificate" (
 	"student_curriculum_id" uuid NOT NULL,
 	"location_id" uuid NOT NULL,
 	"issued_at" timestamp with time zone,
-	"visible_from" timestamp with time zone
+	"visible_from" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "student_completed_competency" (
 	"student_curriculum_id" uuid NOT NULL,
 	"curriculum_module_competency_id" uuid NOT NULL,
 	"certificate_id" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
 	CONSTRAINT "student_completed_competency_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id")
 );
 
@@ -63,14 +72,18 @@ CREATE TABLE IF NOT EXISTS "curriculum" (
 	"program_id" uuid NOT NULL,
 	"revision" text NOT NULL,
 	"started_at" timestamp with time zone,
-	CONSTRAINT "curriculum_program_id_revision_unique" UNIQUE("program_id","revision")
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "curriculum_module" (
 	"curriculum_id" uuid NOT NULL,
 	"module_id" uuid NOT NULL,
-	CONSTRAINT "curriculum_module_curriculum_id_module_id_pk" PRIMARY KEY("curriculum_id","module_id"),
-	CONSTRAINT "curriculum_module_curriculum_id_module_id_unique" UNIQUE("curriculum_id","module_id")
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
+	CONSTRAINT "curriculum_module_curriculum_id_module_id_pk" PRIMARY KEY("curriculum_id","module_id")
 );
 
 CREATE TABLE IF NOT EXISTS "curriculum_competency" (
@@ -79,12 +92,18 @@ CREATE TABLE IF NOT EXISTS "curriculum_competency" (
 	"module_id" uuid NOT NULL,
 	"competency_id" uuid NOT NULL,
 	"is_required" boolean NOT NULL,
-	"requirement" text
+	"requirement" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "curriculum_gear_link" (
 	"curriculum_id" uuid NOT NULL,
 	"gear_type_id" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
 	CONSTRAINT "curriculum_gear_link_curriculum_id_gear_type_id_pk" PRIMARY KEY("curriculum_id","gear_type_id")
 );
 
@@ -94,7 +113,13 @@ CREATE TABLE IF NOT EXISTS "location" (
 	"name" text,
 	"logo_media_id" uuid,
 	"square_logo_media_id" uuid,
-	"website_url" text
+	"certificate_media_id" uuid,
+	"website_url" text,
+	"short_description" text,
+	"_metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "media" (
@@ -107,7 +132,10 @@ CREATE TABLE IF NOT EXISTS "media" (
 	"object_id" uuid NOT NULL,
 	"identity_id" uuid,
 	"location_id" uuid,
-	"_metadata" jsonb
+	"_metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "country" (
@@ -150,21 +178,30 @@ CREATE TABLE IF NOT EXISTS "competency" (
 	"handle" text NOT NULL,
 	"title" text,
 	"type" "competency_type" NOT NULL,
-	CONSTRAINT "competency_handle_unique" UNIQUE("handle")
+	"weight" smallint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "module" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"handle" text NOT NULL,
 	"title" text,
-	CONSTRAINT "module_handle_unique" UNIQUE("handle")
+	"weight" smallint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "discipline" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"handle" text NOT NULL,
 	"title" text,
-	CONSTRAINT "discipline_handle_unique" UNIQUE("handle")
+	"weight" smallint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "degree" (
@@ -172,7 +209,9 @@ CREATE TABLE IF NOT EXISTS "degree" (
 	"handle" text NOT NULL,
 	"title" text,
 	"rang" smallint NOT NULL,
-	CONSTRAINT "degree_handle_unique" UNIQUE("handle")
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "category" (
@@ -181,7 +220,10 @@ CREATE TABLE IF NOT EXISTS "category" (
 	"handle" text NOT NULL,
 	"title" text,
 	"description" text,
-	CONSTRAINT "category_handle_unique" UNIQUE("handle")
+	"weight" smallint NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "program" (
@@ -190,21 +232,27 @@ CREATE TABLE IF NOT EXISTS "program" (
 	"title" text,
 	"discipline_id" uuid NOT NULL,
 	"degree_id" uuid NOT NULL,
-	CONSTRAINT "program_handle_unique" UNIQUE("handle")
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "program_category" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"program_id" uuid NOT NULL,
 	"category_id" uuid NOT NULL,
-	CONSTRAINT "program_category_category_id_program_id_unique" UNIQUE("category_id","program_id")
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "gear_type" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"handle" text NOT NULL,
 	"title" text,
-	CONSTRAINT "gear_type_handle_unique" UNIQUE("handle")
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone
 );
 
 CREATE TABLE IF NOT EXISTS "student_competency_progress" (
@@ -212,7 +260,9 @@ CREATE TABLE IF NOT EXISTS "student_competency_progress" (
 	"curriculum_module_competency_id" uuid NOT NULL,
 	"location_id" uuid NOT NULL,
 	"progress" numeric NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"deleted_at" timestamp with time zone,
 	CONSTRAINT "student_competency_progress_pk" PRIMARY KEY("student_curriculum_id","curriculum_module_competency_id","location_id")
 );
 
@@ -250,10 +300,25 @@ CREATE TABLE IF NOT EXISTS "identity_location_link" (
 
 CREATE UNIQUE INDEX IF NOT EXISTS "student_curriculum_unq_identity_gear_curriculum" ON "student_curriculum" ("identity_id","curriculum_id","gear_type_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "certificate_unq_handle" ON "certificate" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "curriculum_program_id_revision_index" ON "curriculum" ("program_id","revision");
+CREATE UNIQUE INDEX IF NOT EXISTS "curriculum_module_curriculum_id_module_id_index" ON "curriculum_module" ("curriculum_id","module_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "curriculum_competency_unq_set" ON "curriculum_competency" ("curriculum_id","module_id","competency_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "unique_handle_for_location" ON "location" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_2_is_unique" ON "country" ("alpha_2");
 CREATE UNIQUE INDEX IF NOT EXISTS "country_alpha_3_is_unique" ON "country" ("alpha_3");
+CREATE UNIQUE INDEX IF NOT EXISTS "competency_handle_index" ON "competency" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "competency_weight_index" ON "competency" ("weight");
+CREATE UNIQUE INDEX IF NOT EXISTS "module_handle_index" ON "module" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "module_weight_index" ON "module" ("weight");
+CREATE UNIQUE INDEX IF NOT EXISTS "discipline_handle_index" ON "discipline" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "discipline_weight_index" ON "discipline" ("weight");
+CREATE UNIQUE INDEX IF NOT EXISTS "degree_handle_index" ON "degree" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "degree_rang_index" ON "degree" ("rang");
+CREATE UNIQUE INDEX IF NOT EXISTS "category_handle_index" ON "category" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "category_weight_index" ON "category" ("weight");
+CREATE UNIQUE INDEX IF NOT EXISTS "program_handle_index" ON "program" ("handle");
+CREATE UNIQUE INDEX IF NOT EXISTS "program_category_category_id_program_id_index" ON "program_category" ("category_id","program_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "gear_type_handle_index" ON "gear_type" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "unq_handle" ON "identity" ("handle");
 CREATE INDEX IF NOT EXISTS "user_global" ON "identity" ("user_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "one_instructor_per_auth_user" ON "identity" ("user_id");
@@ -362,6 +427,12 @@ END $$;
 
 DO $$ BEGIN
  ALTER TABLE "location" ADD CONSTRAINT "location_square_logo_media_id_media_id_fk" FOREIGN KEY ("square_logo_media_id") REFERENCES "media"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+ ALTER TABLE "location" ADD CONSTRAINT "location_certificate_media_id_media_id_fk" FOREIGN KEY ("certificate_media_id") REFERENCES "media"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

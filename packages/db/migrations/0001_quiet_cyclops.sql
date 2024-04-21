@@ -1,4 +1,5 @@
--- Custom SQL migration file, put you code below! --DO $$
+-- Custom SQL migration file, put you code below! 
+DO $$
 DECLARE t text;
 BEGIN
     FOR t IN
@@ -11,4 +12,4 @@ BEGIN
         ', t, t);
     END loop;
 END;
-$$ LANGUAGE plpgsql;=
+$$ LANGUAGE plpgsql;

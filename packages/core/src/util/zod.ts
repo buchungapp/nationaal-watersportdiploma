@@ -23,18 +23,57 @@ export type DateTime = z.infer<typeof dateTimeSchema>
 export const singleOrArray = <T extends z.ZodTypeAny>(schema: T) =>
   z.union([schema, schema.array()])
 
+// Define function overloads
 export function withZod<
-  Schema extends z.ZodSchema<any, any, any>,
+  InputSchema extends z.ZodSchema<any, any, any>,
   Return extends any,
->(schema: Schema, func: (value: z.output<Schema>) => Return) {
-  const result = (
-    input: undefined extends z.input<Schema>
-      ? z.input<Schema> | void
-      : z.input<Schema>,
-  ) => {
-    const parsed = schema.parse(input)
-    return func(parsed)
+>(
+  inputSchema: InputSchema,
+  func: (value: z.output<InputSchema>) => Return,
+): (input: z.input<InputSchema> | void) => Return
+
+export function withZod<
+  InputSchema extends z.ZodSchema<any, any, any>,
+  OutputSchema extends z.ZodSchema<any, any, any>,
+  Return extends any,
+>(
+  inputSchema: InputSchema,
+  outputSchema: OutputSchema,
+  func: (value: z.output<InputSchema>) => Promise<z.output<OutputSchema>>,
+): (input: z.input<InputSchema> | void) => Promise<z.output<OutputSchema>>
+
+// Implement the function
+export function withZod<
+  InputSchema extends z.ZodSchema<any, any, any>,
+  OutputSchema extends z.ZodSchema<any, any, any> | undefined,
+  Return extends any,
+>(
+  inputSchema: InputSchema,
+  secondArgument: OutputSchema | ((value: z.output<InputSchema>) => Return),
+  thirdArgument?: (
+    value: z.output<InputSchema>,
+  ) => OutputSchema extends z.ZodSchema<any, any, any>
+    ? Promise<z.input<OutputSchema>>
+    : never,
+) {
+  const func: any =
+    typeof secondArgument === 'function' ? secondArgument : thirdArgument
+  const outputSchema: OutputSchema | undefined =
+    typeof secondArgument === 'function' ? undefined : secondArgument
+
+  const result = (input: z.input<InputSchema> | void) => {
+    const parsed = inputSchema.parse(input)
+    const result = func(parsed)
+    if (outputSchema) {
+      return outputSchema.parse(result) // Validate the result if outputSchema is defined
+    }
+    return result
   }
-  result.schema = schema
+
+  result.inputSchema = inputSchema
+  if (outputSchema) {
+    result.outputSchema = outputSchema
+  }
+
   return result
 }
