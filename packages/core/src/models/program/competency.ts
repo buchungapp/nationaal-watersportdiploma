@@ -1,7 +1,7 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
@@ -31,21 +31,28 @@ export const create = withZod(
     handle: handleSchema,
     type: z.enum(['knowledge', 'skill']),
   }),
-  async (item) => {
-    const query = useQuery()
+  async (item) =>
+    withTransaction(async (tx) => {
+      const currentHeighestWeight = await tx
+        .select({ weight: s.competency.weight })
+        .from(s.competency)
+        .orderBy(desc(s.competency.weight))
+        .limit(1)
+        .then((rows) => rows[0]?.weight ?? 0)
 
-    const rows = await query
-      .insert(s.competency)
-      .values({
-        title: item.title,
-        handle: item.handle,
-        type: item.type,
-      })
-      .returning({ id: s.competency.id })
+      const rows = await tx
+        .insert(s.competency)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          type: item.type,
+          weight: currentHeighestWeight + 1,
+        })
+        .returning({ id: s.competency.id })
 
-    const row = singleRow(rows)
-    return row
-  },
+      const row = singleRow(rows)
+      return row
+    }),
 )
 
 export const fromHandle = withZod(handleSchema, async (handle) => {

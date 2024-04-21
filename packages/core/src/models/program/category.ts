@@ -1,8 +1,8 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
@@ -19,22 +19,29 @@ export const create = withZod(
     parentCategoryId: uuidSchema.optional(),
     description: z.string().trim().optional(),
   }),
-  async (item) => {
-    const query = useQuery()
+  async (item) =>
+    withTransaction(async (tx) => {
+      const currentHeighestWeight = await tx
+        .select({ weight: s.category.weight })
+        .from(s.category)
+        .orderBy(desc(s.category.weight))
+        .limit(1)
+        .then((rows) => rows[0]?.weight ?? 0)
 
-    const rows = await query
-      .insert(s.category)
-      .values({
-        title: item.title,
-        handle: item.handle,
-        description: item.description,
-        parentCategoryId: item.parentCategoryId,
-      })
-      .returning({ id: s.category.id })
+      const rows = await tx
+        .insert(s.category)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          description: item.description,
+          parentCategoryId: item.parentCategoryId,
+          weight: currentHeighestWeight + 1,
+        })
+        .returning({ id: s.category.id })
 
-    const row = singleRow(rows)
-    return row
-  },
+      const row = singleRow(rows)
+      return row
+    }),
 )
 
 export const list = withZod(z.void(), async () => {

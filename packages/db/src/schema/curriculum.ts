@@ -6,7 +6,6 @@ import {
   primaryKey,
   text,
   timestamp,
-  unique,
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
@@ -35,7 +34,7 @@ export const curriculum = pgTable(
         foreignColumns: [program.id],
         name: 'curriculum_program_id_fk',
       }),
-      unqProgramRevision: unique().on(table.programId, table.revision),
+      unqProgramRevision: uniqueIndex().on(table.programId, table.revision),
     }
   },
 )
@@ -60,7 +59,7 @@ export const curriculumModule = pgTable(
         foreignColumns: [module.id],
         name: 'curriculum_module_module_id_fk',
       }),
-      unqCurriculumModule: unique().on(table.curriculumId, table.moduleId),
+      unqCurriculumModule: uniqueIndex().on(table.curriculumId, table.moduleId),
     }
   },
 )

@@ -1,7 +1,7 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
@@ -29,20 +29,27 @@ export const create = withZod(
     title: titleSchema,
     handle: handleSchema,
   }),
-  async (item) => {
-    const query = useQuery()
+  async (item) =>
+    withTransaction(async (tx) => {
+      const currentHeighestWeight = await tx
+        .select({ weight: s.module.weight })
+        .from(s.module)
+        .orderBy(desc(s.module.weight))
+        .limit(1)
+        .then((rows) => rows[0]?.weight ?? 0)
 
-    const rows = await query
-      .insert(s.module)
-      .values({
-        title: item.title,
-        handle: item.handle,
-      })
-      .returning({ id: s.module.id })
+      const rows = await tx
+        .insert(s.module)
+        .values({
+          title: item.title,
+          handle: item.handle,
+          weight: currentHeighestWeight + 1,
+        })
+        .returning({ id: s.module.id })
 
-    const row = singleRow(rows)
-    return row
-  },
+      const row = singleRow(rows)
+      return row
+    }),
 )
 
 export const fromHandle = withZod(handleSchema, async (handle) => {

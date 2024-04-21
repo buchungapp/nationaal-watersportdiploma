@@ -5,7 +5,7 @@ import {
   pgTable,
   smallint,
   text,
-  unique,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../utils/sql'
@@ -27,7 +27,8 @@ export const competency = pgTable(
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
+      unqWeight: uniqueIndex().on(table.weight),
     }
   },
 )
@@ -47,7 +48,8 @@ export const module = pgTable(
 
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
+      unqWeight: uniqueIndex().on(table.weight),
     }
   },
 )
@@ -66,7 +68,8 @@ export const discipline = pgTable(
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
+      unqWeight: uniqueIndex().on(table.weight),
     }
   },
 )
@@ -85,7 +88,8 @@ export const degree = pgTable(
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
+      unqRang: uniqueIndex().on(table.rang),
     }
   },
 )
@@ -106,7 +110,8 @@ export const category = pgTable(
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
+      unqWeight: uniqueIndex().on(table.weight),
       parentCategoryReference: foreignKey({
         columns: [table.parentCategoryId],
         foreignColumns: [table.id],
@@ -131,7 +136,7 @@ export const program = pgTable(
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
       disciplineReference: foreignKey({
         columns: [table.disciplineId],
         foreignColumns: [discipline.id],
@@ -169,7 +174,7 @@ export const programCategory = pgTable(
         foreignColumns: [category.id],
         name: 'program_category_category_id_fk',
       }),
-      unqCategoryProgram: unique().on(table.categoryId, table.programId),
+      unqCategoryProgram: uniqueIndex().on(table.categoryId, table.programId),
     }
   },
 )
@@ -187,7 +192,7 @@ export const gearType = pgTable(
   },
   (table) => {
     return {
-      unqHandle: unique().on(table.handle),
+      unqHandle: uniqueIndex().on(table.handle),
     }
   },
 )
