@@ -88,7 +88,7 @@ We are going to use drizzle-kit and the db program via an npm script.
 First, you might want to generate migrations scripts. Be sure to check these in into git after they are generated. Generate migration scripts (and metadata) via:
 
 ```sh
-pnpm --filter db run generate-migration
+pnpm --filter db run generate-all
 ```
 
 In order to run the migration in a production environment you first need to get a connection string to the database server in this environment. Then make sure all of the code is compiled. This is automatically done after and install so you'll probably be fine. Then use the following command, replacing the connection string.

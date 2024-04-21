@@ -16,8 +16,11 @@
     "pretest": "tsc --build",
     "build": "tsc --build",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js",
-    "generate-migration": "drizzle-kit generate:pg",
+    "test": "node --test './out/**/*.test.js'",
+    "generate:custom": "drizzle-kit generate:pg --custom",
+    "generate:schema": "drizzle-kit generate:pg",
+    "generate:all": "sh './src/generate-migrations.sh'",
+    "generate:clean": "rm -rf ./migrations && pnpm run generate:all",
     "execute-migration": "node ./out/program.js migrate"
   },
   "repository": {

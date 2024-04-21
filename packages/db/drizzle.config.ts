@@ -1,7 +1,7 @@
 import type { Config } from 'drizzle-kit'
 
 export default {
-  schema: './src/schema/index.ts',
+  schema: './out/schema/index.js',
   out: './migrations',
   driver: 'pg',
   breakpoints: false,
