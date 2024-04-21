@@ -22,6 +22,7 @@ export const competency = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     type: competencyType('type').notNull(),
+    weight: smallint('weight').notNull(),
     ...timestamps,
   },
   (table) => {
@@ -40,6 +41,7 @@ export const module = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    weight: smallint('weight').notNull(),
     ...timestamps,
   },
 
@@ -59,6 +61,7 @@ export const discipline = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    weight: smallint('weight').notNull(),
     ...timestamps,
   },
   (table) => {
@@ -98,6 +101,7 @@ export const category = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     description: text('description'),
+    weight: smallint('weight').notNull(),
     ...timestamps,
   },
   (table) => {
