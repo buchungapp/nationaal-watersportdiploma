@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import { competency, gearType, module, program } from './program.js'
 
 export const curriculum = pgTable(
@@ -25,6 +26,7 @@ export const curriculum = pgTable(
       withTimezone: true,
       mode: 'string',
     }),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -43,6 +45,7 @@ export const curriculumModule = pgTable(
   {
     curriculumId: uuid('curriculum_id').notNull(),
     moduleId: uuid('module_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -74,6 +77,7 @@ export const curriculumCompetency = pgTable(
     competencyId: uuid('competency_id').notNull(),
     isRequired: boolean('is_required').notNull(),
     requirement: text('requirement'),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -104,6 +108,7 @@ export const curriculumGearLink = pgTable(
   {
     curriculumId: uuid('curriculum_id').notNull(),
     gearTypeId: uuid('gear_type_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {

@@ -8,6 +8,7 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql'
 
 export const competencyType = pgEnum('competency_type', ['knowledge', 'skill'])
 
@@ -21,6 +22,7 @@ export const competency = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     type: competencyType('type').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -38,6 +40,7 @@ export const module = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    ...timestamps,
   },
 
   (table) => {
@@ -56,6 +59,7 @@ export const discipline = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -74,6 +78,7 @@ export const degree = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     rang: smallint('rang').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -93,6 +98,7 @@ export const category = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     description: text('description'),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -117,6 +123,7 @@ export const program = pgTable(
     title: text('title'),
     disciplineId: uuid('discipline_id').notNull(),
     degreeId: uuid('degree_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -144,6 +151,7 @@ export const programCategory = pgTable(
       .notNull(),
     programId: uuid('program_id').notNull(),
     categoryId: uuid('category_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -171,6 +179,7 @@ export const gearType = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
+    ...timestamps,
   },
   (table) => {
     return {

@@ -8,6 +8,7 @@ import {
   text,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import { _objectTable } from './_sb_controlled/storage.js'
 import { location } from './location.js'
 import { identity } from './user.js'
@@ -37,6 +38,7 @@ export const media = pgTable(
     identityId: uuid('identity_id'),
     locationId: uuid('location_id'),
     _metadata: jsonb('_metadata'),
+    ...timestamps,
   },
   (table) => {
     return {

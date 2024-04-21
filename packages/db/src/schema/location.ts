@@ -1,11 +1,13 @@
 import { sql } from 'drizzle-orm'
 import {
+  jsonb,
   pgTable,
   text,
   uniqueIndex,
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import { media } from './media.js'
 
 export const location = pgTable(
@@ -23,7 +25,14 @@ export const location = pgTable(
       // To prevent a circular dependency, we use a function to reference the media table
       (): AnyPgColumn => media.id,
     ),
+    certificateMediaId: uuid('certificate_media_id').references(
+      // To prevent a circular dependency, we use a function to reference the media table
+      (): AnyPgColumn => media.id,
+    ),
     websiteUrl: text('website_url'),
+    shortDescription: text('short_description'),
+    _metadata: jsonb('_metadata'),
+    ...timestamps,
   },
   (table) => {
     return {

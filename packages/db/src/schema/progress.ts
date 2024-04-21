@@ -3,9 +3,9 @@ import {
   numeric,
   pgTable,
   primaryKey,
-  timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import { studentCurriculum } from './certificate.js'
 import { curriculumCompetency } from './curriculum.js'
 import { location } from './location.js'
@@ -17,12 +17,7 @@ export const studentCompetencyProgress = pgTable(
     competencyId: uuid('curriculum_module_competency_id').notNull(),
     locationId: uuid('location_id').notNull(),
     progress: numeric('progress').notNull(),
-    updatedAt: timestamp('updated_at', {
-      withTimezone: true,
-      mode: 'string',
-    })
-      .defaultNow()
-      .notNull(),
+    ...timestamps,
   },
   (table) => {
     return {

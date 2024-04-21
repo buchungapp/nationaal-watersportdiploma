@@ -8,6 +8,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
 import {
   curriculum,
   curriculumCompetency,
@@ -33,6 +34,7 @@ export const studentCurriculum = pgTable(
     })
       .defaultNow()
       .notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -84,6 +86,7 @@ export const certificate = pgTable(
       withTimezone: true,
       mode: 'string',
     }),
+    ...timestamps,
   },
   (table) => {
     return {
@@ -108,6 +111,7 @@ export const studentCompletedCompetency = pgTable(
     studentCurriculumId: uuid('student_curriculum_id').notNull(),
     competencyId: uuid('curriculum_module_competency_id').notNull(),
     certificateId: uuid('certificate_id').notNull(),
+    ...timestamps,
   },
   (table) => {
     return {
