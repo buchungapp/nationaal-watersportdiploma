@@ -26,3 +26,18 @@ cp.execFileSync(
 
 cp.execFileSync('pnpm', ['--filter', '@nawadi/api', 'install'], options)
 cp.execFileSync('pnpm', ['--filter', '@nawadi/api', 'build'], options)
+
+cp.execFileSync(
+  'pnpm',
+  [
+    '--package',
+    '@redocly/cli@1.11.0',
+    'dlx',
+    'redocly',
+    'build-docs',
+    path.resolve('specifications', 'api.yaml'),
+    '--output',
+    path.resolve('generated', 'api-docs', 'index.html'),
+  ],
+  options,
+)
