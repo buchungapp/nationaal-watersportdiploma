@@ -4,6 +4,7 @@
     "start": "supabase start -x realtime,pgadmin-schema-diff,migra,edge-runtime,vector",
     "stop": "supabase stop",
     "reset": "supabase db reset",
+    "link": "supabase link --project-ref $SUPABASE_PROJECT_REF",
     "lint": "supabase db lint",
     "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
   },

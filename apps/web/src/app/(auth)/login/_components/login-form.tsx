@@ -4,14 +4,15 @@ import clsx from "clsx";
 import { OTPInput } from "input-otp";
 import { useRef, type PropsWithChildren } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-import { login, verify } from "../../_actions/auth";
-import { Button } from "../../_components/button";
+import { Button } from "~/app/(dashboard)/_components/button";
+import { login, verify } from "~/app/_actions/auth";
+import Spinner from "~/app/_components/spinner";
 
 export function SubmitButton({ children }: PropsWithChildren) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" color="blue" className="w-full" disabled={pending}>
-      {children}
+      {pending ? <Spinner className="h-5 w-5 text-white" /> : children}
     </Button>
   );
 }
@@ -21,8 +22,6 @@ export function EmailForm({
   ...formProps
 }: PropsWithChildren<Exclude<React.ComponentProps<"form">, "action">>) {
   const [state, formAction] = useFormState(login, undefined);
-
-  console.log("state", state);
 
   return (
     <form action={formAction} {...formProps}>
