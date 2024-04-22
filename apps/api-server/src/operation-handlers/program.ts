@@ -6,7 +6,9 @@ export const getPrograms: api.GetProgramsOperationHandler<
   application.Authentication
 > = (incomingRequest, authentication) =>
   withTransaction(async () => {
-    const programsEntity = (await Program.list()).map((item) => ({
+    const list = await Program.list()
+
+    const listEntity = list.map((item) => ({
       id: item.id,
       handle: item.handle,
       title: item.title,
@@ -20,6 +22,6 @@ export const getPrograms: api.GetProgramsOperationHandler<
       status: 200,
       parameters: {},
       contentType: 'application/json',
-      entity: () => programsEntity,
+      entity: () => listEntity,
     }
   })

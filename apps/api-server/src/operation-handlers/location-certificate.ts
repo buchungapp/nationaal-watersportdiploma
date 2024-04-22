@@ -33,6 +33,8 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
     status: 201,
     parameters: {},
     contentType: 'application/json',
-    entity: () => ({}),
+    entity: () => ({
+      id: '',
+    }),
   }
 }

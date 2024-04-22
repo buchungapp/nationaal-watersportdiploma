@@ -75,6 +75,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Id'
         '403':
           $ref: '#/components/responses/forbidden'
 
@@ -115,6 +120,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Id'
         '403':
           $ref: '#/components/responses/forbidden'
 
@@ -155,6 +165,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Id'
         '403':
           $ref: '#/components/responses/forbidden'
 

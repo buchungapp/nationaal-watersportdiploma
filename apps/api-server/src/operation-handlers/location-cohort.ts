@@ -33,6 +33,8 @@ export const createLocationCohort: api.CreateLocationCohortOperationHandler<
     status: 201,
     parameters: {},
     contentType: 'application/json',
-    entity: () => ({}),
+    entity: () => ({
+      id: '',
+    }),
   }
 }
