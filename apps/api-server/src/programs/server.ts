@@ -36,6 +36,7 @@ async function main(configuration: MainConfiguration) {
   await withDatabase({ pgUri }, async () => {
     const server = application.createApplicationServer()
 
+    // TODO there should be some kind of shortcut or something for this
     const httpServer = http.createServer()
     const onRequest = server.asHttpRequestListener()
     httpServer.addListener('request', onRequest)
