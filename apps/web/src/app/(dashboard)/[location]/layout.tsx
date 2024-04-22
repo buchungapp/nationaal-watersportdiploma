@@ -42,7 +42,7 @@ export default function RootLayout({
       </div>
 
       <main className="py-2.5 min-h-full flex flex-col lg:pl-72 pr-2.5">
-        <div className="px-4 sm:px-6 shadow flex-1 ring-1 ring-gray-200 rounded min-h-full lg:px-8 bg-white">
+        <div className="px-4 sm:px-8 shadow flex-1 ring-1 ring-gray-200 rounded min-h-full lg:px-12 bg-white">
           {children}
         </div>
       </main>
