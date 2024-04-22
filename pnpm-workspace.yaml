@@ -6,4 +6,5 @@ packages:
   - packages/scripts
   - apps/api-server
   - apps/web
+  - apps/docs
   - supabase
