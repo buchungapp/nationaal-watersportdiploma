@@ -9,11 +9,11 @@ export const getPrograms: api.GetProgramsOperationHandler<
     const programsEntity = (await Program.list()).map((item) => ({
       id: item.id,
       handle: item.handle,
-      title: item.title ?? '', // TODO remove once nulls are properly supported
-      degreeId: item.degreeId,
-      degreeTitle: item.degreeTitle ?? '', // TODO remove once nulls are properly supported
-      disciplineId: item.disciplineId,
-      disciplineTitle: item.disciplineTitle ?? '', // TODO remove once nulls are properly supported
+      title: item.title,
+      degreeId: item.degree.id,
+      degreeTitle: item.degree.title,
+      disciplineId: item.discipline.id,
+      disciplineTitle: item.discipline.title,
     }))
 
     return {
