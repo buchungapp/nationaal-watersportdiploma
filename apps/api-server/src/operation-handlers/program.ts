@@ -1,6 +1,6 @@
 import * as api from '@nawadi/api'
 import { Program, withTransaction } from '@nawadi/core'
-import * as application from '../../application/index.js'
+import * as application from '../application/index.js'
 
 export const getPrograms: api.GetProgramsOperationHandler<
   application.Authentication
