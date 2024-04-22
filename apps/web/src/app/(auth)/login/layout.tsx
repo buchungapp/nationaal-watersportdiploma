@@ -4,7 +4,8 @@ import SessionCheck from "./_components/session-check";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    //  Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430
+    <div className="h-full">
       <div className="flex min-h-full flex-1">
         <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
           {children}
@@ -20,6 +21,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <SessionCheck />
-    </>
+    </div>
   );
 }
