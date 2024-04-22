@@ -1,13 +1,13 @@
 import { MenuButton as HeadlessMenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { logout } from "~/app/_actions/auth";
-import { Avatar } from "../avatar";
+import { Avatar } from "./avatar";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownSeparator,
-} from "../dropdown";
+} from "./dropdown";
 
 export async function UserSelector() {
   const currentUser = await new Promise<{
@@ -23,7 +23,7 @@ export async function UserSelector() {
   return (
     <Dropdown>
       <HeadlessMenuButton
-        className="flex items-center w-full gap-3 rounded-xl border border-transparent p-1 data-[active]:border-zinc-200 data-[hover]:border-zinc-200 dark:data-[active]:border-zinc-700 dark:data-[hover]:border-zinc-700"
+        className="flex items-center w-full gap-3 rounded-xl border border-transparent py-1 data-[active]:border-zinc-200 data-[hover]:border-zinc-200 dark:data-[active]:border-zinc-700 dark:data-[hover]:border-zinc-700"
         aria-label="Account options"
       >
         <Avatar

@@ -1,5 +1,6 @@
 import { UserSelector } from "../_components/user-selector";
 import LatestNews from "./_components/latest-news";
+import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
 
 export default function RootLayout({
@@ -20,6 +21,9 @@ export default function RootLayout({
           </div>
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
+              <li className="">
+                <LocationSelector />
+              </li>
               <li>
                 <LocationSidebarMenu />
               </li>
