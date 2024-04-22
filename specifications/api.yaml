@@ -10,6 +10,20 @@ security:
   - api-token: []
 
 paths:
+  /me:
+    get:
+      operationId: me
+      summary: Retrieves information about the current user (if any)
+      security:
+        - token: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserModel'
+
   /programs:
     get:
       operationId: get-programs
@@ -29,12 +43,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProgramSchema'
+                  $ref: '#/components/schemas/ProgramListModel'
 
-  /main-category:
+  /location:
     get:
-      operationId: get-main-categories
-      summary: Get main get-main-categories
+      operationId: get-locations
+      summary: Get all locations
       responses:
         '200':
           description: Ok
@@ -43,35 +57,39 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/main-category'
+                  $ref: '#/components/schemas/LocationListModel'
+
     post:
-      operationId: create-main-category
-      summary: Create an new main category
+      operationId: create-location
+      summary: Creates a new location
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/main-category-fields'
+              $ref: '#/components/schemas/CreateLocationModel'
+
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/main-category'
+                type: object
         '403':
           $ref: '#/components/responses/forbidden'
 
-  /sub-category/{main-category-id}:
+  /location/{location}/certificate:
     parameters:
-      - name: main-category-id
-        in: path
+      - in: path
         required: true
+        name: location
         schema:
-          $ref: '#/components/schemas/entity-id'
+          type: string
+          format: uuid
+
     get:
-      operationId: get-sub-categories
-      summary: Get sub categories in a main category
+      operationId: get-location-certificates
+      summary: Get all certificates for location
       responses:
         '200':
           description: Ok
@@ -80,31 +98,91 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/main-category'
+                  $ref: '#/components/schemas/LocationCertificateListModel'
+
     post:
-      operationId: create-sub-category
-      summary: Create an new sub category in a main category
+      operationId: create-location-certificate
+      summary: Creates a new certificate for a location
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/sub-category-fields'
+              $ref: '#/components/schemas/CreateLocationCertificateModel'
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/sub-category'
+                type: object
+        '403':
+          $ref: '#/components/responses/forbidden'
+
+  /location/{location}/cohort:
+    parameters:
+      - in: path
+        required: true
+        name: location
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      operationId: get-location-cohorts
+      summary: Get all cohorts for location
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LocationCohortListModel'
+
+    post:
+      operationId: create-location-cohort
+      summary: Creates a new cohort for a location
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLocationCohortModel'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
         '403':
           $ref: '#/components/responses/forbidden'
 
 components:
   schemas:
-    #entity schemas
+    # Entities
 
-    ProgramSchema:
+    UserModel:
       type: object
+      required:
+        - id
+        - handle
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+
+    ProgramListModel:
+      type: object
+      required:
+        - id
+        - handle
+        - title
+        - degreeId
+        - degreeTitle
+        - disciplineId
+        - disciplineTitle
       properties:
         id:
           $ref: '#/components/schemas/Id'
@@ -121,14 +199,88 @@ components:
         disciplineTitle:
           $ref: '#/components/schemas/Title'
 
+    LocationListModel:
+      type: object
       required:
         - id
         - handle
         - title
-        - degreeId
-        - degreeTitle
-        - disciplineId
-        - disciplineTitle
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+
+    CreateLocationModel:
+      type: object
+      required:
+        - handle
+        - title
+      properties:
+        handle:
+          $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+
+    LocationCohortListModel:
+      type: object
+      required:
+        - id
+        - handle
+        - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+
+    CreateLocationCohortModel:
+      type: object
+      required:
+        - id
+        - handle
+        - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+
+    LocationCertificateListModel:
+      type: object
+      required:
+        - id
+        - handle
+        - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+
+    CreateLocationCertificateModel:
+      type: object
+      required:
+        - id
+        - handle
+        - title
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+
+    # Fields
 
     Id:
       type: string
@@ -146,73 +298,6 @@ components:
       pattern: ^[a-z0-9\-]+$
       minLength: 3
       description: The unique handle of an item
-
-    main-category:
-      description: |-
-        Full main category entity
-      $ref: '#/components/schemas/main-category-fields'
-      required:
-        - id
-      properties:
-        id:
-          $ref: '#/components/schemas/entity-id'
-
-    main-category-fields:
-      description: |-
-        Main category editable fields
-      type: object
-      required:
-        - name
-      properties:
-        name:
-          $ref: '#/components/schemas/entity-name'
-        description:
-          $ref: '#/components/schemas/entity-description'
-
-    sub-category:
-      description: |-
-        Full sub category entity
-      $ref: '#/components/schemas/sub-category-fields'
-      required:
-        - id
-      properties:
-        id:
-          $ref: '#/components/schemas/entity-id'
-
-    sub-category-fields:
-      description: |-
-        Sub category entity editable fields
-      type: object
-      required:
-        - name
-      properties:
-        name:
-          $ref: '#/components/schemas/entity-name'
-        description:
-          $ref: '#/components/schemas/entity-description'
-
-    # field schemas
-
-    entity-id:
-      description: |-
-        Key of an entity
-      type: integer
-      minimum: 0
-      exclusiveMinimum: true
-
-    entity-name:
-      description: |-
-        The name of an entity
-      type: string
-      minLength: 1
-      maxLength: 100
-
-    entity-description:
-      description: |-
-        Description of an entity
-      type: string
-      minLength: 1
-      maxLength: 100
 
   responses:
     forbidden:
