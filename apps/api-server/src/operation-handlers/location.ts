@@ -13,6 +13,7 @@ export const getLocations: api.GetLocationsOperationHandler<
     title: item.name,
   }))
 
+  // TODO this could be easier
   return {
     status: 200,
     parameters: {},

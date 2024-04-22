@@ -12,14 +12,19 @@ test('location crud', () =>
         handle: 'handle-123',
       }
       const result = await api.createLocation(
+        // TODO this could be more friendly
         {
           contentType: 'application/json',
           parameters: {},
           entity: () => entity,
         },
+        // TODO this should be made implicit in a future version of the generator
         { apiToken: 'supersecret' },
+        // TODO this too
         { baseUrl },
       )
+
+      // TODO this could be more friendly
       assert(result.status === 201)
 
       const item = await result.entity()
