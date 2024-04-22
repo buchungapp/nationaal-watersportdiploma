@@ -11,5 +11,5 @@ jobs:
       - run: pnpm run initialize
       - uses: actions/upload-artifact@v4
         with:
-          name: api-docs.html
-          path: generated/api-docs/index.html
+          name: api-docs
+          path: generated/api-docs
