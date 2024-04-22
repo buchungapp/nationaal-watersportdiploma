@@ -16,6 +16,7 @@ words:
   - kwaliteitspeilers
   - lpignore
   - migra
+  - mintlify
   - nawadi
   - nums
   - onnotice
@@ -48,6 +49,7 @@ ignorePaths:
   - pnpm-lock.yaml
   - generated/
   - apps/nwd-web/src/app/
+  - apps/docs/
   - '*.svg'
   - supabase/config.toml
   - packages/db/migrations/
