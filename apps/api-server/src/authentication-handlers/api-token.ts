@@ -3,7 +3,7 @@ import * as application from '../application/index.js'
 
 export const apiToken: ApiTokenAuthenticationHandler<
   application.Authentication
-> = (credential) => {
+> = async (credential) => {
   switch (credential) {
     case 'supersecret':
       return {
@@ -12,7 +12,6 @@ export const apiToken: ApiTokenAuthenticationHandler<
       }
 
     default:
-      // TODO This should return nothing once the generator supports it
-      return undefined as any
+      return
   }
 }
