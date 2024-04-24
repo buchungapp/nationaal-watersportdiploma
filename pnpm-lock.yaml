@@ -233,23 +233,23 @@ importers:
   generated/api:
     dependencies:
       '@types/node':
-        specifier: ^20.12.4
+        specifier: ^20.12.7
         version: 20.12.7
       goodrouter:
         specifier: ^2.1.6
         version: 2.1.6
       oa42-lib:
-        specifier: ^0.8.20
+        specifier: ^0.8.22
         version: 0.8.22
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.4
         version: 20.1.4
       rollup:
-        specifier: ^4.14.0
+        specifier: ^4.16.2
         version: 4.16.2
       typescript:
-        specifier: ^5.4.4
+        specifier: ^5.4.5
         version: 5.4.5
 
   packages/core:
@@ -4099,7 +4099,7 @@ packages:
   /@types/ws@8.5.10:
     resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
     dependencies:
-      '@types/node': 20.11.26
+      '@types/node': 20.12.7
     dev: false
 
   /@types/yargs-parser@21.0.3:
