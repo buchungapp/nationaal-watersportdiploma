@@ -51,8 +51,8 @@ importers:
         specifier: ^2.6.2
         version: 2.6.2
       type-fest:
-        specifier: ^4.10.2
-        version: 4.12.0
+        specifier: ^4.17.0
+        version: 4.17.0
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
@@ -285,6 +285,9 @@ importers:
       drizzle-orm:
         specifier: ^0.30.8
         version: 0.30.8(@opentelemetry/api@1.7.0)(postgres@3.4.4)
+      type-fest:
+        specifier: ^4.17.0
+        version: 4.17.0
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -307,8 +310,8 @@ importers:
         specifier: ^2.6.2
         version: 2.6.2
       type-fest:
-        specifier: ^4.10.2
-        version: 4.12.0
+        specifier: ^4.17.0
+        version: 4.17.0
       yargs:
         specifier: ^17.7.2
         version: 17.7.2
@@ -9969,7 +9972,7 @@ packages:
       '@types/node': 20.12.7
       oa42-lib: 0.8.22
       tslib: 2.6.2
-      type-fest: 4.12.0
+      type-fest: 4.17.0
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -9982,7 +9985,7 @@ packages:
       js-base64: 3.7.7
       msecs: 1.0.3
       tslib: 2.6.2
-      type-fest: 4.12.0
+      type-fest: 4.17.0
     dev: false
 
   /object-assign@4.1.1:
@@ -11943,10 +11946,9 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /type-fest@4.12.0:
-    resolution: {integrity: sha512-5Y2/pp2wtJk8o08G0CMkuFPCO354FGwk/vbidxrdhRGZfd0tFnb4Qb8anp9XxXriwBgVPjdWbKpGl4J9lJY2jQ==}
+  /type-fest@4.17.0:
+    resolution: {integrity: sha512-9flrz1zkfLRH3jO3bLflmTxryzKMxVa7841VeMgBaNQGY6vH4RCcpN/sQLB7mQQYh1GZ5utT2deypMuCy4yicw==}
     engines: {node: '>=16'}
-    dev: false
 
   /type-is@1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}

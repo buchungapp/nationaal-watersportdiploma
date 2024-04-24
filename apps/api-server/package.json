@@ -31,17 +31,17 @@
   "keywords": [],
   "dependencies": {
     "@appsignal/nodejs": "^3.1.0",
+    "@nawadi/api": "workspace:*",
+    "@nawadi/core": "workspace:^",
+    "@nawadi/db": "workspace:^",
     "@types/node": "^20.11.19",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.30.7",
     "oa42-appsignal": "^0.1.11",
-    "tslib": "^2.6.2",
-    "type-fest": "^4.10.2",
-    "yargs": "^17.7.2",
     "postgres": "^3.4.4",
-    "@nawadi/api": "workspace:*",
-    "@nawadi/core": "workspace:^",
-    "@nawadi/db": "workspace:^"
+    "tslib": "^2.6.2",
+    "type-fest": "^4.17.0",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",

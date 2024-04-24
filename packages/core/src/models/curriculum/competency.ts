@@ -1,8 +1,8 @@
 import { schema as s } from '@nawadi/db'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { singleRow } from '../../util/data-helpers.js'
-import { successfulCreateResponse, withZod } from '../../util/zod.js'
+import { singleRow } from '../../utils/data-helpers.js'
+import { successfulCreateResponse, withZod } from '../../utils/zod.js'
 import { insertSchema, selectSchema } from './competency.schema.js'
 
 export * as Competency from './competency.js'

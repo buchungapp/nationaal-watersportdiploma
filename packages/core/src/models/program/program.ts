@@ -12,7 +12,7 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../util/index.js'
+} from '../../utils/index.js'
 import { Category, Degree, Discipline } from './index.js'
 import { insertSchema, outputSchema } from './program.schema.js'
 

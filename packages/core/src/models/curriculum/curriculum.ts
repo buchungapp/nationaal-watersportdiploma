@@ -3,14 +3,14 @@ import { and, desc, eq, inArray, isNotNull, lte } from 'drizzle-orm'
 import assert from 'node:assert'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { findItem } from '../../util/data-helpers.js'
-import dayjs from '../../util/dayjs.js'
+import { findItem } from '../../utils/data-helpers.js'
+import dayjs from '../../utils/dayjs.js'
 import {
   singleOrArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../util/zod.js'
+} from '../../utils/zod.js'
 import { Program } from '../index.js'
 import { Module } from '../program/index.js'
 import { insertSchema, outputSchema } from './curriculum.schema.js'

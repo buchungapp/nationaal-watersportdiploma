@@ -9,7 +9,7 @@ import {
   singleRow,
   successfulCreateResponse,
   withZod,
-} from '../../util/index.js'
+} from '../../utils/index.js'
 import { insertSchema, outputSchema } from './category.schema.js'
 
 export const create = withZod(
