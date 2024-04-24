@@ -25,6 +25,7 @@ words:
   - PGURI
   - plpgsql
   - pnpx
+  - redocly
   - rehype
   - ryanluker
   - skreet

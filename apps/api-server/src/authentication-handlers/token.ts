@@ -1,9 +1,9 @@
 import { TokenAuthenticationHandler } from '@nawadi/api'
 import * as application from '../application/index.js'
 
-export const token: TokenAuthenticationHandler<application.Authentication> = (
-  credential,
-) => {
+export const token: TokenAuthenticationHandler<
+  application.Authentication
+> = async (credential) => {
   switch (credential) {
     case 'supersecret':
       return {
@@ -11,7 +11,6 @@ export const token: TokenAuthenticationHandler<application.Authentication> = (
       }
 
     default:
-      // TODO This should return nothing once the generator supports it
-      return undefined as any
+      return
   }
 }

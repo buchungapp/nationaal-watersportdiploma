@@ -1,7 +1,8 @@
+import { listen } from '@nawadi/api'
 import { withDatabase } from '@nawadi/core'
-import * as http from 'http'
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
+import { waitForSignal } from '../utils/index.js'
 
 export function configureServerProgram(argv: yargs.Argv) {
   return argv.command(
@@ -35,38 +36,13 @@ async function main(configuration: MainConfiguration) {
 
   await withDatabase({ pgUri }, async () => {
     const server = application.createApplicationServer()
+    await using listener = await listen(server, { port })
 
-    const httpServer = http.createServer()
-    const onRequest = server.asHttpRequestListener()
-    httpServer.addListener('request', onRequest)
+    console.info(`Server started (${listener.port})`)
 
-    await new Promise<void>((resolve) => httpServer.listen({ port }, resolve))
+    await waitForSignal('SIGINT', 'SIGTERM')
 
-    console.info('Server started')
-    try {
-      await new Promise<void>((resolve) => {
-        const abort = () => {
-          process.removeListener('SIGINT', abort)
-          process.removeListener('SIGTERM', abort)
-
-          resolve()
-        }
-        process.addListener('SIGINT', abort)
-        process.addListener('SIGTERM', abort)
-      })
-
-      console.info('Stopping server...')
-    } finally {
-      httpServer.removeListener('request', onRequest)
-
-      httpServer.closeAllConnections()
-
-      await new Promise<void>((resolve, reject) =>
-        httpServer.close((error) =>
-          error == null ? resolve() : reject(error),
-        ),
-      )
-    }
+    console.info('Stopping server...')
   })
 
   console.info('Server stopped')
