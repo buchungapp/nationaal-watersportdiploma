@@ -20,6 +20,7 @@
   "dependencies": {
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
+    "@supabase/supabase-js": "^2.42.5",
     "@types/node": "^20.11.19",
     "dayjs": "^1.11.10",
     "drizzle-zod": "^0.5.1",
