@@ -21,6 +21,7 @@ export const user = pgTable(
   'user',
   {
     authUserId: uuid('auth_user_id').primaryKey().notNull(),
+    email: text('email').notNull(),
     displayName: text('display_name'),
     _metadata: jsonb('_metadata'),
   },
@@ -97,26 +98,29 @@ export const actor = pgTable(
         foreignColumns: [location.id],
         name: 'actor_location_link_location_id_fk',
       }),
-      unqActorTypePerson: uniqueIndex('unq_actor_type_person').on(
+      unqActorTypePerson: uniqueIndex('unq_actor_type_person_location').on(
         table.type,
         table.personId,
+        table.locationId,
       ),
     }
   },
 )
 
 export const personLocationLinkStatus = pgEnum('person_location_link_status', [
-  'pending',
-  'accepted',
-  'rejected',
-  'revoked',
+  'pending', // The location has requested a link with the person, but the person has not yet accepted or rejected the request.
+  'accepted', // The person has accepted the location's request to link.
+  'rejected', // The person has rejected the location's request to link.
+  'revoked', // The person has revoked the link with the location.
+  'removed', // The location has removed the link with the person.
 ])
 
 export const locationLinkPermissionLevel = pgEnum(
   'location_link_permission_level',
-  // pii_only: Only the person's PII and curriculum progress that is obtained through the location is shared with the location.
-  // all: All of the person's PII and curriculum progress is shared with the location.
-  ['pii_only', 'all'],
+  [
+    'pii_only', // pii_only: Only the person's PII and curriculum progress that is obtained through the location is shared with the location.
+    'all', // all: All of the person's PII and curriculum progress is shared with the location.
+  ],
 )
 
 export const personLocationLink = pgTable(
@@ -141,6 +145,10 @@ export const personLocationLink = pgTable(
       mode: 'string',
     }),
     revokedAt: timestamp('revoked_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    removedAt: timestamp('removed_at', {
       withTimezone: true,
       mode: 'string',
     }),

@@ -23,6 +23,7 @@ words:
   - Outro
   - pgadmin
   - PGURI
+  - pkce
   - plpgsql
   - pnpx
   - redocly
