@@ -1,6 +1,5 @@
 import { schema as s } from '@nawadi/db'
 import { and, eq, isNull } from 'drizzle-orm'
-import { customAlphabet } from 'nanoid'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -11,7 +10,8 @@ import {
 } from '../../utils/index.js'
 import { insertSchema } from './certificate.schema.js'
 
-function generateCertificateID() {
+async function generateCertificateID() {
+  const { customAlphabet } = await import('nanoid')
   const dictionary = '6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz'
   const nanoid = customAlphabet(dictionary, 10)
 
@@ -32,7 +32,7 @@ export const startCertificate = withZod(
     const [insert] = await query
       .insert(s.certificate)
       .values({
-        handle: generateCertificateID(),
+        handle: await generateCertificateID(),
         studentCurriculumId: input.studentCurriculumId,
         locationId: input.locationId,
         issuedAt: input.issuedAt,

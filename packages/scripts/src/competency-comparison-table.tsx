@@ -12,7 +12,11 @@ import {
 import 'dotenv/config'
 import path from 'path'
 import React from 'react'
-import slugify from 'slugify'
+
+async function slugify(text: string): Promise<string> {
+  const slugify = (await import('@sindresorhus/slugify')).default
+  return slugify(text)
+}
 
 async function main() {
   const [allPrograms, allActiveCurricula] = await Promise.all([
@@ -304,7 +308,7 @@ async function main() {
     )
   }
 
-  const createDocumentPromises = perCompetency.map((competency) => {
+  const createDocumentPromises = perCompetency.map(async (competency) => {
     const documentName = `${competency.title}`
 
     return renderToFile(
@@ -314,7 +318,7 @@ async function main() {
         '..',
         'generated',
         'competentieoverzicht',
-        `${slugify(documentName, { lower: true, strict: true, locale: 'nl' })}.pdf`,
+        `${await slugify(documentName)}.pdf`,
       ),
     )
   })

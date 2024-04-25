@@ -7,7 +7,7 @@ const validatedEnv = z
     SUPABASE_SERVICE_ROLE_KEY: z.string(),
   })
   .parse({
-    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     SUPABASE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   })
 

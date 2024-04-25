@@ -350,6 +350,9 @@ importers:
       '@react-pdf/renderer':
         specifier: ^3.4.2
         version: 3.4.2(react@18.2.0)
+      '@sindresorhus/slugify':
+        specifier: ^2.2.1
+        version: 2.2.1
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -362,9 +365,6 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
-      slugify:
-        specifier: ^1.6.6
-        version: 1.6.6
       tsx:
         specifier: ^4.7.2
         version: 4.7.2
@@ -3615,14 +3615,12 @@ packages:
     dependencies:
       '@sindresorhus/transliterate': 1.6.0
       escape-string-regexp: 5.0.0
-    dev: true
 
   /@sindresorhus/transliterate@1.6.0:
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
     dependencies:
       escape-string-regexp: 5.0.0
-    dev: true
 
   /@socket.io/component-emitter@3.1.1:
     resolution: {integrity: sha512-dzJtaDAAoXx4GCOJpbB2eG/Qj8VDpdwkLsWGzGm+0L7E8/434RyMbAHmk9ubXWVAb9nXmc44jUf8GKqVDiKezg==}
