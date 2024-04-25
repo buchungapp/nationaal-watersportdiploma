@@ -9,7 +9,7 @@ import { outputSchema } from './user.schema.js'
 
 export const getOrCreateFromEmail = withZod(
   z.object({
-    email: z.string().email(),
+    email: z.string().trim().toLowerCase().email(),
   }),
   z.object({
     id: uuidSchema,

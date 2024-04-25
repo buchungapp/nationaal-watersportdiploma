@@ -1,4 +1,4 @@
-import { Location, withDatabase } from '@nawadi/core'
+import { Curriculum, withDatabase } from '@nawadi/core'
 import slugify from '@sindresorhus/slugify'
 import 'dotenv/config'
 import inquirer from 'inquirer'
@@ -11,7 +11,7 @@ async function main() {
     {
       type: 'input',
       name: 'name',
-      message: 'Location name',
+      message: 'Gear type name',
     },
   ])
 
@@ -22,8 +22,8 @@ async function main() {
     .transform((v) => slugify(v))
     .refine((v) => validSlugRegex.test(v), { message: 'Invalid slug format' })
 
-  await Location.create({
-    name: result.name,
+  await Curriculum.GearType.create({
+    title: result.name,
     handle: slugSchema.parse(result.name),
   })
 }

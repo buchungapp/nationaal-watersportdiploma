@@ -5,8 +5,6 @@ import { singleRow } from '../../utils/data-helpers.js'
 import { successfulCreateResponse, withZod } from '../../utils/zod.js'
 import { insertSchema, selectSchema } from './competency.schema.js'
 
-export * as Competency from './competency.js'
-
 export const create = withZod(
   insertSchema.pick({
     curriculumId: true,

@@ -13,6 +13,7 @@
     "@nawadi/core": "workspace:^",
     "@react-pdf/renderer": "^3.4.2",
     "@sindresorhus/slugify": "^2.2.1",
+    "csvtojson": "^2.0.10",
     "dotenv": "^16.4.5",
     "google-auth-library": "^9.7.0",
     "googleapis": "^134.0.0",
