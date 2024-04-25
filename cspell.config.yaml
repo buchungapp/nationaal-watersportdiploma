@@ -1,5 +1,7 @@
-version: '0.2'
+version: "0.2"
 words:
+  - ABCDEFGHJKLMNPQRSTVWXY
+  - BCDFGHJKLMNPQRT
   - buchungapp
   - clsx
   - diplomeringslijn
@@ -37,8 +39,10 @@ words:
   - trivago
   - veiligheids
   - Wavie
+  - Wbcdfghjkmnpqrtwz
   - WQGR
   - Wytse
+  - Zabcdefghijkmnpqrstvwxyz
 ignoreWords:
   - TERMS
   - transform
@@ -52,15 +56,15 @@ ignorePaths:
   - generated/
   - apps/nwd-web/src/app/
   - apps/docs/
-  - '*.svg'
+  - "*.svg"
   - supabase/config.toml
   - packages/db/migrations/
 files:
-  - '**'
+  - "**"
 enableFiletypes:
-  - '*'
+  - "*"
 dictionaries:
   - sql
   - nl-nl
 import:
-  - '@cspell/dict-nl-nl/cspell-ext.json'
+  - "@cspell/dict-nl-nl/cspell-ext.json"

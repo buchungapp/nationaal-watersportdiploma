@@ -2,8 +2,12 @@ import { schema as s } from '@nawadi/db'
 import { and, eq, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { uuidSchema, withZod } from '../../utils/index.js'
-import { selectSchema } from './actor.schema.js'
+import {
+  successfulCreateResponse,
+  uuidSchema,
+  withZod,
+} from '../../utils/index.js'
+import { insertSchema, selectSchema } from './actor.schema.js'
 
 export const listActiveTypesForUser = withZod(
   z.object({ userId: uuidSchema }),
@@ -22,11 +26,33 @@ export const listActiveTypesForUser = withZod(
         and(
           eq(s.personLocationLink.personId, s.person.id),
           eq(s.personLocationLink.locationId, s.location.id),
-          eq(s.personLocationLink.status, 'accepted'),
+          eq(s.personLocationLink.status, 'linked'),
         ),
       )
       .where(isNull(s.actor.deletedAt))
 
     return rows.map(({ type }) => type)
+  },
+)
+
+export const upsert = withZod(
+  insertSchema.pick({ locationId: true, type: true, personId: true }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    const [actor] = await query
+      .insert(s.actor)
+      .values(input)
+      .onConflictDoNothing({
+        target: [s.actor.type, s.actor.personId, s.actor.locationId],
+      })
+      .returning({ id: s.actor.id })
+
+    if (!actor) {
+      throw new Error('Failed to create actor')
+    }
+
+    return actor
   },
 )

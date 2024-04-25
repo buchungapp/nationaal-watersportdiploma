@@ -47,7 +47,7 @@ export const person = pgTable(
     firstName: text('first_name').notNull(),
     lastNamePrefix: text('last_name_prefix'),
     lastName: text('last_name'),
-    dateOfBirth: date('date_of_birth'),
+    dateOfBirth: date('date_of_birth', { mode: 'string' }),
     birthCity: text('birth_city'),
     birthCountry: char('birth_country', { length: 2 }).references(
       () => country.alpha_2,
@@ -108,20 +108,17 @@ export const actor = pgTable(
 )
 
 export const personLocationLinkStatus = pgEnum('person_location_link_status', [
-  'pending', // The location has requested a link with the person, but the person has not yet accepted or rejected the request.
-  'accepted', // The person has accepted the location's request to link.
-  'rejected', // The person has rejected the location's request to link.
+  'linked', // Indicates an active link.
   'revoked', // The person has revoked the link with the location.
   'removed', // The location has removed the link with the person.
 ])
 
-export const locationLinkPermissionLevel = pgEnum(
-  'location_link_permission_level',
-  [
-    'pii_only', // pii_only: Only the person's PII and curriculum progress that is obtained through the location is shared with the location.
-    'all', // all: All of the person's PII and curriculum progress is shared with the location.
-  ],
-)
+// Define a new enum for permission request statuses.
+export const permissionRequestStatus = pgEnum('permissionRequestStatus', [
+  'none', // No request made.
+  'requested', // The location has requested an upgrade in permission level.
+  'permission_granted', // Request approved, full data access granted.
+])
 
 export const personLocationLink = pgTable(
   'person_location_link',
@@ -129,26 +126,26 @@ export const personLocationLink = pgTable(
     personId: uuid('person_id').notNull(),
     locationId: uuid('location_id').notNull(),
     status: personLocationLinkStatus('status').notNull(),
-    permissionLevel: locationLinkPermissionLevel('permission_level').notNull(),
-    requestedAt: timestamp('requested_at', {
+    permissionLevel: permissionRequestStatus('permission_level')
+      .default('none')
+      .notNull(), // Tracks permission request state.
+    linkedAt: timestamp('linked_at', {
       withTimezone: true,
       mode: 'string',
-    })
-      .defaultNow()
-      .notNull(),
-    acceptedAt: timestamp('accepted_at', {
-      withTimezone: true,
-      mode: 'string',
-    }),
-    rejectedAt: timestamp('rejected_at', {
-      withTimezone: true,
-      mode: 'string',
-    }),
+    }).defaultNow(),
     revokedAt: timestamp('revoked_at', {
       withTimezone: true,
       mode: 'string',
     }),
     removedAt: timestamp('removed_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    requestedAt: timestamp('requested_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    grantedAt: timestamp('granted_at', {
       withTimezone: true,
       mode: 'string',
     }),
