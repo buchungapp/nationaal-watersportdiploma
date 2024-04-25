@@ -50,7 +50,24 @@ export const upsert = withZod(
       .returning({ id: s.actor.id })
 
     if (!actor) {
-      throw new Error('Failed to create actor')
+      const [existing] = await query
+        .select({ id: s.actor.id })
+        .from(s.actor)
+        .where(
+          and(
+            eq(s.actor.type, input.type),
+            input.personId ? eq(s.actor.personId, input.personId) : undefined,
+            eq(s.actor.locationId, input.locationId),
+          ),
+        )
+
+      if (!existing) {
+        throw new Error('Failed to create actor')
+      }
+
+      return {
+        id: existing.id,
+      }
     }
 
     return actor

@@ -28,7 +28,7 @@ export const getOrCreate = withZod(
   async (input) => {
     const query = useQuery()
 
-    const conditions: SQL[] = [eq(s.user.authUserId, input.userId)]
+    const conditions: SQL[] = [eq(s.person.userId, input.userId)]
 
     // Add conditions dynamically based on defined inputs
     if (input.firstName) {
