@@ -1,6 +1,8 @@
-import { supabase } from './supabase.js'
+import { useSupabaseClient } from '../../contexts'
 
 export const getUserIdByJwt = async (jwt: string) => {
+  const supabase = useSupabaseClient()
+
   const { data, error } = await supabase.auth.getUser(jwt)
 
   if (error) {
@@ -11,6 +13,8 @@ export const getUserIdByJwt = async (jwt: string) => {
 }
 
 export const createAuthUser = async ({ email }: { email: string }) => {
+  const supabase = useSupabaseClient()
+
   const { data, error } = await supabase.auth.admin.createUser({
     email,
     email_confirm: true,
