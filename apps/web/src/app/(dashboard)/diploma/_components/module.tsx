@@ -13,15 +13,22 @@ export default function Module({
     <HeadlessDisclosure as="div" className="pt-6 w-full">
       {({ open }) => (
         <>
-          <HeadlessDisclosure.Button className="w-full flex items-center justify-between">
-            {button}
-            <span className="ml-6 flex h-7 items-center">
-              {open ? (
-                <MinusIcon className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <PlusIcon className="h-6 w-6" aria-hidden="true" />
-              )}
-            </span>
+          <HeadlessDisclosure.Button className="w-full">
+            <div className="w-full flex items-center justify-between">
+              {button}
+              <span className="ml-6 flex h-7 items-center">
+                {open ? (
+                  <MinusIcon className="h-6 w-6" aria-hidden="true" />
+                ) : (
+                  <PlusIcon className="h-6 w-6" aria-hidden="true" />
+                )}
+              </span>
+            </div>
+
+            <div className="flex mt-1 flex-col gap-y-[4px]">
+              <hr className="w-full h-0.5 bg-branding-dark" />
+              <hr className="w-full h-0.5 bg-branding-dark" />
+            </div>
           </HeadlessDisclosure.Button>
           <HeadlessDisclosure.Panel as="div">
             {children}
@@ -30,17 +37,4 @@ export default function Module({
       )}
     </HeadlessDisclosure>
   );
-}
-
-{
-  /* <div key={module.id} className="flex flex-col">
-<span className="text-base font-semibold">
-  {module.title}
-</span>
-
-<div className="flex flex-col gap-y-[4px]">
-  <hr className="w-full h-0.5 bg-branding-dark" />
-  <hr className="w-full h-0.5 bg-branding-dark" />
-</div>
-</div> */
 }

@@ -87,7 +87,7 @@ export default async function CertificateTemplate({
                   key={module.id}
                   button={
                     <>
-                      <span className="text-base font-semibold">
+                      <span className="text-semibold font-bold">
                         {module.title}
                       </span>
 
@@ -98,7 +98,18 @@ export default async function CertificateTemplate({
                     </>
                   }
                 >
-                  Test
+                  <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 py-4">
+                    {module.competencies.map((competency) => {
+                      return (
+                        <li className="flex flex-col pt-3.5">
+                          <span className="font-semibold">
+                            {competency.title}
+                          </span>
+                          <span>{competency.requirement}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </Module>
               );
             })}
