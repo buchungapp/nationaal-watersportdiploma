@@ -39,7 +39,7 @@
     "drizzle-orm": "^0.30.8",
     "postgres": "^3.4.4",
     "tslib": "^2.6.2",
-    "type-fest": "^4.10.2",
+    "type-fest": "^4.17.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

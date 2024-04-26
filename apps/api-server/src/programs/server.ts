@@ -1,5 +1,5 @@
 import { listen } from '@nawadi/api'
-import { withDatabase } from '@nawadi/core'
+import { withDatabase, withSupabaseClient } from '@nawadi/core'
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
 import { waitForSignal } from '../utils/index.js'
@@ -19,6 +19,16 @@ export function configureServerProgram(argv: yargs.Argv) {
           description: 'connection string for postgres',
           type: 'string',
           demandOption: true,
+        })
+        .option('supabase-url', {
+          description: 'url to supabase',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('supabase-service-role-key', {
+          description: 'supabase service role key',
+          type: 'string',
+          demandOption: true,
         }),
     (argv) => main(argv),
   )
@@ -27,23 +37,32 @@ export function configureServerProgram(argv: yargs.Argv) {
 interface MainConfiguration {
   port: number
   pgUri: string
+  supabaseUrl: string
+  supabaseServiceRoleKey: string
 }
 
 async function main(configuration: MainConfiguration) {
-  const { port, pgUri } = configuration
+  const { port, pgUri, supabaseUrl, supabaseServiceRoleKey } = configuration
 
   console.info('Starting server...')
 
-  await withDatabase({ pgUri }, async () => {
-    const server = application.createApplicationServer()
-    await using listener = await listen(server, { port })
+  await withSupabaseClient(
+    {
+      url: supabaseUrl,
+      serviceRoleKey: supabaseServiceRoleKey,
+    },
+    () =>
+      withDatabase({ pgUri }, async () => {
+        const server = application.createApplicationServer()
+        await using listener = await listen(server, { port })
 
-    console.info(`Server started (${listener.port})`)
+        console.info(`Server started (${listener.port})`)
 
-    await waitForSignal('SIGINT', 'SIGTERM')
+        await waitForSignal('SIGINT', 'SIGTERM')
 
-    console.info('Stopping server...')
-  })
+        console.info('Stopping server...')
+      }),
+  )
 
   console.info('Server stopped')
 }

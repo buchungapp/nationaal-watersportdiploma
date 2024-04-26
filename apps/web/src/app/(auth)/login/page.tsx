@@ -1,7 +1,7 @@
 import { constants } from "@nawadi/lib";
+import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
+import { Input } from "~/app/(dashboard)/_components/input";
 import Logo from "~/app/_components/brand/logo";
-import { Field, Label } from "../_components/fieldset";
-import { Input } from "../_components/input";
 import { EmailForm, SubmitButton } from "./_components/login-form";
 
 export default function Page() {

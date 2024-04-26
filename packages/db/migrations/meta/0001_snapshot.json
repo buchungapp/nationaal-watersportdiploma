@@ -1,6 +1,6 @@
 {
-  "id": "f576b5a8-b738-4d90-80d8-83fd48275514",
-  "prevId": "ece63a78-f9a2-47d1-b8ab-a96a5eb27d99",
+  "id": "cb3480e2-615d-4ef2-82db-04cd025886f5",
+  "prevId": "5a0eb5bc-6d27-4dc8-aa09-4a9597016eda",
   "version": "5",
   "dialect": "pg",
   "tables": {
@@ -1895,6 +1895,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "display_name": {
           "name": "display_name",
           "type": "text",
@@ -2077,11 +2083,12 @@
         }
       },
       "indexes": {
-        "unq_actor_type_person": {
-          "name": "unq_actor_type_person",
+        "unq_actor_type_person_location": {
+          "name": "unq_actor_type_person_location",
           "columns": [
             "type",
-            "person_id"
+            "person_id",
+            "location_id"
           ],
           "isUnique": true
         }
@@ -2141,31 +2148,38 @@
         },
         "permission_level": {
           "name": "permission_level",
-          "type": "location_link_permission_level",
+          "type": "permissionRequestStatus",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'none'"
+        },
+        "linked_at": {
+          "name": "linked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "revoked_at": {
+          "name": "revoked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "removed_at": {
+          "name": "removed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "requested_at": {
           "name": "requested_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "accepted_at": {
-          "name": "accepted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
           "notNull": false
         },
-        "rejected_at": {
-          "name": "rejected_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "revoked_at": {
-          "name": "revoked_at",
+        "granted_at": {
+          "name": "granted_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
@@ -2250,17 +2264,17 @@
     "person_location_link_status": {
       "name": "person_location_link_status",
       "values": {
-        "pending": "pending",
-        "accepted": "accepted",
-        "rejected": "rejected",
-        "revoked": "revoked"
+        "linked": "linked",
+        "revoked": "revoked",
+        "removed": "removed"
       }
     },
-    "location_link_permission_level": {
-      "name": "location_link_permission_level",
+    "permissionRequestStatus": {
+      "name": "permissionRequestStatus",
       "values": {
-        "pii_only": "pii_only",
-        "all": "all"
+        "none": "none",
+        "requested": "requested",
+        "permission_granted": "permission_granted"
       }
     }
   },

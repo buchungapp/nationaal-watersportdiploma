@@ -1,7 +1,7 @@
 import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
-import dayjs from '../../util/dayjs.js'
+import dayjs from '../../utils/dayjs.js'
 import { Program } from '../index.js'
 import { Degree, Discipline } from '../program/index.js'
 import * as Curriculum from './curriculum.js'

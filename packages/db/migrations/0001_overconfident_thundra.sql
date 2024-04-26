@@ -1,4 +1,4 @@
--- Custom SQL migration file, put you code below! 
+-- Custom SQL migration file, put you code below!
 DO $$
 DECLARE t text;
 BEGIN

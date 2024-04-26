@@ -1,7 +1,7 @@
 {
   "name": "@nawadi/scripts",
   "version": "0.0.0",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "prepack": "tsc --build",
     "pretest": "tsc --build",
@@ -12,11 +12,12 @@
   "dependencies": {
     "@nawadi/core": "workspace:^",
     "@react-pdf/renderer": "^3.4.2",
+    "@sindresorhus/slugify": "^2.2.1",
+    "csvtojson": "^2.0.10",
     "dotenv": "^16.4.5",
     "google-auth-library": "^9.7.0",
     "googleapis": "^134.0.0",
     "react": "^18.2.0",
-    "slugify": "^1.6.6",
     "tsx": "^4.7.2",
     "zod": "^3.22.4"
   },

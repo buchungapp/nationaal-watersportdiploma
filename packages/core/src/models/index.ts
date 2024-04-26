@@ -1,3 +1,6 @@
+export * as Certificate from './certificate/index.js'
 export * as Curriculum from './curriculum/index.js'
 export * as Location from './location/index.js'
 export * as Program from './program/index.js'
+export * as Student from './student/index.js'
+export * as User from './user/index.js'

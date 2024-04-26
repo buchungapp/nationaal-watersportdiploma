@@ -23,13 +23,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- CREATE TYPE "person_location_link_status" AS ENUM('pending', 'accepted', 'rejected', 'revoked');
+ CREATE TYPE "person_location_link_status" AS ENUM('linked', 'revoked', 'removed');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- CREATE TYPE "location_link_permission_level" AS ENUM('pii_only', 'all');
+ CREATE TYPE "permissionRequestStatus" AS ENUM('none', 'requested', 'permission_granted');
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -268,6 +268,7 @@ CREATE TABLE IF NOT EXISTS "student_competency_progress" (
 
 CREATE TABLE IF NOT EXISTS "user" (
 	"auth_user_id" uuid PRIMARY KEY NOT NULL,
+	"email" text NOT NULL,
 	"display_name" text,
 	"_metadata" jsonb
 );
@@ -299,11 +300,12 @@ CREATE TABLE IF NOT EXISTS "person_location_link" (
 	"person_id" uuid NOT NULL,
 	"location_id" uuid NOT NULL,
 	"status" "person_location_link_status" NOT NULL,
-	"permission_level" "location_link_permission_level" NOT NULL,
-	"requested_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"accepted_at" timestamp with time zone,
-	"rejected_at" timestamp with time zone,
+	"permission_level" "permissionRequestStatus" DEFAULT 'none' NOT NULL,
+	"linked_at" timestamp with time zone DEFAULT now(),
 	"revoked_at" timestamp with time zone,
+	"removed_at" timestamp with time zone,
+	"requested_at" timestamp with time zone,
+	"granted_at" timestamp with time zone,
 	CONSTRAINT "person_location_link_pk" PRIMARY KEY("person_id","location_id")
 );
 
@@ -324,7 +326,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "category_handle_index" ON "category" ("handle
 CREATE UNIQUE INDEX IF NOT EXISTS "program_handle_index" ON "program" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "program_category_category_id_program_id_index" ON "program_category" ("category_id","program_id");
 CREATE UNIQUE INDEX IF NOT EXISTS "gear_type_handle_index" ON "gear_type" ("handle");
-CREATE UNIQUE INDEX IF NOT EXISTS "unq_actor_type_person" ON "actor" ("type","person_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "unq_actor_type_person_location" ON "actor" ("type","person_id","location_id");
 DO $$ BEGIN
  ALTER TABLE "student_curriculum" ADD CONSTRAINT "student_curriculum_link_curriculum_id_gear_type_id_fk" FOREIGN KEY ("curriculum_id","gear_type_id") REFERENCES "curriculum_gear_link"("curriculum_id","gear_type_id") ON DELETE no action ON UPDATE no action;
 EXCEPTION

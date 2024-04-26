@@ -19,7 +19,6 @@ import {
 } from '@nawadi/core'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
-import slugify from 'slugify'
 import { z } from 'zod'
 
 const auth = new GoogleAuth({
@@ -52,6 +51,11 @@ async function retrieveSheets() {
   )
 }
 
+async function slugify(text: string): Promise<string> {
+  const slugify = (await import('@sindresorhus/slugify')).default
+  return slugify(text)
+}
+
 const rowSchema = z.tuple([
   z.string().trim(),
   z.preprocess(
@@ -75,12 +79,6 @@ const rowSchema = z.tuple([
   z.string().trim(),
   z.string().trim(),
 ])
-
-const slugifyOpts = {
-  lower: true,
-  strict: true,
-  locale: 'nl',
-} satisfies Parameters<typeof slugify>[1]
 
 const dedupeCache = new Map<string, Promise<string>>()
 
@@ -126,7 +124,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     const disciplineTitle = row[0].startsWith('Jacht/kajuitzeilen ')
       ? 'Jachtzeilen'
       : row[0]
-    const disciplineHandle = slugify(disciplineTitle.trim(), slugifyOpts)
+    const disciplineHandle = await slugify(disciplineTitle.trim())
     const disciplinePromise = getOrCreateCachedItem(
       Program.Discipline,
       disciplineHandle,
@@ -154,7 +152,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       ]
         .filter((cat): cat is string => Boolean(cat))
         .map(async (category, index) => {
-          const categoryHandle = slugify(category, slugifyOpts)
+          const categoryHandle = await slugify(category)
           return getOrCreateCachedItem(
             Program.Category,
             categoryHandle,
@@ -180,7 +178,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     )
 
     // Module
-    const moduleHandle = slugify(row[3], slugifyOpts)
+    const moduleHandle = await slugify(row[3])
     const modulePromise = getOrCreateCachedItem(
       Program.Module,
       moduleHandle,
@@ -189,7 +187,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     )
 
     // Competency
-    const competencyHandle = slugify(row[5], slugifyOpts)
+    const competencyHandle = await slugify(row[5])
     const competencyPromise = getOrCreateCachedItem(
       Program.Competency,
       competencyHandle,
@@ -210,7 +208,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       ])
 
     const programName = `${row[0]} ${row[1]} ${row[2]}`
-    const programHandle = slugify(programName, slugifyOpts)
+    const programHandle = await slugify(programName)
 
     const programId = await getOrCreateCachedItem(
       Program,

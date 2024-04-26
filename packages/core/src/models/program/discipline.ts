@@ -9,7 +9,7 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../util/index.js'
+} from '../../utils/index.js'
 import { insertSchema, selectSchema } from './discipline.schema.js'
 
 export const create = withZod(

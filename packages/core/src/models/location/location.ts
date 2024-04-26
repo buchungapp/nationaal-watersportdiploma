@@ -2,13 +2,13 @@ import { schema as s } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { singleRow } from '../../util/data-helpers.js'
+import { singleRow } from '../../utils/data-helpers.js'
 import {
   handleSchema,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../util/zod.js'
+} from '../../utils/zod.js'
 import { insertSchema, outputSchema } from './location.schema.js'
 
 export const create = withZod(

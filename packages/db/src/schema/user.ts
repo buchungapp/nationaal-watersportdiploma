@@ -21,6 +21,7 @@ export const user = pgTable(
   'user',
   {
     authUserId: uuid('auth_user_id').primaryKey().notNull(),
+    email: text('email').notNull(),
     displayName: text('display_name'),
     _metadata: jsonb('_metadata'),
   },
@@ -46,11 +47,12 @@ export const person = pgTable(
     firstName: text('first_name').notNull(),
     lastNamePrefix: text('last_name_prefix'),
     lastName: text('last_name'),
-    dateOfBirth: date('date_of_birth'),
+    dateOfBirth: date('date_of_birth', { mode: 'string' }),
     birthCity: text('birth_city'),
     birthCountry: char('birth_country', { length: 2 }).references(
       () => country.alpha_2,
     ),
+    ...timestamps,
     _metadata: jsonb('_metadata'),
   },
   (table) => {
@@ -97,27 +99,27 @@ export const actor = pgTable(
         foreignColumns: [location.id],
         name: 'actor_location_link_location_id_fk',
       }),
-      unqActorTypePerson: uniqueIndex('unq_actor_type_person').on(
+      unqActorTypePerson: uniqueIndex('unq_actor_type_person_location').on(
         table.type,
         table.personId,
+        table.locationId,
       ),
     }
   },
 )
 
 export const personLocationLinkStatus = pgEnum('person_location_link_status', [
-  'pending',
-  'accepted',
-  'rejected',
-  'revoked',
+  'linked', // Indicates an active link.
+  'revoked', // The person has revoked the link with the location.
+  'removed', // The location has removed the link with the person.
 ])
 
-export const locationLinkPermissionLevel = pgEnum(
-  'location_link_permission_level',
-  // pii_only: Only the person's PII and curriculum progress that is obtained through the location is shared with the location.
-  // all: All of the person's PII and curriculum progress is shared with the location.
-  ['pii_only', 'all'],
-)
+// Define a new enum for permission request statuses.
+export const permissionRequestStatus = pgEnum('permissionRequestStatus', [
+  'none', // No request made.
+  'requested', // The location has requested an upgrade in permission level.
+  'permission_granted', // Request approved, full data access granted.
+])
 
 export const personLocationLink = pgTable(
   'person_location_link',
@@ -125,22 +127,26 @@ export const personLocationLink = pgTable(
     personId: uuid('person_id').notNull(),
     locationId: uuid('location_id').notNull(),
     status: personLocationLinkStatus('status').notNull(),
-    permissionLevel: locationLinkPermissionLevel('permission_level').notNull(),
+    permissionLevel: permissionRequestStatus('permission_level')
+      .default('none')
+      .notNull(), // Tracks permission request state.
+    linkedAt: timestamp('linked_at', {
+      withTimezone: true,
+      mode: 'string',
+    }).defaultNow(),
+    revokedAt: timestamp('revoked_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    removedAt: timestamp('removed_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
     requestedAt: timestamp('requested_at', {
       withTimezone: true,
       mode: 'string',
-    })
-      .defaultNow()
-      .notNull(),
-    acceptedAt: timestamp('accepted_at', {
-      withTimezone: true,
-      mode: 'string',
     }),
-    rejectedAt: timestamp('rejected_at', {
-      withTimezone: true,
-      mode: 'string',
-    }),
-    revokedAt: timestamp('revoked_at', {
+    grantedAt: timestamp('granted_at', {
       withTimezone: true,
       mode: 'string',
     }),

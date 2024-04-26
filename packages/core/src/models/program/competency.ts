@@ -8,7 +8,7 @@ import {
   singleRow,
   successfulCreateResponse,
   withZod,
-} from '../../util/index.js'
+} from '../../utils/index.js'
 import { insertSchema, selectSchema } from './competency.schema.js'
 
 export const create = withZod(

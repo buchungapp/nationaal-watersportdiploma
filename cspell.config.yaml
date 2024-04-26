@@ -1,5 +1,7 @@
 version: '0.2'
 words:
+  - ABCDEFGHJKLMNPQRSTVWXY
+  - BCDFGHJKLMNPQRT
   - buchungapp
   - clsx
   - diplomeringslijn
@@ -23,11 +25,13 @@ words:
   - Outro
   - pgadmin
   - PGURI
+  - pkce
   - plpgsql
   - pnpx
   - redocly
   - rehype
   - ryanluker
+  - sindresorhus
   - skreet
   - solvebv
   - supabase
@@ -36,8 +40,10 @@ words:
   - trivago
   - veiligheids
   - Wavie
+  - Wbcdfghjkmnpqrtwz
   - WQGR
   - Wytse
+  - Zabcdefghijkmnpqrstvwxyz
 ignoreWords:
   - TERMS
   - transform
