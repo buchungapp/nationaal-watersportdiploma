@@ -52,10 +52,10 @@ export default async function CertificateTemplate({
           </div>
           <div className="flex gap-4 pr-4">
             <div className="flex flex-col justify-center text-end">
-              <p className="text-[20pt] font-bold">
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold">
                 {certificate.gearType.title}
               </p>
-              <p className="text-[12pt]">
+              <p className="text-sm sm:text-base lg:text-lg">
                 {certificate.program.title?.slice(0, -1).trim()}
               </p>
             </div>
@@ -83,11 +83,13 @@ export default async function CertificateTemplate({
             {modules.map((module) => {
               return (
                 <div key={module.id} className="flex flex-col">
-                  <span className="text-sm font-semibold">{module.title}</span>
+                  <span className="text-base font-semibold">
+                    {module.title}
+                  </span>
 
-                  <div className="flex flex-col gap-y-[2px]">
-                    <hr className="w-full h-1 border-branding-dark" />
-                    <hr className="w-full h-1 border-branding-dark" />
+                  <div className="flex flex-col gap-y-[4px]">
+                    <hr className="w-full h-0.5 bg-branding-dark" />
+                    <hr className="w-full h-0.5 bg-branding-dark" />
                   </div>
                 </div>
               );
