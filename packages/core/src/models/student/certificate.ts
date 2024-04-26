@@ -22,8 +22,6 @@ export const startCertificate = withZod(
   insertSchema.pick({
     studentCurriculumId: true,
     locationId: true,
-    issuedAt: true,
-    visibleFrom: true,
   }),
   successfulCreateResponse,
   async (input) => {
@@ -35,8 +33,6 @@ export const startCertificate = withZod(
         handle: await generateCertificateID(),
         studentCurriculumId: input.studentCurriculumId,
         locationId: input.locationId,
-        issuedAt: input.issuedAt,
-        visibleFrom: input.visibleFrom,
       })
       .returning({ id: s.certificate.id })
 

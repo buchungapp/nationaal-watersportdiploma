@@ -1,12 +1,14 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { SQLWrapper, and, eq, exists, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
+  singleOrArray,
   singleRow,
   successfulCreateResponse,
+  uuidSchema,
   withZod,
 } from '../../utils/index.js'
 import { insertSchema, selectSchema } from './gear-type.schema.js'
@@ -32,13 +34,49 @@ export const create = withZod(
     }),
 )
 
-export const list = withZod(z.void(), selectSchema.array(), async () => {
-  const query = useQuery()
+export const list = withZod(
+  z
+    .object({
+      filter: z
+        .object({
+          curriculumId: singleOrArray(uuidSchema).optional(),
+        })
+        .default({}),
+    })
+    .default({}),
+  selectSchema.array(),
+  async ({ filter }) => {
+    const query = useQuery()
+    const filters: SQLWrapper[] = []
 
-  const rows = await query.select().from(s.gearType)
+    const gearTypeQuery = query.select().from(s.gearType)
 
-  return rows
-})
+    if (filter.curriculumId) {
+      filters.push(
+        exists(
+          query
+            .select()
+            .from(s.curriculumGearLink)
+            .where(
+              and(
+                eq(s.curriculumGearLink.gearTypeId, s.gearType.id),
+                Array.isArray(filter.curriculumId)
+                  ? inArray(
+                      s.curriculumGearLink.curriculumId,
+                      filter.curriculumId,
+                    )
+                  : eq(s.curriculumGearLink.curriculumId, filter.curriculumId),
+              ),
+            ),
+        ),
+      )
+    }
+
+    const rows = await gearTypeQuery.where(and(...filters))
+
+    return rows
+  },
+)
 
 export const fromHandle = withZod(
   handleSchema,

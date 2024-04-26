@@ -1,1 +1,2 @@
-src/process-certificates.ts
+src/process-csv-student-import.ts
+src/add-certificate.ts

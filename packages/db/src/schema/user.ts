@@ -52,6 +52,7 @@ export const person = pgTable(
     birthCountry: char('birth_country', { length: 2 }).references(
       () => country.alpha_2,
     ),
+    ...timestamps,
     _metadata: jsonb('_metadata'),
   },
   (table) => {
