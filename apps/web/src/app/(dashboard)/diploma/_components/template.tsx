@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { findCertificate } from "~/lib/nwd";
+import Module from "./module";
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
   <p className="text-branding-dark font-medium">{children}</p>
@@ -82,16 +83,23 @@ export default async function CertificateTemplate({
           <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
             {modules.map((module) => {
               return (
-                <div key={module.id} className="flex flex-col">
-                  <span className="text-base font-semibold">
-                    {module.title}
-                  </span>
+                <Module
+                  key={module.id}
+                  button={
+                    <>
+                      <span className="text-base font-semibold">
+                        {module.title}
+                      </span>
 
-                  <div className="flex flex-col gap-y-[4px]">
-                    <hr className="w-full h-0.5 bg-branding-dark" />
-                    <hr className="w-full h-0.5 bg-branding-dark" />
-                  </div>
-                </div>
+                      <div className="flex flex-col gap-y-[4px]">
+                        <hr className="w-full h-0.5 bg-branding-dark" />
+                        <hr className="w-full h-0.5 bg-branding-dark" />
+                      </div>
+                    </>
+                  }
+                >
+                  Test
+                </Module>
               );
             })}
           </div>
