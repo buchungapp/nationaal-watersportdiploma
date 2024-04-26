@@ -93,6 +93,21 @@ export const fromHandle = withZod(
   },
 )
 
+export const fromId = withZod(
+  uuidSchema,
+  selectSchema.nullable(),
+  async (id) => {
+    const query = useQuery()
+
+    const rows = await query
+      .select()
+      .from(s.gearType)
+      .where(eq(s.gearType.id, id))
+
+    return possibleSingleRow(rows) ?? null
+  },
+)
+
 export const linkToCurriculum = withZod(
   z.object({
     gearTypeId: z.string(),

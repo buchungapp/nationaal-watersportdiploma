@@ -107,3 +107,14 @@ export const createLocationLink = withZod(
     return
   },
 )
+
+export const fromId = async (id: string) => {
+  const query = useQuery()
+
+  const [result] = await query
+    .select()
+    .from(s.person)
+    .where(eq(s.person.id, id))
+
+  return result
+}

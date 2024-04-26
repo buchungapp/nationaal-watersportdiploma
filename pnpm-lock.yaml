@@ -93,6 +93,9 @@ importers:
       '@mux/mux-player-react':
         specifier: ^2.3.3
         version: 2.3.3(@types/react-dom@18.2.21)(@types/react@18.2.65)(react-dom@18.2.0)(react@18.2.0)
+      '@nawadi/core':
+        specifier: workspace:^
+        version: link:../../packages/core
       '@next/mdx':
         specifier: 14.2.0-canary.60
         version: 14.2.0-canary.60(@mdx-js/loader@3.0.1)(@mdx-js/react@3.0.1)
@@ -114,6 +117,9 @@ importers:
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
       fast-glob:
         specifier: ^3.3.2
         version: 3.3.2

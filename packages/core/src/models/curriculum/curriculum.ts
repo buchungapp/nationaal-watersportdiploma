@@ -49,6 +49,7 @@ export const list = withZod(
     .object({
       filter: z
         .object({
+          id: singleOrArray(uuidSchema).optional(),
           programId: singleOrArray(uuidSchema).optional(),
           onlyCurrentActive: z.boolean().optional(),
           disciplineId: singleOrArray(uuidSchema).optional(),
@@ -78,6 +79,14 @@ export const list = withZod(
           eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
         ),
       )
+
+    if (filter.id) {
+      if (Array.isArray(filter.id)) {
+        filters.push(inArray(s.curriculum.id, filter.id))
+      } else {
+        filters.push(eq(s.curriculum.id, filter.id))
+      }
+    }
 
     // Filter for only current and active curricula if specified.
     if (filter.onlyCurrentActive) {

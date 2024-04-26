@@ -9,6 +9,7 @@ import postgres from 'postgres'
  */
 export interface DatabaseConfiguration {
   pgUri: string
+  serverless?: boolean
 }
 
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
@@ -29,9 +30,11 @@ export async function withDatabase<T>(
   configuration: DatabaseConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { pgUri } = configuration
+  const { pgUri, serverless = false } = configuration
 
-  const pgSql = postgres(pgUri)
+  const pgSql = postgres(pgUri, {
+    prepare: !serverless,
+  })
   try {
     const database = db.createDatabase(pgSql)
     const result = await storage.run(database, job)

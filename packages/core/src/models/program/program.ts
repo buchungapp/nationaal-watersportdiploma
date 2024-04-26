@@ -177,3 +177,47 @@ export const fromHandle = withZod(
     }
   },
 )
+
+export const fromId = withZod(
+  uuidSchema,
+  outputSchema.nullable(),
+  async (id) => {
+    const query = useQuery()
+
+    const program = await query
+      .select()
+      .from(s.program)
+      .leftJoin(
+        s.programCategory,
+        eq(s.programCategory.programId, s.program.id),
+      )
+      .where(eq(s.program.id, id))
+      .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
+      .then((rows) => possibleSingleRow(rows))
+
+    if (!program) {
+      return null
+    }
+
+    const [categories, degree, discipline] = await Promise.all([
+      Category.list(),
+      Degree.fromId(program.degreeId),
+      Discipline.fromId(program.disciplineId),
+    ])
+
+    assert(degree, 'Degree not found')
+    assert(discipline, 'Discipline not found')
+
+    const { program_category, degreeId, disciplineId, ...programProperties } =
+      program
+
+    return {
+      ...programProperties,
+      degree,
+      discipline,
+      categories: categories.filter((category) =>
+        program_category.some((pc) => pc.categoryId === category.id),
+      ),
+    }
+  },
+)
