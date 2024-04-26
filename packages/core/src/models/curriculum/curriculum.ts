@@ -215,7 +215,7 @@ export const list = withZod(
           })
 
           const competenciesFormatted = curriculumModule.competencies.map(
-            ({ isRequired, requirement, competencyId }) => {
+            ({ isRequired, requirement, competencyId, id }) => {
               const competency = findItem({
                 items: competencies,
                 predicate: (item) => item.id === competencyId,
@@ -224,6 +224,8 @@ export const list = withZod(
 
               return {
                 ...competency,
+                id,
+                competencyId,
                 isRequired,
                 requirement,
               }

@@ -83,3 +83,32 @@ export const completeCompetency = withZod(
     return
   },
 )
+
+export const completeCertificate = withZod(
+  insertSchema
+    .pick({
+      visibleFrom: true,
+    })
+    .extend({
+      certificateId: uuidSchema,
+    }),
+  z.void(),
+  async (input) => {
+    const query = useQuery()
+
+    const [res] = await query
+      .update(s.certificate)
+      .set({
+        issuedAt: new Date().toISOString(),
+        visibleFrom: input.visibleFrom,
+      })
+      .where(eq(s.certificate.id, input.certificateId))
+      .returning({ id: s.certificate.id })
+
+    if (!res) {
+      throw new Error('Failed to complete certificate')
+    }
+
+    return
+  },
+)
