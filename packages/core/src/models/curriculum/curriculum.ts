@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { and, desc, eq, inArray, isNotNull, lte } from 'drizzle-orm'
+import { SQLWrapper, and, desc, eq, inArray, isNotNull, lte } from 'drizzle-orm'
 import assert from 'node:assert'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -51,6 +51,8 @@ export const list = withZod(
         .object({
           programId: singleOrArray(uuidSchema).optional(),
           onlyCurrentActive: z.boolean().optional(),
+          disciplineId: singleOrArray(uuidSchema).optional(),
+          categoryId: singleOrArray(uuidSchema).optional(),
         })
         .default({}),
     })
@@ -58,6 +60,8 @@ export const list = withZod(
   outputSchema.array(),
   async ({ filter }) => {
     const query = useQuery()
+
+    const filters: SQLWrapper[] = []
 
     // Initialize the curricula query to fetch curriculum details along with joined module and competency data.
     let curriculaQuery = query
@@ -74,7 +78,6 @@ export const list = withZod(
           eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
         ),
       )
-      .$dynamic()
 
     // Filter for only current and active curricula if specified.
     if (filter.onlyCurrentActive) {
@@ -100,16 +103,44 @@ export const list = withZod(
 
     // Apply filtering based on program ID if provided.
     if (filter.programId) {
-      curriculaQuery = Array.isArray(filter.programId)
-        ? curriculaQuery.where(
-            inArray(s.curriculum.programId, filter.programId),
-          )
-        : curriculaQuery.where(eq(s.curriculum.programId, filter.programId))
+      if (Array.isArray(filter.programId)) {
+        filters.push(inArray(s.curriculum.programId, filter.programId))
+      } else {
+        filters.push(eq(s.curriculum.programId, filter.programId))
+      }
+    }
+
+    // Apply filtering based on discipline ID if provided.
+    if (filter.disciplineId) {
+      curriculaQuery = curriculaQuery.innerJoin(
+        s.program,
+        eq(s.curriculum.programId, s.program.id),
+      )
+
+      if (Array.isArray(filter.disciplineId)) {
+        filters.push(inArray(s.program.disciplineId, filter.disciplineId))
+      } else {
+        filters.push(eq(s.program.disciplineId, filter.disciplineId))
+      }
+    }
+
+    // Apply filtering based on category ID if provided.
+    if (filter.categoryId) {
+      curriculaQuery = curriculaQuery.innerJoin(
+        s.programCategory,
+        and(eq(s.programCategory.programId, s.curriculum.programId)),
+      )
+
+      if (Array.isArray(filter.categoryId)) {
+        filters.push(inArray(s.programCategory.categoryId, filter.categoryId))
+      } else {
+        filters.push(eq(s.programCategory.categoryId, filter.categoryId))
+      }
     }
 
     // Fetch curricula, modules, and competencies data concurrently for efficiency.
     const [curricula, modules, competencies] = await Promise.all([
-      curriculaQuery,
+      curriculaQuery.where(and(...filters)),
       Module.list(),
       Program.Competency.list(),
     ])

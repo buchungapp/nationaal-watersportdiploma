@@ -25,7 +25,7 @@ export const create = withZod(
           title: item.title,
           handle: item.handle,
         })
-        .returning({ id: s.module.id })
+        .returning({ id: s.gearType.id })
 
       const row = singleRow(rows)
       return row
@@ -35,7 +35,7 @@ export const create = withZod(
 export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query.select().from(s.module)
+  const rows = await query.select().from(s.gearType)
 
   return rows
 })
@@ -48,9 +48,33 @@ export const fromHandle = withZod(
 
     const rows = await query
       .select()
-      .from(s.module)
-      .where(eq(s.module.handle, handle))
+      .from(s.gearType)
+      .where(eq(s.gearType.handle, handle))
 
     return possibleSingleRow(rows) ?? null
+  },
+)
+
+export const linkToCurriculum = withZod(
+  z.object({
+    gearTypeId: z.string(),
+    curriculumId: z.string(),
+  }),
+  z.void(),
+  async (input) => {
+    const query = useQuery()
+
+    await query
+      .insert(s.curriculumGearLink)
+      .values({
+        gearTypeId: input.gearTypeId,
+        curriculumId: input.curriculumId,
+      })
+      .onConflictDoNothing({
+        target: [
+          s.curriculumGearLink.gearTypeId,
+          s.curriculumGearLink.curriculumId,
+        ],
+      })
   },
 )
