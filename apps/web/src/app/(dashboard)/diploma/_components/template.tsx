@@ -69,7 +69,7 @@ export default async function CertificateTemplate({
           <div className="bg-white h-1 w-full" />
         </div>
       </header>
-      <section className="grid flex-1 grid-cols-1 lg:grid-cols-2 px-16 py-6 gap-16">
+      <section className="grid flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16">
         <div className="flex flex-col justify-between w-full">
           <div>
             <p className="font-bold text-[12pt]">
