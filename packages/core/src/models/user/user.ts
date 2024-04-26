@@ -10,6 +10,7 @@ import { outputSchema } from './user.schema.js'
 export const getOrCreateFromEmail = withZod(
   z.object({
     email: z.string().trim().toLowerCase().email(),
+    displayName: z.string().optional(),
   }),
   z.object({
     id: uuidSchema,
@@ -32,7 +33,11 @@ export const getOrCreateFromEmail = withZod(
 
     const [newUser] = await query
       .insert(s.user)
-      .values({ authUserId: newAuthUserId, email: input.email })
+      .values({
+        authUserId: newAuthUserId,
+        email: input.email,
+        displayName: input.displayName,
+      })
       .returning({ authUserId: s.user.authUserId })
 
     if (!newUser) {
