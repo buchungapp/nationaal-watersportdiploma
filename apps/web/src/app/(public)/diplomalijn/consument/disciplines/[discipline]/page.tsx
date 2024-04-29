@@ -71,62 +71,130 @@ async function RecursivePrograms({
   const groupingCategory = uniqueParentCategories.at(0);
 
   if (!groupingCategory) {
-    return (
-      <ul className="list-none">
-        {filteredPrograms.map((program) => {
-          const curriculum = curricula.find(
-            (curriculum) => curriculum.programId === program.id,
-          );
+    const uniqueModules = curricula
+      .filter((curriculum) =>
+        filteredPrograms.some((program) => program.id === curriculum.programId),
+      )
+      .flatMap((curriculum) => curriculum.modules)
+      .filter(
+        (module, index, self) =>
+          self.findIndex((m) => m.id === module.id) === index,
+      )
+      .sort((a, b) => a.weight - b.weight);
 
-          return (
-            <li key={program.id}>
-              <Disclosure
-                button={
-                  <span className="font-medium text-gray-900">
-                    {program.title}
-                  </span>
-                }
-                size="xs"
-              >
-                <ul className="list-none">
-                  {curriculum?.modules.map((module) => (
-                    <li
-                      key={module.id}
-                      className="bg-gray-50 border border-gray-200 rounded py-3.5 px-6"
+    return (
+      <>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Module</th>
+              <th>Type</th>
+              {filteredPrograms.map((program) => (
+                <th
+                  key={program.id}
+                  style={{
+                    writingMode: "vertical-rl",
+                  }}
+                  className="rotate-180 whitespace-nowrap text-center font-semibold text-gray-800 leading-none left:[calc(50%-0.5em)]"
+                >
+                  {program.degree.title}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {uniqueModules.map((module, index) => (
+              <tr key={module.id}>
+                <td>{`${index + 1}.`}</td>
+                <td>{module.title}</td>
+                <td>{module.type === "skill" ? "Praktijk" : "Theorie"}</td>
+                {filteredPrograms.map((program) => {
+                  const curriculum = curricula.find(
+                    (curriculum) =>
+                      curriculum.programId === program.id &&
+                      curriculum.modules.some(
+                        (curriculumModule) => curriculumModule.id === module.id,
+                      ),
+                  );
+
+                  return (
+                    <td
+                      key={program.id}
+                      className="text-center"
+                      style={{
+                        backgroundColor: curriculum
+                          ? module.isRequired
+                            ? "rgba(255, 0, 0, 0.1)"
+                            : "rgba(0, 0, 255, 0.1)"
+                          : "transparent",
+                      }}
                     >
-                      <p className="flex items-center justify-between">
-                        <span className="font-semibold text-gray-600">
-                          {module.title}
-                        </span>
-                        <span
-                          className={clsx(
-                            "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                            module.isRequired
-                              ? "bg-pink-50 text-pink-600 ring-pink-500/10"
-                              : "bg-blue-50 text-blue-600 ring-blue-500/10",
-                          )}
-                        >
-                          {module.isRequired ? "Verplicht" : "Optioneel"}
-                        </span>
-                      </p>
-                      <ul className="columns-1 lg:columns-2 gap-x-10">
-                        {module.competencies.map((competency) => (
-                          <li
-                            key={competency.id}
-                            className="text-base mt-0 mb-3.5"
+                      {curriculum ? "✔" : ""}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <ul className="list-none">
+          {filteredPrograms.map((program) => {
+            const curriculum = curricula.find(
+              (curriculum) => curriculum.programId === program.id,
+            );
+
+            return (
+              <li key={program.id}>
+                <Disclosure
+                  button={
+                    <span className="font-medium text-gray-900">
+                      {program.title}
+                    </span>
+                  }
+                  size="xs"
+                >
+                  <ul className="list-none">
+                    {curriculum?.modules.map((module) => (
+                      <li
+                        key={module.id}
+                        className="bg-branding-light/5 border border-branding-light/25 rounded py-3.5 px-6"
+                      >
+                        <p className="flex items-center justify-between">
+                          <span className="font-semibold text-gray-700">
+                            {module.title}
+                          </span>
+                          <span
+                            className={clsx(
+                              "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                              module.isRequired
+                                ? "bg-pink-50 text-pink-600 ring-pink-500/20"
+                                : "bg-blue-50 text-blue-600 ring-blue-500/20",
+                            )}
                           >
-                            {competency.title}
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  ))}
-                </ul>
-              </Disclosure>
-            </li>
-          );
-        })}
-      </ul>
+                            {module.isRequired ? "Verplicht" : "Optioneel"}
+                          </span>
+                        </p>
+                        <ul className="mt-6 columns-1 lg:columns-2 gap-x-10 px-3.5">
+                          {module.competencies.map((competency) => (
+                            <li
+                              key={competency.id}
+                              className="text-base mt-0 mb-3.5"
+                            >
+                              {competency.title}
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </Disclosure>
+              </li>
+            );
+          })}
+        </ul>
+      </>
     );
   }
 
