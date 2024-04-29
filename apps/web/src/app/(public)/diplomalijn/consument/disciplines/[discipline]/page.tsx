@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { notFound } from "next/navigation";
 import Disclosure from "~/app/(public)/_components/disclosure";
 import {
@@ -71,7 +72,7 @@ async function RecursivePrograms({
 
   if (!groupingCategory) {
     return (
-      <ul>
+      <ul className="list-none">
         {filteredPrograms.map((program) => {
           const curriculum = curricula.find(
             (curriculum) => curriculum.programId === program.id,
@@ -79,19 +80,49 @@ async function RecursivePrograms({
 
           return (
             <li key={program.id}>
-              {program.title}
-              <ul>
-                {curriculum?.modules.map((module) => (
-                  <li key={module.id}>
-                    {module.title}
-                    <ul>
-                      {module.competencies.map((competency) => (
-                        <li key={competency.id}>{competency.title}</li>
-                      ))}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
+              <Disclosure
+                button={
+                  <span className="font-medium text-gray-900">
+                    {program.title}
+                  </span>
+                }
+                size="xs"
+              >
+                <ul className="list-none">
+                  {curriculum?.modules.map((module) => (
+                    <li
+                      key={module.id}
+                      className="bg-gray-50 border border-gray-200 rounded py-3.5 px-6"
+                    >
+                      <p className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-600">
+                          {module.title}
+                        </span>
+                        <span
+                          className={clsx(
+                            "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                            module.isRequired
+                              ? "bg-pink-50 text-pink-600 ring-pink-500/10"
+                              : "bg-blue-50 text-blue-600 ring-blue-500/10",
+                          )}
+                        >
+                          {module.isRequired ? "Verplicht" : "Optioneel"}
+                        </span>
+                      </p>
+                      <ul className="columns-1 lg:columns-2 gap-x-10">
+                        {module.competencies.map((competency) => (
+                          <li
+                            key={competency.id}
+                            className="text-base mt-0 mb-3.5"
+                          >
+                            {competency.title}
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+              </Disclosure>
             </li>
           );
         })}
@@ -104,7 +135,12 @@ async function RecursivePrograms({
   );
 
   return (
-    <ul className="list-none w-full">
+    <ul
+      className={clsx(
+        "list-none w-full",
+        seenParentIds.length < 1 && "pl-0 *:pl-0",
+      )}
+    >
       {relevantCategories.map((category) => {
         const relevantPrograms = filteredPrograms.filter((program) =>
           program.categories.some(
@@ -116,16 +152,19 @@ async function RecursivePrograms({
           <li key={category.id} className="w-full">
             <Disclosure
               button={
-                <div className="w-full text-left">
+                <div className="w-full text-left font-semibold text-gray-800">
                   {`${groupingCategory.title}: ${category.title}`}
                 </div>
               }
+              size={seenParentIds.length < 1 ? "base" : "sm"}
             >
-              <RecursivePrograms
-                programs={relevantPrograms}
-                disciplineId={disciplineId}
-                seenParentIds={[...seenParentIds, groupingCategory.id]}
-              />
+              <div className="border-l border-gray-300">
+                <RecursivePrograms
+                  programs={relevantPrograms}
+                  disciplineId={disciplineId}
+                  seenParentIds={[...seenParentIds, groupingCategory.id]}
+                />
+              </div>
             </Disclosure>
           </li>
         );
@@ -154,7 +193,13 @@ export default async function Page({
 
   return (
     <div className="w-full">
-      <h1>Programma's</h1>
+      <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+        Programma's
+      </h1>
+      <p>
+        Op deze pagina vind je een overzicht van de programma's die onder de
+        discipline <strong>{discipline.title}</strong> vallen.
+      </p>
       <RecursivePrograms programs={programs} disciplineId={discipline.id} />
     </div>
   );

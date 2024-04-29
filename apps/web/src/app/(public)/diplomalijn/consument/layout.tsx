@@ -37,7 +37,7 @@ export default async function Layout({
           />
         </div>
         <div className="flex flex-col justify-center">
-          <Prose className="max-w-prose mr-auto" data-mdx-content>
+          <Prose className="max-w-prose w-full mr-auto" data-mdx-content>
             {children}
           </Prose>
         </div>
