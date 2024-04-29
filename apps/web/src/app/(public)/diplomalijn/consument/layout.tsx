@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import MdxPageHeader from "~/app/(public)/_components/mdx-page-header";
 import { Prose } from "~/app/(public)/_components/prose";
 import { getAllDiplomalijnConsumentenPages } from "~/lib/mdx-pages";
+import { listDisciplines } from "~/lib/nwd";
 import SideNavDiplomalijn from "./_components/side-nav";
 
 export const metadata: Metadata = {
@@ -18,7 +19,10 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pages = await getAllDiplomalijnConsumentenPages();
+  const [pages, disciplines] = await Promise.all([
+    getAllDiplomalijnConsumentenPages(),
+    listDisciplines(),
+  ]);
 
   return (
     <main>
@@ -29,6 +33,7 @@ export default async function Layout({
             pages={{
               general: pages.filter((page) => page.pathSegments.length === 0),
             }}
+            disciplines={disciplines}
           />
         </div>
         <div className="flex flex-col justify-center">
