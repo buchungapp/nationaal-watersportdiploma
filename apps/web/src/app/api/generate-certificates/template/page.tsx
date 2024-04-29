@@ -1,7 +1,15 @@
+import { constants } from "@nawadi/lib";
 import clsx from "clsx";
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import QRCode from "react-qr-code";
+import { z } from "zod";
+import { findCertificate } from "~/lib/nwd";
 import "./styles.css";
+
+dayjs.extend(customParseFormat);
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
   <p className="text-[#1B4D90] font-medium print:invisible">{children}</p>
@@ -13,7 +21,7 @@ const DataField = ({
   isBold,
 }: {
   label: string;
-  value: string;
+  value?: string | null;
   isBold?: boolean;
 }) => (
   <div className="text-[12pt]">
@@ -59,24 +67,50 @@ const Module = ({ value }: { value: string }) => (
 );
 
 interface PageProps {
-  searchParams?: {
-    schoolName?: string;
-    schoolSlogan?: string;
-    name?: string;
-    birthdate?: string;
-    birthplace?: string;
-    issueDate?: string;
-    diplomaNumber?: string;
+  searchParams: {
     issueLocationSrc?: string;
     notes?: string;
     advice?: string;
-    adviceQrCodeValue?: string;
-    modules?: string;
+    nummer?: string;
+    datum?: string;
   };
 }
 
-export default function Page({ searchParams }: PageProps) {
-  const modules = searchParams?.modules?.split(",");
+export default async function Page({ searchParams }: PageProps) {
+  const parsed = z
+    .object({
+      handle: z.string(),
+      // String in YYYYMMDD format
+      issuedDate: z
+        .string()
+        .refine((datestr) => dayjs(datestr, "YYYYMMDD"))
+        .transform((datestr) => dayjs(datestr, "YYYYMMDD")),
+    })
+    .safeParse({
+      handle: searchParams.nummer,
+      issuedDate: searchParams.datum,
+    });
+
+  if (!parsed.success) {
+    notFound();
+  }
+
+  const certificate = await findCertificate({
+    handle: parsed.data.handle,
+    issuedAt: parsed.data.issuedDate.toISOString(),
+  });
+
+  const uniqueCompletedModules = Array.from(
+    new Set(
+      certificate.completedCompetencies.map(
+        (competency) => competency.curriculum_competency.moduleId,
+      ),
+    ),
+  );
+
+  const modules = certificate.curriculum.modules.filter((module) =>
+    uniqueCompletedModules.includes(module.id),
+  );
 
   return (
     <div className="page">
@@ -86,15 +120,14 @@ export default function Page({ searchParams }: PageProps) {
           <div className="flex gap-4 pr-4">
             <div className="flex flex-col justify-center text-end">
               <p className="text-[20pt] font-bold">
-                {searchParams?.schoolName ?? "Laser Bahia"}
+                {certificate.gearType.title}
               </p>
               <p className="text-[12pt] font-medium">
-                {searchParams?.schoolSlogan ??
-                  "Jachtzeilen Waddenzee en Zeeuwse Stromen"}
+                {certificate.program.title?.slice(0, -1).trim()}
               </p>
             </div>
             <p className="text-[42pt] font-black text-[#CA752E] align-text-bottom">
-              4
+              {certificate.program.degree.rang}
             </p>
           </div>
         </div>
@@ -114,9 +147,11 @@ export default function Page({ searchParams }: PageProps) {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-8">
-            {modules?.map((module, index) => (
-              <Module key={index} value={module} />
-            ))}
+            {modules.map((module) =>
+              module.title ? (
+                <Module key={module.id} value={module.title} />
+              ) : null,
+            )}
           </div>
           <div className="grid grid-cols-[1fr_100px] items-end gap-4">
             <AdviceField
@@ -124,35 +159,42 @@ export default function Page({ searchParams }: PageProps) {
               value={searchParams?.advice ?? ""}
             />
 
-            <QRField value={searchParams?.adviceQrCodeValue ?? ""} />
+            <QRField
+              value={`${constants.WEBSITE_URL}/diploma?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+            />
           </div>
         </div>
         <div className="flex basis-1/2 flex-col gap-4 justify-between">
           <DataField
             label="NAAM DIPLOMAHOUDER"
             isBold={true}
-            value={searchParams?.name ?? "Duco van Voorst tot Papenrecht"}
+            value={[
+              certificate.student.firstName,
+              certificate.student.lastNamePrefix,
+              certificate.student.lastName,
+            ]
+              .filter(Boolean)
+              .join(" ")}
           />
           <div className="grid grid-cols-2 gap-x-4 gap-y-5">
             <DataField
               label="GEBOORTEDATUM"
-              value={searchParams?.birthdate ?? "05-11-2005"}
+              value={dayjs(certificate.student.dateOfBirth).format(
+                "DD-MM-YYYY",
+              )}
             />
 
             <DataField
               label="GEBOORTEPLAATS"
-              value={searchParams?.birthplace ?? "Amsterdam"}
+              value={certificate.student.birthCity}
             />
 
             <DataField
               label="DATUM VAN AFGIFTE"
-              value={searchParams?.issueDate ?? "19-04-2024"}
+              value={dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
             />
 
-            <DataField
-              label="DIPLOMANUMMER"
-              value={searchParams?.diplomaNumber ?? "43215678"}
-            />
+            <DataField label="DIPLOMANUMMER" value={certificate.handle} />
 
             <StampField
               label="VAARLOCATIE VAN UITGIFTE"
