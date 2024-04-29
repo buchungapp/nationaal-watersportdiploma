@@ -3,7 +3,7 @@
 import SideNav from "~/app/(public)/_components/style/side-nav";
 import type { PageWithMeta } from "~/types";
 
-export default function SideNavVereniging({
+export default function SideNavDiplomalijn({
   pages: { general },
 }: {
   pages: {
