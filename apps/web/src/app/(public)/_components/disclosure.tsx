@@ -34,7 +34,7 @@ export default function Disclosure({
               )}
             </span>
           </HeadlessDisclosure.Button>
-          <HeadlessDisclosure.Panel as="div">
+          <HeadlessDisclosure.Panel unmount={false} as="div">
             {children}
           </HeadlessDisclosure.Panel>
         </>
