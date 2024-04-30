@@ -214,41 +214,43 @@ export const list = withZod(
         startedAt: curriculum.startedAt
           ? dayjs(curriculum.startedAt).toISOString()
           : null,
-        modules: curriculum.modules.map((curriculumModule) => {
-          const module = findItem({
-            items: modules,
-            predicate(item) {
-              return item.id === curriculumModule.moduleId
-            },
-            enforce: true,
-          })
+        modules: curriculum.modules
+          .map((curriculumModule) => {
+            const module = findItem({
+              items: modules,
+              predicate(item) {
+                return item.id === curriculumModule.moduleId
+              },
+              enforce: true,
+            })
 
-          const competenciesFormatted = curriculumModule.competencies.map(
-            ({ isRequired, requirement, competencyId, id }) => {
-              const competency = findItem({
-                items: competencies,
-                predicate: (item) => item.id === competencyId,
-                enforce: true,
+            const competenciesFormatted = curriculumModule.competencies
+              .map(({ isRequired, requirement, competencyId, id }) => {
+                const competency = findItem({
+                  items: competencies,
+                  predicate: (item) => item.id === competencyId,
+                  enforce: true,
+                })
+
+                return {
+                  ...competency,
+                  id,
+                  competencyId,
+                  isRequired,
+                  requirement,
+                }
               })
+              .sort((a, b) => a.weight - b.weight)
 
-              return {
-                ...competency,
-                id,
-                competencyId,
-                isRequired,
-                requirement,
-              }
-            },
-          )
-
-          return {
-            ...module,
-            competencies: competenciesFormatted,
-            isRequired: competenciesFormatted.every((c) => c.isRequired),
-            // As for now, a module can only have one type of competencies
-            type: competenciesFormatted[0]?.type || null,
-          }
-        }),
+            return {
+              ...module,
+              competencies: competenciesFormatted,
+              isRequired: competenciesFormatted.every((c) => c.isRequired),
+              // As for now, a module can only have one type of competencies
+              type: competenciesFormatted[0]?.type || null,
+            }
+          })
+          .sort((a, b) => a.weight - b.weight),
       }
     })
 
