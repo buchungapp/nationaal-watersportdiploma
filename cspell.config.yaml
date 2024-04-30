@@ -26,6 +26,7 @@ words:
   - pgadmin
   - PGURI
   - pkce
+  - pkey
   - plpgsql
   - pnpx
   - redocly
