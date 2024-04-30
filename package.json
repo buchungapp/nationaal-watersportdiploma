@@ -6,11 +6,16 @@
     "spelling": "cspell",
     "formatting": "prettier --check *",
     "formatting:fix": "prettier --write *",
-    "initialize": "node ./scripts/initialize.js"
+    "initialize": "node ./scripts/initialize.js",
+    "db:seed": "snaplet ss restore --latest --no-reset --no-schema"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",
     "cspell": "^8.7.0",
     "prettier": "^3.2.5"
+  },
+  "dependencies": {
+    "@snaplet/copycat": "^5.0.0",
+    "snaplet": "^0.91.1"
   }
 }
