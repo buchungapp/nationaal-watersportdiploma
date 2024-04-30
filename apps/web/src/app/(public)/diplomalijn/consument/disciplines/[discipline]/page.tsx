@@ -121,16 +121,16 @@ async function RecursivePrograms({
                   return (
                     <td
                       key={program.id}
-                      className="text-center"
-                      style={{
-                        backgroundColor: curriculum
+                      className={clsx(
+                        "text-center",
+                        curriculum
                           ? module.isRequired
-                            ? "rgba(255, 0, 0, 0.1)"
-                            : "rgba(0, 0, 255, 0.1)"
+                            ? "bg-pink-100"
+                            : "bg-blue-100"
                           : "transparent",
-                      }}
+                      )}
                     >
-                      {curriculum ? "✔" : ""}
+                      {curriculum ? (module.isRequired ? "✔" : "❍") : ""}
                     </td>
                   );
                 })}
