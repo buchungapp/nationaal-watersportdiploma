@@ -17,18 +17,21 @@ export function LocationSidebarMenu() {
       {[
         {
           name: "Cohorten",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/${params.location}/cohorten`,
           icon: RectangleStackIcon,
           current: segment === "cohorten",
         },
         {
           name: "Personen",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/${params.location}/personen`,
           icon: UserGroupIcon,
           current: segment === "personen",
         },
         {
           name: "Diploma's",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/${params.location}/diplomas`,
           icon: AcademicCapIcon,
           current: segment === "diplomas",
