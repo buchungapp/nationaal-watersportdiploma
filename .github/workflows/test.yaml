@@ -13,11 +13,16 @@ jobs:
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
       - run: corepack enable
-      - uses: actions/checkout@v4
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - name: Install Vercel CLI
@@ -34,11 +39,16 @@ jobs:
         runs-on: [ubuntu-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
       - run: corepack enable
-      - uses: actions/checkout@v4
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
