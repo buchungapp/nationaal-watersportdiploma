@@ -139,7 +139,7 @@ export const list = withZod(
       conditions.push(eq(s.actor.locationId, input.filters.locationId))
     }
 
-    const res = await query
+    return await query
       .select({
         ...getTableColumns(s.person),
         actor: s.actor,
@@ -151,9 +151,5 @@ export const list = withZod(
       )
       .where(and(...conditions))
       .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
-
-    console.log('res', res)
-
-    return res
   },
 )
