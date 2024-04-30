@@ -1,3 +1,7 @@
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 on:
   pull_request: {}
 
@@ -9,14 +13,22 @@ jobs:
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
       - run: corepack enable
-      - uses: actions/checkout@v4
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --recursive run build
+      - name: Install Vercel CLI
+        run: pnpm install vercel@latest --global
+      - name: Pull Vercel Environment Information
+        run: vercel env pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} ./apps/web/.env
+      - name: Build Project Artifacts
+        run: pnpm --recursive run build
 
   test:
     strategy:
@@ -25,11 +37,14 @@ jobs:
         runs-on: [ubuntu-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
       - run: corepack enable
-      - uses: actions/checkout@v4
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
