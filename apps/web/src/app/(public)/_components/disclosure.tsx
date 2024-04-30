@@ -8,7 +8,18 @@ import React from "react";
 export default function Disclosure({
   button,
   children,
-}: PropsWithChildren<{ button: React.ReactNode }>) {
+  size = "base",
+}: PropsWithChildren<{
+  button: React.ReactNode;
+  size?: "base" | "sm" | "xs" | "lg";
+}>) {
+  const buttonSize = {
+    base: "h-6 w-6",
+    sm: "h-5 w-5",
+    xs: "h-4 w-4",
+    lg: "h-8 w-8",
+  }[size];
+
   return (
     <HeadlessDisclosure as="div" className="pt-6 w-full">
       {({ open }) => (
@@ -17,9 +28,9 @@ export default function Disclosure({
             {button}
             <span className="ml-6 flex h-7 items-center">
               {open ? (
-                <MinusIcon className="h-6 w-6" aria-hidden="true" />
+                <MinusIcon className={buttonSize} aria-hidden="true" />
               ) : (
-                <PlusIcon className="h-6 w-6" aria-hidden="true" />
+                <PlusIcon className={buttonSize} aria-hidden="true" />
               )}
             </span>
           </HeadlessDisclosure.Button>
