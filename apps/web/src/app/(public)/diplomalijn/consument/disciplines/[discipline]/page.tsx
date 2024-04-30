@@ -173,7 +173,7 @@ async function RecursivePrograms({
             <p className="text-sm">
               Een overzicht van de cursussen, met de bijbehorende competenties
               die per module worden aangeboden. De eisomschrijvingen zijn voor
-              instructeurs via de eigen vaarlocatie te vinden.
+              instructeurs via de eigen vaarlocatie te verkrijgen.
             </p>
           </div>
 
