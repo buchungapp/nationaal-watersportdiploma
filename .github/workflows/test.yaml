@@ -1,3 +1,7 @@
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 on:
   pull_request: {}
 
@@ -16,7 +20,12 @@ jobs:
       - uses: actions/checkout@v4
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --recursive run build
+      - name: Install Vercel CLI
+        run: pnpm install vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel env pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} ./apps/web/.env
+      - name: Build Project Artifacts
+        run: pnpm --recursive run build
 
   test:
     strategy:
