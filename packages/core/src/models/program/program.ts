@@ -1,10 +1,10 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
-import { eq } from 'drizzle-orm'
+import { eq, getTableColumns } from 'drizzle-orm'
+import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
-  aggregateOneToMany,
   findItem,
   handleSchema,
   possibleSingleRow,
@@ -141,21 +141,29 @@ export const fromHandle = withZod(
     const query = useQuery()
 
     const program = await query
-      .select()
+      .select({
+        ...getTableColumns(s.program),
+        category: s.programCategory,
+      })
       .from(s.program)
       .leftJoin(
         s.programCategory,
         eq(s.programCategory.programId, s.program.id),
       )
       .where(eq(s.program.handle, handle))
-      .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
+      .then(
+        aggregate({
+          pkey: 'id',
+          fields: { categories: 'category.id' },
+        }),
+      )
       .then((rows) => possibleSingleRow(rows))
 
     if (!program) {
       return null
     }
 
-    const [categories, degree, discipline] = await Promise.all([
+    const [allCategories, degree, discipline] = await Promise.all([
       Category.list(),
       Degree.fromId(program.degreeId),
       Discipline.fromId(program.disciplineId),
@@ -164,15 +172,14 @@ export const fromHandle = withZod(
     assert(degree, 'Degree not found')
     assert(discipline, 'Discipline not found')
 
-    const { program_category, degreeId, disciplineId, ...programProperties } =
-      program
+    const { categories, degreeId, disciplineId, ...programProperties } = program
 
     return {
       ...programProperties,
       degree,
       discipline,
-      categories: categories.filter((category) =>
-        program_category.some((pc) => pc.categoryId === category.id),
+      categories: allCategories.filter((category) =>
+        categories.some((pc) => pc.categoryId === category.id),
       ),
     }
   },
@@ -185,21 +192,29 @@ export const fromId = withZod(
     const query = useQuery()
 
     const program = await query
-      .select()
+      .select({
+        ...getTableColumns(s.program),
+        category: s.programCategory,
+      })
       .from(s.program)
       .leftJoin(
         s.programCategory,
         eq(s.programCategory.programId, s.program.id),
       )
       .where(eq(s.program.id, id))
-      .then((rows) => aggregateOneToMany(rows, 'program', 'program_category'))
+      .then(
+        aggregate({
+          pkey: 'id',
+          fields: { categories: 'category.id' },
+        }),
+      )
       .then((rows) => possibleSingleRow(rows))
 
     if (!program) {
       return null
     }
 
-    const [categories, degree, discipline] = await Promise.all([
+    const [allCategories, degree, discipline] = await Promise.all([
       Category.list(),
       Degree.fromId(program.degreeId),
       Discipline.fromId(program.disciplineId),
@@ -208,15 +223,14 @@ export const fromId = withZod(
     assert(degree, 'Degree not found')
     assert(discipline, 'Discipline not found')
 
-    const { program_category, degreeId, disciplineId, ...programProperties } =
-      program
+    const { categories, degreeId, disciplineId, ...programProperties } = program
 
     return {
       ...programProperties,
       degree,
       discipline,
-      categories: categories.filter((category) =>
-        program_category.some((pc) => pc.categoryId === category.id),
+      categories: allCategories.filter((category) =>
+        categories.some((pc) => pc.categoryId === category.id),
       ),
     }
   },

@@ -177,8 +177,6 @@ export const retrieveUser = cache(async () => {
         async () => {
           const authUser = await tmpAuthCheck();
 
-          console.log("authUser", authUser);
-
           const user = await User.fromId(authUser.id);
 
           if (!user) {
@@ -190,3 +188,24 @@ export const retrieveUser = cache(async () => {
       ),
   );
 });
+
+export const listPersonsForLocation = cache(async (locationId: string) => {
+  return withSupabaseClient(
+    {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    },
+    () =>
+      withDatabase(
+        { pgUri: process.env.PGURI!, serverless: true },
+        async () => {
+          await tmpAuthCheck();
+
+          const persons = await User.Person.
+
+          return persons;
+        },
+      ),
+  );
+}
+)

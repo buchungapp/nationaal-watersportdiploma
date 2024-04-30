@@ -1,6 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
-import { SQL, and, eq, sql } from 'drizzle-orm'
+import { SQL, and, eq, isNotNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -118,3 +118,33 @@ export const fromId = async (id: string) => {
 
   return result
 }
+
+export const list = withZod(
+  z
+    .object({
+      filters: z
+        .object({
+          locationId: uuidSchema.optional(),
+        })
+        .default({}),
+    })
+    .default({}),
+  async (input) => {
+    const query = useQuery()
+
+    const conditions: SQL[] = []
+
+    if (input.filters.locationId) {
+      conditions.push(eq(s.actor.locationId, input.filters.locationId))
+    }
+
+    return await query
+      .select()
+      .from(s.person)
+      .innerJoin(
+        s.actor,
+        and(eq(s.actor.personId, s.person.id), isNotNull(s.actor.deletedAt)),
+      )
+      .where(and(...conditions))
+  },
+)
