@@ -40,22 +40,18 @@ export const list = withZod(z.void(), outputSchema.array(), async () => {
   return await query.select().from(s.location)
 })
 
-export const fromId = withZod(
-  uuidSchema,
-  outputSchema.nullable(),
-  async (id) => {
-    const query = useQuery()
-    return await query
-      .select()
-      .from(s.location)
-      .where(eq(s.location.id, id))
-      .then((rows) => singleRow(rows))
-  },
-)
+export const fromId = withZod(uuidSchema, outputSchema, async (id) => {
+  const query = useQuery()
+  return await query
+    .select()
+    .from(s.location)
+    .where(eq(s.location.id, id))
+    .then((rows) => singleRow(rows))
+})
 
 export const fromHandle = withZod(
   handleSchema,
-  outputSchema.nullable(),
+  outputSchema,
   async (handle) => {
     const query = useQuery()
     return await query

@@ -1,5 +1,7 @@
 import { MenuButton as HeadlessMenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
+import { notFound } from "next/navigation";
+import { retrieveLocationByHandle } from "~/lib/nwd";
 import { Avatar } from "../../_components/avatar";
 import {
   Dropdown,
@@ -7,14 +9,14 @@ import {
   DropdownMenu,
 } from "../../_components/dropdown";
 
-export async function LocationSelector() {
-  const currentLocation = await new Promise<{
-    name: string;
-  }>((resolve) => {
-    return resolve({
-      name: "Zeilschool de Optimist",
-    });
-  });
+export async function LocationSelector({
+  currentLocationSlug,
+}: {
+  currentLocationSlug: string;
+}) {
+  const currentLocation = await retrieveLocationByHandle(
+    currentLocationSlug,
+  ).catch(() => notFound());
 
   return (
     <Dropdown>
@@ -24,7 +26,10 @@ export async function LocationSelector() {
       >
         <Avatar
           className="size-6"
-          initials={currentLocation.name.slice(0, 2)}
+          initials={(currentLocation.name ?? currentLocation.handle).slice(
+            0,
+            2,
+          )}
         />
         <span className="block text-left">
           <span className="block text-sm/5 font-medium">

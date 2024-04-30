@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { createAuthUser } from '../../services/auth/handlers.js'
@@ -72,5 +72,34 @@ export const fromId = withZod(
       _metadata: self._metadata as any,
       activeActorTypes,
     }
+  },
+)
+
+export const canUserAccessLocation = withZod(
+  z.object({
+    userId: uuidSchema,
+    locationId: uuidSchema,
+  }),
+  z.boolean(),
+  async ({ userId, locationId }) => {
+    const query = useQuery()
+
+    const rows = await query
+      .select({ number: sql<number>`1` })
+      .from(s.actor)
+      .innerJoin(
+        s.person,
+        and(eq(s.actor.personId, s.person.id), eq(s.person.userId, userId)),
+      )
+      .where(
+        and(
+          eq(s.actor.personId, userId),
+          eq(s.actor.locationId, locationId),
+          isNotNull(s.actor.deletedAt),
+          inArray(s.actor.type, ['instructor', 'location_admin']),
+        ),
+      )
+
+    return rows.length > 0
   },
 )
