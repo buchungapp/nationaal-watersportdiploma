@@ -1,7 +1,17 @@
+import { listPersonsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
-export default function Page() {
+export default async function Page({
+  params,
+}: {
+  params: {
+    location: string;
+  };
+}) {
+  const location = await retrieveLocationByHandle(params.location);
+  const persons = await listPersonsForLocation(location.id);
+
   return (
     <div className="py-16">
       <div className="md:flex md:items-center md:justify-between md:space-x-8 pb-4 border-b border-gray-200">
@@ -25,7 +35,7 @@ export default function Page() {
         </div>
       </div>
 
-      <Table />
+      <Table persons={persons} />
     </div>
   );
 }

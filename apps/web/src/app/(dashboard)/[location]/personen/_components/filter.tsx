@@ -4,12 +4,12 @@ import { MultiSelect, MultiSelectItem } from "@tremor/react";
 import { useState } from "react";
 
 export function FilterSelect() {
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [_selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
   return (
     <MultiSelect
       onValueChange={setSelectedStatus}
-      placeholder="Type..."
+      placeholder="Rol..."
       placeholderSearch="Zoek"
       className="w-full sm:w-44 [&>button]:h-9 [&>button]:rounded-tremor-small"
     >

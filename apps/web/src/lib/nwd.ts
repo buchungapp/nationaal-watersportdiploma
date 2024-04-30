@@ -201,11 +201,10 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
         async () => {
           await tmpAuthCheck();
 
-          const persons = await User.Person.
+          const persons = await User.Person.list({ filters: { locationId } });
 
           return persons;
         },
       ),
   );
-}
-)
+});

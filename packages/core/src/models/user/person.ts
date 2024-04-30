@@ -1,6 +1,7 @@
 import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
-import { SQL, and, eq, isNotNull, sql } from 'drizzle-orm'
+import { SQL, and, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
+import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -138,13 +139,21 @@ export const list = withZod(
       conditions.push(eq(s.actor.locationId, input.filters.locationId))
     }
 
-    return await query
-      .select()
+    const res = await query
+      .select({
+        ...getTableColumns(s.person),
+        actor: s.actor,
+      })
       .from(s.person)
       .innerJoin(
         s.actor,
-        and(eq(s.actor.personId, s.person.id), isNotNull(s.actor.deletedAt)),
+        and(eq(s.actor.personId, s.person.id), isNull(s.actor.deletedAt)),
       )
       .where(and(...conditions))
+      .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+
+    console.log('res', res)
+
+    return res
   },
 )
