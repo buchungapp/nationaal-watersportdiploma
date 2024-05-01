@@ -1,20 +1,36 @@
+import { constants } from "@nawadi/lib";
+import dayjs from "dayjs";
+import { notFound } from "next/navigation";
 import type { NextRequest } from "next/server";
+import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
-
+import { retrieveCertificateById } from "~/lib/nwd";
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
 ) {
   const query = new URL(request.url).searchParams;
 
+  const certificate = await retrieveCertificateById(params.id).catch(() =>
+    notFound(),
+  );
+
   const type = query.has("preview")
     ? ("preview" as const)
     : ("download" as const);
+
+  const filename = `${dayjs(certificate.issuedAt).toISOString()}-${certificate.handle}.pdf`;
+
+  return presentPDF(
+    filename,
+    await generatePDF(request.url.replace("/pdf", "/raw")),
+    type,
+  );
 }
 
 function presentPDF(
   filename: string,
-  data: Buffer,
+  data: Uint8Array,
   type: "download" | "preview",
 ) {
   const types = {
@@ -37,19 +53,17 @@ async function generatePDF(url: string) {
 
   await page.goto(url);
 
-  // Give the page time to load
-  await page.waitForSelector('[data-pdf-state="ready"]', {
-    timeout: 2 * 60 * 1000, // 2 minutes
-  });
-
   const pdfBuffer = await page.pdf({
     printBackground: false,
     landscape: true,
-    format: "A4",
     preferCSSPageSize: true,
   });
 
   await browser.close();
 
-  return pdfBuffer;
+  const pdfDoc = await PDFDocument.load(pdfBuffer);
+  pdfDoc.setTitle(`${dayjs().toISOString()}-diploma-export.pdf`);
+  pdfDoc.setAuthor(constants.APP_NAME);
+
+  return pdfDoc.save();
 }
