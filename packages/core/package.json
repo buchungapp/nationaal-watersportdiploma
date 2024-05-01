@@ -25,6 +25,8 @@
     "dayjs": "^1.11.10",
     "drizzle-toolbelt": "^1.1.1",
     "drizzle-zod": "^0.5.1",
+    "file-type": "^16.5.4",
+    "image-size": "^1.1.1",
     "nanoid": "^3.3.7",
     "postgres": "^3.4.4",
     "zod": "^3.22.4"

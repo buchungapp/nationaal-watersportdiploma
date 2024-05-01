@@ -119,6 +119,17 @@ export default async function Page({
         {certificate.handle}
       </DataField>
 
+      {certificate.location.logoCertificate ? (
+        <span className="absolute left-[171mm] top-[117.833mm] w-[46.5mm] h-[29mm]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="w-full h-full object-contain"
+            src={certificate.location.logoCertificate.url}
+            alt={certificate.location.logoCertificate.alt ?? ""}
+          />
+        </span>
+      ) : null}
+
       <span className="absolute left-[20mm] top-[62.5mm] w-[108mm] h-auto grid gap-x-[3mm] gap-y-[6mm] grid-cols-2">
         {modules.map((module) =>
           module.title ? <Module key={module.id} value={module.title} /> : null,
