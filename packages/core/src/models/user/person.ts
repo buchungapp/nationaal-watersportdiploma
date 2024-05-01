@@ -17,6 +17,7 @@ export const getOrCreate = withZod(
     .pick({
       firstName: true,
       lastName: true,
+      lastNamePrefix: true,
       dateOfBirth: true,
       birthCity: true,
       birthCountry: true,
@@ -65,6 +66,7 @@ export const getOrCreate = withZod(
         userId: input.userId,
         firstName: input.firstName,
         lastName: input.lastName,
+        lastNamePrefix: input.lastNamePrefix,
         dateOfBirth: dayjs(input.dateOfBirth).format('YYYY-MM-DD'),
         birthCity: input.birthCity,
         birthCountry: input.birthCountry,
