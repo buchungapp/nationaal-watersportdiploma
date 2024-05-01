@@ -1,0 +1,92 @@
+import Link from "next/link";
+import Image from "../../../_components/mdx-image";
+import LaunchFaq from "../_components/launch-faq";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./_assets/nwd-news.jpg";
+import Slide1 from "./_assets/slide-1.png";
+import Slide2 from "./_assets/slide-2.png";
+import Slide3 from "./_assets/slide-3.png";
+
+export const article = {
+  date: "2024-04-30T19:00:00Z",
+  category: "consument",
+  title:
+    "Introductie nieuwe diplomalijn: duidelijk, realistisch en enthousiasmerend leren watersporten",
+  description:
+    "Het NWD introduceert de nieuwe diplomalijn: duidelijke, realistische doelen en flexibele modules verbeteren de toegankelijkheid, herkenning en enthousiasme voor de watersport.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/vs3stv9X-nieuwe-diplomalijn-duidelijk-realistisch-en-enthousiasmerend-leren-watersporten",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Bij het Nationaal Watersportdiploma (NWD) zetten we in op een heldere en
+motiverende aanpak van vaaropleidingen. Onze nieuwe diplomalijn, bedacht met
+zowel cursisten als instructeurs in het achterhoofd, is gebaseerd op de
+kernwaarden van duidelijkheid, realisme, enthousiasmeren en herkenbaarheid.
+
+### Duidelijkheid voorop
+
+We hebben onze diplomalijn zo vormgegeven dat iedereen - instructeur of
+cursist - meteen begrijpt wat de verwachtingen zijn. Competenties en modules
+zijn expliciet gedefinieerd, waardoor de leerdoelen en vereisten ondubbelzinnig
+zijn. Een andere winst is het duidelijke onderscheid tussen de rollen van
+stuurman en bemanning die we maken in de omschrijving van de eisen, zoals
+hieronder geïllustreerd:
+
+<Image src={Slide2} className="rounded-none" />
+
+### Realistische verwachtingen
+
+Onze vernieuwde diplomalijn is vanaf de grond opgebouwd rond een essentiële
+vraag: wat is een haalbare verwachting voor een watersporter van een bepaalde
+leeftijd en op een bepaald niveau? Dit inzicht leidde tot de creatie van drie
+leeftijdscategorieën, omdat de fysieke en mentale ontwikkeling bij kinderen en
+jongeren sterk varieert. Een visuele weergave van de ontwikkeling van
+competenties over verschillende niveaus en leeftijdsgroepen zie je hieronder:
+
+<Image src={Slide1} className="rounded-none" />
+
+Daarnaast hebben we rekening gehouden met de praktische uitvoerbaarheid van
+competenties, wat leidt tot flexibiliteit binnen de opleidingen waarbij een
+module optioneel of verplicht kan zijn. Zo is de module 'Bomen' niet langer
+verplicht, omdat dit niet mogelijk is op elk vaarwater. Een voorbeeld van de
+modulestructuur vind je hieronder:
+
+<Image src={Slide3} className="rounded-none" />
+
+### Enthousiasmerend leren
+
+Onze focus ligt op wat de cursisten kunnen en hebben bereikt, niet enkel op wat
+ze nog niet beheersen. Na een week intensief zeilen kun je misschien nog niet de
+meest complexe manoeuvres uitvoeren, maar de progressie die je hebt geboekt in
+andere gebieden is minstens even belangrijk. We vieren de afgeronde modules en
+we bieden duidelijk adviezen voor de volgende stappen, of dit nu het voltooien
+van extra modules is of het starten in een nieuwe boot.
+
+### Herkenbaar en toegankelijk
+
+Bij het NWD is een diploma direct gelinkt aan een specifiek boottype, wat de
+herkenbaarheid vergroot. Abstracte benamingen maken plaats voor de concrete
+boten waarin de vaardigheden zijn opgedaan. Dat doet ook recht aan wat de
+cursist heeft laten zien, een overstag in een Valk, Tirion of Randmeer is toch
+echt een heel andere handeling, ondanks dat ze allemaal Kielboten zijn. Het NWD
+beschrijft de eisen op disciplineniveau (de _“wat”_), terwijl de vaarlocaties de
+technische standaard ontwikkelen voor de boten die zij aanbieden (de _“hoe”_).
+
+Met deze nieuwe diplomalijn verwachten we een nog betere leerervaring te bieden
+en de watersport toegankelijker te maken voor een breder publiek. Voor meer
+informatie over de specifieke inhoud van de diplomalijn, bezoek onze&#32;<Link
+href={"/diplomalijn/consument"}>diplomalijn-pagina</Link>. Ben je enthousiast
+geworden en wil je een NWD-diploma behalen? Boek dan een cursus bij één van
+de&#32;<Link href={"/vaarlocaties"}>NWD-vaarlocaties</Link>!
