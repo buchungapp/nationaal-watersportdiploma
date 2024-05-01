@@ -66,7 +66,7 @@ export default async function Page({
 
   return (
     <div className="page" style={{ backgroundImage: `url(${bg.src})` }}>
-      <span className="text-[20pt] font-bold absolute pr-[2mm] left-[168mm] leading-[6.322mm] top-[13mm] w-[96mm] h-[6.322mm] text-right">
+      <span className="text-[20pt] font-bold absolute pr-[2mm] left-[168mm] leading-[7.322mm] top-[13mm] w-[96mm] h-[6.322mm] text-right">
         {certificate.gearType.title}
       </span>
 

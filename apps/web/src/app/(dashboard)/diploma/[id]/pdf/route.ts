@@ -19,11 +19,11 @@ export async function GET(
     ? ("preview" as const)
     : ("download" as const);
 
-  const filename = `${dayjs(certificate.issuedAt).toISOString()}-${certificate.handle}.pdf`;
+  const filename = `${dayjs().toISOString()}-${certificate.handle}-${dayjs(certificate.issuedAt).format("DD-MM-YYYY")}.pdf`;
 
   return presentPDF(
     filename,
-    await generatePDF(request.url.replace("/pdf", "/raw")),
+    await generatePDF(filename, request.url.replace("/pdf", "/raw")),
     type,
   );
 }
@@ -47,7 +47,7 @@ function presentPDF(
   });
 }
 
-async function generatePDF(url: string) {
+async function generatePDF(filename: string, url: string) {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
@@ -62,7 +62,7 @@ async function generatePDF(url: string) {
   await browser.close();
 
   const pdfDoc = await PDFDocument.load(pdfBuffer);
-  pdfDoc.setTitle(`${dayjs().toISOString()}-diploma-export.pdf`);
+  pdfDoc.setTitle(filename);
   pdfDoc.setAuthor(constants.APP_NAME);
 
   return pdfDoc.save();
