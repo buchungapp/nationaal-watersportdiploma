@@ -1,0 +1,127 @@
+import { constants } from "@nawadi/lib";
+import Link from "next/link";
+import Image from "../../../_components/mdx-image";
+import LaunchFaq from "../_components/launch-faq";
+import { ArticleLayout } from "../_components/news-article";
+import Afrondingsdag from "./_assets/nwd-afrondingsdag-1.jpg";
+import Diploma from "./_assets/nwd-diploma-mock.png";
+import Instructeursopleiding from "./_assets/nwd-instructeursopleiding.png";
+
+export const article = {
+  date: "2024-05-01T10:00:00Z",
+  category: "achterban",
+  title: "Nieuwsbrief april: lancering diplomalijn",
+  description:
+    "Het NWD introduceert de nieuwe diplomalijn: duidelijke, realistische doelen en flexibele modules verbeteren de toegankelijkheid, herkenning en enthousiasme voor de watersport.",
+  // featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/tIcx6pQm-nieuwsbrief-april",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het is de eerste van de maand, tijd dus voor weer een update vanuit het
+Nationaal Watersportdiploma (NWD). Er is namelijk weer een hoop gebeurd...
+
+## Onze nieuwe diplomalijn is gelanceerd!
+
+We zijn trots te kunnen aankondigen dat onze nieuwe diplomalijn volledig is
+afgerond, dankzij de geweldige inzet en expertise van onze opleiders en
+initiatiefnemers. Een grote dankjewel aan iedereen die heeft bijgedragen! Deze
+mijlpaal hebben we feestelijk gevierd op zaterdag 23 maart in Friesland tijdens
+de afrondingsdag.
+
+<Image src={Afrondingsdag} className="rounded-none" />
+
+## Ontdek de fundamenten van onze nieuwe diplomalijn
+
+De basis van onze diplomalijn — duidelijkheid, realisme, enthousiasme en
+herkenbaarheid — wordt dieper uitgewerkt in een uitgebreid artikel op onze
+website:&#32;<Link
+href={"/actueel/vs3stv9X-nieuwe-diplomalijn-duidelijk-realistisch-en-enthousiasmerend-leren-watersporten"}
+target="\_blank">Introductie nieuwe diplomalijn: duidelijk, realistisch en&#32;
+enthousiasmerend leren watersporten</Link>.
+
+Instructeurs van aangesloten NWD vaarlocaties kunnen de volledige handboeken
+verkrijgen via hun locatie, terwijl een openbaar overzicht tot op
+competentieniveau per discipline beschikbaar is via de&#32;<Link
+href={"/diplomalijn/consument"} target="\_blank">diplomeringslijn pagina</Link>.
+
+---
+
+## Nieuwe diploma's met een persoonlijke touch
+
+Een nieuwe diplomalijn betekent ook nieuwe diploma’s! We zijn afgestapt van het
+zakelijk, abstracte design voor diploma's. Elk nieuw sjabloon biedt ruimte voor
+prachtige watersportfoto’s, waarmee we elk diploma een uniek en herkenbaar
+karakter geven. Voor elk boottype streven we naar een eigen sjabloon, zodat elke
+cursist zijn diploma herkent en als een collectors item kan zien. Aan de
+binnenkant is ruimte voor persoonlijke opmerkingen en geeft het NWD advies over
+mogelijke vervolgstappen. De eerste diploma’s zijn inmiddels uitgegeven, wat
+heeft geleid tot veel blije gezichten, zoals te zien is op ons&#32;<Link
+href={"https://www.instagram.com/nationaalwatersportdiploma"}
+target="\_blank">Instagram-account</Link>.
+
+<Image src={Diploma} className="rounded-none" />
+
+Heb je een prachtige foto die bij zou dragen aan onze diploma’s? We horen graag
+van je via info@nationaalwatersportdiploma.nl.
+
+---
+
+## Welkom aan ruim 300 nieuwe NWD instructeurs!
+
+Het voorjaar is traditioneel de tijd waarin we nieuwe instructeurs opleiden, en
+dit jaar is geen uitzondering. We zijn onwijs blij te kunnen delen dat er
+inmiddels ruim 300 nieuwe instructeurs zijn opgeleid en klaar staan om hun
+passie voor zeilen te delen met anderen. Samen met onze bestaande instructeurs
+staan nu meer dan 1.000 professionals klaar om les te geven volgens de
+NWD-richtlijnen!
+
+Check hieronder een aantal foto’s die we binnenkregen van de
+instructeursopleidingen op de verschillende locaties.
+
+<Image src={Instructeursopleiding} className="rounded-none" />
+
+---
+
+## Draag bij aan de ontwikkeling van het NWD
+
+Onze achterban is divers en rijk aan kennis. We nodigen iedereen uit om mee te
+denken en bij te dragen, of het nu op technisch of marketinggebied is:
+
+- **Techniek**: Onze website en diplomasysteem worden volledig open-source
+  ontwikkeld. Ben je geïnteresseerd in hoe je kunt bijdragen? Bezoek
+  onze&#32;<Link href={"https://www.nationaalwatersportdiploma.dev"}
+  target="\_blank">GitHub repository</Link>, join de Discord community en mis
+  onze aankomende code walkthrough niet, bedoeld om nieuwe contributors wegwijs
+  te maken in onze systemen.
+- **Marketing**: Het NWD wil als merk zichtbaar zijn, en actief in contact staat
+  met onze achterban. Niet alleen via nieuwsbrieven, maar ook via social media.
+  Heb je ervaring met social media, of heb je gewoon frisse ideeën over hoe we
+  ons kunnen presenteren? Jouw input kan een groot verschil maken. Neem contact
+  op met Maurits van het Secretariaat via info@nationaalwatersportdiploma.nl.
+
+---
+
+## Boek je NWD cursus
+
+Ontdek zelf de voordelen van onze innovatieve aanpak: boek nu een zeilcursus bij
+een van onze&#32;<Link href={"/vaarlocaties"}>NWD-vaarlocaties</Link>. Of je nu
+een beginner bent of een ervaren zeiler, NWD cursussen zijn ontworpen om een
+boeiend en volledig programma te bieden dat naadloos aansluit bij jouw ambities
+en vaardigheidsniveau.
+
+Volg ons
+op&#32;<Link href={constants.INSTAGRAM_URL}>Instagram</Link>,&#32;<Link href={constants.LINKEDIN_URL}>LinkedIn</Link>,&#32;<Link href={constants.FACEBOOK_URL}>Facebook</Link>
+en&#32;<Link href={constants.TIKTOK_URL}>TikTok</Link> om verbonden te blijven,
+en tot de volgende!
