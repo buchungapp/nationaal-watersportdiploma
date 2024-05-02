@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "main": "./out/main.js",
+  "module": "./out/main.js",
   "types": "./out/main.d.ts",
   "exports": {
     ".": {
