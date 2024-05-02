@@ -1,6 +1,7 @@
 {
   "name": "@nawadi/scripts",
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "prepack": "tsc --build",
