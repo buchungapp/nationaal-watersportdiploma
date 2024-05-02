@@ -7,24 +7,41 @@ export const getLocationCertificates: api.GetLocationCertificatesOperationHandle
 > = async (incomingRequest, authentication) => {
   const { locationKey } = incomingRequest.parameters
 
-  // TODO list certificates
+  // TODO get type from core
+  let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
+
+  if (api.isComponentsHandle(locationKey)) {
+    locationItem = await core.Location.fromHandle(locationKey)
+  } else if (api.isComponentsId(locationKey)) {
+    locationItem = await core.Location.fromId(locationKey)
+  } else {
+    throw 'impossible'
+  }
+
+  if (locationItem == null) {
+    return {
+      parameters: {},
+      status: 404,
+      contentType: null,
+    }
+  }
+
+  // TODO actually list certificates
+  const certificateList: any[] = await (core.Certificate as any).byLocation(
+    locationItem.id,
+  )
+
+  const responseEntity = certificateList.map((item) => ({
+    id: item.id,
+    handle: item.handle,
+    title: item.title,
+  }))
 
   return {
     status: 200,
     parameters: {},
     contentType: 'application/json',
-    entity: () => [
-      {
-        id: '',
-        handle: '',
-        title: '',
-      },
-      {
-        id: '',
-        handle: '',
-        title: '',
-      },
-    ],
+    entity: () => responseEntity,
   }
 }
 
@@ -35,14 +52,40 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
     const { locationKey } = incomingRequest.parameters
     const requestEntity = await incomingRequest.entity()
 
-    // TODO create certificate
+    // TODO get type from core
+    let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
+
+    if (api.isComponentsHandle(locationKey)) {
+      locationItem = await core.Location.fromHandle(locationKey)
+    } else if (api.isComponentsId(locationKey)) {
+      locationItem = await core.Location.fromId(locationKey)
+    } else {
+      throw 'impossible'
+    }
+
+    if (locationItem == null) {
+      return {
+        parameters: {},
+        status: 404,
+        contentType: null,
+      }
+    }
+
+    // TODO actually create a certificate
+    const certificateItem: any = (core.Certificate as any).create({
+      locationId: locationItem.id,
+      handle: requestEntity.handle,
+      title: requestEntity.title,
+    })
+
+    const responseItem = {
+      id: certificateItem.id,
+    }
 
     return {
       status: 201,
       parameters: {},
       contentType: 'application/json',
-      entity: () => ({
-        id: '',
-      }),
+      entity: () => responseItem,
     }
   })

@@ -188,6 +188,8 @@ paths:
                     $ref: '#/components/schemas/Id'
         '403':
           description: Forbidden
+        '404':
+          description: Not Found
 
   /location/{location-key}/cohort:
     parameters:
@@ -348,12 +350,9 @@ components:
     CreateLocationCohortModel:
       type: object
       required:
-        - id
         - handle
         - title
       properties:
-        id:
-          $ref: '#/components/schemas/Id'
         handle:
           $ref: '#/components/schemas/Handle'
         title:
@@ -376,12 +375,9 @@ components:
     CreateLocationCertificateModel:
       type: object
       required:
-        - id
         - handle
         - title
       properties:
-        id:
-          $ref: '#/components/schemas/Id'
         handle:
           $ref: '#/components/schemas/Handle'
         title:
