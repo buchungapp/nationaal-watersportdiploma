@@ -19,7 +19,7 @@ test('location crud', () =>
           entity: () => entity,
         },
         // TODO this should be made implicit in a future version of the generator
-        { apiToken: 'supersecret' },
+        { apiKey: 'supersecret' },
         // TODO this too
         { baseUrl },
       )
@@ -37,7 +37,7 @@ test('location crud', () =>
           contentType: null,
           parameters: {},
         },
-        { apiToken: 'supersecret' },
+        { apiKey: 'supersecret' },
         { baseUrl },
       )
       assert(result.status === 200)

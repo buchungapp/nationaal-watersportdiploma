@@ -2,7 +2,7 @@ export type Authentication = {
   apiKey: {
     school: string
   }
-  token: {
+  openId: {
     user: string
     people: string[]
   }

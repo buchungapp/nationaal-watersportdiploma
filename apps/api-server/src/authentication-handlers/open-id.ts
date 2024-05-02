@@ -1,7 +1,7 @@
-import { TokenAuthenticationHandler } from '@nawadi/api'
+import { OpenIdAuthenticationHandler } from '@nawadi/api'
 import * as application from '../application/index.js'
 
-export const token: TokenAuthenticationHandler<
+export const openId: OpenIdAuthenticationHandler<
   application.Authentication
 > = async (credential) => {
   switch (credential) {
