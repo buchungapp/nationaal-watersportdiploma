@@ -24,14 +24,16 @@ export const openId: OpenIdAuthenticationHandler<
   const { user: authUser } = userResponse.data
 
   // TODO make this proposal work
-  const userItem = await core.User.byOauthId(authUser.id)
+  const userItem = await core.User.fromId(authUser.id)
   if (userItem == null) {
     // TODO log something?
     core.warn('user not found')
     return
   }
 
-  const personItems = await core.User.Person.byUserId(userItem.id)
+  const personItems = await core.User.Person.list({
+    filters: { userId: userItem.id },
+  })
 
   return {
     user: userItem.id,

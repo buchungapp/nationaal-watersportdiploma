@@ -1,6 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
-import { SQL, and, eq, sql } from 'drizzle-orm'
+import { SQL, SQLWrapper, and, eq, isNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -118,3 +118,30 @@ export const fromId = async (id: string) => {
 
   return result
 }
+
+export const list = withZod(
+  z
+    .object({
+      filters: z
+        .object({
+          userId: z.string().uuid().optional(),
+        })
+        .default({}),
+    })
+    .default({}),
+  async ({ filters }) => {
+    const query = useQuery()
+
+    const whereConditions: SQLWrapper[] = [isNull(s.person.deletedAt)]
+
+    if (filters.userId != null) {
+      whereConditions.push(eq(s.person.userId, filters.userId))
+    }
+
+    return query
+      .select()
+      .from(s.person)
+      .where(and(...whereConditions))
+      .then((rows) => rows)
+  },
+)

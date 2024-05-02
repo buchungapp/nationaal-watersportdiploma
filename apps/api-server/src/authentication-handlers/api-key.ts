@@ -12,7 +12,7 @@ export const apiKey: ApiKeyAuthenticationHandler<
     case 'supersecret':
       return {
         apiKey: apiKey.id,
-        school: apiKey.schoolId,
+        user: apiKey.userId,
       }
 
     default:
