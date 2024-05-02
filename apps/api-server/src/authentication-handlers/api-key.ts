@@ -6,7 +6,7 @@ export const apiKey: ApiKeyAuthenticationHandler<
   application.Authentication
 > = async (token) => {
   // TODO make this work
-  const tokenItem = await core.Token.byToken(token)
+  const tokenItem = await core.ApiKey.byToken(token)
 
   if (tokenItem == null) {
     return
@@ -14,6 +14,6 @@ export const apiKey: ApiKeyAuthenticationHandler<
 
   return {
     apiKey: tokenItem.id,
-    school: tokenItem.schoolId,
+    location: '00000000-0000-0000-0000-000000000000',
   }
 }

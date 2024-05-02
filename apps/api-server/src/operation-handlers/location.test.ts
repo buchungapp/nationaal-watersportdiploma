@@ -10,7 +10,7 @@ test('location crud', () =>
         case 'supersecret':
           return {
             apiKey: 0,
-            school: '00000000-0000-0000-0000-000000000000',
+            location: '00000000-0000-0000-0000-000000000000',
           }
 
         default:

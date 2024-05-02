@@ -18,7 +18,6 @@ export const openId: OpenIdAuthenticationHandler<
   // TODO make this proposal work
   const userItem = await core.User.fromId(authUser.id)
   if (userItem == null) {
-    // TODO log something?
     core.warn('user not found')
     return
   }
