@@ -6,7 +6,8 @@
     "spelling": "cspell",
     "formatting": "prettier --check *",
     "formatting:fix": "prettier --write *",
-    "initialize": "node ./scripts/initialize.js"
+    "initialize": "node ./scripts/initialize.js",
+    "db:seed": "snaplet ss restore --latest --no-reset --no-schema"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",

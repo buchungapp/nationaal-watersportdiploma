@@ -17,6 +17,7 @@ import {
   withDatabase,
   withTransaction,
 } from '@nawadi/core'
+import slugify from '@sindresorhus/slugify'
 import { GoogleAuth } from 'google-auth-library'
 import { google } from 'googleapis'
 import { z } from 'zod'
@@ -49,11 +50,6 @@ async function retrieveSheets() {
       return !sheet.properties?.title?.startsWith('_')
     }) ?? []
   )
-}
-
-async function slugify(text: string): Promise<string> {
-  const slugify = (await import('@sindresorhus/slugify')).default
-  return slugify(text)
 }
 
 const rowSchema = z.tuple([
@@ -124,7 +120,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     const disciplineTitle = row[0].startsWith('Jacht/kajuitzeilen ')
       ? 'Jachtzeilen'
       : row[0]
-    const disciplineHandle = await slugify(disciplineTitle.trim())
+    const disciplineHandle = slugify(disciplineTitle.trim())
     const disciplinePromise = getOrCreateCachedItem(
       Program.Discipline,
       disciplineHandle,
@@ -152,7 +148,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       ]
         .filter((cat): cat is string => Boolean(cat))
         .map(async (category, index) => {
-          const categoryHandle = await slugify(category)
+          const categoryHandle = slugify(category)
           return getOrCreateCachedItem(
             Program.Category,
             categoryHandle,
@@ -178,7 +174,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     )
 
     // Module
-    const moduleHandle = await slugify(row[3])
+    const moduleHandle = slugify(row[3])
     const modulePromise = getOrCreateCachedItem(
       Program.Module,
       moduleHandle,
@@ -187,7 +183,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
     )
 
     // Competency
-    const competencyHandle = await slugify(row[5])
+    const competencyHandle = slugify(row[5])
     const competencyPromise = getOrCreateCachedItem(
       Program.Competency,
       competencyHandle,
@@ -208,7 +204,7 @@ async function processRow(row: z.infer<typeof rowSchema>) {
       ])
 
     const programName = `${row[0]} ${row[1]} ${row[2]}`
-    const programHandle = await slugify(programName)
+    const programHandle = slugify(programName)
 
     const programId = await getOrCreateCachedItem(
       Program,

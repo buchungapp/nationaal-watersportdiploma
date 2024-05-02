@@ -1,0 +1,19 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  margin: auto; /* centers element within parent container */
+  background-color: white;
+  /* The actual print is a spread of two pages, so we need to set the background size to the size of the spread */
+  background-size: 296mm 210mm;
+  background-repeat: no-repeat;
+  position: relative; /* for child elements that need absolute positioning */
+  height: 210mm;
+  width: 297mm;
+
+  overflow: hidden;
+}
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}

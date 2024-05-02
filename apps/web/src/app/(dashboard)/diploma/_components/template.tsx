@@ -1,9 +1,9 @@
-import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
+import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
-import { findCertificate } from "~/lib/nwd";
+import { retrieveCertificateById } from "~/lib/nwd";
 import Module from "./module";
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
@@ -17,17 +17,8 @@ const DataField = ({ label, value }: { label: string; value: ReactNode }) => (
   </div>
 );
 
-export default async function CertificateTemplate({
-  issuedAt,
-  handle,
-}: {
-  issuedAt: Dayjs;
-  handle: string;
-}) {
-  const certificate = await findCertificate({
-    handle,
-    issuedAt: issuedAt.toISOString(),
-  });
+export default async function CertificateTemplate({ id }: { id: string }) {
+  const certificate = await retrieveCertificateById(id).catch(() => notFound());
 
   const degree = certificate.program.degree.rang;
 

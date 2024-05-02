@@ -9,6 +9,7 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/zod.js'
+import { Platform } from '../index.js'
 import { insertSchema, outputSchema } from './location.schema.js'
 
 export const create = withZod(
@@ -37,31 +38,73 @@ export const create = withZod(
 
 export const list = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
-  return await query.select().from(s.location)
+  return await query
+    .select()
+    .from(s.location)
+    .then((rows) =>
+      rows.map((row) => ({
+        ...row,
+        // TODO: Implement media in list procedure
+        logo: null,
+        logoSquare: null,
+        logoCertificate: null,
+      })),
+    )
 })
 
-export const fromId = withZod(
-  uuidSchema,
-  outputSchema.nullable(),
-  async (id) => {
-    const query = useQuery()
-    return await query
-      .select()
-      .from(s.location)
-      .where(eq(s.location.id, id))
-      .then((rows) => singleRow(rows))
-  },
-)
+export const fromId = withZod(uuidSchema, outputSchema, async (id) => {
+  const query = useQuery()
+  const location = await query
+    .select()
+    .from(s.location)
+    .where(eq(s.location.id, id))
+    .then((rows) => singleRow(rows))
+
+  const [logo, squareLogo, certificateLogo] = await Promise.all([
+    location.logoMediaId ? Platform.Media.fromId(location.logoMediaId) : null,
+    location.squareLogoMediaId
+      ? Platform.Media.fromId(location.squareLogoMediaId)
+      : null,
+    location.certificateMediaId
+      ? Platform.Media.fromId(location.certificateMediaId)
+      : null,
+  ])
+
+  return {
+    ...location,
+    logo,
+    logoSquare: squareLogo,
+    logoCertificate: certificateLogo,
+  }
+})
 
 export const fromHandle = withZod(
   handleSchema,
-  outputSchema.nullable(),
+  outputSchema,
   async (handle) => {
     const query = useQuery()
-    return await query
+
+    const location = await query
       .select()
       .from(s.location)
       .where(eq(s.location.handle, handle))
       .then((rows) => singleRow(rows))
+
+    const [logo, squareLogo, certificateLogo] = await Promise.all([
+      location.logoMediaId ? Platform.Media.fromId(location.logoMediaId) : null,
+      location.squareLogoMediaId
+        ? Platform.Media.fromId(location.squareLogoMediaId)
+        : null,
+      location.certificateMediaId
+        ? Platform.Media.fromId(location.certificateMediaId)
+        : null,
+    ])
+
+    return {
+      ...location,
+      logo,
+      logoSquare: squareLogo,
+      logoCertificate: certificateLogo,
+    }
   },
 )

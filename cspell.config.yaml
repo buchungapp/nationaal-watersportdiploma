@@ -27,8 +27,10 @@ words:
   - pgadmin
   - PGURI
   - pkce
+  - pkey
   - plpgsql
   - pnpx
+  - qrcode
   - redocly
   - rehype
   - ryanluker
@@ -51,6 +53,7 @@ ignoreWords:
   - BUT
   - LOSS
   - spandiensten
+  - PDF
 allowCompoundWords: true
 useGitignore: true
 ignorePaths:
