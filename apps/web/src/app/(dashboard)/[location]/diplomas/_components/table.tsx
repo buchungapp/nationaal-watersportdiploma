@@ -17,6 +17,7 @@ import {
 } from "@tremor/react";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import Link from "next/link";
 import { useState } from "react";
 import {
   Checkbox,
@@ -54,6 +55,9 @@ const columns = [
     meta: {
       align: "text-left",
     },
+    cell: ({ getValue, row }) => (
+      <Link href={`/diplomas/${row.original.id}/pdf`}>{getValue()}</Link>
+    ),
   }),
   columnHelper.accessor(
     (data) =>
