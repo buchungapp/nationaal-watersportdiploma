@@ -1,7 +1,7 @@
 export type Authentication = {
   apiKey: {
     apiKey: string
-    location: string
+    user: string
   }
   openId: {
     user: string
