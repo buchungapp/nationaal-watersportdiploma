@@ -17,8 +17,7 @@ export const openId: OpenIdAuthenticationHandler<
   const userResponse = await supabase.auth.getUser(token)
 
   if (userResponse.error != null) {
-    // TODO how do we log? opentelemetry?
-    console.error(userResponse.error)
+    core.warn(userResponse.error)
     return
   }
 
@@ -28,7 +27,7 @@ export const openId: OpenIdAuthenticationHandler<
   const userItem = await core.User.byOauthId(authUser.id)
   if (userItem == null) {
     // TODO log something?
-    console.error('user not found')
+    core.warn('user not found')
     return
   }
 
