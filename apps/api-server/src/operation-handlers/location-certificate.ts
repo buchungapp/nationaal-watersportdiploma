@@ -5,7 +5,7 @@ import * as application from '../application/index.js'
 export const getLocationCertificates: api.GetLocationCertificatesOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
-  const { location } = incomingRequest.parameters
+  const { locationKey } = incomingRequest.parameters
 
   // TODO list certificates
 
@@ -32,7 +32,7 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
   application.Authentication
 > = async (incomingRequest, authentication) =>
   core.withTransaction(async () => {
-    const { location } = incomingRequest.parameters
+    const { locationKey } = incomingRequest.parameters
     const entity = await incomingRequest.entity()
 
     // TODO create certificate
