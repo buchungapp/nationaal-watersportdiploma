@@ -1,3 +1,4 @@
+export * as ApiKey from './api-key/index.js'
 export * as Certificate from './certificate/index.js'
 export * as Curriculum from './curriculum/index.js'
 export * as Location from './location/index.js'
