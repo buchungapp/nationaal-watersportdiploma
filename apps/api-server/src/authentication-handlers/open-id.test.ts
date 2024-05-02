@@ -4,24 +4,23 @@ import assert from 'assert'
 import test from 'node:test'
 import { withTestEnvironment } from '../testing/index.js'
 
-test('api-key authentication', () =>
+test('open-id authentication', () =>
   withTestEnvironment(async ({ baseUrl }) => {
     const userItem = await core.User.getOrCreateFromEmail({
       email: 'test@test.test',
       displayName: 'test harry',
     })
 
-    const apiKeyItem = await core.ApiKey.createForUser({
-      name: 'test api-key',
-      userId: userItem.id,
-    })
+    const supabaseClient = core.useSupabaseClient()
+
+    const token = '' // TODO get token somehow
 
     const result = await api.me(
       {
         contentType: null,
         parameters: {},
       },
-      { apiKey: apiKeyItem.token } as api.MeCredentials, // TODO generator should do this properly, cast should  not be necessary
+      { openId: token } as api.MeCredentials, // TODO generator should do this properly, cast should  not be necessary
       { baseUrl },
     )
 

@@ -1,10 +1,10 @@
 import * as api from '@nawadi/api'
 import assert from 'assert/strict'
 import test from 'node:test'
-import { withTestServer } from '../testing/index.js'
+import { withTestEnvironment } from '../testing/index.js'
 
 test('location crud', () =>
-  withTestServer(async ({ server, baseUrl }) => {
+  withTestEnvironment(async ({ server, baseUrl }) => {
     server.registerApiKeyAuthentication(async (token) => {
       switch (token) {
         case 'supersecret':
