@@ -305,7 +305,7 @@ components:
     Title:
       type: string
       minLength: 1
-      nullable: true # needs support from generator
+      nullable: true
       description: A title (may be null)
 
     Handle:

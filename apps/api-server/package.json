@@ -1,8 +1,9 @@
 {
   "name": "@nawadi/api-server",
   "version": "0.0.0",
+  "private": true,
   "description": "",
-  "type": "commonjs",
+  "type": "module",
   "main": "./out/main.js",
   "types": "./out/main.d.ts",
   "files": [
@@ -10,7 +11,7 @@
     "./out/**"
   ],
   "bin": {
-    "nwd-api-server": "bin/program.js"
+    "nawadi-api-server": "bin/program.js"
   },
   "scripts": {
     "prepack": "tsc --build",

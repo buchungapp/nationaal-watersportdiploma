@@ -7,9 +7,9 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
-import { timestamps } from '../utils/sql'
-import { location } from './location'
-import { actor } from './user'
+import { timestamps } from '../utils/sql.js'
+import { location } from './location.js'
+import { actor } from './user.js'
 
 export const privilege = pgTable(
   'privilege',
