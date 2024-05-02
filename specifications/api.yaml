@@ -7,6 +7,26 @@ info:
   version: 0.1.0
 
 paths:
+  /discipline/{handle-or-id}:
+    parameters:
+      - in: path
+        name: handle-or-id
+        required: true
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+    get:
+      operationId: retrieveDiscipline
+      summary: Retrieves a single discipline
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Not Found
+
   /me:
     get:
       operationId: me
@@ -311,6 +331,13 @@ components:
       pattern: ^[a-z0-9\-]+$
       minLength: 3
       description: The unique handle of an item
+      not:
+        $ref: '#/components/schemas/Id'
+
+    HandleOrId:
+      oneOf:
+        - $ref: '#/components/schemas/Id'
+        - $ref: '#/components/schemas/Handle'
 
   responses:
     forbidden:
