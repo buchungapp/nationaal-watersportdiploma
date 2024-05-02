@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { hashToken } from '../../utils/crypto.js'
-import { singleRow, withZod } from '../../utils/index.js'
+import { possibleSingleRow, singleRow, withZod } from '../../utils/index.js'
 
 export const createForUser = withZod(
   z.object({
@@ -62,9 +62,9 @@ export const byToken = withZod(
           ),
         ),
       )
-      .then(singleRow)
+      .then(possibleSingleRow)
 
-    if (row.userId === null) {
+    if (row != null && row.userId === null) {
       throw new Error('Unassociated tokens are not supported at this time.')
     }
 
