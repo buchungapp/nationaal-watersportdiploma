@@ -1,6 +1,6 @@
 import assert from 'assert'
 import test from 'node:test'
-import { aggregateOneToMany } from './data-helpers'
+import { aggregateOneToMany } from './data-helpers.js'
 
 test.describe('aggregateOneToMany', () => {
   test.it('should aggregate one-to-many relationship correctly', () => {
