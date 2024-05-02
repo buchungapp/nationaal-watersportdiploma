@@ -5,11 +5,24 @@ import test from 'node:test'
 import { withTestEnvironment } from '../testing/index.js'
 
 test('api-key authentication', () =>
-  withTestEnvironment(async ({ baseUrl }) => {
+  withTestEnvironment({ isolation: 'supabase' }, async ({ baseUrl }) => {
+    const supabaseClient = core.useSupabaseClient()
+
+    // const createUserResult = await supabaseClient.auth.admin.createUser({
+    //   email: 'test@test.test',
+    //   email_confirm: true,
+    //   password: 'supersecret',
+    // })
+    // assert.ifError(createUserResult.error)
+
+    // const authUserItem = createUserResult.data.user
+    // assert(authUserItem != null)
+
     const userItem = await core.User.getOrCreateFromEmail({
       email: 'test@test.test',
       displayName: 'test harry',
     })
+    // assert.equal(userItem.id, authUserItem.id)
 
     const apiKeyItem = await core.ApiKey.createForUser({
       name: 'test api-key',
@@ -21,7 +34,7 @@ test('api-key authentication', () =>
         contentType: null,
         parameters: {},
       },
-      { apiKey: apiKeyItem.token } as api.MeCredentials, // TODO generator should do this properly, cast should  not be necessary
+      { apiKey: apiKeyItem.token },
       { baseUrl },
     )
 
