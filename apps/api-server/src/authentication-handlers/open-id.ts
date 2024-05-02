@@ -5,14 +5,6 @@ import * as application from '../application/index.js'
 export const openId: OpenIdAuthenticationHandler<
   application.Authentication
 > = async (token) => {
-  switch (token) {
-    case 'supersecret':
-      return {
-        user: '00000000-0000-0000-0000-000000000000',
-        persons: [],
-      }
-  }
-
   const supabase = core.useSupabaseClient()
   const userResponse = await supabase.auth.getUser(token)
 

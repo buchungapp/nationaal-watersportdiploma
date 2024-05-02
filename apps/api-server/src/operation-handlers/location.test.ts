@@ -4,7 +4,20 @@ import test from 'node:test'
 import { withTestServer } from '../testing/index.js'
 
 test('location crud', () =>
-  withTestServer(async ({ baseUrl }) => {
+  withTestServer(async ({ server, baseUrl }) => {
+    server.registerApiKeyAuthentication(async (token) => {
+      switch (token) {
+        case 'supersecret':
+          return {
+            apiKey: 0,
+            school: '00000000-0000-0000-0000-000000000000',
+          }
+
+        default:
+          return
+      }
+    })
+
     let id
     {
       const entity = {

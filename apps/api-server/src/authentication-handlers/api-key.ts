@@ -6,16 +6,14 @@ export const apiKey: ApiKeyAuthenticationHandler<
   application.Authentication
 > = async (token) => {
   // TODO make this work
-  const apiKey = await core.ApiKey.byToken(token)
+  const tokenItem = await core.Token.byToken(token)
 
-  switch (token) {
-    case 'supersecret':
-      return {
-        apiKey: apiKey.id,
-        school: apiKey.schoolId,
-      }
+  if (tokenItem == null) {
+    return
+  }
 
-    default:
-      return
+  return {
+    apiKey: tokenItem.id,
+    school: tokenItem.schoolId,
   }
 }
