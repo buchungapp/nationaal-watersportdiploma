@@ -319,6 +319,7 @@ components:
       description: Forbidden
 
   securitySchemes:
+    # this should be transformed into oauth authentication once the generator supports it
     token:
       type: http
       description: Default authentication mechanism
