@@ -5,7 +5,7 @@ import { withTestEnvironment } from '../testing/index.js'
 
 test('location crud', () =>
   withTestEnvironment(
-    { isolation: 'supabase' },
+    { isolation: 'transaction' },
     async ({ server, baseUrl }) => {
       server.registerApiKeyAuthentication(async (token) => {
         switch (token) {
