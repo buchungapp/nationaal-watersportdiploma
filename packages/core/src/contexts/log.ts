@@ -1,9 +1,9 @@
 import { AsyncLocalStorage } from 'async_hooks'
 
 export interface LogConfiguration {
-  error: (message: unknown) => void
-  warn: (message: unknown) => void
-  info: (message: unknown) => void
+  error?: (message: unknown) => void
+  warn?: (message: unknown) => void
+  info?: (message: unknown) => void
 }
 
 export function consoleLogConfiguration(): LogConfiguration {
@@ -32,15 +32,15 @@ export async function withLog<T>(
 
 export function error(message: unknown) {
   const configuration = storage.getStore()
-  configuration?.error(message)
+  configuration?.error?.(message)
 }
 
 export function warn(message: unknown) {
   const configuration = storage.getStore()
-  configuration?.warn(message)
+  configuration?.warn?.(message)
 }
 
 export function info(message: unknown) {
   const configuration = storage.getStore()
-  configuration?.info(message)
+  configuration?.info?.(message)
 }
