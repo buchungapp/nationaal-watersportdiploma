@@ -42,7 +42,10 @@ interface MainConfiguration {
 }
 
 async function main(configuration: MainConfiguration) {
-  await core.withLog(core.consoleLogConfiguration(), async () => {
+  // TODO support appsignal
+  const logConfiguration = core.consoleLogConfiguration()
+
+  await core.withLog(logConfiguration, async () => {
     try {
       const { port, pgUri, supabaseUrl, supabaseServiceRoleKey } = configuration
 
