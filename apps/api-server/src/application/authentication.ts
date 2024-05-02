@@ -5,6 +5,6 @@ export type Authentication = {
   }
   openId: {
     user: string
-    people: string[]
+    persons: string[]
   }
 }

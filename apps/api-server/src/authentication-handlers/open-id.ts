@@ -9,7 +9,7 @@ export const openId: OpenIdAuthenticationHandler<
     case 'supersecret':
       return {
         user: '00000000-0000-0000-0000-000000000000',
-        people: [],
+        persons: [],
       }
   }
 
@@ -32,10 +32,10 @@ export const openId: OpenIdAuthenticationHandler<
     return
   }
 
-  const peopleItems = await core.User.Person.byUserId(userItem.id)
+  const personItems = await core.User.Person.byUserId(userItem.id)
 
   return {
     user: userItem.id,
-    people: peopleItems.map((item) => item.id),
+    persons: personItems.map((item) => item.id),
   }
 }
