@@ -33,7 +33,7 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
 > = async (incomingRequest, authentication) =>
   core.withTransaction(async () => {
     const { locationKey } = incomingRequest.parameters
-    const entity = await incomingRequest.entity()
+    const requestEntity = await incomingRequest.entity()
 
     // TODO create certificate
 
