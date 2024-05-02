@@ -6,9 +6,6 @@ info:
     Nationaal Watersportdiploma API
   version: 0.1.0
 
-security:
-  - api-key: []
-
 paths:
   /me:
     get:
@@ -16,6 +13,7 @@ paths:
       summary: Retrieves information about the current user (if any)
       security:
         - open-id: []
+        - api-key: []
       responses:
         '200':
           description: Ok
