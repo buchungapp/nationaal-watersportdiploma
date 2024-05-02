@@ -10,7 +10,7 @@ export function createApplicationServer() {
 
   // authentication
 
-  server.registerApiTokenAuthentication(authenticationHandlers.apiToken)
+  server.registerApiKeyAuthentication(authenticationHandlers.apiToken)
   server.registerTokenAuthentication(authenticationHandlers.token)
 
   // operations

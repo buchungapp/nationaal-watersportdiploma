@@ -7,7 +7,8 @@ export const token: TokenAuthenticationHandler<
   switch (credential) {
     case 'supersecret':
       return {
-        userId: 1,
+        user: '',
+        people: [],
       }
 
     default:
