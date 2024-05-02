@@ -3,8 +3,8 @@ import * as application from '../application/index.js'
 
 export const openId: OpenIdAuthenticationHandler<
   application.Authentication
-> = async (credential) => {
-  switch (credential) {
+> = async (token) => {
+  switch (token) {
     case 'supersecret':
       return {
         user: '',
