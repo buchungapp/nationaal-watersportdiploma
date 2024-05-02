@@ -34,7 +34,7 @@ export const createForUser = withZod(
       .returning({ id: s.token.id })
       .then(singleRow)
 
-    return row as { id: string; token: string }
+    return { id: row.id, token }
   },
 )
 
