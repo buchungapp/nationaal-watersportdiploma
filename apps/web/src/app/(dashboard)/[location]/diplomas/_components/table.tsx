@@ -56,7 +56,7 @@ const columns = [
       align: "text-left",
     },
     cell: ({ getValue, row }) => (
-      <Link href={`/diplomas/${row.original.id}/pdf`}>{getValue()}</Link>
+      <Link href={`/diploma/${row.original.id}/pdf`}>{getValue()}</Link>
     ),
   }),
   columnHelper.accessor(
