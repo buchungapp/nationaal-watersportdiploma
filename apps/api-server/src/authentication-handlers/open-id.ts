@@ -24,20 +24,18 @@ export const openId: OpenIdAuthenticationHandler<
 
   const { user: authUser } = userResponse.data
 
-  // TODO select user id from database
-  // and select people from database
-  const user = await core.User.fromId(authUser.id)
-  const people = [await core.User.Person.fromId(authUser.id)].map(
-    (item) => item.id,
-  )
-
-  if (user == null) {
+  // TODO make this proposal work
+  const userItem = await core.User.byOauthId(authUser.id)
+  if (userItem == null) {
     // TODO log something?
+    console.error('user not found')
     return
   }
 
+  const peopleItems = await core.User.Person.byUserId(userItem.id)
+
   return {
-    user: user.id,
-    people,
+    user: userItem.id,
+    people: peopleItems.map((item) => item.id),
   }
 }

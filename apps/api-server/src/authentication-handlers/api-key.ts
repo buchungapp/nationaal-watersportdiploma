@@ -5,7 +5,7 @@ import * as application from '../application/index.js'
 export const apiKey: ApiKeyAuthenticationHandler<
   application.Authentication
 > = async (token) => {
-  // TODO something like
+  // TODO make this work
   const apiKey = await core.ApiKey.byToken(token)
 
   switch (token) {
