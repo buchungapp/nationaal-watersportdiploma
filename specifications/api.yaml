@@ -325,7 +325,7 @@ components:
       description: Default authentication mechanism
       scheme: bearer
 
-    api-token:
+    api-key:
       type: apiKey
-      name: api-token
+      name: x-api-key
       in: header
