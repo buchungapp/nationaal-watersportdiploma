@@ -21,7 +21,16 @@ export function createApplicationServer() {
 
   server.registerMeOperation(operationHandlers.me)
 
-  server.registerGetProgramsOperation(operationHandlers.getPrograms)
+  server.registerListDisciplinesOperation(operationHandlers.listDisciplines)
+  server.registerRetrieveDisciplineOperation(
+    operationHandlers.retrieveDiscipline,
+  )
+
+  server.registerRetrieveCurriculaByDisciplineOperation(
+    operationHandlers.retrieveCurriculaByDiscipline,
+  )
+
+  server.registerListProgramsOperation(operationHandlers.listPrograms)
 
   server.registerGetLocationsOperation(operationHandlers.getLocations)
   server.registerCreateLocationOperation(operationHandlers.createLocation)

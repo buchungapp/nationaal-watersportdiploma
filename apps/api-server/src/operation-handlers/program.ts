@@ -2,7 +2,7 @@ import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const getPrograms: api.GetProgramsOperationHandler<
+export const listPrograms: api.ListProgramsOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const list = await core.Program.list()

@@ -7,26 +7,6 @@ info:
   version: 0.1.0
 
 paths:
-  /discipline/{handle-or-id}:
-    parameters:
-      - in: path
-        name: handle-or-id
-        required: true
-        schema:
-          $ref: '#/components/schemas/HandleOrId'
-    get:
-      operationId: retrieveDiscipline
-      summary: Retrieves a single discipline
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: object
-        '404':
-          description: Not Found
-
   /me:
     get:
       operationId: me
@@ -42,20 +22,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserModel'
 
+  /discipline:
+    get:
+      operationId: listDisciplines
+      tags:
+        - discipline
+      summary: Lists all disciplines
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DisciplineListModel'
+
+  /discipline/{discipline-key}:
+    parameters:
+      - in: path
+        name: discipline-key
+        required: true
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+    get:
+      operationId: retrieveDiscipline
+      tags:
+        - discipline
+      summary: Retrieves a single discipline
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisciplineModel'
+        '404':
+          description: Not Found
+
+  /discipline/{discipline-key}/curriculum:
+    parameters:
+      - in: path
+        name: discipline-key
+        required: true
+        schema:
+          $ref: '#/components/schemas/HandleOrId'
+    get:
+      operationId: retrieveCurriculaByDiscipline
+      tags:
+        - curriculum
+      summary: Retrieves a curricula by discipline
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CurriculumListModel'
+        '404':
+          description: Not Found
+
   /programs:
     get:
-      operationId: get-programs
+      operationId: listPrograms
       summary: Retrieve a list of programs
       description: >-
         Retrieve a list of programs. The list will be paginated and the provided
         query parameters allow filtering the returned programs.
       tags:
-        - Programs
+        - program
       security:
         - open-id: []
       responses:
         '200':
-          description: A list of programs
+          description: Ok
           content:
             application/json:
               schema:
@@ -99,16 +141,15 @@ paths:
                   id:
                     $ref: '#/components/schemas/Id'
         '403':
-          $ref: '#/components/responses/forbidden'
+          description: Forbidden
 
-  /location/{location}/certificate:
+  /location/{location-key}/certificate:
     parameters:
       - in: path
         required: true
-        name: location
+        name: location-key
         schema:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/HandleOrId'
 
     get:
       operationId: get-location-certificates
@@ -122,6 +163,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LocationCertificateListModel'
+        '404':
+          description: Not Found
 
     post:
       operationId: create-location-certificate
@@ -144,16 +187,15 @@ paths:
                   id:
                     $ref: '#/components/schemas/Id'
         '403':
-          $ref: '#/components/responses/forbidden'
+          description: Forbidden
 
-  /location/{location}/cohort:
+  /location/{location-key}/cohort:
     parameters:
       - in: path
         required: true
-        name: location
+        name: location-key
         schema:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/HandleOrId'
 
     get:
       operationId: get-location-cohorts
@@ -167,6 +209,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LocationCohortListModel'
+        '404':
+          description: Not Found
 
     post:
       operationId: create-location-cohort
@@ -189,7 +233,7 @@ paths:
                   id:
                     $ref: '#/components/schemas/Id'
         '403':
-          $ref: '#/components/responses/forbidden'
+          description: Forbidden
 
 components:
   schemas:
@@ -205,6 +249,36 @@ components:
           $ref: '#/components/schemas/Id'
         handle:
           $ref: '#/components/schemas/Handle'
+
+    DisciplineModel:
+      type: object
+      required:
+        - id
+        - handle
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+
+    DisciplineListModel:
+      type: object
+      required:
+        - id
+        - handle
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        handle:
+          $ref: '#/components/schemas/Handle'
+
+    CurriculumListModel:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
 
     ProgramListModel:
       type: object
@@ -338,10 +412,6 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Id'
         - $ref: '#/components/schemas/Handle'
-
-  responses:
-    forbidden:
-      description: Forbidden
 
   securitySchemes:
     # this should be transformed into oauth authentication once the generator supports it
