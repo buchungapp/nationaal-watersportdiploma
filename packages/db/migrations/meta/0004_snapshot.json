@@ -1,5 +1,5 @@
 {
-  "id": "b1233dcc-b9b4-4b4b-8de9-416d34be6ced",
+  "id": "94202300-6138-4831-9d44-47a0906804df",
   "prevId": "0dcc7ee9-4eab-4f49-9526-53e223734145",
   "version": "5",
   "dialect": "pg",
@@ -465,8 +465,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "role_privilege_token_id_fk": {
-          "name": "role_privilege_token_id_fk",
+        "token_privilege_token_id_fk": {
+          "name": "token_privilege_token_id_fk",
           "tableFrom": "token_privilege",
           "tableTo": "token",
           "columnsFrom": [
@@ -478,8 +478,8 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "role_privilege_privilege_id_fk": {
-          "name": "role_privilege_privilege_id_fk",
+        "token_privilege_privilege_id_fk": {
+          "name": "token_privilege_privilege_id_fk",
           "tableFrom": "token_privilege",
           "tableTo": "privilege",
           "columnsFrom": [
@@ -493,8 +493,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "role_privilege_pk": {
-          "name": "role_privilege_pk",
+        "token_privilege_pk": {
+          "name": "token_privilege_pk",
           "columns": [
             "token_id",
             "privilege_id"

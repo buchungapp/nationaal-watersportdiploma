@@ -66,17 +66,17 @@ export const tokenPrivilege = pgTable(
     return {
       pk: primaryKey({
         columns: [table.tokenId, table.privilegeId],
-        name: 'role_privilege_pk',
+        name: 'token_privilege_pk',
       }),
       tokenReference: foreignKey({
         columns: [table.tokenId],
         foreignColumns: [token.id],
-        name: 'role_privilege_token_id_fk',
+        name: 'token_privilege_token_id_fk',
       }),
       privilegeReference: foreignKey({
         columns: [table.privilegeId],
         foreignColumns: [privilege.id],
-        name: 'role_privilege_privilege_id_fk',
+        name: 'token_privilege_privilege_id_fk',
       }),
     }
   },

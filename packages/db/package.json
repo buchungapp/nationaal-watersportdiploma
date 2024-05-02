@@ -22,6 +22,7 @@
     "generate:schema": "drizzle-kit generate:pg",
     "generate:all": "sh './src/generate-migrations.sh'",
     "generate:clean": "rm -rf ./migrations && pnpm run generate:all",
+    "drop": "drizzle-kit drop",
     "execute-migration": "node ./out/program.js migrate"
   },
   "repository": {

@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS "token_privilege" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone,
-	CONSTRAINT "role_privilege_pk" PRIMARY KEY("token_id","privilege_id")
+	CONSTRAINT "token_privilege_pk" PRIMARY KEY("token_id","privilege_id")
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "token_hashed_key_index" ON "token" ("hashed_key");
@@ -108,13 +108,13 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "token_privilege" ADD CONSTRAINT "role_privilege_token_id_fk" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "token_privilege" ADD CONSTRAINT "token_privilege_token_id_fk" FOREIGN KEY ("token_id") REFERENCES "token"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "token_privilege" ADD CONSTRAINT "role_privilege_privilege_id_fk" FOREIGN KEY ("privilege_id") REFERENCES "privilege"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "token_privilege" ADD CONSTRAINT "token_privilege_privilege_id_fk" FOREIGN KEY ("privilege_id") REFERENCES "privilege"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
