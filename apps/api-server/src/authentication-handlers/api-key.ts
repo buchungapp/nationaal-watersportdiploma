@@ -1,13 +1,18 @@
 import { ApiKeyAuthenticationHandler } from '@nawadi/api'
+import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
 export const apiKey: ApiKeyAuthenticationHandler<
   application.Authentication
 > = async (token) => {
+  // TODO something like
+  const apiKey = await core.ApiKey.byToken(token)
+
   switch (token) {
     case 'supersecret':
       return {
-        school: '',
+        apiKey: apiKey.id,
+        school: apiKey.schoolId,
       }
 
     default:
