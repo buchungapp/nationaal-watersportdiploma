@@ -59,6 +59,13 @@ export default async function Page({
     ),
   );
 
+  const allUniqueModules = Array.from(
+    new Set(certificate.curriculum.modules.map((module) => module.id)),
+  );
+
+  const hasMoreModules =
+    uniqueCompletedModules.length < allUniqueModules.length;
+
   const modules = certificate.curriculum.modules.filter((module) =>
     uniqueCompletedModules.includes(module.id),
   );
@@ -79,8 +86,12 @@ export default async function Page({
 
       <span className="text-[10pt] text-justify leading-[12pt] flex items-center justify-center absolute left-[23mm] top-[177mm] w-[71mm] h-[22mm]">
         <span>
-          Verbreed jezelf binnen je huidige niveau door extra modules te volgen,
-          ga de uitdaging aan met het volgende niveau 3, of duik in een nieuwe
+          {hasMoreModules
+            ? `Verbreed jezelf binnen je huidige niveau door extra modules te volgen,
+          ga `
+            : `Ga `}
+          de uitdaging aan met het volgende niveau{" "}
+          {certificate.program.degree.rang + 1}, of duik in een nieuwe
           discipline! Scan de QR-code voor meer informatie.
         </span>
       </span>
