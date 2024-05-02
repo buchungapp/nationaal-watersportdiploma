@@ -71,6 +71,28 @@ export const findCertificate = async ({
   );
 };
 
+export const listCertificates = cache(async (locationId: string) => {
+  return withSupabaseClient(
+    {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    },
+    () =>
+      withDatabase(
+        { pgUri: process.env.PGURI!, serverless: true },
+        async () => {
+          await tmpAuthCheck();
+
+          const certificates = await Certificate.list({
+            filter: { locationId },
+          });
+
+          return certificates;
+        },
+      ),
+  );
+});
+
 export const retrieveCertificateById = cache(async (id: string) => {
   return withSupabaseClient(
     {
@@ -223,7 +245,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
         async () => {
           await tmpAuthCheck();
 
-          const persons = await User.Person.list({ filters: { locationId } });
+          const persons = await User.Person.list({ filter: { locationId } });
 
           return persons;
         },

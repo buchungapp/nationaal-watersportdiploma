@@ -125,7 +125,7 @@ export const fromId = async (id: string) => {
 export const list = withZod(
   z
     .object({
-      filters: z
+      filter: z
         .object({
           locationId: uuidSchema.optional(),
         })
@@ -137,8 +137,8 @@ export const list = withZod(
 
     const conditions: SQL[] = []
 
-    if (input.filters.locationId) {
-      conditions.push(eq(s.actor.locationId, input.filters.locationId))
+    if (input.filter.locationId) {
+      conditions.push(eq(s.actor.locationId, input.filter.locationId))
     }
 
     return await query
