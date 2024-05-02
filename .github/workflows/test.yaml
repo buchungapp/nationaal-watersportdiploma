@@ -23,12 +23,14 @@ jobs:
       - run: corepack enable
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
-      - name: Install Vercel CLI
-        run: pnpm install vercel@latest --global
-      - name: Pull Vercel Environment Information
-        run: vercel env pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} ./apps/web/.env
       - name: Build Project Artifacts
-        run: pnpm --recursive run build
+        run: >
+          pnpm
+          --filter @nawadi/lib
+          --filter @nawadi/db
+          --filter @nawadi/core
+          --filter @nawadi/api-server
+          run build
 
   test:
     strategy:

@@ -53,7 +53,7 @@ Releasing from this repository is done manually. It works a little different for
 
 (see https://github.com/buchungapp/nationaal-watersportdiploma/discussions/22)
 
-### api-server
+### API-server
 
 The `nawadi-api-server` service is hosted on render.com via docker. To release it we need docker and installed and running. Also we need docker to be authorized to push to github's docker registry. Also read https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry.
 

@@ -1,15 +1,12 @@
 {
   "extends": "@tsconfig/node20",
   "compilerOptions": {
-    "module": "CommonJS",
-    "moduleResolution": "Node",
     "rootDir": "./src",
     "outDir": "./out",
     "sourceMap": true,
     "declaration": true,
     "composite": true,
     "lib": ["es2023"],
-    "strict": true,
     "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"],

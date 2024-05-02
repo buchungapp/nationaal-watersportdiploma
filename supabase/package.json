@@ -1,5 +1,8 @@
 {
   "name": "@nawadi/supabase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
   "scripts": {
     "start": "supabase start -x realtime,pgadmin-schema-diff,migra,edge-runtime,vector",
     "stop": "supabase stop",
