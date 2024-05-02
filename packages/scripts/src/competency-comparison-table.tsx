@@ -13,6 +13,7 @@ import slugify from '@sindresorhus/slugify'
 import 'dotenv/config'
 import path from 'path'
 import React from 'react'
+import { projectRoot } from './utils/root.js'
 
 async function main() {
   const [allPrograms, allActiveCurricula] = await Promise.all([
@@ -310,7 +311,7 @@ async function main() {
     return renderToFile(
       <Competency comptency={competency} />,
       path.join(
-        __dirname,
+        projectRoot,
         '..',
         'generated',
         'competentieoverzicht',
