@@ -1,8 +1,8 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
 import { eq, sql } from 'drizzle-orm'
-import { fromBuffer } from 'file-type'
-import sizeOf from 'image-size'
+import { fileTypeFromBuffer } from 'file-type'
+import { imageSize } from 'image-size'
 import crypto from 'node:crypto'
 import { z } from 'zod'
 import { useQuery, useSupabaseClient } from '../../contexts/index.js'
@@ -30,7 +30,7 @@ export const create = withZod(
     const supabase = useSupabaseClient()
 
     // Determine the file type
-    const type = await fromBuffer(input.file)
+    const type = await fileTypeFromBuffer(input.file)
 
     if (!type) {
       throw new Error('Failed to determine file type')
@@ -68,7 +68,7 @@ export const create = withZod(
       throw new Error('Failed to upload file')
     }
 
-    const dimensions = sizeOf(input.file)
+    const dimensions = imageSize(input.file)
 
     const query = useQuery()
 

@@ -9,14 +9,10 @@ import {
   View,
   renderToFile,
 } from '@react-pdf/renderer'
+import slugify from '@sindresorhus/slugify'
 import 'dotenv/config'
 import path from 'path'
 import React from 'react'
-
-async function slugify(text: string): Promise<string> {
-  const slugify = (await import('@sindresorhus/slugify')).default
-  return slugify(text)
-}
 
 async function main() {
   const [allPrograms, allActiveCurricula] = await Promise.all([
@@ -318,7 +314,7 @@ async function main() {
         '..',
         'generated',
         'competentieoverzicht',
-        `${await slugify(documentName)}.pdf`,
+        `${slugify(documentName)}.pdf`,
       ),
     )
   })

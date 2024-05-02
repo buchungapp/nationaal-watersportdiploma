@@ -1,4 +1,4 @@
-import { useSupabaseClient } from '../../contexts'
+import { useSupabaseClient } from '../../contexts/index.js'
 
 export function constructBaseUrl(bucketId: string, objectName: string) {
   const supabase = useSupabaseClient()
