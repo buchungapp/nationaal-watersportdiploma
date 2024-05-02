@@ -1,5 +1,5 @@
 import { OpenIdAuthenticationHandler } from '@nawadi/api'
-import { useSupabaseClient } from '@nawadi/core'
+import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
 export const openId: OpenIdAuthenticationHandler<
@@ -13,7 +13,7 @@ export const openId: OpenIdAuthenticationHandler<
       }
   }
 
-  const supabase = useSupabaseClient()
+  const supabase = core.useSupabaseClient()
   const userResponse = await supabase.auth.getUser(token)
 
   if (userResponse.error != null) {
@@ -22,14 +22,22 @@ export const openId: OpenIdAuthenticationHandler<
     return
   }
 
-  const { user } = userResponse.data
+  const { user: authUser } = userResponse.data
 
   // TODO select user id from database
   // and select people from database
-  // also come up with a better name for "people"
+  const user = await core.User.fromId(authUser.id)
+  const people = [await core.User.Person.fromId(authUser.id)].map(
+    (item) => item.id,
+  )
+
+  if (user == null) {
+    // TODO log something?
+    return
+  }
 
   return {
     user: user.id,
-    people: [],
+    people,
   }
 }
