@@ -3,7 +3,6 @@ import slugify from '@sindresorhus/slugify'
 import 'dotenv/config'
 import inquirer from 'inquirer'
 import { z } from 'zod'
-
 export const validSlugRegex = new RegExp(/^[a-zA-Z0-9\-]+$/)
 
 async function main() {

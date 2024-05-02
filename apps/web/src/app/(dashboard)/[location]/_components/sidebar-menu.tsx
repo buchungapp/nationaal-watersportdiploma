@@ -6,29 +6,33 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import { useSelectedLayoutSegment } from "next/navigation";
+import { useParams, useSelectedLayoutSegment } from "next/navigation";
 
 export function LocationSidebarMenu() {
   const segment = useSelectedLayoutSegment();
+  const params = useParams();
 
   return (
     <ul role="list" className="-mx-2 space-y-1">
       {[
         {
           name: "Cohorten",
-          href: "#",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          href: `/${params.location}/cohorten`,
           icon: RectangleStackIcon,
           current: segment === "cohorten",
         },
         {
           name: "Personen",
-          href: "#",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          href: `/${params.location}/personen`,
           icon: UserGroupIcon,
           current: segment === "personen",
         },
         {
           name: "Diploma's",
-          href: "#",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          href: `/${params.location}/diplomas`,
           icon: AcademicCapIcon,
           current: segment === "diplomas",
         },

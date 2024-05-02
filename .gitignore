@@ -17,5 +17,8 @@ coverage/
 
 !.vscode/
 !.github/
+!.snaplet/
+.snaplet/snapshots
+.snaplet/structure.d.ts
 
 .vercel

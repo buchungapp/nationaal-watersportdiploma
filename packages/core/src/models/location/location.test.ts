@@ -27,5 +27,8 @@ test('location crud', () =>
       updatedAt: item!.updatedAt,
       deletedAt: null,
       _metadata: null,
+      logo: null,
+      logoCertificate: null,
+      logoSquare: null,
     } satisfies Output)
   }))

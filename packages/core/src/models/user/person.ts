@@ -1,6 +1,7 @@
 import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
-import { SQL, and, eq, sql } from 'drizzle-orm'
+import { SQL, and, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
+import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -16,19 +17,26 @@ export const getOrCreate = withZod(
     .pick({
       firstName: true,
       lastName: true,
+      lastNamePrefix: true,
       dateOfBirth: true,
       birthCity: true,
       birthCountry: true,
     })
     .required()
     .extend({
-      userId: selectSchema.shape.authUserId,
+      userId: selectSchema.shape.authUserId.optional(),
     }),
   successfulCreateResponse,
   async (input) => {
     const query = useQuery()
 
-    const conditions: SQL[] = [eq(s.person.userId, input.userId)]
+    const conditions: SQL[] = []
+
+    if (input.userId) {
+      conditions.push(eq(s.person.userId, input.userId))
+    } else {
+      conditions.push(isNull(s.person.userId))
+    }
 
     // Add conditions dynamically based on defined inputs
     if (input.firstName) {
@@ -64,6 +72,7 @@ export const getOrCreate = withZod(
         userId: input.userId,
         firstName: input.firstName,
         lastName: input.lastName,
+        lastNamePrefix: input.lastNamePrefix,
         dateOfBirth: dayjs(input.dateOfBirth).format('YYYY-MM-DD'),
         birthCity: input.birthCity,
         birthCountry: input.birthCountry,
@@ -112,9 +121,55 @@ export const fromId = async (id: string) => {
   const query = useQuery()
 
   const [result] = await query
-    .select()
+    .select({
+      ...getTableColumns(s.person),
+      birthCountry: {
+        code: s.country.alpha_2,
+        name: s.country.nl,
+      },
+    })
     .from(s.person)
+    .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
 
   return result
 }
+
+export const list = withZod(
+  z
+    .object({
+      filter: z
+        .object({
+          locationId: uuidSchema.optional(),
+        })
+        .default({}),
+    })
+    .default({}),
+  async (input) => {
+    const query = useQuery()
+
+    const conditions: SQL[] = []
+
+    if (input.filter.locationId) {
+      conditions.push(eq(s.actor.locationId, input.filter.locationId))
+    }
+
+    return await query
+      .select({
+        ...getTableColumns(s.person),
+        birthCountry: {
+          code: s.country.alpha_2,
+          name: s.country.nl,
+        },
+        actor: s.actor,
+      })
+      .from(s.person)
+      .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+      .innerJoin(
+        s.actor,
+        and(eq(s.actor.personId, s.person.id), isNull(s.actor.deletedAt)),
+      )
+      .where(and(...conditions))
+      .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+  },
+)

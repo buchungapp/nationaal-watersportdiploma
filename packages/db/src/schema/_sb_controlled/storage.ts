@@ -12,6 +12,6 @@ export const _objectTable = pgSchema('storage').table('objects', {
     mode: 'string',
   }),
   metadata: jsonb('metadata'),
-  path_token: text('path_token').array(),
+  path_tokens: text('path_tokens').array(),
   version: text('version'),
 })

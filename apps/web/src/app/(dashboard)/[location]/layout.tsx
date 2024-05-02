@@ -3,10 +3,12 @@ import LatestNews from "./_components/latest-news";
 import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
 
-export default function RootLayout({
+export default function Layout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: { location: string };
 }>) {
   return (
     <>
@@ -22,7 +24,7 @@ export default function RootLayout({
           <nav className="flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col gap-y-7">
               <li className="">
-                <LocationSelector />
+                <LocationSelector currentLocationSlug={params.location} />
               </li>
               <li>
                 <LocationSidebarMenu />
