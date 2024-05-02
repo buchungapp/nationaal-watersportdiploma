@@ -11,7 +11,7 @@
     "./out/**"
   ],
   "bin": {
-    "nwd-api-server": "bin/program.js"
+    "nawadi-api-server": "bin/program.js"
   },
   "scripts": {
     "prepack": "tsc --build",
