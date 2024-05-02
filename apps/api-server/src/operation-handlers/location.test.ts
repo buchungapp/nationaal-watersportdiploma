@@ -9,8 +9,8 @@ test('location crud', () =>
       switch (token) {
         case 'supersecret':
           return {
-            apiKey: 0,
-            location: '00000000-0000-0000-0000-000000000000',
+            apiKey: '00000000-0000-0000-0000-000000000000',
+            user: '00000000-0000-0000-0000-000000000000',
           }
 
         default:
