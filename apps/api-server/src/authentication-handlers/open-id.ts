@@ -15,19 +15,12 @@ export const openId: OpenIdAuthenticationHandler<
 
   const { user: authUser } = userResponse.data
 
-  // TODO make this proposal work
-  const userItem = await core.User.fromId(authUser.id)
-  if (userItem == null) {
-    core.warn('user not found')
-    return
-  }
-
   const personItems = await core.User.Person.list({
-    filters: { userId: userItem.id },
+    filters: { userId: authUser.id },
   })
 
   return {
-    user: userItem.id,
+    user: authUser.id,
     persons: personItems.map((item) => item.id),
   }
 }
