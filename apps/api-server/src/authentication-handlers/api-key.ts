@@ -5,14 +5,18 @@ import * as application from '../application/index.js'
 export const apiKey: ApiKeyAuthenticationHandler<
   application.Authentication
 > = async (token) => {
-  const apiKeyItem = await core.ApiKey.byToken(token)
+  try {
+    const apiKeyItem = await core.ApiKey.byToken(token)
 
-  if (apiKeyItem == null) {
-    return
-  }
+    if (apiKeyItem == null) {
+      return
+    }
 
-  return {
-    apiKey: apiKeyItem.id,
-    user: apiKeyItem.userId,
+    return {
+      apiKey: apiKeyItem.id,
+      user: apiKeyItem.userId,
+    }
+  } catch (error) {
+    core.error(error)
   }
 }
