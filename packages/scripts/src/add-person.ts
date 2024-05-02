@@ -58,7 +58,13 @@ async function main() {
   ])
 
   const rowSchema = z.object({
-    email: z.string().trim().toLowerCase().email(),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email()
+      .nullable()
+      .catch(() => null),
     firstName: z.string().trim(),
     lastNamePrefix: z
       .string()
@@ -74,13 +80,17 @@ async function main() {
 
   const row = rowSchema.parse(answers)
 
-  const user = await User.getOrCreateFromEmail({
-    email: row.email,
-    displayName: row.firstName,
-  })
+  let user
+
+  if (row.email) {
+    user = await User.getOrCreateFromEmail({
+      email: row.email,
+      displayName: row.firstName,
+    })
+  }
 
   const person = await User.Person.getOrCreate({
-    userId: user.id,
+    userId: user?.id,
     firstName: row.firstName,
     lastName: row.lastName,
     lastNamePrefix: row.lastNamePrefix,

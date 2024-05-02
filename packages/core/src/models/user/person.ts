@@ -24,13 +24,19 @@ export const getOrCreate = withZod(
     })
     .required()
     .extend({
-      userId: selectSchema.shape.authUserId,
+      userId: selectSchema.shape.authUserId.optional(),
     }),
   successfulCreateResponse,
   async (input) => {
     const query = useQuery()
 
-    const conditions: SQL[] = [eq(s.person.userId, input.userId)]
+    const conditions: SQL[] = []
+
+    if (input.userId) {
+      conditions.push(eq(s.person.userId, input.userId))
+    } else {
+      conditions.push(isNull(s.person.userId))
+    }
 
     // Add conditions dynamically based on defined inputs
     if (input.firstName) {
@@ -115,8 +121,15 @@ export const fromId = async (id: string) => {
   const query = useQuery()
 
   const [result] = await query
-    .select()
+    .select({
+      ...getTableColumns(s.person),
+      birthCountry: {
+        code: s.country.alpha_2,
+        name: s.country.nl,
+      },
+    })
     .from(s.person)
+    .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
 
   return result
@@ -144,9 +157,14 @@ export const list = withZod(
     return await query
       .select({
         ...getTableColumns(s.person),
+        birthCountry: {
+          code: s.country.alpha_2,
+          name: s.country.nl,
+        },
         actor: s.actor,
       })
       .from(s.person)
+      .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
       .innerJoin(
         s.actor,
         and(eq(s.actor.personId, s.person.id), isNull(s.actor.deletedAt)),
