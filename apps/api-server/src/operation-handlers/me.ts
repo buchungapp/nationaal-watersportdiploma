@@ -7,10 +7,12 @@ export const me: api.MeOperationHandler<application.Authentication> = async (
   authentication,
 ) => {
   let id: string | undefined
+  // TODO make this more ergonomic
   if ('apiKey' in authentication && authentication.apiKey != null) {
     id = authentication.apiKey.user
   }
 
+  // TODO make this more ergonomic
   if ('openId' in authentication && authentication.openId != null) {
     id = authentication.openId.user
   }
