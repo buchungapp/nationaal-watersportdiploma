@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 function showConfetti() {
   const jsConfetti = new JSConfetti();
-  jsConfetti.addConfetti({
+  void jsConfetti.addConfetti({
     confettiColors: ["#ff8000", "#007FFF", "#0047ab"],
     confettiRadius: 6,
     confettiNumber: 500,
