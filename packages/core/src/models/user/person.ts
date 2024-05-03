@@ -1,6 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
-import { SQL, and, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
+import { SQL, SQLWrapper, getTableColumns, and, eq, isNull, sql } from 'drizzle-orm'
 import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
