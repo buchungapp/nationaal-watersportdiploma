@@ -202,7 +202,6 @@ async function main(filePath: string) {
 
   if (!parseResult.success) {
     console.error('Error parsing the CSV file:', parseResult.error.flatten())
-    console.log('normalizedEntries', normalizedEntries)
     process.exit(1)
   }
 

@@ -7,7 +7,7 @@ import { retrieveCertificateById } from "~/lib/nwd";
 import Module from "./module";
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
-  <p className="text-branding-dark font-medium">{children}</p>
+  <p className="text-branding-dark font-semibold">{children}</p>
 );
 
 const DataField = ({ label, value }: { label: string; value: ReactNode }) => (

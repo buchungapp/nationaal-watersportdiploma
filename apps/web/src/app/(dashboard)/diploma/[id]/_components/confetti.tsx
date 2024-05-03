@@ -9,7 +9,11 @@ export function Confetti() {
   useEffect(() => {
     if (searchParams.has("redirected")) {
       const jsConfetti = new JSConfetti();
-      jsConfetti.addConfetti();
+      jsConfetti.addConfetti({
+        confettiColors: ["#ff8000", "#007FFF", "#0047ab"],
+        confettiRadius: 6,
+        confettiNumber: 500,
+      });
     }
   }, []);
 
