@@ -1,6 +1,7 @@
 import { MenuButton as HeadlessMenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { logout } from "~/app/_actions/auth";
+import { retrieveUser } from "~/lib/nwd";
 import { Avatar } from "./avatar";
 import {
   Dropdown,
@@ -10,15 +11,7 @@ import {
 } from "./dropdown";
 
 export async function UserSelector() {
-  const currentUser = await new Promise<{
-    name: string;
-    email: string;
-  }>((resolve) => {
-    return resolve({
-      name: "Maurits",
-      email: "maurits@buchung.nl",
-    });
-  });
+  const currentUser = await retrieveUser();
 
   return (
     <Dropdown>
@@ -28,12 +21,12 @@ export async function UserSelector() {
       >
         <Avatar
           className="size-8"
-          initials={currentUser.name.slice(0, 2)}
+          initials={(currentUser.displayName ?? currentUser.email).slice(0, 2)}
           square={true}
         />
         <span className="block text-left">
           <span className="block text-sm/5 font-medium">
-            {currentUser.name}
+            {currentUser.displayName}
           </span>
           <span className="block text-xs/5 text-zinc-500">
             {currentUser.email}

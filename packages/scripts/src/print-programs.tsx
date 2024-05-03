@@ -14,6 +14,7 @@ import {
 } from '@react-pdf/renderer'
 import path from 'path'
 import React, { Fragment, PropsWithChildren } from 'react'
+import { projectRoot } from './utils/root.js'
 
 async function main() {
   const [allActiveCurricula, allPrograms] = await Promise.all([
@@ -587,7 +588,7 @@ async function main() {
         ))}
       </Document>,
       path.join(
-        __dirname,
+        projectRoot,
         '..',
         'generated',
         'opleidingsoverzicht',

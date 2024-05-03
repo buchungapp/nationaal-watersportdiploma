@@ -1,9 +1,6 @@
 {
   "extends": "@tsconfig/node20",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
     "rootDir": "./src",
     "outDir": "./out",
     "sourceMap": true,

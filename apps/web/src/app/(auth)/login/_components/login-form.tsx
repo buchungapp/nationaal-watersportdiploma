@@ -42,6 +42,11 @@ function FakeCaret() {
   );
 }
 
+function OTPInputWithPending({ children }: PropsWithChildren) {
+  const { pending } = useFormStatus();
+  return pending ? <Spinner className="h-5 w-5 text-black" /> : children;
+}
+
 export function OtpForm({
   email,
   ...formProps
@@ -51,58 +56,60 @@ export function OtpForm({
 
   return (
     <form ref={formRef} action={formAction} {...formProps}>
-      <OTPInput
-        maxLength={6}
-        autoFocus
-        name="otp"
-        containerClassName={clsx([
-          "group flex justify-between items-center has-[:disabled]:opacity-30",
-        ])}
-        pushPasswordManagerStrategy="none"
-        data-lpignore="true"
-        data-1p-ignore="true"
-        onComplete={() => formRef.current?.requestSubmit()}
-        render={({ slots }) => (
-          <>
-            {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
-              console.log("hasFakeCaret", hasFakeCaret);
-              return (
-                <div
-                  key={idx}
-                  className={clsx([
-                    // Basic layout
-                    "h-12 w-12 relative flex items-center justify-center appearance-none rounded-lg px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing[3])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
+      <OTPInputWithPending>
+        <OTPInput
+          maxLength={6}
+          autoFocus
+          name="otp"
+          containerClassName={clsx([
+            "group flex justify-between items-center has-[:disabled]:opacity-30",
+          ])}
+          pushPasswordManagerStrategy="none"
+          data-lpignore="true"
+          data-1p-ignore="true"
+          onComplete={() => formRef.current?.requestSubmit()}
+          render={({ slots }) => (
+            <>
+              {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
+                console.log("hasFakeCaret", hasFakeCaret);
+                return (
+                  <div
+                    key={idx}
+                    className={clsx([
+                      // Basic layout
+                      "h-12 w-12 relative flex items-center justify-center appearance-none rounded-lg px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing[3])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
 
-                    // Typography
-                    "text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white",
+                      // Typography
+                      "text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white",
 
-                    // Border
-                    "border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20",
+                      // Border
+                      "border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20",
 
-                    // Background color
-                    "bg-transparent dark:bg-white/5",
+                      // Background color
+                      "bg-transparent dark:bg-white/5",
 
-                    // Hide default focus styles
-                    "focus:outline-none",
+                      // Hide default focus styles
+                      "focus:outline-none",
 
-                    //   Focus ring
-                    isActive && "ring-inset ring-2 ring-blue-500",
+                      //   Focus ring
+                      isActive && "ring-inset ring-2 ring-blue-500",
 
-                    // Invalid state
-                    "data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[invalid]:dark:border-red-500 data-[invalid]:data-[hover]:dark:border-red-500",
+                      // Invalid state
+                      "data-[invalid]:border-red-500 data-[invalid]:data-[hover]:border-red-500 data-[invalid]:dark:border-red-500 data-[invalid]:data-[hover]:dark:border-red-500",
 
-                    // Disabled state
-                    "data-[disabled]:border-zinc-950/20 dark:data-[hover]:data-[disabled]:border-white/15 data-[disabled]:dark:border-white/15 data-[disabled]:dark:bg-white/[2.5%]",
-                  ])}
-                >
-                  {char}
-                  {hasFakeCaret && <FakeCaret />}
-                </div>
-              );
-            })}
-          </>
-        )}
-      />
+                      // Disabled state
+                      "data-[disabled]:border-zinc-950/20 dark:data-[hover]:data-[disabled]:border-white/15 data-[disabled]:dark:border-white/15 data-[disabled]:dark:bg-white/[2.5%]",
+                    ])}
+                  >
+                    {char}
+                    {hasFakeCaret && <FakeCaret />}
+                  </div>
+                );
+              })}
+            </>
+          )}
+        />
+      </OTPInputWithPending>
 
       {state?.error ? (
         <div className="text-red-500 text-xs font-mono">{state.error}</div>
