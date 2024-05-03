@@ -1,10 +1,9 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-export const projectRoot = getProjectRoot()
+export const projectRoot = makeProjectRoot()
 
-function getProjectRoot() {
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
-  return path.resolve(__dirname, '..')
+function makeProjectRoot() {
+  const dirname = path.dirname(fileURLToPath(import.meta.url))
+  return path.resolve(dirname, '..')
 }

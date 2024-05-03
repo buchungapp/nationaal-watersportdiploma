@@ -3,9 +3,8 @@ import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { createAuthUser } from '../../services/auth/handlers.js'
-import { uuidSchema, withZod } from '../../utils/index.js'
-import { listActiveTypesForUser } from './actor.js'
-import { outputSchema } from './user.schema.js'
+import { singleRow, uuidSchema, withZod } from '../../utils/index.js'
+import { selectSchema } from './user.schema.js'
 
 export const getOrCreateFromEmail = withZod(
   z.object({
@@ -52,26 +51,15 @@ export const getOrCreateFromEmail = withZod(
 
 export const fromId = withZod(
   uuidSchema,
-  outputSchema.nullable(),
+  selectSchema.nullable(),
   async (id) => {
     const query = useQuery()
 
-    const _self = query.select().from(s.user).where(eq(s.user.authUserId, id))
-
-    const [[self], activeActorTypes] = await Promise.all([
-      _self,
-      listActiveTypesForUser({ userId: id }),
-    ])
-
-    if (!self) {
-      return null
-    }
-
-    return {
-      ...self,
-      _metadata: self._metadata as any,
-      activeActorTypes,
-    }
+    return (await query
+      .select()
+      .from(s.user)
+      .where(eq(s.user.authUserId, id))
+      .then(singleRow)) as any // Metadata does not match the type,  but we have Zod to validate
   },
 )
 

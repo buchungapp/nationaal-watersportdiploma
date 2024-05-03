@@ -1,4 +1,5 @@
 import * as api from '@nawadi/api'
+import * as core from '@nawadi/core'
 import * as authenticationHandlers from '../authentication-handlers/index.js'
 import * as operationHandlers from '../operation-handlers/index.js'
 import { Authentication } from './authentication.js'
@@ -10,8 +11,8 @@ export function createApplicationServer() {
 
   // authentication
 
-  server.registerApiTokenAuthentication(authenticationHandlers.apiToken)
-  server.registerTokenAuthentication(authenticationHandlers.token)
+  server.registerApiKeyAuthentication(authenticationHandlers.apiKey)
+  server.registerOpenIdAuthentication(authenticationHandlers.openId)
 
   // operations
 
@@ -20,7 +21,16 @@ export function createApplicationServer() {
 
   server.registerMeOperation(operationHandlers.me)
 
-  server.registerGetProgramsOperation(operationHandlers.getPrograms)
+  server.registerListDisciplinesOperation(operationHandlers.listDisciplines)
+  server.registerRetrieveDisciplineOperation(
+    operationHandlers.retrieveDiscipline,
+  )
+
+  server.registerRetrieveCurriculaByDisciplineOperation(
+    operationHandlers.retrieveCurriculaByDiscipline,
+  )
+
+  server.registerListProgramsOperation(operationHandlers.listPrograms)
 
   server.registerGetLocationsOperation(operationHandlers.getLocations)
   server.registerCreateLocationOperation(operationHandlers.createLocation)
@@ -41,6 +51,14 @@ export function createApplicationServer() {
 
   // middleware!
 
+  server.registerMiddleware(async (req, next) => {
+    try {
+      return await next(req)
+    } catch (error) {
+      core.error(error)
+      throw error
+    }
+  })
   server.registerMiddleware(api.createErrorMiddleware())
 
   return server

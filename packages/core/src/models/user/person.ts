@@ -140,6 +140,7 @@ export const list = withZod(
     .object({
       filter: z
         .object({
+          userId: z.string().uuid().optional(),
           locationId: uuidSchema.optional(),
         })
         .default({}),
@@ -149,6 +150,10 @@ export const list = withZod(
     const query = useQuery()
 
     const conditions: SQL[] = []
+
+    if (input.filter.userId != null) {
+      conditions.push(eq(s.person.userId, input.filter.userId))
+    }
 
     if (input.filter.locationId) {
       conditions.push(eq(s.actor.locationId, input.filter.locationId))
