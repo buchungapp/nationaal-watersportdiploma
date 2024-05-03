@@ -1,15 +1,26 @@
 import { listCertificates, retrieveLocationByHandle } from "~/lib/nwd";
+import { TablePagination } from "../../_components/table-pagination";
 import Table from "./_components/table";
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: {
     location: string;
   };
+  searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const location = await retrieveLocationByHandle(params.location);
   const certificates = await listCertificates(location.id);
+
+  const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
+  const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
+
+  const paginatedCertificates = certificates.slice(
+    (currentPage - 1) * paginationLimit,
+    currentPage * paginationLimit,
+  );
 
   return (
     <div className="py-16">
@@ -34,7 +45,10 @@ export default async function Page({
         </div>
       </div>
 
-      <Table certificates={certificates} />
+      <Table certificates={paginatedCertificates} />
+      <div className="mt-4 flex w-full justify-end">
+        <TablePagination totalItems={certificates.length} />
+      </div>
     </div>
   );
 }
