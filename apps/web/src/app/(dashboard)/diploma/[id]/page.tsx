@@ -1,7 +1,8 @@
+import { constants } from "@nawadi/lib";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { retrieveCertificateById } from "~/lib/nwd";
-import { Text } from "../../_components/text";
+import { Text, TextLink } from "../../_components/text";
 import { generateAdvise } from "../_utils/generate-advise";
 import { Confetti } from "./_components/confetti";
 import CertificateTemplate from "./_components/template";
@@ -37,7 +38,22 @@ export default async function Page({
       <div className="text-center py-8">
         <h2 className="text-2xl font-semibold text-gray-950">En nu?</h2>
 
-        <Text className="max-w-prose mx-auto">{advice}</Text>
+        <Text className="max-w-prose mx-auto mt-1.5">{advice}</Text>
+
+        <Text className="max-w-prose mx-auto mt-2">
+          Leer meer over alle verschillende diploma's op{" "}
+          <TextLink href="/diplomalijn/consument">onze diplomalijn</TextLink>{" "}
+          pagina!
+        </Text>
+
+        <Text className="max-w-prose mx-auto mt-8">
+          <strong>Psst..</strong> Deel een foto van jou en je diploma op
+          Instagram, tag ons op{" "}
+          <TextLink href={constants.INSTAGRAM_URL}>
+            @nationaalwatersportdiploma
+          </TextLink>{" "}
+          en krijg een unieke NWD sticker thuisgestuurd!
+        </Text>
       </div>
     </div>
   );
