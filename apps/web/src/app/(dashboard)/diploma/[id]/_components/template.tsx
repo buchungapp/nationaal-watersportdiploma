@@ -63,14 +63,14 @@ export default async function CertificateTemplate({ id }: { id: string }) {
         </div>
       </header>
       <section className="grid flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
-        <div className="flex flex-col justify-between w-full">
+        <div className="flex flex-col w-full">
           <div>
             <DataLabel>Afgeronde modules</DataLabel>
             <p className="text-base">
               Klik op een module voor meer informatie.
             </p>
           </div>
-          <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6">
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6">
             {modules.map((module) => {
               return (
                 <Module
@@ -142,6 +142,22 @@ export default async function CertificateTemplate({ id }: { id: string }) {
             />
 
             <DataField label="DIPLOMANUMMER" value={certificate.handle} />
+
+            <DataField
+              label="Vaarlocatie van uitgifte"
+              value={
+                certificate.location.logoCertificate ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    className="w-full h-auto object-contain"
+                    src={certificate.location.logoCertificate.url}
+                    alt={certificate.location.logoCertificate.alt ?? ""}
+                  />
+                ) : (
+                  certificate.location.name
+                )
+              }
+            />
           </div>
         </div>
       </section>
