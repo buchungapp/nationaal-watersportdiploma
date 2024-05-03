@@ -50,13 +50,15 @@ export const create = withZod(
 )
 
 export const list = withZod(
-  z.object({
-    filter: z
-      .object({
-        id: singleOrArray(uuidSchema).optional(),
-      })
-      .default({}),
-  }),
+  z
+    .object({
+      filter: z
+        .object({
+          id: singleOrArray(uuidSchema).optional(),
+        })
+        .default({}),
+    })
+    .default({}),
   outputSchema.array(),
   async ({ filter }) => {
     const query = useQuery()

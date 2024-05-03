@@ -63,12 +63,49 @@ export default async function Page({
     new Set(certificate.curriculum.modules.map((module) => module.id)),
   );
 
-  const hasMoreModules =
-    uniqueCompletedModules.length < allUniqueModules.length;
-
   const modules = certificate.curriculum.modules.filter((module) =>
     uniqueCompletedModules.includes(module.id),
   );
+
+  const hasMoreModules =
+    uniqueCompletedModules.length < allUniqueModules.length;
+
+  const nextRang = certificate.program.degree.rang + 1;
+
+  const adviceStrings = [];
+
+  if (hasMoreModules) {
+    adviceStrings.push(
+      "verbreed jezelf binnen je huidige niveau door extra modules te volgen",
+    );
+  }
+
+  if (nextRang <= 4) {
+    adviceStrings.push(
+      `ga de uitdaging aan met het volgende niveau ${nextRang}`,
+    );
+  }
+
+  adviceStrings.push("duik in een nieuwe discipline");
+
+  // Function to format and combine advice strings
+  const formatAdvice = (advice: string[]) => {
+    if (advice.length === 0) {
+      return ""; // No advice to give
+    }
+
+    // Capitalize the first letter of the first advice
+    advice[0] = advice[0]!.charAt(0).toUpperCase() + advice[0]!.slice(1);
+
+    if (advice.length > 1) {
+      const lastAdvice = advice.pop();
+      return `${advice.join(", ")} of ${lastAdvice}!`;
+    } else {
+      return `${advice[0]}.`;
+    }
+  };
+
+  const combinedAdvice = formatAdvice(adviceStrings);
 
   return (
     <div className="page" style={{ backgroundImage: `url(${bg.src})` }}>
@@ -85,15 +122,7 @@ export default async function Page({
       </span>
 
       <span className="text-[10pt] text-justify leading-[12pt] flex items-center justify-center absolute left-[23mm] top-[177mm] w-[71mm] h-[22mm]">
-        <span>
-          {hasMoreModules
-            ? `Verbreed jezelf binnen je huidige niveau door extra modules te volgen,
-          ga `
-            : `Ga `}
-          de uitdaging aan met het volgende niveau{" "}
-          {certificate.program.degree.rang + 1}, of duik in een nieuwe
-          discipline! Scan de QR-code voor meer informatie.
-        </span>
+        <span>{`${combinedAdvice} Scan de QR-code voor meer informatie.`}</span>
       </span>
 
       <div className="size-[28mm] absolute left-[100mm] p-[3mm] top-[174mm]">
