@@ -1,17 +1,18 @@
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
+import { DialogBody, DialogTitle } from "~/app/(dashboard)/_components/dialog";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { retrieveCertificateById } from "~/lib/nwd";
 import Module from "./module";
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
-  <p className="text-branding-dark font-medium">{children}</p>
+  <p className="text-branding-dark font-semibold uppercase">{children}</p>
 );
 
 const DataField = ({ label, value }: { label: string; value: ReactNode }) => (
-  <div className="text-[12pt]">
+  <div className="text-base">
     <DataLabel>{label}</DataLabel>
     <p className="font-medium">{value}</p>
   </div>
@@ -44,14 +45,14 @@ export default async function CertificateTemplate({ id }: { id: string }) {
           </div>
           <div className="flex gap-4 pr-4">
             <div className="flex flex-col justify-center text-end">
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold">
+              <p className="text-lg sm:text-xl leading-1 lg:text-2xl font-bold">
                 {certificate.gearType.title}
               </p>
-              <p className="text-sm sm:text-base lg:text-lg">
+              <p className="text-sm sm:text-base leading-1 lg:text-lg">
                 {certificate.program.title?.slice(0, -1).trim()}
               </p>
             </div>
-            <p className="text-[42pt] font-black text-branding-orange align-text-bottom">
+            <p className="text-6xl font-black text-branding-orange align-text-bottom">
               {degree}
             </p>
           </div>
@@ -61,26 +62,22 @@ export default async function CertificateTemplate({ id }: { id: string }) {
           <div className="bg-white h-1 w-full" />
         </div>
       </header>
-      <section className="grid flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16">
+      <section className="grid flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
         <div className="flex flex-col justify-between w-full">
           <div>
-            <p className="font-bold text-[12pt]">
-              Gefeliciteerd! Een nieuw diploma!
-            </p>
-            <p className="text-[12pt]">
-              De volgende modules heb je succesvol afgerond:
+            <DataLabel>Afgeronde modules</DataLabel>
+            <p className="text-base">
+              Klik op een module voor meer informatie.
             </p>
           </div>
-          <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-y-8 gap-x-6">
             {modules.map((module) => {
               return (
                 <Module
                   key={module.id}
                   button={
                     <>
-                      <span className="text-semibold font-bold">
-                        {module.title}
-                      </span>
+                      <span className="font-semibold">{module.title}</span>
 
                       <div className="flex flex-col gap-y-[4px]">
                         <hr className="w-full h-0.5 bg-branding-dark" />
@@ -89,18 +86,27 @@ export default async function CertificateTemplate({ id }: { id: string }) {
                     </>
                   }
                 >
-                  <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 py-4">
-                    {module.competencies.map((competency) => {
-                      return (
-                        <li className="flex flex-col pt-3.5">
-                          <span className="font-semibold">
-                            {competency.title}
-                          </span>
-                          <span>{competency.requirement}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <DialogTitle>{module.title}</DialogTitle>
+
+                  <p className="mt-2 text-pretty text-base/6 text-zinc-500 sm:text-sm/6">
+                    Lees hieronder welke competenties vallen onder deze module,
+                    en jij hebt laten zien dat je beheerst!
+                  </p>
+
+                  <DialogBody className="text-sm/6 text-zinc-900">
+                    <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 pt-4 pb-8">
+                      {module.competencies.map((competency) => {
+                        return (
+                          <li className="flex flex-col pt-3.5">
+                            <span className="font-semibold">
+                              {competency.title}
+                            </span>
+                            <span>{competency.requirement}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </DialogBody>
                 </Module>
               );
             })}
