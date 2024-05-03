@@ -33,5 +33,7 @@ export async function GET(request: NextRequest) {
     issuedAt: parsed.data.issuedDate.toISOString(),
   }).catch(() => notFound());
 
-  redirect(`/diploma/${certificate.id}/`);
+  // We assume that visitors came from a QR code, so we redirect them to the
+  // certificate page and add a query parameter to show some confetti.
+  redirect(`/diploma/${certificate.id}/?redirected=true`);
 }
