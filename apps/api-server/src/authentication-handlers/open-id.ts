@@ -16,7 +16,7 @@ export const openId: OpenIdAuthenticationHandler<
   const { user: authUser } = userResponse.data
 
   const personItems = await core.User.Person.list({
-    filters: { userId: authUser.id },
+    filter: { userId: authUser.id },
   })
 
   return {
