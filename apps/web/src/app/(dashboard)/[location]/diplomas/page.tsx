@@ -1,5 +1,7 @@
+import Fuse from "fuse.js";
 import { listCertificates, retrieveLocationByHandle } from "~/lib/nwd";
 import { TablePagination } from "../../_components/table-pagination";
+import Search from "../_components/search";
 import Table from "./_components/table";
 
 export default async function Page({
@@ -14,10 +16,36 @@ export default async function Page({
   const location = await retrieveLocationByHandle(params.location);
   const certificates = await listCertificates(location.id);
 
+  // Search
+  const certificatesFuse = new Fuse(certificates, {
+    includeMatches: true,
+    keys: [
+      "name",
+      "student.firstName",
+      "student.lastNamePrefix",
+      "student.lastName",
+      "student.email",
+    ],
+    minMatchCharLength: 2,
+    ignoreLocation: true,
+  });
+
+  const searchQuery = searchParams?.query
+    ? Array.isArray(searchParams.query)
+      ? searchParams.query.join(" ")
+      : searchParams.query
+    : null;
+
+  const searchedCertificates =
+    searchQuery && searchQuery.length >= 2
+      ? certificatesFuse.search(searchQuery).map((result) => result.item)
+      : certificates;
+
+  // Pagination
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
-  const paginatedCertificates = certificates.slice(
+  const paginatedCertificates = searchedCertificates.slice(
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit,
   );
@@ -43,6 +71,9 @@ export default async function Page({
             Persoon toevoegen
           </button> */}
         </div>
+      </div>
+      <div className="mt-4">
+        <Search />
       </div>
 
       <Table certificates={paginatedCertificates} />
