@@ -8,8 +8,8 @@ import {
   text,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { _objectTable } from '../uncontrolled_schema/storage.js'
 import { timestamps } from '../utils/sql.js'
-import { _objectTable } from './_sb_controlled/storage.js'
 import { location } from './location.js'
 import { actor } from './user.js'
 

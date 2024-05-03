@@ -1,4 +1,4 @@
-import { schema as s } from '@nawadi/db'
+import { schema as s, uncontrolledSchema } from '@nawadi/db'
 import assert from 'assert'
 import { eq, sql } from 'drizzle-orm'
 import { fileTypeFromBuffer } from 'file-type'
@@ -108,7 +108,10 @@ export const fromId = withZod(
     const [mediaRow] = await query
       .select()
       .from(s.media)
-      .innerJoin(s._objectTable, eq(s.media.object_id, s._objectTable.id))
+      .innerJoin(
+        uncontrolledSchema._objectTable,
+        eq(s.media.object_id, uncontrolledSchema._objectTable.id),
+      )
       .where(eq(s.media.id, id))
 
     if (!mediaRow) {
