@@ -39,6 +39,8 @@ export const list = withZod(
     .object({
       filter: z
         .object({
+          id: singleOrArray(uuidSchema).optional(),
+          handle: singleOrArray(handleSchema).optional(),
           curriculumId: singleOrArray(uuidSchema).optional(),
         })
         .default({}),
@@ -69,6 +71,22 @@ export const list = withZod(
               ),
             ),
         ),
+      )
+    }
+
+    if (filter.id) {
+      filters.push(
+        Array.isArray(filter.id)
+          ? inArray(s.gearType.id, filter.id)
+          : eq(s.gearType.id, filter.id),
+      )
+    }
+
+    if (filter.handle) {
+      filters.push(
+        Array.isArray(filter.handle)
+          ? inArray(s.gearType.handle, filter.handle)
+          : eq(s.gearType.handle, filter.handle),
       )
     }
 

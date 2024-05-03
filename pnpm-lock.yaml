@@ -380,6 +380,9 @@ importers:
       '@nawadi/core':
         specifier: workspace:^
         version: link:../core
+      '@nawadi/lib':
+        specifier: workspace:^
+        version: link:../lib
       '@react-pdf/renderer':
         specifier: ^3.4.2
         version: 3.4.4(react@18.3.1)

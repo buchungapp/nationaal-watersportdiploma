@@ -25,7 +25,7 @@ async function main(filePath: string) {
     {
       type: 'list',
       name: 'location',
-      message: 'For which location would you like to add media?',
+      message: 'To which location would you like to add students?',
       choices: async () => {
         const locations = await Location.list()
 
