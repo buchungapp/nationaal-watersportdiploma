@@ -12,7 +12,7 @@ export default function Layout({
 }>) {
   return (
     <>
-      <div className="fixed inset-y-0 z-50 flex w-72 flex-col">
+      <div className="fixed inset-y-0 z-50 hidden w-72 flex-col sm:flex">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6">
           <div className="flex h-16 shrink-0 items-center">
             <img
