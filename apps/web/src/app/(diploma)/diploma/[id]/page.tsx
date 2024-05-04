@@ -20,22 +20,30 @@ import { Confetti } from "./_components/confetti";
 import { ShareCertificate } from "./_components/share";
 import CertificateTemplate from "./_components/template";
 
-export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
-export default async function Page({
-  params,
-  searchParams,
-}: {
+interface Props {
   params: {
     id: string;
   };
   searchParams: Record<string, string | string[] | undefined>;
-}) {
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  // read route params
+  const id = params.id;
+
+  const certificate = await retrieveCertificateById(id).catch(() => notFound());
+
+  return {
+    title: `Bekijk het NWD diploma van ${certificate.student.firstName}!`,
+    description: `${certificate.student.firstName} heeft een nieuwe diploma behaald voor ${certificate.program.title} bij ${certificate.location.name}!`,
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+}
+
+export default async function Page({ params, searchParams }: Props) {
   const [certificate, advice] = await Promise.all([
     retrieveCertificateById(params.id).catch(() => notFound()),
     generateAdvise(params.id),
