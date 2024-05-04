@@ -75,6 +75,9 @@ const columns = [
     cell: ({ getValue, row }) => (
       <Link href={`/diploma/${row.original.id}/pdf`}>{getValue()}</Link>
     ),
+    meta: {
+      suppressLinkBehavior: true,
+    },
   }),
   columnHelper.accessor(
     (data) =>
