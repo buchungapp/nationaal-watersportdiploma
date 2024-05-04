@@ -1,8 +1,17 @@
 import { constants } from "@nawadi/lib";
 import dayjs from "dayjs";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import {
+  Facebook,
+  Instagram,
+  LinkedIn,
+  TikTok,
+  YouTube,
+} from "~/app/(public)/_components/socials";
+import Logo from "~/app/_components/brand/logo";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { Text, TextLink } from "../../../(dashboard)/_components/text";
 import { generateAdvise } from "../_utils/generate-advise";
@@ -36,6 +45,34 @@ export default async function Page({
     handle: searchParams.nummer,
     issuedDate: searchParams.datum,
   });
+
+  const socials = [
+    {
+      name: "Facebook",
+      icon: Facebook,
+      link: constants.FACEBOOK_URL,
+    },
+    {
+      name: "Instagram",
+      icon: Instagram,
+      link: constants.INSTAGRAM_URL,
+    },
+    {
+      name: "LinkedIn",
+      icon: LinkedIn,
+      link: constants.LINKEDIN_URL,
+    },
+    {
+      name: "TikTok",
+      icon: TikTok,
+      link: constants.TIKTOK_URL,
+    },
+    {
+      name: "YouTube",
+      icon: YouTube,
+      link: constants.YOUTUBE_URL,
+    },
+  ];
 
   /**
    * Determines whether the value should be masked based on the given conditions.
@@ -94,6 +131,29 @@ export default async function Page({
           <TextLink href="/diplomalijn/consument">onze diplomalijn</TextLink>{" "}
           pagina!
         </Text>
+      </div>
+
+      <div className="mt-10 pb-8 lg:pb-12 xl:pb-16">
+        <div className="flex justify-center items-center gap-x-6 sm:gap-x-8 mx-auto">
+          <Link href="/">
+            <Logo className="size-20 sm:size-24 md:size-28 lg:size-32 mx-auto text-white" />
+          </Link>
+
+          <ul className="flex items-center gap-6 justify-start">
+            {socials.map((social, i) => (
+              <li key={i}>
+                <Link
+                  href={social.link}
+                  className="text-branding-dark hover:text-branding-light"
+                  target="_blank"
+                  referrerPolicy="no-referrer"
+                >
+                  <social.icon className="h-5 w-5" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
