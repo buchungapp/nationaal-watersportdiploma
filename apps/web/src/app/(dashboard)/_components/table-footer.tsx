@@ -86,7 +86,7 @@ export function TablePagination({ totalItems }: { totalItems: number }) {
   );
 }
 
-export function TableRowSelection<T extends unknown>({
+export function TableRowSelection<T>({
   rowSelection,
   table,
   totalItems,
