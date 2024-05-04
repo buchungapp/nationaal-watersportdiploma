@@ -10,7 +10,7 @@ export default function Search() {
   const searchParams = useSearchParams();
   const setQueryParams = useSetQueryParams();
 
-  const [query, setQuery] = useState(searchParams.get("query") || "");
+  const [query, setQuery] = useState(searchParams.get("query") ?? "");
   const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
