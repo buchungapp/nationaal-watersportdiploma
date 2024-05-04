@@ -1,11 +1,19 @@
 import clsx from "clsx";
 import dayjs from "dayjs";
+import type { Metadata } from "next";
 import { QRCodeSVG } from "qrcode.react";
 import type { PropsWithChildren } from "react";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { generateAdvise } from "../../_utils/generate-advise";
 import bg from "./diploma-print-bg.png";
 import "./printStyles.css";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 const DataField = ({
   children,

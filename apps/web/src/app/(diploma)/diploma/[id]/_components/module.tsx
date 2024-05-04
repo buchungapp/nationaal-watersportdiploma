@@ -4,7 +4,8 @@ import { Button as HeadlessButton } from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import type { PropsWithChildren } from "react";
 import React, { useState } from "react";
-import { Dialog } from "~/app/(dashboard)/_components/dialog";
+import { Button } from "~/app/(dashboard)/_components/button";
+import { Dialog, DialogActions } from "~/app/(dashboard)/_components/dialog";
 
 export default function Module({
   button,
@@ -29,6 +30,9 @@ export default function Module({
       </HeadlessButton>
       <Dialog open={isOpen} onClose={setIsOpen} size="xl">
         {children}
+        <DialogActions>
+          <Button onClick={() => setIsOpen(false)}>Sluiten</Button>
+        </DialogActions>
       </Dialog>
     </>
   );
