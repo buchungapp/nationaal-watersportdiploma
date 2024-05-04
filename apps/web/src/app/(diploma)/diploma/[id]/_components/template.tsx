@@ -1,3 +1,4 @@
+import { CheckIcon } from "@heroicons/react/16/solid";
 import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
@@ -131,22 +132,27 @@ export default async function CertificateTemplate({
                   <DialogTitle>{module.title}</DialogTitle>
 
                   <p className="mt-2 text-pretty text-base/6 text-zinc-500 sm:text-sm/6">
-                    Lees hieronder welke competenties vallen onder deze module,
-                    en jij hebt laten zien dat je beheerst!
+                    Hieronder staan de competenties die onder deze module
+                    vallen, en jij hebt laten zien dat je ze beheerst!
                   </p>
 
                   <DialogBody className="text-sm/6 text-zinc-900">
-                    <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 pt-4 pb-8">
+                    <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 pt-2 pb-8">
                       {module.competencies.map((competency) => {
                         return (
                           <li
                             key={competency.id}
                             className="flex flex-col pt-3.5"
                           >
-                            <span className="font-semibold">
-                              {competency.title}
+                            <div className="flex items-center">
+                              <CheckIcon className="h-4 w-4 mr-2 text-green-500" />
+                              <span className="font-semibold">
+                                {competency.title}
+                              </span>
+                            </div>
+                            <span className="pl-6">
+                              {competency.requirement}
                             </span>
-                            <span>{competency.requirement}</span>
                           </li>
                         );
                       })}
