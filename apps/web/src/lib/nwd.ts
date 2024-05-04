@@ -252,3 +252,62 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
       ),
   );
 });
+
+export const createPersonForLocation = cache(
+  async (personInput: {
+    email: string;
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string;
+    dateOfBirth: Date;
+    birthCity: string;
+    birthCountry: string;
+    location: string;
+  }) => {
+    return withSupabaseClient(
+      {
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      },
+      () =>
+        withDatabase(
+          { pgUri: process.env.PGURI!, serverless: true },
+          async () => {
+            await tmpAuthCheck();
+
+            let user;
+
+            if (personInput.email) {
+              user = await User.getOrCreateFromEmail({
+                email: personInput.email,
+                displayName: personInput.firstName,
+              });
+            }
+
+            const person = await User.Person.getOrCreate({
+              userId: user?.id,
+              firstName: personInput.firstName,
+              lastName: personInput.lastName,
+              lastNamePrefix: personInput.lastNamePrefix,
+              dateOfBirth: personInput.dateOfBirth.toISOString(),
+              birthCity: personInput.birthCity,
+              birthCountry: personInput.birthCountry,
+            });
+
+            await User.Person.createLocationLink({
+              personId: person.id,
+              locationId: personInput.location,
+            });
+
+            await User.Actor.upsert({
+              locationId: personInput.location,
+              type: "student",
+              personId: person.id,
+            });
+
+            return person;
+          },
+        ),
+    );
+  },
+);
