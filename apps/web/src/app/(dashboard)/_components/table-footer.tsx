@@ -86,13 +86,13 @@ export function TablePagination({ totalItems }: { totalItems: number }) {
   );
 }
 
-export function TableRowSelection({
+export function TableRowSelection<T extends unknown>({
   rowSelection,
   table,
   totalItems,
 }: {
   rowSelection?: RowSelectionState;
-  table: Table<any>;
+  table: Table<T>;
   totalItems: number;
 }) {
   return rowSelection && Object.keys(rowSelection).length > 0 ? (

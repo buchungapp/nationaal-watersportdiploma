@@ -42,7 +42,7 @@ const columns = [
   ),
   columnHelper.accessor("dateOfBirth", {
     header: "Geboortedatum",
-    cell: ({ getValue, row }) => {
+    cell: ({ getValue }) => {
       const dateOfBirth = getValue();
       return dateOfBirth ? dayjs(dateOfBirth).format("DD-MM-YYYY") : null;
     },
