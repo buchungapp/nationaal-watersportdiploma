@@ -58,13 +58,13 @@ export default async function Page({
         <Text className="italic my-6">
           <strong>Psst..</strong> Deel een foto van jou en je diploma op
           Instagram, tag ons op{" "}
-          <TextLink href={constants.INSTAGRAM_URL}>
+          <TextLink href={constants.INSTAGRAM_URL} target="_blank">
             @nationaalwatersportdiploma
           </TextLink>{" "}
           en krijg een persoonlijke NWD felicitatie met stickers thuisgestuurd!
         </Text>
 
-        <div className="flex items-center justify-center gap-x-4">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-x-4 gap-y-3.5">
           <Suspense>
             <Confetti />
           </Suspense>
@@ -72,7 +72,7 @@ export default async function Page({
         </div>
       </div>
 
-      <div className="rounded-sm overflow-hidden bg-white shadow-md border border-gray-200">
+      <div className="rounded-sm -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-gray-200">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 

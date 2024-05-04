@@ -146,7 +146,7 @@ export default async function CertificateTemplate({
           </div>
         </div>
         <div className="flex flex-col gap-4">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col gap-y-3.5 gap-x-2.5 md:flex-row justify-between items-start">
             <DataField
               label="Naam diplomahouder"
               mask={maskPii}
@@ -167,7 +167,9 @@ export default async function CertificateTemplate({
                 .join(" ")}
             />
 
-            <TogglePiiButton currentState={maskPii ? "hide" : "show"} />
+            <div className="order-first md:order-none shrink-0 md:-mr-[5px] md:-mt-[5px]">
+              <TogglePiiButton currentState={maskPii ? "hide" : "show"} />
+            </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5">
             <DataField

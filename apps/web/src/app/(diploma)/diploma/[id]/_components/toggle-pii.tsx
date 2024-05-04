@@ -88,12 +88,7 @@ function ShowButton() {
 
   return (
     <>
-      <Button
-        type="button"
-        plain
-        onClick={() => setIsOpen(true)}
-        className="-mr-[5px] -mt-[5px]"
-      >
+      <Button type="button" plain onClick={() => setIsOpen(true)}>
         <EyeIcon /> Bekijk gegevens
       </Button>
       <Dialog open={isOpen} onClose={closeAndReset}>
@@ -119,7 +114,6 @@ function HideButton() {
         href={pathname}
         prefetch={false}
         scroll={false}
-        className="-mr-[5px] -mt-[5px]"
       >
         <EyeSlashIcon /> Verberg gegevens
       </Button>
