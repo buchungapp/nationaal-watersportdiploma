@@ -1,5 +1,6 @@
 import { constants } from "@nawadi/lib";
 import dayjs from "dayjs";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { retrieveCertificateById } from "~/lib/nwd";
@@ -9,6 +10,13 @@ import { safeParseCertificateParams } from "../_utils/parse-certificate-params";
 import { Confetti } from "./_components/confetti";
 import { ShareCertificate } from "./_components/share";
 import CertificateTemplate from "./_components/template";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function Page({
   params,

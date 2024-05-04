@@ -1,10 +1,13 @@
 import dayjs from "dayjs";
+import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { DialogBody, DialogTitle } from "~/app/(dashboard)/_components/dialog";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { retrieveCertificateById } from "~/lib/nwd";
+import background from "../_assets/nwd-2024-cover-bahia-blue.png";
 import Module from "./module";
 import { TogglePiiButton } from "./toggle-pii";
 
@@ -92,8 +95,17 @@ export default async function CertificateTemplate({
           <div className="bg-white h-1 w-full" />
         </div>
       </header>
-      <section className="grid flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
-        <div className="flex flex-col w-full">
+      <section className="grid aspect-[2/1] relative flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="relative h-full w-full">
+            <Image
+              src={background}
+              alt=""
+              className="h-auto absolute bottom-0 object-bottom inset-x-0 opacity-10"
+            />
+          </div>
+        </div>
+        <div className="relative flex flex-col w-full">
           <div>
             <DataLabel>Afgeronde modules</DataLabel>
             <p className="text-base">
@@ -145,7 +157,7 @@ export default async function CertificateTemplate({
             })}
           </div>
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex relative flex-col gap-4">
           <div className="flex flex-col gap-y-3.5 gap-x-2.5 md:flex-row justify-between items-start">
             <DataField
               label="Naam diplomahouder"
@@ -202,16 +214,23 @@ export default async function CertificateTemplate({
               label="Vaarlocatie van uitgifte"
               mask={false}
               value={
-                certificate.location.logoCertificate ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    className="w-full h-auto object-contain py-1.5"
-                    src={certificate.location.logoCertificate.url}
-                    alt={certificate.location.logoCertificate.alt ?? ""}
-                  />
-                ) : (
-                  certificate.location.name
-                )
+                <Link
+                  href={certificate.location.websiteUrl ?? "/vaarlocaties"}
+                  target="_blank"
+                >
+                  {certificate.location.logoCertificate ? (
+                    <span className="p-2.5 inline-block bg-white max-w-64">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        className="w-full h-auto object-contain"
+                        src={certificate.location.logoCertificate.url}
+                        alt={certificate.location.logoCertificate.alt ?? ""}
+                      />
+                    </span>
+                  ) : (
+                    certificate.location.name
+                  )}
+                </Link>
               }
             />
           </div>
