@@ -1,7 +1,9 @@
 "use client";
+import { CakeIcon } from "@heroicons/react/16/solid";
 import JSConfetti from "js-confetti";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
+import { Button } from "~/app/(dashboard)/_components/button";
 
 export function Confetti() {
   const searchParams = useSearchParams();
@@ -34,11 +36,9 @@ export function Confetti() {
   }, [searchParams, showConfetti]);
 
   return (
-    <button
-      onClick={showConfetti}
-      className="mt-6 mx-auto px-4 py-2.5 bg-branding-orange text-white rounded-full font-medium"
-    >
-      Nog een keer vieren?! 🎉
-    </button>
+    <Button onClick={showConfetti} color="orange">
+      <CakeIcon />
+      Nog een keer vieren?!
+    </Button>
   );
 }

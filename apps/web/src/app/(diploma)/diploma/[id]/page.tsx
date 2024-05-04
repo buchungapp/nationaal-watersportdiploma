@@ -7,6 +7,7 @@ import { Text, TextLink } from "../../../(dashboard)/_components/text";
 import { generateAdvise } from "../_utils/generate-advise";
 import { safeParseCertificateParams } from "../_utils/parse-certificate-params";
 import { Confetti } from "./_components/confetti";
+import { ShareCertificate } from "./_components/share";
 import CertificateTemplate from "./_components/template";
 
 export default async function Page({
@@ -43,17 +44,35 @@ export default async function Page({
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-semibold text-gray-950">
+      <div className="text-center py-8 lg:py-12 max-w-prose mx-auto">
+        <h2 className="text-2xl font-bold text-gray-950">
           {`Gefeliciteerd, ${certificate.student.firstName}! Een nieuw diploma!`}
         </h2>
 
-        <Suspense>
-          <Confetti />
-        </Suspense>
+        <Text>
+          Op deze pagina vind je alle details over jouw behaalde diploma. Kom er
+          achter welke eisen je hebt behaald, wat je hierna kunt doen of deel je
+          diploma met je familie en vrienden!
+        </Text>
+
+        <Text className="italic my-6">
+          <strong>Psst..</strong> Deel een foto van jou en je diploma op
+          Instagram, tag ons op{" "}
+          <TextLink href={constants.INSTAGRAM_URL}>
+            @nationaalwatersportdiploma
+          </TextLink>{" "}
+          en krijg een persoonlijke NWD felicitatie met stickers thuisgestuurd!
+        </Text>
+
+        <div className="flex items-center justify-center gap-x-4">
+          <Suspense>
+            <Confetti />
+          </Suspense>
+          <ShareCertificate id={params.id} />
+        </div>
       </div>
 
-      <div className="rounded-sm overflow-hidden bg-white shadow border border-gray-200">
+      <div className="rounded-sm overflow-hidden bg-white shadow-md border border-gray-200">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 
@@ -66,15 +85,6 @@ export default async function Page({
           Leer meer over alle verschillende diploma's op{" "}
           <TextLink href="/diplomalijn/consument">onze diplomalijn</TextLink>{" "}
           pagina!
-        </Text>
-
-        <Text className="max-w-prose mx-auto mt-8">
-          <strong>Psst..</strong> Deel een foto van jou en je diploma op
-          Instagram, tag ons op{" "}
-          <TextLink href={constants.INSTAGRAM_URL}>
-            @nationaalwatersportdiploma
-          </TextLink>{" "}
-          en krijg een unieke NWD sticker thuisgestuurd!
         </Text>
       </div>
     </div>
