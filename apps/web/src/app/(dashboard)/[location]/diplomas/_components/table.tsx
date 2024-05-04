@@ -67,7 +67,7 @@ const columns = [
     ),
     enableSorting: false,
     meta: {
-      suppressLinkBehaviour: true,
+      suppressLinkBehavior: true,
     },
   }),
   columnHelper.accessor("handle", {
@@ -164,8 +164,8 @@ export default function CertificateTable({
                 <TableCell
                   key={cell.id}
                   className={clsx(cell.column.columnDef.meta?.align)}
-                  suppressLinkBehaviour={
-                    cell.column.columnDef.meta?.suppressLinkBehaviour
+                  suppressLinkBehavior={
+                    cell.column.columnDef.meta?.suppressLinkBehavior
                   }
                 >
                   {index === 0 && row.getIsSelected() && (

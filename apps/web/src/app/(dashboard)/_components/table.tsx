@@ -148,10 +148,10 @@ export function TableHeader({
 export function TableCell({
   className,
   children,
-  suppressLinkBehaviour = false,
+  suppressLinkBehavior = false,
   ...props
 }: React.ComponentPropsWithoutRef<"td"> & {
-  suppressLinkBehaviour?: boolean;
+  suppressLinkBehavior?: boolean;
 }) {
   const { bleed, dense, grid, striped } = useContext(TableContext);
   const { href, target, title } = useContext(TableRowContext);
@@ -159,7 +159,7 @@ export function TableCell({
 
   return (
     <td
-      ref={!suppressLinkBehaviour && href ? setCellRef : undefined}
+      ref={!suppressLinkBehavior && href ? setCellRef : undefined}
       {...props}
       className={clsx(
         className,
@@ -171,7 +171,7 @@ export function TableCell({
         !bleed && "sm:first:pl-2 sm:last:pr-2",
       )}
     >
-      {!suppressLinkBehaviour && href && (
+      {!suppressLinkBehavior && href && (
         <Link
           data-row-link
           href={href}

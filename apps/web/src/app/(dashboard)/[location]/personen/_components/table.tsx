@@ -112,8 +112,8 @@ export default function PersonsTable({
                 <TableCell
                   key={cell.id}
                   className={clsx(cell.column.columnDef.meta?.align)}
-                  suppressLinkBehaviour={
-                    cell.column.columnDef.meta?.suppressLinkBehaviour
+                  suppressLinkBehavior={
+                    cell.column.columnDef.meta?.suppressLinkBehavior
                   }
                 >
                   {index === 0 && row.getIsSelected() && (
