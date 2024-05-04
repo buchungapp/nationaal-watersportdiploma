@@ -153,6 +153,13 @@ export default function CertificateTable({
           ))}
         </TableHead>
         <TableBody>
+          {table.getRowCount() <= 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center">
+                Geen items gevonden
+              </TableCell>
+            </TableRow>
+          ) : null}
           {table.getRowModel().rows.map((row) => (
             <TableRow
               className={clsx(
