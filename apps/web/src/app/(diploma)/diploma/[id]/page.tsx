@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { retrieveCertificateById } from "~/lib/nwd";
-import { Text, TextLink } from "../../_components/text";
+import { Text, TextLink } from "../../../(dashboard)/_components/text";
 import { generateAdvise } from "../_utils/generate-advise";
 import { safeParseCertificateParams } from "../_utils/parse-certificate-params";
 import { Confetti } from "./_components/confetti";
@@ -53,7 +53,7 @@ export default async function Page({
         </Suspense>
       </div>
 
-      <div className="rounded-sm overflow-hidden bg-white drop-shadow-[0_10px_8px_rgba(0,0,0,0.04),0_4px_3px_rgba(0,0,0,0.1)]">
+      <div className="rounded-sm overflow-hidden bg-white shadow border border-gray-200">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 

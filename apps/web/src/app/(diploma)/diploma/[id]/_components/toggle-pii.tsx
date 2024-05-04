@@ -1,7 +1,7 @@
 "use client";
 
-import { EyeIcon } from "@heroicons/react/16/solid";
-import { useParams } from "next/navigation";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
+import { useParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -76,7 +76,7 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
   );
 }
 
-export function ShowPiiButton() {
+function ShowButton() {
   const [isOpen, setIsOpen] = useState(false);
 
   const key = useRef(0);
@@ -106,4 +106,35 @@ export function ShowPiiButton() {
       </Dialog>
     </>
   );
+}
+
+function HideButton() {
+  const pathname = usePathname();
+
+  return (
+    <>
+      <Button
+        type="button"
+        plain
+        href={pathname}
+        prefetch={false}
+        scroll={false}
+        className="-mr-[5px] -mt-[5px]"
+      >
+        <EyeSlashIcon /> Verberg gegevens
+      </Button>
+    </>
+  );
+}
+
+export function TogglePiiButton({
+  currentState,
+}: {
+  currentState: "show" | "hide";
+}) {
+  if (currentState === "hide") {
+    return <ShowButton />;
+  }
+
+  return <HideButton />;
 }

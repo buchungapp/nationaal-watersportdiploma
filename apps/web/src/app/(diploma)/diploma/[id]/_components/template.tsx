@@ -6,7 +6,7 @@ import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { retrieveCertificateById } from "~/lib/nwd";
 import Module from "./module";
-import { ShowPiiButton } from "./show-pii";
+import { TogglePiiButton } from "./toggle-pii";
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
   <p className="text-branding-dark font-semibold uppercase">{children}</p>
@@ -167,7 +167,7 @@ export default async function CertificateTemplate({
                 .join(" ")}
             />
 
-            {maskPii ? <ShowPiiButton /> : null}
+            <TogglePiiButton currentState={maskPii ? "hide" : "show"} />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5">
             <DataField
