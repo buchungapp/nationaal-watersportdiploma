@@ -6,19 +6,49 @@ import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
 import { retrieveCertificateById } from "~/lib/nwd";
 import Module from "./module";
+import { ShowPiiButton } from "./show-pii";
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
   <p className="text-branding-dark font-semibold uppercase">{children}</p>
 );
 
-const DataField = ({ label, value }: { label: string; value: ReactNode }) => (
-  <div className="text-base">
-    <DataLabel>{label}</DataLabel>
-    <p className="font-medium">{value}</p>
-  </div>
+const MaskComponent = () => (
+  <span className="pointer-events-none relative w-20 h-4 inline-block select-none">
+    <span className="pointer-events-none absolute inset-0 h-full w-full select-none bg-zinc-950" />
+  </span>
 );
 
-export default async function CertificateTemplate({ id }: { id: string }) {
+const DataField = ({
+  label,
+  value,
+  mask = true,
+  customMask,
+}: {
+  label: string;
+  value: React.ReactNode;
+  mask?: boolean;
+  customMask?: (mask: React.ElementType) => React.ReactNode;
+}) => {
+  const renderMask = () =>
+    customMask ? customMask(MaskComponent) : <MaskComponent />;
+
+  return (
+    <div className="text-base">
+      <DataLabel>{label}</DataLabel>
+      <span>
+        {mask ? renderMask() : <p className="font-medium">{value}</p>}
+      </span>
+    </div>
+  );
+};
+
+export default async function CertificateTemplate({
+  id,
+  maskPii = true,
+}: {
+  id: string;
+  maskPii?: boolean;
+}) {
   const certificate = await retrieveCertificateById(id).catch(() => notFound());
 
   const degree = certificate.program.degree.rang;
@@ -97,7 +127,10 @@ export default async function CertificateTemplate({ id }: { id: string }) {
                     <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 pt-4 pb-8">
                       {module.competencies.map((competency) => {
                         return (
-                          <li className="flex flex-col pt-3.5">
+                          <li
+                            key={competency.id}
+                            className="flex flex-col pt-3.5"
+                          >
                             <span className="font-semibold">
                               {competency.title}
                             </span>
@@ -113,43 +146,64 @@ export default async function CertificateTemplate({ id }: { id: string }) {
           </div>
         </div>
         <div className="flex flex-col gap-4">
-          <DataField
-            label="NAAM DIPLOMAHOUDER"
-            value={[
-              certificate.student.firstName,
-              certificate.student.lastNamePrefix,
-              certificate.student.lastName,
-            ]
-              .filter(Boolean)
-              .join(" ")}
-          />
+          <div className="flex justify-between items-start">
+            <DataField
+              label="Naam diplomahouder"
+              mask={maskPii}
+              customMask={(Mask) => (
+                <span className="flex items-center gap-x-2">
+                  <span className="font-medium">
+                    {certificate.student.firstName}
+                  </span>
+                  <Mask />
+                </span>
+              )}
+              value={[
+                certificate.student.firstName,
+                certificate.student.lastNamePrefix,
+                certificate.student.lastName,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            />
+
+            {maskPii ? <ShowPiiButton /> : null}
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-5">
             <DataField
-              label="GEBOORTEDATUM"
+              mask={maskPii}
+              label="Geboortedatum"
               value={dayjs(certificate.student.dateOfBirth).format(
                 "DD-MM-YYYY",
               )}
             />
 
             <DataField
-              label="GEBOORTEPLAATS"
+              mask={maskPii}
+              label="Geboorteplaats"
               value={certificate.student.birthCity}
             />
 
             <DataField
-              label="DATUM VAN AFGIFTE"
+              mask={maskPii}
+              label="Datum van uitgifte"
               value={dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
             />
 
-            <DataField label="DIPLOMANUMMER" value={certificate.handle} />
+            <DataField
+              mask={maskPii}
+              label="Diplomanummer"
+              value={certificate.handle}
+            />
 
             <DataField
               label="Vaarlocatie van uitgifte"
+              mask={false}
               value={
                 certificate.location.logoCertificate ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    className="w-full h-auto object-contain"
+                    className="w-full h-auto object-contain py-1.5"
                     src={certificate.location.logoCertificate.url}
                     alt={certificate.location.logoCertificate.alt ?? ""}
                   />
