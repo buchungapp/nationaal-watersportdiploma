@@ -180,7 +180,7 @@ export function Switch({
         "data-[checked]:bg-[--switch-bg] data-[checked]:ring-[--switch-bg-ring] dark:data-[checked]:bg-[--switch-bg] dark:data-[checked]:ring-[--switch-bg-ring]",
 
         // Focus
-        "focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500",
+        "focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-branding-light",
 
         // Hover
         "data-[hover]:data-[checked]:ring-[--switch-bg-ring] data-[hover]:ring-black/15",
