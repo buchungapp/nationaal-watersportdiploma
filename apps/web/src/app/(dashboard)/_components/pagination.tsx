@@ -27,7 +27,7 @@ export function PaginationPrevious({
     <span className="grow basis-0">
       <Button
         {...(href === null ? { disabled: true } : { href })}
-        plain
+        outline
         aria-label="Previous page"
       >
         <svg
@@ -61,7 +61,7 @@ export function PaginationNext({
     <span className="flex grow basis-0 justify-end">
       <Button
         {...(href === null ? { disabled: true } : { href })}
-        plain
+        outline
         aria-label="Next page"
       >
         {children}

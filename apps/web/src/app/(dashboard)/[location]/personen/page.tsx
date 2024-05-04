@@ -1,6 +1,5 @@
 import Fuse from "fuse.js";
 import { listPersonsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
-import { TablePagination } from "../../_components/table-pagination";
 import Search from "../_components/search";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
@@ -49,11 +48,11 @@ export default async function Page({
     <div className="py-16">
       <div className="md:flex md:items-center md:justify-between md:space-x-8 pb-4 border-b border-gray-200">
         <div>
-          <h1 className="font-semibold text-tremor-content-strong dark:text-dark-tremor-content-strong">
+          <h1 className="font-semibold text-zinc-950 dark:text-white text-lg/6 sm:text-base/6">
             Personen
           </h1>
 
-          <p className="mt-1 text-tremor-default leading-6 text-tremor-content dark:text-dark-tremor-content">
+          <p className="mt-1 leading-6 text-zinc-600 dark:text-zinc-300 text-sm">
             Een overzicht van personen die een rol hebben binnen de locatie.
           </p>
         </div>
@@ -71,11 +70,7 @@ export default async function Page({
         <Search />
       </div>
 
-      <Table persons={paginatedPersons} />
-
-      <div className="mt-4 flex w-full justify-end">
-        <TablePagination totalItems={persons.length} />
-      </div>
+      <Table persons={paginatedPersons} totalItems={persons.length} />
     </div>
   );
 }
