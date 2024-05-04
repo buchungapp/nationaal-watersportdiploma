@@ -1,5 +1,7 @@
+import Fuse from "fuse.js";
 import { listPersonsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
 import { TablePagination } from "../../_components/table-pagination";
+import Search from "../_components/search";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
@@ -15,10 +17,30 @@ export default async function Page({
   const location = await retrieveLocationByHandle(params.location);
   const persons = await listPersonsForLocation(location.id);
 
+  // Search
+  const personsFuse = new Fuse(persons, {
+    includeMatches: true,
+    keys: ["firstName", "lastNamePrefix", "lastName", "email"],
+    minMatchCharLength: 2,
+    ignoreLocation: true,
+  });
+
+  const searchQuery = searchParams?.query
+    ? Array.isArray(searchParams.query)
+      ? searchParams.query.join(" ")
+      : searchParams.query
+    : null;
+
+  const searchedPersons =
+    searchQuery && searchQuery.length >= 2
+      ? personsFuse.search(searchQuery).map((result) => result.item)
+      : persons;
+
+  // Pagination
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
-  const paginatedPersons = persons.slice(
+  const paginatedPersons = searchedPersons.slice(
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit,
   );
@@ -44,6 +66,9 @@ export default async function Page({
             Persoon toevoegen
           </button>
         </div>
+      </div>
+      <div className="mt-4">
+        <Search />
       </div>
 
       <Table persons={paginatedPersons} />
