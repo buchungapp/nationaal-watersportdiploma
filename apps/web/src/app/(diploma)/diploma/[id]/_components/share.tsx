@@ -38,7 +38,7 @@ export function ShareCertificate({ id }: { id: string }) {
         </DialogDescription>
         <DialogBody>
           <div className="divide-x-200 mt-2 flex items-center justify-between divide-x overflow-hidden rounded-md border border-gray-200 bg-gray-100">
-            <div className="scrollbar-hide overflow-scroll pl-2">
+            <div className="scrollbar-none overflow-scroll pl-2">
               <p className="whitespace-nowrap text-gray-600">{shareUrl}</p>
             </div>
             <button
