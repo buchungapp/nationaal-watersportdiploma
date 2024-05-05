@@ -239,6 +239,9 @@ export default function CreateDialogClient({
               <Button
                 color="branding-dark"
                 onClick={() => {
+                  setSelectedProgram(null);
+                  setSelectedGearType(null);
+                  setSelectedCurricula(null);
                   setIsOpen(false);
                 }}
               >
@@ -246,7 +249,15 @@ export default function CreateDialogClient({
               </Button>
             ) : (
               <>
-                <Button plain onClick={() => setIsOpen(false)}>
+                <Button
+                  plain
+                  onClick={() => {
+                    setSelectedProgram(null);
+                    setSelectedGearType(null);
+                    setSelectedCurricula(null);
+                    setIsOpen(false);
+                  }}
+                >
                   Sluiten
                 </Button>
                 <SubmitButton />

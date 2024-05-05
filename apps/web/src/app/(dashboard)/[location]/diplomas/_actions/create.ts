@@ -12,13 +12,25 @@ export async function createCertificate(
     personId: z.string().uuid(),
     gearTypeId: z.string().uuid(),
     curriculumId: z.string().uuid(),
-    competencies: z.array(z.string().uuid()),
+    "competencies[]": z.array(z.string().uuid()),
   });
 
-  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
-    formData.entries(),
-  );
-  console.log(data);
+  const data: Record<string, string | string[] | null> = {};
+  for (const [key, value] of formData.entries()) {
+    const currentValue = data[key];
+
+    if (typeof currentValue === "undefined" || currentValue === null) {
+      data[key] = value as string;
+      continue;
+    }
+
+    if (Array.isArray(currentValue)) {
+      currentValue.push(value as string);
+      continue;
+    }
+
+    data[key] = [currentValue, value as string];
+  }
 
   // Set all empty strings to null
   for (const key in data) {
@@ -30,19 +42,17 @@ export async function createCertificate(
   try {
     const parsed = expectedSchema.parse(data);
 
-    await createCompletedCertificate(
-      parsed.locationId,
-      parsed.personId,
-      parsed,
-    );
+    await createCompletedCertificate(parsed.locationId, parsed.personId, {
+      curriculumId: parsed.curriculumId,
+      gearTypeId: parsed.gearTypeId,
+      competencies: parsed["competencies[]"],
+    });
 
     return {
       message: "Success",
       errors: {},
     };
   } catch (error) {
-    console.log(error);
-
     if (error instanceof z.ZodError) {
       return {
         message: "Error",
