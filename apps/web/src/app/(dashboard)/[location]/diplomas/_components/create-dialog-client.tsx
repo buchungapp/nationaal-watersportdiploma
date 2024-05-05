@@ -117,7 +117,7 @@ export default function CreateDialogClient({
                     name="program"
                     setQuery={setProgramQuery}
                     displayValue={(value: string) =>
-                      programs.find((program) => program.id === value)?.title ||
+                      programs.find((program) => program.id === value)?.title ??
                       ""
                     }
                     onChange={(value) => {
