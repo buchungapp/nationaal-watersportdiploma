@@ -52,7 +52,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                       name="firstName"
                       invalid={!!state.errors.firstName}
                       required
-                      minLength={2}
+                      minLength={1}
                       disabled={state.message === "Success"}
                     />
                   </Field>
@@ -70,7 +70,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                       name="lastName"
                       invalid={!!state.errors.lastName}
                       required
-                      minLength={2}
+                      minLength={1}
                       disabled={state.message === "Success"}
                     />
                   </Field>
@@ -103,8 +103,6 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Input
                       name="birthCity"
                       invalid={!!state.errors.birthCity}
-                      required
-                      minLength={2}
                       disabled={state.message === "Success"}
                     />
                   </Field>

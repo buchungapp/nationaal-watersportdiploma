@@ -6,7 +6,7 @@ import { createPersonForLocation } from "~/lib/nwd";
 export async function createPerson(_prevState: unknown, formData: FormData) {
   const expectedSchema = z.object({
     email: z.string().trim().toLowerCase().email(),
-    firstName: z.string().trim(),
+    firstName: z.string().trim().min(1),
     lastNamePrefix: z
       .string()
       .trim()
@@ -14,7 +14,7 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
       .transform((tussenvoegsel) =>
         tussenvoegsel === "" ? null : tussenvoegsel,
       ),
-    lastName: z.string(),
+    lastName: z.string().min(1),
     dateOfBirth: z.string().pipe(z.coerce.date()),
     birthCity: z.string(),
     birthCountry: z.string().length(2).toLowerCase(),
