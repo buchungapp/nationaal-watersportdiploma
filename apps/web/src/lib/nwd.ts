@@ -3,6 +3,7 @@ import {
   Curriculum,
   Location,
   Program,
+  Student,
   User,
   withDatabase,
   withSupabaseClient,
@@ -350,6 +351,66 @@ export const createPersonForLocation = cache(
             });
 
             return person;
+          },
+        ),
+    );
+  },
+);
+
+export const createCompletedCertificate = cache(
+  async (
+    locationId: string,
+    personId: string,
+    {
+      curriculumId,
+      gearTypeId,
+      competencies,
+    }: {
+      curriculumId: string;
+      gearTypeId: string;
+      competencies: string[];
+    },
+  ) => {
+    return withSupabaseClient(
+      {
+        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      },
+      () =>
+        withDatabase(
+          { pgUri: process.env.PGURI!, serverless: true },
+          async () => {
+            await tmpAuthCheck();
+
+            // Start student curriculum
+            const { id: studentCurriculumId } =
+              await Student.Program.startProgram({
+                curriculumId,
+                personId,
+                gearTypeId,
+              });
+
+            // Start certificate
+            const { id: certificateId } =
+              await Student.Certificate.startCertificate({
+                locationId,
+                studentCurriculumId,
+              });
+
+            // Add completed competencies
+            await Student.Certificate.completeCompetency({
+              certificateId,
+              studentCurriculumId,
+              competencyId: competencies.flat(),
+            });
+
+            // Complete certificate
+            await Student.Certificate.completeCertificate({
+              certificateId,
+              visibleFrom: new Date().toISOString(),
+            });
+
+            return { id: certificateId };
           },
         ),
     );

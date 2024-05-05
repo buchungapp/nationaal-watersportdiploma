@@ -1,32 +1,24 @@
 "use server";
 
 import { z } from "zod";
-import { createPersonForLocation } from "~/lib/nwd";
+import { createCompletedCertificate } from "~/lib/nwd";
 
 export async function createCertificate(
   _prevState: unknown,
   formData: FormData,
 ) {
   const expectedSchema = z.object({
-    email: z.string().trim().toLowerCase().email(),
-    firstName: z.string().trim(),
-    lastNamePrefix: z
-      .string()
-      .trim()
-      .nullable()
-      .transform((tussenvoegsel) =>
-        tussenvoegsel === "" ? null : tussenvoegsel,
-      ),
-    lastName: z.string(),
-    dateOfBirth: z.string().pipe(z.coerce.date()),
-    birthCity: z.string(),
-    birthCountry: z.string().length(2).toLowerCase(),
     locationId: z.string().uuid(),
+    personId: z.string().uuid(),
+    gearTypeId: z.string().uuid(),
+    curriculumId: z.string().uuid(),
+    competencies: z.array(z.string().uuid()),
   });
 
   const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
     formData.entries(),
   );
+  console.log(data);
 
   // Set all empty strings to null
   for (const key in data) {
@@ -38,13 +30,19 @@ export async function createCertificate(
   try {
     const parsed = expectedSchema.parse(data);
 
-    await createPersonForLocation(parsed.locationId, parsed);
+    await createCompletedCertificate(
+      parsed.locationId,
+      parsed.personId,
+      parsed,
+    );
 
     return {
       message: "Success",
       errors: {},
     };
   } catch (error) {
+    console.log(error);
+
     if (error instanceof z.ZodError) {
       return {
         message: "Error",

@@ -126,6 +126,7 @@ export default function CreateDialogClient({
                       setGearTypes([]);
                       setSelectedCurricula(null);
                     }}
+                    invalid={!!state.errors.curriculumId}
                   >
                     {programs
                       .filter(
@@ -145,9 +146,10 @@ export default function CreateDialogClient({
                 <Field>
                   <Label>Gear Type</Label>
                   <Listbox
-                    name="gearType"
+                    name="gearTypeId"
                     value={selectedGearType}
                     onChange={(value) => setSelectedGearType(value)}
+                    invalid={!!state.errors.gearTypeId}
                   >
                     {gearTypes.map((gearType) => (
                       <ListboxOption key={gearType.id} value={gearType.id}>
@@ -159,7 +161,7 @@ export default function CreateDialogClient({
                 <Field>
                   <Label>Student</Label>
                   <Combobox
-                    name="student"
+                    name="personId"
                     setQuery={setPersonQuery}
                     displayValue={(value: string) => {
                       const person = persons.find(
@@ -174,6 +176,7 @@ export default function CreateDialogClient({
                         .filter(Boolean)
                         .join(" ");
                     }}
+                    invalid={!!state.errors.personId}
                   >
                     {persons
                       .filter(
@@ -209,7 +212,7 @@ export default function CreateDialogClient({
                         .map((module) => (
                           <CheckboxField>
                             <Checkbox
-                              name="modules"
+                              name="competencies[]"
                               value={module.id}
                               defaultChecked={module.isRequired}
                               disabled={module.isRequired}
@@ -224,6 +227,11 @@ export default function CreateDialogClient({
                 </Fieldset>
               </FieldGroup>
               <input type="hidden" name="locationId" value={locationId} />
+              <input
+                type="hidden"
+                name="curriculumId"
+                value={selectedCurricula?.id}
+              />
             </Fieldset>
           </DialogBody>
           <DialogActions>

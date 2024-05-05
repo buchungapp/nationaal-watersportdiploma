@@ -34,6 +34,7 @@ export function Combobox<T>({
   value: theirValue,
   displayValue,
   setQuery,
+  invalid,
   ...props
 }: {
   className?: string;
@@ -42,9 +43,13 @@ export function Combobox<T>({
   "aria-label"?: string;
   children?: React.ReactNode;
   setQuery?: (query: string) => void;
-} & Omit<HeadlessComboboxProps<T, false, false, typeof Fragment>, "multiple"> &
-  Pick<HeadlessComboboxInputProps<typeof Fragment, T>, "displayValue">) {
-  const [value, setValue] = useState<T | undefined>(theirValue);
+  invalid?: boolean;
+} & Omit<
+  HeadlessComboboxProps<T | null, false, false, typeof Fragment>,
+  "multiple"
+> &
+  Pick<HeadlessComboboxInputProps<typeof Fragment, T | null>, "displayValue">) {
+  const [value, setValue] = useState<T | null>(theirValue ?? null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState(0);
 
@@ -57,7 +62,7 @@ export function Combobox<T>({
   }, [buttonRef]);
 
   useEffect(() => {
-    setValue(theirValue);
+    setValue(theirValue ?? null);
   }, [theirValue]);
 
   return (
@@ -97,6 +102,7 @@ export function Combobox<T>({
           // Disabled state
           "data-[disabled]:opacity-50 before:data-[disabled]:bg-zinc-950/5 before:data-[disabled]:shadow-none",
         ])}
+        {...(invalid && { "data-invalid": true })}
       >
         <HeadlessComboboxInput
           className={clsx([
