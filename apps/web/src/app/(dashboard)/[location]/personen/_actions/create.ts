@@ -21,9 +21,9 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
     locationId: z.string().uuid(),
   });
 
-  const data: {
-    [k: string]: FormDataEntryValue | null;
-  } = Object.fromEntries(formData.entries());
+  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
+    formData.entries(),
+  );
 
   // Set all empty strings to null
   for (const key in data) {
@@ -50,7 +50,7 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
             acc[issue.path.join(".")] = issue.message;
             return acc;
           },
-          {} as { [path: string]: string },
+          {} as Record<string, string>,
         ),
       };
     }

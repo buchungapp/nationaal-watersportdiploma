@@ -19,7 +19,7 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import { createPerson } from "../_actions/create";
 
 export default function CreateDialog({ locationId }: { locationId: string }) {
-  let [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [state, formAction] = useFormState(createPerson, {
     message: "",
@@ -50,7 +50,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Label>Voornaam</Label>
                     <Input
                       name="firstName"
-                      invalid={!!state.errors["firstName"]}
+                      invalid={!!state.errors.firstName}
                       required
                       minLength={2}
                       disabled={state.message === "Success"}
@@ -60,7 +60,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Label>Tussenvoegsel</Label>
                     <Input
                       name="lastNamePrefix"
-                      invalid={!!state.errors["lastNamePrefix"]}
+                      invalid={!!state.errors.lastNamePrefix}
                       disabled={state.message === "Success"}
                     />
                   </Field>
@@ -68,7 +68,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Label>Achternaam</Label>
                     <Input
                       name="lastName"
-                      invalid={!!state.errors["lastName"]}
+                      invalid={!!state.errors.lastName}
                       required
                       minLength={2}
                       disabled={state.message === "Success"}
@@ -81,7 +81,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                   <Input
                     name="email"
                     type="email"
-                    invalid={!!state.errors["email"]}
+                    invalid={!!state.errors.email}
                     required
                     disabled={state.message === "Success"}
                   />
@@ -93,7 +93,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Input
                       name="dateOfBirth"
                       type="date"
-                      invalid={!!state.errors["dateOfBirth"]}
+                      invalid={!!state.errors.dateOfBirth}
                       required
                       disabled={state.message === "Success"}
                     />
@@ -102,7 +102,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
-                      invalid={!!state.errors["birthCity"]}
+                      invalid={!!state.errors.birthCity}
                       required
                       minLength={2}
                       disabled={state.message === "Success"}
@@ -112,7 +112,7 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Label>Geboorteland</Label>
                     <Input
                       name="birthCountry"
-                      invalid={!!state.errors["birthCountry"]}
+                      invalid={!!state.errors.birthCountry}
                       placeholder="nl"
                       required
                       minLength={2}
