@@ -30,9 +30,9 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
     ReturnType<typeof core.Program.Discipline.fromHandle>
   >
 
-  if (api.isComponentsHandle(disciplineKey)) {
+  if (api.validators.isComponentsHandle(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
-  } else if (api.isComponentsId(disciplineKey)) {
+  } else if (api.validators.isComponentsId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
   } else {
     throw 'impossible'

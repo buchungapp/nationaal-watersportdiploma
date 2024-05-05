@@ -10,9 +10,9 @@ export const getLocationCertificates: api.GetLocationCertificatesOperationHandle
   // TODO get type from core
   let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
 
-  if (api.isComponentsHandle(locationKey)) {
+  if (api.validators.isComponentsHandle(locationKey)) {
     locationItem = await core.Location.fromHandle(locationKey)
-  } else if (api.isComponentsId(locationKey)) {
+  } else if (api.validators.isComponentsId(locationKey)) {
     locationItem = await core.Location.fromId(locationKey)
   } else {
     throw 'impossible'
@@ -55,9 +55,9 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
     // TODO get type from core
     let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
 
-    if (api.isComponentsHandle(locationKey)) {
+    if (api.validators.isComponentsHandle(locationKey)) {
       locationItem = await core.Location.fromHandle(locationKey)
-    } else if (api.isComponentsId(locationKey)) {
+    } else if (api.validators.isComponentsId(locationKey)) {
       locationItem = await core.Location.fromId(locationKey)
     } else {
       throw 'impossible'
