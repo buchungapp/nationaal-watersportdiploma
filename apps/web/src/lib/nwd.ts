@@ -161,7 +161,7 @@ export const listPrograms = cache(async () => {
       withDatabase(
         { pgUri: process.env.PGURI!, serverless: true },
         async () => {
-          const disciplines = await Program.list();
+          const disciplines = await Program.list({});
 
           return disciplines;
         },
@@ -184,6 +184,48 @@ export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
           });
 
           return disciplines;
+        },
+      ),
+  );
+});
+
+export const listCurriculaByProgram = cache(async (programId: string) => {
+  return withSupabaseClient(
+    {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    },
+    () =>
+      withDatabase(
+        { pgUri: process.env.PGURI!, serverless: true },
+        async () => {
+          const disciplines = await Curriculum.list({
+            filter: { onlyCurrentActive: true, programId },
+          });
+
+          return disciplines;
+        },
+      ),
+  );
+});
+
+export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
+  return withSupabaseClient(
+    {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    },
+    () =>
+      withDatabase(
+        { pgUri: process.env.PGURI!, serverless: true },
+        async () => {
+          const gearTypes = await Curriculum.GearType.list({
+            filter: {
+              curriculumId: curriculumId,
+            },
+          });
+
+          return gearTypes;
         },
       ),
   );
