@@ -30,7 +30,6 @@ test('location crud', () =>
           // TODO this could be more friendly
           {
             contentType: 'application/json',
-
             entity: () => entity,
           },
           // TODO this should be made implicit in a future version of the generator
