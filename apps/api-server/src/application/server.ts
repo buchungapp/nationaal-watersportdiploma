@@ -22,7 +22,7 @@ export function createApplicationServer() {
       throw error
     }
   })
-  server.registerMiddleware(api.createErrorMiddleware())
+  server.registerMiddleware(api.lib.createErrorMiddleware())
 
   return server
 }
