@@ -142,7 +142,7 @@ function SideNavInner({
       </Menu>
       <div
         className={twMerge(
-          "text-sm sticky h-fit top-[160px] hidden sm:flex flex-col gap-y-12",
+          "text-sm sticky h-fit top-[160px] hidden md:flex flex-col gap-y-12",
           className,
         )}
       >

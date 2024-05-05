@@ -36,6 +36,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Bekijk het NWD diploma van ${certificate.student.firstName}!`,
     description: `${certificate.student.firstName} heeft een nieuwe diploma behaald voor ${certificate.program.title} bij ${certificate.location.name}!`,
+    openGraph: {
+      title: `Bekijk het NWD diploma van ${certificate.student.firstName}!`,
+      description: `${certificate.student.firstName} heeft een nieuwe diploma behaald voor ${certificate.program.title} bij ${certificate.location.name}!`,
+    },
     robots: {
       index: false,
       follow: false,

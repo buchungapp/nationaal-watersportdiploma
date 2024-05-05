@@ -17,8 +17,22 @@ export default async function Page({
   const location = await retrieveLocationByHandle(params.location);
   const persons = await listPersonsForLocation(location.id);
 
+  // Filter
+  const filterParams = searchParams?.filter
+    ? Array.isArray(searchParams.filter)
+      ? searchParams.filter
+      : [searchParams.filter]
+    : [];
+
+  const filteredPersons =
+    filterParams.length > 0
+      ? persons.filter((person) =>
+          person.actors.some((actor) => filterParams.includes(actor.type)),
+        )
+      : persons;
+
   // Search
-  const personsFuse = new Fuse(persons, {
+  const personsFuse = new Fuse(filteredPersons, {
     includeMatches: true,
     keys: ["firstName", "lastNamePrefix", "lastName", "email"],
     minMatchCharLength: 2,
@@ -34,7 +48,7 @@ export default async function Page({
   const searchedPersons =
     searchQuery && searchQuery.length >= 2
       ? personsFuse.search(searchQuery).map((result) => result.item)
-      : persons;
+      : filteredPersons;
 
   // Pagination
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
@@ -57,13 +71,13 @@ export default async function Page({
             Een overzicht van personen die een rol hebben binnen de locatie.
           </p>
         </div>
-        <div className="mt-4 sm:flex sm:items-center sm:space-x-2 md:mt-0">
-          <FilterSelect />
+        <div className="mt-4 md:mt-0">
           <CreateDialog locationId={location.id} />
         </div>
       </div>
-      <div className="mt-4">
+      <div className="mt-4 w-full flex flex-col gap-2 sm:flex-row">
         <Search />
+        <FilterSelect />
       </div>
 
       <Table persons={paginatedPersons} totalItems={persons.length} />
