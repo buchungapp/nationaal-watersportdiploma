@@ -22,7 +22,6 @@ export const retrieveCurriculaByDiscipline: api.RetrieveCurriculaByDisciplineOpe
 
   if (disciplineItem == null) {
     return {
-      parameters: {},
       status: 404,
       contentType: null,
     }
@@ -37,7 +36,6 @@ export const retrieveCurriculaByDiscipline: api.RetrieveCurriculaByDisciplineOpe
   }))
 
   return {
-    parameters: {},
     status: 200,
     contentType: 'application/json',
     entity: () => responseEntity,

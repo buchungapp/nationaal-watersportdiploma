@@ -31,7 +31,6 @@ test('open-id authentication', () =>
     const result = await api.me(
       {
         contentType: null,
-        parameters: {},
       },
       { openId: token },
       { baseUrl },

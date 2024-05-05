@@ -19,7 +19,6 @@ export const listPrograms: api.ListProgramsOperationHandler<
 
   return {
     status: 200,
-    parameters: {},
     contentType: 'application/json',
     entity: () => listEntity,
   }

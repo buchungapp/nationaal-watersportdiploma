@@ -11,7 +11,6 @@ export const getLocationCohorts: api.GetLocationCohortsOperationHandler<
 
   return {
     status: 200,
-    parameters: {},
     contentType: 'application/json',
     entity: () => [
       {
@@ -39,7 +38,6 @@ export const createLocationCohort: api.CreateLocationCohortOperationHandler<
 
     return {
       status: 201,
-      parameters: {},
       contentType: 'application/json',
       entity: () => ({
         id: '',

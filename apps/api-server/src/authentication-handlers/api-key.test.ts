@@ -19,7 +19,6 @@ test('api-key authentication', () =>
     const result = await api.me(
       {
         contentType: null,
-        parameters: {},
       },
       { apiKey: apiKeyItem.token },
       { baseUrl },

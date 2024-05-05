@@ -20,7 +20,6 @@ export const getLocationCertificates: api.GetLocationCertificatesOperationHandle
 
   if (locationItem == null) {
     return {
-      parameters: {},
       status: 404,
       contentType: null,
     }
@@ -39,7 +38,7 @@ export const getLocationCertificates: api.GetLocationCertificatesOperationHandle
 
   return {
     status: 200,
-    parameters: {},
+
     contentType: 'application/json',
     entity: () => responseEntity,
   }
@@ -65,7 +64,6 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
 
     if (locationItem == null) {
       return {
-        parameters: {},
         status: 404,
         contentType: null,
       }
@@ -84,7 +82,6 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
 
     return {
       status: 201,
-      parameters: {},
       contentType: 'application/json',
       entity: () => responseItem,
     }

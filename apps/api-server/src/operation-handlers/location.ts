@@ -16,7 +16,6 @@ export const getLocations: api.GetLocationsOperationHandler<
   // TODO this could be easier
   return {
     status: 200,
-    parameters: {},
     contentType: 'application/json',
     entity: () => listEntity,
   }
@@ -40,7 +39,6 @@ export const createLocation: api.CreateLocationOperationHandler<
 
     return {
       status: 201,
-      parameters: {},
       contentType: 'application/json',
       entity: () => resultEntity,
     }

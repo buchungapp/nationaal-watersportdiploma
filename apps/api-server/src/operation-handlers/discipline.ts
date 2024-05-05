@@ -13,7 +13,6 @@ export const listDisciplines: api.ListDisciplinesOperationHandler<
   }))
 
   return {
-    parameters: {},
     status: 200,
     contentType: 'application/json',
     entity: () => responseEntity,
@@ -40,7 +39,6 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
 
   if (disciplineItem == null) {
     return {
-      parameters: {},
       status: 404,
       contentType: null,
     }
@@ -52,7 +50,6 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
   }
 
   return {
-    parameters: {},
     status: 200,
     contentType: 'application/json',
     entity: () => responseEntity,

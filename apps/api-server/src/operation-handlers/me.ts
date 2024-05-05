@@ -21,7 +21,6 @@ export const me: api.MeOperationHandler<application.Authentication> = async (
 
   return {
     status: 200,
-    parameters: {},
     contentType: 'application/json',
     entity: () => ({
       id,

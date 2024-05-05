@@ -30,7 +30,7 @@ test('location crud', () =>
           // TODO this could be more friendly
           {
             contentType: 'application/json',
-            parameters: {},
+
             entity: () => entity,
           },
           // TODO this should be made implicit in a future version of the generator
@@ -50,7 +50,6 @@ test('location crud', () =>
         const result = await api.getLocations(
           {
             contentType: null,
-            parameters: {},
           },
           { apiKey: 'supersecret' },
           { baseUrl },
