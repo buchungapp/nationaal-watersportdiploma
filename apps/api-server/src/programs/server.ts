@@ -1,5 +1,5 @@
 import { listen } from '@nawadi/api'
-import { withDatabase, withSupabaseClient } from '@nawadi/core'
+import * as core from '@nawadi/core'
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
 import { waitForSignal } from '../utils/index.js'
@@ -42,27 +42,38 @@ interface MainConfiguration {
 }
 
 async function main(configuration: MainConfiguration) {
-  const { port, pgUri, supabaseUrl, supabaseServiceRoleKey } = configuration
+  // TODO support appsignal
+  const logConfiguration = core.consoleLogConfiguration()
 
-  console.info('Starting server...')
+  await core.withLog(logConfiguration, async () => {
+    try {
+      const { port, pgUri, supabaseUrl, supabaseServiceRoleKey } = configuration
 
-  await withSupabaseClient(
-    {
-      url: supabaseUrl,
-      serviceRoleKey: supabaseServiceRoleKey,
-    },
-    () =>
-      withDatabase({ pgUri }, async () => {
-        const server = application.createApplicationServer()
-        await using listener = await listen(server, { port })
+      core.info('Starting server...')
 
-        console.info(`Server started (${listener.port})`)
+      await core.withSupabaseClient(
+        {
+          url: supabaseUrl,
+          serviceRoleKey: supabaseServiceRoleKey,
+        },
+        () =>
+          core.withDatabase({ pgUri }, async () => {
+            const server = application.createApplicationServer()
+            await using listener = await listen(server, { port })
 
-        await waitForSignal('SIGINT', 'SIGTERM')
+            core.info(`Server started (${listener.port})`)
 
-        console.info('Stopping server...')
-      }),
-  )
+            await waitForSignal('SIGINT', 'SIGTERM')
 
-  console.info('Server stopped')
+            core.info('Stopping server...')
+          }),
+      )
+
+      core.info('Server stopped')
+    } catch (error) {
+      core.error(error)
+
+      process.exit(1)
+    }
+  })
 }

@@ -147,6 +147,9 @@ importers:
       input-otp:
         specifier: ^1.2.4
         version: 1.2.4(react-dom@18.3.1)(react@18.3.1)
+      js-confetti:
+        specifier: ^0.12.0
+        version: 0.12.0
       micromark:
         specifier: ^4.0.0
         version: 4.0.0
@@ -380,6 +383,9 @@ importers:
       '@nawadi/core':
         specifier: workspace:^
         version: link:../core
+      '@nawadi/lib':
+        specifier: workspace:^
+        version: link:../lib
       '@react-pdf/renderer':
         specifier: ^3.4.2
         version: 3.4.4(react@18.3.1)
@@ -9025,6 +9031,10 @@ packages:
 
   /js-base64@3.7.7:
     resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
+    dev: false
+
+  /js-confetti@0.12.0:
+    resolution: {integrity: sha512-1R0Akxn3Zn82pMqW65N1V2NwKkZJ75bvBN/VAb36Ya0YHwbaSiAJZVRr/19HBxH/O8x2x01UFAbYI18VqlDN6g==}
     dev: false
 
   /js-tokens@4.0.0:

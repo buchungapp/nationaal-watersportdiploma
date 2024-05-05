@@ -65,13 +65,7 @@ export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
     process.env.PGURI ??
     'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
 
-  {
-    // reset database
-    const options = { shell: true, stdio: 'inherit' } as const
-    cp.execFileSync('pnpm', ['--filter', 'supabase', 'reset'], options)
-  }
-
-  {
+  try {
     // use a single connection pool for the migration
     const pgSql = postgres(pgUri.toString(), {
       max: 1,
@@ -84,9 +78,12 @@ export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
     } finally {
       await pgSql.end()
     }
+
+    const result = await withDatabase({ pgUri }, job)
+    return result
+  } finally {
+    // reset database
+    const options = { shell: true, stdio: 'inherit' } as const
+    cp.execFileSync('pnpm', ['--filter', 'supabase', 'reset'], options)
   }
-
-  const result = await withDatabase({ pgUri }, job)
-
-  return result
 }

@@ -1,6 +1,14 @@
 import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
-import { SQL, and, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
+import {
+  SQL,
+  SQLWrapper,
+  getTableColumns,
+  and,
+  eq,
+  isNull,
+  sql,
+} from 'drizzle-orm'
 import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -140,6 +148,7 @@ export const list = withZod(
     .object({
       filter: z
         .object({
+          userId: z.string().uuid().optional(),
           locationId: uuidSchema.optional(),
         })
         .default({}),
@@ -149,6 +158,10 @@ export const list = withZod(
     const query = useQuery()
 
     const conditions: SQL[] = []
+
+    if (input.filter.userId != null) {
+      conditions.push(eq(s.person.userId, input.filter.userId))
+    }
 
     if (input.filter.locationId) {
       conditions.push(eq(s.actor.locationId, input.filter.locationId))

@@ -18,7 +18,7 @@ function usePrevious<T>(value: T) {
 }
 
 if (typeof window !== "undefined") {
-  const currentUrl = BASE_URL;
+  const currentUrl = new URL(BASE_URL);
   currentUrl.pathname = "/ingest";
 
   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {

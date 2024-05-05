@@ -8,8 +8,9 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../utils/sql.js'
+import { token } from './authn.js'
 import { location } from './location.js'
-import { actor } from './user.js'
+import { person } from './user.js'
 
 export const privilege = pgTable(
   'privilege',
@@ -39,7 +40,7 @@ export const role = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     description: text('description'),
-    locationId: uuid('location_id').notNull(),
+    locationId: uuid('location_id'),
     ...timestamps,
   },
   (table) => {
@@ -54,14 +55,39 @@ export const role = pgTable(
   },
 )
 
+export const tokenPrivilege = pgTable(
+  'token_privilege',
+  {
+    tokenId: uuid('token_id').notNull(),
+    privilegeId: uuid('privilege_id').notNull(),
+    ...timestamps,
+  },
+  (table) => {
+    return {
+      pk: primaryKey({
+        columns: [table.tokenId, table.privilegeId],
+        name: 'token_privilege_pk',
+      }),
+      tokenReference: foreignKey({
+        columns: [table.tokenId],
+        foreignColumns: [token.id],
+        name: 'token_privilege_token_id_fk',
+      }),
+      privilegeReference: foreignKey({
+        columns: [table.privilegeId],
+        foreignColumns: [privilege.id],
+        name: 'token_privilege_privilege_id_fk',
+      }),
+    }
+  },
+)
+
 export const rolePrivilege = pgTable(
   'role_privilege',
   {
     roleId: uuid('role_id').notNull(),
     privilegeId: uuid('privilege_id').notNull(),
     ...timestamps,
-    insertedBy: uuid('inserted_by').notNull(),
-    deletedBy: uuid('deleted_by'),
   },
   (table) => {
     return {
@@ -79,51 +105,29 @@ export const rolePrivilege = pgTable(
         foreignColumns: [privilege.id],
         name: 'role_privilege_privilege_id_fk',
       }),
-      insertedByReference: foreignKey({
-        columns: [table.insertedBy],
-        foreignColumns: [actor.id],
-        name: 'role_privilege_inserted_by_fk',
-      }),
-      deletedByReference: foreignKey({
-        columns: [table.deletedBy],
-        foreignColumns: [actor.id],
-        name: 'role_privilege_deleted_by_fk',
-      }),
     }
   },
 )
 
-export const userRole = pgTable(
-  'user_role',
+export const personRole = pgTable(
+  'person_role',
   {
-    actorId: uuid('actor_id').notNull(),
+    personId: uuid('person_id').notNull(),
     roleId: uuid('role_id').notNull(),
-    insertedBy: uuid('inserted_by').notNull(),
-    deletedBy: uuid('deleted_by'),
     ...timestamps,
   },
   (table) => {
     return {
-      pk: primaryKey({ columns: [table.actorId, table.roleId] }),
+      pk: primaryKey({ columns: [table.personId, table.roleId] }),
       actorReference: foreignKey({
-        columns: [table.actorId],
-        foreignColumns: [actor.id],
-        name: 'user_role_actor_id_fk',
+        columns: [table.personId],
+        foreignColumns: [person.id],
+        name: 'person_role_person_id_fk',
       }),
       roleReference: foreignKey({
         columns: [table.roleId],
         foreignColumns: [role.id],
         name: 'user_role_role_id_fk',
-      }),
-      insertedByReference: foreignKey({
-        columns: [table.insertedBy],
-        foreignColumns: [actor.id],
-        name: 'user_role_inserted_by_fk',
-      }),
-      deletedByReference: foreignKey({
-        columns: [table.deletedBy],
-        foreignColumns: [actor.id],
-        name: 'user_role_deleted_by_fk',
       }),
     }
   },

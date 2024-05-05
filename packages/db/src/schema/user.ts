@@ -12,8 +12,8 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
+import { _usersTable } from '../uncontrolled_schema/auth.js'
 import { timestamps } from '../utils/sql.js'
-import { _usersTable } from './_sb_controlled/auth.js'
 import { location } from './location.js'
 import { country } from './platform.js'
 

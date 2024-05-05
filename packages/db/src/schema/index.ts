@@ -1,5 +1,5 @@
-export * from './_sb_controlled/auth.js'
-export * from './_sb_controlled/storage.js'
+export * from './authn.js'
+export * from './authz.js'
 export * from './certificate.js'
 export * from './curriculum.js'
 export * from './location.js'

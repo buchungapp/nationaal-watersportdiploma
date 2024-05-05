@@ -1,9 +1,10 @@
 export type Authentication = {
-  apiToken: {
-    userId: number
-    super: boolean
+  apiKey: {
+    apiKey: string
+    user: string
   }
-  token: {
-    userId: number
+  openId: {
+    user: string
+    persons: string[]
   }
 }

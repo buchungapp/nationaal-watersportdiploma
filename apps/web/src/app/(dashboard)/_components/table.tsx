@@ -111,7 +111,7 @@ export function TableRow({
         className={clsx(
           className,
           href &&
-            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-blue-500 dark:focus-within:bg-white/[2.5%]",
+            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-branding-light dark:focus-within:bg-white/[2.5%]",
           striped && "even:bg-zinc-950/[2.5%] dark:even:bg-white/[2.5%]",
           href && striped && "hover:bg-zinc-950/5 dark:hover:bg-white/5",
           href &&
@@ -148,15 +148,18 @@ export function TableHeader({
 export function TableCell({
   className,
   children,
+  suppressLinkBehavior = false,
   ...props
-}: React.ComponentPropsWithoutRef<"td">) {
+}: React.ComponentPropsWithoutRef<"td"> & {
+  suppressLinkBehavior?: boolean;
+}) {
   const { bleed, dense, grid, striped } = useContext(TableContext);
   const { href, target, title } = useContext(TableRowContext);
   const [cellRef, setCellRef] = useState<HTMLElement | null>(null);
 
   return (
     <td
-      ref={href ? setCellRef : undefined}
+      ref={!suppressLinkBehavior && href ? setCellRef : undefined}
       {...props}
       className={clsx(
         className,
@@ -168,7 +171,7 @@ export function TableCell({
         !bleed && "sm:first:pl-2 sm:last:pr-2",
       )}
     >
-      {href && (
+      {!suppressLinkBehavior && href && (
         <Link
           data-row-link
           href={href}
