@@ -217,7 +217,7 @@ export function ComboboxOption<T>({
 
   return (
     <HeadlessComboboxOption as={Fragment} {...props}>
-      {({ selected }) => {
+      {({}) => {
         // if (!selected) {
         //   return (
         //     <div className={clsx(className, sharedClasses)}>{children}</div>

@@ -83,6 +83,10 @@ export default function CreateDialogClient({
         })
         .then((gearTypes) => {
           setGearTypes(gearTypes);
+        })
+        .catch(() => {
+          setSelectedCurricula(null);
+          setGearTypes([]);
         });
     }
   }, [selectedProgram]);
