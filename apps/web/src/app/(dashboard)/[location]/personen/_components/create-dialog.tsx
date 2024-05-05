@@ -18,15 +18,13 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { createPerson } from "../_actions/create";
 
-export default function CreateDialog() {
+export default function CreateDialog({ locationId }: { locationId: string }) {
   let [isOpen, setIsOpen] = useState(false);
 
   const [state, formAction] = useFormState(createPerson, {
     message: "",
     errors: {},
   });
-
-  console.log(state);
 
   return (
     <>
@@ -53,6 +51,9 @@ export default function CreateDialog() {
                     <Input
                       name="firstName"
                       invalid={!!state.errors["firstName"]}
+                      required
+                      minLength={2}
+                      disabled={state.message === "Success"}
                     />
                   </Field>
                   <Field>
@@ -60,6 +61,7 @@ export default function CreateDialog() {
                     <Input
                       name="lastNamePrefix"
                       invalid={!!state.errors["lastNamePrefix"]}
+                      disabled={state.message === "Success"}
                     />
                   </Field>
                   <Field>
@@ -67,6 +69,9 @@ export default function CreateDialog() {
                     <Input
                       name="lastName"
                       invalid={!!state.errors["lastName"]}
+                      required
+                      minLength={2}
+                      disabled={state.message === "Success"}
                     />
                   </Field>
                 </div>
@@ -77,6 +82,8 @@ export default function CreateDialog() {
                     name="email"
                     type="email"
                     invalid={!!state.errors["email"]}
+                    required
+                    disabled={state.message === "Success"}
                   />
                 </Field>
 
@@ -87,6 +94,8 @@ export default function CreateDialog() {
                       name="dateOfBirth"
                       type="date"
                       invalid={!!state.errors["dateOfBirth"]}
+                      required
+                      disabled={state.message === "Success"}
                     />
                   </Field>
                   <Field>
@@ -94,6 +103,9 @@ export default function CreateDialog() {
                     <Input
                       name="birthCity"
                       invalid={!!state.errors["birthCity"]}
+                      required
+                      minLength={2}
+                      disabled={state.message === "Success"}
                     />
                   </Field>
                   <Field>
@@ -101,16 +113,19 @@ export default function CreateDialog() {
                     <Input
                       name="birthCountry"
                       invalid={!!state.errors["birthCountry"]}
+                      placeholder="nl"
+                      required
+                      minLength={2}
+                      maxLength={2}
+                      disabled={state.message === "Success"}
                     />
                   </Field>
                 </div>
               </FieldGroup>
+              <input type="hidden" name="locationId" value={locationId} />
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
-              Sluiten
-            </Button>
             {state.message === "Success" ? (
               <Button
                 color="branding-dark"
@@ -121,7 +136,12 @@ export default function CreateDialog() {
                 Sluiten
               </Button>
             ) : (
-              <SubmitButton />
+              <>
+                <Button plain onClick={() => setIsOpen(false)}>
+                  Sluiten
+                </Button>
+                <SubmitButton />
+              </>
             )}
           </DialogActions>
         </form>

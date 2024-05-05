@@ -254,16 +254,18 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 });
 
 export const createPersonForLocation = cache(
-  async (personInput: {
-    email: string;
-    firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
-    location: string;
-  }) => {
+  async (
+    locationId: string,
+    personInput: {
+      email: string;
+      firstName: string;
+      lastNamePrefix: string | null;
+      lastName: string;
+      dateOfBirth: Date;
+      birthCity: string;
+      birthCountry: string;
+    },
+  ) => {
     return withSupabaseClient(
       {
         url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -296,11 +298,11 @@ export const createPersonForLocation = cache(
 
             await User.Person.createLocationLink({
               personId: person.id,
-              locationId: personInput.location,
+              locationId: locationId,
             });
 
             await User.Actor.upsert({
-              locationId: personInput.location,
+              locationId: locationId,
               type: "student",
               personId: person.id,
             });

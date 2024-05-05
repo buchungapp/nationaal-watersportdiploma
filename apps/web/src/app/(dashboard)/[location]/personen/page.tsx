@@ -59,7 +59,7 @@ export default async function Page({
         </div>
         <div className="mt-4 sm:flex sm:items-center sm:space-x-2 md:mt-0">
           <FilterSelect />
-          <CreateDialog />
+          <CreateDialog locationId={location.id} />
         </div>
       </div>
       <div className="mt-4">

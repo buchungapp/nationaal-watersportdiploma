@@ -10,16 +10,20 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
     lastNamePrefix: z
       .string()
       .trim()
+      .nullable()
       .transform((tussenvoegsel) =>
         tussenvoegsel === "" ? null : tussenvoegsel,
       ),
     lastName: z.string(),
     dateOfBirth: z.string().pipe(z.coerce.date()),
     birthCity: z.string(),
-    birthCountry: z.string().length(2),
+    birthCountry: z.string().length(2).toLowerCase(),
+    locationId: z.string().uuid(),
   });
 
-  const data = Object.fromEntries(formData.entries());
+  const data: {
+    [k: string]: FormDataEntryValue | null;
+  } = Object.fromEntries(formData.entries());
 
   // Set all empty strings to null
   for (const key in data) {
@@ -31,10 +35,7 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
   try {
     const parsed = expectedSchema.parse(data);
 
-    await createPersonForLocation({
-      ...parsed,
-      location: "some-location",
-    });
+    await createPersonForLocation(parsed.locationId, parsed);
 
     return {
       message: "Success",

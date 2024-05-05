@@ -14,7 +14,9 @@ export default function Search() {
   const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
-    router.push(setQueryParams({ query: deferredQuery }));
+    router.push(
+      setQueryParams({ query: deferredQuery.length > 0 ? deferredQuery : [] }),
+    );
   }, [deferredQuery]);
 
   return (
