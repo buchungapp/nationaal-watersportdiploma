@@ -263,8 +263,8 @@ importers:
         specifier: ^2.1.6
         version: 2.1.6
       oa42-lib:
-        specifier: ^0.8.22
-        version: 0.8.22
+        specifier: ^0.9.0
+        version: 0.9.0
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.4
@@ -10702,6 +10702,17 @@ packages:
 
   /oa42-lib@0.8.22:
     resolution: {integrity: sha512-qysJMF6VQSw+KyLtmNWh5JVFUEn0+UdHylgWFtXTW7ZNuQu022dlN7Ta18YT3kVWHArYwbfPvml1qo51JoQyYA==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@types/node': 20.12.8
+      js-base64: 3.7.7
+      msecs: 1.0.3
+      tslib: 2.6.2
+      type-fest: 4.18.1
+    dev: false
+
+  /oa42-lib@0.9.0:
+    resolution: {integrity: sha512-kH/nEVcnC38Co7EwkiVOUQAEMI5L4JjhfD1zCiwpx/bio/jx+D8yBMXxZArcJMROdr0RdNa0l3AYAe+VK3YpGw==}
     engines: {node: '>=18'}
     dependencies:
       '@types/node': 20.12.8
