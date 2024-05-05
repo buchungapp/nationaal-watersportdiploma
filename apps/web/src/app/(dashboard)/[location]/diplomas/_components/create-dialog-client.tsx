@@ -31,7 +31,7 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
-import {
+import type {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
   listPersonsForLocation,

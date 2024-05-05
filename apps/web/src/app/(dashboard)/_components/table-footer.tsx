@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 
 import type { RowSelectionState, Table } from "@tanstack/react-table";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { Select } from "~/app/(dashboard)/_components/select";
 import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import { PaginationNext, PaginationPrevious } from "./pagination";
