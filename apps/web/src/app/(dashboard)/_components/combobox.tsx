@@ -2,23 +2,15 @@
 
 import {
   Combobox as HeadlessCombobox,
-  ComboboxButton as HeadlessComboboxButton,
-  ComboboxInput as HeadlessComboboxInput,
-  ComboboxOption as HeadlessComboboxOption,
-  ComboboxOptions as HeadlessComboboxOptions,
   Transition as HeadlessTransition,
   type ComboboxInputProps as HeadlessComboboxInputProps,
   type ComboboxOptionProps as HeadlessComboboxOptionProps,
   type ComboboxProps as HeadlessComboboxProps,
 } from "@headlessui/react";
 import clsx from "clsx";
-import {
-  Fragment,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-} from "react";
+import type { CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { useElementSize } from "../_hooks/use-element-size";
 
 /****************************************************************
  * TODO: this combobox is temporary used should be from catalyst
@@ -51,15 +43,7 @@ export function Combobox<T>({
   Pick<HeadlessComboboxInputProps<typeof Fragment, T | null>, "displayValue">) {
   const [value, setValue] = useState<T | null>(theirValue ?? null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [buttonWidth, setButtonWidth] = useState(0);
-
-  useEffect(() => {
-    if (!buttonRef.current) return;
-
-    if (buttonRef.current.clientWidth !== buttonWidth) {
-      setButtonWidth(buttonRef.current.clientWidth);
-    }
-  }, [buttonRef]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setValue(theirValue ?? null);
@@ -76,11 +60,11 @@ export function Combobox<T>({
       }}
       multiple={false}
     >
-      <HeadlessComboboxButton
+      <HeadlessCombobox.Button
         autoFocus={autoFocus}
         data-slot="control"
-        aria-label={ariaLabel}
         ref={buttonRef}
+        aria-label={ariaLabel}
         className={clsx([
           className,
 
@@ -104,7 +88,8 @@ export function Combobox<T>({
         ])}
         {...(invalid && { "data-invalid": true })}
       >
-        <HeadlessComboboxInput
+        <HeadlessCombobox.Input
+          ref={inputRef}
           className={clsx([
             // Basic layout
             "relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",
@@ -133,6 +118,7 @@ export function Combobox<T>({
           displayValue={displayValue}
           placeholder={placeholder}
           onChange={(e) => setQuery && setQuery(e.target.value)}
+          onBlur={() => setQuery && setQuery("")}
         />
         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
           <svg
@@ -155,7 +141,7 @@ export function Combobox<T>({
             />
           </svg>
         </span>
-      </HeadlessComboboxButton>
+      </HeadlessCombobox.Button>
       <HeadlessTransition
         as={Fragment}
         leave="transition-opacity duration-100 ease-in pointer-events-none"
@@ -165,24 +151,27 @@ export function Combobox<T>({
         <div
           style={
             {
-              "--button-width": `${buttonWidth}px`,
+              "--input-width": useElementSize(inputRef, true).width,
+              "--button-width": useElementSize(buttonRef, true).width,
             } as CSSProperties
           }
         >
-          <HeadlessComboboxOptions
+          <HeadlessCombobox.Options
             as="div"
             anchor={{
-              to: "top start",
+              to: "bottom start",
+              gap: "var(--anchor-gap)",
               offset: "var(--anchor-offset)",
               padding: "var(--anchor-padding)",
             }}
             className={clsx(
-              "z-10",
+              "z-20",
+
               // Anchor positioning
               "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
 
               // Base styles
-              "isolate w-max min-w-[calc(var(--button-width)+1.75rem)] select-none scroll-py-1 rounded-xl p-1 mt-1",
+              "isolate w-max min-w-[calc(var(--button-width)+1.75rem)] select-none scroll-py-1 rounded-xl p-1",
 
               // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
               "outline outline-1 outline-transparent focus:outline-none",
@@ -198,7 +187,7 @@ export function Combobox<T>({
             )}
           >
             {options}
-          </HeadlessComboboxOptions>
+          </HeadlessCombobox.Options>
         </div>
       </HeadlessTransition>
     </HeadlessCombobox>
@@ -222,7 +211,7 @@ export function ComboboxOption<T>({
   );
 
   return (
-    <HeadlessComboboxOption as={Fragment} {...props}>
+    <HeadlessCombobox.Option as={Fragment} {...props}>
       {({}) => {
         // if (!selected) {
         //   return (
@@ -268,7 +257,7 @@ export function ComboboxOption<T>({
           </div>
         );
       }}
-    </HeadlessComboboxOption>
+    </HeadlessCombobox.Option>
   );
 }
 

@@ -1,5 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import clsx from "clsx";
+import dayjs from "dayjs";
+import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -31,6 +33,7 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
+import { Text } from "~/app/(dashboard)/_components/text";
 import type {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
@@ -43,25 +46,54 @@ import {
   getGearTypesByCurriculum,
 } from "../_actions/fetch";
 
-export default function CreateDialogClient({
-  locationId,
-  persons,
-  programs,
-}: {
+interface Props {
   locationId: string;
   persons: Awaited<ReturnType<typeof listPersonsForLocation>>;
   programs: Awaited<ReturnType<typeof listPrograms>>;
-}) {
+}
+
+export default function Wrapper(props: Props) {
+  const forceRerenderId = useRef(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [state, formAction] = useFormState(createCertificate, {
-    message: "",
-    errors: {},
-  });
+  return (
+    <CreateDialogClient
+      key={String(forceRerenderId.current)}
+      {...props}
+      isOpen={isOpen}
+      setIsOpen={(next) => {
+        setIsOpen(next);
+        forceRerenderId.current += 1;
+      }}
+    />
+  );
+}
+
+function CreateDialogClient({
+  locationId,
+  persons,
+  programs,
+  isOpen,
+  setIsOpen,
+}: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
+  const submit = async (prevState: unknown, formData: FormData) => {
+    const result = await createCertificate(prevState, formData);
+
+    console.log("result", result);
+
+    if (result.message === "Success") {
+      console.log("arrived herekl1j2lkj!!");
+      setIsOpen(false);
+    }
+
+    return result;
+  };
+
+  const [state, formAction] = useFormState(submit, undefined);
 
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [selectedGearType, setSelectedGearType] = useState<string | null>(null);
-  const [selectedCurricula, setSelectedCurricula] = useState<
+  const [selectedCurriculum, setSelectedCurriculum] = useState<
     Awaited<ReturnType<typeof listCurriculaByProgram>>[number] | null
   >(null);
 
@@ -73,22 +105,25 @@ export default function CreateDialogClient({
   >([]);
 
   useEffect(() => {
-    if (selectedProgram) {
-      getCurriculaByProgram(selectedProgram)
-        .then((curricula) => {
-          if (curricula.length !== 1 || !curricula[0]) return [];
+    async function fetchCurricula() {
+      if (!selectedProgram) {
+        return;
+      }
 
-          setSelectedCurricula(curricula[0]);
-          return getGearTypesByCurriculum(curricula[0].id);
-        })
-        .then((gearTypes) => {
-          setGearTypes(gearTypes);
-        })
-        .catch(() => {
-          setSelectedCurricula(null);
-          setGearTypes([]);
-        });
+      const [curriculum] = await getCurriculaByProgram(selectedProgram);
+
+      if (!curriculum) {
+        setSelectedCurriculum(null);
+        setGearTypes([]);
+        return;
+      }
+
+      setSelectedCurriculum(curriculum);
+      const gearTypes = await getGearTypesByCurriculum(curriculum.id);
+      setGearTypes(gearTypes);
     }
+
+    void fetchCurricula();
   }, [selectedProgram]);
 
   return (
@@ -101,7 +136,7 @@ export default function CreateDialogClient({
       >
         Diploma toevoegen
       </Button>
-      <Dialog open={isOpen} onClose={setIsOpen}>
+      <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
         <DialogTitle>Diploma toevoegen</DialogTitle>
         <DialogDescription>
           Vul de gegevens in om een diploma toe te voegen.
@@ -110,56 +145,8 @@ export default function CreateDialogClient({
           <DialogBody>
             <Fieldset>
               <FieldGroup>
-                <Field>
-                  <Label>Programma</Label>
-                  {/* TODO: this combobox is temporary used should be from catalyst */}
-                  <Combobox
-                    name="program"
-                    setQuery={setProgramQuery}
-                    displayValue={(value: string) =>
-                      programs.find((program) => program.id === value)?.title ??
-                      ""
-                    }
-                    onChange={(value) => {
-                      setSelectedProgram(value);
-                      setSelectedGearType(null);
-                      setGearTypes([]);
-                      setSelectedCurricula(null);
-                    }}
-                    invalid={!!state.errors.curriculumId}
-                  >
-                    {programs
-                      .filter(
-                        (x) =>
-                          programQuery.length < 1 ||
-                          x.title
-                            ?.toLowerCase()
-                            .includes(programQuery.toLowerCase()),
-                      )
-                      .map((program) => (
-                        <ComboboxOption key={program.id} value={program.id}>
-                          <ComboboxLabel>{program.title}</ComboboxLabel>
-                        </ComboboxOption>
-                      ))}
-                  </Combobox>
-                </Field>
-                <Field>
-                  <Label>Gear Type</Label>
-                  <Listbox
-                    name="gearTypeId"
-                    value={selectedGearType}
-                    onChange={(value) => setSelectedGearType(value)}
-                    invalid={!!state.errors.gearTypeId}
-                  >
-                    {gearTypes.map((gearType) => (
-                      <ListboxOption key={gearType.id} value={gearType.id}>
-                        <ListboxLabel>{gearType.title}</ListboxLabel>
-                      </ListboxOption>
-                    ))}
-                  </Listbox>
-                </Field>
-                <Field>
-                  <Label>Student</Label>
+                <Field className="max-w-md">
+                  <Label>Cursist</Label>
                   <Combobox
                     name="personId"
                     setQuery={setPersonQuery}
@@ -167,16 +154,20 @@ export default function CreateDialogClient({
                       const person = persons.find(
                         (person) => person.id === value,
                       );
+
                       if (!person) return "";
-                      return [
+
+                      const fullName = [
                         person.firstName,
                         person.lastNamePrefix,
                         person.lastName,
                       ]
                         .filter(Boolean)
                         .join(" ");
+
+                      return fullName;
                     }}
-                    invalid={!!state.errors.personId}
+                    invalid={!!state?.errors.personId}
                   >
                     {persons
                       .filter(
@@ -188,81 +179,146 @@ export default function CreateDialogClient({
                             .toLowerCase()
                             .includes(personQuery.toLowerCase()),
                       )
-                      .map((person) => (
-                        <ComboboxOption key={person.id} value={person.id}>
-                          <ComboboxLabel>
-                            {[
-                              person.firstName,
-                              person.lastNamePrefix,
-                              person.lastName,
-                            ]
-                              .filter(Boolean)
-                              .join(" ")}
-                          </ComboboxLabel>
-                        </ComboboxOption>
-                      ))}
+                      .map((person) => {
+                        const fullName = [
+                          person.firstName,
+                          person.lastNamePrefix,
+                          person.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(" ");
+
+                        return (
+                          <ComboboxOption key={person.id} value={person.id}>
+                            <ComboboxLabel>
+                              <div className="flex">
+                                <span className={clsx("truncate")}>
+                                  {fullName}
+                                </span>
+                                <span
+                                  className={clsx(
+                                    "ml-2 truncate text-gray-500 group-data-[active]/option:text-white",
+                                  )}
+                                >
+                                  {dayjs(person.dateOfBirth).format(
+                                    "DD-MM-YYYY",
+                                  )}
+                                </span>
+                              </div>
+                            </ComboboxLabel>
+                          </ComboboxOption>
+                        );
+                      })}
                   </Combobox>
                 </Field>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                  <Field>
+                    <Label>Programma</Label>
+                    {/* TODO: this combobox is temporary used should be from catalyst */}
+                    <Combobox
+                      name="program"
+                      setQuery={setProgramQuery}
+                      displayValue={(value: string) =>
+                        programs.find((program) => program.id === value)
+                          ?.title ?? ""
+                      }
+                      onChange={(value) => {
+                        setSelectedProgram(value);
+                        setSelectedGearType(null);
+                        setGearTypes([]);
+                        setSelectedCurriculum(null);
+                      }}
+                      invalid={!!state?.errors.curriculumId}
+                    >
+                      {programs
+                        .filter(
+                          (x) =>
+                            programQuery.length < 1 ||
+                            x.title
+                              ?.toLowerCase()
+                              .includes(programQuery.toLowerCase()),
+                        )
+                        .map((program) => (
+                          <ComboboxOption key={program.id} value={program.id}>
+                            <ComboboxLabel>{program.title}</ComboboxLabel>
+                          </ComboboxOption>
+                        ))}
+                    </Combobox>
+                  </Field>
+                  <Field>
+                    <Label>Materiaal</Label>
+                    <Listbox
+                      name="gearTypeId"
+                      disabled={!selectedProgram}
+                      value={selectedGearType}
+                      onChange={(value) => setSelectedGearType(value)}
+                      invalid={!!state?.errors.gearTypeId}
+                    >
+                      {gearTypes.map((gearType) => (
+                        <ListboxOption key={gearType.id} value={gearType.id}>
+                          <ListboxLabel>{gearType.title}</ListboxLabel>
+                        </ListboxOption>
+                      ))}
+                    </Listbox>
+                  </Field>
+                </div>
+
                 <Fieldset>
-                  <CheckboxGroup>
-                    <Legend>Modules</Legend>
-                    {selectedCurricula ? (
-                      selectedCurricula.modules
-                        .sort((a, b) => a.weight - b.weight)
-                        .map((module) => (
-                          <CheckboxField>
-                            <Checkbox
-                              name="competencies[]"
-                              value={module.id}
-                              defaultChecked={module.isRequired}
-                              disabled={module.isRequired}
-                            />
-                            <Label>{module.title}</Label>
-                          </CheckboxField>
-                        ))
-                    ) : (
-                      <span>Geen modules gevonden</span>
-                    )}
-                  </CheckboxGroup>
+                  <Legend>Modules</Legend>
+                  {selectedCurriculum ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 mt-2 gap-x-4">
+                      <CheckboxGroup>
+                        <Legend>Verplicht</Legend>
+                        {selectedCurriculum.modules
+                          .sort((a, b) => a.weight - b.weight)
+                          .filter((module) => module.isRequired)
+                          .map((module) => (
+                            <CheckboxField key={module.id}>
+                              <Checkbox
+                                name="competencies[]"
+                                value={module.id}
+                                defaultChecked={true}
+                              />
+                              <Label>{module.title}</Label>
+                            </CheckboxField>
+                          ))}
+                      </CheckboxGroup>
+                      <CheckboxGroup>
+                        <Legend>Optioneel</Legend>
+                        {selectedCurriculum.modules
+                          .sort((a, b) => a.weight - b.weight)
+                          .filter((module) => !module.isRequired)
+                          .map((module) => (
+                            <CheckboxField key={module.id}>
+                              <Checkbox
+                                name="competencies[]"
+                                value={module.id}
+                                defaultChecked={false}
+                              />
+                              <Label>{module.title}</Label>
+                            </CheckboxField>
+                          ))}
+                      </CheckboxGroup>
+                    </div>
+                  ) : (
+                    <Text>Selecteer eerst een programma...</Text>
+                  )}
                 </Fieldset>
               </FieldGroup>
               <input type="hidden" name="locationId" value={locationId} />
               <input
                 type="hidden"
                 name="curriculumId"
-                value={selectedCurricula?.id}
+                value={selectedCurriculum?.id}
               />
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            {state.message === "Success" ? (
-              <Button
-                color="branding-dark"
-                onClick={() => {
-                  setSelectedProgram(null);
-                  setSelectedGearType(null);
-                  setSelectedCurricula(null);
-                  setIsOpen(false);
-                }}
-              >
-                Sluiten
-              </Button>
-            ) : (
-              <>
-                <Button
-                  plain
-                  onClick={() => {
-                    setSelectedProgram(null);
-                    setSelectedGearType(null);
-                    setSelectedCurricula(null);
-                    setIsOpen(false);
-                  }}
-                >
-                  Sluiten
-                </Button>
-                <SubmitButton />
-              </>
-            )}
+            <Button plain onClick={() => setIsOpen(false)}>
+              Sluiten
+            </Button>
+            <SubmitButton />
           </DialogActions>
         </form>
       </Dialog>

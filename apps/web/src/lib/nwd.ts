@@ -7,11 +7,13 @@ import {
   User,
   withDatabase,
   withSupabaseClient,
+  withTransaction,
 } from "@nawadi/core";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
+import "server-only";
 
 async function tmpAuthCheck() {
   const cookieStore = cookies();
@@ -162,7 +164,7 @@ export const listPrograms = cache(async () => {
       withDatabase(
         { pgUri: process.env.PGURI!, serverless: true },
         async () => {
-          const disciplines = await Program.list({});
+          const disciplines = await Program.list();
 
           return disciplines;
         },
@@ -380,37 +382,39 @@ export const createCompletedCertificate = cache(
         withDatabase(
           { pgUri: process.env.PGURI!, serverless: true },
           async () => {
-            await tmpAuthCheck();
+            return withTransaction(async () => {
+              await tmpAuthCheck();
 
-            // Start student curriculum
-            const { id: studentCurriculumId } =
-              await Student.Program.startProgram({
-                curriculumId,
-                personId,
-                gearTypeId,
-              });
+              // Start student curriculum
+              const { id: studentCurriculumId } =
+                await Student.Program.startProgram({
+                  curriculumId,
+                  personId,
+                  gearTypeId,
+                });
 
-            // Start certificate
-            const { id: certificateId } =
-              await Student.Certificate.startCertificate({
-                locationId,
+              // Start certificate
+              const { id: certificateId } =
+                await Student.Certificate.startCertificate({
+                  locationId,
+                  studentCurriculumId,
+                });
+
+              // Add completed competencies
+              await Student.Certificate.completeCompetency({
+                certificateId,
                 studentCurriculumId,
+                competencyId: competencies.flat(),
               });
 
-            // Add completed competencies
-            await Student.Certificate.completeCompetency({
-              certificateId,
-              studentCurriculumId,
-              competencyId: competencies.flat(),
-            });
+              // Complete certificate
+              await Student.Certificate.completeCertificate({
+                certificateId,
+                visibleFrom: new Date().toISOString(),
+              });
 
-            // Complete certificate
-            await Student.Certificate.completeCertificate({
-              certificateId,
-              visibleFrom: new Date().toISOString(),
+              return { id: certificateId };
             });
-
-            return { id: certificateId };
           },
         ),
     );

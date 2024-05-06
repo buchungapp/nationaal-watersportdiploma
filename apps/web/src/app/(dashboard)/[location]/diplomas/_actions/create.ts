@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createCompletedCertificate } from "~/lib/nwd";
 
@@ -48,11 +49,15 @@ export async function createCertificate(
       competencies: parsed["competencies[]"],
     });
 
+    revalidatePath("/[location]/diplomas", "page");
+
     return {
       message: "Success",
       errors: {},
     };
   } catch (error) {
+    console.error(error);
+
     if (error instanceof z.ZodError) {
       return {
         message: "Error",

@@ -79,7 +79,7 @@ export default function PersonsTable({
 
   return (
     <>
-      <Table className="mt-8">
+      <Table className="mt-8" dense>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

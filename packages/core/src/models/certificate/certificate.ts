@@ -1,6 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
-import { and, eq, gte, inArray, lt } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, lt } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { findItem, singleRow, uuidSchema, withZod } from '../../utils/index.js'
@@ -131,6 +131,7 @@ export const list = withZod(
             : undefined,
         ),
       )
+      .orderBy(desc(s.certificate.createdAt))
 
     if (certificates.length === 0) {
       return []
