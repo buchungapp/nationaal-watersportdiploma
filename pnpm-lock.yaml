@@ -260,18 +260,18 @@ importers:
   generated/api:
     dependencies:
       '@types/node':
-        specifier: ^20.12.8
-        version: 20.12.8
+        specifier: ^18.19.32
+        version: 18.19.32
       goodrouter:
         specifier: ^2.1.6
         version: 2.1.6
       oa42-lib:
-        specifier: ^0.10.0
-        version: 0.10.0
+        specifier: ^0.10.5
+        version: 0.10.5
     devDependencies:
-      '@tsconfig/node20':
-        specifier: ^20.1.4
-        version: 20.1.4
+      '@tsconfig/node18':
+        specifier: ^18.2.4
+        version: 18.2.4
       rollup:
         specifier: ^4.17.2
         version: 4.17.2
@@ -4165,6 +4165,10 @@ packages:
       - tailwindcss
     dev: false
 
+  /@tsconfig/node18@18.2.4:
+    resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
+    dev: true
+
   /@tsconfig/node20@20.1.4:
     resolution: {integrity: sha512-sqgsT69YFeLWf5NtJ4Xq/xAF8p4ZQHlmGW74Nu2tD4+g5fAsposc4ZfaaPixVu4y01BEiDCWLRDCvDM5JOsRxg==}
     dev: true
@@ -4431,6 +4435,12 @@ packages:
     dependencies:
       '@types/unist': 2.0.10
     dev: true
+
+  /@types/node@18.19.32:
+    resolution: {integrity: sha512-2bkg93YBSDKk8DLmmHnmj/Rwr18TLx7/n+I23BigFwgexUJoMHZOd8X1OFxuF/W3NN0S2W2E5sVabI5CPinNvA==}
+    dependencies:
+      undici-types: 5.26.5
+    dev: false
 
   /@types/node@20.12.8:
     resolution: {integrity: sha512-NU0rJLJnshZWdE/097cdCBbyW1h4hEg0xpovcoAQYHl8dnEyp/NAOiE45pvc+Bd1Dt+2r94v2eGFpQJ4R7g+2w==}
@@ -10710,11 +10720,11 @@ packages:
       - supports-color
     dev: false
 
-  /oa42-lib@0.10.0:
-    resolution: {integrity: sha512-XIGqpTftnzPgbDRurOkEwFIt/60eMaIicUa8Nv0Bul1SQAwk8FrJ5zvmsp3ttpG77mogZlUc62sJ3aWRXLr3QQ==}
+  /oa42-lib@0.10.5:
+    resolution: {integrity: sha512-rp+eO1BWXzlfYExQXv5TU7pKB9pXpRWgaRSzb3lavuTd143U6CcihH7NEtx2zJyio9eySPMQ7nSI9Q0lU5zUAA==}
     engines: {node: '>=18'}
     dependencies:
-      '@types/node': 20.12.8
+      '@types/node': 18.19.32
       js-base64: 3.7.7
       msecs: 1.0.3
       tslib: 2.6.2

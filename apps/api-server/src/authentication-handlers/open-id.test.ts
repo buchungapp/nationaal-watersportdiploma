@@ -36,7 +36,7 @@ test('open-id authentication', () =>
       { baseUrl },
     )
 
-    assert(result.status === 200)
+    api.lib.expectStatus(result, 200)
 
     const meItem = await result.entity()
     assert.equal(meItem.id, authUserItem.id)

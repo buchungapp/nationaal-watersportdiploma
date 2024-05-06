@@ -38,8 +38,7 @@ test('location crud', () =>
           { baseUrl },
         )
 
-        // TODO this could be more friendly
-        assert(result.status === 201)
+        api.lib.expectStatus(result, 201)
 
         const item = await result.entity()
         id = item.id
@@ -53,7 +52,7 @@ test('location crud', () =>
           { apiKey: 'supersecret' },
           { baseUrl },
         )
-        assert(result.status === 200)
+        api.lib.expectStatus(result, 200)
 
         const list = await result.entity()
         assert.equal(list.length, 1)
