@@ -5,30 +5,34 @@ import { z } from "zod";
 import { createCompletedCertificate } from "~/lib/nwd";
 
 export async function createCertificate(
+  locationId: string,
+  curriculumId: string,
   _prevState: unknown,
   formData: FormData,
 ) {
   const expectedSchema = z.object({
-    locationId: z.string().uuid(),
     personId: z.string().uuid(),
     gearTypeId: z.string().uuid(),
-    curriculumId: z.string().uuid(),
     "competencies[]": z.array(z.string().uuid()),
   });
 
+  const expectedLocationId = z.string().uuid();
+  const expectedCurriculumId = z.string().uuid();
+
   try {
     const parsed = expectedSchema.parse({
-      locationId: formData.get("locationId"),
       personId: formData.get("personId"),
       gearTypeId: formData.get("gearTypeId"),
-      curriculumId: formData.get("curriculumId"),
       "competencies[]": formData
         .getAll("competencies[]")
         .flatMap((arr) => String(arr).split(",")),
     });
 
-    await createCompletedCertificate(parsed.locationId, parsed.personId, {
-      curriculumId: parsed.curriculumId,
+    const parsedLocationId = expectedLocationId.parse(locationId);
+    const parsedCurriculumId = expectedCurriculumId.parse(curriculumId);
+
+    await createCompletedCertificate(parsedLocationId, parsed.personId, {
+      curriculumId: parsedCurriculumId,
       gearTypeId: parsed.gearTypeId,
       competencies: parsed["competencies[]"],
     });

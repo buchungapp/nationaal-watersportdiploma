@@ -77,9 +77,12 @@ function CreateDialogClient({
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
   const submit = async (prevState: unknown, formData: FormData) => {
-    formData.append("locationId", locationId);
-    formData.append("curriculumId", selectedCurriculum?.id ?? "");
-    const result = await createCertificate(prevState, formData);
+    const result = await createCertificate(
+      locationId,
+      selectedCurriculum?.id ?? "",
+      prevState,
+      formData,
+    );
 
     if (result.message === "Success") {
       setIsOpen(false);

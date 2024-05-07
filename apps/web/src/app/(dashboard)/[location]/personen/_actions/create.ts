@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createPersonForLocation } from "~/lib/nwd";
 
-export async function createPerson(_prevState: unknown, formData: FormData) {
+export async function createPerson(
+  locationId: string,
+  _prevState: unknown,
+  formData: FormData,
+) {
   const expectedSchema = z.object({
     email: z.string().trim().toLowerCase().email(),
     firstName: z.string().trim().min(1),
@@ -19,8 +23,9 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
     dateOfBirth: z.string().pipe(z.coerce.date()),
     birthCity: z.string(),
     birthCountry: z.string().length(2).toLowerCase(),
-    locationId: z.string().uuid(),
   });
+
+  const expectedLocationId = z.string().uuid();
 
   const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
     formData.entries(),
@@ -35,8 +40,9 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
 
   try {
     const parsed = expectedSchema.parse(data);
+    const parsedLocationId = expectedLocationId.parse(locationId);
 
-    await createPersonForLocation(parsed.locationId, parsed);
+    await createPersonForLocation(parsedLocationId, parsed);
 
     revalidatePath("/[location]/personen", "page");
 

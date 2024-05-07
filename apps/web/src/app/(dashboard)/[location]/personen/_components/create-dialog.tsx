@@ -45,8 +45,7 @@ function CreateDialog({
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
   const submit = async (prevState: unknown, formData: FormData) => {
-    formData.append("locationId", locationId);
-    const result = await createPerson(prevState, formData);
+    const result = await createPerson(locationId, prevState, formData);
 
     if (result.message === "Success") {
       setIsOpen(false);
