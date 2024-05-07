@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createPersonForLocation } from "~/lib/nwd";
 
@@ -36,6 +37,8 @@ export async function createPerson(_prevState: unknown, formData: FormData) {
     const parsed = expectedSchema.parse(data);
 
     await createPersonForLocation(parsed.locationId, parsed);
+
+    revalidatePath("/[location]/personen", "page");
 
     return {
       message: "Success",
