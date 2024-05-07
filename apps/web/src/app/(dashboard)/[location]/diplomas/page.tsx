@@ -20,7 +20,7 @@ export default async function Page({
   const certificatesFuse = new Fuse(certificates, {
     includeMatches: true,
     keys: [
-      "name",
+      "handle",
       "student.firstName",
       "student.lastNamePrefix",
       "student.lastName",
