@@ -28,6 +28,7 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { Code } from "~/app/(dashboard)/_components/text";
 import type { listCertificates } from "~/lib/nwd";
 
 type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
@@ -73,7 +74,9 @@ const columns = [
   columnHelper.accessor("handle", {
     header: "Nummer",
     cell: ({ getValue, row }) => (
-      <Link href={`/diploma/${row.original.id}/pdf`}>{getValue()}</Link>
+      <Link href={`/diploma/${row.original.id}/pdf`}>
+        <Code>{getValue()}</Code>
+      </Link>
     ),
     meta: {
       suppressLinkBehavior: true,
@@ -106,7 +109,15 @@ const columns = [
   }),
   columnHelper.accessor("issuedAt", {
     header: "Behaald op",
-    cell: ({ getValue }) => dayjs(getValue()).format("DD-MM-YYYY"),
+    cell: ({ getValue }) => {
+      const issuedAt = getValue();
+
+      return issuedAt ? (
+        <span className="tabular-nums">
+          {dayjs(issuedAt).format("DD-MM-YYYY")}
+        </span>
+      ) : null;
+    },
   }),
 ];
 

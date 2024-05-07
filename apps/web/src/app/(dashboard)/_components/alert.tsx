@@ -8,7 +8,7 @@ import {
   type DialogProps as HeadlessDialogProps,
 } from "@headlessui/react";
 import clsx from "clsx";
-import React, { Fragment } from "react";
+import React from "react";
 import { Text } from "./text";
 
 const sizes = {
@@ -35,10 +35,9 @@ export function Alert({
   children: React.ReactNode;
 } & HeadlessDialogProps) {
   return (
-    <HeadlessTransition appear as={Fragment} show={open} {...props}>
+    <HeadlessTransition appear show={open} {...props}>
       <HeadlessDialog onClose={onClose}>
         <HeadlessTransitionChild
-          as={Fragment}
           enter="ease-out duration-100"
           enterFrom="opacity-0"
           enterTo="opacity-100"
@@ -49,34 +48,28 @@ export function Alert({
           <div className="fixed inset-0 flex w-screen justify-center overflow-y-auto bg-zinc-950/15 px-2 py-2 focus:outline-0 sm:px-6 sm:py-8 lg:px-8 lg:py-16 dark:bg-zinc-950/50" />
         </HeadlessTransitionChild>
 
-        <HeadlessTransitionChild
-          className="fixed inset-0 w-screen overflow-y-auto pt-6 sm:pt-0"
-          enter="ease-out duration-100"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-100"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
+        <div className="fixed inset-0 w-screen overflow-y-auto pt-6 sm:pt-0">
           <div className="grid min-h-full grid-rows-[1fr_auto_1fr] justify-items-center p-8 sm:grid-rows-[1fr_auto_3fr] sm:p-4">
             <HeadlessTransitionChild
-              as={HeadlessDialogPanel}
-              className={clsx(
-                className,
-                sizes[size],
-                "row-start-2 w-full rounded-2xl bg-white p-8 shadow-lg ring-1 ring-zinc-950/10 sm:rounded-2xl sm:p-6 dark:bg-zinc-900 dark:ring-white/10 forced-colors:outline",
-              )}
               enter="ease-out duration-100"
-              enterFrom="scale-95"
-              enterTo="scale-100"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
               leave="ease-in duration-100"
-              leaveFrom="scale-100"
-              leaveTo="scale-100"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
             >
-              {children}
+              <HeadlessDialogPanel
+                className={clsx(
+                  className,
+                  sizes[size],
+                  "row-start-2 w-full rounded-2xl bg-white p-8 shadow-lg ring-1 ring-zinc-950/10 sm:rounded-2xl sm:p-6 dark:bg-zinc-900 dark:ring-white/10 forced-colors:outline",
+                )}
+              >
+                {children}
+              </HeadlessDialogPanel>
             </HeadlessTransitionChild>
           </div>
-        </HeadlessTransitionChild>
+        </div>
       </HeadlessDialog>
     </HeadlessTransition>
   );

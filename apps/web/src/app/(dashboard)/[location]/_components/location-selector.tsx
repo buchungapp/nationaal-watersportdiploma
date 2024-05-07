@@ -1,4 +1,3 @@
-import { MenuButton as HeadlessMenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { retrieveLocationByHandle } from "~/lib/nwd";
@@ -7,6 +6,7 @@ import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
+  HeadlessMenuButton,
 } from "../../_components/dropdown";
 
 export async function LocationSelector({

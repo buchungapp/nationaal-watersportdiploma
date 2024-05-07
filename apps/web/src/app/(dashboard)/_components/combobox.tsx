@@ -8,9 +8,7 @@ import {
   type ComboboxProps as HeadlessComboboxProps,
 } from "@headlessui/react";
 import clsx from "clsx";
-import type { CSSProperties } from "react";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { useElementSize } from "../_hooks/use-element-size";
 
 /****************************************************************
  * TODO: this combobox is temporary used should be from catalyst
@@ -36,10 +34,7 @@ export function Combobox<T>({
   children?: React.ReactNode;
   setQuery?: (query: string) => void;
   invalid?: boolean;
-} & Omit<
-  HeadlessComboboxProps<T | null, false, false, typeof Fragment>,
-  "multiple"
-> &
+} & Omit<HeadlessComboboxProps<T | null, false, typeof Fragment>, "multiple"> &
   Pick<HeadlessComboboxInputProps<typeof Fragment, T | null>, "displayValue">) {
   const [value, setValue] = useState<T | null>(theirValue ?? null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -148,47 +143,38 @@ export function Combobox<T>({
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
       >
-        <div
-          style={
-            {
-              "--input-width": useElementSize(inputRef, true).width,
-              "--button-width": useElementSize(buttonRef, true).width,
-            } as CSSProperties
-          }
+        <HeadlessCombobox.Options
+          as="div"
+          anchor={{
+            to: "bottom start",
+            gap: "var(--anchor-gap)",
+            offset: "var(--anchor-offset)",
+            padding: "var(--anchor-padding)",
+          }}
+          className={clsx(
+            "z-20",
+
+            // Anchor positioning
+            "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
+
+            // Base styles
+            "isolate w-max min-w-[calc(var(--button-width)+1.75rem)] select-none scroll-py-1 rounded-xl p-1",
+
+            // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+            "outline outline-1 outline-transparent focus:outline-none",
+
+            // Handle scrolling when menu won't fit in viewport
+            "overflow-y-scroll overscroll-contain",
+
+            // Popover background
+            "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
+
+            // Shadows
+            "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
+          )}
         >
-          <HeadlessCombobox.Options
-            as="div"
-            anchor={{
-              to: "bottom start",
-              gap: "var(--anchor-gap)",
-              offset: "var(--anchor-offset)",
-              padding: "var(--anchor-padding)",
-            }}
-            className={clsx(
-              "z-20",
-
-              // Anchor positioning
-              "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
-
-              // Base styles
-              "isolate w-max min-w-[calc(var(--button-width)+1.75rem)] select-none scroll-py-1 rounded-xl p-1",
-
-              // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-              "outline outline-1 outline-transparent focus:outline-none",
-
-              // Handle scrolling when menu won't fit in viewport
-              "overflow-y-scroll overscroll-contain",
-
-              // Popover background
-              "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
-
-              // Shadows
-              "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
-            )}
-          >
-            {options}
-          </HeadlessCombobox.Options>
-        </div>
+          {options}
+        </HeadlessCombobox.Options>
       </HeadlessTransition>
     </HeadlessCombobox>
   );

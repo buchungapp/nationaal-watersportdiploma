@@ -220,7 +220,11 @@ function CreateDialogClient({
                         programs.find((program) => program.id === value)
                           ?.title ?? ""
                       }
-                      onChange={(value) => {
+                      onChange={(value: unknown) => {
+                        if (!(typeof value === "string" || value === null)) {
+                          throw new Error("Invalid value for program");
+                        }
+
                         setSelectedProgram(value);
                         setSelectedGearType(null);
                         setGearTypes([]);

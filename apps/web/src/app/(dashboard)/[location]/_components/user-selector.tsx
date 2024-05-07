@@ -1,14 +1,14 @@
-import { MenuButton as HeadlessMenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { logout } from "~/app/_actions/auth";
 import { retrieveUser } from "~/lib/nwd";
-import { Avatar } from "./avatar";
+import { Avatar } from "../../_components/avatar";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownSeparator,
-} from "./dropdown";
+  HeadlessMenuButton,
+} from "../../_components/dropdown";
 
 export async function UserSelector() {
   const currentUser = await retrieveUser();

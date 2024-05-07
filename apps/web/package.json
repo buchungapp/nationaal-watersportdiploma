@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.3.42",
-    "@headlessui/react": "2.0.0-alpha.4",
+    "@headlessui/react": "2.0.1",
     "@headlessui/tailwindcss": "^0.2.0",
     "@heroicons/react": "^2.1.1",
     "@mdx-js/loader": "^3.0.1",
@@ -38,7 +38,7 @@
     "input-otp": "^1.2.4",
     "js-confetti": "^0.12.0",
     "micromark": "^4.0.0",
-    "next": "14.2.3",
+    "next": "14.3.0-canary.44",
     "pdf-lib": "^1.17.1",
     "posthog-js": "^1.116.2",
     "posthog-node": "^4.0.0",
