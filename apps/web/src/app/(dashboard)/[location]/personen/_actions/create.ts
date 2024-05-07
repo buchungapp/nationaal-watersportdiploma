@@ -25,8 +25,6 @@ export async function createPerson(
     birthCountry: z.string().length(2).toLowerCase(),
   });
 
-  const expectedLocationId = z.string().uuid();
-
   const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
     formData.entries(),
   );
@@ -40,9 +38,8 @@ export async function createPerson(
 
   try {
     const parsed = expectedSchema.parse(data);
-    const parsedLocationId = expectedLocationId.parse(locationId);
 
-    await createPersonForLocation(parsedLocationId, parsed);
+    await createPersonForLocation(locationId, parsed);
 
     revalidatePath("/[location]/personen", "page");
 

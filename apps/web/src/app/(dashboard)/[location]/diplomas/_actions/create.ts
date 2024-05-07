@@ -16,9 +16,6 @@ export async function createCertificate(
     "competencies[]": z.array(z.string().uuid()),
   });
 
-  const expectedLocationId = z.string().uuid();
-  const expectedCurriculumId = z.string().uuid();
-
   try {
     const parsed = expectedSchema.parse({
       personId: formData.get("personId"),
@@ -28,11 +25,8 @@ export async function createCertificate(
         .flatMap((arr) => String(arr).split(",")),
     });
 
-    const parsedLocationId = expectedLocationId.parse(locationId);
-    const parsedCurriculumId = expectedCurriculumId.parse(curriculumId);
-
-    await createCompletedCertificate(parsedLocationId, parsed.personId, {
-      curriculumId: parsedCurriculumId,
+    await createCompletedCertificate(locationId, parsed.personId, {
+      curriculumId: curriculumId,
       gearTypeId: parsed.gearTypeId,
       competencies: parsed["competencies[]"],
     });
