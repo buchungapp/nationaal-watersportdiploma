@@ -136,7 +136,6 @@ export default function CertificateTable({
   totalItems: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const anyRowSelected = Object.keys(rowSelection).length > 0;
 
   const table = useReactTable({
     data: certificates,
@@ -151,11 +150,14 @@ export default function CertificateTable({
     },
   });
 
+  const anyRowSelected =
+    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
+
   return (
-    <>
+    <div className="mt-10 relative">
       {anyRowSelected ? (
-        <Popover className="mt-1">
-          <PopoverButton>
+        <Popover className="absolute left-14 top-0 flex items-center space-x-2 lg:left-20">
+          <PopoverButton color="orange">
             Acties <ChevronDownIcon />
           </PopoverButton>
           <PopoverPanel anchor="bottom start">
@@ -163,7 +165,7 @@ export default function CertificateTable({
           </PopoverPanel>
         </Popover>
       ) : null}
-      <Table className={anyRowSelected ? "mt-0" : "mt-10"} dense>
+      <Table dense>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -225,6 +227,6 @@ export default function CertificateTable({
         />
         <TablePagination totalItems={totalItems} />
       </TableFooter>
-    </>
+    </div>
   );
 }

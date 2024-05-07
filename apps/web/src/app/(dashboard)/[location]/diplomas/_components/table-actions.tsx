@@ -29,7 +29,7 @@ export function Download({ rows }: { rows: Row<Certificate>[] }) {
       }
     >
       {isPending ? <Spinner className="text-gray-700" size="sm" /> : null}{" "}
-      Download
+      Download PDF
     </Button>
   );
 }
