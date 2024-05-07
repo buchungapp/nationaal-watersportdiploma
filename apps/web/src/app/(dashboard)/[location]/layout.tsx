@@ -1,7 +1,7 @@
-import { UserSelector } from "../_components/user-selector";
 import LatestNews from "./_components/latest-news";
 import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
+import { UserSelector } from "./_components/user-selector";
 
 export default function Layout({
   children,
@@ -12,7 +12,7 @@ export default function Layout({
 }>) {
   return (
     <>
-      <div className="fixed inset-y-0 z-50 hidden w-72 flex-col sm:flex">
+      <div className="fixed inset-y-0 hidden w-72 flex-col sm:flex">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6">
           <div className="flex h-16 shrink-0 items-center">
             <img
@@ -43,7 +43,7 @@ export default function Layout({
         </div>
       </div>
 
-      <main className="py-2.5 min-h-screen flex flex-col lg:pl-72 pr-2.5">
+      <main className="py-2.5 h-screen flex flex-col lg:pl-72 pr-2.5">
         <div className="px-4 sm:px-8 shadow flex-1 ring-1 ring-gray-200 rounded min-h-full lg:px-12 bg-white overflow-y-auto">
           {children}
         </div>

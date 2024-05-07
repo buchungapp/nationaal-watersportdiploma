@@ -25,6 +25,8 @@ import React, { Fragment } from "react";
 import { Button } from "./button";
 import { Link } from "./link";
 
+export { HeadlessMenuButton };
+
 export function Dropdown(props: HeadlessMenuProps) {
   return <HeadlessMenu {...props} />;
 }
@@ -38,10 +40,7 @@ export function DropdownButton<T extends React.ElementType = typeof Button>(
 export function DropdownMenu({
   anchor = "bottom",
   ...props
-}: { anchor?: NonNullable<HeadlessMenuItemsProps["anchor"]>["to"] } & Omit<
-  HeadlessMenuItemsProps,
-  "anchor"
->) {
+}: HeadlessMenuItemsProps) {
   return (
     <HeadlessTransition
       as={Fragment}
@@ -50,12 +49,7 @@ export function DropdownMenu({
     >
       <HeadlessMenuItems
         {...props}
-        anchor={{
-          to: anchor,
-          gap: "var(--anchor-gap)",
-          offset: "var(--anchor-offset)",
-          padding: "var(--anchor-padding)",
-        }}
+        anchor={anchor}
         className={clsx(
           props.className,
 
