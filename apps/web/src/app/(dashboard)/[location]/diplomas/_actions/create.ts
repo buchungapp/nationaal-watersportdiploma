@@ -16,32 +16,16 @@ export async function createCertificate(
     "competencies[]": z.array(z.string().uuid()),
   });
 
-  const data: Record<string, string | string[] | null> = {};
-  for (const [key, value] of formData.entries()) {
-    const currentValue = data[key];
-
-    if (typeof currentValue === "undefined" || currentValue === null) {
-      data[key] = value as string;
-      continue;
-    }
-
-    if (Array.isArray(currentValue)) {
-      currentValue.push(value as string);
-      continue;
-    }
-
-    data[key] = [currentValue, value as string];
-  }
-
-  // Set all empty strings to null
-  for (const key in data) {
-    if (data[key] === "") {
-      data[key] = null;
-    }
-  }
-
   try {
-    const parsed = expectedSchema.parse(data);
+    const parsed = expectedSchema.parse({
+      locationId: formData.get("locationId"),
+      personId: formData.get("personId"),
+      gearTypeId: formData.get("gearTypeId"),
+      curriculumId: formData.get("curriculumId"),
+      "competencies[]": formData
+        .getAll("competencies[]")
+        .flatMap((arr) => String(arr).split(",")),
+    });
 
     await createCompletedCertificate(parsed.locationId, parsed.personId, {
       curriculumId: parsed.curriculumId,

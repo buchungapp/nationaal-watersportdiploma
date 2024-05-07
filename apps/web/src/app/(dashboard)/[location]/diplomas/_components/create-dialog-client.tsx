@@ -79,10 +79,7 @@ function CreateDialogClient({
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await createCertificate(prevState, formData);
 
-    console.log("result", result);
-
     if (result.message === "Success") {
-      console.log("arrived herekl1j2lkj!!");
       setIsOpen(false);
     }
 
@@ -277,7 +274,9 @@ function CreateDialogClient({
                             <CheckboxField key={module.id}>
                               <Checkbox
                                 name="competencies[]"
-                                value={module.id}
+                                value={module.competencies
+                                  .map((c) => c.id)
+                                  .join(",")}
                                 defaultChecked={true}
                               />
                               <Label>{module.title}</Label>
@@ -293,7 +292,9 @@ function CreateDialogClient({
                             <CheckboxField key={module.id}>
                               <Checkbox
                                 name="competencies[]"
-                                value={module.id}
+                                value={module.competencies
+                                  .map((c) => c.id)
+                                  .join(",")}
                                 defaultChecked={false}
                               />
                               <Label>{module.title}</Label>
