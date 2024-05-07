@@ -3,7 +3,8 @@
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ComponentProps, useDeferredValue, useEffect, useState } from "react";
+import type { ComponentProps } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import { Checkbox } from "../../../_components/checkbox";
 import {
