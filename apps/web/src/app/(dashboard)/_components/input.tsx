@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Input as HeadlessInput,
   type InputProps as HeadlessInputProps,
