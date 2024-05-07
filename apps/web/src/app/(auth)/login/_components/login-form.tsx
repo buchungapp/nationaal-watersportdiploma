@@ -12,7 +12,7 @@ export function SubmitButton({ children }: PropsWithChildren) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" color="blue" className="w-full" disabled={pending}>
-      {pending ? <Spinner className="h-5 w-5 text-white" /> : children}
+      {pending ? <Spinner className="text-white" /> : children}
     </Button>
   );
 }
@@ -44,7 +44,7 @@ function FakeCaret() {
 
 function OTPInputWithPending({ children }: PropsWithChildren) {
   const { pending } = useFormStatus();
-  return pending ? <Spinner className="h-5 w-5 text-black" /> : children;
+  return pending ? <Spinner className="text-black" /> : children;
 }
 
 export function OtpForm({

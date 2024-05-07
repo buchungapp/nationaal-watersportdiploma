@@ -4,8 +4,9 @@ import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ComponentProps } from "react";
-import { useDeferredValue, useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useState, useTransition } from "react";
 import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
+import Spinner from "~/app/_components/spinner";
 import { Checkbox } from "../../../_components/checkbox";
 import {
   Popover,
@@ -20,6 +21,8 @@ function CheckboxButton({
   ...props
 }: Pick<ComponentProps<"button">, "onClick" | "className" | "children"> &
   ComponentProps<typeof Checkbox>) {
+  const [isPending, startTransition] = useTransition();
+
   return (
     <button
       className={clsx([
@@ -34,9 +37,19 @@ function CheckboxButton({
         // Disabled
         "data-[disabled]:opacity-50",
       ])}
-      onClick={onClick}
+      onClick={(...e) => {
+        if (!onClick) return;
+
+        return startTransition(() => {
+          onClick(...e);
+        });
+      }}
     >
-      <Checkbox {...props} />
+      {isPending ? (
+        <Spinner className="text-gray-700" size="sm" />
+      ) : (
+        <Checkbox {...props} />
+      )}
       {children}
     </button>
   );
