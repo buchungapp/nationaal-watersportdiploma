@@ -12,7 +12,7 @@ export default function Layout({
 }>) {
   return (
     <>
-      <div className="fixed inset-y-0 hidden w-72 flex-col sm:flex">
+      <div className="fixed inset-y-0 hidden w-72 flex-col md:flex">
         <div className="flex grow flex-col gap-y-5 overflow-y-auto px-6">
           <div className="flex h-16 shrink-0 items-center">
             <img
@@ -44,7 +44,12 @@ export default function Layout({
       </div>
 
       <main className="py-2.5 h-screen flex flex-col lg:pl-72 pr-2.5">
-        <div className="px-4 sm:px-8 shadow flex-1 ring-1 ring-gray-200 rounded min-h-full lg:px-12 bg-white overflow-y-auto">
+        <div
+          className="px-4 sm:px-8 shadow flex-1 ring-1 ring-gray-200 rounded min-h-full lg:px-12 bg-white overflow-y-auto"
+          style={{
+            scrollbarGutter: "stable",
+          }}
+        >
           {children}
         </div>
       </main>
