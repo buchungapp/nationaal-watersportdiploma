@@ -34,7 +34,10 @@ export function Combobox<T>({
   children?: React.ReactNode;
   setQuery?: (query: string) => void;
   invalid?: boolean;
-} & Omit<HeadlessComboboxProps<T | null, false, typeof Fragment>, "multiple"> &
+} & Omit<
+  HeadlessComboboxProps<T | null, false, false, typeof Fragment>,
+  "multiple"
+> &
   Pick<HeadlessComboboxInputProps<typeof Fragment, T | null>, "displayValue">) {
   const [value, setValue] = useState<T | null>(theirValue ?? null);
   const buttonRef = useRef<HTMLButtonElement>(null);

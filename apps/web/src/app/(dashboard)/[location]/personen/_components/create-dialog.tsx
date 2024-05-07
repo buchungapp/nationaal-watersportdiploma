@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -18,13 +18,44 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { createPerson } from "../_actions/create";
 
-export default function CreateDialog({ locationId }: { locationId: string }) {
+interface Props {
+  locationId: string;
+}
+
+export default function Wrapper(props: Props) {
+  const forceRerenderId = useRef(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [state, formAction] = useFormState(createPerson, {
-    message: "",
-    errors: {},
-  });
+  return (
+    <CreateDialog
+      key={String(forceRerenderId.current)}
+      {...props}
+      isOpen={isOpen}
+      setIsOpen={(next) => {
+        setIsOpen(next);
+        forceRerenderId.current += 1;
+      }}
+    />
+  );
+}
+
+function CreateDialog({
+  locationId,
+  isOpen,
+  setIsOpen,
+}: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
+  const submit = async (prevState: unknown, formData: FormData) => {
+    formData.append("locationId", locationId);
+    const result = await createPerson(prevState, formData);
+
+    if (result.message === "Success") {
+      setIsOpen(false);
+    }
+
+    return result;
+  };
+
+  const [state, formAction] = useFormState(submit, undefined);
 
   return (
     <>
@@ -50,28 +81,28 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Label>Voornaam</Label>
                     <Input
                       name="firstName"
-                      invalid={!!state.errors.firstName}
+                      invalid={!!state?.errors.firstName}
                       required
                       minLength={1}
-                      disabled={state.message === "Success"}
+                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
                     <Label>Tussenvoegsel</Label>
                     <Input
                       name="lastNamePrefix"
-                      invalid={!!state.errors.lastNamePrefix}
-                      disabled={state.message === "Success"}
+                      invalid={!!state?.errors.lastNamePrefix}
+                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
                     <Label>Achternaam</Label>
                     <Input
                       name="lastName"
-                      invalid={!!state.errors.lastName}
+                      invalid={!!state?.errors.lastName}
                       required
                       minLength={1}
-                      disabled={state.message === "Success"}
+                      disabled={state?.message === "Success"}
                     />
                   </Field>
                 </div>
@@ -81,9 +112,9 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                   <Input
                     name="email"
                     type="email"
-                    invalid={!!state.errors.email}
+                    invalid={!!state?.errors.email}
                     required
-                    disabled={state.message === "Success"}
+                    disabled={state?.message === "Success"}
                   />
                 </Field>
 
@@ -93,54 +124,40 @@ export default function CreateDialog({ locationId }: { locationId: string }) {
                     <Input
                       name="dateOfBirth"
                       type="date"
-                      invalid={!!state.errors.dateOfBirth}
+                      invalid={!!state?.errors.dateOfBirth}
                       required
-                      disabled={state.message === "Success"}
+                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
-                      invalid={!!state.errors.birthCity}
-                      disabled={state.message === "Success"}
+                      invalid={!!state?.errors.birthCity}
+                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
                     <Label>Geboorteland</Label>
                     <Input
                       name="birthCountry"
-                      invalid={!!state.errors.birthCountry}
+                      invalid={!!state?.errors.birthCountry}
                       placeholder="nl"
                       required
                       minLength={2}
                       maxLength={2}
-                      disabled={state.message === "Success"}
+                      disabled={state?.message === "Success"}
                     />
                   </Field>
                 </div>
               </FieldGroup>
-              <input type="hidden" name="locationId" value={locationId} />
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            {state.message === "Success" ? (
-              <Button
-                color="branding-dark"
-                onClick={() => {
-                  setIsOpen(false);
-                }}
-              >
-                Sluiten
-              </Button>
-            ) : (
-              <>
-                <Button plain onClick={() => setIsOpen(false)}>
-                  Sluiten
-                </Button>
-                <SubmitButton />
-              </>
-            )}
+            <Button plain onClick={() => setIsOpen(false)}>
+              Sluiten
+            </Button>
+            <SubmitButton />
           </DialogActions>
         </form>
       </Dialog>

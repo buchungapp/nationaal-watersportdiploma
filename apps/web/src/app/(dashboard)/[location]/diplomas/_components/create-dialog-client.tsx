@@ -77,6 +77,8 @@ function CreateDialogClient({
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
   const submit = async (prevState: unknown, formData: FormData) => {
+    formData.append("locationId", locationId);
+    formData.append("curriculumId", selectedCurriculum?.id ?? "");
     const result = await createCertificate(prevState, formData);
 
     if (result.message === "Success") {
@@ -311,12 +313,6 @@ function CreateDialogClient({
                   )}
                 </Fieldset>
               </FieldGroup>
-              <input type="hidden" name="locationId" value={locationId} />
-              <input
-                type="hidden"
-                name="curriculumId"
-                value={selectedCurriculum?.id}
-              />
             </Fieldset>
           </DialogBody>
           <DialogActions>
