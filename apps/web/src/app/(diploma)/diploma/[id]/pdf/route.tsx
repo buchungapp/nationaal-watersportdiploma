@@ -1,10 +1,12 @@
 import { constants } from "@nawadi/lib";
+import chromium from "@sparticuz/chromium";
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import type { NextRequest } from "next/server";
 import { PDFDocument } from "pdf-lib";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import { retrieveCertificateById } from "~/lib/nwd";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } },
@@ -48,7 +50,15 @@ function presentPDF(
 }
 
 async function generatePDF(filename: string, url: string) {
-  const browser = await puppeteer.launch({ headless: true });
+  chromium.setHeadlessMode = true;
+
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+  });
+
   const page = await browser.newPage();
 
   await page.goto(url);
