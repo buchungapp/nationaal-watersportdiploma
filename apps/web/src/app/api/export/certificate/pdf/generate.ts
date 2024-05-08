@@ -8,36 +8,38 @@ import SVGtoPDF from "svg-to-pdfkit";
 import { generateAdvise } from "~/app/(diploma)/diploma/_utils/generate-advise";
 import { listCertificatesByNumber } from "~/lib/nwd";
 
-const DEBUG = false;
+const fontPaths = {
+  regular: "public/fonts/Inter-Regular.ttf",
+  medium: "public/fonts/Inter-Medium.ttf",
+  bold: "public/fonts/Inter-Bold.ttf",
+  black: "public/fonts/Inter-Black.ttf",
+};
 
-// Define a cache interface to store promises of fetched data
+// Caching setup
 const cache = new Map<string, Promise<ArrayBuffer>>();
 
 async function fetchLogoWithCache(
   url: string,
   options?: RequestInit,
 ): Promise<ArrayBuffer> {
-  const cacheKey = JSON.stringify({ url, options });
+  const cacheKey = `${url}_${JSON.stringify(options)}`;
 
-  // If the cache already has a promise for this request, return it
-  if (cache.has(cacheKey)) {
-    return cache.get(cacheKey)!;
+  if (!cache.has(cacheKey)) {
+    cache.set(
+      cacheKey,
+      fetch(url, options).then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch logo");
+        return res.arrayBuffer();
+      }),
+    );
   }
 
-  // If not, create a new fetch promise and store it in the cache
-  const promise = fetch(url, options).then((res) => {
-    if (!res.ok) {
-      throw new Error("Failed to fetch logo");
-    }
-    return res.arrayBuffer();
-  });
-
-  cache.set(cacheKey, promise);
-  return promise;
+  return cache.get(cacheKey)!;
 }
 
 export async function generatePDF(
   certificateNumbers: string[],
+  { debug = false } = {},
 ): Promise<ReadableStream> {
   const data = await listCertificatesByNumber(certificateNumbers);
 
@@ -50,7 +52,7 @@ export async function generatePDF(
   const doc = new PDFDocument({
     size: "A4",
     layout: "landscape",
-    font: path.join(process.cwd(), "public/fonts/Inter-Regular.ttf"),
+    font: path.join(process.cwd(), fontPaths.regular),
     info: {
       Author: constants.APP_NAME,
       CreationDate: new Date(),
@@ -58,24 +60,8 @@ export async function generatePDF(
     },
   });
 
-  doc.registerFont(
-    "regular",
-    path.join(process.cwd(), "public/fonts/Inter-Regular.ttf"),
-  );
-
-  doc.registerFont(
-    "medium",
-    path.join(process.cwd(), "public/fonts/Inter-Medium.ttf"),
-  );
-
-  doc.registerFont(
-    "bold",
-    path.join(process.cwd(), "public/fonts/Inter-Bold.ttf"),
-  );
-
-  doc.registerFont(
-    "black",
-    path.join(process.cwd(), "public/fonts/Inter-Black.ttf"),
+  Object.entries(fontPaths).forEach(([key, value]) =>
+    doc.registerFont(key, path.join(process.cwd(), value)),
   );
 
   for await (const certificate of data) {
@@ -122,7 +108,7 @@ export async function generatePDF(
       baseline: "hanging",
     });
 
-    DEBUG && doc.rect(476.22, 36.85, 272.126 - 5.669, 17.921).stroke();
+    debug && doc.rect(476.22, 36.85, 272.126 - 5.669, 17.921).stroke();
 
     // Program title
     doc
@@ -141,7 +127,7 @@ export async function generatePDF(
         },
       );
 
-    DEBUG && doc.rect(476.22, 56.378, 272.126 - 5.669, 14.488).stroke();
+    debug && doc.rect(476.22, 56.378, 272.126 - 5.669, 14.488).stroke();
 
     // Degree
     doc.font("black", 42).fillColor([255, 128, 0]);
@@ -154,7 +140,7 @@ export async function generatePDF(
       baseline: "hanging",
     });
 
-    DEBUG && doc.rect(748.346, 36.85, 34.016, 34.016).stroke();
+    debug && doc.rect(748.346, 36.85, 34.016, 34.016).stroke();
 
     // Name
     doc.fillColor("black");
@@ -235,7 +221,7 @@ export async function generatePDF(
       preserveAspectRatio: "xMidYMid meet",
     });
 
-    DEBUG && doc.rect(291.969, 501.732, 62.362, 62.362).stroke();
+    debug && doc.rect(291.969, 501.732, 62.362, 62.362).stroke();
 
     // Advice
     const options = {
@@ -253,7 +239,7 @@ export async function generatePDF(
         options,
       );
 
-    DEBUG && doc.rect(65.197, 501.732, 201.26, 62.362).stroke();
+    debug && doc.rect(65.197, 501.732, 201.26, 62.362).stroke();
 
     // Modules
     let x = 56.693;
