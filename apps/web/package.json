@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.3.42",
-    "@headlessui/react": "2.0.1",
+    "@headlessui/react": "2.0.3",
     "@headlessui/tailwindcss": "^0.2.0",
     "@heroicons/react": "^2.1.1",
     "@mdx-js/loader": "^3.0.1",

@@ -2,6 +2,7 @@ import {
   Certificate,
   Curriculum,
   Location,
+  Platform,
   Program,
   Student,
   User,
@@ -153,6 +154,24 @@ export const listDisciplines = cache(async () => {
         { pgUri: process.env.PGURI!, serverless: true },
         async () => {
           const disciplines = await Program.Discipline.list();
+
+          return disciplines;
+        },
+      ),
+  );
+});
+
+export const listCountries = cache(async () => {
+  return withSupabaseClient(
+    {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    },
+    () =>
+      withDatabase(
+        { pgUri: process.env.PGURI!, serverless: true },
+        async () => {
+          const disciplines = await Platform.Country.list();
 
           return disciplines;
         },

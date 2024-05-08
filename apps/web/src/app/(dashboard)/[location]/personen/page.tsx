@@ -1,5 +1,9 @@
 import Fuse from "fuse.js";
-import { listPersonsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listCountries,
+  listPersonsForLocation,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import Search from "../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
@@ -14,7 +18,13 @@ export default async function Page({
   };
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const location = await retrieveLocationByHandle(params.location);
+  const [location, countries] = await Promise.all([
+    retrieveLocationByHandle(params.location),
+    listCountries(),
+  ]);
+
+  console.log(countries);
+
   const persons = await listPersonsForLocation(location.id);
 
   // Filter
@@ -72,7 +82,7 @@ export default async function Page({
           </p>
         </div>
         <div className="mt-4 md:mt-0">
-          <CreateDialog locationId={location.id} />
+          <CreateDialog locationId={location.id} countries={countries} />
         </div>
       </div>
       <div className="mt-4 w-full flex flex-col gap-2 sm:flex-row">
