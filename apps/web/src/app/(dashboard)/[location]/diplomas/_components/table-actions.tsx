@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import Spinner from "~/app/_components/spinner";
-import type { listCertificates } from "~/lib/nwd";
+import type { listCertificatesByLocationId } from "~/lib/nwd";
 
-type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
+type Certificate = Awaited<
+  ReturnType<typeof listCertificatesByLocationId>
+>[number];
 export function Download({ rows }: { rows: Row<Certificate>[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

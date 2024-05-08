@@ -3,7 +3,13 @@ import assert from 'assert'
 import { and, desc, eq, gte, inArray, lt } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { findItem, singleRow, uuidSchema, withZod } from '../../utils/index.js'
+import {
+  findItem,
+  singleOrArray,
+  singleRow,
+  uuidSchema,
+  withZod,
+} from '../../utils/index.js'
 import { Curriculum, Location, Program, User } from '../index.js'
 
 export const find = withZod(
@@ -105,6 +111,8 @@ export const list = withZod(
     .object({
       filter: z
         .object({
+          id: singleOrArray(uuidSchema).optional(),
+          number: singleOrArray(z.string().length(10)).optional(),
           locationId: uuidSchema.optional(),
           issuedAfter: z.string().datetime().optional(),
           issuedBefore: z.string().datetime().optional(),
@@ -120,6 +128,16 @@ export const list = withZod(
       .from(s.certificate)
       .where(
         and(
+          filter.id
+            ? Array.isArray(filter.id)
+              ? inArray(s.certificate.id, filter.id)
+              : eq(s.certificate.id, filter.id)
+            : undefined,
+          filter.number
+            ? Array.isArray(filter.number)
+              ? inArray(s.certificate.handle, filter.number)
+              : eq(s.certificate.handle, filter.number)
+            : undefined,
           filter.locationId
             ? eq(s.certificate.locationId, filter.locationId)
             : undefined,

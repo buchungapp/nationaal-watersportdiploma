@@ -35,10 +35,12 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { Code } from "~/app/(dashboard)/_components/text";
-import type { listCertificates } from "~/lib/nwd";
+import type { listCertificatesByLocationId } from "~/lib/nwd";
 import { Download } from "./table-actions";
 
-type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
+type Certificate = Awaited<
+  ReturnType<typeof listCertificatesByLocationId>
+>[number];
 
 const columnHelper = createColumnHelper<Certificate>();
 
