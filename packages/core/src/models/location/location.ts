@@ -2,7 +2,7 @@ import { schema as s } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
-import { singleRow } from '../../utils/data-helpers.js'
+import { findItem, singleRow } from '../../utils/data-helpers.js'
 import {
   handleSchema,
   successfulCreateResponse,
@@ -38,18 +38,54 @@ export const create = withZod(
 
 export const list = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
-  return await query
-    .select()
-    .from(s.location)
-    .then((rows) =>
-      rows.map((row) => ({
-        ...row,
-        // TODO: Implement media in list procedure
-        logo: null,
-        logoSquare: null,
-        logoCertificate: null,
-      })),
-    )
+  const locations = await query.select().from(s.location)
+
+  const uniqueMediaIds = Array.from(
+    new Set(
+      locations
+        .map((row) => [
+          row.logoMediaId,
+          row.squareLogoMediaId,
+          row.certificateMediaId,
+        ])
+        .flat(),
+    ),
+  ).filter((id): id is string => !!id)
+
+  const allMedia = await Platform.Media.list()
+
+  return locations.map((row) => {
+    const logo = row.logoMediaId
+      ? findItem({
+          items: allMedia,
+          predicate: (media) => media.id === row.logoMediaId,
+          enforce: true,
+        })
+      : null
+
+    const logoSquare = row.squareLogoMediaId
+      ? findItem({
+          items: allMedia,
+          predicate: (media) => media.id === row.squareLogoMediaId,
+          enforce: true,
+        })
+      : null
+
+    const logoCertificate = row.certificateMediaId
+      ? findItem({
+          items: allMedia,
+          predicate: (media) => media.id === row.certificateMediaId,
+          enforce: true,
+        })
+      : null
+
+    return {
+      ...row,
+      logo,
+      logoSquare,
+      logoCertificate,
+    }
+  })
 })
 
 export const fromId = withZod(uuidSchema, outputSchema, async (id) => {

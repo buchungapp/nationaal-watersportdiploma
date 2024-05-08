@@ -1,19 +1,10 @@
 import clsx from "clsx";
 import dayjs from "dayjs";
-import type { Metadata } from "next";
 import { QRCodeSVG } from "qrcode.react";
 import type { PropsWithChildren } from "react";
-import { retrieveCertificateById } from "~/lib/nwd";
-import { generateAdvise } from "../../_utils/generate-advise";
+import type { retrieveCertificateById } from "~/lib/nwd";
 import bg from "./diploma-print-bg.png";
 import "./printStyles.css";
-
-export const metadata: Metadata = {
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
 
 const DataField = ({
   children,
@@ -51,15 +42,13 @@ const Module = ({ value }: { value: string }) => (
   </span>
 );
 
-export default async function Page({
-  params,
+export default function RawCertificate({
+  certificate,
+  advice,
 }: {
-  params: {
-    id: string;
-  };
+  certificate: Awaited<ReturnType<typeof retrieveCertificateById>>;
+  advice: string;
 }) {
-  const certificate = await retrieveCertificateById(params.id);
-
   const uniqueCompletedModules = Array.from(
     new Set(
       certificate.completedCompetencies.map(
@@ -71,8 +60,6 @@ export default async function Page({
   const modules = certificate.curriculum.modules.filter((module) =>
     uniqueCompletedModules.includes(module.id),
   );
-
-  const advice = await generateAdvise(params.id);
 
   return (
     <div className="page" style={{ backgroundImage: `url(${bg.src})` }}>
@@ -95,7 +82,6 @@ export default async function Page({
       <div className="size-[28mm] absolute left-[100mm] p-[3mm] top-[174mm]">
         <QRCodeSVG
           className="w-full h-full"
-          // value={`${BASE_URL.toString().replace(/\/$/, "")}/diploma?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
           value={`https://www.nationaalwatersportdiploma.nl/diploma?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
         />
       </div>

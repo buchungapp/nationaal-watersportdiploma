@@ -1,4 +1,5 @@
 "use client";
+import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -16,6 +17,11 @@ import {
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+} from "~/app/(dashboard)/_components/popover";
+import {
   Table,
   TableBody,
   TableCell,
@@ -29,9 +35,12 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { Code } from "~/app/(dashboard)/_components/text";
-import type { listCertificates } from "~/lib/nwd";
+import type { listCertificatesByLocationId } from "~/lib/nwd";
+import { Download } from "./table-actions";
 
-type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
+type Certificate = Awaited<
+  ReturnType<typeof listCertificatesByLocationId>
+>[number];
 
 const columnHelper = createColumnHelper<Certificate>();
 
@@ -143,9 +152,22 @@ export default function CertificateTable({
     },
   });
 
+  const anyRowSelected =
+    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
+
   return (
-    <>
-      <Table className="mt-8" dense>
+    <div className="mt-10 relative">
+      {anyRowSelected ? (
+        <Popover className="absolute left-14 top-0 flex items-center space-x-2 lg:left-20">
+          <PopoverButton color="branding-orange">
+            Acties <ChevronDownIcon />
+          </PopoverButton>
+          <PopoverPanel anchor="bottom start">
+            <Download rows={table.getSelectedRowModel().rows} />
+          </PopoverPanel>
+        </Popover>
+      ) : null}
+      <Table dense>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -207,6 +229,6 @@ export default function CertificateTable({
         />
         <TablePagination totalItems={totalItems} />
       </TableFooter>
-    </>
+    </div>
   );
 }
