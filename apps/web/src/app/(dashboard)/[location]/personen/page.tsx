@@ -23,8 +23,6 @@ export default async function Page({
     listCountries(),
   ]);
 
-  console.log(countries);
-
   const persons = await listPersonsForLocation(location.id);
 
   // Filter

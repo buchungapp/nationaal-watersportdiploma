@@ -9,10 +9,10 @@ import { generateAdvise } from "~/app/(diploma)/diploma/_utils/generate-advise";
 import { listCertificatesByNumber } from "~/lib/nwd";
 
 const fontPaths = {
-  regular: "public/fonts/Inter-Regular.ttf",
-  medium: "public/fonts/Inter-Medium.ttf",
-  bold: "public/fonts/Inter-Bold.ttf",
-  black: "public/fonts/Inter-Black.ttf",
+  regular: "./src/assets/fonts/Inter-Regular.ttf",
+  medium: "./src/assets/fonts/Inter-Medium.ttf",
+  bold: "./src/assets/fonts/Inter-Bold.ttf",
+  black: "./src/assets/fonts/Inter-Black.ttf",
 };
 
 // Caching setup
