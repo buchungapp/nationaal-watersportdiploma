@@ -2,10 +2,10 @@ import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
 import {
   SQL,
-  SQLWrapper,
-  getTableColumns,
   and,
   eq,
+  getTableColumns,
+  inArray,
   isNull,
   sql,
 } from 'drizzle-orm'
@@ -13,6 +13,7 @@ import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
+  singleOrArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -149,7 +150,7 @@ export const list = withZod(
       filter: z
         .object({
           userId: z.string().uuid().optional(),
-          locationId: uuidSchema.optional(),
+          locationId: singleOrArray(uuidSchema).optional(),
         })
         .default({}),
     })
@@ -163,8 +164,13 @@ export const list = withZod(
       conditions.push(eq(s.person.userId, input.filter.userId))
     }
 
+    // TODO: it's weird that we depend on the actor table here
     if (input.filter.locationId) {
-      conditions.push(eq(s.actor.locationId, input.filter.locationId))
+      if (Array.isArray(input.filter.locationId)) {
+        conditions.push(inArray(s.actor.locationId, input.filter.locationId))
+      } else {
+        conditions.push(eq(s.actor.locationId, input.filter.locationId))
+      }
     }
 
     return await query
@@ -177,12 +183,55 @@ export const list = withZod(
         actor: s.actor,
       })
       .from(s.person)
-      .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+      .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
       .innerJoin(
         s.actor,
         and(eq(s.actor.personId, s.person.id), isNull(s.actor.deletedAt)),
       )
       .where(and(...conditions))
       .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+  },
+)
+
+export const listLocations = withZod(
+  z.object({
+    personId: uuidSchema,
+    roles: z
+      .array(z.enum(['student', 'instructor', 'location_admin']))
+      .default(['instructor', 'student', 'location_admin']),
+  }),
+  z.array(
+    z.object({
+      locationId: uuidSchema,
+      roles: z.array(z.enum(['student', 'instructor', 'location_admin'])),
+    }),
+  ),
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .select({
+        locationId: s.personLocationLink.locationId,
+        role: s.actor.type,
+      })
+      .from(s.personLocationLink)
+      .leftJoin(
+        s.actor,
+        and(
+          eq(s.actor.personId, s.personLocationLink.personId),
+          eq(s.actor.locationId, s.personLocationLink.locationId),
+          isNull(s.actor.deletedAt),
+          inArray(s.actor.type, input.roles),
+        ),
+      )
+      .where(
+        and(
+          eq(s.personLocationLink.personId, input.personId),
+          eq(s.personLocationLink.status, 'linked'),
+        ),
+      )
+      .then(aggregate({ pkey: 'locationId', fields: { roles: 'role' } }))
+
+    return result as any
   },
 )

@@ -13,8 +13,15 @@ import {
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
+
+function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
+  assert.strictEqual(user.persons.length, 1, "Expected exactly one person");
+
+  return user.persons[0]!;
+}
 
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
@@ -31,7 +38,7 @@ async function makeRequest<T>(cb: () => Promise<T>) {
   }
 }
 
-export const getUser = cache(async () => {
+export const getUserOrThrow = cache(async () => {
   const cookieStore = cookies();
 
   const supabase = createServerClient(
@@ -55,13 +62,21 @@ export const getUser = cache(async () => {
   const { user: authUser } = userResponse.data;
 
   return makeRequest(async () => {
-    const userData = await User.fromId(authUser.id);
+    const [userData, persons] = await Promise.all([
+      User.fromId(authUser.id),
+      User.Person.list({ filter: { userId: authUser.id } }),
+    ]);
+
+    console.log("persons", persons);
 
     if (!userData) {
       throw new Error("User not found");
     }
 
-    return userData;
+    return {
+      ...userData,
+      persons,
+    };
   });
 });
 
@@ -86,26 +101,45 @@ export const findCertificate = async ({
   });
 };
 
-export const listCertificatesByLocationId = cache(
-  async (locationId: string) => {
-    return makeRequest(async () => {
-      await getUser();
+export const listCertificates = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
 
-      const certificates = await Certificate.list({
-        filter: { locationId },
-      });
+    const person = extractPerson(user);
 
-      return certificates;
+    const availableLocations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
     });
-  },
-);
+
+    if (!availableLocations.some((l) => l.locationId === locationId)) {
+      throw new Error("Location not found for person");
+    }
+
+    const certificates = await Certificate.list({
+      filter: { locationId },
+    });
+
+    return certificates;
+  });
+});
 
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   return makeRequest(async () => {
-    await getUser();
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    const availableLocations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
 
     const certificates = await Certificate.list({
-      filter: { number: numbers },
+      filter: {
+        number: numbers,
+        locationId: availableLocations.map((l) => l.locationId),
+      },
     });
 
     return certificates;
@@ -190,9 +224,20 @@ export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
 
 export const retrieveLocationByHandle = cache(async (handle: string) => {
   return makeRequest(async () => {
-    await getUser();
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    const availableLocations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
 
     const location = await Location.fromHandle(handle);
+
+    if (!availableLocations.some((l) => l.locationId === location.id)) {
+      throw new Error("Location not found for person");
+    }
 
     return location;
   });
@@ -200,7 +245,18 @@ export const retrieveLocationByHandle = cache(async (handle: string) => {
 
 export const listPersonsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    await getUser();
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    const availableLocations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === locationId)) {
+      throw new Error("Location not found for person");
+    }
 
     const persons = await User.Person.list({ filter: { locationId } });
 
@@ -221,7 +277,18 @@ export const createPersonForLocation = async (
   },
 ) => {
   return makeRequest(async () => {
-    await getUser();
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    const availableLocations = await User.Person.listLocations({
+      personId: authPerson.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === locationId)) {
+      throw new Error("Location not found for person");
+    }
 
     let user;
 
@@ -272,7 +339,18 @@ export const createCompletedCertificate = async (
 ) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      await getUser();
+      const authUser = await getUserOrThrow();
+
+      const authPerson = extractPerson(authUser);
+
+      const availableLocations = await User.Person.listLocations({
+        personId: authPerson.id,
+        roles: ["location_admin"],
+      });
+
+      if (!availableLocations.some((l) => l.locationId === locationId)) {
+        throw new Error("Location not found for person");
+      }
 
       // Start student curriculum
       const { id: studentCurriculumId } = await Student.Program.startProgram({

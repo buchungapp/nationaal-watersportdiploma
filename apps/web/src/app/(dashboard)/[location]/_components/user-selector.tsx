@@ -1,6 +1,6 @@
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { logout } from "~/app/_actions/auth";
-import { getUser } from "~/lib/nwd";
+import { getUserOrThrow } from "~/lib/nwd";
 import { Avatar } from "../../_components/avatar";
 import {
   Dropdown,
@@ -11,7 +11,7 @@ import {
 } from "../../_components/dropdown";
 
 export async function UserSelector() {
-  const currentUser = await getUser();
+  const currentUser = await getUserOrThrow();
 
   return (
     <Dropdown>

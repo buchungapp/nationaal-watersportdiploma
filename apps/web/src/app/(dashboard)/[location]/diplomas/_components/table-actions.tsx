@@ -1,10 +1,8 @@
 import type { Row } from "@tanstack/react-table";
 import { Button } from "~/app/(dashboard)/_components/button";
-import type { listCertificatesByLocationId } from "~/lib/nwd";
+import type { listCertificates } from "~/lib/nwd";
 
-type Certificate = Awaited<
-  ReturnType<typeof listCertificatesByLocationId>
->[number];
+type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 export function Download({ rows }: { rows: Row<Certificate>[] }) {
   const params = new URLSearchParams();
 

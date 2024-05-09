@@ -113,7 +113,7 @@ export const list = withZod(
         .object({
           id: singleOrArray(uuidSchema).optional(),
           number: singleOrArray(z.string().length(10)).optional(),
-          locationId: uuidSchema.optional(),
+          locationId: singleOrArray(uuidSchema).optional(),
           issuedAfter: z.string().datetime().optional(),
           issuedBefore: z.string().datetime().optional(),
         })
@@ -139,7 +139,9 @@ export const list = withZod(
               : eq(s.certificate.handle, filter.number)
             : undefined,
           filter.locationId
-            ? eq(s.certificate.locationId, filter.locationId)
+            ? Array.isArray(filter.locationId)
+              ? inArray(s.certificate.locationId, filter.locationId)
+              : eq(s.certificate.locationId, filter.locationId)
             : undefined,
           filter.issuedAfter
             ? gte(s.certificate.issuedAt, filter.issuedAfter)
