@@ -16,7 +16,7 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 
-async function tmpAuthCheck() {
+export const getUser = cache(async () => {
   const cookieStore = cookies();
 
   const supabase = createServerClient(
@@ -31,18 +31,22 @@ async function tmpAuthCheck() {
     },
   );
 
-  const { data, error } = await supabase.auth.getUser();
+  const userResponse = await supabase.auth.getUser();
 
-  if (error) {
+  if (userResponse.error != null) {
     redirect("/login");
   }
 
-  if (data.user.id !== "d9dd30ea-1ebb-4e56-aa24-25cd9a38692e") {
-    throw new Error("Unauthorized");
+  const { user: authUser } = userResponse.data;
+
+  const userData = await User.fromId(authUser.id);
+
+  if (!userData) {
+    throw new Error("User not found");
   }
 
-  return data.user;
-}
+  return userData;
+});
 
 export const findCertificate = async ({
   handle,
@@ -86,7 +90,7 @@ export const listCertificatesByLocationId = cache(
         withDatabase(
           { pgUri: process.env.PGURI!, serverless: true },
           async () => {
-            await tmpAuthCheck();
+            await getUser();
 
             const certificates = await Certificate.list({
               filter: { locationId },
@@ -109,7 +113,7 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
       withDatabase(
         { pgUri: process.env.PGURI!, serverless: true },
         async () => {
-          await tmpAuthCheck();
+          await getUser();
 
           const certificates = await Certificate.list({
             filter: { number: numbers },
@@ -287,35 +291,11 @@ export const retrieveLocationByHandle = cache(async (handle: string) => {
       withDatabase(
         { pgUri: process.env.PGURI!, serverless: true },
         async () => {
-          await tmpAuthCheck();
+          await getUser();
 
           const location = await Location.fromHandle(handle);
 
           return location;
-        },
-      ),
-  );
-});
-
-export const retrieveUser = cache(async () => {
-  return withSupabaseClient(
-    {
-      url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    },
-    () =>
-      withDatabase(
-        { pgUri: process.env.PGURI!, serverless: true },
-        async () => {
-          const authUser = await tmpAuthCheck();
-
-          const user = await User.fromId(authUser.id);
-
-          if (!user) {
-            throw new Error("User not found");
-          }
-
-          return user;
         },
       ),
   );
@@ -331,7 +311,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
       withDatabase(
         { pgUri: process.env.PGURI!, serverless: true },
         async () => {
-          await tmpAuthCheck();
+          await getUser();
 
           const persons = await User.Person.list({ filter: { locationId } });
 
@@ -363,7 +343,7 @@ export const createPersonForLocation = cache(
         withDatabase(
           { pgUri: process.env.PGURI!, serverless: true },
           async () => {
-            await tmpAuthCheck();
+            await getUser();
 
             let user;
 
@@ -426,7 +406,7 @@ export const createCompletedCertificate = cache(
           { pgUri: process.env.PGURI!, serverless: true },
           async () => {
             return withTransaction(async () => {
-              await tmpAuthCheck();
+              await getUser();
 
               // Start student curriculum
               const { id: studentCurriculumId } =
