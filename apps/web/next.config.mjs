@@ -7,6 +7,9 @@ const nextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   experimental: {
     mdxRs: true,
+    outputFileTracingIncludes: {
+      "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
+    },
   },
   async redirects() {
     return [
