@@ -51,6 +51,7 @@
     "remark-gfm": "^3.0.1",
     "server-only": "^0.0.1",
     "slugify": "^1.6.6",
+    "sonner": "^1.4.41",
     "svg-to-pdfkit": "^0.1.8",
     "tailwind-merge": "^2.2.1",
     "zod": "^3.22.4"
