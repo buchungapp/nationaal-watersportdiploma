@@ -156,7 +156,7 @@ export default function CertificateTable({
   return (
     <div className="mt-10 relative">
       {anyRowSelected ? (
-        <Popover className="absolute left-14 top-0 flex items-center space-x-2 lg:left-20">
+        <Popover className="absolute left-12 top-0 flex items-center space-x-2">
           <PopoverButton color="branding-orange">
             Acties <ChevronDownIcon />
           </PopoverButton>

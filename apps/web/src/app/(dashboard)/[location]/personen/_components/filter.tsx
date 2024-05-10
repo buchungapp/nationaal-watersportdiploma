@@ -106,12 +106,12 @@ export function FilterSelect() {
         <CheckboxButton
           onClick={() => {
             setSelectedStatus((prev) =>
-              prev.includes("location-admin")
-                ? prev.filter((item) => item !== "location-admin")
-                : [...prev, "location-admin"],
+              prev.includes("location_admin")
+                ? prev.filter((item) => item !== "location_admin")
+                : [...prev, "location_admin"],
             );
           }}
-          checked={_selectedStatus.includes("location-admin")}
+          checked={_selectedStatus.includes("location_admin")}
         >
           Locatie-beheerder
         </CheckboxButton>

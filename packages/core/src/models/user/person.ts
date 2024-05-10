@@ -4,6 +4,7 @@ import {
   SQL,
   and,
   eq,
+  exists,
   getTableColumns,
   inArray,
   isNull,
@@ -32,7 +33,6 @@ export const getOrCreate = withZod(
       birthCity: true,
       birthCountry: true,
     })
-    .required()
     .extend({
       userId: selectSchema.shape.authUserId.optional(),
     }),
@@ -173,12 +173,31 @@ export const list = withZod(
       conditions.push(eq(s.person.userId, input.filter.userId))
     }
 
-    // TODO: it's weird that we depend on the actor table here
     if (input.filter.locationId) {
       if (Array.isArray(input.filter.locationId)) {
-        conditions.push(inArray(s.actor.locationId, input.filter.locationId))
+        const existsQuery = query
+          .select({ personId: s.personLocationLink.personId })
+          .from(s.personLocationLink)
+          .where(
+            and(
+              inArray(s.personLocationLink.locationId, input.filter.locationId),
+              eq(s.personLocationLink.status, 'linked'),
+              eq(s.personLocationLink.personId, s.person.id),
+            ),
+          )
+        conditions.push(exists(existsQuery))
       } else {
-        conditions.push(eq(s.actor.locationId, input.filter.locationId))
+        const existsQuery = query
+          .select({ personId: s.personLocationLink.personId })
+          .from(s.personLocationLink)
+          .where(
+            and(
+              eq(s.personLocationLink.locationId, input.filter.locationId),
+              eq(s.personLocationLink.status, 'linked'),
+              eq(s.personLocationLink.personId, s.person.id),
+            ),
+          )
+        conditions.push(exists(existsQuery))
       }
     }
 
