@@ -14,6 +14,7 @@ import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   singleOrArray,
+  singleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -129,7 +130,7 @@ export const createLocationLink = withZod(
 export const fromId = async (id: string) => {
   const query = useQuery()
 
-  const [result] = await query
+  return await query
     .select({
       ...getTableColumns(s.person),
       birthCountry: {
@@ -140,8 +141,16 @@ export const fromId = async (id: string) => {
     .from(s.person)
     .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
-
-  return result
+    .then((rows) => {
+      const result = singleRow(rows)
+      if (result.birthCountry.code === null) {
+        return {
+          ...result,
+          birthCountry: null,
+        }
+      }
+      return result
+    })
 }
 
 export const list = withZod(
