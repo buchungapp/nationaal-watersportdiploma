@@ -71,7 +71,6 @@ export function OtpForm({
           render={({ slots }) => (
             <>
               {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
-                console.log("hasFakeCaret", hasFakeCaret);
                 return (
                   <div
                     key={idx}

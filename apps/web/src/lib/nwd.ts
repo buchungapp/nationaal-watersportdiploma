@@ -67,8 +67,6 @@ export const getUserOrThrow = cache(async () => {
       User.Person.list({ filter: { userId: authUser.id } }),
     ]);
 
-    console.log("persons", persons);
-
     if (!userData) {
       throw new Error("User not found");
     }
