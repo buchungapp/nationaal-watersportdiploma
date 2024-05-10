@@ -35,12 +35,10 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { Code } from "~/app/(dashboard)/_components/text";
-import type { listCertificatesByLocationId } from "~/lib/nwd";
+import type { listCertificates } from "~/lib/nwd";
 import { Download } from "./table-actions";
 
-type Certificate = Awaited<
-  ReturnType<typeof listCertificatesByLocationId>
->[number];
+type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 
 const columnHelper = createColumnHelper<Certificate>();
 
@@ -158,7 +156,7 @@ export default function CertificateTable({
   return (
     <div className="mt-10 relative">
       {anyRowSelected ? (
-        <Popover className="absolute left-14 top-0 flex items-center space-x-2 lg:left-20">
+        <Popover className="absolute left-12 top-0 flex items-center space-x-2">
           <PopoverButton color="branding-orange">
             Acties <ChevronDownIcon />
           </PopoverButton>

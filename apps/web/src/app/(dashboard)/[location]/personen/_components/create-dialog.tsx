@@ -1,7 +1,13 @@
 "use client";
 import { useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
+import {
+  Combobox,
+  ComboboxLabel,
+  ComboboxOption,
+} from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
   DialogActions,
@@ -20,6 +26,7 @@ import { createPerson } from "../_actions/create";
 
 interface Props {
   locationId: string;
+  countries: { code: string; name: string }[];
 }
 
 export default function Wrapper(props: Props) {
@@ -43,18 +50,35 @@ function CreateDialog({
   locationId,
   isOpen,
   setIsOpen,
-}: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
+  countries,
+}: Props & {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+}) {
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await createPerson(locationId, prevState, formData);
 
     if (result.message === "Success") {
       setIsOpen(false);
+      toast.success("Persoon is toegevoegd.");
     }
 
     return result;
   };
 
   const [state, formAction] = useFormState(submit, undefined);
+  const [selectedCountry, setSelectedCountry] = useState<string | null>("nl");
+
+  const [countryQuery, setCountryQuery] = useState("");
+
+  const filteredCountries =
+    countryQuery === ""
+      ? countries
+      : countries.filter((country) => {
+          return country.name
+            .toLowerCase()
+            .includes(countryQuery.toLowerCase());
+        });
 
   return (
     <>
@@ -83,7 +107,6 @@ function CreateDialog({
                       invalid={!!state?.errors.firstName}
                       required
                       minLength={1}
-                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
@@ -91,7 +114,6 @@ function CreateDialog({
                     <Input
                       name="lastNamePrefix"
                       invalid={!!state?.errors.lastNamePrefix}
-                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
@@ -101,52 +123,62 @@ function CreateDialog({
                       invalid={!!state?.errors.lastName}
                       required
                       minLength={1}
-                      disabled={state?.message === "Success"}
                     />
                   </Field>
                 </div>
 
-                <Field>
-                  <Label>E-mail</Label>
-                  <Input
-                    name="email"
-                    type="email"
-                    invalid={!!state?.errors.email}
-                    required
-                    disabled={state?.message === "Success"}
-                  />
-                </Field>
-
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
-                  <Field>
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-5 sm:gap-4">
+                  <Field className="sm:col-span-3">
+                    <Label>E-mail</Label>
+                    <Input
+                      name="email"
+                      type="email"
+                      invalid={!!state?.errors.email}
+                      required
+                    />
+                  </Field>
+                  <Field className="sm:col-span-2">
                     <Label>Geboortedatum</Label>
                     <Input
                       name="dateOfBirth"
                       type="date"
                       invalid={!!state?.errors.dateOfBirth}
                       required
-                      disabled={state?.message === "Success"}
                     />
                   </Field>
+                </div>
+
+                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
                   <Field>
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
                       invalid={!!state?.errors.birthCity}
-                      disabled={state?.message === "Success"}
                     />
                   </Field>
                   <Field>
                     <Label>Geboorteland</Label>
-                    <Input
+                    <Combobox
                       name="birthCountry"
                       invalid={!!state?.errors.birthCountry}
-                      placeholder="nl"
-                      required
-                      minLength={2}
-                      maxLength={2}
-                      disabled={state?.message === "Success"}
-                    />
+                      value={selectedCountry}
+                      setQuery={setCountryQuery}
+                      onChange={(value) => setSelectedCountry(value)}
+                      displayValue={(value: string | null) => {
+                        if (!value) return "";
+                        const country = countries.find(
+                          (country) => country.code === value,
+                        );
+                        return country?.name ?? "";
+                      }}
+                      defaultValue="nl"
+                    >
+                      {filteredCountries.map((country) => (
+                        <ComboboxOption key={country.code} value={country.code}>
+                          <ComboboxLabel>{country.name}</ComboboxLabel>
+                        </ComboboxOption>
+                      ))}
+                    </Combobox>
                   </Field>
                 </div>
               </FieldGroup>

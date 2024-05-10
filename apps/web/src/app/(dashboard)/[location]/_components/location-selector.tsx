@@ -39,7 +39,9 @@ export async function LocationSelector({
         <ChevronUpDownIcon className="ml-auto mr-1 size-4 shrink-0 stroke-zinc-400" />
       </HeadlessMenuButton>
       <DropdownMenu className="min-w-[--button-width] z-50">
-        <DropdownItem>Instellingen</DropdownItem>
+        <DropdownItem href={`/${currentLocationSlug}/instellingen`}>
+          Instellingen
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );

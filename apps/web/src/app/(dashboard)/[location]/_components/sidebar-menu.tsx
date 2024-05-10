@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  AcademicCapIcon,
-  RectangleStackIcon,
-  UserGroupIcon,
-} from "@heroicons/react/20/solid";
+import { AcademicCapIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { useParams, useSelectedLayoutSegment } from "next/navigation";
 
@@ -15,13 +11,13 @@ export function LocationSidebarMenu() {
   return (
     <ul role="list" className="-mx-2 space-y-1">
       {[
-        {
-          name: "Cohorten",
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          href: `/${params.location}/cohorten`,
-          icon: RectangleStackIcon,
-          current: segment === "cohorten",
-        },
+        // {
+        //   name: "Cohorten",
+        //   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        //   href: `/${params.location}/cohorten`,
+        //   icon: RectangleStackIcon,
+        //   current: segment === "cohorten",
+        // },
         {
           name: "Personen",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

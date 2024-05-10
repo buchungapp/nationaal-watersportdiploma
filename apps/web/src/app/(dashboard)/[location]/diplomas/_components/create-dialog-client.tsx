@@ -3,6 +3,7 @@ import clsx from "clsx";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -85,6 +86,7 @@ function CreateDialogClient({
     );
 
     if (result.message === "Success") {
+      toast.success("Diploma toegevoegd");
       setIsOpen(false);
     }
 
