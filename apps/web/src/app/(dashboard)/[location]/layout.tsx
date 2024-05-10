@@ -49,7 +49,7 @@ export default function Layout({
           {children}
         </div>
       </main>
-      <Toaster />
+      <Toaster richColors />
     </>
   );
 }
