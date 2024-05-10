@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -59,6 +60,7 @@ function CreateDialog({
 
     if (result.message === "Success") {
       setIsOpen(false);
+      toast.success("Persoon is toegevoegd.");
     }
 
     return result;
