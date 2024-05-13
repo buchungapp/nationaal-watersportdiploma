@@ -18,6 +18,9 @@ export async function generateMetadata(
     title: "Merk",
     description:
       "Alles over het logo, de kleuren en de huisstijl van het Nationaal Watersportdiploma.",
+    alternates: {
+      canonical: "/merk",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Merk",

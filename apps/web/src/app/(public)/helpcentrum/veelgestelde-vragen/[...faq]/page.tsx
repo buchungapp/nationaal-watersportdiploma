@@ -50,6 +50,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${question.question} - Helpcentrum`,
+    alternates: {
+      canonical: `/helpcentrum/veelgestelde-vragen/${params.faq.join("/")}`,
+    },
   };
 }
 export default async function Page({ params }: Props) {

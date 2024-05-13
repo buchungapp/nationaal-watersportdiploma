@@ -80,7 +80,9 @@ export default function Footer() {
         </div>
         <div className="grid grid-cols-1 items-start gap-12 text-sm lg:grid-cols-3 lg:gap-0">
           <div className="grid gap-6">
-            <h3 className="font-semibold uppercase text-white">Diplomalijn</h3>
+            <h3 className="font-semibold uppercase text-white">
+              Diplomeringslijn
+            </h3>
             <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/diplomalijn/consument">Consumenten</FooterLink>
               <FooterLink href="/diplomalijn/instructeur">

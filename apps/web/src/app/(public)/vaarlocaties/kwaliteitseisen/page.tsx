@@ -13,6 +13,9 @@ export async function generateMetadata(
     title: "Kwaliteitseisen",
     description:
       "De eisen voor deelnemende vaarlocaties die de drie pijlers veiligheid, kwaliteit en plezier moeten waarborgen.",
+    alternates: {
+      canonical: "/vaarlocaties/kwaliteitseisen",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Kwaliteitseisen",

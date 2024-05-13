@@ -11,6 +11,9 @@ export const metadata: Metadata = {
     default: "Verenigingszaken",
   },
   description: "Opzet en werking van de vereniging.",
+  alternates: {
+    canonical: "/vereniging",
+  },
   openGraph: {
     title: {
       template: `%s | Verenigingszaken | ${constants.APP_NAME}`,

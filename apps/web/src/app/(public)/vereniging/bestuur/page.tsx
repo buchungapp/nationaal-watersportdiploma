@@ -10,6 +10,9 @@ export async function generateMetadata(
 
   return {
     title: "Bestuur",
+    alternates: {
+      canonical: "/vereniging/bestuur",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Bestuur",

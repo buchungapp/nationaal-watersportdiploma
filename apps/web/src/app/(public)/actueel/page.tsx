@@ -19,6 +19,9 @@ export async function generateMetadata(
     title: "Actueel",
     description:
       "Blijf op de hoogte van het laatste nieuws en vereniging updates.",
+    alternates: {
+      canonical: "/actueel",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Actueel",

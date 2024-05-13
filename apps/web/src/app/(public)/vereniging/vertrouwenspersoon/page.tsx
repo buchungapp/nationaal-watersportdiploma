@@ -14,6 +14,9 @@ export async function generateMetadata(
 
   return {
     title: "Vertrouwenspersoon",
+    alternates: {
+      canonical: "/vereniging/vertrouwenspersoon",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Vertrouwenspersoon",
