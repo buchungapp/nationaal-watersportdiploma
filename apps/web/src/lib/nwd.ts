@@ -265,7 +265,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 export const getPersonById = cache(async (personId: string) => {
   return makeRequest(async () => {
     const person = await User.Person.fromId(personId);
-    if (!person || !person.userId) return { ...person, user: null };
+    if (!person?.userId) return { ...person, user: null };
 
     const user = await User.fromId(person.userId);
 
