@@ -15,13 +15,11 @@ import { BackButton } from "../_components/back-button";
 
 export default async function Page({
   params,
-  searchParams,
 }: {
   params: {
     location: string;
     id: string;
   };
-  searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const location = await retrieveLocationByHandle(params.location);
   const [certificates, person] = await Promise.all([
