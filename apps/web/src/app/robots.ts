@@ -6,6 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
+      disallow: ["/diploma/"],
     },
     sitemap: `${constants.WEBSITE_URL}/sitemap.xml`,
   };
