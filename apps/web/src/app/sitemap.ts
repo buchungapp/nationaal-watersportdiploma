@@ -59,44 +59,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  return [
-    {
-      url: `${BASE_URL}`,
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-    {
-      url: `${BASE_URL}/vaarlocaties`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/helpcentrum`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/contact`,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/actueel`,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    ...articleMaps,
-    ...consument,
-    ...instructeur,
-    ...vereniging,
-    ...faqGeneralPages,
-    ...faqDiplomalijnPages,
-    {
-      url: `${BASE_URL}/merk`,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-  ].map((page) => ({
+  return (
+    [
+      {
+        url: `${BASE_URL}`,
+        changeFrequency: "monthly",
+        priority: 1,
+      },
+      {
+        url: `${BASE_URL}/vaarlocaties`,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/helpcentrum`,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/contact`,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/actueel`,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      },
+      ...articleMaps,
+      ...consument,
+      ...instructeur,
+      ...vereniging,
+      ...faqGeneralPages,
+      ...faqDiplomalijnPages,
+      {
+        url: `${BASE_URL}/merk`,
+        changeFrequency: "monthly",
+        priority: 0.6,
+      },
+    ] as const
+  ).map((page) => ({
     ...page,
     url: page.url.replace(/\/$/, ""),
     lastModified: new Date().toISOString(),
