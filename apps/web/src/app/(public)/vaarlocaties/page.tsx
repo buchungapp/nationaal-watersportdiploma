@@ -23,6 +23,9 @@ export async function generateMetadata(
   return {
     title: "Vaarlocaties",
     description: "Vind een NWD vaarlocatie bij jou in de buurt.",
+    alternates: {
+      canonical: "/vaarlocaties",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Vaarlocaties",

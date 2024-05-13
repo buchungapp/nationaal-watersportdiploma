@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   icons: {
     shortcut: "/favicon.ico",
   },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: {
       default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,

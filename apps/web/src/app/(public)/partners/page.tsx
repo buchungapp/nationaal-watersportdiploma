@@ -15,6 +15,9 @@ export async function generateMetadata(
   return {
     title: "Partners",
     description: "Partijen waarmee het Nationaal Watersportdiploma samenwerkt.",
+    alternates: {
+      canonical: "/partners",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Partners",
