@@ -99,7 +99,7 @@ export const findCertificate = async ({
   });
 };
 
-export const listCertificates = cache(async (locationId: string) => {
+export const listCertificatesByLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
@@ -259,6 +259,17 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
     const persons = await User.Person.list({ filter: { locationId } });
 
     return persons;
+  });
+});
+
+export const getPersonById = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const person = await User.Person.fromId(personId);
+    if (!person || !person.userId) return { ...person, user: null };
+
+    const user = await User.fromId(person.userId);
+
+    return { ...person, user };
   });
 });
 

@@ -120,7 +120,7 @@ export default function PersonsTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`personen/${row.id}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
