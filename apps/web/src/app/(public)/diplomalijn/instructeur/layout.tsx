@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     template: `%s - Diplomalijn instructeurs | ${constants.APP_NAME}`,
     default: `Diplomalijn instructeurs | ${constants.APP_NAME}`,
   },
+  alternates: null,
 };
 
 export default async function Layout({
