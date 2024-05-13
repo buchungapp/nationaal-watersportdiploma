@@ -1,4 +1,7 @@
-import { AcademicCapIcon } from "@heroicons/react/16/solid";
+import {
+  AcademicCapIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -146,7 +149,10 @@ export default async function Page({
         >
           <ul role="list" className="space-y-6">
             {activity
-              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime(),
+              )
               .map((activityItem, activityItemIdx) => (
                 <li
                   key={activityItem.type + activityItemIdx}
@@ -172,8 +178,13 @@ export default async function Page({
                       </div>
                       <Link
                         href={`/${location.handle}/diplomas/${activityItem.certificate.id}`}
+                        target="_blank"
                         className="flex-auto rounded-md p-3 ring-1 ring-inset ring-gray-200"
                       >
+                        <div className="flex justify-between gap-x-4">
+                          <Code>{activityItem.certificate.handle}</Code>
+                          <ArrowTopRightOnSquareIcon className="h-4 w-4 text-gray-400" />
+                        </div>
                         <div className="flex justify-between gap-x-4">
                           <div className="py-0.5 text-xs leading-5 text-gray-500">
                             <span className="font-medium text-gray-900">
@@ -197,11 +208,11 @@ export default async function Page({
                           <span className="font-medium">
                             {activityItem.certificate.gearType.title}
                           </span>{" "}
-                          bij {/* <span className="whitespace-nowrap"> */}
-                          {activityItem.certificate.location.name}
-                          {/* </span> */}
+                          bij{" "}
+                          <span className="font-medium">
+                            {activityItem.certificate.location.name}
+                          </span>
                           <br />
-                          <Code>{activityItem.certificate.handle}</Code>
                         </p>
                       </Link>
                     </>
