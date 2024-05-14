@@ -300,7 +300,7 @@ paths:
 
   /country:
     get:
-      operationId: listDCountries
+      operationId: listCountries
       tags:
         - country
       summary: Lists all countries
@@ -501,13 +501,13 @@ components:
     CountryListModel:
       type: object
       required:
-        - id
-        - handle
+        - code
+        - name
       properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
+        code:
+          $ref: '#/components/schemas/Code'
+        name:
+          $ref: '#/components/schemas/Name'
 
     # Fields
 
@@ -516,11 +516,20 @@ components:
       format: uuid
       description: A unique identifier
 
+    Code:
+      type: string
+      description: A code
+
     Title:
       type: string
       minLength: 1
       nullable: true
       description: A title (may be null)
+
+    Name:
+      type: string
+      minLength: 1
+      description: A name (not null)
 
     Handle:
       type: string

@@ -3,7 +3,6 @@ import {
   Certificate,
   Curriculum,
   Location,
-  Platform,
   Program,
   Student,
   User,
@@ -101,8 +100,8 @@ export const findCertificate = async ({
 
   switch (result.status) {
     case 200: {
-      const certificate = await result.entity();
-      return certificate;
+      const entity = await result.entity();
+      return entity;
     }
     case 404:
       notFound();
@@ -144,8 +143,8 @@ export const retrieveCertificateById = cache(async (id: string) => {
 
   switch (result.status) {
     case 200: {
-      const certificate = await result.entity();
-      return certificate;
+      const entity = await result.entity();
+      return entity;
     }
     case 404:
       notFound();
@@ -161,11 +160,21 @@ export const listDisciplines = cache(async () => {
 });
 
 export const listCountries = cache(async () => {
-  return makeRequest(async () => {
-    const disciplines = await Platform.Country.list();
+  const result = await api.listCountries(
+    {
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200);
 
-    return disciplines;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+  }
 });
 
 export const retrieveDisciplineByHandle = cache(async (handle: string) => {
