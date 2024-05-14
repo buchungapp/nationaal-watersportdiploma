@@ -160,6 +160,10 @@ paths:
 
       operationId: find-certificate
       summary: Find certificate by handle and issue date
+
+      security:
+        - api-key: []
+
       responses:
         '200':
           description: Ok
@@ -169,6 +173,9 @@ paths:
                 $ref: '#/components/schemas/CertificateModel'
         '404':
           description: Not found
+
+        '403':
+          description: Forbidden
 
   /location/{location-key}/certificate:
     parameters:

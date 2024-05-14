@@ -14,5 +14,6 @@ export const apiKey: ApiKeyAuthenticationHandler<
   return {
     apiKey: apiKeyItem.id,
     user: apiKeyItem.userId,
+    isSuper: false,
   }
 }

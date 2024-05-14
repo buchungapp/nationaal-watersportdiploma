@@ -19,6 +19,7 @@ import { cache } from "react";
 import "server-only";
 
 const baseUrl = new URL(process.env.NAWADI_API_URL!);
+const apiKey = String(process.env.NAWADI_API_KEY!);
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
   assert.strictEqual(user.persons.length, 1, "Expected exactly one person");
@@ -93,9 +94,10 @@ export const findCertificate = async ({
       parameters: { certificateHandle: handle, issuedAt },
       contentType: null,
     },
-    {},
+    { apiKey },
     { baseUrl },
   );
+  api.lib.expectStatus(result, 200, 404);
 
   switch (result.status) {
     case 200: {

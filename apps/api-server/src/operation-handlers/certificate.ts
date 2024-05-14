@@ -4,8 +4,15 @@ import * as application from '../application/index.js'
 
 export const findCertificate: api.FindCertificateOperationHandler<
   application.Authentication
-> = async (incomingRequest) => {
+> = async (incomingRequest, authentication) => {
   const { certificateHandle, issuedAt } = incomingRequest.parameters
+
+  if (!authentication.apiKey.isSuper) {
+    return {
+      status: 403,
+      contentType: null,
+    }
+  }
 
   const certificateItem = await core.Certificate.find({
     handle: certificateHandle,
