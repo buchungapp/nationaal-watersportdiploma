@@ -11,6 +11,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@nawadi/api": "workspace:*",
     "@googlemaps/google-maps-services-js": "^3.3.42",
     "@headlessui/react": "2.0.3",
     "@headlessui/tailwindcss": "^0.2.0",

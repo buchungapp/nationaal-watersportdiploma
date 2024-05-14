@@ -1,3 +1,4 @@
+export * from './certificate.js'
 export * from './curriculum.js'
 export * from './discipline.js'
 export * from './location-certificate.js'

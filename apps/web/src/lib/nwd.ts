@@ -1,3 +1,4 @@
+import * as api from "@nawadi/api";
 import {
   Certificate,
   Curriculum,
@@ -16,6 +17,8 @@ import { notFound, redirect } from "next/navigation";
 import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
+
+const baseUrl = new URL(process.env.NAWADI_API_URL!);
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
   assert.strictEqual(user.persons.length, 1, "Expected exactly one person");
@@ -85,42 +88,24 @@ export const findCertificate = async ({
   handle: string;
   issuedAt: string;
 }) => {
-  return makeRequest(async () => {
-    const certificate = await Certificate.find({
-      handle,
-      issuedAt,
-    });
+  const result = await api.findCertificate(
+    {
+      parameters: { certificateHandle: handle, issuedAt },
+      contentType: null,
+    },
+    {},
+    { baseUrl },
+  );
 
-    if (!certificate) {
+  switch (result.status) {
+    case 200: {
+      const certificate = await result.entity();
+      return certificate;
+    }
+    case 404:
       notFound();
-    }
-
-    return certificate;
-  });
+  }
 };
-
-export const listCertificates = cache(async (locationId: string) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
-
-    const person = extractPerson(user);
-
-    const availableLocations = await User.Person.listLocations({
-      personId: person.id,
-      roles: ["location_admin"],
-    });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
-    }
-
-    const certificates = await Certificate.list({
-      filter: { locationId },
-    });
-
-    return certificates;
-  });
-});
 
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   return makeRequest(async () => {
