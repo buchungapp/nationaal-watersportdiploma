@@ -125,8 +125,17 @@ export default {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
+        spinner: {
+          "0%": {
+            opacity: "1",
+          },
+          "100%": {
+            opacity: "0",
+          },
+        },
       },
       animation: {
+        spinner: "spinner 1.2s linear infinite",
         "caret-blink": "caret-blink 1.2s ease-out infinite",
       },
     },

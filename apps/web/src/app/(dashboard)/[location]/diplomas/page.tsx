@@ -1,6 +1,7 @@
 import Fuse from "fuse.js";
 import { listCertificates, retrieveLocationByHandle } from "~/lib/nwd";
 import Search from "../_components/search";
+import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
 
 export default async function Page({
@@ -19,7 +20,7 @@ export default async function Page({
   const certificatesFuse = new Fuse(certificates, {
     includeMatches: true,
     keys: [
-      "name",
+      "handle",
       "student.firstName",
       "student.lastNamePrefix",
       "student.lastName",
@@ -61,18 +62,13 @@ export default async function Page({
             Een overzicht van uitgegeven diploma's.
           </p>
         </div>
-        <div className="mt-4 sm:flex sm:items-center sm:space-x-2 md:mt-0">
-          {/* <FilterSelect /> */}
-          {/* <button
-            type="button"
-            className="mt-2 flex h-9 w-full items-center whitespace-nowrap rounded-tremor-small bg-branding-light px-4 py-2.5 text-tremor-default font-medium text-tremor-brand-inverted shadow-tremor-input hover:bg-branding-dark dark:bg-dark-tremor-brand dark:text-dark-tremor-brand-inverted dark:shadow-dark-tremor-input dark:hover:bg-dark-tremor-brand-emphasis sm:mt-0 sm:w-fit"
-          >
-            Persoon toevoegen
-          </button> */}
+        <div className="mt-4 md:mt-0">
+          <CreateDialog locationId={location.id} />
         </div>
       </div>
-      <div className="mt-4">
+      <div className="mt-4 w-full flex flex-col gap-2 sm:flex-row">
         <Search />
+        {/* <FilterSelect /> */}
       </div>
 
       <Table

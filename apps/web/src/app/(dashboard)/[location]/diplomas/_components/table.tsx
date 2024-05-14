@@ -1,4 +1,5 @@
 "use client";
+import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -16,6 +17,11 @@ import {
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+} from "~/app/(dashboard)/_components/popover";
+import {
   Table,
   TableBody,
   TableCell,
@@ -28,7 +34,9 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { Code } from "~/app/(dashboard)/_components/text";
 import type { listCertificates } from "~/lib/nwd";
+import { Download } from "./table-actions";
 
 type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 
@@ -73,7 +81,9 @@ const columns = [
   columnHelper.accessor("handle", {
     header: "Nummer",
     cell: ({ getValue, row }) => (
-      <Link href={`/diploma/${row.original.id}/pdf`}>{getValue()}</Link>
+      <Link href={`/diploma/${row.original.id}/pdf`}>
+        <Code>{getValue()}</Code>
+      </Link>
     ),
     meta: {
       suppressLinkBehavior: true,
@@ -106,7 +116,15 @@ const columns = [
   }),
   columnHelper.accessor("issuedAt", {
     header: "Behaald op",
-    cell: ({ getValue }) => dayjs(getValue()).format("DD-MM-YYYY"),
+    cell: ({ getValue }) => {
+      const issuedAt = getValue();
+
+      return issuedAt ? (
+        <span className="tabular-nums">
+          {dayjs(issuedAt).format("DD-MM-YYYY")}
+        </span>
+      ) : null;
+    },
   }),
 ];
 
@@ -132,9 +150,22 @@ export default function CertificateTable({
     },
   });
 
+  const anyRowSelected =
+    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
+
   return (
-    <>
-      <Table className="mt-8">
+    <div className="mt-10 relative">
+      {anyRowSelected ? (
+        <Popover className="absolute left-12 top-0 flex items-center space-x-2">
+          <PopoverButton color="branding-orange">
+            Acties <ChevronDownIcon />
+          </PopoverButton>
+          <PopoverPanel anchor="bottom start">
+            <Download rows={table.getSelectedRowModel().rows} />
+          </PopoverPanel>
+        </Popover>
+      ) : null}
+      <Table dense>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -196,6 +227,6 @@ export default function CertificateTable({
         />
         <TablePagination totalItems={totalItems} />
       </TableFooter>
-    </>
+    </div>
   );
 }

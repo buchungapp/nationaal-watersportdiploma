@@ -24,6 +24,9 @@ export async function generateMetadata(
     title: "Contact",
     description:
       "Bezoek het helpcentrum, download de mediakit of neem contact op.",
+    alternates: {
+      canonical: "/contact",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Contact",

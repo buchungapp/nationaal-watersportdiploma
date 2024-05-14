@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   icons: {
     shortcut: "/favicon.ico",
   },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: {
       default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,
@@ -51,7 +54,7 @@ export default function RootLayout({
       lang="nl"
       className={clsx(
         inter.variable,
-        "h-full scroll-smooth antialiased text-gray-900 bg-white",
+        "h-full scroll-smooth antialiased text-gray-900 bg-white !pr-0",
       )}
     >
       <body className="h-full">

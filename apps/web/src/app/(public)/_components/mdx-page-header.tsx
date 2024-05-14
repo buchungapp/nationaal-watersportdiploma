@@ -23,7 +23,7 @@ export default function MdxPageHeader({ pages }: { pages: PageWithMeta[] }) {
     );
 
     if (!activePage) {
-      throw new Error("No active page found");
+      console.error("No active page found for segments", currentSegments);
     }
 
     return (
@@ -31,9 +31,9 @@ export default function MdxPageHeader({ pages }: { pages: PageWithMeta[] }) {
         <div className="px-4 lg:px-16">
           <div className="grid gap-6 text-white">
             <h1 className="text-4xl font-bold lg:text-5xl xl:text-6xl">
-              {activePage.title}
+              {activePage?.title}
             </h1>
-            {activePage.description ? (
+            {activePage?.description ? (
               <p className="text-xl">{activePage.description}</p>
             ) : null}
           </div>

@@ -2,7 +2,7 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
-import { NavItem } from "../nav";
+import type { NavItem } from "../nav";
 
 export default function MobileItem({ item }: { item: NavItem }) {
   const segment = useSelectedLayoutSegment();

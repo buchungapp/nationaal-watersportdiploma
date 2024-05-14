@@ -17,6 +17,9 @@ export async function generateMetadata(
     title: "Helpcentrum",
     description:
       "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
+    alternates: {
+      canonical: "/helpcentrum",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Helpcentrum",

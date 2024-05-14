@@ -2,10 +2,11 @@ import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
 import {
   SQL,
-  SQLWrapper,
-  getTableColumns,
   and,
   eq,
+  exists,
+  getTableColumns,
+  inArray,
   isNull,
   sql,
 } from 'drizzle-orm'
@@ -13,6 +14,8 @@ import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
+  singleOrArray,
+  singleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -30,7 +33,6 @@ export const getOrCreate = withZod(
       birthCity: true,
       birthCountry: true,
     })
-    .required()
     .extend({
       userId: selectSchema.shape.authUserId.optional(),
     }),
@@ -128,7 +130,7 @@ export const createLocationLink = withZod(
 export const fromId = async (id: string) => {
   const query = useQuery()
 
-  const [result] = await query
+  return await query
     .select({
       ...getTableColumns(s.person),
       birthCountry: {
@@ -139,8 +141,16 @@ export const fromId = async (id: string) => {
     .from(s.person)
     .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
-
-  return result
+    .then((rows) => {
+      const result = singleRow(rows)
+      if (result.birthCountry.code === null) {
+        return {
+          ...result,
+          birthCountry: null,
+        }
+      }
+      return result
+    })
 }
 
 export const list = withZod(
@@ -149,7 +159,7 @@ export const list = withZod(
       filter: z
         .object({
           userId: z.string().uuid().optional(),
-          locationId: uuidSchema.optional(),
+          locationId: singleOrArray(uuidSchema).optional(),
         })
         .default({}),
     })
@@ -164,7 +174,31 @@ export const list = withZod(
     }
 
     if (input.filter.locationId) {
-      conditions.push(eq(s.actor.locationId, input.filter.locationId))
+      if (Array.isArray(input.filter.locationId)) {
+        const existsQuery = query
+          .select({ personId: s.personLocationLink.personId })
+          .from(s.personLocationLink)
+          .where(
+            and(
+              inArray(s.personLocationLink.locationId, input.filter.locationId),
+              eq(s.personLocationLink.status, 'linked'),
+              eq(s.personLocationLink.personId, s.person.id),
+            ),
+          )
+        conditions.push(exists(existsQuery))
+      } else {
+        const existsQuery = query
+          .select({ personId: s.personLocationLink.personId })
+          .from(s.personLocationLink)
+          .where(
+            and(
+              eq(s.personLocationLink.locationId, input.filter.locationId),
+              eq(s.personLocationLink.status, 'linked'),
+              eq(s.personLocationLink.personId, s.person.id),
+            ),
+          )
+        conditions.push(exists(existsQuery))
+      }
     }
 
     return await query
@@ -177,12 +211,55 @@ export const list = withZod(
         actor: s.actor,
       })
       .from(s.person)
-      .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+      .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
       .innerJoin(
         s.actor,
         and(eq(s.actor.personId, s.person.id), isNull(s.actor.deletedAt)),
       )
       .where(and(...conditions))
       .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+  },
+)
+
+export const listLocations = withZod(
+  z.object({
+    personId: uuidSchema,
+    roles: z
+      .array(z.enum(['student', 'instructor', 'location_admin']))
+      .default(['instructor', 'student', 'location_admin']),
+  }),
+  z.array(
+    z.object({
+      locationId: uuidSchema,
+      roles: z.array(z.enum(['student', 'instructor', 'location_admin'])),
+    }),
+  ),
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .select({
+        locationId: s.personLocationLink.locationId,
+        role: s.actor.type,
+      })
+      .from(s.personLocationLink)
+      .leftJoin(
+        s.actor,
+        and(
+          eq(s.actor.personId, s.personLocationLink.personId),
+          eq(s.actor.locationId, s.personLocationLink.locationId),
+          isNull(s.actor.deletedAt),
+          inArray(s.actor.type, input.roles),
+        ),
+      )
+      .where(
+        and(
+          eq(s.personLocationLink.personId, input.personId),
+          eq(s.personLocationLink.status, 'linked'),
+        ),
+      )
+      .then(aggregate({ pkey: 'locationId', fields: { roles: 'role' } }))
+
+    return result as any
   },
 )

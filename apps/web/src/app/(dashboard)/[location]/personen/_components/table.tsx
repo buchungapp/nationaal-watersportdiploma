@@ -22,6 +22,7 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import type { listPersonsForLocation } from "~/lib/nwd";
+import PersonRoleBadge from "../../_components/person-role-badge";
 
 type Person = Awaited<ReturnType<typeof listPersonsForLocation>>[number];
 
@@ -44,20 +45,26 @@ const columns = [
     header: "Geboortedatum",
     cell: ({ getValue }) => {
       const dateOfBirth = getValue();
-      return dateOfBirth ? dayjs(dateOfBirth).format("DD-MM-YYYY") : null;
+      return dateOfBirth ? (
+        <span className="tabular-nums">
+          {dayjs(dateOfBirth).format("DD-MM-YYYY")}
+        </span>
+      ) : null;
     },
   }),
   columnHelper.accessor("birthCity", {
     header: "Geboorteplaats",
   }),
   columnHelper.accessor("actors", {
-    header: "Niveau",
+    header: "Rollen",
     cell: ({ getValue }) => {
-      return getValue().map((actor) => (
-        <span key={actor.id} className="block">
-          {actor.type}
-        </span>
-      ));
+      return (
+        <div className="flex gap-x-2 items-center">
+          {getValue().map((actor) => (
+            <PersonRoleBadge key={actor.id} role={actor.type} />
+          ))}
+        </div>
+      );
     },
   }),
 ];
@@ -79,7 +86,7 @@ export default function PersonsTable({
 
   return (
     <>
-      <Table className="mt-8">
+      <Table className="mt-8" dense>
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

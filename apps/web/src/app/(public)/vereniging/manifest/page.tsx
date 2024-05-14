@@ -8,6 +8,9 @@ export async function generateMetadata(
 
   return {
     title: "Manifest",
+    alternates: {
+      canonical: "/vereniging/manifest",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Manifest",

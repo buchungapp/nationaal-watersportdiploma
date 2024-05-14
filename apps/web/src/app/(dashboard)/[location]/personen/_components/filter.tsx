@@ -1,16 +1,59 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
+import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useDeferredValue, useEffect, useState } from "react";
+import type { ComponentProps } from "react";
+import { useDeferredValue, useEffect, useState, useTransition } from "react";
 import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
+import Spinner from "~/app/_components/spinner";
 import { Checkbox } from "../../../_components/checkbox";
 import {
-  Dropdown,
-  DropdownButton,
-  DropdownItem,
-  DropdownMenu,
-} from "../../../_components/dropdown";
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+} from "../../../_components/popover";
+
+function CheckboxButton({
+  children,
+  className,
+  onClick,
+  ...props
+}: Pick<ComponentProps<"button">, "onClick" | "className" | "children"> &
+  ComponentProps<typeof Checkbox>) {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <button
+      className={clsx([
+        className,
+
+        // Base
+        "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
+
+        // Sizing
+        "px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6",
+
+        // Disabled
+        "data-[disabled]:opacity-50",
+      ])}
+      onClick={(...e) => {
+        if (!onClick) return;
+
+        return startTransition(() => {
+          onClick(...e);
+        });
+      }}
+    >
+      {isPending ? (
+        <Spinner className="text-gray-700" size="sm" />
+      ) : (
+        <Checkbox {...props} />
+      )}
+      {children}
+    </button>
+  );
+}
 
 export function FilterSelect() {
   const router = useRouter();
@@ -31,13 +74,12 @@ export function FilterSelect() {
   }, [deferredStatus]);
 
   return (
-    <Dropdown>
-      <DropdownButton outline className={"min-w-32"}>
-        Filter
-        <ChevronDownIcon />
-      </DropdownButton>
-      <DropdownMenu anchor="bottom end">
-        <DropdownItem
+    <Popover className="relative">
+      <PopoverButton className={"min-w-32"}>
+        Filter <ChevronDownIcon />
+      </PopoverButton>
+      <PopoverPanel anchor="bottom end" className="flex flex-col gap-1">
+        <CheckboxButton
           onClick={() => {
             setSelectedStatus((prev) =>
               prev.includes("student")
@@ -45,11 +87,11 @@ export function FilterSelect() {
                 : [...prev, "student"],
             );
           }}
+          checked={_selectedStatus.includes("student")}
         >
-          <Checkbox checked={_selectedStatus.includes("student")} />
-          <span className="ml-2">Cursist</span>
-        </DropdownItem>
-        <DropdownItem
+          Cursist
+        </CheckboxButton>
+        <CheckboxButton
           onClick={() => {
             setSelectedStatus((prev) =>
               prev.includes("instructor")
@@ -57,23 +99,23 @@ export function FilterSelect() {
                 : [...prev, "instructor"],
             );
           }}
+          checked={_selectedStatus.includes("instructor")}
         >
-          <Checkbox checked={_selectedStatus.includes("instructor")} />
-          <span className="ml-2">Instructeur</span>
-        </DropdownItem>
-        <DropdownItem
+          Instructeur
+        </CheckboxButton>
+        <CheckboxButton
           onClick={() => {
             setSelectedStatus((prev) =>
-              prev.includes("location-admin")
-                ? prev.filter((item) => item !== "location-admin")
-                : [...prev, "location-admin"],
+              prev.includes("location_admin")
+                ? prev.filter((item) => item !== "location_admin")
+                : [...prev, "location_admin"],
             );
           }}
+          checked={_selectedStatus.includes("location_admin")}
         >
-          <Checkbox checked={_selectedStatus.includes("location-admin")} />
-          <span className="ml-2">Locatie-beheerder</span>
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+          Locatie-beheerder
+        </CheckboxButton>
+      </PopoverPanel>
+    </Popover>
   );
 }

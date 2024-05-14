@@ -1,4 +1,3 @@
-import { MenuButton as HeadlessMenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { retrieveLocationByHandle } from "~/lib/nwd";
@@ -7,6 +6,7 @@ import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
+  HeadlessMenuButton,
 } from "../../_components/dropdown";
 
 export async function LocationSelector({
@@ -39,7 +39,9 @@ export async function LocationSelector({
         <ChevronUpDownIcon className="ml-auto mr-1 size-4 shrink-0 stroke-zinc-400" />
       </HeadlessMenuButton>
       <DropdownMenu className="min-w-[--button-width] z-50">
-        <DropdownItem>Instellingen</DropdownItem>
+        <DropdownItem href={`/${currentLocationSlug}/instellingen`}>
+          Instellingen
+        </DropdownItem>
       </DropdownMenu>
     </Dropdown>
   );

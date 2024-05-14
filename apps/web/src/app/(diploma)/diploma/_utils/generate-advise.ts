@@ -1,7 +1,13 @@
 import { retrieveCertificateById } from "~/lib/nwd";
 
-export async function generateAdvise(certificateId: string) {
-  const certificate = await retrieveCertificateById(certificateId);
+export async function generateAdvise(
+  input: string | Awaited<ReturnType<typeof retrieveCertificateById>>,
+) {
+  let certificate = input;
+
+  if (typeof certificate === "string") {
+    certificate = await retrieveCertificateById(certificate);
+  }
 
   const uniqueCompletedModules = Array.from(
     new Set(

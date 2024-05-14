@@ -25,10 +25,12 @@ export default function Locations() {
           <BoxedButton href="/vaarlocaties" className="bg-white text-gray-900">
             Bekijk NWD vaarlocaties
           </BoxedButton>
-          {/* TODO: reimplement this button once we have a dedicated page for the 'kwaliteitseisen' */}
-          {/* <BoxedButton href="/kwaliteitseisen-locaties" className="hover:bg-white/10 text-white">
+          <BoxedButton
+            href="/vaarlocaties/kwaliteitseisen"
+            className="hover:bg-white/10 text-white"
+          >
             Kwaliteitseisen voor locaties
-          </BoxedButton> */}
+          </BoxedButton>
         </div>
       </div>
       <div className="h-full min-h-[24rem] w-full">

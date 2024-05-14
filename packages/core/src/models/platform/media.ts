@@ -156,3 +156,54 @@ export const fromId = withZod(
     }
   },
 )
+
+export const list = withZod(z.void(), outputSchema.array(), async () => {
+  const query = useQuery()
+  return await query
+    .select()
+    .from(s.media)
+    .innerJoin(
+      uncontrolledSchema._objectTable,
+      eq(s.media.object_id, uncontrolledSchema._objectTable.id),
+    )
+    .then((rows) =>
+      rows.map((row) => {
+        const expectedMetadataSchema = z.object({
+          width: z
+            .number()
+            .int()
+            .nullable()
+            .catch(() => null),
+          height: z
+            .number()
+            .int()
+            .nullable()
+            .catch(() => null),
+        })
+        const { height, width } = expectedMetadataSchema.parse(
+          row.media._metadata,
+        )
+
+        const bucketId = row.objects.bucket_id
+        const objectName = row.objects.name
+
+        assert(bucketId, 'Bucket ID is expected')
+        assert(objectName, 'Object name is expected')
+
+        return {
+          id: row.media.id,
+          type: 'image' as const,
+          url: constructBaseUrl(bucketId, objectName),
+          transformUrl: constructTransformBaseUrl(bucketId, objectName),
+          name: getNameFromObjectName(objectName),
+          width,
+          height,
+          alt: row.media.alt ?? '',
+          size: row.media.size,
+          mimeType: row.media.mimeType,
+          createdAt: row.media.createdAt,
+          updatedAt: row.media.updatedAt,
+        }
+      }),
+    )
+})

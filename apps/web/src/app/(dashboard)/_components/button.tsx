@@ -152,6 +152,18 @@ const styles = {
       "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.sky.500)] [--btn-border:theme(colors.sky.600/80%)]",
       "[--btn-icon:theme(colors.white/60%)] data-[active]:[--btn-icon:theme(colors.white/80%)] data-[hover]:[--btn-icon:theme(colors.white/80%)]",
     ],
+    "branding-light": [
+      "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.branding.light)] [--btn-border:theme(colors.branding.light/80%)]",
+      "[--btn-icon:theme(colors.branding.white/30%] data-[active]:[--btn-icon:theme(colors.branding.white/20%] data-[hover]:[--btn-icon:theme(colors.branding.white/20%)]",
+    ],
+    "branding-dark": [
+      "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.branding.dark)] [--btn-border:theme(colors.branding.dark/80%)]",
+      "[--btn-icon:theme(colors.branding.white/30%)] data-[active]:[--btn-icon:theme(colors.branding.white/20%)] data-[hover]:[--btn-icon:theme(colors.branding.white/20%)]",
+    ],
+    "branding-orange": [
+      "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.branding.orange)] [--btn-border:theme(colors.branding.orange/80%)]",
+      "[--btn-icon:theme(colors.branding.white/30%)] data-[active]:[--btn-icon:theme(colors.branding.white/20%)] data-[hover]:[--btn-icon:theme(colors.branding.white/20%)]",
+    ],
     blue: [
       "text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.blue.600)] [--btn-border:theme(colors.blue.700/90%)]",
       "[--btn-icon:theme(colors.blue.400)] data-[active]:[--btn-icon:theme(colors.blue.300)] data-[hover]:[--btn-icon:theme(colors.blue.300)]",

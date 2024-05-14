@@ -11,6 +11,9 @@ export async function generateMetadata(
 
   return {
     title: "Statuten en Reglementen",
+    alternates: {
+      canonical: "/vereniging/statuten-reglementen",
+    },
     openGraph: {
       ...parentOpenGraph,
       title: "Statuten en Reglementen",
