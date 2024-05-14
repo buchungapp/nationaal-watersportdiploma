@@ -5,11 +5,16 @@ import * as application from '../application/index.js'
 export const listDisciplines: api.ListDisciplinesOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
-  const disciplineList = await core.Program.Discipline.list()
+  const list = await core.Program.Discipline.list()
 
-  const responseEntity = disciplineList.map((item) => ({
+  const responseEntity = list.map((item) => ({
     id: item.id,
     handle: item.handle,
+    title: item.title,
+    weight: item.weight,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    deletedAt: item.deletedAt,
   }))
 
   return {

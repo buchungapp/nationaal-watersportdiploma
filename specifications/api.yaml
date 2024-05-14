@@ -345,11 +345,26 @@ components:
       required:
         - id
         - handle
+        - title
+        - weight
+        - createdAt
+        - updatedAt
+        - deletedAt
       properties:
         id:
           $ref: '#/components/schemas/Id'
         handle:
           $ref: '#/components/schemas/Handle'
+        title:
+          $ref: '#/components/schemas/Title'
+        weight:
+          $ref: '#/components/schemas/PositiveInteger'
+        createdAt:
+          $ref: '#/components/schemas/Date'
+        updatedAt:
+          $ref: '#/components/schemas/Date'
+        deletedAt:
+          $ref: '#/components/schemas/OptionalDate'
 
     CurriculumListModel:
       type: object
@@ -452,26 +467,17 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         studentCurriculumId:
-          type: string
-          format: uuid
+          $ref: '#/components/schemas/Id'
         createdAt:
-          type: string
-          format: date
+          $ref: '#/components/schemas/Date'
         updatedAt:
-          type: string
-          format: date
+          $ref: '#/components/schemas/Date'
         deletedAt:
-          nullable: true
-          type: string
-          format: date
+          $ref: '#/components/schemas/OptionalDate'
         issuedAt:
-          nullable: true
-          type: string
-          format: date
+          $ref: '#/components/schemas/OptionalDate'
         visibleFrom:
-          nullable: true
-          type: string
-          format: date
+          $ref: '#/components/schemas/OptionalDate'
 
     LocationCertificateListModel:
       type: object
@@ -557,6 +563,20 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Id'
         - $ref: '#/components/schemas/CertificateHandle'
+
+    Date:
+      type: string
+      format: date
+
+    OptionalDate:
+      type: string
+      format: date
+      nullable: true
+
+    PositiveInteger:
+      type: integer
+      minimum: 0
+      exclusiveMinimum: true
 
   securitySchemes:
     # this should be transformed into oauth authentication once the generator supports it
