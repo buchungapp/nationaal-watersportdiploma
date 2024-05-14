@@ -97,7 +97,6 @@ export const findCertificate = async ({
     { apiKey },
     { baseUrl },
   );
-
   api.lib.expectStatus(result, 200, 404);
 
   switch (result.status) {
@@ -133,15 +132,24 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
 });
 
 export const retrieveCertificateById = cache(async (id: string) => {
-  return makeRequest(async () => {
-    const certificate = await Certificate.byId(id);
+  const result = await api.getCertificate(
+    {
+      parameters: { certificateKey: id },
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    if (!certificate) {
-      notFound();
+  switch (result.status) {
+    case 200: {
+      const certificate = await result.entity();
+      return certificate;
     }
-
-    return certificate;
-  });
+    case 404:
+      notFound();
+  }
 });
 
 export const listDisciplines = cache(async () => {

@@ -32,3 +32,40 @@ export const findCertificate: api.FindCertificateOperationHandler<
     entity: () => certificateItem,
   }
 }
+
+export const getCertificate: api.GetCertificateOperationHandler<
+  application.Authentication
+> = async (incomingRequest, authentication) => {
+  const { certificateKey } = incomingRequest.parameters
+
+  if (!authentication.apiKey.isSuper) {
+    return {
+      status: 403,
+      contentType: null,
+    }
+  }
+
+  let certificateItem:
+    | Awaited<ReturnType<typeof core.Certificate.byId>>
+    | undefined
+  if (api.validators.isCertificateHandle(certificateKey)) {
+    throw 'not supported yet'
+  } else if (api.validators.isComponentsId(certificateKey)) {
+    certificateItem = await core.Certificate.byId(certificateKey)
+  } else {
+    throw 'impossible'
+  }
+
+  if (certificateItem == null) {
+    return {
+      status: 404,
+      contentType: null,
+    }
+  }
+
+  return {
+    status: 200,
+    contentType: 'application/json',
+    entity: () => certificateItem,
+  }
+}
