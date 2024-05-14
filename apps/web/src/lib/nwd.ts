@@ -97,6 +97,7 @@ export const findCertificate = async ({
     { apiKey },
     { baseUrl },
   );
+
   api.lib.expectStatus(result, 200, 404);
 
   switch (result.status) {

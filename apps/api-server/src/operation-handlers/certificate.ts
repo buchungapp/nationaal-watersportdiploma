@@ -19,7 +19,6 @@ export const findCertificate: api.FindCertificateOperationHandler<
     issuedAt,
   })
 
-  // FIXME according to the types certificateItem is never null
   if (certificateItem == null) {
     return {
       status: 404,

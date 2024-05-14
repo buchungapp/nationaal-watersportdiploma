@@ -156,7 +156,6 @@ paths:
           required: true
           schema:
             type: string
-            format: date
 
       operationId: find-certificate
       summary: Find certificate by handle and issue date
@@ -497,7 +496,7 @@ components:
 
     Handle:
       type: string
-      pattern: ^[a-z0-9\-]+$
+      # pattern: ^[a-zA-Z0-9\-]+$
       minLength: 3
       description: The unique handle of an item
       not:
