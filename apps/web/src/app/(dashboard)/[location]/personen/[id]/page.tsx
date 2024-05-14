@@ -47,7 +47,7 @@ export default async function Page({
       date: "2021-07-12",
     },
     ...certificates.slice(0, 3).map((certificate) => ({
-      type: "certificate" as "certificate",
+      type: "certificate" as const,
       certificate,
       date: certificate.issuedAt!,
     })),
@@ -176,7 +176,6 @@ export default async function Page({
                       </div>
                       <Link
                         href={`/${location.handle}/diplomas/${activityItem.certificate.id}`}
-                        target="_blank"
                         className="flex-auto rounded-md p-3 ring-1 ring-inset ring-gray-200"
                       >
                         <div className="flex justify-between gap-x-4">
