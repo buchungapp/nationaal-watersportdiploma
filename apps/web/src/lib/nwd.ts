@@ -152,11 +152,21 @@ export const retrieveCertificateById = cache(async (id: string) => {
 });
 
 export const listDisciplines = cache(async () => {
-  return makeRequest(async () => {
-    const disciplines = await Program.Discipline.list();
+  const result = await api.listDisciplines(
+    {
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200);
 
-    return disciplines;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+  }
 });
 
 export const listCountries = cache(async () => {
