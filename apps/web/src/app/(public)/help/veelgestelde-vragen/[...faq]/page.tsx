@@ -105,7 +105,7 @@ export default async function Page({ params }: Props) {
           </div>
         </div>
       </PageHero>
-      <main className="container max-w-prose text-lg mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="container max-w-prose text-lg mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <span className="font-semibold text-base text-gray-600">Antwoord:</span>
         <Prose dangerouslySetInnerHTML={{ __html: question.answer }} />
 
@@ -119,7 +119,7 @@ export default async function Page({ params }: Props) {
           </div>
           <ChevronRightIcon className="h-6 w-6 ml-6 text-gray-500" />
         </Link>
-      </main>
+      </div>
     </>
   );
 }
