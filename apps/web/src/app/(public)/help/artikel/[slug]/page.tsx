@@ -1,3 +1,4 @@
+import { constants } from "@nawadi/lib";
 import { notFound } from "next/navigation";
 import { Prose } from "~/app/(public)/_components/prose";
 import PageHero from "~/app/(public)/_components/style/page-hero";
@@ -17,30 +18,60 @@ export default function Page({ params }: { params: { slug: string } }) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            headline: post.metadata.title,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            datePublished: post.metadata.publishedAt,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            dateModified: post.metadata.lastUpdatedAt,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            description: post.metadata.summary,
+            url: `${constants.WEBSITE_URL}/help/artikel/${post.slug}`,
+            author: {
+              "@type": "Organization",
+              name: "Nationaal Watersportdiploma",
+              url: constants.WEBSITE_URL,
+            },
+          }),
+        }}
+      />
+
       <PageHero>
         <div className="px-4 lg:px-16">
           <div className="grid gap-6 text-white">
-            <h1 className="text-4xl font-bold lg:text-5xl xl:text-6xl">
+            <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl">
               {post.metadata.title}
             </h1>
           </div>
         </div>
       </PageHero>
-      <Container className="mt-16 lg:mt-24">
+      <Container className="mt-12 lg:mt-16">
         <div className="mx-auto max-w-2xl">
-          <article>
+          <article className="flex flex-col gap-y-10">
+            <p className="text-gray-500 text-lg">{post.metadata.summary}</p>
+
             <div className="flex items-center gap-x-4 text-gray-400">
               <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
               <span className="flex gap-x-1.5">
-                <p>Laatste update:</p>
+                <p>Laatste update</p>
 
-                <time dateTime={post.metadata.publishedAt as string}>
+                <time
+                  className="font-medium"
+                  dateTime={post.metadata.publishedAt as string}
+                >
                   {formatDate(post.metadata.publishedAt as string)}
                 </time>
               </span>
             </div>
 
-            <Prose className="mt-8" data-mdx-content>
+            <Prose className="-mt-7" data-mdx-content>
               <HelpArticle source={post.content} />
             </Prose>
           </article>

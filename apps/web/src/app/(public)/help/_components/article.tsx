@@ -10,6 +10,7 @@ import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import FaqDisclosure from "../../_components/faq/faq";
 
 function CustomLink(props: any) {
   const href = typeof props.href === "string" ? props.href : props.href.href;
@@ -62,7 +63,7 @@ function createHeading(level: number) {
           {
             href: `#${slug}`,
             key: `link-${slug}`,
-            className: "anchor",
+            className: "anchor text-gray-900",
           },
           children,
         ),
@@ -80,6 +81,7 @@ const components = {
   h6: createHeading(6),
   Image: RoundedImage,
   a: CustomLink,
+  Faq: FaqDisclosure,
 };
 
 export function HelpArticle(props: any) {

@@ -1,4 +1,5 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { constants } from "@nawadi/lib";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -49,9 +50,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${question.question} - Helpcentrum`,
+    title: `${question.question}`,
     alternates: {
-      canonical: `/helpcentrum/veelgestelde-vragen/${params.faq.join("/")}`,
+      canonical: `/help/veelgestelde-vragen/${params.faq.join("/")}`,
+    },
+    openGraph: {
+      title: `${question.question}`,
+      type: "article",
+      url: `/help/veelgestelde-vragen/${params.faq.join("/")}`,
     },
   };
 }
@@ -68,6 +74,28 @@ export default async function Page({ params }: Props) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: question.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: question.answer,
+                },
+              },
+            ],
+            url: `${constants.WEBSITE_URL}/help/veelgestelde-vragen/${params.faq.join("/")}`,
+          }),
+        }}
+      />
+
       <PageHero>
         <div className="px-4 lg:px-16">
           <div className="grid gap-6 text-white">

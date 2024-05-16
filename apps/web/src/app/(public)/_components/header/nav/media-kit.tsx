@@ -16,17 +16,17 @@ import { logo, wordmark } from "./media-kit-svgs";
 
 export default function MediaKit() {
   const ref = useRef<HTMLButtonElement>(null);
-  const { push } = useRouter();
+  const router = useRouter();
   const intent = useRef<"homepage" | "context">("homepage");
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (intent.current === "homepage") {
         e.preventDefault();
-        push("/");
+        router.push("/");
       }
     },
-    [push, intent.current],
+    [router, intent.current],
   );
 
   const handleContextMenu = useCallback(

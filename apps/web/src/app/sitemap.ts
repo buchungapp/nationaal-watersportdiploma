@@ -46,14 +46,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const faqGeneralPages: MetadataRoute.Sitemap = faqsGeneral.map((faq) => ({
-    url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
+    url: `${BASE_URL}/help/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   const faqDiplomalijnPages: MetadataRoute.Sitemap = faqsDiplomalijn.map(
     (faq) => ({
-      url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
+      url: `${BASE_URL}/help/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
       changeFrequency: "monthly",
       priority: 0.7,
     }),
@@ -72,7 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       },
       {
-        url: `${BASE_URL}/helpcentrum`,
+        url: `${BASE_URL}/help`,
         changeFrequency: "monthly",
         priority: 0.8,
       },
