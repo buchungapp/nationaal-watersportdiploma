@@ -300,22 +300,22 @@ paths:
         schema:
           $ref: '#/components/schemas/HandleOrId'
 
-    #   get:
-    #     operationId: listPersonsForLocation
-    #     summary: List persons for a location
-    #     responses:
-    #       "200":
-    #         description: Ok
-    #         content:
-    #           application/json:
-    #             schema:
-    #               type: array
-    #               items:
-    #                 $ref: "#/components/schemas/PersonModel"
-    #       "403":
-    #         description: Forbidden
-    #       "404":
-    #         description: Not found
+    get:
+      operationId: listPersonsForLocation
+      summary: List persons for a location
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
     post:
       operationId: createPersonForLocation
@@ -363,30 +363,30 @@ paths:
         '404':
           description: Not found
 
-    # post:
-    #   operationId: create-location-certificate
-    #   summary: Creates a new certificate for a location
-    #   requestBody:
-    #     content:
-    #       application/json:
-    #         schema:
-    #           $ref: '#/components/schemas/CreateLocationCertificateModel'
-    #   responses:
-    #     '201':
-    #       description: Created
-    #       content:
-    #         application/json:
-    #           schema:
-    #             type: object
-    #             required:
-    #               - id
-    #             properties:
-    #               id:
-    #                 $ref: '#/components/schemas/Id'
-    #     '403':
-    #       description: Forbidden
-    #     '404':
-    #       description: Not Found
+    post:
+      operationId: create-location-certificate
+      summary: Creates a new certificate for a location
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLocationCertificateModel'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    $ref: '#/components/schemas/Id'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
 
   /location/{location-key}/cohort:
     parameters:
