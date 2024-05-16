@@ -7,17 +7,10 @@ export const getLocations: api.GetLocationsOperationHandler<
 > = async (incomingRequest, authentication) => {
   const list = await core.Location.list()
 
-  const listEntity = list.map((item) => ({
-    id: item.id,
-    handle: item.handle,
-    title: item.name,
-  }))
-
-  // TODO this could be easier
   return {
     status: 200,
     contentType: 'application/json',
-    entity: () => listEntity,
+    entity: () => list,
   }
 }
 
@@ -30,7 +23,6 @@ export const createLocation: api.CreateLocationOperationHandler<
     const result = await core.Location.create({
       name: entity.title,
       handle: entity.handle,
-      // TODO add website-url
     })
 
     const resultEntity = {

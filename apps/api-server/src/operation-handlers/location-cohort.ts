@@ -1,46 +1,46 @@
-import * as api from '@nawadi/api'
-import * as core from '@nawadi/core'
-import * as application from '../application/index.js'
+// import * as api from '@nawadi/api'
+// import * as core from '@nawadi/core'
+// import * as application from '../application/index.js'
 
-export const getLocationCohorts: api.GetLocationCohortsOperationHandler<
-  application.Authentication
-> = async (incomingRequest, authentication) => {
-  const { locationKey } = incomingRequest.parameters
+// export const getLocationCohorts: api.GetLocationCohortsOperationHandler<
+//   application.Authentication
+// > = async (incomingRequest, authentication) => {
+//   const { locationKey } = incomingRequest.parameters
 
-  // TODO list cohorts
+//   // TODO list cohorts
 
-  return {
-    status: 200,
-    contentType: 'application/json',
-    entity: () => [
-      {
-        id: '',
-        handle: '',
-        title: '',
-      },
-      {
-        id: '',
-        handle: '',
-        title: '',
-      },
-    ],
-  }
-}
+//   return {
+//     status: 200,
+//     contentType: 'application/json',
+//     entity: () => [
+//       {
+//         id: '',
+//         handle: '',
+//         title: '',
+//       },
+//       {
+//         id: '',
+//         handle: '',
+//         title: '',
+//       },
+//     ],
+//   }
+// }
 
-export const createLocationCohort: api.CreateLocationCohortOperationHandler<
-  application.Authentication
-> = async (incomingRequest, authentication) =>
-  core.withTransaction(async () => {
-    const { locationKey } = incomingRequest.parameters
-    const entity = await incomingRequest.entity()
+// export const createLocationCohort: api.CreateLocationCohortOperationHandler<
+//   application.Authentication
+// > = async (incomingRequest, authentication) =>
+//   core.withTransaction(async () => {
+//     const { locationKey } = incomingRequest.parameters
+//     const entity = await incomingRequest.entity()
 
-    // TODO create cohort
+//     // TODO create cohort
 
-    return {
-      status: 201,
-      contentType: 'application/json',
-      entity: () => ({
-        id: '',
-      }),
-    }
-  })
+//     return {
+//       status: 201,
+//       contentType: 'application/json',
+//       entity: () => ({
+//         id: '',
+//       }),
+//     }
+//   })

@@ -1,9 +1,5 @@
 import * as api from "@nawadi/api";
 import {
-  Certificate,
-  Curriculum,
-  Location,
-  Program,
   Student,
   User,
   withDatabase,
@@ -109,25 +105,26 @@ export const findCertificate = async ({
 };
 
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
-
-    const person = extractPerson(user);
-
-    const availableLocations = await User.Person.listLocations({
-      personId: person.id,
-      roles: ["location_admin"],
-    });
-
-    const certificates = await Certificate.list({
-      filter: {
-        number: numbers,
-        locationId: availableLocations.map((l) => l.locationId),
+  const result = await api.listCertificatesByNumber(
+    {
+      parameters: {
+        numbers,
       },
-    });
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    return certificates;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+    case 404:
+      notFound();
+  }
 });
 
 export const retrieveCertificateById = cache(async (id: string) => {
@@ -159,13 +156,15 @@ export const listDisciplines = cache(async () => {
     { apiKey },
     { baseUrl },
   );
-  api.lib.expectStatus(result, 200);
+  api.lib.expectStatus(result, 200, 404);
 
   switch (result.status) {
     case 200: {
       const entity = await result.entity();
       return entity;
     }
+    case 404:
+      notFound();
   }
 });
 
@@ -177,104 +176,174 @@ export const listCountries = cache(async () => {
     { apiKey },
     { baseUrl },
   );
-  api.lib.expectStatus(result, 200);
+  api.lib.expectStatus(result, 200, 404);
 
   switch (result.status) {
     case 200: {
       const entity = await result.entity();
       return entity;
     }
+    case 404:
+      notFound();
   }
 });
 
 export const retrieveDisciplineByHandle = cache(async (handle: string) => {
-  return makeRequest(async () => {
-    const disciplines = await Program.Discipline.fromHandle(handle);
+  const result = await api.retrieveDiscipline(
+    {
+      parameters: {
+        disciplineKey: handle,
+      },
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    return disciplines;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+    case 404:
+      notFound();
+  }
 });
 
 export const listPrograms = cache(async () => {
-  return makeRequest(async () => {
-    const disciplines = await Program.list();
+  const result = await api.listPrograms(
+    {
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    return disciplines;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+    case 404:
+      notFound();
+  }
 });
 
 export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
-  return makeRequest(async () => {
-    const disciplines = await Curriculum.list({
-      filter: { onlyCurrentActive: true, disciplineId },
-    });
+  const result = await api.listCurriculaByDiscipline(
+    {
+      parameters: {
+        disciplineKey: disciplineId,
+      },
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    return disciplines;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+    case 404:
+      notFound();
+  }
 });
 
 export const listCurriculaByProgram = cache(async (programId: string) => {
-  return makeRequest(async () => {
-    const disciplines = await Curriculum.list({
-      filter: { onlyCurrentActive: true, programId },
-    });
+  const result = await api.listCurriculaByProgram(
+    {
+      parameters: {
+        programKey: programId,
+      },
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    return disciplines;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+    case 404:
+      notFound();
+  }
 });
 
 export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
-  return makeRequest(async () => {
-    const gearTypes = await Curriculum.GearType.list({
-      filter: {
-        curriculumId: curriculumId,
+  const result = await api.listGearTypesByCurriculum(
+    {
+      parameters: {
+        curriculumKey: curriculumId,
       },
-    });
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    return gearTypes;
-  });
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
+    }
+    case 404:
+      notFound();
+  }
 });
 
 export const retrieveLocationByHandle = cache(async (handle: string) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
+  const result = await api.getLocation(
+    {
+      parameters: {
+        locationKey: handle,
+      },
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    const person = extractPerson(user);
-
-    const availableLocations = await User.Person.listLocations({
-      personId: person.id,
-      roles: ["location_admin"],
-    });
-
-    const location = await Location.fromHandle(handle);
-
-    if (!availableLocations.some((l) => l.locationId === location.id)) {
-      throw new Error("Location not found for person");
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
     }
-
-    return location;
-  });
+    case 404:
+      notFound();
+  }
 });
 
 export const listPersonsForLocation = cache(async (locationId: string) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
+  const result = await api.listPersonsForLocation(
+    {
+      parameters: {
+        locationKey: locationId,
+      },
+      contentType: null,
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 200, 404);
 
-    const person = extractPerson(user);
-
-    const availableLocations = await User.Person.listLocations({
-      personId: person.id,
-      roles: ["location_admin"],
-    });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
+  switch (result.status) {
+    case 200: {
+      const entity = await result.entity();
+      return entity;
     }
-
-    const persons = await User.Person.list({ filter: { locationId } });
-
-    return persons;
-  });
+    case 404:
+      notFound();
+  }
 });
 
 export const createPersonForLocation = async (
@@ -289,52 +358,35 @@ export const createPersonForLocation = async (
     birthCountry: string;
   },
 ) => {
-  return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-
-    const authPerson = extractPerson(authUser);
-
-    const availableLocations = await User.Person.listLocations({
-      personId: authPerson.id,
-      roles: ["location_admin"],
-    });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
-    }
-
-    let user;
-
-    if (personInput.email) {
-      user = await User.getOrCreateFromEmail({
+  const result = await api.createPersonForLocation(
+    {
+      parameters: {
+        locationKey: locationId,
+      },
+      contentType: "application/json",
+      entity: () => ({
         email: personInput.email,
-        displayName: personInput.firstName,
-      });
+        firstName: personInput.firstName,
+        lastNamePrefix: personInput.lastNamePrefix,
+        lastName: personInput.lastName,
+        dateOfBirth: personInput.dateOfBirth.toISOString(),
+        birthCity: personInput.birthCity,
+        birthCountry: personInput.birthCountry,
+      }),
+    },
+    { apiKey },
+    { baseUrl },
+  );
+  api.lib.expectStatus(result, 201, 404);
+
+  switch (result.status) {
+    case 201: {
+      const entity = await result.entity();
+      return entity;
     }
-
-    const person = await User.Person.getOrCreate({
-      userId: user?.id,
-      firstName: personInput.firstName,
-      lastName: personInput.lastName,
-      lastNamePrefix: personInput.lastNamePrefix,
-      dateOfBirth: personInput.dateOfBirth.toISOString(),
-      birthCity: personInput.birthCity,
-      birthCountry: personInput.birthCountry,
-    });
-
-    await User.Person.createLocationLink({
-      personId: person.id,
-      locationId: locationId,
-    });
-
-    await User.Actor.upsert({
-      locationId: locationId,
-      type: "student",
-      personId: person.id,
-    });
-
-    return person;
-  });
+    case 404:
+      notFound();
+  }
 };
 
 export const createCompletedCertificate = async (

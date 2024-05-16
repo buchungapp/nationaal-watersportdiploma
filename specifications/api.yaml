@@ -6,14 +6,15 @@ info:
     Nationaal Watersportdiploma API
   version: 0.1.0
 
+security:
+  - open-id: []
+  - api-key: []
+
 paths:
   /me:
     get:
       operationId: me
       summary: Retrieves information about the current user (if any)
-      security:
-        - open-id: []
-        - api-key: []
       responses:
         '200':
           description: Ok
@@ -37,6 +38,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DisciplineModel'
+        '404':
+          description: Not found
+        '403':
+          description: Forbidden
 
   /discipline/{discipline-key}:
     parameters:
@@ -57,8 +62,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DisciplineModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
   /discipline/{discipline-key}/curricula:
     parameters:
@@ -81,8 +88,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CurriculumModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
   /programs:
     get:
@@ -93,8 +102,7 @@ paths:
         query parameters allow filtering the returned programs.
       tags:
         - program
-      security:
-        - open-id: []
+
       responses:
         '200':
           description: Ok
@@ -104,6 +112,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ProgramModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /program/{program-key}/curricula:
     parameters:
@@ -126,8 +138,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CurriculumModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
   /find-certificate:
     get:
@@ -146,9 +160,6 @@ paths:
       operationId: find-certificate
       summary: Find certificate by handle and issue date
 
-      security:
-        - api-key: []
-
       responses:
         '200':
           description: Ok
@@ -156,14 +167,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CertificateModel'
+        '403':
+          description: Forbidden
         '404':
           description: Not found
 
-        '403':
-          description: Forbidden
-
   /list-certificates-by-number:
     get:
+      parameters:
+        - in: query
+          name: numbers
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/CertificateHandle'
+
       operationId: listCertificatesByNumber
       tags:
         - certificate
@@ -176,7 +195,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CertificateHandle'
+                  $ref: '#/components/schemas/CertificateModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /certificate/{certificate-key}:
     parameters:
@@ -190,9 +213,6 @@ paths:
       operationId: get-certificate
       summary: Get certificate by handle or id
 
-      security:
-        - api-key: []
-
       responses:
         '200':
           description: Ok
@@ -200,11 +220,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CertificateModel'
-        '404':
-          description: Not found
-
         '403':
           description: Forbidden
+        '404':
+          description: Not found
 
   /locations:
     get:
@@ -219,6 +238,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LocationModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
     post:
       operationId: create-location
@@ -243,6 +266,8 @@ paths:
                     $ref: '#/components/schemas/Id'
         '403':
           description: Forbidden
+        '404':
+          description: Not found
 
   /location/{location-key}:
     parameters:
@@ -262,8 +287,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LocationModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
   /location/{location-key}/persons:
     parameters:
@@ -273,20 +300,22 @@ paths:
         schema:
           $ref: '#/components/schemas/HandleOrId'
 
-    get:
-      operationId: listPersonsForLocation
-      summary: List persons for a location
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PersonModel'
-        '404':
-          description: Not Found
+    #   get:
+    #     operationId: listPersonsForLocation
+    #     summary: List persons for a location
+    #     responses:
+    #       "200":
+    #         description: Ok
+    #         content:
+    #           application/json:
+    #             schema:
+    #               type: array
+    #               items:
+    #                 $ref: "#/components/schemas/PersonModel"
+    #       "403":
+    #         description: Forbidden
+    #       "404":
+    #         description: Not found
 
     post:
       operationId: createPersonForLocation
@@ -304,6 +333,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IdContainer'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /location/{location-key}/certificate:
     parameters:
@@ -325,33 +358,35 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LocationCertificateModel'
-        '404':
-          description: Not Found
-
-    post:
-      operationId: create-location-certificate
-      summary: Creates a new certificate for a location
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateLocationCertificateModel'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - id
-                properties:
-                  id:
-                    $ref: '#/components/schemas/Id'
         '403':
           description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
+
+    # post:
+    #   operationId: create-location-certificate
+    #   summary: Creates a new certificate for a location
+    #   requestBody:
+    #     content:
+    #       application/json:
+    #         schema:
+    #           $ref: '#/components/schemas/CreateLocationCertificateModel'
+    #   responses:
+    #     '201':
+    #       description: Created
+    #       content:
+    #         application/json:
+    #           schema:
+    #             type: object
+    #             required:
+    #               - id
+    #             properties:
+    #               id:
+    #                 $ref: '#/components/schemas/Id'
+    #     '403':
+    #       description: Forbidden
+    #     '404':
+    #       description: Not Found
 
   /location/{location-key}/cohort:
     parameters:
@@ -373,8 +408,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/LocationCohortModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
     post:
       operationId: create-location-cohort
@@ -398,6 +435,8 @@ paths:
                     $ref: '#/components/schemas/Id'
         '403':
           description: Forbidden
+        '404':
+          description: Not found
 
   /country:
     get:
@@ -414,6 +453,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CountryModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /curriculum/{curriculum-key}/gear-types:
     parameters:
@@ -436,8 +479,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/GearTypeModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
 components:
   schemas:
@@ -466,8 +511,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         weight:
           $ref: '#/components/schemas/PositiveInteger'
 
@@ -483,8 +529,9 @@ components:
         - modules
       properties:
         startedAt:
-          nullable: true
-          $ref: '#/components/schemas/Date'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Date'
         programId:
           $ref: '#/components/schemas/Id'
         revision:
@@ -510,13 +557,15 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         type:
-          nullable: true
-          enum:
-            - 'knowledge'
-            - 'skill'
+          oneOf:
+            - nullable: true
+            - enum:
+                - 'knowledge'
+                - 'skill'
         isRequired:
           type: boolean
         weight:
@@ -542,18 +591,21 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         type:
-          nullable: true
-          enum:
-            - 'knowledge'
-            - 'skill'
+          oneOf:
+            - nullable: true
+            - enum:
+                - 'knowledge'
+                - 'skill'
         isRequired:
           type: boolean
         requirement:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         weight:
           $ref: '#/components/schemas/PositiveInteger'
 
@@ -572,8 +624,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         degree:
           $ref: '#/components/schemas/DegreeModel'
         discipline:
@@ -581,7 +634,7 @@ components:
         categories:
           type: array
           items:
-            $ref: '#/components/schemas/CategoryModel'
+            $ref: '#/components/schemas/ChildCategoryModel'
 
     LocationModel:
       type: object
@@ -591,27 +644,38 @@ components:
       required:
         - handle
         - name
-        - userId
         - websiteUrl
         - shortDescription
         - logo
         - logoSquare
+        - logoCertificate
       properties:
         handle:
           $ref: '#/components/schemas/Handle'
         name:
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         websiteUrl:
-          $ref: '#/components/schemas/Url'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Url'
         shortDescription:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         logo:
-          $ref: '#/components/schemas/ImageModel'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/ImageModel'
         logoSquare:
-          $ref: '#/components/schemas/ImageModel'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/ImageModel'
         logoCertificate:
-          $ref: '#/components/schemas/ImageModel'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/ImageModel'
 
     CreateLocationModel:
       type: object
@@ -622,8 +686,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     LocationCohortModel:
       type: object
@@ -636,8 +701,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     CreateLocationCohortModel:
       type: object
@@ -648,8 +714,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     CertificateModel:
       type: object
@@ -667,11 +734,13 @@ components:
         studentCurriculumId:
           $ref: '#/components/schemas/Id'
         issuedAt:
-          nullable: true
-          $ref: '#/components/schemas/Date'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Date'
         visibleFrom:
-          nullable: true
-          $ref: '#/components/schemas/Date'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Date'
 
     DegreeModel:
       type: object
@@ -686,8 +755,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         rang:
           $ref: '#/components/schemas/PositiveInteger'
 
@@ -701,20 +771,31 @@ components:
         - title
         - description
         - weight
-        - parent
       properties:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         description:
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         weight:
           $ref: '#/components/schemas/PositiveInteger'
+
+    ChildCategoryModel:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CategoryModel'
+      required:
+        - parent
+      properties:
         parent:
-          nullable: true
-          $ref: '#/components/schemas/CategoryModel'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/CategoryModel'
 
     LocationCertificateModel:
       type: object
@@ -727,8 +808,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     CreateLocationCertificateModel:
       type: object
@@ -739,8 +821,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     CountryModel:
       type: object
@@ -751,8 +834,9 @@ components:
         code:
           $ref: '#/components/schemas/Code'
         name:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     GearTypeModel:
       type: object
@@ -766,8 +850,9 @@ components:
         handle:
           $ref: '#/components/schemas/Handle'
         title:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
 
     ImageModel:
       type: object
@@ -793,21 +878,25 @@ components:
           enum:
             - image
         alt:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         mimeType:
-          nullable: true
-          $ref: '#/components/schemas/MimeType'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/MimeType'
         size:
           $ref: '#/components/schemas/PositiveInteger'
         transformUrl:
           $ref: '#/components/schemas/Url'
         width:
-          nullable: true
-          $ref: '#/components/schemas/PositiveInteger'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/PositiveInteger'
         height:
-          nullable: true
-          $ref: '#/components/schemas/PositiveInteger'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/PositiveInteger'
 
     PersonModel:
       type: object
@@ -825,25 +914,31 @@ components:
         - actors
       properties:
         userId:
-          nullable: true
-          $ref: '#/components/schemas/Id'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Id'
         firstName:
           $ref: '#/components/schemas/Text'
         lastNamePrefix:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         lastName:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         dateOfBirth:
-          nullable: true
-          $ref: '#/components/schemas/Date'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Date'
         birthCity:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         birthCountry:
-          nullable: true
-          $ref: '#/components/schemas/CountryModel'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/CountryModel'
         actors:
           type: array
           items:
@@ -865,8 +960,9 @@ components:
         firstName:
           $ref: '#/components/schemas/Text'
         lastNamePrefix:
-          nullable: true
-          $ref: '#/components/schemas/Text'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Text'
         lastName:
           $ref: '#/components/schemas/Text'
         dateOfBirth:
@@ -874,8 +970,9 @@ components:
         birthCity:
           $ref: '#/components/schemas/Text'
         birthCountry:
-          nullable: true
-          $ref: '#/components/schemas/Code'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Code'
 
     ActorModel:
       type: object
@@ -897,8 +994,9 @@ components:
         locationId:
           $ref: '#/components/schemas/Id'
         personId:
-          nullable: true
-          $ref: '#/components/schemas/Id'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Id'
     # Bases
 
     IdContainer:
@@ -921,8 +1019,9 @@ components:
         updatedAt:
           $ref: '#/components/schemas/Date'
         deletedAt:
-          nullable: true
-          $ref: '#/components/schemas/Date'
+          oneOf:
+            - nullable: true
+            - $ref: '#/components/schemas/Date'
 
     CuFields:
       type: object

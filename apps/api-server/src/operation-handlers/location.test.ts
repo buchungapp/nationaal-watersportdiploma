@@ -57,6 +57,7 @@ test('location crud', () =>
 
         const list = await result.entity()
         assert.equal(list.length, 1)
+        assert(list[0] != null)
         assert.equal(list[0].id, id)
       }
     },

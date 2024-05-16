@@ -5,7 +5,8 @@ export type Authentication = {
     isSuper: boolean
   }
   openId: {
-    user: string
-    persons: string[]
+    userId: string
+    personIds: string[]
+    locationIds: string[]
   }
 }

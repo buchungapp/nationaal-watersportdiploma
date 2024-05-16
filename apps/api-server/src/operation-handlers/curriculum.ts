@@ -2,20 +2,17 @@ import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const retrieveCurriculaByDiscipline: api.RetrieveCurriculaByDisciplineOperationHandler<
+export const listCurriculaByDiscipline: api.ListCurriculaByDisciplineOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const { disciplineKey } = incomingRequest.parameters
 
-  // TODO get discipline type from core
-  let disciplineItem: Awaited<
-    ReturnType<typeof core.Program.Discipline.fromHandle>
-  >
+  let disciplineItem: Awaited<ReturnType<typeof core.Program.Discipline.fromId>>
 
-  if (api.validators.isComponentsHandle(disciplineKey)) {
-    disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
-  } else if (api.validators.isComponentsId(disciplineKey)) {
+  if (api.validators.isComponentsId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
+  } else if (api.validators.isComponentsHandle(disciplineKey)) {
+    disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
   } else {
     throw 'impossible'
   }
@@ -31,13 +28,9 @@ export const retrieveCurriculaByDiscipline: api.RetrieveCurriculaByDisciplineOpe
     filter: { onlyCurrentActive: true, disciplineId: disciplineItem.id },
   })
 
-  const responseEntity = curriculumList.map((item) => ({
-    id: item.id,
-  }))
-
   return {
     status: 200,
     contentType: 'application/json',
-    entity: () => responseEntity,
+    entity: () => curriculumList,
   }
 }

@@ -7,20 +7,10 @@ export const listDisciplines: api.ListDisciplinesOperationHandler<
 > = async (incomingRequest, authentication) => {
   const list = await core.Program.Discipline.list()
 
-  const responseEntity = list.map((item) => ({
-    id: item.id,
-    handle: item.handle,
-    title: item.title,
-    weight: item.weight,
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-    deletedAt: item.deletedAt,
-  }))
-
   return {
     status: 200,
     contentType: 'application/json',
-    entity: () => responseEntity,
+    entity: () => list,
   }
 }
 
@@ -29,15 +19,12 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
 > = async (incomingRequest, authentication) => {
   const { disciplineKey } = incomingRequest.parameters
 
-  // TODO get discipline type from core
-  let disciplineItem: Awaited<
-    ReturnType<typeof core.Program.Discipline.fromHandle>
-  >
+  let disciplineItem: Awaited<ReturnType<typeof core.Program.Discipline.fromId>>
 
-  if (api.validators.isComponentsHandle(disciplineKey)) {
-    disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
-  } else if (api.validators.isComponentsId(disciplineKey)) {
+  if (api.validators.isComponentsId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
+  } else if (api.validators.isComponentsHandle(disciplineKey)) {
+    disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
   } else {
     throw 'impossible'
   }
@@ -49,14 +36,9 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
     }
   }
 
-  const responseEntity = {
-    id: disciplineItem.id,
-    handle: disciplineItem.handle,
-  }
-
   return {
     status: 200,
     contentType: 'application/json',
-    entity: () => responseEntity,
+    entity: () => disciplineItem,
   }
 }

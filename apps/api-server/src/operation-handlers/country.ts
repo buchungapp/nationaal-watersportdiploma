@@ -4,7 +4,7 @@ import * as application from '../application/index.js'
 
 export const listCountries: api.ListCountriesOperationHandler<
   application.Authentication
-> = async (incomingRequest) => {
+> = async (incomingRequest, authentication) => {
   const list = await core.Platform.Country.list()
 
   const responseEntity = list.map((item) => ({
