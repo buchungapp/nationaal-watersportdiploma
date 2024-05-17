@@ -12,16 +12,13 @@ import { getHelpFaqs } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
 
 // Return a list of `params` to populate the [slug] dynamic segment
-// export async function generateStaticParams() {
-//   const [faqsGeneral, faqsDiplomalijn] = await Promise.all([
-//     listFaqsGeneral(),
-//     listFaqsDiplomalijn(),
-//   ]);
+export async function generateStaticParams() {
+  const allQuestions = await getHelpFaqs();
 
-//   return [...faqsGeneral, ...faqsDiplomalijn].map((faq) => ({
-//     faq: [...faq.categories, faq.slug],
-//   }));
-// }
+  return allQuestions.map((faq) => ({
+    slug: [faq.slug],
+  }));
+}
 
 async function findQuestion(slug: string) {
   const allQuestions = await getHelpFaqs();
@@ -95,7 +92,7 @@ export default async function Page({ params }: Props) {
       <PageHero>
         <div className="px-4 lg:px-16">
           <div className="grid gap-6 text-white">
-            <h1 className="text-4xl font-bold lg:text-5xl xl:text-6xl">
+            <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl">
               {question.metadata.question}
             </h1>
           </div>

@@ -1,4 +1,5 @@
 import { constants } from "@nawadi/lib";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Prose } from "~/app/(public)/_components/prose";
 import PageHero from "~/app/(public)/_components/style/page-hero";
@@ -7,10 +8,48 @@ import { Container } from "~/app/(public)/actueel/(article)/_components/containe
 import { getHelpArticles } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
 
-export default async function Page({ params }: { params: { slug: string } }) {
+// Return a list of `params` to populate the [slug] dynamic segment
+export async function generateStaticParams() {
   const posts = await getHelpArticles();
 
-  const post = posts.find((article) => article.slug === params.slug);
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
+}
+
+async function findPost(slug: string) {
+  const posts = await getHelpArticles();
+
+  return posts.find((article) => article.slug === slug);
+}
+
+interface Props {
+  params: { slug: string };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await findPost(params.slug);
+
+  if (!post) {
+    notFound();
+  }
+
+  return {
+    title: `${post.metadata.title}`,
+    description: post.metadata.summary,
+    alternates: {
+      canonical: `/help/artikel/${post.slug}`,
+    },
+    openGraph: {
+      title: `${post.metadata.title}`,
+      type: "article",
+      url: `/help/artikel/${post.slug}`,
+    },
+  };
+}
+
+export default async function Page({ params }: Props) {
+  const post = await findPost(params.slug);
 
   if (!post) {
     notFound();

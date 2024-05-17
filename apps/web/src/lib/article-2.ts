@@ -93,3 +93,31 @@ export async function getHelpFaqs() {
     return article;
   });
 }
+
+export async function getHelpCategories() {
+  const categories = await glob("**/_meta.yaml", {
+    cwd: path.join(process.cwd(), "./src/app/(public)/help/artikel/_content"),
+  });
+
+  return categories.map((category) => {
+    const rawContent = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "./src/app/(public)/help/artikel/_content",
+        category,
+      ),
+      "utf-8",
+    );
+    const meta = z
+      .object({
+        title: z.string(),
+        description: z.string().optional(),
+      })
+      .parse(matter(rawContent).data);
+
+    return {
+      slug: category.replace(/\/_meta.yaml$/, ""),
+      ...meta,
+    };
+  });
+}
