@@ -60,6 +60,7 @@ export async function getHelpArticles() {
       publishedAt: z.string().date(),
       lastUpdatedAt: z.string().date(),
       summary: z.string(),
+      isPopulaire: z.boolean().default(false),
     }),
   );
 

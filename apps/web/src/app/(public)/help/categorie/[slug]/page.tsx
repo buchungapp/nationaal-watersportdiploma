@@ -1,6 +1,7 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
-import { getHelpCategories } from "~/lib/article-2";
+import { BoxedButton } from "~/app/(public)/_components/style/buttons";
+import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import PageHero from "../../../_components/style/page-hero";
 
 interface PageProps {
@@ -44,7 +45,10 @@ export async function generateMetadata(
 }
 
 export default async function Page({ params: { slug } }: PageProps) {
-  const category = await findCategory(slug);
+  const [category, articles] = await Promise.all([
+    findCategory(slug),
+    getHelpArticles(),
+  ]);
 
   if (!category) {
     notFound();
@@ -64,7 +68,21 @@ export default async function Page({ params: { slug } }: PageProps) {
           </div>
         </div>
       </PageHero>
-      <div className="min-h-72 py-16 lg:py-32 w-full -mb-32 flex flex-col items-center justify-center gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8"></div>
+      <div className="min-h-72 py-16 lg:py-32 w-full -mb-32 flex flex-col items-center justify-center gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 md:max-w-3xl">
+        <div className="grid break-inside-avoid gap-2 rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full">
+          {articles
+            .filter((x) => x.category === category.slug)
+            .map((article) => (
+              <BoxedButton
+                key={article.slug}
+                href={`/help/artikel/${article.slug}`}
+                className="mt-2 text-branding-dark hover:bg-branding-dark/10 w-full"
+              >
+                <span className="mr-2">{article.metadata.title}</span>
+              </BoxedButton>
+            ))}
+        </div>
+      </div>
     </main>
   );
 }

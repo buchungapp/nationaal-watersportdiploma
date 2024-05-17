@@ -54,7 +54,7 @@ export default function RootLayout({
       lang="nl"
       className={clsx(
         inter.variable,
-        "h-full scroll-smooth antialiased text-gray-900 bg-white !pr-0",
+        "h-full scroll-smooth antialiased text-gray-900 bg-white",
       )}
     >
       <body className="h-full">
