@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import PageHero from "../../../_components/style/page-hero";
+import Breadcrumb from "../../_components/breadcrumb";
 
 interface PageProps {
   params: {
@@ -69,6 +70,15 @@ export default async function Page({ params: { slug } }: PageProps) {
         </div>
       </PageHero>
       <div className="min-h-72 py-16 lg:py-32 w-full -mb-32 flex flex-col items-center justify-center gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 md:max-w-3xl">
+        <Breadcrumb
+          items={[
+            { label: "Alle categorieën", href: "/help" },
+            {
+              label: category.title,
+              href: `/help/categorie/${slug}`,
+            },
+          ]}
+        />
         <div className="grid break-inside-avoid gap-2 rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full">
           {articles
             .filter((x) => x.category === category.slug)

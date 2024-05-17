@@ -5,8 +5,9 @@ import { Prose } from "~/app/(public)/_components/prose";
 import PageHero from "~/app/(public)/_components/style/page-hero";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { Container } from "~/app/(public)/actueel/(article)/_components/container";
-import { getHelpArticles } from "~/lib/article-2";
+import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
+import Breadcrumb from "../../_components/breadcrumb";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
@@ -57,7 +58,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Page({ params }: Props) {
-  const post = await findPost(params.slug);
+  const [post, categories] = await Promise.all([
+    findPost(params.slug),
+    getHelpCategories(),
+  ]);
 
   if (!post) {
     notFound();
@@ -98,6 +102,21 @@ export default async function Page({ params }: Props) {
       <Container className="mt-12 lg:mt-16">
         <div className="mx-auto max-w-2xl">
           <article className="flex flex-col gap-y-10">
+            <Breadcrumb
+              items={[
+                { label: "Alle categorieën", href: "/help" },
+                {
+                  label:
+                    categories.find((x) => x.slug === post.category)?.title ??
+                    post.category,
+                  href: `/help/categorie/${post.category}`,
+                },
+                {
+                  label: post.metadata.title,
+                  href: `/help/artikel/${post.slug}`,
+                },
+              ]}
+            />
             <p className="text-gray-500 text-lg">{post.metadata.summary}</p>
 
             <div className="flex items-center gap-x-4 text-gray-400">

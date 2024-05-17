@@ -76,7 +76,7 @@ export default async function Page() {
             ))}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
           {categories.map((category) => (
             <CategorieCard key={category.slug} category={category} />
           ))}
