@@ -7,11 +7,13 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 import { useState } from "react";
-import { locations } from "~/locations";
+import type { Location } from "../vaarlocaties/_lib/retrieve-locations";
 
-const markers = locations;
-
-export default function LocationsMap() {
+export default function LocationsMap({
+  locations = [],
+}: {
+  locations: Location[];
+}) {
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
 
   const { isLoaded } = useJsApiLoader({
@@ -35,7 +37,7 @@ export default function LocationsMap() {
 
   const handleOnLoad = (map: google.maps.Map) => {
     const bounds = new google.maps.LatLngBounds();
-    markers.forEach(({ position }) => bounds.extend(position));
+    locations.forEach(({ geometry }) => bounds.extend(geometry!.location));
     map.fitBounds(bounds);
   };
 
@@ -46,10 +48,10 @@ export default function LocationsMap() {
       mapContainerStyle={{ width: "100%", height: "100%" }}
       zoom={7}
     >
-      {markers.map(({ id, name, position, url }) => (
+      {locations.map(({ id, geometry, name, url }) => (
         <Marker
           key={id}
-          position={position}
+          position={geometry!.location}
           onClick={() => handleActiveMarker(id)}
         >
           {activeMarker === id ? (

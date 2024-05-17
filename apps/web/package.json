@@ -11,7 +11,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@googlemaps/google-maps-services-js": "^3.3.42",
+    "@googlemaps/google-maps-services-js": "^3.4.0",
     "@headlessui/react": "2.0.3",
     "@headlessui/tailwindcss": "^0.2.0",
     "@heroicons/react": "^2.1.1",
