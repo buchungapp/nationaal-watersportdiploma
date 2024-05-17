@@ -65,6 +65,7 @@ ignorePaths:
   - '*.svg'
   - supabase/config.toml
   - packages/db/migrations/
+  - locations.ts
 files:
   - '**'
 enableFiletypes:
