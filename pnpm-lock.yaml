@@ -73,7 +73,7 @@ importers:
   apps/web:
     dependencies:
       '@googlemaps/google-maps-services-js':
-        specifier: ^3.3.42
+        specifier: ^3.4.0
         version: 3.4.0
       '@headlessui/react':
         specifier: 2.0.3
