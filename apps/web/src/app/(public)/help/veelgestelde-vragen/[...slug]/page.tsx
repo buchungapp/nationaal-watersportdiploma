@@ -50,6 +50,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${question.metadata.question}`,
       type: "article",
       url: `/help/veelgestelde-vragen/${question.slug}`,
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent(question.metadata.question)}`,
+          width: 1200,
+          height: 630,
+          alt: question.metadata.question,
+        },
+      ],
     },
   };
 }

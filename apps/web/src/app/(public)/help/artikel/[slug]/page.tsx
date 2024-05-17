@@ -44,6 +44,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${post.metadata.title}`,
       type: "article",
       url: `/help/artikel/${post.slug}`,
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent(post.metadata.title)}${post.metadata.summary ? `&description=${encodeURIComponent(post.metadata.summary)}` : ""}`,
+          width: 1200,
+          height: 630,
+          alt: post.metadata.title,
+        },
+      ],
     },
   };
 }
