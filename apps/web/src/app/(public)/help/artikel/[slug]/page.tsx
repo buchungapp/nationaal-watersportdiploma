@@ -7,10 +7,10 @@ import { Container } from "~/app/(public)/actueel/(article)/_components/containe
 import { getHelpArticles } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
 
-export default function Page({ params }: { params: { slug: string } }) {
-  const post = getHelpArticles().find(
-    (article) => article.slug === params.slug,
-  );
+export default async function Page({ params }: { params: { slug: string } }) {
+  const posts = await getHelpArticles();
+
+  const post = posts.find((article) => article.slug === params.slug);
 
   if (!post) {
     notFound();
@@ -25,13 +25,9 @@ export default function Page({ params }: { params: { slug: string } }) {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BlogPosting",
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             headline: post.metadata.title,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             datePublished: post.metadata.publishedAt,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             dateModified: post.metadata.lastUpdatedAt,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             description: post.metadata.summary,
             url: `${constants.WEBSITE_URL}/help/artikel/${post.slug}`,
             author: {
@@ -64,9 +60,9 @@ export default function Page({ params }: { params: { slug: string } }) {
 
                 <time
                   className="font-medium"
-                  dateTime={post.metadata.publishedAt as string}
+                  dateTime={post.metadata.lastUpdatedAt}
                 >
-                  {formatDate(post.metadata.publishedAt as string)}
+                  {formatDate(post.metadata.lastUpdatedAt)}
                 </time>
               </span>
             </div>

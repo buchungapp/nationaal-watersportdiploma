@@ -18,14 +18,14 @@ export async function generateMetadata(
     description:
       "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
     alternates: {
-      canonical: "/helpcentrum",
+      canonical: "/help",
     },
     openGraph: {
       ...parentOpenGraph,
       title: "Helpcentrum",
       description:
         "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
-      url: `/helpcentrum/categorie/${category}`,
+      url: `/help/categorie/${category}`,
     },
   };
 }

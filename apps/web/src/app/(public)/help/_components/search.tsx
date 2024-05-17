@@ -44,7 +44,7 @@ export default function Search({
       <Combobox
         onChange={(question: (typeof questions)[number]) => {
           router.push(
-            `/helpcentrum/veelgestelde-vragen/${question.categories.join("/")}/${question.slug}`,
+            `/help/veelgestelde-vragen/${question.categories.join("/")}/${question.slug}`,
           );
         }}
       >

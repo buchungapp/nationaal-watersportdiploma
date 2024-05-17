@@ -105,7 +105,7 @@ export default function Footer() {
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
             <ul className="grid gap-6 text-gray-200">
               <FooterLink href="/vereniging/manifest">Manifest</FooterLink>
-              <FooterLink href="/helpcentrum">Helpcentrum</FooterLink>
+              <FooterLink href="/help">Helpcentrum</FooterLink>
               <FooterLink href="/vereniging/bestuur">Bestuur</FooterLink>
               <FooterLink href="/merk">Merkkit</FooterLink>
               <FooterLink href="/vereniging/vertrouwenspersoon">

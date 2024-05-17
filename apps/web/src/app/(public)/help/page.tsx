@@ -18,14 +18,14 @@ export async function generateMetadata(
     description:
       "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
     alternates: {
-      canonical: "/helpcentrum",
+      canonical: "/help",
     },
     openGraph: {
       ...parentOpenGraph,
       title: "Helpcentrum",
       description:
         "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
-      url: "/helpcentrum",
+      url: "/help",
     },
   };
 }
@@ -71,7 +71,7 @@ export default async function Page() {
             .map((q, idx) => (
               <React.Fragment key={`${q.categories.join("-")}-${q.slug}`}>
                 <Link
-                  href={`/helpcentrum/veelgestelde-vragen/${q.categories.join("/")}/${q.slug}`}
+                  href={`/help/veelgestelde-vragen/${q.categories.join("/")}/${q.slug}`}
                   className="text-gray-500 hover:text-gray-900 underline"
                 >
                   {q.question}

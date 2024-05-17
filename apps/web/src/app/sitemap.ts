@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     (article) => ({
       url: `${BASE_URL}/help/artikel/${article.slug}`,
       changeFrequency: "monthly",
-      lastModified: new Date(article.metadata.lastUpdatedAt).toISOString(),
+      lastModified: new Date(article.metadata.lastUpdatedAt),
       priority: 0.8,
     }),
   );
@@ -115,11 +115,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly",
         priority: 0.6,
       },
-    ] as const
+    ] as MetadataRoute.Sitemap
   ).map((page) => ({
     ...page,
     url: page.url.replace(/\/$/, ""),
-    // @ts-expect-error fix this error
-    lastModified: page.lastModified ?? new Date().toISOString(),
+    lastModified: page.lastModified ?? new Date(),
   }));
 }
