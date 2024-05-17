@@ -1,8 +1,11 @@
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import Double from "~/app/_components/brand/double-line";
 import LocationsMap from "../../_components/locations-map";
+import { retrieveLocations } from "../../vaarlocaties/_lib/retrieve-locations";
 
-export default function Locations() {
+export default async function Locations() {
+  const locations = await retrieveLocations();
+
   return (
     <section className="grid w-full items-center overflow-hidden rounded-[3rem] bg-branding-orange lg:grid-cols-2">
       <div className="px-4 py-12 text-white lg:p-16">
@@ -34,7 +37,7 @@ export default function Locations() {
         </div>
       </div>
       <div className="h-full min-h-[24rem] w-full">
-        <LocationsMap />
+        <LocationsMap locations={locations} />
       </div>
     </section>
   );
