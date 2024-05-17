@@ -1,6 +1,12 @@
 "use client";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import {
+  MotionStyle,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+} from "framer-motion";
 import Link from "next/link";
+import { useId } from "react";
 import { Wave } from "../../_assets/wave";
 
 export default function CategorieCard({
@@ -34,22 +40,34 @@ export default function CategorieCard({
         className="absolute inset-0 rounded-2xl bg-gradient-to-r from-branding-light/20 to-branding-light/10 opacity-0 transition duration-300 group-hover:opacity-100"
         style={style}
       />
-      <Pattern className="text-white/40" />
+      <Pattern
+        className="text-white/70 opacity-0 group-hover:opacity-100 duration-300 transition"
+        style={style}
+      />
+      <Pattern className="text-white/40 group-hover:opacity-30 duration-300 transition" />
       <h3 className="text-lg relative font-semibold z-10">{category.title}</h3>
       <p className="text-sm relative z-10">{category.description}</p>
     </Link>
   );
 }
 
-function Pattern({ className }: { className?: string }) {
+function Pattern({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: MotionStyle;
+}) {
+  const id = useId();
   return (
-    <svg
+    <motion.svg
       xmlns="http://www.w3.org/2000/svg"
       className="w-full h-full absolute top-0 left-0"
+      style={style}
     >
       <defs>
         <pattern
-          id="bg"
+          id={id}
           patternUnits="userSpaceOnUse"
           width="240.24"
           height="36"
@@ -57,7 +75,7 @@ function Pattern({ className }: { className?: string }) {
           <Wave className={className} />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="url(#bg)" />
-    </svg>
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
+    </motion.svg>
   );
 }
