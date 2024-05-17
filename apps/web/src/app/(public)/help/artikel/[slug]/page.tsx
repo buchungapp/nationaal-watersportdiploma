@@ -8,6 +8,7 @@ import { Container } from "~/app/(public)/actueel/(article)/_components/containe
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
 import Breadcrumb from "../../_components/breadcrumb";
+import Search from "../../_components/search";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
@@ -102,6 +103,7 @@ export default async function Page({ params }: Props) {
       <Container className="mt-12 lg:mt-16">
         <div className="mx-auto max-w-2xl">
           <article className="flex flex-col gap-y-10">
+            <Search />
             <Breadcrumb
               items={[
                 { label: "Alle categorieën", href: "/help" },

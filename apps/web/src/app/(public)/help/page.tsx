@@ -1,6 +1,6 @@
 import { BoxedButton } from "../_components/style/buttons";
 import PageHero from "../_components/style/page-hero";
-import Search from "./_components/search";
+import SearchClient from "./_components/search-client";
 
 import type { Metadata, ResolvingMetadata } from "next";
 import {
@@ -59,7 +59,7 @@ export default async function Page() {
         <h2 className="text-2xl font-bold lg:text-3xl xl:text-4xl text-gray-900">
           Hoe kunnen we helpen?
         </h2>
-        <Search questions={questions} articles={articles} />
+        <SearchClient questions={questions} articles={articles} />
 
         <div className="grid break-inside-avoid gap-2 rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full">
           <h2 className="text-lg font-semibold px-4">Populaire artikelen</h2>
@@ -77,6 +77,14 @@ export default async function Page() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
+          <CategorieCard
+            category={{
+              slug: "veelgestelde-vragen",
+              title: "Veelgestelde vragen",
+              description: "Ontdek antwoorden op veelgestelde vragen.",
+            }}
+            base="/help"
+          />
           {categories.map((category) => (
             <CategorieCard key={category.slug} category={category} />
           ))}

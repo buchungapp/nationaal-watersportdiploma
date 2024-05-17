@@ -4,6 +4,7 @@ import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import PageHero from "../../../_components/style/page-hero";
 import Breadcrumb from "../../_components/breadcrumb";
+import Search from "../../_components/search";
 
 interface PageProps {
   params: {
@@ -70,6 +71,7 @@ export default async function Page({ params: { slug } }: PageProps) {
         </div>
       </PageHero>
       <div className="min-h-72 py-16 lg:py-32 w-full -mb-32 flex flex-col items-center justify-center gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 md:max-w-3xl">
+        <Search />
         <Breadcrumb
           items={[
             { label: "Alle categorieën", href: "/help" },

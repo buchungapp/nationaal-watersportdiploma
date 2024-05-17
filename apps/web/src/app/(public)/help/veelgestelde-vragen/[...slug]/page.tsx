@@ -10,6 +10,8 @@ import { formatDate } from "~/app/(public)/_utils/format-date";
 import { Container } from "~/app/(public)/actueel/(article)/_components/container";
 import { getHelpFaqs } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
+import Breadcrumb from "../../_components/breadcrumb";
+import Search from "../../_components/search";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
@@ -109,6 +111,23 @@ export default async function Page({ params }: Props) {
       <Container className="mt-12 lg:mt-16">
         <div className="mx-auto max-w-2xl">
           <article className="flex flex-col gap-y-10">
+            <Search />
+            <Breadcrumb
+              items={[
+                {
+                  label: "Alle categorieën",
+                  href: "/help",
+                },
+                {
+                  label: "Alle vragen",
+                  href: "/help/veelgestelde-vragen",
+                },
+                {
+                  label: question.metadata.question,
+                  href: `/help/veelgestelde-vragen/${question.slug}`,
+                },
+              ]}
+            />
             <div className="flex items-center gap-x-4 text-gray-400">
               <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
               <span className="flex gap-x-1.5">

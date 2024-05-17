@@ -11,8 +11,10 @@ import { Wave } from "../../_assets/wave";
 
 export default function CategorieCard({
   category,
+  base = "/help/categorie",
 }: {
   category: { title: string; description?: string | undefined; slug: string };
+  base?: string;
 }) {
   let mouseX = useMotionValue(0);
   let mouseY = useMotionValue(0);
@@ -32,7 +34,7 @@ export default function CategorieCard({
 
   return (
     <Link
-      href={`/help/categorie/${category.slug}`}
+      href={`${base}/${category.slug}`}
       className="border bg-gray-100 transition-shadow group hover:shadow-md hover:shadow-zinc-900/5 border-gray-100 rounded-2xl pt-16 p-6 relative overflow-hidden"
       onMouseMove={onMouseMove}
     >
