@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Partially taken from https://github.com/leerob/leerob.io/blob/main/app/components/mdx.tsx#L168
 
+import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { ImageProps } from "next/image";
@@ -72,6 +73,17 @@ function createHeading(level: number) {
   };
 }
 
+function Note({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="my-6 flex gap-2.5 rounded-2xl border border-branding-light/20 bg-branding-light/10 p-4 leading-6 text-branding-dark">
+      <InformationCircleIcon className="mt-1 h-4 w-4 flex-none fill-branding-light stroke-white" />
+      <div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 const components = {
   h1: createHeading(1),
   h2: createHeading(2),
@@ -82,6 +94,7 @@ const components = {
   Image: RoundedImage,
   a: CustomLink,
   Faq: FaqDisclosure,
+  Note: Note,
 };
 
 export function HelpArticle(props: any) {
