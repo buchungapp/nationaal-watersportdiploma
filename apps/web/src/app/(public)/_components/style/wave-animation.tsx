@@ -66,7 +66,7 @@ export default function WaveAnimation({
           left: inverseProgress,
         }}
       >
-        <Wave className="h-full" />
+        <Wave className="h-7" />
       </motion.div>
       <motion.div
         className="absolute right-0 top-[12px] translate-x-[240px]"

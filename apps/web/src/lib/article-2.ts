@@ -5,6 +5,7 @@ import glob from "fast-glob";
 import fs from "fs";
 import matter from "gray-matter";
 import path from "path";
+import { cache } from "react";
 import { z } from "zod";
 
 function getMDXFiles(dir: string) {
@@ -52,7 +53,7 @@ async function getMDXData<T extends z.ZodSchema<any>>(
   });
 }
 
-export async function getHelpArticles() {
+export const getHelpArticles = cache(async function () {
   const articles = await getMDXData(
     path.join(process.cwd(), "./src/app/(public)/help/artikel/_content"),
     z.object({
@@ -60,7 +61,7 @@ export async function getHelpArticles() {
       publishedAt: z.string().date(),
       lastUpdatedAt: z.string().date(),
       summary: z.string(),
-      isPopulaire: z.boolean().default(false),
+      isPopulair: z.boolean().default(false),
     }),
   );
 
@@ -76,9 +77,9 @@ export async function getHelpArticles() {
       ...article,
     };
   });
-}
+});
 
-export async function getHelpFaqs() {
+export const getHelpFaqs = cache(async function () {
   const articles = await getMDXData(
     path.join(
       process.cwd(),
@@ -93,9 +94,9 @@ export async function getHelpFaqs() {
   return articles.map(({ pathSegments: _p, ...article }) => {
     return article;
   });
-}
+});
 
-export async function getHelpCategories() {
+export const getHelpCategories = cache(async function () {
   const categories = await glob("**/_meta.yaml", {
     cwd: path.join(process.cwd(), "./src/app/(public)/help/artikel/_content"),
   });
@@ -121,4 +122,4 @@ export async function getHelpCategories() {
       ...meta,
     };
   });
-}
+});
