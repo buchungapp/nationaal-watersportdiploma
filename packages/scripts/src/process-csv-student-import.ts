@@ -49,6 +49,10 @@ async function main(filePath: string) {
     Achternaam: z.string(),
     Geboortedatum: z.string().pipe(z.coerce.date()),
     Geboorteplaats: z.string(),
+    Geboorteland: z
+      .string()
+      .length(2)
+      .catch(() => 'nl'),
   })
 
   const rows = rowSchema.array().parse(
@@ -71,7 +75,7 @@ async function main(filePath: string) {
       lastNamePrefix: row.Tussenvoegsels,
       dateOfBirth: row.Geboortedatum.toISOString(),
       birthCity: row.Geboorteplaats,
-      birthCountry: 'nl',
+      birthCountry: row.Geboorteland,
     })
 
     await User.Person.createLocationLink({

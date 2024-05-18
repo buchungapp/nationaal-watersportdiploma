@@ -19,10 +19,7 @@ export default async function Faq() {
           vragen voor je op een rijtje.
         </Article.Paragraph>
         <Article.ButtonSection className="mt-8">
-          <BoxedButton
-            href="/helpcentrum"
-            className="bg-branding-dark text-white"
-          >
+          <BoxedButton href="/help" className="bg-branding-dark text-white">
             Bekijk alle vragen
           </BoxedButton>
         </Article.ButtonSection>

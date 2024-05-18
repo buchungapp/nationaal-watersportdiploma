@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { Toaster } from "sonner";
 
 import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -54,11 +55,13 @@ export default function RootLayout({
       lang="nl"
       className={clsx(
         inter.variable,
-        "h-full scroll-smooth antialiased text-gray-900 bg-white !pr-0",
+        "h-full scroll-smooth antialiased text-gray-900 bg-white",
       )}
     >
       <body className="h-full">
         <CommonProviders>{children}</CommonProviders>
+        <Toaster richColors />
+
         <SpeedInsights />
       </body>
     </html>

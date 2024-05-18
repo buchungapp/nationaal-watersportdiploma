@@ -3,7 +3,11 @@
 import type { PropsWithChildren } from "react";
 import React from "react";
 
-import { Disclosure } from "@headlessui/react";
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+} from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
 
 export default function FaqDisclosure({
@@ -19,7 +23,7 @@ export default function FaqDisclosure({
   return (
     <Disclosure as="div" className={className} defaultOpen={defaultOpen}>
       <dt>
-        <Disclosure.Button
+        <DisclosureButton
           className="flex p-4 hover:bg-gray-100 w-full items-start justify-start text-left"
           data-attr="faq"
         >
@@ -27,14 +31,15 @@ export default function FaqDisclosure({
             <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 transition-transform ui-open:rotate-90" />
           </div>
           <span className="font-semibold leading-6">{question}</span>
-        </Disclosure.Button>
+        </DisclosureButton>
       </dt>
-      <Disclosure.Panel
+      <DisclosurePanel
+        unmount={false}
         as="dd"
         className="mt-2 pl-14 pr-4 pb-4 leading-relaxed"
       >
         {children}
-      </Disclosure.Panel>
+      </DisclosurePanel>
     </Disclosure>
   );
 }

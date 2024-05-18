@@ -11,6 +11,7 @@ const nextConfig = {
       "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
     },
   },
+  transpilePackages: ["next-mdx-remote"],
   async redirects() {
     return [
       {
@@ -22,6 +23,11 @@ const nextConfig = {
         source: "/faq-instructeur",
         destination:
           "/actueel/3yHwZSTf-een-nieuw-tijdperk-voor-jou-als-instructeur-met-het-nwd",
+        permanent: true,
+      },
+      {
+        source: "/helpcentrum/:path*",
+        destination: "/help/:path*",
         permanent: true,
       },
     ];

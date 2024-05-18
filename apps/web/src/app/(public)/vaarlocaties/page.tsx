@@ -14,6 +14,13 @@ import PageHero from "../_components/style/page-hero";
 import { StarIcon } from "@heroicons/react/16/solid";
 import type { Metadata, ResolvingMetadata } from "next";
 import { Badge } from "~/app/(dashboard)/_components/badge";
+import {
+  Facebook,
+  Instagram,
+  TikTok,
+  Whatsapp,
+  YouTube,
+} from "../_components/socials";
 import { retrieveLocations } from "./_lib/retrieve-locations";
 
 export async function generateMetadata(
@@ -36,6 +43,14 @@ export async function generateMetadata(
     },
   };
 }
+
+const platformComponents = {
+  whatsapp: Whatsapp,
+  instagram: Instagram,
+  tiktok: TikTok,
+  facebook: Facebook,
+  youtube: YouTube,
+} as const;
 
 export default async function Page() {
   const locations = await retrieveLocations();
@@ -136,9 +151,41 @@ export default async function Page() {
                   >
                     {normalizeUrl(location.url).split("//")[1]}
                   </Link>
-                  <address className="mt-3 space-y-1 h-full text-sm not-italic leading-6 text-gray-600">
+                  <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-gray-600">
                     <p>{location.city}</p>
                   </address>
+
+                  {/* Socials */}
+                  <ul className="flex gap-x-5 mt-6">
+                    {Object.entries(location.social_media)
+                      .sort((a, b) => {
+                        const order = [
+                          "whatsapp",
+                          "instagram",
+                          "tiktok",
+                          "facebook",
+                          "youtube",
+                        ];
+                        return order.indexOf(a[0]) - order.indexOf(b[0]);
+                      })
+                      .map(([platform, url]) => {
+                        const IconComponent =
+                          platformComponents[
+                            platform as keyof typeof platformComponents
+                          ];
+                        return IconComponent ? (
+                          <li key={platform}>
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <IconComponent className="w-4 h-4 text-branding-light/70 hover:text-branding-light" />
+                            </a>
+                          </li>
+                        ) : null;
+                      })}
+                  </ul>
                 </div>
               ))}
           </div>

@@ -1,30 +1,55 @@
 "use client";
-import { Popover, Transition } from "@headlessui/react";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+  Transition,
+} from "@headlessui/react";
 import { HomeIcon, SparklesIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import Link from "next/link";
-import React, { Fragment, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { Fragment, useCallback, useRef, useState } from "react";
 import Logo from "../../../../_components/brand/logo";
 import Wordmark from "../../../../_components/brand/wordmark";
 import { logo, wordmark } from "./media-kit-svgs";
 
 export default function MediaKit() {
   const ref = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
+  const intent = useRef<"homepage" | "context">("homepage");
+
+  const handleClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (intent.current === "homepage") {
+        e.preventDefault();
+        router.push("/");
+      }
+    },
+    [router, intent.current],
+  );
+
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      intent.current = "context";
+      e.preventDefault();
+      ref.current?.click();
+      intent.current = "homepage";
+    },
+    [intent.current],
+  );
 
   return (
     <Popover className={"relative inline"}>
-      <Link
-        href="/"
+      <PopoverButton
+        ref={ref}
+        onClick={handleClick}
+        onContextMenu={handleContextMenu}
         className="flex shrink-0"
-        onContextMenu={(e) => {
-          e.preventDefault();
-          ref.current?.click();
-        }}
       >
         <Logo className="h-24 w-24 p-2 text-white" />
         <Wordmark className="block h-24 lg:hidden xl:block" />
-      </Link>
-      <Popover.Button ref={ref} className={"hidden"}></Popover.Button>
+      </PopoverButton>
       <Transition
         as={Fragment}
         enter="transition ease-out duration-200"
@@ -34,7 +59,7 @@ export default function MediaKit() {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <Popover.Panel className="absolute -left-4 top-full z-10 mt-3 w-screen max-w-xs rounded-xl px-2.5 py-4 bg-white shadow-lg ring-1 ring-gray-900/5">
+        <PopoverPanel className="absolute -left-4 top-full z-10 mt-3 w-screen max-w-xs rounded-xl px-2.5 py-4 bg-white shadow-lg ring-1 ring-gray-900/5">
           <CopyButton
             label={(active) => (
               <div className="flex items-center gap-x-2.5">
@@ -90,7 +115,7 @@ export default function MediaKit() {
             <HomeIcon className="h-4 w-4 text-gray-600" aria-hidden={true} />
             <p className="block font-semibold text-gray-900">Homepagina</p>
           </Link>
-        </Popover.Panel>
+        </PopoverPanel>
       </Transition>
     </Popover>
   );

@@ -18,13 +18,13 @@ export function BoxedButton({
     <Link
       {...props}
       className={clsx(
-        "group flex w-fit items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+        "group flex w-fit gap-1 justify-between rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
         className,
       )}
     >
       {children}
       <ArrowLongRightIcon
-        className="h-5 w-5 transition-transform group-hover:translate-x-1"
+        className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1"
         strokeWidth={2.5}
       />
     </Link>
@@ -41,20 +41,20 @@ export function TekstButton({
     <Link
       {...props}
       className={clsx(
-        "group -mx-2.5 -my-1.5 flex w-fit items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors",
+        "group -mx-2.5 -my-1.5 flex w-fit items-center gap-1 justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors",
         className,
       )}
     >
       {backwards ? (
         <ArrowLeftIcon
-          className="h-4 w-4 transition-transform group-hover:-translate-x-1"
+          className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1"
           strokeWidth={2.5}
         />
       ) : null}
       {children}
       {!backwards ? (
         <ArrowRightIcon
-          className="h-4 w-4 transition-transform group-hover:translate-x-1"
+          className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1"
           strokeWidth={2.5}
         />
       ) : null}

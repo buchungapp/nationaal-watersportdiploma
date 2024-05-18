@@ -1,3 +1,4 @@
+import { constants } from "@nawadi/lib";
 import { Prose } from "~/app/(public)/_components/prose";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import PageHero from "~/app/(public)/_components/style/page-hero";
@@ -14,6 +15,27 @@ export function ArticleLayout({
 }) {
   return (
     <>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            headline: article.title,
+            datePublished: article.date,
+            dateModified: article.date,
+            description: article.description,
+            url: `${constants.WEBSITE_URL}/actueel/${article.slug}`,
+            author: {
+              "@type": "Organization",
+              name: "Nationaal Watersportdiploma",
+              url: constants.WEBSITE_URL,
+            },
+          }),
+        }}
+      />
+
       <PageHero>
         <div className="px-4 lg:px-16">
           <div className="grid gap-6 text-white">
