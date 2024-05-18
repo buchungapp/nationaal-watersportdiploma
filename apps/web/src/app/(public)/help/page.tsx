@@ -46,8 +46,8 @@ export default async function Page() {
                   href={`/help/artikel/${article.slug}`}
                   className="group flex w-full gap-1 justify-between hover:bg-branding-dark/10 rounded-lg px-4 py-2 text-sm transition-colors"
                 >
-                  <div>
-                    <p className="mr-2 text-lg/6 text-branding-dark font-semibold">
+                  <div className="mr-2">
+                    <p className="text-lg/6 text-branding-dark font-semibold">
                       {article.metadata.title}
                     </p>
                     <p className="text-gray-800 mt-1 font-normal">

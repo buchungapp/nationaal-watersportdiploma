@@ -1,10 +1,9 @@
+import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
-import PageHero from "../../../_components/style/page-hero";
 import Breadcrumb from "../../_components/breadcrumb";
-import Search from "../../_components/search";
 
 interface PageProps {
   params: {
@@ -49,7 +48,9 @@ export async function generateMetadata(
 export default async function Page({ params: { slug } }: PageProps) {
   const [category, articles] = await Promise.all([
     findCategory(slug),
-    getHelpArticles(),
+    getHelpArticles().then((articles) =>
+      articles.filter((x) => x.category === slug),
+    ),
   ]);
 
   if (!category) {
@@ -57,44 +58,50 @@ export default async function Page({ params: { slug } }: PageProps) {
   }
 
   return (
-    <main className="flex flex-col items-center">
-      <PageHero>
-        <div className="px-4 lg:px-16">
-          <div className="grid gap-6 text-white">
-            <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
-              {category.title}
-            </h1>
-            {category.description ? (
-              <p className="text-xl">{category.description}</p>
-            ) : null}
-          </div>
-        </div>
-      </PageHero>
-      <div className="min-h-72 py-16 lg:py-32 w-full -mb-32 flex flex-col items-center justify-center gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 md:max-w-3xl">
-        <Search />
-        <Breadcrumb
-          items={[
-            { label: "Alle categorieën", href: "/help" },
-            {
-              label: category.title,
-              href: `/help/categorie/${slug}`,
-            },
-          ]}
-        />
-        <div className="grid break-inside-avoid gap-2 rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full">
-          {articles
-            .filter((x) => x.category === category.slug)
-            .map((article) => (
-              <BoxedButton
-                key={article.slug}
-                href={`/help/artikel/${article.slug}`}
-                className="mt-2 text-branding-dark hover:bg-branding-dark/10 w-full"
-              >
-                <span className="mr-2">{article.metadata.title}</span>
-              </BoxedButton>
-            ))}
-        </div>
+    <>
+      <Breadcrumb
+        items={[
+          { label: "Alle categorieën", href: "/help" },
+          {
+            label: category.title,
+            href: `/help/categorie/${slug}`,
+          },
+        ]}
+      />
+
+      <div className="">
+        <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl text-branding-dark">
+          {category.title}
+        </h1>
+        <p className="text-lg/6 text-gray-800 mt-4">{category.description}</p>
       </div>
-    </main>
+
+      <ul className="space-y-3.5 w-full">
+        {articles.map((article) => (
+          <li key={article.slug}>
+            <Link
+              href={`/help/artikel/${article.slug}`}
+              className="group flex w-full gap-1 justify-between bg-gray-100 hover:bg-branding-dark/10 rounded-2xl px-6 py-4 text-sm transition-colors"
+            >
+              <div className="mr-2">
+                <p className="text-lg/6 text-branding-dark font-semibold">
+                  {article.metadata.title}
+                </p>
+                <p className="text-gray-800 mt-1 font-normal max-w-prose">
+                  {article.metadata.summary}
+                </p>
+              </div>
+
+              <div className="h-6 flex items-center justify-center">
+                <ArrowLongRightIcon
+                  className="h-5 w-5 shrink-0 text-branding-dark transition-transform group-hover:translate-x-1"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

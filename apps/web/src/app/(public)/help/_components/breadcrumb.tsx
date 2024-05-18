@@ -9,7 +9,7 @@ export default function Breadcrumb({
   items: { label: string; href: string }[];
 }) {
   return (
-    <div className="flex items-center w-full overflow-hidden -mx-4">
+    <div className="flex items-center w-full overflow-x-auto -mx-4">
       {items.map((item, index) => (
         <Fragment key={item.href}>
           <Link
