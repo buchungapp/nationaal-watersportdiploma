@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { Toaster } from "sonner";
 
 import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -59,6 +60,8 @@ export default function RootLayout({
     >
       <body className="h-full">
         <CommonProviders>{children}</CommonProviders>
+        <Toaster richColors />
+
         <SpeedInsights />
       </body>
     </html>

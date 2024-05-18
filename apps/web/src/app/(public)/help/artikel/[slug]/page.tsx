@@ -1,14 +1,21 @@
+import { LinkIcon, PrinterIcon } from "@heroicons/react/24/solid";
 import { constants } from "@nawadi/lib";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
+import PrintPage from "~/app/(public)/_components/print-page";
 import { Prose } from "~/app/(public)/_components/prose";
-import PageHero from "~/app/(public)/_components/style/page-hero";
+import {
+  LinkedIn,
+  Whatsapp,
+  Twitter as X,
+} from "~/app/(public)/_components/socials";
+import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import { Container } from "~/app/(public)/actueel/(article)/_components/container";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import { HelpArticle } from "../../_components/article";
 import Breadcrumb from "../../_components/breadcrumb";
-import Search from "../../_components/search";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
@@ -59,8 +66,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Page({ params }: Props) {
-  const [post, categories] = await Promise.all([
+  const [post, relatedArticles, categories] = await Promise.all([
     findPost(params.slug),
+    getHelpArticles().then((articles) =>
+      articles.filter((x) => x.slug !== params.slug),
+    ),
     getHelpCategories(),
   ]);
 
@@ -91,35 +101,33 @@ export default async function Page({ params }: Props) {
         }}
       />
 
-      <PageHero>
-        <div className="px-4 lg:px-16">
-          <div className="grid gap-6 text-white">
-            <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl">
-              {post.metadata.title}
-            </h1>
-          </div>
-        </div>
-      </PageHero>
-      <Container className="mt-12 lg:mt-16">
-        <div className="mx-auto max-w-2xl">
+      <div className="grid lg:grid-cols-3 gap-x-8 gap-y-6">
+        <div className="lg:col-span-2">
+          <Breadcrumb
+            items={[
+              { label: "Alle categorieën", href: "/help" },
+              {
+                label:
+                  categories.find((x) => x.slug === post.category)?.title ??
+                  post.category,
+                href: `/help/categorie/${post.category}`,
+              },
+              {
+                label: post.metadata.title,
+                href: `/help/artikel/${post.slug}`,
+              },
+            ]}
+          />
+
           <article className="flex flex-col gap-y-10">
-            <Search />
-            <Breadcrumb
-              items={[
-                { label: "Alle categorieën", href: "/help" },
-                {
-                  label:
-                    categories.find((x) => x.slug === post.category)?.title ??
-                    post.category,
-                  href: `/help/categorie/${post.category}`,
-                },
-                {
-                  label: post.metadata.title,
-                  href: `/help/artikel/${post.slug}`,
-                },
-              ]}
-            />
-            <p className="text-gray-500 text-lg">{post.metadata.summary}</p>
+            <div className="">
+              <h1 className="text-3xl font-bold lg:text-4xl text-branding-dark">
+                {post.metadata.title}
+              </h1>
+              <p className="text-lg/6 text-gray-800 mt-4 text-justify">
+                {post.metadata.summary}
+              </p>
+            </div>
 
             <div className="flex items-center gap-x-4 text-gray-400">
               <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
@@ -140,7 +148,85 @@ export default async function Page({ params }: Props) {
             </Prose>
           </article>
         </div>
-      </Container>
+
+        <div className="flex flex-col divide-y divide-gray-200 space-y-8 lg:border-l lg:border-gray-200 lg:pl-6">
+          {/* Related articles */}
+          <div className="grid gap-4">
+            <h2 className="text-gray-600 text-sm font-semibold">Gerelateerd</h2>
+            <ul className="space-y-3.5 -mx-4">
+              {relatedArticles.map((article) => (
+                <li key={article.slug}>
+                  <BoxedButton
+                    href={`/help/artikel/${article.slug}`}
+                    className="text-branding-dark"
+                  >
+                    <p className="text-sm/5 font-semibold">
+                      {article.metadata.title}
+                    </p>
+                  </BoxedButton>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Socials */}
+          <div className="grid gap-4 pt-8">
+            <h2 className="text-gray-600 text-sm font-semibold">
+              Deel dit artikel
+            </h2>
+            <ul className="flex items-center gap-x-5">
+              {/* WhatsApp */}
+              <li>
+                <Link
+                  href={`https://wa.me/?text=${encodeURIComponent(`Lees: ${post.metadata.title} via ${constants.WEBSITE_URL}/help/artikel/${post.slug}`)}`}
+                  title="Deel via WhatsApp"
+                  target="_blank"
+                >
+                  <Whatsapp className="text-branding-dark h-5 w-5" />
+                </Link>
+              </li>
+
+              {/* LinkedIn */}
+              <li>
+                <Link
+                  href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(`${constants.WEBSITE_URL}/help/artikel/${post.slug}`)}&title=${encodeURIComponent(post.metadata.title)}&summary=${encodeURIComponent(post.metadata.summary)}&source=${encodeURIComponent(constants.WEBSITE_URL)}`}
+                  title="Deel via LinkedIn"
+                  target="_blank"
+                >
+                  <LinkedIn className="text-branding-dark h-5 w-5" />
+                </Link>
+              </li>
+
+              {/* X */}
+              <li>
+                <Link
+                  href={`https://x.com/intent/tweet?text=${encodeURIComponent(`Lees: ${post.metadata.title} via ${constants.WEBSITE_URL}/help/artikel/${post.slug}`)}`}
+                  title="Deel via X"
+                  target="_blank"
+                >
+                  <X className="text-branding-dark h-5 w-5" />
+                </Link>
+              </li>
+
+              {/* Copy link */}
+              <li>
+                <CopyToClipboard
+                  copyValue={`${constants.WEBSITE_URL}/help/artikel/${post.slug}`}
+                >
+                  <LinkIcon className="h-5 w-5 text-branding-dark" />
+                </CopyToClipboard>
+              </li>
+
+              {/* Print */}
+              <li>
+                <PrintPage>
+                  <PrinterIcon className="h-5 w-5 text-branding-dark" />
+                </PrintPage>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
