@@ -1,7 +1,7 @@
 import PageHero from "../_components/style/page-hero";
 import SearchClient from "./_components/search-client";
 
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
 
 export default async function Layout({ children }: PropsWithChildren) {
@@ -13,7 +13,7 @@ export default async function Layout({ children }: PropsWithChildren) {
   return (
     <main className="flex flex-col items-center">
       <PageHero>
-        <div className="px-4 lg:px-16 max-w-screen-lg w-full mx-auto">
+        <div className="max-w-screen-lg w-full container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold lg:text-4xl xl:text-5xl text-white">
             Hoe kunnen we helpen?
           </h2>
@@ -22,7 +22,9 @@ export default async function Layout({ children }: PropsWithChildren) {
           </div>
         </div>
       </PageHero>
-      {children}
+      <div className="min-h-72 pt-16 pb-16 lg:pb-32 w-full -mb-32 flex flex-col gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-lg">
+        {children}
+      </div>
     </main>
   );
 }
