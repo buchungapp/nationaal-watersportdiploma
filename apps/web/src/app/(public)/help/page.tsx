@@ -35,7 +35,7 @@ export default async function Page() {
 
   return (
     <div className="min-h-72 pt-16 pb-16 lg:pb-32 w-full -mb-32 flex flex-col items-center justify-center gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-lg">
-      <div className="grid break-inside-avoid gap-2 max-w-2xl rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full">
+      <div className="grid break-inside-avoid gap-2 max-w-2xl rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full ring-1 ring-zinc-900/10">
         <h2 className="text-lg font-semibold px-4">Populaire artikelen</h2>
         <ul className="space-y-3.5">
           {articles
