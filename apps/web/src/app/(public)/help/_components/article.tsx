@@ -63,7 +63,7 @@ function createHeading(level: number) {
           {
             href: `#${slug}`,
             key: `link-${slug}`,
-            className: "anchor text-gray-900",
+            className: "anchor text-gray-800",
           },
           children,
         ),

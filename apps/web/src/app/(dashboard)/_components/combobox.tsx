@@ -204,51 +204,41 @@ export function ComboboxOption<T>({
 
   return (
     <HeadlessComboboxOption as={Fragment} {...props}>
-      {({}) => {
-        // if (!selected) {
-        //   return (
-        //     <div className={clsx(className, sharedClasses)}>{children}</div>
-        //   );
-        // }
+      <div
+        className={clsx(
+          // Basic layout
+          "group/option grid cursor-default grid-cols-[theme(spacing.5),1fr] items-baseline gap-x-1.5 rounded-lg py-2.5 pl-2.5 pr-3.5 sm:grid-cols-[theme(spacing.4),1fr] sm:py-1.5 sm:pl-2 sm:pr-3",
 
-        return (
-          <div
-            className={clsx(
-              // Basic layout
-              "group/option grid cursor-default grid-cols-[theme(spacing.5),1fr] items-baseline gap-x-1.5 rounded-lg py-2.5 pl-2.5 pr-3.5 sm:grid-cols-[theme(spacing.4),1fr] sm:py-1.5 sm:pl-2 sm:pr-3",
+          // Typography
+          "text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white forced-colors:text-[CanvasText]",
 
-              // Typography
-              "text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white forced-colors:text-[CanvasText]",
+          // Focus
+          "outline-none data-[focus]:bg-blue-500 data-[focus]:text-white",
 
-              // Focus
-              "outline-none data-[focus]:bg-blue-500 data-[focus]:text-white",
+          // Forced colors mode
+          "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText]",
 
-              // Forced colors mode
-              "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText]",
-
-              // Disabled
-              "data-[disabled]:opacity-50",
-            )}
-          >
-            <svg
-              className="relative hidden size-5 self-center stroke-current group-data-[selected]/option:inline sm:size-4"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M4 8.5l3 3L12 4"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <span className={clsx(className, sharedClasses, "col-start-2")}>
-              {children}
-            </span>
-          </div>
-        );
-      }}
+          // Disabled
+          "data-[disabled]:opacity-50",
+        )}
+      >
+        <svg
+          className="relative hidden size-5 self-center stroke-current group-data-[selected]/option:inline sm:size-4"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M4 8.5l3 3L12 4"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className={clsx(className, sharedClasses, "col-start-2")}>
+          {children}
+        </span>
+      </div>
     </HeadlessComboboxOption>
   );
 }

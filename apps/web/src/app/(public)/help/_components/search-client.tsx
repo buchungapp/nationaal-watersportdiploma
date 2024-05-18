@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
-
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import {
   Combobox,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
+  Transition,
 } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
@@ -14,9 +16,16 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Fuse from "fuse.js";
+import FlexSearch from "flexsearch";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
+import {
+  Fragment,
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 export default function SearchClient({
   questions,
@@ -47,27 +56,47 @@ export default function SearchClient({
   const router = useRouter();
   const posthog = usePostHog();
 
-  const fuse = useMemo(
-    () =>
-      new Fuse(questions, {
-        includeMatches: true,
-        keys: ["metadata.question"],
-        minMatchCharLength: 2,
-        ignoreLocation: true,
-      }),
-    [questions],
-  );
+  const index = useMemo(() => {
+    return new FlexSearch.Document({
+      tokenize: "full",
+      document: {
+        id: "url",
+        index: "content",
+        store: ["title", "type"],
+      },
+      context: {
+        resolution: 9,
+        depth: 2,
+        bidirectional: true,
+      },
+    });
+  }, []);
 
-  const articlesFuse = useMemo(
-    () =>
-      new Fuse(articles, {
-        includeMatches: true,
-        keys: ["metadata.title"],
-        minMatchCharLength: 2,
-        ignoreLocation: true,
-      }),
-    [articles],
-  );
+  useEffect(() => {
+    articles.forEach((article) => {
+      index.add({
+        url: article.slug,
+        title: article.metadata.title,
+        type: "article",
+        content: [
+          article.metadata.title,
+          article.metadata.summary,
+          article.content,
+        ].join("\\n"),
+      });
+    });
+  }, [articles]);
+
+  useEffect(() => {
+    questions.forEach((question) => {
+      index.add({
+        url: question.slug,
+        title: question.metadata.question,
+        type: "question",
+        content: [question.metadata.question, question.content].join("\\n"),
+      });
+    });
+  }, [questions]);
 
   useEffect(() => {
     posthog.capture("searched_faq", {
@@ -75,101 +104,106 @@ export default function SearchClient({
     });
   }, [deferredQuery]);
 
-  const filteredQuestions = query === "" ? [] : fuse.search(deferredQuery);
-  const filteredArticles =
-    query === "" ? [] : articlesFuse.search(deferredQuery);
+  const filteredArticles = useMemo(() => {
+    if (query === "") return [];
+
+    const searchResult = index.search(query, { enrich: true });
+
+    if (searchResult.length === 0) return [];
+
+    return searchResult[0]!.result.map(
+      // @ts-expect-error Type does not account for the enrich option
+      (article: {
+        id: string;
+        doc: { type: "article" | "question"; title: string };
+      }) => {
+        return {
+          url:
+            article.doc.type === "article"
+              ? `/help/artikel/${article.id}`
+              : `/help/veelgestelde-vragen/${article.id}`,
+          title: article.doc.title,
+          type: article.doc.type,
+        };
+      },
+    );
+  }, [query, articles, index]);
 
   return (
     <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded bg-white ring-1 ring-branding-light ring-opacity-95 transition-all">
       <Combobox
-        onChange={(
-          value:
-            | ({ type: "question" } & (typeof questions)[number])
-            | ({ type: "article" } & (typeof articles)[number])
-            | undefined,
-        ) => {
+        multiple={false}
+        onChange={(value: { url: string }) => {
           if (!value) return;
 
-          if (value.type === "article") {
-            router.push(`/help/artikel/${value.slug}`);
-            return;
-          }
-
-          router.push(`/help/veelgestelde-vragen/${value.slug}`);
+          router.push(value.url);
         }}
       >
-        {({ open }) => (
-          <>
-            <div className="relative">
-              <MagnifyingGlassIcon
-                className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-500 md:top-3 md:h-6 md:w-6"
-                aria-hidden="true"
-              />
-              <ComboboxInput
-                //   We can't have a smaller font on mobile, because iOS Safari would zoom in on the input
-                className="h-10 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-500 focus:ring-0 sm:text-sm md:h-12 md:pl-12 lg:pl-14 lg:text-lg"
-                placeholder="Typ een vraag, onderwerp of trefwoord.."
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </div>
+        <div className="relative">
+          <MagnifyingGlassIcon
+            className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-500 md:top-3 md:h-6 md:w-6"
+            aria-hidden="true"
+          />
+          <ComboboxInput
+            //   We can't have a smaller font on mobile, because iOS Safari would zoom in on the input
+            className="h-10 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-500 focus:ring-0 sm:text-sm md:h-12 md:pl-12 lg:pl-14 lg:text-lg"
+            placeholder="Typ een vraag, onderwerp of trefwoord.."
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
 
-            {open && query !== "" ? (
-              <div className="absolute inset-x-0 top-12 max-h-72 scroll-py-2 overflow-y-auto bg-white py-2 text-sm text-gray-800 shadow-sm ring-1 ring-black ring-opacity-5 lg:text-base">
-                {filteredQuestions.length > 0 || filteredArticles.length > 0 ? (
-                  <ComboboxOptions>
-                    {filteredArticles.map((fuse) => {
-                      return (
-                        <ComboboxOption
-                          key={fuse.item.slug}
-                          value={{
-                            type: "article",
-                            ...fuse.item,
-                          }}
-                          className={({ active }) =>
-                            clsx(
-                              "cursor-default select-none px-4 py-2 flex gap-1",
-                              active && "bg-branding-light text-white",
-                            )
-                          }
-                        >
-                          <NewspaperIcon className="w-6 h-6 shrink-0" />{" "}
-                          {fuse.item.metadata.title}
-                        </ComboboxOption>
-                      );
-                    })}
-                    {filteredQuestions.map((fuse) => {
-                      return (
-                        <ComboboxOption
-                          key={fuse.item.slug}
-                          value={{
-                            type: "question",
-                            ...fuse.item,
-                          }}
-                          className={({ active }) =>
-                            clsx(
-                              "cursor-default select-none px-4 py-2 flex gap-1",
-                              active && "bg-branding-light text-white",
-                            )
-                          }
-                        >
-                          <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" />{" "}
-                          {fuse.item.metadata.question}
-                        </ComboboxOption>
-                      );
-                    })}
-                  </ComboboxOptions>
-                ) : null}
+        <Transition
+          as={Fragment}
+          leave="transition-opacity duration-100 ease-in pointer-events-none"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <ComboboxOptions
+            as="div"
+            anchor={{
+              to: "bottom start",
+              gap: "var(--anchor-gap)",
+              offset: "var(--anchor-offset)",
+              padding: "var(--anchor-padding)",
+            }}
+            className={clsx(
+              // Anchor positioning
+              "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
 
-                {filteredQuestions.length === 0 &&
-                filteredArticles.length === 0 ? (
-                  <p className="px-4 py-2 text-sm text-gray-500 lg:text-base">
-                    Geen resultaten gevonden.
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-          </>
-        )}
+              // Base styles
+              "isolate w-max min-w-[calc(var(--button-width)+var(--input-width)+1.75rem)] empty:hidden select-none scroll-py-1 rounded-xl p-1",
+
+              // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+              "outline outline-1 outline-transparent focus:outline-none",
+
+              // Handle scrolling when menu won't fit in viewport
+              "overflow-y-scroll overscroll-contain",
+
+              // Popover background
+              "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
+
+              // Shadows
+              "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
+            )}
+          >
+            {filteredArticles.map((article) => {
+              return (
+                <ComboboxOption
+                  key={article.url}
+                  value={article}
+                  className="cursor-default select-none px-4 py-2 flex gap-1 data-[active]:bg-branding-light data-[active]:text-white"
+                >
+                  {article.type === "article" ? (
+                    <NewspaperIcon className="w-6 h-6 shrink-0" />
+                  ) : (
+                    <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" />
+                  )}
+                  {article.title}
+                </ComboboxOption>
+              );
+            })}
+          </ComboboxOptions>
+        </Transition>
       </Combobox>
     </div>
   );

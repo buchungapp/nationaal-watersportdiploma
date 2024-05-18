@@ -129,7 +129,7 @@ export default async function Page({ params }: Props) {
               </p>
             </div>
 
-            <div className="flex items-center gap-x-4 text-gray-400">
+            <div className="flex items-center gap-x-4 text-gray-500">
               <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
               <span className="flex gap-x-1.5">
                 <p>Laatste update</p>
