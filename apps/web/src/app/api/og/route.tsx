@@ -437,7 +437,7 @@ export async function GET(request: Request) {
             {!!description && (
               <div
                 style={{
-                  fontSize: 24,
+                  fontSize: 30,
                   fontStyle: "normal",
                   fontFamily: "Inter",
                   fontWeight: 400,

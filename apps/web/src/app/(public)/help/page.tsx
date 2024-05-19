@@ -23,6 +23,14 @@ export async function generateMetadata(
       description:
         "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
       url: "/help",
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent("Helpcentrum")}&description=${encodeURIComponent("Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.")}`,
+          width: 1200,
+          height: 630,
+          alt: "Helpcentrum",
+        },
+      ],
     },
   };
 }
