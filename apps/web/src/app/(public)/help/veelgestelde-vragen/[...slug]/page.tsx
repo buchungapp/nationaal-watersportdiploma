@@ -4,6 +4,7 @@ import { marked } from "marked";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { FindNWDCourse } from "~/app/(public)/_components/cta";
 import { Prose } from "~/app/(public)/_components/prose";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { getHelpFaqs } from "~/lib/article-2";
@@ -150,6 +151,8 @@ export default async function Page({ params }: Props) {
         </div>
         <ChevronRightIcon className="h-6 w-6 ml-6 text-gray-500" />
       </Link>
+
+      <FindNWDCourse />
     </>
   );
 }

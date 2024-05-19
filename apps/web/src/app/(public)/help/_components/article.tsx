@@ -64,7 +64,7 @@ function createHeading(level: number) {
           {
             href: `#${slug}`,
             key: `link-${slug}`,
-            className: "anchor text-gray-800",
+            className: "anchor text-gray-800 break-words hyphens-auto",
           },
           children,
         ),
@@ -99,7 +99,7 @@ const components = {
 
 export function HelpArticle(props: any) {
   return (
-    <div className="text-justify">
+    <div className="">
       <MDXRemote
         {...props}
         components={{ ...components, ...(props.components || {}) }}

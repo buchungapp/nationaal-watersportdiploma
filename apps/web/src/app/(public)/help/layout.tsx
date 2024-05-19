@@ -22,7 +22,7 @@ export default async function Layout({ children }: PropsWithChildren) {
           </div>
         </div>
       </PageHero>
-      <div className="min-h-72 pt-16 pb-16 lg:pb-32 w-full -mb-32 flex flex-col gap-y-8 container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+      <div className="min-h-72 pt-16 pb-16 lg:pb-32 w-full -mb-32 flex flex-col gap-y-8 container overflow-x-hidden mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
         {children}
       </div>
     </main>
