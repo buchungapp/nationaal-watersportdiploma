@@ -214,7 +214,15 @@ export const list = withZod(
       .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
       .innerJoin(
         s.actor,
-        and(eq(s.actor.personId, s.person.id), isNull(s.actor.deletedAt)),
+        and(
+          eq(s.actor.personId, s.person.id),
+          isNull(s.actor.deletedAt),
+          !!input.filter.locationId
+            ? Array.isArray(input.filter.locationId)
+              ? inArray(s.actor.locationId, input.filter.locationId)
+              : eq(s.actor.locationId, input.filter.locationId)
+            : undefined,
+        ),
       )
       .where(and(...conditions))
       .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
