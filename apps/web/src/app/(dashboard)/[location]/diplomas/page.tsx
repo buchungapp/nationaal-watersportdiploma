@@ -1,5 +1,8 @@
 import Fuse from "fuse.js";
-import { listCertificates, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listCertificatesByLocation,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import Search from "../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
@@ -14,7 +17,7 @@ export default async function Page({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const location = await retrieveLocationByHandle(params.location);
-  const certificates = await listCertificates(location.id);
+  const certificates = await listCertificatesByLocation(location.id);
 
   // Search
   const certificatesFuse = new Fuse(certificates, {
