@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -88,14 +89,16 @@ export async function createPersonBulk(
 
   revalidatePath("/[location]/personen", "page");
 
-  const rowsWithError = result.filter((result) => result.status === "rejected");
+  const rowsWithError = result.filter(
+    (result): result is PromiseRejectedResult => result.status === "rejected",
+  );
 
   if (rowsWithError.length > 0) {
     return {
       message: "Error",
       errors: `
         ${rowsWithError.length} rows failed to import.
-        ${rowsWithError.map((result) => result.status === "rejected" && result.reason).join("\n")}
+        ${rowsWithError.map((result) => result.reason).join("\n")}
       `,
     };
   }
