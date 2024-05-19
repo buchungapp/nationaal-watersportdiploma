@@ -17,6 +17,7 @@ const DialogContext = createContext<{
   setIsOpen: Dispatch<SetStateAction<"single" | "bulk" | null>>;
 }>({
   isOpen: null,
+  //   eslint-disable-next-line @typescript-eslint/no-empty-function
   setIsOpen: () => {},
 });
 
