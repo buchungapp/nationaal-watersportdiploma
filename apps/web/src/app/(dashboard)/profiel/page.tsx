@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { listLocationsForPerson } from "~/lib/nwd";
 
-export default function Page() {
+export default async function Page() {
+  const locations = await listLocationsForPerson();
+
   return (
     <div className="p-4 prose max-w-prose mx-auto">
       <p>
@@ -20,6 +23,21 @@ export default function Page() {
           </Link>
         </li>
       </ul>
+
+      {locations.length > 0 ? (
+        <>
+          <h2>Beheer locatie</h2>
+          <ul>
+            {locations.map((location) => (
+              <li key={location.id}>
+                <Link href={`/${location.handle}/personen`}>
+                  {location.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </div>
   );
 }

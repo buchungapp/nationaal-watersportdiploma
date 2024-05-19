@@ -27,34 +27,27 @@ import { createPerson } from "../_actions/create";
 interface Props {
   locationId: string;
   countries: { code: string; name: string }[];
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
 }
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <CreateDialog
       key={String(forceRerenderId.current)}
       {...props}
-      isOpen={isOpen}
+      isOpen={props.isOpen}
       setIsOpen={(next) => {
-        setIsOpen(next);
+        props.setIsOpen(next);
         forceRerenderId.current += 1;
       }}
     />
   );
 }
 
-function CreateDialog({
-  locationId,
-  isOpen,
-  setIsOpen,
-  countries,
-}: Props & {
-  isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
-}) {
+function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await createPerson(locationId, prevState, formData);
 
@@ -82,14 +75,6 @@ function CreateDialog({
 
   return (
     <>
-      <Button
-        color="branding-dark"
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className={"whitespace-nowrap"}
-      >
-        Persoon toevoegen
-      </Button>
       <Dialog open={isOpen} onClose={setIsOpen}>
         <DialogTitle>Persoon toevoegen</DialogTitle>
         <DialogDescription>

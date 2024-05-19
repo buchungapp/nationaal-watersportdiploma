@@ -262,6 +262,27 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
   });
 });
 
+export const listLocationsForPerson = cache(async (personId?: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    if (personId && person.id !== personId) {
+      throw new Error("Person not found for user");
+    }
+
+    const locations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
+
+    return await Location.list().then((locs) =>
+      locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+    );
+  });
+});
+
 export const createPersonForLocation = async (
   locationId: string,
   personInput: {
