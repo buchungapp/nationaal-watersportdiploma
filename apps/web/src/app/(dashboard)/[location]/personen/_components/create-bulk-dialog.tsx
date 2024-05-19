@@ -1,6 +1,6 @@
 "use client";
 import dayjs from "dayjs";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { ZodError, z } from "zod";
@@ -33,34 +33,27 @@ import { createPersonBulk } from "../_actions/create";
 interface Props {
   locationId: string;
   countries: { code: string; name: string }[];
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
 }
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <CreateDialog
       key={String(forceRerenderId.current)}
       {...props}
-      isOpen={isOpen}
+      isOpen={props.isOpen}
       setIsOpen={(next) => {
-        setIsOpen(next);
+        props.setIsOpen(next);
         forceRerenderId.current += 1;
       }}
     />
   );
 }
 
-function CreateDialog({
-  locationId,
-  isOpen,
-  setIsOpen,
-  countries,
-}: Props & {
-  isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
-}) {
+function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   const submit = async (
     prevState:
       | {
@@ -210,14 +203,6 @@ function CreateDialog({
 
   return (
     <>
-      <Button
-        color="branding-dark"
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className={"whitespace-nowrap"}
-      >
-        Persoon toevoegen (bulk)
-      </Button>
       <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
         <DialogTitle>Personen toevoegen (bulk)</DialogTitle>
         <DialogDescription>
