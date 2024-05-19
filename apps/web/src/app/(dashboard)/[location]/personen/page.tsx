@@ -5,7 +5,7 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import Search from "../_components/search";
-import CreateDialog from "./_components/create-dialog";
+import CreateDialog from "./_components/create-bulk-dialog";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 

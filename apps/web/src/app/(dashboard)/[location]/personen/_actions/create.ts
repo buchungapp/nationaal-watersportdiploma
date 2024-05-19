@@ -67,3 +67,41 @@ export async function createPerson(
     };
   }
 }
+
+export async function createPersonBulk(
+  locationId: string,
+  persons: {
+    email: string;
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string;
+    dateOfBirth: Date;
+    birthCity: string;
+    birthCountry: string;
+  }[],
+) {
+  const result = await Promise.allSettled(
+    persons.map(async (row) => {
+      await createPersonForLocation(locationId, row);
+    }),
+  );
+
+  revalidatePath("/[location]/personen", "page");
+
+  const rowsWithError = result.filter((result) => result.status === "rejected");
+
+  if (rowsWithError.length > 0) {
+    return {
+      message: "Error",
+      errors: `
+        ${rowsWithError.length} rows failed to import.
+        ${rowsWithError.map((result) => result.status === "rejected" && result.reason).join("\n")}
+      `,
+    };
+  }
+
+  return {
+    message: "Success",
+    errors: {},
+  };
+}
