@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
+import { FindNWDCourse } from "~/app/(public)/_components/cta";
 import PrintPage from "~/app/(public)/_components/print-page";
 import { Prose } from "~/app/(public)/_components/prose";
 import {
@@ -227,6 +228,8 @@ export default async function Page({ params }: Props) {
           </div>
         </div>
       </div>
+
+      <FindNWDCourse />
     </>
   );
 }
