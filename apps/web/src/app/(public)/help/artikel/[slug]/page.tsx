@@ -101,30 +101,30 @@ export default async function Page({ params }: Props) {
         }}
       />
 
+      <Breadcrumb
+        items={[
+          { label: "Alle categorieën", href: "/help" },
+          {
+            label:
+              categories.find((x) => x.slug === post.category)?.title ??
+              post.category,
+            href: `/help/categorie/${post.category}`,
+          },
+          {
+            label: post.metadata.title,
+            href: `/help/artikel/${post.slug}`,
+          },
+        ]}
+      />
+
       <div className="grid lg:grid-cols-3 gap-x-8 gap-y-6">
         <div className="lg:col-span-2">
-          <Breadcrumb
-            items={[
-              { label: "Alle categorieën", href: "/help" },
-              {
-                label:
-                  categories.find((x) => x.slug === post.category)?.title ??
-                  post.category,
-                href: `/help/categorie/${post.category}`,
-              },
-              {
-                label: post.metadata.title,
-                href: `/help/artikel/${post.slug}`,
-              },
-            ]}
-          />
-
           <article className="flex flex-col gap-y-10">
             <div className="">
-              <h1 className="text-3xl font-bold lg:text-4xl text-branding-dark">
+              <h1 className="text-3xl font-bold lg:text-4xl text-branding-dark break-words hyphens-auto">
                 {post.metadata.title}
               </h1>
-              <p className="text-lg/6 text-gray-800 mt-4 text-justify">
+              <p className="text-lg/6 text-gray-800 mt-4 text-justify break-words hyphens-auto">
                 {post.metadata.summary}
               </p>
             </div>
