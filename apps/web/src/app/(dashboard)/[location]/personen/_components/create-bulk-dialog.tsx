@@ -146,9 +146,13 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
         z.string().pipe(z.coerce.date()),
         z.string(),
         z
-          .string()
-          .length(2)
-          .catch(() => "nl"),
+          .preprocess(
+            (value) => (value === "" ? "nl" : value),
+            z.enum(countries.map((c) => c.code) as [string, ...string[]], {
+              message: "Ongeldige landcode",
+            }),
+          )
+          .default("nl"),
       ]);
 
       const rows = personRowSchema.array().parse(data);
