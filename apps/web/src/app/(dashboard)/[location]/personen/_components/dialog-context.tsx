@@ -1,5 +1,6 @@
 "use client";
 
+import { usePostHog } from "posthog-js/react";
 import {
   Dispatch,
   PropsWithChildren,
@@ -23,9 +24,17 @@ const DialogContext = createContext<{
 
 export function DialogWrapper({ children }: PropsWithChildren) {
   const [isOpen, setIsOpen] = useState<"single" | "bulk" | null>(null);
-
+  const posthog = usePostHog();
   return (
-    <DialogContext.Provider value={{ isOpen, setIsOpen }}>
+    <DialogContext.Provider
+      value={{
+        isOpen,
+        setIsOpen: (newValue) => {
+          posthog.capture("Create Person Dialog Opened", { type: newValue });
+          setIsOpen(newValue);
+        },
+      }}
+    >
       {children}
     </DialogContext.Provider>
   );
