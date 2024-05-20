@@ -1,11 +1,14 @@
 "use client";
 
+import type { Session } from "@supabase/supabase-js";
 import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
-import { PostHogProvider } from "posthog-js/react";
+import { PostHogProvider, usePostHog } from "posthog-js/react";
+import type { PropsWithChildren } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
+import { supabaseBrowser } from "~/lib/supabase/client";
 
 if (typeof window !== "undefined") {
   const currentUrl = new URL(BASE_URL);
@@ -48,7 +51,46 @@ export function useIsSticky() {
 }
 
 export function CommonProviders({ children }: { children: React.ReactNode }) {
-  return <PHProvider>{children}</PHProvider>;
+  return (
+    <PHProvider>
+      <SessionProvider>{children}</SessionProvider>
+    </PHProvider>
+  );
+}
+
+const SessionContext = createContext<{
+  session: Session | null;
+}>({ session: null });
+
+function SessionProvider({ children }: PropsWithChildren) {
+  const [session, setSession] = useState<Session | null>(null);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabaseBrowser.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        posthog.reset();
+      } else if (session) {
+        setSession(session);
+        posthog.identify(session.user.id, {
+          email: session.user.email,
+        });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return (
+    <SessionContext.Provider value={{ session }}>
+      {children}
+    </SessionContext.Provider>
+  );
 }
 
 export function MarketingProviders({

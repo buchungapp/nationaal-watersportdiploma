@@ -16,6 +16,7 @@ import { notFound, redirect } from "next/navigation";
 import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
+import posthog from "./posthog";
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
   assert.strictEqual(user.persons.length, 1, "Expected exactly one person");
@@ -339,6 +340,14 @@ export const createPersonForLocation = async (
       personId: person.id,
     });
 
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "create_person_for_location",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+      },
+    });
+
     return person;
   });
 };
@@ -395,6 +404,14 @@ export const createCompletedCertificate = async (
       await Student.Certificate.completeCertificate({
         certificateId,
         visibleFrom: new Date().toISOString(),
+      });
+
+      posthog.capture({
+        distinctId: authUser.authUserId,
+        event: "create_completed_certificate",
+        properties: {
+          $set: { email: authUser.email, displayName: authUser.displayName },
+        },
       });
 
       return { id: certificateId };
