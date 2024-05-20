@@ -1,21 +1,14 @@
 "use client";
 
+import type { Session } from "@supabase/supabase-js";
 import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
-import { PostHogProvider } from "posthog-js/react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { PostHogProvider, usePostHog } from "posthog-js/react";
+import type { PropsWithChildren } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
-
-function usePrevious<T>(value: T) {
-  const ref = useRef<T>();
-
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref.current;
-}
+import { supabaseBrowser } from "~/lib/supabase/client";
 
 if (typeof window !== "undefined") {
   const currentUrl = new URL(BASE_URL);
@@ -25,7 +18,6 @@ if (typeof window !== "undefined") {
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     api_host: `${currentUrl.toString().replace(/\/$/, "")}`,
     capture_pageview: false, // Disable automatic pageview capture, as we capture manually
-    persistence: "memory", // Don't use cookies so we avoid the cookie consent banner
   });
 }
 
@@ -34,22 +26,15 @@ function PHProvider({ children }: { children: React.ReactNode }) {
 }
 
 const AppContext = createContext<{
-  previousPathname?: string;
   isMobileMenuOpen: boolean;
   setMobileMenuOpen: (open?: boolean) => void;
   scrollPosition: number;
 }>({
   isMobileMenuOpen: false,
-  previousPathname: undefined,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setMobileMenuOpen: () => {},
   scrollPosition: 0,
 });
-
-export function useHasPreviousPathname() {
-  const { previousPathname } = useContext(AppContext);
-  return !!previousPathname;
-}
 
 export function useMobileMenuState() {
   const { isMobileMenuOpen, setMobileMenuOpen } = useContext(AppContext);
@@ -66,7 +51,46 @@ export function useIsSticky() {
 }
 
 export function CommonProviders({ children }: { children: React.ReactNode }) {
-  return <PHProvider>{children}</PHProvider>;
+  return (
+    <PHProvider>
+      <SessionProvider>{children}</SessionProvider>
+    </PHProvider>
+  );
+}
+
+const SessionContext = createContext<{
+  session: Session | null;
+}>({ session: null });
+
+function SessionProvider({ children }: PropsWithChildren) {
+  const [session, setSession] = useState<Session | null>(null);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabaseBrowser.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        posthog.reset();
+      } else if (session) {
+        setSession(session);
+        posthog.identify(session.user.id, {
+          email: session.user.email,
+        });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return (
+    <SessionContext.Provider value={{ session }}>
+      {children}
+    </SessionContext.Provider>
+  );
 }
 
 export function MarketingProviders({
@@ -75,8 +99,16 @@ export function MarketingProviders({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const previousPathname = usePrevious(pathname);
+  const [previousPathname, setPreviousPathname] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  if (pathname !== previousPathname) {
+    if (mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+
+    setPreviousPathname(pathname);
+  }
 
   const [scrollPosition, setScrollPosition] = useState(0);
   const handleScroll = () => {
@@ -85,12 +117,6 @@ export function MarketingProviders({
   };
 
   const isClient = typeof window !== "undefined";
-
-  useEffect(() => {
-    if (pathname !== previousPathname && mobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
-  }, [pathname, previousPathname, mobileMenuOpen]);
 
   useEffect(() => {
     if (!isClient) return;
@@ -105,7 +131,6 @@ export function MarketingProviders({
   return (
     <AppContext.Provider
       value={{
-        previousPathname,
         isMobileMenuOpen: mobileMenuOpen,
         setMobileMenuOpen: (newState) => {
           if (newState === undefined) {

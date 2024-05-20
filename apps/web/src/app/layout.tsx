@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { BASE_URL } from "~/constants";
 
+import Analytics from "./_components/analytics";
 import { CommonProviders } from "./_components/providers";
 import "./globals.css";
 
@@ -59,10 +60,13 @@ export default function RootLayout({
       )}
     >
       <body className="h-full">
-        <CommonProviders>{children}</CommonProviders>
-        <Toaster richColors />
+        <CommonProviders>
+          {children}
 
-        <SpeedInsights />
+          <Toaster richColors />
+          <SpeedInsights />
+          <Analytics />
+        </CommonProviders>
       </body>
     </html>
   );

@@ -10,6 +10,7 @@ const nextConfig = {
     outputFileTracingIncludes: {
       "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
     },
+    instrumentationHook: true,
   },
   transpilePackages: ["next-mdx-remote"],
   async redirects() {
