@@ -6,8 +6,7 @@ import {
 import clsx from "clsx";
 import Link from "next/link";
 import type { ComponentProps } from "react";
-
-import BackButton from "../back-button";
+import BackButton from "./back-button";
 
 export function BoxedButton({
   className,
@@ -96,28 +95,6 @@ export function BoxedBackButton({
       {children}
       <ArrowLongRightIcon
         className="h-5 w-5 transition-transform group-hover:translate-x-1"
-        strokeWidth={2.5}
-      />
-    </BackButton>
-  );
-}
-
-export function TekstBackButton({
-  className,
-  children,
-  ...props
-}: ComponentProps<"button">) {
-  return (
-    <BackButton
-      {...props}
-      className={clsx(
-        "group flex w-fit items-center gap-1 font-semibold",
-        className,
-      )}
-    >
-      {children}
-      <ArrowRightIcon
-        className="h-4 w-4 transition-transform group-hover:translate-x-1"
         strokeWidth={2.5}
       />
     </BackButton>
