@@ -1,13 +1,13 @@
+import { MenuButton } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { logout } from "~/app/_actions/auth";
 import { getUserOrThrow } from "~/lib/nwd";
 import { Avatar } from "../../_components/avatar";
 import {
   Dropdown,
+  DropdownDivider,
   DropdownItem,
   DropdownMenu,
-  DropdownSeparator,
-  HeadlessMenuButton,
 } from "../../_components/dropdown";
 
 export async function UserSelector() {
@@ -15,7 +15,7 @@ export async function UserSelector() {
 
   return (
     <Dropdown>
-      <HeadlessMenuButton
+      <MenuButton
         className="flex items-center w-full gap-3 rounded-xl border border-transparent py-1 data-[active]:border-zinc-200 data-[hover]:border-zinc-200 dark:data-[active]:border-zinc-700 dark:data-[hover]:border-zinc-700"
         aria-label="Account options"
       >
@@ -33,9 +33,9 @@ export async function UserSelector() {
           </span>
         </span>
         <ChevronUpDownIcon className="ml-auto mr-1 size-4 shrink-0 stroke-zinc-400" />
-      </HeadlessMenuButton>
+      </MenuButton>
       <DropdownMenu className="min-w-[--button-width] z-50">
-        <DropdownSeparator />
+        <DropdownDivider />
         <DropdownItem href="/profiel">Profiel</DropdownItem>
         <DropdownItem onClick={logout}>Uitloggen</DropdownItem>
       </DropdownMenu>

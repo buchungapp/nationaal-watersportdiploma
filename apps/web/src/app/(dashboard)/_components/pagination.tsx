@@ -106,6 +106,7 @@ export function PaginationPage({
     <Button
       href={href}
       plain
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       aria-label={`Page ${children}`}
       aria-current={current ? "page" : undefined}
       className={clsx(

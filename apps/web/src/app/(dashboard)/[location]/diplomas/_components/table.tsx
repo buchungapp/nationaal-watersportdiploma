@@ -205,9 +205,10 @@ export default function CertificateTable({
                 <TableCell
                   key={cell.id}
                   className={clsx(cell.column.columnDef.meta?.align)}
-                  suppressLinkBehavior={
-                    cell.column.columnDef.meta?.suppressLinkBehavior
-                  }
+                  // TODO: re-enable when we have a proper solution for this
+                  // suppressLinkBehavior={
+                  //   cell.column.columnDef.meta?.suppressLinkBehavior
+                  // }
                 >
                   {index === 0 && row.getIsSelected() && (
                     <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />

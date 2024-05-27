@@ -24,14 +24,7 @@
       "~/*": ["./src/*"]
     }
   },
-  "references": [
-    {
-      "path": "../../packages/lib"
-    },
-    {
-      "path": "../../packages/core"
-    }
-  ],
+
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
