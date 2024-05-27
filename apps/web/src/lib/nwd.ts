@@ -19,9 +19,9 @@ import "server-only";
 import posthog from "./posthog";
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
-  assert.strictEqual(user.persons.length, 1, "Expected exactly one person");
+  assert(user.persons.length < 1, "Expected at most one person per user");
 
-  return user.persons[0]!;
+  return user.persons[0] ?? null;
 }
 
 async function makeRequest<T>(cb: () => Promise<T>) {
@@ -63,10 +63,9 @@ export const getUserOrThrow = cache(async () => {
   const { user: authUser } = userResponse.data;
 
   return makeRequest(async () => {
-    const [userData, persons] = await Promise.all([
-      User.fromId(authUser.id),
-      User.Person.list({ filter: { userId: authUser.id } }),
-    ]);
+    const userData = await User.fromId(authUser.id);
+    // We can't run this in parallel, because fromId will create the user if it doesn't exist
+    const persons = await User.Person.list({ filter: { userId: authUser.id } });
 
     if (!userData) {
       throw new Error("User not found");
@@ -106,6 +105,8 @@ export const listCertificates = cache(async (locationId: string) => {
 
     const person = extractPerson(user);
 
+    if (!person) return [];
+
     const availableLocations = await User.Person.listLocations({
       personId: person.id,
       roles: ["location_admin"],
@@ -128,6 +129,8 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
     const user = await getUserOrThrow();
 
     const person = extractPerson(user);
+
+    if (!person) return [];
 
     const availableLocations = await User.Person.listLocations({
       personId: person.id,
@@ -227,6 +230,10 @@ export const retrieveLocationByHandle = cache(async (handle: string) => {
 
     const person = extractPerson(user);
 
+    if (!person) {
+      throw new Error("Person not found for user");
+    }
+
     const availableLocations = await User.Person.listLocations({
       personId: person.id,
       roles: ["location_admin"],
@@ -248,6 +255,10 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 
     const person = extractPerson(user);
 
+    if (!person) {
+      throw new Error("Person not found for user");
+    }
+
     const availableLocations = await User.Person.listLocations({
       personId: person.id,
       roles: ["location_admin"],
@@ -268,6 +279,10 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
     const user = await getUserOrThrow();
 
     const person = extractPerson(user);
+
+    if (!person) {
+      return [];
+    }
 
     if (personId && person.id !== personId) {
       throw new Error("Person not found for user");
@@ -300,6 +315,10 @@ export const createPersonForLocation = async (
     const authUser = await getUserOrThrow();
 
     const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
 
     const availableLocations = await User.Person.listLocations({
       personId: authPerson.id,
@@ -370,6 +389,10 @@ export const createCompletedCertificate = async (
       const authUser = await getUserOrThrow();
 
       const authPerson = extractPerson(authUser);
+
+      if (!authPerson) {
+        throw new Error("Person not found for user");
+      }
 
       const availableLocations = await User.Person.listLocations({
         personId: authPerson.id,

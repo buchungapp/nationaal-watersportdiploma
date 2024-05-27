@@ -1,4 +1,4 @@
-import { schema as s } from '@nawadi/db'
+import { schema as s, uncontrolledSchema } from '@nawadi/db'
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -49,19 +49,39 @@ export const getOrCreateFromEmail = withZod(
   },
 )
 
-export const fromId = withZod(
-  uuidSchema,
-  selectSchema.nullable(),
-  async (id) => {
-    const query = useQuery()
+export const fromId = withZod(uuidSchema, selectSchema, async (id) => {
+  const query = useQuery()
 
+  try {
     return (await query
       .select()
       .from(s.user)
       .where(eq(s.user.authUserId, id))
       .then(singleRow)) as any // Metadata does not match the type,  but we have Zod to validate
-  },
-)
+  } catch (error) {
+    if (
+      error instanceof TypeError &&
+      error.message === 'Expected 1 row, got 0'
+    ) {
+      const authUser = await query
+        .select({
+          id: uncontrolledSchema._usersTable.id,
+          email: uncontrolledSchema._usersTable.email,
+        })
+        .from(uncontrolledSchema._usersTable)
+        .where(eq(uncontrolledSchema._usersTable.id, id))
+        .then(singleRow)
+
+      return (await query
+        .insert(s.user)
+        .values({
+          authUserId: authUser.id,
+          email: authUser.email!,
+        })
+        .returning()) as any // Metadata does not match the type,  but we have Zod to validate
+    }
+  }
+})
 
 export const canUserAccessLocation = withZod(
   z.object({

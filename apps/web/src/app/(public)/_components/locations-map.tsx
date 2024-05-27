@@ -54,10 +54,7 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
         locations.forEach(({ geometry }) => bounds.extend(geometry!.location));
         setBounds(bounds);
         map.fitBounds(bounds);
-        console.log("find bounds and fit");
       } else {
-        console.log("bounds exist, fit again");
-
         map.fitBounds(bounds);
       }
     }
