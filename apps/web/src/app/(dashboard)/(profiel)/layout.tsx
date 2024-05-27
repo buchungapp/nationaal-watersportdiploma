@@ -7,7 +7,7 @@ import {
   PlusIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
-import { logout } from "~/app/_actions/auth";
+import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
   Dropdown,
@@ -117,10 +117,10 @@ export default function Layout({
                   <DropdownLabel>Privacybeleid</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
-                <DropdownItem onClick={logout}>
+                <LogOutDropdownItem>
                   <ArrowRightStartOnRectangleIcon />
                   <DropdownLabel>Uitloggen</DropdownLabel>
-                </DropdownItem>
+                </LogOutDropdownItem>
               </DropdownMenu>
             </Dropdown>
           </NavbarSection>

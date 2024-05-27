@@ -19,7 +19,7 @@ import "server-only";
 import posthog from "./posthog";
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
-  assert(user.persons.length < 1, "Expected at most one person per user");
+  assert(user.persons.length <= 1, "Expected at most one person per user");
 
   return user.persons[0] ?? null;
 }
