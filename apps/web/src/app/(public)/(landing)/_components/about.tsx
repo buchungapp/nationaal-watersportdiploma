@@ -22,7 +22,7 @@ export default function About() {
           </Balancer>
         </p>
 
-        <div className="mt-6 flex flex-col md:flex-row items-center gap-x-6 gap-y-4">
+        <div className="mt-6 mx-auto flex flex-col md:flex-row items-center gap-x-6 gap-y-4">
           <BoxedButton href="/" className="text-white bg-branding-light">
             Kwaliteitseisen voor locaties
           </BoxedButton>
