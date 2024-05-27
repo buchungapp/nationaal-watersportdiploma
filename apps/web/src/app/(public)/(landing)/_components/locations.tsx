@@ -1,6 +1,6 @@
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import Double from "~/app/_components/brand/double-line";
-import LocationsMap from "../../_components/locations-map";
+import { LocationsMap } from "../../_components/locations-map";
 import { retrieveLocations } from "../../vaarlocaties/_lib/retrieve-locations";
 
 export default async function Locations() {
@@ -27,12 +27,6 @@ export default async function Locations() {
         <div className="mt-8 flex items-center gap-x-6">
           <BoxedButton href="/vaarlocaties" className="bg-white text-gray-900">
             Bekijk NWD vaarlocaties
-          </BoxedButton>
-          <BoxedButton
-            href="/vaarlocaties/kwaliteitseisen"
-            className="hover:bg-white/10 text-white"
-          >
-            Kwaliteitseisen voor locaties
           </BoxedButton>
         </div>
       </div>
