@@ -36,14 +36,13 @@ export function LocationsMapContainer({ children }: PropsWithChildren) {
   );
 }
 
-const SelectedLocationContext = createContext<{
-  selectedLocation: Location | null;
-  setSelectedLocation: (location: Location | null) => void;
-}>({
-  selectedLocation: null,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setSelectedLocation: () => {},
-});
+const SelectedLocationContext = createContext<
+  | {
+      selectedLocation: Location | null;
+      setSelectedLocation: (location: Location | null) => void;
+    }
+  | undefined
+>(undefined);
 
 function useBounds(map: google.maps.Map | null, locations: Location[]) {
   const [bounds, setBounds] = useState<google.maps.LatLngBounds | null>(null);
@@ -55,7 +54,10 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
         locations.forEach(({ geometry }) => bounds.extend(geometry!.location));
         setBounds(bounds);
         map.fitBounds(bounds);
+        console.log("find bounds and fit");
       } else {
+        console.log("bounds exist, fit again");
+
         map.fitBounds(bounds);
       }
     }
@@ -124,6 +126,8 @@ export function LocationsMap({ locations }: Props) {
     lng: 5.6581,
   });
   const isContextDefined = useContext(SelectedLocationContext) !== undefined;
+
+  console.log("isContextDefined", isContextDefined);
 
   const MapComponent = (
     <Map
