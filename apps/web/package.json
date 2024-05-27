@@ -30,6 +30,7 @@
     "@types/mdx": "^2.0.11",
     "@vercel/otel": "^1.8.2",
     "@vercel/speed-insights": "^1.0.10",
+    "@vis.gl/react-google-maps": "^1.0.0",
     "clsx": "^2.1.0",
     "dayjs": "^1.11.10",
     "fast-glob": "^3.3.2",

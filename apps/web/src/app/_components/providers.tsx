@@ -9,6 +9,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
 import { supabaseBrowser } from "~/lib/supabase/client";
+import { LocationsMapContainer } from "../(public)/_components/locations-map";
 
 if (typeof window !== "undefined") {
   const currentUrl = new URL(BASE_URL);
@@ -144,7 +145,9 @@ export function MarketingProviders({
         scrollPosition,
       }}
     >
-      <BalancerProvider>{children}</BalancerProvider>
+      <LocationsMapContainer>
+        <BalancerProvider>{children}</BalancerProvider>
+      </LocationsMapContainer>
     </AppContext.Provider>
   );
 }

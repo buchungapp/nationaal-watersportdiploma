@@ -129,6 +129,9 @@ importers:
       '@vercel/speed-insights':
         specifier: ^1.0.10
         version: 1.0.10(next@14.2.3)(react@18.3.1)
+      '@vis.gl/react-google-maps':
+        specifier: ^1.0.0
+        version: 1.0.0(react-dom@18.3.1)(react@18.3.1)
       clsx:
         specifier: ^2.1.0
         version: 2.1.1
@@ -1798,7 +1801,7 @@ packages:
   /@googlemaps/google-maps-services-js@3.4.0:
     resolution: {integrity: sha512-M1G+Jl4ri9YIODxC+RwvW4UkonTQ+ZFE5gjdIrKP/4/vYG2q2dDN1IgTp03I2MI0eGQs2FmQlxGJ0lBaZ5Ysyw==}
     dependencies:
-      '@googlemaps/url-signature': 1.0.33
+      '@googlemaps/url-signature': 1.0.34
       agentkeepalive: 4.5.0
       axios: 1.6.8
       query-string: 7.1.3
@@ -1820,8 +1823,8 @@ packages:
       supercluster: 8.0.1
     dev: false
 
-  /@googlemaps/url-signature@1.0.33:
-    resolution: {integrity: sha512-NHC3UFPnU03bY5IH8mqiERjUmtuk5ZseltWaR1XDQhhkAKLd8amCqEul3cvdPchWB14nqgDEM6ZhNtEeHW76ZA==}
+  /@googlemaps/url-signature@1.0.34:
+    resolution: {integrity: sha512-1KiM7IkGpm/ZIQDbYH9mk81GNGOrIime/YQoNfAnrKr8+ojbup2i4uEsbfAUHrV0qHK/0P08VI1iNU2Lbk5SuQ==}
     dependencies:
       crypto-js: 4.2.0
     dev: false
@@ -4889,6 +4892,18 @@ packages:
     dependencies:
       next: 14.2.3(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(react-dom@18.3.1)(react@18.3.1)
       react: 18.3.1
+    dev: false
+
+  /@vis.gl/react-google-maps@1.0.0(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-qkD2k8SIg5SrNJjM+FNOh0IITGLGCBULdALDOXGhVBq0hriv1GkTsoi7D0rs4fiYDQeKSqX8cmWgwGZcMTum1g==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      '@types/google.maps': 3.55.2
+      fast-deep-equal: 3.1.3
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
     dev: false
 
   /@webassemblyjs/ast@1.12.1:
