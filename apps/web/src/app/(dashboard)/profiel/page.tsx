@@ -1,5 +1,7 @@
-import Link from "next/link";
+import { logout } from "~/app/_actions/auth";
 import { listLocationsForPerson } from "~/lib/nwd";
+import { Button } from "../_components/button";
+import { Link } from "../_components/link";
 
 export default async function Page() {
   const locations = await listLocationsForPerson();
@@ -15,12 +17,15 @@ export default async function Page() {
       <h2>Wat nu?</h2>
       <ul>
         <li>
-          <Link href="/">Terug naar de homepage</Link>
+          <Button href="/">Terug naar de homepage</Button>
         </li>
         <li>
-          <Link href="https://www.nationaalwatersportdiploma.dev">
+          <Button href="https://www.nationaalwatersportdiploma.dev">
             Volg de ontwikkelingen via GitHub
-          </Link>
+          </Button>
+        </li>
+        <li>
+          <Button onClick={logout}>Volg de ontwikkelingen via GitHub</Button>
         </li>
       </ul>
 

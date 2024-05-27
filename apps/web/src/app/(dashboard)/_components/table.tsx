@@ -1,7 +1,8 @@
 "use client";
 
 import { clsx } from "clsx";
-import React, { createContext, useContext, useState } from "react";
+import type React from "react";
+import { createContext, useContext, useState } from "react";
 import { Link } from "./link";
 
 const TableContext = createContext<{
@@ -66,8 +67,8 @@ export function TableHead({
 }: React.ComponentPropsWithoutRef<"thead">) {
   return (
     <thead
-      className={clsx(className, "text-zinc-500 dark:text-zinc-400")}
       {...props}
+      className={clsx(className, "text-zinc-500 dark:text-zinc-400")}
     />
   );
 }
@@ -91,14 +92,13 @@ export function TableRow({
   target,
   title,
   className,
-  children,
   ...props
 }: {
   href?: string;
   target?: string;
   title?: string;
 } & React.ComponentPropsWithoutRef<"tr">) {
-  const { striped } = useContext(TableContext);
+  let { striped } = useContext(TableContext);
 
   return (
     <TableRowContext.Provider
@@ -111,16 +111,14 @@ export function TableRow({
         className={clsx(
           className,
           href &&
-            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-branding-light dark:focus-within:bg-white/[2.5%]",
+            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-blue-500 dark:focus-within:bg-white/[2.5%]",
           striped && "even:bg-zinc-950/[2.5%] dark:even:bg-white/[2.5%]",
           href && striped && "hover:bg-zinc-950/5 dark:hover:bg-white/5",
           href &&
             !striped &&
             "hover:bg-zinc-950/[2.5%] dark:hover:bg-white/[2.5%]",
         )}
-      >
-        {children}
-      </tr>
+      />
     </TableRowContext.Provider>
   );
 }
@@ -129,7 +127,7 @@ export function TableHeader({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"th">) {
-  const { bleed, grid } = useContext(TableContext);
+  let { bleed, grid } = useContext(TableContext);
 
   return (
     <th
@@ -139,7 +137,7 @@ export function TableHeader({
         "border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] dark:border-b-white/10",
         grid &&
           "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
-        !bleed && "sm:first:pl-2 sm:last:pr-2",
+        !bleed && "sm:first:pl-1 sm:last:pr-1",
       )}
     />
   );
@@ -148,18 +146,15 @@ export function TableHeader({
 export function TableCell({
   className,
   children,
-  suppressLinkBehavior = false,
   ...props
-}: React.ComponentPropsWithoutRef<"td"> & {
-  suppressLinkBehavior?: boolean;
-}) {
-  const { bleed, dense, grid, striped } = useContext(TableContext);
-  const { href, target, title } = useContext(TableRowContext);
-  const [cellRef, setCellRef] = useState<HTMLElement | null>(null);
+}: React.ComponentPropsWithoutRef<"td">) {
+  let { bleed, dense, grid, striped } = useContext(TableContext);
+  let { href, target, title } = useContext(TableRowContext);
+  let [cellRef, setCellRef] = useState<HTMLElement | null>(null);
 
   return (
     <td
-      ref={!suppressLinkBehavior && href ? setCellRef : undefined}
+      ref={href ? setCellRef : undefined}
       {...props}
       className={clsx(
         className,
@@ -168,10 +163,10 @@ export function TableCell({
         grid &&
           "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
         dense ? "py-2.5" : "py-4",
-        !bleed && "sm:first:pl-2 sm:last:pr-2",
+        !bleed && "sm:first:pl-1 sm:last:pr-1",
       )}
     >
-      {!suppressLinkBehavior && href && (
+      {href && (
         <Link
           data-row-link
           href={href}

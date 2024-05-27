@@ -1,9 +1,4 @@
-"use client";
-
-import {
-  Button as HeadlessButton,
-  type ButtonProps as HeadlessButtonProps,
-} from "@headlessui/react";
+import * as Headless from "@headlessui/react";
 import clsx from "clsx";
 import React from "react";
 import { TouchTarget } from "./button";
@@ -79,7 +74,7 @@ export const AvatarButton = React.forwardRef(function AvatarButton(
     className,
     ...props
   }: AvatarProps &
-    (HeadlessButtonProps | React.ComponentPropsWithoutRef<typeof Link>),
+    (Headless.ButtonProps | React.ComponentPropsWithoutRef<typeof Link>),
   ref: React.ForwardedRef<HTMLElement>,
 ) {
   const classes = clsx(
@@ -99,10 +94,10 @@ export const AvatarButton = React.forwardRef(function AvatarButton(
       </TouchTarget>
     </Link>
   ) : (
-    <HeadlessButton {...props} className={classes} ref={ref}>
+    <Headless.Button {...props} className={classes} ref={ref}>
       <TouchTarget>
         <Avatar src={src} square={square} initials={initials} alt={alt} />
       </TouchTarget>
-    </HeadlessButton>
+    </Headless.Button>
   );
 });

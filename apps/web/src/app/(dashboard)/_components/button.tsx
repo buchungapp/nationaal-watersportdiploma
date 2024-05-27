@@ -1,9 +1,4 @@
-"use client";
-
-import {
-  Button as HeadlessButton,
-  type ButtonProps as HeadlessButtonProps,
-} from "@headlessui/react";
+import * as Headless from "@headlessui/react";
 import { clsx } from "clsx";
 import React from "react";
 import { Link } from "./link";
@@ -198,7 +193,7 @@ type ButtonProps = (
   | { color?: never; outline: true; plain?: never }
   | { color?: never; outline?: never; plain: true }
 ) & { children: React.ReactNode } & (
-    | HeadlessButtonProps
+    | Headless.ButtonProps
     | React.ComponentPropsWithoutRef<typeof Link>
   );
 
@@ -225,13 +220,13 @@ export const Button = React.forwardRef(function Button(
       <TouchTarget>{children}</TouchTarget>
     </Link>
   ) : (
-    <HeadlessButton
+    <Headless.Button
       {...props}
       className={clsx(classes, "cursor-default")}
       ref={ref}
     >
       <TouchTarget>{children}</TouchTarget>
-    </HeadlessButton>
+    </Headless.Button>
   );
 });
 
