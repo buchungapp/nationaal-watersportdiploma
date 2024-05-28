@@ -112,6 +112,7 @@ export default function Footer() {
                 Vertrouwenspersoon
               </FooterLink>
               <FooterLink href="/partners">Partners</FooterLink>
+              <FooterLink href="/privacy">Privacy</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </ul>
           </div>
