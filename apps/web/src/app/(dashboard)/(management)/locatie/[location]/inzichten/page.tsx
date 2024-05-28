@@ -5,6 +5,7 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import {
   listCertificates,
+  listDisciplines,
   listPersonsForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -20,13 +21,14 @@ export default async function Page({
 }>) {
   const location = await retrieveLocationByHandle(params.location);
 
-  const [persons, certificates] = await Promise.all([
+  const [persons, certificates, disciplines] = await Promise.all([
     listPersonsForLocation(location.id),
     listCertificates(location.id).then((certificates) => {
       return certificates
         .filter((certificate) => !!certificate.issuedAt)
         .sort((a, b) => dayjs(a.issuedAt).diff(dayjs(b.issuedAt)));
     }),
+    listDisciplines(),
   ]);
 
   const certificatesPerWeek = Object.values(
@@ -43,11 +45,19 @@ export default async function Page({
             weekEnd: dayjs(certificate.issuedAt).endOf("week").toISOString(),
             count: 0,
             certificates: [],
+            ...disciplines.reduce(
+              (perDiscipline, discipline) => ({
+                ...perDiscipline,
+                [discipline.title!]: 0,
+              }),
+              {} as Record<string, number>,
+            ),
           };
         }
 
         acc[week]!.certificates.push(certificate);
         acc[week]!.count += 1;
+        (acc[week]![certificate.program.discipline.title!] as number) += 1;
 
         return acc;
       },
@@ -59,6 +69,7 @@ export default async function Page({
           week: string;
           count: number;
           certificates: (typeof certificates)[number][];
+          [key: string]: number | string | (typeof certificates)[number][];
         }
       >,
     ),
@@ -157,10 +168,19 @@ export default async function Page({
       <BarChart
         data={certificatesPerWeek}
         index="week"
-        categories={["count"]}
-        colors={["slate"]}
+        categories={
+          disciplines
+            .filter((discipline) => {
+              return certificatesPerWeek.some(
+                (week) => (week[discipline.title!]! as number) > 0,
+              );
+            })
+            .map((discipline) => discipline.title) as string[]
+        }
+        colors={["blue", "violet", "fuchsia", "cyan"]}
         yAxisWidth={30}
         showLegend={false}
+        stack={true}
         className="mt-12 h-72"
       />
     </>
