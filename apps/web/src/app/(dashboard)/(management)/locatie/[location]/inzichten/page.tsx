@@ -47,7 +47,7 @@ export default async function Page({
         }
 
         acc[week]!.certificates.push(certificate);
-        acc[week]!.count += 5;
+        acc[week]!.count += 1;
 
         return acc;
       },
