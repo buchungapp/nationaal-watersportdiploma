@@ -1,7 +1,7 @@
 "use client";
 import dayjs from "dayjs";
 import { useRef } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -201,7 +201,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     }
   };
 
-  const [state, formAction] = useFormState(submit, undefined);
+  const [state, formAction] = useActionState(submit, undefined);
 
   const parseSuccess = state?.success === true;
 

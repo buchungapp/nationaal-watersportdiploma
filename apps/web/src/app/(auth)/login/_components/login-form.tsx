@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { OTPInput } from "input-otp";
 import { useRef, type PropsWithChildren } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { login, verify } from "~/app/_actions/auth";
 import Spinner from "~/app/_components/spinner";
@@ -21,7 +21,7 @@ export function EmailForm({
   children,
   ...formProps
 }: PropsWithChildren<Exclude<React.ComponentProps<"form">, "action">>) {
-  const [state, formAction] = useFormState(login, undefined);
+  const [state, formAction] = useActionState(login, undefined);
 
   return (
     <form action={formAction} {...formProps}>
@@ -52,7 +52,10 @@ export function OtpForm({
   ...formProps
 }: { email: string } & Exclude<React.ComponentProps<"form">, "action">) {
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction] = useFormState(verify.bind(null, email), undefined);
+  const [state, formAction] = useActionState(
+    verify.bind(null, email),
+    undefined,
+  );
 
   return (
     <form ref={formRef} action={formAction} {...formProps}>

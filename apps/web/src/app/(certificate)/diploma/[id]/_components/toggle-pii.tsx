@@ -3,7 +3,7 @@
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
 import { useParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -38,7 +38,7 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
 
   const formActionWithId = showPiiHandler.bind(null, certificateId);
 
-  const [result, action] = useFormState(formActionWithId, undefined);
+  const [result, action] = useActionState(formActionWithId, undefined);
 
   const formRef = useRef<HTMLFormElement>(null);
   return (

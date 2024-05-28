@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -59,7 +59,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     return result;
   };
 
-  const [state, formAction] = useFormState(submit, undefined);
+  const [state, formAction] = useActionState(submit, undefined);
   const [selectedCountry, setSelectedCountry] = useState<string | null>("nl");
 
   const [countryQuery, setCountryQuery] = useState("");

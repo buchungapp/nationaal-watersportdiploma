@@ -2,7 +2,7 @@
 import clsx from "clsx";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -93,7 +93,7 @@ function CreateDialogClient({
     return result;
   };
 
-  const [state, formAction] = useFormState(submit, undefined);
+  const [state, formAction] = useActionState(submit, undefined);
 
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [selectedGearType, setSelectedGearType] = useState<string | null>(null);
