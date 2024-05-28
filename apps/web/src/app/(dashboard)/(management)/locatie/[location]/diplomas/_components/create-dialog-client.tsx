@@ -1,4 +1,5 @@
 "use client";
+import { PlusIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
@@ -133,11 +134,12 @@ function CreateDialogClient({
   return (
     <>
       <Button
-        color="branding-dark"
+        color="branding-orange"
         type="button"
         onClick={() => setIsOpen(true)}
         className={"whitespace-nowrap"}
       >
+        <PlusIcon />
         Diploma toevoegen
       </Button>
       <Dialog open={isOpen} onClose={setIsOpen} size="2xl">

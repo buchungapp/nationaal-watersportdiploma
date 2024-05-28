@@ -75,7 +75,7 @@ export function FilterSelect() {
 
   return (
     <Popover className="relative">
-      <PopoverButton className={"min-w-32"}>
+      <PopoverButton outline>
         Filter <ChevronDownIcon />
       </PopoverButton>
       <PopoverPanel anchor="bottom end" className="flex flex-col gap-1">

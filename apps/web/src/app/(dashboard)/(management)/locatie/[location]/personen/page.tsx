@@ -5,11 +5,13 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 
+import { PlusIcon } from "@heroicons/react/16/solid";
 import {
   Dropdown,
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
+import { Heading } from "~/app/(dashboard)/_components/heading";
 import Search from "../_components/search";
 import {
   DialogButtons,
@@ -78,35 +80,26 @@ export default async function Page({
 
   return (
     <DialogWrapper>
-      <div className="py-16">
-        <div className="md:flex md:items-center md:justify-between md:space-x-8 pb-4 border-b border-gray-200">
-          <div>
-            <h1 className="font-semibold text-zinc-950 dark:text-white text-lg/6 sm:text-base/6">
-              Personen
-            </h1>
-
-            <p className="mt-1 leading-6 text-zinc-600 dark:text-zinc-300 text-sm">
-              Een overzicht van personen die een rol hebben binnen de locatie.
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0">
-            <Dropdown>
-              <DropdownButton color="branding-orange">
-                Persoon aanmaken
-              </DropdownButton>
-              <DropdownMenu>
-                <DialogButtons />
-              </DropdownMenu>
-            </Dropdown>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="max-sm:w-full sm:flex-1">
+          <Heading>Personen</Heading>
+          <div className="mt-4 flex max-w-xl gap-4">
+            <Search placeholder="Doorzoek personen..." />
+            <FilterSelect />
           </div>
         </div>
-        <div className="mt-4 w-full flex flex-col gap-2 sm:flex-row">
-          <Search />
-          <FilterSelect />
-        </div>
-
-        <Table persons={paginatedPersons} totalItems={persons.length} />
+        <Dropdown>
+          <DropdownButton color="branding-orange">
+            <PlusIcon />
+            Persoon aanmaken
+          </DropdownButton>
+          <DropdownMenu>
+            <DialogButtons />
+          </DropdownMenu>
+        </Dropdown>
       </div>
+
+      <Table persons={paginatedPersons} totalItems={persons.length} />
 
       <Dialogs locationId={location.id} countries={countries} />
     </DialogWrapper>
