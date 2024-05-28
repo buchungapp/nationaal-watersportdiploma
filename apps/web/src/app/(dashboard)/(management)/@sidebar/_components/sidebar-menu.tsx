@@ -44,11 +44,11 @@ export function LocationSidebarMenu() {
           current: lastSegment === "diplomas",
         },
         {
-          name: "Rapportages",
+          name: "Inzichten",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          href: `/locatie/${params.location}/rapportages`,
+          href: `/locatie/${params.location}/inzichten`,
           Icon: ChartBarIcon,
-          current: lastSegment === "rapportages",
+          current: lastSegment === "inzichten",
         },
       ].map((item) => (
         <SidebarItem key={item.name} href={item.href} current={item.current}>
