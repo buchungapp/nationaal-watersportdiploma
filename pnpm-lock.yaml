@@ -89,10 +89,10 @@ importers:
         version: 3.0.1(webpack@5.91.0)
       '@mdx-js/react':
         specifier: ^3.0.1
-        version: 3.0.1(@types/react@18.3.3)(react@19.0.0-rc-935180c7e0-20240524)
+        version: 3.0.1(react@19.0.0-rc-935180c7e0-20240524)(types-react@19.0.0-rc.0)
       '@mux/mux-player-react':
         specifier: ^2.3.3
-        version: 2.5.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)
+        version: 2.5.0(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)(types-react-dom@19.0.0-rc.0)(types-react@19.0.0-rc.0)
       '@nawadi/core':
         specifier: workspace:^
         version: link:../../packages/core
@@ -120,9 +120,6 @@ importers:
       '@tremor/react':
         specifier: ^3.16.2
         version: 3.16.2(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)(tailwindcss@3.4.3)
-      '@types/mdx':
-        specifier: ^2.0.11
-        version: 2.0.13
       '@vercel/otel':
         specifier: ^1.8.2
         version: 1.8.2(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.8.0)(@opentelemetry/instrumentation@0.46.0)(@opentelemetry/resources@1.24.1)(@opentelemetry/sdk-logs@0.46.0)(@opentelemetry/sdk-metrics@1.24.1)(@opentelemetry/sdk-trace-base@1.24.1)
@@ -179,7 +176,7 @@ importers:
         version: 15.0.0-rc.0(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)
       next-mdx-remote:
         specifier: 0.0.0-canary-20240321205249
-        version: 0.0.0-canary-20240321205249(@types/react@18.3.3)(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)
+        version: 0.0.0-canary-20240321205249(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)(types-react@19.0.0-rc.0)
       pdfkit:
         specifier: ^0.15.0
         version: 0.15.0
@@ -244,6 +241,9 @@ importers:
       '@types/eslint':
         specifier: ^8.56.5
         version: 8.56.10
+      '@types/mdx':
+        specifier: ^2.0.11
+        version: 2.0.13
       '@types/node':
         specifier: ^20
         version: 20.12.8
@@ -254,11 +254,11 @@ importers:
         specifier: ^1.5.5
         version: 1.5.5
       '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
+        specifier: npm:types-react@rc
+        version: /types-react@19.0.0-rc.0
       '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
+        specifier: npm:types-react-dom@rc
+        version: /types-react-dom@19.0.0-rc.0
       '@types/svg-to-pdfkit':
         specifier: ^0.1.3
         version: 0.1.3
@@ -2262,18 +2262,18 @@ packages:
       react: '>=16'
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 18.3.1
+      '@types/react': 18.3.3
       react: 18.3.1
     dev: true
 
-  /@mdx-js/react@3.0.1(@types/react@18.3.3)(react@19.0.0-rc-935180c7e0-20240524):
+  /@mdx-js/react@3.0.1(react@19.0.0-rc-935180c7e0-20240524)(types-react@19.0.0-rc.0):
     resolution: {integrity: sha512-9ZrPIU4MGf6et1m1ov3zKf+q9+deetI51zprKB1D/z3NOb+rUxxtEl3mCjW5wTGh6VhRdwPueh1oRzi6ezkA8A==}
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
     dependencies:
       '@types/mdx': 2.0.13
-      '@types/react': 18.3.3
+      '@types/react': /types-react@19.0.0-rc.0
       react: 19.0.0-rc-935180c7e0-20240524
     dev: false
 
@@ -2469,7 +2469,7 @@ packages:
       - debug
     dev: true
 
-  /@mux/mux-player-react@2.5.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524):
+  /@mux/mux-player-react@2.5.0(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)(types-react-dom@19.0.0-rc.0)(types-react@19.0.0-rc.0):
     resolution: {integrity: sha512-HTJ55X+ngrR2tVgvCEc6edihyHGYkB4C8TqPNM+tbHeQqIevvyatJAMlZHZbpFEdOLUeL3I/PwsDQ6FOV7csKw==}
     peerDependencies:
       '@types/react': ^17.0.0 || ^18
@@ -2484,8 +2484,8 @@ packages:
     dependencies:
       '@mux/mux-player': 2.5.0
       '@mux/playback-core': 0.23.0
-      '@types/react': 18.3.3
-      '@types/react-dom': 18.3.0
+      '@types/react': /types-react@19.0.0-rc.0
+      '@types/react-dom': /types-react-dom@19.0.0-rc.0
       prop-types: 15.8.1
       react: 19.0.0-rc-935180c7e0-20240524
       react-dom: 19.0.0-rc-935180c7e0-20240524(react@19.0.0-rc-935180c7e0-20240524)
@@ -2543,7 +2543,7 @@ packages:
         optional: true
     dependencies:
       '@mdx-js/loader': 3.0.1(webpack@5.91.0)
-      '@mdx-js/react': 3.0.1(@types/react@18.3.3)(react@19.0.0-rc-935180c7e0-20240524)
+      '@mdx-js/react': 3.0.1(react@19.0.0-rc-935180c7e0-20240524)(types-react@19.0.0-rc.0)
       source-map: 0.7.4
     dev: false
 
@@ -4532,11 +4532,6 @@ packages:
   /@types/range-parser@1.2.7:
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
     dev: false
-
-  /@types/react-dom@18.3.0:
-    resolution: {integrity: sha512-EhwApuTmMBmXuFOikhQLIBUn6uFg81SwLMOAUgodJF14SOBOCMdU04gDoYi0WOJJHD144TL32z4yDqCW3dnkQg==}
-    dependencies:
-      '@types/react': 18.3.3
 
   /@types/react@18.3.1:
     resolution: {integrity: sha512-V0kuGBX3+prX+DQ/7r2qsv1NsdfnCLnTgnRJ1pYnxykBhGMz+qj+box5lq7XsO5mtZsBqpjwwTu/7wszPfMBcw==}
@@ -10611,7 +10606,7 @@ packages:
     resolution: {integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==}
     dev: false
 
-  /next-mdx-remote@0.0.0-canary-20240321205249(@types/react@18.3.3)(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524):
+  /next-mdx-remote@0.0.0-canary-20240321205249(react-dom@19.0.0-rc-935180c7e0-20240524)(react@19.0.0-rc-935180c7e0-20240524)(types-react@19.0.0-rc.0):
     resolution: {integrity: sha512-vqerW3tdmFCLtmENseqAF2GPRV6ka/b39//Rhl7zkAMalJ/OpQ6MYqrnLYFlyOc1aVyV/D5IpxjK4Uw071jq2A==}
     engines: {node: '>=14', npm: '>=7'}
     peerDependencies:
@@ -10620,7 +10615,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.24.2
       '@mdx-js/mdx': 3.0.1
-      '@mdx-js/react': 3.0.1(@types/react@18.3.3)(react@19.0.0-rc-935180c7e0-20240524)
+      '@mdx-js/react': 3.0.1(react@19.0.0-rc-935180c7e0-20240524)(types-react@19.0.0-rc.0)
       react: 19.0.0-rc-935180c7e0-20240524
       react-dom: 19.0.0-rc-935180c7e0-20240524(react@19.0.0-rc-935180c7e0-20240524)
       unist-util-remove: 3.1.1
@@ -12972,6 +12967,16 @@ packages:
     dependencies:
       is-typedarray: 1.0.0
     dev: true
+
+  /types-react-dom@19.0.0-rc.0:
+    resolution: {integrity: sha512-wGlQSD6H6EeCxhH+dSip1cPcCU7nNTOwHEr29rjiNtGkUPlmEofOizoQaPMEqQH2V76ME3NLvBDLGajRu3xZOw==}
+    dependencies:
+      '@types/react': 18.3.3
+
+  /types-react@19.0.0-rc.0:
+    resolution: {integrity: sha512-JFd3qtgXZ+EdHht8WXMPSF231brd6Bu4yLKqyo0JjpzhmjYxJptT6TBh/xFqOhx+ee2Nagj7Ttkh5F/jc49TVQ==}
+    dependencies:
+      csstype: 3.1.3
 
   /typescript@5.4.5:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
