@@ -1,14 +1,8 @@
 "use client";
 
 import { usePostHog } from "posthog-js/react";
-import {
-  Dispatch,
-  PropsWithChildren,
-  SetStateAction,
-  createContext,
-  useContext,
-  useState,
-} from "react";
+import type { Dispatch, PropsWithChildren, SetStateAction } from "react";
+import { createContext, useContext, useState } from "react";
 import { DropdownItem } from "~/app/(dashboard)/_components/dropdown";
 import CreateBulkDialog from "./create-bulk-dialog";
 import CreateSingleDialog from "./create-single-dialog";

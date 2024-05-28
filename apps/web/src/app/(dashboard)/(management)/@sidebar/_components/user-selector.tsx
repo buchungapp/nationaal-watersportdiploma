@@ -7,8 +7,8 @@ import {
 import { constants } from "@nawadi/lib";
 import { Github } from "~/app/_components/socials";
 import { getUserOrThrow } from "~/lib/nwd";
-import { LogOutDropdownItem } from "../../_components/auth";
-import { Avatar } from "../../_components/avatar";
+import { LogOutDropdownItem } from "../../../_components/auth";
+import { Avatar } from "../../../_components/avatar";
 import {
   Dropdown,
   DropdownButton,
@@ -16,8 +16,8 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
-} from "../../_components/dropdown";
-import { SidebarItem } from "../../_components/sidebar";
+} from "../../../_components/dropdown";
+import { SidebarItem } from "../../../_components/sidebar";
 
 export async function UserSelector() {
   const currentUser = await getUserOrThrow();

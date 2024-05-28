@@ -1,7 +1,7 @@
 "use client";
 import dayjs from "dayjs";
-import { useActionState, useRef } from "react";
-import { useFormStatus } from "react-dom";
+import { useRef } from "react";
+import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";

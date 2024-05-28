@@ -2,8 +2,8 @@
 
 import clsx from "clsx";
 import { OTPInput } from "input-otp";
-import { useActionState, useRef, type PropsWithChildren } from "react";
-import { useFormStatus } from "react-dom";
+import { useRef, type PropsWithChildren } from "react";
+import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { login, verify } from "~/app/_actions/auth";
 import Spinner from "~/app/_components/spinner";

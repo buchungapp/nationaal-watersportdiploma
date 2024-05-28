@@ -67,10 +67,8 @@ function PersonDropdownMenu() {
 
 export default function Layout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { location: string };
 }>) {
   return (
     <StackedLayout

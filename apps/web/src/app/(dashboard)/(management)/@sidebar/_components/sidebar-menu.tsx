@@ -5,18 +5,17 @@ import {
   RectangleStackIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
-import { useParams, useSelectedLayoutSegments } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   SidebarItem,
   SidebarLabel,
   SidebarSection,
-} from "../../_components/sidebar";
+} from "../../../_components/sidebar";
 
 export function LocationSidebarMenu() {
-  const segments = useSelectedLayoutSegments();
   const params = useParams();
 
-  const lastSegment = segments.at(-1);
+  const lastSegment = (params.routes as string[]).at(-1);
 
   return (
     <SidebarSection>

@@ -32,9 +32,6 @@ export default function Layout({
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
-
-  console.log('sidebar :>> ', sidebar)
-
   return (
     <SidebarLayout
       navbar={

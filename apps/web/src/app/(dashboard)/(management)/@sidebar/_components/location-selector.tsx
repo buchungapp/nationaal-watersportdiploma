@@ -1,7 +1,7 @@
 import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
-import { notFound } from "next/navigation";
+import { notFound, useSelectedLayoutSegments } from "next/navigation";
 import { listLocationsForPerson } from "~/lib/nwd";
-import { Avatar } from "../../_components/avatar";
+import { Avatar } from "../../../_components/avatar";
 import {
   Dropdown,
   DropdownButton,
@@ -9,8 +9,8 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
-} from "../../_components/dropdown";
-import { SidebarItem, SidebarLabel } from "../../_components/sidebar";
+} from "../../../_components/dropdown";
+import { SidebarItem, SidebarLabel } from "../../../_components/sidebar";
 
 export async function LocationSelector({
   currentLocationSlug,
@@ -18,10 +18,13 @@ export async function LocationSelector({
   currentLocationSlug: string;
 }) {
   const locations = await listLocationsForPerson();
+  const segments = useSelectedLayoutSegments();
 
   const currentLocation = locations.find(
     (location) => location.handle === currentLocationSlug,
   );
+
+  console.log("segment :>> ", segments);
 
   if (!currentLocation) {
     return notFound();
@@ -29,9 +32,13 @@ export async function LocationSelector({
 
   return (
     <Dropdown>
-      <DropdownButton as={SidebarItem} className="lg:mb-2.5">
+      <DropdownButton
+        as={SidebarItem}
+        className="lg:mb-2.5"
+        title={currentLocation.name ?? undefined}
+      >
         <Avatar
-          className="size-6"
+          className="size-6 flex-shrink-0"
           initials={(currentLocation.name ?? currentLocation.handle).slice(
             0,
             2,
@@ -48,19 +55,21 @@ export async function LocationSelector({
         </DropdownItem>
         <DropdownDivider />
 
-        {locations.map((location) => (
-          <DropdownItem
-            key={location.id}
-            href={`/locatie/${location.handle}/personen`}
-          >
-            <Avatar
-              slot="icon"
-              initials={(location.name ?? location.handle).slice(0, 2)}
-              className="bg-purple-500 text-white "
-            />
-            <DropdownLabel>{location.name}</DropdownLabel>
-          </DropdownItem>
-        ))}
+        {locations
+          .filter((location) => location.id !== currentLocation.id)
+          .map((location) => (
+            <DropdownItem
+              key={location.id}
+              href={`/locatie/${location.handle}/personen`}
+            >
+              <Avatar
+                slot="icon"
+                initials={(location.name ?? location.handle).slice(0, 2)}
+                className="bg-purple-500 text-white "
+              />
+              <DropdownLabel>{location.name}</DropdownLabel>
+            </DropdownItem>
+          ))}
       </DropdownMenu>
     </Dropdown>
   );

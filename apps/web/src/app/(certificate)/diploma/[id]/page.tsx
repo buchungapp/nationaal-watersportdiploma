@@ -4,14 +4,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import Logo from "~/app/_components/brand/logo";
 import {
   Facebook,
   Instagram,
   LinkedIn,
   TikTok,
   YouTube,
-} from "~/app/(public)/_components/socials";
-import Logo from "~/app/_components/brand/logo";
+} from "~/app/_components/socials";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { Text, TextLink } from "../../../(dashboard)/_components/text";
 import { generateAdvise } from "../_utils/generate-advise";

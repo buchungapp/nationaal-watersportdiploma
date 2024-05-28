@@ -1,6 +1,6 @@
 "use client";
-import { useActionState, useRef, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { useRef, useState } from "react";
+import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {

@@ -4,7 +4,7 @@ import {
   SidebarHeading,
   SidebarItem,
   SidebarSection,
-} from "../../_components/sidebar";
+} from "../../../_components/sidebar";
 
 async function LatestNewsList() {
   const articles = await getAllArticles();
