@@ -1,16 +1,15 @@
-import { clsx } from "clsx";
-import { Toaster } from "sonner";
-import { CommonProviders, MarketingProviders } from "../_components/providers";
-import Footer from "./_components/footer/footer";
-import Header from "./_components/header/header";
-
 import { constants } from "@nawadi/lib";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+
+import { clsx } from "clsx";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import { BASE_URL } from "~/constants";
 
-import Analytics from "../_components/analytics";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Inter } from "next/font/google";
+
+import Analytics from "~/app/_components/analytics";
+import { CommonProviders } from "~/app/_components/providers";
 import "../globals.css";
 
 const inter = Inter({
@@ -48,11 +47,7 @@ export const metadata: Metadata = {
 
 export const runtime = "nodejs";
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="nl"
@@ -63,16 +58,7 @@ export default function RootLayout({
     >
       <body className="h-full">
         <CommonProviders>
-          <MarketingProviders>
-            {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
-            <div>
-              <Header />
-              <div id="content" className="[--header-height:112px]">
-                {children}
-              </div>
-              <Footer />
-            </div>
-          </MarketingProviders>
+          {children}
 
           <Toaster richColors />
           <SpeedInsights />

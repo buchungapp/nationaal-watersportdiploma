@@ -1,6 +1,10 @@
 "use client";
 
-import { AcademicCapIcon, UserGroupIcon } from "@heroicons/react/20/solid";
+import {
+  AcademicCapIcon,
+  RectangleStackIcon,
+  UserGroupIcon,
+} from "@heroicons/react/20/solid";
 import { useParams, useSelectedLayoutSegment } from "next/navigation";
 import {
   SidebarItem,
@@ -15,13 +19,13 @@ export function LocationSidebarMenu() {
   return (
     <SidebarSection>
       {[
-        // {
-        //   name: "Cohorten",
-        //   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        //   href: `/${params.location}/cohorten`,
-        //   Icon: RectangleStackIcon,
-        //   current: segment === "cohorten",
-        // },
+        {
+          name: "Cohorten",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          href: `/${params.location}/cohorten`,
+          Icon: RectangleStackIcon,
+          current: segment === "cohorten",
+        },
         {
           name: "Personen",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

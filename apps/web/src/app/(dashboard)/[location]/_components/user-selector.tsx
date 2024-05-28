@@ -1,10 +1,11 @@
 import {
   ArrowRightStartOnRectangleIcon,
   ChevronUpIcon,
-  Cog8ToothIcon,
   ShieldCheckIcon,
   UserIcon,
 } from "@heroicons/react/16/solid";
+import { constants } from "@nawadi/lib";
+import { Github } from "~/app/_components/socials";
 import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../../_components/auth";
 import { Avatar } from "../../_components/avatar";
@@ -46,18 +47,18 @@ export async function UserSelector() {
         <ChevronUpIcon />
       </DropdownButton>
       <DropdownMenu className="min-w-[--button-width] z-50">
-        <DropdownItem href="/my-profile">
+        <DropdownItem href="/account">
           <UserIcon />
-          <DropdownLabel>Mijn paspoort</DropdownLabel>
-        </DropdownItem>
-        <DropdownItem href="/settings">
-          <Cog8ToothIcon />
-          <DropdownLabel>Instellingen</DropdownLabel>
+          <DropdownLabel>Mijn account</DropdownLabel>
         </DropdownItem>
         <DropdownDivider />
-        <DropdownItem href="/privacy-policy">
+        <DropdownItem href="/privacy" target="_blank">
           <ShieldCheckIcon />
-          <DropdownLabel>Privacybeleid</DropdownLabel>
+          <DropdownLabel>Privacyverklaring</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem href={constants.GITHUB_URL} target="_blank">
+          <Github data-slot="icon" />
+          <DropdownLabel>GitHub</DropdownLabel>
         </DropdownItem>
         <DropdownDivider />
         <LogOutDropdownItem>

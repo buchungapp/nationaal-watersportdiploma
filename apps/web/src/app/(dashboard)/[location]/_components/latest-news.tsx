@@ -18,7 +18,7 @@ async function LatestNewsList() {
           href={`/actueel/${article.slug}`}
           target="_blank"
           title={article.title}
-          className="truncate"
+          className="*:truncate *:inline-block"
         >
           {article.title}
         </SidebarItem>

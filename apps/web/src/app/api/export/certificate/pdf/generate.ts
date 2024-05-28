@@ -5,7 +5,7 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import SVGtoPDF from "svg-to-pdfkit";
-import { generateAdvise } from "~/app/(diploma)/diploma/_utils/generate-advise";
+import { generateAdvise } from "~/app/(certificate)/diploma/_utils/generate-advise";
 import { listCertificatesByNumber } from "~/lib/nwd";
 
 const fontPaths = {
