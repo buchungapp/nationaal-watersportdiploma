@@ -6,7 +6,7 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import Spinner from "~/app/_components/spinner";
 
-export default function Search() {
+export default function Search({ placeholder = "Zoeken..." }) {
   // TODO: this still needs debouncing
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -35,7 +35,7 @@ export default function Search() {
         onChange={(e) => {
           setQuery(e.target.value);
         }}
-        placeholder="Zoeken..."
+        placeholder={placeholder}
       />
       {isPending && (
         <div className="absolute inset-y-0 right-2 flex items-center">

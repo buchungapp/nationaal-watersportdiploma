@@ -33,8 +33,6 @@ export function TablePagination({ totalItems }: { totalItems: number }) {
 
       <div>
         <Select
-          // @ts-expect-error TODO: Fix this
-          size="sm"
           value={limit}
           onChange={(event) => {
             router.push(
