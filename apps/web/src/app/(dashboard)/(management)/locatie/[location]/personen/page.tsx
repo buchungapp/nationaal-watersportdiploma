@@ -4,11 +4,12 @@ import {
   listPersonsForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+
 import {
   Dropdown,
   DropdownButton,
   DropdownMenu,
-} from "../../_components/dropdown";
+} from "~/app/(dashboard)/_components/dropdown";
 import Search from "../_components/search";
 import {
   DialogButtons,

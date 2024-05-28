@@ -5,7 +5,7 @@ import {
   RectangleStackIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
-import { useParams, useSelectedLayoutSegment } from "next/navigation";
+import { useParams, useSelectedLayoutSegments } from "next/navigation";
 import {
   SidebarItem,
   SidebarLabel,
@@ -13,8 +13,10 @@ import {
 } from "../../_components/sidebar";
 
 export function LocationSidebarMenu() {
-  const segment = useSelectedLayoutSegment();
+  const segments = useSelectedLayoutSegments();
   const params = useParams();
+
+  const lastSegment = segments.at(-1);
 
   return (
     <SidebarSection>
@@ -22,23 +24,23 @@ export function LocationSidebarMenu() {
         {
           name: "Cohorten",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          href: `/${params.location}/cohorten`,
+          href: `/locatie/${params.location}/cohorten`,
           Icon: RectangleStackIcon,
-          current: segment === "cohorten",
+          current: lastSegment === "cohorten",
         },
         {
           name: "Personen",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          href: `/${params.location}/personen`,
+          href: `/locatie/${params.location}/personen`,
           Icon: UserGroupIcon,
-          current: segment === "personen",
+          current: lastSegment === "personen",
         },
         {
           name: "Diploma's",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          href: `/${params.location}/diplomas`,
+          href: `/locatie/${params.location}/diplomas`,
           Icon: AcademicCapIcon,
-          current: segment === "diplomas",
+          current: lastSegment === "diplomas",
         },
       ].map((item) => (
         <SidebarItem key={item.name} href={item.href} current={item.current}>

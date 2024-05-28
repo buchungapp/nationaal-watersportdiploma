@@ -2,9 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import { Input } from "~/app/(dashboard)/_components/input";
+import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import Spinner from "~/app/_components/spinner";
-import { Input } from "../../_components/input";
-import { useSetQueryParams } from "../../_utils/set-query-params";
 
 export default function Search() {
   // TODO: this still needs debouncing

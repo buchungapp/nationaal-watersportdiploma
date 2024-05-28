@@ -42,10 +42,8 @@ import { UserSelector } from "./_components/user-selector";
 
 export default function Layout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { location: string };
 }>) {
   return (
     <SidebarLayout

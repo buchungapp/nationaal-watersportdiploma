@@ -5,14 +5,14 @@ import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ComponentProps } from "react";
 import { useDeferredValue, useEffect, useState, useTransition } from "react";
-import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
-import Spinner from "~/app/_components/spinner";
-import { Checkbox } from "../../../_components/checkbox";
+import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
-} from "../../../_components/popover";
+} from "~/app/(dashboard)/_components/popover";
+import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
+import Spinner from "~/app/_components/spinner";
 
 function CheckboxButton({
   children,

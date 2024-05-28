@@ -1,4 +1,4 @@
-import { Badge } from "../../_components/badge";
+import { Badge } from "~/app/(dashboard)/_components/badge";
 
 type Role =
   | "student"
