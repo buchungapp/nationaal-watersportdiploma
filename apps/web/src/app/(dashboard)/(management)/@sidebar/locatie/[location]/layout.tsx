@@ -1,7 +1,7 @@
 import {
-  LightBulbIcon,
+  ChatBubbleOvalLeftIcon,
   QuestionMarkCircleIcon,
-} from "@heroicons/react/16/solid";
+} from "@heroicons/react/20/solid";
 import {
   SidebarBody,
   SidebarHeader,
@@ -37,8 +37,8 @@ export default function SidebarLayout({ params, children }: LayoutProps) {
             <SidebarLabel>Helpcentrum</SidebarLabel>
           </SidebarItem>
           <SidebarItem href="/help" target="_blank">
-            <LightBulbIcon />
-            <SidebarLabel>Feedback delen</SidebarLabel>
+            <ChatBubbleOvalLeftIcon />
+            <SidebarLabel>Melding doen</SidebarLabel>
           </SidebarItem>
         </SidebarSection>
       </SidebarBody>
