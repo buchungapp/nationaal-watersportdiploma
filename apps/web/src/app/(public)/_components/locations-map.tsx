@@ -124,8 +124,6 @@ export function LocationsMap({ locations }: Props) {
   });
   const isContextDefined = useContext(SelectedLocationContext) !== undefined;
 
-  console.log("isContextDefined", isContextDefined);
-
   const MapComponent = (
     <Map
       mapId="ea3856b90f7238a7"

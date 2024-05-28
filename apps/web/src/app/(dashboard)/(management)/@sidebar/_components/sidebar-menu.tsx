@@ -17,8 +17,6 @@ export function LocationSidebarMenu() {
   const segments = useSelectedLayoutSegments();
   const params = useParams();
 
-  console.log("segments :>> ", segments);
-
   const lastSegment = segments.at(-1);
 
   return (

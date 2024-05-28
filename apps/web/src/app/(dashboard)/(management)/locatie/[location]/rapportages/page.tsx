@@ -5,7 +5,7 @@ export default function Page() {
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-sm:w-full sm:flex-1">
-          <Heading>Instellingen</Heading>
+          <Heading>Rapportages</Heading>
         </div>
       </div>
     </>
