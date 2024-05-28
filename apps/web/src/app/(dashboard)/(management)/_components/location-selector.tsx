@@ -1,29 +1,35 @@
-import { MenuButton } from "@headlessui/react";
-import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
+import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
-import { retrieveLocationByHandle } from "~/lib/nwd";
+import { listLocationsForPerson } from "~/lib/nwd";
 import { Avatar } from "../../_components/avatar";
 import {
   Dropdown,
+  DropdownButton,
+  DropdownDivider,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
 } from "../../_components/dropdown";
+import { SidebarItem, SidebarLabel } from "../../_components/sidebar";
 
 export async function LocationSelector({
   currentLocationSlug,
 }: {
   currentLocationSlug: string;
 }) {
-  const currentLocation = await retrieveLocationByHandle(
-    currentLocationSlug,
-  ).catch(() => notFound());
+  const locations = await listLocationsForPerson();
+
+  const currentLocation = locations.find(
+    (location) => location.handle === currentLocationSlug,
+  );
+
+  if (!currentLocation) {
+    return notFound();
+  }
 
   return (
     <Dropdown>
-      <MenuButton
-        className="flex items-center w-full gap-3 rounded-xl border border-transparent py-1 data-[active]:border-zinc-200 data-[hover]:border-zinc-200 dark:data-[active]:border-zinc-700 dark:data-[hover]:border-zinc-700"
-        aria-label="Account options"
-      >
+      <DropdownButton as={SidebarItem} className="lg:mb-2.5">
         <Avatar
           className="size-6"
           initials={(currentLocation.name ?? currentLocation.handle).slice(
@@ -31,17 +37,30 @@ export async function LocationSelector({
             2,
           )}
         />
-        <span className="block text-left">
-          <span className="block text-sm/5 font-medium">
-            {currentLocation.name}
-          </span>
-        </span>
-        <ChevronUpDownIcon className="ml-auto mr-1 size-4 shrink-0 stroke-zinc-400" />
-      </MenuButton>
-      <DropdownMenu className="min-w-[--button-width] z-50">
-        <DropdownItem href={`/${currentLocationSlug}/instellingen`}>
-          Instellingen
+        <SidebarLabel> {currentLocation.name}</SidebarLabel>
+        <ChevronDownIcon />
+      </DropdownButton>
+
+      <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
+        <DropdownItem href={`/locatie/${currentLocationSlug}/instellingen`}>
+          <Cog8ToothIcon />
+          <DropdownLabel>Instellingen</DropdownLabel>
         </DropdownItem>
+        <DropdownDivider />
+
+        {locations.map((location) => (
+          <DropdownItem
+            key={location.id}
+            href={`/locatie/${location.handle}/personen`}
+          >
+            <Avatar
+              slot="icon"
+              initials={(location.name ?? location.handle).slice(0, 2)}
+              className="bg-purple-500 text-white "
+            />
+            <DropdownLabel>{location.name}</DropdownLabel>
+          </DropdownItem>
+        ))}
       </DropdownMenu>
     </Dropdown>
   );
