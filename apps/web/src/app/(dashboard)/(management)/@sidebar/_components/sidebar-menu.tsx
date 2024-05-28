@@ -2,10 +2,11 @@
 
 import {
   AcademicCapIcon,
-  RectangleStackIcon,
+  CalendarDaysIcon,
+  ChartBarIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
-import { useParams } from "next/navigation";
+import { useParams, useSelectedLayoutSegments } from "next/navigation";
 import {
   SidebarItem,
   SidebarLabel,
@@ -13,9 +14,12 @@ import {
 } from "../../../_components/sidebar";
 
 export function LocationSidebarMenu() {
+  const segments = useSelectedLayoutSegments();
   const params = useParams();
 
-  const lastSegment = (params.routes as string[]).at(-1);
+  console.log("segments :>> ", segments);
+
+  const lastSegment = segments.at(-1);
 
   return (
     <SidebarSection>
@@ -24,7 +28,7 @@ export function LocationSidebarMenu() {
           name: "Cohorten",
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/locatie/${params.location}/cohorten`,
-          Icon: RectangleStackIcon,
+          Icon: CalendarDaysIcon,
           current: lastSegment === "cohorten",
         },
         {
@@ -39,6 +43,13 @@ export function LocationSidebarMenu() {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/locatie/${params.location}/diplomas`,
           Icon: AcademicCapIcon,
+          current: lastSegment === "diplomas",
+        },
+        {
+          name: "Rapportages",
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          href: `/locatie/${params.location}/rapportages`,
+          Icon: ChartBarIcon,
           current: lastSegment === "diplomas",
         },
       ].map((item) => (

@@ -1,5 +1,5 @@
 import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
-import { notFound, useSelectedLayoutSegments } from "next/navigation";
+import { notFound } from "next/navigation";
 import { listLocationsForPerson } from "~/lib/nwd";
 import { Avatar } from "../../../_components/avatar";
 import {
@@ -18,13 +18,10 @@ export async function LocationSelector({
   currentLocationSlug: string;
 }) {
   const locations = await listLocationsForPerson();
-  const segments = useSelectedLayoutSegments();
 
   const currentLocation = locations.find(
     (location) => location.handle === currentLocationSlug,
   );
-
-  console.log("segment :>> ", segments);
 
   if (!currentLocation) {
     return notFound();

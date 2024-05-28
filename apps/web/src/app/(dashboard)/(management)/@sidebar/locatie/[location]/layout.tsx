@@ -14,14 +14,16 @@ import LatestNews from "../../_components/latest-news";
 import { LocationSelector } from "../../_components/location-selector";
 import { LocationSidebarMenu } from "../../_components/sidebar-menu";
 
-interface PageProps {
+interface LayoutProps {
+  children: React.ReactNode;
   params: {
     location: string;
   };
 }
-export default function SidebarLayout({ params }: PageProps) {
+export default function SidebarLayout({ params, children }: LayoutProps) {
   return (
     <>
+      {children}
       <SidebarHeader>
         <LocationSelector currentLocationSlug={params.location} />
       </SidebarHeader>
