@@ -200,6 +200,14 @@ export const listGearTypes = cache(async () => {
   });
 });
 
+export const listCategories = cache(async () => {
+  return makeRequest(async () => {
+    const categories = await Program.Category.list();
+
+    return categories;
+  });
+});
+
 export const listCountries = cache(async () => {
   return makeRequest(async () => {
     const disciplines = await Platform.Country.list();

@@ -28,29 +28,38 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
-import type { listGearTypes } from "~/lib/nwd";
+import type { listCategories } from "~/lib/nwd";
 
-type GearType = Awaited<ReturnType<typeof listGearTypes>>[number];
+type Category = Awaited<ReturnType<typeof listCategories>>[number];
 
-const columnHelper = createColumnHelper<GearType>();
+const columnHelper = createColumnHelper<Category>();
 
 const columns = [
   columnHelper.accessor("title", {
     header: "Naam",
   }),
+  columnHelper.accessor("description", {
+    header: "Omschrijving",
+  }),
+  columnHelper.accessor("weight", {
+    header: "Sortering",
+  }),
+  columnHelper.accessor("parent.title", {
+    header: "Hoofdcategorie",
+  }),
 ];
 
 export default function ModuleTable({
-  gearTypes,
+  categories,
   totalItems,
 }: {
-  gearTypes: GearType[];
+  categories: Category[];
   totalItems: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
-    data: gearTypes,
+    data: categories,
     columns,
     enableRowSelection: true,
     getRowId: (row) => row.id,

@@ -1,15 +1,15 @@
 import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listGearTypes } from "~/lib/nwd";
+import { listCategories } from "~/lib/nwd";
 import Search from "../../../_components/search";
-import GearTypeTableCLient from "./_components/gear-type-table";
+import CategoryTableCLient from "./_components/category-table";
 
-async function GearTypeTable({
+async function CategoryTable({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const gearTypes = await listGearTypes();
+  const categories = await listCategories();
   const searchQuery = searchParams?.query?.toString() ?? null;
 
   // Create a FlexSearch index
@@ -23,16 +23,16 @@ async function GearTypeTable({
   });
 
   // Add programs to the index
-  gearTypes.forEach((module) => {
-    index.add(module.id, module.title!);
+  categories.forEach((category) => {
+    index.add(category.id, category.title!);
   });
 
   // Search programs using FlexSearch
-  let filteredGearTypes = gearTypes;
+  let filteredCategories = categories;
   if (searchQuery) {
     const results = index.search(searchQuery);
-    filteredGearTypes = results.map(
-      (result) => gearTypes.find((gearType) => gearType.id === result)!,
+    filteredCategories = results.map(
+      (result) => categories.find((category) => category.id === result)!,
     );
   }
 
@@ -40,15 +40,15 @@ async function GearTypeTable({
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
-  const paginatedGearTypes = filteredGearTypes.slice(
+  const paginatedCategories = filteredCategories.slice(
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit,
   );
 
   return (
-    <GearTypeTableCLient
-      gearTypes={paginatedGearTypes}
-      totalItems={filteredGearTypes.length}
+    <CategoryTableCLient
+      categories={paginatedCategories}
+      totalItems={filteredCategories.length}
     />
   );
 }
@@ -62,13 +62,13 @@ export default function Page({
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-sm:w-full sm:flex-1">
-          <Heading>Materialen</Heading>
+          <Heading>Categorieën</Heading>
           <div className="mt-4 flex max-w-xl gap-4">
-            <Search placeholder="Doorzoek modules..." />
+            <Search placeholder="Doorzoek categorieën..." />
           </div>
         </div>
       </div>
-      <GearTypeTable searchParams={searchParams} />
+      <CategoryTable searchParams={searchParams} />
     </>
   );
 }
