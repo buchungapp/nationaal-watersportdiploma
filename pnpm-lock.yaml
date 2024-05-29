@@ -219,6 +219,9 @@ importers:
       tailwind-merge:
         specifier: ^2.2.1
         version: 2.3.0
+      use-debounce:
+        specifier: ^10.0.1
+        version: 10.0.1(react@18.3.1)
       zod:
         specifier: ^3.22.4
         version: 3.23.5
@@ -13209,6 +13212,15 @@ packages:
 
   /url-template@2.0.8:
     resolution: {integrity: sha512-XdVKMF4SJ0nP/O7XIPB0JwAEuT9lDIYnNsK8yGVe43y0AWoKeJNdv3ZNWh7ksJ6KqQFjOO6ox/VEitLnaVNufw==}
+    dev: false
+
+  /use-debounce@10.0.1(react@18.3.1):
+    resolution: {integrity: sha512-0uUXjOfm44e6z4LZ/woZvkM8FwV1wiuoB6xnrrOmeAEjRDDzTLQNRFtYHvqUsJdrz1X37j0rVGIVp144GLHGKg==}
+    engines: {node: '>= 16.0.0'}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.3.1
     dev: false
 
   /util-deprecate@1.0.2:

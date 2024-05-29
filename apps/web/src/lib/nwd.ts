@@ -107,7 +107,7 @@ export const listCertificates = cache(async (locationId: string) => {
 
     if (!person) return [];
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -132,7 +132,7 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
 
     if (!person) return [];
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -165,6 +165,22 @@ export const listDisciplines = cache(async () => {
     const disciplines = await Program.Discipline.list();
 
     return disciplines;
+  });
+});
+
+export const listModules = cache(async () => {
+  return makeRequest(async () => {
+    const modules = await Program.Module.list();
+
+    return modules;
+  });
+});
+
+export const listCompetencies = cache(async () => {
+  return makeRequest(async () => {
+    const competencies = await Program.Competency.list();
+
+    return competencies;
   });
 });
 
@@ -234,7 +250,7 @@ export const retrieveLocationByHandle = cache(async (handle: string) => {
       throw new Error("Person not found for user");
     }
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -259,7 +275,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
       throw new Error("Person not found for user");
     }
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -288,7 +304,7 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
       throw new Error("Person not found for user");
     }
 
-    const locations = await User.Person.listLocations({
+    const locations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -320,7 +336,7 @@ export const createPersonForLocation = async (
       throw new Error("Person not found for user");
     }
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: authPerson.id,
       roles: ["location_admin"],
     });
@@ -394,7 +410,7 @@ export const createCompletedCertificate = async (
         throw new Error("Person not found for user");
       }
 
-      const availableLocations = await User.Person.listLocations({
+      const availableLocations = await User.Person.listLocationsByRole({
         personId: authPerson.id,
         roles: ["location_admin"],
       });

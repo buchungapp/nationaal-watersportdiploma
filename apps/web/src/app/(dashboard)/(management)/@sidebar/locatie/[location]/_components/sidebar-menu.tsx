@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 "use client";
 
 import {
@@ -11,7 +12,7 @@ import {
   SidebarItem,
   SidebarLabel,
   SidebarSection,
-} from "../../../_components/sidebar";
+} from "../../../../../_components/sidebar";
 
 export function LocationSidebarMenu() {
   const segments = useSelectedLayoutSegments();
@@ -24,28 +25,24 @@ export function LocationSidebarMenu() {
       {[
         {
           name: "Cohorten",
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/locatie/${params.location}/cohorten`,
           Icon: CalendarDaysIcon,
           current: lastSegment === "cohorten",
         },
         {
           name: "Personen",
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/locatie/${params.location}/personen`,
           Icon: UserGroupIcon,
           current: lastSegment === "personen",
         },
         {
           name: "Diploma's",
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/locatie/${params.location}/diplomas`,
           Icon: AcademicCapIcon,
           current: lastSegment === "diplomas",
         },
         {
           name: "Inzichten",
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           href: `/locatie/${params.location}/inzichten`,
           Icon: ChartBarIcon,
           current: lastSegment === "inzichten",

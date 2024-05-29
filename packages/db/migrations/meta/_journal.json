@@ -43,6 +43,13 @@
       "when": 1714652218717,
       "tag": "0005_melted_hemingway",
       "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1716982127534,
+      "tag": "0006_mighty_the_anarchist",
+      "breakpoints": false
     }
   ]
 }

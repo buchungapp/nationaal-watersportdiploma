@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -39,7 +39,7 @@ export const create = withZod(
 export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query.select().from(s.degree)
+  const rows = await query.select().from(s.degree).orderBy(asc(s.degree.rang))
 
   return rows
 })

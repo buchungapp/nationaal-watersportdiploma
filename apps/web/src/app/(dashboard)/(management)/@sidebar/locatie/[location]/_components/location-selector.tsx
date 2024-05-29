@@ -1,7 +1,7 @@
 import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { listLocationsForPerson } from "~/lib/nwd";
-import { Avatar } from "../../../_components/avatar";
+import { Avatar } from "../../../../../_components/avatar";
 import {
   Dropdown,
   DropdownButton,
@@ -9,8 +9,8 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
-} from "../../../_components/dropdown";
-import { SidebarItem, SidebarLabel } from "../../../_components/sidebar";
+} from "../../../../../_components/dropdown";
+import { SidebarItem, SidebarLabel } from "../../../../../_components/sidebar";
 
 export async function LocationSelector({
   currentLocationSlug,

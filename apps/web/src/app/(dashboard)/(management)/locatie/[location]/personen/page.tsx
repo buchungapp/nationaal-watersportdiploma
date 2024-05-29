@@ -12,7 +12,7 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import Search from "../_components/search";
+import Search from "../../../_components/search";
 import {
   DialogButtons,
   DialogWrapper,

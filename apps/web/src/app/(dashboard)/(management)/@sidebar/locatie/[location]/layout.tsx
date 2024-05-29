@@ -11,8 +11,8 @@ import {
   SidebarSpacer,
 } from "~/app/(dashboard)/_components/sidebar";
 import LatestNews from "../../_components/latest-news";
-import { LocationSelector } from "../../_components/location-selector";
-import { LocationSidebarMenu } from "../../_components/sidebar-menu";
+import { LocationSelector } from "./_components/location-selector";
+import { LocationSidebarMenu } from "./_components/sidebar-menu";
 
 interface LayoutProps {
   children: React.ReactNode;
