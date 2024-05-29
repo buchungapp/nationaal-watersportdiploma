@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { desc, eq } from 'drizzle-orm'
+import { asc, desc, eq, isNull } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
@@ -48,13 +48,35 @@ export const create = withZod(
 export const list = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
 
-  const rows = await query.select().from(s.category)
+  const rows = await query
+    .select()
+    .from(s.category)
+    .orderBy(asc(s.category.weight))
 
   return rows.map(({ parentCategoryId, ...row }) => ({
     ...row,
     parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
   }))
 })
+
+export const listParentCategories = withZod(
+  z.void(),
+  outputSchema.omit({ parent: true }).array(),
+  async () => {
+    const query = useQuery()
+
+    const rows = await query
+      .select()
+      .from(s.category)
+      .where(isNull(s.category.parentCategoryId))
+      .orderBy(asc(s.category.weight))
+
+    return rows.map(({ parentCategoryId, ...row }) => ({
+      ...row,
+      parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
+    }))
+  },
+)
 
 export const fromHandle = withZod(
   handleSchema,

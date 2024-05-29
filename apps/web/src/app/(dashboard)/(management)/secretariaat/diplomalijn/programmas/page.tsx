@@ -1,6 +1,6 @@
 import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listPrograms } from "~/lib/nwd";
+import { listParentCategories, listPrograms } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import ProgramTableClient from "./_components/program-table";
 
@@ -9,7 +9,10 @@ async function ProgramTable({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const programs = await listPrograms();
+  const [programs, parentCategories] = await Promise.all([
+    listPrograms(),
+    listParentCategories(),
+  ]);
   const searchQuery = searchParams?.query?.toString() ?? null;
 
   // Create a FlexSearch index
@@ -48,6 +51,7 @@ async function ProgramTable({
   return (
     <ProgramTableClient
       programs={paginatedPrograms}
+      parentCategories={parentCategories}
       totalItems={filteredPrograms.length}
     />
   );

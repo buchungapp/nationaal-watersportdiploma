@@ -12,10 +12,6 @@ import clsx from "clsx";
 import { useMemo, useState } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
-  Checkbox,
-  CheckboxField,
-} from "~/app/(dashboard)/_components/checkbox";
-import {
   Popover,
   PopoverButton,
   PopoverPanel,
@@ -33,7 +29,7 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
-import type { listPrograms } from "~/lib/nwd";
+import type { listParentCategories, listPrograms } from "~/lib/nwd";
 
 type Program = Awaited<ReturnType<typeof listPrograms>>[number];
 
@@ -41,71 +37,17 @@ const columnHelper = createColumnHelper<Program>();
 
 export default function ProgramTable({
   programs,
+  parentCategories,
   totalItems,
 }: {
   programs: Program[];
+  parentCategories: Awaited<ReturnType<typeof listParentCategories>>;
   totalItems: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const columns = useMemo(() => {
-    const uniqueParentCategories = new Map<
-      string,
-      {
-        createdAt: string;
-        updatedAt: string;
-        deletedAt: string | null;
-        id: string;
-        handle: string;
-        description: string | null;
-        title: string | null;
-        weight: number;
-      }
-    >();
-
-    programs.forEach((program) => {
-      program.categories.forEach((category) => {
-        !!category.parent &&
-          uniqueParentCategories.set(category.parent.id, category.parent);
-      });
-    });
-
     return [
-      columnHelper.display({
-        id: "select",
-        cell: ({ row }) => (
-          <CheckboxField>
-            <Checkbox
-              {...{
-                checked: row.getIsSelected(),
-                disabled: !row.getCanSelect(),
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler(),
-              }}
-              className="-translate-y-[1px]"
-            />
-          </CheckboxField>
-        ),
-        header: ({ table }) => (
-          <CheckboxField>
-            <Checkbox
-              {...{
-                disabled: false,
-                checked:
-                  table.getIsSomePageRowsSelected() ||
-                  table.getIsAllPageRowsSelected(),
-                indeterminate: !table.getIsAllPageRowsSelected(),
-                onChange: (checked) => table.toggleAllPageRowsSelected(checked),
-              }}
-              className="-translate-y-[1px]"
-            />
-          </CheckboxField>
-        ),
-        enableSorting: false,
-        meta: {
-          suppressLinkBehavior: true,
-        },
-      }),
       columnHelper.accessor("title", {
         header: "Naam",
       }),
@@ -115,14 +57,19 @@ export default function ProgramTable({
       columnHelper.accessor("degree.title", {
         header: "Niveau",
       }),
-      ...Array.from(uniqueParentCategories.values()).map((category) =>
+      ...parentCategories.map((category) =>
         columnHelper.display({
-          id: category.id,
+          id: `category-${category.id}`,
           header: category.title!,
-          cell: ({ row }) =>
-            row.original.categories
-              .filter((c) => c.parent?.id === category.id)
-              .map((c) => <Badge>{c.title}</Badge>),
+          cell: ({ row }) => (
+            <div className="flex items-center gap-x-2.5">
+              {row.original.categories
+                .filter((c) => c.parent?.id === category.id)
+                .map((c) => (
+                  <Badge>{c.title}</Badge>
+                ))}
+            </div>
+          ),
         }),
       ),
     ];

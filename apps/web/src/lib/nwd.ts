@@ -208,6 +208,14 @@ export const listCategories = cache(async () => {
   });
 });
 
+export const listParentCategories = cache(async () => {
+  return makeRequest(async () => {
+    const categories = await Program.Category.listParentCategories();
+
+    return categories;
+  });
+});
+
 export const listCountries = cache(async () => {
   return makeRequest(async () => {
     const disciplines = await Platform.Country.list();

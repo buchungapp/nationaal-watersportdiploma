@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useState } from "react";
+import { CompetencyTypeBadge } from "~/app/(dashboard)/_components/badges";
 import {
   Popover,
   PopoverButton,
@@ -40,13 +41,16 @@ const columns = [
   }),
   columnHelper.accessor("type", {
     header: "Type",
+    cell: ({ getValue }) => {
+      return <CompetencyTypeBadge type={getValue()} />;
+    },
   }),
   columnHelper.accessor("weight", {
     header: "Sortering",
   }),
 ];
 
-export default function ProgramTable({
+export default function CompetencyTable({
   competencies,
   totalItems,
 }: {
