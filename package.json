@@ -7,6 +7,7 @@
     "formatting": "prettier --check *",
     "formatting:fix": "prettier --write *",
     "initialize": "node ./scripts/initialize.js",
+    "db:reset": "node ./scripts/reset-migrate-local-db.js",
     "db:seed": "snaplet ss restore --latest --no-reset --no-schema"
   },
   "devDependencies": {
