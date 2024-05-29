@@ -117,6 +117,59 @@ export const category = pgTable(
   },
 )
 
+export const course = pgTable(
+  'course',
+  {
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    handle: text('handle').notNull(),
+    title: text('title'),
+    description: text('description'),
+    disciplineId: uuid('discipline_id').notNull(),
+    ...timestamps,
+  },
+  (table) => {
+    return {
+      unqHandle: uniqueIndex().on(table.handle),
+      disciplineReference: foreignKey({
+        columns: [table.disciplineId],
+        foreignColumns: [discipline.id],
+        name: 'course_discipline_id_fk',
+      }),
+    }
+  },
+)
+
+export const courseCategory = pgTable(
+  'course_category',
+  {
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    courseId: uuid('course_id').notNull(),
+    categoryId: uuid('category_id').notNull(),
+    ...timestamps,
+  },
+  (table) => {
+    return {
+      courseReference: foreignKey({
+        columns: [table.courseId],
+        foreignColumns: [program.id],
+        name: 'course_category_program_id_fk',
+      }),
+      categoryReference: foreignKey({
+        columns: [table.categoryId],
+        foreignColumns: [category.id],
+        name: 'course_category_category_id_fk',
+      }),
+      unqCourseCategory: uniqueIndex().on(table.categoryId, table.courseId),
+    }
+  },
+)
+
 export const program = pgTable(
   'program',
   {
@@ -127,6 +180,7 @@ export const program = pgTable(
     handle: text('handle').notNull(),
     title: text('title'),
     disciplineId: uuid('discipline_id').notNull(),
+    courseId: uuid('course_id'),
     degreeId: uuid('degree_id').notNull(),
     ...timestamps,
   },
@@ -137,6 +191,11 @@ export const program = pgTable(
         columns: [table.disciplineId],
         foreignColumns: [discipline.id],
         name: 'program_discipline_id_fk',
+      }),
+      courseReference: foreignKey({
+        columns: [table.courseId],
+        foreignColumns: [course.id],
+        name: 'program_course_id_fk',
       }),
       degreeReference: foreignKey({
         columns: [table.degreeId],
