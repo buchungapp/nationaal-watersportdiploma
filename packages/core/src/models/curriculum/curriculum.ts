@@ -1,5 +1,14 @@
 import { schema as s } from '@nawadi/db'
-import { SQLWrapper, and, desc, eq, inArray, isNotNull, lte } from 'drizzle-orm'
+import {
+  SQLWrapper,
+  and,
+  countDistinct,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  lte,
+} from 'drizzle-orm'
 import assert from 'node:assert'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -255,6 +264,24 @@ export const list = withZod(
     })
 
     return mapped
+  },
+)
+
+export const countStartedStudents = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+  }),
+  z.number(),
+  async ({ curriculumId }) => {
+    const query = useQuery()
+
+    const count = await query
+      .select({ count: countDistinct(s.studentCurriculum.personId) })
+      .from(s.studentCurriculum)
+      .where(eq(s.studentCurriculum.curriculumId, curriculumId))
+      .then((rows) => rows[0]?.count ?? 0)
+
+    return count
   },
 )
 

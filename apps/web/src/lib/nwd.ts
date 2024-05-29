@@ -250,15 +250,29 @@ export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
   });
 });
 
-export const listCurriculaByProgram = cache(async (programId: string) => {
-  return makeRequest(async () => {
-    const disciplines = await Curriculum.list({
-      filter: { onlyCurrentActive: true, programId },
-    });
+export const listCurriculaByProgram = cache(
+  async (programId: string, onlyCurrentActive = true) => {
+    return makeRequest(async () => {
+      const disciplines = await Curriculum.list({
+        filter: { onlyCurrentActive, programId },
+      });
 
-    return disciplines;
-  });
-});
+      return disciplines;
+    });
+  },
+);
+
+export const countStartedStudentsForCurriculum = cache(
+  async (curriculumId: string) => {
+    return makeRequest(async () => {
+      const count = await Curriculum.countStartedStudents({
+        curriculumId,
+      });
+
+      return count;
+    });
+  },
+);
 
 export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
   return makeRequest(async () => {

@@ -140,7 +140,7 @@ export default function ProgramTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`/secretariaat/diplomalijn/programmas/${row.original.handle}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
