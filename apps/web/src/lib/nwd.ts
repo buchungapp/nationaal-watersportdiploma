@@ -168,6 +168,14 @@ export const listDisciplines = cache(async () => {
   });
 });
 
+export const listDegrees = cache(async () => {
+  return makeRequest(async () => {
+    const degrees = await Program.Degree.list();
+
+    return degrees;
+  });
+});
+
 export const listModules = cache(async () => {
   return makeRequest(async () => {
     const modules = await Program.Module.list();
@@ -181,6 +189,14 @@ export const listCompetencies = cache(async () => {
     const competencies = await Program.Competency.list();
 
     return competencies;
+  });
+});
+
+export const listGearTypes = cache(async () => {
+  return makeRequest(async () => {
+    const gearTypes = await Curriculum.GearType.list();
+
+    return gearTypes;
   });
 });
 

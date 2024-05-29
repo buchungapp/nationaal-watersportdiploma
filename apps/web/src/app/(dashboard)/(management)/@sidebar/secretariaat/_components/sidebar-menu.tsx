@@ -34,6 +34,26 @@ export function SecretariaatSidebarMenu() {
             href: `/secretariaat/diplomalijn/competenties`,
             current: lastSegment === "competenties",
           },
+          {
+            name: "Materialen",
+            href: `/secretariaat/diplomalijn/materialen`,
+            current: lastSegment === "materialen",
+          },
+          {
+            name: "Disciplines",
+            href: `/secretariaat/diplomalijn/disciplines`,
+            current: lastSegment === "disciplines",
+          },
+          {
+            name: "Niveaus",
+            href: `/secretariaat/diplomalijn/niveaus`,
+            current: lastSegment === "niveaus",
+          },
+          {
+            name: "Categorieën",
+            href: `/secretariaat/diplomalijn/categorieen`,
+            current: lastSegment === "categorieen",
+          },
         ].map((item) => (
           <SidebarItem key={item.name} href={item.href} current={item.current}>
             <SidebarLabel> {item.name}</SidebarLabel>
@@ -72,12 +92,12 @@ export function SecretariaatSidebarMenu() {
       </SidebarSection>
 
       <SidebarSection>
-        <SidebarHeading>Diploma's</SidebarHeading>
+        <SidebarHeading>Opleidingen</SidebarHeading>
         {[
           {
-            name: "Overzicht",
-            href: `/secretariaat/diplomas`,
-            current: lastSegment === "cohorten",
+            name: "Diploma's",
+            href: `/secretariaat/opleidingen/diplomas`,
+            current: lastSegment === "diplomas",
           },
         ].map((item) => (
           <SidebarItem key={item.name} href={item.href} current={item.current}>
