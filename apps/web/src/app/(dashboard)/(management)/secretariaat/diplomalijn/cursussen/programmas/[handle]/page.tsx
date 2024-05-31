@@ -22,6 +22,7 @@ import {
   listParentCategories,
   listPrograms,
 } from "~/lib/nwd";
+import { CopyCurriculum } from "../../_components/action-buttons";
 
 type Curriculum = Awaited<ReturnType<typeof listCurriculaByProgram>>[number];
 
@@ -59,6 +60,11 @@ async function Curriculum({
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12">
         <div>
+          <div>
+            <CopyCurriculum curriculumId={curriculum.id} />
+          </div>
+          <Divider soft className="my-6" />
+
           {curriculum.startedAt ? (
             <>
               <div className="flex flex-col space-y-1">
@@ -76,7 +82,7 @@ async function Curriculum({
             </>
           ) : null}
 
-          <div className="mt-2.5 flex flex-col space-y-1">
+          <div className="flex flex-col space-y-1">
             <Subheading level={3}>Boottypen</Subheading>
             <ul className="">
               {gearTypes.map((gearType) => (
@@ -91,8 +97,8 @@ async function Curriculum({
         <div className="lg:col-span-2">
           {curriculum.modules.map((module, index) => {
             return (
-              <>
-                <div key={module.id} className="">
+              <React.Fragment key={module.id}>
+                <div className="">
                   <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-x-2">
                       <div className="flex-shrink-0 w-12">
@@ -132,7 +138,7 @@ async function Curriculum({
                 {index < curriculum.modules.length - 1 ? (
                   <Divider soft className="my-6" />
                 ) : null}
-              </>
+              </React.Fragment>
             );
           })}
         </div>

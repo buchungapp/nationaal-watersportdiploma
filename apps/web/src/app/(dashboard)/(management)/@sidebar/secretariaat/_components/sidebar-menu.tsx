@@ -20,39 +20,43 @@ export function SecretariaatSidebarMenu() {
         <SidebarHeading>Diplomalijn</SidebarHeading>
         {[
           {
-            name: "Programma's",
-            href: `/secretariaat/diplomalijn/programmas`,
-            current: lastSegment === "programmas",
+            name: "Cursussen",
+            href: `/secretariaat/diplomalijn/cursussen`,
+            current: segments.slice(0, 2).join("/") === "diplomalijn/cursussen",
           },
           {
             name: "Modules",
             href: `/secretariaat/diplomalijn/modules`,
-            current: lastSegment === "modules",
+            current: segments.slice(0, 2).join("/") === "diplomalijn/modules",
           },
           {
             name: "Competenties",
             href: `/secretariaat/diplomalijn/competenties`,
-            current: lastSegment === "competenties",
+            current:
+              segments.slice(0, 2).join("/") === "diplomalijn/competenties",
           },
           {
             name: "Materialen",
             href: `/secretariaat/diplomalijn/materialen`,
-            current: lastSegment === "materialen",
+            current:
+              segments.slice(0, 2).join("/") === "diplomalijn/materialen",
           },
           {
             name: "Disciplines",
             href: `/secretariaat/diplomalijn/disciplines`,
-            current: lastSegment === "disciplines",
+            current:
+              segments.slice(0, 2).join("/") === "diplomalijn/disciplines",
           },
           {
             name: "Niveaus",
             href: `/secretariaat/diplomalijn/niveaus`,
-            current: lastSegment === "niveaus",
+            current: segments.slice(0, 2).join("/") === "diplomalijn/niveaus",
           },
           {
             name: "Categorieën",
             href: `/secretariaat/diplomalijn/categorieen`,
-            current: lastSegment === "categorieen",
+            current:
+              segments.slice(0, 2).join("/") === "diplomalijn/categorieen",
           },
         ].map((item) => (
           <SidebarItem key={item.name} href={item.href} current={item.current}>

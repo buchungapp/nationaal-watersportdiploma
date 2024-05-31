@@ -274,6 +274,21 @@ export const countStartedStudentsForCurriculum = cache(
   },
 );
 
+export const copyCurriculum = async ({
+  curriculumId,
+  revision,
+}: {
+  curriculumId: string;
+  revision?: string;
+}) => {
+  return makeRequest(async () => {
+    return Curriculum.copy({
+      curriculumId,
+      revision: revision ?? `Copy of ${new Date().toISOString()}`,
+    });
+  });
+};
+
 export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list({

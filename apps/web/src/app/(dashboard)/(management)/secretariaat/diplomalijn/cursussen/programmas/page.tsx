@@ -1,8 +1,8 @@
 import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listParentCategories, listPrograms } from "~/lib/nwd";
-import Search from "../../../_components/search";
-import ProgramTableClient from "./_components/program-table";
+import Search from "../../../../_components/search";
+import ProgramTableClient from "../_components/program-table";
 
 async function ProgramTable({
   searchParams,
