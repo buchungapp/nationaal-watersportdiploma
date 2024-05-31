@@ -251,7 +251,7 @@ export const listLocations = withZod(
         role: s.actor.type,
       })
       .from(s.personLocationLink)
-      .leftJoin(
+      .innerJoin(
         s.actor,
         and(
           eq(s.actor.personId, s.personLocationLink.personId),
