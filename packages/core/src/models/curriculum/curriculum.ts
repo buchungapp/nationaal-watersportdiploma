@@ -20,8 +20,8 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/zod.js'
+import { Module } from '../course/index.js'
 import { Program } from '../index.js'
-import { Module } from '../program/index.js'
 import { insertSchema, outputSchema } from './curriculum.schema.js'
 
 export * as Curriculum from './curriculum.js'

@@ -1,8 +1,8 @@
 import { schema as s } from '@nawadi/db'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { selectSchema as competencySelectSchema } from '../program/competency.schema.js'
-import { selectSchema as moduleSelectSchema } from '../program/module.schema.js'
+import { selectSchema as competencySelectSchema } from '../course/competency.schema.js'
+import { selectSchema as moduleSelectSchema } from '../course/module.schema.js'
 export const insertSchema = createInsertSchema(s.curriculum, {
   programId: (schema) => schema.programId.uuid(),
   revision: (schema) => schema.revision.trim(),
