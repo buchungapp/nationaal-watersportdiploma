@@ -1,7 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
-import { SQLWrapper, and, eq, getTableColumns, inArray } from 'drizzle-orm'
-import { aggregate } from 'drizzle-toolbelt'
+import { SQLWrapper, and, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
@@ -14,7 +13,7 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/index.js'
-import { Category, Degree, Discipline } from './index.js'
+import { Degree, fromId as courseFromId, list as listCourse } from './index.js'
 import { insertSchema, outputSchema } from './program.schema.js'
 
 export const create = withZod(
@@ -29,7 +28,6 @@ export const create = withZod(
         .values({
           title: item.title,
           handle: item.handle,
-          disciplineId: item.disciplineId,
           degreeId: item.degreeId,
         })
         .returning({ id: s.program.id })
@@ -77,46 +75,13 @@ export const list = withZod(
     const programsPromise = query
       .select()
       .from(s.program)
-      .leftJoin(
-        s.programCategory,
-        eq(s.programCategory.programId, s.program.id),
-      )
       .where(and(...whereClausules))
-      .then((rows) => {
-        return Object.values(
-          rows.reduce(
-            (acc, { program, program_category }) => {
-              if (!acc[program.id]) {
-                acc[program.id] = {
-                  ...program,
-                  categories: [],
-                }
-              }
-
-              if (!!program_category) {
-                acc[program.id]!.categories.push(program_category)
-              }
-
-              return acc
-            },
-            {} as Record<
-              string,
-              (typeof rows)[number]['program'] & {
-                categories: NonNullable<
-                  (typeof rows)[number]['program_category']
-                >[]
-              }
-            >,
-          ),
-        )
-      }) // Transform joined rows into a structured format with programs and their categories.
 
     // Fetch additional lists of categories, degrees, and disciplines in parallel to optimize loading times.
-    const [programs, categories, degrees, disciplines] = await Promise.all([
+    const [programs, degrees, courses] = await Promise.all([
       programsPromise,
-      Category.list(),
       Degree.list(),
-      Discipline.list(),
+      listCourse(),
     ])
 
     // Map over the programs to enrich them with additional data like degree, discipline, and categories.
@@ -130,32 +95,22 @@ export const list = withZod(
         enforce: true, // Enforce finding the degree, throw error if not found.
       })
 
-      // Find the corresponding discipline for each program enforcing that it must exist.
-      const discipline = findItem({
-        items: disciplines,
+      // Find the corresponding course for each program enforcing that it must exist.
+      const course = findItem({
+        items: courses,
         predicate(item) {
-          return item.id === program.disciplineId
+          return item.id === program.courseId
         },
-        enforce: true, // Enforce finding the discipline, throw error if not found.
+        enforce: true, // Enforce finding the course, throw error if not found.
       })
 
-      const {
-        categories: programCategories,
-        degreeId,
-        disciplineId,
-        ...programProperties
-      } = program
+      const { courseId, degreeId, disciplineId, ...programProperties } = program
 
       // Construct the final program object with additional details.
       return {
         ...programProperties,
         degree,
-        discipline,
-        categories: categories.filter(
-          (
-            category, // Filter categories relevant to the current program.
-          ) => programCategories.some((pc) => pc.categoryId === category.id),
-        ),
+        course,
       }
     })
   },
@@ -168,46 +123,30 @@ export const fromHandle = withZod(
     const query = useQuery()
 
     const program = await query
-      .select({
-        ...getTableColumns(s.program),
-        category: s.programCategory,
-      })
+      .select()
       .from(s.program)
-      .leftJoin(
-        s.programCategory,
-        eq(s.programCategory.programId, s.program.id),
-      )
+
       .where(eq(s.program.handle, handle))
-      .then(
-        aggregate({
-          pkey: 'id',
-          fields: { categories: 'category.id' },
-        }),
-      )
-      .then((rows) => possibleSingleRow(rows))
+      .then(possibleSingleRow)
 
     if (!program) {
       return null
     }
 
-    const [allCategories, degree, discipline] = await Promise.all([
-      Category.list(),
+    const [course, degree] = await Promise.all([
+      courseFromId(program.courseId!),
       Degree.fromId(program.degreeId),
-      Discipline.fromId(program.disciplineId),
     ])
 
     assert(degree, 'Degree not found')
-    assert(discipline, 'Discipline not found')
+    assert(course, 'Course not found')
 
-    const { categories, degreeId, disciplineId, ...programProperties } = program
+    const { courseId, degreeId, disciplineId, ...programProperties } = program
 
     return {
       ...programProperties,
       degree,
-      discipline,
-      categories: allCategories.filter((category) =>
-        categories.some((pc) => pc.categoryId === category.id),
-      ),
+      course,
     }
   },
 )
@@ -219,46 +158,30 @@ export const fromId = withZod(
     const query = useQuery()
 
     const program = await query
-      .select({
-        ...getTableColumns(s.program),
-        category: s.programCategory,
-      })
+      .select()
       .from(s.program)
-      .leftJoin(
-        s.programCategory,
-        eq(s.programCategory.programId, s.program.id),
-      )
+
       .where(eq(s.program.id, id))
-      .then(
-        aggregate({
-          pkey: 'id',
-          fields: { categories: 'category.id' },
-        }),
-      )
-      .then((rows) => possibleSingleRow(rows))
+      .then(possibleSingleRow)
 
     if (!program) {
       return null
     }
 
-    const [allCategories, degree, discipline] = await Promise.all([
-      Category.list(),
+    const [course, degree] = await Promise.all([
+      courseFromId(program.courseId!),
       Degree.fromId(program.degreeId),
-      Discipline.fromId(program.disciplineId),
     ])
 
     assert(degree, 'Degree not found')
-    assert(discipline, 'Discipline not found')
+    assert(course, 'Course not found')
 
-    const { categories, degreeId, disciplineId, ...programProperties } = program
+    const { courseId, degreeId, disciplineId, ...programProperties } = program
 
     return {
       ...programProperties,
       degree,
-      discipline,
-      categories: allCategories.filter((category) =>
-        categories.some((pc) => pc.categoryId === category.id),
-      ),
+      course,
     }
   },
 )

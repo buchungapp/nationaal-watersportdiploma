@@ -1,5 +1,5 @@
 {
-  "id": "97ab63d6-bd24-42c9-a0f4-48641fe62ad9",
+  "id": "31ac06a0-7281-4111-9e65-45244a51c099",
   "prevId": "e055e1e4-fd0e-4d7c-acc7-ea5030a66585",
   "version": "5",
   "dialect": "pg",
@@ -2301,7 +2301,7 @@
           "name": "discipline_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "course_id": {
           "name": "course_id",

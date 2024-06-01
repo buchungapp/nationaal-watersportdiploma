@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS "course_category" (
 	"deleted_at" timestamp with time zone
 );
 
+ALTER TABLE "program" ALTER COLUMN "discipline_id" DROP NOT NULL;
 ALTER TABLE "program" ADD COLUMN "course_id" uuid;
 CREATE UNIQUE INDEX IF NOT EXISTS "course_handle_index" ON "course" ("handle");
 CREATE UNIQUE INDEX IF NOT EXISTS "course_category_category_id_course_id_index" ON "course_category" ("category_id","course_id");

@@ -3,7 +3,8 @@ import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
 import dayjs from '../../utils/dayjs.js'
 import { Degree, Discipline } from '../course/index.js'
-import { Program } from '../index.js'
+
+import { Course } from '../index.js'
 import * as Curriculum from './curriculum.js'
 
 test.skip('curriculum crud', () =>
@@ -24,11 +25,16 @@ test.skip('curriculum crud', () =>
       createDegree,
     ])
 
-    const { id: programId } = await Program.create({
-      title: 'program-1',
+    const { id: courseId } = await Course.create({
+      title: 'course-1',
+      handle: 'co1',
+      disciplineId,
+    })
+
+    const { id: programId } = await Course.Program.create({
       handle: 'pr1',
       degreeId,
-      disciplineId,
+      courseId,
     })
 
     const { id } = await Curriculum.create({
@@ -68,11 +74,16 @@ test.skip('curriculum list filters', () =>
       createDegree,
     ])
 
-    const { id: programId } = await Program.create({
-      title: 'program-1',
+    const { id: courseId } = await Course.create({
+      title: 'course-1',
+      handle: 'co1',
+      disciplineId,
+    })
+
+    const { id: programId } = await Course.Program.create({
       handle: 'pr1',
       degreeId,
-      disciplineId,
+      courseId,
     })
 
     const startedAt = dayjs().toISOString()

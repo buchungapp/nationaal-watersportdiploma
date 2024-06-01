@@ -21,7 +21,7 @@ import {
   withZod,
 } from '../../utils/zod.js'
 import { Module } from '../course/index.js'
-import { Program } from '../index.js'
+import { Course } from '../index.js'
 import { insertSchema, outputSchema } from './curriculum.schema.js'
 
 export * as Curriculum from './curriculum.js'
@@ -160,7 +160,7 @@ export const list = withZod(
     const [curricula, modules, competencies] = await Promise.all([
       curriculaQuery.where(and(...filters)),
       Module.list(),
-      Program.Competency.list(),
+      Course.Competency.list(),
     ])
 
     const normalizedCurricula = Object.values(

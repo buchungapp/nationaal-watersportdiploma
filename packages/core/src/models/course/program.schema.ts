@@ -1,9 +1,8 @@
 import { schema as s } from '@nawadi/db'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { outputSchema as categorySelectSchema } from './category.schema.js'
+import { outputSchema as courseSelectschema } from './course.schema.js'
 import { selectSchema as degreeSelectSchema } from './degree.schema.js'
-import { selectSchema as disciplineSelectSchema } from './discipline.schema.js'
 
 export const insertSchema = createInsertSchema(s.program, {
   handle: (schema) =>
@@ -13,19 +12,20 @@ export const insertSchema = createInsertSchema(s.program, {
       .min(3)
       .regex(/^[a-z0-9\-]+$/),
   title: (schema) => schema.title.trim(),
-  disciplineId: (schema) => schema.disciplineId.uuid(),
   degreeId: (schema) => schema.degreeId.uuid(),
 })
+  .omit({ disciplineId: true })
+  .required({ courseId: true })
+
 export type Input = z.input<typeof insertSchema>
 
 export const selectSchema = createSelectSchema(s.program)
 
 export const outputSchema = selectSchema
-  .omit({ degreeId: true, disciplineId: true })
+  .omit({ degreeId: true, disciplineId: true, courseId: true })
   .extend({
     degree: degreeSelectSchema,
-    discipline: disciplineSelectSchema,
-    categories: categorySelectSchema.array(),
+    course: courseSelectschema,
   })
 
 export type Output = z.output<typeof outputSchema>

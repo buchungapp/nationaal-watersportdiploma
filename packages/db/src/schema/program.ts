@@ -179,7 +179,7 @@ export const program = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     title: text('title'),
-    disciplineId: uuid('discipline_id').notNull(),
+    disciplineId: uuid('discipline_id'),
     courseId: uuid('course_id'),
     degreeId: uuid('degree_id').notNull(),
     ...timestamps,
