@@ -155,18 +155,21 @@ export default async function Page({ params }: Props) {
           <div className="grid gap-4">
             <h2 className="text-gray-600 text-sm font-semibold">Gerelateerd</h2>
             <ul className="space-y-3.5 -mx-4">
-              {relatedArticles.map((article) => (
-                <li key={article.slug}>
-                  <BoxedButton
-                    href={`/help/artikel/${article.slug}`}
-                    className="text-branding-dark"
-                  >
-                    <p className="text-sm/5 font-semibold">
-                      {article.metadata.title}
-                    </p>
-                  </BoxedButton>
-                </li>
-              ))}
+              {relatedArticles
+                .filter((article) => article.category !== "vereniging")
+                .slice(0, 3)
+                .map((article) => (
+                  <li key={article.slug}>
+                    <BoxedButton
+                      href={`/help/artikel/${article.slug}`}
+                      className="text-branding-dark"
+                    >
+                      <p className="text-sm/5 font-semibold">
+                        {article.metadata.title}
+                      </p>
+                    </BoxedButton>
+                  </li>
+                ))}
             </ul>
           </div>
 
