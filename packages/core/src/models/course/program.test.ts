@@ -7,7 +7,7 @@ import * as Discipline from './discipline.js'
 import { Category } from './index.js'
 import * as Program from './program.js'
 
-test.skip('program crud', () =>
+test('program crud', () =>
   withTestTransaction(async () => {
     const createDiscipline = Discipline.create({
       title: 'discipline-1',
