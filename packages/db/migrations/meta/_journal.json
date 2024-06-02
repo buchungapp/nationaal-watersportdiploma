@@ -54,15 +54,15 @@
     {
       "idx": 7,
       "version": "5",
-      "when": 1717244948036,
-      "tag": "0007_brown_skaar",
+      "when": 1717320677369,
+      "tag": "0007_acoustic_thunderbolts",
       "breakpoints": false
     },
     {
       "idx": 8,
       "version": "5",
-      "when": 1717244948618,
-      "tag": "0008_premium_talon",
+      "when": 1717320678128,
+      "tag": "0008_nosy_turbo",
       "breakpoints": false
     }
   ]

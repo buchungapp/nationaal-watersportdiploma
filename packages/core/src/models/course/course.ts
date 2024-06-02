@@ -25,7 +25,6 @@ export const create = withZod(
   async (item) =>
     withTransaction(async (tx) => {
       const disciplineList = await Discipline.list()
-      console.log('disciplineList course.ts', disciplineList)
 
       const row = await tx
         .insert(s.course)

@@ -1,10 +1,10 @@
 import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
+import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from '../../utils/test.js'
 import * as Course from './course.js'
 import * as Degree from './degree.js'
 import * as Discipline from './discipline.js'
-import { Category } from './index.js'
 import * as Program from './program.js'
 
 test('program crud', () =>
@@ -20,28 +20,10 @@ test('program crud', () =>
       rang: 1,
     })
 
-    const createCategory = Category.create({
-      title: 'parent',
-      handle: 'ca1',
-    }).then(async ({ id }) => {
-      return {
-        id,
-        createChild: await Category.create({
-          title: 'child',
-          handle: 'ca2',
-          parentCategoryId: id,
-        }),
-      }
-    })
-
-    const [
-      { id: disciplineId },
-      { id: degreeId },
-      {
-        id: parentCategoryId,
-        createChild: { id: childCategoryId },
-      },
-    ] = await Promise.all([createDiscipline, createDegree, createCategory])
+    const [{ id: disciplineId }, { id: degreeId }] = await Promise.all([
+      createDiscipline,
+      createDegree,
+    ])
 
     const { id: courseId } = await Course.create({
       title: 'course-1',
@@ -64,15 +46,32 @@ test('program crud', () =>
 
     const expected = {
       id: programId,
-      title: 'program-1',
+      title: null,
       handle: 'pr1',
+      createdAt: DEFAULT_TEST_TIMESTAMP,
+      updatedAt: DEFAULT_TEST_TIMESTAMP,
+      deletedAt: null,
 
-      discipline: {
-        id: disciplineId,
-        title: 'discipline-1',
-        handle: 'dc1',
+      course: {
+        id: courseId,
+        title: 'course-1',
+        description: null,
+        handle: 'co1',
+        createdAt: DEFAULT_TEST_TIMESTAMP,
+        updatedAt: DEFAULT_TEST_TIMESTAMP,
         deletedAt: null,
-        weight: 1,
+
+        discipline: {
+          id: disciplineId,
+          title: 'discipline-1',
+          handle: 'dc1',
+          deletedAt: null,
+          createdAt: DEFAULT_TEST_TIMESTAMP,
+          updatedAt: DEFAULT_TEST_TIMESTAMP,
+          weight: 1,
+        },
+
+        categories: [],
       },
 
       degree: {
@@ -80,29 +79,12 @@ test('program crud', () =>
         title: 'degree-1',
         handle: 'dg1',
         rang: 1,
+        createdAt: DEFAULT_TEST_TIMESTAMP,
+        updatedAt: DEFAULT_TEST_TIMESTAMP,
         deletedAt: null,
       },
-
-      categories: [
-        {
-          id: childCategoryId,
-          title: 'child',
-          handle: 'ca2',
-          description: null,
-          deletedAt: null,
-          weight: 2,
-          parent: {
-            id: parentCategoryId,
-            title: 'parent',
-            handle: 'ca1',
-            description: null,
-            deletedAt: null,
-            weight: 1,
-          },
-        },
-      ],
     }
 
-    assert.deepStrictEqual(item, expected)
-    assert.deepStrictEqual(byHandle, expected)
+    assert.deepStrictEqual(defaultTimestamps(item), expected)
+    assert.deepStrictEqual(defaultTimestamps(byHandle), expected)
   }))

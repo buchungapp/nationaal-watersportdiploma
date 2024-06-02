@@ -157,8 +157,8 @@ export const courseCategory = pgTable(
     return {
       courseReference: foreignKey({
         columns: [table.courseId],
-        foreignColumns: [program.id],
-        name: 'course_category_program_id_fk',
+        foreignColumns: [course.id],
+        name: 'course_category_course_id_fk',
       }),
       categoryReference: foreignKey({
         columns: [table.categoryId],

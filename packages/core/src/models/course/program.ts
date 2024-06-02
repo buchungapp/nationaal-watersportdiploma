@@ -29,6 +29,7 @@ export const create = withZod(
           title: item.title,
           handle: item.handle,
           degreeId: item.degreeId,
+          courseId: item.courseId,
         })
         .returning({ id: s.program.id })
 

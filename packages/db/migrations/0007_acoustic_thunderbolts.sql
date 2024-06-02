@@ -35,7 +35,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
- ALTER TABLE "course_category" ADD CONSTRAINT "course_category_program_id_fk" FOREIGN KEY ("course_id") REFERENCES "program"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "course_category" ADD CONSTRAINT "course_category_course_id_fk" FOREIGN KEY ("course_id") REFERENCES "course"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
