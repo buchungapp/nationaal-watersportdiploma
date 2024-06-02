@@ -44,7 +44,7 @@ test('course crud', () =>
 
     const list = await Course.list()
 
-    const byHandle = await Course.fromHandle('pr1')
+    const byHandle = await Course.findOne({ handle: 'pr1' })
 
     assert.equal(list.length, 1)
     const [item] = list

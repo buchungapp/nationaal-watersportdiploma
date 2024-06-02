@@ -1,6 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
-import { SQLWrapper, and, eq, getTableColumns, inArray } from 'drizzle-orm'
+import { SQL, SQLWrapper, and, eq, getTableColumns, inArray } from 'drizzle-orm'
 import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
@@ -24,11 +24,10 @@ export const create = withZod(
   successfulCreateResponse,
   async (item) =>
     withTransaction(async (tx) => {
-      const disciplineList = await Discipline.list()
-
       const row = await tx
         .insert(s.course)
         .values({
+          ...item,
           title: item.title,
           handle: item.handle,
           disciplineId: item.disciplineId,
@@ -146,65 +145,64 @@ export const list = withZod(
   },
 )
 
-export const fromHandle = withZod(
-  handleSchema,
+export const findOne = withZod(
+  z.object({
+    id: uuidSchema.optional(),
+    handle: handleSchema.optional(),
+    title: z.string().optional(),
+    disciplineId: uuidSchema.optional(),
+    categoryId: singleOrArray(uuidSchema).optional(),
+  }),
   outputSchema.nullable(),
-  async (handle) => {
+  async (input) => {
     const query = useQuery()
 
-    const course = await query
+    const whereClausules: (SQL | undefined)[] = []
+
+    if (input.id) {
+      whereClausules.push(eq(s.course.id, input.id))
+    }
+
+    if (input.handle) {
+      whereClausules.push(eq(s.course.handle, input.handle))
+    }
+
+    if (input.disciplineId) {
+      whereClausules.push(eq(s.course.disciplineId, input.disciplineId))
+    }
+
+    if (input.title) {
+      whereClausules.push(eq(s.course.title, input.title))
+    }
+
+    let _query = query
       .select({
         ...getTableColumns(s.course),
         category: s.courseCategory,
       })
       .from(s.course)
       .leftJoin(s.courseCategory, eq(s.courseCategory.courseId, s.course.id))
-      .where(eq(s.course.handle, handle))
-      .then(
-        aggregate({
-          pkey: 'id',
-          fields: { categories: 'category.id' },
-        }),
-      )
-      .then(possibleSingleRow)
+      .where(and(...whereClausules))
 
-    if (!course) {
-      return null
+    if (input.categoryId) {
+      if (Array.isArray(input.categoryId)) {
+        whereClausules.push(
+          and(
+            inArray(s.courseCategory.categoryId, input.categoryId),
+            eq(s.courseCategory.courseId, s.course.id),
+          ),
+        )
+      } else {
+        whereClausules.push(
+          and(
+            eq(s.courseCategory.categoryId, input.categoryId),
+            eq(s.courseCategory.courseId, s.course.id),
+          ),
+        )
+      }
     }
 
-    const [allCategories, discipline] = await Promise.all([
-      Category.list(),
-      Discipline.fromId(course.disciplineId),
-    ])
-
-    assert(discipline, 'Discipline not found')
-
-    const { categories, disciplineId, ...courseProperties } = course
-
-    return {
-      ...courseProperties,
-      discipline,
-      categories: allCategories.filter((category) =>
-        categories.some((pc) => pc.categoryId === category.id),
-      ),
-    }
-  },
-)
-
-export const fromId = withZod(
-  uuidSchema,
-  outputSchema.nullable(),
-  async (id) => {
-    const query = useQuery()
-
-    const course = await query
-      .select({
-        ...getTableColumns(s.course),
-        category: s.courseCategory,
-      })
-      .from(s.course)
-      .leftJoin(s.courseCategory, eq(s.courseCategory.courseId, s.course.id))
-      .where(eq(s.course.id, id))
+    const course = await _query
       .then(
         aggregate({
           pkey: 'id',

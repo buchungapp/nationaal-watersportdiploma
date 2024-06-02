@@ -13,7 +13,11 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/index.js'
-import { Degree, fromId as courseFromId, list as listCourse } from './index.js'
+import {
+  Degree,
+  findOne as findOneCourse,
+  list as listCourse,
+} from './index.js'
 import { insertSchema, outputSchema } from './program.schema.js'
 
 export const create = withZod(
@@ -135,7 +139,9 @@ export const fromHandle = withZod(
     }
 
     const [course, degree] = await Promise.all([
-      courseFromId(program.courseId!),
+      findOneCourse({
+        id: program.courseId!,
+      }),
       Degree.fromId(program.degreeId),
     ])
 
@@ -170,7 +176,7 @@ export const fromId = withZod(
     }
 
     const [course, degree] = await Promise.all([
-      courseFromId(program.courseId!),
+      findOneCourse({ id: program.courseId! }),
       Degree.fromId(program.degreeId),
     ])
 
