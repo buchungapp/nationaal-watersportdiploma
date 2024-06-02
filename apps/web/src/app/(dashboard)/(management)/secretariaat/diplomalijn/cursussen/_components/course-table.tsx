@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
+import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Popover,
   PopoverButton,
@@ -28,34 +29,51 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
-import type { listPrograms } from "~/lib/nwd";
+import type { listCourses, listParentCategories } from "~/lib/nwd";
 
-type Program = Awaited<ReturnType<typeof listPrograms>>[number];
+type Course = Awaited<ReturnType<typeof listCourses>>[number];
 
-const columnHelper = createColumnHelper<Program>();
+const columnHelper = createColumnHelper<Course>();
 
-export default function ProgramTable({
-  programs,
+export default function CourseTable({
+  courses,
+  parentCategories,
   totalItems,
 }: {
-  programs: Program[];
+  courses: Course[];
+  parentCategories: Awaited<ReturnType<typeof listParentCategories>>;
   totalItems: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const columns = useMemo(() => {
     return [
-      columnHelper.accessor("course.title", {
-        header: "Cursus",
+      columnHelper.accessor("title", {
+        header: "Naam",
       }),
-      columnHelper.accessor("degree.title", {
-        header: "Niveau",
+      columnHelper.accessor("discipline.title", {
+        header: "Discipline",
       }),
+      ...parentCategories.map((category) =>
+        columnHelper.display({
+          id: `category-${category.id}`,
+          header: category.title!,
+          cell: ({ row }) => (
+            <div className="flex items-center gap-x-2.5">
+              {row.original.categories
+                .filter((c) => c.parent?.id === category.id)
+                .map((c) => (
+                  <Badge>{c.title}</Badge>
+                ))}
+            </div>
+          ),
+        }),
+      ),
     ];
-  }, [programs]);
+  }, [courses]);
 
   const table = useReactTable({
-    data: programs,
+    data: courses,
     columns,
     enableRowSelection: true,
     getRowId: (row) => row.id,
@@ -119,7 +137,7 @@ export default function ProgramTable({
                   : "",
               )}
               key={row.id}
-              href={`/secretariaat/diplomalijn/cursussen/programmas/${row.original.handle}`}
+              href={`/secretariaat/diplomalijn/cursussen/${row.original.handle}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

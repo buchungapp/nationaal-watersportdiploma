@@ -232,9 +232,25 @@ export const retrieveDisciplineByHandle = cache(async (handle: string) => {
   });
 });
 
+export const listCourses = cache(async () => {
+  return makeRequest(async () => {
+    const courses = await Course.list();
+
+    return courses;
+  });
+});
+
 export const listPrograms = cache(async () => {
   return makeRequest(async () => {
     const programs = await Course.Program.list();
+
+    return programs;
+  });
+});
+
+export const listProgramsForCourse = cache(async (courseId: string) => {
+  return makeRequest(async () => {
+    const programs = await Course.Program.list({ filter: { courseId } });
 
     return programs;
   });

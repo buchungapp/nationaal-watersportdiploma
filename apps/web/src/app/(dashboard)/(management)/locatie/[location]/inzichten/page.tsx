@@ -57,7 +57,8 @@ export default async function Page({
 
         acc[week]!.certificates.push(certificate);
         acc[week]!.count += 1;
-        (acc[week]![certificate.program.discipline.title!] as number) += 1;
+        (acc[week]![certificate.program.course.discipline.title!] as number) +=
+          1;
 
         return acc;
       },

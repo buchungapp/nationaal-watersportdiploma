@@ -115,33 +115,37 @@ export const list = withZod(
     ])
 
     // Map over the programs to enrich them with additional data like degree, discipline, and categories.
-    return courses.map((course) => {
-      // Find the corresponding discipline for each program enforcing that it must exist.
-      const discipline = findItem({
-        items: disciplines,
-        predicate(item) {
-          return item.id === course.disciplineId
-        },
-        enforce: true, // Enforce finding the discipline, throw error if not found.
+    return courses
+      .map((course) => {
+        // Find the corresponding discipline for each program enforcing that it must exist.
+        const discipline = findItem({
+          items: disciplines,
+          predicate(item) {
+            return item.id === course.disciplineId
+          },
+          enforce: true, // Enforce finding the discipline, throw error if not found.
+        })
+
+        const {
+          categories: courseCategories,
+          disciplineId,
+          ...courseProperties
+        } = course
+
+        // Construct the final program object with additional details.
+        return {
+          ...courseProperties,
+          discipline,
+          categories: categories.filter(
+            (
+              category, // Filter categories relevant to the current program.
+            ) => courseCategories.some((pc) => pc.categoryId === category.id),
+          ),
+        }
       })
-
-      const {
-        categories: courseCategories,
-        disciplineId,
-        ...courseProperties
-      } = course
-
-      // Construct the final program object with additional details.
-      return {
-        ...courseProperties,
-        discipline,
-        categories: categories.filter(
-          (
-            category, // Filter categories relevant to the current program.
-          ) => courseCategories.some((pc) => pc.categoryId === category.id),
-        ),
-      }
-    })
+      .sort((a, b) => {
+        return a.discipline.weight - b.discipline.weight
+      })
   },
 )
 

@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import React from "react";
+import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   CompetencyTypeBadge,
@@ -19,20 +20,12 @@ import {
   countStartedStudentsForCurriculum,
   listCurriculaByProgram,
   listGearTypesByCurriculum,
-  listParentCategories,
   listPrograms,
 } from "~/lib/nwd";
 import { CopyCurriculum } from "../../_components/action-buttons";
+import { Weight } from "../../_components/weight";
 
 type Curriculum = Awaited<ReturnType<typeof listCurriculaByProgram>>[number];
-
-function Weight({ weight }: { weight: number }) {
-  return (
-    <p className="tabular-nums text-base/6 text-zinc-400 sm:text-sm/6 dark:text-zinc-500">
-      {`${weight}.`}
-    </p>
-  );
-}
 
 async function Curriculum({
   curriculum,
@@ -158,9 +151,8 @@ export default async function Page({
     notFound();
   }
 
-  const [curricula, parentCategories] = await Promise.all([
+  const [curricula] = await Promise.all([
     listCurriculaByProgram(program.id, false),
-    listParentCategories(),
   ]);
 
   const currentCurriculum =
@@ -176,7 +168,14 @@ export default async function Page({
 
   return (
     <>
-      <Heading>{program.title}</Heading>
+      <BackButton
+        href={`/secretariaat/diplomalijn/cursussen/${program.course.handle}`}
+      >
+        Cursus
+      </BackButton>
+      <Heading>
+        {program.title ?? `${program.course.title} ${program.degree.title}`}
+      </Heading>
 
       <DescriptionList className="mt-10">
         <DescriptionTerm>Handle</DescriptionTerm>
@@ -184,21 +183,11 @@ export default async function Page({
           <Code>{program.handle}</Code>
         </DescriptionDetails>
 
-        <DescriptionTerm>Discipline</DescriptionTerm>
-        <DescriptionDetails>{program.discipline.title}</DescriptionDetails>
+        <DescriptionTerm>Programma</DescriptionTerm>
+        <DescriptionDetails>{program.course.title}</DescriptionDetails>
 
         <DescriptionTerm>Niveau</DescriptionTerm>
         <DescriptionDetails>{program.degree.title}</DescriptionDetails>
-
-        {parentCategories.map((category) => (
-          <React.Fragment key={category.id}>
-            <DescriptionTerm>{category.title}</DescriptionTerm>
-            <DescriptionDetails>
-              {program.categories.find((c) => c.parent?.id === category.id)
-                ?.title ?? "-"}
-            </DescriptionDetails>
-          </React.Fragment>
-        ))}
       </DescriptionList>
 
       <Divider className="my-10" />

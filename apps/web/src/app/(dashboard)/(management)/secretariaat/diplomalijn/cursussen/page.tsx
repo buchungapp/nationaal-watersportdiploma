@@ -1,15 +1,18 @@
 import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listPrograms } from "~/lib/nwd";
-import Search from "../../../../_components/search";
-import ProgramTableClient from "../_components/program-table";
+import { listCourses, listParentCategories } from "~/lib/nwd";
+import Search from "../../../_components/search";
+import CourseTableClient from "./_components/course-table";
 
 async function ProgramTable({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const [programs] = await Promise.all([listPrograms()]);
+  const [courses, parentCategories] = await Promise.all([
+    listCourses(),
+    listParentCategories(),
+  ]);
   const searchQuery = searchParams?.query?.toString() ?? null;
 
   // Create a FlexSearch index
@@ -23,16 +26,16 @@ async function ProgramTable({
   });
 
   // Add programs to the index
-  programs.forEach((program) => {
-    index.add(program.id, program.course.title!);
+  courses.forEach((course) => {
+    index.add(course.id, course.title!);
   });
 
   // Search programs using FlexSearch
-  let filteredPrograms = programs;
+  let filteredCourses = courses;
   if (searchQuery) {
     const results = index.search(searchQuery);
-    filteredPrograms = results.map(
-      (result) => programs.find((program) => program.id === result)!,
+    filteredCourses = results.map(
+      (result) => courses.find((course) => course.id === result)!,
     );
   }
 
@@ -40,15 +43,16 @@ async function ProgramTable({
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
-  const paginatedPrograms = filteredPrograms.slice(
+  const paginatedCourses = filteredCourses.slice(
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit,
   );
 
   return (
-    <ProgramTableClient
-      programs={paginatedPrograms}
-      totalItems={filteredPrograms.length}
+    <CourseTableClient
+      courses={paginatedCourses}
+      parentCategories={parentCategories}
+      totalItems={filteredCourses.length}
     />
   );
 }
@@ -62,9 +66,9 @@ export default function Page({
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-sm:w-full sm:flex-1">
-          <Heading>Programma's</Heading>
+          <Heading>Cursussen</Heading>
           <div className="mt-4 flex max-w-xl gap-4">
-            <Search placeholder="Doorzoek programma's..." />
+            <Search placeholder="Doorzoek cursussen..." />
           </div>
         </div>
       </div>
