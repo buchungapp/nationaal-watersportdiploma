@@ -4,6 +4,7 @@ import { withTestTransaction } from '../../contexts/index.js'
 import dayjs from '../../utils/dayjs.js'
 import { Degree, Discipline } from '../course/index.js'
 
+import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from '../../utils/test.js'
 import { Course } from '../index.js'
 import * as Curriculum from './curriculum.js'
 
@@ -47,12 +48,15 @@ test('curriculum crud', () =>
     assert.equal(list.length, 1)
     const [item] = list
 
-    assert.deepStrictEqual(item, {
+    assert.deepStrictEqual(defaultTimestamps(item), {
       id,
       revision: 'A',
       startedAt: null,
       programId: programId,
       modules: [],
+      createdAt: DEFAULT_TEST_TIMESTAMP,
+      updatedAt: DEFAULT_TEST_TIMESTAMP,
+      deletedAt: null,
     })
   }))
 
@@ -104,11 +108,14 @@ test('curriculum list filters', () =>
     assert.equal(list.length, 1)
     const [item] = list
 
-    assert.deepStrictEqual(item, {
+    assert.deepStrictEqual(defaultTimestamps(item), {
       id,
       revision: 'A',
       startedAt,
       programId: programId,
       modules: [],
+      createdAt: DEFAULT_TEST_TIMESTAMP,
+      updatedAt: DEFAULT_TEST_TIMESTAMP,
+      deletedAt: null,
     })
   }))
