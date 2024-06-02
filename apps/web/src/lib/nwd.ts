@@ -1,9 +1,9 @@
 import {
   Certificate,
+  Course,
   Curriculum,
   Location,
   Platform,
-  Program,
   Student,
   User,
   withDatabase,
@@ -162,7 +162,7 @@ export const retrieveCertificateById = cache(async (id: string) => {
 
 export const listDisciplines = cache(async () => {
   return makeRequest(async () => {
-    const disciplines = await Program.Discipline.list();
+    const disciplines = await Course.Discipline.list();
 
     return disciplines;
   });
@@ -170,7 +170,7 @@ export const listDisciplines = cache(async () => {
 
 export const listDegrees = cache(async () => {
   return makeRequest(async () => {
-    const degrees = await Program.Degree.list();
+    const degrees = await Course.Degree.list();
 
     return degrees;
   });
@@ -178,7 +178,7 @@ export const listDegrees = cache(async () => {
 
 export const listModules = cache(async () => {
   return makeRequest(async () => {
-    const modules = await Program.Module.list();
+    const modules = await Course.Module.list();
 
     return modules;
   });
@@ -186,7 +186,7 @@ export const listModules = cache(async () => {
 
 export const listCompetencies = cache(async () => {
   return makeRequest(async () => {
-    const competencies = await Program.Competency.list();
+    const competencies = await Course.Competency.list();
 
     return competencies;
   });
@@ -202,7 +202,7 @@ export const listGearTypes = cache(async () => {
 
 export const listCategories = cache(async () => {
   return makeRequest(async () => {
-    const categories = await Program.Category.list();
+    const categories = await Course.Category.list();
 
     return categories;
   });
@@ -210,7 +210,7 @@ export const listCategories = cache(async () => {
 
 export const listParentCategories = cache(async () => {
   return makeRequest(async () => {
-    const categories = await Program.Category.listParentCategories();
+    const categories = await Course.Category.listParentCategories();
 
     return categories;
   });
@@ -218,15 +218,15 @@ export const listParentCategories = cache(async () => {
 
 export const listCountries = cache(async () => {
   return makeRequest(async () => {
-    const disciplines = await Platform.Country.list();
+    const countries = await Platform.Country.list();
 
-    return disciplines;
+    return countries;
   });
 });
 
 export const retrieveDisciplineByHandle = cache(async (handle: string) => {
   return makeRequest(async () => {
-    const disciplines = await Program.Discipline.fromHandle(handle);
+    const disciplines = await Course.Discipline.fromHandle(handle);
 
     return disciplines;
   });
@@ -234,30 +234,30 @@ export const retrieveDisciplineByHandle = cache(async (handle: string) => {
 
 export const listPrograms = cache(async () => {
   return makeRequest(async () => {
-    const disciplines = await Program.list();
+    const programs = await Course.Program.list();
 
-    return disciplines;
+    return programs;
   });
 });
 
 export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
   return makeRequest(async () => {
-    const disciplines = await Curriculum.list({
+    const curricula = await Curriculum.list({
       filter: { onlyCurrentActive: true, disciplineId },
     });
 
-    return disciplines;
+    return curricula;
   });
 });
 
 export const listCurriculaByProgram = cache(
   async (programId: string, onlyCurrentActive = true) => {
     return makeRequest(async () => {
-      const disciplines = await Curriculum.list({
+      const curricula = await Curriculum.list({
         filter: { onlyCurrentActive, programId },
       });
 
-      return disciplines;
+      return curricula;
     });
   },
 );
