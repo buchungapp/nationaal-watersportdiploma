@@ -46,6 +46,7 @@
     "micromark": "^4.0.0",
     "next": "14.2.3",
     "next-mdx-remote": "0.0.0-canary-20240321205249",
+    "next-safe-action": "7.0.0-next.47",
     "pdfkit": "^0.15.0",
     "posthog-js": "^1.116.2",
     "posthog-node": "^4.0.0",

@@ -46,9 +46,9 @@ export default async function Page({
   ]);
 
   const uniqueModules = curricula
-    // .filter((curriculum) =>
-    //   programs.some((program) => program.id === curriculum.programId),
-    // )
+    .filter((curriculum) =>
+      programs.some((program) => program.id === curriculum.programId),
+    )
     .flatMap((curriculum) => curriculum.modules)
     .filter(
       (module, index, self) =>

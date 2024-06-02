@@ -177,6 +177,9 @@ importers:
       next-mdx-remote:
         specifier: 0.0.0-canary-20240321205249
         version: 0.0.0-canary-20240321205249(@types/react@18.3.3)(react-dom@18.3.1)(react@18.3.1)
+      next-safe-action:
+        specifier: 7.0.0-next.47
+        version: 7.0.0-next.47(next@14.2.3)(react@18.3.1)(zod@3.23.5)
       pdfkit:
         specifier: ^0.15.0
         version: 0.15.0
@@ -338,6 +341,9 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.11
+      drizzle-orm:
+        specifier: ^0.30.8
+        version: 0.30.10(@types/react@18.3.1)(postgres@3.4.4)(react@18.3.1)
       drizzle-toolbelt:
         specifier: ^1.1.1
         version: 1.1.1
@@ -363,9 +369,6 @@ importers:
       '@tsconfig/node20':
         specifier: ^20.1.2
         version: 20.1.4
-      drizzle-orm:
-        specifier: ^0.30.8
-        version: 0.30.10(@types/react@18.3.1)(postgres@3.4.4)(react@18.3.1)
       type-fest:
         specifier: ^4.17.0
         version: 4.18.1
@@ -4637,6 +4640,100 @@ packages:
       '@types/yargs-parser': 21.0.3
     dev: false
 
+  /@typeschema/core@0.13.2:
+    resolution: {integrity: sha512-pAt0MK249/9szYaoPuvzhSfOd3smrLhhwCCpUNB4onX32mRx5F3lzDIveIYGQkLYRq58xOX5sjoW+n72f/MLLw==}
+    peerDependencies:
+      '@types/json-schema': ^7.0.15
+    peerDependenciesMeta:
+      '@types/json-schema':
+        optional: true
+    dev: false
+
+  /@typeschema/main@0.13.9(@typeschema/zod@0.13.3):
+    resolution: {integrity: sha512-Z6yFaf2dLoqvuSNIeUelek9XI8T5Rog/NXHBMwV6KLhQCT0lQPBtmZSXAdW6EzFaqn1najhQEcirBqjWiFXiig==}
+    peerDependencies:
+      '@typeschema/arktype': 0.13.2
+      '@typeschema/class-validator': 0.1.2
+      '@typeschema/deepkit': 0.13.4
+      '@typeschema/effect': 0.13.4
+      '@typeschema/fastest-validator': 0.1.0
+      '@typeschema/function': 0.13.2
+      '@typeschema/io-ts': 0.13.3
+      '@typeschema/joi': 0.13.3
+      '@typeschema/json': 0.13.3
+      '@typeschema/ow': 0.13.3
+      '@typeschema/runtypes': 0.13.2
+      '@typeschema/superstruct': 0.13.2
+      '@typeschema/suretype': 0.1.0
+      '@typeschema/typebox': 0.13.4
+      '@typeschema/valibot': 0.13.4
+      '@typeschema/valita': 0.1.0
+      '@typeschema/vine': 0.1.0
+      '@typeschema/yup': 0.13.3
+      '@typeschema/zod': 0.13.3
+    peerDependenciesMeta:
+      '@typeschema/arktype':
+        optional: true
+      '@typeschema/class-validator':
+        optional: true
+      '@typeschema/deepkit':
+        optional: true
+      '@typeschema/effect':
+        optional: true
+      '@typeschema/fastest-validator':
+        optional: true
+      '@typeschema/function':
+        optional: true
+      '@typeschema/io-ts':
+        optional: true
+      '@typeschema/joi':
+        optional: true
+      '@typeschema/json':
+        optional: true
+      '@typeschema/ow':
+        optional: true
+      '@typeschema/runtypes':
+        optional: true
+      '@typeschema/superstruct':
+        optional: true
+      '@typeschema/suretype':
+        optional: true
+      '@typeschema/typebox':
+        optional: true
+      '@typeschema/valibot':
+        optional: true
+      '@typeschema/valita':
+        optional: true
+      '@typeschema/vine':
+        optional: true
+      '@typeschema/yup':
+        optional: true
+      '@typeschema/zod':
+        optional: true
+    dependencies:
+      '@typeschema/core': 0.13.2
+      '@typeschema/zod': 0.13.3(zod@3.23.5)
+    transitivePeerDependencies:
+      - '@types/json-schema'
+    dev: false
+
+  /@typeschema/zod@0.13.3(zod@3.23.5):
+    resolution: {integrity: sha512-p5Hs22WIKkM/vZTAvw5QOLSA0EJ6QBUsQMGUrXlYnTAE2LSR/F5MLsDUb18O6S5VxGjrzU7x3VIznD5qOafJRw==}
+    peerDependencies:
+      zod: ^3.22.4
+      zod-to-json-schema: ^3.22.4
+    peerDependenciesMeta:
+      zod:
+        optional: true
+      zod-to-json-schema:
+        optional: true
+    dependencies:
+      '@typeschema/core': 0.13.2
+      zod: 3.23.5
+    transitivePeerDependencies:
+      - '@types/json-schema'
+    dev: false
+
   /@typescript-eslint/eslint-plugin@7.8.0(@typescript-eslint/parser@7.8.0)(eslint@8.57.0)(typescript@5.4.5):
     resolution: {integrity: sha512-gFTT+ezJmkwutUPmB0skOj3GZJtlEGnlssems4AjkVweUPGj7jRwwqg0Hhg7++kPGJqKtTYx+R05Ftww372aIg==}
     engines: {node: ^18.18.0 || >=20.0.0}
@@ -6671,6 +6768,7 @@ packages:
       '@types/react': 18.3.1
       postgres: 3.4.4
       react: 18.3.1
+    dev: false
 
   /drizzle-orm@0.30.10(postgres@3.4.4):
     resolution: {integrity: sha512-IRy/QmMWw9lAQHpwbUh1b8fcn27S/a9zMIzqea1WNOxK9/4EB8gIo+FZWLiPXzl2n9ixGSv8BhsLZiOppWEwBw==}
@@ -10837,6 +10935,45 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /next-safe-action@7.0.0-next.47(next@14.2.3)(react@18.3.1)(zod@3.23.5):
+    resolution: {integrity: sha512-zQlq8czSo+pP0t0+qbk/evy000/9tn5YiznTnhoL6XgAQcuw0pULcuZ48te7FCBeOpobX88t0J9146bX6irYwQ==}
+    engines: {node: '>=18.17'}
+    peerDependencies:
+      next: '>= 14.3.0-canary.42'
+      react: '>= 18.3.1'
+      zod: ^3.23.6
+    peerDependenciesMeta:
+      zod:
+        optional: true
+    dependencies:
+      '@typeschema/main': 0.13.9(@typeschema/zod@0.13.3)
+      '@typeschema/zod': 0.13.3(zod@3.23.5)
+      next: 14.2.3(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(react-dom@18.3.1)(react@18.3.1)
+      react: 18.3.1
+      zod: 3.23.5
+    transitivePeerDependencies:
+      - '@types/json-schema'
+      - '@typeschema/arktype'
+      - '@typeschema/class-validator'
+      - '@typeschema/deepkit'
+      - '@typeschema/effect'
+      - '@typeschema/fastest-validator'
+      - '@typeschema/function'
+      - '@typeschema/io-ts'
+      - '@typeschema/joi'
+      - '@typeschema/json'
+      - '@typeschema/ow'
+      - '@typeschema/runtypes'
+      - '@typeschema/superstruct'
+      - '@typeschema/suretype'
+      - '@typeschema/typebox'
+      - '@typeschema/valibot'
+      - '@typeschema/valita'
+      - '@typeschema/vine'
+      - '@typeschema/yup'
+      - zod-to-json-schema
+    dev: false
 
   /next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}

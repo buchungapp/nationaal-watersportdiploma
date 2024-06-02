@@ -16,9 +16,7 @@ import { copyCurriculumAction } from "../_actions/mutations";
 export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const actionWithId = copyCurriculumAction.bind(null, { curriculumId });
-  const [state, action] = useFormState(async (a, b) => {
-    await actionWithId(a, b);
-  }, undefined);
+  const [state, action] = useFormState(actionWithId, undefined);
 
   return (
     <>
