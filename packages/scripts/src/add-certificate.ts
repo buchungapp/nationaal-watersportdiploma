@@ -1,7 +1,7 @@
 import {
+  Course,
   Curriculum,
   Location,
-  Program,
   Student,
   User,
   withDatabase,
@@ -47,7 +47,7 @@ async function main() {
     },
   ])
 
-  const program = await Program.fromHandle(programHandle)
+  const program = await Course.Program.fromHandle(programHandle)
 
   assert(program, 'Program not found')
 

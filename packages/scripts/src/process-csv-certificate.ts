@@ -1,7 +1,7 @@
 import {
+  Course,
   Curriculum,
   Location,
-  Program,
   Student,
   User,
   withDatabase,
@@ -46,7 +46,7 @@ async function main(filePath: string) {
   ])
 
   const [allPrograms, allBoatTypes, allCurricula] = await Promise.all([
-    Program.list(),
+    Course.Program.list(),
     Curriculum.GearType.list(),
     Curriculum.list({
       filter: {
