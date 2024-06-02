@@ -114,7 +114,7 @@ export async function generatePDF(
     doc
       .font("regular", 11)
       .text(
-        certificate.program.title?.slice(0, -1).trim() ?? "",
+        certificate.program.title ?? certificate.program.course.title ?? "",
         476.22,
         56.378,
         {

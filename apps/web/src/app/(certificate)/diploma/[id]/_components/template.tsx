@@ -83,7 +83,7 @@ export default async function CertificateTemplate({
                 {certificate.gearType.title}
               </p>
               <p className="text-sm sm:text-base leading-1 lg:text-lg">
-                {certificate.program.title?.slice(0, -1).trim()}
+                {certificate.program.title ?? certificate.program.course.title}
               </p>
             </div>
             <p className="text-6xl font-black text-branding-orange align-text-bottom">
