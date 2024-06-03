@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useFormState } from "react-dom";
+import { toast } from "sonner";
 import {
   Alert,
   AlertActions,
@@ -16,7 +17,19 @@ import { copyCurriculumAction } from "../_actions/mutations";
 export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const actionWithId = copyCurriculumAction.bind(null, { curriculumId });
-  const [state, action] = useFormState(actionWithId, undefined);
+
+  const submit = async (prevState: unknown, formData: FormData) => {
+    const result = await actionWithId(prevState, formData);
+
+    if (!!result.id) {
+      setIsOpen(false);
+      toast.success(`Curriculum ${result.id} aangemaakt`);
+    }
+
+    toast.error("Er is iets misgegaan");
+  };
+
+  const [_state, action] = useFormState(submit, undefined);
 
   return (
     <>
