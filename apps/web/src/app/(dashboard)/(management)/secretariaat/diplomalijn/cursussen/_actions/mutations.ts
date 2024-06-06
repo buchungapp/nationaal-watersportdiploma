@@ -17,6 +17,7 @@ export async function copyCurriculumAction(
 
   revalidatePath(
     "/(dashboard)/(management)/secretariaat/diplomalijn/cursussen/programmas/[handle]",
+    "page",
   );
 
   return res;

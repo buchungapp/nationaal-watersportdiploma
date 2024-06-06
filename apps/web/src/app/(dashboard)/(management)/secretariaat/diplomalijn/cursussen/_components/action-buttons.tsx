@@ -24,6 +24,7 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
     if (!!result.id) {
       setIsOpen(false);
       toast.success(`Curriculum ${result.id} aangemaakt`);
+      return;
     }
 
     toast.error("Er is iets misgegaan");
