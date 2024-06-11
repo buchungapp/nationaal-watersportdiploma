@@ -16,6 +16,7 @@ import Disclosure from "~/app/(dashboard)/_components/disclosure";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Code, Strong, Text } from "~/app/(dashboard)/_components/text";
+import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
 import {
   countStartedStudentsForCurriculum,
   listCurriculaByProgram,
@@ -97,7 +98,11 @@ async function Curriculum({
                       <div className="flex-shrink-0 w-12">
                         <Weight weight={module.weight} />
                       </div>
-                      <Heading level={3}>{module.title}</Heading>
+                      <Heading level={3}>
+                        <CopyToClipboard copyValue={module.id}>
+                          {module.title}
+                        </CopyToClipboard>
+                      </Heading>
                     </div>
                     <div className="flex items-center justify-end gap-x-2">
                       <ModuleRequiredBadge
@@ -116,7 +121,9 @@ async function Curriculum({
                         <div>
                           <dt>
                             <Text>
-                              <Strong>{competency.title}</Strong>
+                              <CopyToClipboard copyValue={competency.id}>
+                                <Strong>{competency.title}</Strong>
+                              </CopyToClipboard>
                             </Text>
                           </dt>
                           <dd>
