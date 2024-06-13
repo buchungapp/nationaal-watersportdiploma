@@ -1,6 +1,7 @@
 export * from './authn.js'
 export * from './authz.js'
 export * from './certificate.js'
+export * from './cohort.js'
 export * from './course.js'
 export * from './curriculum.js'
 export * from './location.js'
