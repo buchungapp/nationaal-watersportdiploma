@@ -36,6 +36,7 @@ export async function UserSelector() {
       </HeadlessMenuButton>
       <DropdownMenu className="min-w-[--button-width] z-50">
         <DropdownSeparator />
+        <DropdownItem href="/profiel">Profiel</DropdownItem>
         <DropdownItem onClick={logout}>Uitloggen</DropdownItem>
       </DropdownMenu>
     </Dropdown>

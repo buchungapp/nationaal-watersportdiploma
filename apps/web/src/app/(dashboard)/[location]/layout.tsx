@@ -1,4 +1,3 @@
-import { Toaster } from "sonner";
 import LatestNews from "./_components/latest-news";
 import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
@@ -49,7 +48,6 @@ export default function Layout({
           {children}
         </div>
       </main>
-      <Toaster richColors />
     </>
   );
 }

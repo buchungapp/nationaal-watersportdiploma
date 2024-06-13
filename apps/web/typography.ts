@@ -56,6 +56,7 @@ export default function typographyStyles({ theme }: PluginUtils) {
         p: {
           marginTop: theme("spacing.7"),
           marginBottom: theme("spacing.7"),
+          textAlign: "justify",
         },
 
         // Headings

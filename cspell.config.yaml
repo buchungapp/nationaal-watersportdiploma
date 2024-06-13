@@ -10,6 +10,7 @@ words:
   - Gelicentieerd
   - HACCP
   - headlessui
+  - HISWA
   - ianvs
   - Imuqgg
   - INGB
@@ -23,6 +24,7 @@ words:
   - nawadi
   - nums
   - onnotice
+  - otel
   - Outro
   - pgadmin
   - PGURI
@@ -41,6 +43,7 @@ words:
   - supabase
   - svgs
   - tailwindcss
+  - Tera
   - trivago
   - veiligheids
   - Wavie
@@ -65,6 +68,7 @@ ignorePaths:
   - '*.svg'
   - supabase/config.toml
   - packages/db/migrations/
+  - locations.ts
 files:
   - '**'
 enableFiletypes:

@@ -1,6 +1,7 @@
 import Balancer from "react-wrap-balancer";
 
 import Logo from "~/app/_components/brand/logo";
+import { BoxedButton } from "../../_components/style/buttons";
 import AboutSection from "./about-section";
 
 export default function About() {
@@ -20,28 +21,37 @@ export default function About() {
             Het resultaat is het Nationaal Watersportdiploma (NWD).
           </Balancer>
         </p>
+
+        <div className="mt-6 mx-auto flex flex-col md:flex-row items-center gap-x-6 gap-y-4">
+          <BoxedButton href="/" className="text-white bg-branding-light">
+            Kwaliteitseisen voor locaties
+          </BoxedButton>
+          <BoxedButton
+            href="/vereniging/manifest"
+            className="text-branding-dark hover:bg-white/10"
+          >
+            Ons manifest
+          </BoxedButton>
+        </div>
       </div>
       <div className="grid items-center justify-center gap-12 lg:grid-cols-2 lg:gap-0">
         <div className="flex w-full justify-center">
-          <Logo className="h-full max-h-[24rem] w-full max-w-[24rem] rounded-full text-white shadow-[0px_10px_40px_0px_#0000000D]" />
+          <Logo className="h-full max-h-52 lg:max-h-80 w-full max-w-52 lg:max-w-80 rounded-full text-white shadow-[0px_10px_40px_0px_#0000000D]" />
         </div>
         <div className="grid max-w-lg gap-16">
           <AboutSection
-            href="/vaarlocaties/kwaliteitseisen"
             label="Veiligheid"
             title="Veiligheid voorop."
             description="Een veilige omgeving voor iedereen, met aandacht voor fysieke en sociale veiligheid."
             color="dark"
           />
           <AboutSection
-            href="/vaarlocaties/kwaliteitseisen"
             label="Kwaliteit"
             title="Kwaliteit als basis."
             description="Moderne materialen, hooggekwalificeerde instructeurs, strenge kwaliteitsnormen."
             color="light"
           />
           <AboutSection
-            href="/vaarlocaties/kwaliteitseisen"
             label="Plezier"
             title="Plezier staat centraal."
             description="Leren watersporten moet leuk zijn, met heldere stappen naar je volgende diploma en vele succesmomenten."

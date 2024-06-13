@@ -60,7 +60,7 @@ export default function Contact() {
               description:
                 "Ontdek antwoorden op veelgestelde vragen, handige documenten en meer.",
               label: "Naar het helpcentrum",
-              href: "/helpcentrum",
+              href: "/help",
             },
             {
               title: "Mediakit",

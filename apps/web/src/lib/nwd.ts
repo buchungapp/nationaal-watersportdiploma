@@ -12,14 +12,15 @@ import { notFound, redirect } from "next/navigation";
 import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
+import posthog from "./posthog";
 
 const baseUrl = new URL(process.env.NAWADI_API_URL!);
 const apiKey = String(process.env.NAWADI_API_KEY!);
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
-  assert.strictEqual(user.persons.length, 1, "Expected exactly one person");
+  assert(user.persons.length <= 1, "Expected at most one person per user");
 
-  return user.persons[0]!;
+  return user.persons[0] ?? null;
 }
 
 async function makeRequest<T>(cb: () => Promise<T>) {
@@ -61,10 +62,9 @@ export const getUserOrThrow = cache(async () => {
   const { user: authUser } = userResponse.data;
 
   return makeRequest(async () => {
-    const [userData, persons] = await Promise.all([
-      User.fromId(authUser.id),
-      User.Person.list({ filter: { userId: authUser.id } }),
-    ]);
+    const userData = await User.fromId(authUser.id);
+    // We can't run this in parallel, because fromId will create the user if it doesn't exist
+    const persons = await User.Person.list({ filter: { userId: authUser.id } });
 
     if (!userData) {
       throw new Error("User not found");
@@ -104,11 +104,48 @@ export const findCertificate = async ({
   }
 };
 
+export const listCertificates = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    if (!person) return [];
+
+    const availableLocations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === locationId)) {
+      throw new Error("Location not found for person");
+    }
+
+    const certificates = await Certificate.list({
+      filter: { locationId },
+    });
+
+    return certificates;
+  });
+});
+
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
-  const result = await api.listCertificatesByNumber(
-    {
-      parameters: {
-        numbers,
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    if (!person) return [];
+
+    const availableLocations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
+
+    const certificates = await Certificate.list({
+      filter: {
+        number: numbers,
+        locationId: availableLocations.map((l) => l.locationId),
       },
       contentType: null,
     },
@@ -346,6 +383,31 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
   }
 });
 
+export const listLocationsForPerson = cache(async (personId?: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const person = extractPerson(user);
+
+    if (!person) {
+      return [];
+    }
+
+    if (personId && person.id !== personId) {
+      throw new Error("Person not found for user");
+    }
+
+    const locations = await User.Person.listLocations({
+      personId: person.id,
+      roles: ["location_admin"],
+    });
+
+    return await Location.list().then((locs) =>
+      locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+    );
+  });
+});
+
 export const createPersonForLocation = async (
   locationId: string,
   personInput: {
@@ -408,6 +470,10 @@ export const createCompletedCertificate = async (
 
       const authPerson = extractPerson(authUser);
 
+      if (!authPerson) {
+        throw new Error("Person not found for user");
+      }
+
       const availableLocations = await User.Person.listLocations({
         personId: authPerson.id,
         roles: ["location_admin"],
@@ -441,6 +507,14 @@ export const createCompletedCertificate = async (
       await Student.Certificate.completeCertificate({
         certificateId,
         visibleFrom: new Date().toISOString(),
+      });
+
+      posthog.capture({
+        distinctId: authUser.authUserId,
+        event: "create_completed_certificate",
+        properties: {
+          $set: { email: authUser.email, displayName: authUser.displayName },
+        },
       });
 
       return { id: certificateId };

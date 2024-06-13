@@ -1,8 +1,11 @@
 import { constants } from "@nawadi/lib";
 import { type MetadataRoute } from "next";
+import {
+  getHelpArticles,
+  getHelpCategories,
+  getHelpFaqs,
+} from "~/lib/article-2";
 import { getAllArticles } from "~/lib/articles";
-import { listFaqs as listFaqsGeneral } from "~/lib/faqs";
-import { listFaqs as listFaqsDiplomalijn } from "~/lib/faqs-diplomalijn";
 import {
   getAllDiplomalijnConsumentenPages,
   getAllDiplomalijnInstructeurPages,
@@ -12,13 +15,14 @@ import { verenigingSegments } from "./(public)/vereniging/_utils/segments";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = constants.WEBSITE_URL;
 
-  const [articles, dcPages, diPages, faqsGeneral, faqsDiplomalijn] =
+  const [articles, dcPages, diPages, helpArticles, helpFaqs, helpCategories] =
     await Promise.all([
       getAllArticles(),
       getAllDiplomalijnConsumentenPages(),
       getAllDiplomalijnInstructeurPages(),
-      listFaqsGeneral(),
-      listFaqsDiplomalijn(),
+      getHelpArticles(),
+      getHelpFaqs(),
+      getHelpCategories(),
     ]);
 
   const articleMaps: MetadataRoute.Sitemap = articles.map((article) => ({
@@ -45,15 +49,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const faqGeneralPages: MetadataRoute.Sitemap = faqsGeneral.map((faq) => ({
-    url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
+  const helpArticlePages: MetadataRoute.Sitemap = helpArticles.map(
+    (article) => ({
+      url: `${BASE_URL}/help/artikel/${article.slug}`,
+      changeFrequency: "monthly",
+      lastModified: new Date(article.metadata.lastUpdatedAt),
+      priority: 0.8,
+    }),
+  );
+
+  const helpFaqPages: MetadataRoute.Sitemap = helpFaqs.map((faq) => ({
+    url: `${BASE_URL}/help/veelgestelde-vragen/${faq.slug}`,
     changeFrequency: "monthly",
-    priority: 0.7,
+    lastModified: new Date(faq.metadata.lastUpdatedAt),
+    priority: 0.6,
   }));
 
-  const faqDiplomalijnPages: MetadataRoute.Sitemap = faqsDiplomalijn.map(
-    (faq) => ({
-      url: `${BASE_URL}/helpcentrum/veelgestelde-vragen/${faq.categories.join("/")}/${faq.slug}`,
+  const helpCategoryPages: MetadataRoute.Sitemap = helpCategories.map(
+    (category) => ({
+      url: `${BASE_URL}/help/categorie/${category.slug}`,
       changeFrequency: "monthly",
       priority: 0.7,
     }),
@@ -72,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       },
       {
-        url: `${BASE_URL}/helpcentrum`,
+        url: `${BASE_URL}/help`,
         changeFrequency: "monthly",
         priority: 0.8,
       },
@@ -90,17 +104,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...consument,
       ...instructeur,
       ...vereniging,
-      ...faqGeneralPages,
-      ...faqDiplomalijnPages,
+      ...helpArticlePages,
+      ...helpFaqPages,
+      ...helpCategoryPages,
       {
         url: `${BASE_URL}/merk`,
         changeFrequency: "monthly",
         priority: 0.6,
       },
-    ] as const
+    ] as MetadataRoute.Sitemap
   ).map((page) => ({
     ...page,
     url: page.url.replace(/\/$/, ""),
-    lastModified: new Date().toISOString(),
+    lastModified: page.lastModified ?? new Date(),
   }));
 }

@@ -1,6 +1,10 @@
 "use client";
 
-import { Disclosure as HeadlessDisclosure } from "@headlessui/react";
+import {
+  Disclosure as HeadlessDisclosure,
+  DisclosureButton as HeadlessDisclosureButton,
+  DisclosurePanel as HeadlessDisclosurePanel,
+} from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { PropsWithChildren } from "react";
 import React from "react";
@@ -24,7 +28,7 @@ export default function Disclosure({
     <HeadlessDisclosure as="div" className="pt-6 w-full">
       {({ open }) => (
         <>
-          <HeadlessDisclosure.Button className="w-full flex items-center justify-between">
+          <HeadlessDisclosureButton className="w-full flex items-center justify-between">
             {button}
             <span className="ml-6 flex h-7 items-center">
               {open ? (
@@ -33,10 +37,10 @@ export default function Disclosure({
                 <PlusIcon className={buttonSize} aria-hidden="true" />
               )}
             </span>
-          </HeadlessDisclosure.Button>
-          <HeadlessDisclosure.Panel unmount={false} as="div">
+          </HeadlessDisclosureButton>
+          <HeadlessDisclosurePanel unmount={false} as="div">
             {children}
-          </HeadlessDisclosure.Panel>
+          </HeadlessDisclosurePanel>
         </>
       )}
     </HeadlessDisclosure>

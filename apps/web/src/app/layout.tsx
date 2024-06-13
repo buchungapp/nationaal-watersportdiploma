@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { Toaster } from "sonner";
 
 import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -6,6 +7,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { BASE_URL } from "~/constants";
 
+import Analytics from "./_components/analytics";
 import { CommonProviders } from "./_components/providers";
 import "./globals.css";
 
@@ -54,12 +56,17 @@ export default function RootLayout({
       lang="nl"
       className={clsx(
         inter.variable,
-        "h-full scroll-smooth antialiased text-gray-900 bg-white !pr-0",
+        "h-full scroll-smooth antialiased text-gray-900 bg-white",
       )}
     >
       <body className="h-full">
-        <CommonProviders>{children}</CommonProviders>
-        <SpeedInsights />
+        <CommonProviders>
+          {children}
+
+          <Toaster richColors />
+          <SpeedInsights />
+          <Analytics />
+        </CommonProviders>
       </body>
     </html>
   );
