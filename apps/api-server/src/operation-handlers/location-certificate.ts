@@ -10,7 +10,7 @@
 //   // TODO get type from core
 //   let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
 
-//   if (api.validators.isComponentsHandle(locationKey)) {
+//   if (api.validators.isFieldsHandle(locationKey)) {
 //     locationItem = await core.Location.fromHandle(locationKey)
 //   } else if (api.validators.isFieldsId(locationKey)) {
 //     locationItem = await core.Location.fromId(locationKey)
@@ -54,7 +54,7 @@
 //     // TODO get type from core
 //     let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
 
-//     if (api.validators.isComponentsHandle(locationKey)) {
+//     if (api.validators.isFieldsHandle(locationKey)) {
 //       locationItem = await core.Location.fromHandle(locationKey)
 //     } else if (api.validators.isFieldsId(locationKey)) {
 //       locationItem = await core.Location.fromId(locationKey)

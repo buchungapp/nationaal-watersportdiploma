@@ -9,7 +9,7 @@ cp.execFileSync(
   'pnpm',
   [
     '--package',
-    'oa42-generator@0.10.6',
+    'oa42-generator@0.10.7',
     'dlx',
     'oa42-generator',
     'package',

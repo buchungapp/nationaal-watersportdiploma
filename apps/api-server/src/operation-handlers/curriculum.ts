@@ -11,7 +11,7 @@ export const listCurriculaByDiscipline: api.ListCurriculaByDisciplineOperationHa
 
   if (api.validators.isFieldsId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
-  } else if (api.validators.isComponentsHandle(disciplineKey)) {
+  } else if (api.validators.isFieldsHandle(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
   } else {
     throw 'impossible'
@@ -28,9 +28,50 @@ export const listCurriculaByDiscipline: api.ListCurriculaByDisciplineOperationHa
     filter: { onlyCurrentActive: true, disciplineId: disciplineItem.id },
   })
 
+  const responseEntity: api.types.CurriculumModel[] = curriculumList.map(
+    (curriculumItem) => {
+      return {
+        updatedAt: curriculumItem.updatedAt,
+        modules: curriculumItem.modules.map((moduleItem) => {
+          return {
+            id: moduleItem.id,
+            competencies: moduleItem.competencies.map((competencyItem) => {
+              return {
+                weight: competencyItem.weight,
+                type: competencyItem.type ?? undefined,
+                handle: competencyItem.handle,
+                isRequired: competencyItem.isRequired,
+                requirement: competencyItem.requirement ?? undefined,
+                id: competencyItem.id,
+                title: competencyItem.title ?? undefined,
+                updatedAt: competencyItem.updatedAt,
+                deletedAt: competencyItem.deletedAt ?? undefined,
+                createdAt: competencyItem.createdAt,
+              }
+            }),
+            handle: moduleItem.handle,
+            deletedAt: moduleItem.deletedAt ?? undefined,
+            updatedAt: moduleItem.updatedAt,
+            isRequired: moduleItem.isRequired,
+            weight: moduleItem.weight,
+            type: moduleItem.type ?? undefined,
+            createdAt: moduleItem.createdAt,
+            title: moduleItem.title ?? undefined,
+          }
+        }),
+        id: curriculumItem.id,
+        programId: curriculumItem.programId,
+        createdAt: curriculumItem.createdAt,
+        startedAt: curriculumItem.startedAt ?? undefined,
+        deletedAt: curriculumItem.deletedAt ?? undefined,
+        revision: curriculumItem.revision,
+      }
+    },
+  )
+
   return {
     status: 200,
     contentType: 'application/json',
-    entity: () => curriculumList,
+    entity: () => responseEntity,
   }
 }

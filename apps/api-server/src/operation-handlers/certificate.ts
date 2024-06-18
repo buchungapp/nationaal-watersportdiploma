@@ -27,10 +27,21 @@ export const findCertificate: api.FindCertificateOperationHandler<
       }
     }
 
+    const responseEntity: api.types.CertificateModel = {
+      id: certificateItem.id,
+      handle: certificateItem.handle,
+      studentCurriculumId: certificateItem.studentCurriculumId,
+      issuedAt: certificateItem.issuedAt ?? undefined,
+      visibleFrom: certificateItem.visibleFrom ?? undefined,
+      createdAt: certificateItem.createdAt,
+      updatedAt: certificateItem.updatedAt,
+      deletedAt: certificateItem.deletedAt ?? undefined,
+    }
+
     return {
       status: 200,
       contentType: 'application/json',
-      entity: () => certificateItem,
+      entity: () => responseEntity,
     }
   }
 
@@ -72,10 +83,21 @@ export const getCertificate: api.GetCertificateOperationHandler<
       }
     }
 
+    const responseEntity: api.types.CertificateModel = {
+      id: certificateItem.id,
+      handle: certificateItem.handle,
+      studentCurriculumId: certificateItem.studentCurriculumId,
+      issuedAt: certificateItem.issuedAt ?? undefined,
+      visibleFrom: certificateItem.visibleFrom ?? undefined,
+      createdAt: certificateItem.createdAt,
+      updatedAt: certificateItem.updatedAt,
+      deletedAt: certificateItem.deletedAt ?? undefined,
+    }
+
     return {
       status: 200,
       contentType: 'application/json',
-      entity: () => certificateItem,
+      entity: () => responseEntity,
     }
   }
 
@@ -104,10 +126,25 @@ export const listCertificatesByNumber: api.ListCertificatesByNumberOperationHand
       },
     })
 
+    const responseEntity: api.types.CertificateModel[] = certificateList.map(
+      (certificateItem) => {
+        return {
+          id: certificateItem.id,
+          handle: certificateItem.handle,
+          studentCurriculumId: certificateItem.studentCurriculumId,
+          issuedAt: certificateItem.issuedAt ?? undefined,
+          visibleFrom: certificateItem.visibleFrom ?? undefined,
+          createdAt: certificateItem.createdAt,
+          updatedAt: certificateItem.updatedAt,
+          deletedAt: certificateItem.deletedAt ?? undefined,
+        }
+      },
+    )
+
     return {
       status: 200,
       contentType: 'application/json',
-      entity: () => certificateList,
+      entity: () => responseEntity,
     }
   }
 
@@ -119,10 +156,23 @@ export const listCertificatesByNumber: api.ListCertificatesByNumberOperationHand
       },
     })
 
+    const responseEntity = certificateList.map((certificateItem) => {
+      return {
+        id: certificateItem.id,
+        handle: certificateItem.handle,
+        studentCurriculumId: certificateItem.studentCurriculumId,
+        issuedAt: certificateItem.issuedAt ?? undefined,
+        visibleFrom: certificateItem.visibleFrom ?? undefined,
+        createdAt: certificateItem.createdAt,
+        updatedAt: certificateItem.updatedAt,
+        deletedAt: certificateItem.deletedAt ?? undefined,
+      }
+    })
+
     return {
       status: 200,
       contentType: 'application/json',
-      entity: () => certificateList,
+      entity: () => responseEntity,
     }
   }
 
