@@ -12,7 +12,7 @@
 
 //   if (api.validators.isComponentsHandle(locationKey)) {
 //     locationItem = await core.Location.fromHandle(locationKey)
-//   } else if (api.validators.isComponentsId(locationKey)) {
+//   } else if (api.validators.isFieldsId(locationKey)) {
 //     locationItem = await core.Location.fromId(locationKey)
 //   } else {
 //     throw 'impossible'
@@ -56,7 +56,7 @@
 
 //     if (api.validators.isComponentsHandle(locationKey)) {
 //       locationItem = await core.Location.fromHandle(locationKey)
-//     } else if (api.validators.isComponentsId(locationKey)) {
+//     } else if (api.validators.isFieldsId(locationKey)) {
 //       locationItem = await core.Location.fromId(locationKey)
 //     } else {
 //       throw 'impossible'

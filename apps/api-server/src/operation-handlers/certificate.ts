@@ -59,7 +59,7 @@ export const getCertificate: api.GetCertificateOperationHandler<
     if (api.validators.isCertificateHandle(certificateKey)) {
       // TODO create a BLL operation
       throw 'not supported yet'
-    } else if (api.validators.isComponentsId(certificateKey)) {
+    } else if (api.validators.isFieldsId(certificateKey)) {
       certificateItem = await core.Certificate.byId(certificateKey)
     } else {
       throw 'impossible'

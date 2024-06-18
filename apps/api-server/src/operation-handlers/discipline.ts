@@ -21,7 +21,7 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
 
   let disciplineItem: Awaited<ReturnType<typeof core.Program.Discipline.fromId>>
 
-  if (api.validators.isComponentsId(disciplineKey)) {
+  if (api.validators.isFieldsId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
   } else if (api.validators.isComponentsHandle(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
