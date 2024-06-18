@@ -97,7 +97,7 @@ async function main() {
   ])
 
   // Start student curriculum
-  const { id: studentCurriculumId } = await Student.Program.startProgram({
+  const { id: studentCurriculumId } = await Student.Curriculum.start({
     curriculumId: curriculum.id,
     personId: person,
     gearTypeId: gearType,

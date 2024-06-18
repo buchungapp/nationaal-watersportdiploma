@@ -159,7 +159,7 @@ async function main(filePath: string) {
       ])
 
       // Start student curriculum
-      const { id: studentCurriculumId } = await Student.Program.startProgram({
+      const { id: studentCurriculumId } = await Student.Curriculum.start({
         curriculumId: curriculum.id,
         personId: person.id,
         gearTypeId: gearTypes[0]!.id,

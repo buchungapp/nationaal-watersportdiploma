@@ -30,7 +30,7 @@ export const cohort = pgTable(
     accessEndTime: timestamp('access_end_time', {
       withTimezone: true,
       mode: 'string',
-    }),
+    }).notNull(),
     ...timestamps,
   },
   (table) => {

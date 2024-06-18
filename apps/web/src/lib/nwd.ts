@@ -497,7 +497,7 @@ export const createCompletedCertificate = async (
       }
 
       // Start student curriculum
-      const { id: studentCurriculumId } = await Student.Program.startProgram({
+      const { id: studentCurriculumId } = await Student.Curriculum.start({
         curriculumId,
         personId,
         gearTypeId,

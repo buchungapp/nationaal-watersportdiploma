@@ -1,9 +1,9 @@
 import { schema as s } from '@nawadi/db'
 import { useQuery } from '../../contexts/index.js'
 import { successfulCreateResponse, withZod } from '../../utils/index.js'
-import { insertSchema } from './program.schema.js'
+import { insertSchema } from './curriculum.schema.js'
 
-export const startProgram = withZod(
+export const start = withZod(
   insertSchema.pick({
     personId: true,
     curriculumId: true,
