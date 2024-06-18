@@ -184,30 +184,10 @@ export const listCountries = cache(async () => {
   switch (result.status) {
     case 200: {
       const entity = await result.entity();
-      return entity;
-    }
-    case 404:
-      notFound();
-  }
-});
-
-export const retrieveDisciplineByHandle = cache(async (handle: string) => {
-  const result = await api.retrieveDiscipline(
-    {
-      parameters: {
-        disciplineKey: handle,
-      },
-      contentType: null,
-    },
-    { apiKey },
-    { baseUrl },
-  );
-  api.lib.expectStatus(result, 200, 404);
-
-  switch (result.status) {
-    case 200: {
-      const entity = await result.entity();
-      return entity;
+      return entity.map((entity) => ({
+        id: entity.code,
+        name: entity.name ?? "",
+      }));
     }
     case 404:
       notFound();
