@@ -1,11 +1,5 @@
 import * as api from "@nawadi/api";
-import {
-  Student,
-  User,
-  withDatabase,
-  withSupabaseClient,
-  withTransaction,
-} from "@nawadi/core";
+import * as core from "@nawadi/core";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
@@ -25,12 +19,13 @@ function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
 
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
-    return withSupabaseClient(
+    return core.withSupabaseClient(
       {
         url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
         serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
       },
-      () => withDatabase({ pgUri: process.env.PGURI!, serverless: true }, cb),
+      () =>
+        core.withDatabase({ pgUri: process.env.PGURI!, serverless: true }, cb),
     );
   } catch (error) {
     console.error(error);
@@ -62,9 +57,11 @@ export const getUserOrThrow = cache(async () => {
   const { user: authUser } = userResponse.data;
 
   return makeRequest(async () => {
-    const userData = await User.fromId(authUser.id);
+    const userData = await core.User.fromId(authUser.id);
     // We can't run this in parallel, because fromId will create the user if it doesn't exist
-    const persons = await User.Person.list({ filter: { userId: authUser.id } });
+    const persons = await core.User.Person.list({
+      filter: { userId: authUser.id },
+    });
 
     if (!userData) {
       throw new Error("User not found");
@@ -112,7 +109,7 @@ export const listCertificates = cache(async (locationId: string) => {
 
     if (!person) return [];
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await core.User.Person.listLocations({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -121,7 +118,7 @@ export const listCertificates = cache(async (locationId: string) => {
       throw new Error("Location not found for person");
     }
 
-    const certificates = await Certificate.list({
+    const certificates = await core.Certificate.list({
       filter: { locationId },
     });
 
@@ -130,22 +127,10 @@ export const listCertificates = cache(async (locationId: string) => {
 });
 
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
-
-    const person = extractPerson(user);
-
-    if (!person) return [];
-
-    const availableLocations = await User.Person.listLocations({
-      personId: person.id,
-      roles: ["location_admin"],
-    });
-
-    const certificates = await Certificate.list({
-      filter: {
-        number: numbers,
-        locationId: availableLocations.map((l) => l.locationId),
+  const result = await api.listCertificatesByNumber(
+    {
+      parameters: {
+        numbers,
       },
       contentType: null,
     },
@@ -164,26 +149,7 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   }
 });
 
-export const retrieveCertificateById = cache(async (id: string) => {
-  const result = await api.getCertificate(
-    {
-      parameters: { certificateKey: id },
-      contentType: null,
-    },
-    { apiKey },
-    { baseUrl },
-  );
-  api.lib.expectStatus(result, 200, 404);
-
-  switch (result.status) {
-    case 200: {
-      const entity = await result.entity();
-      return entity;
-    }
-    case 404:
-      notFound();
-  }
-});
+export const retrieveCertificateById = cache(async (id: string) => {});
 
 export const listDisciplines = cache(async () => {
   const result = await api.listDisciplines(
@@ -397,12 +363,12 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
       throw new Error("Person not found for user");
     }
 
-    const locations = await User.Person.listLocations({
+    const locations = await core.User.Person.listLocations({
       personId: person.id,
       roles: ["location_admin"],
     });
 
-    return await Location.list().then((locs) =>
+    return await core.Location.list().then((locs) =>
       locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
     );
   });
@@ -429,7 +395,7 @@ export const createPersonForLocation = async (
       entity: () => ({
         email: personInput.email,
         firstName: personInput.firstName,
-        lastNamePrefix: personInput.lastNamePrefix,
+        lastNamePrefix: personInput.lastNamePrefix ?? undefined,
         lastName: personInput.lastName,
         dateOfBirth: personInput.dateOfBirth.toISOString(),
         birthCity: personInput.birthCity,
@@ -465,7 +431,7 @@ export const createCompletedCertificate = async (
   },
 ) => {
   return makeRequest(async () => {
-    return withTransaction(async () => {
+    return core.withTransaction(async () => {
       const authUser = await getUserOrThrow();
 
       const authPerson = extractPerson(authUser);
@@ -474,7 +440,7 @@ export const createCompletedCertificate = async (
         throw new Error("Person not found for user");
       }
 
-      const availableLocations = await User.Person.listLocations({
+      const availableLocations = await core.User.Person.listLocations({
         personId: authPerson.id,
         roles: ["location_admin"],
       });
@@ -484,27 +450,29 @@ export const createCompletedCertificate = async (
       }
 
       // Start student curriculum
-      const { id: studentCurriculumId } = await Student.Program.startProgram({
-        curriculumId,
-        personId,
-        gearTypeId,
-      });
+      const { id: studentCurriculumId } =
+        await core.Student.Program.startProgram({
+          curriculumId,
+          personId,
+          gearTypeId,
+        });
 
       // Start certificate
-      const { id: certificateId } = await Student.Certificate.startCertificate({
-        locationId,
-        studentCurriculumId,
-      });
+      const { id: certificateId } =
+        await core.Student.Certificate.startCertificate({
+          locationId,
+          studentCurriculumId,
+        });
 
       // Add completed competencies
-      await Student.Certificate.completeCompetency({
+      await core.Student.Certificate.completeCompetency({
         certificateId,
         studentCurriculumId,
         competencyId: competencies.flat(),
       });
 
       // Complete certificate
-      await Student.Certificate.completeCertificate({
+      await core.Student.Certificate.completeCertificate({
         certificateId,
         visibleFrom: new Date().toISOString(),
       });
