@@ -302,20 +302,20 @@ importers:
   generated/api:
     dependencies:
       '@types/node':
-        specifier: ^18.19.36
-        version: 18.19.36
+        specifier: ^20.12.8
+        version: 20.12.11
       goodrouter:
         specifier: ^2.1.6
         version: 2.1.6
       oa42-lib:
-        specifier: ^0.10.6
-        version: 0.10.6
+        specifier: ^0.8.22
+        version: 0.8.22
     devDependencies:
-      '@tsconfig/node18':
-        specifier: ^18.2.4
-        version: 18.2.4
+      '@tsconfig/node20':
+        specifier: ^20.1.4
+        version: 20.1.4
       rollup:
-        specifier: ^4.18.0
+        specifier: ^4.17.2
         version: 4.18.0
       typescript:
         specifier: ^5.4.5
@@ -386,7 +386,7 @@ importers:
         version: 17.0.32
       drizzle-orm:
         specifier: ^0.30.8
-        version: 0.30.10(@opentelemetry/api@1.7.0)(postgres@3.4.4)
+        version: 0.30.10(@opentelemetry/api@1.8.0)(postgres@3.4.4)
       postgres:
         specifier: ^3.4.4
         version: 3.4.4
@@ -4133,7 +4133,7 @@ packages:
   /@swc/helpers@0.3.17:
     resolution: {integrity: sha512-tb7Iu+oZ+zWJZ3HJqwx8oNwSDIU440hmVMDPhpACWQWnrZHK99Bxs70gT1L2dnr5Hg50ZRWEFkQCAnOVVV0z1Q==}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: false
 
   /@swc/helpers@0.4.14:
@@ -4146,7 +4146,7 @@ packages:
     resolution: {integrity: sha512-5lxnyLEYFskErRPenYItLRSge5DjrJngYKdVjRSrWfza9G6KkgHEXi0vUZiyUeMU5JfXH1YnvXZzSp8ul88o2Q==}
     dependencies:
       legacy-swc-helpers: /@swc/helpers@0.4.14
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: false
 
   /@swc/helpers@0.5.11:
@@ -4245,10 +4245,6 @@ packages:
     transitivePeerDependencies:
       - tailwindcss
     dev: false
-
-  /@tsconfig/node18@18.2.4:
-    resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
-    dev: true
 
   /@tsconfig/node20@20.1.4:
     resolution: {integrity: sha512-sqgsT69YFeLWf5NtJ4Xq/xAF8p4ZQHlmGW74Nu2tD4+g5fAsposc4ZfaaPixVu4y01BEiDCWLRDCvDM5JOsRxg==}
@@ -4517,18 +4513,6 @@ packages:
       '@types/unist': 2.0.10
     dev: true
 
-  /@types/node@18.19.36:
-    resolution: {integrity: sha512-tX1BNmYSWEvViftB26VLNxT6mEr37M7+ldUtq7rlKnv4/2fKYsJIOmqJAjT6h1DNuwQjIKgw3VJ/Dtw3yiTIQw==}
-    dependencies:
-      undici-types: 5.26.5
-    dev: false
-
-  /@types/node@20.12.10:
-    resolution: {integrity: sha512-Eem5pH9pmWBHoGAT8Dr5fdc5rYA+4NAovdM4EktRPVAAiJhmWWfQrA0cFhAbOsQdSfIHjAud6YdkbL69+zSKjw==}
-    dependencies:
-      undici-types: 5.26.5
-    dev: true
-
   /@types/node@20.12.11:
     resolution: {integrity: sha512-vDg9PZ/zi+Nqp6boSOT7plNuthRugEKixDv5sFTIpkE89MmNtEArAShI4mxuX2+UrLEe9pxC1vm2cjm9YlWbJw==}
     dependencies:
@@ -4546,7 +4530,7 @@ packages:
   /@types/pdfkit@0.13.4:
     resolution: {integrity: sha512-ixGNDHYJCCKuamY305wbfYSphZ2WPe8FPkjn8oF4fHV+PgPV4V+hecPh2VOS2h4RNtpSB3zQcR4sCpNvvrEb1A==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
     dev: true
 
   /@types/pg-pool@2.0.4:
@@ -4577,7 +4561,7 @@ packages:
   /@types/qrcode@1.5.5:
     resolution: {integrity: sha512-CdfBi/e3Qk+3Z/fXYShipBT13OJ2fDO2Q2w5CIP5anLTLIndQG9z6P1cnm+8zCWSpm5dnxMFd/uREtb0EXuQzg==}
     dependencies:
-      '@types/node': 20.12.10
+      '@types/node': 20.12.11
     dev: true
 
   /@types/qs@6.9.15:
@@ -10881,23 +10865,12 @@ packages:
     dependencies:
       '@appsignal/nodejs': 3.4.1
       '@opentelemetry/api': 1.8.0
-      '@types/node': 20.12.8
+      '@types/node': 20.12.11
       oa42-lib: 0.8.22
       tslib: 2.6.2
       type-fest: 4.18.1
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /oa42-lib@0.10.6:
-    resolution: {integrity: sha512-MAB9crGGcij0D6BdBpsicaNPqEhuDnnyNdQ1H8tE5ScCLe0vGRfzD2bdFTtOJCuhA5h7eEnpBs8FJPvGqsy4dQ==}
-    engines: {node: '>=18'}
-    dependencies:
-      '@types/node': 18.19.36
-      js-base64: 3.7.7
-      msecs: 1.0.3
-      tslib: 2.6.3
-      type-fest: 4.20.1
     dev: false
 
   /oa42-lib@0.8.22:
@@ -10907,8 +10880,8 @@ packages:
       '@types/node': 20.12.11
       js-base64: 3.7.7
       msecs: 1.0.3
-      tslib: 2.6.2
-      type-fest: 4.18.1
+      tslib: 2.6.3
+      type-fest: 4.20.1
     dev: false
 
   /object-assign@4.1.1:
