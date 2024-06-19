@@ -11,9 +11,10 @@ const queryTracer = opentelemetry.trace.getTracer('query')
  * @returns the result of the command function
  */
 export function wrapCommand<R, A extends unknown[]>(
+  name: string,
   task: (...args: A) => Promise<R>,
 ) {
-  const result = wrap(commandTracer, task)
+  const result = wrap(commandTracer, name, task)
   return result
 }
 
@@ -24,18 +25,20 @@ export function wrapCommand<R, A extends unknown[]>(
  * @returns the result of the query function
  */
 export function wrapQuery<R, A extends unknown[]>(
+  name: string,
   task: (...args: A) => Promise<R>,
 ) {
-  const result = wrap(queryTracer, task)
+  const result = wrap(queryTracer, name, task)
   return result
 }
 
 function wrap<R, A extends unknown[]>(
   tracer: opentelemetry.Tracer,
+  name: string,
   task: (...args: A) => Promise<R>,
 ) {
   return async (...args: A): Promise<R> => {
-    const result = await tracer.startActiveSpan(task.name, async (span) => {
+    const result = await tracer.startActiveSpan(name, async (span) => {
       try {
         const result = await task(...args)
         return result

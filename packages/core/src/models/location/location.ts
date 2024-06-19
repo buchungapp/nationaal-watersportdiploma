@@ -14,6 +14,7 @@ import { Platform } from '../index.js'
 import { insertSchema, outputSchema } from './location.schema.js'
 
 export const create = wrapCommand(
+  'createLocation',
   withZod(
     insertSchema.pick({
       handle: true,
@@ -40,6 +41,7 @@ export const create = wrapCommand(
 )
 
 export const list = wrapQuery(
+  'listLocations',
   withZod(z.void(), outputSchema.array(), async () => {
     const query = useQuery()
     const locations = await query.select().from(s.location)
@@ -94,6 +96,7 @@ export const list = wrapQuery(
 )
 
 export const fromId = wrapQuery(
+  'getLocationFromId',
   withZod(uuidSchema, outputSchema, async (id) => {
     const query = useQuery()
     const location = await query
@@ -121,6 +124,7 @@ export const fromId = wrapQuery(
   }),
 )
 export const fromHandle = wrapQuery(
+  'getLocationFromHandle',
   withZod(handleSchema, outputSchema, async (handle) => {
     const query = useQuery()
 
