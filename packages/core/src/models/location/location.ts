@@ -123,6 +123,7 @@ export const fromId = wrapQuery(
     }
   }),
 )
+
 export const fromHandle = wrapQuery(
   'getLocationFromHandle',
   withZod(handleSchema, outputSchema, async (handle) => {
