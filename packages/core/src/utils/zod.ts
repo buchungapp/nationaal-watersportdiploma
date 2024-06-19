@@ -8,11 +8,17 @@ export const handleSchema = z
   .regex(/^[a-z0-9\-]+$/)
 export type Handle = z.infer<typeof handleSchema>
 
-export const titleSchema = z.string().trim()
-export type Title = z.infer<typeof titleSchema>
-
 export const uuidSchema = z.string().uuid()
 export type UUID = z.infer<typeof uuidSchema>
+
+export const idOrHandleSchema = z.union([
+  z.object({ id: uuidSchema }),
+  z.object({ handle: handleSchema }),
+])
+export type IdOrHandle = z.infer<typeof idOrHandleSchema>
+
+export const titleSchema = z.string().trim()
+export type Title = z.infer<typeof titleSchema>
 
 /** A string representation (ISO 8601 format) of a date.
  * @example "2021-01-01T00:00:00.000Z"

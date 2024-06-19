@@ -40,9 +40,9 @@ export const create = withZod(
   },
 )
 
-export const findMany = withZod(
+export const listByLocationId = withZod(
   z.object({
-    locationId: uuidSchema,
+    id: uuidSchema,
   }),
   selectSchema.array(),
   async (input) => {
@@ -51,7 +51,7 @@ export const findMany = withZod(
     const rows = await query
       .select()
       .from(s.cohort)
-      .where(eq(s.cohort.locationId, input.locationId))
+      .where(eq(s.cohort.locationId, input.id))
       .orderBy(asc(s.cohort.accessStartTime), asc(s.cohort.accessEndTime))
 
     return rows

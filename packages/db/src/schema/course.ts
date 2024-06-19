@@ -91,6 +91,8 @@ export const degree = pgTable(
   },
 )
 
+// type Degree = degree.$inferSelect
+
 export const category = pgTable(
   'category',
   {

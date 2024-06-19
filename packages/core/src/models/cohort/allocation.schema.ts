@@ -1,8 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { outputSchema as studentCurriculumSelectSchema } from '../student/curriculum.schema.js'
-import { selectSchema as actorSelectSchema } from '../user/actor.schema.js'
 
 export const insertSchema = createInsertSchema(s.cohortAllocation, {
   actorId: (schema) => schema.actorId.uuid(),
@@ -12,13 +10,8 @@ export const insertSchema = createInsertSchema(s.cohortAllocation, {
 })
 export type Input = z.input<typeof insertSchema>
 
-export const selectSchema = createSelectSchema(s.cohortAllocation)
+export const selectSchema = createSelectSchema(s.cohortAllocation, {
+  tags: (schema) => schema.tags.array(),
+})
 
-export const outputSchema = selectSchema
-  .omit({ actorId: true, studentCurriculumId: true })
-  .extend({
-    actor: actorSelectSchema,
-    studentCurriculum: studentCurriculumSelectSchema,
-  })
-
-export type Output = z.output<typeof outputSchema>
+export type Output = z.output<typeof selectSchema>

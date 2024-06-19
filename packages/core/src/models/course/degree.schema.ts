@@ -2,6 +2,7 @@ import { schema as s } from '@nawadi/db'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
 
+// Should normalization be part of this core? Or do we only validate
 export const insertSchema = createInsertSchema(s.degree, {
   handle: (schema) =>
     schema.handle
