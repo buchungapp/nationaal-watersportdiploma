@@ -1069,7 +1069,7 @@ packages:
     resolution: {integrity: sha512-3bfqkzuR1KLx57nZfjr2NLnFOobvyS0aTszaEGCGqmYMVDRaGvgIZbjGSV/MHSSmLgQ/b9JFHQ5xm5WRZYd+XQ==}
     requiresBuild: true
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: true
     optional: true
 
@@ -4139,7 +4139,7 @@ packages:
   /@swc/helpers@0.4.14:
     resolution: {integrity: sha512-4C7nX/dvpzB7za4Ql9K81xK3HPxCpHMgwTZVyf+9JQ6VUbn9jjZVN7/Nkdz/Ugzs2CSjqnL/UPXroiVBVHUWUw==}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: false
 
   /@swc/helpers@0.4.36:
@@ -12945,7 +12945,6 @@ packages:
 
   /tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
-    dev: false
 
   /tsx@4.8.2:
     resolution: {integrity: sha512-hmmzS4U4mdy1Cnzpl/NQiPUC2k34EcNSTZYVJThYKhdqTwuBeF+4cG9KUK/PFQ7KHaAaYwqlb7QfmsE2nuj+WA==}
