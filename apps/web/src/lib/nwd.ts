@@ -1,5 +1,6 @@
 import {
   Certificate,
+  Cohort,
   Course,
   Curriculum,
   Location,
@@ -10,6 +11,7 @@ import {
   withSupabaseClient,
   withTransaction,
 } from "@nawadi/core";
+import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
@@ -532,5 +534,62 @@ export const createCompletedCertificate = async (
 
       return { id: certificateId };
     });
+  });
+};
+
+export const listCohortsForLocation = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const cohorts = await Cohort.listByLocationId({ id: locationId });
+
+    return cohorts;
+  });
+});
+
+export const createCohort = async ({
+  locationId,
+  label,
+  accessStartTimestamp,
+  accessEndTimestamp,
+}: {
+  locationId: string;
+  label: string;
+  accessStartTimestamp: string;
+  accessEndTimestamp: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    const availableLocations = await User.Person.listLocationsByRole({
+      personId: authPerson.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === locationId)) {
+      throw new Error("Location not found for person");
+    }
+
+    const res = await Cohort.create({
+      locationId,
+      label,
+      accessStartTime: accessStartTimestamp,
+      accessEndTime: accessEndTimestamp,
+      handle: slugify(label),
+    });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "create_cohort",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+      },
+    });
+
+    return res;
   });
 };

@@ -13,13 +13,17 @@ import {
 import { insertSchema, selectSchema } from './cohort.schema.js'
 
 export const create = withZod(
-  insertSchema.pick({
-    label: true,
-    handle: true,
-    locationId: true,
-    accessStartTime: true,
-    accessEndTime: true,
-  }),
+  insertSchema
+    .pick({
+      label: true,
+      handle: true,
+      locationId: true,
+      accessStartTime: true,
+      accessEndTime: true,
+    })
+    .refine((data) => {
+      return data.accessStartTime < data.accessEndTime
+    }, 'accessStartTime should be before accessEndTime'),
   successfulCreateResponse,
   async (item) => {
     const query = useQuery()
