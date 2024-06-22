@@ -2,18 +2,20 @@ import clsx from "clsx";
 import { notFound } from "next/navigation";
 import Disclosure from "~/app/(public)/_components/disclosure";
 import {
+  listCourses,
   listCurriculaByDiscipline,
   listPrograms,
   retrieveDisciplineByHandle,
 } from "~/lib/nwd";
 
+type Course = Awaited<ReturnType<typeof listCourses>>[number];
 type Program = Awaited<ReturnType<typeof listPrograms>>[number];
-type Category = Program["categories"][number];
+type Category = Course["categories"][number];
 
-const getUniqueParentCategories = (items: Program[], seen: string[]) => {
+const getUniqueParentCategories = (items: Course[], seen: string[]) => {
   const uniqueItems = items.reduce(
-    (acc, program) => {
-      program.categories.forEach(({ parent }) => {
+    (acc, course) => {
+      course.categories.forEach(({ parent }) => {
         if (!parent || seen.includes(parent.id)) {
           return;
         }
@@ -31,7 +33,7 @@ const getUniqueParentCategories = (items: Program[], seen: string[]) => {
   return Object.values(uniqueItems).sort((a, b) => a.weight - b.weight);
 };
 
-const getUniqueCategories = (items: Program[]) => {
+const getUniqueCategories = (items: Course[]) => {
   const uniqueItems = items.reduce(
     (acc, program) => {
       program.categories.forEach((category) => {
@@ -48,23 +50,29 @@ const getUniqueCategories = (items: Program[]) => {
   return Object.values(uniqueItems).sort((a, b) => a.weight - b.weight);
 };
 
-async function RecursivePrograms({
+async function RecursiveCourses({
+  courses,
   programs,
   disciplineId,
   seenParentIds = [],
 }: {
+  courses: Course[];
   programs: Program[];
   disciplineId: string;
   seenParentIds?: string[];
 }) {
   const curricula = await listCurriculaByDiscipline(disciplineId);
 
-  const filteredPrograms = programs.filter(
-    (p) => p.discipline.id === disciplineId,
+  const filteredCourses = courses.filter(
+    (c) => c.discipline.id === disciplineId,
+  );
+
+  const filteredPrograms = programs.filter((p) =>
+    filteredCourses.some((c) => c.id === p.course.id),
   );
 
   const uniqueParentCategories = getUniqueParentCategories(
-    filteredPrograms,
+    filteredCourses,
     seenParentIds,
   );
 
@@ -193,6 +201,10 @@ async function RecursivePrograms({
 
           <ul className="list-none space-y-6">
             {filteredPrograms.map((program) => {
+              const course = filteredCourses.find(
+                (course) => course.id === program.course.id,
+              )!;
+
               const curriculum = curricula.find(
                 (curriculum) => curriculum.programId === program.id,
               );
@@ -202,44 +214,49 @@ async function RecursivePrograms({
                   <Disclosure
                     button={
                       <span className="font-medium text-gray-900">
-                        {program.title}
+                        {program.title ??
+                          `${course.title} ${program.degree.title}`}
                       </span>
                     }
                     size="xs"
                   >
                     <ul className="list-none">
-                      {curriculum?.modules.map((module) => (
-                        <li
-                          key={module.id}
-                          className="bg-branding-light/5 border border-branding-light/25 rounded py-1.5 px-6"
-                        >
-                          <p className="flex items-center justify-between">
-                            <span className="font-semibold text-gray-700">
-                              {module.title}
-                            </span>
-                            <span
-                              className={clsx(
-                                "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                                module.isRequired
-                                  ? "bg-pink-50 text-pink-600 ring-pink-500/20"
-                                  : "bg-blue-50 text-blue-600 ring-blue-500/20",
-                              )}
-                            >
-                              {module.isRequired ? "Verplicht" : "Optioneel"}
-                            </span>
-                          </p>
-                          <ul className="mt-6 columns-1 lg:columns-2 gap-x-10 px-3.5">
-                            {module.competencies.map((competency) => (
-                              <li
-                                key={competency.id}
-                                className="text-sm mt-0 mb-2.5 break-inside-avoid"
+                      {curriculum?.modules
+                        .sort((a, b) => a.weight - b.weight)
+                        .map((module) => (
+                          <li
+                            key={module.id}
+                            className="bg-branding-light/5 border border-branding-light/25 rounded py-1.5 px-6"
+                          >
+                            <p className="flex items-center justify-between">
+                              <span className="font-semibold text-gray-700">
+                                {module.title}
+                              </span>
+                              <span
+                                className={clsx(
+                                  "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
+                                  module.isRequired
+                                    ? "bg-pink-50 text-pink-600 ring-pink-500/20"
+                                    : "bg-blue-50 text-blue-600 ring-blue-500/20",
+                                )}
                               >
-                                {competency.title}
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      ))}
+                                {module.isRequired ? "Verplicht" : "Optioneel"}
+                              </span>
+                            </p>
+                            <ul className="mt-6 columns-1 lg:columns-2 gap-x-10 px-3.5">
+                              {module.competencies
+                                .sort((a, b) => a.weight - b.weight)
+                                .map((competency) => (
+                                  <li
+                                    key={competency.id}
+                                    className="text-sm mt-0 mb-2.5 break-inside-avoid"
+                                  >
+                                    {competency.title}
+                                  </li>
+                                ))}
+                            </ul>
+                          </li>
+                        ))}
                     </ul>
                   </Disclosure>
                 </li>
@@ -251,7 +268,7 @@ async function RecursivePrograms({
     );
   }
 
-  const relevantCategories = getUniqueCategories(filteredPrograms).filter(
+  const relevantCategories = getUniqueCategories(filteredCourses).filter(
     (category) => category.parent?.id === groupingCategory.id,
   );
 
@@ -263,10 +280,14 @@ async function RecursivePrograms({
       )}
     >
       {relevantCategories.map((category) => {
-        const relevantPrograms = filteredPrograms.filter((program) =>
-          program.categories.some(
-            (programCategory) => programCategory.id === category.id,
+        const relevantCourses = filteredCourses.filter((course) =>
+          course.categories.some(
+            (courseCategory) => courseCategory.id === category.id,
           ),
+        );
+
+        const relevantPrograms = filteredPrograms.filter((program) =>
+          relevantCourses.some((course) => course.id === program.course.id),
         );
 
         return (
@@ -280,7 +301,8 @@ async function RecursivePrograms({
               size={seenParentIds.length < 1 ? "base" : "sm"}
             >
               <div className="border-l border-gray-300">
-                <RecursivePrograms
+                <RecursiveCourses
+                  courses={relevantCourses}
                   programs={relevantPrograms}
                   disciplineId={disciplineId}
                   seenParentIds={[...seenParentIds, groupingCategory.id]}
@@ -301,8 +323,9 @@ export default async function Page({
     discipline: string;
   };
 }) {
-  const [discipline, programs] = await Promise.all([
+  const [discipline, courses, programs] = await Promise.all([
     retrieveDisciplineByHandle(params.discipline),
+    listCourses(),
     listPrograms(),
   ]);
 
@@ -315,13 +338,17 @@ export default async function Page({
   return (
     <div className="w-full">
       <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
-        Programma's
+        Cursussen
       </h1>
       <p>
-        Op deze pagina vind je een overzicht van de programma's die onder de
+        Op deze pagina vind je een overzicht van de cursussen die onder de
         discipline <strong>{discipline.title}</strong> vallen.
       </p>
-      <RecursivePrograms programs={programs} disciplineId={discipline.id} />
+      <RecursiveCourses
+        courses={courses}
+        programs={programs}
+        disciplineId={discipline.id}
+      />
     </div>
   );
 }
