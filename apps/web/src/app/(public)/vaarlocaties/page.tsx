@@ -14,7 +14,6 @@ import PageHero from "../_components/style/page-hero";
 
 // const mapsClient = new Client({});
 
-import { StarIcon } from "@heroicons/react/16/solid";
 import type { Metadata, ResolvingMetadata } from "next";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { TouchTarget } from "~/app/(dashboard)/_components/button";
@@ -120,7 +119,7 @@ export default async function Page() {
                   <LocationCard key={location.id} location={location}>
                     <div className="flex items-center justify-between">
                       {/* Star rating */}
-                      <Link
+                      {/* <Link
                         // Link to Google Maps page
                         href={location.googleUrl!}
                         target="_blank"
@@ -131,7 +130,7 @@ export default async function Page() {
                         <span className="text-sm text-gray-600">
                           ({location.user_ratings_total} reviews)
                         </span>
-                      </Link>
+                      </Link> */}
 
                       {location.province ? (
                         <Badge
