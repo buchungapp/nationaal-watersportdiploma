@@ -69,6 +69,7 @@ ignorePaths:
   - supabase/config.toml
   - packages/db/migrations/
   - locations.ts
+  - packages/scripts/src/**/*.txt
 files:
   - '**'
 enableFiletypes:
