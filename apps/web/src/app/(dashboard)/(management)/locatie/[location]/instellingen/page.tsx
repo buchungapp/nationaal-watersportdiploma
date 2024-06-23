@@ -15,6 +15,7 @@ import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { retrieveLocationByHandle } from "~/lib/nwd";
 import SettingsForm from "./_components/settings-form";
+import SubmitButton from "./_components/submit-button";
 
 function FieldSection({
   label,
@@ -57,7 +58,7 @@ export default async function Page({
   } = location;
 
   return (
-    <SettingsForm className="mx-auto max-w-4xl">
+    <SettingsForm className="mx-auto max-w-4xl" locationId={location.id}>
       <Heading>Instellingen</Heading>
       <Text>
         Deze informatie wordt gedeeltelijk ook openbaar getoond op{" "}
@@ -127,6 +128,7 @@ export default async function Page({
             label="Standaard"
             description="Het algemene logo van de vaarlocatie."
           >
+            <input type="file" name="logo" />
             <img src={logo?.url} className="w-full h-auto" />
           </FieldSection>
 
@@ -136,6 +138,7 @@ export default async function Page({
             label="Icoon"
             description="Een kleine vierkante versie van het logo, die wordt gebruik op plekken met minder ruimte. Kan zowel vierkant als rond weergegeven worden."
           >
+            <input type="file" name="iconLogo" />
             <img src={logoSquare?.url} className="w-full h-auto" />
           </FieldSection>
 
@@ -145,12 +148,17 @@ export default async function Page({
             label="Diploma"
             description="Het logo zoals hij geprint wordt op diploma's."
           >
+            <input type="file" name="diplomaLogo" />
+
             <img src={logoCertificate?.url} className="w-full h-auto" />
           </FieldSection>
         </FieldGroup>
       </Fieldset>
 
       <Divider soft className="my-10" />
+      <div className="flex justify-end">
+        <SubmitButton />
+      </div>
     </SettingsForm>
   );
 }
