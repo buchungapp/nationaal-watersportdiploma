@@ -103,6 +103,7 @@ export const locations = [
       facebook: "https://www.facebook.com/ZeilschoolVinkeveen",
       instagram: "https://www.instagram.com/zeilschool_vinkeveen/",
       tiktok: "https://www.tiktok.com/@zeilschool_vinkeveen",
+      youtube: "https://www.youtube.com/@zeilschoolvinkeveen4381",
     },
   },
 ] as const;
