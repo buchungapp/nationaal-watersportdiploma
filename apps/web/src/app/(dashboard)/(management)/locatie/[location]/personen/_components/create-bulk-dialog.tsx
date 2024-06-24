@@ -1,10 +1,12 @@
 "use client";
+
 import dayjs from "dayjs";
 import { useRef } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
+import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import {
   Dialog,
   DialogActions,
@@ -18,6 +20,7 @@ import {
   Fieldset,
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
+import { Select } from "~/app/(dashboard)/_components/select";
 import {
   Table,
   TableBody,
@@ -89,9 +92,10 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
     const raw = formData.get("data") as string;
 
-    // Try to parse the data from TSV to JSON
+    // Try to parse the data from CSV to JSON
     let data;
     try {
+      console.log("🔴 raw data: \n", raw);
       data = raw
         // Splits the raw TSV data into an array of lines
         .split("\n")
@@ -117,6 +121,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
       const header = data[0]!;
 
+      // TODO: Fix this check 🚨
       if (header.length !== expectedHeader.length) {
         throw new Error("Je hebt minder kolommen geplakt dan verwacht");
       }
@@ -205,6 +210,18 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
   const parseSuccess = state?.success === true;
 
+  const MAPPED_EXAMPLE_FIELDS = [
+    {
+      email: "E-mailadres",
+      firstName: "Voornaam",
+      lastNamePrefix: "Tussenvoegsels",
+      lastName: "Achternaam",
+      dateOfBirth: "Geboortedatum",
+      birthCity: "Geboorteplaats",
+      birthCountry: "Geboorteland (indien niet nl)",
+    },
+  ];
+
   return (
     <>
       <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
@@ -230,8 +247,48 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
             </>
           )}
         </DialogDescription>
+
         <form action={formAction}>
           <DialogBody>
+            {/* TODO: Design `Map columns` */}
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeader>Your File Column</TableHeader>
+                  <TableHeader>Your Sample Data</TableHeader>
+                  <TableHeader>Destination Column</TableHeader>
+                  <TableHeader>Include</TableHeader>
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                <TableRow>
+                  <TableCell>foo</TableCell>
+                  <TableCell>info@nationaalwatersportdiploma.nl</TableCell>
+                  <TableCell>
+                    <Select name="field-mapped">
+                      <option value="email">E-mailadres</option>
+                      <option value="firstName">Voornaam</option>
+                      <option value="lastNamePrefix">Tussenvoegsels</option>
+                      <option value="lastName">Achternaam</option>
+                      <option value="dateOfBirth">Geboortedatum</option>
+                      <option value="birthCity">Geboorteplaats</option>
+                      {/* TODO: review */}
+                      <option value="birthCountry">
+                        Geboorteland (indien niet nl)
+                      </option>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Checkbox />
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+
+            <pre>{JSON.stringify(MAPPED_EXAMPLE_FIELDS, null, 2)}</pre>
+
+            {/* TODO: Consider to add an extra step. */}
             {parseSuccess ? (
               <Table>
                 <TableHead>
@@ -246,6 +303,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <TableHeader>Geboorteland</TableHeader>
                   </TableRow>
                 </TableHead>
+
                 <TableBody>
                   {state.persons!.map((person, index) => (
                     <TableRow key={JSON.stringify(person)}>
