@@ -1,7 +1,4 @@
-import {
-  ChatBubbleOvalLeftIcon,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/20/solid";
+import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import {
   SidebarBody,
   SidebarHeader,
@@ -11,6 +8,7 @@ import {
   SidebarSpacer,
 } from "~/app/(dashboard)/_components/sidebar";
 import LatestNews from "../../_components/latest-news";
+import { Feedback } from "./_components/feedback";
 import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
 
@@ -36,10 +34,7 @@ export default function SidebarLayout({ params, children }: LayoutProps) {
             <QuestionMarkCircleIcon />
             <SidebarLabel>Helpcentrum</SidebarLabel>
           </SidebarItem>
-          <SidebarItem href="/help" target="_blank">
-            <ChatBubbleOvalLeftIcon />
-            <SidebarLabel>Melding doen</SidebarLabel>
-          </SidebarItem>
+          <Feedback />
         </SidebarSection>
       </SidebarBody>
     </>
