@@ -307,24 +307,24 @@ importers:
   generated/api:
     dependencies:
       '@types/node':
-        specifier: ^20.12.8
-        version: 20.12.11
+        specifier: ^18.19.39
+        version: 18.19.39
       goodrouter:
         specifier: ^2.1.6
         version: 2.1.6
       oa42-lib:
-        specifier: ^0.8.22
-        version: 0.8.22
+        specifier: ^0.10.6
+        version: 0.10.6
     devDependencies:
-      '@tsconfig/node20':
-        specifier: ^20.1.4
-        version: 20.1.4
+      '@tsconfig/node18':
+        specifier: ^18.2.4
+        version: 18.2.4
       rollup:
-        specifier: ^4.17.2
+        specifier: ^4.18.0
         version: 4.18.0
       typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
+        specifier: ^5.5.2
+        version: 5.5.2
 
   packages/core:
     dependencies:
@@ -4157,7 +4157,7 @@ packages:
   /@swc/helpers@0.5.11:
     resolution: {integrity: sha512-YNlnKRWF2sVojTpIyzwou9XoTNbzbzONwRhOoniEioF1AtaitTvVZblaQRrAzChWQ1bLYyYSWzM18y4WwgzJ+A==}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: false
 
   /@swc/helpers@0.5.5:
@@ -4250,6 +4250,10 @@ packages:
     transitivePeerDependencies:
       - tailwindcss
     dev: false
+
+  /@tsconfig/node18@18.2.4:
+    resolution: {integrity: sha512-5xxU8vVs9/FNcvm3gE07fPbn9tl6tqGGWA9tSlwsUEkBxtRnTsNmwrV8gasZ9F/EobaSv9+nu8AxUKccw77JpQ==}
+    dev: true
 
   /@tsconfig/node20@20.1.4:
     resolution: {integrity: sha512-sqgsT69YFeLWf5NtJ4Xq/xAF8p4ZQHlmGW74Nu2tD4+g5fAsposc4ZfaaPixVu4y01BEiDCWLRDCvDM5JOsRxg==}
@@ -4517,6 +4521,12 @@ packages:
     dependencies:
       '@types/unist': 2.0.10
     dev: true
+
+  /@types/node@18.19.39:
+    resolution: {integrity: sha512-nPwTRDKUctxw3di5b4TfT3I0sWDiWoPQCZjXhvdkINntwr8lcoVCKsTgnXeRubKIlfnV+eN/HYk6Jb40tbcEAQ==}
+    dependencies:
+      undici-types: 5.26.5
+    dev: false
 
   /@types/node@20.12.11:
     resolution: {integrity: sha512-vDg9PZ/zi+Nqp6boSOT7plNuthRugEKixDv5sFTIpkE89MmNtEArAShI4mxuX2+UrLEe9pxC1vm2cjm9YlWbJw==}
@@ -5197,7 +5207,7 @@ packages:
     resolution: {integrity: sha512-y+CcFFwelSXpLZk/7fMB2mUbGtX9lKycf1MWJ7CaTIERyitVlyQx6C+sxcROU2BAJ24OiZyK+8wj2i8AlBoS3A==}
     engines: {node: '>=10'}
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
     dev: false
 
   /aria-query@5.3.0:
@@ -10878,6 +10888,17 @@ packages:
       - supports-color
     dev: false
 
+  /oa42-lib@0.10.6:
+    resolution: {integrity: sha512-MAB9crGGcij0D6BdBpsicaNPqEhuDnnyNdQ1H8tE5ScCLe0vGRfzD2bdFTtOJCuhA5h7eEnpBs8FJPvGqsy4dQ==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@types/node': 18.19.39
+      js-base64: 3.7.7
+      msecs: 1.0.3
+      tslib: 2.6.3
+      type-fest: 4.20.1
+    dev: false
+
   /oa42-lib@0.8.22:
     resolution: {integrity: sha512-qysJMF6VQSw+KyLtmNWh5JVFUEn0+UdHylgWFtXTW7ZNuQu022dlN7Ta18YT3kVWHArYwbfPvml1qo51JoQyYA==}
     engines: {node: '>=18'}
@@ -13030,6 +13051,12 @@ packages:
 
   /typescript@5.4.5:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: true
+
+  /typescript@5.5.2:
+    resolution: {integrity: sha512-NcRtPEOsPFFWjobJEtfihkLCZCXZt/os3zf8nTxjVH3RvTSxjrCamJpbExGvYOF+tFHc3pA65qpdwPbzjohhew==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: true

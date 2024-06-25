@@ -2,7 +2,7 @@ import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const getLocations: api.GetLocationsOperationHandler<
+export const getLocations: api.server.GetLocationsOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const list = await core.Location.list()
@@ -22,7 +22,7 @@ export const getLocations: api.GetLocationsOperationHandler<
   }
 }
 
-export const createLocation: api.CreateLocationOperationHandler<
+export const createLocation: api.server.CreateLocationOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) =>
   core.withTransaction(async () => {

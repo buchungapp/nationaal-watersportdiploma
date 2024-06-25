@@ -2,7 +2,7 @@ import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const retrieveCurriculaByDiscipline: api.RetrieveCurriculaByDisciplineOperationHandler<
+export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDisciplineOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const { disciplineKey } = incomingRequest.parameters
@@ -12,9 +12,9 @@ export const retrieveCurriculaByDiscipline: api.RetrieveCurriculaByDisciplineOpe
     ReturnType<typeof core.Program.Discipline.fromHandle>
   >
 
-  if (api.isComponentsHandle(disciplineKey)) {
+  if (api.validators.isHandle(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
-  } else if (api.isComponentsId(disciplineKey)) {
+  } else if (api.validators.isId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
   } else {
     throw 'impossible'

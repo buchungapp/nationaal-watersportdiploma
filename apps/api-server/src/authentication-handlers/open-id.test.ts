@@ -28,7 +28,7 @@ test('open-id authentication', () =>
 
     const token = sessionItem.access_token
 
-    const result = await api.me(
+    const result = await api.client.me(
       {
         contentType: null,
         parameters: {},
