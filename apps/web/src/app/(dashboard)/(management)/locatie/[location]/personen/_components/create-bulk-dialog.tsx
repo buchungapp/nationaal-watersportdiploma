@@ -382,7 +382,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                           {/* TODO: Fix Date */}
                           <TableCell>{String(item?.value)}</TableCell>
                           <TableCell>
-                            <Select name={`destination-column-value-${index}`}>
+                            <Select name={`column-map-${index}`}>
                               <option>Select one</option>
                               <option value="email">E-mailadres</option>
                               <option value="firstName">Voornaam</option>
@@ -395,6 +395,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                               <option value="birthCountry">Geboorteland</option>
                             </Select>
                           </TableCell>
+                          {/* TODO: Do we need include if we change `Select one` to `None`. */}
                           <TableCell>
                             <Checkbox />
                           </TableCell>
