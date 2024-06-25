@@ -310,6 +310,16 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   // TODO: Fix
   const parseSuccess = uploadState?.success === true;
 
+  const columns = [
+    "E-mailadres",
+    "Voornaam",
+    "Tussenvoegsels",
+    "Achternaam",
+    "Geboortedatum",
+    "Geboorteplaats",
+    "Geboorteland (indien niet nl)",
+  ];
+
   return (
     <>
       <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
@@ -382,17 +392,16 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                           {/* TODO: Fix Date */}
                           <TableCell>{String(item?.value)}</TableCell>
                           <TableCell>
-                            <Select name={`column-map-${index}`}>
-                              <option>Select one</option>
-                              <option value="email">E-mailadres</option>
-                              <option value="firstName">Voornaam</option>
-                              <option value="lastNamePrefix">
-                                Tussenvoegsels
-                              </option>
-                              <option value="lastName">Achternaam</option>
-                              <option value="dateOfBirth">Geboortedatum</option>
-                              <option value="birthCity">Geboorteplaats</option>
-                              <option value="birthCountry">Geboorteland</option>
+                            <Select
+                              name={`column-map-${index}`}
+                              value={item?.label || "Select one"}
+                            >
+                              <option value="Select one">Select one</option>
+                              {columns.map((column) => (
+                                <option key={column} value={column}>
+                                  {column}
+                                </option>
+                              ))}
                             </Select>
                           </TableCell>
                           {/* TODO: Do we need include if we change `Select one` to `None`. */}
