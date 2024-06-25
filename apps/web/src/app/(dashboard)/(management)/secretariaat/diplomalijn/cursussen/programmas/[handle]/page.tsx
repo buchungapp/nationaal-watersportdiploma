@@ -17,6 +17,7 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Code, Strong, Text } from "~/app/(dashboard)/_components/text";
 import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
+import { Weight } from "~/app/_components/weight";
 import {
   countStartedStudentsForCurriculum,
   listCurriculaByProgram,
@@ -24,7 +25,6 @@ import {
   listPrograms,
 } from "~/lib/nwd";
 import { CopyCurriculum } from "../../_components/action-buttons";
-import { Weight } from "../../_components/weight";
 
 type Curriculum = Awaited<ReturnType<typeof listCurriculaByProgram>>[number];
 

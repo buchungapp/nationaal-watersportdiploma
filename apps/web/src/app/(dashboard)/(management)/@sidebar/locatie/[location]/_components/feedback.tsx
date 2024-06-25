@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import {
   SidebarItem,
   SidebarLabel,
@@ -166,7 +166,7 @@ function FeedbackTab({
   );
 }
 
-export function Feedback() {
+function Feedback() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
@@ -211,5 +211,20 @@ function SubmitButton() {
     <Button color="branding-dark" disabled={pending} type="submit">
       Verzenden
     </Button>
+  );
+}
+
+export default function () {
+  return (
+    <Suspense
+      fallback={
+        <SidebarItem>
+          <ChatBubbleOvalLeftIcon />
+          <SidebarLabel>Contact opnemen</SidebarLabel>
+        </SidebarItem>
+      }
+    >
+      <Feedback />
+    </Suspense>
   );
 }

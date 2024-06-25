@@ -24,7 +24,7 @@ import {
   listParentCategories,
   listProgramsForCourse,
 } from "~/lib/nwd";
-import { Weight } from "../_components/weight";
+import { Weight } from "../../../../../../_components/weight";
 
 export default async function Page({
   params,

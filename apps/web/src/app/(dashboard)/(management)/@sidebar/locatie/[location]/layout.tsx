@@ -8,7 +8,7 @@ import {
   SidebarSpacer,
 } from "~/app/(dashboard)/_components/sidebar";
 import LatestNews from "../../_components/latest-news";
-import { Feedback } from "./_components/feedback";
+import Feedback from "./_components/feedback";
 import { LocationSelector } from "./_components/location-selector";
 import { LocationSidebarMenu } from "./_components/sidebar-menu";
 

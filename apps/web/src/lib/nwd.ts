@@ -245,6 +245,14 @@ export const listCourses = cache(async () => {
   });
 });
 
+export const retrieveCourseByHandle = cache(async (handle: string) => {
+  return makeRequest(async () => {
+    const courses = await Course.list();
+
+    return courses.find((course) => course.handle === handle);
+  });
+});
+
 export const listPrograms = cache(async () => {
   return makeRequest(async () => {
     const programs = await Course.Program.list();
@@ -640,3 +648,21 @@ export const submitProductFeedback = async ({
     return res;
   });
 };
+
+export const getIsActiveInstructor = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow().catch(() => null);
+
+    if (!user) {
+      return false;
+    }
+
+    const activeActorTypes = await User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+
+    return activeActorTypes.some((type) =>
+      ["instructor", "location_admin"].includes(type),
+    );
+  });
+});
