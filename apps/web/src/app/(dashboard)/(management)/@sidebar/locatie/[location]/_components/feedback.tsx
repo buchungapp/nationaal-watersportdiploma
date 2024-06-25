@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner";
 import {
   Description,
+  ErrorMessage,
   Field,
   Fieldset,
   Label,
@@ -37,34 +38,10 @@ import {
   ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSm,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
-
-const mockSubmitFeedback = (
-  prevState: unknown,
-  formData: FormData,
-): Promise<{ message: string }> => {
-  console.log("✅ prevState", prevState);
-  console.log("✅ formData", formData);
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ message: "Success" });
-    }, 1500);
-  });
-};
-
-const submitFeedback = async (
-  close: () => void,
-  prevState: unknown,
-  formData: FormData,
-) => {
-  const result = await mockSubmitFeedback(prevState, formData);
-  if (result?.message === "Success") {
-    close();
-    toast.success("We hebben je melding ontvangen! 🎉");
-  }
-  return result;
-};
+import { z } from "zod";
+import { submitProductFeedback } from "~/lib/nwd";
 
 const feedbackLabels = {
   bug: {
@@ -81,6 +58,27 @@ const feedbackLabels = {
   },
 } as const;
 
+function urlSearchParamsToObject(
+  urlSearchParams: URLSearchParams,
+): Record<string, string | string[]> {
+  const obj: Record<string, string | string[]> = {};
+
+  urlSearchParams.forEach((value, key) => {
+    if (obj.hasOwnProperty(key)) {
+      const currentValue = obj[key]!;
+      if (Array.isArray(currentValue)) {
+        currentValue.push(value);
+      } else {
+        obj[key] = [currentValue, value];
+      }
+    } else {
+      obj[key] = value;
+    }
+  });
+
+  return obj;
+}
+
 function FeedbackTab({
   close,
   type,
@@ -88,9 +86,47 @@ function FeedbackTab({
   close: () => void;
   type: "bug" | "feedback" | "question";
 }) {
-  const actionWithClose = submitFeedback.bind(null, close);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const [_state, formAction] = useActionState(actionWithClose, undefined);
+  const submitFeedback = async (_prevState: unknown, formData: FormData) => {
+    try {
+      const schema = z.object({
+        comment: z.string(),
+        urgent: z.boolean().optional(),
+      });
+
+      const { comment, urgent } = schema.parse({
+        comment: formData.get("comment") as string,
+        urgent: formData.get("urgent") === "on",
+      });
+
+      await submitProductFeedback({
+        type: type === "feedback" ? "product-feedback" : type,
+        priority: !!urgent ? "high" : "normal",
+        message: comment,
+        path: pathname,
+        query: urlSearchParamsToObject(searchParams),
+        headers: {
+          "user-agent": navigator.userAgent,
+        },
+      });
+
+      close();
+      toast.success("We hebben je melding ontvangen! 🎉");
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          error: error.message,
+        };
+      }
+      return { error: "Er is iets misgegaan. Probeer het later opnieuw." };
+    }
+  };
+
+  const [state, formAction] = useActionState(submitFeedback, undefined);
+
+  console.log("state", state);
 
   const label = feedbackLabels[type].label;
   const placeholder = feedbackLabels[type].placeholder;
@@ -116,6 +152,8 @@ function FeedbackTab({
               </CheckboxGroup>
             )}
           </Fieldset>
+
+          {!!state?.error && <ErrorMessage>{state.error}</ErrorMessage>}
         </DialogBody>
         <DialogActions>
           <Button plain onClick={close}>

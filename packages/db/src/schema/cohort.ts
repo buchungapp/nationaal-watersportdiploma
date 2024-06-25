@@ -31,6 +31,10 @@ export const cohort = pgTable(
       withTimezone: true,
       mode: 'string',
     }).notNull(),
+    certificatesVisibleFrom: timestamp('certificates_visible_from', {
+      withTimezone: true,
+      mode: 'string',
+    }),
     ...timestamps,
   },
   (table) => {

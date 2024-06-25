@@ -1,3 +1,5 @@
+"use server";
+
 import {
   Certificate,
   Cohort,
@@ -18,6 +20,7 @@ import { notFound, redirect } from "next/navigation";
 import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
+import packageInfo from "~/../package.json";
 import posthog from "./posthog";
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
@@ -585,6 +588,50 @@ export const createCohort = async ({
     posthog.capture({
       distinctId: authUser.authUserId,
       event: "create_cohort",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+      },
+    });
+
+    return res;
+  });
+};
+
+export const submitProductFeedback = async ({
+  type,
+  headers,
+  path,
+  query,
+  priority = "normal",
+  message,
+}: {
+  type: "bug" | "product-feedback" | "question";
+  query?: Record<string, string | string[]>;
+  path?: string;
+  headers?: Record<string, string>;
+  priority?: "low" | "normal" | "high";
+  message: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const res = await Platform.Feedback.create({
+      insertedBy: authUser.authUserId,
+      type,
+      headers,
+      path,
+      query,
+      base: {
+        env: process.env.NEXT_PUBLIC_VERCEL_ENV,
+        version: packageInfo.version,
+      },
+      priority,
+      message,
+    });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "submit_feedback",
       properties: {
         $set: { email: authUser.email, displayName: authUser.displayName },
       },
