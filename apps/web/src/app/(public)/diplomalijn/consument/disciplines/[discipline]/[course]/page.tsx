@@ -52,8 +52,8 @@ export default async function Page({
           <h2 className="text-gray-700">Moduleoverzicht</h2>
           <p className="text-sm">
             Een overzicht van modules die op verschillende niveaus worden
-            aangeboden, en of deze verplicht of optioneel zijn om het eindniveau
-            te bereiken.
+            aangeboden, en of deze standaard worden aangeboden, of optioneel
+            zijn voor een vaarlocatie om aan te bieden.
           </p>
         </div>
 
@@ -128,7 +128,7 @@ export default async function Page({
                   <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
                     ✔
                   </span>
-                  Verplicht
+                  Standaard
                 </div>
                 <div className="text-sm text-gray-700 mt-2">
                   <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
@@ -153,7 +153,7 @@ export default async function Page({
           </p>
         </div>
 
-        <ul className="list-none pl-0 space-y-6">
+        <ul className="list-none pl-0 space-y-6 divide-y divide-zinc-950/5">
           {programs.map((program) => {
             return (
               <Program
