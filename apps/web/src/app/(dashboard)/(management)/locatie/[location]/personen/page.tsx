@@ -100,7 +100,7 @@ export default async function Page({
         </Dropdown>
       </div>
 
-      <Table persons={paginatedPersons} totalItems={persons.length} />
+      <Table persons={paginatedPersons} totalItems={searchedPersons.length} />
 
       <Dialogs locationId={location.id} countries={countries} />
     </DialogWrapper>

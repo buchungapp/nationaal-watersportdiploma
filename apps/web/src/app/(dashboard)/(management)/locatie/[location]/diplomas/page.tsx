@@ -65,7 +65,7 @@ export default async function Page({
 
       <Table
         certificates={paginatedCertificates}
-        totalItems={certificates.length}
+        totalItems={searchedCertificates.length}
       />
     </>
   );
