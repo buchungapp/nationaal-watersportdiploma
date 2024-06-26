@@ -5,7 +5,7 @@ import path from "path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import SVGtoPDF from "svg-to-pdfkit";
-import { generateAdvise } from "~/app/(diploma)/diploma/_utils/generate-advise";
+import { generateAdvise } from "~/app/(certificate)/diploma/_utils/generate-advise";
 import { listCertificatesByNumber } from "~/lib/nwd";
 
 const fontPaths = {
@@ -114,7 +114,7 @@ export async function generatePDF(
     doc
       .font("regular", 11)
       .text(
-        certificate.program.title?.slice(0, -1).trim() ?? "",
+        certificate.program.title ?? certificate.program.course.title ?? "",
         476.22,
         56.378,
         {

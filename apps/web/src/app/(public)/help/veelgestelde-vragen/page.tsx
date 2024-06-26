@@ -2,7 +2,7 @@ import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { getHelpFaqs } from "~/lib/article-2";
-import Breadcrumb from "../_components/breadcrumb";
+import Breadcrumb from "../../_components/breadcrumb";
 
 interface PageProps {
   params: {

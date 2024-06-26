@@ -22,10 +22,12 @@
   "dependencies": {
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
+    "@opentelemetry/api": "^1.8.0",
     "@supabase/supabase-js": "^2.42.5",
     "@types/node": "^20.11.19",
     "dayjs": "^1.11.10",
     "drizzle-toolbelt": "^1.1.1",
+    "drizzle-orm": "^0.30.8",
     "drizzle-zod": "^0.5.1",
     "file-type": "^19.0.0",
     "image-size": "^1.1.1",
@@ -35,7 +37,6 @@
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "drizzle-orm": "^0.30.8",
     "type-fest": "^4.17.0",
     "typescript": "^5.4.5"
   }

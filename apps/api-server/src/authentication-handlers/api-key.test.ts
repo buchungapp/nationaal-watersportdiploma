@@ -16,7 +16,7 @@ test('api-key authentication', () =>
       userId: userItem.id,
     })
 
-    const result = await api.me(
+    const result = await api.client.me(
       {
         contentType: null,
         parameters: {},

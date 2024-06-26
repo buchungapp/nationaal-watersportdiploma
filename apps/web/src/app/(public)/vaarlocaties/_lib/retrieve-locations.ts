@@ -14,12 +14,31 @@ async function retrieveLocationsWithAllMeta() {
 
   const locationsWithCity = await Promise.all(
     locations.map(async (location) => {
+      if (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === undefined) {
+        // When the Google Maps API key is not set, we return a dummy location
+        return {
+          ...location,
+          rating: 0,
+          user_ratings_total: 0,
+          geometry: {
+            location: {
+              lat: 0,
+              lng: 0,
+            },
+          },
+          googleUrl: "",
+          province: "",
+          city: "",
+          address_components: [],
+        };
+      }
+
       const placeDetails = await mapsClient
         .placeDetails({
           params: {
             place_id: location.placeId,
             language: Language.nl,
-            key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "",
+            key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
             fields: [
               "rating",
               "user_ratings_total",

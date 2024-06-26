@@ -3,7 +3,7 @@ import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
-import Breadcrumb from "../../_components/breadcrumb";
+import Breadcrumb from "../../../_components/breadcrumb";
 
 interface PageProps {
   params: {

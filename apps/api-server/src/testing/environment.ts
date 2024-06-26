@@ -1,4 +1,4 @@
-import { listen } from '@nawadi/api'
+import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import { URL } from 'node:url'
 import * as application from '../application/index.js'
@@ -23,7 +23,7 @@ export async function withTestEnvironment<T>(
 
   const jobWrapper = async () => {
     const server = application.createApplicationServer()
-    await using listener = await listen(server, {})
+    await using listener = await api.lib.listen(server, {})
 
     const { port } = listener
     const baseUrl = new URL(`http://localhost:${port}`)

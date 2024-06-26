@@ -5,14 +5,14 @@ import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-whi
 
 import Image from "next/image";
 import { Line, LineWave } from "~/app/(public)/_assets/wave";
+import Wordmark from "~/app/_components/brand/wordmark";
 import {
   Facebook,
   Instagram,
   LinkedIn,
   TikTok,
   YouTube,
-} from "~/app/(public)/_components/socials";
-import Wordmark from "~/app/_components/brand/wordmark";
+} from "~/app/_components/socials";
 
 function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (
@@ -112,6 +112,7 @@ export default function Footer() {
                 Vertrouwenspersoon
               </FooterLink>
               <FooterLink href="/partners">Partners</FooterLink>
+              <FooterLink href="/privacy">Privacy</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
             </ul>
           </div>

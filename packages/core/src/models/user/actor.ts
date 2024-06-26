@@ -12,14 +12,13 @@ import { insertSchema, selectSchema } from './actor.schema.js'
 export const listActiveTypesForUser = withZod(
   z.object({ userId: uuidSchema }),
   selectSchema.shape.type.array(),
-  async () => {
+  async (input) => {
     const query = useQuery()
 
     const rows = await query
-      .select({ type: s.actor.type })
+      .selectDistinct({ type: s.actor.type })
       .from(s.actor)
       .innerJoin(s.person, eq(s.actor.personId, s.person.id))
-      .innerJoin(s.user, eq(s.person.userId, s.user.authUserId))
       .innerJoin(s.location, eq(s.actor.locationId, s.location.id))
       .innerJoin(
         s.personLocationLink,
@@ -29,7 +28,7 @@ export const listActiveTypesForUser = withZod(
           eq(s.personLocationLink.status, 'linked'),
         ),
       )
-      .where(isNull(s.actor.deletedAt))
+      .where(and(isNull(s.actor.deletedAt), eq(s.person.userId, input.userId)))
 
     return rows.map(({ type }) => type)
   },

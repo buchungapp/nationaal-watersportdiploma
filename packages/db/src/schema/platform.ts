@@ -1,4 +1,18 @@
-import { char, integer, pgTable, text, uniqueIndex } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import {
+  char,
+  foreignKey,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core'
+import { timestamps } from '../utils/sql.js'
+import { user } from './user.js'
 
 export const country = pgTable(
   'country',
@@ -44,6 +58,47 @@ export const country = pgTable(
       alpha_3_is_unique: uniqueIndex('country_alpha_3_is_unique').on(
         table.alpha_3,
       ),
+    }
+  },
+)
+
+export const feedbackType = pgEnum('feedback_type', [
+  'bug',
+  'product-feedback',
+  'program-feedback',
+  'question',
+  'other',
+])
+
+export const feedback = pgTable(
+  'feedback',
+  {
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    type: feedbackType('type').notNull(),
+    message: text('message'),
+    path: text('path'),
+    query: jsonb('query').default(sql`'{}'::jsonb`),
+    headers: jsonb('headers').default(sql`'{}'::jsonb`),
+    base: jsonb('base').default(sql`'{}'::jsonb`),
+    metadata: jsonb('metadata').default(sql`'{}'::jsonb`),
+    priority: integer('priority').default(1).notNull(),
+    insertedBy: uuid('inserted_by'),
+    ...timestamps,
+    resolvedAt: timestamp('resolved_at', {
+      mode: 'string',
+      withTimezone: true,
+    }),
+  },
+  (table) => {
+    return {
+      insertedByReference: foreignKey({
+        columns: [table.insertedBy],
+        foreignColumns: [user.authUserId],
+        name: 'feedback_inserted_by_fk',
+      }),
     }
   },
 )

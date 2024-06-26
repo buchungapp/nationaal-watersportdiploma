@@ -23,7 +23,7 @@ import {
   TikTok,
   Whatsapp,
   YouTube,
-} from "../_components/socials";
+} from "../../_components/socials";
 import LocationCard, {
   SetActiveLocationButton,
 } from "./_components/location-card";

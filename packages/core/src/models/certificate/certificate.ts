@@ -10,7 +10,7 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/index.js'
-import { Curriculum, Location, Program, User } from '../index.js'
+import { Course, Curriculum, Location, User } from '../index.js'
 
 export const find = withZod(
   z.object({
@@ -91,7 +91,7 @@ export const byId = withZod(uuidSchema, async (input) => {
   assert(gearType)
   assert(curriculum)
 
-  const program = await Program.fromId(curriculum.programId)
+  const program = await Course.Program.fromId(curriculum.programId)
 
   assert(program)
 
@@ -213,7 +213,7 @@ export const list = withZod(
       },
     })
 
-    const programs = await Program.list({
+    const programs = await Course.Program.list({
       filter: {
         id: Array.from(new Set(curricula.map((c) => c.programId))),
       },

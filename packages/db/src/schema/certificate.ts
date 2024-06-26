@@ -9,13 +9,13 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../utils/sql.js'
+import { gearType } from './course.js'
 import {
   curriculum,
   curriculumCompetency,
   curriculumGearLink,
 } from './curriculum.js'
 import { location } from './location.js'
-import { gearType } from './program.js'
 import { person } from './user.js'
 
 export const studentCurriculum = pgTable(

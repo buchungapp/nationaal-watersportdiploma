@@ -1,4 +1,4 @@
-import { Curriculum, Program, withDatabase } from '@nawadi/core'
+import { Course, Curriculum, withDatabase } from '@nawadi/core'
 import 'dotenv/config'
 import inquirer from 'inquirer'
 
@@ -25,7 +25,7 @@ async function main() {
       name: 'discipline',
       message: 'In which discipline would you like to add a new link?',
       choices: async () => {
-        const disciplines = await Program.Discipline.list()
+        const disciplines = await Course.Discipline.list()
 
         return disciplines.map((discipline) => ({
           name: discipline.title,
@@ -38,7 +38,7 @@ async function main() {
       name: 'ageCategories',
       message: 'In which age categories would you like to add a new link?',
       choices: async () => {
-        const categories = await Program.Category.list()
+        const categories = await Course.Category.list()
 
         return categories
           .filter((c) => c.parent?.handle === 'leeftijdsgroep')

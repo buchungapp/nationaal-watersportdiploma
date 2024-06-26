@@ -10,3 +10,5 @@ export const LINKEDIN_URL =
   'https://www.linkedin.com/company/nationaal-watersportdiploma/'
 export const TIKTOK_URL = 'https://www.tiktok.com/@nwdiploma'
 export const YOUTUBE_URL = 'https://www.youtube.com/@nationaalwatersportdiploma'
+
+export const GITHUB_URL = 'https://www.nationaalwatersportdiploma.dev'

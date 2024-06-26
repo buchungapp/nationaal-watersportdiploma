@@ -1,21 +1,26 @@
+"use server";
+
 import {
   Certificate,
+  Cohort,
+  Course,
   Curriculum,
   Location,
   Platform,
-  Program,
   Student,
   User,
   withDatabase,
   withSupabaseClient,
   withTransaction,
 } from "@nawadi/core";
+import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
+import packageInfo from "~/../package.json";
 import posthog from "./posthog";
 
 function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
@@ -107,7 +112,7 @@ export const listCertificates = cache(async (locationId: string) => {
 
     if (!person) return [];
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -132,7 +137,7 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
 
     if (!person) return [];
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -162,55 +167,156 @@ export const retrieveCertificateById = cache(async (id: string) => {
 
 export const listDisciplines = cache(async () => {
   return makeRequest(async () => {
-    const disciplines = await Program.Discipline.list();
+    const disciplines = await Course.Discipline.list();
 
     return disciplines;
+  });
+});
+
+export const listDegrees = cache(async () => {
+  return makeRequest(async () => {
+    const degrees = await Course.Degree.list();
+
+    return degrees;
+  });
+});
+
+export const listModules = cache(async () => {
+  return makeRequest(async () => {
+    const modules = await Course.Module.list();
+
+    return modules;
+  });
+});
+
+export const listCompetencies = cache(async () => {
+  return makeRequest(async () => {
+    const competencies = await Course.Competency.list();
+
+    return competencies;
+  });
+});
+
+export const listGearTypes = cache(async () => {
+  return makeRequest(async () => {
+    const gearTypes = await Curriculum.GearType.list();
+
+    return gearTypes;
+  });
+});
+
+export const listCategories = cache(async () => {
+  return makeRequest(async () => {
+    const categories = await Course.Category.list();
+
+    return categories;
+  });
+});
+
+export const listParentCategories = cache(async () => {
+  return makeRequest(async () => {
+    const categories = await Course.Category.listParentCategories();
+
+    return categories;
   });
 });
 
 export const listCountries = cache(async () => {
   return makeRequest(async () => {
-    const disciplines = await Platform.Country.list();
+    const countries = await Platform.Country.list();
 
-    return disciplines;
+    return countries;
   });
 });
 
 export const retrieveDisciplineByHandle = cache(async (handle: string) => {
   return makeRequest(async () => {
-    const disciplines = await Program.Discipline.fromHandle(handle);
+    const disciplines = await Course.Discipline.fromHandle(handle);
 
     return disciplines;
+  });
+});
+
+export const listCourses = cache(async () => {
+  return makeRequest(async () => {
+    const courses = await Course.list();
+
+    return courses;
+  });
+});
+
+export const retrieveCourseByHandle = cache(async (handle: string) => {
+  return makeRequest(async () => {
+    const courses = await Course.list();
+
+    return courses.find((course) => course.handle === handle);
   });
 });
 
 export const listPrograms = cache(async () => {
   return makeRequest(async () => {
-    const disciplines = await Program.list();
+    const programs = await Course.Program.list();
 
-    return disciplines;
+    return programs;
+  });
+});
+
+export const listProgramsForCourse = cache(async (courseId: string) => {
+  return makeRequest(async () => {
+    const programs = await Course.Program.list({ filter: { courseId } });
+
+    return programs;
   });
 });
 
 export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
   return makeRequest(async () => {
-    const disciplines = await Curriculum.list({
+    const curricula = await Curriculum.list({
       filter: { onlyCurrentActive: true, disciplineId },
     });
 
-    return disciplines;
+    return curricula;
   });
 });
 
-export const listCurriculaByProgram = cache(async (programId: string) => {
-  return makeRequest(async () => {
-    const disciplines = await Curriculum.list({
-      filter: { onlyCurrentActive: true, programId },
+export const listCurriculaByProgram = cache(
+  async (programId: string, onlyCurrentActive = true) => {
+    return makeRequest(async () => {
+      const curricula = await Curriculum.list({
+        filter: { onlyCurrentActive, programId },
+      });
+
+      return curricula;
     });
+  },
+);
 
-    return disciplines;
+export const countStartedStudentsForCurriculum = cache(
+  async (curriculumId: string) => {
+    return makeRequest(async () => {
+      const count = await Curriculum.countStartedStudents({
+        curriculumId,
+      });
+
+      return count;
+    });
+  },
+);
+
+export const copyCurriculum = async ({
+  curriculumId,
+  revision,
+}: {
+  curriculumId: string;
+  revision?: string;
+}) => {
+  return makeRequest(async () => {
+    return Curriculum.copy({
+      curriculumId,
+      revision: revision ?? `Copy of ${new Date().toISOString()}`,
+    });
   });
-});
+};
 
 export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
   return makeRequest(async () => {
@@ -234,7 +340,7 @@ export const retrieveLocationByHandle = cache(async (handle: string) => {
       throw new Error("Person not found for user");
     }
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -259,7 +365,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
       throw new Error("Person not found for user");
     }
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -288,7 +394,7 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
       throw new Error("Person not found for user");
     }
 
-    const locations = await User.Person.listLocations({
+    const locations = await User.Person.listLocationsByRole({
       personId: person.id,
       roles: ["location_admin"],
     });
@@ -320,7 +426,7 @@ export const createPersonForLocation = async (
       throw new Error("Person not found for user");
     }
 
-    const availableLocations = await User.Person.listLocations({
+    const availableLocations = await User.Person.listLocationsByRole({
       personId: authPerson.id,
       roles: ["location_admin"],
     });
@@ -394,7 +500,7 @@ export const createCompletedCertificate = async (
         throw new Error("Person not found for user");
       }
 
-      const availableLocations = await User.Person.listLocations({
+      const availableLocations = await User.Person.listLocationsByRole({
         personId: authPerson.id,
         roles: ["location_admin"],
       });
@@ -404,7 +510,7 @@ export const createCompletedCertificate = async (
       }
 
       // Start student curriculum
-      const { id: studentCurriculumId } = await Student.Program.startProgram({
+      const { id: studentCurriculumId } = await Student.Curriculum.start({
         curriculumId,
         personId,
         gearTypeId,
@@ -441,3 +547,122 @@ export const createCompletedCertificate = async (
     });
   });
 };
+
+export const listCohortsForLocation = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const cohorts = await Cohort.listByLocationId({ id: locationId });
+
+    return cohorts;
+  });
+});
+
+export const createCohort = async ({
+  locationId,
+  label,
+  accessStartTimestamp,
+  accessEndTimestamp,
+}: {
+  locationId: string;
+  label: string;
+  accessStartTimestamp: string;
+  accessEndTimestamp: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    const availableLocations = await User.Person.listLocationsByRole({
+      personId: authPerson.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === locationId)) {
+      throw new Error("Location not found for person");
+    }
+
+    const res = await Cohort.create({
+      locationId,
+      label,
+      accessStartTime: accessStartTimestamp,
+      accessEndTime: accessEndTimestamp,
+      handle: slugify(label),
+    });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "create_cohort",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+      },
+    });
+
+    return res;
+  });
+};
+
+export const submitProductFeedback = async ({
+  type,
+  headers,
+  path,
+  query,
+  priority = "normal",
+  message,
+}: {
+  type: "bug" | "product-feedback" | "question";
+  query?: Record<string, string | string[]>;
+  path?: string;
+  headers?: Record<string, string>;
+  priority?: "low" | "normal" | "high";
+  message: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const res = await Platform.Feedback.create({
+      insertedBy: authUser.authUserId,
+      type,
+      headers,
+      path,
+      query,
+      base: {
+        env: process.env.NEXT_PUBLIC_VERCEL_ENV,
+        version: packageInfo.version,
+      },
+      priority,
+      message,
+    });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "submit_feedback",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+      },
+    });
+
+    return res;
+  });
+};
+
+export const getIsActiveInstructor = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow().catch(() => null);
+
+    if (!user) {
+      return false;
+    }
+
+    const activeActorTypes = await User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+
+    return activeActorTypes.some((type) =>
+      ["instructor", "location_admin"].includes(type),
+    );
+  });
+});

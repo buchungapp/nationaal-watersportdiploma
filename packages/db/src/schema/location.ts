@@ -30,6 +30,7 @@ export const location = pgTable(
       (): AnyPgColumn => media.id,
     ),
     websiteUrl: text('website_url'),
+    email: text('email'),
     shortDescription: text('short_description'),
     _metadata: jsonb('_metadata'),
     ...timestamps,

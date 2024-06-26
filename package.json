@@ -6,12 +6,21 @@
     "spelling": "cspell",
     "formatting": "prettier --check *",
     "formatting:fix": "prettier --write *",
+    "build:packages": "pnpm --recursive --filter './packages/**' build",
     "initialize": "node ./scripts/initialize.js",
+    "db:reset": "node ./scripts/reset-migrate-local-db.js",
     "db:seed": "snaplet ss restore --latest --no-reset --no-schema"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",
     "cspell": "^8.7.0",
     "prettier": "^3.2.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "braces@<3.0.3": ">=3.0.3",
+      "@grpc/grpc-js@>=1.10.0 <1.10.9": ">=1.10.9",
+      "ws@>=8.0.0 <8.17.1": ">=8.17.1"
+    }
   }
 }

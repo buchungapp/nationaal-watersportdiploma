@@ -1,0 +1,1 @@
+ALTER TABLE "cohort" ALTER COLUMN "access_end_time" SET NOT NULL;

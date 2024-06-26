@@ -2,7 +2,13 @@ import Link from "next/link";
 
 import { constants } from "@nawadi/lib";
 
-import { Facebook, Instagram, LinkedIn, TikTok, YouTube } from "../socials";
+import {
+  Facebook,
+  Instagram,
+  LinkedIn,
+  TikTok,
+  YouTube,
+} from "../../../_components/socials";
 
 export default function Trustbar() {
   const socials = [

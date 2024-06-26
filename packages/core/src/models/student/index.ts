@@ -1,2 +1,2 @@
 export * as Certificate from './certificate.js'
-export * as Program from './program.js'
+export * as Curriculum from './curriculum.js'
