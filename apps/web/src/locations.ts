@@ -1,4 +1,4 @@
-export const locations = [
+export const _deprecated_locations = [
   {
     id: 1,
     name: "Zeilschool De Veenhoop",

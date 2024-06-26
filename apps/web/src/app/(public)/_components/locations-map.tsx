@@ -51,7 +51,9 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
     if (map) {
       if (!bounds) {
         const bounds = new google.maps.LatLngBounds();
-        locations.forEach(({ geometry }) => bounds.extend(geometry!.location));
+        locations.forEach(
+          ({ geometry }) => !!geometry && bounds.extend(geometry.location),
+        );
         setBounds(bounds);
         map.fitBounds(bounds);
       } else {
@@ -84,8 +86,8 @@ export function SelectedLocationProvider({
         resetBounds();
       } else {
         setSelectedLocation(location);
-        if (map) {
-          map.panTo(location.geometry!.location);
+        if (map && location.geometry) {
+          map.panTo(location.geometry.location);
           map.setZoom(12);
         }
       }
@@ -153,10 +155,14 @@ function GoogleMapsMarker({ location }: { location: Location }) {
 
   const isSelected = selectedLocation?.id === location.id;
 
+  if (!location.geometry) {
+    return null;
+  }
+
   return (
     <AdvancedMarker
       ref={markerRef}
-      position={location.geometry!.location}
+      position={location.geometry.location}
       title={location.name}
       onClick={() => setSelectedLocation(location)}
     >
@@ -175,13 +181,15 @@ function GoogleMapsMarker({ location }: { location: Location }) {
           <h3 className="text-lg mt-1.5 font-semibold leading-5 text-gray-900">
             {location.name}
           </h3>
-          <Link
-            className="text-branding-dark hover:text-branding-light text-sm"
-            href={location.url}
-            target="_blank"
-          >
-            {normalizeUrl(location.url).split("//")[1]}
-          </Link>
+          {location.websiteUrl ? (
+            <Link
+              className="text-branding-dark hover:text-branding-light text-sm"
+              href={location.websiteUrl}
+              target="_blank"
+            >
+              {normalizeUrl(location.websiteUrl).split("//")[1]}
+            </Link>
+          ) : null}
           <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-gray-600">
             <p>{location.city}</p>
           </address>

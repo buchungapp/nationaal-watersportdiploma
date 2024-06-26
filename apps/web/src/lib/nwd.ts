@@ -405,6 +405,12 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
   });
 });
 
+export const listAllLocations = cache(async () => {
+  return makeRequest(async () => {
+    return await Location.list();
+  });
+});
+
 export const createPersonForLocation = async (
   locationId: string,
   personInput: {
