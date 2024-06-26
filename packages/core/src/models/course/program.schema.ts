@@ -14,15 +14,13 @@ export const insertSchema = createInsertSchema(s.program, {
   title: (schema) => schema.title.trim(),
   degreeId: (schema) => schema.degreeId.uuid(),
 })
-  .omit({ disciplineId: true })
-  .required({ courseId: true })
 
 export type Input = z.input<typeof insertSchema>
 
 export const selectSchema = createSelectSchema(s.program)
 
 export const outputSchema = selectSchema
-  .omit({ degreeId: true, disciplineId: true, courseId: true })
+  .omit({ degreeId: true, courseId: true })
   .extend({
     degree: degreeSelectSchema,
     course: courseSelectschema,

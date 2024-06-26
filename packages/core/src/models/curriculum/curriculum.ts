@@ -5,9 +5,11 @@ import {
   countDistinct,
   desc,
   eq,
+  exists,
   inArray,
   isNotNull,
   lte,
+  sql,
 } from 'drizzle-orm'
 import assert from 'node:assert'
 import { z } from 'zod'
@@ -130,30 +132,36 @@ export const list = withZod(
 
     // Apply filtering based on discipline ID if provided.
     if (filter.disciplineId) {
-      curriculaQuery = curriculaQuery.innerJoin(
-        s.program,
-        eq(s.curriculum.programId, s.program.id),
-      )
+      const sq = query
+        .select({ id: sql`1` })
+        .from(s.program)
+        .innerJoin(s.course, eq(s.program.courseId, s.course.id))
+        .where(
+          Array.isArray(filter.disciplineId)
+            ? inArray(s.course.disciplineId, filter.disciplineId)
+            : eq(s.course.disciplineId, filter.disciplineId),
+        )
 
-      if (Array.isArray(filter.disciplineId)) {
-        filters.push(inArray(s.program.disciplineId, filter.disciplineId))
-      } else {
-        filters.push(eq(s.program.disciplineId, filter.disciplineId))
-      }
+      filters.push(exists(sq))
     }
 
     // Apply filtering based on category ID if provided.
     if (filter.categoryId) {
-      curriculaQuery = curriculaQuery.innerJoin(
-        s.programCategory,
-        and(eq(s.programCategory.programId, s.curriculum.programId)),
-      )
+      const sq = query
+        .select({ id: sql`1` })
+        .from(s.program)
+        .innerJoin(
+          s.courseCategory,
+          and(
+            eq(s.courseCategory.courseId, s.program.courseId),
+            Array.isArray(filter.categoryId)
+              ? inArray(s.courseCategory.categoryId, filter.categoryId)
+              : eq(s.courseCategory.categoryId, filter.categoryId),
+          ),
+        )
+        .where(eq(s.curriculum.programId, s.program.id))
 
-      if (Array.isArray(filter.categoryId)) {
-        filters.push(inArray(s.programCategory.categoryId, filter.categoryId))
-      } else {
-        filters.push(eq(s.programCategory.categoryId, filter.categoryId))
-      }
+      filters.push(exists(sq))
     }
 
     // Fetch curricula, modules, and competencies data concurrently for efficiency.

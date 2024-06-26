@@ -21,9 +21,7 @@ import {
 import { insertSchema, outputSchema } from './program.schema.js'
 
 export const create = withZod(
-  insertSchema.extend({
-    categories: uuidSchema.array().optional(),
-  }),
+  insertSchema,
   successfulCreateResponse,
   async (item) =>
     withTransaction(async (tx) => {
@@ -38,15 +36,6 @@ export const create = withZod(
         .returning({ id: s.program.id })
 
       const row = singleRow(rows)
-
-      if (!!item.categories && item.categories.length > 0) {
-        await tx.insert(s.programCategory).values(
-          item.categories.map((categoryId) => ({
-            programId: row.id,
-            categoryId,
-          })),
-        )
-      }
 
       return row
     }),
@@ -119,8 +108,7 @@ export const list = withZod(
           enforce: true, // Enforce finding the course, throw error if not found.
         })
 
-        const { courseId, degreeId, disciplineId, ...programProperties } =
-          program
+        const { courseId, degreeId, ...programProperties } = program
 
         // Construct the final program object with additional details.
         return {
@@ -160,7 +148,7 @@ export const fromHandle = withZod(
     assert(degree, 'Degree not found')
     assert(course, 'Course not found')
 
-    const { courseId, degreeId, disciplineId, ...programProperties } = program
+    const { courseId, degreeId, ...programProperties } = program
 
     return {
       ...programProperties,
@@ -195,7 +183,7 @@ export const fromId = withZod(
     assert(degree, 'Degree not found')
     assert(course, 'Course not found')
 
-    const { courseId, degreeId, disciplineId, ...programProperties } = program
+    const { courseId, degreeId, ...programProperties } = program
 
     return {
       ...programProperties,

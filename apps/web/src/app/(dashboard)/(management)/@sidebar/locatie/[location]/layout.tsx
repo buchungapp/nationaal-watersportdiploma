@@ -1,4 +1,7 @@
-import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
+import {
+  BookOpenIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/20/solid";
 import {
   SidebarBody,
   SidebarHeader,
@@ -30,6 +33,10 @@ export default function SidebarLayout({ params, children }: LayoutProps) {
         <LatestNews />
         <SidebarSpacer />
         <SidebarSection>
+          <SidebarItem href="/diplomalijn/consument" target="_blank">
+            <BookOpenIcon />
+            <SidebarLabel>Diplomalijnen</SidebarLabel>
+          </SidebarItem>
           <SidebarItem href="/help" target="_blank">
             <QuestionMarkCircleIcon />
             <SidebarLabel>Helpcentrum</SidebarLabel>
