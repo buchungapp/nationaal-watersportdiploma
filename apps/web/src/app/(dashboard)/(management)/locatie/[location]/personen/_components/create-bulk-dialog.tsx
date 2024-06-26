@@ -198,37 +198,46 @@ function SubmitForm({
     }
 
     try {
-      const itemCount = csvData?.[0]?.length;
-      const expectedItemCount = Object.keys(COLUMN_MAPPING).length;
-      if (itemCount !== expectedItemCount) {
-        throw new Error("Je hebt minder kolommen geplakt dan verwacht");
-      }
+      const mappingConfig = Object.fromEntries(formData);
 
-      // We need to sort the data based on the order COLUMN_MAPPING, so that we can parse it correctly.
-      function sortDataByOrder(
-        data: string[][] | null | undefined,
-        order: Record<string, unknown>,
-        columnMapping: Record<string, string>,
-      ): string[][] {
-        const newOrder = Object.keys(order).map((key) => order[key]);
+      // Exclude data if "Select one" is selected
+      const selectOneIndices = Object.keys(mappingConfig)
+        .filter((key) => mappingConfig[key] === "Select one")
+        .map((key) => parseInt(key.split("-").pop()));
 
-        const indices = newOrder.map((columnName) =>
-          Object.keys(columnMapping).findIndex((key) => key === columnName),
-        );
-
-        const sortedData = data?.map((row) =>
-          indices.map((index) => row[index]),
-        );
-
-        // @ts-expect-error fix later
-        return sortedData;
-      }
-
-      const sortedData = sortDataByOrder(
-        csvData,
-        Object.fromEntries(formData),
-        COLUMN_MAPPING,
+      const filteredData = csvData?.map((item) =>
+        item.filter((_, index) => !selectOneIndices.includes(index)),
       );
+
+      // Check errors!
+      const count = filteredData?.[0]?.length ?? 0;
+      const expectedCount = Object.keys(COLUMN_MAPPING).length;
+
+      if (count < expectedCount) {
+        throw new Error("Je hebt minder kolommen geplakt dan verwacht.");
+      }
+
+      if (count > expectedCount) {
+        throw new Error("Je hebt te veel kolommen geplakt dan verwacht.");
+      }
+
+      // TODO: Check if all columns are selected that are difined in COLUMN_MAPPING
+
+      // Sort data so that we can parse it correctly.
+      const newOrder = Object.keys(mappingConfig).map(
+        (key) => mappingConfig[key],
+      );
+
+      const indices = newOrder
+        .filter((item) => item !== "Select one")
+        .map((columnName) =>
+          Object.keys(COLUMN_MAPPING).findIndex((key) => key === columnName),
+        );
+
+      const sortedData = filteredData?.map((row) =>
+        indices.map((index) => row[index]),
+      );
+      console.log("sortedData", sortedData);
 
       const personRowSchema = z.tuple([
         z.string().trim().toLowerCase().email(),
@@ -305,6 +314,7 @@ function SubmitForm({
 
   return (
     <form action={formAction}>
+      {/* TODO: Fix this description in step 2. */}
       <DialogDescription>
         Er zijn <Strong>{state?.persons?.length}</Strong> personen gevonden.
         Controleer de geïmporteerde data en klik op "Verder" om door te gaan.
