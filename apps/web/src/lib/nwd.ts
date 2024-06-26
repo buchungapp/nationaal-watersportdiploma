@@ -666,3 +666,40 @@ export const getIsActiveInstructor = cache(async () => {
     );
   });
 });
+
+export const updateLocationDetails = async (fields: {
+  id: string;
+  name: string;
+  websiteUrl: string;
+  email: string;
+  shortDescription?: string | null;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    const availableLocations = await User.Person.listLocationsByRole({
+      personId: authPerson.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === fields.id)) {
+      throw new Error("Location not found for person");
+    }
+
+    await Location.updateDetails({
+      id: fields.id,
+      name: fields.name,
+      websiteUrl: fields.websiteUrl,
+      email: fields.email,
+      shortDescription: fields.shortDescription,
+    });
+
+    return;
+  });
+};

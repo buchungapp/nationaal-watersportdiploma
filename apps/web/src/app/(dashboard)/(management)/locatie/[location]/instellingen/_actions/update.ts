@@ -3,6 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { updateLocationDetails } from "~/lib/nwd";
 
 export async function updateSettings(
   locationId: string,
@@ -10,37 +11,21 @@ export async function updateSettings(
   formData: FormData,
 ) {
   const expectedSchema = z.object({
-    name: z.string().min(1).nullable(),
-    websiteUrl: z.string().url().nullable(),
-    email: z.string().email().nullable(),
+    name: z.string().min(1),
+    websiteUrl: z.string().url(),
+    email: z.string().email(),
     shortDescription: z.string().nullable(),
-    logo: z.any(z.instanceof(File)).nullable(),
-    iconLogo: z.any(z.instanceof(File)).nullable(),
-    diplomaLogo: z.any(z.instanceof(File)).nullable(),
   });
 
-  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
-    formData.entries(),
-  );
-
-  // Set all empty strings to null, and empty files to null
-  for (const key in data) {
-    const value = data[key];
-    if (
-      value === "" ||
-      (value !== null && value instanceof File && value.size === 0)
-    ) {
-      data[key] = null;
-    }
-  }
-
-  console.log(data);
-
   try {
-    const parsed = expectedSchema.parse(data);
-    console.log(parsed);
+    const parsed = expectedSchema.parse(Object.fromEntries(formData.entries()));
 
-    revalidatePath("/locatie/[location]/instellingen", "page");
+    await updateLocationDetails({
+      id: locationId,
+      ...parsed,
+    });
+
+    revalidatePath("/locatie/[location]", "layout");
 
     return {
       message: "Success",

@@ -1,5 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import { eq } from 'drizzle-orm'
+import { sql } from 'drizzle-orm/sql'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { findItem, singleRow } from '../../utils/data-helpers.js'
@@ -36,6 +37,64 @@ export const create = wrapCommand(
       }
 
       return insert
+    },
+  ),
+)
+
+export const updateDetails = wrapCommand(
+  'updateLocationDetails',
+  withZod(
+    insertSchema
+      .pick({
+        id: true,
+        name: true,
+        websiteUrl: true,
+        email: true,
+        shortDescription: true,
+      })
+      .extend({
+        googlePlaceId: z.string().optional(),
+        socialMedia: z
+          .object({
+            platform: z.union([
+              z.literal('facebook'),
+              z.literal('instagram'),
+              z.literal('linkedin'),
+              z.literal('tiktok'),
+              z.literal('whatsapp'),
+              z.literal('x'),
+              z.literal('youtube'),
+            ]),
+            url: z.string().url(),
+          })
+          .array(),
+      })
+      .partial()
+      .required({ id: true }),
+    z.void(),
+    async (input) => {
+      const query = useQuery()
+
+      const existing = await query
+        .select()
+        .from(s.location)
+        .where(eq(s.location.id, input.id))
+        .then(singleRow)
+
+      await query
+        .update(s.location)
+        .set({
+          name: input.name,
+          websiteUrl: input.websiteUrl,
+          email: input.email,
+          shortDescription: input.shortDescription,
+          _metadata: sql`(((${JSON.stringify({
+            ...(existing._metadata as JSON),
+            ...(input.googlePlaceId && { googlePlaceId: input.googlePlaceId }),
+            ...(input.socialMedia && { socialMedia: input.socialMedia }),
+          })})::jsonb)#>> '{}')::jsonb`,
+        })
+        .where(eq(s.location.id, input.id))
     },
   ),
 )

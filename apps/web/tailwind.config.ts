@@ -27,6 +27,10 @@ export default {
           light: "#007FFF",
           dark: "#0047ab",
         },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
         tremor: {
           brand: {
             faint: colors.blue[50],

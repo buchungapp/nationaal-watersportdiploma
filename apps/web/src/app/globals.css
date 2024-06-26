@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

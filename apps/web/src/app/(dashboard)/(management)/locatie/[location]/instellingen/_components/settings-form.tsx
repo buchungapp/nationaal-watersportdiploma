@@ -5,6 +5,18 @@ import { useFormState as useActionState } from "react-dom";
 import { toast } from "sonner";
 import { updateSettings } from "../_actions/update";
 
+import { useFormStatus } from "react-dom";
+import { Button } from "~/app/(dashboard)/_components/button";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button color="branding-dark" disabled={pending} type="submit">
+      Opslaan
+    </Button>
+  );
+}
+
 export default function SettingsForm({
   children,
   className,
@@ -18,11 +30,19 @@ export default function SettingsForm({
     return result;
   };
 
-  const [state, formAction] = useActionState(submit, undefined);
+  const [_state, formAction] = useActionState(submit, undefined);
 
   return (
     <form className={className} action={formAction}>
       {children}
+
+      <div className="mt-6 flex gap-x-2.5 justify-end">
+        <Button plain type="reset">
+          Reset
+        </Button>
+
+        <SubmitButton />
+      </div>
     </form>
   );
 }

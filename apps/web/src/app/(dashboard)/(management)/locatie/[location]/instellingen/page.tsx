@@ -10,12 +10,22 @@ import {
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
-import { Input } from "~/app/(dashboard)/_components/input";
+import { Input, InputGroup } from "~/app/(dashboard)/_components/input";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import {
+  Facebook,
+  Google,
+  Instagram,
+  LinkedIn,
+  TikTok,
+  Whatsapp,
+  Twitter as X,
+  YouTube,
+} from "~/app/_components/socials";
 import { retrieveLocationByHandle } from "~/lib/nwd";
+import { ImageUpload } from "./_components/image-upload";
 import SettingsForm from "./_components/settings-form";
-import SubmitButton from "./_components/submit-button";
 
 function FieldSection({
   label,
@@ -55,10 +65,11 @@ export default async function Page({
     logo,
     logoSquare,
     logoCertificate,
+    email,
   } = location;
 
   return (
-    <SettingsForm className="mx-auto max-w-4xl" locationId={location.id}>
+    <div className="mx-auto max-w-4xl">
       <Heading>Instellingen</Heading>
       <Text>
         Deze informatie wordt gedeeltelijk ook openbaar getoond op{" "}
@@ -69,48 +80,56 @@ export default async function Page({
       </Text>
       <Divider className="my-10" />
 
-      <FieldSection
-        label="Naam"
-        description="De naam zoals deze getoond wordt op de website."
-      >
-        <Input name="name" defaultValue={name ?? undefined} required />
-      </FieldSection>
+      <SettingsForm locationId={location.id}>
+        <FieldSection
+          label="Naam"
+          description="De naam zoals deze getoond wordt op de website."
+        >
+          <Input name="name" defaultValue={name ?? undefined} required />
+        </FieldSection>
 
-      <Divider soft className="my-10" />
+        <Divider soft className="my-10" />
 
-      <FieldSection
-        label="Bio"
-        description="Een korte omschrijving zoals deze getoond wordt op de website. Maximaal 260 karakters."
-      >
-        <Textarea
-          name="shortDescription"
-          defaultValue={shortDescription ?? undefined}
-          rows={3}
-          maxLength={260}
-        />
-      </FieldSection>
+        <FieldSection
+          label="Bio"
+          description="Een korte omschrijving zoals deze getoond wordt op de website. Maximaal 260 karakters."
+        >
+          <Textarea
+            name="shortDescription"
+            defaultValue={shortDescription ?? undefined}
+            rows={3}
+            maxLength={260}
+          />
+        </FieldSection>
 
-      <Divider soft className="my-10" />
+        <Divider soft className="my-10" />
 
-      <FieldSection
-        label="E-mail"
-        description="Hoe kunnen deelnemers contact met jullie opnemen?"
-      >
-        <Input name="email" defaultValue={undefined} type="email" />
-      </FieldSection>
+        <FieldSection
+          label="E-mail"
+          description="Hoe kunnen deelnemers contact met jullie opnemen?"
+        >
+          <Input
+            name="email"
+            defaultValue={email ?? undefined}
+            type="email"
+            required
+          />
+        </FieldSection>
 
-      <Divider soft className="my-10" />
+        <Divider soft className="my-10" />
 
-      <FieldSection
-        label="Website"
-        description="Waar kunnen deelnemers meer informatie vinden?"
-      >
-        <Input
-          name="websiteUrl"
-          defaultValue={websiteUrl ?? undefined}
-          type="url"
-        />
-      </FieldSection>
+        <FieldSection
+          label="Website"
+          description="Waar kunnen deelnemers meer informatie vinden?"
+        >
+          <Input
+            name="websiteUrl"
+            defaultValue={websiteUrl ?? undefined}
+            required
+            type="url"
+          />
+        </FieldSection>
+      </SettingsForm>
 
       <Divider className="my-12" />
 
@@ -128,7 +147,7 @@ export default async function Page({
             label="Standaard"
             description="Het algemene logo van de vaarlocatie."
           >
-            <input type="file" name="logo" />
+            <ImageUpload />
             <img src={logo?.url} className="w-full h-auto" />
           </FieldSection>
 
@@ -138,7 +157,7 @@ export default async function Page({
             label="Icoon"
             description="Een kleine vierkante versie van het logo, die wordt gebruik op plekken met minder ruimte. Kan zowel vierkant als rond weergegeven worden."
           >
-            <input type="file" name="iconLogo" />
+            <ImageUpload />
             <img src={logoSquare?.url} className="w-full h-auto" />
           </FieldSection>
 
@@ -148,17 +167,154 @@ export default async function Page({
             label="Diploma"
             description="Het logo zoals hij geprint wordt op diploma's."
           >
-            <input type="file" name="diplomaLogo" />
+            <ImageUpload />
 
             <img src={logoCertificate?.url} className="w-full h-auto" />
           </FieldSection>
         </FieldGroup>
       </Fieldset>
 
-      <Divider soft className="my-10" />
-      <div className="flex justify-end">
-        <SubmitButton />
-      </div>
-    </SettingsForm>
+      <Divider className="my-12" />
+
+      <Fieldset>
+        <Legend>
+          <Subheading className="select-none">Socials</Subheading>
+        </Legend>
+        <Text>Beheer de links naar verschillende social media kanalen.</Text>
+
+        <FieldGroup>
+          <FieldSection
+            label="Google Place ID"
+            description={
+              <span>
+                Te vinden via{" "}
+                <TextLink
+                  href="https://developers.google.com/maps/documentation/places/web-service/place-id#find-id"
+                  target="_blank"
+                >
+                  developers.google.com
+                </TextLink>
+                . Wordt gebruikt voor het tonen van de locatie op de vaarlocatie
+                kaart.
+              </span>
+            }
+          >
+            <InputGroup>
+              <Google data-slot="icon" />
+              <Input
+                name="googlePlaceId"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection
+            label="Facebook"
+            description="https://www.facebook.com/[pagina]"
+          >
+            <InputGroup>
+              <Facebook data-slot="icon" />
+              <Input
+                name="socials-facebook"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection
+            label="Instagram"
+            description="https://www.instagram.com/[account]"
+          >
+            <InputGroup>
+              <Instagram data-slot="icon" />
+              <Input
+                name="socials-instagram"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection
+            label="LinkedIn"
+            description="https://www.linkedin.com/company/[bedrijfsnaam]"
+          >
+            <InputGroup>
+              <LinkedIn data-slot="icon" />
+              <Input
+                name="socials-linkedin"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection
+            label="TikTok"
+            description="https://www.tiktok.com/@[account]"
+          >
+            <InputGroup>
+              <TikTok data-slot="icon" />
+              <Input
+                name="socials-tiktok"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection
+            label="WhatsApp"
+            description="https://wa.me/[telefoonnummer]"
+          >
+            <InputGroup>
+              <Whatsapp data-slot="icon" />
+              <Input
+                name="socials-whatsapp"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection label="X" description="https://x.com/[account]">
+            <InputGroup>
+              <X data-slot="icon" />
+              <Input name="socials-x" defaultValue={undefined} type="text" />
+            </InputGroup>
+          </FieldSection>
+
+          <Divider soft className="my-10" />
+
+          <FieldSection
+            label="YouTube"
+            description="https://www.youtube.com/[kanaal]"
+          >
+            <InputGroup>
+              <YouTube data-slot="icon" />
+              <Input
+                name="socials-youtube"
+                defaultValue={undefined}
+                type="text"
+              />
+            </InputGroup>
+          </FieldSection>
+        </FieldGroup>
+      </Fieldset>
+    </div>
   );
 }
