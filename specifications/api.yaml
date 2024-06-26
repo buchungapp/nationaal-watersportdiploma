@@ -6,21 +6,22 @@ info:
     Nationaal Watersportdiploma API
   version: 0.1.0
 
+security:
+  - open-id: []
+  - api-key: []
+
 paths:
   /me:
     get:
       operationId: me
       summary: Retrieves information about the current user (if any)
-      security:
-        - open-id: []
-        - api-key: []
       responses:
         '200':
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserModel'
+                $ref: 'models.yaml#/$defs/UserModel'
 
   /discipline:
     get:
@@ -36,7 +37,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DisciplineListModel'
+                  $ref: 'models.yaml#/$defs/DisciplineModel'
+        '404':
+          description: Not found
+        '403':
+          description: Forbidden
 
   /discipline/{discipline-key}:
     parameters:
@@ -44,7 +49,7 @@ paths:
         name: discipline-key
         required: true
         schema:
-          $ref: '#/components/schemas/HandleOrId'
+          $ref: 'fields.yaml#/$defs/HandleOrId'
     get:
       operationId: retrieveDiscipline
       tags:
@@ -56,22 +61,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DisciplineModel'
+                $ref: 'models.yaml#/$defs/DisciplineModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
-  /discipline/{discipline-key}/curriculum:
+  /discipline/{discipline-key}/curricula:
     parameters:
       - in: path
         name: discipline-key
         required: true
         schema:
-          $ref: '#/components/schemas/HandleOrId'
+          $ref: 'fields.yaml#/$defs/HandleOrId'
     get:
-      operationId: retrieveCurriculaByDiscipline
+      operationId: listCurriculaByDiscipline
       tags:
         - curriculum
-      summary: Retrieves a curricula by discipline
+      summary: List a curricula by discipline
       responses:
         '200':
           description: Ok
@@ -80,9 +87,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/CurriculumListModel'
+                  $ref: 'models.yaml#/$defs/CurriculumModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
   /programs:
     get:
@@ -93,8 +102,7 @@ paths:
         query parameters allow filtering the returned programs.
       tags:
         - program
-      security:
-        - open-id: []
+
       responses:
         '200':
           description: Ok
@@ -103,9 +111,121 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ProgramListModel'
+                  $ref: 'models.yaml#/$defs/ProgramModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
-  /location:
+  /program/{program-key}/curricula:
+    parameters:
+      - in: path
+        name: program-key
+        required: true
+        schema:
+          $ref: 'fields.yaml#/$defs/HandleOrId'
+    get:
+      operationId: listCurriculaByProgram
+      tags:
+        - curriculum
+      summary: List curricula by program
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/$defs/CurriculumModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /find-certificate:
+    get:
+      parameters:
+        - in: query
+          name: certificate-handle
+          required: true
+          schema:
+            $ref: 'fields.yaml#/$defs/CertificateHandle'
+        - in: query
+          name: issuedAt
+          required: true
+          schema:
+            type: string
+
+      operationId: find-certificate
+      summary: Find certificate by handle and issue date
+
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/$defs/CertificateModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /list-certificates-by-number:
+    get:
+      parameters:
+        - in: query
+          name: numbers
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: 'fields.yaml#/$defs/CertificateHandle'
+
+      operationId: listCertificatesByNumber
+      tags:
+        - certificate
+      summary: List certificates by number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/$defs/CertificateModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /certificate/{certificate-key}:
+    parameters:
+      - in: query
+        name: certificate-key
+        required: true
+        schema:
+          $ref: 'fields.yaml#/$defs/CertificateHandleOrId'
+
+    get:
+      operationId: get-certificate
+      summary: Get certificate by handle or id
+
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/$defs/CertificateModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /locations:
     get:
       operationId: get-locations
       summary: Get all locations
@@ -117,7 +237,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LocationListModel'
+                  $ref: 'models.yaml#/$defs/LocationModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
     post:
       operationId: create-location
@@ -126,7 +250,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateLocationModel'
+              $ref: 'models.yaml#/$defs/CreateLocationModel'
 
       responses:
         '201':
@@ -139,9 +263,80 @@ paths:
                   - id
                 properties:
                   id:
-                    $ref: '#/components/schemas/Id'
+                    $ref: 'fields.yaml#/$defs/Id'
         '403':
           description: Forbidden
+        '404':
+          description: Not found
+
+  /location/{location-key}:
+    parameters:
+      - in: path
+        required: true
+        name: location-key
+        schema:
+          $ref: 'fields.yaml#/$defs/HandleOrId'
+
+    get:
+      operationId: get-location
+      summary: Get location
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: 'models.yaml#/$defs/LocationModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /location/{location-key}/persons:
+    parameters:
+      - in: path
+        required: true
+        name: location-key
+        schema:
+          $ref: 'fields.yaml#/$defs/HandleOrId'
+
+    get:
+      operationId: listPersonsForLocation
+      summary: List persons for a location
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/$defs/PersonModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+    post:
+      operationId: createPersonForLocation
+      summary: create a person for a location
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'models.yaml#/$defs/CreatePersonModel'
+
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: 'bases.yaml#/$defs/IdContainer'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
   /location/{location-key}/certificate:
     parameters:
@@ -149,7 +344,7 @@ paths:
         required: true
         name: location-key
         schema:
-          $ref: '#/components/schemas/HandleOrId'
+          $ref: 'fields.yaml#/$defs/HandleOrId'
 
     get:
       operationId: get-location-certificates
@@ -162,9 +357,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LocationCertificateListModel'
+                  $ref: 'models.yaml#/$defs/LocationCertificateModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
     post:
       operationId: create-location-certificate
@@ -173,7 +370,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateLocationCertificateModel'
+              $ref: 'models.yaml#/$defs/CreateLocationCertificateModel'
       responses:
         '201':
           description: Created
@@ -185,7 +382,7 @@ paths:
                   - id
                 properties:
                   id:
-                    $ref: '#/components/schemas/Id'
+                    $ref: 'fields.yaml#/$defs/Id'
         '403':
           description: Forbidden
         '404':
@@ -197,7 +394,7 @@ paths:
         required: true
         name: location-key
         schema:
-          $ref: '#/components/schemas/HandleOrId'
+          $ref: 'fields.yaml#/$defs/HandleOrId'
 
     get:
       operationId: get-location-cohorts
@@ -210,9 +407,11 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/LocationCohortListModel'
+                  $ref: 'models.yaml#/$defs/LocationCohortModel'
+        '403':
+          description: Forbidden
         '404':
-          description: Not Found
+          description: Not found
 
     post:
       operationId: create-location-cohort
@@ -221,7 +420,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateLocationCohortModel'
+              $ref: 'models.yaml#/$defs/CreateLocationCohortModel'
       responses:
         '201':
           description: Created
@@ -233,182 +432,59 @@ paths:
                   - id
                 properties:
                   id:
-                    $ref: '#/components/schemas/Id'
+                    $ref: 'fields.yaml#/$defs/Id'
         '403':
           description: Forbidden
+        '404':
+          description: Not found
+
+  /country:
+    get:
+      operationId: listCountries
+      tags:
+        - country
+      summary: Lists all countries
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/$defs/CountryModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+
+  /curriculum/{curriculum-key}/gear-types:
+    parameters:
+      - in: path
+        name: curriculum-key
+        required: true
+        schema:
+          $ref: 'fields.yaml#/$defs/HandleOrId'
+    get:
+      operationId: listGearTypesByCurriculum
+      tags:
+        - gear-type
+      summary: List gear typers by curriculum
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: 'models.yaml#/$defs/GearTypeModel'
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
 
 components:
-  schemas:
-    # Entities
-
-    UserModel:
-      type: object
-      required:
-        - id
-        - handle
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-
-    DisciplineModel:
-      type: object
-      required:
-        - id
-        - handle
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-
-    DisciplineListModel:
-      type: object
-      required:
-        - id
-        - handle
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-
-    CurriculumListModel:
-      type: object
-      required:
-        - id
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-
-    ProgramListModel:
-      type: object
-      required:
-        - id
-        - handle
-        - title
-        - degreeId
-        - degreeTitle
-        - disciplineId
-        - disciplineTitle
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-        degreeId:
-          $ref: '#/components/schemas/Id'
-        degreeTitle:
-          $ref: '#/components/schemas/Title'
-        disciplineId:
-          $ref: '#/components/schemas/Id'
-        disciplineTitle:
-          $ref: '#/components/schemas/Title'
-
-    LocationListModel:
-      type: object
-      required:
-        - id
-        - handle
-        - title
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-
-    CreateLocationModel:
-      type: object
-      required:
-        - handle
-        - title
-      properties:
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-
-    LocationCohortListModel:
-      type: object
-      required:
-        - id
-        - handle
-        - title
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-
-    CreateLocationCohortModel:
-      type: object
-      required:
-        - handle
-        - title
-      properties:
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-
-    LocationCertificateListModel:
-      type: object
-      required:
-        - id
-        - handle
-        - title
-      properties:
-        id:
-          $ref: '#/components/schemas/Id'
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-
-    CreateLocationCertificateModel:
-      type: object
-      required:
-        - handle
-        - title
-      properties:
-        handle:
-          $ref: '#/components/schemas/Handle'
-        title:
-          $ref: '#/components/schemas/Title'
-
-    # Fields
-
-    Id:
-      type: string
-      format: uuid
-      description: A unique identifier
-
-    Title:
-      type: string
-      minLength: 1
-      nullable: true
-      description: A title (may be null)
-
-    Handle:
-      type: string
-      pattern: ^[a-z0-9\-]+$
-      minLength: 3
-      description: The unique handle of an item
-      not:
-        $ref: '#/components/schemas/Id'
-
-    HandleOrId:
-      oneOf:
-        - $ref: '#/components/schemas/Id'
-        - $ref: '#/components/schemas/Handle'
-
   securitySchemes:
     # this should be transformed into oauth authentication once the generator supports it
     open-id:

@@ -1,0 +1,71 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+$defs:
+  Id:
+    type: string
+    format: uuid
+    description: A unique identifier
+
+  Code:
+    type: string
+    description: A code
+
+  Text:
+    type: string
+    minLength: 1
+    description: non empty text
+
+  MimeType:
+    type: string
+    minLength: 1
+    description: a valid mime type
+
+  Url:
+    type: string
+    format: uri
+    description: a valid url
+
+  Email:
+    type: string
+    format: email
+    description: email
+
+  Handle:
+    type: string
+    pattern: ^[a-z0-9\-]+$
+    minLength: 3
+    description: The unique handle of an item
+    not:
+      $ref: '#/$defs/Id'
+
+  HandleOrId:
+    oneOf:
+      - $ref: '#/$defs/Id'
+      - $ref: '#/$defs/Handle'
+
+  CertificateHandle:
+    type: string
+    pattern: ^[a-zA-Z0-9]+$
+    minLength: 10
+    maxLength: 10
+    description: The unique handle of a certificate
+    not:
+      $ref: '#/$defs/Id'
+
+  CertificateHandleOrId:
+    oneOf:
+      - $ref: '#/$defs/Id'
+      - $ref: '#/$defs/CertificateHandle'
+
+  Date:
+    type: string
+    format: date
+
+  PositiveInteger:
+    type: integer
+    minimum: 0
+    exclusiveMinimum: true
+
+  Revision:
+    type: string
+    minLength: 1

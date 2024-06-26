@@ -18,9 +18,23 @@ export const openId: OpenIdAuthenticationHandler<
   const personItems = await core.User.Person.list({
     filter: { userId: authUser.id },
   })
+  const personIds = personItems.map((item) => item.id)
+
+  const locationItems = (
+    await Promise.all(
+      personIds.map((personId) =>
+        core.User.Person.listLocations({
+          personId,
+          roles: ['location_admin'],
+        }),
+      ),
+    )
+  ).flatMap((list) => list)
+  const locationIds = locationItems.map((item) => item.locationId)
 
   return {
-    user: authUser.id,
-    persons: personItems.map((item) => item.id),
+    userId: authUser.id,
+    personIds,
+    locationIds,
   }
 }

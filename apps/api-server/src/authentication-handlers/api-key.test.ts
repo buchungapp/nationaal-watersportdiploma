@@ -19,13 +19,12 @@ test('api-key authentication', () =>
     const result = await api.me(
       {
         contentType: null,
-        parameters: {},
       },
       { apiKey: apiKeyItem.token },
       { baseUrl },
     )
 
-    assert(result.status === 200)
+    api.lib.expectStatus(result, 200)
 
     const meItem = await result.entity()
     assert.equal(meItem.id, userItem.id)

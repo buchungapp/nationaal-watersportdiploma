@@ -94,5 +94,5 @@ pnpm --filter db run generate-all
 In order to run the migration in a production environment you first need to get a connection string to the database server in this environment. Then make sure all of the code is compiled. This is automatically done after and install so you'll probably be fine. Then use the following command, replacing the connection string.
 
 ```sh
-pnpm --filter db run execute-migration --pg-uri postgres://postgres:postgres@localhost:5432/postgres
+pnpm --filter db run execute-migration --pg-uri postgres://postgres:postgres@localhost:54322/postgres
 ```

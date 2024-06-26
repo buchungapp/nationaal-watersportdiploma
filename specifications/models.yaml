@@ -1,0 +1,391 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+$defs:
+  UserModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+
+  DisciplineModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - weight
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+      weight:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+
+  CurriculumModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - programId
+      - revision
+      - modules
+    properties:
+      startedAt:
+        $ref: 'fields.yaml#/$defs/Date'
+      programId:
+        $ref: 'fields.yaml#/$defs/Id'
+      revision:
+        $ref: 'fields.yaml#/$defs/Revision'
+      modules:
+        type: array
+        items:
+          $ref: '#/$defs/ModuleModel'
+
+  ModuleModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - isRequired
+      - weight
+      - competencies
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+      type:
+        enum:
+          - 'knowledge'
+          - 'skill'
+      isRequired:
+        type: boolean
+      weight:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+      competencies:
+        type: array
+        items:
+          $ref: '#/$defs/CompetencyModel'
+
+  CompetencyModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - isRequired
+      - weight
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+      type:
+        enum:
+          - 'knowledge'
+          - 'skill'
+      isRequired:
+        type: boolean
+      requirement:
+        $ref: 'fields.yaml#/$defs/Text'
+      weight:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+
+  ProgramModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - degree
+      - discipline
+      - categories
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+      degree:
+        $ref: '#/$defs/DegreeModel'
+      discipline:
+        $ref: '#/$defs/DisciplineModel'
+      categories:
+        type: array
+        items:
+          $ref: '#/$defs/ChildCategoryModel'
+
+  LocationModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      name:
+        $ref: 'fields.yaml#/$defs/Text'
+      websiteUrl:
+        $ref: 'fields.yaml#/$defs/Url'
+      shortDescription:
+        $ref: 'fields.yaml#/$defs/Text'
+      logo:
+        $ref: '#/$defs/ImageModel'
+      logoSquare:
+        $ref: '#/$defs/ImageModel'
+      logoCertificate:
+        $ref: '#/$defs/ImageModel'
+
+  CreateLocationModel:
+    type: object
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  LocationCohortModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  CreateLocationCohortModel:
+    type: object
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  CertificateModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - studentCurriculumId
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      studentCurriculumId:
+        $ref: 'fields.yaml#/$defs/Id'
+      issuedAt:
+        $ref: 'fields.yaml#/$defs/Date'
+      visibleFrom:
+        $ref: 'fields.yaml#/$defs/Date'
+
+  DegreeModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - rang
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+      rang:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+
+  CategoryModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+      - weight
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+      description:
+        $ref: 'fields.yaml#/$defs/Text'
+      weight:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+
+  ChildCategoryModel:
+    type: object
+    allOf:
+      - $ref: '#/$defs/CategoryModel'
+    properties:
+      parent:
+        $ref: '#/$defs/CategoryModel'
+
+  LocationCertificateModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  CreateLocationCertificateModel:
+    type: object
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  CountryModel:
+    type: object
+    required:
+      - code
+    properties:
+      code:
+        $ref: 'fields.yaml#/$defs/Code'
+      name:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  GearTypeModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - handle
+    properties:
+      handle:
+        $ref: 'fields.yaml#/$defs/Handle'
+      title:
+        $ref: 'fields.yaml#/$defs/Text'
+
+  ImageModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CuFields'
+    required:
+      - name
+      - url
+      - type
+      - size
+      - transformUrl
+    properties:
+      name:
+        $ref: 'fields.yaml#/$defs/Text'
+      url:
+        $ref: 'fields.yaml#/$defs/Url'
+      type:
+        enum:
+          - image
+      alt:
+        $ref: 'fields.yaml#/$defs/Text'
+      mimeType:
+        $ref: 'fields.yaml#/$defs/MimeType'
+      size:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+      transformUrl:
+        $ref: 'fields.yaml#/$defs/Url'
+      width:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+      height:
+        $ref: 'fields.yaml#/$defs/PositiveInteger'
+
+  PersonModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - firstName
+      - actors
+    properties:
+      userId:
+        $ref: 'fields.yaml#/$defs/Id'
+      firstName:
+        $ref: 'fields.yaml#/$defs/Text'
+      lastNamePrefix:
+        $ref: 'fields.yaml#/$defs/Text'
+      lastName:
+        $ref: 'fields.yaml#/$defs/Text'
+      dateOfBirth:
+        $ref: 'fields.yaml#/$defs/Date'
+      birthCity:
+        $ref: 'fields.yaml#/$defs/Text'
+      birthCountry:
+        $ref: '#/$defs/CountryModel'
+      actors:
+        type: array
+        items:
+          $ref: '#/$defs/ActorModel'
+
+  CreatePersonModel:
+    type: object
+    required:
+      - email
+      - firstName
+      - lastName
+      - dateOfBirth
+      - birthCity
+    properties:
+      email:
+        $ref: 'fields.yaml#/$defs/Email'
+      firstName:
+        $ref: 'fields.yaml#/$defs/Text'
+      lastNamePrefix:
+        $ref: 'fields.yaml#/$defs/Text'
+      lastName:
+        $ref: 'fields.yaml#/$defs/Text'
+      dateOfBirth:
+        $ref: 'fields.yaml#/$defs/Date'
+      birthCity:
+        $ref: 'fields.yaml#/$defs/Text'
+      birthCountry:
+        $ref: 'fields.yaml#/$defs/Code'
+
+  ActorModel:
+    type: object
+    allOf:
+      - $ref: 'bases.yaml#/$defs/IdContainer'
+      - $ref: 'bases.yaml#/$defs/CudFields'
+    required:
+      - type
+      - locationId
+    properties:
+      type:
+        enum:
+          - student
+          - instructor
+          - location_admin
+          - application
+          - system
+      locationId:
+        $ref: 'fields.yaml#/$defs/Id'
+      personId:
+        $ref: 'fields.yaml#/$defs/Id'

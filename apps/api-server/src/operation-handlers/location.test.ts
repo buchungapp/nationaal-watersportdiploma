@@ -13,6 +13,7 @@ test('location crud', () =>
             return {
               apiKey: '00000000-0000-0000-0000-000000000000',
               user: '00000000-0000-0000-0000-000000000000',
+              isSuper: false,
             }
 
           default:
@@ -30,7 +31,6 @@ test('location crud', () =>
           // TODO this could be more friendly
           {
             contentType: 'application/json',
-            parameters: {},
             entity: () => entity,
           },
           // TODO this should be made implicit in a future version of the generator
@@ -39,8 +39,7 @@ test('location crud', () =>
           { baseUrl },
         )
 
-        // TODO this could be more friendly
-        assert(result.status === 201)
+        api.lib.expectStatus(result, 201)
 
         const item = await result.entity()
         id = item.id
@@ -50,15 +49,15 @@ test('location crud', () =>
         const result = await api.getLocations(
           {
             contentType: null,
-            parameters: {},
           },
           { apiKey: 'supersecret' },
           { baseUrl },
         )
-        assert(result.status === 200)
+        api.lib.expectStatus(result, 200)
 
         const list = await result.entity()
         assert.equal(list.length, 1)
+        assert(list[0] != null)
         assert.equal(list[0].id, id)
       }
     },

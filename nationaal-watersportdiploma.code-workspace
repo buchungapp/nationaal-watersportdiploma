@@ -1,36 +1,40 @@
 {
   "folders": [
     {
+      "name": "docs",
+      "path": "docs",
+    },
+    {
       "name": "specifications",
-      "path": "./specifications",
+      "path": "specifications",
     },
     {
       "name": "apps/web",
-      "path": "./apps/web",
+      "path": "apps/web",
     },
     {
       "name": "apps/api-server",
-      "path": "./apps/api-server",
+      "path": "apps/api-server",
     },
     {
       "name": "packages/db",
-      "path": "./packages/db",
+      "path": "packages/db",
     },
     {
       "name": "packages/core",
-      "path": "./packages/core",
+      "path": "packages/core",
     },
     {
       "name": "packages/lib",
-      "path": "./packages/lib",
+      "path": "packages/lib",
     },
     {
       "name": "packages/scripts",
-      "path": "./packages/scripts",
+      "path": "packages/scripts",
     },
     {
       "name": "supabase",
-      "path": "./supabase",
+      "path": "supabase",
     },
   ],
   "settings": {

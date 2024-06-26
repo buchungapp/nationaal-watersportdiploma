@@ -27,10 +27,6 @@ export const find = withZod(
 
     const [result] = await resultQuery
 
-    if (!result) {
-      throw new Error('Failed to find certificate')
-    }
-
     return result
   },
 )

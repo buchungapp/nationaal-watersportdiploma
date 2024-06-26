@@ -6,7 +6,7 @@
     "sourceMap": true,
     "declaration": true,
     "composite": true,
-    "lib": ["es2023"]
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"],
   "references": [
