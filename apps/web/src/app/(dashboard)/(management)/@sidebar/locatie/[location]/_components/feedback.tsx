@@ -126,8 +126,6 @@ function FeedbackTab({
 
   const [state, formAction] = useActionState(submitFeedback, undefined);
 
-  console.log("state", state);
-
   const label = feedbackLabels[type].label;
   const placeholder = feedbackLabels[type].placeholder;
 

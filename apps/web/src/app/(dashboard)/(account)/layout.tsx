@@ -3,8 +3,6 @@ import {
   ChevronDownIcon,
   Cog8ToothIcon,
   LifebuoyIcon,
-  LightBulbIcon,
-  PlusIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
 import { LogOutDropdownItem } from "../_components/auth";
@@ -34,6 +32,10 @@ import {
   SidebarSection,
 } from "../_components/sidebar";
 import { StackedLayout } from "../_components/stacked-layout";
+import FeedbackDialog, {
+  FeedbackButton,
+  FeedbackProvider,
+} from "./_components/feedback";
 
 const navItems = [
   { label: "Paspoort", url: "/profiel" },
@@ -44,7 +46,7 @@ const navItems = [
 function PersonDropdownMenu() {
   return (
     <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
-      <DropdownItem href="/teams/1">
+      {/* <DropdownItem href="/teams/1">
         <Avatar slot="icon" src="/tailwind-logo.svg" />
         <DropdownLabel>Tailwind Labs</DropdownLabel>
       </DropdownItem>
@@ -55,11 +57,11 @@ function PersonDropdownMenu() {
           className="bg-purple-500 text-white "
         />
         <DropdownLabel>Workcation</DropdownLabel>
-      </DropdownItem>
+      </DropdownItem> */}
       <DropdownDivider />
-      <DropdownItem href="/teams/create">
-        <PlusIcon />
-        <DropdownLabel>Nieuw persoon&hellip;</DropdownLabel>
+      <DropdownItem href="/profiel/personen">
+        <Cog8ToothIcon />
+        <DropdownLabel>Beheer personen</DropdownLabel>
       </DropdownItem>
     </DropdownMenu>
   );
@@ -76,8 +78,8 @@ export default function Layout({
         <Navbar>
           <Dropdown>
             <DropdownButton as={NavbarItem} className="max-lg:hidden">
-              <Avatar src={""} initials="MM" />
-              <NavbarLabel>Tailwind Labs</NavbarLabel>
+              <Avatar src={""} initials="Vo" />
+              <NavbarLabel>Voornaam Achternaam</NavbarLabel>
               <ChevronDownIcon />
             </DropdownButton>
             <PersonDropdownMenu />
@@ -92,35 +94,35 @@ export default function Layout({
           </NavbarSection>
           <NavbarSpacer />
           <NavbarSection>
-            <Dropdown>
-              <DropdownButton as={NavbarItem}>
-                <Avatar src="" initials="mm" square />
-              </DropdownButton>
-              <DropdownMenu className="min-w-64" anchor="bottom end">
-                <DropdownItem href="/instellingen">
-                  <Cog8ToothIcon />
-                  <DropdownLabel>Instellingen</DropdownLabel>
-                </DropdownItem>
-                <DropdownDivider />
-                <DropdownItem href="/help">
-                  <LifebuoyIcon />
-                  <DropdownLabel>Helpcentrum</DropdownLabel>
-                </DropdownItem>
-                <DropdownItem href="/feedback">
-                  <LightBulbIcon />
-                  <DropdownLabel>Feedback delen</DropdownLabel>
-                </DropdownItem>
-                <DropdownItem href="/privacy">
-                  <ShieldCheckIcon />
-                  <DropdownLabel>Privacybeleid</DropdownLabel>
-                </DropdownItem>
-                <DropdownDivider />
-                <LogOutDropdownItem>
-                  <ArrowRightStartOnRectangleIcon />
-                  <DropdownLabel>Uitloggen</DropdownLabel>
-                </LogOutDropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            <FeedbackProvider>
+              <Dropdown>
+                <DropdownButton as={NavbarItem}>
+                  <Avatar src="" initials="mm" square />
+                </DropdownButton>
+                <DropdownMenu className="min-w-64" anchor="bottom end">
+                  <DropdownItem href="/instellingen">
+                    <Cog8ToothIcon />
+                    <DropdownLabel>Instellingen</DropdownLabel>
+                  </DropdownItem>
+                  <DropdownDivider />
+                  <DropdownItem href="/help">
+                    <LifebuoyIcon />
+                    <DropdownLabel>Helpcentrum</DropdownLabel>
+                  </DropdownItem>
+                  <FeedbackButton />
+                  <DropdownItem href="/privacy">
+                    <ShieldCheckIcon />
+                    <DropdownLabel>Privacybeleid</DropdownLabel>
+                  </DropdownItem>
+                  <DropdownDivider />
+                  <LogOutDropdownItem>
+                    <ArrowRightStartOnRectangleIcon />
+                    <DropdownLabel>Uitloggen</DropdownLabel>
+                  </LogOutDropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+              <FeedbackDialog />
+            </FeedbackProvider>
           </NavbarSection>
         </Navbar>
       }
