@@ -18,16 +18,42 @@ export const selectSchema = createSelectSchema(s.location, {
   _metadata: z.any(),
 })
 
+export const locationMetadataSchema = z.object({
+  googlePlaceId: z
+    .string()
+    .nullable()
+    .catch(() => null),
+  socialMedia: z
+    .object({
+      platform: z.union([
+        z.literal('facebook'),
+        z.literal('instagram'),
+        z.literal('linkedin'),
+        z.literal('tiktok'),
+        z.literal('whatsapp'),
+        z.literal('x'),
+        z.literal('youtube'),
+      ]),
+      url: z.string().url(),
+    })
+    .array()
+    .catch(() => []),
+})
+
+export type LocationMetadata = z.infer<typeof locationMetadataSchema>
+
 export const outputSchema = selectSchema
   .omit({
     logoMediaId: true,
     squareLogoMediaId: true,
     certificateMediaId: true,
+    _metadata: true,
   })
   .extend({
     logo: mediaOutputSchema.nullable(),
     logoSquare: mediaOutputSchema.nullable(),
     logoCertificate: mediaOutputSchema.nullable(),
   })
+  .merge(locationMetadataSchema)
 
 export type Output = z.output<typeof outputSchema>

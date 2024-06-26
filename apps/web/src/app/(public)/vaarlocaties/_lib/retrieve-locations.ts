@@ -1,42 +1,38 @@
-import { locations as locationsData } from "~/locations";
-
 import {
   AddressType,
   Client,
   Language,
 } from "@googlemaps/google-maps-services-js";
 import { cache } from "react";
+import { listAllLocations } from "~/lib/nwd";
 
 const mapsClient = new Client({});
 
 async function retrieveLocationsWithAllMeta() {
-  const locations = locationsData;
+  const locations = await listAllLocations();
 
   const locationsWithCity = await Promise.all(
     locations.map(async (location) => {
-      if (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === undefined) {
-        // When the Google Maps API key is not set, we return a dummy location
+      if (
+        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === undefined ||
+        !location.googlePlaceId
+      ) {
         return {
           ...location,
-          rating: 0,
-          user_ratings_total: 0,
-          geometry: {
-            location: {
-              lat: 0,
-              lng: 0,
-            },
-          },
-          googleUrl: "",
-          province: "",
-          city: "",
-          address_components: [],
+          rating: undefined,
+          user_ratings_total: undefined,
+          geometry: undefined,
+          googleUrl: undefined,
+          province: undefined,
+          city: undefined,
+          address_components: undefined,
         };
       }
 
       const placeDetails = await mapsClient
         .placeDetails({
           params: {
-            place_id: location.placeId,
+            place_id: location.googlePlaceId,
             language: Language.nl,
             key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
             fields: [

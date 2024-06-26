@@ -3,7 +3,7 @@
 import { type PropsWithChildren } from "react";
 import { useFormState as useActionState } from "react-dom";
 import { toast } from "sonner";
-import { updateSettings } from "../_actions/update";
+import { updateSocials } from "../_actions/update";
 
 import { useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -17,13 +17,13 @@ function SubmitButton() {
   );
 }
 
-export default function SettingsForm({
+export default function SocialsForm({
   children,
   className,
   locationId,
 }: PropsWithChildren<{ className?: string; locationId: string }>) {
   const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await updateSettings(locationId, prevState, formData);
+    const result = await updateSocials(locationId, prevState, formData);
     if (result.message === "Success") {
       toast.success("Instellingen zijn geüpdatet.");
     } else {

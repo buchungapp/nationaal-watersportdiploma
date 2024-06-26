@@ -405,6 +405,12 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
   });
 });
 
+export const listAllLocations = cache(async () => {
+  return makeRequest(async () => {
+    return await Location.list();
+  });
+});
+
 export const createPersonForLocation = async (
   locationId: string,
   personInput: {
@@ -666,3 +672,58 @@ export const getIsActiveInstructor = cache(async () => {
     );
   });
 });
+
+export type SocialPlatform =
+  | "facebook"
+  | "instagram"
+  | "linkedin"
+  | "tiktok"
+  | "whatsapp"
+  | "x"
+  | "youtube";
+
+export const updateLocationDetails = async (
+  id: string,
+  fields: Partial<{
+    name: string;
+    websiteUrl: string;
+    email: string;
+    shortDescription: string | null;
+    googlePlaceId: string | null;
+    socialMedia: {
+      platform: SocialPlatform;
+      url: string;
+    }[];
+  }>,
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    const availableLocations = await User.Person.listLocationsByRole({
+      personId: authPerson.id,
+      roles: ["location_admin"],
+    });
+
+    if (!availableLocations.some((l) => l.locationId === id)) {
+      throw new Error("Location not found for person");
+    }
+
+    await Location.updateDetails({
+      id,
+      name: fields.name,
+      websiteUrl: fields.websiteUrl,
+      email: fields.email,
+      shortDescription: fields.shortDescription,
+      googlePlaceId: fields.googlePlaceId,
+      socialMedia: fields.socialMedia,
+    });
+
+    return;
+  });
+};
