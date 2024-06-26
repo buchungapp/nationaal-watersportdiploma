@@ -325,14 +325,14 @@ function SubmitForm({
 
   return (
     <form action={formAction}>
-      {/* TODO: Fix this description in step 2. */}
-      <DialogDescription>
-        Er zijn <Strong>{state?.persons?.length}</Strong> personen gevonden.
-        Controleer de geïmporteerde data en klik op "Verder" om door te gaan.
-      </DialogDescription>
-      <DialogBody>
-        {state?.success === true ? (
-          <>
+      {state?.success === true ? (
+        <>
+          <DialogDescription>
+            Er zijn <Strong>{state?.persons?.length}</Strong> personen gevonden.
+            Controleer de geïmporteerde data en klik op "Verder" om door te
+            gaan.
+          </DialogDescription>
+          <DialogBody>
             <Table>
               <TableHead>
                 <TableRow>
@@ -369,9 +369,19 @@ function SubmitForm({
                 ))}
               </TableBody>
             </Table>
-          </>
-        ) : (
-          <>
+          </DialogBody>
+        </>
+      ) : (
+        <>
+          <DialogDescription>
+            Voeg de kolommen van je bestand toe aan de juiste velden: <br />{" "}
+            {Object.keys(COLUMN_MAPPING).map((item) => (
+              <span key={item}>
+                <Code>{item}</Code>{" "}
+              </span>
+            ))}
+          </DialogDescription>
+          <DialogBody>
             <Table>
               <TableHead>
                 <TableRow>
@@ -407,9 +417,9 @@ function SubmitForm({
             <div className="pt-4">
               {!!state?.message && <ErrorMessage>{state.message}</ErrorMessage>}
             </div>
-          </>
-        )}
-      </DialogBody>
+          </DialogBody>
+        </>
+      )}
       <DialogActions>
         <Button plain onClick={() => setIsOpen(false)}>
           Sluiten
