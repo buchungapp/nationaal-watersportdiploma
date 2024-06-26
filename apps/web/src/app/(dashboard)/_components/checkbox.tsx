@@ -1,9 +1,4 @@
-import {
-  Checkbox as HeadlessCheckbox,
-  Field as HeadlessField,
-  type CheckboxProps as HeadlessCheckboxProps,
-  type FieldProps as HeadlessFieldProps,
-} from "@headlessui/react";
+import * as Headless from "@headlessui/react";
 import { clsx } from "clsx";
 import React from "react";
 
@@ -28,9 +23,12 @@ export function CheckboxGroup({
   );
 }
 
-export function CheckboxField({ className, ...props }: HeadlessFieldProps) {
+export function CheckboxField({
+  className,
+  ...props
+}: { className?: string } & Omit<Headless.FieldProps, "className">) {
   return (
-    <HeadlessField
+    <Headless.Field
       data-slot="field"
       {...props}
       className={clsx(
@@ -142,9 +140,9 @@ export function Checkbox({
 }: {
   color?: Color;
   className?: string;
-} & HeadlessCheckboxProps) {
+} & Omit<Headless.CheckboxProps, "className">) {
   return (
-    <HeadlessCheckbox
+    <Headless.Checkbox
       data-slot="control"
       className={clsx(className, "group inline-flex focus:outline-none")}
       {...props}
@@ -173,6 +171,6 @@ export function Checkbox({
           />
         </svg>
       </span>
-    </HeadlessCheckbox>
+    </Headless.Checkbox>
   );
 }

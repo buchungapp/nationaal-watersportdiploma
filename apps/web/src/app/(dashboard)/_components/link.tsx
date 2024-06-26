@@ -1,4 +1,4 @@
-import { DataInteractive as HeadlessDataInteractive } from "@headlessui/react";
+import * as Headless from "@headlessui/react";
 import NextLink, { type LinkProps } from "next/link";
 import React from "react";
 
@@ -7,8 +7,8 @@ export const Link = React.forwardRef(function Link(
   ref: React.ForwardedRef<HTMLAnchorElement>,
 ) {
   return (
-    <HeadlessDataInteractive>
+    <Headless.DataInteractive>
       <NextLink {...props} ref={ref} />
-    </HeadlessDataInteractive>
+    </Headless.DataInteractive>
   );
 });

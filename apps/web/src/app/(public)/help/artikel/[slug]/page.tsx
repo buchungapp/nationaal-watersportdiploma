@@ -7,16 +7,12 @@ import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple
 import { FindNWDCourse } from "~/app/(public)/_components/cta";
 import PrintPage from "~/app/(public)/_components/print-page";
 import { Prose } from "~/app/(public)/_components/prose";
-import {
-  LinkedIn,
-  Whatsapp,
-  Twitter as X,
-} from "~/app/(public)/_components/socials";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
+import { LinkedIn, Whatsapp, Twitter as X } from "~/app/_components/socials";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
+import Breadcrumb from "../../../_components/breadcrumb";
 import { HelpArticle } from "../../_components/article";
-import Breadcrumb from "../../_components/breadcrumb";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {

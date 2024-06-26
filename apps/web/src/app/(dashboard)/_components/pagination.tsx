@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import React from "react";
+import type React from "react";
 import { Button } from "./button";
 
 export function Pagination({
@@ -18,16 +18,14 @@ export function Pagination({
 
 export function PaginationPrevious({
   href = null,
+  className,
   children = "Previous",
-}: {
-  href?: string | null;
-  children?: React.ReactNode;
-}) {
+}: React.PropsWithChildren<{ href?: string | null; className?: string }>) {
   return (
-    <span className="grow basis-0">
+    <span className={clsx(className, "grow basis-0")}>
       <Button
         {...(href === null ? { disabled: true } : { href })}
-        outline
+        plain
         aria-label="Previous page"
       >
         <svg
@@ -52,16 +50,14 @@ export function PaginationPrevious({
 
 export function PaginationNext({
   href = null,
+  className,
   children = "Next",
-}: {
-  href?: string | null;
-  children?: React.ReactNode;
-}) {
+}: React.PropsWithChildren<{ href?: string | null; className?: string }>) {
   return (
-    <span className="flex grow basis-0 justify-end">
+    <span className={clsx(className, "flex grow basis-0 justify-end")}>
       <Button
         {...(href === null ? { disabled: true } : { href })}
-        outline
+        plain
         aria-label="Next page"
       >
         {children}
@@ -84,28 +80,37 @@ export function PaginationNext({
   );
 }
 
-export function PaginationList({ children }: { children: React.ReactNode }) {
+export function PaginationList({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"span">) {
   return (
-    <span className="hidden items-baseline gap-x-2 sm:flex">{children}</span>
+    <span
+      {...props}
+      className={clsx(className, "hidden items-baseline gap-x-2 sm:flex")}
+    />
   );
 }
 
 export function PaginationPage({
   href,
-  children,
+  className,
   current = false,
-}: {
+  children,
+}: React.PropsWithChildren<{
   href: string;
-  children: string;
+  className?: string;
   current?: boolean;
-}) {
+}>) {
   return (
     <Button
       href={href}
       plain
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       aria-label={`Page ${children}`}
       aria-current={current ? "page" : undefined}
       className={clsx(
+        className,
         "min-w-[2.25rem] before:absolute before:-inset-px before:rounded-lg",
         current && "before:bg-zinc-950/5 dark:before:bg-white/10",
       )}
@@ -115,13 +120,21 @@ export function PaginationPage({
   );
 }
 
-export function PaginationGap() {
+export function PaginationGap({
+  className,
+  children = <>&hellip;</>,
+  ...props
+}: React.ComponentPropsWithoutRef<"span">) {
   return (
-    <div
+    <span
       aria-hidden="true"
-      className="w-[2.25rem] select-none text-center text-sm/6 font-semibold text-zinc-950 dark:text-white"
+      {...props}
+      className={clsx(
+        className,
+        "w-[2.25rem] select-none text-center text-sm/6 font-semibold text-zinc-950 dark:text-white",
+      )}
     >
-      &hellip;
-    </div>
+      {children}
+    </span>
   );
 }

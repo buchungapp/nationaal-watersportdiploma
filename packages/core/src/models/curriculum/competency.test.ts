@@ -1,31 +1,31 @@
 import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
-import { Program } from '../index.js'
+import { Course } from '../index.js'
 import * as Competency from './competency.js'
 import { Output } from './competency.schema.js'
 import { Curriculum } from './curriculum.js'
 
 test('competency crud', () =>
   withTestTransaction(async () => {
-    const createCompetency = Program.Competency.create({
+    const createCompetency = Course.Competency.create({
       title: 'title-1',
       handle: 'handle-1',
       type: 'knowledge',
     })
 
-    const createModule = Program.Module.create({
+    const createModule = Course.Module.create({
       title: 'title-1',
       handle: 'handle-1',
     })
 
     const createCurriculum = async () => {
-      const createDiscipline = Program.Discipline.create({
+      const createDiscipline = Course.Discipline.create({
         title: 'discipline-1',
         handle: 'dc1',
       })
 
-      const createDegree = Program.Degree.create({
+      const createDegree = Course.Degree.create({
         title: 'degree-1',
         handle: 'dg1',
         rang: 1,
@@ -36,11 +36,16 @@ test('competency crud', () =>
         createDegree,
       ])
 
-      const { id: programId } = await Program.create({
-        title: 'program-1',
+      const { id: courseId } = await Course.create({
+        title: 'course-1',
+        handle: 'co1',
+        disciplineId,
+      })
+
+      const { id: programId } = await Course.Program.create({
         handle: 'pr1',
         degreeId,
-        disciplineId,
+        courseId,
       })
 
       return await Curriculum.create({

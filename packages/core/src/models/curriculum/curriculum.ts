@@ -1,9 +1,18 @@
 import { schema as s } from '@nawadi/db'
-import { SQLWrapper, and, desc, eq, inArray, isNotNull, lte } from 'drizzle-orm'
+import {
+  SQLWrapper,
+  and,
+  countDistinct,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  lte,
+} from 'drizzle-orm'
 import assert from 'node:assert'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { findItem } from '../../utils/data-helpers.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
+import { findItem, singleRow } from '../../utils/data-helpers.js'
 import dayjs from '../../utils/dayjs.js'
 import {
   singleOrArray,
@@ -11,8 +20,8 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/zod.js'
-import { Program } from '../index.js'
-import { Module } from '../program/index.js'
+import { Module } from '../course/index.js'
+import { Course } from '../index.js'
 import { insertSchema, outputSchema } from './curriculum.schema.js'
 
 export * as Curriculum from './curriculum.js'
@@ -151,7 +160,7 @@ export const list = withZod(
     const [curricula, modules, competencies] = await Promise.all([
       curriculaQuery.where(and(...filters)),
       Module.list(),
-      Program.Competency.list(),
+      Course.Competency.list(),
     ])
 
     const normalizedCurricula = Object.values(
@@ -255,6 +264,101 @@ export const list = withZod(
     })
 
     return mapped
+  },
+)
+
+export const countStartedStudents = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+  }),
+  z.number(),
+  async ({ curriculumId }) => {
+    const query = useQuery()
+
+    const count = await query
+      .select({ count: countDistinct(s.studentCurriculum.personId) })
+      .from(s.studentCurriculum)
+      .where(eq(s.studentCurriculum.curriculumId, curriculumId))
+      .then((rows) => rows[0]?.count ?? 0)
+
+    return count
+  },
+)
+
+export const copy = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+    revision: z.string(),
+  }),
+  successfulCreateResponse,
+  async ({ curriculumId, revision }) => {
+    return withTransaction(async (tx) => {
+      const curriculum = await tx
+        .select({
+          id: s.curriculum.id,
+          programId: s.curriculum.programId,
+        })
+        .from(s.curriculum)
+
+        .where(eq(s.curriculum.id, curriculumId))
+        .then(singleRow)
+
+      // Insert a new curriculum with the same program ID.
+      const { id: newCurriculum } = await tx
+        .insert(s.curriculum)
+        .values({
+          programId: curriculum.programId,
+          revision,
+          startedAt: null,
+        })
+        .returning({ id: s.curriculum.id })
+        .then(singleRow)
+
+      // Copy modules, competencies and gear types from the old curriculum to the new one.
+      const [oldModules, oldCompetencies, oldGearTypes] = await Promise.all([
+        tx
+          .select()
+          .from(s.curriculumModule)
+          .where(eq(s.curriculumModule.curriculumId, curriculumId)),
+        tx
+          .select()
+          .from(s.curriculumCompetency)
+          .where(eq(s.curriculumCompetency.curriculumId, curriculumId)),
+        tx
+          .select()
+          .from(s.curriculumGearLink)
+          .where(eq(s.curriculumGearLink.curriculumId, curriculumId)),
+      ])
+
+      // Insert modules
+      await tx.insert(s.curriculumModule).values(
+        oldModules.map((module) => ({
+          curriculumId: newCurriculum,
+          moduleId: module.moduleId,
+        })),
+      )
+
+      // Insert competencies
+      await tx.insert(s.curriculumCompetency).values(
+        oldCompetencies.map((competency) => ({
+          curriculumId: newCurriculum,
+          moduleId: competency.moduleId,
+          competencyId: competency.competencyId,
+          isRequired: competency.isRequired,
+          requirement: competency.requirement,
+        })),
+      )
+
+      // Insert gear types
+      await tx.insert(s.curriculumGearLink).values(
+        oldGearTypes.map((gearType) => ({
+          curriculumId: newCurriculum,
+          gearTypeId: gearType.gearTypeId,
+        })),
+      )
+
+      return { id: newCurriculum }
+    })
   },
 )
 

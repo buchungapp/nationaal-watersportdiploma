@@ -23,25 +23,29 @@ const storage = new AsyncLocalStorage<db.Transaction>()
 export async function withTransaction<T>(
   job: (tx: db.Transaction) => Promise<T>,
 ): Promise<T> {
-  try {
-    const transaction = useTransaction()
-    if (transaction) {
-      return await job(transaction)
-    }
+  const existingTransaction = useTransaction()
 
-    throw new Error('No transaction found')
-  } catch {
+  if (existingTransaction) {
+    // If an existing transaction is found, run the job within it
+    return job(existingTransaction)
+  } else {
+    // If no existing transaction is found, create a new transaction
     const database = useDatabase()
-    const result = await database.transaction(
+    return database.transaction(
       async (transaction) => {
-        const result = await storage.run(transaction, () => job(transaction))
-        return result
+        try {
+          // Run the job within the newly created transaction context
+          const result = await storage.run(transaction, () => job(transaction))
+          return result
+        } catch (error) {
+          // If the job throws an error, rethrow it to ensure the transaction is rolled back
+          throw error
+        }
       },
       {
         isolationLevel: 'serializable',
       },
     )
-    return result
   }
 }
 

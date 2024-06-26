@@ -1,9 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import { PropsWithChildren, useEffect, useRef } from "react";
+import type { PropsWithChildren } from "react";
+import { useEffect, useRef } from "react";
 import { useSelectedLocation } from "../../_components/locations-map";
-import { Location } from "../_lib/retrieve-locations";
+import type { Location } from "../_lib/retrieve-locations";
 
 export default function LocationCard({
   location,

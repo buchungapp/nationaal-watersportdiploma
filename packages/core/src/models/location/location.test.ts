@@ -22,6 +22,7 @@ test('location crud', () =>
       handle: 'handle-1',
       name: 'title-1',
       websiteUrl: 'https://example.com',
+      email: null,
       shortDescription: null,
       createdAt: item!.createdAt,
       updatedAt: item!.updatedAt,

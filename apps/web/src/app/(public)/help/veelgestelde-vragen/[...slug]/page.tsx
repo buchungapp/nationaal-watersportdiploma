@@ -8,8 +8,8 @@ import { FindNWDCourse } from "~/app/(public)/_components/cta";
 import { Prose } from "~/app/(public)/_components/prose";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { getHelpFaqs } from "~/lib/article-2";
+import Breadcrumb from "../../../_components/breadcrumb";
 import { HelpArticle } from "../../_components/article";
-import Breadcrumb from "../../_components/breadcrumb";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {

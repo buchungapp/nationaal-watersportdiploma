@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { SQLWrapper, and, eq, exists, inArray } from 'drizzle-orm'
+import { SQLWrapper, and, asc, eq, exists, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
@@ -90,7 +90,9 @@ export const list = withZod(
       )
     }
 
-    const rows = await gearTypeQuery.where(and(...filters))
+    const rows = await gearTypeQuery
+      .where(and(...filters))
+      .orderBy(asc(s.gearType.title))
 
     return rows
   },

@@ -229,7 +229,7 @@ export const list = withZod(
   },
 )
 
-export const listLocations = withZod(
+export const listLocationsByRole = withZod(
   z.object({
     personId: uuidSchema,
     roles: z

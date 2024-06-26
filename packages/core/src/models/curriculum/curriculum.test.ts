@@ -2,11 +2,13 @@ import assert from 'assert'
 import test from 'node:test'
 import { withTestTransaction } from '../../contexts/index.js'
 import dayjs from '../../utils/dayjs.js'
-import { Program } from '../index.js'
-import { Degree, Discipline } from '../program/index.js'
+import { Degree, Discipline } from '../course/index.js'
+
+import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from '../../utils/test.js'
+import { Course } from '../index.js'
 import * as Curriculum from './curriculum.js'
 
-test.skip('curriculum crud', () =>
+test('curriculum crud', () =>
   withTestTransaction(async () => {
     const createDiscipline = Discipline.create({
       title: 'discipline-1',
@@ -24,11 +26,16 @@ test.skip('curriculum crud', () =>
       createDegree,
     ])
 
-    const { id: programId } = await Program.create({
-      title: 'program-1',
+    const { id: courseId } = await Course.create({
+      title: 'course-1',
+      handle: 'co1',
+      disciplineId,
+    })
+
+    const { id: programId } = await Course.Program.create({
       handle: 'pr1',
       degreeId,
-      disciplineId,
+      courseId,
     })
 
     const { id } = await Curriculum.create({
@@ -41,16 +48,19 @@ test.skip('curriculum crud', () =>
     assert.equal(list.length, 1)
     const [item] = list
 
-    assert.deepStrictEqual(item, {
+    assert.deepStrictEqual(defaultTimestamps(item), {
       id,
       revision: 'A',
       startedAt: null,
       programId: programId,
       modules: [],
+      createdAt: DEFAULT_TEST_TIMESTAMP,
+      updatedAt: DEFAULT_TEST_TIMESTAMP,
+      deletedAt: null,
     })
   }))
 
-test.skip('curriculum list filters', () =>
+test('curriculum list filters', () =>
   withTestTransaction(async () => {
     const createDiscipline = Discipline.create({
       title: 'discipline-1',
@@ -68,11 +78,16 @@ test.skip('curriculum list filters', () =>
       createDegree,
     ])
 
-    const { id: programId } = await Program.create({
-      title: 'program-1',
+    const { id: courseId } = await Course.create({
+      title: 'course-1',
+      handle: 'co1',
+      disciplineId,
+    })
+
+    const { id: programId } = await Course.Program.create({
       handle: 'pr1',
       degreeId,
-      disciplineId,
+      courseId,
     })
 
     const startedAt = dayjs().toISOString()
@@ -93,11 +108,14 @@ test.skip('curriculum list filters', () =>
     assert.equal(list.length, 1)
     const [item] = list
 
-    assert.deepStrictEqual(item, {
+    assert.deepStrictEqual(defaultTimestamps(item), {
       id,
       revision: 'A',
       startedAt,
       programId: programId,
       modules: [],
+      createdAt: DEFAULT_TEST_TIMESTAMP,
+      updatedAt: DEFAULT_TEST_TIMESTAMP,
+      deletedAt: null,
     })
   }))
