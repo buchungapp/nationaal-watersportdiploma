@@ -12,7 +12,16 @@ import {
   withZod,
 } from '../../utils/zod.js'
 import { Platform } from '../index.js'
-import { insertSchema, outputSchema } from './location.schema.js'
+import {
+  LocationMetadata,
+  insertSchema,
+  locationMetadataSchema,
+  outputSchema,
+} from './location.schema.js'
+
+function mapMetaForLocation(metadata: unknown): LocationMetadata {
+  return locationMetadataSchema.parse(metadata ?? {})
+}
 
 export const create = wrapCommand(
   'createLocation',
@@ -149,6 +158,7 @@ export const list = wrapQuery(
         logo,
         logoSquare,
         logoCertificate,
+        ...mapMetaForLocation(row._metadata),
       }
     })
   }),
@@ -179,6 +189,7 @@ export const fromId = wrapQuery(
       logo,
       logoSquare: squareLogo,
       logoCertificate: certificateLogo,
+      ...mapMetaForLocation(location._metadata),
     }
   }),
 )
@@ -209,6 +220,7 @@ export const fromHandle = wrapQuery(
       logo,
       logoSquare: squareLogo,
       logoCertificate: certificateLogo,
+      ...mapMetaForLocation(location._metadata),
     }
   }),
 )

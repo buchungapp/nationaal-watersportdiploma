@@ -27,9 +27,10 @@ test('location crud', () =>
       createdAt: item!.createdAt,
       updatedAt: item!.updatedAt,
       deletedAt: null,
-      _metadata: null,
       logo: null,
       logoCertificate: null,
       logoSquare: null,
+      socialMedia: [],
+      googlePlaceId: null,
     } satisfies Output)
   }))

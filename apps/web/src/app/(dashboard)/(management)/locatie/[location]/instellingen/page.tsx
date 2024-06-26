@@ -33,7 +33,7 @@ function FieldSection({
   children,
 }: PropsWithChildren<{
   label: React.ReactNode;
-  description: React.ReactNode;
+  description?: React.ReactNode;
 }>) {
   return (
     <Headless.Field
@@ -42,7 +42,7 @@ function FieldSection({
     >
       <div className="space-y-1">
         <Label>{label}</Label>
-        <Description>{description}</Description>
+        {description ? <Description>{description}</Description> : null}
       </div>
       <div>{children}</div>
     </Headless.Field>
@@ -66,7 +66,13 @@ export default async function Page({
     logoSquare,
     logoCertificate,
     email,
+    googlePlaceId,
+    socialMedia,
   } = location;
+
+  const findSocialMediaUrl = (
+    platform: (typeof socialMedia)[number]["platform"],
+  ) => socialMedia.find((media) => media.platform === platform)?.url;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -203,7 +209,7 @@ export default async function Page({
               <Google data-slot="icon" />
               <Input
                 name="googlePlaceId"
-                defaultValue={undefined}
+                defaultValue={googlePlaceId ?? undefined}
                 type="text"
               />
             </InputGroup>
@@ -211,105 +217,98 @@ export default async function Page({
 
           <Divider soft className="my-10" />
 
-          <FieldSection
-            label="Facebook"
-            description="https://www.facebook.com/[pagina]"
-          >
+          <FieldSection label="Facebook">
             <InputGroup>
               <Facebook data-slot="icon" />
               <Input
                 name="socials-facebook"
-                defaultValue={undefined}
-                type="text"
+                defaultValue={findSocialMediaUrl("facebook") ?? undefined}
+                type="url"
+                placeholder="https://www.facebook.com/[pagina]"
               />
             </InputGroup>
           </FieldSection>
 
           <Divider soft className="my-10" />
 
-          <FieldSection
-            label="Instagram"
-            description="https://www.instagram.com/[account]"
-          >
+          <FieldSection label="Instagram">
             <InputGroup>
               <Instagram data-slot="icon" />
               <Input
                 name="socials-instagram"
-                defaultValue={undefined}
-                type="text"
+                defaultValue={findSocialMediaUrl("instagram") ?? undefined}
+                type="url"
+                placeholder="https://www.instagram.com/[account]"
               />
             </InputGroup>
           </FieldSection>
 
           <Divider soft className="my-10" />
 
-          <FieldSection
-            label="LinkedIn"
-            description="https://www.linkedin.com/company/[bedrijfsnaam]"
-          >
+          <FieldSection label="LinkedIn">
             <InputGroup>
               <LinkedIn data-slot="icon" />
               <Input
                 name="socials-linkedin"
-                defaultValue={undefined}
-                type="text"
+                defaultValue={findSocialMediaUrl("linkedin") ?? undefined}
+                type="url"
+                placeholder="https://www.linkedin.com/company/[bedrijfsnaam]"
               />
             </InputGroup>
           </FieldSection>
 
           <Divider soft className="my-10" />
 
-          <FieldSection
-            label="TikTok"
-            description="https://www.tiktok.com/@[account]"
-          >
+          <FieldSection label="TikTok">
             <InputGroup>
               <TikTok data-slot="icon" />
               <Input
                 name="socials-tiktok"
-                defaultValue={undefined}
-                type="text"
+                defaultValue={findSocialMediaUrl("tiktok") ?? undefined}
+                type="url"
+                placeholder="https://www.tiktok.com/@[account]"
               />
             </InputGroup>
           </FieldSection>
 
           <Divider soft className="my-10" />
 
-          <FieldSection
-            label="WhatsApp"
-            description="https://wa.me/[telefoonnummer]"
-          >
+          <FieldSection label="WhatsApp">
             <InputGroup>
               <Whatsapp data-slot="icon" />
               <Input
                 name="socials-whatsapp"
-                defaultValue={undefined}
-                type="text"
+                defaultValue={findSocialMediaUrl("whatsapp") ?? undefined}
+                type="url"
+                placeholder="https://wa.me/[telefoonnummer]"
               />
             </InputGroup>
           </FieldSection>
 
           <Divider soft className="my-10" />
 
-          <FieldSection label="X" description="https://x.com/[account]">
+          <FieldSection label="X">
             <InputGroup>
               <X data-slot="icon" />
-              <Input name="socials-x" defaultValue={undefined} type="text" />
+              <Input
+                name="socials-x"
+                defaultValue={findSocialMediaUrl("x") ?? undefined}
+                type="url"
+                placeholder="https://x.com/[account]"
+              />
             </InputGroup>
           </FieldSection>
 
           <Divider soft className="my-10" />
 
-          <FieldSection
-            label="YouTube"
-            description="https://www.youtube.com/[kanaal]"
-          >
+          <FieldSection label="YouTube">
             <InputGroup>
               <YouTube data-slot="icon" />
               <Input
                 name="socials-youtube"
-                defaultValue={undefined}
-                type="text"
+                defaultValue={findSocialMediaUrl("youtube") ?? undefined}
+                type="url"
+                placeholder="https://www.youtube.com/[kanaal]"
               />
             </InputGroup>
           </FieldSection>
