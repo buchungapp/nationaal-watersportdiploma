@@ -3,7 +3,8 @@
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
-import { ZodError } from "zod";
+import { toast } from "sonner";
+import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -12,7 +13,12 @@ import {
   DialogDescription,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
+import {
+  ErrorMessage,
+  Field,
+  Fieldset,
+  Label,
+} from "~/app/(dashboard)/_components/fieldset";
 import { Select } from "~/app/(dashboard)/_components/select";
 import {
   Table,
@@ -22,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/(dashboard)/_components/table";
-import { Code, TextLink } from "~/app/(dashboard)/_components/text";
+import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { createPersonBulk } from "../_actions/create";
 
@@ -32,6 +38,21 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
+
+interface CSVData {
+  labels: { label: string; value: string | null | undefined }[] | null;
+  rows: string[][] | null;
+}
+
+const COLUMN_MAPPING: Record<string, string> = {
+  "E-mailadres": "email",
+  Voornaam: "firstName",
+  Tussenvoegsels: "lastNamePrefix",
+  Achternaam: "lastName",
+  Geboortedatum: "dateOfBirth",
+  Geboorteplaats: "birthCity",
+  "Geboorteland (indien niet nl)": "birthCountry",
+};
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
@@ -50,8 +71,8 @@ export default function Wrapper(props: Props) {
 }
 
 function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
-  const [step, setStep] = useState(1);
-  const [data, setData] = useState([{ labels: [], rows: [] }]);
+  const [isUpload, setIsUpload] = useState(true);
+  const [data, setData] = useState<CSVData>({ labels: null, rows: null });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,16 +101,17 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     });
 
     setData({ labels, rows: data });
-    setStep(2);
+    setIsUpload(false);
   };
 
   return (
     <>
       <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
         <DialogTitle>Personen toevoegen (bulk)</DialogTitle>
-        <DialogDescription>
-          {step === 1 ? (
-            <>
+
+        {isUpload ? (
+          <form onSubmit={handleSubmit}>
+            <DialogDescription>
               Kopier en plak de data vanuit het{" "}
               <TextLink
                 href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
@@ -99,21 +121,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
               </TextLink>
               . <br /> Zorg ervoor dat de geboortedatum in het formaat{" "}
               <Code>YYYY-MM-DD</Code> <i>(2010-12-31)</i> is.
-            </>
-          ) : null}
-
-          {/* TODO: It's better to co-locate the <DialogDescriptions /> 🚨 */}
-          {step === 2 ? (
-            <>
-              {/* Er zijn <Strong>{uploadState?.data?.rows?.length}</Strong>{" "} */}
-              personen gevonden. Controleer de geïmporteerde data en klik op
-              "Verder" om door te gaan.
-            </>
-          ) : null}
-        </DialogDescription>
-
-        {step === 1 ? (
-          <form onSubmit={handleSubmit}>
+            </DialogDescription>
             <DialogBody>
               <Fieldset>
                 <Field>
@@ -132,10 +140,8 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
             </DialogActions>
           </form>
         ) : (
-          // Todo: SubmitForm 👈 here we have to bind the `rows` and `columnMap`
           <SubmitForm
             data={data}
-            step={step}
             countries={countries}
             locationId={locationId}
             setIsOpen={setIsOpen}
@@ -146,33 +152,19 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   );
 }
 
-// TODO: Move to correct place
-type ColumnKey =
-  | "E-mailadres"
-  | "Voornaam"
-  | "Tussenvoegsels"
-  | "Select one"
-  | "Achternaam"
-  | "Geboortedatum"
-  | "Geboorteplaats"
-  | "Geboorteland (indien niet nl)";
-
-type ColumnsConfig = Record<string, ColumnKey>;
-
 function SubmitForm({
   data,
   locationId,
   countries,
   setIsOpen,
 }: {
-  // TODO: Update this type 🚨
-  data: [][];
+  data: CSVData;
   locationId: string;
   countries: { code: string; name: string }[];
   setIsOpen: (value: boolean) => void;
 }) {
   const submit = async (
-    csvData: { labels: { label: string; value: string }[]; rows: string[][] },
+    csvData: string[][] | null | undefined,
     prevState:
       | {
           success: boolean;
@@ -190,22 +182,6 @@ function SubmitForm({
       | undefined,
     formData: FormData,
   ) => {
-    const columnsConfig = Object.fromEntries(formData);
-
-    // TODO: Is this the correct place to keep column mapping?
-    const columnMapping = {
-      "E-mailadres": "email",
-      Voornaam: "firstName",
-      Tussenvoegsels: "lastNamePrefix",
-      Achternaam: "lastName",
-      Geboortedatum: "dateOfBirth",
-      Geboorteplaats: "birthCity",
-      "Geboorteland (indien niet nl)": "birthCountry",
-    };
-
-    console.log("🔴 csvData", csvData);
-    console.log("🎉 columnsConfig", columnsConfig);
-
     if (!!prevState?.success) {
       const result = await createPersonBulk(locationId, prevState.persons!);
       setIsOpen(false);
@@ -222,85 +198,83 @@ function SubmitForm({
     }
 
     try {
-      const generateColumnsToInclude = (config: ColumnsConfig) => {
-        const columnsToInclude: { index: number; key: string }[] = [];
+      const itemCount = csvData?.[0]?.length;
+      const expectedItemCount = Object.keys(COLUMN_MAPPING).length;
+      if (itemCount !== expectedItemCount) {
+        throw new Error("Je hebt minder kolommen geplakt dan verwacht");
+      }
 
-        for (const [key, value] of Object.entries(config)) {
-          if (value !== "Select one" && columnMapping[value]) {
-            const index = parseInt(key.split("-")[2], 10);
-            columnsToInclude.push({ index, key: columnMapping[value] });
-          }
-        }
+      // We need to sort the data based on the order COLUMN_MAPPING, so that we can parse it correctly.
+      function sortDataByOrder(
+        data: string[][] | null | undefined,
+        order: Record<string, unknown>,
+        columnMapping: Record<string, string>,
+      ): string[][] {
+        const newOrder = Object.keys(order).map((key) => order[key]);
 
-        return columnsToInclude;
-      };
+        const indices = newOrder.map((columnName) =>
+          Object.keys(columnMapping).findIndex((key) => key === columnName),
+        );
 
-      const columnsToInclude = generateColumnsToInclude(columnsConfig);
-      console.log("🟠 columnsToInclude", columnsToInclude);
+        const sortedData = data?.map((row) =>
+          indices.map((index) => row[index]),
+        );
 
-      // Transform the data based on the columns to include and schema
-      const transformData = (data: any[][]) => {
-        return data.map((row) => {
-          const obj: Record<string, any> = {};
+        // @ts-expect-error fix later
+        return sortedData;
+      }
 
-          columnsToInclude.forEach(({ index, key }) => {
-            obj[key] = row[index];
-          });
+      const sortedData = sortDataByOrder(
+        csvData,
+        Object.fromEntries(formData),
+        COLUMN_MAPPING,
+      );
 
-          return obj;
-        });
-      };
-      const transformedData = transformData(csvData);
-      console.log("🟢 transformedData", transformedData);
+      const personRowSchema = z.tuple([
+        z.string().trim().toLowerCase().email(),
+        z.string().trim(),
+        z
+          .string()
+          .trim()
+          .transform((tussenvoegsel) =>
+            tussenvoegsel === "" ? null : tussenvoegsel,
+          ),
+        z.string(),
+        z.string().pipe(z.coerce.date()),
+        z.string(),
+        z
+          .preprocess(
+            (value) => (value === "" ? "nl" : value),
+            z.enum(countries.map((c) => c.code) as [string, ...string[]], {
+              message: "Ongeldige landcode",
+            }),
+          )
+          .default("nl"),
+      ]);
 
-      // const header = data[0]!;
-
-      // TODO: Fix this check 🚨
-      // if (header.length !== columnMapping.length) {
-      //   throw new Error("Je hebt minder kolommen geplakt dan verwacht");
-      // }
-
-      // TODO: Fix this check 🚨
-      // Check that the header row matches the expected header
-      // for (let i = 0; i < header.length; i++) {
-      //   if (header[i] !== columnMapping[i]) {
-      //     throw new Error(
-      //       `De naam van kolom "${header[i]}" is niet volgens het template`,
-      //     );
-      //   }
-      // }
-
-      // Remove the header row
-      // data.shift();
-
-      // const personRowSchema = z.tuple([
-      //   z.string().trim().toLowerCase().email(),
-      //   z.string().trim(),
-      //   z
-      //     .string()
-      //     .trim()
-      //     .transform((tussenvoegsel) =>
-      //       tussenvoegsel === "" ? null : tussenvoegsel,
-      //     ),
-      //   z.string(),
-      //   z.string().pipe(z.coerce.date()),
-      //   z.string(),
-      //   z
-      //     .preprocess(
-      //       (value) => (value === "" ? "nl" : value),
-      //       z.enum(countries.map((c) => c.code) as [string, ...string[]], {
-      //         message: "Ongeldige landcode",
-      //       }),
-      //     )
-      //     .default("nl"),
-      // ]);
-
-      // const rows = personRowSchema.array().parse(transformedData);
-      // console.log("🟢 rows", rows);
+      const rows = personRowSchema.array().parse(sortedData);
 
       return {
         success: true,
-        persons: transformedData,
+        persons: rows.map(
+          ([
+            email,
+            firstName,
+            lastNamePrefix,
+            lastName,
+            dateOfBirth,
+            birthCity,
+            birthCountry,
+          ]) => ({
+            email,
+            firstName,
+            lastNamePrefix,
+            lastName,
+            dateOfBirth,
+            birthCity,
+            birthCountry,
+          }),
+        ),
       };
     } catch (error) {
       if (error instanceof ZodError) {
@@ -329,21 +303,12 @@ function SubmitForm({
     undefined,
   );
 
-  // TODO: Fix
-  const parseSuccess = state?.success === true;
-
-  const columns = [
-    "E-mailadres",
-    "Voornaam",
-    "Tussenvoegsels",
-    "Achternaam",
-    "Geboortedatum",
-    "Geboorteplaats",
-    "Geboorteland (indien niet nl)",
-  ];
-
   return (
     <form action={formAction}>
+      <DialogDescription>
+        Er zijn <Strong>{state?.persons?.length}</Strong> personen gevonden.
+        Controleer de geïmporteerde data en klik op "Verder" om door te gaan.
+      </DialogDescription>
       <DialogBody>
         {state?.success === true ? (
           <>
@@ -383,7 +348,6 @@ function SubmitForm({
                 ))}
               </TableBody>
             </Table>
-            <pre>{JSON.stringify(state?.persons, null, 2)}</pre>
           </>
         ) : (
           <>
@@ -396,13 +360,7 @@ function SubmitForm({
                 </TableRow>
               </TableHead>
 
-              {/* TODO: Fix error message 🚨 */}
-              {/* {!!state?.message && (
-                  <ErrorMessage>{state.message}</ErrorMessage>
-              )} */}
-
               <TableBody>
-                {/* TODO: state?.data?.labels */}
                 {data?.labels?.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{item?.label}</TableCell>
@@ -411,10 +369,10 @@ function SubmitForm({
                     <TableCell>
                       <Select
                         name={`include-column-${index}`}
-                        value={item?.label || "Select one"}
+                        defaultValue={item?.label || "Select one"}
                       >
                         <option value="Select one">Select one</option>
-                        {columns.map((column) => (
+                        {Object.keys(COLUMN_MAPPING).map((column) => (
                           <option key={column} value={column}>
                             {column}
                           </option>
@@ -425,7 +383,9 @@ function SubmitForm({
                 ))}
               </TableBody>
             </Table>
-            <pre>{JSON.stringify(data?.labels, null, 2)}</pre>
+            <div className="pt-4">
+              {!!state?.message && <ErrorMessage>{state.message}</ErrorMessage>}
+            </div>
           </>
         )}
       </DialogBody>
