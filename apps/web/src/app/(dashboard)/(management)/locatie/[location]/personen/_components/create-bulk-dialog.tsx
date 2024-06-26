@@ -44,6 +44,7 @@ interface CSVData {
   rows: string[][] | null;
 }
 
+// TODO: Review if are using the values from the mapping
 const COLUMN_MAPPING: Record<string, string> = {
   "E-mailadres": "email",
   Voornaam: "firstName",
@@ -200,18 +201,37 @@ function SubmitForm({
     try {
       const mappingConfig = Object.fromEntries(formData);
 
+      const selectedFields = Object.keys(mappingConfig)
+        .map((key) => mappingConfig[key])
+        .filter((item) => item !== "Select one");
+      console.log("selectedFields", selectedFields);
+
       // Exclude data if "Select one" is selected
-      const selectOneIndices = Object.keys(mappingConfig)
+      const notSelectedIndices = Object.keys(mappingConfig)
         .filter((key) => mappingConfig[key] === "Select one")
+        // @ts-expect-error Fix later
         .map((key) => parseInt(key.split("-").pop()));
 
+      console.log("notSelectedIndices", notSelectedIndices);
+
       const filteredData = csvData?.map((item) =>
-        item.filter((_, index) => !selectOneIndices.includes(index)),
+        item.filter((_, index) => !notSelectedIndices.includes(index)),
       );
 
-      // Check errors!
+      // Validate if columns are correctly pasted
       const count = filteredData?.[0]?.length ?? 0;
       const expectedCount = Object.keys(COLUMN_MAPPING).length;
+
+      const mappingFields = Object.keys(COLUMN_MAPPING);
+      const missingFields = mappingFields.filter(
+        (item) => !selectedFields.includes(item),
+      );
+
+      if (missingFields.length > 0) {
+        throw new Error(
+          `Missing keys in the array: ${missingFields.join(", ")}`,
+        );
+      }
 
       if (count < expectedCount) {
         throw new Error("Je hebt minder kolommen geplakt dan verwacht.");
@@ -221,23 +241,14 @@ function SubmitForm({
         throw new Error("Je hebt te veel kolommen geplakt dan verwacht.");
       }
 
-      // TODO: Check if all columns are selected that are difined in COLUMN_MAPPING
-
       // Sort data so that we can parse it correctly.
-      const newOrder = Object.keys(mappingConfig).map(
-        (key) => mappingConfig[key],
+      const indices = selectedFields.map((columnName) =>
+        Object.keys(COLUMN_MAPPING).findIndex((key) => key === columnName),
       );
-
-      const indices = newOrder
-        .filter((item) => item !== "Select one")
-        .map((columnName) =>
-          Object.keys(COLUMN_MAPPING).findIndex((key) => key === columnName),
-        );
 
       const sortedData = filteredData?.map((row) =>
         indices.map((index) => row[index]),
       );
-      console.log("sortedData", sortedData);
 
       const personRowSchema = z.tuple([
         z.string().trim().toLowerCase().email(),
