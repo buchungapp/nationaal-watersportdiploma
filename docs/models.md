@@ -33,20 +33,22 @@ Models usually originate in the database. They can be retrieved or stored as dat
 
 In the api application the business objects are mapped to and from api objects before they can be used. The same is true for the web application, here the business objects are translated to ui objects before they can be used.
 
+The UI layer uses both the API and core (business) layer. This is because we want to "eat our own dogfood". The UI will use the API layer mostly, and in some rare cases the core.
+
 Diagram:
 
 ```
 -> = read
 
-                              _______
-                              |     |
-______      ____________   -> | API |
-|    |      |          |  /   |_____|
-| DB | ---> | business | /
-|____|      |__________| \    ______
-                          \   |    |
-                           -> | UI |
-                              |____|
+                          _______
+                          |     |
+______      ________   -> | API |-
+|    |      |      |  /   |_____| \
+| DB | ---> | core | /            |  
+|____|      |______| \            \   ______
+                      \            -> |    |
+                       -------------> | UI |
+                                      |____|
 ```
 
 ## Validation
@@ -107,7 +109,7 @@ Another interesting aspect of these models is that tey are exposed to the public
 
 ### UI
 
-The UI, or web interface uses view models to build a user interface. These models are derived from the business models. Their sole purpose is to render in a view. Duplication is ok if this makes rendering easier.
+The UI, or web interface uses view models to build a user interface. These models are derived from the API and core. Their sole purpose is to render in a view. Duplication is ok if this makes rendering easier.
 
 These models should not be accessible publicly, but, because the web UI is publicly available, the models might also be. This needs to be considered when using them.
 
@@ -131,7 +133,7 @@ export type LocationWrite = typeof location1.$inferInsert
 
 It would be wise to first figure out if this is really useful, drizzle allows for flexible queries and that flexibility might be very useful in the business layer. The types are flexible then as well.
 
-### Business
+### Core (business)
 
 For the business models we use zod for validation. We might want to infer types from zod like we might do in the database layer. But then again it might be better to generate interfaces and use them as a contract.
 
