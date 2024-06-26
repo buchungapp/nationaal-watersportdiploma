@@ -1,4 +1,4 @@
-import { listen } from '@nawadi/api'
+import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as yargs from 'yargs'
 import * as application from '../application/index.js'
@@ -59,7 +59,7 @@ async function main(configuration: MainConfiguration) {
         () =>
           core.withDatabase({ pgUri }, async () => {
             const server = application.createApplicationServer()
-            await using listener = await listen(server, { port })
+            await using listener = await api.lib.listen(server, { port })
 
             core.info(`Server started (${listener.port})`)
 
