@@ -62,7 +62,7 @@ export const updateDetails = wrapCommand(
         shortDescription: true,
       })
       .extend({
-        googlePlaceId: z.string().optional(),
+        googlePlaceId: z.string().nullish(),
         socialMedia: z
           .object({
             platform: z.union([
@@ -99,8 +99,12 @@ export const updateDetails = wrapCommand(
           shortDescription: input.shortDescription,
           _metadata: sql`(((${JSON.stringify({
             ...(existing._metadata as JSON),
-            ...(input.googlePlaceId && { googlePlaceId: input.googlePlaceId }),
-            ...(input.socialMedia && { socialMedia: input.socialMedia }),
+            ...(input.googlePlaceId !== undefined && {
+              googlePlaceId: input.googlePlaceId,
+            }),
+            ...(input.socialMedia !== undefined && {
+              socialMedia: input.socialMedia,
+            }),
           })})::jsonb)#>> '{}')::jsonb`,
         })
         .where(eq(s.location.id, input.id))

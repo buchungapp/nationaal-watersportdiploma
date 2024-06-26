@@ -667,13 +667,29 @@ export const getIsActiveInstructor = cache(async () => {
   });
 });
 
-export const updateLocationDetails = async (fields: {
-  id: string;
-  name: string;
-  websiteUrl: string;
-  email: string;
-  shortDescription?: string | null;
-}) => {
+export type SocialPlatform =
+  | "facebook"
+  | "instagram"
+  | "linkedin"
+  | "tiktok"
+  | "whatsapp"
+  | "x"
+  | "youtube";
+
+export const updateLocationDetails = async (
+  id: string,
+  fields: Partial<{
+    name: string;
+    websiteUrl: string;
+    email: string;
+    shortDescription: string | null;
+    googlePlaceId: string | null;
+    socialMedia: {
+      platform: SocialPlatform;
+      url: string;
+    }[];
+  }>,
+) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
 
@@ -688,16 +704,18 @@ export const updateLocationDetails = async (fields: {
       roles: ["location_admin"],
     });
 
-    if (!availableLocations.some((l) => l.locationId === fields.id)) {
+    if (!availableLocations.some((l) => l.locationId === id)) {
       throw new Error("Location not found for person");
     }
 
     await Location.updateDetails({
-      id: fields.id,
+      id,
       name: fields.name,
       websiteUrl: fields.websiteUrl,
       email: fields.email,
       shortDescription: fields.shortDescription,
+      googlePlaceId: fields.googlePlaceId,
+      socialMedia: fields.socialMedia,
     });
 
     return;

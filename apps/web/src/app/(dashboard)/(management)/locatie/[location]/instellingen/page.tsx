@@ -26,6 +26,7 @@ import {
 import { retrieveLocationByHandle } from "~/lib/nwd";
 import { ImageUpload } from "./_components/image-upload";
 import SettingsForm from "./_components/settings-form";
+import SocialsForm from "./_components/socials-form";
 
 function FieldSection({
   label,
@@ -149,6 +150,8 @@ export default async function Page({
         </Text>
 
         <FieldGroup>
+          <Divider soft className="my-10" />
+
           <FieldSection
             label="Standaard"
             description="Het algemene logo van de vaarlocatie."
@@ -182,138 +185,142 @@ export default async function Page({
 
       <Divider className="my-12" />
 
-      <Fieldset>
-        <Legend>
-          <Subheading className="select-none">Socials</Subheading>
-        </Legend>
-        <Text>Beheer de links naar verschillende social media kanalen.</Text>
+      <SocialsForm locationId={location.id}>
+        <Fieldset>
+          <Legend>
+            <Subheading className="select-none">Socials</Subheading>
+          </Legend>
+          <Text>Beheer de links naar verschillende social media kanalen.</Text>
 
-        <FieldGroup>
-          <FieldSection
-            label="Google Place ID"
-            description={
-              <span>
-                Te vinden via{" "}
-                <TextLink
-                  href="https://developers.google.com/maps/documentation/places/web-service/place-id#find-id"
-                  target="_blank"
-                >
-                  developers.google.com
-                </TextLink>
-                . Wordt gebruikt voor het tonen van de locatie op de vaarlocatie
-                kaart.
-              </span>
-            }
-          >
-            <InputGroup>
-              <Google data-slot="icon" />
-              <Input
-                name="googlePlaceId"
-                defaultValue={googlePlaceId ?? undefined}
-                type="text"
-              />
-            </InputGroup>
-          </FieldSection>
+          <FieldGroup>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection
+              label="Google Place ID"
+              description={
+                <span>
+                  Te vinden via{" "}
+                  <TextLink
+                    href="https://developers.google.com/maps/documentation/places/web-service/place-id#find-id"
+                    target="_blank"
+                  >
+                    developers.google.com
+                  </TextLink>
+                  . Wordt gebruikt voor het tonen van de locatie op de
+                  vaarlocatie kaart.
+                </span>
+              }
+            >
+              <InputGroup>
+                <Google data-slot="icon" />
+                <Input
+                  name="googlePlaceId"
+                  defaultValue={googlePlaceId ?? undefined}
+                  type="text"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="Facebook">
-            <InputGroup>
-              <Facebook data-slot="icon" />
-              <Input
-                name="socials-facebook"
-                defaultValue={findSocialMediaUrl("facebook") ?? undefined}
-                type="url"
-                placeholder="https://www.facebook.com/[pagina]"
-              />
-            </InputGroup>
-          </FieldSection>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection label="Facebook">
+              <InputGroup>
+                <Facebook data-slot="icon" />
+                <Input
+                  name="socials-facebook"
+                  defaultValue={findSocialMediaUrl("facebook") ?? undefined}
+                  type="url"
+                  placeholder="https://www.facebook.com/[pagina]"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="Instagram">
-            <InputGroup>
-              <Instagram data-slot="icon" />
-              <Input
-                name="socials-instagram"
-                defaultValue={findSocialMediaUrl("instagram") ?? undefined}
-                type="url"
-                placeholder="https://www.instagram.com/[account]"
-              />
-            </InputGroup>
-          </FieldSection>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection label="Instagram">
+              <InputGroup>
+                <Instagram data-slot="icon" />
+                <Input
+                  name="socials-instagram"
+                  defaultValue={findSocialMediaUrl("instagram") ?? undefined}
+                  type="url"
+                  placeholder="https://www.instagram.com/[account]"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="LinkedIn">
-            <InputGroup>
-              <LinkedIn data-slot="icon" />
-              <Input
-                name="socials-linkedin"
-                defaultValue={findSocialMediaUrl("linkedin") ?? undefined}
-                type="url"
-                placeholder="https://www.linkedin.com/company/[bedrijfsnaam]"
-              />
-            </InputGroup>
-          </FieldSection>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection label="LinkedIn">
+              <InputGroup>
+                <LinkedIn data-slot="icon" />
+                <Input
+                  name="socials-linkedin"
+                  defaultValue={findSocialMediaUrl("linkedin") ?? undefined}
+                  type="url"
+                  placeholder="https://www.linkedin.com/company/[bedrijfsnaam]"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="TikTok">
-            <InputGroup>
-              <TikTok data-slot="icon" />
-              <Input
-                name="socials-tiktok"
-                defaultValue={findSocialMediaUrl("tiktok") ?? undefined}
-                type="url"
-                placeholder="https://www.tiktok.com/@[account]"
-              />
-            </InputGroup>
-          </FieldSection>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection label="TikTok">
+              <InputGroup>
+                <TikTok data-slot="icon" />
+                <Input
+                  name="socials-tiktok"
+                  defaultValue={findSocialMediaUrl("tiktok") ?? undefined}
+                  type="url"
+                  placeholder="https://www.tiktok.com/@[account]"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="WhatsApp">
-            <InputGroup>
-              <Whatsapp data-slot="icon" />
-              <Input
-                name="socials-whatsapp"
-                defaultValue={findSocialMediaUrl("whatsapp") ?? undefined}
-                type="url"
-                placeholder="https://wa.me/[telefoonnummer]"
-              />
-            </InputGroup>
-          </FieldSection>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection label="WhatsApp">
+              <InputGroup>
+                <Whatsapp data-slot="icon" />
+                <Input
+                  name="socials-whatsapp"
+                  defaultValue={findSocialMediaUrl("whatsapp") ?? undefined}
+                  type="url"
+                  placeholder="https://wa.me/[telefoonnummer]"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="X">
-            <InputGroup>
-              <X data-slot="icon" />
-              <Input
-                name="socials-x"
-                defaultValue={findSocialMediaUrl("x") ?? undefined}
-                type="url"
-                placeholder="https://x.com/[account]"
-              />
-            </InputGroup>
-          </FieldSection>
+            <Divider soft className="my-10" />
 
-          <Divider soft className="my-10" />
+            <FieldSection label="X">
+              <InputGroup>
+                <X data-slot="icon" />
+                <Input
+                  name="socials-x"
+                  defaultValue={findSocialMediaUrl("x") ?? undefined}
+                  type="url"
+                  placeholder="https://x.com/[account]"
+                />
+              </InputGroup>
+            </FieldSection>
 
-          <FieldSection label="YouTube">
-            <InputGroup>
-              <YouTube data-slot="icon" />
-              <Input
-                name="socials-youtube"
-                defaultValue={findSocialMediaUrl("youtube") ?? undefined}
-                type="url"
-                placeholder="https://www.youtube.com/[kanaal]"
-              />
-            </InputGroup>
-          </FieldSection>
-        </FieldGroup>
-      </Fieldset>
+            <Divider soft className="my-10" />
+
+            <FieldSection label="YouTube">
+              <InputGroup>
+                <YouTube data-slot="icon" />
+                <Input
+                  name="socials-youtube"
+                  defaultValue={findSocialMediaUrl("youtube") ?? undefined}
+                  type="url"
+                  placeholder="https://www.youtube.com/[kanaal]"
+                />
+              </InputGroup>
+            </FieldSection>
+          </FieldGroup>
+        </Fieldset>
+      </SocialsForm>
     </div>
   );
 }
