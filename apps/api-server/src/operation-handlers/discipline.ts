@@ -50,10 +50,16 @@ export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
   //   handle: disciplineItem.handle,
   // }
 
+  // return {
+  //   parameters: {},
+  //   status: 200,
+  //   contentType: 'application/json',
+  //   entity: () => responseEntity,
+  // }
+
   return {
     parameters: {},
-    status: 200,
-    contentType: 'application/json',
-    entity: () => {},
+    status: 404,
+    contentType: null,
   }
 }
