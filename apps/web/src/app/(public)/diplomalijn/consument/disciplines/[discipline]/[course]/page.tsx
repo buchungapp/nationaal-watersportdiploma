@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { notFound } from "next/navigation";
+import Breadcrumb from "~/app/(public)/_components/breadcrumb";
 import { Weight } from "~/app/_components/weight";
 import {
   listCurriculaByDiscipline,
@@ -45,7 +46,21 @@ export default async function Page({
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-gray-900">{course.title}</h1>
+      <Breadcrumb
+        items={[
+          {
+            label: discipline.title ?? "",
+            href: `/diplomalijn/consument/disciplines/${params.discipline}`,
+          },
+          {
+            label: course.title ?? "",
+            href: `/diplomalijn/consument/disciplines/${params.discipline}/${params.course}`,
+          },
+        ]}
+      />
+      <h1 className="mt-4 text-xl font-semibold text-gray-900">
+        {course.title}
+      </h1>
 
       <div className="mt-8">
         <div>

@@ -8,7 +8,7 @@ export default function Breadcrumb({
   items: { label: string; href: string }[];
 }) {
   return (
-    <nav aria-label="Breadcrumb" className="flex max-w-full">
+    <nav aria-label="Breadcrumb" className="flex max-w-full not-prose">
       <ol className="flex items-center space-x-4 overflow-x-auto">
         {items.map((item, index) => (
           <li key={item.href} className="flex items-center">

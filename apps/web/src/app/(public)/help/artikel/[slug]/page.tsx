@@ -11,8 +11,8 @@ import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { LinkedIn, Whatsapp, Twitter as X } from "~/app/_components/socials";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
+import Breadcrumb from "../../../_components/breadcrumb";
 import { HelpArticle } from "../../_components/article";
-import Breadcrumb from "../../_components/breadcrumb";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {

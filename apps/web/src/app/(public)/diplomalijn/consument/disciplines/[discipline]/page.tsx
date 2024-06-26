@@ -1,3 +1,4 @@
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listCourses, retrieveDisciplineByHandle } from "~/lib/nwd";
@@ -31,15 +32,21 @@ export default async function Page({
         Op deze pagina vind je een overzicht van de cursussen die onder de
         discipline <strong>{discipline.title}</strong> vallen.
       </p>
-      {coursesForDiscipline.map((course) => (
-        <Link
-          href={`/diplomalijn/consument/disciplines/${params.discipline}/${course.handle}`}
-        >
-          <h2 className="text-lg font-semibold text-gray-900">
-            {course.title}
-          </h2>
-        </Link>
-      ))}
+      <ul className="list-none pl-0">
+        {coursesForDiscipline.map((course) => (
+          <li key={course.id} className="pl-0">
+            <Link
+              href={`/diplomalijn/consument/disciplines/${params.discipline}/${course.handle}`}
+              className="flex justify-between items-center"
+            >
+              <h2 className="text-lg/6 font-semibold my-0 text-gray-900">
+                {course.title}
+              </h2>
+              <ChevronRightIcon className="w-6 h-6 text-gray-900" />
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
