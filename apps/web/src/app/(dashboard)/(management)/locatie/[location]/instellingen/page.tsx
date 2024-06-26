@@ -20,7 +20,7 @@ import {
   LinkedIn,
   TikTok,
   Whatsapp,
-  Twitter as X,
+  X,
   YouTube,
 } from "~/app/_components/socials";
 import { retrieveLocationByHandle } from "~/lib/nwd";
