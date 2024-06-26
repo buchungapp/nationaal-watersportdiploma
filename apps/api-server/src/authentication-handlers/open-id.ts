@@ -1,8 +1,8 @@
-import { OpenIdAuthenticationHandler } from '@nawadi/api'
+import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const openId: OpenIdAuthenticationHandler<
+export const openId: api.server.OpenIdAuthenticationHandler<
   application.Authentication
 > = async (token) => {
   const supabase = core.useSupabaseClient()

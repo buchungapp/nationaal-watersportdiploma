@@ -2,7 +2,7 @@ import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const listDisciplines: api.ListDisciplinesOperationHandler<
+export const listDisciplines: api.server.ListDisciplinesOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const disciplineList = await core.Program.Discipline.list()
@@ -20,7 +20,7 @@ export const listDisciplines: api.ListDisciplinesOperationHandler<
   }
 }
 
-export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
+export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const { disciplineKey } = incomingRequest.parameters
@@ -30,9 +30,9 @@ export const retrieveDiscipline: api.RetrieveDisciplineOperationHandler<
     ReturnType<typeof core.Program.Discipline.fromHandle>
   >
 
-  if (api.isComponentsHandle(disciplineKey)) {
+  if (api.validators.isHandle(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
-  } else if (api.isComponentsId(disciplineKey)) {
+  } else if (api.validators.isId(disciplineKey)) {
     disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
   } else {
     throw 'impossible'

@@ -2,7 +2,7 @@ import * as api from '@nawadi/api'
 import * as core from '@nawadi/core'
 import * as application from '../application/index.js'
 
-export const getLocationCertificates: api.GetLocationCertificatesOperationHandler<
+export const getLocationCertificates: api.server.GetLocationCertificatesOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) => {
   const { locationKey } = incomingRequest.parameters
@@ -10,9 +10,9 @@ export const getLocationCertificates: api.GetLocationCertificatesOperationHandle
   // TODO get type from core
   let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
 
-  if (api.isComponentsHandle(locationKey)) {
+  if (api.validators.isHandle(locationKey)) {
     locationItem = await core.Location.fromHandle(locationKey)
-  } else if (api.isComponentsId(locationKey)) {
+  } else if (api.validators.isId(locationKey)) {
     locationItem = await core.Location.fromId(locationKey)
   } else {
     throw 'impossible'
@@ -45,7 +45,7 @@ export const getLocationCertificates: api.GetLocationCertificatesOperationHandle
   }
 }
 
-export const createLocationCertificate: api.CreateLocationCertificateOperationHandler<
+export const createLocationCertificate: api.server.CreateLocationCertificateOperationHandler<
   application.Authentication
 > = async (incomingRequest, authentication) =>
   core.withTransaction(async () => {
@@ -55,9 +55,9 @@ export const createLocationCertificate: api.CreateLocationCertificateOperationHa
     // TODO get type from core
     let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
 
-    if (api.isComponentsHandle(locationKey)) {
+    if (api.validators.isHandle(locationKey)) {
       locationItem = await core.Location.fromHandle(locationKey)
-    } else if (api.isComponentsId(locationKey)) {
+    } else if (api.validators.isId(locationKey)) {
       locationItem = await core.Location.fromId(locationKey)
     } else {
       throw 'impossible'
