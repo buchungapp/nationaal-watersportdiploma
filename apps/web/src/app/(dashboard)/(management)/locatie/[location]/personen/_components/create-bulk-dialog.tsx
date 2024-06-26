@@ -395,7 +395,6 @@ function SubmitForm({
                 {data?.labels?.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell>{item?.label}</TableCell>
-                    {/* TODO: Fix Date */}
                     <TableCell>{String(item?.value)}</TableCell>
                     <TableCell>
                       <Select
