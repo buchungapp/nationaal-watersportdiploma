@@ -54,6 +54,8 @@ const COLUMN_MAPPING = [
   "Geboorteland (indien niet nl)",
 ];
 
+const SELECT_LABEL = "Kies kolom";
+
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
 
@@ -202,16 +204,13 @@ function SubmitForm({
 
       const selectedFields = Object.keys(mappingConfig)
         .map((key) => mappingConfig[key])
-        .filter((item) => item !== "Select one");
-      console.log("selectedFields", selectedFields);
+        .filter((item) => item !== SELECT_LABEL);
 
       // Exclude data if "Select one" is selected
       const notSelectedIndices = Object.keys(mappingConfig)
-        .filter((key) => mappingConfig[key] === "Select one")
+        .filter((key) => mappingConfig[key] === SELECT_LABEL)
         // @ts-expect-error Fix later
         .map((key) => parseInt(key.split("-").pop()));
-
-      console.log("notSelectedIndices", notSelectedIndices);
 
       const filteredData = csvData?.map((item) =>
         item.filter((_, index) => !notSelectedIndices.includes(index)),
@@ -398,9 +397,9 @@ function SubmitForm({
                     <TableCell>
                       <Select
                         name={`include-column-${index}`}
-                        defaultValue={item?.label || "Select one"}
+                        defaultValue={item?.label || SELECT_LABEL}
                       >
-                        <option value="Select one">Select one</option>
+                        <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
                         {COLUMN_MAPPING.map((column) => (
                           <option key={column} value={column}>
                             {column}
