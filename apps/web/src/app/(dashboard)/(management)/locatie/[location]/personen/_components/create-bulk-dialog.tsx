@@ -44,16 +44,15 @@ interface CSVData {
   rows: string[][] | null;
 }
 
-// TODO: Review if are using the values from the mapping
-const COLUMN_MAPPING: Record<string, string> = {
-  "E-mailadres": "email",
-  Voornaam: "firstName",
-  Tussenvoegsels: "lastNamePrefix",
-  Achternaam: "lastName",
-  Geboortedatum: "dateOfBirth",
-  Geboorteplaats: "birthCity",
-  "Geboorteland (indien niet nl)": "birthCountry",
-};
+const COLUMN_MAPPING = [
+  "E-mailadres",
+  "Voornaam",
+  "Tussenvoegsels",
+  "Achternaam",
+  "Geboortedatum",
+  "Geboorteplaats",
+  "Geboorteland (indien niet nl)",
+];
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
@@ -220,9 +219,9 @@ function SubmitForm({
 
       // Validate if columns are correctly pasted
       const count = filteredData?.[0]?.length ?? 0;
-      const expectedCount = Object.keys(COLUMN_MAPPING).length;
+      const expectedCount = COLUMN_MAPPING.length;
 
-      const mappingFields = Object.keys(COLUMN_MAPPING);
+      const mappingFields = COLUMN_MAPPING;
       const missingFields = mappingFields.filter(
         (item) => !selectedFields.includes(item),
       );
@@ -243,7 +242,7 @@ function SubmitForm({
 
       // Sort data so that we can parse it correctly.
       const indices = selectedFields.map((columnName) =>
-        Object.keys(COLUMN_MAPPING).findIndex((key) => key === columnName),
+        COLUMN_MAPPING.findIndex((key) => key === columnName),
       );
 
       const sortedData = filteredData?.map((row) =>
@@ -375,7 +374,7 @@ function SubmitForm({
         <>
           <DialogDescription>
             Voeg de kolommen van je bestand toe aan de juiste velden: <br />{" "}
-            {Object.keys(COLUMN_MAPPING).map((item) => (
+            {COLUMN_MAPPING.map((item) => (
               <span key={item}>
                 <Code>{item}</Code>{" "}
               </span>
@@ -402,7 +401,7 @@ function SubmitForm({
                         defaultValue={item?.label || "Select one"}
                       >
                         <option value="Select one">Select one</option>
-                        {Object.keys(COLUMN_MAPPING).map((column) => (
+                        {COLUMN_MAPPING.map((column) => (
                           <option key={column} value={column}>
                             {column}
                           </option>
