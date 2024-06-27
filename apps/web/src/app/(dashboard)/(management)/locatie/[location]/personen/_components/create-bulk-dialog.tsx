@@ -335,13 +335,9 @@ function SubmitForm({
               <TableHead>
                 <TableRow>
                   <TableHeader />
-                  <TableHeader>E-mailadres</TableHeader>
-                  <TableHeader>Voornaam</TableHeader>
-                  <TableHeader>Tussenvoegsel</TableHeader>
-                  <TableHeader>Achternaam</TableHeader>
-                  <TableHeader>Geboortedatum</TableHeader>
-                  <TableHeader>Geboorteplaats</TableHeader>
-                  <TableHeader>Geboorteland</TableHeader>
+                  {COLUMN_MAPPING.map((item) => (
+                    <TableHeader key={item}>{item}</TableHeader>
+                  ))}
                 </TableRow>
               </TableHead>
 
