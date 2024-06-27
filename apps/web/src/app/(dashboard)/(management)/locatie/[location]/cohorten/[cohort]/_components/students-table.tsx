@@ -1,0 +1,166 @@
+"use client";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import clsx from "clsx";
+import dayjs from "dayjs";
+import { Badge } from "~/app/(dashboard)/_components/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/app/(dashboard)/_components/table";
+import {
+  TableFooter,
+  TableRowSelection,
+} from "~/app/(dashboard)/_components/table-footer";
+import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
+
+type Student = Awaited<
+  ReturnType<typeof listStudentsWithCurriculaByCohortId>
+>[number];
+
+const columnHelper = createColumnHelper<Student>();
+
+const columns = [
+  columnHelper.accessor(
+    (data) =>
+      [data.person.firstName, data.person.lastNamePrefix, data.person.lastName]
+        .filter(Boolean)
+        .join(" "),
+    {
+      header: "Naam",
+      cell: ({ getValue }) => (
+        <span className="font-medium text-zinc-950">{getValue()}</span>
+      ),
+    },
+  ),
+  columnHelper.accessor("person.dateOfBirth", {
+    header: "Leeftijd",
+    cell: ({ getValue }) => {
+      const dateOfBirth = getValue();
+      return dateOfBirth ? (
+        <span>
+          {`${dayjs().diff(dayjs(dateOfBirth), "year")} jr.`}{" "}
+          <span className="text-zinc-500">{`(${dayjs(dateOfBirth).format("DD-MM-YYYY")})`}</span>
+        </span>
+      ) : null;
+    },
+  }),
+  columnHelper.accessor(
+    (data) =>
+      data.studentCurriculum?.program.title ??
+      data.studentCurriculum?.course.title,
+    {
+      header: "Programma",
+    },
+  ),
+  columnHelper.accessor("studentCurriculum.degree.title", {
+    header: "Niveau",
+  }),
+  columnHelper.accessor("studentCurriculum.gearType.title", {
+    header: "Materiaal",
+  }),
+  columnHelper.accessor("tags", {
+    header: "Tags",
+    cell: ({ getValue }) => {
+      return (
+        <div className="flex gap-x-2 items-center">
+          {getValue().map((tag) => (
+            <Badge key={tag}>{tag}</Badge>
+          ))}
+        </div>
+      );
+    },
+  }),
+];
+
+export default function StudentsTable({
+  students,
+  totalItems,
+}: {
+  students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
+  totalItems: number;
+}) {
+  const table = useReactTable({
+    data: students,
+    columns,
+    getRowId: (row) => row.id,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  return (
+    <>
+      <Table
+        className="mt-8 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        dense
+      >
+        <TableHead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHeader
+                  key={header.id}
+                  className={clsx(header.column.columnDef.meta?.align)}
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+                </TableHeader>
+              ))}
+            </TableRow>
+          ))}
+        </TableHead>
+        <TableBody>
+          {table.getRowCount() <= 0 ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="text-center">
+                Geen items gevonden
+              </TableCell>
+            </TableRow>
+          ) : null}
+          {table.getRowModel().rows.map((row) => (
+            <TableRow
+              className={clsx(
+                row.getIsSelected()
+                  ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
+                  : "",
+              )}
+              key={row.id}
+              href={`#TODO`}
+            >
+              {row.getVisibleCells().map((cell, index) => (
+                <TableCell
+                  key={cell.id}
+                  className={clsx(cell.column.columnDef.meta?.align)}
+                  // suppressLinkBehavior={
+                  //   cell.column.columnDef.meta?.suppressLinkBehavior
+                  // }
+                >
+                  {index === 0 && row.getIsSelected() && (
+                    <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
+                  )}
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <TableFooter>
+        <TableRowSelection table={table} totalItems={totalItems} />
+        {/* <TablePagination totalItems={totalItems} /> */}
+      </TableFooter>
+    </>
+  );
+}

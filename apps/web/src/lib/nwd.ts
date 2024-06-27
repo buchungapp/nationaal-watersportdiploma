@@ -562,6 +562,15 @@ export const listCohortsForLocation = cache(async (locationId: string) => {
   });
 });
 
+export const getCohortByHandle = cache(async (handle: string) => {
+  return makeRequest(async () => {
+    // TODO: This needs authorization checks
+    const cohort = await Cohort.byIdOrHandle({ handle });
+
+    return cohort;
+  });
+});
+
 export const createCohort = async ({
   locationId,
   label,
@@ -727,3 +736,11 @@ export const updateLocationDetails = async (
     return;
   });
 };
+
+export const listStudentsWithCurriculaByCohortId = cache(
+  async (cohortId: string) => {
+    return makeRequest(async () => {
+      return await Cohort.listStudentsWithCurricula({ cohortId });
+    });
+  },
+);
