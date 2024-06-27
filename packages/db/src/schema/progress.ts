@@ -6,43 +6,32 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../utils/sql.js'
-import { studentCurriculum } from './certificate.js'
+import { cohortAllocation } from './cohort.js'
 import { curriculumCompetency } from './curriculum.js'
-import { location } from './location.js'
 
-export const studentCompetencyProgress = pgTable(
-  'student_competency_progress',
+export const studentCohortProgress = pgTable(
+  'student_cohort_progress',
   {
-    studentCurriculumId: uuid('student_curriculum_id').notNull(),
+    cohortAllocationId: uuid('cohort_allocation_id').notNull(),
     competencyId: uuid('curriculum_module_competency_id').notNull(),
-    locationId: uuid('location_id').notNull(),
     progress: numeric('progress').notNull(),
     ...timestamps,
   },
   (table) => {
     return {
       pk: primaryKey({
-        columns: [
-          table.studentCurriculumId,
-          table.competencyId,
-          table.locationId,
-        ],
-        name: 'student_competency_progress_pk',
+        columns: [table.cohortAllocationId, table.competencyId],
+        name: 'student_cohort_progress_pkey',
       }),
       studentCurriculumLinkReference: foreignKey({
-        columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.id],
-        name: 'student_curriculum_progress_student_curriculum_link_id_fk',
+        columns: [table.cohortAllocationId],
+        foreignColumns: [cohortAllocation.id],
+        name: 'student_cohort_progress_cohort_allocation_id_fk',
       }),
       competencyReference: foreignKey({
         columns: [table.competencyId],
         foreignColumns: [curriculumCompetency.id],
         name: 'curriculum_competency_competency_id_fk',
-      }),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: 'student_curriculum_progress_location_id_fk',
       }),
     }
   },

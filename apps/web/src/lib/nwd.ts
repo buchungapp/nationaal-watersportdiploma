@@ -291,6 +291,12 @@ export const listCurriculaByProgram = cache(
   },
 );
 
+export const retrieveCurriculumById = cache(async (id: string) => {
+  return makeRequest(async () => {
+    return await Curriculum.getById({ id });
+  });
+});
+
 export const countStartedStudentsForCurriculum = cache(
   async (curriculumId: string) => {
     return makeRequest(async () => {
@@ -562,7 +568,7 @@ export const listCohortsForLocation = cache(async (locationId: string) => {
   });
 });
 
-export const getCohortByHandle = cache(async (handle: string) => {
+export const retrieveCohortByHandle = cache(async (handle: string) => {
   return makeRequest(async () => {
     // TODO: This needs authorization checks
     const cohort = await Cohort.byIdOrHandle({ handle });
@@ -741,6 +747,35 @@ export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
       return await Cohort.listStudentsWithCurricula({ cohortId });
+    });
+  },
+);
+
+export const retrieveStudentAllocationWithCurriculum = cache(
+  async (cohortId: string, allocationId: string) => {
+    return makeRequest(async () => {
+      return await Cohort.retrieveStudentWithCurriculum({
+        cohortId,
+        allocationId,
+      });
+    });
+  },
+);
+
+export const listCompletedCompetenciesByStudentCurriculumId = cache(
+  async (studentCurriculumId: string) => {
+    return makeRequest(async () => {
+      return await Student.Curriculum.listCompletedCompetenciesById({
+        id: studentCurriculumId,
+      });
+    });
+  },
+);
+
+export const listCompetencyProgressInCohortForStudent = cache(
+  async (allocationId: string) => {
+    return makeRequest(async () => {
+      return await Cohort.StudentProgress.byAllocationId({ id: allocationId });
     });
   },
 );

@@ -113,6 +113,27 @@
       "when": 1719430345299,
       "tag": "0015_red_warbound",
       "breakpoints": false
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1719503041413,
+      "tag": "0016_dark_nightmare",
+      "breakpoints": false
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1719503053411,
+      "tag": "0017_powerful_scorpion",
+      "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1719503054125,
+      "tag": "0018_fearless_mother_askani",
+      "breakpoints": false
     }
   ]
 }

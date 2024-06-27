@@ -11,7 +11,7 @@ import { notFound } from "next/navigation";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
-import { getCohortByHandle } from "~/lib/nwd";
+import { retrieveCohortByHandle } from "~/lib/nwd";
 
 dayjs.locale("nl");
 
@@ -22,7 +22,7 @@ export default async function Layout({
   params: { location: string; cohort: string };
   children: React.ReactNode;
 }) {
-  const cohort = await getCohortByHandle(params.cohort);
+  const cohort = await retrieveCohortByHandle(params.cohort);
 
   if (!cohort) {
     notFound();

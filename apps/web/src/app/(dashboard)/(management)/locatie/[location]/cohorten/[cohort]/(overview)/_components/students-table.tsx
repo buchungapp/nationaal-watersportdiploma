@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import { useParams } from "next/navigation";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Table,
@@ -96,6 +97,7 @@ export default function StudentsTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+  const params = useParams();
 
   return (
     <>
@@ -136,7 +138,7 @@ export default function StudentsTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

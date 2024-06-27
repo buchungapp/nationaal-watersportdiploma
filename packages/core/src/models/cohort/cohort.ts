@@ -111,6 +111,9 @@ export const listStudentsWithCurricula = withZod(
           dateOfBirth: s.person.dateOfBirth,
         },
         studentCurriculumId: s.cohortAllocation.studentCurriculumId,
+        curriculum: {
+          id: s.curriculum.id,
+        },
         program: {
           id: s.program.id,
           title: s.program.title,
@@ -167,6 +170,8 @@ export const listStudentsWithCurricula = withZod(
       },
       studentCurriculum: row.studentCurriculumId
         ? {
+            id: row.studentCurriculumId,
+            curriculumId: row.curriculum!.id,
             program: row.program!,
             course: row.course!,
             degree: row.degree!,
@@ -176,5 +181,107 @@ export const listStudentsWithCurricula = withZod(
       createdAt: row.createdAt,
       tags: row.tags,
     }))
+  },
+)
+
+export const retrieveStudentWithCurriculum = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    allocationId: uuidSchema,
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const { id, tags, createdAt } = getTableColumns(s.cohortAllocation)
+
+    const row = await query
+      .select({
+        id,
+        tags,
+        createdAt,
+        person: {
+          id: s.person.id,
+          firstName: s.person.firstName,
+          lastNamePrefix: s.person.lastNamePrefix,
+          lastName: s.person.lastName,
+          dateOfBirth: s.person.dateOfBirth,
+        },
+        studentCurriculumId: s.cohortAllocation.studentCurriculumId,
+        curriculum: {
+          id: s.curriculum.id,
+        },
+        program: {
+          id: s.program.id,
+          title: s.program.title,
+        },
+        course: {
+          id: s.course.id,
+          title: s.course.title,
+        },
+        degree: {
+          id: s.degree.id,
+          title: s.degree.title,
+        },
+        gearType: {
+          id: s.gearType.id,
+          title: s.gearType.title,
+        },
+      })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.actor,
+        and(
+          eq(s.actor.id, s.cohortAllocation.actorId),
+          eq(s.actor.type, 'student'),
+        ),
+      )
+      .innerJoin(s.person, eq(s.person.id, s.actor.personId))
+      .leftJoin(
+        s.studentCurriculum,
+        eq(s.studentCurriculum.id, s.cohortAllocation.studentCurriculumId),
+      )
+      .leftJoin(
+        s.curriculum,
+        eq(s.curriculum.id, s.studentCurriculum.curriculumId),
+      )
+      .leftJoin(s.program, eq(s.program.id, s.curriculum.programId))
+      .leftJoin(s.course, eq(s.course.id, s.program.courseId))
+      .leftJoin(s.degree, eq(s.degree.id, s.program.degreeId))
+      .leftJoin(s.gearType, eq(s.gearType.id, s.studentCurriculum.gearTypeId))
+      .where(
+        and(
+          isNull(s.cohortAllocation.deletedAt),
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          eq(s.cohortAllocation.id, input.allocationId),
+        ),
+      )
+      .then(possibleSingleRow)
+
+    if (!row) {
+      return null
+    }
+
+    return {
+      id: row.id,
+      person: {
+        id: row.person.id,
+        firstName: row.person.firstName,
+        lastNamePrefix: row.person.lastNamePrefix,
+        lastName: row.person.lastName,
+        dateOfBirth: row.person.dateOfBirth,
+      },
+      studentCurriculum: row.studentCurriculumId
+        ? {
+            id: row.studentCurriculumId,
+            curriculumId: row.curriculum!.id,
+            program: row.program!,
+            course: row.course!,
+            degree: row.degree!,
+            gearType: row.gearType!,
+          }
+        : null,
+      createdAt: row.createdAt,
+      tags: row.tags,
+    }
   },
 )
