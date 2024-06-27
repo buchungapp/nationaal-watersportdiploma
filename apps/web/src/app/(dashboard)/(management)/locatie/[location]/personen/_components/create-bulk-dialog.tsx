@@ -384,9 +384,9 @@ function SubmitForm({
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableHeader>Your File Column</TableHeader>
-                  <TableHeader>Your Sample Data</TableHeader>
-                  <TableHeader>Destination Column</TableHeader>
+                  <TableHeader>Uw Bestand Kolom</TableHeader>
+                  <TableHeader>Uw Voorbeeldgegevens</TableHeader>
+                  <TableHeader>Bestemmingskolom</TableHeader>
                 </TableRow>
               </TableHead>
 
