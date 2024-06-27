@@ -38,7 +38,7 @@ export default function SocialsForm({
     <form className={className} action={formAction}>
       {children}
 
-      <div className="mt-6 flex gap-x-2.5 justify-end">
+      <div className="flex justify-end gap-4">
         <Button plain type="reset">
           Reset
         </Button>

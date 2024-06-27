@@ -3,10 +3,8 @@ import type { PropsWithChildren } from "react";
 import React from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
-  Description,
   FieldGroup,
   Fieldset,
-  Label,
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
@@ -42,8 +40,14 @@ function FieldSection({
       className="grid gap-x-8 gap-y-6 sm:grid-cols-2"
     >
       <div className="space-y-1">
-        <Label>{label}</Label>
-        {description ? <Description>{description}</Description> : null}
+        <Headless.Label>
+          <Subheading>{label}</Subheading>
+        </Headless.Label>
+        {description ? (
+          <Headless.Description>
+            <Text>{description}</Text>
+          </Headless.Description>
+        ) : null}
       </div>
       <div>{children}</div>
     </Headless.Field>
@@ -85,7 +89,7 @@ export default async function Page({
         </TextLink>
         .
       </Text>
-      <Divider className="my-10" />
+      <Divider className="mb-10 mt-6" />
 
       <SettingsForm locationId={location.id}>
         <FieldSection
@@ -136,6 +140,8 @@ export default async function Page({
             type="url"
           />
         </FieldSection>
+
+        <Divider soft className="my-10" />
       </SettingsForm>
 
       <Divider className="my-12" />
@@ -320,6 +326,8 @@ export default async function Page({
             </FieldSection>
           </FieldGroup>
         </Fieldset>
+
+        <Divider soft className="my-10" />
       </SocialsForm>
     </div>
   );
