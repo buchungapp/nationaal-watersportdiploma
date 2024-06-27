@@ -51,7 +51,7 @@ const COLUMN_MAPPING = [
   "Achternaam",
   "Geboortedatum",
   "Geboorteplaats",
-  "Geboorteland (indien niet nl)",
+  "Geboorteland",
 ];
 
 const SELECT_LABEL = "Kies kolom";
