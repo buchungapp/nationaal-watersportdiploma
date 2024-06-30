@@ -251,7 +251,9 @@ function CreateDialogClient({
                         )
                         .map((program) => (
                           <ComboboxOption key={program.id} value={program.id}>
-                            <ComboboxLabel>{program.title}</ComboboxLabel>
+                            <ComboboxLabel>
+                              {program.course.title ?? program.title}
+                            </ComboboxLabel>
                           </ComboboxOption>
                         ))}
                     </Combobox>
