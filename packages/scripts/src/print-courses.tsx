@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { Curriculum, Program, withDatabase } from '@nawadi/core'
+import { Course, Curriculum, withDatabase } from '@nawadi/core'
 import {
   Document,
   Font,
@@ -17,40 +17,11 @@ import React, { Fragment, PropsWithChildren } from 'react'
 import { projectRoot } from './utils/root.js'
 
 async function main() {
-  const [allActiveCurricula, allPrograms] = await Promise.all([
-    Curriculum.list(),
-    Program.list(),
+  const [allActiveCurricula, allCourses, allPrograms] = await Promise.all([
+    Curriculum.list({ filter: { onlyCurrentActive: true } }),
+    Course.list(),
+    Course.Program.list(),
   ])
-
-  const perStudy = Object.values(
-    allPrograms.reduce(
-      (acc, program) => {
-        const key = `${program.discipline.id}-${program.categories
-          .map((category) => category.id)
-          .join('-')}`
-
-        if (!acc[key]) {
-          acc[key] = {
-            discipline: program.discipline,
-            categories: program.categories,
-            programs: [],
-          }
-        }
-
-        acc[key]!.programs.push(program)
-
-        return acc
-      },
-      {} as Record<
-        string,
-        {
-          discipline: (typeof allPrograms)[number]['discipline']
-          categories: (typeof allPrograms)[number]['categories']
-          programs: typeof allPrograms
-        }
-      >,
-    ),
-  )
 
   Font.register({
     family: 'Inter',
@@ -535,19 +506,23 @@ async function main() {
       </View>
     )
   }
-  function CoverPage({ study }: { study: (typeof perStudy)[number] }) {
+  function CoverPage({ course }: { course: (typeof allCourses)[number] }) {
+    const programsForCourse = allPrograms.filter(
+      (program) => program.course.id === course.id,
+    )
+
     return (
       <PageLayout bookmark="Voorblad">
         <View>
-          <Text style={coverPageStyles.title}>Opleidingsoverzicht</Text>
+          <Text style={coverPageStyles.title}>Cursusoverzicht</Text>
         </View>
 
         <View style={coverPageStyles.summary}>
           <SummaryRow
             label={'Discipline'}
-            description={study.discipline.title}
+            description={course.discipline.title}
           />
-          {study.categories.map((category) => {
+          {course.categories.map((category) => {
             return (
               <SummaryRow
                 key={category.id}
@@ -558,9 +533,9 @@ async function main() {
           })}
         </View>
 
-        <ProgramsSummary programs={study.programs} />
+        <ProgramsSummary programs={programsForCourse} />
 
-        <ProgramMatrix programs={study.programs} />
+        <ProgramMatrix programs={programsForCourse} />
 
         <Text style={{ marginTop: 40, fontSize: 8, color: 'grey' }}>
           ©️ 2024 Nationaal Watersportdiploma. Alle rechten voorbehouden. Geen
@@ -575,15 +550,19 @@ async function main() {
     )
   }
 
-  const createDocumentPromises = perStudy.map((study) => {
-    const documentName = `${study.discipline.title} ${study.categories.map((c) => c.title).join(' ')}`
+  const createDocumentPromises = allCourses.map((course) => {
+    const documentName = course.title
+
+    const programsForCourse = allPrograms.filter(
+      (program) => program.course.id === course.id,
+    )
 
     return renderToFile(
       <Document>
         {/* Cover page */}
-        <CoverPage study={study} />
+        <CoverPage course={course} />
 
-        {study.programs.map((program) => (
+        {programsForCourse.map((program) => (
           <ProgramPage key={program.id} program={program} />
         ))}
       </Document>,
@@ -591,7 +570,7 @@ async function main() {
         projectRoot,
         '..',
         'generated',
-        'opleidingsoverzicht',
+        'cursusoverzicht',
         `${documentName}.pdf`,
       ),
     )
