@@ -1,5 +1,5 @@
 import { Appsignal } from '@appsignal/nodejs'
-import * as oa42 from 'oa42-appsignal'
+import * as oa42 from '@skiffa/appsignal'
 
 const appsignalPushApiKey = process.env.APPSIGNAL_PUSH_API_KEY
 
