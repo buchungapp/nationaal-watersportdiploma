@@ -100,42 +100,53 @@ export default async function Page({
                   </tr>
                 </thead>
                 <tbody>
-                  {uniqueModules.map((module) => (
-                    <tr key={module.id}>
-                      <td>
-                        <Weight weight={module.weight} />
-                      </td>
-                      <td className="text-gray-900 border-t border-slate-20 whitespace-nowrap">
-                        {module.title}
-                      </td>
-                      {programs.map((program) => {
-                        const curriculum = curricula.find(
-                          (curriculum) =>
-                            curriculum.programId === program.id &&
-                            curriculum.modules.some(
-                              (curriculumModule) =>
-                                curriculumModule.id === module.id,
-                            ),
-                        );
+                  {uniqueModules.map((module) => {
+                    return (
+                      <tr key={module.id}>
+                        <td>
+                          <Weight weight={module.weight} />
+                        </td>
+                        <td className="text-gray-900 border-t border-slate-20 whitespace-nowrap">
+                          {module.title}
+                        </td>
+                        {programs.map((program) => {
+                          const curriculum = curricula.find(
+                            (curriculum) =>
+                              curriculum.programId === program.id &&
+                              curriculum.modules.some(
+                                (curriculumModule) =>
+                                  curriculumModule.id === module.id,
+                              ),
+                          );
 
-                        return (
-                          <td
-                            key={program.id}
-                            className={clsx(
-                              "text-center border-l border-t border-slate-200",
-                              curriculum
-                                ? module.isRequired
-                                  ? "bg-pink-100"
-                                  : "bg-blue-100"
-                                : "bg-slate-100",
-                            )}
-                          >
-                            {curriculum ? (module.isRequired ? "✔" : "❍") : ""}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
+                          const programModule = curriculum?.modules.find(
+                            (curriculumModule) =>
+                              curriculumModule.id === module.id,
+                          );
+
+                          return (
+                            <td
+                              key={program.id}
+                              className={clsx(
+                                "text-center border-l border-t border-slate-200",
+                                programModule
+                                  ? programModule.isRequired
+                                    ? "bg-pink-100"
+                                    : "bg-blue-100"
+                                  : "bg-slate-100",
+                              )}
+                            >
+                              {programModule
+                                ? programModule.isRequired
+                                  ? "✔"
+                                  : "❍"
+                                : ""}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               <div className="text-right flex justify-end mt-4 gap-x-4">
