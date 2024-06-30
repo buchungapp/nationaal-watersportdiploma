@@ -188,20 +188,12 @@ async function main() {
               {...{ bookmark: module.title }}
             >
               <View style={programStyles.moduleTitleSection}>
-                <Text style={programStyles.moduleTitle}>{module.title}</Text>
+                <Text
+                  style={programStyles.moduleTitle}
+                >{`${module.weight}. ${module.title}`}</Text>
               </View>
 
               <View>
-                <ModuleCardRow label="Type">
-                  <Text>
-                    {module.type === 'skill' ? 'Praktijk' : 'Theorie'}
-                  </Text>
-                </ModuleCardRow>
-
-                <ModuleCardRow label="Verplicht">
-                  <Text>{!!module.isRequired ? 'Ja' : 'Nee'}</Text>
-                </ModuleCardRow>
-
                 <ModuleCardRow label="Competenties">
                   <Fragment>
                     {module.competencies.map((competency) => (
@@ -211,7 +203,7 @@ async function main() {
                         wrap={false}
                       >
                         <Text style={programStyles.comptencyTitle}>
-                          {competency.title}
+                          {`${competency.weight}. ${competency.title}`}
                         </Text>
                         <Text style={programStyles.comptencyContent}>
                           {competency.requirement}
@@ -352,7 +344,9 @@ async function main() {
                   backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
                 }}
               >
-                <Text style={programSummaryStyles.title}>{program.title}</Text>
+                <Text style={programSummaryStyles.title}>
+                  {`${program.title ?? program.course.title} ${program.degree.title}`}
+                </Text>
                 <Text style={programSummaryStyles.degree}>
                   {program.degree.title}
                 </Text>
@@ -382,6 +376,7 @@ async function main() {
     },
     index: {
       width: '5%',
+      fontVariantNumeric: 'tabular-nums',
     },
     title: {
       width: '45%',
@@ -470,7 +465,7 @@ async function main() {
               backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
             }}
           >
-            <Text style={programMatrixStyles.index}>{`${index + 1}.`}</Text>
+            <Text style={programMatrixStyles.index}>{`${module.weight}.`}</Text>
             <Text style={programMatrixStyles.title}>{module.title}</Text>
             <Text style={programMatrixStyles.type}>
               {module.type === 'skill' ? 'Praktijk' : 'Theorie'}
@@ -486,7 +481,7 @@ async function main() {
 
               return (
                 <Text key={program.id} style={programMatrixStyles.status}>
-                  {programModule ? (programModule.isRequired ? 'V' : 'O') : '-'}
+                  {programModule ? (programModule.isRequired ? 'S' : 'O') : '-'}
                 </Text>
               )
             })}
@@ -500,7 +495,7 @@ async function main() {
             textAlign: 'right',
           }}
         >
-          <Text>'V' = Verplichte module</Text>
+          <Text>'S' = Standaard module</Text>
           <Text>'O' = Optionele module</Text>
         </View>
       </View>
@@ -518,6 +513,7 @@ async function main() {
         </View>
 
         <View style={coverPageStyles.summary}>
+          <SummaryRow label={'Titel'} description={course.title} />
           <SummaryRow
             label={'Discipline'}
             description={course.discipline.title}
