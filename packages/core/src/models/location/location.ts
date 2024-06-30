@@ -116,19 +116,22 @@ export const list = wrapQuery(
   'listLocations',
   withZod(z.void(), outputSchema.array(), async () => {
     const query = useQuery()
-    const locations = await query.select().from(s.location)
+    const locations = await query
+      .select()
+      .from(s.location)
+      .where(eq(s.location.status, 'active'))
 
-    const uniqueMediaIds = Array.from(
-      new Set(
-        locations
-          .map((row) => [
-            row.logoMediaId,
-            row.squareLogoMediaId,
-            row.certificateMediaId,
-          ])
-          .flat(),
-      ),
-    ).filter((id): id is string => !!id)
+    // const uniqueMediaIds = Array.from(
+    //   new Set(
+    //     locations
+    //       .map((row) => [
+    //         row.logoMediaId,
+    //         row.squareLogoMediaId,
+    //         row.certificateMediaId,
+    //       ])
+    //       .flat(),
+    //   ),
+    // ).filter((id): id is string => !!id)
 
     const allMedia = await Platform.Media.list()
 

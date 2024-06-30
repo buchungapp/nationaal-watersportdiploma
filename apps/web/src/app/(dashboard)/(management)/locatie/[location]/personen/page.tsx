@@ -56,6 +56,7 @@ export default async function Page({
     keys: ["firstName", "lastNamePrefix", "lastName", "email"],
     minMatchCharLength: 2,
     ignoreLocation: true,
+    threshold: 0.3, // Lower threshold for more specific matches
   });
 
   const searchQuery = searchParams?.query
@@ -99,7 +100,7 @@ export default async function Page({
         </Dropdown>
       </div>
 
-      <Table persons={paginatedPersons} totalItems={persons.length} />
+      <Table persons={paginatedPersons} totalItems={searchedPersons.length} />
 
       <Dialogs locationId={location.id} countries={countries} />
     </DialogWrapper>

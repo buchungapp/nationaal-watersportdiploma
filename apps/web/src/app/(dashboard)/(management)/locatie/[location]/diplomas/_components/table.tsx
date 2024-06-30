@@ -105,8 +105,8 @@ const columns = [
       ),
     },
   ),
-  columnHelper.accessor("program.title", {
-    header: "Programma",
+  columnHelper.accessor("program.course.title", {
+    header: "Cursus",
   }),
   columnHelper.accessor("program.degree.title", {
     header: "Niveau",

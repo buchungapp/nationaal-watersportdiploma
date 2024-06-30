@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   jsonb,
+  pgEnum,
   pgTable,
   text,
   uniqueIndex,
@@ -10,6 +11,13 @@ import {
 import { timestamps } from '../utils/sql.js'
 import { media } from './media.js'
 
+export const locationStatus = pgEnum('location_status', [
+  'draft',
+  'active',
+  'hidden',
+  'archived',
+])
+
 export const location = pgTable(
   'location',
   {
@@ -17,6 +25,7 @@ export const location = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
+    status: locationStatus('status').notNull().default('active'),
     handle: text('handle').notNull(),
     name: text('name'),
     // To prevent a circular dependency, we use a function to reference the media table
