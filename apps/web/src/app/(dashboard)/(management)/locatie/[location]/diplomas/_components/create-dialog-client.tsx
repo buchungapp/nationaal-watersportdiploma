@@ -225,10 +225,20 @@ function CreateDialogClient({
                     <Combobox
                       name="program"
                       setQuery={setProgramQuery}
-                      displayValue={(value: string) =>
-                        programs.find((program) => program.id === value)
-                          ?.title ?? ""
-                      }
+                      displayValue={(value: string) => {
+                        const program = programs.find(
+                          (program) => program.id === value,
+                        );
+
+                        if (!program) {
+                          return "";
+                        }
+
+                        return (
+                          program?.title ??
+                          `${program?.course.title} ${program?.degree.title}`
+                        );
+                      }}
                       onChange={(value: unknown) => {
                         if (!(typeof value === "string" || value === null)) {
                           throw new Error("Invalid value for program");
@@ -242,17 +252,22 @@ function CreateDialogClient({
                       invalid={!!state?.errors.curriculumId}
                     >
                       {programs
-                        .filter(
-                          (x) =>
+                        .filter((x) => {
+                          const programTitle =
+                            x.title ?? `${x.course.title} ${x.degree.title}`;
+
+                          return (
                             programQuery.length < 1 ||
-                            x.title
+                            programTitle
                               ?.toLowerCase()
-                              .includes(programQuery.toLowerCase()),
-                        )
+                              .includes(programQuery.toLowerCase())
+                          );
+                        })
                         .map((program) => (
                           <ComboboxOption key={program.id} value={program.id}>
                             <ComboboxLabel>
-                              {program.course.title ?? program.title}
+                              {program.title ??
+                                `${program.course.title} ${program.degree.title}`}
                             </ComboboxLabel>
                           </ComboboxOption>
                         ))}
