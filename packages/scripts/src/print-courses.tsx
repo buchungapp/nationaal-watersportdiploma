@@ -1,6 +1,6 @@
 import 'dotenv/config'
 
-import { Curriculum, Program, withDatabase } from '@nawadi/core'
+import { Course, Curriculum, withDatabase } from '@nawadi/core'
 import {
   Document,
   Font,
@@ -17,40 +17,11 @@ import React, { Fragment, PropsWithChildren } from 'react'
 import { projectRoot } from './utils/root.js'
 
 async function main() {
-  const [allActiveCurricula, allPrograms] = await Promise.all([
-    Curriculum.list(),
-    Program.list(),
+  const [allActiveCurricula, allCourses, allPrograms] = await Promise.all([
+    Curriculum.list({ filter: { onlyCurrentActive: true } }),
+    Course.list(),
+    Course.Program.list(),
   ])
-
-  const perStudy = Object.values(
-    allPrograms.reduce(
-      (acc, program) => {
-        const key = `${program.discipline.id}-${program.categories
-          .map((category) => category.id)
-          .join('-')}`
-
-        if (!acc[key]) {
-          acc[key] = {
-            discipline: program.discipline,
-            categories: program.categories,
-            programs: [],
-          }
-        }
-
-        acc[key]!.programs.push(program)
-
-        return acc
-      },
-      {} as Record<
-        string,
-        {
-          discipline: (typeof allPrograms)[number]['discipline']
-          categories: (typeof allPrograms)[number]['categories']
-          programs: typeof allPrograms
-        }
-      >,
-    ),
-  )
 
   Font.register({
     family: 'Inter',
@@ -217,20 +188,12 @@ async function main() {
               {...{ bookmark: module.title }}
             >
               <View style={programStyles.moduleTitleSection}>
-                <Text style={programStyles.moduleTitle}>{module.title}</Text>
+                <Text
+                  style={programStyles.moduleTitle}
+                >{`${module.weight}. ${module.title}`}</Text>
               </View>
 
               <View>
-                <ModuleCardRow label="Type">
-                  <Text>
-                    {module.type === 'skill' ? 'Praktijk' : 'Theorie'}
-                  </Text>
-                </ModuleCardRow>
-
-                <ModuleCardRow label="Verplicht">
-                  <Text>{!!module.isRequired ? 'Ja' : 'Nee'}</Text>
-                </ModuleCardRow>
-
                 <ModuleCardRow label="Competenties">
                   <Fragment>
                     {module.competencies.map((competency) => (
@@ -240,7 +203,7 @@ async function main() {
                         wrap={false}
                       >
                         <Text style={programStyles.comptencyTitle}>
-                          {competency.title}
+                          {`${competency.weight}. ${competency.title}`}
                         </Text>
                         <Text style={programStyles.comptencyContent}>
                           {competency.requirement}
@@ -381,7 +344,9 @@ async function main() {
                   backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
                 }}
               >
-                <Text style={programSummaryStyles.title}>{program.title}</Text>
+                <Text style={programSummaryStyles.title}>
+                  {`${program.title ?? program.course.title} ${program.degree.title}`}
+                </Text>
                 <Text style={programSummaryStyles.degree}>
                   {program.degree.title}
                 </Text>
@@ -411,6 +376,7 @@ async function main() {
     },
     index: {
       width: '5%',
+      fontVariantNumeric: 'tabular-nums',
     },
     title: {
       width: '45%',
@@ -499,7 +465,7 @@ async function main() {
               backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
             }}
           >
-            <Text style={programMatrixStyles.index}>{`${index + 1}.`}</Text>
+            <Text style={programMatrixStyles.index}>{`${module.weight}.`}</Text>
             <Text style={programMatrixStyles.title}>{module.title}</Text>
             <Text style={programMatrixStyles.type}>
               {module.type === 'skill' ? 'Praktijk' : 'Theorie'}
@@ -515,7 +481,7 @@ async function main() {
 
               return (
                 <Text key={program.id} style={programMatrixStyles.status}>
-                  {programModule ? (programModule.isRequired ? 'V' : 'O') : '-'}
+                  {programModule ? (programModule.isRequired ? 'S' : 'O') : '-'}
                 </Text>
               )
             })}
@@ -529,25 +495,30 @@ async function main() {
             textAlign: 'right',
           }}
         >
-          <Text>'V' = Verplichte module</Text>
+          <Text>'S' = Standaard module</Text>
           <Text>'O' = Optionele module</Text>
         </View>
       </View>
     )
   }
-  function CoverPage({ study }: { study: (typeof perStudy)[number] }) {
+  function CoverPage({ course }: { course: (typeof allCourses)[number] }) {
+    const programsForCourse = allPrograms.filter(
+      (program) => program.course.id === course.id,
+    )
+
     return (
       <PageLayout bookmark="Voorblad">
         <View>
-          <Text style={coverPageStyles.title}>Opleidingsoverzicht</Text>
+          <Text style={coverPageStyles.title}>Cursusoverzicht</Text>
         </View>
 
         <View style={coverPageStyles.summary}>
+          <SummaryRow label={'Titel'} description={course.title} />
           <SummaryRow
             label={'Discipline'}
-            description={study.discipline.title}
+            description={course.discipline.title}
           />
-          {study.categories.map((category) => {
+          {course.categories.map((category) => {
             return (
               <SummaryRow
                 key={category.id}
@@ -558,9 +529,9 @@ async function main() {
           })}
         </View>
 
-        <ProgramsSummary programs={study.programs} />
+        <ProgramsSummary programs={programsForCourse} />
 
-        <ProgramMatrix programs={study.programs} />
+        <ProgramMatrix programs={programsForCourse} />
 
         <Text style={{ marginTop: 40, fontSize: 8, color: 'grey' }}>
           ©️ 2024 Nationaal Watersportdiploma. Alle rechten voorbehouden. Geen
@@ -575,15 +546,19 @@ async function main() {
     )
   }
 
-  const createDocumentPromises = perStudy.map((study) => {
-    const documentName = `${study.discipline.title} ${study.categories.map((c) => c.title).join(' ')}`
+  const createDocumentPromises = allCourses.map((course) => {
+    const documentName = course.title
+
+    const programsForCourse = allPrograms.filter(
+      (program) => program.course.id === course.id,
+    )
 
     return renderToFile(
       <Document>
         {/* Cover page */}
-        <CoverPage study={study} />
+        <CoverPage course={course} />
 
-        {study.programs.map((program) => (
+        {programsForCourse.map((program) => (
           <ProgramPage key={program.id} program={program} />
         ))}
       </Document>,
@@ -591,7 +566,7 @@ async function main() {
         projectRoot,
         '..',
         'generated',
-        'opleidingsoverzicht',
+        'cursusoverzicht',
         `${documentName}.pdf`,
       ),
     )
