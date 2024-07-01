@@ -240,6 +240,10 @@ export default function typographyStyles({ theme }: PluginUtils) {
         "tbody td": {
           verticalAlign: "baseline",
         },
+        "tbody td p": {
+          marginTop: "0",
+          marginBottom: "0",
+        },
         tfoot: {
           borderTopWidth: "1px",
           borderTopColor: "var(--tw-prose-th-borders)",
