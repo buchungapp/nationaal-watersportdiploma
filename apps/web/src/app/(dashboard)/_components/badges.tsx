@@ -23,7 +23,7 @@ export function ModuleRequiredBadge({
 
   return (
     <Badge color={type === "required" ? "red" : "blue"}>
-      {type === "required" ? "Kern" : "Specialisatie"}
+      {type === "required" ? "Kern" : "Keuze"}
     </Badge>
   );
 }

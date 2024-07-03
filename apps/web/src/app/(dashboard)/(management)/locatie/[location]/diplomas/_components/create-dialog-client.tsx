@@ -314,7 +314,7 @@ function CreateDialogClient({
                           ))}
                       </CheckboxGroup>
                       <CheckboxGroup>
-                        <Legend>Specialisatiemodules</Legend>
+                        <Legend>Keuzemodules</Legend>
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => !module.isRequired)

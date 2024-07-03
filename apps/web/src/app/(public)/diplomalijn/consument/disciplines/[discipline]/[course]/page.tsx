@@ -68,8 +68,8 @@ export default async function Page({
           <h2 className="text-gray-700">Moduleoverzicht</h2>
           <p className="text-sm">
             Een overzicht van modules die op verschillende niveaus worden
-            aangeboden, en of deze tot de kern behoren, of specialiserend zijn.
-            Voor meer informatie lees je{" "}
+            aangeboden, en of deze tot de kern behoren, of een keuze zijn voor
+            extra verdieping en/of verbreding. Voor meer informatie lees je{" "}
             <Link href="/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd">
               Hoe is de diplomalijn van het NWD opgebouwd?
             </Link>
@@ -164,7 +164,7 @@ export default async function Page({
                   <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
                     ❍
                   </span>
-                  Specialiserend
+                  Keuze
                 </div>
               </div>
             </div>
