@@ -39,7 +39,7 @@
     "@types/node": "^20.11.19",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "^0.30.7",
-    "oa42-appsignal": "^0.1.11",
+    "@skiffa/appsignal": "^0.2.5",
     "postgres": "^3.4.4",
     "tslib": "^2.6.2",
     "type-fest": "^4.17.0",

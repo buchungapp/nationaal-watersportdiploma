@@ -117,19 +117,27 @@ export default async function Page({
                     ),
                 );
 
+                const programModule = curriculum?.modules.find(
+                  (curriculumModule) => curriculumModule.id === module.id,
+                );
+
                 return (
                   <TableCell
                     key={program.id}
                     className={clsx(
                       "text-center",
-                      curriculum
-                        ? module.isRequired
+                      programModule
+                        ? programModule.isRequired
                           ? "bg-pink-100"
                           : "bg-blue-100"
                         : "bg-gray-100",
                     )}
                   >
-                    {curriculum ? (module.isRequired ? "✔" : "❍") : ""}
+                    {programModule
+                      ? programModule.isRequired
+                        ? "✔"
+                        : "❍"
+                      : ""}
                   </TableCell>
                 );
               })}
