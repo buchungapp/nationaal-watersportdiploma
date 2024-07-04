@@ -481,7 +481,7 @@ async function main() {
 
               return (
                 <Text key={program.id} style={programMatrixStyles.status}>
-                  {programModule ? (programModule.isRequired ? 'K' : 'S') : '-'}
+                  {programModule ? (programModule.isRequired ? 'X' : 'O') : '-'}
                 </Text>
               )
             })}
@@ -495,8 +495,8 @@ async function main() {
             textAlign: 'right',
           }}
         >
-          <Text>'K' = Kernmodule</Text>
-          <Text>'S' = Specialisatiemodule</Text>
+          <Text>'X' = Kernmodule</Text>
+          <Text>'O' = Keuzemodules</Text>
         </View>
       </View>
     )
