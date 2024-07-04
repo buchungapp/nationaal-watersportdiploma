@@ -496,7 +496,7 @@ async function main() {
           }}
         >
           <Text>'X' = Kernmodule</Text>
-          <Text>'O' = Keuzemodules</Text>
+          <Text>'O' = Keuzemodule</Text>
         </View>
       </View>
     )
