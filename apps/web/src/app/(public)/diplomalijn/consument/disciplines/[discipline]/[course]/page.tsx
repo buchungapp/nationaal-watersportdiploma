@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumb from "~/app/(public)/_components/breadcrumb";
 import { Weight } from "~/app/_components/weight";
@@ -67,8 +68,11 @@ export default async function Page({
           <h2 className="text-gray-700">Moduleoverzicht</h2>
           <p className="text-sm">
             Een overzicht van modules die op verschillende niveaus worden
-            aangeboden, en of deze standaard worden aangeboden, of optioneel
-            zijn voor een vaarlocatie om aan te bieden.
+            aangeboden, en of deze tot de kern behoren, of een keuze zijn voor
+            extra verdieping en/of verbreding. Voor meer informatie lees je{" "}
+            <Link href="/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd">
+              Hoe is de diplomalijn van het NWD opgebouwd?
+            </Link>
           </p>
         </div>
 
@@ -154,13 +158,13 @@ export default async function Page({
                   <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
                     ✔
                   </span>
-                  Standaard
+                  Kern
                 </div>
                 <div className="text-sm text-gray-700 mt-2">
                   <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
                     ❍
                   </span>
-                  Optioneel
+                  Keuze
                 </div>
               </div>
             </div>

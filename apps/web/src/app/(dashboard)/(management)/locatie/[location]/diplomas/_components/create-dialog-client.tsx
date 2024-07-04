@@ -296,7 +296,7 @@ function CreateDialogClient({
                   {selectedCurriculum ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 mt-2 gap-x-4">
                       <CheckboxGroup>
-                        <Legend>Verplicht</Legend>
+                        <Legend>Kernmodules</Legend>
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => module.isRequired)
@@ -314,7 +314,7 @@ function CreateDialogClient({
                           ))}
                       </CheckboxGroup>
                       <CheckboxGroup>
-                        <Legend>Optioneel</Legend>
+                        <Legend>Keuzemodules</Legend>
                         {selectedCurriculum.modules
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => !module.isRequired)
