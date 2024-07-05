@@ -1,5 +1,4 @@
 import { ChevronLeftIcon } from "@heroicons/react/16/solid";
-import { Divider } from "@tremor/react";
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -8,6 +7,7 @@ import {
   DescriptionList,
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list";
+import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import { Strong } from "~/app/(dashboard)/_components/text";
@@ -80,6 +80,9 @@ export default async function Page({
             <DescriptionTerm>Cohort</DescriptionTerm>
             <DescriptionDetails>{cohort.label}</DescriptionDetails>
 
+            <DescriptionTerm>Instructeur</DescriptionTerm>
+            <DescriptionDetails></DescriptionDetails>
+
             <DescriptionTerm>Tags</DescriptionTerm>
             <DescriptionDetails>
               <div className="flex gap-x-2 items-center">
@@ -92,18 +95,7 @@ export default async function Page({
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
-          <Subheading>
-            {allocation.studentCurriculum ? (
-              <span>
-                {allocation.studentCurriculum.program.title ??
-                  `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
-                <span className="text-gray-400 font-normal mx-1.5">|</span>
-                {allocation.studentCurriculum.gearType.title}
-              </span>
-            ) : (
-              "Start een programma"
-            )}
-          </Subheading>
+          <Subheading>Cursuskaart</Subheading>
           <Divider className="mt-4" />
           <CourseCard cohortId={cohort.id} cohortAllocationId={allocation.id} />
         </div>

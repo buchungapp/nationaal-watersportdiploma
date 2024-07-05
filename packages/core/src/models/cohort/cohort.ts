@@ -116,18 +116,27 @@ export const listStudentsWithCurricula = withZod(
         },
         program: {
           id: s.program.id,
+          handle: s.program.handle,
           title: s.program.title,
         },
         course: {
           id: s.course.id,
+          handle: s.course.handle,
           title: s.course.title,
         },
         degree: {
           id: s.degree.id,
+          handle: s.degree.handle,
           title: s.degree.title,
+        },
+        discipline: {
+          id: s.discipline.id,
+          handle: s.discipline.handle,
+          title: s.discipline.title,
         },
         gearType: {
           id: s.gearType.id,
+          handle: s.gearType.handle,
           title: s.gearType.title,
         },
       })
@@ -151,6 +160,7 @@ export const listStudentsWithCurricula = withZod(
       .leftJoin(s.program, eq(s.program.id, s.curriculum.programId))
       .leftJoin(s.course, eq(s.course.id, s.program.courseId))
       .leftJoin(s.degree, eq(s.degree.id, s.program.degreeId))
+      .leftJoin(s.discipline, eq(s.discipline.id, s.course.disciplineId))
       .leftJoin(s.gearType, eq(s.gearType.id, s.studentCurriculum.gearTypeId))
       .where(
         and(
@@ -175,6 +185,7 @@ export const listStudentsWithCurricula = withZod(
             program: row.program!,
             course: row.course!,
             degree: row.degree!,
+            discipline: row.discipline!,
             gearType: row.gearType!,
           }
         : null,
@@ -212,18 +223,27 @@ export const retrieveStudentWithCurriculum = withZod(
         },
         program: {
           id: s.program.id,
+          handle: s.program.handle,
           title: s.program.title,
         },
         course: {
           id: s.course.id,
+          handle: s.course.handle,
           title: s.course.title,
         },
         degree: {
           id: s.degree.id,
+          handle: s.degree.handle,
           title: s.degree.title,
+        },
+        discipline: {
+          id: s.discipline.id,
+          handle: s.discipline.handle,
+          title: s.discipline.title,
         },
         gearType: {
           id: s.gearType.id,
+          handle: s.gearType.handle,
           title: s.gearType.title,
         },
       })
@@ -247,6 +267,7 @@ export const retrieveStudentWithCurriculum = withZod(
       .leftJoin(s.program, eq(s.program.id, s.curriculum.programId))
       .leftJoin(s.course, eq(s.course.id, s.program.courseId))
       .leftJoin(s.degree, eq(s.degree.id, s.program.degreeId))
+      .leftJoin(s.discipline, eq(s.discipline.id, s.course.disciplineId))
       .leftJoin(s.gearType, eq(s.gearType.id, s.studentCurriculum.gearTypeId))
       .where(
         and(
@@ -277,6 +298,7 @@ export const retrieveStudentWithCurriculum = withZod(
             program: row.program!,
             course: row.course!,
             degree: row.degree!,
+            discipline: row.discipline!,
             gearType: row.gearType!,
           }
         : null,

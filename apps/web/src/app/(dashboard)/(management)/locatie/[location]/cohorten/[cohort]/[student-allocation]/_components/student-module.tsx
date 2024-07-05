@@ -119,10 +119,8 @@ export function Module({
           <CheckboxGroup role="group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-x-2">
-                <DisclosureButton>
-                  <Button plain>
-                    {panelOpen ? <MinusIcon /> : <PlusIcon />}
-                  </Button>
+                <DisclosureButton as={Button} plain>
+                  {panelOpen ? <MinusIcon /> : <PlusIcon />}
                 </DisclosureButton>
 
                 <CourseCardCheckbox
@@ -168,64 +166,8 @@ export function Module({
               </div>
             </div>
 
-            <DisclosurePanel
-              as="dl"
-              className="mt-2 space-y-1 pl-[52px] sm:pl-11"
-            >
-              {module.competencies.map((competency) => {
-                const isCompletedInPreviousCertification =
-                  completedCompetencies.includes(competency.id);
-
-                const competencyProgress =
-                  optimisticProgress.find((cp) => cp.id === competency.id)
-                    ?.progress ?? 0;
-
-                return (
-                  <CourseCardCheckbox
-                    key={competency.id}
-                    disabled={isCompletedInPreviousCertification}
-                    checked={
-                      isCompletedInPreviousCertification ||
-                      competencyProgress > 0
-                    }
-                    indeterminate={
-                      !isCompletedInPreviousCertification &&
-                      competencyProgress > 0 &&
-                      competencyProgress < 100
-                    }
-                    setCompleted={async (completed) => {
-                      setOptimisticProgress([
-                        {
-                          id: competency.id,
-                          progress: completed ? 100 : 0,
-                        },
-                      ]);
-
-                      await updateSingleCompetencyProgress({
-                        cohortAllocationId,
-                        competencyId: competency.id,
-                        progress: completed ? 100 : 0,
-                      }).catch(() => {
-                        toast.error("Er is iets misgegaan.");
-                      });
-
-                      return;
-                    }}
-                  >
-                    <div className="flex gap-x-2">
-                      <Weight weight={competency.weight} />
-                      <Label>{competency.title}</Label>
-                    </div>
-                    {showRequirements ? (
-                      <Description className="text-justify">
-                        {competency.requirement}
-                      </Description>
-                    ) : null}
-                  </CourseCardCheckbox>
-                );
-              })}
-
-              <div className="flex justify-end">
+            <DisclosurePanel className="mt-2 pl-[52px] sm:pl-11">
+              <div className="flex">
                 <SwitchField>
                   <Label>Toon eisen</Label>
                   <Switch
@@ -234,6 +176,61 @@ export function Module({
                   />
                 </SwitchField>
               </div>
+
+              <dl className="space-y-1 mt-4">
+                {module.competencies.map((competency) => {
+                  const isCompletedInPreviousCertification =
+                    completedCompetencies.includes(competency.id);
+
+                  const competencyProgress =
+                    optimisticProgress.find((cp) => cp.id === competency.id)
+                      ?.progress ?? 0;
+
+                  return (
+                    <CourseCardCheckbox
+                      key={competency.id}
+                      disabled={isCompletedInPreviousCertification}
+                      checked={
+                        isCompletedInPreviousCertification ||
+                        competencyProgress > 0
+                      }
+                      indeterminate={
+                        !isCompletedInPreviousCertification &&
+                        competencyProgress > 0 &&
+                        competencyProgress < 100
+                      }
+                      setCompleted={async (completed) => {
+                        setOptimisticProgress([
+                          {
+                            id: competency.id,
+                            progress: completed ? 100 : 0,
+                          },
+                        ]);
+
+                        await updateSingleCompetencyProgress({
+                          cohortAllocationId,
+                          competencyId: competency.id,
+                          progress: completed ? 100 : 0,
+                        }).catch(() => {
+                          toast.error("Er is iets misgegaan.");
+                        });
+
+                        return;
+                      }}
+                    >
+                      <div className="flex gap-x-2">
+                        <Weight weight={competency.weight} />
+                        <Label>{competency.title}</Label>
+                      </div>
+                      {showRequirements ? (
+                        <Description className="text-justify">
+                          {competency.requirement}
+                        </Description>
+                      ) : null}
+                    </CourseCardCheckbox>
+                  );
+                })}
+              </dl>
             </DisclosurePanel>
           </CheckboxGroup>
         </>
