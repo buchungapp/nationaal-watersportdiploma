@@ -1,5 +1,6 @@
 import {
   foreignKey,
+  index,
   numeric,
   pgTable,
   primaryKey,
@@ -9,13 +10,16 @@ import { timestamps } from '../utils/sql.js'
 import { cohortAllocation } from './cohort.js'
 import { curriculumCompetency } from './curriculum.js'
 
+const { createdAt } = timestamps
+
 export const studentCohortProgress = pgTable(
   'student_cohort_progress',
   {
     cohortAllocationId: uuid('cohort_allocation_id').notNull(),
     competencyId: uuid('curriculum_module_competency_id').notNull(),
     progress: numeric('progress').notNull(),
-    ...timestamps,
+    createdAt,
+    createdBy: uuid('created_by').notNull(),
   },
   (table) => {
     return {
@@ -33,6 +37,11 @@ export const studentCohortProgress = pgTable(
         foreignColumns: [curriculumCompetency.id],
         name: 'curriculum_competency_competency_id_fk',
       }),
+      cohortAllocationIdIdx: index('cohort_allocation_id_idx').on(
+        table.cohortAllocationId,
+        table.createdAt.desc(),
+        table.competencyId,
+      ),
     }
   },
 )
