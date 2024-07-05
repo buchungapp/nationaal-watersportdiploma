@@ -61,6 +61,7 @@
     "slugify": "^1.6.6",
     "sonner": "^1.4.41",
     "svg-to-pdfkit": "^0.1.8",
+    "swr": "2.2.6-beta.4",
     "tailwind-merge": "^2.2.1",
     "use-debounce": "^10.0.1",
     "zod": "^3.22.4"

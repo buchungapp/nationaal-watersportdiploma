@@ -66,7 +66,7 @@ export default async function Program({
         }
         size="xs"
       >
-        <h4 className="font-medium text-sm mt-4">Beschikbaar materiaal</h4>
+        <h4 className="font-medium text-sm mt-4">Beschikbare vaartuigen</h4>
         <ul className="columns-2 list-none not-prose mt-1">
           {gearTypes.map((gearType) => (
             <li key={gearType.id}>

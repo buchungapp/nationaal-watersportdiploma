@@ -274,7 +274,7 @@ function CreateDialogClient({
                     </Combobox>
                   </Field>
                   <Field>
-                    <Label>Materiaal</Label>
+                    <Label>Vaartuig</Label>
                     <Listbox
                       name="gearTypeId"
                       disabled={!selectedProgram}

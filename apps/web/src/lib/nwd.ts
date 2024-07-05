@@ -1,3 +1,5 @@
+"use server";
+
 import {
   Certificate,
   Cohort,
@@ -383,6 +385,39 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
     return persons;
   });
 });
+
+export const listPersonsForLocationByRole = cache(
+  async (
+    locationId: string,
+    role: "student" | "instructor" | "location_admin",
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      const person = extractPerson(user);
+
+      if (!person) {
+        throw new Error("Person not found for user");
+      }
+
+      const availableLocations = await User.Person.listLocationsByRole({
+        personId: person.id,
+        roles: ["location_admin"],
+      });
+
+      if (!availableLocations.some((l) => l.locationId === locationId)) {
+        throw new Error("Location not found for person");
+      }
+
+      const persons = await Location.Person.list({
+        locationId,
+        filter: { type: role },
+      });
+
+      return persons;
+    });
+  },
+);
 
 export const listLocationsForPerson = cache(async (personId?: string) => {
   return makeRequest(async () => {
@@ -815,3 +850,38 @@ export const updateCompetencyProgress = cache(
     });
   },
 );
+
+export async function addStudentToCohortByPersonId({
+  locationId,
+  cohortId,
+  personId,
+}: {
+  locationId: string;
+  cohortId: string;
+  personId: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    const actor = await Location.Person.getActorByPersonIdAndType({
+      locationId,
+      actorType: "student",
+      personId,
+    });
+
+    if (!actor) {
+      throw new Error("No actor found");
+    }
+
+    return await Cohort.Allocation.create({
+      cohortId,
+      actorId: actor.id,
+    });
+  });
+}

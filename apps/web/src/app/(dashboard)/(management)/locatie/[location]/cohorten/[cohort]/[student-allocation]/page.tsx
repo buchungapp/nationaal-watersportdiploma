@@ -86,7 +86,7 @@ export default async function Page({
             <DescriptionTerm>Tags</DescriptionTerm>
             <DescriptionDetails>
               {/* <AllocationTags /> */}
-              <div className="flex gap-x-2 items-center">
+              <div className="flex flex-wrap gap-y-2.5 gap-x-2 items-center">
                 {allocation.tags.map((tag) => (
                   <Badge key={tag}>{tag}</Badge>
                 ))}

@@ -47,12 +47,9 @@ const columns = [
     header: "Leeftijd",
     cell: ({ getValue }) => {
       const dateOfBirth = getValue();
-      return dateOfBirth ? (
-        <span>
-          {`${dayjs().diff(dayjs(dateOfBirth), "year")} jr.`}{" "}
-          <span className="text-zinc-500">{`(${dayjs(dateOfBirth).format("DD-MM-YYYY")})`}</span>
-        </span>
-      ) : null;
+      return dateOfBirth
+        ? `${dayjs().diff(dayjs(dateOfBirth), "year")} jr.`
+        : null;
     },
   }),
   columnHelper.accessor(
@@ -67,7 +64,10 @@ const columns = [
     header: "Niveau",
   }),
   columnHelper.accessor("studentCurriculum.gearType.title", {
-    header: "Materiaal",
+    header: "Vaartuig",
+  }),
+  columnHelper.accessor((row) => null, {
+    header: "Instructeur",
   }),
   columnHelper.accessor("tags", {
     header: "Tags",
