@@ -134,6 +134,20 @@
       "when": 1719503054125,
       "tag": "0018_fearless_mother_askani",
       "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1720173609869,
+      "tag": "0019_red_northstar",
+      "breakpoints": false
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1720177682772,
+      "tag": "0020_cooing_firebrand",
+      "breakpoints": false
     }
   ]
 }

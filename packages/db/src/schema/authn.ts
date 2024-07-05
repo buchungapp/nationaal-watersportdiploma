@@ -63,7 +63,7 @@ export const tokenUsage = pgTable(
         name: 'token_usage_token_id_fk',
       }),
       // Index on token_id and used_at for fast lookups
-      idxUsage: index().on(table.tokenId, table.usedAt).desc(),
+      idxUsage: index().on(table.tokenId, table.usedAt.desc()),
     }
   },
 )

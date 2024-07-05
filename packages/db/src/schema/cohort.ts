@@ -59,6 +59,7 @@ export const cohortAllocation = pgTable(
     cohortId: uuid('cohort_id').notNull(),
     actorId: uuid('actor_id').notNull(),
     studentCurriculumId: uuid('student_curriculum_id'),
+    instructorId: uuid('instructor_id'),
     tags: text('tags')
       .array()
       .notNull()
@@ -87,6 +88,11 @@ export const cohortAllocation = pgTable(
         columns: [table.studentCurriculumId],
         foreignColumns: [studentCurriculum.id],
         name: 'cohort_allocation_student_curriculum_id_fk',
+      }),
+      instructorReference: foreignKey({
+        columns: [table.actorId],
+        foreignColumns: [actor.id],
+        name: 'cohort_allocation_instructor_id_fk',
       }),
     }
   },

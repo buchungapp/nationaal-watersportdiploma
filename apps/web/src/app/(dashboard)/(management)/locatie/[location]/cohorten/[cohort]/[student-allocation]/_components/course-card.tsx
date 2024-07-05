@@ -60,10 +60,11 @@ export async function CourseCard({
               module={module}
               completedCompetencies={completedCompetencyIds}
               competenciesProgress={competencyProgressMap}
+              cohortAllocationId={cohortAllocationId}
             />
 
             {index < curriculum.modules.length - 1 ? (
-              <Divider soft className="my-6" />
+              <Divider soft className="my-2.5" />
             ) : null}
           </React.Fragment>
         );

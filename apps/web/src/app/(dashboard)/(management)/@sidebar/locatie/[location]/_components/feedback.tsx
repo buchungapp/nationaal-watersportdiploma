@@ -41,7 +41,7 @@ import {
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { z } from "zod";
-import { submitProductFeedback } from "~/lib/nwd";
+import { productFeedbackAction } from "~/app/(dashboard)/_actions/feedback";
 
 const feedbackLabels = {
   bug: {
@@ -101,7 +101,7 @@ function FeedbackTab({
         urgent: formData.get("urgent") === "on",
       });
 
-      await submitProductFeedback({
+      await productFeedbackAction({
         type: type === "feedback" ? "product-feedback" : type,
         priority: !!urgent ? "high" : "normal",
         message: comment,

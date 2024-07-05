@@ -1,5 +1,3 @@
-"use server";
-
 import {
   Certificate,
   Cohort,
@@ -776,6 +774,44 @@ export const listCompetencyProgressInCohortForStudent = cache(
   async (allocationId: string) => {
     return makeRequest(async () => {
       return await Cohort.StudentProgress.byAllocationId({ id: allocationId });
+    });
+  },
+);
+
+export const updateCompetencyProgress = cache(
+  async ({
+    cohortAllocationId,
+    competencyProgress,
+  }: {
+    cohortAllocationId: string;
+    competencyProgress: {
+      competencyId: string;
+      progress: number;
+    }[];
+  }) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+
+      const authPerson = extractPerson(authUser);
+
+      if (!authPerson) {
+        throw new Error("Person not found for user");
+      }
+
+      // const availableLocations = await User.Person.listLocationsByRole({
+      //   personId: authPerson.id,
+      //   roles: ["location_admin", "instructor"],
+      // });
+
+      // TODO: Check if the person is an instructor for the cohort
+
+      await Cohort.StudentProgress.upsertProgress({
+        cohortAllocationId,
+        competencyProgress,
+        createdBy: authPerson.id,
+      });
+
+      return;
     });
   },
 );

@@ -51,10 +51,10 @@ export default async function Page({
 
       <div className="mx-auto mt-8 grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         <div className="lg:col-start-3 lg:row-end-1">
-          <Subheading>Samenvatting</Subheading>
+          <Subheading>Cursist</Subheading>
           <Divider className="mt-4" />
           <DescriptionList>
-            <DescriptionTerm>Cursist</DescriptionTerm>
+            <DescriptionTerm>Naam</DescriptionTerm>
             <DescriptionDetails>
               <Strong>
                 {[
@@ -92,15 +92,26 @@ export default async function Page({
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
-          <Subheading>Cursus</Subheading>
+          <Subheading>
+            {allocation.studentCurriculum ? (
+              <span>
+                {allocation.studentCurriculum.program.title ??
+                  `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
+                <span className="text-gray-400 font-normal mx-1.5">|</span>
+                {allocation.studentCurriculum.gearType.title}
+              </span>
+            ) : (
+              "Start een programma"
+            )}
+          </Subheading>
           <Divider className="mt-4" />
           <CourseCard cohortId={cohort.id} cohortAllocationId={allocation.id} />
         </div>
 
-        <div className="lg:col-start-3">
+        {/* <div className="lg:col-start-3">
           <Subheading>Tijdlijn</Subheading>
           <Divider className="mt-4" />
-        </div>
+        </div> */}
       </div>
     </>
   );
