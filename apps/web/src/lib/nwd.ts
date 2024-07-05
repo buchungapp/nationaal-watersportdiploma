@@ -939,3 +939,57 @@ export async function claimStudentsInCohort(
     });
   });
 }
+
+export const enrollStudentsInCurriculumForCohort = async ({
+  curriculumId,
+  gearTypeId,
+  cohortId,
+  students,
+}: {
+  curriculumId: string;
+  gearTypeId: string;
+  cohortId: string;
+  students: {
+    allocationId: string;
+    personId: string;
+  }[];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      const authPerson = extractPerson(authUser);
+
+      // TODO: Update authorization
+
+      // if (!authPerson) {
+      //   throw new Error("Person not found for user");
+      // }
+
+      // const availableLocations = await User.Person.listLocationsByRole({
+      //   personId: authPerson.id,
+      //   roles: ["location_admin"],
+      // });
+
+      // if (!availableLocations.some((l) => l.locationId === locationId)) {
+      //   throw new Error("Location not found for person");
+      // }
+
+      for await (const student of students) {
+        const studentCurriculum = await Student.Curriculum.findOrEnroll({
+          curriculumId,
+          gearTypeId,
+          personId: student.personId,
+        });
+
+        await Cohort.Allocation.setStudentCurriculum({
+          cohortId,
+          studentAllocationId: student.allocationId,
+          studentCurriculumId: studentCurriculum.id,
+        });
+      }
+
+      return;
+    });
+  });
+};

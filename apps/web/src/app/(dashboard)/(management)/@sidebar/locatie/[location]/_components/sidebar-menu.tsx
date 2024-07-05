@@ -12,13 +12,11 @@ import {
   SidebarItem,
   SidebarLabel,
   SidebarSection,
-} from "../../../../../_components/sidebar";
+} from "~/app/(dashboard)/_components/sidebar";
 
 export function LocationSidebarMenu() {
   const segments = useSelectedLayoutSegments();
   const params = useParams();
-
-  const lastSegment = segments.at(-1);
 
   return (
     <SidebarSection>
@@ -27,25 +25,25 @@ export function LocationSidebarMenu() {
           name: "Cohorten",
           href: `/locatie/${params.location}/cohorten`,
           Icon: CalendarDaysIcon,
-          current: lastSegment === "cohorten",
+          current: segments[0] === "cohorten",
         },
         {
           name: "Personen",
           href: `/locatie/${params.location}/personen`,
           Icon: UserGroupIcon,
-          current: lastSegment === "personen",
+          current: segments[0] === "personen",
         },
         {
           name: "Diploma's",
           href: `/locatie/${params.location}/diplomas`,
           Icon: AcademicCapIcon,
-          current: lastSegment === "diplomas",
+          current: segments[0] === "diplomas",
         },
         {
           name: "Inzichten",
           href: `/locatie/${params.location}/inzichten`,
           Icon: ChartBarIcon,
-          current: lastSegment === "inzichten",
+          current: segments[0] === "inzichten",
         },
       ].map((item) => (
         <SidebarItem key={item.name} href={item.href} current={item.current}>

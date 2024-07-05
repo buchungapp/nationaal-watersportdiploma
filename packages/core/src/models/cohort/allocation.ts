@@ -268,3 +268,37 @@ export const setInstructorForStudent = withZod(
       .returning({ id: s.cohortAllocation.id })
   },
 )
+
+export const setStudentCurriculum = withZod(
+  z.object({
+    studentCurriculumId: uuidSchema,
+    cohortId: uuidSchema,
+    studentAllocationId: uuidSchema,
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .update(s.cohortAllocation)
+      .set({ studentCurriculumId: input.studentCurriculumId })
+      .where(
+        and(
+          eq(s.cohortAllocation.id, input.studentAllocationId),
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.actor)
+              .where(
+                and(
+                  eq(s.actor.id, s.cohortAllocation.actorId),
+                  isNull(s.actor.deletedAt),
+                  eq(s.actor.type, 'student'),
+                ),
+              ),
+          ),
+        ),
+      )
+      .returning({ id: s.cohortAllocation.id })
+  },
+)

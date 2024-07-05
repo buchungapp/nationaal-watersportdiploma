@@ -1,11 +1,13 @@
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import type { Row } from "@tanstack/react-table";
 import { useState } from "react";
-import { useFormState as useActionState } from "react-dom";
+import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
 
+import { useRouter } from "next/navigation";
+import { z } from "zod";
 import {
   Combobox,
   ComboboxLabel,
@@ -31,6 +33,7 @@ import {
 } from "~/app/(dashboard)/_components/listbox";
 import {
   claimStudentsInCohort,
+  enrollStudentsInCurriculumForCohort,
   isInstructorInCohort,
   listCurriculaByProgram,
   listGearTypesByCurriculum,
@@ -97,24 +100,48 @@ function StartProgramDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (prevState: unknown, formData: FormData) => {
-    // const result = await createCertificate(
-    //   locationId,
-    //   selectedCurriculum?.id ?? "",
-    //   prevState,
-    //   formData,
-    // );
-    // if (result.message === "Success") {
-    //   toast.success("Diploma toegevoegd");
-    //   setIsOpen(false);
-    // }
-    // return result;
+  const router = useRouter();
+
+  const submit = async (_prevState: unknown, formData: FormData) => {
+    const programId = formData.get("program");
+    const gearTypeId = formData.get("gearTypeId");
+    const curriculumId = formData.get("curriculumId");
+
+    try {
+      const validated = z
+        .object({
+          program: z.string().uuid(),
+          gearTypeId: z.string().uuid(),
+          curriculumId: z.string().uuid(),
+        })
+        .parse({
+          program: programId,
+          gearTypeId: gearTypeId,
+          curriculumId: curriculumId,
+        });
+
+      await enrollStudentsInCurriculumForCohort({
+        cohortId,
+        curriculumId: validated.curriculumId,
+        gearTypeId: validated.gearTypeId,
+        students: rows.map((row) => ({
+          allocationId: row.original.id,
+          personId: row.original.person.id,
+        })),
+      });
+
+      router.refresh();
+      toast.success("Programma's gestart");
+      setIsOpen(false);
+    } catch (error) {
+      toast.error("Er is iets misgegaan");
+    }
   };
 
   const [programQuery, setProgramQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
-  const [state, formAction] = useActionState(submit, undefined);
+  const [_state, formAction] = useActionState(submit, undefined);
 
   const { data: programs } = useSWR("allPrograms", listPrograms);
   const { data: activeCurriculumForProgram } = useSWR(
@@ -151,7 +178,13 @@ function StartProgramDialog({
         <DialogTitle>Start programma</DialogTitle>
         <form action={formAction}>
           <DialogBody>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+            {/* Hidden input for curriculumId */}
+            <input
+              type="hidden"
+              name="curriculumId"
+              value={activeCurriculumForProgram?.curriculum?.id ?? ""}
+            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
               <Field>
                 <Label>Programma</Label>
                 {/* TODO: this combobox is temporary used should be from catalyst */}
@@ -179,7 +212,7 @@ function StartProgramDialog({
 
                     setSelectedProgram(value);
                   }}
-                  invalid={!!state?.errors.curriculumId}
+                  // invalid={!!state?.errors.curriculumId}
                 >
                   {programs
                     .filter((x) => {
@@ -213,7 +246,7 @@ function StartProgramDialog({
                       !!activeCurriculumForProgram?.curriculum
                     )
                   }
-                  invalid={!!state?.errors.gearTypeId}
+                  // invalid={!!state?.errors.gearTypeId}
                 >
                   {activeCurriculumForProgram?.gearTypes.map((gearType) => (
                     <ListboxOption key={gearType.id} value={gearType.id}>
@@ -228,11 +261,20 @@ function StartProgramDialog({
             <Button plain onClick={() => setIsOpen(false)}>
               Annuleren
             </Button>
-            <Button onClick={() => setIsOpen(false)}>Starten</Button>
+            <ProgramSubmitButton />
           </DialogActions>
         </form>
       </Dialog>
     </>
+  );
+}
+
+function ProgramSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button color="branding-dark" disabled={pending} type="submit">
+      Starten
+    </Button>
   );
 }
 
