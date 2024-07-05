@@ -1,10 +1,8 @@
 {
-  "id": "cb3480e2-615d-4ef2-82db-04cd025886f5",
-  "prevId": "5a0eb5bc-6d27-4dc8-aa09-4a9597016eda",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "student_curriculum": {
+    "public.student_curriculum": {
       "name": "student_curriculum",
       "schema": "",
       "columns": {
@@ -63,13 +61,31 @@
       },
       "indexes": {
         "student_curriculum_unq_identity_gear_curriculum": {
-          "name": "student_curriculum_unq_identity_gear_curriculum",
           "columns": [
-            "person_id",
-            "curriculum_id",
-            "gear_type_id"
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "curriculum_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "gear_type_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "student_curriculum_unq_identity_gear_curriculum",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -131,7 +147,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "certificate": {
+    "public.certificate": {
       "name": "certificate",
       "schema": "",
       "columns": {
@@ -195,11 +211,19 @@
       },
       "indexes": {
         "certificate_unq_handle": {
-          "name": "certificate_unq_handle",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "certificate_unq_handle",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -233,7 +257,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "student_completed_competency": {
+    "public.student_completed_competency": {
       "name": "student_completed_competency",
       "schema": "",
       "columns": {
@@ -329,7 +353,7 @@
       },
       "uniqueConstraints": {}
     },
-    "curriculum": {
+    "public.curriculum": {
       "name": "curriculum",
       "schema": "",
       "columns": {
@@ -381,12 +405,25 @@
       },
       "indexes": {
         "curriculum_program_id_revision_index": {
-          "name": "curriculum_program_id_revision_index",
           "columns": [
-            "program_id",
-            "revision"
+            {
+              "expression": "program_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "revision",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "curriculum_program_id_revision_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -407,7 +444,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "curriculum_module": {
+    "public.curriculum_module": {
       "name": "curriculum_module",
       "schema": "",
       "columns": {
@@ -446,12 +483,25 @@
       },
       "indexes": {
         "curriculum_module_curriculum_id_module_id_index": {
-          "name": "curriculum_module_curriculum_id_module_id_index",
           "columns": [
-            "curriculum_id",
-            "module_id"
+            {
+              "expression": "curriculum_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "module_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "curriculum_module_curriculum_id_module_id_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -493,7 +543,7 @@
       },
       "uniqueConstraints": {}
     },
-    "curriculum_competency": {
+    "public.curriculum_competency": {
       "name": "curriculum_competency",
       "schema": "",
       "columns": {
@@ -557,13 +607,31 @@
       },
       "indexes": {
         "curriculum_competency_unq_set": {
-          "name": "curriculum_competency_unq_set",
           "columns": [
-            "curriculum_id",
-            "module_id",
-            "competency_id"
+            {
+              "expression": "curriculum_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "module_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "competency_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "curriculum_competency_unq_set",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -599,7 +667,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "curriculum_gear_link": {
+    "public.curriculum_gear_link": {
       "name": "curriculum_gear_link",
       "schema": "",
       "columns": {
@@ -676,7 +744,7 @@
       },
       "uniqueConstraints": {}
     },
-    "location": {
+    "public.location": {
       "name": "location",
       "schema": "",
       "columns": {
@@ -758,11 +826,19 @@
       },
       "indexes": {
         "unique_handle_for_location": {
-          "name": "unique_handle_for_location",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "unique_handle_for_location",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -809,7 +885,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "media": {
+    "public.media": {
       "name": "media",
       "schema": "",
       "columns": {
@@ -942,7 +1018,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "country": {
+    "public.country": {
       "name": "country",
       "schema": "",
       "columns": {
@@ -1172,25 +1248,41 @@
       },
       "indexes": {
         "country_alpha_2_is_unique": {
-          "name": "country_alpha_2_is_unique",
           "columns": [
-            "alpha_2"
+            {
+              "expression": "alpha_2",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "country_alpha_2_is_unique",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "country_alpha_3_is_unique": {
-          "name": "country_alpha_3_is_unique",
           "columns": [
-            "alpha_3"
+            {
+              "expression": "alpha_3",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "country_alpha_3_is_unique",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "competency": {
+    "public.competency": {
       "name": "competency",
       "schema": "",
       "columns": {
@@ -1248,18 +1340,26 @@
       },
       "indexes": {
         "competency_handle_index": {
-          "name": "competency_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "competency_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "module": {
+    "public.module": {
       "name": "module",
       "schema": "",
       "columns": {
@@ -1311,18 +1411,26 @@
       },
       "indexes": {
         "module_handle_index": {
-          "name": "module_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "module_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "discipline": {
+    "public.discipline": {
       "name": "discipline",
       "schema": "",
       "columns": {
@@ -1374,18 +1482,26 @@
       },
       "indexes": {
         "discipline_handle_index": {
-          "name": "discipline_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "discipline_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "degree": {
+    "public.degree": {
       "name": "degree",
       "schema": "",
       "columns": {
@@ -1437,25 +1553,41 @@
       },
       "indexes": {
         "degree_handle_index": {
-          "name": "degree_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "degree_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         },
         "degree_rang_index": {
-          "name": "degree_rang_index",
           "columns": [
-            "rang"
+            {
+              "expression": "rang",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "degree_rang_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "category": {
+    "public.category": {
       "name": "category",
       "schema": "",
       "columns": {
@@ -1519,11 +1651,19 @@
       },
       "indexes": {
         "category_handle_index": {
-          "name": "category_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "category_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -1544,7 +1684,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "program": {
+    "public.program": {
       "name": "program",
       "schema": "",
       "columns": {
@@ -1602,11 +1742,19 @@
       },
       "indexes": {
         "program_handle_index": {
-          "name": "program_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "program_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -1640,7 +1788,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "program_category": {
+    "public.program_category": {
       "name": "program_category",
       "schema": "",
       "columns": {
@@ -1686,12 +1834,25 @@
       },
       "indexes": {
         "program_category_category_id_program_id_index": {
-          "name": "program_category_category_id_program_id_index",
           "columns": [
-            "category_id",
-            "program_id"
+            {
+              "expression": "category_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "program_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "program_category_category_id_program_id_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -1725,7 +1886,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "gear_type": {
+    "public.gear_type": {
       "name": "gear_type",
       "schema": "",
       "columns": {
@@ -1771,18 +1932,26 @@
       },
       "indexes": {
         "gear_type_handle_index": {
-          "name": "gear_type_handle_index",
           "columns": [
-            "handle"
+            {
+              "expression": "handle",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "gear_type_handle_index",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "student_competency_progress": {
+    "public.student_competency_progress": {
       "name": "student_competency_progress",
       "schema": "",
       "columns": {
@@ -1885,7 +2054,7 @@
       },
       "uniqueConstraints": {}
     },
-    "user": {
+    "public.user": {
       "name": "user",
       "schema": "",
       "columns": {
@@ -1934,7 +2103,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "person": {
+    "public.person": {
       "name": "person",
       "schema": "",
       "columns": {
@@ -2026,7 +2195,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "actor": {
+    "public.actor": {
       "name": "actor",
       "schema": "",
       "columns": {
@@ -2084,13 +2253,31 @@
       },
       "indexes": {
         "unq_actor_type_person_location": {
-          "name": "unq_actor_type_person_location",
           "columns": [
-            "type",
-            "person_id",
-            "location_id"
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "location_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": true
+          "with": {},
+          "name": "unq_actor_type_person_location",
+          "isUnique": true,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
@@ -2124,7 +2311,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "person_location_link": {
+    "public.person_location_link": {
       "name": "person_location_link",
       "schema": "",
       "columns": {
@@ -2227,61 +2414,69 @@
     }
   },
   "enums": {
-    "media_status": {
+    "public.media_status": {
       "name": "media_status",
-      "values": {
-        "failed": "failed",
-        "processing": "processing",
-        "ready": "ready",
-        "uploaded": "uploaded",
-        "corrupt": "corrupt"
-      }
+      "schema": "public",
+      "values": [
+        "failed",
+        "processing",
+        "ready",
+        "uploaded",
+        "corrupt"
+      ]
     },
-    "media_type": {
+    "public.media_type": {
       "name": "media_type",
-      "values": {
-        "image": "image",
-        "file": "file"
-      }
+      "schema": "public",
+      "values": [
+        "image",
+        "file"
+      ]
     },
-    "competency_type": {
+    "public.competency_type": {
       "name": "competency_type",
-      "values": {
-        "knowledge": "knowledge",
-        "skill": "skill"
-      }
+      "schema": "public",
+      "values": [
+        "knowledge",
+        "skill"
+      ]
     },
-    "actor_type": {
+    "public.actor_type": {
       "name": "actor_type",
-      "values": {
-        "student": "student",
-        "instructor": "instructor",
-        "location_admin": "location_admin",
-        "application": "application",
-        "system": "system"
-      }
+      "schema": "public",
+      "values": [
+        "student",
+        "instructor",
+        "location_admin",
+        "application",
+        "system"
+      ]
     },
-    "person_location_link_status": {
+    "public.person_location_link_status": {
       "name": "person_location_link_status",
-      "values": {
-        "linked": "linked",
-        "revoked": "revoked",
-        "removed": "removed"
-      }
+      "schema": "public",
+      "values": [
+        "linked",
+        "revoked",
+        "removed"
+      ]
     },
-    "permissionRequestStatus": {
+    "public.permissionRequestStatus": {
       "name": "permissionRequestStatus",
-      "values": {
-        "none": "none",
-        "requested": "requested",
-        "permission_granted": "permission_granted"
-      }
+      "schema": "public",
+      "values": [
+        "none",
+        "requested",
+        "permission_granted"
+      ]
     }
   },
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "cb3480e2-615d-4ef2-82db-04cd025886f5",
+  "prevId": "5a0eb5bc-6d27-4dc8-aa09-4a9597016eda"
 }
