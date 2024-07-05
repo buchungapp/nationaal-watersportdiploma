@@ -885,3 +885,57 @@ export async function addStudentToCohortByPersonId({
     });
   });
 }
+
+export async function isInstructorInCohort(cohortId: string) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    return await Cohort.Allocation.isPersonInCohortById({
+      cohortId,
+      personId: authPerson.id,
+      actorType: "instructor",
+    });
+  });
+}
+
+export async function claimStudentsInCohort(
+  cohortId: string,
+  studentAllocationIds: string[],
+) {
+  return makeRequest(async () => {
+    const [authUser, cohort] = await Promise.all([
+      getUserOrThrow(),
+      Cohort.byIdOrHandle({ id: cohortId }).then(
+        (cohort) => cohort ?? notFound(),
+      ),
+    ]);
+
+    const authPerson = extractPerson(authUser);
+
+    if (!authPerson) {
+      throw new Error("Person not found for user");
+    }
+
+    const instructorActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: cohort.locationId,
+      actorType: "instructor",
+      personId: authPerson.id,
+    });
+
+    if (!instructorActor) {
+      throw new Error("Instructor not found for location");
+    }
+
+    return await Cohort.Allocation.setInstructorForStudent({
+      cohortId,
+      instructorId: instructorActor.id,
+      studentAllocationId: studentAllocationIds,
+    });
+  });
+}

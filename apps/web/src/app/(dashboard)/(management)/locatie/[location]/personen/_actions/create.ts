@@ -42,7 +42,7 @@ export async function createPerson(
 
     await createPersonForLocation(locationId, parsed);
 
-    revalidatePath("/[location]/personen", "page");
+    revalidatePath("/locatie/[location]/personen", "page");
 
     return {
       message: "Success",
@@ -87,7 +87,7 @@ export async function createPersonBulk(
     }),
   );
 
-  revalidatePath("/[location]/personen", "page");
+  revalidatePath("/locatie/[location]/personen", "page");
 
   const rowsWithError = result.filter(
     (result): result is PromiseRejectedResult => result.status === "rejected",

@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm/sql/sql'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
+  possibleSingleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -21,6 +22,53 @@ export const start = withZod(
   successfulCreateResponse,
   async (input) => {
     const query = useQuery()
+
+    const [insert] = await query
+      .insert(s.studentCurriculum)
+      .values({
+        personId: input.personId,
+        curriculumId: input.curriculumId,
+        gearTypeId: input.gearTypeId,
+        startedAt: input.startedAt,
+      })
+      .returning({ id: s.studentCurriculum.id })
+
+    if (!insert) {
+      throw new Error('Failed to start program')
+    }
+
+    return insert
+  },
+)
+
+export const findOrEnroll = withZod(
+  insertSchema.pick({
+    personId: true,
+    curriculumId: true,
+    gearTypeId: true,
+    startedAt: true,
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    // Check for existing student curriculum
+    const existingCurriculum = await query
+      .select({ id: s.studentCurriculum.id })
+      .from(s.studentCurriculum)
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, input.personId),
+          eq(s.studentCurriculum.curriculumId, input.curriculumId),
+          eq(s.studentCurriculum.gearTypeId, input.gearTypeId),
+          isNull(s.studentCurriculum.deletedAt),
+        ),
+      )
+      .then(possibleSingleRow)
+
+    if (!!existingCurriculum) {
+      return existingCurriculum
+    }
 
     const [insert] = await query
       .insert(s.studentCurriculum)

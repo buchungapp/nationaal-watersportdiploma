@@ -92,6 +92,7 @@ export const getActorByPersonIdAndType = withZod(
           eq(s.actor.locationId, input.locationId),
           eq(s.actor.personId, input.personId),
           eq(s.actor.type, input.actorType),
+          isNull(s.actor.deletedAt),
         ),
       )
       .then(possibleSingleRow)

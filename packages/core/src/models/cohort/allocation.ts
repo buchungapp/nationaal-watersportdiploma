@@ -9,10 +9,12 @@ import {
   isNull,
   sql,
 } from 'drizzle-orm'
+import { inArray } from 'drizzle-orm/sql/expressions'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   applyArrayOrEqual,
+  possibleSingleRow,
   singleOrArray,
   singleRow,
   successfulCreateResponse,
@@ -130,13 +132,139 @@ export const listAndCountForCohort = withZod(
         createdAt,
       })
       .from(s.cohortAllocation)
-      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
-      .innerJoin(s.person, eq(s.person.id, s.actor.personId))
+      .innerJoin(
+        s.actor,
+        and(
+          eq(s.actor.id, s.cohortAllocation.actorId),
+          isNull(s.actor.deletedAt),
+        ),
+      )
+      .innerJoin(
+        s.person,
+        and(eq(s.person.id, s.actor.personId), isNull(s.person.deletedAt)),
+      )
       .where(and(...whereClausules))
 
     return {
       rows,
       count: rows.length,
     }
+  },
+)
+
+export const isPersonInCohortById = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    personId: uuidSchema,
+    actorType: singleOrArray(
+      z.enum(['student', 'instructor', 'location_admin']),
+    ).optional(),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const exists = await query
+      .select({ id: sql`1` })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.actor,
+        and(
+          eq(s.actor.id, s.cohortAllocation.actorId),
+          isNull(s.actor.deletedAt),
+          input.actorType
+            ? Array.isArray(input.actorType)
+              ? inArray(s.actor.type, input.actorType)
+              : eq(s.actor.type, input.actorType)
+            : undefined,
+        ),
+      )
+      .innerJoin(
+        s.person,
+        and(
+          eq(s.person.id, s.actor.personId),
+          isNull(s.person.deletedAt),
+          eq(s.person.id, input.personId),
+        ),
+      )
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .limit(1)
+      .then(possibleSingleRow)
+
+    return !!exists
+  },
+)
+
+export const isActorInCohortById = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    actorId: uuidSchema,
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const exists = await query
+      .select({ id: sql`1` })
+      .from(s.cohortAllocation)
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          eq(s.cohortAllocation.actorId, input.actorId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then(possibleSingleRow)
+
+    return !!exists
+  },
+)
+
+export const setInstructorForStudent = withZod(
+  z.object({
+    instructorId: uuidSchema,
+    cohortId: uuidSchema,
+    studentAllocationId: singleOrArray(uuidSchema),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    // Make sure the instructorId belong to an actor with type instructor and is in the cohort
+    await query
+      .select({ id: sql`1` })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.actor,
+        and(
+          eq(s.actor.id, s.cohortAllocation.actorId),
+          isNull(s.actor.deletedAt),
+          eq(s.actor.type, 'instructor'),
+          eq(s.actor.id, input.instructorId),
+        ),
+      )
+      .where(
+        and(
+          eq(s.cohortAllocation.actorId, input.instructorId),
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then(singleRow)
+
+    return await query
+      .update(s.cohortAllocation)
+      .set({ instructorId: input.instructorId })
+      .where(
+        and(
+          Array.isArray(input.studentAllocationId)
+            ? inArray(s.cohortAllocation.id, input.studentAllocationId)
+            : eq(s.cohortAllocation.id, input.studentAllocationId),
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+        ),
+      )
+      .returning({ id: s.cohortAllocation.id })
   },
 )

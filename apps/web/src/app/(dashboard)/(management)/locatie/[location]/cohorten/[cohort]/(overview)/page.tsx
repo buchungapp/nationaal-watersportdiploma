@@ -8,8 +8,10 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
+  isInstructorInCohort,
   listCountries,
   listPersonsForLocationByRole,
+  listPrograms,
   listStudentsWithCurriculaByCohortId,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
@@ -54,6 +56,8 @@ export default async function Page({
             location.id,
             "student",
           ),
+          isInstructor: isInstructorInCohort(cohort.id),
+          allPrograms: listPrograms(),
         },
       }}
     >
@@ -76,7 +80,11 @@ export default async function Page({
           </Dropdown>
         </div>
 
-        <StudentsTable students={students} totalItems={students.length} />
+        <StudentsTable
+          students={students}
+          totalItems={students.length}
+          cohortId={cohort.id}
+        />
 
         <Dialogs locationId={location.id} cohortId={cohort.id} />
       </DialogWrapper>

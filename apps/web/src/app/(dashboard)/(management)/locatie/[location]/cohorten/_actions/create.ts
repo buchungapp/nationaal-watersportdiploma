@@ -35,7 +35,7 @@ export async function createCohortAction(
       accessEndTimestamp: parsed.accessEndTime,
     });
 
-    revalidatePath("/[location]/cohorten", "page");
+    revalidatePath("/locatie/[location]/cohorten", "page");
 
     return {
       message: "Success",

@@ -11,6 +11,10 @@ import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
+import {
   Table,
   TableBody,
   TableCell,
@@ -23,14 +27,50 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
+import { ActionButtons } from "./table-actions";
 
-type Student = Awaited<
+export type Student = Awaited<
   ReturnType<typeof listStudentsWithCurriculaByCohortId>
 >[number];
 
 const columnHelper = createColumnHelper<Student>();
 
 const columns = [
+  columnHelper.display({
+    id: "select",
+    cell: ({ row }) => (
+      <CheckboxField>
+        <Checkbox
+          {...{
+            checked: row.getIsSelected(),
+            disabled: !row.getCanSelect(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+          className="-translate-y-[1px]"
+        />
+      </CheckboxField>
+    ),
+    header: ({ table }) => (
+      <CheckboxField>
+        <Checkbox
+          {...{
+            disabled: false,
+            checked:
+              table.getIsSomePageRowsSelected() ||
+              table.getIsAllPageRowsSelected(),
+            indeterminate: !table.getIsAllPageRowsSelected(),
+            onChange: (checked) => table.toggleAllPageRowsSelected(checked),
+          }}
+          className="-translate-y-[1px]"
+        />
+      </CheckboxField>
+    ),
+    enableSorting: false,
+    meta: {
+      suppressLinkBehavior: true,
+    },
+  }),
   columnHelper.accessor(
     (data) =>
       [data.person.firstName, data.person.lastNamePrefix, data.person.lastName]
@@ -84,9 +124,11 @@ const columns = [
 ];
 
 export default function StudentsTable({
+  cohortId,
   students,
   totalItems,
 }: {
+  cohortId: string;
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
 }) {
@@ -99,12 +141,21 @@ export default function StudentsTable({
   });
   const params = useParams();
 
+  const anyRowSelected =
+    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
+
   return (
-    <>
+    <div className="mt-8 relative">
       <Table
-        className="mt-8 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
         dense
       >
+        {anyRowSelected ? (
+          <ActionButtons
+            rows={table.getSelectedRowModel().rows}
+            cohortId={cohortId}
+          />
+        ) : null}
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -163,6 +214,6 @@ export default function StudentsTable({
         <TableRowSelection table={table} totalItems={totalItems} />
         {/* <TablePagination totalItems={totalItems} /> */}
       </TableFooter>
-    </>
+    </div>
   );
 }

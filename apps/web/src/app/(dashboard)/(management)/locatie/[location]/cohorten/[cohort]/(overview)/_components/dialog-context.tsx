@@ -7,9 +7,11 @@ import { DropdownItem } from "~/app/(dashboard)/_components/dropdown";
 import CreateBulkDialog from "./create-bulk-dialog";
 import CreateSingleDialog from "./create-single-dialog";
 
+type DialogStates = "single" | "bulk" | null;
+
 const DialogContext = createContext<{
-  isOpen: "single" | "bulk" | null;
-  setIsOpen: Dispatch<SetStateAction<"single" | "bulk" | null>>;
+  isOpen: DialogStates;
+  setIsOpen: Dispatch<SetStateAction<DialogStates>>;
 }>({
   isOpen: null,
   //   eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -17,7 +19,7 @@ const DialogContext = createContext<{
 });
 
 export function DialogWrapper({ children }: PropsWithChildren) {
-  const [isOpen, setIsOpen] = useState<"single" | "bulk" | null>(null);
+  const [isOpen, setIsOpen] = useState<DialogStates>(null);
   const posthog = usePostHog();
   return (
     <DialogContext.Provider
