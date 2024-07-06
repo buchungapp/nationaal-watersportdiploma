@@ -38,6 +38,6 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "type-fest": "^4.17.0",
-    "typescript": "^5.4.5"
+    "typescript": "5.4.5"
   }
 }

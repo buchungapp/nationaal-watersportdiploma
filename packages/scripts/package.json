@@ -32,6 +32,6 @@
     "@types/inquirer": "^8.2.6",
     "@types/react": "^18.2.64",
     "postgres": "^3.4.4",
-    "typescript": "^5.4.5"
+    "typescript": "5.4.5"
   }
 }

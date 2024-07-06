@@ -22,6 +22,9 @@ importers:
       prettier:
         specifier: ^3.3.2
         version: 3.3.2
+      typescript:
+        specifier: 5.4.5
+        version: 5.4.5
 
   apps/api-server:
     dependencies:
@@ -66,7 +69,7 @@ importers:
         specifier: ^20.1.2
         version: 20.1.4
       typescript:
-        specifier: ^5.4.5
+        specifier: 5.4.5
         version: 5.4.5
 
   apps/docs:
@@ -310,7 +313,7 @@ importers:
         specifier: ^3.4.3
         version: 3.4.3
       typescript:
-        specifier: ^5.4.5
+        specifier: 5.4.5
         version: 5.4.5
 
   generated/api:
@@ -332,8 +335,8 @@ importers:
         specifier: ^4.18.0
         version: 4.18.0
       typescript:
-        specifier: ^5.5.2
-        version: 5.5.2
+        specifier: ^5.4.5
+        version: 5.4.5
 
   packages/core:
     dependencies:
@@ -387,7 +390,7 @@ importers:
         specifier: ^4.17.0
         version: 4.18.1
       typescript:
-        specifier: ^5.4.5
+        specifier: 5.4.5
         version: 5.4.5
 
   packages/db:
@@ -421,7 +424,7 @@ importers:
         specifier: ^0.22.8
         version: 0.22.8
       typescript:
-        specifier: ^5.4.5
+        specifier: 5.4.5
         version: 5.4.5
 
   packages/lib:
@@ -434,7 +437,7 @@ importers:
         specifier: ^20.1.2
         version: 20.1.4
       typescript:
-        specifier: ^5.4.5
+        specifier: 5.4.5
         version: 5.4.5
 
   packages/scripts:
@@ -498,7 +501,7 @@ importers:
         specifier: ^3.4.4
         version: 3.4.4
       typescript:
-        specifier: ^5.4.5
+        specifier: 5.4.5
         version: 5.4.5
 
   supabase:
@@ -13910,12 +13913,6 @@ packages:
 
   /typescript@5.4.5:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-    dev: true
-
-  /typescript@5.5.2:
-    resolution: {integrity: sha512-NcRtPEOsPFFWjobJEtfihkLCZCXZt/os3zf8nTxjVH3RvTSxjrCamJpbExGvYOF+tFHc3pA65qpdwPbzjohhew==}
     engines: {node: '>=14.17'}
     hasBin: true
     dev: true
