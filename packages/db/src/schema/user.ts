@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  boolean,
   char,
   date,
   foreignKey,
@@ -45,6 +46,7 @@ export const person = pgTable(
       .notNull(),
     userId: uuid('user_id'),
     firstName: text('first_name').notNull(),
+    isPrimary: boolean('is_primary').notNull().default(false),
     lastNamePrefix: text('last_name_prefix'),
     lastName: text('last_name'),
     dateOfBirth: date('date_of_birth', { mode: 'string' }),
@@ -62,6 +64,9 @@ export const person = pgTable(
         foreignColumns: [user.authUserId],
         name: 'person_user_id_fk',
       }),
+      unqPrimaryPerson: uniqueIndex('unq_primary_person')
+        .on(table.userId, table.isPrimary)
+        .where(sql`${table.isPrimary} = true`),
     }
   },
 )

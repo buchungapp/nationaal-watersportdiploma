@@ -116,37 +116,16 @@
     },
     {
       "idx": 16,
-      "version": "5",
-      "when": 1719503041413,
-      "tag": "0016_dark_nightmare",
+      "version": "7",
+      "when": 1720263100563,
+      "tag": "0016_late_iron_monger",
       "breakpoints": false
     },
     {
       "idx": 17,
-      "version": "5",
-      "when": 1719503053411,
-      "tag": "0017_powerful_scorpion",
-      "breakpoints": false
-    },
-    {
-      "idx": 18,
-      "version": "5",
-      "when": 1719503054125,
-      "tag": "0018_fearless_mother_askani",
-      "breakpoints": false
-    },
-    {
-      "idx": 19,
       "version": "7",
-      "when": 1720173609869,
-      "tag": "0019_red_northstar",
-      "breakpoints": false
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1720177682772,
-      "tag": "0020_cooing_firebrand",
+      "when": 1720263101699,
+      "tag": "0017_sweet_skullbuster",
       "breakpoints": false
     }
   ]

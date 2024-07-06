@@ -1,4 +1,6 @@
 {
+  "id": "a9b4bb85-717b-4be0-9be4-446e7ad7ecc4",
+  "prevId": "451aefd0-7694-4894-8d51-48a464762b0e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -66,6 +68,7 @@
       },
       "indexes": {
         "token_hashed_key_index": {
+          "name": "token_hashed_key_index",
           "columns": [
             {
               "expression": "hashed_key",
@@ -74,9 +77,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "token_hashed_key_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -126,6 +128,7 @@
       },
       "indexes": {
         "token_usage_token_id_used_at_index": {
+          "name": "token_usage_token_id_used_at_index",
           "columns": [
             {
               "expression": "token_id",
@@ -136,13 +139,12 @@
             {
               "expression": "used_at",
               "isExpression": false,
-              "asc": true,
+              "asc": false,
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "token_usage_token_id_used_at_index",
           "isUnique": false,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -274,6 +276,7 @@
       },
       "indexes": {
         "privilege_handle_index": {
+          "name": "privilege_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -282,9 +285,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "privilege_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -351,6 +353,7 @@
       },
       "indexes": {
         "role_handle_index": {
+          "name": "role_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -359,9 +362,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "role_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -561,6 +563,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "cohort_allocation_id": {
+          "name": "cohort_allocation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "location_id": {
           "name": "location_id",
           "type": "uuid",
@@ -602,6 +610,7 @@
       },
       "indexes": {
         "certificate_unq_handle": {
+          "name": "certificate_unq_handle",
           "columns": [
             {
               "expression": "handle",
@@ -610,9 +619,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "certificate_unq_handle",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -638,6 +646,19 @@
             "location_id"
           ],
           "tableTo": "location",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "certificate_cohort_allocation_id_fk": {
+          "name": "certificate_cohort_allocation_id_fk",
+          "tableFrom": "certificate",
+          "columnsFrom": [
+            "cohort_allocation_id"
+          ],
+          "tableTo": "cohort_allocation",
           "columnsTo": [
             "id"
           ],
@@ -803,6 +824,7 @@
       },
       "indexes": {
         "student_curriculum_unq_identity_gear_curriculum": {
+          "name": "student_curriculum_unq_identity_gear_curriculum",
           "columns": [
             {
               "expression": "person_id",
@@ -823,9 +845,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "student_curriculum_unq_identity_gear_curriculum",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -959,6 +980,7 @@
       },
       "indexes": {
         "cohort_handle_index": {
+          "name": "cohort_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -967,9 +989,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "cohort_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1021,6 +1042,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "instructor_id": {
+          "name": "instructor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "tags": {
           "name": "tags",
           "type": "text[]",
@@ -1051,6 +1078,7 @@
       },
       "indexes": {
         "cohort_allocation_cohort_id_actor_id_student_curriculum_id_index": {
+          "name": "cohort_allocation_cohort_id_actor_id_student_curriculum_id_index",
           "columns": [
             {
               "expression": "cohort_id",
@@ -1071,13 +1099,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "cohort_allocation_cohort_id_actor_id_student_curriculum_id_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         },
         "cohort_allocation_cohort_id_tags_index": {
+          "name": "cohort_allocation_cohort_id_tags_index",
           "columns": [
             {
               "expression": "cohort_id",
@@ -1092,9 +1120,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "cohort_allocation_cohort_id_tags_index",
           "isUnique": false,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1133,6 +1160,19 @@
             "student_curriculum_id"
           ],
           "tableTo": "student_curriculum",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "cohort_allocation_instructor_id_fk": {
+          "name": "cohort_allocation_instructor_id_fk",
+          "tableFrom": "cohort_allocation",
+          "columnsFrom": [
+            "actor_id"
+          ],
+          "tableTo": "actor",
           "columnsTo": [
             "id"
           ],
@@ -1207,6 +1247,7 @@
       },
       "indexes": {
         "category_handle_index": {
+          "name": "category_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1215,9 +1256,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "category_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1266,6 +1306,7 @@
         "type": {
           "name": "type",
           "type": "competency_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -1298,6 +1339,7 @@
       },
       "indexes": {
         "competency_handle_index": {
+          "name": "competency_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1306,9 +1348,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "competency_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1375,6 +1416,7 @@
       },
       "indexes": {
         "course_handle_index": {
+          "name": "course_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1383,9 +1425,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "course_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1454,6 +1495,7 @@
       },
       "indexes": {
         "course_category_category_id_course_id_index": {
+          "name": "course_category_category_id_course_id_index",
           "columns": [
             {
               "expression": "category_id",
@@ -1468,9 +1510,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "course_category_category_id_course_id_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1558,6 +1599,7 @@
       },
       "indexes": {
         "degree_handle_index": {
+          "name": "degree_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1566,13 +1608,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "degree_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         },
         "degree_rang_index": {
+          "name": "degree_rang_index",
           "columns": [
             {
               "expression": "rang",
@@ -1581,9 +1623,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "degree_rang_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1644,6 +1685,7 @@
       },
       "indexes": {
         "discipline_handle_index": {
+          "name": "discipline_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1652,9 +1694,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "discipline_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1709,6 +1750,7 @@
       },
       "indexes": {
         "gear_type_handle_index": {
+          "name": "gear_type_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1717,9 +1759,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "gear_type_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1780,6 +1821,7 @@
       },
       "indexes": {
         "module_handle_index": {
+          "name": "module_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1788,9 +1830,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "module_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1857,6 +1898,7 @@
       },
       "indexes": {
         "program_handle_index": {
+          "name": "program_handle_index",
           "columns": [
             {
               "expression": "handle",
@@ -1865,9 +1907,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "program_handle_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -1955,6 +1996,7 @@
       },
       "indexes": {
         "curriculum_program_id_revision_index": {
+          "name": "curriculum_program_id_revision_index",
           "columns": [
             {
               "expression": "program_id",
@@ -1969,9 +2011,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "curriculum_program_id_revision_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -2058,6 +2099,7 @@
       },
       "indexes": {
         "curriculum_competency_unq_set": {
+          "name": "curriculum_competency_unq_set",
           "columns": [
             {
               "expression": "curriculum_id",
@@ -2078,9 +2120,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "curriculum_competency_unq_set",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -2234,6 +2275,7 @@
       },
       "indexes": {
         "curriculum_module_curriculum_id_module_id_index": {
+          "name": "curriculum_module_curriculum_id_module_id_index",
           "columns": [
             {
               "expression": "curriculum_id",
@@ -2248,9 +2290,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "curriculum_module_curriculum_id_module_id_index",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -2308,6 +2349,7 @@
         "status": {
           "name": "status",
           "type": "location_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'active'"
@@ -2389,6 +2431,7 @@
       },
       "indexes": {
         "unique_handle_for_location": {
+          "name": "unique_handle_for_location",
           "columns": [
             {
               "expression": "handle",
@@ -2397,9 +2440,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "unique_handle_for_location",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -2474,12 +2516,14 @@
         "status": {
           "name": "status",
           "type": "media_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
         "type": {
           "name": "type",
           "type": "media_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -2811,6 +2855,7 @@
       },
       "indexes": {
         "country_alpha_2_is_unique": {
+          "name": "country_alpha_2_is_unique",
           "columns": [
             {
               "expression": "alpha_2",
@@ -2819,13 +2864,13 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "country_alpha_2_is_unique",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         },
         "country_alpha_3_is_unique": {
+          "name": "country_alpha_3_is_unique",
           "columns": [
             {
               "expression": "alpha_3",
@@ -2834,9 +2879,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "country_alpha_3_is_unique",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -2859,6 +2903,7 @@
         "type": {
           "name": "type",
           "type": "feedback_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -2965,6 +3010,13 @@
       "name": "student_cohort_progress",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
         "cohort_allocation_id": {
           "name": "cohort_allocation_id",
           "type": "uuid",
@@ -2990,21 +3042,42 @@
           "notNull": true,
           "default": "now()"
         },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "cohort_allocation_id_idx": {
+          "name": "cohort_allocation_id_idx",
+          "columns": [
+            {
+              "expression": "cohort_allocation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "curriculum_module_competency_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
         "student_cohort_progress_cohort_allocation_id_fk": {
           "name": "student_cohort_progress_cohort_allocation_id_fk",
@@ -3031,17 +3104,22 @@
           ],
           "onUpdate": "no action",
           "onDelete": "no action"
+        },
+        "student_cohort_progress_created_by_fk": {
+          "name": "student_cohort_progress_created_by_fk",
+          "tableFrom": "student_cohort_progress",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "tableTo": "person",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "student_cohort_progress_pkey": {
-          "name": "student_cohort_progress_pkey",
-          "columns": [
-            "cohort_allocation_id",
-            "curriculum_module_competency_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
     "public.actor": {
@@ -3058,6 +3136,7 @@
         "type": {
           "name": "type",
           "type": "actor_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -3102,6 +3181,7 @@
       },
       "indexes": {
         "unq_actor_type_person_location": {
+          "name": "unq_actor_type_person_location",
           "columns": [
             {
               "expression": "type",
@@ -3122,9 +3202,8 @@
               "nulls": "last"
             }
           ],
-          "with": {},
-          "name": "unq_actor_type_person_location",
           "isUnique": true,
+          "with": {},
           "method": "btree",
           "concurrently": false
         }
@@ -3183,6 +3262,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "is_primary": {
+          "name": "is_primary",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "last_name_prefix": {
           "name": "last_name_prefix",
           "type": "text",
@@ -3240,7 +3326,30 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unq_primary_person": {
+          "name": "unq_primary_person",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "is_primary",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "where": "\"person\".\"is_primary\" = true",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
         "person_birth_country_country_alpha_2_fk": {
           "name": "person_birth_country_country_alpha_2_fk",
@@ -3291,12 +3400,14 @@
         "status": {
           "name": "status",
           "type": "person_location_link_status",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
         "permission_level": {
           "name": "permission_level",
           "type": "permissionRequestStatus",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'none'"
@@ -3504,10 +3615,8 @@
   },
   "schemas": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "id": "6097117c-77c9-45c1-9e4c-9c775082fbf2",
-  "prevId": "fca11eec-02f9-4c2a-afbc-ab0a6ece62d4"
+    "tables": {}
+  }
 }
