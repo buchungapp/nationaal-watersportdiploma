@@ -1,6 +1,8 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import {
+  addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
   claimStudentsInCohort as claimStudentsInCohortInner,
   enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
@@ -11,6 +13,7 @@ import {
   listGearTypesByCurriculum as listGearTypesByCurriculumInner,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrograms as listProgramsInner,
+  removeAllocationById,
   type ActorType,
 } from "~/lib/nwd";
 
@@ -73,6 +76,34 @@ export async function addStudentToCohortByPersonId(props: {
   await getUserOrThrow();
 
   return addStudentToCohortByPersonIdInner(props);
+}
+
+export async function addInstructorToCohortByPersonId(props: {
+  cohortId: string;
+  locationId: string;
+  personId: string;
+}) {
+  await getUserOrThrow();
+
+  const result = addInstructorToCohortByPersonIdInner(props);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+
+  return result;
+}
+
+export async function removeAllocation(input: {
+  locationId: string;
+  allocationId: string;
+}) {
+  await getUserOrThrow();
+
+  await removeAllocationById(input);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+
+  return;
 }
 
 export async function listCountries() {

@@ -1,4 +1,5 @@
 "use client";
+import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import {
   createColumnHelper,
   flexRender,
@@ -9,7 +10,14 @@ import {
 import clsx from "clsx";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
-import { Badge } from "~/app/(dashboard)/_components/badge";
+import { useMemo } from "react";
+import { toast } from "sonner";
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownItem,
+  DropdownMenu,
+} from "~/app/(dashboard)/_components/dropdown";
 import {
   Table,
   TableBody,
@@ -22,78 +30,87 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
-import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
+import { type listInstructorsByCohortId } from "~/lib/nwd";
+import { removeAllocation } from "../../_actions/nwd";
 
-export type Student = Awaited<
-  ReturnType<typeof listStudentsWithCurriculaByCohortId>
+export type Instructor = Awaited<
+  ReturnType<typeof listInstructorsByCohortId>
 >[number];
 
-const columnHelper = createColumnHelper<Student>();
-
-const columns = [
-  columnHelper.accessor(
-    (data) =>
-      [data.person.firstName, data.person.lastNamePrefix, data.person.lastName]
-        .filter(Boolean)
-        .join(" "),
-    {
-      header: "Naam",
-      cell: ({ getValue }) => (
-        <span className="font-medium text-zinc-950">{getValue()}</span>
-      ),
-    },
-  ),
-  columnHelper.accessor("person.dateOfBirth", {
-    header: "Leeftijd",
-    cell: ({ getValue }) => {
-      const dateOfBirth = getValue();
-      return dateOfBirth
-        ? `${dayjs().diff(dayjs(dateOfBirth), "year")} jr.`
-        : null;
-    },
-  }),
-  columnHelper.accessor(
-    (data) =>
-      data.studentCurriculum?.program.title ??
-      data.studentCurriculum?.course.title,
-    {
-      header: "Programma",
-    },
-  ),
-  columnHelper.accessor("studentCurriculum.degree.title", {
-    header: "Niveau",
-  }),
-  columnHelper.accessor("studentCurriculum.gearType.title", {
-    header: "Vaartuig",
-  }),
-  columnHelper.accessor((row) => null, {
-    header: "Instructeur",
-  }),
-  columnHelper.accessor("tags", {
-    header: "Tags",
-    cell: ({ getValue }) => {
-      return (
-        <div className="flex gap-x-2 items-center">
-          {getValue().map((tag) => (
-            <Badge key={tag}>{tag}</Badge>
-          ))}
-        </div>
-      );
-    },
-  }),
-];
+const columnHelper = createColumnHelper<Instructor>();
 
 export default function InstructorsTable({
   cohortId,
-  students,
+  instructors,
   totalItems,
+  locationId,
 }: {
   cohortId: string;
-  students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
+  instructors: Awaited<ReturnType<typeof listInstructorsByCohortId>>;
   totalItems: number;
+  locationId: string;
 }) {
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor(
+        (data) =>
+          [
+            data.person.firstName,
+            data.person.lastNamePrefix,
+            data.person.lastName,
+          ]
+            .filter(Boolean)
+            .join(" "),
+        {
+          header: "Naam",
+          cell: ({ getValue }) => (
+            <span className="font-medium text-zinc-950">{getValue()}</span>
+          ),
+        },
+      ),
+      columnHelper.accessor("createdAt", {
+        header: "Toegevoegd",
+        cell: ({ getValue }) => {
+          const createdAt = getValue();
+          return dayjs(createdAt).format("DD-MM-YYYY");
+        },
+      }),
+      columnHelper.display({
+        id: "actions",
+        cell: ({ row }) => {
+          const deleteInstructor = async () => {
+            await removeAllocation({
+              locationId,
+              allocationId: row.original.id,
+            });
+
+            toast.success("Instructeur verwijderd");
+          };
+
+          return (
+            <>
+              <div className="-mx-3 -my-1.5 sm:-mx-2.5">
+                <Dropdown>
+                  <DropdownButton plain aria-label="More options">
+                    <EllipsisHorizontalIcon />
+                  </DropdownButton>
+                  <DropdownMenu anchor="bottom end">
+                    <DropdownItem onClick={deleteInstructor}>
+                      Verwijder
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            </>
+          );
+        },
+      }),
+    ],
+    [locationId],
+  );
+
   const table = useReactTable({
-    data: students,
+    data: instructors,
     columns,
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
@@ -140,15 +157,11 @@ export default function InstructorsTable({
                   : "",
               )}
               key={row.id}
-              href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
                   className={clsx(cell.column.columnDef.meta?.align)}
-                  // suppressLinkBehavior={
-                  //   cell.column.columnDef.meta?.suppressLinkBehavior
-                  // }
                 >
                   {index === 0 && row.getIsSelected() && (
                     <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />

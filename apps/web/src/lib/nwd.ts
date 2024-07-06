@@ -786,17 +786,24 @@ export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
-      return await Cohort.listStudentsWithCurricula({ cohortId });
+      return await Cohort.Allocation.listStudentsWithCurricula({ cohortId });
     });
   },
 );
+
+export const listInstructorsByCohortId = cache(async (cohortId: string) => {
+  return makeRequest(async () => {
+    // TODO: This needs authorization checks
+    return await Cohort.Allocation.listInstructors({ cohortId });
+  });
+});
 
 export const retrieveStudentAllocationWithCurriculum = cache(
   async (cohortId: string, allocationId: string) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
 
-      return await Cohort.retrieveStudentWithCurriculum({
+      return await Cohort.Allocation.retrieveStudentWithCurriculum({
         cohortId,
         allocationId,
       });
@@ -870,14 +877,13 @@ export async function addStudentToCohortByPersonId({
 }) {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const _primaryPerson = await getPrimaryPerson(authUser);
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-    // TODO: Update authorization
-    // await isActiveActorTypeInLocation({
-    //   actorType: ["location_admin"],
-    //   locationId: id,
-    //   personId: primaryPerson.id,
-    // });
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
 
     const actor = await Location.Person.getActorByPersonIdAndType({
       locationId,
@@ -893,6 +899,63 @@ export async function addStudentToCohortByPersonId({
       cohortId,
       actorId: actor.id,
     });
+  });
+}
+
+export async function addInstructorToCohortByPersonId({
+  locationId,
+  cohortId,
+  personId,
+}: {
+  locationId: string;
+  cohortId: string;
+  personId: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    const actor = await Location.Person.getActorByPersonIdAndType({
+      locationId,
+      actorType: "instructor",
+      personId,
+    });
+
+    if (!actor) {
+      throw new Error("No actor found");
+    }
+
+    return await Cohort.Allocation.create({
+      cohortId,
+      actorId: actor.id,
+    });
+  });
+}
+
+export async function removeAllocationById({
+  locationId,
+  allocationId,
+}: {
+  locationId: string;
+  allocationId: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    });
+
+    await Cohort.Allocation.remove({ id: allocationId });
   });
 }
 
