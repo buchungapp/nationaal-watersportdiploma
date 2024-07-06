@@ -106,7 +106,7 @@ const columns = [
   columnHelper.accessor("studentCurriculum.gearType.title", {
     header: "Vaartuig",
   }),
-  columnHelper.accessor((row) => null, {
+  columnHelper.accessor(() => null, {
     header: "Instructeur",
   }),
   columnHelper.accessor("tags", {

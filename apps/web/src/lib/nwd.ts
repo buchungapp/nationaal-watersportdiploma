@@ -1,5 +1,3 @@
-"use server";
-
 import {
   Certificate,
   Cohort,
@@ -17,16 +15,62 @@ import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import assert from "node:assert";
 import { cache } from "react";
 import "server-only";
 import packageInfo from "~/../package.json";
 import posthog from "./posthog";
 
-function extractPerson(user: Awaited<ReturnType<typeof getUserOrThrow>>) {
-  assert(user.persons.length <= 1, "Expected at most one person per user");
+export type ActorType = "student" | "instructor" | "location_admin";
 
-  return user.persons[0] ?? null;
+async function getPrimaryPerson<T extends boolean = true>(
+  user: Awaited<ReturnType<typeof getUserOrThrow>>,
+  force = true as T,
+): Promise<
+  T extends true
+    ? Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number]
+    : Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number] | null
+> {
+  if (user.persons.length === 0) {
+    throw new Error("Expected at least one person for user");
+  }
+
+  const primaryPerson =
+    user.persons.find((person) => person.isPrimary) || user.persons[0]!;
+
+  if (!primaryPerson.isPrimary && !force) {
+    return null as T extends true
+      ? Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number]
+      : null;
+  }
+
+  if (!primaryPerson.isPrimary) {
+    await User.Person.setPrimary({ personId: primaryPerson.id });
+  }
+
+  return primaryPerson;
+}
+
+async function isActiveActorTypeInLocation({
+  actorType,
+  locationId,
+  personId,
+}: {
+  personId: string;
+  locationId: string;
+  actorType: ActorType[];
+}) {
+  const availableLocations = await User.Person.listLocationsByRole({
+    personId: personId,
+    roles: actorType,
+  });
+
+  const isMatch = availableLocations.some((l) => l.locationId === locationId);
+
+  if (!isMatch) {
+    throw new Error("Unauthorized");
+  }
+
+  return true as const;
 }
 
 async function makeRequest<T>(cb: () => Promise<T>) {
@@ -107,19 +151,13 @@ export const findCertificate = async ({
 export const listCertificates = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
 
-    const person = extractPerson(user);
-
-    if (!person) return [];
-
-    const availableLocations = await User.Person.listLocationsByRole({
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
       personId: person.id,
-      roles: ["location_admin"],
     });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
-    }
 
     const certificates = await Certificate.list({
       filter: { locationId },
@@ -132,10 +170,7 @@ export const listCertificates = cache(async (locationId: string) => {
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
-
-    const person = extractPerson(user);
-
-    if (!person) return [];
+    const person = await getPrimaryPerson(user);
 
     const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
@@ -338,47 +373,20 @@ export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
 
 export const retrieveLocationByHandle = cache(async (handle: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
-
-    const person = extractPerson(user);
-
-    if (!person) {
-      throw new Error("Person not found for user");
-    }
-
-    const availableLocations = await User.Person.listLocationsByRole({
-      personId: person.id,
-      roles: ["location_admin"],
-    });
-
-    const location = await Location.fromHandle(handle);
-
-    if (!availableLocations.some((l) => l.locationId === location.id)) {
-      throw new Error("Location not found for person");
-    }
-
-    return location;
+    return await Location.fromHandle(handle);
   });
 });
 
 export const listPersonsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
 
-    const person = extractPerson(user);
-
-    if (!person) {
-      throw new Error("Person not found for user");
-    }
-
-    const availableLocations = await User.Person.listLocationsByRole({
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
       personId: person.id,
-      roles: ["location_admin"],
     });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
-    }
 
     const persons = await User.Person.list({ filter: { locationId } });
 
@@ -387,27 +395,16 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 });
 
 export const listPersonsForLocationByRole = cache(
-  async (
-    locationId: string,
-    role: "student" | "instructor" | "location_admin",
-  ) => {
+  async (locationId: string, role: ActorType) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
 
-      const person = extractPerson(user);
-
-      if (!person) {
-        throw new Error("Person not found for user");
-      }
-
-      const availableLocations = await User.Person.listLocationsByRole({
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
         personId: person.id,
-        roles: ["location_admin"],
       });
-
-      if (!availableLocations.some((l) => l.locationId === locationId)) {
-        throw new Error("Location not found for person");
-      }
 
       const persons = await Location.Person.list({
         locationId,
@@ -422,15 +419,10 @@ export const listPersonsForLocationByRole = cache(
 export const listLocationsForPerson = cache(async (personId?: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
-
-    const person = extractPerson(user);
-
-    if (!person) {
-      return [];
-    }
+    const person = await getPrimaryPerson(user);
 
     if (personId && person.id !== personId) {
-      throw new Error("Person not found for user");
+      throw new Error("Unauthorized");
     }
 
     const locations = await User.Person.listLocationsByRole({
@@ -450,7 +442,7 @@ export const listAllLocations = cache(async () => {
   });
 });
 
-export const createPersonForLocation = async (
+export const createStudentForLocation = async (
   locationId: string,
   personInput: {
     email: string;
@@ -464,21 +456,13 @@ export const createPersonForLocation = async (
 ) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-    const authPerson = extractPerson(authUser);
-
-    if (!authPerson) {
-      throw new Error("Person not found for user");
-    }
-
-    const availableLocations = await User.Person.listLocationsByRole({
-      personId: authPerson.id,
-      roles: ["location_admin"],
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
     });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
-    }
 
     let user;
 
@@ -512,7 +496,7 @@ export const createPersonForLocation = async (
 
     posthog.capture({
       distinctId: authUser.authUserId,
-      event: "create_person_for_location",
+      event: "create_student_for_location",
       properties: {
         $set: { email: authUser.email, displayName: authUser.displayName },
       },
@@ -538,21 +522,13 @@ export const createCompletedCertificate = async (
   return makeRequest(async () => {
     return withTransaction(async () => {
       const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
 
-      const authPerson = extractPerson(authUser);
-
-      if (!authPerson) {
-        throw new Error("Person not found for user");
-      }
-
-      const availableLocations = await User.Person.listLocationsByRole({
-        personId: authPerson.id,
-        roles: ["location_admin"],
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
       });
-
-      if (!availableLocations.some((l) => l.locationId === locationId)) {
-        throw new Error("Location not found for person");
-      }
 
       // Start student curriculum
       const { id: studentCurriculumId } = await Student.Curriculum.start({
@@ -595,6 +571,8 @@ export const createCompletedCertificate = async (
 
 export const listCohortsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
+    // TODO: This needs authorization checks
+
     const cohorts = await Cohort.listByLocationId({ id: locationId });
 
     return cohorts;
@@ -623,21 +601,13 @@ export const createCohort = async ({
 }) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-    const authPerson = extractPerson(authUser);
-
-    if (!authPerson) {
-      throw new Error("Person not found for user");
-    }
-
-    const availableLocations = await User.Person.listLocationsByRole({
-      personId: authPerson.id,
-      roles: ["location_admin"],
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
     });
-
-    if (!availableLocations.some((l) => l.locationId === locationId)) {
-      throw new Error("Location not found for person");
-    }
 
     const res = await Cohort.create({
       locationId,
@@ -711,6 +681,7 @@ export const getIsActiveInstructor = cache(async () => {
       return false;
     }
 
+    // TODO: This should probably move to a check on the primary person
     const activeActorTypes = await User.Actor.listActiveTypesForUser({
       userId: user.authUserId,
     });
@@ -746,21 +717,13 @@ export const updateLocationDetails = async (
 ) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-    const authPerson = extractPerson(authUser);
-
-    if (!authPerson) {
-      throw new Error("Person not found for user");
-    }
-
-    const availableLocations = await User.Person.listLocationsByRole({
-      personId: authPerson.id,
-      roles: ["location_admin"],
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: id,
+      personId: primaryPerson.id,
     });
-
-    if (!availableLocations.some((l) => l.locationId === id)) {
-      throw new Error("Location not found for person");
-    }
 
     await Location.updateDetails({
       id,
@@ -779,6 +742,7 @@ export const updateLocationDetails = async (
 export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
+      // TODO: This needs authorization checks
       return await Cohort.listStudentsWithCurricula({ cohortId });
     });
   },
@@ -787,6 +751,8 @@ export const listStudentsWithCurriculaByCohortId = cache(
 export const retrieveStudentAllocationWithCurriculum = cache(
   async (cohortId: string, allocationId: string) => {
     return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
       return await Cohort.retrieveStudentWithCurriculum({
         cohortId,
         allocationId,
@@ -798,6 +764,8 @@ export const retrieveStudentAllocationWithCurriculum = cache(
 export const listCompletedCompetenciesByStudentCurriculumId = cache(
   async (studentCurriculumId: string) => {
     return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
       return await Student.Curriculum.listCompletedCompetenciesById({
         id: studentCurriculumId,
       });
@@ -808,6 +776,8 @@ export const listCompletedCompetenciesByStudentCurriculumId = cache(
 export const listCompetencyProgressInCohortForStudent = cache(
   async (allocationId: string) => {
     return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
       return await Cohort.StudentProgress.byAllocationId({ id: allocationId });
     });
   },
@@ -826,12 +796,7 @@ export const updateCompetencyProgress = cache(
   }) => {
     return makeRequest(async () => {
       const authUser = await getUserOrThrow();
-
-      const authPerson = extractPerson(authUser);
-
-      if (!authPerson) {
-        throw new Error("Person not found for user");
-      }
+      const primaryPerson = await getPrimaryPerson(authUser);
 
       // const availableLocations = await User.Person.listLocationsByRole({
       //   personId: authPerson.id,
@@ -843,7 +808,7 @@ export const updateCompetencyProgress = cache(
       await Cohort.StudentProgress.upsertProgress({
         cohortAllocationId,
         competencyProgress,
-        createdBy: authPerson.id,
+        createdBy: primaryPerson.id,
       });
 
       return;
@@ -862,12 +827,14 @@ export async function addStudentToCohortByPersonId({
 }) {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-    const authPerson = extractPerson(authUser);
-
-    if (!authPerson) {
-      throw new Error("Person not found for user");
-    }
+    // TODO: Update authorization
+    // await isActiveActorTypeInLocation({
+    //   actorType: ["location_admin"],
+    //   locationId: id,
+    //   personId: primaryPerson.id,
+    // });
 
     const actor = await Location.Person.getActorByPersonIdAndType({
       locationId,
@@ -886,23 +853,18 @@ export async function addStudentToCohortByPersonId({
   });
 }
 
-export async function isInstructorInCohort(cohortId: string) {
+export const isInstructorInCohort = cache(async (cohortId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-
-    const authPerson = extractPerson(authUser);
-
-    if (!authPerson) {
-      throw new Error("Person not found for user");
-    }
+    const primaryPerson = await getPrimaryPerson(authUser);
 
     return await Cohort.Allocation.isPersonInCohortById({
       cohortId,
-      personId: authPerson.id,
+      personId: primaryPerson.id,
       actorType: "instructor",
     });
   });
-}
+});
 
 export async function claimStudentsInCohort(
   cohortId: string,
@@ -916,16 +878,12 @@ export async function claimStudentsInCohort(
       ),
     ]);
 
-    const authPerson = extractPerson(authUser);
-
-    if (!authPerson) {
-      throw new Error("Person not found for user");
-    }
+    const primaryPerson = await getPrimaryPerson(authUser);
 
     const instructorActor = await Location.Person.getActorByPersonIdAndType({
       locationId: cohort.locationId,
       actorType: "instructor",
-      personId: authPerson.id,
+      personId: primaryPerson.id,
     });
 
     if (!instructorActor) {
@@ -957,8 +915,7 @@ export const enrollStudentsInCurriculumForCohort = async ({
   return makeRequest(async () => {
     return withTransaction(async () => {
       const authUser = await getUserOrThrow();
-
-      const authPerson = extractPerson(authUser);
+      const authPerson = await getPrimaryPerson(authUser);
 
       // TODO: Update authorization
 

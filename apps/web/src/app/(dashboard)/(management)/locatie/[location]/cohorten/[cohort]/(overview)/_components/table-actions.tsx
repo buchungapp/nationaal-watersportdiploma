@@ -31,6 +31,7 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
+
 import {
   claimStudentsInCohort,
   enrollStudentsInCurriculumForCohort,
@@ -38,7 +39,7 @@ import {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
   listPrograms,
-} from "~/lib/nwd";
+} from "../_actions/nwd";
 import { Student } from "./students-table";
 
 type Props = { rows: Row<Student>[]; cohortId: string };

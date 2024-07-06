@@ -28,12 +28,12 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
+import { createPerson } from "../_actions/create";
 import {
   addStudentToCohortByPersonId,
   listCountries,
   listPersonsForLocationByRole,
-} from "~/lib/nwd";
-import { createPerson } from "../_actions/create";
+} from "../_actions/nwd";
 
 interface Props {
   locationId: string;

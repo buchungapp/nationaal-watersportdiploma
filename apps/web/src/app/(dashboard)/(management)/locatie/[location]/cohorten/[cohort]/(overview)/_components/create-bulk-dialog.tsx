@@ -29,8 +29,8 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { listCountries } from "~/lib/nwd";
 import { createPersonBulk } from "../_actions/create";
+import { listCountries } from "../_actions/nwd";
 
 interface Props {
   locationId: string;

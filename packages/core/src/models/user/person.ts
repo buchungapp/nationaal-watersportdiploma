@@ -271,3 +271,24 @@ export const listLocationsByRole = withZod(
     return result as any
   },
 )
+
+export const setPrimary = withZod(
+  z.object({
+    personId: uuidSchema,
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .update(s.person)
+      .set({
+        isPrimary: true,
+      })
+      .where(and(eq(s.person.id, input.personId), isNull(s.person.deletedAt)))
+      .returning({ id: s.person.id })
+      .then(singleRow)
+
+    return result
+  },
+)

@@ -3,7 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createPersonForLocation } from "~/lib/nwd";
+import { createStudentForLocation } from "~/lib/nwd";
 
 export async function createPerson(
   locationId: string,
@@ -40,7 +40,7 @@ export async function createPerson(
   try {
     const parsed = expectedSchema.parse(data);
 
-    const result = await createPersonForLocation(locationId, parsed);
+    const result = await createStudentForLocation(locationId, parsed);
 
     revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
 
@@ -85,7 +85,7 @@ export async function createPersonBulk(
 ) {
   const result = await Promise.allSettled(
     persons.map(async (row) => {
-      await createPersonForLocation(locationId, row);
+      await createStudentForLocation(locationId, row);
     }),
   );
 
