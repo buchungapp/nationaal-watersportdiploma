@@ -427,7 +427,6 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
 
     const locations = await User.Person.listLocationsByRole({
       personId: person.id,
-      roles: ["location_admin"],
     });
 
     return await Location.list().then((locs) =>
@@ -862,6 +861,18 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
       cohortId,
       personId: primaryPerson.id,
       actorType: "instructor",
+    });
+  });
+});
+
+export const listRolesForLocation = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    return await User.Person.listActiveRolesForLocation({
+      locationId,
+      personId: primaryPerson.id,
     });
   });
 });

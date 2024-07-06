@@ -314,3 +314,36 @@ export const replaceMetadata = withZod(
       .then(singleRow)
   },
 )
+
+export const listActiveRolesForLocation = withZod(
+  z.object({
+    personId: uuidSchema,
+    locationId: uuidSchema,
+  }),
+  z.array(z.enum(['student', 'instructor', 'location_admin'])),
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .select({
+        type: s.actor.type,
+      })
+      .from(s.actor)
+      .where(
+        and(
+          eq(s.actor.locationId, input.locationId),
+          eq(s.actor.personId, input.personId),
+          isNull(s.actor.deletedAt),
+        ),
+      )
+      .then((rows) =>
+        rows
+          .filter(({ type }) =>
+            ['student', 'instructor', 'location_admin'].includes(type),
+          )
+          .map(
+            ({ type }) => type as 'student' | 'instructor' | 'location_admin',
+          ),
+      )
+  },
+)

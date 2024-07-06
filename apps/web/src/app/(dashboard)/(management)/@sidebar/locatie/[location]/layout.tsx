@@ -10,6 +10,7 @@ import {
   SidebarSection,
   SidebarSpacer,
 } from "~/app/(dashboard)/_components/sidebar";
+import { listRolesForLocation, retrieveLocationByHandle } from "~/lib/nwd";
 import LatestNews from "../../_components/latest-news";
 import Feedback from "./_components/feedback";
 import { LocationSelector } from "./_components/location-selector";
@@ -21,7 +22,10 @@ interface LayoutProps {
     location: string;
   };
 }
-export default function SidebarLayout({ params, children }: LayoutProps) {
+export default async function SidebarLayout({ params, children }: LayoutProps) {
+  const location = await retrieveLocationByHandle(params.location);
+  const rolesForPerson = await listRolesForLocation(location.id);
+
   return (
     <>
       {children}
@@ -29,7 +33,7 @@ export default function SidebarLayout({ params, children }: LayoutProps) {
         <LocationSelector currentLocationSlug={params.location} />
       </SidebarHeader>
       <SidebarBody>
-        <LocationSidebarMenu />
+        <LocationSidebarMenu personRoles={rolesForPerson} />
         <LatestNews />
         <SidebarSpacer />
         <SidebarSection>
