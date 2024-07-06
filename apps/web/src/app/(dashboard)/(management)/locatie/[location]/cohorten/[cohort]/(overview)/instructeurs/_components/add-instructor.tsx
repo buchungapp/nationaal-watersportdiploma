@@ -26,7 +26,7 @@ export function AddInstructor({
   const [personQuery, setPersonQuery] = useState("");
 
   return (
-    <div>
+    <div className="max-w-lg">
       <Subheading>Snel toevoegen</Subheading>
       <Combobox
         key={forceRerenderId}

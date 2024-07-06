@@ -92,7 +92,7 @@ export const cohortAllocation = pgTable(
         name: 'cohort_allocation_student_curriculum_id_fk',
       }),
       instructorReference: foreignKey({
-        columns: [table.actorId],
+        columns: [table.instructorId],
         foreignColumns: [actor.id],
         name: 'cohort_allocation_instructor_id_fk',
       }),

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
   claimStudentsInCohort as claimStudentsInCohortInner,
@@ -14,6 +15,7 @@ import {
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrograms as listProgramsInner,
   removeAllocationById,
+  removeCohortRole as removeCohortRoleInner,
   type ActorType,
 } from "~/lib/nwd";
 
@@ -73,8 +75,6 @@ export async function addStudentToCohortByPersonId(props: {
   locationId: string;
   personId: string;
 }) {
-  await getUserOrThrow();
-
   return addStudentToCohortByPersonIdInner(props);
 }
 
@@ -83,8 +83,6 @@ export async function addInstructorToCohortByPersonId(props: {
   locationId: string;
   personId: string;
 }) {
-  await getUserOrThrow();
-
   const result = addInstructorToCohortByPersonIdInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
@@ -95,9 +93,8 @@ export async function addInstructorToCohortByPersonId(props: {
 export async function removeAllocation(input: {
   locationId: string;
   allocationId: string;
+  cohortId: string;
 }) {
-  await getUserOrThrow();
-
   await removeAllocationById(input);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
@@ -116,7 +113,29 @@ export async function listPersonsForLocationByRole(
   locationId: string,
   role: ActorType,
 ) {
-  await getUserOrThrow();
-
   return listPersonsForLocationByRoleInner(locationId, role);
+}
+
+export async function addCohortRole(props: {
+  cohortId: string;
+  allocationId: string;
+  roleHandle: "cohort_admin";
+}) {
+  addCohortRoleInner(props);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+
+  return;
+}
+
+export async function removeCohortRole(props: {
+  cohortId: string;
+  allocationId: string;
+  roleHandle: "cohort_admin";
+}) {
+  removeCohortRoleInner(props);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+
+  return;
 }

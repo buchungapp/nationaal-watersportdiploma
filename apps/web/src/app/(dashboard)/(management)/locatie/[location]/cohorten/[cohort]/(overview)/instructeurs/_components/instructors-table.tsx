@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Dropdown,
   DropdownButton,
@@ -31,7 +32,11 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { type listInstructorsByCohortId } from "~/lib/nwd";
-import { removeAllocation } from "../../_actions/nwd";
+import {
+  addCohortRole,
+  removeAllocation,
+  removeCohortRole,
+} from "../../_actions/nwd";
 
 export type Instructor = Awaited<
   ReturnType<typeof listInstructorsByCohortId>
@@ -68,6 +73,16 @@ export default function InstructorsTable({
           ),
         },
       ),
+      columnHelper.accessor("roles", {
+        header: "Rollen",
+        cell: ({ getValue }) => (
+          <div className="flex gap-x-2 items-center">
+            {getValue().map((tag) => (
+              <Badge key={tag.id}>{tag.title ?? tag.handle}</Badge>
+            ))}
+          </div>
+        ),
+      }),
       columnHelper.accessor("createdAt", {
         header: "Toegevoegd",
         cell: ({ getValue }) => {
@@ -82,9 +97,30 @@ export default function InstructorsTable({
             await removeAllocation({
               locationId,
               allocationId: row.original.id,
+              cohortId,
             });
 
-            toast.success("Instructeur verwijderd");
+            toast(`${row.original.person.firstName} verwijderd`);
+          };
+
+          const makeAdmin = async () => {
+            await addCohortRole({
+              roleHandle: "cohort_admin",
+              allocationId: row.original.id,
+              cohortId,
+            });
+
+            toast(`${row.original.person.firstName} is nu beheerder`);
+          };
+
+          const removeAdmin = async () => {
+            await removeCohortRole({
+              roleHandle: "cohort_admin",
+              allocationId: row.original.id,
+              cohortId,
+            });
+
+            toast(`${row.original.person.firstName} is geen beheerder meer`);
           };
 
           return (
@@ -96,8 +132,19 @@ export default function InstructorsTable({
                   </DropdownButton>
                   <DropdownMenu anchor="bottom end">
                     <DropdownItem onClick={deleteInstructor}>
-                      Verwijder
+                      Verwijder uit cohort
                     </DropdownItem>
+                    {row.original.roles.some(
+                      (role) => role.handle === "cohort_admin",
+                    ) ? (
+                      <DropdownItem onClick={removeAdmin}>
+                        Verwijder als beheerder
+                      </DropdownItem>
+                    ) : (
+                      <DropdownItem onClick={makeAdmin}>
+                        Maak beheerder
+                      </DropdownItem>
+                    )}
                   </DropdownMenu>
                 </Dropdown>
               </div>

@@ -658,6 +658,11 @@ export const listInstructors = withZod(
           lastName: s.person.lastName,
           dateOfBirth: s.person.dateOfBirth,
         },
+        role: {
+          id: s.role.id,
+          handle: s.role.handle,
+          title: s.role.title,
+        },
       })
       .from(s.cohortAllocation)
       .innerJoin(
@@ -669,6 +674,20 @@ export const listInstructors = withZod(
         ),
       )
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
+      .leftJoin(
+        s.cohortAllocationRole,
+        and(
+          eq(s.cohortAllocationRole.cohortAllocationId, s.cohortAllocation.id),
+          isNull(s.cohortAllocationRole.deletedAt),
+        ),
+      )
+      .leftJoin(
+        s.role,
+        and(
+          eq(s.role.id, s.cohortAllocationRole.roleId),
+          isNull(s.role.deletedAt),
+        ),
+      )
       .where(
         and(
           isNull(s.cohortAllocation.deletedAt),
@@ -676,16 +695,105 @@ export const listInstructors = withZod(
         ),
       )
 
-    return rows.map((row) => ({
-      id: row.id,
-      person: {
-        id: row.person.id,
-        firstName: row.person.firstName,
-        lastNamePrefix: row.person.lastNamePrefix,
-        lastName: row.person.lastName,
-        dateOfBirth: row.person.dateOfBirth,
-      },
-      createdAt: row.createdAt,
-    }))
+    // Group the results by instructor
+    const instructorsMap = new Map<
+      string,
+      {
+        id: string
+        person: {
+          id: string
+          firstName: string
+          lastNamePrefix: string | null
+          lastName: string | null
+          dateOfBirth: string | null
+        }
+        roles: {
+          id: string
+          handle: string
+          title: string | null
+        }[]
+        createdAt: string
+      }
+    >()
+
+    for (const row of rows) {
+      if (!instructorsMap.has(row.person.id)) {
+        instructorsMap.set(row.person.id, {
+          id: row.id,
+          person: {
+            id: row.person.id,
+            firstName: row.person.firstName,
+            lastNamePrefix: row.person.lastNamePrefix,
+            lastName: row.person.lastName,
+            dateOfBirth: row.person.dateOfBirth,
+          },
+          roles: [],
+          createdAt: row.createdAt,
+        })
+      }
+
+      const instructor = instructorsMap.get(row.person.id)!
+      if (row.role && !instructor.roles.some((r) => r.id === row.role!.id)) {
+        instructor.roles.push({
+          id: row.role.id,
+          handle: row.role.handle,
+          title: row.role.title,
+        })
+      }
+    }
+
+    return Array.from(instructorsMap.values())
+  },
+)
+
+export const addRole = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    allocationId: uuidSchema,
+    roleHandle: z.string(),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const role = await query
+      .select({ id: s.role.id })
+      .from(s.role)
+      .where(and(eq(s.role.handle, input.roleHandle), isNull(s.role.deletedAt)))
+      .then(singleRow)
+
+    return await query
+      .insert(s.cohortAllocationRole)
+      .values({
+        cohortAllocationId: input.allocationId,
+        roleId: role.id,
+      })
+      .onConflictDoNothing()
+  },
+)
+
+export const withdrawlRole = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    allocationId: uuidSchema,
+    roleHandle: z.string(),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const role = await query
+      .select({ id: s.role.id })
+      .from(s.role)
+      .where(and(eq(s.role.handle, input.roleHandle), isNull(s.role.deletedAt)))
+      .then(singleRow)
+
+    // TODO: this is a hard delete, since our PK is a composite key
+    return await query
+      .delete(s.cohortAllocationRole)
+      .where(
+        and(
+          eq(s.cohortAllocationRole.cohortAllocationId, input.allocationId),
+          eq(s.cohortAllocationRole.roleId, role.id),
+        ),
+      )
   },
 )

@@ -915,11 +915,21 @@ export async function addInstructorToCohortByPersonId({
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId,
-      personId: primaryPerson.id,
-    });
+    const [isLocationAdmin, privileges] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listPrivilegesForPerson({
+        cohortId,
+        personId: primaryPerson.id,
+      }),
+    ]);
+
+    if (!isLocationAdmin && !privileges.includes("manage_cohort_instructors")) {
+      throw new Error("Unauthorized");
+    }
 
     const actor = await Location.Person.getActorByPersonIdAndType({
       locationId,
@@ -941,19 +951,37 @@ export async function addInstructorToCohortByPersonId({
 export async function removeAllocationById({
   locationId,
   allocationId,
+  cohortId,
 }: {
   locationId: string;
   allocationId: string;
+  cohortId: string;
 }) {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId,
-      personId: primaryPerson.id,
-    });
+    const [isLocationAdmin, privileges] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listPrivilegesForPerson({
+        cohortId,
+        personId: primaryPerson.id,
+      }),
+    ]);
+
+    if (
+      !isLocationAdmin &&
+      // TODO: This should be a separate check, but for now we only have one role
+      !privileges.some((p) =>
+        ["manage_cohort_students", "manage_cohort_instructors"].includes(p),
+      )
+    ) {
+      throw new Error("Unauthorized");
+    }
 
     await Cohort.Allocation.remove({ id: allocationId });
   });
@@ -1080,3 +1108,89 @@ export const enrollStudentsInCurriculumForCohort = async ({
     });
   });
 };
+
+export async function addCohortRole({
+  allocationId,
+  roleHandle,
+  cohortId,
+}: {
+  cohortId: string;
+  allocationId: string;
+  roleHandle: "cohort_admin";
+}) {
+  return makeRequest(async () => {
+    const [authUser, cohort] = await Promise.all([
+      getUserOrThrow(),
+      Cohort.byIdOrHandle({ id: cohortId }).then(
+        (cohort) => cohort ?? notFound(),
+      ),
+    ]);
+
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const [isLocationAdmin, privileges] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: cohort.locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listPrivilegesForPerson({
+        cohortId,
+        personId: primaryPerson.id,
+      }),
+    ]);
+
+    if (!isLocationAdmin && !privileges.includes("manage_cohort_instructors")) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Cohort.Allocation.addRole({
+      cohortId,
+      allocationId,
+      roleHandle,
+    });
+  });
+}
+
+export async function removeCohortRole({
+  allocationId,
+  roleHandle,
+  cohortId,
+}: {
+  cohortId: string;
+  allocationId: string;
+  roleHandle: "cohort_admin";
+}) {
+  return makeRequest(async () => {
+    const [authUser, cohort] = await Promise.all([
+      getUserOrThrow(),
+      Cohort.byIdOrHandle({ id: cohortId }).then(
+        (cohort) => cohort ?? notFound(),
+      ),
+    ]);
+
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const [isLocationAdmin, privileges] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: cohort.locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listPrivilegesForPerson({
+        cohortId,
+        personId: primaryPerson.id,
+      }),
+    ]);
+
+    if (!isLocationAdmin && !privileges.includes("manage_cohort_instructors")) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Cohort.Allocation.withdrawlRole({
+      cohortId,
+      allocationId,
+      roleHandle,
+    });
+  });
+}

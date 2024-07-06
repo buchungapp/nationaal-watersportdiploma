@@ -21,7 +21,7 @@ export function LayoutTabs({
   const hasRole = (role: ActorType[]) =>
     personRoles.some((r) => role.includes(r));
 
-  const hasPrivilege = (privilege: typeof enums.Privilege.options) =>
+  const hasPrivilege = (privilege: z.infer<typeof enums.Privilege>[]) =>
     personPrivileges.some((p) => privilege.includes(p));
 
   return (
@@ -42,13 +42,15 @@ export function LayoutTabs({
             href: `/locatie/${params.location}/cohorten/${params.cohort}/diplomas`,
             enabled:
               hasRole(["location_admin"]) ||
-              hasPrivilege(["accredit_certificate"]),
+              hasPrivilege(["manage_cohort_certificate"]),
             current: segments[0] === "diplomas",
           },
           {
             name: "Instructeurs",
             href: `/locatie/${params.location}/cohorten/${params.cohort}/instructeurs`,
-            enabled: hasRole(["location_admin"]),
+            enabled:
+              hasRole(["location_admin"]) ||
+              hasPrivilege(["manage_cohort_students"]),
             current: segments[0] === "instructeurs",
           },
         ]

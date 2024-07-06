@@ -127,6 +127,13 @@
       "when": 1720294829779,
       "tag": "0017_sticky_warhawk",
       "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1720304672864,
+      "tag": "0018_ambitious_flatman",
+      "breakpoints": false
     }
   ]
 }
