@@ -39,7 +39,9 @@ export const cohort = pgTable(
   },
   (table) => {
     return {
-      unqHandle: uniqueIndex().on(table.handle),
+      unqHandleForLocation: uniqueIndex()
+        .on(table.handle, table.locationId)
+        .where(sql`deleted_at IS NULL`),
       locationReference: foreignKey({
         columns: [table.locationId],
         foreignColumns: [location.id],

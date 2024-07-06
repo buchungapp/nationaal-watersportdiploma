@@ -127,6 +127,13 @@
       "when": 1720263101699,
       "tag": "0017_sweet_skullbuster",
       "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1720290888209,
+      "tag": "0018_high_maximus",
+      "breakpoints": false
     }
   ]
 }

@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
-import { retrieveCohortByHandle } from "~/lib/nwd";
+import { retrieveCohortByHandle, retrieveLocationByHandle } from "~/lib/nwd";
 import { LayoutTabs } from "./_components/layout-tabs";
 
 dayjs.locale("nl");
@@ -21,7 +21,8 @@ export default async function Layout({
   params: { location: string; cohort: string };
   children: React.ReactNode;
 }) {
-  const cohort = await retrieveCohortByHandle(params.cohort);
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
   if (!cohort) {
     notFound();

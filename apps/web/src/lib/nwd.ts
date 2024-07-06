@@ -18,6 +18,7 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import packageInfo from "~/../package.json";
+import { isPersonInCohortById } from "../../../../packages/core/out/models/cohort/allocation";
 import posthog from "./posthog";
 
 export type ActorType = "student" | "instructor" | "location_admin";
@@ -35,7 +36,7 @@ async function getPrimaryPerson<T extends boolean = true>(
   }
 
   const primaryPerson =
-    user.persons.find((person) => person.isPrimary) || user.persons[0]!;
+    user.persons.find((person) => person.isPrimary) ?? user.persons[0]!;
 
   if (!primaryPerson.isPrimary && !force) {
     return null as T extends true
@@ -578,14 +579,45 @@ export const listCohortsForLocation = cache(async (locationId: string) => {
   });
 });
 
-export const retrieveCohortByHandle = cache(async (handle: string) => {
-  return makeRequest(async () => {
-    // TODO: This needs authorization checks
-    const cohort = await Cohort.byIdOrHandle({ handle });
+export const retrieveCohortByHandle = cache(
+  async (handle: string, locationId: string) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
 
-    return cohort;
-  });
-});
+      const cohort = await Cohort.byIdOrHandle({ handle, locationId });
+
+      if (!cohort) {
+        return null;
+      }
+
+      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort?.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        isPersonInCohortById({
+          cohortId: cohort.id,
+          personId: primaryPerson.id,
+          actorType: "instructor",
+        }),
+      ]);
+
+      const canAccessCohort =
+        isLocationAdmin ||
+        (isInstructorInCohort &&
+          cohort.accessStartTime <= new Date().toISOString() &&
+          cohort.accessEndTime >= new Date().toISOString());
+
+      if (!canAccessCohort) {
+        return null;
+      }
+
+      return cohort;
+    });
+  },
+);
 
 export const createCohort = async ({
   locationId,
@@ -826,7 +858,7 @@ export async function addStudentToCohortByPersonId({
 }) {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const _primaryPerson = await getPrimaryPerson(authUser);
 
     // TODO: Update authorization
     // await isActiveActorTypeInLocation({
@@ -926,7 +958,7 @@ export const enrollStudentsInCurriculumForCohort = async ({
   return makeRequest(async () => {
     return withTransaction(async () => {
       const authUser = await getUserOrThrow();
-      const authPerson = await getPrimaryPerson(authUser);
+      const _authPerson = await getPrimaryPerson(authUser);
 
       // TODO: Update authorization
 

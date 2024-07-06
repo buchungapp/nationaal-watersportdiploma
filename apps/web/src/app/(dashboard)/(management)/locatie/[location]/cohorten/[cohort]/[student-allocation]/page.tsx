@@ -13,6 +13,7 @@ import { Link } from "~/app/(dashboard)/_components/link";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import {
   retrieveCohortByHandle,
+  retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
 import { CourseCard } from "./_components/course-card";
@@ -22,7 +23,8 @@ export default async function Page({
 }: {
   params: { location: string; cohort: string; "student-allocation": string };
 }) {
-  const cohort = await retrieveCohortByHandle(params.cohort);
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
   if (!cohort) {
     notFound();

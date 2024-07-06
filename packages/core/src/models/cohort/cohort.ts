@@ -3,7 +3,7 @@ import { SQL, and, asc, eq, getTableColumns, isNull } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
-  idOrHandleSchema,
+  handleSchema,
   possibleSingleRow,
   singleRow,
   successfulCreateResponse,
@@ -63,7 +63,10 @@ export const listByLocationId = withZod(
 )
 
 export const byIdOrHandle = withZod(
-  idOrHandleSchema,
+  z.union([
+    z.object({ id: uuidSchema }),
+    z.object({ handle: handleSchema, locationId: uuidSchema }),
+  ]),
   selectSchema.nullable(),
   async (input) => {
     const query = useQuery()
@@ -76,6 +79,7 @@ export const byIdOrHandle = withZod(
 
     if ('handle' in input) {
       whereClausules.push(eq(s.cohort.handle, input.handle))
+      whereClausules.push(eq(s.cohort.locationId, input.locationId))
     }
 
     const rows = await query

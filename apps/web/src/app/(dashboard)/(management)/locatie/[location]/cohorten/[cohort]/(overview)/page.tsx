@@ -28,12 +28,15 @@ export default async function Page({
 }: {
   params: { location: string; cohort: string };
 }) {
-  const cohortPromise = retrieveCohortByHandle(params.cohort).then((cohort) => {
-    if (!cohort) {
-      notFound();
-    }
-    return cohort;
-  });
+  const cohortPromise = retrieveLocationByHandle(params.location).then(
+    (location) =>
+      retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
+        if (!cohort) {
+          notFound();
+        }
+        return cohort;
+      }),
+  );
 
   const [cohort, students, location] = await Promise.all([
     cohortPromise,

@@ -24,6 +24,7 @@ import {
 import { selectSchema as actorSelectSchema } from '../user/actor.schema.js'
 import { selectSchema as personSelectSchema } from '../user/person.schema.js'
 import { insertSchema, selectSchema } from './allocation.schema.js'
+
 export const create = withZod(
   insertSchema.pick({
     actorId: true,
@@ -156,9 +157,7 @@ export const isPersonInCohortById = withZod(
   z.object({
     cohortId: uuidSchema,
     personId: uuidSchema,
-    actorType: singleOrArray(
-      z.enum(['student', 'instructor', 'location_admin']),
-    ).optional(),
+    actorType: singleOrArray(z.enum(['student', 'instructor'])).optional(),
   }),
   async (input) => {
     const query = useQuery()
