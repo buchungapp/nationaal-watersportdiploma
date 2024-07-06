@@ -21,7 +21,7 @@ export const createAuthUser = async ({ email }: { email: string }) => {
   })
 
   if (error) {
-    throw new Error(error.message)
+    throw error
   }
 
   return data.user.id

@@ -83,7 +83,9 @@ export const getOrCreate = withZod(
         firstName: input.firstName,
         lastName: input.lastName,
         lastNamePrefix: input.lastNamePrefix,
-        dateOfBirth: dayjs(input.dateOfBirth).format('YYYY-MM-DD'),
+        dateOfBirth: input.dateOfBirth
+          ? dayjs(input.dateOfBirth).format('YYYY-MM-DD')
+          : undefined,
         birthCity: input.birthCity,
         birthCountry: input.birthCountry,
       })
@@ -290,5 +292,25 @@ export const setPrimary = withZod(
       .then(singleRow)
 
     return result
+  },
+)
+
+export const replaceMetadata = withZod(
+  z.object({
+    personId: uuidSchema,
+    metadata: z.record(z.any()),
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .update(s.person)
+      .set({
+        _metadata: sql`(((${JSON.stringify(input.metadata)})::jsonb)#>> '{}')::jsonb`,
+      })
+      .where(eq(s.person.id, input.personId))
+      .returning({ id: s.person.id })
+      .then(singleRow)
   },
 )
