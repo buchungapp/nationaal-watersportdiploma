@@ -3,15 +3,14 @@ import {
   CalendarIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/16/solid";
-import clsx from "clsx";
 import dayjs from "dayjs";
 import "dayjs/locale/nl";
-import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import { retrieveCohortByHandle } from "~/lib/nwd";
+import { LayoutTabs } from "./_components/layout-tabs";
 
 dayjs.locale("nl");
 
@@ -60,47 +59,7 @@ export default async function Layout({
 
       <Divider className="my-4" />
 
-      <nav
-        className="flex space-x-6 text-sm overflow-auto scrollbar-none"
-        aria-label="Tabs"
-      >
-        {[
-          {
-            name: "Cursisten",
-            href: `/locatie/${params.location}/cohorten/${params.cohort}`,
-            current: true,
-          },
-          {
-            name: "Diploma's",
-            href: `/locatie/${params.location}/cohorten/${params.cohort}/diplomas`,
-            current: false,
-          },
-          {
-            name: "Instructeurs",
-            href: `/locatie/${params.location}/cohorten/${params.cohort}/instructeurs`,
-            current: false,
-          },
-          {
-            name: "Instellingen",
-            href: `/locatie/${params.location}/cohorten/${params.cohort}/instellingen`,
-            current: false,
-          },
-        ].map((tab) => (
-          <NextLink
-            key={tab.name}
-            href={tab.href}
-            className={clsx(
-              tab.current
-                ? "bg-gray-100 text-gray-700"
-                : "text-gray-500 hover:text-gray-700",
-              "rounded-md px-3 py-2 text-sm font-medium",
-            )}
-            aria-current={tab.current ? "page" : undefined}
-          >
-            {tab.name}
-          </NextLink>
-        ))}
-      </nav>
+      <LayoutTabs />
 
       <div className="mt-4">{children}</div>
     </>

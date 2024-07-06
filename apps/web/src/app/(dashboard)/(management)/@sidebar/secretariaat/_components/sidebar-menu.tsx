@@ -2,12 +2,13 @@
 "use client";
 
 import { useSelectedLayoutSegments } from "next/navigation";
+
 import {
   SidebarHeading,
   SidebarItem,
   SidebarLabel,
   SidebarSection,
-} from "../../../../_components/sidebar";
+} from "~/app/(dashboard)/_components/sidebar";
 
 export function SecretariaatSidebarMenu() {
   const segments = useSelectedLayoutSegments();
