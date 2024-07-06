@@ -5,6 +5,7 @@ import {
   LifebuoyIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
+import { listPersonsForUser } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
@@ -67,19 +68,31 @@ function PersonDropdownMenu() {
   );
 }
 
-export default function Layout({
+export default async function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const persons = await listPersonsForUser();
+
+  const firstPerson = persons[0]!;
+
   return (
     <StackedLayout
       navbar={
         <Navbar>
           <Dropdown>
             <DropdownButton as={NavbarItem} className="max-lg:hidden">
-              <Avatar src={""} initials="Vo" />
-              <NavbarLabel>Voornaam Achternaam</NavbarLabel>
+              <Avatar src={""} initials={firstPerson.firstName.slice(0, 2)} />
+              <NavbarLabel>
+                {[
+                  firstPerson.firstName,
+                  firstPerson.lastNamePrefix,
+                  firstPerson.lastName,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              </NavbarLabel>
               <ChevronDownIcon />
             </DropdownButton>
             <PersonDropdownMenu />

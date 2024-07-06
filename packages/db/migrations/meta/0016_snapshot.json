@@ -1,5 +1,5 @@
 {
-  "id": "451aefd0-7694-4894-8d51-48a464762b0e",
+  "id": "881de3ef-d2e2-4212-983b-a36acd4f4333",
   "prevId": "f17864b7-152a-4533-84cd-fb78e0b7f6ad",
   "version": "7",
   "dialect": "postgresql",
@@ -167,6 +167,83 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.cohort_allocation_role": {
+      "name": "cohort_allocation_role",
+      "schema": "",
+      "columns": {
+        "cohort_allocation_id": {
+          "name": "cohort_allocation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role_id": {
+          "name": "role_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cohort_allocation_role_allocation_id_fk": {
+          "name": "cohort_allocation_role_allocation_id_fk",
+          "tableFrom": "cohort_allocation_role",
+          "tableTo": "cohort_allocation",
+          "columnsFrom": [
+            "cohort_allocation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_role_role_id_fk": {
+          "name": "user_role_role_id_fk",
+          "tableFrom": "cohort_allocation_role",
+          "tableTo": "role",
+          "columnsFrom": [
+            "role_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "cohort_allocation_role_cohort_allocation_id_role_id_pk": {
+          "name": "cohort_allocation_role_cohort_allocation_id_role_id_pk",
+          "columns": [
+            "cohort_allocation_id",
+            "role_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
+    },
     "public.person_role": {
       "name": "person_role",
       "schema": "",
@@ -329,6 +406,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
+        },
+        "type": {
+          "name": "type",
+          "type": "role_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -979,17 +1063,24 @@
         }
       },
       "indexes": {
-        "cohort_handle_index": {
-          "name": "cohort_handle_index",
+        "cohort_handle_location_id_index": {
+          "name": "cohort_handle_location_id_index",
           "columns": [
             {
               "expression": "handle",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
+            },
+            {
+              "expression": "location_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
             }
           ],
           "isUnique": true,
+          "where": "deleted_at IS NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -3535,6 +3626,15 @@
     }
   },
   "enums": {
+    "public.role_type": {
+      "name": "role_type",
+      "schema": "public",
+      "values": [
+        "organization",
+        "location",
+        "cohort"
+      ]
+    },
     "public.competency_type": {
       "name": "competency_type",
       "schema": "public",

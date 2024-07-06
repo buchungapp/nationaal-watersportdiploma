@@ -9,7 +9,12 @@ import { notFound } from "next/navigation";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
-import { retrieveCohortByHandle, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listPrivilegesForCohort,
+  listRolesForLocation,
+  retrieveCohortByHandle,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { LayoutTabs } from "./_components/layout-tabs";
 
 dayjs.locale("nl");
@@ -27,6 +32,11 @@ export default async function Layout({
   if (!cohort) {
     notFound();
   }
+
+  const [roles, privileges] = await Promise.all([
+    listRolesForLocation(location.id),
+    listPrivilegesForCohort(cohort.id),
+  ]);
 
   return (
     <>
@@ -60,7 +70,7 @@ export default async function Layout({
 
       <Divider className="my-4" />
 
-      <LayoutTabs />
+      <LayoutTabs personRoles={roles} personPrivileges={privileges} />
 
       <div className="mt-4">{children}</div>
     </>

@@ -1,4 +1,5 @@
 import { schema as s } from '@nawadi/db'
+import { enums } from '@nawadi/lib'
 import {
   SQL,
   and,
@@ -6,7 +7,9 @@ import {
   eq,
   exists,
   getTableColumns,
+  gte,
   isNull,
+  lte,
   sql,
 } from 'drizzle-orm'
 import { inArray } from 'drizzle-orm/sql/expressions'
@@ -299,5 +302,65 @@ export const setStudentCurriculum = withZod(
         ),
       )
       .returning({ id: s.cohortAllocation.id })
+  },
+)
+
+export const listPrivilegesForPerson = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    personId: uuidSchema,
+  }),
+  enums.Privilege.array(),
+  async (input) => {
+    const query = useQuery()
+
+    const rows = await query
+      .selectDistinct({
+        handle: s.privilege.handle,
+      })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.cohortAllocationRole,
+        and(
+          eq(s.cohortAllocationRole.cohortAllocationId, s.cohortAllocation.id),
+          isNull(s.cohortAllocationRole.deletedAt),
+        ),
+      )
+      .innerJoin(s.role, eq(s.role.id, s.cohortAllocationRole.roleId))
+      .innerJoin(s.rolePrivilege, eq(s.rolePrivilege.roleId, s.role.id))
+      .innerJoin(s.privilege, eq(s.privilege.id, s.rolePrivilege.privilegeId))
+      .where(
+        and(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.actor)
+              .where(
+                and(
+                  eq(s.actor.id, s.cohortAllocation.actorId),
+                  eq(s.actor.personId, input.personId),
+                  isNull(s.actor.deletedAt),
+                ),
+              ),
+          ),
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.cohort)
+              .where(
+                and(
+                  eq(s.cohort.id, s.cohortAllocation.cohortId),
+                  lte(s.cohort.accessStartTime, sql`NOW()`),
+                  gte(s.cohort.accessEndTime, sql`NOW()`),
+                  isNull(s.cohort.deletedAt),
+                ),
+              ),
+          ),
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+
+    return enums.Privilege.array().parse(rows.map((row) => row.handle))
   },
 )

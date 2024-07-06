@@ -48,7 +48,7 @@ export function DialogButtons() {
   return (
     <>
       <DropdownItem onClick={() => setIsOpen("single")}>Enkel</DropdownItem>
-      <DropdownItem onClick={() => setIsOpen("bulk")}>
+      <DropdownItem onClick={() => setIsOpen("bulk")} disabled>
         Meerdere (bulk)
       </DropdownItem>
     </>

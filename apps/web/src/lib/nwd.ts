@@ -97,8 +97,8 @@ export const getUserOrThrow = cache(async () => {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
       },
     },
@@ -390,6 +390,18 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
     });
 
     const persons = await User.Person.list({ filter: { locationId } });
+
+    return persons;
+  });
+});
+
+export const listPersonsForUser = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const persons = await User.Person.list({
+      filter: { userId: user.authUserId },
+    });
 
     return persons;
   });
@@ -904,6 +916,18 @@ export const listRolesForLocation = cache(async (locationId: string) => {
 
     return await User.Person.listActiveRolesForLocation({
       locationId,
+      personId: primaryPerson.id,
+    });
+  });
+});
+
+export const listPrivilegesForCohort = cache(async (cohortId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    return await Cohort.Allocation.listPrivilegesForPerson({
+      cohortId,
       personId: primaryPerson.id,
     });
   });

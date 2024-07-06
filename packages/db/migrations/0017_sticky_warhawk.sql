@@ -13,3 +13,9 @@ BEGIN
     END loop;
 END;
 $$ LANGUAGE plpgsql;
+
+ INSERT INTO privilege (handle,  description)
+    VALUES 
+      ('accredit_certificate', 'Can accredit certificates in a cohort'),
+    ON CONFLICT (handle) DO UPDATE 
+    SET description = EXCLUDED.description;

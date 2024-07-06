@@ -117,22 +117,15 @@
     {
       "idx": 16,
       "version": "7",
-      "when": 1720263100563,
-      "tag": "0016_late_iron_monger",
+      "when": 1720294828933,
+      "tag": "0016_complete_silver_samurai",
       "breakpoints": false
     },
     {
       "idx": 17,
       "version": "7",
-      "when": 1720263101699,
-      "tag": "0017_sweet_skullbuster",
-      "breakpoints": false
-    },
-    {
-      "idx": 18,
-      "version": "7",
-      "when": 1720290888209,
-      "tag": "0018_high_maximus",
+      "when": 1720294829779,
+      "tag": "0017_sticky_warhawk",
       "breakpoints": false
     }
   ]
