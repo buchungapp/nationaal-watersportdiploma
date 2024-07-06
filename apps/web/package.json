@@ -23,7 +23,7 @@
     "@opentelemetry/api": "^1.8.0",
     "@react-google-maps/api": "^2.19.3",
     "@sindresorhus/slugify": "^2.2.1",
-    "@supabase/ssr": "^0.1.0",
+    "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.42.5",
     "@tanstack/react-table": "^8.16.0",
     "@tremor/react": "^3.16.2",
