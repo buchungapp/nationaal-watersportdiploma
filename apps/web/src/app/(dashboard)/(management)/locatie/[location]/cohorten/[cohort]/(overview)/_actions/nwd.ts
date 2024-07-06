@@ -24,9 +24,8 @@ export async function claimStudentsInCohort(
   cohortId: string,
   studentIds: string[],
 ) {
-  await getUserOrThrow();
-
-  return claimStudentsInCohortInner(cohortId, studentIds);
+  await claimStudentsInCohortInner(cohortId, studentIds);
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
 }
 
 export async function enrollStudentsInCurriculumForCohort(props: {
@@ -38,14 +37,11 @@ export async function enrollStudentsInCurriculumForCohort(props: {
     personId: string;
   }[];
 }) {
-  await getUserOrThrow();
-
-  return enrollStudentsInCurriculumForCohortInner(props);
+  await enrollStudentsInCurriculumForCohortInner(props);
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
 }
 
 export async function isInstructorInCohort(cohortId: string) {
-  await getUserOrThrow();
-
   return isInstructorInCohortInner(cohortId);
 }
 

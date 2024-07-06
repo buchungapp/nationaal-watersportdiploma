@@ -106,9 +106,24 @@ const columns = [
   columnHelper.accessor("studentCurriculum.gearType.title", {
     header: "Vaartuig",
   }),
-  columnHelper.accessor(() => null, {
-    header: "Instructeur",
-  }),
+  columnHelper.accessor(
+    (data) =>
+      data.instructor
+        ? [
+            data.instructor.firstName,
+            data.instructor.lastNamePrefix,
+            data.instructor.lastName,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : null,
+    {
+      header: "Instructeur",
+      cell: ({ getValue }) => (
+        <span className="font-medium text-zinc-950">{getValue()}</span>
+      ),
+    },
+  ),
   columnHelper.accessor("tags", {
     header: "Tags",
     cell: ({ getValue }) => {

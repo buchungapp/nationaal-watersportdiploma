@@ -12,6 +12,7 @@ import {
   lte,
   sql,
 } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core/alias'
 import { inArray } from 'drizzle-orm/sql/expressions'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -428,6 +429,9 @@ export const listStudentsWithCurricula = withZod(
 
     const { id, tags, createdAt } = getTableColumns(s.cohortAllocation)
 
+    const instructorActor = alias(s.actor, 'instructor_actor')
+    const instructorPerson = alias(s.person, 'instructor_person')
+
     const rows = await query
       .select({
         id,
@@ -439,6 +443,12 @@ export const listStudentsWithCurricula = withZod(
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
           dateOfBirth: s.person.dateOfBirth,
+        },
+        instructor: {
+          id: instructorPerson.id,
+          firstName: instructorPerson.firstName,
+          lastNamePrefix: instructorPerson.lastNamePrefix,
+          lastName: instructorPerson.lastName,
         },
         studentCurriculumId: s.cohortAllocation.studentCurriculumId,
         curriculum: {
@@ -480,6 +490,14 @@ export const listStudentsWithCurricula = withZod(
       )
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
       .leftJoin(
+        instructorActor,
+        eq(instructorActor.id, s.cohortAllocation.instructorId),
+      )
+      .leftJoin(
+        instructorPerson,
+        eq(instructorPerson.id, instructorActor.personId),
+      )
+      .leftJoin(
         s.studentCurriculum,
         eq(s.studentCurriculum.id, s.cohortAllocation.studentCurriculumId),
       )
@@ -508,6 +526,14 @@ export const listStudentsWithCurricula = withZod(
         lastName: row.person.lastName,
         dateOfBirth: row.person.dateOfBirth,
       },
+      instructor: row.instructor?.id
+        ? {
+            id: row.instructor.id,
+            firstName: row.instructor.firstName,
+            lastNamePrefix: row.instructor.lastNamePrefix,
+            lastName: row.instructor.lastName,
+          }
+        : null,
       studentCurriculum: row.studentCurriculumId
         ? {
             id: row.studentCurriculumId,
