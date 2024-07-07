@@ -15,6 +15,7 @@ import {
   listPrograms as listProgramsInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
+  setAllocationTags as setAllocationTagsInner,
   updateStudentInstructorAssignment,
   type ActorType,
 } from "~/lib/nwd";
@@ -26,9 +27,9 @@ export async function claimStudents(cohortId: string, studentIds: string[]) {
     studentAllocationIds: studentIds,
     action: "claim",
   });
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
   revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/cursisten/[student-allocation]",
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
 }
@@ -40,9 +41,9 @@ export async function releaseStudent(cohortId: string, studentId: string) {
     studentAllocationIds: [studentId],
     action: "release",
   });
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
   revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/cursisten/[student-allocation]",
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
 }
@@ -57,9 +58,9 @@ export async function enrollStudentsInCurriculumForCohort(props: {
   }[];
 }) {
   await enrollStudentsInCurriculumForCohortInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
   revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/cursisten/[student-allocation]",
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
 }
@@ -117,7 +118,7 @@ export async function removeAllocation(input: {
   await removeAllocationById(input);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
 
   return;
 }
@@ -155,6 +156,22 @@ export async function removeCohortRole(props: {
   removeCohortRoleInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+
+  return;
+}
+
+export async function setTags(props: {
+  cohortId: string;
+  allocationId: string;
+  tags: string[];
+}) {
+  setAllocationTagsInner(props);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
+    "page",
+  );
 
   return;
 }

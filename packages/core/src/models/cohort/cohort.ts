@@ -131,3 +131,35 @@ export const byIdOrHandle = withZod(
     return row ?? null
   },
 )
+
+export const listDistinctTags = withZod(
+  z.object({
+    cohortId: uuidSchema,
+  }),
+  z.array(z.string()),
+  async (input) => {
+    const query = useQuery()
+
+    const tagsSubquery = query
+      .select({
+        tag: sql<string>`UNNEST(${s.cohortAllocation.tags})`.as('tag'),
+      })
+      .from(s.cohortAllocation)
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .as('tags')
+
+    const rows = await query
+      .selectDistinct({
+        tag: tagsSubquery.tag,
+      })
+      .from(tagsSubquery)
+      .orderBy(asc(tagsSubquery.tag))
+
+    return rows.map((row) => row.tag)
+  },
+)

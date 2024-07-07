@@ -864,3 +864,21 @@ export const withdrawlRole = withZod(
       )
   },
 )
+
+export const setTags = withZod(
+  z.object({
+    allocationId: uuidSchema,
+    tags: z.string().array(),
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .update(s.cohortAllocation)
+      .set({ tags: input.tags })
+      .where(eq(s.cohortAllocation.id, input.allocationId))
+      .returning({ id: s.cohortAllocation.id })
+      .then(singleRow)
+  },
+)

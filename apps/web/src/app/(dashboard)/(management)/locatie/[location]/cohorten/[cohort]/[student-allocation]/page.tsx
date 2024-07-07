@@ -15,6 +15,7 @@ import { Link } from "~/app/(dashboard)/_components/link";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
+  listDistinctTagsForCohort,
   listPrivilegesForCohort,
   listPrograms,
   retrieveCohortByHandle,
@@ -26,6 +27,7 @@ import {
   ReleaseInstructorAllocation,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
+import { ManageAllocationTags } from "./_components/tag-input";
 
 async function InstructorField({
   cohortId,
@@ -83,6 +85,45 @@ async function InstructorField({
         />
       )}
     </div>
+  );
+}
+
+async function TagsField({
+  cohortId,
+  studentAllocationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+}) {
+  const [allocation, privileges, allCohortTags] = await Promise.all([
+    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    listPrivilegesForCohort(cohortId),
+    listDistinctTagsForCohort(cohortId),
+  ]);
+
+  if (!allocation) {
+    notFound();
+  }
+
+  const canManageStudents = privileges.includes("manage_cohort_students");
+
+  if (!canManageStudents) {
+    return (
+      <div className="flex flex-wrap gap-y-2.5 gap-x-2 items-center">
+        {allocation.tags.map((tag) => (
+          <Badge key={tag}>{tag}</Badge>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <ManageAllocationTags
+      tags={allocation.tags}
+      cohortId={cohortId}
+      allocationId={studentAllocationId}
+      allCohortTags={allCohortTags}
+    />
   );
 }
 
@@ -185,12 +226,20 @@ export default async function Page({
 
             <DescriptionTerm>Tags</DescriptionTerm>
             <DescriptionDetails>
-              {/* <AllocationTags /> */}
-              <div className="flex flex-wrap gap-y-2.5 gap-x-2 items-center">
-                {allocation.tags.map((tag) => (
-                  <Badge key={tag}>{tag}</Badge>
-                ))}
-              </div>
+              <Suspense
+                fallback={
+                  <div className="flex flex-wrap gap-y-2.5 gap-x-2 items-center">
+                    {allocation.tags.map((tag) => (
+                      <Badge key={tag}>{tag}</Badge>
+                    ))}
+                  </div>
+                }
+              >
+                <TagsField
+                  cohortId={cohort.id}
+                  studentAllocationId={allocation.id}
+                />
+              </Suspense>
             </DescriptionDetails>
           </DescriptionList>
         </div>

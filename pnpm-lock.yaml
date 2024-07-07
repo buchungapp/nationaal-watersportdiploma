@@ -212,6 +212,9 @@ importers:
       react-dropzone:
         specifier: ^14.2.3
         version: 14.2.3(react@18.3.1)
+      react-tag-autocomplete:
+        specifier: ^7.3.0
+        version: 7.3.0(react@18.3.1)
       react-wrap-balancer:
         specifier: ^1.1.0
         version: 1.1.0(react@18.3.1)
@@ -12543,6 +12546,15 @@ packages:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-transition-group: 4.4.5(react-dom@18.3.1)(react@18.3.1)
+    dev: false
+
+  /react-tag-autocomplete@7.3.0(react@18.3.1):
+    resolution: {integrity: sha512-YgbGlZ4ZkfQw23yMIvw0gCsex0LtYojLiVsfAb8w05r1npMo5+Q699KXfrUZ3W01U7mrxvd/YcMcw7WVkDdZQA==}
+    engines: {node: '>= 16.12.0'}
+    peerDependencies:
+      react: ^18.0.0
+    dependencies:
+      react: 18.3.1
     dev: false
 
   /react-transition-group@4.4.5(react-dom@18.3.1)(react@18.3.1):
