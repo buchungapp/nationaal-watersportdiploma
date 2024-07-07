@@ -23,7 +23,7 @@
     "@opentelemetry/api": "^1.8.0",
     "@react-google-maps/api": "^2.19.3",
     "@sindresorhus/slugify": "^2.2.1",
-    "@supabase/ssr": "^0.1.0",
+    "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.42.5",
     "@tanstack/react-table": "^8.16.0",
     "@tremor/react": "^3.16.2",
@@ -55,12 +55,14 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-dropzone": "^14.2.3",
+    "react-tag-autocomplete": "^7.3.0",
     "react-wrap-balancer": "^1.1.0",
     "remark-gfm": "^3.0.1",
     "server-only": "^0.0.1",
     "slugify": "^1.6.6",
     "sonner": "^1.4.41",
     "svg-to-pdfkit": "^0.1.8",
+    "swr": "2.2.6-beta.4",
     "tailwind-merge": "^2.2.1",
     "use-debounce": "^10.0.1",
     "zod": "^3.22.4"
@@ -89,6 +91,6 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.12",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.4.5"
+    "typescript": "5.4.5"
   }
 }

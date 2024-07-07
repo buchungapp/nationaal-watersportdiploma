@@ -83,7 +83,9 @@ export const getOrCreate = withZod(
         firstName: input.firstName,
         lastName: input.lastName,
         lastNamePrefix: input.lastNamePrefix,
-        dateOfBirth: dayjs(input.dateOfBirth).format('YYYY-MM-DD'),
+        dateOfBirth: input.dateOfBirth
+          ? dayjs(input.dateOfBirth).format('YYYY-MM-DD')
+          : undefined,
         birthCity: input.birthCity,
         birthCountry: input.birthCountry,
       })
@@ -269,5 +271,79 @@ export const listLocationsByRole = withZod(
       .then(aggregate({ pkey: 'locationId', fields: { roles: 'role' } }))
 
     return result as any
+  },
+)
+
+export const setPrimary = withZod(
+  z.object({
+    personId: uuidSchema,
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .update(s.person)
+      .set({
+        isPrimary: true,
+      })
+      .where(and(eq(s.person.id, input.personId), isNull(s.person.deletedAt)))
+      .returning({ id: s.person.id })
+      .then(singleRow)
+
+    return result
+  },
+)
+
+export const replaceMetadata = withZod(
+  z.object({
+    personId: uuidSchema,
+    metadata: z.record(z.any()),
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .update(s.person)
+      .set({
+        _metadata: sql`(((${JSON.stringify(input.metadata)})::jsonb)#>> '{}')::jsonb`,
+      })
+      .where(eq(s.person.id, input.personId))
+      .returning({ id: s.person.id })
+      .then(singleRow)
+  },
+)
+
+export const listActiveRolesForLocation = withZod(
+  z.object({
+    personId: uuidSchema,
+    locationId: uuidSchema,
+  }),
+  z.array(z.enum(['student', 'instructor', 'location_admin'])),
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .select({
+        type: s.actor.type,
+      })
+      .from(s.actor)
+      .where(
+        and(
+          eq(s.actor.locationId, input.locationId),
+          eq(s.actor.personId, input.personId),
+          isNull(s.actor.deletedAt),
+        ),
+      )
+      .then((rows) =>
+        rows
+          .filter(({ type }) =>
+            ['student', 'instructor', 'location_admin'].includes(type),
+          )
+          .map(
+            ({ type }) => type as 'student' | 'instructor' | 'location_admin',
+          ),
+      )
   },
 )

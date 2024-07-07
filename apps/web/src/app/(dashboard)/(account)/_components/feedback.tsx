@@ -25,7 +25,7 @@ import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { z } from "zod";
-import { submitProductFeedback } from "~/lib/nwd";
+import { productFeedbackAction } from "../../_actions/feedback";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
 function urlSearchParamsToObject(
@@ -93,7 +93,7 @@ function Feedback() {
         comment: formData.get("comment") as string,
       });
 
-      await submitProductFeedback({
+      await productFeedbackAction({
         type: "product-feedback",
         priority: "normal",
         message: comment,

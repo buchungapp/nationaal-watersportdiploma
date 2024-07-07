@@ -1,11 +1,34 @@
 import { schema as s, uncontrolledSchema } from '@nawadi/db'
+import { AuthError } from '@supabase/supabase-js'
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
+import postgres from 'postgres'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { createAuthUser } from '../../services/auth/handlers.js'
-import { singleRow, uuidSchema, withZod } from '../../utils/index.js'
+import {
+  possibleSingleRow,
+  singleRow,
+  uuidSchema,
+  withZod,
+} from '../../utils/index.js'
 import { selectSchema } from './user.schema.js'
 
+/**
+ * Get or create a user from an email address.
+ *
+ * Note: This function may seem overly complex, but it addresses several edge cases
+ * and race conditions we encountered in production. It handles scenarios where:
+ * 1. The user already exists in our database
+ * 2. The user exists in the auth system but not in our database
+ * 3. The user is being created concurrently by multiple requests
+ *
+ * While it may appear overkill, this implementation has proven to be reliable in
+ * preventing the recurring bugs we faced with simpler versions. It ensures consistency
+ * between our auth system and database, even under high concurrency.
+ *
+ * TODO: Consider revisiting this implementation in the future to see if it can be
+ * optimized or simplified without reintroducing the original issues.
+ */
 export const getOrCreateFromEmail = withZod(
   z.object({
     email: z.string().trim().toLowerCase().email(),
@@ -17,34 +40,69 @@ export const getOrCreateFromEmail = withZod(
   async (input) => {
     const query = useQuery()
 
-    const [existing] = await query
-      .select({ authUserId: s.user.authUserId })
-      .from(s.user)
-      .where(eq(s.user.email, input.email))
-
-    if (existing) {
-      return {
-        id: existing.authUserId,
-      }
+    const getExistingUser = async () => {
+      return query
+        .select({ authUserId: s.user.authUserId })
+        .from(s.user)
+        .where(eq(s.user.email, input.email))
+        .then(possibleSingleRow)
     }
 
-    const newAuthUserId = await createAuthUser({ email: input.email })
+    const createUserInPublicSchema = async (authUserId: string) => {
+      return query
+        .insert(s.user)
+        .values({
+          authUserId,
+          email: input.email,
+          displayName: input.displayName,
+        })
+        .returning({ authUserId: s.user.authUserId })
+        .then(singleRow)
+    }
 
-    const [newUser] = await query
-      .insert(s.user)
-      .values({
-        authUserId: newAuthUserId,
-        email: input.email,
-        displayName: input.displayName,
-      })
-      .returning({ authUserId: s.user.authUserId })
-
-    if (!newUser) {
+    const handleUniqueViolation = async (error: unknown) => {
+      if (error instanceof postgres.PostgresError && error.code === '23505') {
+        const existing = await getExistingUser()
+        if (existing) return { id: existing.authUserId }
+      }
       throw new Error('Failed to create user')
     }
 
-    return {
-      id: newUser.authUserId,
+    // Check for existing user
+    const existing = await getExistingUser()
+    if (existing) return { id: existing.authUserId }
+
+    try {
+      // Try to create auth user
+      const newAuthUserId = await createAuthUser({ email: input.email })
+      const newUser = await createUserInPublicSchema(newAuthUserId)
+      return { id: newUser.authUserId }
+    } catch (error) {
+      if (error instanceof AuthError && error.code === 'email_exists') {
+        const existingInAuthTable = await query
+          .select({ id: uncontrolledSchema._usersTable.id })
+          .from(uncontrolledSchema._usersTable)
+          .where(eq(uncontrolledSchema._usersTable.email, input.email))
+          .then(singleRow)
+          .catch(() => {
+            throw new Error(
+              'Inconsistent state: Auth user exists but not found in Supabase schema',
+            )
+          })
+
+        try {
+          const newUser = await createUserInPublicSchema(existingInAuthTable.id)
+          return { id: newUser.authUserId }
+        } catch (insertError) {
+          return handleUniqueViolation(insertError)
+        }
+      }
+
+      if (error instanceof postgres.PostgresError) {
+        return handleUniqueViolation(error)
+      }
+
+      throw error
     }
   },
 )

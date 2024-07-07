@@ -275,6 +275,125 @@ export const list = withZod(
   },
 )
 
+export const getById = withZod(
+  z.object({
+    id: uuidSchema,
+  }),
+  outputSchema.nullable(),
+  async ({ id }) => {
+    const query = useQuery()
+
+    // Initialize the curricula query to fetch curriculum details along with joined module and competency data.
+    let curriculaQuery = query
+      .select()
+      .from(s.curriculum)
+      .leftJoin(
+        s.curriculumModule,
+        eq(s.curriculum.id, s.curriculumModule.curriculumId),
+      )
+      .leftJoin(
+        s.curriculumCompetency,
+        and(
+          eq(s.curriculum.id, s.curriculumCompetency.curriculumId),
+          eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
+        ),
+      )
+      .where(eq(s.curriculum.id, id))
+
+    // Fetch curricula, modules, and competencies data concurrently for efficiency.
+    const [curricula, modules, competencies] = await Promise.all([
+      curriculaQuery,
+      Module.list(),
+      Course.Competency.list(),
+    ])
+
+    const normalizedCurriculum = curricula.reduce<
+      | ((typeof curricula)[number]['curriculum'] & {
+          modules: (NonNullable<
+            (typeof curricula)[number]['curriculum_module']
+          > & {
+            competencies: NonNullable<
+              (typeof curricula)[number]['curriculum_competency']
+            >[]
+          })[]
+        })
+      | null
+    >((acc, { curriculum, curriculum_competency, curriculum_module }) => {
+      if (!acc) {
+        acc = { ...curriculum, modules: [] }
+      }
+
+      if (curriculum_module) {
+        let module = acc.modules.find(
+          (m) => m.moduleId === curriculum_module.moduleId,
+        )
+
+        if (!module) {
+          module = { ...curriculum_module, competencies: [] }
+          acc.modules.push(module)
+        }
+
+        if (curriculum_competency) {
+          module.competencies.push(curriculum_competency)
+        }
+      }
+
+      return acc
+    }, null)
+
+    if (!normalizedCurriculum) {
+      return null
+    }
+
+    // Map normalized data to the final structure with date formatting and module aggregation.
+    const mapped = {
+      ...normalizedCurriculum,
+      startedAt: normalizedCurriculum.startedAt
+        ? dayjs(normalizedCurriculum.startedAt).toISOString()
+        : null,
+      modules: normalizedCurriculum.modules
+        .map((curriculumModule) => {
+          const module = findItem({
+            items: modules,
+            predicate(item) {
+              return item.id === curriculumModule.moduleId
+            },
+            enforce: true,
+          })
+
+          const competenciesFormatted = curriculumModule.competencies
+            .map(({ isRequired, requirement, competencyId, id }) => {
+              const competency = findItem({
+                items: competencies,
+                predicate: (item) => item.id === competencyId,
+                enforce: true,
+              })
+
+              return {
+                ...competency,
+                id,
+                competencyId,
+                isRequired,
+                requirement,
+              }
+            })
+            .sort((a, b) => a.weight - b.weight)
+
+          return {
+            ...module,
+            competencies: competenciesFormatted,
+            isRequired: competenciesFormatted.every((c) => c.isRequired),
+            // As for now, a module can only have one type of competencies
+            type: competenciesFormatted[0]?.type || null,
+          }
+        })
+        .sort((a, b) => a.weight - b.weight),
+    }
+
+    return mapped
+  },
+)
+
 export const countStartedStudents = withZod(
   z.object({
     curriculumId: uuidSchema,

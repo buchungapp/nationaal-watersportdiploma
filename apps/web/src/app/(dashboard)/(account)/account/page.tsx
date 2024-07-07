@@ -36,7 +36,7 @@ export default async function Page() {
           <ul>
             {locations.map((location) => (
               <li key={location.id}>
-                <Link href={`/${location.handle}/personen`}>
+                <Link href={`/locatie/${location.handle}/cohorten`}>
                   {location.name}
                 </Link>
               </li>

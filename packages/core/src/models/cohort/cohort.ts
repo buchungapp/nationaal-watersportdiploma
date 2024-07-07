@@ -1,5 +1,6 @@
 import { schema as s } from '@nawadi/db'
-import { SQL, and, asc, eq } from 'drizzle-orm'
+import { SQL, and, asc, eq, gte, isNull, lte, sql } from 'drizzle-orm'
+import { exists } from 'drizzle-orm/mysql-core/expressions'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -47,6 +48,7 @@ export const create = withZod(
 export const listByLocationId = withZod(
   z.object({
     id: uuidSchema,
+    personId: uuidSchema.optional(),
   }),
   selectSchema.array(),
   async (input) => {
@@ -55,30 +57,68 @@ export const listByLocationId = withZod(
     const rows = await query
       .select()
       .from(s.cohort)
-      .where(eq(s.cohort.locationId, input.id))
+      .where(
+        and(
+          eq(s.cohort.locationId, input.id),
+          isNull(s.cohort.deletedAt),
+          input.personId
+            ? and(
+                exists(
+                  query
+                    .select({ id: sql`1` })
+                    .from(s.cohortAllocation)
+                    .innerJoin(
+                      s.actor,
+                      and(
+                        eq(s.actor.id, s.cohortAllocation.actorId),
+                        isNull(s.actor.deletedAt),
+                      ),
+                    )
+                    .innerJoin(
+                      s.person,
+                      and(
+                        eq(s.person.id, s.actor.personId),
+                        eq(s.person.id, input.personId),
+                        isNull(s.person.deletedAt),
+                      ),
+                    )
+                    .where(
+                      and(
+                        eq(s.cohort.id, s.cohortAllocation.cohortId),
+                        isNull(s.cohortAllocation.deletedAt),
+                      ),
+                    ),
+                ),
+                lte(s.cohort.accessStartTime, sql`NOW()`),
+                gte(s.cohort.accessEndTime, sql`NOW()`),
+              )
+            : undefined,
+        ),
+      )
       .orderBy(asc(s.cohort.accessStartTime), asc(s.cohort.accessEndTime))
 
     return rows
   },
 )
 
-export const findOne = withZod(
-  z.object({
-    id: uuidSchema.optional(),
-    handle: handleSchema.optional(),
-  }),
+export const byIdOrHandle = withZod(
+  z.union([
+    z.object({ id: uuidSchema }),
+    z.object({ handle: handleSchema, locationId: uuidSchema }),
+  ]),
   selectSchema.nullable(),
   async (input) => {
     const query = useQuery()
 
     const whereClausules: (SQL | undefined)[] = []
 
-    if (input.id) {
+    if ('id' in input) {
       whereClausules.push(eq(s.cohort.id, input.id))
     }
 
-    if (input.handle) {
+    if ('handle' in input) {
       whereClausules.push(eq(s.cohort.handle, input.handle))
+      whereClausules.push(eq(s.cohort.locationId, input.locationId))
     }
 
     const rows = await query
@@ -89,5 +129,37 @@ export const findOne = withZod(
     const row = possibleSingleRow(rows)
 
     return row ?? null
+  },
+)
+
+export const listDistinctTags = withZod(
+  z.object({
+    cohortId: uuidSchema,
+  }),
+  z.array(z.string()),
+  async (input) => {
+    const query = useQuery()
+
+    const tagsSubquery = query
+      .select({
+        tag: sql<string>`UNNEST(${s.cohortAllocation.tags})`.as('tag'),
+      })
+      .from(s.cohortAllocation)
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .as('tags')
+
+    const rows = await query
+      .selectDistinct({
+        tag: tagsSubquery.tag,
+      })
+      .from(tagsSubquery)
+      .orderBy(asc(tagsSubquery.tag))
+
+    return rows.map((row) => row.tag)
   },
 )
