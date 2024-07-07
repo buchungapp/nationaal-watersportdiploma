@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
 
-import { useRouter } from "next/navigation";
 import { z } from "zod";
 import {
   Combobox,
@@ -101,8 +100,6 @@ function StartProgramDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const router = useRouter();
-
   const submit = async (_prevState: unknown, formData: FormData) => {
     const programId = formData.get("program");
     const gearTypeId = formData.get("gearTypeId");
@@ -131,7 +128,6 @@ function StartProgramDialog({
         })),
       });
 
-      router.refresh();
       toast.success("Programma's gestart");
       setIsOpen(false);
     } catch (error) {

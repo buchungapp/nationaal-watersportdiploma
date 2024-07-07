@@ -13,6 +13,7 @@ import {
   retrieveCurriculumById,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
+import { StartStudentCurriculum } from "./start-curriculum";
 import { Module } from "./student-module";
 
 export async function CourseCard({
@@ -32,7 +33,13 @@ export async function CourseCard({
   }
 
   if (!allocation.studentCurriculum) {
-    return "Nog geen curriculum toegekend";
+    return (
+      <StartStudentCurriculum
+        allocationId={cohortAllocationId}
+        cohortId={cohortId}
+        personId={allocation.person.id}
+      />
+    );
   }
 
   const [curriculum, completedCompetencies, allCompetencyProgress] =

@@ -94,7 +94,9 @@ export async function addStudentToCohortByPersonId(props: {
   locationId: string;
   personId: string;
 }) {
-  return addStudentToCohortByPersonIdInner(props);
+  const result = await addStudentToCohortByPersonIdInner(props);
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  return result;
 }
 
 export async function addInstructorToCohortByPersonId(props: {
@@ -103,9 +105,7 @@ export async function addInstructorToCohortByPersonId(props: {
   personId: string;
 }) {
   const result = addInstructorToCohortByPersonIdInner(props);
-
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
-
   return result;
 }
 

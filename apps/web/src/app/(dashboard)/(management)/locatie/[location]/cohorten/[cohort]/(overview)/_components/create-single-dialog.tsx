@@ -2,7 +2,6 @@
 
 import { clsx } from "clsx";
 import dayjs from "dayjs";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -59,8 +58,6 @@ export default function Wrapper(props: Props) {
 }
 
 function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
-  const router = useRouter();
-
   const submit = async (
     prevState: unknown,
     formData: FormData,
@@ -92,8 +89,6 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
 
     setIsOpen(false);
     toast.success("Cursist is toegevoegd.");
-
-    router.refresh();
 
     return { message: "Success", errors: {} };
   };

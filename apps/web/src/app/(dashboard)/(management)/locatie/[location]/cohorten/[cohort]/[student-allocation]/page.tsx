@@ -2,6 +2,7 @@ import { ChevronLeftIcon } from "@heroicons/react/16/solid";
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { SWRConfig } from "swr";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   DescriptionDetails,
@@ -15,6 +16,7 @@ import { Strong } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
   listPrivilegesForCohort,
+  listPrograms,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
@@ -106,7 +108,16 @@ export default async function Page({
   }
 
   return (
-    <>
+    <SWRConfig
+      value={{
+        fallback: {
+          // Note that there is no `await` here,
+          // so it only blocks rendering of components that
+          // actually rely on this data.
+          allPrograms: listPrograms(),
+        },
+      }}
+    >
       <div className="max-lg:hidden">
         <Link
           href={`/locatie/${params.location}/cohorten/${params.cohort}`}
@@ -195,6 +206,6 @@ export default async function Page({
           <Divider className="mt-4" />
         </div> */}
       </div>
-    </>
+    </SWRConfig>
   );
 }

@@ -171,7 +171,7 @@ function Feedback() {
     <>
       <SidebarItem onClick={() => setIsOpen(true)}>
         <ChatBubbleOvalLeftIcon />
-        <SidebarLabel>Contact opnemen</SidebarLabel>
+        <SidebarLabel>Feedback geven</SidebarLabel>
       </SidebarItem>
 
       <Dialog open={isOpen} onClose={setIsOpen}>
@@ -218,7 +218,7 @@ export default function () {
       fallback={
         <SidebarItem>
           <ChatBubbleOvalLeftIcon />
-          <SidebarLabel>Contact opnemen</SidebarLabel>
+          <SidebarLabel>Feedback geven</SidebarLabel>
         </SidebarItem>
       }
     >
