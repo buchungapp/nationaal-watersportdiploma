@@ -35,10 +35,10 @@ export async function claimStudents(cohortId: string, studentIds: string[]) {
 }
 
 // Export all as async functions
-export async function releaseStudent(cohortId: string, studentId: string) {
+export async function releaseStudent(cohortId: string, studentIds: string[]) {
   await updateStudentInstructorAssignment({
     cohortId,
-    studentAllocationIds: [studentId],
+    studentAllocationIds: studentIds,
     action: "release",
   });
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
@@ -141,7 +141,7 @@ export async function addCohortRole(props: {
   allocationId: string;
   roleHandle: "cohort_admin";
 }) {
-  addCohortRoleInner(props);
+  await addCohortRoleInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
 
@@ -153,7 +153,7 @@ export async function removeCohortRole(props: {
   allocationId: string;
   roleHandle: "cohort_admin";
 }) {
-  removeCohortRoleInner(props);
+  await removeCohortRoleInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
 
@@ -165,7 +165,7 @@ export async function setTags(props: {
   allocationId: string;
   tags: string[];
 }) {
-  setAllocationTagsInner(props);
+  await setAllocationTagsInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
   revalidatePath(

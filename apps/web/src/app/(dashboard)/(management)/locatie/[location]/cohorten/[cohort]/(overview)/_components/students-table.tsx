@@ -142,10 +142,12 @@ export default function StudentsTable({
   cohortId,
   students,
   totalItems,
+  noOptionsLabel = "Geen items gevonden",
 }: {
   cohortId: string;
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
+  noOptionsLabel?: React.ReactNode;
 }) {
   const table = useReactTable({
     data: students,
@@ -192,7 +194,7 @@ export default function StudentsTable({
           {table.getRowCount() <= 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center">
-                Geen items gevonden
+                {noOptionsLabel}
               </TableCell>
             </TableRow>
           ) : null}

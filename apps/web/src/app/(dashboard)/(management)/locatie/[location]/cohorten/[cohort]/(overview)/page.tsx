@@ -4,13 +4,14 @@ import FlexSearch from "flexsearch";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SWRConfig } from "swr";
+import { z } from "zod";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
   Dropdown,
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
-import { Select } from "~/app/(dashboard)/_components/select";
+import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
   listCountries,
@@ -26,6 +27,7 @@ import {
   DialogWrapper,
   Dialogs,
 } from "./_components/dialog-context";
+import { SetView } from "./_components/filters";
 import StudentsTable from "./_components/students-table";
 
 async function QuickActionButtons({
@@ -80,11 +82,18 @@ export default async function Page({
   ]);
 
   // Filter
-  const filterParams = searchParams?.filter
-    ? Array.isArray(searchParams.filter)
-      ? searchParams.filter
-      : [searchParams.filter]
-    : [];
+  const viewParam = z
+    .enum(["all", "claimed"])
+    .catch(() => (!!instructorAllocation ? "claimed" : "all"))
+    .parse(searchParams.view);
+
+  let filteredStudents = students;
+
+  if (viewParam === "claimed" && !!instructorAllocation) {
+    filteredStudents = students.filter(
+      (student) => student.instructor?.id === instructorAllocation.personId,
+    );
+  }
 
   // Search
   const index = new FlexSearch.Document({
@@ -102,7 +111,7 @@ export default async function Page({
   });
 
   // Add students to the index, first name, last name, and tags
-  students.forEach((student) => {
+  filteredStudents.forEach((student) => {
     index.add({
       id: student.id,
       name: [
@@ -122,13 +131,13 @@ export default async function Page({
       : searchParams.query
     : null;
 
-  let searchedStudents = students;
+  let searchedStudents = filteredStudents;
 
   if (searchQuery && searchQuery.length >= 2) {
     const searchResult = index.search(searchQuery);
 
     if (searchResult.length > 0) {
-      searchedStudents = students.filter((student) =>
+      searchedStudents = filteredStudents.filter((student) =>
         searchResult.flatMap(({ result }) => result).includes(student.id),
       );
     }
@@ -161,10 +170,10 @@ export default async function Page({
 
               {!!instructorAllocation ? (
                 <div className="shrink-0">
-                  <Select name="view" className="">
+                  <SetView value={viewParam}>
                     <option value="all">Alle cursisten</option>
                     <option value="claimed">Mijn cursisten</option>
-                  </Select>
+                  </SetView>
                 </div>
               ) : null}
             </div>
@@ -178,6 +187,21 @@ export default async function Page({
           students={searchedStudents}
           totalItems={searchedStudents.length}
           cohortId={cohort.id}
+          noOptionsLabel={
+            viewParam === "all" ? (
+              "Dit cohort heeft nog geen cursisten"
+            ) : (
+              <span>
+                Je hebt nog geen cursisten geclaimd.{" "}
+                <TextLink
+                  href={`/locatie/${params.location}/cohorten/${params.cohort}?view=all`}
+                >
+                  Bekijk alle cursisten
+                </TextLink>
+                .
+              </span>
+            )
+          }
         />
 
         <Dialogs locationId={location.id} cohortId={cohort.id} />

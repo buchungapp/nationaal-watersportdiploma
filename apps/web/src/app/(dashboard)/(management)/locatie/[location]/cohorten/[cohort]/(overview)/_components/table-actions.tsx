@@ -38,30 +38,51 @@ import {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
   listPrograms,
+  releaseStudent,
 } from "../_actions/nwd";
-import { Student } from "./students-table";
+import type { Student } from "./students-table";
 
-type Props = { rows: Row<Student>[]; cohortId: string };
+interface Props {
+  rows: Row<Student>[];
+  cohortId: string;
+}
 
 function Claim({ rows, cohortId }: Props) {
   const { data: isInstructor } = useSWR("isInstructor", () =>
     isInstructorInCohort(cohortId),
   );
 
+  const doAllSelectedRowsBelongToThisInstructor = rows.every(
+    (row) => row.original.instructor?.id === isInstructor?.personId,
+  );
+
   return (
     <DropdownItem
       onClick={async () => {
-        await claimStudents(
-          cohortId,
-          rows.map((row) => row.original.id),
-        )
-          .then(() => toast("Cursisten geclaimd"))
-          .catch(() => toast.error("Er is iets misgegaan"));
+        try {
+          if (doAllSelectedRowsBelongToThisInstructor) {
+            await releaseStudent(
+              cohortId,
+              rows.map((row) => row.original.id),
+            );
+            toast.success("Cursisten vrijgegeven");
+          } else {
+            await claimStudents(
+              cohortId,
+              rows.map((row) => row.original.id),
+            );
+            toast.success("Cursisten toegekent");
+          }
+        } catch (error) {
+          toast.error("Er is iets misgegaan");
+        }
       }}
       disabled={!isInstructor}
       title={!isInstructor ? "Je bent geen instructeur in dit cohort" : ""}
     >
-      Claim cursisten
+      {doAllSelectedRowsBelongToThisInstructor
+        ? "Vergeef cursisten"
+        : "Claim cursisten"}
     </DropdownItem>
   );
 }

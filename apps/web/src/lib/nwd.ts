@@ -1009,10 +1009,14 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
       return undefined;
     }
 
-    return possibleInstructorActor as {
+    return {
+      ...possibleInstructorActor,
+      personId: primaryPerson.id,
+    } as {
       actorId: string;
       type: "instructor";
       allocationId: string;
+      personId: string;
     };
   });
 });

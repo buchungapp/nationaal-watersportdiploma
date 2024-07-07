@@ -39,7 +39,7 @@ export function ReleaseInstructorAllocation({
       plain
       className="shrink-0"
       onClick={async () => {
-        await releaseStudent(cohortId, studentAllocationId)
+        await releaseStudent(cohortId, [studentAllocationId])
           .then(() => toast.success("Cursist vrijgegeven"))
           .catch(() => toast.error("Er is iets misgegaan"));
       }}
