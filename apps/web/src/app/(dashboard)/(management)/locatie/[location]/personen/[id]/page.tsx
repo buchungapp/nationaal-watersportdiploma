@@ -21,6 +21,7 @@ import {
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { ChangeEmail } from "./_components/action-buttons";
 import { RoleToggleCheckbox } from "./_components/role-checkbox";
 
 const ROLES = [
@@ -82,13 +83,16 @@ export default async function Page({
         </Link>
       </div>
 
-      <div className="mt-4 lg:mt-8">
+      <div className="mt-4 lg:mt-8 flex flex-wrap justify-between gap-x-6">
         <div className="flex items-center gap-4">
           <Heading>
             {[person.firstName, person.lastNamePrefix, person.lastName]
               .filter(Boolean)
               .join(" ")}
           </Heading>
+        </div>
+        <div>
+          <ChangeEmail personId={person.id} locationId={location.id} />
         </div>
       </div>
 

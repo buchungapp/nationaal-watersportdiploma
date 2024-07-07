@@ -1375,3 +1375,36 @@ export async function dropActorForLocation({
     });
   });
 }
+
+export async function updateEmailForPerson({
+  personId,
+  locationId,
+  email,
+}: {
+  personId: string;
+  email: string;
+  locationId: string;
+}) {
+  return makeRequest(async () => {
+    const [primaryPerson] = await Promise.all([
+      getUserOrThrow().then(getPrimaryPerson),
+    ]);
+
+    await listRolesForLocation(locationId, personId).then((roles) => {
+      if (roles.length < 1) {
+        throw new Error("Unauthorized");
+      }
+    });
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: locationId,
+      personId: primaryPerson.id,
+    });
+
+    return await User.Person.updateEmail({
+      email,
+      personId,
+    });
+  });
+}
