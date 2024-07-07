@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams, useRouter } from "next/navigation";
 import { useOptimistic } from "react";
 import { toast } from "sonner";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
@@ -21,6 +22,9 @@ export function RoleToggleCheckbox({
   locationId: string;
   personId: string;
 }) {
+  const router = useRouter();
+  const params = useParams();
+
   const [optimisticChecked, setOptimisticChecked] = useOptimistic(
     !!roles.includes(type),
     (_current, checked: boolean) => {
@@ -48,8 +52,9 @@ export function RoleToggleCheckbox({
     toast.success("Rol bijgewerkt");
 
     if (roles.length <= 1 && !checked) {
-      // TODO: We disabled the last role, this person will be removed from the location,
-      // and now we get a 404. Try to navigate back to the list of people.
+      // We disabled the last role, this person will be removed from the location,
+      // redirect to the overview page
+      router.push(`/locatie/${params.location as string}/personen`);
     }
   };
 
