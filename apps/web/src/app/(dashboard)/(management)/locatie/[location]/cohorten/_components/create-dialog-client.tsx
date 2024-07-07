@@ -19,12 +19,11 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import type { listPersonsForLocation, listPrograms } from "~/lib/nwd";
+import type { listPrograms } from "~/lib/nwd";
 import { createCohortAction } from "../_actions/create";
 
 interface Props {
   locationId: string;
-  persons: Awaited<ReturnType<typeof listPersonsForLocation>>;
   programs: Awaited<ReturnType<typeof listPrograms>>;
 }
 

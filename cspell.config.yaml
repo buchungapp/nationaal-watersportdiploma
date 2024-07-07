@@ -32,11 +32,13 @@ words:
   - pkey
   - plpgsql
   - pnpx
+  - Polyvalk
   - qrcode
   - redocly
   - rehype
   - ryanluker
   - sindresorhus
+  - skiffa
   - skreet
   - solvebv
   - sonner

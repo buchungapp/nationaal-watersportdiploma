@@ -9,9 +9,9 @@ cp.execFileSync(
   'pnpm',
   [
     '--package',
-    'oa42-generator@0.11.0',
+    '@skiffa/generator@0.11.1',
     'dlx',
-    'oa42-generator',
+    'skiffa-generator',
     'package',
     path.resolve('specifications', 'api.yaml'),
     '--package-directory',

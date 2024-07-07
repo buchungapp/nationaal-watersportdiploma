@@ -9,6 +9,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../utils/sql.js'
+import { cohortAllocation } from './cohort.js'
 import { gearType } from './course.js'
 import {
   curriculum,
@@ -77,6 +78,7 @@ export const certificate = pgTable(
       .notNull(),
     handle: text('handle').notNull(),
     studentCurriculumId: uuid('student_curriculum_id').notNull(),
+    cohortAllocationId: uuid('cohort_allocation_id'),
     locationId: uuid('location_id').notNull(),
     issuedAt: timestamp('issued_at', {
       withTimezone: true,
@@ -100,6 +102,11 @@ export const certificate = pgTable(
         columns: [table.locationId],
         foreignColumns: [location.id],
         name: 'certificate_location_id_fk',
+      }),
+      cohortAllocationReference: foreignKey({
+        columns: [table.cohortAllocationId],
+        foreignColumns: [cohortAllocation.id],
+        name: 'certificate_cohort_allocation_id_fk',
       }),
     }
   },

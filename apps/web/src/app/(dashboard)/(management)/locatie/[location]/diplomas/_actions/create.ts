@@ -31,7 +31,7 @@ export async function createCertificate(
       competencies: parsed["competencies[]"],
     });
 
-    revalidatePath("/[location]/diplomas", "page");
+    revalidatePath("/locatie/[location]/diplomas", "page");
 
     return {
       message: "Success",

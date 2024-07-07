@@ -1,6 +1,6 @@
 import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
-import { listLocationsForPerson } from "~/lib/nwd";
+import { listLocationsForPerson, listRolesForLocation } from "~/lib/nwd";
 import { Avatar } from "../../../../../_components/avatar";
 import {
   Dropdown,
@@ -27,12 +27,18 @@ export async function LocationSelector({
     return notFound();
   }
 
+  const rolesInCurrentLocation = await listRolesForLocation(currentLocation.id);
+
+  const isLocationAdmin = rolesInCurrentLocation.includes("location_admin");
+  const disabled = !isLocationAdmin && locations.length <= 1;
+
   return (
     <Dropdown>
       <DropdownButton
         as={SidebarItem}
         className="lg:mb-2.5"
         title={currentLocation.name ?? undefined}
+        disabled={disabled}
       >
         <Avatar
           className="size-6 flex-shrink-0"
@@ -42,22 +48,27 @@ export async function LocationSelector({
           )}
         />
         <SidebarLabel> {currentLocation.name}</SidebarLabel>
-        <ChevronDownIcon />
+        {disabled ? null : <ChevronDownIcon />}
       </DropdownButton>
 
       <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
-        <DropdownItem href={`/locatie/${currentLocationSlug}/instellingen`}>
-          <Cog8ToothIcon />
-          <DropdownLabel>Instellingen</DropdownLabel>
-        </DropdownItem>
-        <DropdownDivider />
+        {isLocationAdmin ? (
+          <>
+            <DropdownItem href={`/locatie/${currentLocationSlug}/instellingen`}>
+              <Cog8ToothIcon />
+              <DropdownLabel>Instellingen</DropdownLabel>
+            </DropdownItem>
+
+            {locations.length > 1 ? <DropdownDivider /> : null}
+          </>
+        ) : null}
 
         {locations
           .filter((location) => location.id !== currentLocation.id)
           .map((location) => (
             <DropdownItem
               key={location.id}
-              href={`/locatie/${location.handle}/personen`}
+              href={`/locatie/${location.handle}/cohorten`}
             >
               <Avatar
                 slot="icon"

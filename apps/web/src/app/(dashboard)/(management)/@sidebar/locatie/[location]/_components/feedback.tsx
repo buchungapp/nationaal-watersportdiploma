@@ -41,7 +41,7 @@ import {
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { z } from "zod";
-import { submitProductFeedback } from "~/lib/nwd";
+import { productFeedbackAction } from "~/app/(dashboard)/_actions/feedback";
 
 const feedbackLabels = {
   bug: {
@@ -101,7 +101,7 @@ function FeedbackTab({
         urgent: formData.get("urgent") === "on",
       });
 
-      await submitProductFeedback({
+      await productFeedbackAction({
         type: type === "feedback" ? "product-feedback" : type,
         priority: !!urgent ? "high" : "normal",
         message: comment,
@@ -171,7 +171,7 @@ function Feedback() {
     <>
       <SidebarItem onClick={() => setIsOpen(true)}>
         <ChatBubbleOvalLeftIcon />
-        <SidebarLabel>Contact opnemen</SidebarLabel>
+        <SidebarLabel>Feedback geven</SidebarLabel>
       </SidebarItem>
 
       <Dialog open={isOpen} onClose={setIsOpen}>
@@ -218,7 +218,7 @@ export default function () {
       fallback={
         <SidebarItem>
           <ChatBubbleOvalLeftIcon />
-          <SidebarLabel>Contact opnemen</SidebarLabel>
+          <SidebarLabel>Feedback geven</SidebarLabel>
         </SidebarItem>
       }
     >

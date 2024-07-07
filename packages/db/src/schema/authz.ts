@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   foreignKey,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -9,6 +10,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { timestamps } from '../utils/sql.js'
 import { token } from './authn.js'
+import { cohortAllocation } from './cohort.js'
 import { location } from './location.js'
 import { person } from './user.js'
 
@@ -30,6 +32,12 @@ export const privilege = pgTable(
   },
 )
 
+export const roleType = pgEnum('role_type', [
+  'organization',
+  'location',
+  'cohort',
+])
+
 export const role = pgTable(
   'role',
   {
@@ -41,6 +49,7 @@ export const role = pgTable(
     title: text('title'),
     description: text('description'),
     locationId: uuid('location_id'),
+    type: roleType('type').notNull(),
     ...timestamps,
   },
   (table) => {
@@ -123,6 +132,30 @@ export const personRole = pgTable(
         columns: [table.personId],
         foreignColumns: [person.id],
         name: 'person_role_person_id_fk',
+      }),
+      roleReference: foreignKey({
+        columns: [table.roleId],
+        foreignColumns: [role.id],
+        name: 'user_role_role_id_fk',
+      }),
+    }
+  },
+)
+
+export const cohortAllocationRole = pgTable(
+  'cohort_allocation_role',
+  {
+    cohortAllocationId: uuid('cohort_allocation_id').notNull(),
+    roleId: uuid('role_id').notNull(),
+    ...timestamps,
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.cohortAllocationId, table.roleId] }),
+      allocationReference: foreignKey({
+        columns: [table.cohortAllocationId],
+        foreignColumns: [cohortAllocation.id],
+        name: 'cohort_allocation_role_allocation_id_fk',
       }),
       roleReference: foreignKey({
         columns: [table.roleId],

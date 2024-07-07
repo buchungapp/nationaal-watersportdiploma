@@ -1,0 +1,48 @@
+import { notFound } from "next/navigation";
+import {
+  listInstructorsByCohortId,
+  listPersonsForLocationByRole,
+  retrieveCohortByHandle,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
+import { AddInstructor } from "./_components/add-instructor";
+import StudentsTable from "./_components/instructors-table";
+
+export default async function Page({
+  params,
+}: {
+  params: { location: string; cohort: string };
+}) {
+  const location = await retrieveLocationByHandle(params.location);
+
+  const cohortPromise = retrieveCohortByHandle(params.cohort, location.id).then(
+    (cohort) => {
+      if (!cohort) {
+        notFound();
+      }
+      return cohort;
+    },
+  );
+
+  const [cohort, instructors, allInstructors] = await Promise.all([
+    cohortPromise,
+    cohortPromise.then((cohort) => listInstructorsByCohortId(cohort.id)),
+    listPersonsForLocationByRole(location.id, "instructor"),
+  ]);
+
+  return (
+    <div className="max-w-3xl">
+      <AddInstructor
+        allInstructors={allInstructors}
+        cohortId={cohort.id}
+        locationId={location.id}
+      />
+      <StudentsTable
+        instructors={instructors}
+        totalItems={instructors.length}
+        cohortId={cohort.id}
+        locationId={location.id}
+      />
+    </div>
+  );
+}

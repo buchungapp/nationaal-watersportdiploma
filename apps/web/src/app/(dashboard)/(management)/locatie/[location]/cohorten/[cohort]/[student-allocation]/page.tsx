@@ -1,0 +1,260 @@
+import { ChevronLeftIcon } from "@heroicons/react/16/solid";
+import dayjs from "dayjs";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { SWRConfig } from "swr";
+import { Badge } from "~/app/(dashboard)/_components/badge";
+import {
+  DescriptionDetails,
+  DescriptionList,
+  DescriptionTerm,
+} from "~/app/(dashboard)/_components/description-list";
+import { Divider } from "~/app/(dashboard)/_components/divider";
+import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { Link } from "~/app/(dashboard)/_components/link";
+import { Strong } from "~/app/(dashboard)/_components/text";
+import {
+  isInstructorInCohort,
+  listDistinctTagsForCohort,
+  listPrivilegesForCohort,
+  listPrograms,
+  retrieveCohortByHandle,
+  retrieveLocationByHandle,
+  retrieveStudentAllocationWithCurriculum,
+} from "~/lib/nwd";
+import {
+  ClaimInstructorAllocation,
+  ReleaseInstructorAllocation,
+} from "./_components/actions";
+import { CourseCard } from "./_components/course-card";
+import { ManageAllocationTags } from "./_components/tag-input";
+
+async function InstructorField({
+  cohortId,
+  studentAllocationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+}) {
+  const [allocation, instructorAllocation, privileges] = await Promise.all([
+    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    isInstructorInCohort(cohortId),
+    listPrivilegesForCohort(cohortId),
+  ]);
+
+  if (!allocation) {
+    notFound();
+  }
+
+  const { instructor } = allocation;
+  const isInstructor = !!instructorAllocation;
+  const canManageInstructors = privileges.includes("manage_cohort_instructors");
+
+  if (!instructor && isInstructor) {
+    return (
+      <ClaimInstructorAllocation
+        cohortId={cohortId}
+        studentAllocationId={studentAllocationId}
+      />
+    );
+  }
+
+  if (!instructor) {
+    return null;
+  }
+
+  const instructorName = [
+    instructor.firstName,
+    instructor.lastNamePrefix,
+    instructor.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const showRemoveButton =
+    (isInstructor && instructor.id === instructorAllocation?.allocationId) ||
+    canManageInstructors;
+
+  return (
+    <div className="flex items-center justify-between gap-x-2">
+      <span className="whitespace-pre-line">{instructorName}</span>
+      {showRemoveButton && (
+        <ReleaseInstructorAllocation
+          cohortId={cohortId}
+          studentAllocationId={studentAllocationId}
+        />
+      )}
+    </div>
+  );
+}
+
+async function TagsField({
+  cohortId,
+  studentAllocationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+}) {
+  const [allocation, privileges, allCohortTags] = await Promise.all([
+    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    listPrivilegesForCohort(cohortId),
+    listDistinctTagsForCohort(cohortId),
+  ]);
+
+  if (!allocation) {
+    notFound();
+  }
+
+  const canManageStudents = privileges.includes("manage_cohort_students");
+
+  if (!canManageStudents) {
+    return (
+      <div className="flex flex-wrap gap-y-2.5 gap-x-2 items-center">
+        {allocation.tags.map((tag) => (
+          <Badge key={tag}>{tag}</Badge>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <ManageAllocationTags
+      tags={allocation.tags}
+      cohortId={cohortId}
+      allocationId={studentAllocationId}
+      allCohortTags={allCohortTags}
+    />
+  );
+}
+
+export default async function Page({
+  params,
+}: {
+  params: { location: string; cohort: string; "student-allocation": string };
+}) {
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
+
+  if (!cohort) {
+    notFound();
+  }
+
+  const allocation = await retrieveStudentAllocationWithCurriculum(
+    cohort.id,
+    params["student-allocation"],
+  );
+
+  if (!allocation) {
+    notFound();
+  }
+
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          // Note that there is no `await` here,
+          // so it only blocks rendering of components that
+          // actually rely on this data.
+          allPrograms: listPrograms(),
+        },
+      }}
+    >
+      <div className="max-lg:hidden">
+        <Link
+          href={`/locatie/${params.location}/cohorten/${params.cohort}`}
+          className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
+        >
+          <ChevronLeftIcon className="size-4 fill-zinc-400 dark:fill-zinc-500" />
+          Cohort {cohort.label}
+        </Link>
+      </div>
+
+      <div className="mx-auto mt-8 grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <div className="lg:col-start-3 lg:row-end-1">
+          <Subheading>Cursist</Subheading>
+          <Divider className="mt-4" />
+          <DescriptionList>
+            <DescriptionTerm>Naam</DescriptionTerm>
+            <DescriptionDetails>
+              <Strong>
+                {[
+                  allocation.person.firstName,
+                  allocation.person.lastNamePrefix,
+                  allocation.person.lastName,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              </Strong>
+            </DescriptionDetails>
+
+            <DescriptionTerm>Leeftijd</DescriptionTerm>
+            <DescriptionDetails>
+              {allocation.person.dateOfBirth ? (
+                <span>
+                  {`${dayjs().diff(dayjs(allocation.person.dateOfBirth), "year")} jr.`}{" "}
+                  <span className="text-zinc-500">{`(${dayjs(allocation.person.dateOfBirth).format("DD-MM-YYYY")})`}</span>
+                </span>
+              ) : null}
+            </DescriptionDetails>
+
+            <DescriptionTerm>Cohort</DescriptionTerm>
+            <DescriptionDetails>{cohort.label}</DescriptionDetails>
+
+            <DescriptionTerm>Instructeur</DescriptionTerm>
+            <DescriptionDetails>
+              <Suspense
+                fallback={
+                  <>
+                    {allocation.instructor
+                      ? [
+                          allocation.instructor.firstName,
+                          allocation.instructor.lastNamePrefix,
+                          allocation.instructor.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")
+                      : null}
+                  </>
+                }
+              >
+                <InstructorField
+                  cohortId={cohort.id}
+                  studentAllocationId={allocation.id}
+                />
+              </Suspense>
+            </DescriptionDetails>
+
+            <DescriptionTerm>Tags</DescriptionTerm>
+            <DescriptionDetails>
+              <Suspense
+                fallback={
+                  <div className="flex flex-wrap gap-y-2.5 gap-x-2 items-center">
+                    {allocation.tags.map((tag) => (
+                      <Badge key={tag}>{tag}</Badge>
+                    ))}
+                  </div>
+                }
+              >
+                <TagsField
+                  cohortId={cohort.id}
+                  studentAllocationId={allocation.id}
+                />
+              </Suspense>
+            </DescriptionDetails>
+          </DescriptionList>
+        </div>
+
+        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
+          <Subheading>Cursuskaart</Subheading>
+          <Divider className="mt-4" />
+          <CourseCard cohortId={cohort.id} cohortAllocationId={allocation.id} />
+        </div>
+
+        {/* <div className="lg:col-start-3">
+          <Subheading>Tijdlijn</Subheading>
+          <Divider className="mt-4" />
+        </div> */}
+      </div>
+    </SWRConfig>
+  );
+}
