@@ -1,5 +1,6 @@
 import { schema as s } from '@nawadi/db'
-import { SQL, and, asc, eq } from 'drizzle-orm'
+import { SQL, and, asc, eq, gte, isNull, lte, sql } from 'drizzle-orm'
+import { exists } from 'drizzle-orm/mysql-core/expressions'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -47,6 +48,7 @@ export const create = withZod(
 export const listByLocationId = withZod(
   z.object({
     id: uuidSchema,
+    personId: uuidSchema.optional(),
   }),
   selectSchema.array(),
   async (input) => {
@@ -55,7 +57,44 @@ export const listByLocationId = withZod(
     const rows = await query
       .select()
       .from(s.cohort)
-      .where(eq(s.cohort.locationId, input.id))
+      .where(
+        and(
+          eq(s.cohort.locationId, input.id),
+          isNull(s.cohort.deletedAt),
+          input.personId
+            ? and(
+                exists(
+                  query
+                    .select({ id: sql`1` })
+                    .from(s.cohortAllocation)
+                    .innerJoin(
+                      s.actor,
+                      and(
+                        eq(s.actor.id, s.cohortAllocation.actorId),
+                        isNull(s.actor.deletedAt),
+                      ),
+                    )
+                    .innerJoin(
+                      s.person,
+                      and(
+                        eq(s.person.id, s.actor.personId),
+                        eq(s.person.id, input.personId),
+                        isNull(s.person.deletedAt),
+                      ),
+                    )
+                    .where(
+                      and(
+                        eq(s.cohort.id, s.cohortAllocation.cohortId),
+                        isNull(s.cohortAllocation.deletedAt),
+                      ),
+                    ),
+                ),
+                lte(s.cohort.accessStartTime, sql`NOW()`),
+                gte(s.cohort.accessEndTime, sql`NOW()`),
+              )
+            : undefined,
+        ),
+      )
       .orderBy(asc(s.cohort.accessStartTime), asc(s.cohort.accessEndTime))
 
     return rows

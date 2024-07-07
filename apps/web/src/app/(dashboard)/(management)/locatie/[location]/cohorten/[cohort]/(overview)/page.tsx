@@ -1,5 +1,6 @@
 import { PlusIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { SWRConfig } from "swr";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
@@ -12,6 +13,7 @@ import {
   listCountries,
   listPersonsForLocationByRole,
   listPrograms,
+  listRolesForLocation,
   listStudentsWithCurriculaByCohortId,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
@@ -22,6 +24,31 @@ import {
   Dialogs,
 } from "./_components/dialog-context";
 import StudentsTable from "./_components/students-table";
+
+async function QuickActionButtons({
+  locationId,
+}: {
+  cohortId: string;
+  locationId: string;
+}) {
+  const [roles] = await Promise.all([listRolesForLocation(locationId)]);
+
+  if (!roles.includes("location_admin")) {
+    return null;
+  }
+
+  return (
+    <Dropdown>
+      <DropdownButton color="branding-orange">
+        <PlusIcon />
+        Cursist toevoegen
+      </DropdownButton>
+      <DropdownMenu>
+        <DialogButtons />
+      </DropdownMenu>
+    </Dropdown>
+  );
+}
 
 export default async function Page({
   params,
@@ -72,15 +99,9 @@ export default async function Page({
               {/* <FilterSelect /> */}
             </div>
           </div>
-          <Dropdown>
-            <DropdownButton color="branding-orange">
-              <PlusIcon />
-              Cursist toevoegen
-            </DropdownButton>
-            <DropdownMenu>
-              <DialogButtons />
-            </DropdownMenu>
-          </Dropdown>
+          <Suspense fallback={null}>
+            <QuickActionButtons locationId={location.id} cohortId={cohort.id} />
+          </Suspense>
         </div>
 
         <StudentsTable

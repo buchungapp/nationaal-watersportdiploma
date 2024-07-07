@@ -387,7 +387,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
       actorType: ["location_admin"],
       locationId,
       personId: person.id,
-    });
+    }).catch(() => []);
 
     const persons = await User.Person.list({ filter: { locationId } });
 
@@ -417,7 +417,7 @@ export const listPersonsForLocationByRole = cache(
         actorType: ["location_admin"],
         locationId,
         personId: person.id,
-      });
+      }).catch(() => []);
 
       const persons = await Location.Person.list({
         locationId,
@@ -583,9 +583,19 @@ export const createCompletedCertificate = async (
 
 export const listCohortsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    // TODO: This needs authorization checks
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-    const cohorts = await Cohort.listByLocationId({ id: locationId });
+    const isLocationAdmin = await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: primaryPerson.id,
+    }).catch(() => false);
+
+    const cohorts = await Cohort.listByLocationId({
+      id: locationId,
+      personId: isLocationAdmin ? undefined : primaryPerson.id,
+    });
 
     return cohorts;
   });
