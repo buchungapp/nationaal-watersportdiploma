@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import dayjs from "dayjs";
-import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -163,7 +162,6 @@ export default function InstructorsTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
-  const params = useParams();
 
   return (
     <div className="mt-8 relative">

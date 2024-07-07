@@ -10,7 +10,7 @@ import {
   ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { listPersonsForLocationByRole } from "~/lib/nwd";
+import type { listPersonsForLocationByRole } from "~/lib/nwd";
 import { addInstructorToCohortByPersonId } from "../../_actions/nwd";
 
 export function AddInstructor({
@@ -44,7 +44,7 @@ export function AddInstructor({
               toast.success("Instructeur toegevoegd");
               setForceRerenderId((prev) => prev + 1);
             })
-            .catch((error) => {
+            .catch(() => {
               toast.error("Er is een fout opgetreden");
             });
         }}
