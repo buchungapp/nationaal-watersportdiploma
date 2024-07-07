@@ -12,13 +12,19 @@ import {
   SidebarItem,
   SidebarLabel,
   SidebarSection,
-} from "../../../../../_components/sidebar";
+} from "~/app/(dashboard)/_components/sidebar";
+import type { ActorType } from "~/lib/nwd";
 
-export function LocationSidebarMenu() {
+export function LocationSidebarMenu({
+  personRoles,
+}: {
+  personRoles: ActorType[];
+}) {
   const segments = useSelectedLayoutSegments();
   const params = useParams();
 
-  const lastSegment = segments.at(-1);
+  const hasRole = (role: ActorType[]) =>
+    personRoles.some((r) => role.includes(r));
 
   return (
     <SidebarSection>
@@ -27,32 +33,38 @@ export function LocationSidebarMenu() {
           name: "Cohorten",
           href: `/locatie/${params.location}/cohorten`,
           Icon: CalendarDaysIcon,
-          current: lastSegment === "cohorten",
+          active: hasRole(["instructor", "location_admin"]),
+          current: segments[0] === "cohorten",
         },
         {
           name: "Personen",
           href: `/locatie/${params.location}/personen`,
           Icon: UserGroupIcon,
-          current: lastSegment === "personen",
+          active: hasRole(["location_admin"]),
+          current: segments[0] === "personen",
         },
         {
           name: "Diploma's",
           href: `/locatie/${params.location}/diplomas`,
           Icon: AcademicCapIcon,
-          current: lastSegment === "diplomas",
+          active: hasRole(["location_admin"]),
+          current: segments[0] === "diplomas",
         },
         {
           name: "Inzichten",
           href: `/locatie/${params.location}/inzichten`,
           Icon: ChartBarIcon,
-          current: lastSegment === "inzichten",
+          active: hasRole(["location_admin"]),
+          current: segments[0] === "inzichten",
         },
-      ].map((item) => (
-        <SidebarItem key={item.name} href={item.href} current={item.current}>
-          <item.Icon />
-          <SidebarLabel> {item.name}</SidebarLabel>
-        </SidebarItem>
-      ))}
+      ]
+        .filter((item) => !!item.active)
+        .map((item) => (
+          <SidebarItem key={item.name} href={item.href} current={item.current}>
+            <item.Icon />
+            <SidebarLabel> {item.name}</SidebarLabel>
+          </SidebarItem>
+        ))}
     </SidebarSection>
   );
 }

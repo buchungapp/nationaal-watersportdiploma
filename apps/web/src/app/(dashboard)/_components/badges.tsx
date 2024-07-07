@@ -8,7 +8,7 @@ export function CompetencyTypeBadge({
   if (!type) return null;
 
   return (
-    <Badge color={type === "knowledge" ? "blue" : "orange"}>
+    <Badge color={type === "knowledge" ? "green" : "orange"}>
       {type === "knowledge" ? "Kennis" : "Vaardigheid"}
     </Badge>
   );

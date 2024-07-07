@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import { useParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -71,6 +72,8 @@ export default function CohortsTable({
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const params = useParams();
+
   return (
     <>
       <Table
@@ -110,7 +113,7 @@ export default function CohortsTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`/locatie/${params.location as string}/cohorten/${row.original.handle}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

@@ -18,7 +18,7 @@
     "@sindresorhus/slugify": "^2.2.1",
     "csvtojson": "^2.0.10",
     "dotenv": "^16.4.5",
-    "drizzle-orm": "^0.30.8",
+    "drizzle-orm": "^0.31.2",
     "drizzle-toolbelt": "^1.1.1",
     "google-auth-library": "^9.7.0",
     "googleapis": "^134.0.0",
@@ -32,6 +32,6 @@
     "@types/inquirer": "^8.2.6",
     "@types/react": "^18.2.64",
     "postgres": "^3.4.4",
-    "typescript": "^5.4.5"
+    "typescript": "5.4.5"
   }
 }
