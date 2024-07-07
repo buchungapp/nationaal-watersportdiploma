@@ -561,6 +561,9 @@ export const retrieveStudentWithCurriculum = withZod(
 
     const { id, tags, createdAt } = getTableColumns(s.cohortAllocation)
 
+    const instructorActor = alias(s.actor, 'instructor_actor')
+    const instructorPerson = alias(s.person, 'instructor_person')
+
     const row = await query
       .select({
         id,
@@ -572,6 +575,12 @@ export const retrieveStudentWithCurriculum = withZod(
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
           dateOfBirth: s.person.dateOfBirth,
+        },
+        instructor: {
+          id: instructorPerson.id,
+          firstName: instructorPerson.firstName,
+          lastNamePrefix: instructorPerson.lastNamePrefix,
+          lastName: instructorPerson.lastName,
         },
         studentCurriculumId: s.cohortAllocation.studentCurriculumId,
         curriculum: {
@@ -613,6 +622,14 @@ export const retrieveStudentWithCurriculum = withZod(
       )
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
       .leftJoin(
+        instructorActor,
+        eq(instructorActor.id, s.cohortAllocation.instructorId),
+      )
+      .leftJoin(
+        instructorPerson,
+        eq(instructorPerson.id, instructorActor.personId),
+      )
+      .leftJoin(
         s.studentCurriculum,
         eq(s.studentCurriculum.id, s.cohortAllocation.studentCurriculumId),
       )
@@ -647,6 +664,14 @@ export const retrieveStudentWithCurriculum = withZod(
         lastName: row.person.lastName,
         dateOfBirth: row.person.dateOfBirth,
       },
+      instructor: row.instructor?.id
+        ? {
+            id: row.instructor.id,
+            firstName: row.instructor.firstName,
+            lastNamePrefix: row.instructor.lastNamePrefix,
+            lastName: row.instructor.lastName,
+          }
+        : null,
       studentCurriculum: row.studentCurriculumId
         ? {
             id: row.studentCurriculumId,

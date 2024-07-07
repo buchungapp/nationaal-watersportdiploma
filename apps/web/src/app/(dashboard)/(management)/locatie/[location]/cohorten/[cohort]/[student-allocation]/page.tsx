@@ -83,7 +83,17 @@ export default async function Page({
             <DescriptionDetails>{cohort.label}</DescriptionDetails>
 
             <DescriptionTerm>Instructeur</DescriptionTerm>
-            <DescriptionDetails></DescriptionDetails>
+            <DescriptionDetails>
+              {allocation.instructor
+                ? [
+                    allocation.instructor.firstName,
+                    allocation.instructor.lastNamePrefix,
+                    allocation.instructor.lastName,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")
+                : null}
+            </DescriptionDetails>
 
             <DescriptionTerm>Tags</DescriptionTerm>
             <DescriptionDetails>
