@@ -8,7 +8,7 @@ export const useSetQueryParams = () => {
   const pathname = usePathname();
 
   const setQueryParams = useCallback(
-    (paramsObj: Record<string, string | string[]>): string => {
+    (paramsObj: Record<string, string | string[] | undefined>): string => {
       const params = new URLSearchParams(searchParams.toString());
 
       Object.entries(paramsObj).forEach(([key, value]) => {
@@ -16,6 +16,11 @@ export const useSetQueryParams = () => {
           params.delete(key);
           value.forEach((item) => params.append(key, item));
         } else {
+          if (value === undefined) {
+            params.delete(key);
+            return;
+          }
+
           params.set(key, value);
         }
       });

@@ -4,7 +4,7 @@ import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ComponentProps } from "react";
-import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import { useOptimistic, useTransition } from "react";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import {
   Popover,
@@ -59,19 +59,31 @@ export function FilterSelect() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setQueryParams = useSetQueryParams();
-  const [_selectedStatus, setSelectedStatus] = useState<string[]>(
+
+  const [optimisticSelectedStatus, setOptimisticSelectedStatus] = useOptimistic(
     searchParams.has("filter") ? searchParams.getAll("filter") : [],
+    (current, toggle: "student" | "instructor" | "location_admin") => {
+      return current.includes(toggle)
+        ? current.filter((item) => item !== toggle)
+        : [...current, toggle];
+    },
   );
 
-  const deferredStatus = useDeferredValue(_selectedStatus);
+  const handleToggle = (
+    toggle: "student" | "instructor" | "location_admin",
+  ) => {
+    setOptimisticSelectedStatus(toggle);
 
-  useEffect(() => {
     router.push(
       setQueryParams({
-        filter: deferredStatus,
+        filter: optimisticSelectedStatus.includes(toggle)
+          ? optimisticSelectedStatus.filter((item) => item !== toggle)
+          : [...optimisticSelectedStatus, toggle],
+        page: undefined,
+        limit: undefined,
       }),
     );
-  }, [deferredStatus]);
+  };
 
   return (
     <Popover className="relative">
@@ -80,38 +92,20 @@ export function FilterSelect() {
       </PopoverButton>
       <PopoverPanel anchor="bottom end" className="flex flex-col gap-1">
         <CheckboxButton
-          onClick={() => {
-            setSelectedStatus((prev) =>
-              prev.includes("student")
-                ? prev.filter((item) => item !== "student")
-                : [...prev, "student"],
-            );
-          }}
-          checked={_selectedStatus.includes("student")}
+          onClick={() => handleToggle("student")}
+          checked={optimisticSelectedStatus.includes("student")}
         >
           Cursist
         </CheckboxButton>
         <CheckboxButton
-          onClick={() => {
-            setSelectedStatus((prev) =>
-              prev.includes("instructor")
-                ? prev.filter((item) => item !== "instructor")
-                : [...prev, "instructor"],
-            );
-          }}
-          checked={_selectedStatus.includes("instructor")}
+          onClick={() => handleToggle("instructor")}
+          checked={optimisticSelectedStatus.includes("instructor")}
         >
           Instructeur
         </CheckboxButton>
         <CheckboxButton
-          onClick={() => {
-            setSelectedStatus((prev) =>
-              prev.includes("location_admin")
-                ? prev.filter((item) => item !== "location_admin")
-                : [...prev, "location_admin"],
-            );
-          }}
-          checked={_selectedStatus.includes("location_admin")}
+          onClick={() => handleToggle("location_admin")}
+          checked={optimisticSelectedStatus.includes("location_admin")}
         >
           Locatie-beheerder
         </CheckboxButton>

@@ -18,6 +18,7 @@ import {
   listDistinctTagsForCohort,
   listPrivilegesForCohort,
   listPrograms,
+  listRolesForLocation,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
@@ -32,15 +33,19 @@ import { ManageAllocationTags } from "./_components/tag-input";
 async function InstructorField({
   cohortId,
   studentAllocationId,
+  locationId,
 }: {
   cohortId: string;
   studentAllocationId: string;
+  locationId: string;
 }) {
-  const [allocation, instructorAllocation, privileges] = await Promise.all([
-    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
-    isInstructorInCohort(cohortId),
-    listPrivilegesForCohort(cohortId),
-  ]);
+  const [allocation, locationRoles, instructorAllocation, privileges] =
+    await Promise.all([
+      retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+      listRolesForLocation(locationId),
+      isInstructorInCohort(cohortId),
+      listPrivilegesForCohort(cohortId),
+    ]);
 
   if (!allocation) {
     notFound();
@@ -48,7 +53,9 @@ async function InstructorField({
 
   const { instructor } = allocation;
   const isInstructor = !!instructorAllocation;
-  const canManageInstructors = privileges.includes("manage_cohort_instructors");
+  const canManageInstructors =
+    locationRoles.includes("location_admin") ||
+    privileges.includes("manage_cohort_instructors");
 
   if (!instructor && isInstructor) {
     return (
@@ -91,21 +98,27 @@ async function InstructorField({
 async function TagsField({
   cohortId,
   studentAllocationId,
+  locationId,
 }: {
   cohortId: string;
   studentAllocationId: string;
+  locationId: string;
 }) {
-  const [allocation, privileges, allCohortTags] = await Promise.all([
-    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
-    listPrivilegesForCohort(cohortId),
-    listDistinctTagsForCohort(cohortId),
-  ]);
+  const [allocation, locationRoles, privileges, allCohortTags] =
+    await Promise.all([
+      retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+      listRolesForLocation(locationId),
+      listPrivilegesForCohort(cohortId),
+      listDistinctTagsForCohort(cohortId),
+    ]);
 
   if (!allocation) {
     notFound();
   }
 
-  const canManageStudents = privileges.includes("manage_cohort_students");
+  const canManageStudents =
+    locationRoles.includes("location_admin") ||
+    privileges.includes("manage_cohort_students");
 
   if (!canManageStudents) {
     return (
@@ -218,6 +231,7 @@ export default async function Page({
                 }
               >
                 <InstructorField
+                  locationId={location.id}
                   cohortId={cohort.id}
                   studentAllocationId={allocation.id}
                 />
@@ -236,6 +250,7 @@ export default async function Page({
                 }
               >
                 <TagsField
+                  locationId={location.id}
                   cohortId={cohort.id}
                   studentAllocationId={allocation.id}
                 />

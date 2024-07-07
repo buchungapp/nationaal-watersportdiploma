@@ -1,4 +1,5 @@
 import { schema as s } from '@nawadi/db'
+import { AuthError } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
 import {
   SQL,
@@ -12,8 +13,9 @@ import {
 } from 'drizzle-orm'
 import { aggregate } from 'drizzle-toolbelt'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, useSupabaseClient } from '../../contexts/index.js'
 import {
+  possibleSingleRow,
   singleOrArray,
   singleRow,
   successfulCreateResponse,
@@ -21,6 +23,7 @@ import {
   withZod,
 } from '../../utils/index.js'
 import { insertSchema } from './person.schema.js'
+import { getOrCreateFromEmail } from './user.js'
 import { selectSchema } from './user.schema.js'
 
 export const getOrCreate = withZod(
@@ -135,17 +138,19 @@ export const fromId = async (id: string) => {
   return await query
     .select({
       ...getTableColumns(s.person),
+      email: s.user.email,
       birthCountry: {
         code: s.country.alpha_2,
         name: s.country.nl,
       },
     })
     .from(s.person)
-    .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+    .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+    .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
     .then((rows) => {
       const result = singleRow(rows)
-      if (result.birthCountry.code === null) {
+      if (result.birthCountry?.code === null) {
         return {
           ...result,
           birthCountry: null,
@@ -210,10 +215,12 @@ export const list = withZod(
           code: s.country.alpha_2,
           name: s.country.nl,
         },
+        email: s.user.email,
         actor: s.actor,
       })
       .from(s.person)
       .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+      .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
       .innerJoin(
         s.actor,
         and(
@@ -345,5 +352,81 @@ export const listActiveRolesForLocation = withZod(
             ({ type }) => type as 'student' | 'instructor' | 'location_admin',
           ),
       )
+  },
+)
+
+export const updateEmail = withZod(
+  z.object({
+    personId: uuidSchema,
+    email: z.string().email(),
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+    const supabase = useSupabaseClient()
+
+    // TODO: handle the case where a user holds multiple persons
+    // and we want to move only one of them to a new email address
+
+    function findUserForPerson(personId: string) {
+      return query
+        .select({ id: s.user.authUserId })
+        .from(s.user)
+        .where(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.person)
+              .where(
+                and(
+                  eq(s.person.id, personId),
+                  isNull(s.person.deletedAt),
+                  eq(s.person.userId, s.user.authUserId),
+                ),
+              ),
+          ),
+        )
+        .then(possibleSingleRow)
+    }
+
+    async function updateUserEmail(userId: string, email: string) {
+      await supabase.auth.admin.updateUserById(userId, {
+        email: email,
+        email_confirm: false,
+      })
+
+      return query
+        .update(s.user)
+        .set({ email: email })
+        .where(eq(s.user.authUserId, userId))
+        .returning({ id: s.user.authUserId })
+        .then(singleRow)
+    }
+
+    async function updatePersonUser(personId: string, userId: string) {
+      return query
+        .update(s.person)
+        .set({ userId: userId })
+        .where(eq(s.person.id, personId))
+        .returning({ id: s.person.id })
+        .then(singleRow)
+    }
+
+    const user = await findUserForPerson(input.personId)
+
+    if (user) {
+      try {
+        return await updateUserEmail(user.id, input.email)
+      } catch (error) {
+        if (error instanceof AuthError && error.code === 'email_exists') {
+          const newUser = await getOrCreateFromEmail({ email: input.email })
+          return await updatePersonUser(input.personId, newUser.id)
+        }
+        throw error
+      }
+    }
+
+    const newUser = await getOrCreateFromEmail({ email: input.email })
+    return await updatePersonUser(input.personId, newUser.id)
   },
 )

@@ -1,8 +1,9 @@
 import { schema as s } from '@nawadi/db'
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
+  singleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -40,35 +41,47 @@ export const upsert = withZod(
   async (input) => {
     const query = useQuery()
 
-    const [actor] = await query
+    const actor = await query
       .insert(s.actor)
       .values(input)
-      .onConflictDoNothing({
+      .onConflictDoUpdate({
         target: [s.actor.type, s.actor.personId, s.actor.locationId],
+        set: {
+          deletedAt: null,
+          createdAt: sql`NOW()`,
+        },
       })
       .returning({ id: s.actor.id })
-
-    if (!actor) {
-      const [existing] = await query
-        .select({ id: s.actor.id })
-        .from(s.actor)
-        .where(
-          and(
-            eq(s.actor.type, input.type),
-            input.personId ? eq(s.actor.personId, input.personId) : undefined,
-            eq(s.actor.locationId, input.locationId),
-          ),
-        )
-
-      if (!existing) {
-        throw new Error('Failed to create actor')
-      }
-
-      return {
-        id: existing.id,
-      }
-    }
+      .then(singleRow)
 
     return actor
+  },
+)
+
+export const remove = withZod(
+  z.union([
+    z.object({
+      type: insertSchema.shape.type,
+      personId: uuidSchema,
+      locationId: uuidSchema,
+    }),
+    z.object({ actorId: uuidSchema }),
+  ]),
+  z.void(),
+  async (input) => {
+    const query = useQuery()
+
+    await query
+      .update(s.actor)
+      .set({ deletedAt: sql`NOW()` })
+      .where(
+        'actorId' in input
+          ? eq(s.actor.id, input.actorId)
+          : and(
+              eq(s.actor.type, input.type),
+              eq(s.actor.personId, input.personId),
+              eq(s.actor.locationId, input.locationId),
+            ),
+      )
   },
 )
