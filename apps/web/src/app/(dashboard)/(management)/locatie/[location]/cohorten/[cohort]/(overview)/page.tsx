@@ -1,4 +1,6 @@
 import { PlusIcon } from "@heroicons/react/16/solid";
+import FlexSearch from "flexsearch";
+
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SWRConfig } from "swr";
@@ -8,6 +10,7 @@ import {
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
+import { Select } from "~/app/(dashboard)/_components/select";
 import {
   isInstructorInCohort,
   listCountries,
@@ -52,8 +55,10 @@ async function QuickActionButtons({
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: { location: string; cohort: string };
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
   const cohortPromise = retrieveLocationByHandle(params.location).then(
     (location) =>
@@ -65,14 +70,69 @@ export default async function Page({
       }),
   );
 
-  const [cohort, students, location] = await Promise.all([
+  const [cohort, students, location, instructorAllocation] = await Promise.all([
     cohortPromise,
     cohortPromise.then((cohort) =>
       listStudentsWithCurriculaByCohortId(cohort.id),
     ),
     retrieveLocationByHandle(params.location),
-    ,
+    cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
   ]);
+
+  // Filter
+  const filterParams = searchParams?.filter
+    ? Array.isArray(searchParams.filter)
+      ? searchParams.filter
+      : [searchParams.filter]
+    : [];
+
+  // Search
+  const index = new FlexSearch.Document({
+    tokenize: "full",
+    context: {
+      resolution: 9,
+      depth: 2,
+      bidirectional: true,
+    },
+    document: {
+      id: "id",
+      store: ["name", "tags"],
+      index: ["name", "tags"],
+    },
+  });
+
+  // Add students to the index, first name, last name, and tags
+  students.forEach((student) => {
+    index.add({
+      id: student.id,
+      name: [
+        student.person.firstName,
+        student.person.lastNamePrefix,
+        student.person.lastName,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      tags: student.tags,
+    });
+  });
+
+  const searchQuery = searchParams?.query
+    ? Array.isArray(searchParams.query)
+      ? searchParams.query.join(" ")
+      : searchParams.query
+    : null;
+
+  let searchedStudents = students;
+
+  if (searchQuery && searchQuery.length >= 2) {
+    const searchResult = index.search(searchQuery);
+
+    if (searchResult.length > 0) {
+      searchedStudents = students.filter((student) =>
+        searchResult.flatMap(({ result }) => result).includes(student.id),
+      );
+    }
+  }
 
   return (
     <SWRConfig
@@ -94,9 +154,19 @@ export default async function Page({
       <DialogWrapper>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-sm:w-full sm:flex-1">
-            <div className="mt-4 flex max-w-xl gap-4">
-              <Search placeholder="Doorzoek cursisten..." />
-              {/* <FilterSelect /> */}
+            <div className="mt-4 flex gap-4">
+              <div className="w-full max-w-xl">
+                <Search placeholder="Doorzoek cursisten..." />
+              </div>
+
+              {!!instructorAllocation ? (
+                <div className="shrink-0">
+                  <Select name="view" className="">
+                    <option value="all">Alle cursisten</option>
+                    <option value="claimed">Mijn cursisten</option>
+                  </Select>
+                </div>
+              ) : null}
             </div>
           </div>
           <Suspense fallback={null}>
@@ -105,8 +175,8 @@ export default async function Page({
         </div>
 
         <StudentsTable
-          students={students}
-          totalItems={students.length}
+          students={searchedStudents}
+          totalItems={searchedStudents.length}
           cohortId={cohort.id}
         />
 
