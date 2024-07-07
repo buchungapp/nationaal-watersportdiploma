@@ -192,10 +192,10 @@ importers:
         specifier: ^0.15.0
         version: 0.15.0
       posthog-js:
-        specifier: ^1.116.2
-        version: 1.130.2
+        specifier: ^1.144.2
+        version: 1.144.2
       posthog-node:
-        specifier: ^4.0.0
+        specifier: ^4.0.1
         version: 4.0.1
       qrcode:
         specifier: ^1.5.3
@@ -2503,7 +2503,7 @@ packages:
     resolution: {integrity: sha512-BYMYz+vH4Ywieg+dcGwGAW8/lN+GGaz40/r1RiBlTwGPPi0iYdOxYk8XiCng+2nigPAk5781ZzDjDHi9IobpOA==}
     engines: {node: '>=18.0.0'}
     dependencies:
-      axios: 1.6.8
+      axios: 1.7.2
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - debug
@@ -5315,7 +5315,7 @@ packages:
   /@types/ioredis@4.28.10:
     resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
     dependencies:
-      '@types/node': 20.14.10
+      '@types/node': 20.12.8
     dev: false
 
   /@types/js-yaml@4.0.9:
@@ -6392,6 +6392,16 @@ packages:
 
   /axios@1.6.8:
     resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
+    dependencies:
+      follow-redirects: 1.15.6
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+    dev: false
+
+  /axios@1.7.2:
+    resolution: {integrity: sha512-2A8QhOMrbomlDuiLeK9XibIBzuHeRcqqNOHp0Cyp5EoJ1IFDh+XZH3A6BkXtv0K4gFGCI0Y4BM7B1wOEi0Rmgw==}
     dependencies:
       follow-redirects: 1.15.6
       form-data: 4.0.0
@@ -12258,25 +12268,26 @@ packages:
     resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
     engines: {node: '>=12'}
 
-  /posthog-js@1.130.2:
-    resolution: {integrity: sha512-QR/j9Xs/STK3+VJgqiByeXFKT17LGZZvJtrCdgFhwydp8WfisJw7zrSy7rVDjYS0UeKJJ/3cO/qtlXD3dR2+Eg==}
+  /posthog-js@1.144.2:
+    resolution: {integrity: sha512-Kgq8/bJvrTbDDsfSqAURIiYdkJ5tPegR2JC6pqIeoFjnTx/Rrq0j4n3vDW7K1nCapBch7G5gTZdaK7O6t+rI9A==}
     dependencies:
       fflate: 0.4.8
-      preact: 10.21.0
+      preact: 10.22.1
+      web-vitals: 4.2.1
     dev: false
 
   /posthog-node@4.0.1:
     resolution: {integrity: sha512-rtqm2h22QxLGBrW2bLYzbRhliIrqgZ0k+gF0LkQ1SNdeD06YE5eilV0MxZppFSxC8TfH0+B0cWCuebEnreIDgQ==}
     engines: {node: '>=15.0.0'}
     dependencies:
-      axios: 1.6.8
+      axios: 1.7.2
       rusha: 0.8.14
     transitivePeerDependencies:
       - debug
     dev: false
 
-  /preact@10.21.0:
-    resolution: {integrity: sha512-aQAIxtzWEwH8ou+OovWVSVNlFImL7xUCwJX3YMqA3U8iKCNC34999fFOnWjYNsylgfPgMexpbk7WYOLtKr/mxg==}
+  /preact@10.22.1:
+    resolution: {integrity: sha512-jRYbDDgMpIb5LHq3hkI0bbl+l/TQ9UnkdQ0ww+lp+4MMOdqaUYdFc5qeyP+IV8FAd/2Em7drVPeKdQxsiWCf/A==}
     dev: false
 
   /prelude-ls@1.2.1:
@@ -14329,6 +14340,10 @@ packages:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
     dev: true
+
+  /web-vitals@4.2.1:
+    resolution: {integrity: sha512-U6bAxeudnhDqcXNl50JC4hLlqox9DZnngxfISZm3DMZnonW35xtJOVUc091L+DOY+6hVZVpKXoiCP0RiT6339Q==}
+    dev: false
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
