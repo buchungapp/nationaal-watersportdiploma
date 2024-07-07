@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import dayjs from "dayjs";
+import { useParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -76,6 +77,8 @@ export default function PersonsTable({
   persons: Awaited<ReturnType<typeof listPersonsForLocation>>;
   totalItems: number;
 }) {
+  const params = useParams();
+
   const table = useReactTable({
     data: persons,
     columns,
@@ -123,15 +126,12 @@ export default function PersonsTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`/locatie/${params.location as string}/personen/${row.original.id}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
                   key={cell.id}
                   className={clsx(cell.column.columnDef.meta?.align)}
-                  // suppressLinkBehavior={
-                  //   cell.column.columnDef.meta?.suppressLinkBehavior
-                  // }
                 >
                   {index === 0 && row.getIsSelected() && (
                     <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />

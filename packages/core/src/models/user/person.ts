@@ -143,11 +143,11 @@ export const fromId = async (id: string) => {
     })
     .from(s.person)
     .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-    .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+    .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
     .then((rows) => {
       const result = singleRow(rows)
-      if (result.birthCountry.code === null) {
+      if (result.birthCountry?.code === null) {
         return {
           ...result,
           birthCountry: null,
