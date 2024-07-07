@@ -33,7 +33,7 @@ import {
 } from "~/app/(dashboard)/_components/listbox";
 
 import {
-  claimStudentsInCohort,
+  claimStudents,
   enrollStudentsInCurriculumForCohort,
   isInstructorInCohort,
   listCurriculaByProgram,
@@ -52,7 +52,7 @@ function Claim({ rows, cohortId }: Props) {
   return (
     <DropdownItem
       onClick={async () => {
-        await claimStudentsInCohort(
+        await claimStudents(
           cohortId,
           rows.map((row) => row.original.id),
         )

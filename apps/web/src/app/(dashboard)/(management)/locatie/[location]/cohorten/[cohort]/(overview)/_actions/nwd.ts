@@ -5,7 +5,6 @@ import {
   addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
-  claimStudentsInCohort as claimStudentsInCohortInner,
   enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
   getUserOrThrow,
   isInstructorInCohort as isInstructorInCohortInner,
@@ -16,16 +15,36 @@ import {
   listPrograms as listProgramsInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
+  updateStudentInstructorAssignment,
   type ActorType,
 } from "~/lib/nwd";
 
 // Export all as async functions
-export async function claimStudentsInCohort(
-  cohortId: string,
-  studentIds: string[],
-) {
-  await claimStudentsInCohortInner(cohortId, studentIds);
+export async function claimStudents(cohortId: string, studentIds: string[]) {
+  await updateStudentInstructorAssignment({
+    cohortId,
+    studentAllocationIds: studentIds,
+    action: "claim",
+  });
   revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/cursisten/[student-allocation]",
+    "page",
+  );
+}
+
+// Export all as async functions
+export async function releaseStudent(cohortId: string, studentId: string) {
+  await updateStudentInstructorAssignment({
+    cohortId,
+    studentAllocationIds: [studentId],
+    action: "release",
+  });
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/cursisten/[student-allocation]",
+    "page",
+  );
 }
 
 export async function enrollStudentsInCurriculumForCohort(props: {
@@ -39,6 +58,10 @@ export async function enrollStudentsInCurriculumForCohort(props: {
 }) {
   await enrollStudentsInCurriculumForCohortInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]/cursisten", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/cursisten/[student-allocation]",
+    "page",
+  );
 }
 
 export async function isInstructorInCohort(cohortId: string) {

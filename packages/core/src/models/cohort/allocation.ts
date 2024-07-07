@@ -211,28 +211,40 @@ export const listAndCountForCohort = withZod(
   },
 )
 
-export const isPersonInCohortById = withZod(
+export const listByPersonId = withZod(
   z.object({
     cohortId: uuidSchema,
     personId: uuidSchema,
-    actorType: singleOrArray(z.enum(['student', 'instructor'])).optional(),
+    actorType: singleOrArray(z.enum(['student', 'instructor'])).default([
+      'student',
+      'instructor',
+    ]),
   }),
+  z
+    .object({
+      allocationId: uuidSchema,
+      actorId: uuidSchema,
+      type: z.enum(['student', 'instructor']),
+    })
+    .array(),
   async (input) => {
     const query = useQuery()
 
-    const exists = await query
-      .select({ id: sql`1` })
+    const rows = await query
+      .select({
+        allocationId: s.cohortAllocation.id,
+        actorId: s.actor.id,
+        type: s.actor.type,
+      })
       .from(s.cohortAllocation)
       .innerJoin(
         s.actor,
         and(
           eq(s.actor.id, s.cohortAllocation.actorId),
           isNull(s.actor.deletedAt),
-          input.actorType
-            ? Array.isArray(input.actorType)
-              ? inArray(s.actor.type, input.actorType)
-              : eq(s.actor.type, input.actorType)
-            : undefined,
+          Array.isArray(input.actorType)
+            ? inArray(s.actor.type, input.actorType)
+            : eq(s.actor.type, input.actorType),
         ),
       )
       .innerJoin(
@@ -249,10 +261,12 @@ export const isPersonInCohortById = withZod(
           isNull(s.cohortAllocation.deletedAt),
         ),
       )
-      .limit(1)
-      .then(possibleSingleRow)
 
-    return !!exists
+    return rows as {
+      allocationId: string
+      actorId: string
+      type: 'student' | 'instructor'
+    }[]
   },
 )
 
@@ -282,34 +296,36 @@ export const isActorInCohortById = withZod(
 
 export const setInstructorForStudent = withZod(
   z.object({
-    instructorId: uuidSchema,
+    instructorId: uuidSchema.nullable(),
     cohortId: uuidSchema,
     studentAllocationId: singleOrArray(uuidSchema),
   }),
   async (input) => {
     const query = useQuery()
 
-    // Make sure the instructorId belong to an actor with type instructor and is in the cohort
-    await query
-      .select({ id: sql`1` })
-      .from(s.cohortAllocation)
-      .innerJoin(
-        s.actor,
-        and(
-          eq(s.actor.id, s.cohortAllocation.actorId),
-          isNull(s.actor.deletedAt),
-          eq(s.actor.type, 'instructor'),
-          eq(s.actor.id, input.instructorId),
-        ),
-      )
-      .where(
-        and(
-          eq(s.cohortAllocation.actorId, input.instructorId),
-          eq(s.cohortAllocation.cohortId, input.cohortId),
-          isNull(s.cohortAllocation.deletedAt),
-        ),
-      )
-      .then(singleRow)
+    if (input.instructorId) {
+      // Make sure the instructorId belong to an actor with type instructor and is in the cohort
+      await query
+        .select({ id: sql`1` })
+        .from(s.cohortAllocation)
+        .innerJoin(
+          s.actor,
+          and(
+            eq(s.actor.id, s.cohortAllocation.actorId),
+            isNull(s.actor.deletedAt),
+            eq(s.actor.type, 'instructor'),
+            eq(s.actor.id, input.instructorId),
+          ),
+        )
+        .where(
+          and(
+            eq(s.cohortAllocation.actorId, input.instructorId),
+            eq(s.cohortAllocation.cohortId, input.cohortId),
+            isNull(s.cohortAllocation.deletedAt),
+          ),
+        )
+        .then(singleRow)
+    }
 
     return await query
       .update(s.cohortAllocation)

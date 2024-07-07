@@ -18,7 +18,6 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import packageInfo from "~/../package.json";
-import { isPersonInCohortById } from "../../../../packages/core/out/models/cohort/allocation";
 import posthog from "./posthog";
 
 export type ActorType = "student" | "instructor" | "location_admin";
@@ -619,11 +618,11 @@ export const retrieveCohortByHandle = cache(
           locationId: cohort?.locationId,
           personId: primaryPerson.id,
         }).catch(() => false),
-        isPersonInCohortById({
+        Cohort.Allocation.listByPersonId({
           cohortId: cohort.id,
           personId: primaryPerson.id,
           actorType: "instructor",
-        }),
+        }).then((actors) => actors.length > 0),
       ]);
 
       const canAccessCohort =
@@ -1002,11 +1001,21 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    return await Cohort.Allocation.isPersonInCohortById({
+    const [possibleInstructorActor] = await Cohort.Allocation.listByPersonId({
       cohortId,
       personId: primaryPerson.id,
       actorType: "instructor",
     });
+
+    if (!possibleInstructorActor) {
+      return undefined;
+    }
+
+    return possibleInstructorActor as {
+      actorId: string;
+      type: "instructor";
+      allocationId: string;
+    };
   });
 });
 
@@ -1034,19 +1043,22 @@ export const listPrivilegesForCohort = cache(async (cohortId: string) => {
   });
 });
 
-export async function claimStudentsInCohort(
-  cohortId: string,
-  studentAllocationIds: string[],
-) {
+export async function updateStudentInstructorAssignment({
+  action,
+  cohortId,
+  studentAllocationIds,
+}: {
+  cohortId: string;
+  studentAllocationIds: string[];
+  action: "claim" | "release";
+}) {
   return makeRequest(async () => {
-    const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
+    const [cohort, primaryPerson] = await Promise.all([
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
+      getUserOrThrow().then(getPrimaryPerson),
     ]);
-
-    const primaryPerson = await getPrimaryPerson(authUser);
 
     const instructorActor = await Location.Person.getActorByPersonIdAndType({
       locationId: cohort.locationId,
@@ -1055,12 +1067,14 @@ export async function claimStudentsInCohort(
     });
 
     if (!instructorActor) {
-      throw new Error("Instructor not found for location");
+      throw new Error("User is not an instructor for this location");
     }
 
-    return await Cohort.Allocation.setInstructorForStudent({
+    const instructorId = action === "claim" ? instructorActor.id : null;
+
+    return Cohort.Allocation.setInstructorForStudent({
       cohortId,
-      instructorId: instructorActor.id,
+      instructorId,
       studentAllocationId: studentAllocationIds,
     });
   });

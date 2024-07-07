@@ -1,6 +1,7 @@
 import { ChevronLeftIcon } from "@heroicons/react/16/solid";
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   DescriptionDetails,
@@ -12,11 +13,76 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import {
+  isInstructorInCohort,
+  listPrivilegesForCohort,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
+import {
+  ClaimInstructorAllocation,
+  ReleaseInstructorAllocation,
+} from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
+
+async function InstructorField({
+  cohortId,
+  studentAllocationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+}) {
+  const [allocation, instructorAllocation, privileges] = await Promise.all([
+    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    isInstructorInCohort(cohortId),
+    listPrivilegesForCohort(cohortId),
+  ]);
+
+  if (!allocation) {
+    notFound();
+  }
+
+  const { instructor } = allocation;
+  const isInstructor = !!instructorAllocation;
+  const canManageInstructors = privileges.includes("manage_cohort_instructors");
+
+  if (!instructor && isInstructor) {
+    return (
+      <ClaimInstructorAllocation
+        cohortId={cohortId}
+        studentAllocationId={studentAllocationId}
+      />
+    );
+  }
+
+  if (!instructor) {
+    return null;
+  }
+
+  const instructorName = [
+    instructor.firstName,
+    instructor.lastNamePrefix,
+    instructor.lastName,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const showRemoveButton =
+    (isInstructor && instructor.id === instructorAllocation?.allocationId) ||
+    canManageInstructors;
+
+  return (
+    <div className="flex items-center justify-between gap-x-2">
+      <span className="whitespace-pre-line">{instructorName}</span>
+      {showRemoveButton && (
+        <ReleaseInstructorAllocation
+          cohortId={cohortId}
+          studentAllocationId={studentAllocationId}
+        />
+      )}
+    </div>
+  );
+}
 
 export default async function Page({
   params,
@@ -84,15 +150,26 @@ export default async function Page({
 
             <DescriptionTerm>Instructeur</DescriptionTerm>
             <DescriptionDetails>
-              {allocation.instructor
-                ? [
-                    allocation.instructor.firstName,
-                    allocation.instructor.lastNamePrefix,
-                    allocation.instructor.lastName,
-                  ]
-                    .filter(Boolean)
-                    .join(" ")
-                : null}
+              <Suspense
+                fallback={
+                  <>
+                    {allocation.instructor
+                      ? [
+                          allocation.instructor.firstName,
+                          allocation.instructor.lastNamePrefix,
+                          allocation.instructor.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")
+                      : null}
+                  </>
+                }
+              >
+                <InstructorField
+                  cohortId={cohort.id}
+                  studentAllocationId={allocation.id}
+                />
+              </Suspense>
             </DescriptionDetails>
 
             <DescriptionTerm>Tags</DescriptionTerm>
