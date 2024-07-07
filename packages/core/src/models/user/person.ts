@@ -135,12 +135,14 @@ export const fromId = async (id: string) => {
   return await query
     .select({
       ...getTableColumns(s.person),
+      email: s.user.email,
       birthCountry: {
         code: s.country.alpha_2,
         name: s.country.nl,
       },
     })
     .from(s.person)
+    .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
     .innerJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
     .where(eq(s.person.id, id))
     .then((rows) => {
@@ -210,10 +212,12 @@ export const list = withZod(
           code: s.country.alpha_2,
           name: s.country.nl,
         },
+        email: s.user.email,
         actor: s.actor,
       })
       .from(s.person)
       .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+      .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
       .innerJoin(
         s.actor,
         and(

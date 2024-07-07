@@ -15,6 +15,9 @@ export default function Search({ placeholder = "Zoeken...", debounce = 300 }) {
 
   const handleSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
+    params.delete("page");
+    params.delete("limit");
+
     if (term) {
       params.set("query", term);
     } else {

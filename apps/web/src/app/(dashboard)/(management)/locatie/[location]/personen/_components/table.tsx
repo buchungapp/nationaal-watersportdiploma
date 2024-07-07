@@ -41,6 +41,9 @@ const columns = [
       ),
     },
   ),
+  columnHelper.accessor("email", {
+    header: "E-mailadres",
+  }),
   columnHelper.accessor("dateOfBirth", {
     header: "Geboortedatum",
     cell: ({ getValue }) => {
@@ -51,9 +54,6 @@ const columns = [
         </span>
       ) : null;
     },
-  }),
-  columnHelper.accessor("birthCity", {
-    header: "Geboorteplaats",
   }),
   columnHelper.accessor("actors", {
     header: "Rollen",
