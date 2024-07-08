@@ -57,11 +57,11 @@ export default async function Layout({
           <div className="flex flex-wrap gap-x-10 gap-y-2 py-1.5 items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
             <CalendarIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
             <span>
-              {dayjs(cohort.accessStartTime).format("ddd DD-MM-YYYY HH:MM uur")}
+              {dayjs(cohort.accessStartTime).format("ddd DD-MM-YYYY HH:mm uur")}
             </span>
             <ArrowRightIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
             <span>
-              {dayjs(cohort.accessEndTime).format("ddd DD-MM-YYYY HH:MM uur")}
+              {dayjs(cohort.accessEndTime).format("ddd DD-MM-YYYY HH:mm uur")}
             </span>
           </div>
           <div className="flex gap-4">{/* ActionButtons */}</div>
