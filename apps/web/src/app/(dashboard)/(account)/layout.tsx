@@ -1,11 +1,10 @@
 import {
   ArrowRightStartOnRectangleIcon,
   ChevronDownIcon,
-  Cog8ToothIcon,
   LifebuoyIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
-import { listPersonsForUser } from "~/lib/nwd";
+import { getUserOrThrow, listPersonsForUser } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
@@ -39,9 +38,9 @@ import FeedbackDialog, {
 } from "./_components/feedback";
 
 const navItems = [
-  { label: "Paspoort", url: "/profiel" },
-  { label: "Diploma's", url: "/diploma" },
-  { label: "Vaarlocaties", url: "/vaarlocaties" },
+  // { label: "Paspoort", url: "/profiel" },
+  // { label: "Diploma's", url: "/diploma" },
+  { label: "Vaarlocaties", url: "/profiel" },
 ] as const;
 
 function PersonDropdownMenu() {
@@ -59,11 +58,11 @@ function PersonDropdownMenu() {
         />
         <DropdownLabel>Workcation</DropdownLabel>
       </DropdownItem> */}
-      <DropdownDivider />
+      {/* <DropdownDivider />
       <DropdownItem href="/profiel/personen">
         <Cog8ToothIcon />
         <DropdownLabel>Beheer personen</DropdownLabel>
-      </DropdownItem>
+      </DropdownItem> */}
     </DropdownMenu>
   );
 }
@@ -73,7 +72,71 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const persons = await listPersonsForUser();
+  const user = await getUserOrThrow();
+  const persons = await listPersonsForUser().catch(() => null);
+
+  if (!persons || persons.length < 1) {
+    return (
+      <StackedLayout
+        navbar={
+          <Navbar>
+            <NavbarSpacer />
+            <NavbarSection>
+              <FeedbackProvider>
+                <Dropdown>
+                  <DropdownButton as={NavbarItem}>
+                    <Avatar
+                      src=""
+                      initials={(user.displayName ?? user.email).slice(0, 2)}
+                      square
+                    />
+                  </DropdownButton>
+                  <DropdownMenu className="min-w-64" anchor="bottom end">
+                    {/* <DropdownItem href="/instellingen">
+                      <Cog8ToothIcon />
+                      <DropdownLabel>Instellingen</DropdownLabel>
+                    </DropdownItem>
+                    <DropdownDivider /> */}
+                    <DropdownItem href="/help">
+                      <LifebuoyIcon />
+                      <DropdownLabel>Helpcentrum</DropdownLabel>
+                    </DropdownItem>
+                    <FeedbackButton />
+                    <DropdownItem href="/privacy">
+                      <ShieldCheckIcon />
+                      <DropdownLabel>Privacybeleid</DropdownLabel>
+                    </DropdownItem>
+                    <DropdownDivider />
+                    <LogOutDropdownItem>
+                      <ArrowRightStartOnRectangleIcon />
+                      <DropdownLabel>Uitloggen</DropdownLabel>
+                    </LogOutDropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <FeedbackDialog />
+              </FeedbackProvider>
+            </NavbarSection>
+          </Navbar>
+        }
+        sidebar={
+          <Sidebar>
+            <SidebarHeader></SidebarHeader>
+            <SidebarBody>
+              <SidebarSection>
+                {navItems.map(({ label, url }) => (
+                  <SidebarItem key={label} href={url}>
+                    {label}
+                  </SidebarItem>
+                ))}
+              </SidebarSection>
+            </SidebarBody>
+          </Sidebar>
+        }
+      >
+        {children}
+      </StackedLayout>
+    );
+  }
 
   const firstPerson = persons[0]!;
 
@@ -83,7 +146,10 @@ export default async function Layout({
         <Navbar>
           <Dropdown>
             <DropdownButton as={NavbarItem} className="max-lg:hidden">
-              <Avatar src={""} initials={firstPerson.firstName.slice(0, 2)} />
+              <Avatar
+                src={""}
+                initials={(user.displayName ?? user.email).slice(0, 2)}
+              />
               <NavbarLabel>
                 {[
                   firstPerson.firstName,
@@ -110,14 +176,18 @@ export default async function Layout({
             <FeedbackProvider>
               <Dropdown>
                 <DropdownButton as={NavbarItem}>
-                  <Avatar src="" initials="mm" square />
+                  <Avatar
+                    src=""
+                    initials={(user.displayName ?? user.email).slice(0, 2)}
+                    square
+                  />
                 </DropdownButton>
                 <DropdownMenu className="min-w-64" anchor="bottom end">
-                  <DropdownItem href="/instellingen">
+                  {/* <DropdownItem href="/instellingen">
                     <Cog8ToothIcon />
                     <DropdownLabel>Instellingen</DropdownLabel>
                   </DropdownItem>
-                  <DropdownDivider />
+                  <DropdownDivider /> */}
                   <DropdownItem href="/help">
                     <LifebuoyIcon />
                     <DropdownLabel>Helpcentrum</DropdownLabel>
@@ -144,8 +214,11 @@ export default async function Layout({
           <SidebarHeader>
             <Dropdown>
               <DropdownButton as={SidebarItem} className="lg:mb-2.5">
-                <Avatar src={undefined} initials="mm" />
-                <SidebarLabel>Tailwind Labs</SidebarLabel>
+                <Avatar
+                  src={undefined}
+                  initials={(user.displayName ?? user.email).slice(0, 2)}
+                />
+                <SidebarLabel>Nationaal Watersportdiploma</SidebarLabel>
                 <ChevronDownIcon />
               </DropdownButton>
               <PersonDropdownMenu />
