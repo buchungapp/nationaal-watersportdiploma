@@ -39,9 +39,9 @@ import FeedbackDialog, {
 } from "./_components/feedback";
 
 const navItems = [
-  { label: "Paspoort", url: "/profiel" },
-  { label: "Diploma's", url: "/diploma" },
-  { label: "Vaarlocaties", url: "/vaarlocaties" },
+  // { label: "Paspoort", url: "/profiel" },
+  // { label: "Diploma's", url: "/diploma" },
+  { label: "Vaarlocaties", url: "/profiel" },
 ] as const;
 
 function PersonDropdownMenu() {
@@ -73,7 +73,66 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const persons = await listPersonsForUser();
+  const persons = await listPersonsForUser().catch(() => null);
+
+  if (!persons || persons.length < 1) {
+    return (
+      <StackedLayout
+        navbar={
+          <Navbar>
+            <NavbarSpacer />
+            <NavbarSection>
+              <FeedbackProvider>
+                <Dropdown>
+                  <DropdownButton as={NavbarItem}>
+                    <Avatar src="" initials="mm" square />
+                  </DropdownButton>
+                  <DropdownMenu className="min-w-64" anchor="bottom end">
+                    {/* <DropdownItem href="/instellingen">
+                      <Cog8ToothIcon />
+                      <DropdownLabel>Instellingen</DropdownLabel>
+                    </DropdownItem>
+                    <DropdownDivider /> */}
+                    <DropdownItem href="/help">
+                      <LifebuoyIcon />
+                      <DropdownLabel>Helpcentrum</DropdownLabel>
+                    </DropdownItem>
+                    <FeedbackButton />
+                    <DropdownItem href="/privacy">
+                      <ShieldCheckIcon />
+                      <DropdownLabel>Privacybeleid</DropdownLabel>
+                    </DropdownItem>
+                    <DropdownDivider />
+                    <LogOutDropdownItem>
+                      <ArrowRightStartOnRectangleIcon />
+                      <DropdownLabel>Uitloggen</DropdownLabel>
+                    </LogOutDropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+                <FeedbackDialog />
+              </FeedbackProvider>
+            </NavbarSection>
+          </Navbar>
+        }
+        sidebar={
+          <Sidebar>
+            <SidebarHeader></SidebarHeader>
+            <SidebarBody>
+              <SidebarSection>
+                {navItems.map(({ label, url }) => (
+                  <SidebarItem key={label} href={url}>
+                    {label}
+                  </SidebarItem>
+                ))}
+              </SidebarSection>
+            </SidebarBody>
+          </Sidebar>
+        }
+      >
+        {children}
+      </StackedLayout>
+    );
+  }
 
   const firstPerson = persons[0]!;
 
@@ -113,11 +172,11 @@ export default async function Layout({
                   <Avatar src="" initials="mm" square />
                 </DropdownButton>
                 <DropdownMenu className="min-w-64" anchor="bottom end">
-                  <DropdownItem href="/instellingen">
+                  {/* <DropdownItem href="/instellingen">
                     <Cog8ToothIcon />
                     <DropdownLabel>Instellingen</DropdownLabel>
                   </DropdownItem>
-                  <DropdownDivider />
+                  <DropdownDivider /> */}
                   <DropdownItem href="/help">
                     <LifebuoyIcon />
                     <DropdownLabel>Helpcentrum</DropdownLabel>
@@ -145,7 +204,7 @@ export default async function Layout({
             <Dropdown>
               <DropdownButton as={SidebarItem} className="lg:mb-2.5">
                 <Avatar src={undefined} initials="mm" />
-                <SidebarLabel>Tailwind Labs</SidebarLabel>
+                <SidebarLabel>Nationaal Watersportdiploma</SidebarLabel>
                 <ChevronDownIcon />
               </DropdownButton>
               <PersonDropdownMenu />
