@@ -118,6 +118,8 @@ export async function addStudentsToCohort(
   );
 
   if (rowsWithError.length > 0) {
+    rowsWithError.map((result) => console.error(result.reason));
+
     return {
       message: "Error",
       errors: `
