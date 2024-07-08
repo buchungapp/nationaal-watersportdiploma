@@ -386,7 +386,6 @@ function SubmitForm({
 
               <TableBody>
                 {data?.labels?.map((item, index) => {
-                  console.log("label :>>", item.value);
                   return (
                     <TableRow key={index}>
                       <TableCell>{item.label}</TableCell>
