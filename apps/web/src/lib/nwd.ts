@@ -895,10 +895,12 @@ export async function addStudentToCohortByPersonId({
   locationId,
   cohortId,
   personId,
+  tags,
 }: {
   locationId: string;
   cohortId: string;
   personId: string;
+  tags?: string[];
 }) {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
@@ -920,10 +922,19 @@ export async function addStudentToCohortByPersonId({
       throw new Error("No actor found");
     }
 
-    return await Cohort.Allocation.create({
+    const result = await Cohort.Allocation.create({
       cohortId,
       actorId: actor.id,
     });
+
+    if (!!tags && tags.length > 0) {
+      await Cohort.Allocation.setTags({
+        allocationId: result.id,
+        tags,
+      });
+    }
+
+    return result;
   });
 }
 

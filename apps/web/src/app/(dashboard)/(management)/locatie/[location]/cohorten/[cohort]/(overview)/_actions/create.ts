@@ -3,7 +3,11 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createStudentForLocation } from "~/lib/nwd";
+import {
+  addStudentToCohortByPersonId,
+  createStudentForLocation,
+  setAllocationTags,
+} from "~/lib/nwd";
 
 export async function createPerson(
   locationId: string,
@@ -71,8 +75,9 @@ export async function createPerson(
   }
 }
 
-export async function createPersonBulk(
+export async function addStudentsToCohort(
   locationId: string,
+  cohortId: string,
   persons: {
     email: string;
     firstName: string;
@@ -81,15 +86,32 @@ export async function createPersonBulk(
     dateOfBirth: Date;
     birthCity: string;
     birthCountry: string;
+    tags?: string[];
   }[],
 ) {
   const result = await Promise.allSettled(
     persons.map(async (row) => {
-      await createStudentForLocation(locationId, row);
+      const person = await createStudentForLocation(locationId, row);
+
+      const allocation = await addStudentToCohortByPersonId({
+        cohortId,
+        locationId,
+        personId: person.id,
+      });
+
+      if (row.tags && row.tags.length > 0) {
+        await setAllocationTags({
+          allocationId: allocation.id,
+          cohortId,
+          tags: row.tags,
+        });
+      }
+
+      return allocation;
     }),
   );
 
-  revalidatePath("/locatie/[location]/personen", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
 
   const rowsWithError = result.filter(
     (result): result is PromiseRejectedResult => result.status === "rejected",

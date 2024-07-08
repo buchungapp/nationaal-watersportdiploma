@@ -94,6 +94,7 @@ export async function addStudentToCohortByPersonId(props: {
   cohortId: string;
   locationId: string;
   personId: string;
+  tags?: string[];
 }) {
   const result = await addStudentToCohortByPersonIdInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
