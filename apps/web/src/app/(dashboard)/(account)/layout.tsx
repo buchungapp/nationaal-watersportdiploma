@@ -5,7 +5,7 @@ import {
   LifebuoyIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
-import { listPersonsForUser } from "~/lib/nwd";
+import { getUserOrThrow, listPersonsForUser } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
@@ -73,6 +73,7 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getUserOrThrow();
   const persons = await listPersonsForUser().catch(() => null);
 
   if (!persons || persons.length < 1) {
@@ -85,7 +86,11 @@ export default async function Layout({
               <FeedbackProvider>
                 <Dropdown>
                   <DropdownButton as={NavbarItem}>
-                    <Avatar src="" initials="mm" square />
+                    <Avatar
+                      src=""
+                      initials={user.displayName ?? user.email.slice(0, 2)}
+                      square
+                    />
                   </DropdownButton>
                   <DropdownMenu className="min-w-64" anchor="bottom end">
                     {/* <DropdownItem href="/instellingen">
@@ -169,7 +174,11 @@ export default async function Layout({
             <FeedbackProvider>
               <Dropdown>
                 <DropdownButton as={NavbarItem}>
-                  <Avatar src="" initials="mm" square />
+                  <Avatar
+                    src=""
+                    initials={user.displayName ?? user.email.slice(0, 2)}
+                    square
+                  />
                 </DropdownButton>
                 <DropdownMenu className="min-w-64" anchor="bottom end">
                   {/* <DropdownItem href="/instellingen">
@@ -203,7 +212,10 @@ export default async function Layout({
           <SidebarHeader>
             <Dropdown>
               <DropdownButton as={SidebarItem} className="lg:mb-2.5">
-                <Avatar src={undefined} initials="mm" />
+                <Avatar
+                  src={undefined}
+                  initials={user.displayName ?? user.email.slice(0, 2)}
+                />
                 <SidebarLabel>Nationaal Watersportdiploma</SidebarLabel>
                 <ChevronDownIcon />
               </DropdownButton>
