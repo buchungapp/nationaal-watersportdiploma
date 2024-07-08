@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import useSWR from "swr";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -30,11 +31,12 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { createPersonBulk } from "../_actions/create";
+import { addStudentsToCohort } from "../_actions/create";
+import { listCountries } from "../_actions/nwd";
 
 interface Props {
   locationId: string;
-  countries: { code: string; name: string }[];
+  cohortId: string;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
@@ -52,7 +54,8 @@ const COLUMN_MAPPING = [
   "Geboortedatum",
   "Geboorteplaats",
   "Geboorteland",
-];
+  "Tag",
+] as const;
 
 const SELECT_LABEL = "Niet importeren";
 
@@ -72,7 +75,7 @@ export default function Wrapper(props: Props) {
   );
 }
 
-function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
+function CreateDialog({ locationId, isOpen, setIsOpen, cohortId }: Props) {
   const [isUpload, setIsUpload] = useState(true);
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
 
@@ -109,7 +112,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   return (
     <>
       <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
-        <DialogTitle>Personen toevoegen (bulk)</DialogTitle>
+        <DialogTitle>Cursisten toevoegen (bulk)</DialogTitle>
 
         {isUpload ? (
           <form onSubmit={handleSubmit}>
@@ -127,6 +130,14 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                 <li>
                   Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
                   <i>(jaar-maand-dag)</i> voor geboortedata.
+                </li>
+                <li>
+                  Tags kunnen aangemaakt worden door extra kolommen toe te
+                  voegen, waarbij elke extra kolom een tag representeert. <br />
+                  <i>
+                    Tip: Start de naam van de kolom met 'Tag' om deze
+                    automatisch te kunnen herkennen.
+                  </i>
                 </li>
               </ul>
             </DialogDescription>
@@ -150,7 +161,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
         ) : (
           <SubmitForm
             data={data}
-            countries={countries}
+            cohortId={cohortId}
             locationId={locationId}
             setIsOpen={setIsOpen}
           />
@@ -163,14 +174,18 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 function SubmitForm({
   data,
   locationId,
-  countries,
+  cohortId,
   setIsOpen,
 }: {
   data: CSVData;
   locationId: string;
-  countries: { code: string; name: string }[];
+  cohortId: string;
   setIsOpen: (value: boolean) => void;
 }) {
+  const { data: countries } = useSWR("countries", listCountries);
+
+  if (!countries) throw new Error("Data must be available through fallback");
+
   const submit = async (
     csvData: string[][] | null | undefined,
     prevState:
@@ -184,50 +199,53 @@ function SubmitForm({
             dateOfBirth: Date;
             birthCity: string;
             birthCountry: string;
+            tags: string[];
           }[];
           message?: string;
         }
       | undefined,
     formData: FormData,
   ) => {
-    if (!!prevState?.success) {
-      const result = await createPersonBulk(locationId, prevState.persons!);
+    if (prevState?.success) {
+      const result = await addStudentsToCohort(
+        locationId,
+        cohortId,
+        prevState.persons!,
+      );
       setIsOpen(false);
 
       if (result.message === "Success") {
         toast.success("Personen zijn toegevoegd.");
-        return;
+      } else {
+        console.error("result", result.errors);
+        toast.error("Er is een fout opgetreden.");
       }
-
-      console.log("result", result.errors);
-
-      toast.error("Er is een fout opgetreden.");
       return;
     }
 
     try {
-      const mappingConfig = Object.fromEntries(formData);
+      if (!csvData) {
+        throw new Error("Geen data gevonden.");
+      }
 
-      const selectedFields = Object.keys(mappingConfig)
-        .map((key) => mappingConfig[key])
-        .filter((item) => item !== SELECT_LABEL);
+      const indexToColumnSelection = Object.fromEntries(formData);
+      const selectedFields = Object.values(indexToColumnSelection).filter(
+        (item) => item !== SELECT_LABEL,
+      );
+      const notSelectedIndices = Object.entries(indexToColumnSelection)
+        .filter(([_, value]) => value === SELECT_LABEL)
+        .map(([key]) => parseInt(key.split("-").pop()!));
 
-      // Exclude data if "Select one" is selected
-      const notSelectedIndices = Object.keys(mappingConfig)
-        .filter((key) => mappingConfig[key] === SELECT_LABEL)
-        // @ts-expect-error Fix later
-        .map((key) => parseInt(key.split("-").pop()));
-
-      const filteredData = csvData?.map((item) =>
+      const filteredData = csvData.map((item) =>
         item.filter((_, index) => !notSelectedIndices.includes(index)),
       );
 
-      // Validate if columns are correctly pasted
-      const count = filteredData?.[0]?.length ?? 0;
-      const expectedCount = COLUMN_MAPPING.length;
+      const count = filteredData[0]?.length ?? 0;
 
-      const mappingFields = COLUMN_MAPPING;
-      const missingFields = mappingFields.filter(
+      const minimalExpectedCount = COLUMN_MAPPING.filter(
+        (col) => col !== "Tag",
+      ).length;
+      const missingFields = COLUMN_MAPPING.filter(
         (item) => !selectedFields.includes(item),
       );
 
@@ -235,49 +253,76 @@ function SubmitForm({
         throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
       }
 
-      if (count < expectedCount) {
+      if (count < minimalExpectedCount) {
         throw new Error("Je hebt minder kolommen geplakt dan verwacht.");
       }
 
-      if (count > expectedCount) {
-        throw new Error("Je hebt te veel kolommen geplakt dan verwacht.");
-      }
+      const nonTagColumns = COLUMN_MAPPING.filter((col) => col !== "Tag");
 
-      // Sort data so that we can parse it correctly.
-      const indices = selectedFields.map((columnName) =>
-        COLUMN_MAPPING.findIndex((key) => key === columnName),
-      );
+      // Sort the data for each tuple in filteredData so that it appears
+      // in the order that we have in COLUMNS.
+      const sortedData = filteredData.map((row) => {
+        const sortedRow = Array(nonTagColumns.length).fill(null);
+        const tags: string[] = [];
 
-      const sortedData = filteredData?.map((row) =>
-        indices.map((index) => row[index]),
-      );
+        row.forEach((value, index) => {
+          const column = selectedFields[index];
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+          const columnIndex = nonTagColumns.indexOf(column as any);
 
-      const personRowSchema = z.tuple([
-        z.string().trim().toLowerCase().email(),
-        z.string().trim(),
-        z
-          .string()
-          .trim()
-          .transform((tussenvoegsel) =>
-            tussenvoegsel === "" ? null : tussenvoegsel,
-          ),
-        z.string(),
-        z.string().pipe(z.coerce.date()),
-        z.string(),
-        z
-          .preprocess(
-            (value) => (value === "" ? "nl" : value),
-            z.enum(countries.map((c) => c.code) as [string, ...string[]], {
-              message: "Ongeldige landcode",
-            }),
-          )
-          .default("nl"),
-      ]);
+          if (columnIndex !== -1) {
+            sortedRow[columnIndex] = value;
+          } else if (value && value.length > 0) {
+            tags.push(value);
+          }
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
+        return [...sortedRow, ...tags];
+      });
+
+      const calculateMaxLength = (data: string[][] | undefined): number => {
+        if (!data || data.length === 0) return 0;
+        return Math.max(...data.map((row) => row.length));
+      };
+
+      const maxLength = calculateMaxLength(sortedData);
+      const tagColumnsCount = Math.max(0, maxLength - nonTagColumns.length);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const COLUMNS: string[] = [
+        ...nonTagColumns,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ...Array(tagColumnsCount).fill("Tag"),
+      ];
+
+      const personRowSchema = z
+        .tuple([
+          z.string().trim().toLowerCase().email(),
+          z.string().trim(),
+          z
+            .string()
+            .trim()
+            .transform((v) => v || null),
+          z.string(),
+          z.string().pipe(z.coerce.date()),
+          z.string(),
+          z
+            .preprocess(
+              (value) => (value === "" ? "nl" : value),
+              z.enum(countries.map((c) => c.code) as [string, ...string[]], {
+                message: "Ongeldige landcode",
+              }),
+            )
+            .default("nl"),
+        ])
+        .rest(z.string().nullish());
 
       const rows = personRowSchema.array().parse(sortedData);
 
       return {
         success: true,
+        columns: COLUMNS,
         persons: rows.map(
           ([
             email,
@@ -287,6 +332,7 @@ function SubmitForm({
             dateOfBirth,
             birthCity,
             birthCountry,
+            ...tags
           ]) => ({
             email,
             firstName,
@@ -295,6 +341,7 @@ function SubmitForm({
             dateOfBirth,
             birthCity,
             birthCountry,
+            tags: tags.filter(Boolean) as string[],
           }),
         ),
       };
@@ -330,23 +377,23 @@ function SubmitForm({
       {state?.success === true ? (
         <>
           <DialogDescription>
-            Er zijn <Strong>{state?.persons?.length}</Strong> personen gevonden.
-            Controleer de geïmporteerde data en klik op "Verder" om door te
-            gaan.
+            Er zijn <Strong>{state?.persons?.length}</Strong> cursisten
+            gevonden. Controleer de geïmporteerde data en klik op "Verder" om
+            door te gaan.
           </DialogDescription>
           <DialogBody>
             <Table>
               <TableHead>
                 <TableRow>
                   <TableHeader />
-                  {COLUMN_MAPPING.map((item) => (
+                  {state.columns?.map((item) => (
                     <TableHeader key={item}>{item}</TableHeader>
                   ))}
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {state?.persons?.map((person, index) => (
+                {state.persons?.map((person, index) => (
                   <TableRow key={JSON.stringify(person)}>
                     <TableCell className="text-right tabular-nums">{`${index + 1}.`}</TableCell>
                     <TableCell className="font-medium">
@@ -363,6 +410,9 @@ function SubmitForm({
                       {countries.find((c) => c.code === person.birthCountry)
                         ?.name ?? person.birthCountry}
                     </TableCell>
+                    {person.tags.map((tag, index) => (
+                      <TableCell key={index}>{tag}</TableCell>
+                    ))}
                   </TableRow>
                 ))}
               </TableBody>
@@ -379,7 +429,7 @@ function SubmitForm({
               <TableHead>
                 <TableRow>
                   <TableHeader>Kolom</TableHeader>
-                  <TableHeader>Voorbeeld</TableHeader>
+                  <TableHeader>Voorbeelddata</TableHeader>
                   <TableHeader>Doel</TableHeader>
                 </TableRow>
               </TableHead>
@@ -401,7 +451,9 @@ function SubmitForm({
                           name={`include-column-${index}`}
                           defaultValue={
                             COLUMN_MAPPING.find((col) =>
-                              item?.label.startsWith(col),
+                              item?.label
+                                .toLowerCase()
+                                .startsWith(col.toLowerCase()),
                             ) ?? SELECT_LABEL
                           }
                           className="min-w-48"

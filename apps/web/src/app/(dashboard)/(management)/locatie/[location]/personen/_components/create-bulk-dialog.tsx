@@ -240,7 +240,7 @@ function SubmitForm({
       }
 
       if (count > expectedCount) {
-        throw new Error("Je hebt te veel kolommen geplakt dan verwacht.");
+        throw new Error("Je hebt te veel kolommen geselecteerd.");
       }
 
       // Sort data so that we can parse it correctly.
@@ -379,7 +379,7 @@ function SubmitForm({
               <TableHead>
                 <TableRow>
                   <TableHeader>Kolom</TableHeader>
-                  <TableHeader>Voorbeeld</TableHeader>
+                  <TableHeader>Voorbeelddata</TableHeader>
                   <TableHeader>Doel</TableHeader>
                 </TableRow>
               </TableHead>
@@ -401,7 +401,9 @@ function SubmitForm({
                           name={`include-column-${index}`}
                           defaultValue={
                             COLUMN_MAPPING.find((col) =>
-                              item?.label.startsWith(col),
+                              item?.label
+                                .toLowerCase()
+                                .startsWith(col.toLowerCase()),
                             ) ?? SELECT_LABEL
                           }
                           className="min-w-48"

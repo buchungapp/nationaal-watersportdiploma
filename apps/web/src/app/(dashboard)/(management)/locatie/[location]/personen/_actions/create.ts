@@ -83,7 +83,7 @@ export async function createPersonBulk(
 ) {
   const result = await Promise.allSettled(
     persons.map(async (row) => {
-      await createStudentForLocation(locationId, row);
+      return createStudentForLocation(locationId, row);
     }),
   );
 
