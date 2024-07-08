@@ -3,7 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createStudentForLocation } from "~/lib/nwd";
+import { createStudentForLocation, updateEmailForPerson } from "~/lib/nwd";
 
 export async function createPerson(
   locationId: string,
@@ -106,5 +106,28 @@ export async function createPersonBulk(
   return {
     message: "Success",
     errors: {},
+  };
+}
+
+export async function updateEmail(
+  props: {
+    personId: string;
+    locationId: string;
+  },
+  _previousState: unknown,
+  formData: FormData,
+) {
+  const email = formData.get("email") as string;
+
+  await updateEmailForPerson({
+    ...props,
+    email,
+  });
+
+  revalidatePath("/locatie/[location]/personen", "page");
+  revalidatePath("/locatie/[location]/personen/[id]", "page");
+
+  return {
+    state: "success",
   };
 }

@@ -394,6 +394,24 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
   });
 });
 
+export const getPersonById = cache(
+  async (personId: string, locationId: string) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      }).catch(() => []);
+
+      const person = await User.Person.fromId(personId);
+      return person;
+    });
+  },
+);
+
 export const listPersonsForUser = cache(async () => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
@@ -1021,17 +1039,27 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
   });
 });
 
-export const listRolesForLocation = cache(async (locationId: string) => {
-  return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+export const listRolesForLocation = cache(
+  async (locationId: string, personId?: string) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
 
-    return await User.Person.listActiveRolesForLocation({
-      locationId,
-      personId: primaryPerson.id,
+      if (!!personId) {
+        await isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId,
+          personId: primaryPerson.id,
+        });
+      }
+
+      return await User.Person.listActiveRolesForLocation({
+        locationId,
+        personId: personId ?? primaryPerson.id,
+      });
     });
-  });
-});
+  },
+);
 
 export const listPrivilegesForCohort = cache(async (cohortId: string) => {
   return makeRequest(async () => {
@@ -1291,3 +1319,92 @@ export const listDistinctTagsForCohort = async (cohortId: string) => {
     });
   });
 };
+
+export async function upsertActorForLocation({
+  locationId,
+  personId,
+  type,
+}: {
+  locationId: string;
+  personId: string;
+  type: ActorType;
+}) {
+  return makeRequest(async () => {
+    const [primaryPerson] = await Promise.all([
+      getUserOrThrow().then(getPrimaryPerson),
+    ]);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: locationId,
+      personId: primaryPerson.id,
+    });
+
+    return await User.Actor.upsert({
+      locationId,
+      type,
+      personId,
+    });
+  });
+}
+
+export async function dropActorForLocation({
+  locationId,
+  personId,
+  type,
+}: {
+  locationId: string;
+  personId: string;
+  type: ActorType;
+}) {
+  return makeRequest(async () => {
+    const [primaryPerson] = await Promise.all([
+      getUserOrThrow().then(getPrimaryPerson),
+    ]);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: locationId,
+      personId: primaryPerson.id,
+    });
+
+    return await User.Actor.remove({
+      locationId,
+      type,
+      personId,
+    });
+  });
+}
+
+export async function updateEmailForPerson({
+  personId,
+  locationId,
+  email,
+}: {
+  personId: string;
+  email: string;
+  locationId: string;
+}) {
+  return makeRequest(async () => {
+    const [primaryPerson] = await Promise.all([
+      getUserOrThrow().then(getPrimaryPerson),
+    ]);
+
+    await listRolesForLocation(locationId, personId).then((roles) => {
+      if (roles.length < 1) {
+        throw new Error("Unauthorized");
+      }
+    });
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: locationId,
+      personId: primaryPerson.id,
+    });
+
+    return await User.Person.updateEmail({
+      email,
+      personId,
+    });
+  });
+}
