@@ -6,6 +6,7 @@ import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
+
 import {
   Dialog,
   DialogActions,
@@ -15,9 +16,8 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import {
   ErrorMessage,
-  Field,
   Fieldset,
-  Label,
+  Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Select } from "~/app/(dashboard)/_components/select";
 import {
@@ -28,9 +28,29 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/(dashboard)/_components/table";
-import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
+import {
+  Code,
+  Strong,
+  Text,
+  TextLink,
+} from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { createPersonBulk } from "../_actions/create";
+
+const ROLES = [
+  {
+    type: "student",
+    label: "Cursist",
+    description: "Kan toegevoegd worden aan cohorten.",
+    defaultChecked: true,
+  },
+  {
+    type: "instructor",
+    label: "Instructeur",
+    description:
+      "Geeft lessen, kan toegevoegd worden aan cohorten en kan de diplomalijn inzien.",
+  },
+] as const;
 
 interface Props {
   locationId: string;
@@ -113,30 +133,49 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
         {isUpload ? (
           <form onSubmit={handleSubmit}>
-            <DialogDescription>
-              Importeer data door deze te kopiëren en plakken vanuit het{" "}
-              <TextLink
-                href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
-                target="_blank"
-              >
-                template
-              </TextLink>{" "}
-              of je eigen databron. <br /> Let op het volgende:
-              <ul className="list-inside list-disc">
-                <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
-                <li>
-                  Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
-                  <i>(jaar-maand-dag)</i> voor geboortedata.
-                </li>
-              </ul>
-            </DialogDescription>
             <DialogBody>
               <Fieldset>
-                <Field>
-                  <Label>Data</Label>
-                  <Textarea name="data" required />
-                </Field>
+                <Legend>Data</Legend>
+                <Text>
+                  Importeer data door deze te kopiëren en plakken vanuit het{" "}
+                  <TextLink
+                    href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
+                    target="_blank"
+                  >
+                    template
+                  </TextLink>{" "}
+                  of je eigen databron. <br /> Let op het volgende:
+                  <ul className="list-inside list-disc">
+                    <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
+                    <li>
+                      Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
+                      <i>(jaar-maand-dag)</i> voor geboortedata.
+                    </li>
+                  </ul>
+                </Text>
+                <Textarea name="data" required />
               </Fieldset>
+
+              {/* <Fieldset className="mt-6">
+                <Legend>Rollen</Legend>
+                <Text>
+                  Welke rol(len) vervullen deze personen in jullie locatie?
+                </Text>
+                <CheckboxGroup>
+                  {ROLES.map((role) => (
+                    <CheckboxField key={role.type}>
+                      <Checkbox
+                        name={`role-${role.type}`}
+                        defaultChecked={
+                          "defaultChecked" in role && role.defaultChecked
+                        }
+                      />
+                      <Label>{role.label}</Label>
+                      <Description>{role.description}</Description>
+                    </CheckboxField>
+                  ))}
+                </CheckboxGroup>
+              </Fieldset> */}
             </DialogBody>
             <DialogActions>
               <Button plain onClick={() => setIsOpen(false)}>
