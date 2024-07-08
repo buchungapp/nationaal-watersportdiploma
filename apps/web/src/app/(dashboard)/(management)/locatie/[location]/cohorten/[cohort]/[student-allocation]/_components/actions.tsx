@@ -1,9 +1,16 @@
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/16/solid";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
-import { claimStudents, releaseStudent } from "../../(overview)/_actions/nwd";
+import { DropdownItem } from "~/app/(dashboard)/_components/dropdown";
+import {
+  claimStudents,
+  releaseStudent,
+  releaseStudentFromCohortByAllocationId,
+  withdrawStudentFromCurriculum,
+} from "../../(overview)/_actions/nwd";
 
 export function ClaimInstructorAllocation({
   cohortId,
@@ -46,5 +53,67 @@ export function ReleaseInstructorAllocation({
     >
       <XMarkIcon />
     </Button>
+  );
+}
+
+export function ReleaseStudentAllocation({
+  cohortId,
+  studentAllocationId,
+  locationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+  locationId: string;
+}) {
+  const router = useRouter();
+  const params = useParams();
+
+  return (
+    <DropdownItem
+      onClick={async () => {
+        try {
+          await releaseStudentFromCohortByAllocationId({
+            allocationId: studentAllocationId,
+            cohortId,
+            locationId,
+          });
+
+          // We deleted the allocation, so the page does not exist anymore
+          // We need to redirect to the cohort overview
+          router.push(
+            `/locatie/${params.location as string}/cohorten/${params.cohort as string}`,
+          );
+          toast.success("Cursist verwijderd");
+        } catch (error) {
+          toast.error("Er is iets misgegaan");
+        }
+      }}
+    >
+      Verwijder uit cohort
+    </DropdownItem>
+  );
+}
+
+export function WithdrawStudentCurriculum({
+  studentAllocationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+  locationId: string;
+}) {
+  return (
+    <DropdownItem
+      onClick={async () => {
+        try {
+          await withdrawStudentFromCurriculum({
+            allocationId: studentAllocationId,
+          });
+        } catch (error) {
+          toast.error("Er is iets misgegaan");
+        }
+      }}
+    >
+      Verwijder programma
+    </DropdownItem>
   );
 }

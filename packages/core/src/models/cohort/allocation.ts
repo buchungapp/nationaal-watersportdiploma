@@ -15,7 +15,7 @@ import {
 import { alias } from 'drizzle-orm/pg-core/alias'
 import { inArray } from 'drizzle-orm/sql/expressions'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   applyArrayOrEqual,
   possibleSingleRow,
@@ -373,6 +373,37 @@ export const setStudentCurriculum = withZod(
         ),
       )
       .returning({ id: s.cohortAllocation.id })
+  },
+)
+
+export const releaseStudentCurriculum = withZod(
+  z.object({
+    studentAllocationId: uuidSchema,
+  }),
+  async (input) => {
+    return withTransaction(async (tx) => {
+      // TODO: handle case when we already assigned a certificate
+
+      await Promise.all([
+        tx
+          .update(s.cohortAllocation)
+          .set({ studentCurriculumId: null })
+          .where(and(eq(s.cohortAllocation.id, input.studentAllocationId)))
+          .returning({ id: s.cohortAllocation.id }),
+        tx
+          .delete(s.studentCohortProgress)
+          .where(
+            and(
+              eq(
+                s.studentCohortProgress.cohortAllocationId,
+                input.studentAllocationId,
+              ),
+            ),
+          ),
+      ])
+
+      return
+    })
   },
 )
 

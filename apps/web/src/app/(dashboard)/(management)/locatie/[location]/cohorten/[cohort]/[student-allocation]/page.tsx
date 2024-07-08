@@ -1,4 +1,7 @@
-import { ChevronLeftIcon } from "@heroicons/react/16/solid";
+import {
+  ChevronLeftIcon,
+  EllipsisHorizontalIcon,
+} from "@heroicons/react/16/solid";
 import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -10,6 +13,11 @@ import {
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list";
 import { Divider } from "~/app/(dashboard)/_components/divider";
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownMenu,
+} from "~/app/(dashboard)/_components/dropdown";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import { Strong } from "~/app/(dashboard)/_components/text";
@@ -26,6 +34,8 @@ import {
 import {
   ClaimInstructorAllocation,
   ReleaseInstructorAllocation,
+  ReleaseStudentAllocation,
+  WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
 import { ManageAllocationTags } from "./_components/tag-input";
@@ -140,6 +150,91 @@ async function TagsField({
   );
 }
 
+async function ManageStudentActions({
+  cohortId,
+  studentAllocationId,
+  locationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+  locationId: string;
+}) {
+  const [locationRoles, privileges] = await Promise.all([
+    listRolesForLocation(locationId),
+    listPrivilegesForCohort(cohortId),
+  ]);
+
+  const canManageStudent =
+    locationRoles.includes("location_admin") ||
+    privileges.includes("manage_cohort_students");
+
+  if (!canManageStudent) {
+    return null;
+  }
+
+  return (
+    <Dropdown>
+      <DropdownButton plain className="-my-1.5">
+        <EllipsisHorizontalIcon />
+      </DropdownButton>
+      <DropdownMenu anchor="bottom end">
+        <ReleaseStudentAllocation
+          cohortId={cohortId}
+          studentAllocationId={studentAllocationId}
+          locationId={locationId}
+        />
+      </DropdownMenu>
+    </Dropdown>
+  );
+}
+
+async function ManageStudentCurriculumActions({
+  cohortId,
+  studentAllocationId,
+  locationId,
+}: {
+  cohortId: string;
+  studentAllocationId: string;
+  locationId: string;
+}) {
+  const [allocation, locationRoles, privileges] = await Promise.all([
+    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    listRolesForLocation(locationId),
+    listPrivilegesForCohort(cohortId),
+  ]);
+
+  if (!studentAllocationId) {
+    notFound();
+  }
+
+  if (!allocation?.studentCurriculum) {
+    return null;
+  }
+
+  const canManageStudent =
+    locationRoles.includes("location_admin") ||
+    privileges.includes("manage_cohort_students");
+
+  if (!canManageStudent) {
+    return null;
+  }
+
+  return (
+    <Dropdown>
+      <DropdownButton plain className="-my-1.5">
+        <EllipsisHorizontalIcon />
+      </DropdownButton>
+      <DropdownMenu anchor="bottom end">
+        <WithdrawStudentCurriculum
+          cohortId={cohortId}
+          studentAllocationId={studentAllocationId}
+          locationId={locationId}
+        />
+      </DropdownMenu>
+    </Dropdown>
+  );
+}
+
 export default async function Page({
   params,
 }: {
@@ -184,7 +279,16 @@ export default async function Page({
 
       <div className="mx-auto mt-8 grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         <div className="lg:col-start-3 lg:row-end-1">
-          <Subheading>Cursist</Subheading>
+          <div className="flex items-center justify-between">
+            <Subheading>Cursist</Subheading>
+            <Suspense fallback={null}>
+              <ManageStudentActions
+                locationId={location.id}
+                cohortId={cohort.id}
+                studentAllocationId={allocation.id}
+              />
+            </Suspense>
+          </div>
           <Divider className="mt-4" />
           <DescriptionList>
             <DescriptionTerm>Naam</DescriptionTerm>
@@ -260,7 +364,16 @@ export default async function Page({
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
-          <Subheading>Cursuskaart</Subheading>
+          <div className="flex items-center justify-between">
+            <Subheading>Cursuskaart</Subheading>
+            <Suspense fallback={null}>
+              <ManageStudentCurriculumActions
+                locationId={location.id}
+                cohortId={cohort.id}
+                studentAllocationId={allocation.id}
+              />
+            </Suspense>
+          </div>
           <Divider className="mt-4" />
           <CourseCard cohortId={cohort.id} cohortAllocationId={allocation.id} />
         </div>

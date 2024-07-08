@@ -938,6 +938,44 @@ export async function addStudentToCohortByPersonId({
   });
 }
 
+export async function releaseStudentFromCohortByAllocationId({
+  locationId,
+  cohortId,
+  allocationId,
+}: {
+  locationId: string;
+  cohortId: string;
+  allocationId: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const [isLocationAdmin, privileges] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listPrivilegesForPerson({
+        cohortId,
+        personId: primaryPerson.id,
+      }),
+    ]);
+
+    if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
+      throw new Error("Unauthorized");
+    }
+
+    // TODO: add check if it really is a student, not an instructor
+    const result = await Cohort.Allocation.remove({
+      id: allocationId,
+    });
+
+    return result;
+  });
+}
+
 export async function addInstructorToCohortByPersonId({
   locationId,
   cohortId,
@@ -1168,6 +1206,43 @@ export const enrollStudentsInCurriculumForCohort = async ({
           studentCurriculumId: studentCurriculum.id,
         });
       }
+
+      return;
+    });
+  });
+};
+
+export const withdrawStudentFromCurriculumInCohort = async ({
+  allocationId,
+}: {
+  allocationId: string;
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+      const _primaryPerson = await getPrimaryPerson(authUser);
+
+      // TODO: Update authorization
+
+      // const [isLocationAdmin, privileges] = await Promise.all([
+      //   isActiveActorTypeInLocation({
+      //     actorType: ["location_admin"],
+      //     locationId: cohort.locationId,
+      //     personId: primaryPerson.id,
+      //   }).catch(() => false),
+      //   Cohort.Allocation.listPrivilegesForPerson({
+      //     cohortId,
+      //     personId: primaryPerson.id,
+      //   }),
+      // ]);
+
+      // if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
+      //   throw new Error("Unauthorized");
+      // }
+
+      await Cohort.Allocation.releaseStudentCurriculum({
+        studentAllocationId: allocationId,
+      });
 
       return;
     });

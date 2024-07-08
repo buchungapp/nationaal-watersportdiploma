@@ -217,7 +217,6 @@ function SubmitForm({
       if (result.message === "Success") {
         toast.success("Personen zijn toegevoegd.");
       } else {
-        console.error("result", result.errors);
         toast.error("Er is een fout opgetreden.");
       }
       return;
@@ -242,10 +241,9 @@ function SubmitForm({
 
       const count = filteredData[0]?.length ?? 0;
 
-      const minimalExpectedCount = COLUMN_MAPPING.filter(
-        (col) => col !== "Tag",
-      ).length;
-      const missingFields = COLUMN_MAPPING.filter(
+      const requiredColumns = COLUMN_MAPPING.filter((col) => col !== "Tag");
+      const minimalExpectedCount = requiredColumns.length;
+      const missingFields = requiredColumns.filter(
         (item) => !selectedFields.includes(item),
       );
 

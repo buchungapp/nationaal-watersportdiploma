@@ -1,5 +1,5 @@
 import { schema as s, uncontrolledSchema } from '@nawadi/db'
-import { AuthError } from '@supabase/supabase-js'
+import { AuthApiError, AuthError } from '@supabase/supabase-js'
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
 import postgres from 'postgres'
 import { z } from 'zod'
@@ -78,7 +78,10 @@ export const getOrCreateFromEmail = withZod(
       const newUser = await createUserInPublicSchema(newAuthUserId)
       return { id: newUser.authUserId }
     } catch (error) {
-      if (error instanceof AuthError && error.code === 'email_exists') {
+      if (
+        (error instanceof AuthError || error instanceof AuthApiError) &&
+        (error.code === 'email_exists' || error.code === 'unexpected_failure')
+      ) {
         const existingInAuthTable = await query
           .select({ id: uncontrolledSchema._usersTable.id })
           .from(uncontrolledSchema._usersTable)
