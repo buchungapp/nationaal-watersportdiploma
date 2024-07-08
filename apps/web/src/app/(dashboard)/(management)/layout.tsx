@@ -1,13 +1,13 @@
 import {
   ArrowRightStartOnRectangleIcon,
-  Cog8ToothIcon,
-  InboxIcon,
-  LightBulbIcon,
-  MagnifyingGlassIcon,
   ShieldCheckIcon,
   UserIcon,
 } from "@heroicons/react/16/solid";
+import { constants } from "@nawadi/lib";
 import React from "react";
+import { Github } from "~/app/_components/socials";
+import { getUserOrThrow } from "~/lib/nwd";
+import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
   Dropdown,
@@ -25,52 +25,47 @@ import {
 } from "../_components/navbar";
 import { SidebarLayout } from "../_components/sidebar-layout";
 
-export default function Layout({
+export default async function Layout({
   children,
   sidebar,
 }: Readonly<{
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
+  const user = await getUserOrThrow();
+
   return (
     <SidebarLayout
       navbar={
         <Navbar>
           <NavbarSpacer />
           <NavbarSection>
-            <NavbarItem href="/search" aria-label="Search">
-              <MagnifyingGlassIcon />
-            </NavbarItem>
-            <NavbarItem href="/inbox" aria-label="Inbox">
-              <InboxIcon />
-            </NavbarItem>
             <Dropdown>
               <DropdownButton as={NavbarItem}>
-                <Avatar src="/profile-photo.jpg" square />
+                <Avatar
+                  initials={(user.displayName ?? user.email).slice(0, 2)}
+                  square
+                />
               </DropdownButton>
               <DropdownMenu className="min-w-64" anchor="bottom end">
-                <DropdownItem href="/my-profile">
+                <DropdownItem href="/account">
                   <UserIcon />
-                  <DropdownLabel>My profile</DropdownLabel>
-                </DropdownItem>
-                <DropdownItem href="/settings">
-                  <Cog8ToothIcon />
-                  <DropdownLabel>Settings</DropdownLabel>
+                  <DropdownLabel>Mijn account</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
-                <DropdownItem href="/privacy-policy">
+                <DropdownItem href="/privacy" target="_blank">
                   <ShieldCheckIcon />
-                  <DropdownLabel>Privacy policy</DropdownLabel>
+                  <DropdownLabel>Privacyverklaring</DropdownLabel>
                 </DropdownItem>
-                <DropdownItem href="/share-feedback">
-                  <LightBulbIcon />
-                  <DropdownLabel>Share feedback</DropdownLabel>
+                <DropdownItem href={constants.GITHUB_URL} target="_blank">
+                  <Github data-slot="icon" />
+                  <DropdownLabel>GitHub</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
-                <DropdownItem href="/logout">
+                <LogOutDropdownItem>
                   <ArrowRightStartOnRectangleIcon />
-                  <DropdownLabel>Sign out</DropdownLabel>
-                </DropdownItem>
+                  <DropdownLabel>Uitloggen</DropdownLabel>
+                </LogOutDropdownItem>
               </DropdownMenu>
             </Dropdown>
           </NavbarSection>

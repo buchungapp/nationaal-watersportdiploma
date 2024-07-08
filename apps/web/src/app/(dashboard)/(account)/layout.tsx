@@ -1,7 +1,6 @@
 import {
   ArrowRightStartOnRectangleIcon,
   ChevronDownIcon,
-  Cog8ToothIcon,
   LifebuoyIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
@@ -59,11 +58,11 @@ function PersonDropdownMenu() {
         />
         <DropdownLabel>Workcation</DropdownLabel>
       </DropdownItem> */}
-      <DropdownDivider />
+      {/* <DropdownDivider />
       <DropdownItem href="/profiel/personen">
         <Cog8ToothIcon />
         <DropdownLabel>Beheer personen</DropdownLabel>
-      </DropdownItem>
+      </DropdownItem> */}
     </DropdownMenu>
   );
 }
@@ -88,7 +87,7 @@ export default async function Layout({
                   <DropdownButton as={NavbarItem}>
                     <Avatar
                       src=""
-                      initials={user.displayName ?? user.email.slice(0, 2)}
+                      initials={(user.displayName ?? user.email).slice(0, 2)}
                       square
                     />
                   </DropdownButton>
@@ -147,7 +146,10 @@ export default async function Layout({
         <Navbar>
           <Dropdown>
             <DropdownButton as={NavbarItem} className="max-lg:hidden">
-              <Avatar src={""} initials={firstPerson.firstName.slice(0, 2)} />
+              <Avatar
+                src={""}
+                initials={(user.displayName ?? user.email).slice(0, 2)}
+              />
               <NavbarLabel>
                 {[
                   firstPerson.firstName,
@@ -176,7 +178,7 @@ export default async function Layout({
                 <DropdownButton as={NavbarItem}>
                   <Avatar
                     src=""
-                    initials={user.displayName ?? user.email.slice(0, 2)}
+                    initials={(user.displayName ?? user.email).slice(0, 2)}
                     square
                   />
                 </DropdownButton>
@@ -214,7 +216,7 @@ export default async function Layout({
               <DropdownButton as={SidebarItem} className="lg:mb-2.5">
                 <Avatar
                   src={undefined}
-                  initials={user.displayName ?? user.email.slice(0, 2)}
+                  initials={(user.displayName ?? user.email).slice(0, 2)}
                 />
                 <SidebarLabel>Nationaal Watersportdiploma</SidebarLabel>
                 <ChevronDownIcon />
