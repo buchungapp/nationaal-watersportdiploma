@@ -390,14 +390,18 @@ export const updateEmail = withZod(
     }
 
     async function updateUserEmail(userId: string, email: string) {
-      await supabase.auth.admin.updateUserById(userId, {
+      const { data, error } = await supabase.auth.admin.updateUserById(userId, {
         email: email,
         email_confirm: false,
       })
 
+      if (error) {
+        throw error
+      }
+
       return query
         .update(s.user)
-        .set({ email: email })
+        .set({ authUserId: data.user.id, email: data.user.email })
         .where(eq(s.user.authUserId, userId))
         .returning({ id: s.user.authUserId })
         .then(singleRow)
