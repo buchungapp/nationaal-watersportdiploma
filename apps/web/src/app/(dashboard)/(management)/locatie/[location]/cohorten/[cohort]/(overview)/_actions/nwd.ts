@@ -13,10 +13,12 @@ import {
   listGearTypesByCurriculum as listGearTypesByCurriculumInner,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrograms as listProgramsInner,
+  releaseStudentFromCohortByAllocationId as releaseStudentFromCohortByAllocationIdInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
   setAllocationTags as setAllocationTagsInner,
   updateStudentInstructorAssignment,
+  withdrawStudentFromCurriculumInCohort,
   type ActorType,
 } from "~/lib/nwd";
 
@@ -65,6 +67,17 @@ export async function enrollStudentsInCurriculumForCohort(props: {
   );
 }
 
+export async function withdrawStudentFromCurriculum(props: {
+  allocationId: string;
+}) {
+  await withdrawStudentFromCurriculumInCohort(props);
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
+    "page",
+  );
+}
+
 export async function isInstructorInCohort(cohortId: string) {
   return isInstructorInCohortInner(cohortId);
 }
@@ -98,6 +111,21 @@ export async function addStudentToCohortByPersonId(props: {
 }) {
   const result = await addStudentToCohortByPersonIdInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  return result;
+}
+
+export async function releaseStudentFromCohortByAllocationId(props: {
+  locationId: string;
+  cohortId: string;
+  allocationId: string;
+}) {
+  const result = await releaseStudentFromCohortByAllocationIdInner(props);
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
+    "page",
+  );
+
   return result;
 }
 
