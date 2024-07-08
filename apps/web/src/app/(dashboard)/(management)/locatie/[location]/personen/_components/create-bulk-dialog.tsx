@@ -37,7 +37,7 @@ import {
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { createPersonBulk } from "../_actions/create";
 
-const ROLES = [
+const _ROLES = [
   {
     type: "student",
     label: "Cursist",
