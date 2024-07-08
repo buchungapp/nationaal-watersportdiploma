@@ -40,7 +40,7 @@ interface Props {
 }
 
 interface CSVData {
-  labels: { label: string; value: string | null | undefined }[] | null;
+  labels: { label: string; value: (string | null | undefined)[] }[] | null;
   rows: string[][] | null;
 }
 
@@ -54,7 +54,7 @@ const COLUMN_MAPPING = [
   "Geboorteland",
 ];
 
-const SELECT_LABEL = "Kies kolom";
+const SELECT_LABEL = "Niet importeren";
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
@@ -98,7 +98,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     const labels = headers.map((header, item) => {
       return {
         label: header,
-        value: data[0] ? data[0][item] : null,
+        value: data.slice(0, 2).map((row) => row[item]),
       };
     });
 
@@ -114,15 +114,21 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
         {isUpload ? (
           <form onSubmit={handleSubmit}>
             <DialogDescription>
-              Kopier en plak de data vanuit het{" "}
+              Importeer data door deze te kopiëren en plakken vanuit het{" "}
               <TextLink
                 href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
                 target="_blank"
               >
                 template
-              </TextLink>
-              . <br /> Zorg ervoor dat de geboortedatum in het formaat{" "}
-              <Code>YYYY-MM-DD</Code> <i>(2010-12-31)</i> is.
+              </TextLink>{" "}
+              of je eigen databron. <br /> Let op het volgende:
+              <ul className="list-inside list-disc">
+                <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
+                <li>
+                  Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
+                  <i>(jaar-maand-dag)</i> voor geboortedata.
+                </li>
+              </ul>
             </DialogDescription>
             <DialogBody>
               <Fieldset>
@@ -226,9 +232,7 @@ function SubmitForm({
       );
 
       if (missingFields.length > 0) {
-        throw new Error(
-          `Missing keys in the array: ${missingFields.join(", ")}`,
-        );
+        throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
       }
 
       if (count < expectedCount) {
@@ -368,43 +372,52 @@ function SubmitForm({
       ) : (
         <>
           <DialogDescription>
-            Voeg de kolommen van je bestand toe aan de juiste velden: <br />{" "}
-            {COLUMN_MAPPING.map((item) => (
-              <span key={item}>
-                <Code>{item}</Code>{" "}
-              </span>
-            ))}
+            Voeg de kolommen van je data toe aan de juiste velden.
           </DialogDescription>
           <DialogBody>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableHeader>Uw Bestand Kolom</TableHeader>
-                  <TableHeader>Uw Voorbeeldgegevens</TableHeader>
-                  <TableHeader>Bestemmingskolom</TableHeader>
+                  <TableHeader>Kolom</TableHeader>
+                  <TableHeader>Voorbeeld</TableHeader>
+                  <TableHeader>Doel</TableHeader>
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {data?.labels?.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item?.label}</TableCell>
-                    <TableCell>{String(item?.value)}</TableCell>
-                    <TableCell>
-                      <Select
-                        name={`include-column-${index}`}
-                        defaultValue={item?.label || SELECT_LABEL}
-                      >
-                        <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
-                        {COLUMN_MAPPING.map((column) => (
-                          <option key={column} value={column}>
-                            {column}
-                          </option>
-                        ))}
-                      </Select>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {data?.labels?.map((item, index) => {
+                  console.log("label :>>", item.value);
+                  return (
+                    <TableRow key={index}>
+                      <TableCell>{item.label}</TableCell>
+                      <TableCell className="space-x-2">
+                        {item.value
+                          .filter((val) => !!val)
+                          .map((value, index) => (
+                            <Code key={index}>{String(value)}</Code>
+                          ))}
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          name={`include-column-${index}`}
+                          defaultValue={
+                            COLUMN_MAPPING.find((col) =>
+                              item?.label.startsWith(col),
+                            ) ?? SELECT_LABEL
+                          }
+                          className="min-w-48"
+                        >
+                          <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
+                          {COLUMN_MAPPING.map((column) => (
+                            <option key={column} value={column}>
+                              {column}
+                            </option>
+                          ))}
+                        </Select>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
             <div className="pt-4">
