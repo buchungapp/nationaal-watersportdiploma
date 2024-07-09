@@ -56,7 +56,7 @@ export function LocationSidebarMenu({
           href: `/locatie/${params.location}/kennisbank`,
           Icon: FolderIcon,
           active: hasRole(["instructor", "location_admin"]),
-          current: segments[0] === "inzichten",
+          current: segments[0] === "kennisbank",
         },
         {
           name: "Inzichten",

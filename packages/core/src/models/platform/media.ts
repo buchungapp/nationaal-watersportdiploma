@@ -1,12 +1,13 @@
 import { schema as s, uncontrolledSchema } from '@nawadi/db'
-import assert from 'assert'
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
 import { fileTypeFromBuffer } from 'file-type'
 import { imageSize } from 'image-size'
+import assert from 'node:assert'
 import crypto from 'node:crypto'
 import { z } from 'zod'
 import { useQuery, useSupabaseClient } from '../../contexts/index.js'
 import {
+  singleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -157,7 +158,7 @@ export const fromId = withZod(
   },
 )
 
-export const list = withZod(z.void(), outputSchema.array(), async () => {
+export const listImages = withZod(z.void(), outputSchema.array(), async () => {
   const query = useQuery()
   return await query
     .select()
@@ -165,6 +166,13 @@ export const list = withZod(z.void(), outputSchema.array(), async () => {
     .innerJoin(
       uncontrolledSchema._objectTable,
       eq(s.media.object_id, uncontrolledSchema._objectTable.id),
+    )
+    .where(
+      and(
+        isNull(s.media.deletedAt),
+        eq(s.media.type, 'image'),
+        eq(s.media.status, 'ready'),
+      ),
     )
     .then((rows) =>
       rows.map((row) => {
@@ -207,3 +215,72 @@ export const list = withZod(z.void(), outputSchema.array(), async () => {
       }),
     )
 })
+
+export const listFiles = withZod(z.void(), async () => {
+  const query = useQuery()
+
+  const { object_id, actorId, locationId, status, type, ...selectFields } =
+    getTableColumns(s.media)
+
+  const rows = await query
+    .select({
+      ...selectFields,
+    })
+    .from(s.media)
+    .where(
+      and(
+        isNull(s.media.deletedAt),
+        isNull(s.media.locationId),
+        eq(s.media.type, 'file'),
+        eq(s.media.status, 'ready'),
+      ),
+    )
+
+  return rows
+})
+
+export const createSignedUrl = withZod(
+  z.object({
+    id: z.string().uuid(),
+  }),
+  z.string().url(),
+  async ({ id }) => {
+    const query = useQuery()
+    const supabase = useSupabaseClient()
+
+    const mediaRow = await query
+      .select({
+        fileName: s.media.name,
+        bucketId: uncontrolledSchema._objectTable.bucket_id,
+        path: uncontrolledSchema._objectTable.name,
+      })
+      .from(s.media)
+      .innerJoin(
+        uncontrolledSchema._objectTable,
+        eq(s.media.object_id, uncontrolledSchema._objectTable.id),
+      )
+      .where(
+        and(
+          isNull(s.media.deletedAt),
+          eq(s.media.id, id),
+          eq(s.media.status, 'ready'),
+        ),
+      )
+      .then(singleRow)
+
+    assert(mediaRow.bucketId, 'Bucket ID is required')
+    assert(mediaRow.path, 'Path is required')
+
+    const { data, error } = await supabase.storage
+      .from(mediaRow.bucketId)
+      .createSignedUrl(mediaRow.path, 60 * 5, {
+        download: mediaRow.fileName ?? true,
+      })
+
+    if (error) {
+      throw error
+    }
+
+    return data.signedUrl
+  },
+)

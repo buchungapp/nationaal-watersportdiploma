@@ -1509,3 +1509,47 @@ export async function updateEmailForPerson({
     });
   });
 }
+
+export const listKnowledgeCenterDocuments = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const activeActorTypes = await User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+
+    if (
+      !activeActorTypes.some((type) =>
+        ["instructor", "location_admin"].includes(type),
+      )
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Platform.Media.listFiles();
+  });
+});
+
+export const downloadKnowledgeCenterDocument = cache(
+  async (documentId: string) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      const activeActorTypes = await User.Actor.listActiveTypesForUser({
+        userId: user.authUserId,
+      });
+
+      if (
+        !activeActorTypes.some((type) =>
+          ["instructor", "location_admin"].includes(type),
+        )
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      return await Platform.Media.createSignedUrl({
+        id: documentId,
+      });
+    });
+  },
+);
