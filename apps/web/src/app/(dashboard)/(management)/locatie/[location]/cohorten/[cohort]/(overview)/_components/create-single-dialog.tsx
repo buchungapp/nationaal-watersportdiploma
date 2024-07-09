@@ -101,7 +101,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
   const [countryQuery, setCountryQuery] = useState("");
 
   const { data: countries } = useSWR("countries", listCountries);
-  const { data: allStudents } = useSWR(`allStudents-${locationId}`, async () =>
+  const { data: allStudents } = useSWR([`allStudents`, locationId], async () =>
     listPersonsForLocationByRole(locationId, "student"),
   );
 

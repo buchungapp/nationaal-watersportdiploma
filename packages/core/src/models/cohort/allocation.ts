@@ -296,14 +296,14 @@ export const isActorInCohortById = withZod(
 
 export const setInstructorForStudent = withZod(
   z.object({
-    instructorId: uuidSchema.nullable(),
+    instructorActorId: uuidSchema.nullable(),
     cohortId: uuidSchema,
     studentAllocationId: singleOrArray(uuidSchema),
   }),
   async (input) => {
     const query = useQuery()
 
-    if (input.instructorId) {
+    if (!!input.instructorActorId) {
       // Make sure the instructorId belong to an actor with type instructor and is in the cohort
       await query
         .select({ id: sql`1` })
@@ -314,12 +314,12 @@ export const setInstructorForStudent = withZod(
             eq(s.actor.id, s.cohortAllocation.actorId),
             isNull(s.actor.deletedAt),
             eq(s.actor.type, 'instructor'),
-            eq(s.actor.id, input.instructorId),
+            eq(s.actor.id, input.instructorActorId),
           ),
         )
         .where(
           and(
-            eq(s.cohortAllocation.actorId, input.instructorId),
+            eq(s.cohortAllocation.actorId, input.instructorActorId),
             eq(s.cohortAllocation.cohortId, input.cohortId),
             isNull(s.cohortAllocation.deletedAt),
           ),
@@ -329,7 +329,7 @@ export const setInstructorForStudent = withZod(
 
     return await query
       .update(s.cohortAllocation)
-      .set({ instructorId: input.instructorId })
+      .set({ instructorId: input.instructorActorId })
       .where(
         and(
           Array.isArray(input.studentAllocationId)
