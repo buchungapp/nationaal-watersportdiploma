@@ -1,5 +1,5 @@
 import { schema as s, uncontrolledSchema } from '@nawadi/db'
-import { and, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
+import { and, asc, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
 import { fileTypeFromBuffer } from 'file-type'
 import { imageSize } from 'image-size'
 import assert from 'node:assert'
@@ -235,6 +235,7 @@ export const listFiles = withZod(z.void(), async () => {
         eq(s.media.status, 'ready'),
       ),
     )
+    .orderBy(asc(s.media.name))
 
   return rows
 })
