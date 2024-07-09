@@ -3,7 +3,7 @@ import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { SWRConfig } from "swr";
+import { SWRConfig, unstable_serialize } from "swr";
 import { z } from "zod";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
@@ -15,7 +15,9 @@ import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
   listCountries,
+  listInstructorsByCohortId,
   listPersonsForLocationByRole,
+  listPrivilegesForCohort,
   listPrograms,
   listRolesForLocation,
   listStudentsWithCurriculaByCohortId,
@@ -72,19 +74,23 @@ export default async function Page({
       }),
   );
 
-  const [cohort, students, location, instructorAllocation] = await Promise.all([
-    cohortPromise,
-    cohortPromise.then((cohort) =>
-      listStudentsWithCurriculaByCohortId(cohort.id),
-    ),
-    retrieveLocationByHandle(params.location),
-    cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
-  ]);
+  const [cohort, students, location, instructorAllocation, permissions] =
+    await Promise.all([
+      cohortPromise,
+      cohortPromise.then((cohort) =>
+        listStudentsWithCurriculaByCohortId(cohort.id),
+      ),
+      retrieveLocationByHandle(params.location),
+      cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
+      cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
+    ]);
+
+  const isCohortAdmin = permissions.length > 0;
 
   // Filter
   const viewParam = z
     .enum(["all", "claimed"])
-    .catch(() => (!!instructorAllocation ? "claimed" : "all"))
+    .catch(() => (!!instructorAllocation && !isCohortAdmin ? "claimed" : "all"))
     .parse(searchParams.view);
 
   let filteredStudents = students;
@@ -95,9 +101,8 @@ export default async function Page({
     );
   }
 
-  // Search
   const index = new FlexSearch.Document({
-    tokenize: "full",
+    tokenize: "forward",
     context: {
       resolution: 9,
       depth: 2,
@@ -105,12 +110,15 @@ export default async function Page({
     },
     document: {
       id: "id",
-      store: ["name", "tags"],
-      index: ["name", "tags"],
+      index: [
+        { field: "name", tokenize: "full" },
+        { field: "tags", tokenize: "forward" },
+        { field: "instructor", tokenize: "full" },
+      ],
     },
   });
 
-  // Add students to the index, first name, last name, and tags
+  // Add students to the index
   filteredStudents.forEach((student) => {
     index.add({
       id: student.id,
@@ -121,7 +129,14 @@ export default async function Page({
       ]
         .filter(Boolean)
         .join(" "),
-      tags: student.tags,
+      tags: student.tags || [],
+      instructor: [
+        student.instructor?.firstName,
+        student.instructor?.lastNamePrefix,
+        student.instructor?.lastName,
+      ]
+        .filter(Boolean)
+        .join(" "),
     });
   });
 
@@ -151,11 +166,16 @@ export default async function Page({
           // so it only blocks rendering of components that
           // actually rely on this data.
           countries: listCountries(),
-          [`allStudents-${location.id}`]: listPersonsForLocationByRole(
-            location.id,
-            "student",
-          ),
-          isInstructor: isInstructorInCohort(cohort.id),
+          [unstable_serialize([`allStudents`, location.id])]:
+            listPersonsForLocationByRole(location.id, "student"),
+          [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
+            listInstructorsByCohortId(cohort.id),
+          [unstable_serialize(["isInstructorInCohort", cohort.id])]:
+            isInstructorInCohort(cohort.id),
+          [unstable_serialize(["permissionsInCohort", cohort.id])]:
+            listPrivilegesForCohort(cohort.id),
+          [unstable_serialize(["locationRoles", location.id])]:
+            listRolesForLocation(location.id),
           allPrograms: listPrograms(),
         },
       }}
@@ -165,7 +185,7 @@ export default async function Page({
           <div className="max-sm:w-full sm:flex-1">
             <div className="mt-4 flex gap-4">
               <div className="w-full max-w-xl">
-                <Search placeholder="Doorzoek cursisten..." />
+                <Search placeholder="Zoek cursisten op naam, instructeur of tag" />
               </div>
 
               {!!instructorAllocation ? (
@@ -187,6 +207,8 @@ export default async function Page({
           students={searchedStudents}
           totalItems={searchedStudents.length}
           cohortId={cohort.id}
+          // TODO: this can be optimized
+          locationRoles={await listRolesForLocation(location.id)}
           noOptionsLabel={
             viewParam === "all" ? (
               "Dit cohort heeft nog geen cursisten"

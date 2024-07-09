@@ -143,11 +143,13 @@ export default function StudentsTable({
   students,
   totalItems,
   noOptionsLabel = "Geen items gevonden",
+  locationRoles,
 }: {
   cohortId: string;
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
+  locationRoles: ("student" | "instructor" | "location_admin")[];
 }) {
   const table = useReactTable({
     data: students,
@@ -171,6 +173,7 @@ export default function StudentsTable({
           <ActionButtons
             rows={table.getSelectedRowModel().rows}
             cohortId={cohortId}
+            locationRoles={locationRoles}
           />
         ) : null}
         <TableHead>

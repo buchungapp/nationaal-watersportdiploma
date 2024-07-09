@@ -1126,11 +1126,20 @@ export async function updateStudentInstructorAssignment({
   action,
   cohortId,
   studentAllocationIds,
-}: {
-  cohortId: string;
-  studentAllocationIds: string[];
-  action: "claim" | "release";
-}) {
+  instructorPersonId,
+}:
+  | {
+      cohortId: string;
+      studentAllocationIds: string[];
+      action: "claim";
+      instructorPersonId?: string;
+    }
+  | {
+      cohortId: string;
+      studentAllocationIds: string[];
+      action: "release";
+      instructorPersonId?: never;
+    }) {
   return makeRequest(async () => {
     const [cohort, primaryPerson] = await Promise.all([
       Cohort.byIdOrHandle({ id: cohortId }).then(
@@ -1139,22 +1148,28 @@ export async function updateStudentInstructorAssignment({
       getUserOrThrow().then(getPrimaryPerson),
     ]);
 
-    const instructorActor = await Location.Person.getActorByPersonIdAndType({
-      locationId: cohort.locationId,
-      actorType: "instructor",
-      personId: primaryPerson.id,
-    });
+    const instructorId =
+      action === "claim" ? instructorPersonId ?? primaryPerson.id : null;
 
-    if (!instructorActor) {
+    const instructorActor = instructorId
+      ? await Location.Person.getActorByPersonIdAndType({
+          locationId: cohort.locationId,
+          actorType: "instructor",
+          personId: instructorId,
+        })
+      : null;
+
+    if (!!instructorId && !instructorActor) {
       throw new Error("User is not an instructor for this location");
     }
 
-    const instructorId = action === "claim" ? instructorActor.id : null;
-
     return Cohort.Allocation.setInstructorForStudent({
       cohortId,
-      instructorId,
+      instructorActorId: instructorActor?.id ?? null,
       studentAllocationId: studentAllocationIds,
+    }).catch((e) => {
+      console.error("Error updating student instructor assignment", e);
+      throw e;
     });
   });
 }
