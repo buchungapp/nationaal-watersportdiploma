@@ -3,7 +3,7 @@ import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { SWRConfig } from "swr";
+import { SWRConfig, unstable_serialize } from "swr";
 import { z } from "zod";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
@@ -15,6 +15,7 @@ import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
   listCountries,
+  listInstructorsByCohortId,
   listPersonsForLocationByRole,
   listPrivilegesForCohort,
   listPrograms,
@@ -156,11 +157,16 @@ export default async function Page({
           // so it only blocks rendering of components that
           // actually rely on this data.
           countries: listCountries(),
-          [`allStudents-${location.id}`]: listPersonsForLocationByRole(
-            location.id,
-            "student",
-          ),
-          isInstructor: isInstructorInCohort(cohort.id),
+          [unstable_serialize([`allStudents`, location.id])]:
+            listPersonsForLocationByRole(location.id, "student"),
+          [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
+            listInstructorsByCohortId(cohort.id),
+          [unstable_serialize(["isInstructorInCohort", cohort.id])]:
+            isInstructorInCohort(cohort.id),
+          [unstable_serialize(["permissionsInCohort", cohort.id])]:
+            listPrivilegesForCohort(cohort.id),
+          [unstable_serialize(["locationRoles", location.id])]:
+            listRolesForLocation(location.id),
           allPrograms: listPrograms(),
         },
       }}
@@ -192,6 +198,8 @@ export default async function Page({
           students={searchedStudents}
           totalItems={searchedStudents.length}
           cohortId={cohort.id}
+          // TODO: this can be optimized
+          locationRoles={await listRolesForLocation(location.id)}
           noOptionsLabel={
             viewParam === "all" ? (
               "Dit cohort heeft nog geen cursisten"

@@ -11,7 +11,9 @@ import {
   listCountries as listCountriesInner,
   listCurriculaByProgram as listCurriculaByProgramInner,
   listGearTypesByCurriculum as listGearTypesByCurriculumInner,
+  listInstructorsByCohortId,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
+  listPrivilegesForCohort as listPrivilegesForCohortInner,
   listPrograms as listProgramsInner,
   releaseStudentFromCohortByAllocationId as releaseStudentFromCohortByAllocationIdInner,
   removeAllocationById,
@@ -22,7 +24,6 @@ import {
   type ActorType,
 } from "~/lib/nwd";
 
-// Export all as async functions
 export async function claimStudents(cohortId: string, studentIds: string[]) {
   await updateStudentInstructorAssignment({
     cohortId,
@@ -36,13 +37,42 @@ export async function claimStudents(cohortId: string, studentIds: string[]) {
   );
 }
 
-// Export all as async functions
 export async function releaseStudent(cohortId: string, studentIds: string[]) {
   await updateStudentInstructorAssignment({
     cohortId,
     studentAllocationIds: studentIds,
     action: "release",
   });
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
+    "page",
+  );
+}
+
+export async function assignInstructorToStudents({
+  cohortId,
+  instructorPersonId,
+  studentIds,
+}: {
+  cohortId: string;
+  studentIds: string[];
+  instructorPersonId: string | null;
+}) {
+  if (!!instructorPersonId) {
+    await updateStudentInstructorAssignment({
+      cohortId,
+      studentAllocationIds: studentIds,
+      action: "claim",
+      instructorPersonId: instructorPersonId ?? undefined,
+    });
+  } else {
+    await updateStudentInstructorAssignment({
+      cohortId,
+      studentAllocationIds: studentIds,
+      action: "release",
+    });
+  }
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
@@ -101,6 +131,14 @@ export async function listPrograms() {
   await getUserOrThrow();
 
   return listProgramsInner();
+}
+
+export async function listPrivilegesForCohort(cohortId: string) {
+  return listPrivilegesForCohortInner(cohortId);
+}
+
+export async function listInstructorsInCohort(cohortId: string) {
+  return listInstructorsByCohortId(cohortId);
 }
 
 export async function addStudentToCohortByPersonId(props: {
