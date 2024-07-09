@@ -16,6 +16,7 @@ import {
   isInstructorInCohort,
   listCountries,
   listPersonsForLocationByRole,
+  listPrivilegesForCohort,
   listPrograms,
   listRolesForLocation,
   listStudentsWithCurriculaByCohortId,
@@ -72,19 +73,23 @@ export default async function Page({
       }),
   );
 
-  const [cohort, students, location, instructorAllocation] = await Promise.all([
-    cohortPromise,
-    cohortPromise.then((cohort) =>
-      listStudentsWithCurriculaByCohortId(cohort.id),
-    ),
-    retrieveLocationByHandle(params.location),
-    cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
-  ]);
+  const [cohort, students, location, instructorAllocation, permissions] =
+    await Promise.all([
+      cohortPromise,
+      cohortPromise.then((cohort) =>
+        listStudentsWithCurriculaByCohortId(cohort.id),
+      ),
+      retrieveLocationByHandle(params.location),
+      cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
+      cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
+    ]);
+
+  const isCohortAdmin = permissions.length > 0;
 
   // Filter
   const viewParam = z
     .enum(["all", "claimed"])
-    .catch(() => (!!instructorAllocation ? "claimed" : "all"))
+    .catch(() => (!!instructorAllocation && !isCohortAdmin ? "claimed" : "all"))
     .parse(searchParams.view);
 
   let filteredStudents = students;
