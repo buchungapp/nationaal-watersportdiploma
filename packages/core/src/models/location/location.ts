@@ -133,12 +133,12 @@ export const list = wrapQuery(
     //   ),
     // ).filter((id): id is string => !!id)
 
-    const allMedia = await Platform.Media.list()
+    const allImages = await Platform.Media.listImages()
 
     return locations.map((row) => {
       const logo = row.logoMediaId
         ? findItem({
-            items: allMedia,
+            items: allImages,
             predicate: (media) => media.id === row.logoMediaId,
             enforce: true,
           })
@@ -146,7 +146,7 @@ export const list = wrapQuery(
 
       const logoSquare = row.squareLogoMediaId
         ? findItem({
-            items: allMedia,
+            items: allImages,
             predicate: (media) => media.id === row.squareLogoMediaId,
             enforce: true,
           })
@@ -154,7 +154,7 @@ export const list = wrapQuery(
 
       const logoCertificate = row.certificateMediaId
         ? findItem({
-            items: allMedia,
+            items: allImages,
             predicate: (media) => media.id === row.certificateMediaId,
             enforce: true,
           })

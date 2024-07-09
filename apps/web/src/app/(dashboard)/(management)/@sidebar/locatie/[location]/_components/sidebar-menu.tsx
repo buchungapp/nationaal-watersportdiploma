@@ -5,6 +5,7 @@ import {
   AcademicCapIcon,
   CalendarDaysIcon,
   ChartBarIcon,
+  FolderIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
 import { useParams, useSelectedLayoutSegments } from "next/navigation";
@@ -49,6 +50,13 @@ export function LocationSidebarMenu({
           Icon: AcademicCapIcon,
           active: hasRole(["location_admin"]),
           current: segments[0] === "diplomas",
+        },
+        {
+          name: "Kennisbank",
+          href: `/locatie/${params.location}/kennisbank`,
+          Icon: FolderIcon,
+          active: hasRole(["instructor", "location_admin"]),
+          current: segments[0] === "kennisbank",
         },
         {
           name: "Inzichten",
