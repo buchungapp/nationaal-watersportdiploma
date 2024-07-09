@@ -101,9 +101,8 @@ export default async function Page({
     );
   }
 
-  // Search
   const index = new FlexSearch.Document({
-    tokenize: "full",
+    tokenize: "forward",
     context: {
       resolution: 9,
       depth: 2,
@@ -111,12 +110,15 @@ export default async function Page({
     },
     document: {
       id: "id",
-      store: ["name", "tags"],
-      index: ["name", "tags"],
+      index: [
+        { field: "name", tokenize: "full" },
+        { field: "tags", tokenize: "forward" },
+        { field: "instructor", tokenize: "full" },
+      ],
     },
   });
 
-  // Add students to the index, first name, last name, and tags
+  // Add students to the index
   filteredStudents.forEach((student) => {
     index.add({
       id: student.id,
@@ -127,7 +129,14 @@ export default async function Page({
       ]
         .filter(Boolean)
         .join(" "),
-      tags: student.tags,
+      tags: student.tags || [],
+      instructor: [
+        student.instructor?.firstName,
+        student.instructor?.lastNamePrefix,
+        student.instructor?.lastName,
+      ]
+        .filter(Boolean)
+        .join(" "),
     });
   });
 
@@ -176,7 +185,7 @@ export default async function Page({
           <div className="max-sm:w-full sm:flex-1">
             <div className="mt-4 flex gap-4">
               <div className="w-full max-w-xl">
-                <Search placeholder="Doorzoek cursisten..." />
+                <Search placeholder="Zoek cursisten op naam, instructeur of tag" />
               </div>
 
               {!!instructorAllocation ? (
