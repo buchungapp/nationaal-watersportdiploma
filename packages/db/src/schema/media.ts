@@ -29,6 +29,8 @@ export const media = pgTable(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
+    name: text('name'),
+    description: text('description'),
     alt: text('alt'),
     mimeType: text('mime_type'),
     status: media_status('status').notNull(),
@@ -38,6 +40,10 @@ export const media = pgTable(
     actorId: uuid('actor_id'),
     locationId: uuid('location_id'),
     _metadata: jsonb('_metadata'),
+    tags: text('tags')
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::text[]`),
     ...timestamps,
   },
   (table) => {
