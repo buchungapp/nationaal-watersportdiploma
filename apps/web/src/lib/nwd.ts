@@ -808,12 +808,73 @@ export const updateLocationDetails = async (
     return;
   });
 };
-
 export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
-      return await Cohort.Allocation.listStudentsWithCurricula({ cohortId });
+      const [authUser, cohort] = await Promise.all([
+        getUserOrThrow(),
+        Cohort.byIdOrHandle({ id: cohortId }),
+      ]);
+
+      if (!cohort) {
+        throw new Error("Cohort not found");
+      }
+
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listByPersonId({
+          cohortId,
+          personId: primaryPerson.id,
+          actorType: "instructor",
+        }).then((actors) => actors.length > 0),
+      ]);
+
+      if (!isLocationAdmin && !isInstructorInCohort) {
+        throw new Error("Unauthorized");
+      }
+
+      return Cohort.Allocation.listStudentsWithCurricula({ cohortId });
+    });
+  },
+);
+
+export const listCertificateOverviewByCohortId = cache(
+  async (cohortId: string) => {
+    return makeRequest(async () => {
+      const [authUser, cohort] = await Promise.all([
+        getUserOrThrow(),
+        Cohort.byIdOrHandle({ id: cohortId }),
+      ]);
+
+      if (!cohort) {
+        throw new Error("Cohort not found");
+      }
+
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      const [isLocationAdmin, privileges] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId,
+          personId: primaryPerson.id,
+        }),
+      ]);
+
+      if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
+        throw new Error("Unauthorized");
+      }
+
+      return await Cohort.Certificate.listStatus({ cohortId });
     });
   },
 );
@@ -828,7 +889,33 @@ export const listInstructorsByCohortId = cache(async (cohortId: string) => {
 export const retrieveStudentAllocationWithCurriculum = cache(
   async (cohortId: string, allocationId: string) => {
     return makeRequest(async () => {
-      // TODO: This needs authorization checks
+      const [authUser, cohort] = await Promise.all([
+        getUserOrThrow(),
+        Cohort.byIdOrHandle({ id: cohortId }),
+      ]);
+
+      if (!cohort) {
+        throw new Error("Cohort not found");
+      }
+
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listByPersonId({
+          cohortId,
+          personId: primaryPerson.id,
+          actorType: "instructor",
+        }).then((actors) => actors.length > 0),
+      ]);
+
+      if (!isLocationAdmin && !isInstructorInCohort) {
+        throw new Error("Unauthorized");
+      }
 
       return await Cohort.Allocation.retrieveStudentWithCurriculum({
         cohortId,

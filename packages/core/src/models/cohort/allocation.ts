@@ -4,6 +4,7 @@ import {
   SQL,
   and,
   arrayContains,
+  asc,
   eq,
   exists,
   getTableColumns,
@@ -562,6 +563,10 @@ export const listStudentsWithCurricula = withZod(
           isNull(s.cohortAllocation.deletedAt),
           eq(s.cohortAllocation.cohortId, input.cohortId),
         ),
+      )
+      .orderBy(
+        asc(sql`LOWER(${s.person.firstName})`),
+        asc(sql`LOWER(${s.person.lastName})`),
       )
 
     return rows.map((row) => ({
