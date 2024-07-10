@@ -30,7 +30,7 @@ async function GearTypeTable({
   // Search programs using FlexSearch
   let filteredGearTypes = gearTypes;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredGearTypes = results.map(
       (result) => gearTypes.find((gearType) => gearType.id === result)!,
     );

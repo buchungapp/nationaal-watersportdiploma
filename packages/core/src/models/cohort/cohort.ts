@@ -1,4 +1,5 @@
 import { schema as s } from '@nawadi/db'
+import dayjs from 'dayjs'
 import { SQL, and, asc, eq, gte, isNull, lte, sql } from 'drizzle-orm'
 import { exists } from 'drizzle-orm/mysql-core/expressions'
 import { z } from 'zod'
@@ -161,5 +162,51 @@ export const listDistinctTags = withZod(
       .orderBy(asc(tagsSubquery.tag))
 
     return rows.map((row) => row.tag)
+  },
+)
+
+export const getDefaultVisibleFromDate = withZod(
+  z.object({
+    cohortId: uuidSchema,
+  }),
+  z.string().datetime().nullable(),
+  async (input) => {
+    const query = useQuery()
+
+    const row = await query
+      .select({
+        visibleFromDate: s.cohort.certificatesVisibleFrom,
+      })
+      .from(s.cohort)
+      .where(and(eq(s.cohort.id, input.cohortId), isNull(s.cohort.deletedAt)))
+      .then(singleRow)
+
+    return row.visibleFromDate ? dayjs(row.visibleFromDate).toISOString() : null
+  },
+)
+
+export const setDefaultVisibleFromDate = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    visibleFromDate: z.string().datetime(),
+  }),
+  z.object({
+    visibleFromDate: z.string().datetime(),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .update(s.cohort)
+      .set({
+        certificatesVisibleFrom: input.visibleFromDate,
+      })
+      .where(and(eq(s.cohort.id, input.cohortId), isNull(s.cohort.deletedAt)))
+      .returning({
+        visibleFromDate: s.cohort.certificatesVisibleFrom,
+      })
+      .then(singleRow)
+
+    return result as { visibleFromDate: string }
   },
 )

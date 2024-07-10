@@ -39,7 +39,9 @@ export default async function Page({
 
   const searchedCertificates =
     searchQuery && searchQuery.length >= 2
-      ? certificatesFuse.search(searchQuery).map((result) => result.item)
+      ? certificatesFuse
+          .search(decodeURIComponent(searchQuery))
+          .map((result) => result.item)
       : certificates;
 
   // Pagination

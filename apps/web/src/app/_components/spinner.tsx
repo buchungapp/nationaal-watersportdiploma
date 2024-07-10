@@ -15,7 +15,7 @@ export default function Spinner({
   size?: "sm" | "md" | "lg";
 }) {
   return (
-    <div className={clsx(sizeToClassName[size], className)}>
+    <div className={clsx(sizeToClassName[size], className)} data-slot="icon">
       <div
         style={{
           position: "relative",

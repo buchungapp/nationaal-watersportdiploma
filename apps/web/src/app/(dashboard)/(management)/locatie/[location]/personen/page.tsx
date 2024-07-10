@@ -67,7 +67,9 @@ export default async function Page({
 
   const searchedPersons =
     searchQuery && searchQuery.length >= 2
-      ? personsFuse.search(searchQuery).map((result) => result.item)
+      ? personsFuse
+          .search(decodeURIComponent(searchQuery))
+          .map((result) => result.item)
       : filteredPersons;
 
   // Pagination

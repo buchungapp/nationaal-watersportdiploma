@@ -33,7 +33,7 @@ async function ProgramTable({
   // Search programs using FlexSearch
   let filteredCourses = courses;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredCourses = results.map(
       (result) => courses.find((course) => course.id === result)!,
     );

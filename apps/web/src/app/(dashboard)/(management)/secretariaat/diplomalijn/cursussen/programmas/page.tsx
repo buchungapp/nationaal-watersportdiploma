@@ -30,7 +30,7 @@ async function ProgramTable({
   // Search programs using FlexSearch
   let filteredPrograms = programs;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredPrograms = results.map(
       (result) => programs.find((program) => program.id === result)!,
     );
