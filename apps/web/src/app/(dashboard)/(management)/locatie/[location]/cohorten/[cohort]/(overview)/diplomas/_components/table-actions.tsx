@@ -140,7 +140,9 @@ export function IssueCertificateDialog({
           startTransition(async () => {
             await issueCertificates({
               cohortAllocationIds: rows.map((row) => row.original.id),
-              visibleFrom: delayVisibility ? visibleFrom : null,
+              visibleFrom: delayVisibility
+                ? dayjs(visibleFrom).toISOString()
+                : null,
               cohortId,
             })
               .then(() => setIsOpen(false))
@@ -182,7 +184,6 @@ export function IssueCertificateDialog({
                   defaultValue={
                     defaultVisibleFrom ?? dayjs().toISOString().split(".")[0]
                   }
-                  max={dayjs().add(72, "hour").toISOString().split(".")[0]}
                 />
               </div>
             </>

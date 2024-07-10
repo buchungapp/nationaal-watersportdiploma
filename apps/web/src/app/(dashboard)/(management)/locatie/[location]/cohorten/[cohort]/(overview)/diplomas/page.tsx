@@ -10,6 +10,7 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 
+import { FilterSelect } from "./_components/filter";
 import StudentsTable from "./_components/students-table";
 
 export default async function Page({
@@ -36,7 +37,34 @@ export default async function Page({
     ),
   ]);
 
-  const filteredStudents = students;
+  // Filter
+  const filterParams = searchParams?.filter
+    ? Array.isArray(searchParams.filter)
+      ? searchParams.filter
+      : [searchParams.filter]
+    : [];
+
+  const filteredStudents =
+    filterParams.length > 0
+      ? students.filter((student) => {
+          const includesIssued = filterParams.includes("uitgegeven");
+          const includesNotIssued = filterParams.includes("niet-uitgegeven");
+
+          if (includesIssued && includesNotIssued) {
+            return true;
+          }
+
+          if (!includesIssued && !includesNotIssued) {
+            return true;
+          }
+
+          if (includesIssued) {
+            return !!student.certificate;
+          }
+
+          return !student.certificate;
+        })
+      : students;
 
   const index = new FlexSearch.Document({
     tokenize: "forward",
@@ -104,10 +132,10 @@ export default async function Page({
       <>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-sm:w-full sm:flex-1">
-            <div className="mt-4 flex gap-4">
-              <div className="w-full max-w-xl">
-                <Search placeholder="Zoek cursisten op naam, instructeur of tag" />
-              </div>
+            <div className="mt-4 flex max-w-xl gap-4">
+              <Search placeholder="Zoek cursisten op naam, instructeur of tag" />
+
+              <FilterSelect />
             </div>
           </div>
         </div>

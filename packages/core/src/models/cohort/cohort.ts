@@ -1,4 +1,5 @@
 import { schema as s } from '@nawadi/db'
+import dayjs from 'dayjs'
 import { SQL, and, asc, eq, gte, isNull, lte, sql } from 'drizzle-orm'
 import { exists } from 'drizzle-orm/mysql-core/expressions'
 import { z } from 'zod'
@@ -180,7 +181,7 @@ export const getDefaultVisibleFromDate = withZod(
       .where(and(eq(s.cohort.id, input.cohortId), isNull(s.cohort.deletedAt)))
       .then(singleRow)
 
-    return row.visibleFromDate
+    return row.visibleFromDate ? dayjs(row.visibleFromDate).toISOString() : null
   },
 )
 
