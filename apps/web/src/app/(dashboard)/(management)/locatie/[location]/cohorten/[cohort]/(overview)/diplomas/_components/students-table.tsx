@@ -26,6 +26,7 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { Code } from "~/app/(dashboard)/_components/text";
 import type { listCertificateOverviewByCohortId } from "~/lib/nwd";
 import { ActionButtons } from "./table-actions";
 
@@ -70,6 +71,10 @@ const columns = [
   }),
   columnHelper.accessor("certificate.handle", {
     header: "Diploma",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value ? <Code>{getValue()}</Code> : null;
+    },
   }),
   columnHelper.accessor(
     (data) =>
@@ -200,13 +205,13 @@ export default function StudentsTable({
   students,
   totalItems,
   noOptionsLabel = "Geen items gevonden",
-  locationRoles,
+  defaultCertificateVisibleFromDate,
 }: {
   cohortId: string;
   students: Awaited<ReturnType<typeof listCertificateOverviewByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
-  locationRoles: ("student" | "instructor" | "location_admin")[];
+  defaultCertificateVisibleFromDate?: string;
 }) {
   const table = useReactTable({
     data: students,
@@ -230,7 +235,7 @@ export default function StudentsTable({
           <ActionButtons
             rows={table.getSelectedRowModel().rows}
             cohortId={cohortId}
-            locationRoles={locationRoles}
+            defaultVisibleFrom={defaultCertificateVisibleFromDate}
           />
         ) : null}
         <TableHead>

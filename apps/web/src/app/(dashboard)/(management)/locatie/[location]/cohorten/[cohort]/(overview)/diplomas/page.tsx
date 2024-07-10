@@ -1,13 +1,12 @@
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
-import { SWRConfig, unstable_serialize } from "swr";
+import { SWRConfig } from "swr";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
   listCertificateOverviewByCohortId,
-  listPrivilegesForCohort,
-  listRolesForLocation,
   retrieveCohortByHandle,
+  retrieveDefaultCertificateVisibleFromDate,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 
@@ -30,12 +29,11 @@ export default async function Page({
       }),
   );
 
-  const [cohort, students, location] = await Promise.all([
+  const [cohort, students] = await Promise.all([
     cohortPromise,
     cohortPromise.then((cohort) =>
       listCertificateOverviewByCohortId(cohort.id),
     ),
-    retrieveLocationByHandle(params.location),
   ]);
 
   const filteredStudents = students;
@@ -100,15 +98,7 @@ export default async function Page({
   return (
     <SWRConfig
       value={{
-        fallback: {
-          // Note that there is no `await` here,
-          // so it only blocks rendering of components that
-          // actually rely on this data.
-          [unstable_serialize(["permissionsInCohort", cohort.id])]:
-            listPrivilegesForCohort(cohort.id),
-          [unstable_serialize(["locationRoles", location.id])]:
-            listRolesForLocation(location.id),
-        },
+        fallback: {},
       }}
     >
       <>
@@ -127,7 +117,10 @@ export default async function Page({
           totalItems={searchedStudents.length}
           cohortId={cohort.id}
           // TODO: this can be optimized
-          locationRoles={await listRolesForLocation(location.id)}
+          defaultCertificateVisibleFromDate={
+            (await retrieveDefaultCertificateVisibleFromDate(cohort.id)) ??
+            undefined
+          }
           noOptionsLabel="Dit cohort heeft nog geen cursisten"
         />
       </>

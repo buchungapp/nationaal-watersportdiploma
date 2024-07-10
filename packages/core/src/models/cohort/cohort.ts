@@ -163,3 +163,49 @@ export const listDistinctTags = withZod(
     return rows.map((row) => row.tag)
   },
 )
+
+export const getDefaultVisibleFromDate = withZod(
+  z.object({
+    cohortId: uuidSchema,
+  }),
+  z.string().datetime().nullable(),
+  async (input) => {
+    const query = useQuery()
+
+    const row = await query
+      .select({
+        visibleFromDate: s.cohort.certificatesVisibleFrom,
+      })
+      .from(s.cohort)
+      .where(and(eq(s.cohort.id, input.cohortId), isNull(s.cohort.deletedAt)))
+      .then(singleRow)
+
+    return row.visibleFromDate
+  },
+)
+
+export const setDefaultVisibleFromDate = withZod(
+  z.object({
+    cohortId: uuidSchema,
+    visibleFromDate: z.string().datetime(),
+  }),
+  z.object({
+    visibleFromDate: z.string().datetime(),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .update(s.cohort)
+      .set({
+        certificatesVisibleFrom: input.visibleFromDate,
+      })
+      .where(and(eq(s.cohort.id, input.cohortId), isNull(s.cohort.deletedAt)))
+      .returning({
+        visibleFromDate: s.cohort.certificatesVisibleFrom,
+      })
+      .then(singleRow)
+
+    return result as { visibleFromDate: string }
+  },
+)

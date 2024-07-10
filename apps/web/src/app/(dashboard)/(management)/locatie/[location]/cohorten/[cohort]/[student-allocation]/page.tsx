@@ -27,6 +27,7 @@ import {
   isInstructorInCohort,
   listDistinctTagsForCohort,
   listPrivilegesForCohort,
+  listPrograms,
   listRolesForLocation,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
@@ -297,7 +298,12 @@ export default async function Page({
   return (
     <SWRConfig
       value={{
-        fallback: {},
+        fallback: {
+          // Note that there is no `await` here,
+          // so it only blocks rendering of components that
+          // actually rely on this data.
+          allPrograms: listPrograms(),
+        },
       }}
     >
       <div className="max-lg:hidden flex items-center justify-between">

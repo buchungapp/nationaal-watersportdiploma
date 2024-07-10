@@ -72,7 +72,7 @@ export const listStatus = withZod(
         ),
       )
       .innerJoin(s.module, eq(s.module.id, s.curriculumCompetency.moduleId))
-      .leftJoin(
+      .innerJoin(
         s.cohortAllocation,
         eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
       )
@@ -90,6 +90,7 @@ export const listStatus = withZod(
       .where(
         and(
           isNull(s.studentCurriculum.deletedAt),
+          isNull(s.cohortAllocation.deletedAt),
           eq(s.cohortAllocation.cohortId, input.cohortId),
         ),
       )
@@ -210,10 +211,6 @@ export const listStatus = withZod(
         throw new Error(
           `Module status not found for student curriculum ${student.studentCurriculumId}`,
         )
-      }
-
-      if (student.person.firstName === 'Hemme') {
-        console.log('moduleStatusForStudent', moduleStatusForStudent)
       }
 
       return {
