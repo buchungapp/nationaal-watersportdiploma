@@ -4,13 +4,8 @@ import { notFound } from "next/navigation";
 import { SWRConfig, unstable_serialize } from "swr";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
-  isInstructorInCohort,
   listCertificateOverviewByCohortId,
-  listCountries,
-  listInstructorsByCohortId,
-  listPersonsForLocationByRole,
   listPrivilegesForCohort,
-  listPrograms,
   listRolesForLocation,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
@@ -109,18 +104,10 @@ export default async function Page({
           // Note that there is no `await` here,
           // so it only blocks rendering of components that
           // actually rely on this data.
-          countries: listCountries(),
-          [unstable_serialize([`allStudents`, location.id])]:
-            listPersonsForLocationByRole(location.id, "student"),
-          [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
-            listInstructorsByCohortId(cohort.id),
-          [unstable_serialize(["isInstructorInCohort", cohort.id])]:
-            isInstructorInCohort(cohort.id),
           [unstable_serialize(["permissionsInCohort", cohort.id])]:
             listPrivilegesForCohort(cohort.id),
           [unstable_serialize(["locationRoles", location.id])]:
             listRolesForLocation(location.id),
-          allPrograms: listPrograms(),
         },
       }}
     >

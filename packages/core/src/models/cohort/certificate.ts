@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import { uuidSchema, withZod } from '../../utils/index.js'
 
+// TODO: There will come a day that I will simplify this query
 export const listStatus = withZod(
   z.object({
     cohortId: uuidSchema,
@@ -17,74 +18,83 @@ export const listStatus = withZod(
     const instructorActor = alias(s.actor, 'instructor_actor')
     const instructorPerson = alias(s.person, 'instructor_person')
 
-    // TODO: I'm making this too complicated, let's try again another day.
-    // const latestCompetencyProgressSq = query
-    //   .select({
-    //     cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
-    //     competencyId: s.studentCohortProgress.competencyId,
-    //     maxCreatedAt: max(s.studentCohortProgress.createdAt).as(
-    //       'max_created_at',
-    //     ),
-    //   })
-    //   .from(s.studentCohortProgress)
-    //   .groupBy(
-    //     s.studentCohortProgress.cohortAllocationId,
-    //     s.studentCohortProgress.competencyId,
-    //   )
-    //   .as('latest')
+    const rankedSq = query
+      .select({
+        cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
+        curriculumModuleCompetencyId: s.studentCohortProgress.competencyId,
+        progress: s.studentCohortProgress.progress,
+        rn: sql<number>`ROW_NUMBER() OVER (
+    PARTITION BY ${s.studentCohortProgress.cohortAllocationId}, ${s.studentCohortProgress.competencyId}
+    ORDER BY ${s.studentCohortProgress.createdAt} DESC
+  )`
+          .mapWith(Number)
+          .as('rn'),
+      })
+      .from(s.studentCohortProgress)
+      .as('ranked')
 
-    // const progressPerCompetencySq = query
-    //   .select(getTableColumns(s.studentCohortProgress))
-    //   .from(s.studentCohortProgress)
-    //   .innerJoin(
-    //     latestCompetencyProgressSq,
-    //     and(
-    //       eq(
-    //         s.studentCohortProgress.cohortAllocationId,
-    //         latestCompetencyProgressSq.cohortAllocationId,
-    //       ),
-    //       eq(
-    //         s.studentCohortProgress.competencyId,
-    //         latestCompetencyProgressSq.competencyId,
-    //       ),
-    //       eq(
-    //         s.studentCohortProgress.createdAt,
-    //         latestCompetencyProgressSq.maxCreatedAt,
-    //       ),
-    //     ),
-    //   )
-    //   .as('progress_per_competency')
+    const latestProgress = query.$with('latest_progress').as(
+      query
+        .select({
+          cohortAllocationId: rankedSq.cohortAllocationId,
+          curriculumModuleCompetencyId: rankedSq.curriculumModuleCompetencyId,
+          progress: rankedSq.progress,
+        })
+        .from(rankedSq)
+        .where(eq(rankedSq.rn, 1)),
+    )
 
-    // const curriculumModulesWithProgress = await query
-    //   .select()
-    //   .from(s.cohortAllocation)
-    //   .innerJoin(
-    //     s.studentCurriculum,
-    //     eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
-    //   )
-    //   .innerJoin(
-    //     s.curriculumCompetency,
-    //     eq(
-    //       s.curriculumCompetency.curriculumId,
-    //       s.studentCurriculum.curriculumId,
-    //     ),
-    //   )
-    //   .leftJoin(
-    //     progressPerCompetencySq,
-    //     eq(
-    //       progressPerCompetencySq.competencyId,
-    //       s.curriculumCompetency.competencyId,
-    //     ),
-    //   )
-    //   .groupBy(s.cohortAllocation.id, s.studentCurriculum.id)
-    //   .where(
-    //     and(
-    //       isNull(s.cohortAllocation.deletedAt),
-    //       eq(s.cohortAllocation.cohortId, input.cohortId),
-    //     ),
-    //   )
+    const moduleStatusQuery = query
+      .with(latestProgress)
+      .select({
+        studentCurriculumId: s.studentCurriculum.id,
+        module: {
+          ...getTableColumns(s.module),
+          type: sql<string>`CASE WHEN COUNT(${s.curriculumCompetency.id}) FILTER (WHERE ${s.curriculumCompetency.isRequired}) = COUNT(${s.curriculumCompetency.id}) THEN 'required' ELSE 'optional' END`,
+        },
+        totalCompetencies:
+          sql<number>`COUNT(${s.curriculumCompetency.id})`.mapWith(Number),
+        completedCompetencies:
+          sql<number>`COUNT(${s.curriculumCompetency.id}) FILTER (WHERE COALESCE(${latestProgress.progress}, 0) >= 100)`.mapWith(
+            Number,
+          ),
+        uncompletedCompetencies:
+          sql<number>`COUNT(${s.curriculumCompetency.id}) FILTER (WHERE COALESCE(${latestProgress.progress}, 0) < 100)`.mapWith(
+            Number,
+          ),
+      })
+      .from(s.studentCurriculum)
+      .innerJoin(
+        s.curriculumCompetency,
+        eq(
+          s.curriculumCompetency.curriculumId,
+          s.studentCurriculum.curriculumId,
+        ),
+      )
+      .innerJoin(s.module, eq(s.module.id, s.curriculumCompetency.moduleId))
+      .leftJoin(
+        s.cohortAllocation,
+        eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
+      )
+      .leftJoin(
+        latestProgress,
+        and(
+          eq(
+            latestProgress.curriculumModuleCompetencyId,
+            s.curriculumCompetency.id,
+          ),
+          eq(s.cohortAllocation.id, latestProgress.cohortAllocationId),
+        ),
+      )
+      .groupBy(s.studentCurriculum.id, s.module.id)
+      .where(
+        and(
+          isNull(s.studentCurriculum.deletedAt),
+          eq(s.cohortAllocation.cohortId, input.cohortId),
+        ),
+      )
 
-    const rows = await query
+    const studentsQuery = query
       .select({
         id,
         tags,
@@ -186,44 +196,67 @@ export const listStatus = withZod(
         asc(sql`LOWER(${s.person.lastName})`),
       )
 
-    return rows.map((row) => ({
-      id: row.id,
-      person: {
-        id: row.person.id,
-        firstName: row.person.firstName,
-        lastNamePrefix: row.person.lastNamePrefix,
-        lastName: row.person.lastName,
-        dateOfBirth: row.person.dateOfBirth,
-      },
-      instructor: row.instructor?.id
-        ? {
-            id: row.instructor.id,
-            firstName: row.instructor.firstName,
-            lastNamePrefix: row.instructor.lastNamePrefix,
-            lastName: row.instructor.lastName,
-          }
-        : null,
-      studentCurriculum: row.studentCurriculumId
-        ? {
-            id: row.studentCurriculumId,
-            curriculumId: row.curriculum!.id,
-            program: row.program!,
-            course: row.course!,
-            degree: row.degree!,
-            discipline: row.discipline!,
-            gearType: row.gearType!,
-          }
-        : null,
-      createdAt: row.createdAt,
-      tags: row.tags,
-      certificate: row.certificate
-        ? {
-            id: row.certificate.id,
-            handle: row.certificate.handle,
-            issuedAt: row.certificate.issuedAt,
-            visibleFrom: row.certificate.visibleFrom,
-          }
-        : null,
-    }))
+    const [students, moduleStatus] = await Promise.all([
+      studentsQuery,
+      moduleStatusQuery,
+    ])
+
+    return students.map((student) => {
+      const moduleStatusForStudent = moduleStatus.filter(
+        (status) => status.studentCurriculumId === student.studentCurriculumId,
+      )
+
+      if (student.studentCurriculumId && moduleStatusForStudent.length < 1) {
+        throw new Error(
+          `Module status not found for student curriculum ${student.studentCurriculumId}`,
+        )
+      }
+
+      return {
+        id: student.id,
+        person: {
+          id: student.person.id,
+          firstName: student.person.firstName,
+          lastNamePrefix: student.person.lastNamePrefix,
+          lastName: student.person.lastName,
+          dateOfBirth: student.person.dateOfBirth,
+        },
+        instructor: student.instructor?.id
+          ? {
+              id: student.instructor.id,
+              firstName: student.instructor.firstName,
+              lastNamePrefix: student.instructor.lastNamePrefix,
+              lastName: student.instructor.lastName,
+            }
+          : null,
+        studentCurriculum: student.studentCurriculumId
+          ? {
+              id: student.studentCurriculumId,
+              curriculumId: student.curriculum!.id,
+              program: student.program!,
+              course: student.course!,
+              degree: student.degree!,
+              discipline: student.discipline!,
+              gearType: student.gearType!,
+              moduleStatus: moduleStatusForStudent.map((status) => ({
+                module: status.module,
+                totalCompetencies: status.totalCompetencies,
+                completedCompetencies: status.completedCompetencies,
+                uncompletedCompetencies: status.uncompletedCompetencies,
+              })),
+            }
+          : null,
+        createdAt: student.createdAt,
+        tags: student.tags,
+        certificate: student.certificate
+          ? {
+              id: student.certificate.id,
+              handle: student.certificate.handle,
+              issuedAt: student.certificate.issuedAt,
+              visibleFrom: student.certificate.visibleFrom,
+            }
+          : null,
+      }
+    })
   },
 )

@@ -67,9 +67,9 @@ const columns = [
       </CheckboxField>
     ),
     enableSorting: false,
-    meta: {
-      suppressLinkBehavior: true,
-    },
+  }),
+  columnHelper.accessor("certificate.handle", {
+    header: "Diploma",
   }),
   columnHelper.accessor(
     (data) =>
@@ -92,8 +92,62 @@ const columns = [
         : null;
     },
   }),
-  columnHelper.accessor("certificate.handle", {
-    header: "Diplomanummer",
+  columnHelper.display({
+    id: "completedRequired",
+    header: "Kernmodules",
+    cell: ({ row }) => {
+      if (!row.original.studentCurriculum) {
+        return null;
+      }
+
+      const coreModules = row.original.studentCurriculum.moduleStatus.filter(
+        (status) => status.module.type === "required",
+      );
+
+      return (
+        <div className="flex items-center gap-x-1.5">
+          <span className="font-medium text-zinc-950">
+            {
+              coreModules.filter(
+                (status) =>
+                  status.completedCompetencies === status.totalCompetencies,
+              ).length
+            }
+          </span>
+          <span className="text-zinc-500">/</span>
+          <span className="text-zinc-950">{coreModules.length}</span>
+        </div>
+      );
+    },
+  }),
+  columnHelper.display({
+    id: "completedOptional",
+    header: "Keuzemodules",
+    cell: ({ row }) => {
+      if (!row.original.studentCurriculum) {
+        return null;
+      }
+
+      const electiveModules =
+        row.original.studentCurriculum.moduleStatus.filter(
+          (status) => status.module.type === "optional",
+        );
+
+      return (
+        <div className="flex items-center gap-x-1.5">
+          <span className="font-medium text-zinc-950">
+            {
+              electiveModules.filter(
+                (status) =>
+                  status.completedCompetencies === status.totalCompetencies,
+              ).length
+            }
+          </span>
+          <span className="text-zinc-500">/</span>
+          <span className="text-zinc-950">{electiveModules.length}</span>
+        </div>
+      );
+    },
   }),
   columnHelper.accessor(
     (data) =>
