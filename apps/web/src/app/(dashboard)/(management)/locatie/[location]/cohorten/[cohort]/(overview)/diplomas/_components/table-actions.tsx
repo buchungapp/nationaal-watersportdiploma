@@ -182,7 +182,7 @@ export function IssueCertificateDialog({
                   required={delayVisibility}
                   disabled={!delayVisibility}
                   defaultValue={
-                    defaultVisibleFrom ?? dayjs().toISOString().split(".")[0]
+                    (defaultVisibleFrom ?? dayjs().toISOString()).split(".")[0]
                   }
                 />
               </div>
