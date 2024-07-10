@@ -30,7 +30,7 @@ async function DisciplineTable({
   // Search programs using FlexSearch
   let filteredDisciplines = disciplines;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredDisciplines = results.map(
       (result) => disciplines.find((discipline) => discipline.id === result)!,
     );

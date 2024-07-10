@@ -30,7 +30,7 @@ async function ModuleTable({
   // Search programs using FlexSearch
   let filteredModules = modules;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredModules = results.map(
       (result) => modules.find((module) => module.id === result)!,
     );

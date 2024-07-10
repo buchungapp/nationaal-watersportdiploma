@@ -19,7 +19,7 @@ export default function Search({ placeholder = "Zoeken...", debounce = 300 }) {
     params.delete("limit");
 
     if (term) {
-      params.set("query", term);
+      params.set("query", encodeURIComponent(term.trim()));
     } else {
       params.delete("query");
     }

@@ -1,8 +1,9 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
-import { and, desc, eq, gte, inArray, lt } from 'drizzle-orm'
+import dayjs from 'dayjs'
+import { and, desc, eq, gte, inArray, isNull, lt } from 'drizzle-orm'
 import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
   findItem,
   singleOrArray,
@@ -23,7 +24,12 @@ export const find = withZod(
     const resultQuery = query
       .select()
       .from(s.certificate)
-      .where(and(eq(s.certificate.handle, input.handle)))
+      .where(
+        and(
+          eq(s.certificate.handle, input.handle),
+          isNull(s.certificate.deletedAt),
+        ),
+      )
 
     const [result] = await resultQuery
 
@@ -41,7 +47,7 @@ export const byId = withZod(uuidSchema, async (input) => {
   const resultQuery = query
     .select()
     .from(s.certificate)
-    .where(eq(s.certificate.id, input))
+    .where(and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)))
 
   const [result] = await resultQuery
 
@@ -149,6 +155,7 @@ export const list = withZod(
           filter.issuedBefore
             ? lt(s.certificate.issuedAt, filter.issuedBefore)
             : undefined,
+          isNull(s.certificate.deletedAt),
         ),
       )
       .orderBy(desc(s.certificate.createdAt))
@@ -274,3 +281,55 @@ export const list = withZod(
     })
   },
 )
+
+export const assignToCohortAllocation = withZod(
+  z.object({
+    certificateId: uuidSchema,
+    cohortAllocationId: uuidSchema.nullable(),
+  }),
+  async ({ certificateId, cohortAllocationId }) => {
+    const query = useQuery()
+
+    await query
+      .update(s.certificate)
+      .set({ cohortAllocationId: cohortAllocationId })
+      .where(
+        and(
+          eq(s.certificate.id, certificateId),
+          isNull(s.certificate.deletedAt),
+        ),
+      )
+  },
+)
+
+export const withdraw = withZod(uuidSchema, async (input) => {
+  return withTransaction(async (tx) => {
+    const certificate = await tx
+      .select()
+      .from(s.certificate)
+      .where(
+        and(
+          eq(s.certificate.id, input),
+          isNull(s.certificate.deletedAt),
+          // Must be maximum 24 hours after the certificate was issued
+          gte(s.certificate.createdAt, dayjs().subtract(24, 'h').toISOString()),
+        ),
+      )
+      .then(singleRow)
+
+    await Promise.all([
+      tx
+        .update(s.certificate)
+        .set({ deletedAt: new Date().toISOString() })
+        .where(
+          and(
+            eq(s.certificate.id, certificate.id),
+            isNull(s.certificate.deletedAt),
+          ),
+        ),
+      tx
+        .delete(s.studentCompletedCompetency)
+        .where(eq(s.studentCompletedCompetency.certificateId, certificate.id)),
+    ])
+  })
+})

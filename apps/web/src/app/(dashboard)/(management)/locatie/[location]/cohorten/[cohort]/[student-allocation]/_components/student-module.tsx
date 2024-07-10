@@ -5,8 +5,13 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import { MinusIcon, PlusIcon } from "@heroicons/react/16/solid";
-import { useOptimistic, useState, type PropsWithChildren } from "react";
+import { CheckIcon, MinusIcon, PlusIcon } from "@heroicons/react/16/solid";
+import {
+  useOptimistic,
+  useState,
+  useTransition,
+  type PropsWithChildren,
+} from "react";
 import { toast } from "sonner";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -18,6 +23,7 @@ import {
 import { Description, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Switch, SwitchField } from "~/app/(dashboard)/_components/switch";
 import { Strong } from "~/app/(dashboard)/_components/text";
+import Spinner from "~/app/_components/spinner";
 import { Weight } from "~/app/_components/weight";
 import type { retrieveCurriculumById } from "~/lib/nwd";
 import {
@@ -25,7 +31,47 @@ import {
   updateSingleCompetencyProgress,
 } from "../_actions/progress";
 
-export function CourseCardCheckbox({
+export function CompleteAllCoreModules({
+  cohortAllocationId,
+  competencyIds,
+  disabled,
+}: {
+  cohortAllocationId: string;
+  competencyIds: string[];
+  disabled?: boolean;
+}) {
+  const [isBusy, startTransition] = useTransition();
+
+  if (competencyIds.length < 1) {
+    return null;
+  }
+
+  return (
+    <Button
+      outline
+      disabled={disabled ?? isBusy}
+      onClick={() => {
+        startTransition(
+          async () =>
+            await updateBulkCompetencyProgress({
+              cohortAllocationId,
+              progressData: competencyIds.map((competencyId) => ({
+                competencyId,
+                progress: 100,
+              })),
+            }).catch(() => {
+              toast.error("Er is iets misgegaan.");
+            }),
+        );
+      }}
+    >
+      {isBusy ? <Spinner /> : <CheckIcon />}
+      Voltooi alle kernmodules
+    </Button>
+  );
+}
+
+function CourseCardCheckbox({
   children,
   checked,
   disabled,
@@ -50,11 +96,13 @@ export function CourseCardCheckbox({
 }
 
 export function Module({
+  disabled,
   module,
   competenciesProgress,
   completedCompetencies,
   cohortAllocationId,
 }: {
+  disabled?: boolean;
   module: NonNullable<
     Awaited<ReturnType<typeof retrieveCurriculumById>>
   >["modules"][number];
@@ -124,7 +172,7 @@ export function Module({
                 </DisclosureButton>
 
                 <CourseCardCheckbox
-                  disabled={areAllCompetenciesCompleted}
+                  disabled={disabled ?? areAllCompetenciesCompleted}
                   checked={
                     areAllCompetenciesCompleted || areSomeCompetenciesSelected
                   }
@@ -189,7 +237,7 @@ export function Module({
                   return (
                     <CourseCardCheckbox
                       key={competency.id}
-                      disabled={isCompletedInPreviousCertification}
+                      disabled={disabled ?? isCompletedInPreviousCertification}
                       checked={
                         isCompletedInPreviousCertification ||
                         competencyProgress > 0

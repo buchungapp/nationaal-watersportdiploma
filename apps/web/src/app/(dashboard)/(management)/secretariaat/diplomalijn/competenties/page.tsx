@@ -30,7 +30,7 @@ async function CompetencyTable({
   // Search programs using FlexSearch
   let filteredCompetencies = competencies;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredCompetencies = results.map(
       (result) => competencies.find((competency) => competency.id === result)!,
     );

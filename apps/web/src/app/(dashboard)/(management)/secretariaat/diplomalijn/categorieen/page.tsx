@@ -30,7 +30,7 @@ async function CategoryTable({
   // Search programs using FlexSearch
   let filteredCategories = categories;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredCategories = results.map(
       (result) => categories.find((category) => category.id === result)!,
     );

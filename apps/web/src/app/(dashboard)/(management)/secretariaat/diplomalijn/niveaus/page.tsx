@@ -30,7 +30,7 @@ async function DegreesTable({
   // Search programs using FlexSearch
   let filteredGearTypes = degrees;
   if (searchQuery) {
-    const results = index.search(searchQuery);
+    const results = index.search(decodeURIComponent(searchQuery));
     filteredGearTypes = results.map(
       (result) => degrees.find((degree) => degree.id === result)!,
     );

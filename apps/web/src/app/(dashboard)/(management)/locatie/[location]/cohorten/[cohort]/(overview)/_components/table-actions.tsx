@@ -384,8 +384,6 @@ function AssignInstructorDialog({
         .nullable()
         .parse(formData.get("instructorPersonId"));
 
-      console.log("instructorPersonId", instructorPersonId);
-
       await assignInstructorToStudents({
         cohortId,
         instructorPersonId,
