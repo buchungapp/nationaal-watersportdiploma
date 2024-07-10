@@ -26,6 +26,7 @@ export async function updateSingleCompetencyProgress({
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
 }
 
 export async function updateBulkCompetencyProgress({
@@ -47,4 +48,5 @@ export async function updateBulkCompetencyProgress({
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
 }

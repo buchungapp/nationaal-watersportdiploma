@@ -14,7 +14,7 @@ import {
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
 import { StartStudentCurriculum } from "./start-curriculum";
-import { Module } from "./student-module";
+import { CompleteAllCoreModules, Module } from "./student-module";
 
 export async function CourseCard({
   cohortAllocationId,
@@ -83,6 +83,23 @@ export async function CourseCard({
           {allocation.studentCurriculum.gearType.title}
         </DescriptionDetails>
       </DescriptionList>
+
+      <div className="flex flex-wrap mt-2 gap-x-2 gap-y-2">
+        <CompleteAllCoreModules
+          cohortAllocationId={cohortAllocationId}
+          competencyIds={curriculum.modules
+            .filter((m) => m.isRequired)
+            .flatMap((module) => module.competencies.map((c) => c.id))
+            .filter((c) => {
+              // Filter out if already in completedCompetencyIds or
+              // if progress is >= 100 in competencyProgressMap
+              const completed = completedCompetencyIds.includes(c);
+              const progress = competencyProgressMap.find((cp) => cp.id === c);
+
+              return !completed && (!progress || progress.progress < 100);
+            })}
+        />
+      </div>
 
       <div className="mt-6">
         {curriculum.modules.map((module, index) => {
