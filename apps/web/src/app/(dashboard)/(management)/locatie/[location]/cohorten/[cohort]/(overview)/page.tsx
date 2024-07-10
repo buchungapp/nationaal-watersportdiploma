@@ -149,7 +149,7 @@ export default async function Page({
   let searchedStudents = filteredStudents;
 
   if (searchQuery && searchQuery.length >= 2) {
-    const searchResult = index.search(searchQuery);
+    const searchResult = index.search(decodeURIComponent(searchQuery));
 
     if (searchResult.length > 0) {
       searchedStudents = filteredStudents.filter((student) =>
