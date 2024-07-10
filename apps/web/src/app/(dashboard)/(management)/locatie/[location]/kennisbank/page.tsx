@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/(dashboard)/_components/table";
-import { TextLink } from "~/app/(dashboard)/_components/text";
+import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
 
 dayjs.locale("nl");
@@ -35,6 +35,17 @@ export default async function Page(
       <div className="flex items-end justify-between gap-4">
         <Heading>Kennisbank</Heading>
       </div>
+
+      <Text>
+        Hier vind je als instructeur zowel de NWD cursusboeken als de
+        PvB-protocollen in PDF formaat. De cursusboeken zijn ook digitaal
+        beschikbaar voor ingelogde NWD-instructeurs via{" "}
+        <TextLink href="/diplomalijn/consument" target="_blank">
+          www.nwd.nl/diplomalijn/consument
+        </TextLink>
+        .
+      </Text>
+
       <Table
         className="mt-8 [--gutter:theme(spacing.6)] sm:[--gutter:theme(spacing.8)]"
         dense
