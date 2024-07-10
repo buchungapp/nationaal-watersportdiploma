@@ -96,13 +96,16 @@ export function ReleaseStudentAllocation({
 
 export function WithdrawStudentCurriculum({
   studentAllocationId,
+  disabled,
 }: {
   cohortId: string;
   studentAllocationId: string;
   locationId: string;
+  disabled?: boolean;
 }) {
   return (
     <DropdownItem
+      disabled={disabled}
       onClick={async () => {
         try {
           await withdrawStudentFromCurriculum({

@@ -231,6 +231,7 @@ async function ManageStudentCurriculumActions({
           cohortId={cohortId}
           studentAllocationId={studentAllocationId}
           locationId={locationId}
+          disabled={!!allocation.certificate}
         />
       </DropdownMenu>
     </Dropdown>

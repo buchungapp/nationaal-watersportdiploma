@@ -34,9 +34,11 @@ import {
 export function CompleteAllCoreModules({
   cohortAllocationId,
   competencyIds,
+  disabled,
 }: {
   cohortAllocationId: string;
   competencyIds: string[];
+  disabled?: boolean;
 }) {
   const [isBusy, startTransition] = useTransition();
 
@@ -47,7 +49,7 @@ export function CompleteAllCoreModules({
   return (
     <Button
       outline
-      disabled={isBusy}
+      disabled={disabled ?? isBusy}
       onClick={() => {
         startTransition(
           async () =>
@@ -94,11 +96,13 @@ function CourseCardCheckbox({
 }
 
 export function Module({
+  disabled,
   module,
   competenciesProgress,
   completedCompetencies,
   cohortAllocationId,
 }: {
+  disabled?: boolean;
   module: NonNullable<
     Awaited<ReturnType<typeof retrieveCurriculumById>>
   >["modules"][number];
@@ -168,7 +172,7 @@ export function Module({
                 </DisclosureButton>
 
                 <CourseCardCheckbox
-                  disabled={areAllCompetenciesCompleted}
+                  disabled={disabled ?? areAllCompetenciesCompleted}
                   checked={
                     areAllCompetenciesCompleted || areSomeCompetenciesSelected
                   }
@@ -233,7 +237,7 @@ export function Module({
                   return (
                     <CourseCardCheckbox
                       key={competency.id}
-                      disabled={isCompletedInPreviousCertification}
+                      disabled={disabled ?? isCompletedInPreviousCertification}
                       checked={
                         isCompletedInPreviousCertification ||
                         competencyProgress > 0

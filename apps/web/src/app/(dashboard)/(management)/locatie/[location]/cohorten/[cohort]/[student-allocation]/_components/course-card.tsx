@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import React from "react";
 import {
@@ -6,7 +7,7 @@ import {
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list";
 import { Divider } from "~/app/(dashboard)/_components/divider";
-import { TextLink } from "~/app/(dashboard)/_components/text";
+import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import {
   listCompetencyProgressInCohortForStudent,
   listCompletedCompetenciesByStudentCurriculumId,
@@ -64,6 +65,8 @@ export async function CourseCard({
     progress: Number(cp.progress),
   }));
 
+  const hasIssuedCertificate = !!allocation.certificate;
+
   return (
     <div>
       <DescriptionList>
@@ -84,8 +87,22 @@ export async function CourseCard({
         </DescriptionDetails>
       </DescriptionList>
 
+      {hasIssuedCertificate ? (
+        <Text className="my-4">
+          Dit diploma is uitgegeven op{" "}
+          <Strong>
+            {dayjs(allocation.certificate!.issuedAt).format(
+              "DD-MM-YYYY HH:mm uur",
+            )}
+          </Strong>
+          . Om aanpassingen in de cursuskaart te kunnen doen moet een
+          cohortbeheerder het diploma eerst verwijderen.
+        </Text>
+      ) : null}
+
       <div className="flex flex-wrap mt-2 gap-x-2 gap-y-2">
         <CompleteAllCoreModules
+          disabled={hasIssuedCertificate}
           cohortAllocationId={cohortAllocationId}
           competencyIds={curriculum.modules
             .filter((m) => m.isRequired)
@@ -106,6 +123,7 @@ export async function CourseCard({
           return (
             <React.Fragment key={module.id}>
               <Module
+                disabled={hasIssuedCertificate}
                 module={module}
                 completedCompetencies={completedCompetencyIds}
                 competenciesProgress={competencyProgressMap}
