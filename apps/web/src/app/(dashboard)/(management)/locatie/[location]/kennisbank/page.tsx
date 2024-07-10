@@ -37,8 +37,8 @@ export default async function Page(
       </div>
 
       <Text>
-        Hier vind je als instructeur zowel de NWD cursusboeken als de
-        PvB-protocollen in PDF formaat. De cursusboeken zijn ook digitaal
+        Hier vind je als instructeur zowel de NWD cursushandboeken als de
+        PvB-protocollen in PDF formaat. De handboeken zijn ook digitaal
         beschikbaar voor ingelogde NWD-instructeurs via{" "}
         <TextLink href="/diplomalijn/consument" target="_blank">
           www.nwd.nl/diplomalijn/consument
