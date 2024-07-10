@@ -212,6 +212,10 @@ export const listStatus = withZod(
         )
       }
 
+      if (student.person.firstName === 'Hemme') {
+        console.log('moduleStatusForStudent', moduleStatusForStudent)
+      }
+
       return {
         id: student.id,
         person: {

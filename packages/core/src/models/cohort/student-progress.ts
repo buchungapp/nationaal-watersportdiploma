@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, max } from 'drizzle-orm'
 import { getTableColumns } from 'drizzle-orm/utils'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -17,47 +17,34 @@ export const byAllocationId = withZod(
   async ({ id: cohortAllocationId }) => {
     const query = useQuery()
 
-    const rankedSq = query
+    const subquery = query
       .select({
         cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
-        curriculumModuleCompetencyId: s.studentCohortProgress.competencyId,
-        progress: s.studentCohortProgress.progress,
-        rn: sql<number>`ROW_NUMBER() OVER (
-  PARTITION BY ${s.studentCohortProgress.cohortAllocationId}, ${s.studentCohortProgress.competencyId}
-  ORDER BY ${s.studentCohortProgress.createdAt} DESC
-)`
-          .mapWith(Number)
-          .as('rn'),
+        competencyId: s.studentCohortProgress.competencyId,
+        maxCreatedAt: max(s.studentCohortProgress.createdAt).as(
+          'max_created_at',
+        ),
       })
       .from(s.studentCohortProgress)
-      .as('ranked')
-
-    const latestProgress = query.$with('latest_progress').as(
-      query
-        .select({
-          cohortAllocationId: rankedSq.cohortAllocationId,
-          curriculumModuleCompetencyId: rankedSq.curriculumModuleCompetencyId,
-          progress: rankedSq.progress,
-        })
-        .from(rankedSq)
-        .where(eq(rankedSq.rn, 1)),
-    )
+      .where(eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId))
+      .groupBy(
+        s.studentCohortProgress.cohortAllocationId,
+        s.studentCohortProgress.competencyId,
+      )
+      .as('latest')
 
     const rows = await query
-      .with(latestProgress)
       .select(getTableColumns(s.studentCohortProgress))
       .from(s.studentCohortProgress)
       .innerJoin(
-        latestProgress,
+        subquery,
         and(
           eq(
             s.studentCohortProgress.cohortAllocationId,
-            latestProgress.cohortAllocationId,
+            subquery.cohortAllocationId,
           ),
-          eq(
-            s.studentCohortProgress.competencyId,
-            latestProgress.curriculumModuleCompetencyId,
-          ),
+          eq(s.studentCohortProgress.competencyId, subquery.competencyId),
+          eq(s.studentCohortProgress.createdAt, subquery.maxCreatedAt),
         ),
       )
       .where(
