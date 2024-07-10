@@ -1,4 +1,4 @@
-import { schema as s } from '@nawadi/db'
+import { schema as s, uncontrolledSchema } from '@nawadi/db'
 import { AuthError } from '@supabase/supabase-js'
 import dayjs from 'dayjs'
 import {
@@ -390,18 +390,35 @@ export const updateEmail = withZod(
     }
 
     async function updateUserEmail(userId: string, email: string) {
-      const { data, error } = await supabase.auth.admin.updateUserById(userId, {
-        email: email,
-        email_confirm: false,
-      })
+      let updatedUserId: string
 
-      if (error) {
-        throw error
+      // First check if there already is a user with the new email address
+      const [existingUser] = await query
+        .select({ id: s.user.authUserId })
+        .from(uncontrolledSchema._usersTable)
+        .where(eq(uncontrolledSchema._usersTable.email, email))
+
+      if (existingUser) {
+        updatedUserId = existingUser.id
+      } else {
+        const { data, error } = await supabase.auth.admin.updateUserById(
+          userId,
+          {
+            email: email,
+            email_confirm: false,
+          },
+        )
+
+        if (error) {
+          throw error
+        }
+
+        updatedUserId = data.user.id
       }
 
       return query
         .update(s.user)
-        .set({ authUserId: data.user.id, email: data.user.email })
+        .set({ authUserId: userId, email: email })
         .where(eq(s.user.authUserId, userId))
         .returning({ id: s.user.authUserId })
         .then(singleRow)
