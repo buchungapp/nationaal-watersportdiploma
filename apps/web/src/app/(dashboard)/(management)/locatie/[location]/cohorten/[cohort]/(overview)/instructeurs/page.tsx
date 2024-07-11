@@ -31,7 +31,7 @@ export default async function Page({
   ]);
 
   return (
-    <div className="max-w-3xl">
+    <div className="max-w-4xl">
       <AddInstructor
         allInstructors={allInstructors}
         cohortId={cohort.id}
