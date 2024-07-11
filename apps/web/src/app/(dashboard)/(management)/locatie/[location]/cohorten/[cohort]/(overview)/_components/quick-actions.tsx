@@ -115,8 +115,6 @@ function EditCohortDialog({
 
   const [state, formAction] = useActionState(submit, undefined);
 
-  console.log("cohort.accessStartTime", cohort.accessStartTime);
-
   return (
     <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
       <DialogTitle>Cohort bewerken</DialogTitle>
