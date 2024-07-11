@@ -55,7 +55,7 @@ function CheckboxButton({
   );
 }
 
-type FilterType = "uitgegeven" | "niet-uitgegeven";
+type FilterType = "uitgegeven" | "klaar-voor-uitgifte" | "geen-voortgang";
 
 export function FilterSelect() {
   const router = useRouter();
@@ -96,10 +96,16 @@ export function FilterSelect() {
           Uitgegeven
         </CheckboxButton>
         <CheckboxButton
-          onClick={() => handleToggle("niet-uitgegeven")}
-          checked={optimisticSelectedStatus.includes("niet-uitgegeven")}
+          onClick={() => handleToggle("klaar-voor-uitgifte")}
+          checked={optimisticSelectedStatus.includes("klaar-voor-uitgifte")}
         >
-          Niet-uitgegeven
+          Klaar voor uitgifte
+        </CheckboxButton>
+        <CheckboxButton
+          onClick={() => handleToggle("geen-voortgang")}
+          checked={optimisticSelectedStatus.includes("geen-voortgang")}
+        >
+          Geen voortgang
         </CheckboxButton>
       </PopoverPanel>
     </Popover>

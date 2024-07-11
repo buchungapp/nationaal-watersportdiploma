@@ -72,6 +72,9 @@ export default function InstructorsTable({
           ),
         },
       ),
+      columnHelper.accessor("person.email", {
+        header: "E-mail",
+      }),
       columnHelper.accessor("roles", {
         header: "Rollen",
         cell: ({ getValue }) => (
