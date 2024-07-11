@@ -60,7 +60,7 @@ export function ChangeEmail({
   return (
     <>
       <Button type="button" onClick={() => setIsOpen(true)}>
-        Email wijzigen
+        E-mail wijzigen
       </Button>
       <Alert open={isOpen} onClose={setIsOpen} size="md">
         <form action={action}>
