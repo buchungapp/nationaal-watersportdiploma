@@ -5,6 +5,7 @@ import {
   addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
+  deleteCohort as deleteCohortInner,
   enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
   getUserOrThrow,
   isInstructorInCohort as isInstructorInCohortInner,
@@ -19,6 +20,7 @@ import {
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
   setAllocationTags as setAllocationTagsInner,
+  updateCohortDetails,
   updateStudentInstructorAssignment,
   withdrawStudentFromCurriculumInCohort,
   type ActorType,
@@ -239,6 +241,29 @@ export async function setTags(props: {
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
+
+  return;
+}
+
+export async function updateCohort(props: {
+  cohortId: string;
+  label?: string;
+  accessStartTimestamp?: string;
+  accessEndTimestamp?: string;
+}) {
+  await updateCohortDetails(props);
+
+  revalidatePath("/locatie/[location]/cohorten/", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
+
+  return;
+}
+
+export async function deleteCohort(props: { cohortId: string }) {
+  await deleteCohortInner(props.cohortId);
+
+  revalidatePath("/locatie/[location]/cohorten/", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
 
   return;
 }

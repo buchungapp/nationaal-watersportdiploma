@@ -30,6 +30,11 @@ export const create = withZod(
   async (item) => {
     const query = useQuery()
 
+    // Make sure accessStartTime is before accessEndTime
+    if (item.accessStartTime >= item.accessEndTime) {
+      throw new Error('accessStartTime should be before accessEndTime')
+    }
+
     const row = await query
       .insert(s.cohort)
       .values({
@@ -51,13 +56,18 @@ export const update = withZod(
     id: uuidSchema,
     data: z.object({
       label: z.string().optional(),
-      accessStartTime: z.string().datetime().optional(),
-      accessEndTime: z.string().datetime().optional(),
+      accessStartTime: z.string().datetime(),
+      accessEndTime: z.string().datetime(),
     }),
   }),
   successfulCreateResponse,
   async (item) => {
     const query = useQuery()
+
+    // Make sure accessStartTime is before accessEndTime
+    if (item.data.accessStartTime >= item.data.accessEndTime) {
+      throw new Error('accessStartTime should be before accessEndTime')
+    }
 
     const row = await query
       .update(s.cohort)

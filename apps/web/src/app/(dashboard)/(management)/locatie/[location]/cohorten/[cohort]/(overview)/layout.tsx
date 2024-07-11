@@ -67,7 +67,16 @@ export default async function Layout({
             </span>
           </div>
           <div className="flex gap-4">
-            <CohortActions />
+            {roles.includes("location_admin") ? (
+              <CohortActions
+                cohort={{
+                  id: cohort.id,
+                  label: cohort.label,
+                  accessStartTime: cohort.accessStartTime,
+                  accessEndTime: cohort.accessEndTime,
+                }}
+              />
+            ) : null}
           </div>
         </div>
       </div>
