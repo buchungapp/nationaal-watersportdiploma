@@ -451,3 +451,39 @@ export const updateEmail = withZod(
     return await updatePersonUser(input.personId, newUser.id)
   },
 )
+
+export const updateDetails = withZod(
+  z.object({
+    personId: uuidSchema,
+    data: insertSchema
+      .pick({
+        firstName: true,
+        lastName: true,
+        lastNamePrefix: true,
+        dateOfBirth: true,
+        birthCity: true,
+        birthCountry: true,
+      })
+      .partial(),
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .update(s.person)
+      .set({
+        firstName: input.data.firstName,
+        lastName: input.data.lastName,
+        lastNamePrefix: input.data.lastNamePrefix,
+        dateOfBirth: input.data.dateOfBirth
+          ? dayjs(input.data.dateOfBirth).format('YYYY-MM-DD')
+          : undefined,
+        birthCity: input.data.birthCity,
+        birthCountry: input.data.birthCountry,
+      })
+      .where(eq(s.person.id, input.personId))
+      .returning({ id: s.person.id })
+      .then(singleRow)
+  },
+)

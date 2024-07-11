@@ -46,6 +46,55 @@ export const create = withZod(
   },
 )
 
+export const update = withZod(
+  z.object({
+    id: uuidSchema,
+    data: z.object({
+      label: z.string().optional(),
+      accessStartTime: z.string().datetime().optional(),
+      accessEndTime: z.string().datetime().optional(),
+    }),
+  }),
+  successfulCreateResponse,
+  async (item) => {
+    const query = useQuery()
+
+    const row = await query
+      .update(s.cohort)
+      .set({
+        label: item.data.label,
+        accessStartTime: item.data.accessStartTime,
+        accessEndTime: item.data.accessEndTime,
+      })
+      .where(eq(s.cohort.id, item.id))
+      .returning({ id: s.cohort.id })
+      .then(singleRow)
+
+    return row
+  },
+)
+
+export const remove = withZod(
+  z.object({
+    id: uuidSchema,
+  }),
+  z.object({ id: uuidSchema }),
+  async (item) => {
+    const query = useQuery()
+
+    const res = await query
+      .update(s.cohort)
+      .set({
+        deletedAt: sql`NOW()`,
+      })
+      .where(eq(s.cohort.id, item.id))
+      .returning({ id: s.cohort.id })
+      .then(singleRow)
+
+    return res
+  },
+)
+
 export const listByLocationId = withZod(
   z.object({
     id: uuidSchema,

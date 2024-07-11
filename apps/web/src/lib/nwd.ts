@@ -1902,3 +1902,111 @@ export const updateDefaultCertificateVisibleFromDate = async ({
     });
   });
 };
+
+export const updateCohortDetails = async ({
+  cohortId,
+  label,
+  accessStartTimestamp,
+  accessEndTimestamp,
+}: {
+  cohortId: string;
+  label?: string;
+  accessStartTimestamp?: string;
+  accessEndTimestamp?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+    if (!cohort) {
+      throw new Error("Cohort not found");
+    }
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: cohort.locationId,
+      personId: primaryPerson.id,
+    });
+
+    return await Cohort.update({
+      id: cohortId,
+      data: {
+        label,
+        accessStartTime: accessStartTimestamp,
+        accessEndTime: accessEndTimestamp,
+      },
+    });
+  });
+};
+
+export const deleteCohort = async (cohortId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+    if (!cohort) {
+      throw new Error("Cohort not found");
+    }
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: cohort.locationId,
+      personId: primaryPerson.id,
+    });
+
+    return await Cohort.remove({ id: cohortId });
+  });
+};
+
+export const updatePersonDetails = async ({
+  personId,
+  locationId,
+  ...details
+}: {
+  personId: string;
+  locationId: string;
+  firstName?: string;
+  lastNamePrefix?: string | null;
+  lastName?: string;
+  dateOfBirth?: Date;
+  birthCity?: string;
+  birthCountry?: string;
+}) => {
+  return makeRequest(async () => {
+    const [primaryPerson, person] = await Promise.all([
+      getUserOrThrow().then(getPrimaryPerson),
+      User.Person.fromId(personId),
+    ]);
+
+    if (!person) {
+      throw new Error("Person not found");
+    }
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: locationId,
+      personId: primaryPerson.id,
+    });
+
+    const associatedToLocation = await User.Person.listActiveRolesForLocation({
+      locationId,
+      personId,
+    }).then((roles) => roles.length > 0);
+
+    if (!associatedToLocation) {
+      throw new Error("Unauthorized");
+    }
+
+    return await User.Person.updateDetails({
+      personId,
+      data: {
+        ...details,
+        dateOfBirth: details.dateOfBirth?.toISOString(),
+      },
+    });
+  });
+};
