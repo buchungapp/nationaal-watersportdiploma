@@ -66,6 +66,7 @@ export default async function Page(
                   <div>
                     <TextLink
                       href={`/kennisbank/${document.id}`}
+                      target="_blank"
                       prefetch={false}
                     >
                       {document.name}
@@ -86,7 +87,7 @@ export default async function Page(
                 <div className="-mx-3 -my-1.5 sm:-mx-2.5">
                   <Button
                     plain
-                    href={`/kennisbank/${document.id}`}
+                    href={`/kennisbank/${document.id}?download=1`}
                     prefetch={false}
                   >
                     <ArrowDownTrayIcon />

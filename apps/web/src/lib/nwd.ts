@@ -1798,7 +1798,7 @@ export const listKnowledgeCenterDocuments = cache(async () => {
 });
 
 export const downloadKnowledgeCenterDocument = cache(
-  async (documentId: string) => {
+  async (documentId: string, forceDownload = true) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
 
@@ -1816,6 +1816,7 @@ export const downloadKnowledgeCenterDocument = cache(
 
       return await Platform.Media.createSignedUrl({
         id: documentId,
+        download: forceDownload,
       });
     });
   },
