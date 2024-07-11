@@ -1,7 +1,7 @@
 export function Weight({ weight }: { weight: number }) {
   if (
-    process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ||
-    process.env.VERCEL_ENV === "production"
+    process.env.NEXT_PUBLIC_VERCEL_ENV !== "development" ||
+    process.env.VERCEL_ENV !== "development"
   ) {
     return null;
   }
