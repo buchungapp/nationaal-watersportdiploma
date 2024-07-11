@@ -49,7 +49,7 @@ export function CompleteAllCoreModules({
   return (
     <Button
       outline
-      disabled={disabled ?? isBusy}
+      disabled={disabled || isBusy}
       onClick={() => {
         startTransition(
           async () =>
@@ -172,7 +172,7 @@ export function Module({
                 </DisclosureButton>
 
                 <CourseCardCheckbox
-                  disabled={disabled ?? areAllCompetenciesCompleted}
+                  disabled={disabled || areAllCompetenciesCompleted}
                   checked={
                     areAllCompetenciesCompleted || areSomeCompetenciesSelected
                   }
@@ -237,7 +237,7 @@ export function Module({
                   return (
                     <CourseCardCheckbox
                       key={competency.id}
-                      disabled={disabled ?? isCompletedInPreviousCertification}
+                      disabled={disabled || isCompletedInPreviousCertification}
                       checked={
                         isCompletedInPreviousCertification ||
                         competencyProgress > 0
