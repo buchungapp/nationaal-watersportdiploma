@@ -394,7 +394,7 @@ export const updateEmail = withZod(
 
       // First check if there already is a user with the new email address
       const [existingUser] = await query
-        .select({ id: s.user.authUserId })
+        .select({ id: uncontrolledSchema._usersTable.id })
         .from(uncontrolledSchema._usersTable)
         .where(eq(uncontrolledSchema._usersTable.email, email))
 
