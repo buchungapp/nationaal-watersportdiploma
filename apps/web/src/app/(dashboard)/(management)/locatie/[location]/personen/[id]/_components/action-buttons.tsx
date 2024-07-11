@@ -51,6 +51,7 @@ export function ChangeEmail({
 
     if (res.state === "success") {
       setIsOpen(false);
+      toast.success("E-mailadres bijgewerkt.");
     }
     return res;
   };
