@@ -243,15 +243,17 @@ export const listFiles = withZod(z.void(), async () => {
 export const createSignedUrl = withZod(
   z.object({
     id: z.string().uuid(),
+    download: z.boolean().default(true),
   }),
   z.string().url(),
-  async ({ id }) => {
+  async ({ id, download }) => {
     const query = useQuery()
     const supabase = useSupabaseClient()
 
     const mediaRow = await query
       .select({
         fileName: s.media.name,
+        mimeType: s.media.mimeType,
         bucketId: uncontrolledSchema._objectTable.bucket_id,
         path: uncontrolledSchema._objectTable.name,
       })
@@ -272,10 +274,14 @@ export const createSignedUrl = withZod(
     assert(mediaRow.bucketId, 'Bucket ID is required')
     assert(mediaRow.path, 'Path is required')
 
+    const fileNameWithExtension = `${mediaRow.fileName}.${
+      mediaRow.mimeType?.split('/')[1]
+    }`
+
     const { data, error } = await supabase.storage
       .from(mediaRow.bucketId)
       .createSignedUrl(mediaRow.path, 60 * 5, {
-        download: mediaRow.fileName ?? true,
+        download: download ? fileNameWithExtension : false,
       })
 
     if (error) {

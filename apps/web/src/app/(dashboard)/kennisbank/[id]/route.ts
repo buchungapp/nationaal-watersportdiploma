@@ -3,12 +3,17 @@ import type { NextRequest } from "next/server";
 import { downloadKnowledgeCenterDocument } from "~/lib/nwd";
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: { id: string } },
 ) {
-  const url = await downloadKnowledgeCenterDocument(context.params.id).catch(
-    () => notFound(),
-  );
+  const { searchParams } = new URL(request.url);
+
+  const forceDownload = searchParams.has("download");
+
+  const url = await downloadKnowledgeCenterDocument(
+    context.params.id,
+    forceDownload,
+  ).catch(() => notFound());
 
   redirect(url);
 }
