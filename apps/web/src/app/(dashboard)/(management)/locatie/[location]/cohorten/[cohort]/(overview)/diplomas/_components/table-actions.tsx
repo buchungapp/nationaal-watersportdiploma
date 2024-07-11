@@ -179,8 +179,7 @@ export function IssueCertificateDialog({
                   name="visibleFrom"
                   type="datetime-local"
                   aria-label="Zichtbaar vanaf"
-                  required={delayVisibility}
-                  disabled={!delayVisibility}
+                  required={true}
                   defaultValue={
                     (defaultVisibleFrom ?? dayjs().toISOString()).split(".")[0]
                   }

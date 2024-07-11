@@ -49,7 +49,8 @@ export function CompleteAllCoreModules({
   return (
     <Button
       outline
-      disabled={disabled ?? isBusy}
+      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+      disabled={disabled || isBusy}
       onClick={() => {
         startTransition(
           async () =>
@@ -172,7 +173,8 @@ export function Module({
                 </DisclosureButton>
 
                 <CourseCardCheckbox
-                  disabled={disabled ?? areAllCompetenciesCompleted}
+                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                  disabled={disabled || areAllCompetenciesCompleted}
                   checked={
                     areAllCompetenciesCompleted || areSomeCompetenciesSelected
                   }
@@ -237,7 +239,8 @@ export function Module({
                   return (
                     <CourseCardCheckbox
                       key={competency.id}
-                      disabled={disabled ?? isCompletedInPreviousCertification}
+                      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+                      disabled={disabled || isCompletedInPreviousCertification}
                       checked={
                         isCompletedInPreviousCertification ||
                         competencyProgress > 0
