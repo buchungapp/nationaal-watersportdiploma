@@ -1924,6 +1924,12 @@ export const updateCohortDetails = async ({
       throw new Error("Cohort not found");
     }
 
+    if (!accessStartTimestamp || !accessEndTimestamp) {
+      // TODO: These are required for now, which doesn't match the type.
+      // We first need to fix the data integrity check in `core`
+      throw new Error("Access start and end timestamps are required");
+    }
+
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: cohort.locationId,
