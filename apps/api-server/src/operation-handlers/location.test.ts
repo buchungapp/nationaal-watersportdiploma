@@ -19,9 +19,7 @@ test('location crud', () =>
             return
         }
       })
-
       api.facade.defaultCredentials.apiKey = 'supersecret'
-      api.facade.defaultClientConfiguration.baseUrl = baseUrl
 
       let id
       {
