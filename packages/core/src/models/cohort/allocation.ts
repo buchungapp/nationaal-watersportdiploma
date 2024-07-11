@@ -781,6 +781,7 @@ export const listInstructors = withZod(
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
           dateOfBirth: s.person.dateOfBirth,
+          email: s.user.email,
         },
         role: {
           id: s.role.id,
@@ -798,6 +799,7 @@ export const listInstructors = withZod(
         ),
       )
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
+      .leftJoin(s.user, eq(s.user.authUserId, s.person.userId))
       .leftJoin(
         s.cohortAllocationRole,
         and(
@@ -830,6 +832,7 @@ export const listInstructors = withZod(
           lastNamePrefix: string | null
           lastName: string | null
           dateOfBirth: string | null
+          email: string | null
         }
         roles: {
           id: string
@@ -850,6 +853,7 @@ export const listInstructors = withZod(
             lastNamePrefix: row.person.lastNamePrefix,
             lastName: row.person.lastName,
             dateOfBirth: row.person.dateOfBirth,
+            email: row.person.email,
           },
           roles: [],
           createdAt: row.createdAt,

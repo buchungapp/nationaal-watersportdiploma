@@ -18,10 +18,11 @@ import { Link } from "~/app/(dashboard)/_components/link";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import {
   getPersonById,
+  listCountries,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
-import { ChangeEmail } from "./_components/action-buttons";
+import { ChangeEmail, EditDetails } from "./_components/action-buttons";
 import { RoleToggleCheckbox } from "./_components/role-checkbox";
 
 const ROLES = [
@@ -57,7 +58,7 @@ export default async function Page({
     getPersonById(params.id, location.id),
   );
 
-  const [person, rolesInLocation, location] = await Promise.all([
+  const [person, rolesInLocation, location, countries] = await Promise.all([
     retrievePersonPromise,
     retrievePersonPromise.then(async (person) => {
       const location = await retrieveLocationPromise;
@@ -65,11 +66,21 @@ export default async function Page({
       return listRolesForLocation(location.id, person.id);
     }),
     retrieveLocationPromise,
+    listCountries(),
   ]);
 
   if (!person) {
     notFound();
   }
+
+  const {
+    firstName,
+    lastNamePrefix,
+    lastName,
+    dateOfBirth,
+    birthCity,
+    birthCountry,
+  } = person;
 
   return (
     <>
@@ -91,7 +102,20 @@ export default async function Page({
               .join(" ")}
           </Heading>
         </div>
-        <div>
+        <div className="flex gap-4">
+          <EditDetails
+            person={{
+              id: person.id,
+              firstName,
+              lastNamePrefix,
+              lastName,
+              dateOfBirth,
+              birthCity,
+              birthCountry,
+            }}
+            locationId={location.id}
+            countries={countries}
+          />
           <ChangeEmail personId={person.id} locationId={location.id} />
         </div>
       </div>

@@ -3,7 +3,11 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { createStudentForLocation, updateEmailForPerson } from "~/lib/nwd";
+import {
+  createStudentForLocation,
+  updateEmailForPerson,
+  updatePersonDetails,
+} from "~/lib/nwd";
 
 export async function createPerson(
   locationId: string,
@@ -130,4 +134,78 @@ export async function updateEmail(
   return {
     state: "success",
   };
+}
+
+export async function updatePerson(
+  {
+    locationId,
+    personId,
+  }: {
+    locationId: string;
+    personId: string;
+  },
+  _prevState: unknown,
+  formData: FormData,
+) {
+  const expectedSchema = z.object({
+    firstName: z.string().trim().min(1),
+    lastNamePrefix: z
+      .string()
+      .trim()
+      .nullable()
+      .transform((tussenvoegsel) =>
+        tussenvoegsel === "" ? null : tussenvoegsel,
+      ),
+    lastName: z.string().min(1),
+    dateOfBirth: z.string().pipe(z.coerce.date()),
+    birthCity: z.string(),
+    birthCountry: z.string().length(2).toLowerCase(),
+  });
+
+  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
+    formData.entries(),
+  );
+
+  // Set all empty strings to null
+  for (const key in data) {
+    if (data[key] === "") {
+      data[key] = null;
+    }
+  }
+
+  try {
+    const parsed = expectedSchema.parse(data);
+
+    await updatePersonDetails({
+      locationId,
+      personId,
+      ...parsed,
+    });
+
+    revalidatePath("/locatie/[location]/personen", "page");
+    revalidatePath("/locatie/[location]/personen/[id]", "page");
+
+    return {
+      message: "Success",
+      errors: {},
+    };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        message: "Error",
+        errors: error.issues.reduce(
+          (acc, issue) => {
+            acc[issue.path.join(".")] = issue.message;
+            return acc;
+          },
+          {} as Record<string, string>,
+        ),
+      };
+    }
+
+    return {
+      message: "Error",
+      errors: {},
+    };
+  }
 }

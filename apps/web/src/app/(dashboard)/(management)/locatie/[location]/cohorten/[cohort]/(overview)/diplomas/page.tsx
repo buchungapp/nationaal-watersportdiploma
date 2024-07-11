@@ -47,22 +47,19 @@ export default async function Page({
   const filteredStudents =
     filterParams.length > 0
       ? students.filter((student) => {
-          const includesIssued = filterParams.includes("uitgegeven");
-          const includesNotIssued = filterParams.includes("niet-uitgegeven");
+          const isIssued = !!student.certificate;
+          const isReady =
+            student.studentCurriculum?.moduleStatus.some(
+              (module) => module.uncompletedCompetencies < 1,
+            ) ?? false;
 
-          if (includesIssued && includesNotIssued) {
-            return true;
-          }
-
-          if (!includesIssued && !includesNotIssued) {
-            return true;
-          }
-
-          if (includesIssued) {
-            return !!student.certificate;
-          }
-
-          return !student.certificate;
+          return (
+            (filterParams.includes("uitgegeven") && isIssued) ||
+            (filterParams.includes("klaar-voor-uitgifte") &&
+              !isIssued &&
+              isReady) ||
+            (filterParams.includes("geen-voortgang") && !isIssued && !isReady)
+          );
         })
       : students;
 

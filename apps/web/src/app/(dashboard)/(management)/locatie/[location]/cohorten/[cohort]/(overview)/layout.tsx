@@ -16,6 +16,7 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import { LayoutTabs } from "./_components/layout-tabs";
+import { CohortActions } from "./_components/quick-actions";
 
 dayjs.locale("nl");
 
@@ -53,6 +54,7 @@ export default async function Layout({
         <div className="flex items-center gap-4">
           <Heading>{`Cohort ${cohort.label}`}</Heading>
         </div>
+
         <div className="isolate mt-1 flex flex-wrap justify-between gap-x-6">
           <div className="flex flex-wrap gap-x-10 gap-y-2 py-1.5 items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
             <CalendarIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
@@ -64,7 +66,18 @@ export default async function Layout({
               {dayjs(cohort.accessEndTime).format("ddd DD-MM-YYYY HH:mm uur")}
             </span>
           </div>
-          <div className="flex gap-4">{/* ActionButtons */}</div>
+          <div className="flex gap-4">
+            {roles.includes("location_admin") ? (
+              <CohortActions
+                cohort={{
+                  id: cohort.id,
+                  label: cohort.label,
+                  accessStartTime: cohort.accessStartTime,
+                  accessEndTime: cohort.accessEndTime,
+                }}
+              />
+            ) : null}
+          </div>
         </div>
       </div>
 

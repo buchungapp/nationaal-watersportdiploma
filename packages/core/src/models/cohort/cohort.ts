@@ -30,6 +30,11 @@ export const create = withZod(
   async (item) => {
     const query = useQuery()
 
+    // Make sure accessStartTime is before accessEndTime
+    if (item.accessStartTime >= item.accessEndTime) {
+      throw new Error('accessStartTime should be before accessEndTime')
+    }
+
     const row = await query
       .insert(s.cohort)
       .values({
@@ -43,6 +48,60 @@ export const create = withZod(
       .then(singleRow)
 
     return row
+  },
+)
+
+export const update = withZod(
+  z.object({
+    id: uuidSchema,
+    data: z.object({
+      label: z.string().optional(),
+      accessStartTime: z.string().datetime(),
+      accessEndTime: z.string().datetime(),
+    }),
+  }),
+  successfulCreateResponse,
+  async (item) => {
+    const query = useQuery()
+
+    // Make sure accessStartTime is before accessEndTime
+    if (item.data.accessStartTime >= item.data.accessEndTime) {
+      throw new Error('accessStartTime should be before accessEndTime')
+    }
+
+    const row = await query
+      .update(s.cohort)
+      .set({
+        label: item.data.label,
+        accessStartTime: item.data.accessStartTime,
+        accessEndTime: item.data.accessEndTime,
+      })
+      .where(eq(s.cohort.id, item.id))
+      .returning({ id: s.cohort.id })
+      .then(singleRow)
+
+    return row
+  },
+)
+
+export const remove = withZod(
+  z.object({
+    id: uuidSchema,
+  }),
+  z.object({ id: uuidSchema }),
+  async (item) => {
+    const query = useQuery()
+
+    const res = await query
+      .update(s.cohort)
+      .set({
+        deletedAt: sql`NOW()`,
+      })
+      .where(eq(s.cohort.id, item.id))
+      .returning({ id: s.cohort.id })
+      .then(singleRow)
+
+    return res
   },
 )
 
