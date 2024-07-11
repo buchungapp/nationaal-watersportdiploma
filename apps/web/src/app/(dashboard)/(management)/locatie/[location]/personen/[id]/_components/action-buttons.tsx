@@ -66,12 +66,9 @@ export function ChangeEmail({
         <form action={action}>
           <AlertTitle>Nieuw e-mailadres</AlertTitle>
           <AlertDescription>
-            Voer het nieuwe e-mailadres voor deze persoon in. <br />
-            <Strong>
-              Let op: dit wijzigt het e-mailadres voor{" "}
-              <span className="underline underline-offset-1">alle</span>{" "}
-              personen die op dit moment dit e-mailadres gebruiken!
-            </Strong>
+            <Strong>Let op:</Strong> dit wijzigt het e-mailadres voor{" "}
+            <span className="underline underline-offset-1">alle</span> personen
+            die op dit moment dit e-mailadres gebruiken!
           </AlertDescription>
           <AlertBody>
             <Input name="email" type="email" aria-label="E-mail" />
