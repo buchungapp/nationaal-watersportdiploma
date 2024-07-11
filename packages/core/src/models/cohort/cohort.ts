@@ -111,7 +111,7 @@ export const byIdOrHandle = withZod(
   async (input) => {
     const query = useQuery()
 
-    const whereClausules: (SQL | undefined)[] = []
+    const whereClausules: (SQL | undefined)[] = [isNull(s.cohort.deletedAt)]
 
     if ('id' in input) {
       whereClausules.push(eq(s.cohort.id, input.id))
