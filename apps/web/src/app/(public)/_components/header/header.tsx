@@ -11,6 +11,9 @@ export default function Header() {
         Naar de inhoud gaan
       </a>
       <Trustbar />
+      {/* TODO: I don't find this 'active' prop intuitive. 
+      It's also not flexibel enough, the help & contact section is currently not highlighted for example.
+      ideally it take a function (segments: string[]) => boolean */}
       <Nav
         items={[
           {
@@ -80,10 +83,21 @@ export default function Header() {
               },
             ],
           },
-
           {
-            label: "Contact",
-            href: "/contact",
+            label: "Hulp & contact",
+            active: "/diplomalijn",
+            component: [
+              {
+                label: "Helpcentrum",
+                href: "/help",
+                description: "Antwoord op vele vragen.",
+              },
+              {
+                label: "Contact",
+                href: "/contact",
+                description: "Neem contact met ons op.",
+              },
+            ],
           },
         ]}
       />
