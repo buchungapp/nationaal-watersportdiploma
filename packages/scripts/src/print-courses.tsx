@@ -175,7 +175,12 @@ async function main() {
     )
 
     return (
-      <PageLayout bookmark="Modules" footerTitle={program.title ?? undefined}>
+      <PageLayout
+        bookmark="Modules"
+        footerTitle={
+          program.title ?? `${program.course.title} ${program.degree.title}`
+        }
+      >
         <View>
           <Text style={programStyles.title}>{program.title}</Text>
         </View>
@@ -188,9 +193,7 @@ async function main() {
               {...{ bookmark: module.title }}
             >
               <View style={programStyles.moduleTitleSection}>
-                <Text
-                  style={programStyles.moduleTitle}
-                >{`${module.weight}. ${module.title}`}</Text>
+                <Text style={programStyles.moduleTitle}>{module.title}</Text>
               </View>
 
               <View>
@@ -203,7 +206,7 @@ async function main() {
                         wrap={false}
                       >
                         <Text style={programStyles.comptencyTitle}>
-                          {`${competency.weight}. ${competency.title}`}
+                          {competency.title}
                         </Text>
                         <Text style={programStyles.comptencyContent}>
                           {competency.requirement}
