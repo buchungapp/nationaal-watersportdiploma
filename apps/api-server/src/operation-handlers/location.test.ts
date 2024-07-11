@@ -25,11 +25,10 @@ test('location crud', () =>
 
       let id
       {
-        const entity = {
+        const item = await api.facade.createLocation({
           title: 'title-123',
           handle: 'handle-123',
-        }
-        const item = await api.facade.createLocation(entity)
+        })
         id = item.id
       }
 
