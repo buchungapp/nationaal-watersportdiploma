@@ -358,7 +358,7 @@ export const listActiveRolesForLocation = withZod(
 export const updateEmail = withZod(
   z.object({
     personId: uuidSchema,
-    email: z.string().email(),
+    email: z.string().toLowerCase().trim().email(),
   }),
   successfulCreateResponse,
   async (input) => {
