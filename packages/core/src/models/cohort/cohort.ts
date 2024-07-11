@@ -266,6 +266,8 @@ export const setDefaultVisibleFromDate = withZod(
       })
       .then(singleRow)
 
-    return result as { visibleFromDate: string }
+    return {
+      visibleFromDate: dayjs(result.visibleFromDate).toISOString(),
+    }
   },
 )
