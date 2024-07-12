@@ -347,6 +347,7 @@ export const setPrimary = withZod(
       .update(s.person)
       .set({
         isPrimary: true,
+        updatedAt: sql`NOW()`,
       })
       .where(and(eq(s.person.id, input.personId), isNull(s.person.deletedAt)))
       .returning({ id: s.person.id })
@@ -369,6 +370,7 @@ export const replaceMetadata = withZod(
       .update(s.person)
       .set({
         _metadata: sql`(((${JSON.stringify(input.metadata)})::jsonb)#>> '{}')::jsonb`,
+        updatedAt: sql`NOW()`,
       })
       .where(eq(s.person.id, input.personId))
       .returning({ id: s.person.id })
@@ -442,7 +444,7 @@ export const moveToAccountByEmail = withZod(
     async function updatePersonUser(personId: string, userId: string) {
       return query
         .update(s.person)
-        .set({ userId: userId })
+        .set({ userId: userId, updatedAt: sql`NOW()` })
         .where(eq(s.person.id, personId))
         .returning({ id: s.person.id })
         .then(singleRow)
@@ -487,6 +489,7 @@ export const updateDetails = withZod(
           : undefined,
         birthCity: input.data.birthCity,
         birthCountry: input.data.birthCountry,
+        updatedAt: sql`NOW()`,
       })
       .where(eq(s.person.id, input.personId))
       .returning({ id: s.person.id })
