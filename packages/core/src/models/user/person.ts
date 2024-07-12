@@ -1,5 +1,4 @@
-import { schema as s, uncontrolledSchema } from '@nawadi/db'
-import { AuthError } from '@supabase/supabase-js'
+import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
 import {
   SQL,
@@ -14,7 +13,7 @@ import {
 import { aggregate } from 'drizzle-toolbelt'
 import { customAlphabet } from 'nanoid'
 import { z } from 'zod'
-import { useQuery, useSupabaseClient } from '../../contexts/index.js'
+import { useQuery } from '../../contexts/index.js'
 import {
   handleSchema,
   possibleSingleRow,
@@ -394,7 +393,7 @@ export const listActiveRolesForLocation = withZod(
   },
 )
 
-export const updateEmail = withZod(
+export const moveToAccountByEmail = withZod(
   z.object({
     personId: uuidSchema,
     email: z.string().toLowerCase().trim().email(),
@@ -402,14 +401,10 @@ export const updateEmail = withZod(
   successfulCreateResponse,
   async (input) => {
     const query = useQuery()
-    const supabase = useSupabaseClient()
 
-    // TODO: handle the case where a user holds multiple persons
-    // and we want to move only one of them to a new email address
-
-    function findUserForPerson(personId: string) {
+    async function findUserForPerson(personId: string) {
       return query
-        .select({ id: s.user.authUserId })
+        .select()
         .from(s.user)
         .where(
           exists(
@@ -428,41 +423,6 @@ export const updateEmail = withZod(
         .then(possibleSingleRow)
     }
 
-    async function updateUserEmail(userId: string, email: string) {
-      let updatedUserId: string
-
-      // First check if there already is a user with the new email address
-      const [existingUser] = await query
-        .select({ id: uncontrolledSchema._usersTable.id })
-        .from(uncontrolledSchema._usersTable)
-        .where(eq(uncontrolledSchema._usersTable.email, email))
-
-      if (existingUser) {
-        updatedUserId = existingUser.id
-      } else {
-        const { data, error } = await supabase.auth.admin.updateUserById(
-          userId,
-          {
-            email: email,
-            email_confirm: false,
-          },
-        )
-
-        if (error) {
-          throw error
-        }
-
-        updatedUserId = data.user.id
-      }
-
-      return query
-        .update(s.user)
-        .set({ authUserId: userId, email: email })
-        .where(eq(s.user.authUserId, userId))
-        .returning({ id: s.user.authUserId })
-        .then(singleRow)
-    }
-
     async function updatePersonUser(personId: string, userId: string) {
       return query
         .update(s.person)
@@ -474,19 +434,10 @@ export const updateEmail = withZod(
 
     const user = await findUserForPerson(input.personId)
 
-    if (user) {
-      try {
-        return await updateUserEmail(user.id, input.email)
-      } catch (error) {
-        if (error instanceof AuthError && error.code === 'email_exists') {
-          const newUser = await getOrCreateFromEmail({ email: input.email })
-          return await updatePersonUser(input.personId, newUser.id)
-        }
-        throw error
-      }
-    }
-
-    const newUser = await getOrCreateFromEmail({ email: input.email })
+    const newUser = await getOrCreateFromEmail({
+      email: input.email,
+      displayName: user?.displayName ?? undefined,
+    })
     return await updatePersonUser(input.personId, newUser.id)
   },
 )

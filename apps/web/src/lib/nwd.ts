@@ -1770,7 +1770,7 @@ export async function updateEmailForPerson({
       personId: primaryPerson.id,
     });
 
-    return await User.Person.updateEmail({
+    return await User.Person.moveToAccountByEmail({
       email,
       personId,
     });

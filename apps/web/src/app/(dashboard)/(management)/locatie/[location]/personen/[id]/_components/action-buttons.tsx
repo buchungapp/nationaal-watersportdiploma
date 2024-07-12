@@ -67,9 +67,8 @@ export function ChangeEmail({
         <form action={action}>
           <AlertTitle>Nieuw e-mailadres</AlertTitle>
           <AlertDescription>
-            <Strong>Let op:</Strong> dit wijzigt het e-mailadres voor{" "}
-            <span className="underline underline-offset-1">alle</span> personen
-            die op dit moment dit e-mailadres gebruiken!
+            Dit wijzigt enkel het e-mailadres van deze persoon, niet van andere
+            personen die onder het account vallen.
           </AlertDescription>
           <AlertBody>
             <Input name="email" type="email" aria-label="E-mail" />
