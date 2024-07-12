@@ -406,7 +406,7 @@ export const getPersonById = cache(
         personId: primaryPerson.id,
       }).catch(() => []);
 
-      const person = await User.Person.fromId(personId);
+      const person = await User.Person.byIdOrHandle({ id: personId });
       return person;
     });
   },
@@ -1986,7 +1986,7 @@ export const updatePersonDetails = async ({
   return makeRequest(async () => {
     const [primaryPerson, person] = await Promise.all([
       getUserOrThrow().then(getPrimaryPerson),
-      User.Person.fromId(personId),
+      User.Person.byIdOrHandle({ id: personId }),
     ]);
 
     if (!person) {
