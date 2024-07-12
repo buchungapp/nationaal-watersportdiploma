@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -12,6 +12,7 @@ import {
   getPersonByHandle,
   listCertificatesForPerson,
   listCountries,
+  listExternalCertificatesForPerson,
 } from "~/lib/nwd";
 import {
   GridList,
@@ -20,12 +21,54 @@ import {
 } from "../../_components/grid-list";
 import { EditDetails } from "./_components/action-buttons";
 
+async function ExternalCertificates({ personId }: { personId: string }) {
+  const certificates = await listExternalCertificatesForPerson(personId);
+
+  if (certificates.length === 0) {
+    return (
+      <Text className="italic">
+        We kunnen geen overige certificaten voor jou kunnen vinden.
+      </Text>
+    );
+  }
+
+  return (
+    <GridList>
+      {certificates.map((certificate) => {
+        const metadataEntries = certificate.metadata
+          ? Object.entries(certificate.metadata)
+          : [];
+
+        return (
+          <GridListItem key={certificate.id}>
+            <div className="flex items-center gap-x-4 border-b border-gray-900/5 bg-branding-light/10 p-6">
+              <div className="text-sm font-medium leading-6 text-gray-900">
+                {certificate.identifier}
+              </div>
+            </div>
+            {metadataEntries.length > 0 ? (
+              <DescriptionList className="px-6">
+                {metadataEntries.map(([key, value]) => (
+                  <React.Fragment key={key}>
+                    <DescriptionTerm>{key}</DescriptionTerm>
+                    <DescriptionDetails>{value}</DescriptionDetails>
+                  </React.Fragment>
+                ))}
+              </DescriptionList>
+            ) : null}
+          </GridListItem>
+        );
+      })}
+    </GridList>
+  );
+}
+
 async function NWDCertificates({ personId }: { personId: string }) {
   const certificates = await listCertificatesForPerson(personId);
 
   if (certificates.length === 0) {
     return (
-      <Text>
+      <Text className="italic">
         Je hebt nog geen NWD-diploma's behaald. Klopt dit niet? Neem dan contact
         op met de{" "}
         <TextLink href="/vaarlocaties" target="_blank">
@@ -134,11 +177,32 @@ export default async function Page({
         </DescriptionList>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-12">
         <Subheading>Jouw NWD-diploma's</Subheading>
+        <Text>
+          Hieronder vind je een overzicht van de NWD-diploma's die je hebt
+          behaald. Klik ze aan om er meer over te leren, en je succes nogmaals
+          te vieren! Mis je een diploma? Neem dan contact op met de{" "}
+          <TextLink href="/vaarlocaties" target="_blank">
+            vaarlocatie
+          </TextLink>{" "}
+          waar je de cursus hebt gevolgd.
+        </Text>
         <Divider className="mt-2 mb-4" />
         <Suspense>
           <NWDCertificates personId={person.id} />
+        </Suspense>
+      </div>
+
+      <div className="mt-12">
+        <Subheading>Jouw overige certificaten</Subheading>
+        <Text>
+          Hieronder vind je een overzicht van andere certificaten die je behaalt
+          hebt, zoals oude CWO diploma's.
+        </Text>
+        <Divider className="mt-2 mb-4" />
+        <Suspense>
+          <ExternalCertificates personId={person.id} />
         </Suspense>
       </div>
     </div>

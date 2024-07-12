@@ -1,5 +1,5 @@
 {
-  "id": "b45731e2-965b-4e7c-8439-2fc3f0b3640a",
+  "id": "0b381bdb-7c9d-41cb-ac43-ef3e98c9e981",
   "prevId": "4829af2c-841e-4139-9742-1f2ab0f8ac82",
   "version": "7",
   "dialect": "postgresql",
@@ -742,6 +742,75 @@
           "tableTo": "cohort_allocation",
           "columnsFrom": [
             "cohort_allocation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.external_certificate": {
+      "name": "external_certificate",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "_metadata": {
+          "name": "_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "external_certificate_person_id_fk": {
+          "name": "external_certificate_person_id_fk",
+          "tableFrom": "external_certificate",
+          "tableTo": "person",
+          "columnsFrom": [
+            "person_id"
           ],
           "columnsTo": [
             "id"

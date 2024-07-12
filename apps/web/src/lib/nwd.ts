@@ -183,6 +183,24 @@ export const listCertificatesForPerson = cache(async (personId: string) => {
   });
 });
 
+export const listExternalCertificatesForPerson = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      if (!user.persons.map((p) => p.id).includes(personId)) {
+        throw new Error("Unauthorized");
+      }
+
+      const certificates = await Certificate.External.listForPerson({
+        personId,
+      });
+
+      return certificates;
+    });
+  },
+);
+
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
