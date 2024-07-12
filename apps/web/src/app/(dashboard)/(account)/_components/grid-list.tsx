@@ -30,7 +30,7 @@ export function GridListHeader({
   return (
     <Link
       {...linkProps}
-      className="flex items-center gap-x-4 border-b border-gray-900/5 bg-gray-50 p-6"
+      className="flex items-center gap-x-4 border-b border-gray-900/5 bg-branding-light/10 p-6"
     >
       {children}
     </Link>

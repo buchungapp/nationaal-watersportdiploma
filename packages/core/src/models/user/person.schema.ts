@@ -1,7 +1,7 @@
 import { schema as s } from '@nawadi/db'
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
 import { z } from 'zod'
-import { handleSchema, uuidSchema } from '../../utils/index.js'
+import { uuidSchema } from '../../utils/index.js'
 
 export const insertSchema = createInsertSchema(s.person, {
   firstName: (schema) => schema.firstName.trim(),
@@ -16,7 +16,7 @@ export const selectSchema = createSelectSchema(s.person)
 export const personSchema = z.object({
   id: uuidSchema,
   userId: uuidSchema.nullable(),
-  handle: handleSchema,
+  handle: z.string(),
   email: z.string().email().nullable(),
   firstName: z.string(),
   lastName: z.string().nullable(),

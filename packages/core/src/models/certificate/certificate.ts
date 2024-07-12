@@ -1,7 +1,17 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
 import dayjs from 'dayjs'
-import { and, desc, eq, gte, inArray, isNull, lt } from 'drizzle-orm'
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  gte,
+  inArray,
+  isNull,
+  lt,
+  sql,
+} from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
@@ -120,6 +130,7 @@ export const list = withZod(
           id: singleOrArray(uuidSchema).optional(),
           number: singleOrArray(z.string().length(10)).optional(),
           locationId: singleOrArray(uuidSchema).optional(),
+          personId: singleOrArray(uuidSchema).optional(),
           issuedAfter: z.string().datetime().optional(),
           issuedBefore: z.string().datetime().optional(),
         })
@@ -154,6 +165,24 @@ export const list = withZod(
             : undefined,
           filter.issuedBefore
             ? lt(s.certificate.issuedAt, filter.issuedBefore)
+            : undefined,
+          filter.personId
+            ? exists(
+                query
+                  .select({ id: sql`1` })
+                  .from(s.studentCurriculum)
+                  .where(
+                    and(
+                      Array.isArray(filter.personId)
+                        ? inArray(s.studentCurriculum.personId, filter.personId)
+                        : eq(s.studentCurriculum.personId, filter.personId),
+                      eq(
+                        s.studentCurriculum.id,
+                        s.certificate.studentCurriculumId,
+                      ),
+                    ),
+                  ),
+              )
             : undefined,
           isNull(s.certificate.deletedAt),
         ),

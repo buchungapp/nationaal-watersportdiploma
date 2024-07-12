@@ -1,12 +1,12 @@
 import { Suspense, type PropsWithChildren } from "react";
 import { getUserOrThrow } from "~/lib/nwd";
-import { Avatar } from "../../_components/avatar";
 import {
   Dropdown,
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
 } from "../../_components/dropdown";
+import { PersonItem } from "./_components/person-item";
 
 async function PersonsDropdownMenu() {
   const { persons } = await getUserOrThrow();
@@ -25,18 +25,13 @@ async function PersonsDropdownMenu() {
     <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
       {persons.map((person) => {
         return (
-          <DropdownItem key={person.id} href={`/profiel/${person.handle}`}>
-            <Avatar
-              slot="icon"
-              initials={person.firstName.slice(0, 2)}
-              className="bg-branding-orange text-white"
-            />
-            <DropdownLabel>
-              {[person.firstName, person.lastNamePrefix, person.lastName]
-                .filter(Boolean)
-                .join(" ")}
-            </DropdownLabel>
-          </DropdownItem>
+          <PersonItem
+            key={person.id}
+            handle={person.handle}
+            name={[person.firstName, person.lastNamePrefix, person.lastName]
+              .filter(Boolean)
+              .join(" ")}
+          />
         );
       })}
     </DropdownMenu>

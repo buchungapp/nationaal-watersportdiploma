@@ -167,6 +167,22 @@ export const listCertificates = cache(async (locationId: string) => {
   });
 });
 
+export const listCertificatesForPerson = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!user.persons.map((p) => p.id).includes(personId)) {
+      throw new Error("Unauthorized");
+    }
+
+    const certificates = await Certificate.list({
+      filter: { personId },
+    });
+
+    return certificates;
+  });
+});
+
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
@@ -2007,7 +2023,7 @@ export const updatePersonDetails = async ({
   ...details
 }: {
   personId: string;
-  locationId: string;
+  locationId?: string | null;
   firstName?: string;
   lastNamePrefix?: string | null;
   lastName?: string;
@@ -2025,19 +2041,27 @@ export const updatePersonDetails = async ({
       throw new Error("Person not found");
     }
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: locationId,
-      personId: primaryPerson.id,
-    });
+    if (locationId) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: locationId,
+        personId: primaryPerson.id,
+      });
 
-    const associatedToLocation = await User.Person.listActiveRolesForLocation({
-      locationId,
-      personId,
-    }).then((roles) => roles.length > 0);
+      const associatedToLocation = await User.Person.listActiveRolesForLocation(
+        {
+          locationId,
+          personId,
+        },
+      ).then((roles) => roles.length > 0);
 
-    if (!associatedToLocation) {
-      throw new Error("Unauthorized");
+      if (!associatedToLocation) {
+        throw new Error("Unauthorized");
+      }
+    } else {
+      if (person.userId !== primaryPerson.userId) {
+        throw new Error("Unauthorized");
+      }
     }
 
     return await User.Person.updateDetails({

@@ -51,7 +51,7 @@ export default async function Layout({
             <Logo className="text-white size-8" />
           </Link>
           <NavbarDivider className="max-lg:hidden" />
-          {selector}
+          <div className="max-lg:hidden">{selector}</div>
           {/* <NavbarSection className="max-lg:hidden">
             {navItems.map(({ label, url }) => (
               <NavbarItem key={label} href={url}>
@@ -99,16 +99,9 @@ export default async function Layout({
       }
       sidebar={
         <Sidebar>
-          <SidebarHeader>{selector}</SidebarHeader>
-          {/* <SidebarBody>
-            <SidebarSection>
-              {navItems.map(({ label, url }) => (
-                <SidebarItem key={label} href={url}>
-                  {label}
-                </SidebarItem>
-              ))}
-            </SidebarSection>
-          </SidebarBody> */}
+          <SidebarHeader>
+            <div className="lg:mb-2.5">{selector}</div>
+          </SidebarHeader>
         </Sidebar>
       }
     >

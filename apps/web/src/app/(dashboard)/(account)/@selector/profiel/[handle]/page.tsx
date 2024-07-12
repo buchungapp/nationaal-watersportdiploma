@@ -12,9 +12,13 @@ export default async function PersonSelector({
   const person = await getPersonByHandle(params.handle);
 
   return (
-    <DropdownButton as={NavbarItem} className="max-lg:hidden">
-      <Avatar src="/tailwind-logo.svg" />
-      <NavbarLabel>Tailwind Labs</NavbarLabel>
+    <DropdownButton as={NavbarItem}>
+      <Avatar initials={person.firstName.slice(0, 2)} />
+      <NavbarLabel>
+        {[person.firstName, person.lastNamePrefix, person.lastName]
+          .filter(Boolean)
+          .join(" ")}
+      </NavbarLabel>
       <ChevronDownIcon />
     </DropdownButton>
   );

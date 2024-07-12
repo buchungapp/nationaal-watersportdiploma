@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import {
+  getUserOrThrow,
   listLocationsWherePrimaryPersonHasManagementRole,
   listPersonsForUser,
 } from "~/lib/nwd";
@@ -18,7 +19,7 @@ import {
   GridListItem,
 } from "../_components/grid-list";
 
-async function Perons() {
+async function Persons() {
   const persons = await listPersonsForUser();
 
   return (
@@ -28,7 +29,7 @@ async function Perons() {
       {persons.length > 0 ? (
         <GridList>
           {persons.map((person) => (
-            <GridListItem>
+            <GridListItem key={person.id}>
               <GridListHeader href={`/profiel/${person.handle}`}>
                 <Avatar
                   square
@@ -79,8 +80,8 @@ async function InstructionLocations() {
       <Divider className="mt-2 mb-4" />
       <GridList>
         {locations.map((location) => (
-          <GridListItem>
-            <GridListHeader href={`/locatie/${location.handle}`}>
+          <GridListItem key={location.id}>
+            <GridListHeader href={`/locatie/${location.handle}/cohorten`}>
               <Avatar
                 square
                 initials={location.name?.slice(0, 2)}
@@ -97,10 +98,12 @@ async function InstructionLocations() {
   );
 }
 
-export default function Page() {
+export default async function Page() {
+  const user = await getUserOrThrow();
+
   return (
     <div className="p-4 max-w-3xl mx-auto">
-      <Heading>Welkom Maurits!</Heading>
+      <Heading>Welkom{user.displayName ? ` ${user.displayName}` : ""}!</Heading>
 
       <Text>
         Dit is jouw NWD-omgeving. Aan jouw account zijn cursisten gekoppeld, die
@@ -112,7 +115,7 @@ export default function Page() {
         waar de cursus is gevolgd.
       </Text>
 
-      <Perons />
+      <Persons />
 
       <Suspense fallback={null}>
         <InstructionLocations />

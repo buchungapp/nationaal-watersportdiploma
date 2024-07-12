@@ -15,7 +15,6 @@ import { customAlphabet } from 'nanoid'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
-  handleSchema,
   possibleSingleRow,
   singleOrArray,
   singleRow,
@@ -142,7 +141,7 @@ export const createLocationLink = withZod(
 )
 
 export const byIdOrHandle = withZod(
-  z.union([z.object({ id: uuidSchema }), z.object({ handle: handleSchema })]),
+  z.union([z.object({ id: uuidSchema }), z.object({ handle: z.string() })]),
   personSchema,
   async (input) => {
     const query = useQuery()
