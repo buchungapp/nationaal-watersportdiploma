@@ -40,7 +40,7 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/secretariaat")) {
     if (user?.email !== "info@nationaalwatersportdiploma.nl") {
       const url = request.nextUrl.clone();
-      url.pathname = "/profiel";
+      url.pathname = "/account";
       return NextResponse.redirect(url);
     }
   }

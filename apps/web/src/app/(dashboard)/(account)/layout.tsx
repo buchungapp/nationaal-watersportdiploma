@@ -25,51 +25,14 @@ import {
   NavbarSection,
   NavbarSpacer,
 } from "../_components/navbar";
-import {
-  Sidebar,
-  SidebarBody,
-  SidebarHeader,
-  SidebarItem,
-  SidebarSection,
-} from "../_components/sidebar";
+import { Sidebar, SidebarHeader } from "../_components/sidebar";
 import { StackedLayout } from "../_components/stacked-layout";
 import FeedbackDialog, {
   FeedbackButton,
   FeedbackProvider,
 } from "./_components/feedback";
 
-const navItems = [{ label: "Homepage", url: "/" }];
-
-function PersonDropdownMenu() {
-  return (
-    <Dropdown>
-      <DropdownButton as={NavbarItem}>
-        <Avatar src="" initials="mm" square />
-      </DropdownButton>
-      <DropdownMenu className="min-w-64" anchor="bottom end">
-        {/* <DropdownItem href="/instellingen">
-         <Cog8ToothIcon />
-         <DropdownLabel>Instellingen</DropdownLabel>
-       </DropdownItem>
-       <DropdownDivider /> */}
-        <DropdownItem href="/help">
-          <LifebuoyIcon />
-          <DropdownLabel>Helpcentrum</DropdownLabel>
-        </DropdownItem>
-        <FeedbackButton />
-        <DropdownItem href="/privacy">
-          <ShieldCheckIcon />
-          <DropdownLabel>Privacybeleid</DropdownLabel>
-        </DropdownItem>
-        <DropdownDivider />
-        <LogOutDropdownItem>
-          <ArrowRightStartOnRectangleIcon />
-          <DropdownLabel>Uitloggen</DropdownLabel>
-        </LogOutDropdownItem>
-      </DropdownMenu>
-    </Dropdown>
-  );
-}
+// const navItems = [{ label: "Homepage", url: "/" }];
 
 export default async function Layout({
   children,
@@ -87,15 +50,15 @@ export default async function Layout({
           <Link href="/" target="_blank">
             <Logo className="text-white size-8" />
           </Link>
-          {selector}
           <NavbarDivider className="max-lg:hidden" />
-          <NavbarSection className="max-lg:hidden">
+          {selector}
+          {/* <NavbarSection className="max-lg:hidden">
             {navItems.map(({ label, url }) => (
               <NavbarItem key={label} href={url}>
                 {label}
               </NavbarItem>
             ))}
-          </NavbarSection>
+          </NavbarSection> */}
           <NavbarSpacer />
           <NavbarSection>
             <FeedbackProvider>
@@ -137,7 +100,7 @@ export default async function Layout({
       sidebar={
         <Sidebar>
           <SidebarHeader>{selector}</SidebarHeader>
-          <SidebarBody>
+          {/* <SidebarBody>
             <SidebarSection>
               {navItems.map(({ label, url }) => (
                 <SidebarItem key={label} href={url}>
@@ -145,7 +108,7 @@ export default async function Layout({
                 </SidebarItem>
               ))}
             </SidebarSection>
-          </SidebarBody>
+          </SidebarBody> */}
         </Sidebar>
       }
     >

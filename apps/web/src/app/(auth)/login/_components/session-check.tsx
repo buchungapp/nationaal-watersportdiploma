@@ -8,7 +8,7 @@ async function SessionCheckLogic() {
   const { data } = await supabase.auth.getUser();
 
   if (!!data.user) {
-    redirect("/profiel");
+    redirect("/account");
   }
 
   return null;

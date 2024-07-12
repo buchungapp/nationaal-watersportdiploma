@@ -201,7 +201,24 @@ export const list = withZod(
         .default({}),
     })
     .default({}),
-  personSchema.array(),
+  personSchema
+    .extend({
+      actors: z
+        .object({
+          id: uuidSchema,
+          createdAt: z.string(),
+          type: z.enum([
+            'student',
+            'instructor',
+            'location_admin',
+            'application',
+            'system',
+          ]),
+          locationId: uuidSchema,
+        })
+        .array(),
+    })
+    .array(),
   async (input) => {
     const query = useQuery()
 

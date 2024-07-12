@@ -412,6 +412,20 @@ export const getPersonById = cache(
   },
 );
 
+export const getPersonByHandle = cache(async (handle: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const person = await User.Person.byIdOrHandle({ handle });
+
+    if (person.userId !== user.authUserId) {
+      throw new Error("Unauthorized");
+    }
+
+    return person;
+  });
+});
+
 export const listPersonsForUser = cache(async () => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
