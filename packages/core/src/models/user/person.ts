@@ -1,5 +1,4 @@
-import { schema as s, uncontrolledSchema } from '@nawadi/db'
-import { AuthError } from '@supabase/supabase-js'
+import { schema as s } from '@nawadi/db'
 import dayjs from 'dayjs'
 import {
   SQL,
@@ -12,8 +11,9 @@ import {
   sql,
 } from 'drizzle-orm'
 import { aggregate } from 'drizzle-toolbelt'
+import { customAlphabet } from 'nanoid'
 import { z } from 'zod'
-import { useQuery, useSupabaseClient } from '../../contexts/index.js'
+import { useQuery } from '../../contexts/index.js'
 import {
   possibleSingleRow,
   singleOrArray,
@@ -22,9 +22,16 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/index.js'
-import { insertSchema } from './person.schema.js'
+import { insertSchema, personSchema } from './person.schema.js'
 import { getOrCreateFromEmail } from './user.js'
 import { selectSchema } from './user.schema.js'
+
+export function generatePersonID() {
+  const dictionary = '6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz'
+  const nanoid = customAlphabet(dictionary, 10)
+
+  return nanoid()
+}
 
 export const getOrCreate = withZod(
   insertSchema
@@ -83,6 +90,7 @@ export const getOrCreate = withZod(
       .insert(s.person)
       .values({
         userId: input.userId,
+        handle: generatePersonID(),
         firstName: input.firstName,
         lastName: input.lastName,
         lastNamePrefix: input.lastNamePrefix,
@@ -132,33 +140,54 @@ export const createLocationLink = withZod(
   },
 )
 
-export const fromId = async (id: string) => {
-  const query = useQuery()
+export const byIdOrHandle = withZod(
+  z.union([z.object({ id: uuidSchema }), z.object({ handle: z.string() })]),
+  personSchema,
+  async (input) => {
+    const query = useQuery()
 
-  return await query
-    .select({
-      ...getTableColumns(s.person),
-      email: s.user.email,
-      birthCountry: {
-        code: s.country.alpha_2,
-        name: s.country.nl,
-      },
-    })
-    .from(s.person)
-    .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-    .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
-    .where(eq(s.person.id, id))
-    .then((rows) => {
-      const result = singleRow(rows)
-      if (result.birthCountry?.code === null) {
-        return {
-          ...result,
-          birthCountry: null,
+    const whereClausules: (SQL | undefined)[] = [isNull(s.person.deletedAt)]
+
+    if ('id' in input) {
+      whereClausules.push(eq(s.person.id, input.id))
+    }
+
+    if ('handle' in input) {
+      whereClausules.push(eq(s.person.handle, input.handle))
+    }
+
+    const res = await query
+      .select({
+        ...getTableColumns(s.person),
+        email: s.user.email,
+        birthCountry: {
+          code: s.country.alpha_2,
+          name: s.country.nl,
+        },
+      })
+      .from(s.person)
+      .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+      .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+      .where(and(...whereClausules))
+      .then((rows) => {
+        const result = singleRow(rows)
+        if (result.birthCountry?.code === null) {
+          return {
+            ...result,
+            birthCountry: null,
+          }
         }
-      }
-      return result
-    })
-}
+        return result
+      })
+
+    return {
+      ...res,
+      handle: res.handle!,
+      createdAt: dayjs(res.createdAt).toISOString(),
+      updatedAt: dayjs(res.updatedAt).toISOString(),
+    }
+  },
+)
 
 export const list = withZod(
   z
@@ -171,6 +200,24 @@ export const list = withZod(
         .default({}),
     })
     .default({}),
+  personSchema
+    .extend({
+      actors: z
+        .object({
+          id: uuidSchema,
+          createdAt: z.string(),
+          type: z.enum([
+            'student',
+            'instructor',
+            'location_admin',
+            'application',
+            'system',
+          ]),
+          locationId: uuidSchema,
+        })
+        .array(),
+    })
+    .array(),
   async (input) => {
     const query = useQuery()
 
@@ -208,7 +255,7 @@ export const list = withZod(
       }
     }
 
-    return await query
+    const rows = await query
       .select({
         ...getTableColumns(s.person),
         birthCountry: {
@@ -235,6 +282,13 @@ export const list = withZod(
       )
       .where(and(...conditions))
       .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+
+    return rows.map((row) => ({
+      ...row,
+      handle: row.handle!,
+      createdAt: dayjs(row.createdAt).toISOString(),
+      updatedAt: dayjs(row.updatedAt).toISOString(),
+    }))
   },
 )
 
@@ -293,6 +347,7 @@ export const setPrimary = withZod(
       .update(s.person)
       .set({
         isPrimary: true,
+        updatedAt: sql`NOW()`,
       })
       .where(and(eq(s.person.id, input.personId), isNull(s.person.deletedAt)))
       .returning({ id: s.person.id })
@@ -315,6 +370,7 @@ export const replaceMetadata = withZod(
       .update(s.person)
       .set({
         _metadata: sql`(((${JSON.stringify(input.metadata)})::jsonb)#>> '{}')::jsonb`,
+        updatedAt: sql`NOW()`,
       })
       .where(eq(s.person.id, input.personId))
       .returning({ id: s.person.id })
@@ -355,7 +411,7 @@ export const listActiveRolesForLocation = withZod(
   },
 )
 
-export const updateEmail = withZod(
+export const moveToAccountByEmail = withZod(
   z.object({
     personId: uuidSchema,
     email: z.string().toLowerCase().trim().email(),
@@ -363,14 +419,10 @@ export const updateEmail = withZod(
   successfulCreateResponse,
   async (input) => {
     const query = useQuery()
-    const supabase = useSupabaseClient()
 
-    // TODO: handle the case where a user holds multiple persons
-    // and we want to move only one of them to a new email address
-
-    function findUserForPerson(personId: string) {
+    async function findUserForPerson(personId: string) {
       return query
-        .select({ id: s.user.authUserId })
+        .select()
         .from(s.user)
         .where(
           exists(
@@ -389,45 +441,10 @@ export const updateEmail = withZod(
         .then(possibleSingleRow)
     }
 
-    async function updateUserEmail(userId: string, email: string) {
-      let updatedUserId: string
-
-      // First check if there already is a user with the new email address
-      const [existingUser] = await query
-        .select({ id: uncontrolledSchema._usersTable.id })
-        .from(uncontrolledSchema._usersTable)
-        .where(eq(uncontrolledSchema._usersTable.email, email))
-
-      if (existingUser) {
-        updatedUserId = existingUser.id
-      } else {
-        const { data, error } = await supabase.auth.admin.updateUserById(
-          userId,
-          {
-            email: email,
-            email_confirm: false,
-          },
-        )
-
-        if (error) {
-          throw error
-        }
-
-        updatedUserId = data.user.id
-      }
-
-      return query
-        .update(s.user)
-        .set({ authUserId: userId, email: email })
-        .where(eq(s.user.authUserId, userId))
-        .returning({ id: s.user.authUserId })
-        .then(singleRow)
-    }
-
     async function updatePersonUser(personId: string, userId: string) {
       return query
         .update(s.person)
-        .set({ userId: userId })
+        .set({ userId: userId, updatedAt: sql`NOW()` })
         .where(eq(s.person.id, personId))
         .returning({ id: s.person.id })
         .then(singleRow)
@@ -435,19 +452,10 @@ export const updateEmail = withZod(
 
     const user = await findUserForPerson(input.personId)
 
-    if (user) {
-      try {
-        return await updateUserEmail(user.id, input.email)
-      } catch (error) {
-        if (error instanceof AuthError && error.code === 'email_exists') {
-          const newUser = await getOrCreateFromEmail({ email: input.email })
-          return await updatePersonUser(input.personId, newUser.id)
-        }
-        throw error
-      }
-    }
-
-    const newUser = await getOrCreateFromEmail({ email: input.email })
+    const newUser = await getOrCreateFromEmail({
+      email: input.email,
+      displayName: user?.displayName ?? undefined,
+    })
     return await updatePersonUser(input.personId, newUser.id)
   },
 )
@@ -481,6 +489,7 @@ export const updateDetails = withZod(
           : undefined,
         birthCity: input.data.birthCity,
         birthCountry: input.data.birthCountry,
+        updatedAt: sql`NOW()`,
       })
       .where(eq(s.person.id, input.personId))
       .returning({ id: s.person.id })

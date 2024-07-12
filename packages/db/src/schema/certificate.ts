@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   foreignKey,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -140,6 +141,39 @@ export const studentCompletedCompetency = pgTable(
         columns: [table.certificateId],
         foreignColumns: [certificate.id],
         name: 'student_completed_competency_certificate_id_fk',
+      }),
+    }
+  },
+)
+
+export const externalCertificate = pgTable(
+  'external_certificate',
+  {
+    id: uuid('id')
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    personId: uuid('person_id').notNull(),
+    identifier: text('identifier'),
+    awardedAt: timestamp('awarded_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    locationId: uuid('location_id'),
+    _metadata: jsonb('_metadata'),
+    ...timestamps,
+  },
+  (table) => {
+    return {
+      personReference: foreignKey({
+        columns: [table.personId],
+        foreignColumns: [person.id],
+        name: 'external_certificate_person_id_fk',
+      }),
+      locationReference: foreignKey({
+        columns: [table.locationId],
+        foreignColumns: [location.id],
+        name: 'external_certificate_location_id_fk',
       }),
     }
   },

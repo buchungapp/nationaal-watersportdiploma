@@ -1,7 +1,17 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
 import dayjs from 'dayjs'
-import { and, desc, eq, gte, inArray, isNull, lt } from 'drizzle-orm'
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  gte,
+  inArray,
+  isNull,
+  lt,
+  sql,
+} from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
@@ -88,7 +98,7 @@ export const byId = withZod(uuidSchema, async (input) => {
   assert(location)
 
   const [student, gearType, [curriculum]] = await Promise.all([
-    User.Person.fromId(studentCurriculum.personId),
+    User.Person.byIdOrHandle({ id: studentCurriculum.personId }),
     Curriculum.GearType.fromId(studentCurriculum.gearTypeId),
     Curriculum.list({ filter: { id: studentCurriculum.curriculumId } }),
   ])
@@ -120,13 +130,16 @@ export const list = withZod(
           id: singleOrArray(uuidSchema).optional(),
           number: singleOrArray(z.string().length(10)).optional(),
           locationId: singleOrArray(uuidSchema).optional(),
+          personId: singleOrArray(uuidSchema).optional(),
           issuedAfter: z.string().datetime().optional(),
           issuedBefore: z.string().datetime().optional(),
         })
         .default({}),
+      // TODO: alter this default value to be true
+      respectVisibility: z.boolean().default(false),
     })
     .default({}),
-  async ({ filter }) => {
+  async ({ filter, respectVisibility }) => {
     const query = useQuery()
 
     const certificates = await query
@@ -155,7 +168,28 @@ export const list = withZod(
           filter.issuedBefore
             ? lt(s.certificate.issuedAt, filter.issuedBefore)
             : undefined,
+          filter.personId
+            ? exists(
+                query
+                  .select({ id: sql`1` })
+                  .from(s.studentCurriculum)
+                  .where(
+                    and(
+                      Array.isArray(filter.personId)
+                        ? inArray(s.studentCurriculum.personId, filter.personId)
+                        : eq(s.studentCurriculum.personId, filter.personId),
+                      eq(
+                        s.studentCurriculum.id,
+                        s.certificate.studentCurriculumId,
+                      ),
+                    ),
+                  ),
+              )
+            : undefined,
           isNull(s.certificate.deletedAt),
+          respectVisibility
+            ? gte(s.certificate.visibleFrom, sql`NOW()`)
+            : undefined,
         ),
       )
       .orderBy(desc(s.certificate.createdAt))

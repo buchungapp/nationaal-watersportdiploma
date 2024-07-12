@@ -22,7 +22,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
-import { Strong } from "~/app/(dashboard)/_components/text";
+import { Code, Strong } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
   listDistinctTagsForCohort,
@@ -335,6 +335,11 @@ export default async function Page({
           </div>
           <Divider className="mt-4" />
           <DescriptionList>
+            <DescriptionTerm>NWD-id</DescriptionTerm>
+            <DescriptionDetails>
+              <Code>{allocation.person.handle}</Code>
+            </DescriptionDetails>
+
             <DescriptionTerm>Naam</DescriptionTerm>
             <DescriptionDetails>
               <Strong>

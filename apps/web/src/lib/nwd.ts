@@ -167,6 +167,41 @@ export const listCertificates = cache(async (locationId: string) => {
   });
 });
 
+export const listCertificatesForPerson = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!user.persons.map((p) => p.id).includes(personId)) {
+      throw new Error("Unauthorized");
+    }
+
+    const certificates = await Certificate.list({
+      filter: { personId },
+      respectVisibility: true,
+    });
+
+    return certificates;
+  });
+});
+
+export const listExternalCertificatesForPerson = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      if (!user.persons.map((p) => p.id).includes(personId)) {
+        throw new Error("Unauthorized");
+      }
+
+      const certificates = await Certificate.External.listForPerson({
+        personId,
+      });
+
+      return certificates;
+    });
+  },
+);
+
 export const listCertificatesByNumber = cache(async (numbers: string[]) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
@@ -407,11 +442,25 @@ export const getPersonById = cache(
         personId: primaryPerson.id,
       }).catch(() => []);
 
-      const person = await User.Person.fromId(personId);
+      const person = await User.Person.byIdOrHandle({ id: personId });
       return person;
     });
   },
 );
+
+export const getPersonByHandle = cache(async (handle: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    const person = await User.Person.byIdOrHandle({ handle });
+
+    if (person.userId !== user.authUserId) {
+      throw new Error("Unauthorized");
+    }
+
+    return person;
+  });
+});
 
 export const listPersonsForUser = cache(async () => {
   return makeRequest(async () => {
@@ -465,6 +514,24 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
     );
   });
 });
+
+export const listLocationsWherePrimaryPersonHasManagementRole = cache(
+  async () => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      const locations = await User.Person.listLocationsByRole({
+        personId: person.id,
+        roles: ["instructor", "location_admin"],
+      });
+
+      return await Location.list().then((locs) =>
+        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+      );
+    });
+  },
+);
 
 export const listAllLocations = cache(async () => {
   return makeRequest(async () => {
@@ -1771,7 +1838,7 @@ export async function updateEmailForPerson({
       personId: primaryPerson.id,
     });
 
-    return await User.Person.updateEmail({
+    return await User.Person.moveToAccountByEmail({
       email,
       personId,
     });
@@ -1976,7 +2043,7 @@ export const updatePersonDetails = async ({
   ...details
 }: {
   personId: string;
-  locationId: string;
+  locationId?: string | null;
   firstName?: string;
   lastNamePrefix?: string | null;
   lastName?: string;
@@ -1987,26 +2054,34 @@ export const updatePersonDetails = async ({
   return makeRequest(async () => {
     const [primaryPerson, person] = await Promise.all([
       getUserOrThrow().then(getPrimaryPerson),
-      User.Person.fromId(personId),
+      User.Person.byIdOrHandle({ id: personId }),
     ]);
 
     if (!person) {
       throw new Error("Person not found");
     }
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: locationId,
-      personId: primaryPerson.id,
-    });
+    if (locationId) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: locationId,
+        personId: primaryPerson.id,
+      });
 
-    const associatedToLocation = await User.Person.listActiveRolesForLocation({
-      locationId,
-      personId,
-    }).then((roles) => roles.length > 0);
+      const associatedToLocation = await User.Person.listActiveRolesForLocation(
+        {
+          locationId,
+          personId,
+        },
+      ).then((roles) => roles.length > 0);
 
-    if (!associatedToLocation) {
-      throw new Error("Unauthorized");
+      if (!associatedToLocation) {
+        throw new Error("Unauthorized");
+      }
+    } else {
+      if (person.userId !== primaryPerson.userId) {
+        throw new Error("Unauthorized");
+      }
     }
 
     return await User.Person.updateDetails({

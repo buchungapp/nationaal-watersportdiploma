@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { eq } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { sql } from 'drizzle-orm/sql'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -120,6 +120,7 @@ export const list = wrapQuery(
       .select()
       .from(s.location)
       .where(eq(s.location.status, 'active'))
+      .orderBy(asc(s.location.name))
 
     // const uniqueMediaIds = Array.from(
     //   new Set(

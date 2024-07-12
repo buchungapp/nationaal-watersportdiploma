@@ -1,49 +1,125 @@
-import { listLocationsForPerson } from "~/lib/nwd";
-import { Button } from "../../_components/button";
-import { Link } from "../../_components/link";
-import { Text } from "../../_components/text";
+import { Suspense } from "react";
+import {
+  getUserOrThrow,
+  listLocationsWherePrimaryPersonHasManagementRole,
+  listPersonsForUser,
+} from "~/lib/nwd";
+import { Avatar } from "../../_components/avatar";
+import {
+  DescriptionDetails,
+  DescriptionList,
+  DescriptionTerm,
+} from "../../_components/description-list";
+import { Divider } from "../../_components/divider";
+import { Heading, Subheading } from "../../_components/heading";
+import { Code, Text, TextLink } from "../../_components/text";
+import {
+  GridList,
+  GridListHeader,
+  GridListItem,
+} from "../_components/grid-list";
 
-export default async function Page() {
-  const locations = await listLocationsForPerson();
+async function Persons() {
+  const persons = await listPersonsForUser();
 
   return (
-    <div className="p-4 max-w-prose mx-auto">
+    <div className="my-6">
+      <Subheading>Personen die jij beheert</Subheading>
+      <Divider className="mt-2 mb-4" />
+      {persons.length > 0 ? (
+        <GridList>
+          {persons.map((person) => (
+            <GridListItem key={person.id}>
+              <GridListHeader href={`/profiel/${person.handle}`}>
+                <Avatar
+                  square
+                  initials={person.firstName.slice(0, 2)}
+                  className="size-8 bg-zinc-900 text-white"
+                />
+                <div className="text-sm font-medium leading-6 text-gray-900">
+                  {[person.firstName, person.lastNamePrefix, person.lastName]
+                    .filter(Boolean)
+                    .join(" ")}
+                </div>
+              </GridListHeader>
+              <DescriptionList className="px-6">
+                <DescriptionTerm>NWD-id</DescriptionTerm>
+                <DescriptionDetails>
+                  {" "}
+                  <Code>{person.handle}</Code>
+                </DescriptionDetails>
+              </DescriptionList>
+            </GridListItem>
+          ))}
+        </GridList>
+      ) : (
+        <>
+          <Text className="italic">
+            Er zijn nog geen personen aan jouw account gekoppeld. Neem contact
+            op met de{" "}
+            <TextLink href="/vaarlocaties" target="_blank">
+              vaarlocatie
+            </TextLink>{" "}
+            waar de cursus is gevolgd.
+          </Text>
+        </>
+      )}
+    </div>
+  );
+}
+
+async function InstructionLocations() {
+  const locations =
+    await listLocationsWherePrimaryPersonHasManagementRole().catch(() => []);
+
+  if (locations.length < 1) return null;
+
+  return (
+    <div className="mt-10">
+      <Subheading>Vaarlocaties waar jij lesgeeft</Subheading>
+      <Divider className="mt-2 mb-4" />
+      <GridList>
+        {locations.map((location) => (
+          <GridListItem key={location.id}>
+            <GridListHeader href={`/locatie/${location.handle}/cohorten`}>
+              <Avatar
+                square
+                initials={location.name?.slice(0, 2)}
+                className="size-8 bg-zinc-900 text-white"
+              />
+              <div className="text-sm font-medium leading-6 text-gray-900">
+                {location.name}
+              </div>
+            </GridListHeader>
+          </GridListItem>
+        ))}
+      </GridList>
+    </div>
+  );
+}
+
+export default async function Page() {
+  const user = await getUserOrThrow();
+
+  return (
+    <div className="p-4 max-w-3xl mx-auto">
+      <Heading>Welkom{user.displayName ? ` ${user.displayName}` : ""}!</Heading>
+
       <Text>
-        He pionier, je hebt work-in-progress gevonden. Op dit moment werken we
-        namelijk hard aan het implementeren van de nieuwe applicatie. Zodra het
-        zover is, zullen we je hierover informeren.
+        Dit is jouw NWD-omgeving. Aan jouw account zijn cursisten gekoppeld, die
+        NWD-cursussen volgen. Zie je hier niet de cursisten die je verwacht?
+        Neem dan contact op met de{" "}
+        <TextLink href="/vaarlocaties" target="_blank">
+          vaarlocatie
+        </TextLink>{" "}
+        waar de cursus is gevolgd.
       </Text>
 
-      <div className="my-6">
-        <h2>Wat nu?</h2>
-        <ul>
-          <li>
-            <Button href="/" plain>
-              Terug naar de homepage
-            </Button>
-          </li>
-          <li>
-            <Button href="https://www.nationaalwatersportdiploma.dev" plain>
-              Volg de ontwikkelingen via GitHub
-            </Button>
-          </li>
-        </ul>
-      </div>
+      <Persons />
 
-      {locations.length > 0 ? (
-        <div className="my-6">
-          <h2>Beheer locatie</h2>
-          <ul>
-            {locations.map((location) => (
-              <li key={location.id}>
-                <Link href={`/locatie/${location.handle}/cohorten`}>
-                  {location.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      <Suspense fallback={null}>
+        <InstructionLocations />
+      </Suspense>
     </div>
   );
 }

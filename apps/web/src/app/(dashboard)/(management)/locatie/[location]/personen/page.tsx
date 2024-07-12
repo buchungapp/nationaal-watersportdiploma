@@ -53,7 +53,7 @@ export default async function Page({
   // Search
   const personsFuse = new Fuse(filteredPersons, {
     includeMatches: true,
-    keys: ["firstName", "lastNamePrefix", "lastName", "email"],
+    keys: ["firstName", "lastNamePrefix", "lastName", "email", "handle"],
     minMatchCharLength: 2,
     ignoreLocation: true,
     threshold: 0.3, // Lower threshold for more specific matches

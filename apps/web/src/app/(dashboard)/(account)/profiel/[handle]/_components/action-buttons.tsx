@@ -1,15 +1,10 @@
 "use client";
 
+import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import {
-  Alert,
-  AlertActions,
-  AlertBody,
-  AlertDescription,
-  AlertTitle,
-} from "~/app/(dashboard)/_components/alert";
+
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -20,9 +15,14 @@ import {
   Dialog,
   DialogActions,
   DialogBody,
-  DialogDescription,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownItem,
+  DropdownMenu,
+} from "~/app/(dashboard)/_components/dropdown";
 import {
   Field,
   FieldGroup,
@@ -30,63 +30,9 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { Strong } from "~/app/(dashboard)/_components/text";
-import { updateEmail, updatePerson } from "../../_actions/create";
-
-export function ChangeEmail({
-  locationId,
-  personId,
-}: {
-  personId: string;
-  locationId: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const submit = async (_previous: unknown, formData: FormData) => {
-    const res = await updateEmail(
-      { locationId, personId },
-      undefined,
-      formData,
-    );
-
-    if (res.state === "success") {
-      setIsOpen(false);
-      toast.success("E-mailadres bijgewerkt.");
-    }
-    return res;
-  };
-
-  const [_state, action] = useFormState(submit, undefined);
-
-  return (
-    <>
-      <Button type="button" onClick={() => setIsOpen(true)}>
-        E-mail wijzigen
-      </Button>
-      <Alert open={isOpen} onClose={setIsOpen} size="md">
-        <form action={action}>
-          <AlertTitle>Nieuw e-mailadres</AlertTitle>
-          <AlertDescription>
-            Dit wijzigt enkel het e-mailadres van deze persoon, niet van andere
-            personen die onder het account vallen.
-          </AlertDescription>
-          <AlertBody>
-            <Input name="email" type="email" aria-label="E-mail" />
-          </AlertBody>
-          <AlertActions>
-            <Button plain onClick={() => setIsOpen(false)}>
-              Annuleren
-            </Button>
-            <Button type="submit">Bevestigen</Button>
-          </AlertActions>
-        </form>
-      </Alert>
-    </>
-  );
-}
+import { updatePerson } from "../_actions/person";
 
 export function EditDetails({
-  locationId,
   person,
   countries,
 }: {
@@ -102,14 +48,13 @@ export function EditDetails({
       code: string;
     } | null;
   };
-  locationId: string;
   countries: { code: string; name: string }[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await updatePerson(
-      { locationId, personId: person.id },
+      { personId: person.id },
       prevState,
       formData,
     );
@@ -141,16 +86,19 @@ export function EditDetails({
 
   return (
     <>
-      <Button type="button" onClick={() => setIsOpen(true)} outline>
-        Personalia wijzigen
-      </Button>
+      <Dropdown>
+        <DropdownButton plain className="-my-1.5">
+          <EllipsisHorizontalIcon />
+        </DropdownButton>
+        <DropdownMenu anchor="bottom end">
+          <DropdownItem onClick={() => setIsOpen(true)}>
+            Wijzig gegevens
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+
       <Dialog open={isOpen} onClose={setIsOpen}>
         <DialogTitle>Personalia wijzigen</DialogTitle>
-        <DialogDescription>
-          <Strong>Let op:</Strong> deze wijzigingen zijn zichtbaar voor zowel de
-          persoon zelf, als alle NWD-vaarlocatie waarmee deze persoon een link
-          heeft.
-        </DialogDescription>
         <form action={action}>
           <DialogBody>
             <Fieldset>
