@@ -10,6 +10,7 @@ import {
   inArray,
   isNull,
   lt,
+  lte,
   sql,
 } from 'drizzle-orm'
 import { z } from 'zod'
@@ -188,7 +189,7 @@ export const list = withZod(
             : undefined,
           isNull(s.certificate.deletedAt),
           respectVisibility
-            ? gte(s.certificate.visibleFrom, sql`NOW()`)
+            ? lte(s.certificate.visibleFrom, sql`NOW()`)
             : undefined,
         ),
       )
