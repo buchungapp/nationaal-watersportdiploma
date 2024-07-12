@@ -45,6 +45,7 @@ export const person = pgTable(
       .primaryKey()
       .notNull(),
     userId: uuid('user_id'),
+    handle: text('handle'),
     firstName: text('first_name').notNull(),
     isPrimary: boolean('is_primary').notNull().default(false),
     lastNamePrefix: text('last_name_prefix'),
@@ -59,6 +60,7 @@ export const person = pgTable(
   },
   (table) => {
     return {
+      unqHandle: uniqueIndex('person_unq_handle').on(table.handle),
       userReference: foreignKey({
         columns: [table.userId],
         foreignColumns: [user.authUserId],

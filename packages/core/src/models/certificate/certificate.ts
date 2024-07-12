@@ -88,7 +88,7 @@ export const byId = withZod(uuidSchema, async (input) => {
   assert(location)
 
   const [student, gearType, [curriculum]] = await Promise.all([
-    User.Person.fromId(studentCurriculum.personId),
+    User.Person.byIdOrHandle({ id: studentCurriculum.personId }),
     Curriculum.GearType.fromId(studentCurriculum.gearTypeId),
     Curriculum.list({ filter: { id: studentCurriculum.curriculumId } }),
   ])
