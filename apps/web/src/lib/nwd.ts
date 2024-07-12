@@ -172,9 +172,10 @@ export const listCertificatesByNumber = cache(async (numbers: string[]) => {
     const user = await getUserOrThrow();
     const person = await getPrimaryPerson(user);
 
+    // TODO: this authorization check should be more specific
     const availableLocations = await User.Person.listLocationsByRole({
       personId: person.id,
-      roles: ["location_admin"],
+      roles: ["location_admin", "instructor"],
     });
 
     const certificates = await Certificate.list({

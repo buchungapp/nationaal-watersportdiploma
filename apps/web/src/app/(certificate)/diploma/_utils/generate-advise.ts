@@ -26,6 +26,14 @@ export async function generateAdvise(
 
   const nextRang = certificate.program.degree.rang + 1;
 
+  const baseModules = certificate.curriculum.modules.filter((module) =>
+    ["basis", "handeling"].includes(module.handle),
+  );
+
+  const areAllBaseModulesCompleted = baseModules.every((module) =>
+    uniqueCompletedModules.includes(module.id),
+  );
+
   const adviceStrings = [];
 
   if (hasMoreModules) {
@@ -34,7 +42,7 @@ export async function generateAdvise(
     );
   }
 
-  if (nextRang <= 4) {
+  if (nextRang <= 4 && areAllBaseModulesCompleted) {
     adviceStrings.push(
       `ga de uitdaging aan met het volgende niveau ${nextRang}`,
     );
