@@ -31,6 +31,11 @@ const nextConfig = {
         destination: "/help/:path*",
         permanent: true,
       },
+      {
+        source: "/profiel",
+        destination: "/account",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
