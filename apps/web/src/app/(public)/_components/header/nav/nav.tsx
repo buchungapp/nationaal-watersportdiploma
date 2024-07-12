@@ -37,6 +37,14 @@ export default function Nav({ items }: { items: NavItem[] }) {
         <ul role="list" className="flex flex-1 flex-col px-4 py-2.5 gap-6">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
+              <li>
+                <Link
+                  href="/login"
+                  className="group flex gap-x-3 rounded-lg p-2 text-sm leading-6 font-semibold text-branding-dark"
+                >
+                  Jouw account
+                </Link>
+              </li>
               {items.map((item) => (
                 <li key={item.label}>
                   {!item.component ? (
