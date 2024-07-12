@@ -27,7 +27,7 @@ async function ExternalCertificates({ personId }: { personId: string }) {
   if (certificates.length === 0) {
     return (
       <Text className="italic">
-        We kunnen geen overige certificaten voor jou kunnen vinden.
+        We hebben geen overige certificaten voor jou kunnen vinden.
       </Text>
     );
   }
