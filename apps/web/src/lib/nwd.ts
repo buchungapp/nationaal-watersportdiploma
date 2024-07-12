@@ -479,6 +479,24 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
   });
 });
 
+export const listLocationsWherePrimaryPersonHasManagementRole = cache(
+  async () => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      const locations = await User.Person.listLocationsByRole({
+        personId: person.id,
+        roles: ["instructor", "location_admin"],
+      });
+
+      return await Location.list().then((locs) =>
+        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+      );
+    });
+  },
+);
+
 export const listAllLocations = cache(async () => {
   return makeRequest(async () => {
     return await Location.list();

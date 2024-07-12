@@ -1,8 +1,22 @@
-import { listLocationsForPerson, listPersonsForUser } from "~/lib/nwd";
+import { Suspense } from "react";
+import {
+  listLocationsWherePrimaryPersonHasManagementRole,
+  listPersonsForUser,
+} from "~/lib/nwd";
+import { Avatar } from "../../_components/avatar";
+import {
+  DescriptionDetails,
+  DescriptionList,
+  DescriptionTerm,
+} from "../../_components/description-list";
 import { Divider } from "../../_components/divider";
 import { Heading, Subheading } from "../../_components/heading";
-import { Link } from "../../_components/link";
-import { Text, TextLink } from "../../_components/text";
+import { Code, Text, TextLink } from "../../_components/text";
+import {
+  GridList,
+  GridListHeader,
+  GridListItem,
+} from "../_components/grid-list";
 
 async function Perons() {
   const persons = await listPersonsForUser();
@@ -10,51 +24,35 @@ async function Perons() {
   return (
     <div className="my-6">
       <Subheading>Personen die jij beheert</Subheading>
+      <Divider className="mt-2 mb-4" />
       {persons.length > 0 ? (
-        <ul className="mt-10">
-          {persons.map((person, index) => (
-            <>
-              <li key={person.id}>
-                <Divider soft={index > 0} />
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-6 py-6">
-                    <div className="space-y-1.5">
-                      <div className="text-base/6 font-semibold">
-                        <Link href={`/profiel/${person.handle}`}>
-                          {person.firstName}
-                        </Link>
-                      </div>
-                      {/* <div className="text-xs/6 text-zinc-500">
-                      {event.date} at {event.time} <span aria-hidden="true">·</span> {event.location}
-                    </div>
-                    <div className="text-xs/6 text-zinc-600">
-                      {event.ticketsSold}/{event.ticketsAvailable} tickets sold
-                    </div> */}
-                    </div>
-                  </div>
-                  {/* <div className="flex items-center gap-4">
-                  <Badge className="max-sm:hidden" color={event.status === 'On Sale' ? 'lime' : 'zinc'}>
-                    {event.status}
-                  </Badge>
-                  <Dropdown>
-                    <DropdownButton plain aria-label="More options">
-                      <EllipsisVerticalIcon />
-                    </DropdownButton>
-                    <DropdownMenu anchor="bottom end">
-                      <DropdownItem href={event.url}>View</DropdownItem>
-                      <DropdownItem>Edit</DropdownItem>
-                      <DropdownItem>Delete</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div> */}
+        <GridList>
+          {persons.map((person) => (
+            <GridListItem>
+              <GridListHeader href={`/profiel/${person.handle}`}>
+                <Avatar
+                  square
+                  initials={person.firstName.slice(0, 2)}
+                  className="size-8 bg-zinc-900 text-white"
+                />
+                <div className="text-sm font-medium leading-6 text-gray-900">
+                  {[person.firstName, person.lastNamePrefix, person.lastName]
+                    .filter(Boolean)
+                    .join(" ")}
                 </div>
-              </li>
-            </>
+              </GridListHeader>
+              <DescriptionList className="px-6">
+                <DescriptionTerm>NWD-id</DescriptionTerm>
+                <DescriptionDetails>
+                  {" "}
+                  <Code>{person.handle}</Code>
+                </DescriptionDetails>
+              </DescriptionList>
+            </GridListItem>
           ))}
-        </ul>
+        </GridList>
       ) : (
         <>
-          <Divider className="mt-2 mb-4" />
           <Text className="italic">
             Er zijn nog geen personen aan jouw account gekoppeld. Neem contact
             op met de{" "}
@@ -70,23 +68,38 @@ async function Perons() {
 }
 
 async function InstructionLocations() {
-  const persons = await listPersonsForUser();
+  const locations =
+    await listLocationsWherePrimaryPersonHasManagementRole().catch(() => []);
 
-  if (persons.length < 1) return null;
-
-  const loctions = await listLocationsForPerson();
+  if (locations.length < 1) return null;
 
   return (
-    <div className="my-6">
+    <div className="mt-10">
       <Subheading>Vaarlocaties waar jij lesgeeft</Subheading>
-      <Divider soft />
+      <Divider className="mt-2 mb-4" />
+      <GridList>
+        {locations.map((location) => (
+          <GridListItem>
+            <GridListHeader href={`/locatie/${location.handle}`}>
+              <Avatar
+                square
+                initials={location.name?.slice(0, 2)}
+                className="size-8 bg-zinc-900 text-white"
+              />
+              <div className="text-sm font-medium leading-6 text-gray-900">
+                {location.name}
+              </div>
+            </GridListHeader>
+          </GridListItem>
+        ))}
+      </GridList>
     </div>
   );
 }
 
 export default function Page() {
   return (
-    <div className="p-4 max-w-prose mx-auto">
+    <div className="p-4 max-w-3xl mx-auto">
       <Heading>Welkom Maurits!</Heading>
 
       <Text>
@@ -101,7 +114,9 @@ export default function Page() {
 
       <Perons />
 
-      {/* <InstructionLocations /> */}
+      <Suspense fallback={null}>
+        <InstructionLocations />
+      </Suspense>
     </div>
   );
 }
