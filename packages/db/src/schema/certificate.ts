@@ -155,6 +155,11 @@ export const externalCertificate = pgTable(
       .notNull(),
     personId: uuid('person_id').notNull(),
     identifier: text('identifier'),
+    awardedAt: timestamp('awarded_at', {
+      withTimezone: true,
+      mode: 'string',
+    }),
+    locationId: uuid('location_id'),
     _metadata: jsonb('_metadata'),
     ...timestamps,
   },
@@ -164,6 +169,11 @@ export const externalCertificate = pgTable(
         columns: [table.personId],
         foreignColumns: [person.id],
         name: 'external_certificate_person_id_fk',
+      }),
+      locationReference: foreignKey({
+        columns: [table.locationId],
+        foreignColumns: [location.id],
+        name: 'external_certificate_location_id_fk',
       }),
     }
   },

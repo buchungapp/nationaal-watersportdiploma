@@ -487,6 +487,7 @@ export const listStudentsWithCurricula = withZod(
         createdAt,
         person: {
           id: s.person.id,
+          handle: s.person.handle,
           firstName: s.person.firstName,
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
@@ -573,6 +574,7 @@ export const listStudentsWithCurricula = withZod(
       id: row.id,
       person: {
         id: row.person.id,
+        handle: row.person.handle!,
         firstName: row.person.firstName,
         lastNamePrefix: row.person.lastNamePrefix,
         lastName: row.person.lastName,
@@ -623,6 +625,7 @@ export const retrieveStudentWithCurriculum = withZod(
         createdAt,
         person: {
           id: s.person.id,
+          handle: s.person.handle,
           firstName: s.person.firstName,
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
@@ -724,6 +727,7 @@ export const retrieveStudentWithCurriculum = withZod(
       id: row.id,
       person: {
         id: row.person.id,
+        handle: row.person.handle!,
         firstName: row.person.firstName,
         lastNamePrefix: row.person.lastNamePrefix,
         lastName: row.person.lastName,
@@ -777,6 +781,7 @@ export const listInstructors = withZod(
         createdAt,
         person: {
           id: s.person.id,
+          handle: s.person.handle,
           firstName: s.person.firstName,
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
@@ -828,6 +833,7 @@ export const listInstructors = withZod(
         id: string
         person: {
           id: string
+          handle: string
           firstName: string
           lastNamePrefix: string | null
           lastName: string | null
@@ -849,6 +855,7 @@ export const listInstructors = withZod(
           id: row.id,
           person: {
             id: row.person.id,
+            handle: row.person.handle!,
             firstName: row.person.firstName,
             lastNamePrefix: row.person.lastNamePrefix,
             lastName: row.person.lastName,

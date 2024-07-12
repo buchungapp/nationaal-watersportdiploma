@@ -46,16 +46,34 @@ async function ExternalCertificates({ personId }: { personId: string }) {
                 {certificate.identifier}
               </div>
             </div>
-            {metadataEntries.length > 0 ? (
-              <DescriptionList className="px-6">
-                {metadataEntries.map(([key, value]) => (
-                  <React.Fragment key={key}>
-                    <DescriptionTerm>{key}</DescriptionTerm>
-                    <DescriptionDetails>{value}</DescriptionDetails>
-                  </React.Fragment>
-                ))}
-              </DescriptionList>
-            ) : null}
+            <DescriptionList className="px-6">
+              {metadataEntries.length > 0 ? (
+                <>
+                  {metadataEntries.map(([key, value]) => (
+                    <React.Fragment key={key}>
+                      <DescriptionTerm>{key}</DescriptionTerm>
+                      <DescriptionDetails>{value}</DescriptionDetails>
+                    </React.Fragment>
+                  ))}
+                </>
+              ) : null}
+              {certificate.awardedAt ? (
+                <React.Fragment>
+                  <DescriptionTerm>Behaald op</DescriptionTerm>
+                  <DescriptionDetails>
+                    {dayjs(certificate.awardedAt).format("DD-MM-YYYY")}
+                  </DescriptionDetails>
+                </React.Fragment>
+              ) : null}
+              {certificate.location ? (
+                <React.Fragment>
+                  <DescriptionTerm>Behaald bij</DescriptionTerm>
+                  <DescriptionDetails>
+                    {certificate.location}
+                  </DescriptionDetails>
+                </React.Fragment>
+              ) : null}
+            </DescriptionList>
           </GridListItem>
         );
       })}

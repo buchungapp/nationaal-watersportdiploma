@@ -1,5 +1,5 @@
 {
-  "id": "0b381bdb-7c9d-41cb-ac43-ef3e98c9e981",
+  "id": "48e12e54-b072-44b5-b5a4-e787148d08ed",
   "prevId": "4829af2c-841e-4139-9742-1f2ab0f8ac82",
   "version": "7",
   "dialect": "postgresql",
@@ -776,6 +776,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "awarded_at": {
+          "name": "awarded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location_id": {
+          "name": "location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "_metadata": {
           "name": "_metadata",
           "type": "jsonb",
@@ -811,6 +823,19 @@
           "tableTo": "person",
           "columnsFrom": [
             "person_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "external_certificate_location_id_fk": {
+          "name": "external_certificate_location_id_fk",
+          "tableFrom": "external_certificate",
+          "tableTo": "location",
+          "columnsFrom": [
+            "location_id"
           ],
           "columnsTo": [
             "id"

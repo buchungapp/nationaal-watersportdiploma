@@ -135,9 +135,11 @@ export const list = withZod(
           issuedBefore: z.string().datetime().optional(),
         })
         .default({}),
+      // TODO: alter this default value to be true
+      respectVisibility: z.boolean().default(false),
     })
     .default({}),
-  async ({ filter }) => {
+  async ({ filter, respectVisibility }) => {
     const query = useQuery()
 
     const certificates = await query
@@ -185,6 +187,9 @@ export const list = withZod(
               )
             : undefined,
           isNull(s.certificate.deletedAt),
+          respectVisibility
+            ? gte(s.certificate.visibleFrom, sql`NOW()`)
+            : undefined,
         ),
       )
       .orderBy(desc(s.certificate.createdAt))

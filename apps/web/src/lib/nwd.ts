@@ -177,6 +177,7 @@ export const listCertificatesForPerson = cache(async (personId: string) => {
 
     const certificates = await Certificate.list({
       filter: { personId },
+      respectVisibility: true,
     });
 
     return certificates;

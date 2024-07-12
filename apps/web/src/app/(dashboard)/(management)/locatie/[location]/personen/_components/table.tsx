@@ -22,6 +22,7 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { Code } from "~/app/(dashboard)/_components/text";
 import type { listPersonsForLocation } from "~/lib/nwd";
 import PersonRoleBadge from "../../_components/person-role-badge";
 
@@ -30,6 +31,10 @@ type Person = Awaited<ReturnType<typeof listPersonsForLocation>>[number];
 const columnHelper = createColumnHelper<Person>();
 
 const columns = [
+  columnHelper.accessor("handle", {
+    header: "NWD-id",
+    cell: ({ getValue }) => <Code>{getValue()}</Code>,
+  }),
   columnHelper.accessor(
     (data) =>
       [data.firstName, data.lastNamePrefix, data.lastName]
