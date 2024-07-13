@@ -204,7 +204,7 @@ function ProgramSubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
-      {pending ? <Spinner /> : null}
+      {pending ? <Spinner className="text-white" /> : null}
       Starten
     </Button>
   );

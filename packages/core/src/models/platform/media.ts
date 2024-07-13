@@ -76,7 +76,6 @@ export const create = withZod(
     const [media] = await query
       .insert(s.media)
       .values({
-        // @ts-expect-error https://github.com/supabase/supabase-js/issues/923
         object_id: data.id,
         alt: '',
         size: input.file.length,

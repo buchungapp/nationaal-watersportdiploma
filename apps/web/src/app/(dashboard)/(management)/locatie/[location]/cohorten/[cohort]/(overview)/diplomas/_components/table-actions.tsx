@@ -196,7 +196,7 @@ export function IssueCertificateDialog({
             Annuleren
           </Button>
           <Button type="submit" disabled={pending}>
-            {pending ? <Spinner /> : null}
+            {pending ? <Spinner className="text-white" /> : null}
             Uitgeven
           </Button>
         </AlertActions>
@@ -254,7 +254,7 @@ export function RemoveCertificateDialog({
             });
           }}
         >
-          {pending ? <Spinner /> : null} Verwijderen
+          {pending ? <Spinner className="text-white" /> : null} Verwijderen
         </Button>
       </AlertActions>
     </Alert>

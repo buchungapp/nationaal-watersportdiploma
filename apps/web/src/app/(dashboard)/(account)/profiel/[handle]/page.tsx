@@ -162,6 +162,8 @@ export default async function Page({
     },
   });
 
+  await posthog.shutdown();
+
   return (
     <div className="p-4 max-w-3xl mx-auto">
       <Heading>Welkom {person.firstName}!</Heading>
