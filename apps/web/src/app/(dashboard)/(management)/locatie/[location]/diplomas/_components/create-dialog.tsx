@@ -14,7 +14,9 @@ export default async function CreateDialog({
   return (
     <CreateDialogClient
       locationId={locationId}
-      persons={persons}
+      persons={persons.filter((person) =>
+        person.actors.map((a) => a.type).includes("student"),
+      )}
       programs={programs}
     />
   );

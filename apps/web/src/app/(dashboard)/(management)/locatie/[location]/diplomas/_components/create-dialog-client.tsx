@@ -166,7 +166,7 @@ function CreateDialogClient({
                 <Field className="max-w-md">
                   <Label>Cursist</Label>
                   <Headless.Combobox
-                    // name="personId"
+                    name="person"
                     onClose={() => setPersonQuery("")}
                     virtual={{ options: filteredPersons }}
                     multiple={false}
