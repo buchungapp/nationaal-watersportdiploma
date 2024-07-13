@@ -40,7 +40,7 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import type {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
-  listPersonsForLocation,
+  listPersonsForLocationByRole,
   listPrograms,
 } from "~/lib/nwd";
 import { createCertificate } from "../_actions/create";
@@ -51,7 +51,7 @@ import {
 
 interface Props {
   locationId: string;
-  persons: Awaited<ReturnType<typeof listPersonsForLocation>>;
+  persons: Awaited<ReturnType<typeof listPersonsForLocationByRole>>;
   programs: Awaited<ReturnType<typeof listPrograms>>;
 }
 
