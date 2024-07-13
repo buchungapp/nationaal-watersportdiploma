@@ -13,6 +13,7 @@ import {
 } from "@nawadi/core";
 import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
+import dayjs from "dayjs";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
@@ -894,8 +895,8 @@ export const retrieveCohortByHandle = cache(
       const canAccessCohort =
         isLocationAdmin ||
         (isInstructorInCohort &&
-          cohort.accessStartTime <= new Date().toISOString() &&
-          cohort.accessEndTime >= new Date().toISOString());
+          dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
+          dayjs().isBefore(dayjs(cohort.accessEndTime)));
 
       if (!canAccessCohort) {
         return null;
