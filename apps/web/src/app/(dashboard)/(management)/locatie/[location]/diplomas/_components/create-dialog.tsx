@@ -14,7 +14,7 @@ export default async function CreateDialog({
   return (
     <CreateDialogClient
       locationId={locationId}
-      persons={persons.slice(0, 10)}
+      persons={persons}
       programs={programs}
     />
   );

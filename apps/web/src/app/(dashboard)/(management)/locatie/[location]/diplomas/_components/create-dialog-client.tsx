@@ -143,8 +143,6 @@ function CreateDialogClient({
     void fetchCurricula();
   }, [selectedProgram]);
 
-  console.log("filteredPersons", filteredPersons);
-
   return (
     <>
       <Button
@@ -309,7 +307,11 @@ function CreateDialogClient({
                             .filter(Boolean)
                             .join(" ");
                           return (
-                            <ComboboxOption key={person.id} value={person}>
+                            <ComboboxOption
+                              key={person.id}
+                              value={person}
+                              className="inset-x-0"
+                            >
                               <ComboboxLabel>
                                 <div className="flex">
                                   <span className={clsx("truncate")}>
