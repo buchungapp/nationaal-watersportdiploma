@@ -162,7 +162,7 @@ export default async function Page({
     },
   });
 
-  await posthog.shutdown()
+  await posthog.shutdown();
 
   return (
     <div className="p-4 max-w-3xl mx-auto">
