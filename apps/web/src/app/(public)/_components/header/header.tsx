@@ -85,7 +85,7 @@ export default function Header() {
           },
           {
             label: "Hulp & contact",
-            active: "/diplomalijn",
+            active: "/help",
             component: [
               {
                 label: "Helpcentrum",
