@@ -22,22 +22,22 @@
   "dependencies": {
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
-    "@opentelemetry/api": "^1.8.0",
-    "@supabase/supabase-js": "^2.42.5",
-    "@types/node": "^20.11.19",
-    "dayjs": "^1.11.10",
-    "drizzle-orm": "^0.31.2",
-    "drizzle-toolbelt": "^1.1.1",
+    "@opentelemetry/api": "^1.9.0",
+    "@supabase/supabase-js": "^2.44.3",
+    "@types/node": "^20.14.10",
+    "dayjs": "^1.11.11",
+    "drizzle-orm": "^0.31.4",
+    "drizzle-toolbelt": "^1.2.0",
     "drizzle-zod": "^0.5.1",
-    "file-type": "^19.0.0",
+    "file-type": "^19.1.1",
     "image-size": "^1.1.1",
     "nanoid": "^5.0.7",
     "postgres": "^3.4.4",
-    "zod": "^3.22.4"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.2",
-    "type-fest": "^4.17.0",
+    "@tsconfig/node20": "^20.1.4",
+    "type-fest": "^4.21.0",
     "typescript": "5.4.5"
   }
 }
