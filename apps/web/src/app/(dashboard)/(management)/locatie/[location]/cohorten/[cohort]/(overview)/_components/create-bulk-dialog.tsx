@@ -31,6 +31,7 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import Spinner from "~/app/_components/spinner";
 import { addStudentsToCohort } from "../_actions/create";
 import { listCountries } from "../_actions/nwd";
 
@@ -489,6 +490,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Verder
     </Button>
   );

@@ -225,6 +225,10 @@ export default function StudentsTable({
   const anyRowSelected =
     table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
 
+  const state = table.getState();
+
+  const selectedRows = Object.keys(state.rowSelection).length;
+
   return (
     <div className="mt-8 relative">
       <Table
@@ -236,6 +240,7 @@ export default function StudentsTable({
             rows={table.getSelectedRowModel().rows}
             cohortId={cohortId}
             defaultVisibleFrom={defaultCertificateVisibleFromDate}
+            count={selectedRows}
           />
         ) : null}
         <TableHead>

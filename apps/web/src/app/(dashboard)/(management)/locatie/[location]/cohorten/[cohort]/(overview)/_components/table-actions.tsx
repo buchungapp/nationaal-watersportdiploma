@@ -32,6 +32,7 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 
+import Spinner from "~/app/_components/spinner";
 import {
   assignInstructorToStudents,
   claimStudents,
@@ -47,6 +48,7 @@ import {
 import type { Student } from "./students-table";
 
 interface Props {
+  count?: number;
   rows: Row<Student>[];
   cohortId: string;
   locationRoles: ("student" | "instructor" | "location_admin")[];
@@ -297,6 +299,7 @@ function ProgramSubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Starten
     </Button>
   );
@@ -309,7 +312,7 @@ export function ActionButtons(props: Props) {
     <>
       <Dropdown>
         <DropdownButton aria-label="Acties" className="!absolute left-12 top-0">
-          Acties <ChevronDownIcon />
+          {`(${props.count})`} Acties <ChevronDownIcon />
         </DropdownButton>
         <DropdownMenu anchor="bottom start">
           <Claim {...props} />
@@ -494,6 +497,7 @@ function StudentSubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Toewijzen
     </Button>
   );

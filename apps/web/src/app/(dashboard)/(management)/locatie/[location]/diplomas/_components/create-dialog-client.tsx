@@ -37,6 +37,7 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 import { Text } from "~/app/(dashboard)/_components/text";
+import Spinner from "~/app/_components/spinner";
 import type {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
@@ -473,6 +474,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Opslaan
     </Button>
   );

@@ -7,11 +7,13 @@ import { updateSocials } from "../_actions/update";
 
 import { useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
+import Spinner from "~/app/_components/spinner";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Opslaan
     </Button>
   );

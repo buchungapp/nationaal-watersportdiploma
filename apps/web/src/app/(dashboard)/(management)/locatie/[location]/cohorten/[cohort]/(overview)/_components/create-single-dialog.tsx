@@ -28,6 +28,7 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
+import Spinner from "~/app/_components/spinner";
 import { createPerson } from "../_actions/create";
 import {
   addStudentToCohortByPersonId,
@@ -419,6 +420,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Toevoegen
     </Button>
   );

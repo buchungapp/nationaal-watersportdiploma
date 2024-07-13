@@ -19,6 +19,7 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
+import Spinner from "~/app/_components/spinner";
 import type { listPrograms } from "~/lib/nwd";
 import { createCohortAction } from "../_actions/create";
 
@@ -134,6 +135,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Opslaan
     </Button>
   );
