@@ -18,7 +18,7 @@ export async function createCertificate(
 
   try {
     const parsed = expectedSchema.parse({
-      personId: formData.get("personId"),
+      personId: formData.get("person[id]"),
       gearTypeId: formData.get("gearTypeId"),
       "competencies[]": formData
         .getAll("competencies[]")

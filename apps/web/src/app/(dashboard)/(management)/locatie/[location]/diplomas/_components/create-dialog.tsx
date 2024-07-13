@@ -1,4 +1,4 @@
-import { listPersonsForLocation, listPrograms } from "~/lib/nwd";
+import { listPersonsForLocationByRole, listPrograms } from "~/lib/nwd";
 import CreateDialogClient from "./create-dialog-client";
 
 export default async function CreateDialog({
@@ -6,15 +6,15 @@ export default async function CreateDialog({
 }: {
   locationId: string;
 }) {
-  const [persons, programs] = await Promise.all([
-    listPersonsForLocation(locationId),
+  const [students, programs] = await Promise.all([
+    listPersonsForLocationByRole(locationId, "student"),
     listPrograms(),
   ]);
 
   return (
     <CreateDialogClient
       locationId={locationId}
-      persons={persons}
+      persons={students}
       programs={programs}
     />
   );

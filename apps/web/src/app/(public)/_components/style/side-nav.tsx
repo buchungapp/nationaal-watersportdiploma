@@ -1,12 +1,12 @@
 "use client";
 
-import { Menu, Transition } from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useSearchParams, useSelectedLayoutSegments } from "next/navigation";
-import React, { Fragment, Suspense } from "react";
+import React, { Suspense } from "react";
 import { twMerge } from "tailwind-merge";
 
 interface SideNavProps {
@@ -86,7 +86,7 @@ function SideNavInner({
         className="relative inline-block sm:hidden text-left w-full"
       >
         <div>
-          <Menu.Button className="inline-flex w-full truncate justify-between rounded-xl bg-branding-dark/10 px-4 py-2 text-sm font-medium text-branding-dark group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+          <MenuButton className="inline-flex w-full truncate justify-between rounded-xl bg-branding-dark/10 px-4 py-2 text-sm font-medium text-branding-dark group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
             {active.length == 1 && typeof active[0]!.label === "string"
               ? active[0]!.label
               : label ?? "Menu"}
@@ -94,52 +94,73 @@ function SideNavInner({
               className="-mr-1 ml-2 h-5 w-5 group-hover:translate-y-0.5 transition-transform"
               aria-hidden="true"
             />
-          </Menu.Button>
+          </MenuButton>
         </div>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
+        <MenuItems
+          transition
+          anchor="bottom"
+          className={clsx(
+            className,
+            // Anchor positioning
+            "[--anchor-gap:theme(spacing.2)] [--anchor-padding:theme(spacing.1)] data-[anchor~=start]:[--anchor-offset:-6px] data-[anchor~=end]:[--anchor-offset:6px] sm:data-[anchor~=start]:[--anchor-offset:-4px] sm:data-[anchor~=end]:[--anchor-offset:4px]",
+            // Base styles
+            "isolate w-full rounded-xl p-1 space-y-6",
+            // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+            "outline outline-1 outline-transparent focus:outline-none",
+            // Handle scrolling when menu won't fit in viewport
+            "overflow-y-auto",
+            // Popover background
+            "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
+            // Shadows
+            "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
+            // Transitions
+            "transition data-[closed]:data-[leave]:opacity-0 data-[leave]:duration-100 data-[leave]:ease-in",
+          )}
         >
-          <Menu.Items className="absolute right-0 mt-2 text-sm px-2 py-2.5 w-full gap-6 flex flex-col origin-top rounded-xl bg-white shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
-            {computedSections.map(({ items, label }) => {
-              return (
-                <div key={`${label}`} className="flex flex-col gap-2">
-                  {label ? (
-                    <div className="pl-4 text-sm font-semibold">{label}</div>
-                  ) : null}
-                  <ul className="flex flex-col gap-3">
-                    {items.map(({ href, label, isActive, scroll }) => (
-                      <li key={href}>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <Link
-                              href={href}
-                              scroll={scroll ?? true}
-                              className={clsx(
-                                "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors tabular-nums",
-                                isActive
-                                  ? "bg-branding-dark/10 font-semibold"
-                                  : active && "bg-gray-100",
-                              )}
-                            >
-                              {label}
-                            </Link>
+          {computedSections.map(({ items, label }) => {
+            return (
+              <div key={`${label}`} className="flex flex-col gap-2">
+                {label ? (
+                  <div className="pl-4 text-sm font-semibold">{label}</div>
+                ) : null}
+                <ul className="flex flex-col">
+                  {items.map(({ href, label, isActive, scroll }) => (
+                    <li key={href}>
+                      <MenuItem>
+                        <Link
+                          href={href}
+                          scroll={scroll ?? true}
+                          className={clsx(
+                            // Base styles
+                            "group cursor-default block rounded-lg px-3.5 py-2.5 focus:outline-none sm:px-3 sm:py-1.5 inset-x-0",
+
+                            // Text styles
+                            "text-left text-base/6 text-branding-dark sm:text-sm/6 forced-colors:text-[CanvasText]",
+
+                            // Focus
+                            "data-[focus]:bg-gray-100",
+
+                            // Disabled state
+                            "data-[disabled]:opacity-50",
+
+                            // Forced colors mode
+                            "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText] forced-colors:[&>[data-slot=icon]]:data-[focus]:text-[HighlightText]",
+
+                            isActive && "bg-branding-dark/10 font-semibold",
                           )}
-                        </Menu.Item>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </Menu.Items>
-        </Transition>
+                        >
+                          {label}
+                        </Link>
+                      </MenuItem>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </MenuItems>
       </Menu>
+
       <div
         className={twMerge(
           "text-sm sticky h-fit top-[160px] hidden md:flex flex-col gap-y-12",

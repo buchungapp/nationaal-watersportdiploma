@@ -8,7 +8,6 @@ import {
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
-  Transition,
 } from "@headlessui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import {
@@ -19,13 +18,7 @@ import clsx from "clsx";
 import FlexSearch from "flexsearch";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
-import {
-  Fragment,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 export default function SearchClient({
   questions,
@@ -152,50 +145,46 @@ export default function SearchClient({
           />
         </div>
 
-        <Transition
-          as={Fragment}
-          leave="transition-opacity duration-100 ease-in pointer-events-none"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+        <ComboboxOptions
+          as="div"
+          anchor="bottom start"
+          className={clsx(
+            // Base styles
+            "isolate w-[var(--input-width)] empty:invisible select-none scroll-py-1 rounded-xl p-1",
+
+            // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+            "outline outline-1 outline-transparent focus:outline-none",
+
+            // Handle scrolling when menu won't fit in viewport
+            "overflow-y-scroll overscroll-contain",
+
+            // Popover background
+            "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
+
+            // Shadows
+            "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
+
+            // Transitions
+            "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0",
+          )}
         >
-          <ComboboxOptions
-            as="div"
-            anchor="bottom start"
-            className={clsx(
-              // Base styles
-              "isolate w-[var(--input-width)] empty:hidden select-none scroll-py-1 rounded-xl p-1",
-
-              // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-              "outline outline-1 outline-transparent focus:outline-none",
-
-              // Handle scrolling when menu won't fit in viewport
-              "overflow-y-scroll overscroll-contain",
-
-              // Popover background
-              "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
-
-              // Shadows
-              "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
-            )}
-          >
-            {filteredArticles.map((article) => {
-              return (
-                <ComboboxOption
-                  key={article.url}
-                  value={article}
-                  className="cursor-default select-none px-4 py-2 flex gap-1 data-[active]:bg-branding-light data-[active]:text-white"
-                >
-                  {article.type === "article" ? (
-                    <NewspaperIcon className="w-6 h-6 shrink-0" />
-                  ) : (
-                    <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" />
-                  )}
-                  {article.title}
-                </ComboboxOption>
-              );
-            })}
-          </ComboboxOptions>
-        </Transition>
+          {filteredArticles.map((article) => {
+            return (
+              <ComboboxOption
+                key={article.url}
+                value={article}
+                className="cursor-default select-none px-4 py-2 flex gap-1 data-[active]:bg-branding-light data-[active]:text-white"
+              >
+                {article.type === "article" ? (
+                  <NewspaperIcon className="w-6 h-6 shrink-0" />
+                ) : (
+                  <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" />
+                )}
+                {article.title}
+              </ComboboxOption>
+            );
+          })}
+        </ComboboxOptions>
       </Combobox>
     </div>
   );
