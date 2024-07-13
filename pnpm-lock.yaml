@@ -341,10 +341,10 @@ importers:
         specifier: ^18.2.4
         version: 18.2.4
       rollup:
-        specifier: ^4.18.1
+        specifier: ^4.18.0
         version: 4.18.1
       typescript:
-        specifier: ^5.5.3
+        specifier: ^5.5.2
         version: 5.5.3
 
   packages/core:
