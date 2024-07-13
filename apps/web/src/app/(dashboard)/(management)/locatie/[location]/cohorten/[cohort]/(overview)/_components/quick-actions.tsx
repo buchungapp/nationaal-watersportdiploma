@@ -176,7 +176,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
-      {pending ? <Spinner /> : null}
+      {pending ? <Spinner className="text-white" /> : null}
       Opslaan
     </Button>
   );
@@ -228,7 +228,7 @@ function RemoveCohortDialog({
             });
           }}
         >
-          {pending ? <Spinner /> : null} Verwijderen
+          {pending ? <Spinner className="text-white" /> : null} Verwijderen
         </Button>
       </AlertActions>
     </Alert>
