@@ -35,6 +35,7 @@ import {
   TextLink,
 } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import Spinner from "~/app/_components/spinner";
 import { createPersonBulk } from "../_actions/create";
 
 const _ROLES = [
@@ -480,6 +481,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Verder
     </Button>
   );

@@ -31,6 +31,7 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong } from "~/app/(dashboard)/_components/text";
+import Spinner from "~/app/_components/spinner";
 import { updateEmail, updatePerson } from "../../_actions/create";
 
 export function ChangeEmail({
@@ -252,6 +253,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Opslaan
     </Button>
   );

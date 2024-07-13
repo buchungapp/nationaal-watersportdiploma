@@ -32,6 +32,7 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 
+import Spinner from "~/app/_components/spinner";
 import {
   assignInstructorToStudents,
   claimStudents,
@@ -297,6 +298,7 @@ function ProgramSubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Starten
     </Button>
   );
@@ -494,6 +496,7 @@ function StudentSubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Toewijzen
     </Button>
   );

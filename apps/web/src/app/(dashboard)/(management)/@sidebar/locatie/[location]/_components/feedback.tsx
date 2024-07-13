@@ -42,6 +42,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { z } from "zod";
 import { productFeedbackAction } from "~/app/(dashboard)/_actions/feedback";
+import Spinner from "~/app/_components/spinner";
 
 const feedbackLabels = {
   bug: {
@@ -207,6 +208,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Verzenden
     </Button>
   );

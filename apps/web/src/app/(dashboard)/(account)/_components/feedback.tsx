@@ -25,6 +25,7 @@ import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { z } from "zod";
+import Spinner from "~/app/_components/spinner";
 import { productFeedbackAction } from "../../_actions/feedback";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
@@ -153,6 +154,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner /> : null}
       Verzenden
     </Button>
   );
