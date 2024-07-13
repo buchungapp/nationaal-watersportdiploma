@@ -10,10 +10,12 @@ import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import {
   getPersonByHandle,
+  getUserOrThrow,
   listCertificatesForPerson,
   listCountries,
   listExternalCertificatesForPerson,
 } from "~/lib/nwd";
+import posthog from "~/lib/posthog";
 import {
   GridList,
   GridListHeader,
@@ -147,7 +149,18 @@ async function ActionButton({ handle }: { handle: string }) {
 export default async function Page({
   params,
 }: Readonly<{ params: { handle: string } }>) {
-  const person = await getPersonByHandle(params.handle);
+  const [user, person] = await Promise.all([
+    getUserOrThrow(),
+    getPersonByHandle(params.handle),
+  ]);
+
+  posthog.capture({
+    distinctId: user.authUserId,
+    event: "viewed_profile",
+    properties: {
+      $set: { email: user.email, displayName: user.displayName },
+    },
+  });
 
   return (
     <div className="p-4 max-w-3xl mx-auto">
