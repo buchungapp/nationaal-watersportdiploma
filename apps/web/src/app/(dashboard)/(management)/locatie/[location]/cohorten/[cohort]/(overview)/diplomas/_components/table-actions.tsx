@@ -33,6 +33,7 @@ import {
 import type { Student } from "./students-table";
 
 interface Props {
+  count?: number;
   rows: Row<Student>[];
   cohortId: string;
   defaultVisibleFrom?: string;
@@ -69,7 +70,7 @@ export function ActionButtons(props: Props) {
     <>
       <Dropdown>
         <DropdownButton aria-label="Acties" className="!absolute left-12 top-0">
-          Acties <ChevronDownIcon />
+          {`(${props.count})`} Acties <ChevronDownIcon />
         </DropdownButton>
         <DropdownMenu anchor="bottom start">
           <DropdownItem

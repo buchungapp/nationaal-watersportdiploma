@@ -32,9 +32,6 @@ import {
 import { SetView } from "./_components/filters";
 import StudentsTable from "./_components/students-table";
 
-// We need this for the bulk import
-export const maxDuration = 60 * 5;
-
 async function QuickActionButtons({
   locationId,
 }: {

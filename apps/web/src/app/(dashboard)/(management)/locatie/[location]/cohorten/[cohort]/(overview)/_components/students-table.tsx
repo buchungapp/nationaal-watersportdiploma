@@ -51,21 +51,23 @@ const columns = [
         />
       </CheckboxField>
     ),
-    header: ({ table }) => (
-      <CheckboxField>
-        <Checkbox
-          {...{
-            disabled: false,
-            checked:
-              table.getIsSomePageRowsSelected() ||
-              table.getIsAllPageRowsSelected(),
-            indeterminate: !table.getIsAllPageRowsSelected(),
-            onChange: (checked) => table.toggleAllPageRowsSelected(checked),
-          }}
-          className="-translate-y-[1px]"
-        />
-      </CheckboxField>
-    ),
+    header: ({ table }) => {
+      return (
+        <CheckboxField>
+          <Checkbox
+            {...{
+              disabled: false,
+              checked:
+                table.getIsSomePageRowsSelected() ||
+                table.getIsAllPageRowsSelected(),
+              indeterminate: !table.getIsAllPageRowsSelected(),
+              onChange: (checked) => table.toggleAllPageRowsSelected(checked),
+            }}
+            className="-translate-y-[1px]"
+          />
+        </CheckboxField>
+      );
+    },
     enableSorting: false,
     meta: {
       suppressLinkBehavior: true,
@@ -163,6 +165,10 @@ export default function StudentsTable({
   const anyRowSelected =
     table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
 
+  const state = table.getState();
+
+  const selectedRows = Object.keys(state.rowSelection).length;
+
   return (
     <div className="mt-8 relative">
       <Table
@@ -174,6 +180,7 @@ export default function StudentsTable({
             rows={table.getSelectedRowModel().rows}
             cohortId={cohortId}
             locationRoles={locationRoles}
+            count={selectedRows}
           />
         ) : null}
         <TableHead>

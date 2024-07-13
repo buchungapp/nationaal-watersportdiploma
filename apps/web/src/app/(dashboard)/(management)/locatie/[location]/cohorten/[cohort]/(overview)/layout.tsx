@@ -20,6 +20,9 @@ import { CohortActions } from "./_components/quick-actions";
 
 dayjs.locale("nl");
 
+// We need this for the bulk actions
+export const maxDuration = 240;
+
 export default async function Layout({
   params,
   children,
