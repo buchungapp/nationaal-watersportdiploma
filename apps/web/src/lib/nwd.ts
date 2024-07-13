@@ -600,6 +600,8 @@ export const createStudentForLocation = async (
       },
     });
 
+    await posthog.shutdown();
+
     return person;
   });
 };
@@ -661,6 +663,8 @@ export const createCompletedCertificate = async (
           $set: { email: authUser.email, displayName: authUser.displayName },
         },
       });
+
+      await posthog.shutdown();
 
       return { id: certificateId };
     });
@@ -795,6 +799,8 @@ export const issueCertificatesInCohort = async ({
           certificateCount: result.length,
         },
       });
+
+      await posthog.shutdown();
 
       return result;
     });
@@ -944,6 +950,8 @@ export const createCohort = async ({
       },
     });
 
+    await posthog.shutdown()
+
     return res;
   });
 };
@@ -987,6 +995,8 @@ export const submitProductFeedback = async ({
         $set: { email: authUser.email, displayName: authUser.displayName },
       },
     });
+
+    
 
     return res;
   });
