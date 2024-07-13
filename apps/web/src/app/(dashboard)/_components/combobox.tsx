@@ -6,13 +6,13 @@ import {
   ComboboxInput as HeadlessComboboxInput,
   ComboboxOption as HeadlessComboboxOption,
   ComboboxOptions as HeadlessComboboxOptions,
-  Transition as HeadlessTransition,
   type ComboboxInputProps as HeadlessComboboxInputProps,
   type ComboboxOptionProps as HeadlessComboboxOptionProps,
   type ComboboxProps as HeadlessComboboxProps,
 } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useEffect, useState } from "react";
+import type { Fragment } from "react";
+import { useEffect, useState } from "react";
 
 /****************************************************************
  * TODO: this combobox is temporary used should be from catalyst
@@ -144,43 +144,39 @@ export function Combobox<T>({
           </span>
         </HeadlessComboboxButton>
 
-        <HeadlessTransition
-          as={Fragment}
-          leave="transition-opacity duration-100 ease-in pointer-events-none"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
+        <HeadlessComboboxOptions
+          as="div"
+          anchor={{
+            to: "bottom start",
+            gap: "var(--anchor-gap)",
+            offset: "var(--anchor-offset)",
+            padding: "var(--anchor-padding)",
+          }}
+          className={clsx(
+            // Anchor positioning
+            "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
+
+            // Base styles
+            "isolate w-max min-w-[calc(var(--button-width)+var(--input-width)+1.75rem)] empty:invisible border-0 select-none scroll-py-1 rounded-xl p-1",
+
+            // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
+            "outline outline-1 outline-transparent focus:outline-none",
+
+            // Handle scrolling when menu won't fit in viewport
+            "overflow-y-scroll overscroll-contain",
+
+            // Popover background
+            "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
+
+            // Shadows
+            "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
+
+            // Transitions
+            "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0",
+          )}
         >
-          <HeadlessComboboxOptions
-            as="div"
-            anchor={{
-              to: "bottom start",
-              gap: "var(--anchor-gap)",
-              offset: "var(--anchor-offset)",
-              padding: "var(--anchor-padding)",
-            }}
-            className={clsx(
-              // Anchor positioning
-              "[--anchor-offset:-1.625rem] [--anchor-padding:theme(spacing.4)] sm:[--anchor-offset:-1.375rem]",
-
-              // Base styles
-              "isolate w-max min-w-[calc(var(--button-width)+var(--input-width)+1.75rem)] empty:hidden select-none scroll-py-1 rounded-xl p-1",
-
-              // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-              "outline outline-1 outline-transparent focus:outline-none",
-
-              // Handle scrolling when menu won't fit in viewport
-              "overflow-y-scroll overscroll-contain",
-
-              // Popover background
-              "bg-white/75 backdrop-blur-xl dark:bg-zinc-800/75",
-
-              // Shadows
-              "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
-            )}
-          >
-            {options}
-          </HeadlessComboboxOptions>
-        </HeadlessTransition>
+          {options}
+        </HeadlessComboboxOptions>
       </div>
     </HeadlessCombobox>
   );
@@ -203,42 +199,42 @@ export function ComboboxOption<T>({
   );
 
   return (
-    <HeadlessComboboxOption as={Fragment} {...props}>
-      <div
-        className={clsx(
-          // Basic layout
-          "group/option grid cursor-default grid-cols-[theme(spacing.5),1fr] items-baseline gap-x-1.5 rounded-lg py-2.5 pl-2.5 pr-3.5 sm:grid-cols-[theme(spacing.4),1fr] sm:py-1.5 sm:pl-2 sm:pr-3",
+    <HeadlessComboboxOption
+      as="div"
+      {...props}
+      className={clsx(
+        // Basic layout
+        "group/option grid cursor-default grid-cols-[theme(spacing.5),1fr] items-baseline gap-x-1.5 rounded-lg py-2.5 pl-2.5 pr-3.5 sm:grid-cols-[theme(spacing.4),1fr] sm:py-1.5 sm:pl-2 sm:pr-3",
 
-          // Typography
-          "text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white forced-colors:text-[CanvasText]",
+        // Typography
+        "text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white forced-colors:text-[CanvasText]",
 
-          // Focus
-          "outline-none data-[focus]:bg-blue-500 data-[focus]:text-white",
+        // Focus
+        "outline-none data-[focus]:bg-blue-500 data-[focus]:text-white",
 
-          // Forced colors mode
-          "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText]",
+        // Forced colors mode
+        "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText]",
 
-          // Disabled
-          "data-[disabled]:opacity-50",
-        )}
+        // Disabled
+        "data-[disabled]:opacity-50",
+      )}
+    >
+      <svg
+        className="relative hidden size-5 self-center stroke-current group-data-[selected]/option:inline sm:size-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        aria-hidden="true"
       >
-        <svg
-          className="relative hidden size-5 self-center stroke-current group-data-[selected]/option:inline sm:size-4"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M4 8.5l3 3L12 4"
-            strokeWidth={1.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span className={clsx(className, sharedClasses, "col-start-2")}>
-          {children}
-        </span>
-      </div>
+        <path
+          d="M4 8.5l3 3L12 4"
+          strokeWidth={1.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span className={clsx(className, sharedClasses, "col-start-2")}>
+        {children}
+      </span>
     </HeadlessComboboxOption>
   );
 }
