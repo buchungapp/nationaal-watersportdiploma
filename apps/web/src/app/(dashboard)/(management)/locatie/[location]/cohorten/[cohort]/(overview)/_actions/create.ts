@@ -2,6 +2,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import pLimit from "p-limit";
 import { z } from "zod";
 import {
   addStudentToCohortByPersonId,
@@ -89,26 +90,31 @@ export async function addStudentsToCohort(
     tags?: string[];
   }[],
 ) {
+  // Create a limit function that allows only 5 concurrent operations
+  const limit = pLimit(5);
+
   const result = await Promise.allSettled(
-    persons.map(async (row) => {
-      const person = await createStudentForLocation(locationId, row);
+    persons.map((row) =>
+      limit(async () => {
+        const person = await createStudentForLocation(locationId, row);
 
-      const allocation = await addStudentToCohortByPersonId({
-        cohortId,
-        locationId,
-        personId: person.id,
-      });
-
-      if (row.tags && row.tags.length > 0) {
-        await setAllocationTags({
-          allocationId: allocation.id,
+        const allocation = await addStudentToCohortByPersonId({
           cohortId,
-          tags: row.tags,
+          locationId,
+          personId: person.id,
         });
-      }
 
-      return allocation;
-    }),
+        if (row.tags && row.tags.length > 0) {
+          await setAllocationTags({
+            allocationId: allocation.id,
+            cohortId,
+            tags: row.tags,
+          });
+        }
+
+        return allocation;
+      }),
+    ),
   );
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
