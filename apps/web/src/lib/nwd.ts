@@ -950,7 +950,7 @@ export const createCohort = async ({
       },
     });
 
-    await posthog.shutdown()
+    await posthog.shutdown();
 
     return res;
   });
@@ -996,7 +996,7 @@ export const submitProductFeedback = async ({
       },
     });
 
-    
+    await posthog.shutdown();
 
     return res;
   });
