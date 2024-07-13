@@ -8,6 +8,7 @@ import {
   ComboboxOptions as HeadlessComboboxOptions,
   type ComboboxInputProps as HeadlessComboboxInputProps,
   type ComboboxOptionProps as HeadlessComboboxOptionProps,
+  type ComboboxOptionsProps as HeadlessComboboxOptionsProps,
   type ComboboxProps as HeadlessComboboxProps,
 } from "@headlessui/react";
 import clsx from "clsx";
@@ -35,7 +36,7 @@ export function Combobox<T>({
   placeholder?: string;
   autoFocus?: boolean;
   "aria-label"?: string;
-  children?: React.ReactNode;
+  children?: HeadlessComboboxOptionsProps["children"];
   setQuery?: (query: string) => void;
   invalid?: boolean;
 } & Omit<HeadlessComboboxProps<T | null, false, typeof Fragment>, "multiple"> &
