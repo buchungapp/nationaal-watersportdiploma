@@ -13,7 +13,7 @@ export const getLocationCohorts: api.server.GetLocationCohortsOperationHandler<
     status: 200,
     parameters: {},
     contentType: 'application/json',
-    entity: () => [
+    entity: async () => [
       {
         id: '',
         handle: '',
@@ -41,7 +41,7 @@ export const createLocationCohort: api.server.CreateLocationCohortOperationHandl
       status: 201,
       parameters: {},
       contentType: 'application/json',
-      entity: () => ({
+      entity: async () => ({
         id: '',
       }),
     }

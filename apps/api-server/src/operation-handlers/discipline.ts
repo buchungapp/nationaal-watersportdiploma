@@ -15,7 +15,7 @@ export const listDisciplines: api.server.ListDisciplinesOperationHandler<
     parameters: {},
     status: 200,
     contentType: 'application/json',
-    entity: () => [],
+    entity: async () => [],
   }
 }
 

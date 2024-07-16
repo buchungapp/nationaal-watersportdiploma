@@ -41,7 +41,7 @@ export const getLocationCertificates: api.server.GetLocationCertificatesOperatio
     status: 200,
     parameters: {},
     contentType: 'application/json',
-    entity: () => responseEntity,
+    entity: async () => responseEntity,
   }
 }
 
@@ -86,6 +86,6 @@ export const createLocationCertificate: api.server.CreateLocationCertificateOper
       status: 201,
       parameters: {},
       contentType: 'application/json',
-      entity: () => responseItem,
+      entity: async () => responseItem,
     }
   })

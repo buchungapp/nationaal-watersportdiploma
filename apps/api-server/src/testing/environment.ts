@@ -28,7 +28,7 @@ export async function withTestEnvironment<T>(
     const { port } = listener
     const baseUrl = new URL(`http://localhost:${port}`)
 
-    api.facade.defaultClientConfiguration.baseUrl = baseUrl
+    api.client.defaultClientConfiguration.baseUrl = baseUrl
 
     const result = await job({ server, baseUrl })
     return result

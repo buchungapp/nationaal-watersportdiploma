@@ -22,7 +22,7 @@ export const me: api.server.MeOperationHandler<
     status: 200,
     parameters: {},
     contentType: 'application/json',
-    entity: () => ({
+    entity: async () => ({
       id,
       handle: '',
     }),

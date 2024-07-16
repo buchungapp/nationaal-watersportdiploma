@@ -18,7 +18,7 @@ export const getLocations: api.server.GetLocationsOperationHandler<
     status: 200,
     parameters: {},
     contentType: 'application/json',
-    entity: () => listEntity,
+    entity: async () => listEntity,
   }
 }
 
@@ -42,6 +42,6 @@ export const createLocation: api.server.CreateLocationOperationHandler<
       status: 201,
       parameters: {},
       contentType: 'application/json',
-      entity: () => resultEntity,
+      entity: async () => resultEntity,
     }
   })

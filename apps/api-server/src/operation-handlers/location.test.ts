@@ -17,11 +17,11 @@ test('location crud', () =>
           return
       }
     })
-    api.facade.defaultCredentials.apiKey = 'supersecret'
+    api.client.defaultClientConfiguration.apiKey = 'supersecret'
 
     let id
     {
-      const item = await api.facade.createLocation({
+      const item = await api.client.createLocation({
         title: 'title-123',
         handle: 'handle-123',
       })
@@ -29,7 +29,7 @@ test('location crud', () =>
     }
 
     {
-      const list = await api.facade.getLocations()
+      const list = await api.client.getLocations()
       assert.equal(list.length, 1)
       assert.equal(list[0]?.id, id)
     }

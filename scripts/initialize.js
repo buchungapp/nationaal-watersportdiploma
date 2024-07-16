@@ -9,7 +9,7 @@ cp.execFileSync(
   'pnpm',
   [
     '--package',
-    '@skiffa/generator@0.11.3',
+    '@skiffa/generator@0.12.0',
     'dlx',
     'skiffa-generator',
     'package',

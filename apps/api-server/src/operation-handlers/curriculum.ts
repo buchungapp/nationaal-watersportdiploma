@@ -39,6 +39,6 @@ export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDiscip
     parameters: {},
     status: 200,
     contentType: 'application/json',
-    entity: () => [],
+    entity: async () => [],
   }
 }

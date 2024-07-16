@@ -28,17 +28,7 @@ test('open-id authentication', () =>
 
     const token = sessionItem.access_token
 
-    const result = await api.client.me(
-      {
-        contentType: null,
-        parameters: {},
-      },
-      { openId: token },
-      { baseUrl },
-    )
+    const meItem = await api.client.me({ openId: token, baseUrl })
 
-    assert(result.status === 200)
-
-    const meItem = await result.entity()
     assert.equal(meItem.id, authUserItem.id)
   }))
