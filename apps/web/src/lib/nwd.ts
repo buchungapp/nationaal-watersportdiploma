@@ -1520,7 +1520,7 @@ export async function updateStudentInstructorAssignment({
     ]);
 
     const instructorId =
-      action === "claim" ? (instructorPersonId ?? primaryPerson.id) : null;
+      action === "claim" ? instructorPersonId ?? primaryPerson.id : null;
 
     const instructorActor = instructorId
       ? await Location.Person.getActorByPersonIdAndType({
