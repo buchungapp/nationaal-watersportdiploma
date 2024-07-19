@@ -41,7 +41,7 @@ async function main() {
         const categories = await Course.Category.list()
 
         return categories
-          .filter((c) => c.parent?.handle === 'leeftijdsgroep')
+          .filter((c) => c.parent?.handle === 'leeftijdscategorie')
           .map((ageCategory) => ({
             name: ageCategory.title,
             value: ageCategory.id,
@@ -54,6 +54,7 @@ async function main() {
     filter: {
       categoryId: ageCategories,
       disciplineId: discipline,
+      onlyCurrentActive: true,
     },
   })
 
