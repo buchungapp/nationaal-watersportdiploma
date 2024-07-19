@@ -114,6 +114,7 @@ export default async function Page({
         { field: "name", tokenize: "full" },
         { field: "tags", tokenize: "forward" },
         { field: "instructor", tokenize: "full" },
+        { field: "course", tokenize: "full" },
       ],
     },
   });
@@ -130,6 +131,7 @@ export default async function Page({
         .filter(Boolean)
         .join(" "),
       tags: student.tags || [],
+      course: student.studentCurriculum?.course.title,
       instructor: [
         student.instructor?.firstName,
         student.instructor?.lastNamePrefix,
