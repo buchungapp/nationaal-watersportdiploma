@@ -1,5 +1,5 @@
 import { schema as s } from '@nawadi/db'
-import { and, eq, max } from 'drizzle-orm'
+import { and, eq, inArray, isNull, max, notExists, sql } from 'drizzle-orm'
 import { getTableColumns } from 'drizzle-orm/utils'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -86,6 +86,93 @@ export const upsertProgress = withZod(
           progress: String(progress),
           createdBy: input.createdBy,
         })),
+      )
+      .returning({
+        cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
+        competencyId: s.studentCohortProgress.competencyId,
+      })
+
+    return result
+  },
+)
+
+export const completeAllCoreCompetencies = withZod(
+  z.object({
+    cohortAllocationId: singleOrArray(uuidSchema),
+    createdBy: uuidSchema,
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const uncompletedCoreCompetencies = await query
+      .select({
+        cohortAllocationId: s.cohortAllocation.id,
+        competencyId: s.curriculumCompetency.id,
+      })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.studentCurriculum,
+        eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
+      )
+      .innerJoin(
+        s.curriculumCompetency,
+        eq(
+          s.studentCurriculum.curriculumId,
+          s.curriculumCompetency.curriculumId,
+        ),
+      )
+      .where(
+        and(
+          Array.isArray(input.cohortAllocationId)
+            ? inArray(s.cohortAllocation.id, input.cohortAllocationId)
+            : eq(s.cohortAllocation.id, input.cohortAllocationId),
+          eq(s.curriculumCompetency.isRequired, true),
+          notExists(
+            query
+              .select({ id: sql`1` })
+              .from(s.studentCohortProgress)
+              .where(
+                and(
+                  eq(
+                    s.studentCohortProgress.cohortAllocationId,
+                    s.cohortAllocation.id,
+                  ),
+                  eq(
+                    s.studentCohortProgress.competencyId,
+                    s.curriculumCompetency.competencyId,
+                  ),
+                ),
+              ),
+          ),
+          notExists(
+            query
+              .select({ id: sql`1` })
+              .from(s.studentCompletedCompetency)
+              .where(
+                and(
+                  eq(
+                    s.studentCompletedCompetency.competencyId,
+                    s.curriculumCompetency.competencyId,
+                  ),
+                  isNull(s.studentCompletedCompetency.deletedAt),
+                ),
+              ),
+          ),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+
+    const result = await query
+      .insert(s.studentCohortProgress)
+      .values(
+        uncompletedCoreCompetencies.map(
+          ({ competencyId, cohortAllocationId }) => ({
+            cohortAllocationId,
+            competencyId,
+            progress: '100',
+            createdBy: input.createdBy,
+          }),
+        ),
       )
       .returning({
         cohortAllocationId: s.studentCohortProgress.cohortAllocationId,

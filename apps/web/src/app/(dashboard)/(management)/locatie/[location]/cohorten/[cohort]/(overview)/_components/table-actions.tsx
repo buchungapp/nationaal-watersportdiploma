@@ -31,7 +31,6 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
-
 import Spinner from "~/app/_components/spinner";
 import {
   assignInstructorToStudents,

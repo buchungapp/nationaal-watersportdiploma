@@ -1,6 +1,7 @@
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import type { Row } from "@tanstack/react-table";
 import { useState, useTransition } from "react";
+import { useFormState as useActionState, useFormStatus } from "react-dom";
 
 import {
   Dropdown,
@@ -10,6 +11,8 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 
 import dayjs from "dayjs";
+import { toast } from "sonner";
+import { z } from "zod";
 import {
   Alert,
   AlertActions,
@@ -26,6 +29,7 @@ import { ErrorMessage, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
+import { completeAllCoreCompetencies } from "../../_actions/nwd";
 import {
   issueCertificates,
   withDrawCertificates,
@@ -48,6 +52,10 @@ export function ActionButtons(props: Props) {
   const noneRowsHaveIssuedCertificates = props.rows.every(
     (row) => !row.original.certificate,
   );
+
+  const allRowsHaveACurriculum = props.rows.every((row) => {
+    return !!row.original.studentCurriculum;
+  });
 
   const allRowsHaveACurriculumWithAtLeastOneModule = props.rows.every((row) => {
     if (!row.original.studentCurriculum) return false;
@@ -97,6 +105,12 @@ export function ActionButtons(props: Props) {
           >
             Download
           </DropdownItem>
+          <DropdownItem
+            onClick={() => setIsDialogOpen("complete-core-modules")}
+            disabled={!allRowsHaveACurriculum}
+          >
+            Kerncompetencies afronden
+          </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
@@ -110,6 +124,14 @@ export function ActionButtons(props: Props) {
         {...props}
         isOpen={isDialogOpen === "remove"}
         setIsOpen={(value) => setIsDialogOpen(value ? "remove" : null)}
+      />
+
+      <CompleteCoreModulesDialog
+        {...props}
+        isOpen={isDialogOpen === "complete-core-modules"}
+        setIsOpen={(value) =>
+          setIsDialogOpen(value ? "complete-core-modules" : null)
+        }
       />
     </>
   );
@@ -258,5 +280,87 @@ export function RemoveCertificateDialog({
         </Button>
       </AlertActions>
     </Alert>
+  );
+}
+
+const CONFIRMATION_WORD = "begrepen";
+
+function CompleteCoreModulesDialog({
+  rows,
+  isOpen,
+  setIsOpen,
+}: Props & {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+}) {
+  const submit = async (_prevState: unknown, formData: FormData) => {
+    try {
+      z.literal(CONFIRMATION_WORD).parse(formData.get("confirm"));
+
+      await completeAllCoreCompetencies({
+        cohortAllocationId: rows.map((row) => row.original.id),
+      });
+
+      toast.success("Kernmodules afgerond");
+      setIsOpen(false);
+    } catch (error) {
+      toast.error("Er is iets misgegaan");
+    }
+  };
+
+  const [_state, formAction] = useActionState(submit, undefined);
+
+  return (
+    <>
+      <Alert open={isOpen} onClose={setIsOpen} size="lg">
+        <AlertTitle>Alle kernmodules afronden</AlertTitle>
+        <AlertDescription>
+          With great power comes great responsibility. Houd rekening met het
+          volgende:
+          <ul className="list-inside list-disc mt-2 mb-4">
+            <li>
+              Niet alle kernmodules zijn vereist voor het behalen van een
+              diploma.
+            </li>
+            <li>
+              Het doel is een realistisch en herkenbaar diploma dat alleen de
+              daadwerkelijk geoefende en beheerste modules weergeeft.
+            </li>
+            <li>
+              Niet alle kernmodules kunnen in elk vaartuig worden afgerond.
+            </li>
+          </ul>
+          Als je zeker bent van wat je doet en de gevolgen begrijpt, typ dan het
+          woord <Strong>{CONFIRMATION_WORD}</Strong> om de kernmodules af te
+          ronden.
+        </AlertDescription>
+        <form action={formAction}>
+          <AlertBody>
+            <Input
+              name="confirm"
+              type="text"
+              required
+              pattern={CONFIRMATION_WORD}
+            />
+          </AlertBody>
+          <AlertActions>
+            <Button plain onClick={() => setIsOpen(false)}>
+              Annuleren
+            </Button>
+            <CoreModulesSubmitButton />
+          </AlertActions>
+        </form>
+      </Alert>
+    </>
+  );
+}
+
+function CoreModulesSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner className="text-white" /> : null}
+      Afronden
+    </Button>
   );
 }
