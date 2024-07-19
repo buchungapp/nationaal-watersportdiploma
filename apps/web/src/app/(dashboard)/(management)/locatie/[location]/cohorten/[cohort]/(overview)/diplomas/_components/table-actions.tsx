@@ -109,7 +109,7 @@ export function ActionButtons(props: Props) {
             onClick={() => setIsDialogOpen("complete-core-modules")}
             disabled={!allRowsHaveACurriculum}
           >
-            Kerncompetencies afronden
+            Kernmodules afronden
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
