@@ -5,6 +5,7 @@ import {
   addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
+  completeAllCoreCompetencies as completeAllCoreCompetenciesInner,
   deleteCohort as deleteCohortInner,
   enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
   getUserOrThrow,
@@ -266,4 +267,20 @@ export async function deleteCohort(props: { cohortId: string }) {
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
 
   return;
+}
+
+export async function completeAllCoreCompetencies({
+  cohortAllocationId,
+}: {
+  cohortAllocationId: string[];
+}) {
+  await completeAllCoreCompetenciesInner({
+    cohortAllocationId,
+  });
+
+  revalidatePath(
+    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
+    "page",
+  );
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
 }

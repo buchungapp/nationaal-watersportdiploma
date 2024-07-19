@@ -1237,6 +1237,31 @@ export async function updateCompetencyProgress({
   });
 }
 
+export async function completeAllCoreCompetencies({
+  cohortAllocationId,
+}: {
+  cohortAllocationId: string | string[];
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // const availableLocations = await User.Person.listLocationsByRole({
+    //   personId: authPerson.id,
+    //   roles: ["location_admin", "instructor"],
+    // });
+
+    // TODO: Check if the person is an instructor for the cohort
+
+    await Cohort.StudentProgress.completeAllCoreCompetencies({
+      cohortAllocationId,
+      createdBy: primaryPerson.id,
+    });
+
+    return;
+  });
+}
+
 export async function addStudentToCohortByPersonId({
   locationId,
   cohortId,
@@ -1495,7 +1520,7 @@ export async function updateStudentInstructorAssignment({
     ]);
 
     const instructorId =
-      action === "claim" ? (instructorPersonId ?? primaryPerson.id) : null;
+      action === "claim" ? instructorPersonId ?? primaryPerson.id : null;
 
     const instructorActor = instructorId
       ? await Location.Person.getActorByPersonIdAndType({
