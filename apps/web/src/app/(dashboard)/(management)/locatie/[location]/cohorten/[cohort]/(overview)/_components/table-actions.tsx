@@ -1,4 +1,3 @@
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import type { Row } from "@tanstack/react-table";
 import { useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
@@ -110,7 +109,7 @@ function StartProgram({
         title={
           !areAllRowsUnassigned
             ? "Sommige cursisten zijn al aan een programma gestart"
-            : ""
+            : undefined
         }
       >
         Start programma
@@ -310,10 +309,8 @@ export function ActionButtons(props: Props) {
   return (
     <>
       <Dropdown>
-        <DropdownButton aria-label="Acties" className="!absolute left-12 top-0">
-          {`(${props.count})`} Acties <ChevronDownIcon />
-        </DropdownButton>
-        <DropdownMenu anchor="bottom start">
+        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
+        <DropdownMenu anchor="top">
           <Claim {...props} />
           <StartProgram
             {...props}

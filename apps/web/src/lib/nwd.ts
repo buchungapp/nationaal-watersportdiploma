@@ -1,3 +1,8 @@
+import type {
+  DatabaseConfiguration,
+  RedisConfiguration,
+  SupabaseConfiguration,
+} from "@nawadi/core";
 import {
   Certificate,
   Cohort,
@@ -8,6 +13,7 @@ import {
   Student,
   User,
   withDatabase,
+  withRedisClient,
   withSupabaseClient,
   withTransaction,
 } from "@nawadi/core";
@@ -75,14 +81,26 @@ async function isActiveActorTypeInLocation({
 }
 
 async function makeRequest<T>(cb: () => Promise<T>) {
+  const supabaseConfig: SupabaseConfiguration = {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  };
+
+  const redisConfig: RedisConfiguration = {
+    url: process.env.REDIS_URL!,
+  };
+
+  const dbConfig: DatabaseConfiguration = {
+    pgUri: process.env.PGURI!,
+    serverless: true,
+  };
+
   try {
-    return withSupabaseClient(
-      {
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      },
-      () => withDatabase({ pgUri: process.env.PGURI!, serverless: true }, cb),
-    );
+    return await withSupabaseClient(supabaseConfig, async () => {
+      return await withRedisClient(redisConfig, async () => {
+        return await withDatabase(dbConfig, cb);
+      });
+    });
   } catch (error) {
     console.error(error);
     throw error;
@@ -2127,5 +2145,20 @@ export const updatePersonDetails = async ({
         dateOfBirth: details.dateOfBirth?.toISOString(),
       },
     });
+  });
+};
+
+export const storeCertificateHandles = async (props: {
+  handles: string[];
+  fileName?: string;
+}) => {
+  return makeRequest(async () => {
+    return await Certificate.storeHandles(props);
+  });
+};
+
+export const retrieveCertificateHandles = async (uuid: string) => {
+  return makeRequest(async () => {
+    return await Certificate.retrieveHandles({ uuid });
   });
 };

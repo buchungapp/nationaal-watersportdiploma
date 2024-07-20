@@ -13,8 +13,13 @@ import {
   lte,
   sql,
 } from 'drizzle-orm'
+import crypto from 'node:crypto'
 import { z } from 'zod'
-import { useQuery, withTransaction } from '../../contexts/index.js'
+import {
+  useQuery,
+  useRedisClient,
+  withTransaction,
+} from '../../contexts/index.js'
 import {
   findItem,
   singleOrArray,
@@ -368,3 +373,79 @@ export const withdraw = withZod(uuidSchema, async (input) => {
     ])
   })
 })
+
+export const storeHandles = withZod(
+  z.object({
+    fileName: z.string().optional(),
+    handles: z.array(z.string().length(10)).min(1),
+  }),
+  async ({ fileName, handles }) => {
+    const redis = useRedisClient()
+    const uuid = crypto.randomUUID()
+    const key = `c-export:${uuid}`
+    const expirationTime = 60 * 60 * 24 // 24 hours in seconds
+
+    const pipeline = redis.pipeline()
+
+    pipeline.sadd(`${key}:items`, handles)
+    pipeline.expire(`${key}:items`, expirationTime)
+
+    if (fileName) {
+      pipeline.set(`${key}:file-name`, fileName)
+      pipeline.expire(`${key}:file-name`, expirationTime)
+    }
+
+    await pipeline.exec()
+
+    return uuid
+  },
+)
+
+export const retrieveHandles = withZod(
+  z.object({
+    uuid: z.string().uuid(),
+  }),
+  z.object({
+    fileName: z.string().optional(),
+    handles: z.array(z.string().length(10)),
+  }),
+  async ({ uuid }) => {
+    const redis = useRedisClient()
+    const key = `c-export:${uuid}`
+    const results = await redis
+      .pipeline()
+      .get(`${key}:file-name`)
+      .smembers(`${key}:items`)
+      .exec()
+
+    if (!results || results.length !== 2) {
+      throw new Error('Failed to execute Redis pipeline')
+    }
+
+    const [fileNameResult, handlesResult] = results
+
+    if (!fileNameResult || !handlesResult) {
+      throw new Error('Unexpected Redis pipeline result structure')
+    }
+
+    const [fileNameError, fileName] = fileNameResult
+    const [handlesError, handles] = handlesResult
+
+    if (fileNameError || handlesError) {
+      throw new Error('Redis operation failed')
+    }
+
+    if (!Array.isArray(handles)) {
+      throw new Error('Invalid handles data')
+    }
+
+    if (handles.length === 0) {
+      throw new Error('Export not found')
+    }
+
+    return {
+      fileName: typeof fileName === 'string' ? fileName : undefined,
+      handles: handles as string[],
+    }
+  },
+)

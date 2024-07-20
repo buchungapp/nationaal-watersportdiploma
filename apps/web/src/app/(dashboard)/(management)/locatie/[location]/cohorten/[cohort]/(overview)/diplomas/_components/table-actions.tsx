@@ -1,5 +1,3 @@
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
-import type { Row } from "@tanstack/react-table";
 import { useState, useTransition } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 
@@ -25,11 +23,16 @@ import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
-import { ErrorMessage, Label } from "~/app/(dashboard)/_components/fieldset";
+import {
+  ErrorMessage,
+  Field,
+  Label,
+} from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import { completeAllCoreCompetencies } from "../../_actions/nwd";
+import { kickOffGeneratePDF } from "../_actions/download";
 import {
   issueCertificates,
   withDrawCertificates,
@@ -37,8 +40,11 @@ import {
 import type { Student } from "./students-table";
 
 interface Props {
-  count?: number;
-  rows: Row<Student>[];
+  rows: {
+    id: string;
+    certificate: Student["certificate"];
+    studentCurriculum: Student["studentCurriculum"];
+  }[];
   cohortId: string;
   defaultVisibleFrom?: string;
 }
@@ -47,20 +53,20 @@ export function ActionButtons(props: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState<string | null>(null);
 
   const allRowsHaveIssuedCertificates = props.rows.every(
-    (row) => !!row.original.certificate?.issuedAt,
+    (row) => !!row.certificate?.issuedAt,
   );
   const noneRowsHaveIssuedCertificates = props.rows.every(
-    (row) => !row.original.certificate,
+    (row) => !row.certificate,
   );
 
   const allRowsHaveACurriculum = props.rows.every((row) => {
-    return !!row.original.studentCurriculum;
+    return !!row.studentCurriculum;
   });
 
   const allRowsHaveACurriculumWithAtLeastOneModule = props.rows.every((row) => {
-    if (!row.original.studentCurriculum) return false;
+    if (!row.studentCurriculum) return false;
 
-    const completedModules = row.original.studentCurriculum.moduleStatus.filter(
+    const completedModules = row.studentCurriculum.moduleStatus.filter(
       (status) => status.completedCompetencies === status.totalCompetencies,
     ).length;
 
@@ -70,17 +76,15 @@ export function ActionButtons(props: Props) {
   const params = new URLSearchParams();
 
   props.rows.forEach((row) => {
-    if (!row.original.certificate) return;
-    params.append("certificate[]", row.original.certificate.handle);
+    if (!row.certificate) return;
+    params.append("certificate[]", row.certificate.handle);
   });
 
   return (
     <>
       <Dropdown>
-        <DropdownButton aria-label="Acties" className="!absolute left-12 top-0">
-          {`(${props.count})`} Acties <ChevronDownIcon />
-        </DropdownButton>
-        <DropdownMenu anchor="bottom start">
+        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
+        <DropdownMenu anchor="top">
           <DropdownItem
             onClick={() => setIsDialogOpen("issue")}
             disabled={
@@ -89,25 +93,49 @@ export function ActionButtons(props: Props) {
                 allRowsHaveACurriculumWithAtLeastOneModule
               )
             }
+            title={
+              !(
+                noneRowsHaveIssuedCertificates &&
+                allRowsHaveACurriculumWithAtLeastOneModule
+              )
+                ? "Niet alle cursisten hebben minimaal één module afgerond"
+                : undefined
+            }
           >
             Diploma's uitgeven
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("remove")}
             disabled={!allRowsHaveIssuedCertificates}
+            title={
+              !allRowsHaveIssuedCertificates
+                ? "Niet alle cursisten hebben een uitgegeven diploma"
+                : undefined
+            }
           >
             Diploma's verwijderen
           </DropdownItem>
           <DropdownItem
-            href={`/api/export/certificate/pdf?${params.toString()}`}
-            target="_blank"
+            onClick={() => setIsDialogOpen("download")}
             disabled={!allRowsHaveIssuedCertificates}
+            title={
+              !allRowsHaveIssuedCertificates
+                ? "Niet alle cursisten hebben een uitgegeven diploma"
+                : undefined
+            }
           >
-            Download
+            Diploma's downloaden
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("complete-core-modules")}
-            disabled={!allRowsHaveACurriculum}
+            disabled={
+              !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
+            }
+            title={
+              !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
+                ? "Niet alle cursisten zijn gekoppeld aan een curriculum"
+                : undefined
+            }
           >
             Kernmodules afronden
           </DropdownItem>
@@ -132,6 +160,12 @@ export function ActionButtons(props: Props) {
         setIsOpen={(value) =>
           setIsDialogOpen(value ? "complete-core-modules" : null)
         }
+      />
+
+      <DownloadCertificatesDialog
+        {...props}
+        isOpen={isDialogOpen === "download"}
+        setIsOpen={(value) => setIsDialogOpen(value ? "download" : null)}
       />
     </>
   );
@@ -162,7 +196,7 @@ export function IssueCertificateDialog({
 
           startTransition(async () => {
             await issueCertificates({
-              cohortAllocationIds: rows.map((row) => row.original.id),
+              cohortAllocationIds: rows.map((row) => row.id),
               visibleFrom: delayVisibility
                 ? dayjs(visibleFrom).toISOString()
                 : null,
@@ -263,7 +297,7 @@ export function RemoveCertificateDialog({
           onClick={() => {
             startTransition(async () => {
               await withDrawCertificates({
-                certificateIds: rows.map((row) => row.original.certificate!.id),
+                certificateIds: rows.map((row) => row.certificate!.id),
                 cohortId,
               })
                 .then(() => setIsOpen(false))
@@ -298,7 +332,7 @@ function CompleteCoreModulesDialog({
       z.literal(CONFIRMATION_WORD).parse(formData.get("confirm"));
 
       await completeAllCoreCompetencies({
-        cohortAllocationId: rows.map((row) => row.original.id),
+        cohortAllocationId: rows.map((row) => row.id),
       });
 
       toast.success("Kernmodules afgerond");
@@ -361,6 +395,75 @@ function CoreModulesSubmitButton() {
     <Button color="branding-dark" disabled={pending} type="submit">
       {pending ? <Spinner className="text-white" /> : null}
       Afronden
+    </Button>
+  );
+}
+
+function DownloadCertificatesDialog({
+  rows,
+  isOpen,
+  setIsOpen,
+}: Props & {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+}) {
+  const submit = async (_prevState: unknown, formData: FormData) => {
+    try {
+      z.string().parse(formData.get("filename"));
+
+      await kickOffGeneratePDF({
+        handles: rows.map((row) => row.certificate!.handle),
+        fileName: formData.get("filename") as string,
+      });
+
+      toast.success("Bestand gedownload");
+      setIsOpen(false);
+    } catch (error) {
+      toast.error("Er is iets misgegaan");
+    }
+  };
+
+  const [_state, formAction] = useActionState(submit, undefined);
+
+  return (
+    <>
+      <Alert open={isOpen} onClose={setIsOpen} size="lg">
+        <AlertTitle>Diploma's downloaden</AlertTitle>
+        <AlertDescription>
+          Download een PDF-bestand met de diploma's van de geselecteerde
+          cursisten. Het bestand wordt gesorteerd op alfabetische volgorde van
+          de naam van de cursist.
+        </AlertDescription>
+        <form action={formAction}>
+          <AlertBody>
+            <Field>
+              <Label>Bestandsnaam</Label>
+              <Input
+                name="filename"
+                type="text"
+                required
+                defaultValue={`${dayjs().toISOString()}-export-diplomas`}
+              />
+            </Field>
+          </AlertBody>
+          <AlertActions>
+            <Button plain onClick={() => setIsOpen(false)}>
+              Annuleren
+            </Button>
+            <DownloadSubmitButton />
+          </AlertActions>
+        </form>
+      </Alert>
+    </>
+  );
+}
+
+function DownloadSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner className="text-white" /> : null}
+      Download
     </Button>
   );
 }
