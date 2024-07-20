@@ -45,6 +45,7 @@ export default function SmartDatetimePicker({
       <input
         type="datetime-local"
         step={60 * 15}
+        tabIndex={-1}
         required={required}
         name={name}
         value={dateTime ? dateTimeUtils.getDateTimeLocal(dateTime) : ""}
