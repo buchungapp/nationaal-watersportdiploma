@@ -33,7 +33,10 @@ export default async function Page({
   return (
     <div className="max-w-4xl">
       <AddInstructor
-        allInstructors={allInstructors}
+        allInstructors={allInstructors.filter(
+          (instructor) =>
+            !instructors.some((i) => i.person.id === instructor.id),
+        )}
         cohortId={cohort.id}
         locationId={location.id}
       />
