@@ -15,12 +15,12 @@ import {
   createContext,
   useContext,
   useOptimistic,
+  useRef,
   useState,
   useTransition,
   type PropsWithChildren,
 } from "react";
 import { toast } from "sonner";
-import { useDebouncedCallback } from "use-debounce";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -195,24 +195,22 @@ function ProgressInput({
   setCompleted: (newProgress: number) => Promise<void>;
 }>) {
   const { advancedMode } = useCourseCardSettings();
-
-  const [localValue, setLocalValue] = useState(value);
-
-  // Debounce the setCompleted call
-  const debouncedSetCompleted = useDebouncedCallback(setCompleted, 600);
+  const numberInputRef = useRef<HTMLInputElement>(null);
 
   if (advancedMode) {
     return (
       <Field className="flex items-center gap-x-2">
         <Input
+          ref={numberInputRef}
+          key={value}
           type="number"
           min="0"
           max="100"
           step="1"
           disabled={disabled}
+          defaultValue={value}
           className="max-w-[4rem] tabular-nums text-center"
-          value={localValue}
-          onChange={async (e) => {
+          onBlur={async (e) => {
             const newProgress = parseInt(e.target.value, 10);
 
             if (
@@ -220,11 +218,11 @@ function ProgressInput({
               newProgress < 0 ||
               newProgress > 100
             ) {
+              numberInputRef.current?.focus();
               return toast.error("Voer een getal in van 0 tot 100.");
             }
 
-            setLocalValue(newProgress); // Update local state immediately for responsive UI
-            await debouncedSetCompleted(newProgress); // Debounced API call
+            await setCompleted(newProgress);
           }}
         />
         {children}
