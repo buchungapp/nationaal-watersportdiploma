@@ -35,6 +35,7 @@ import {
   WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
+import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
 
 async function InstructorField({
@@ -244,6 +245,8 @@ export default async function Page({
     notFound();
   }
 
+  const progressTrackingEnabled = params.location === "krekt-sailing";
+
   return (
     <SWRConfig
       value={{
@@ -328,6 +331,24 @@ export default async function Page({
                 />
               </Suspense>
             </DescriptionDetails>
+
+            {progressTrackingEnabled ? (
+              <>
+                <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
+                <DescriptionDetails className="flex items-center justify-between gap-x-2">
+                  {allocation.progressVisibleForStudentUpUntil ? (
+                    dayjs(allocation.progressVisibleForStudentUpUntil).format(
+                      "DD-MM-YYYY HH:mm",
+                    )
+                  ) : (
+                    <>
+                      <span className="text-zinc-500">Niet zichtbaar</span>
+                    </>
+                  )}
+                  <UpdateProgressVisibility />
+                </DescriptionDetails>
+              </>
+            ) : null}
 
             <DescriptionTerm>Tags</DescriptionTerm>
             <DescriptionDetails>

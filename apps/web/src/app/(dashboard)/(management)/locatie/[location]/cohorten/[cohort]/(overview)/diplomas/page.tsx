@@ -140,6 +140,7 @@ export default async function Page({
         </div>
 
         <StudentsTable
+          progressTrackingEnabled={params.location === "krekt-sailing"}
           students={searchedStudents}
           totalItems={searchedStudents.length}
           cohortId={cohort.id}

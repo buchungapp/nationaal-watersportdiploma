@@ -1788,7 +1788,7 @@ export async function setAllocationTags({
   tags,
 }: {
   cohortId: string;
-  allocationId: string;
+  allocationId: string | string[];
   tags: string[];
 }) {
   return makeRequest(async () => {

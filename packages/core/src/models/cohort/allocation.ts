@@ -1009,7 +1009,7 @@ export const withdrawlRole = withZod(
 
 export const setTags = withZod(
   z.object({
-    allocationId: uuidSchema,
+    allocationId: singleOrArray(uuidSchema),
     tags: z.string().array(),
   }),
   successfulCreateResponse,
@@ -1019,7 +1019,32 @@ export const setTags = withZod(
     return await query
       .update(s.cohortAllocation)
       .set({ tags: input.tags })
-      .where(eq(s.cohortAllocation.id, input.allocationId))
+      .where(
+        Array.isArray(input.allocationId)
+          ? inArray(s.cohortAllocation.id, input.allocationId)
+          : eq(s.cohortAllocation.id, input.allocationId),
+      )
+      .returning({ id: s.cohortAllocation.id })
+      .then(singleRow)
+  },
+)
+
+export const makeProgressVisible = withZod(
+  z.object({
+    allocationId: singleOrArray(uuidSchema),
+    visibleUpUntil: z.string().datetime().optional(),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    return await query
+      .update(s.cohortAllocation)
+      .set({ progressVisibleUpUntil: input.visibleUpUntil ?? sql`NOW()` })
+      .where(
+        Array.isArray(input.allocationId)
+          ? inArray(s.cohortAllocation.id, input.allocationId)
+          : eq(s.cohortAllocation.id, input.allocationId),
+      )
       .returning({ id: s.cohortAllocation.id })
       .then(singleRow)
   },
