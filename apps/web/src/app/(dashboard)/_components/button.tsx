@@ -224,7 +224,6 @@ export const Button = React.forwardRef(function Button(
       {...props}
       className={clsx(classes, "cursor-default")}
       ref={ref}
-      data-disabled={props.disabled}
     >
       <TouchTarget>{children}</TouchTarget>
     </Headless.Button>

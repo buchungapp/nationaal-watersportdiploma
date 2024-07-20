@@ -37,9 +37,11 @@ words:
   - redocly
   - rehype
   - ryanluker
+  - sadd
   - sindresorhus
   - skiffa
   - skreet
+  - smembers
   - solvebv
   - sonner
   - supabase
@@ -47,6 +49,7 @@ words:
   - tailwindcss
   - Tera
   - trivago
+  - upstash
   - veiligheids
   - Wavie
   - Wbcdfghjkmnpqrtwz

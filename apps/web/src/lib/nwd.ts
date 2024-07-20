@@ -1,3 +1,8 @@
+import type {
+  DatabaseConfiguration,
+  RedisConfiguration,
+  SupabaseConfiguration,
+} from "@nawadi/core";
 import {
   Certificate,
   Cohort,
@@ -8,20 +13,35 @@ import {
   Student,
   User,
   withDatabase,
+  withRedisClient,
   withSupabaseClient,
   withTransaction,
 } from "@nawadi/core";
 import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
-import dayjs from "dayjs";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import packageInfo from "~/../package.json";
+import dayjs from "~/lib/dayjs";
 import posthog from "./posthog";
 
 export type ActorType = "student" | "instructor" | "location_admin";
+
+const supabaseConfig: SupabaseConfiguration = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+};
+
+const redisConfig: RedisConfiguration = {
+  url: process.env.REDIS_URL!,
+};
+
+const dbConfig: DatabaseConfiguration = {
+  pgUri: process.env.PGURI!,
+  serverless: true,
+};
 
 async function getPrimaryPerson<T extends boolean = true>(
   user: Awaited<ReturnType<typeof getUserOrThrow>>,
@@ -76,13 +96,9 @@ async function isActiveActorTypeInLocation({
 
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
-    return withSupabaseClient(
-      {
-        url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      },
-      () => withDatabase({ pgUri: process.env.PGURI!, serverless: true }, cb),
-    );
+    return await withSupabaseClient(supabaseConfig, async () => {
+      return await withDatabase(dbConfig, cb);
+    });
   } catch (error) {
     console.error(error);
     throw error;
@@ -2126,6 +2142,25 @@ export const updatePersonDetails = async ({
         ...details,
         dateOfBirth: details.dateOfBirth?.toISOString(),
       },
+    });
+  });
+};
+
+export const storeCertificateHandles = async (props: {
+  handles: string[];
+  fileName?: string;
+}) => {
+  return makeRequest(async () => {
+    return await withRedisClient(redisConfig, async () => {
+      return await Certificate.storeHandles(props);
+    });
+  });
+};
+
+export const retrieveCertificateHandles = async (uuid: string) => {
+  return makeRequest(async () => {
+    return await withRedisClient(redisConfig, async () => {
+      return await Certificate.retrieveHandles({ uuid });
     });
   });
 };

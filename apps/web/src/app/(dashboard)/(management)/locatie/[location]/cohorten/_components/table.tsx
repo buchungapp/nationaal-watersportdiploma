@@ -7,7 +7,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import {
   Table,
@@ -22,6 +21,7 @@ import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import dayjs from "~/lib/dayjs";
 import type { listCohortsForLocation } from "~/lib/nwd";
 
 type Cohort = Awaited<ReturnType<typeof listCohortsForLocation>>[number];

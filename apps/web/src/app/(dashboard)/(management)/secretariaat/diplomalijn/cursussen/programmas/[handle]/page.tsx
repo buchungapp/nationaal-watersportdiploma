@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import React from "react";
 import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
@@ -18,6 +17,7 @@ import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Code, Strong, Text } from "~/app/(dashboard)/_components/text";
 import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
 import { Weight } from "~/app/_components/weight";
+import dayjs from "~/lib/dayjs";
 import {
   countStartedStudentsForCurriculum,
   listCurriculaByProgram,

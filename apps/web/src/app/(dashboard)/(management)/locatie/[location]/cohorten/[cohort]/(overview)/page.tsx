@@ -15,6 +15,7 @@ import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
   listCountries,
+  listDistinctTagsForCohort,
   listInstructorsByCohortId,
   listPersonsForLocationByRole,
   listPrivilegesForCohort,
@@ -178,6 +179,8 @@ export default async function Page({
             listPrivilegesForCohort(cohort.id),
           [unstable_serialize(["locationRoles", location.id])]:
             listRolesForLocation(location.id),
+          [unstable_serialize(["distinctTagsForCohort", cohort.id])]:
+            listDistinctTagsForCohort(cohort.id),
           allPrograms: listPrograms(),
         },
       }}

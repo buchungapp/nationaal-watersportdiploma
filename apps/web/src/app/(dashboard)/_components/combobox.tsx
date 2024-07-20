@@ -51,6 +51,7 @@ export function Combobox<T>({
     <HeadlessCombobox
       {...props}
       value={value}
+      immediate
       onChange={(value) => {
         setQuery && setQuery("");
         setValue(value);

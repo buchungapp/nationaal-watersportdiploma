@@ -19,6 +19,7 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
+import SmartDatetimePicker from "~/app/(dashboard)/_components/natural-language-input";
 import Spinner from "~/app/_components/spinner";
 import type { listPrograms } from "~/lib/nwd";
 import { createCohortAction } from "../_actions/create";
@@ -93,21 +94,19 @@ function CreateDialogClient({
                       minLength={1}
                     />
                   </Field>
-                  <Field>
+                  <Field className="relative">
                     <Label>Opent op</Label>
-                    <Input
+                    <SmartDatetimePicker
                       name="accessStartTime"
                       invalid={!!state?.errors.accessStartTime}
-                      type="datetime-local"
                       required
                     />
                   </Field>
-                  <Field>
+                  <Field className="relative">
                     <Label>Sluit op</Label>
-                    <Input
+                    <SmartDatetimePicker
                       name="accessEndTime"
                       invalid={!!state?.errors.accessEndTime}
-                      type="datetime-local"
                       required
                     />
                   </Field>

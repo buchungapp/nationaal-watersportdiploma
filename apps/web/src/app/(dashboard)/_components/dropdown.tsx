@@ -79,7 +79,7 @@ export function DropdownItem({
   );
 
   return (
-    <Headless.MenuItem>
+    <Headless.MenuItem disabled={"disabled" in props && props.disabled}>
       {"href" in props ? (
         <Link {...props} className={classes} />
       ) : (

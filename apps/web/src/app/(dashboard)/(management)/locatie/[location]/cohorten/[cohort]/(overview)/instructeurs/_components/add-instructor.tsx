@@ -1,7 +1,6 @@
 "use client";
 
 import { clsx } from "clsx";
-import dayjs from "dayjs";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -10,6 +9,7 @@ import {
   ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import dayjs from "~/lib/dayjs";
 import type { listPersonsForLocationByRole } from "~/lib/nwd";
 import { addInstructorToCohortByPersonId } from "../../_actions/nwd";
 
@@ -30,6 +30,7 @@ export function AddInstructor({
       <Subheading>Snel toevoegen</Subheading>
       <Combobox
         key={forceRerenderId}
+        autoFocus={true}
         name="personId"
         setQuery={setPersonQuery}
         onChange={async (personId) => {

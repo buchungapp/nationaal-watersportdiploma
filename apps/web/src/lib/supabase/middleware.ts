@@ -22,6 +22,8 @@ export async function updateSession(request: NextRequest) {
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
+            // https://github.com/supabase/auth-helpers/pull/781
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             supabaseResponse.cookies.set(name, value, options),
           );
         },

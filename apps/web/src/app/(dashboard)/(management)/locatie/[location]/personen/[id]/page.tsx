@@ -1,10 +1,10 @@
 import { ChevronLeftIcon } from "@heroicons/react/16/solid";
-import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import {
   CheckboxField,
   CheckboxGroup,
 } from "~/app/(dashboard)/_components/checkbox";
+import dayjs from "~/lib/dayjs";
 
 import {
   DescriptionDetails,

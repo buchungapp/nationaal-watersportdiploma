@@ -2,26 +2,33 @@ import {
   ArrowRightIcon,
   CalendarIcon,
   ChevronLeftIcon,
+  UsersIcon,
 } from "@heroicons/react/16/solid";
-import dayjs from "dayjs";
 import "dayjs/locale/nl";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
+import dayjs from "~/lib/dayjs";
 import {
   listPrivilegesForCohort,
   listRolesForLocation,
+  listStudentsWithCurriculaByCohortId,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import { LayoutTabs } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
 
-dayjs.locale("nl");
-
 // We need this for the bulk actions
 export const maxDuration = 240;
+
+async function StudentCount({ cohortId }: { cohortId: string }) {
+  const count = (await listStudentsWithCurriculaByCohortId(cohortId)).length;
+
+  return count;
+}
 
 export default async function Layout({
   params,
@@ -59,14 +66,31 @@ export default async function Layout({
         </div>
 
         <div className="isolate mt-1 flex flex-wrap justify-between gap-x-6">
-          <div className="flex flex-wrap gap-x-10 gap-y-2 py-1.5 items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
-            <CalendarIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
-            <span>
-              {dayjs(cohort.accessStartTime).format("ddd DD-MM-YYYY HH:mm uur")}
+          <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
+            <span className="flex items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
+              <UsersIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
+              <span>
+                <Suspense fallback={null}>
+                  <StudentCount cohortId={cohort.id} />
+                </Suspense>
+              </span>
             </span>
-            <ArrowRightIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
-            <span>
-              {dayjs(cohort.accessEndTime).format("ddd DD-MM-YYYY HH:mm uur")}
+
+            <span className="flex items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
+              <CalendarIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
+              <div className="flex items-center gap-2">
+                <span>
+                  {dayjs(cohort.accessStartTime).format(
+                    "ddd DD-MM-YYYY HH:mm uur",
+                  )}
+                </span>
+                <ArrowRightIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
+                <span>
+                  {dayjs(cohort.accessEndTime).format(
+                    "ddd DD-MM-YYYY HH:mm uur",
+                  )}
+                </span>
+              </div>
             </span>
           </div>
           <div className="flex gap-4">

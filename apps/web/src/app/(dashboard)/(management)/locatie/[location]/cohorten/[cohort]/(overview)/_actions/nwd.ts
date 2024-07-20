@@ -12,6 +12,7 @@ import {
   isInstructorInCohort as isInstructorInCohortInner,
   listCountries as listCountriesInner,
   listCurriculaByProgram as listCurriculaByProgramInner,
+  listDistinctTagsForCohort as listDistinctTagsForCohortInner,
   listGearTypesByCurriculum as listGearTypesByCurriculumInner,
   listInstructorsByCohortId,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
@@ -144,6 +145,10 @@ export async function listInstructorsInCohort(cohortId: string) {
   return listInstructorsByCohortId(cohortId);
 }
 
+export async function listDistinctTagsForCohort(cohortId: string) {
+  return listDistinctTagsForCohortInner(cohortId);
+}
+
 export async function addStudentToCohortByPersonId(props: {
   cohortId: string;
   locationId: string;
@@ -151,7 +156,7 @@ export async function addStudentToCohortByPersonId(props: {
   tags?: string[];
 }) {
   const result = await addStudentToCohortByPersonIdInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
   return result;
 }
 
@@ -161,7 +166,7 @@ export async function releaseStudentFromCohortByAllocationId(props: {
   allocationId: string;
 }) {
   const result = await releaseStudentFromCohortByAllocationIdInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",

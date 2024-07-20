@@ -2,7 +2,6 @@
 import * as Headless from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import { useEffect, useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -38,6 +37,7 @@ import {
 } from "~/app/(dashboard)/_components/listbox";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import type {
   listCurriculaByProgram,
   listGearTypesByCurriculum,

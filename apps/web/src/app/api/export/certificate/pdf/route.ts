@@ -1,9 +1,9 @@
 import { constants } from "@nawadi/lib";
 import slugify from "@sindresorhus/slugify";
-import dayjs from "dayjs";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { generatePDF } from "./generate";
+import dayjs from "~/lib/dayjs";
+import { generatePDF } from "~/lib/generate-certificate-pdf";
 
 export const runtime = "nodejs";
 

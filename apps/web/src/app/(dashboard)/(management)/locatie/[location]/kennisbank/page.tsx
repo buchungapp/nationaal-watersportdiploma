@@ -1,8 +1,5 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { DocumentTextIcon } from "@heroicons/react/20/solid";
-import dayjs from "dayjs";
-import "dayjs/locale/nl";
-import relativeTime from "dayjs/plugin/relativeTime";
 import prettyBytes from "pretty-bytes";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -16,10 +13,8 @@ import {
   TableRow,
 } from "~/app/(dashboard)/_components/table";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
-
-dayjs.locale("nl");
-dayjs.extend(relativeTime);
 
 export default async function Page(
   _props: Readonly<{
