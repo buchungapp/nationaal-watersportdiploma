@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import {
   foreignKey,
   index,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -35,6 +36,7 @@ export const cohort = pgTable(
       withTimezone: true,
       mode: 'string',
     }),
+    _metadata: jsonb('_metadata'),
     ...timestamps,
   },
   (table) => {
@@ -66,7 +68,7 @@ export const cohortAllocation = pgTable(
       .array()
       .notNull()
       .default(sql`ARRAY[]::text[]`),
-    progressVisibleBefore: timestamp('progress_visible_before', {
+    progressVisibleUpUntil: timestamp('progress_visible_up_until', {
       withTimezone: true,
       mode: 'string',
     }),

@@ -1,1 +1,0 @@
-ALTER TABLE "cohort_allocation" ADD COLUMN "progress_visible_before" timestamp with time zone;

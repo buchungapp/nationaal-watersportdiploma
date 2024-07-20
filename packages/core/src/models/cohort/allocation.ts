@@ -9,6 +9,7 @@ import {
   exists,
   getTableColumns,
   gte,
+  isNotNull,
   isNull,
   lte,
   sql,
@@ -470,12 +471,17 @@ export const listPrivilegesForPerson = withZod(
 
 export const listStudentsWithCurricula = withZod(
   z.object({
-    cohortId: uuidSchema,
+    cohortId: uuidSchema.optional(),
+    personId: uuidSchema.optional(),
+    respectCohortVisibility: z.boolean().default(false),
+    respectProgressVisibility: z.boolean().default(false),
   }),
   async (input) => {
     const query = useQuery()
 
-    const { id, tags, createdAt } = getTableColumns(s.cohortAllocation)
+    const { id, tags, createdAt, progressVisibleUpUntil } = getTableColumns(
+      s.cohortAllocation,
+    )
 
     const instructorActor = alias(s.actor, 'instructor_actor')
     const instructorPerson = alias(s.person, 'instructor_person')
@@ -485,6 +491,7 @@ export const listStudentsWithCurricula = withZod(
         id,
         tags,
         createdAt,
+        progressVisibleUpUntil,
         person: {
           id: s.person.id,
           handle: s.person.handle,
@@ -500,6 +507,14 @@ export const listStudentsWithCurricula = withZod(
           lastName: instructorPerson.lastName,
         },
         studentCurriculumId: s.cohortAllocation.studentCurriculumId,
+        cohort: {
+          id: s.cohort.id,
+          label: s.cohort.label,
+        },
+        location: {
+          id: s.location.id,
+          name: s.location.name,
+        },
         curriculum: {
           id: s.curriculum.id,
         },
@@ -530,6 +545,8 @@ export const listStudentsWithCurricula = withZod(
         },
       })
       .from(s.cohortAllocation)
+      .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
+      .innerJoin(s.location, eq(s.location.id, s.cohort.locationId))
       .innerJoin(
         s.actor,
         and(
@@ -562,7 +579,19 @@ export const listStudentsWithCurricula = withZod(
       .where(
         and(
           isNull(s.cohortAllocation.deletedAt),
-          eq(s.cohortAllocation.cohortId, input.cohortId),
+          input.cohortId
+            ? eq(s.cohortAllocation.cohortId, input.cohortId)
+            : undefined,
+          input.personId ? eq(s.person.id, input.personId) : undefined,
+          input.respectCohortVisibility
+            ? and(
+                lte(s.cohort.accessStartTime, sql`NOW()`),
+                gte(s.cohort.accessEndTime, sql`NOW()`),
+              )
+            : undefined,
+          input.respectProgressVisibility
+            ? isNotNull(s.cohortAllocation.progressVisibleUpUntil)
+            : undefined,
         ),
       )
       .orderBy(
@@ -572,6 +601,7 @@ export const listStudentsWithCurricula = withZod(
 
     return rows.map((row) => ({
       id: row.id,
+      progressVisibleForStudentUpUntil: row.progressVisibleUpUntil,
       person: {
         id: row.person.id,
         handle: row.person.handle!,
@@ -579,6 +609,14 @@ export const listStudentsWithCurricula = withZod(
         lastNamePrefix: row.person.lastNamePrefix,
         lastName: row.person.lastName,
         dateOfBirth: row.person.dateOfBirth,
+      },
+      cohort: {
+        id: row.cohort.id,
+        label: row.cohort.label,
+      },
+      location: {
+        id: row.location.id,
+        name: row.location.name,
       },
       instructor: row.instructor?.id
         ? {
@@ -607,13 +645,17 @@ export const listStudentsWithCurricula = withZod(
 
 export const retrieveStudentWithCurriculum = withZod(
   z.object({
-    cohortId: uuidSchema,
+    cohortId: uuidSchema.optional(),
     allocationId: uuidSchema,
+    respectCohortVisibility: z.boolean().default(false),
+    respectProgressVisibility: z.boolean().default(false),
   }),
   async (input) => {
     const query = useQuery()
 
-    const { id, tags, createdAt } = getTableColumns(s.cohortAllocation)
+    const { id, tags, createdAt, progressVisibleUpUntil } = getTableColumns(
+      s.cohortAllocation,
+    )
 
     const instructorActor = alias(s.actor, 'instructor_actor')
     const instructorPerson = alias(s.person, 'instructor_person')
@@ -623,6 +665,7 @@ export const retrieveStudentWithCurriculum = withZod(
         id,
         tags,
         createdAt,
+        progressVisibleUpUntil,
         person: {
           id: s.person.id,
           handle: s.person.handle,
@@ -638,6 +681,14 @@ export const retrieveStudentWithCurriculum = withZod(
           lastName: instructorPerson.lastName,
         },
         studentCurriculumId: s.cohortAllocation.studentCurriculumId,
+        cohort: {
+          id: s.cohort.id,
+          label: s.cohort.label,
+        },
+        location: {
+          id: s.location.id,
+          name: s.location.name,
+        },
         curriculum: {
           id: s.curriculum.id,
         },
@@ -681,6 +732,8 @@ export const retrieveStudentWithCurriculum = withZod(
           eq(s.actor.type, 'student'),
         ),
       )
+      .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
+      .innerJoin(s.location, eq(s.location.id, s.cohort.locationId))
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
       .leftJoin(
         instructorActor,
@@ -713,8 +766,20 @@ export const retrieveStudentWithCurriculum = withZod(
       .where(
         and(
           isNull(s.cohortAllocation.deletedAt),
-          eq(s.cohortAllocation.cohortId, input.cohortId),
+          isNull(s.cohort.deletedAt),
           eq(s.cohortAllocation.id, input.allocationId),
+          input.cohortId
+            ? eq(s.cohortAllocation.cohortId, input.cohortId)
+            : undefined,
+          input.respectCohortVisibility
+            ? and(
+                lte(s.cohort.accessStartTime, sql`NOW()`),
+                gte(s.cohort.accessEndTime, sql`NOW()`),
+              )
+            : undefined,
+          input.respectProgressVisibility
+            ? isNotNull(s.cohortAllocation.progressVisibleUpUntil)
+            : undefined,
         ),
       )
       .then(possibleSingleRow)
@@ -725,6 +790,15 @@ export const retrieveStudentWithCurriculum = withZod(
 
     return {
       id: row.id,
+      progressVisibleForStudentUpUntil: row.progressVisibleUpUntil,
+      cohort: {
+        id: row.cohort.id,
+        label: row.cohort.label,
+      },
+      location: {
+        id: row.location.id,
+        name: row.location.name,
+      },
       person: {
         id: row.person.id,
         handle: row.person.handle!,

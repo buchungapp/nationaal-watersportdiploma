@@ -1,5 +1,5 @@
 {
-  "id": "bc84a070-5b02-4c36-99c5-08ad9ef562fa",
+  "id": "b85ab7e9-b7e6-4f3f-9296-2d06eb2a1598",
   "prevId": "48e12e54-b072-44b5-b5a4-e787148d08ed",
   "version": "7",
   "dialect": "postgresql",
@@ -1135,6 +1135,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "_metadata": {
+          "name": "_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1240,8 +1246,8 @@
           "notNull": true,
           "default": "ARRAY[]::text[]"
         },
-        "progress_visible_before": {
-          "name": "progress_visible_before",
+        "progress_visible_up_until": {
+          "name": "progress_visible_up_until",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false

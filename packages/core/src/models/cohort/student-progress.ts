@@ -1,5 +1,15 @@
 import { schema as s } from '@nawadi/db'
-import { and, eq, inArray, isNull, max, notExists, sql } from 'drizzle-orm'
+import {
+  and,
+  eq,
+  exists,
+  inArray,
+  isNull,
+  lte,
+  max,
+  notExists,
+  sql,
+} from 'drizzle-orm'
 import { getTableColumns } from 'drizzle-orm/utils'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
@@ -13,8 +23,9 @@ import {
 export const byAllocationId = withZod(
   z.object({
     id: uuidSchema,
+    respectProgressVisibility: z.boolean().default(false),
   }),
-  async ({ id: cohortAllocationId }) => {
+  async ({ id: cohortAllocationId, respectProgressVisibility }) => {
     const query = useQuery()
 
     const subquery = query
@@ -26,7 +37,29 @@ export const byAllocationId = withZod(
         ),
       })
       .from(s.studentCohortProgress)
-      .where(eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId))
+      .where(
+        and(
+          eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId),
+          respectProgressVisibility
+            ? exists(
+                query
+                  .select({
+                    id: sql`1`,
+                  })
+                  .from(s.cohortAllocation)
+                  .where(
+                    and(
+                      eq(s.cohortAllocation.id, cohortAllocationId),
+                      lte(
+                        s.studentCohortProgress.createdAt,
+                        s.cohortAllocation.progressVisibleUpUntil,
+                      ),
+                    ),
+                  ),
+              )
+            : undefined,
+        ),
+      )
       .groupBy(
         s.studentCohortProgress.cohortAllocationId,
         s.studentCohortProgress.competencyId,
