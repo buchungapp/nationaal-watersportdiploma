@@ -431,8 +431,7 @@ function DownloadCertificatesDialog({
         <AlertTitle>Diploma's downloaden</AlertTitle>
         <AlertDescription>
           Download een PDF-bestand met de diploma's van de geselecteerde
-          cursisten. Het bestand wordt gesorteerd op alfabetische volgorde van
-          de naam van de cursist.
+          cursisten.
         </AlertDescription>
         <form action={formAction}>
           <AlertBody>
