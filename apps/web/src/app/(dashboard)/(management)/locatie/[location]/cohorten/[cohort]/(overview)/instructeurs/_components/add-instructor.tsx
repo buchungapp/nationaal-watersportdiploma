@@ -30,6 +30,7 @@ export function AddInstructor({
       <Subheading>Snel toevoegen</Subheading>
       <Combobox
         key={forceRerenderId}
+        autoFocus={true}
         name="personId"
         setQuery={setPersonQuery}
         onChange={async (personId) => {
