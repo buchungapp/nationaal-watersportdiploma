@@ -151,7 +151,7 @@ export async function addStudentToCohortByPersonId(props: {
   tags?: string[];
 }) {
   const result = await addStudentToCohortByPersonIdInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
   return result;
 }
 
@@ -161,7 +161,7 @@ export async function releaseStudentFromCohortByAllocationId(props: {
   allocationId: string;
 }) {
   const result = await releaseStudentFromCohortByAllocationIdInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
