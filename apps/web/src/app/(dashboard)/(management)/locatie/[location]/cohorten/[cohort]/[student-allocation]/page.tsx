@@ -199,10 +199,8 @@ async function ManageStudentCurriculumActions({
   studentAllocationId: string;
   locationId: string;
 }) {
-  const [allocation, locationRoles, privileges] = await Promise.all([
+  const [allocation] = await Promise.all([
     retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
-    listRolesForLocation(locationId),
-    listPrivilegesForCohort(cohortId),
   ]);
 
   if (!studentAllocationId) {
@@ -210,14 +208,6 @@ async function ManageStudentCurriculumActions({
   }
 
   if (!allocation?.studentCurriculum) {
-    return null;
-  }
-
-  const canManageStudent =
-    locationRoles.includes("location_admin") ||
-    privileges.includes("manage_cohort_students");
-
-  if (!canManageStudent) {
     return null;
   }
 

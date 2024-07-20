@@ -1,6 +1,6 @@
 import { schema as s } from '@nawadi/db'
 import assert from 'assert'
-import { SQLWrapper, and, eq, inArray } from 'drizzle-orm'
+import { SQLWrapper, and, asc, eq, getTableColumns, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { useQuery, withTransaction } from '../../contexts/index.js'
 import {
@@ -76,9 +76,12 @@ export const list = withZod(
 
     // Prepare a database query to fetch programs and their categories using joins.
     const programsPromise = query
-      .select()
+      .select(getTableColumns(s.program))
       .from(s.program)
+      .innerJoin(s.degree, eq(s.degree.id, s.program.degreeId))
+      .innerJoin(s.course, eq(s.course.id, s.program.courseId))
       .where(and(...whereClausules))
+      .orderBy(asc(s.program.title), asc(s.course.title), asc(s.degree.rang))
 
     // Fetch additional lists of categories, degrees, and disciplines in parallel to optimize loading times.
     const [programs, degrees, courses] = await Promise.all([
@@ -88,36 +91,34 @@ export const list = withZod(
     ])
 
     // Map over the programs to enrich them with additional data like degree, discipline, and categories.
-    return programs
-      .map((program) => {
-        // Find the corresponding degree for each program enforcing that it must exist.
-        const degree = findItem({
-          items: degrees,
-          predicate(item) {
-            return item.id === program.degreeId
-          },
-          enforce: true, // Enforce finding the degree, throw error if not found.
-        })
-
-        // Find the corresponding course for each program enforcing that it must exist.
-        const course = findItem({
-          items: courses,
-          predicate(item) {
-            return item.id === program.courseId
-          },
-          enforce: true, // Enforce finding the course, throw error if not found.
-        })
-
-        const { courseId, degreeId, ...programProperties } = program
-
-        // Construct the final program object with additional details.
-        return {
-          ...programProperties,
-          degree,
-          course,
-        }
+    return programs.map((program) => {
+      // Find the corresponding degree for each program enforcing that it must exist.
+      const degree = findItem({
+        items: degrees,
+        predicate(item) {
+          return item.id === program.degreeId
+        },
+        enforce: true, // Enforce finding the degree, throw error if not found.
       })
-      .sort((a, b) => a.degree.rang - b.degree.rang)
+
+      // Find the corresponding course for each program enforcing that it must exist.
+      const course = findItem({
+        items: courses,
+        predicate(item) {
+          return item.id === program.courseId
+        },
+        enforce: true, // Enforce finding the course, throw error if not found.
+      })
+
+      const { courseId, degreeId, ...programProperties } = program
+
+      // Construct the final program object with additional details.
+      return {
+        ...programProperties,
+        degree,
+        course,
+      }
+    })
   },
 )
 
