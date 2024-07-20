@@ -30,6 +30,9 @@ export async function withRedisClient<T>(
   const client = new Redis(url)
 
   const result = await storage.run(client, job)
+
+  await client.quit()
+
   return result
 }
 

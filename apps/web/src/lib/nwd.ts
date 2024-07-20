@@ -29,6 +29,20 @@ import posthog from "./posthog";
 
 export type ActorType = "student" | "instructor" | "location_admin";
 
+const supabaseConfig: SupabaseConfiguration = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+};
+
+const redisConfig: RedisConfiguration = {
+  url: process.env.REDIS_URL!,
+};
+
+const dbConfig: DatabaseConfiguration = {
+  pgUri: process.env.PGURI!,
+  serverless: true,
+};
+
 async function getPrimaryPerson<T extends boolean = true>(
   user: Awaited<ReturnType<typeof getUserOrThrow>>,
   force = true as T,
@@ -81,25 +95,9 @@ async function isActiveActorTypeInLocation({
 }
 
 async function makeRequest<T>(cb: () => Promise<T>) {
-  const supabaseConfig: SupabaseConfiguration = {
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  };
-
-  const redisConfig: RedisConfiguration = {
-    url: process.env.REDIS_URL!,
-  };
-
-  const dbConfig: DatabaseConfiguration = {
-    pgUri: process.env.PGURI!,
-    serverless: true,
-  };
-
   try {
     return await withSupabaseClient(supabaseConfig, async () => {
-      return await withRedisClient(redisConfig, async () => {
-        return await withDatabase(dbConfig, cb);
-      });
+      return await withDatabase(dbConfig, cb);
     });
   } catch (error) {
     console.error(error);
@@ -2153,12 +2151,16 @@ export const storeCertificateHandles = async (props: {
   fileName?: string;
 }) => {
   return makeRequest(async () => {
-    return await Certificate.storeHandles(props);
+    return await withRedisClient(redisConfig, async () => {
+      return await Certificate.storeHandles(props);
+    });
   });
 };
 
 export const retrieveCertificateHandles = async (uuid: string) => {
   return makeRequest(async () => {
-    return await Certificate.retrieveHandles({ uuid });
+    return await withRedisClient(redisConfig, async () => {
+      return await Certificate.retrieveHandles({ uuid });
+    });
   });
 };
