@@ -1,4 +1,3 @@
-import type { Row } from "@tanstack/react-table";
 import { useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -46,8 +45,12 @@ import {
 import type { Student } from "./students-table";
 
 interface Props {
-  count?: number;
-  rows: Row<Student>[];
+  rows: {
+    id: string;
+    instructor: Student["instructor"];
+    studentCurriculum: Student["studentCurriculum"];
+    person: Student["person"];
+  }[];
   cohortId: string;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }
@@ -60,7 +63,7 @@ function Claim({ rows, cohortId }: Props) {
 
   const doAllSelectedRowsBelongToThisInstructor =
     !!isInstructor &&
-    rows.every((row) => row.original.instructor?.id === isInstructor.personId);
+    rows.every((row) => row.instructor?.id === isInstructor.personId);
 
   return (
     <DropdownItem
@@ -69,13 +72,13 @@ function Claim({ rows, cohortId }: Props) {
           if (doAllSelectedRowsBelongToThisInstructor) {
             await releaseStudent(
               cohortId,
-              rows.map((row) => row.original.id),
+              rows.map((row) => row.id),
             );
             toast.success("Cursisten vrijgegeven");
           } else {
             await claimStudents(
               cohortId,
-              rows.map((row) => row.original.id),
+              rows.map((row) => row.id),
             );
             toast.success("Cursisten toegekent");
           }
@@ -97,9 +100,7 @@ function StartProgram({
   rows,
   openDialog,
 }: Props & { openDialog: () => void }) {
-  const areAllRowsUnassigned = rows.every(
-    (row) => !row.original.studentCurriculum,
-  );
+  const areAllRowsUnassigned = rows.every((row) => !row.studentCurriculum);
 
   return (
     <>
@@ -150,8 +151,8 @@ function StartProgramDialog({
         curriculumId: validated.curriculumId,
         gearTypeId: validated.gearTypeId,
         students: rows.map((row) => ({
-          allocationId: row.original.id,
-          personId: row.original.person.id,
+          allocationId: row.id,
+          personId: row.person.id,
         })),
       });
 
@@ -386,7 +387,7 @@ function AssignInstructorDialog({
       await assignInstructorToStudents({
         cohortId,
         instructorPersonId,
-        studentIds: rows.map((row) => row.original.id),
+        studentIds: rows.map((row) => row.id),
       });
 
       toast.success("Instructeur gewijzigd");

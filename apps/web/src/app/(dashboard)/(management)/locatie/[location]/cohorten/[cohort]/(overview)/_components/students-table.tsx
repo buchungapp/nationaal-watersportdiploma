@@ -1,4 +1,5 @@
 "use client";
+import { XMarkIcon } from "@heroicons/react/16/solid";
 import {
   createColumnHelper,
   flexRender,
@@ -9,7 +10,9 @@ import {
 import clsx from "clsx";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
+import React from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
+import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
@@ -27,6 +30,7 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
+import { transformSelectionState } from "~/utils/table-state";
 import { ActionButtons } from "./table-actions";
 
 export type Student = Awaited<
@@ -153,21 +157,59 @@ export default function StudentsTable({
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }) {
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<
+      string,
+      {
+        instructor: Student["instructor"];
+        studentCurriculum: Student["studentCurriculum"];
+        person: Student["person"];
+      }
+    >
+  >({});
+
   const table = useReactTable({
     data: students,
     columns,
+    state: {
+      rowSelection: transformSelectionState(rowSelection),
+    },
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    onRowSelectionChange: (updater) => {
+      setRowSelection((prev) => {
+        const normalized = transformSelectionState(prev);
+
+        const newSelectionValue =
+          updater instanceof Function ? updater(normalized) : updater;
+
+        // Generate new rowSelection object
+        return Object.fromEntries(
+          Object.keys(newSelectionValue).map((key) => {
+            const student = students.find((student) => student.id === key);
+            return [
+              key,
+              rowSelection.hasOwnProperty(key)
+                ? rowSelection[key]!
+                : {
+                    instructor: student!.instructor,
+                    studentCurriculum: student!.studentCurriculum,
+                    person: student!.person,
+                  },
+            ];
+          }),
+        );
+      });
+    },
   });
   const params = useParams();
 
-  const anyRowSelected =
-    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
-
-  const state = table.getState();
-
-  const selectedRows = Object.keys(state.rowSelection).length;
+  const selectedRows = Object.keys(rowSelection).length;
+  const actionRows = Object.entries(rowSelection).map(([id, props]) => ({
+    id,
+    ...props,
+  }));
 
   return (
     <div className="mt-8 relative">
@@ -175,14 +217,6 @@ export default function StudentsTable({
         className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
         dense
       >
-        {anyRowSelected ? (
-          <ActionButtons
-            rows={table.getSelectedRowModel().rows}
-            cohortId={cohortId}
-            locationRoles={locationRoles}
-            count={selectedRows}
-          />
-        ) : null}
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -241,6 +275,32 @@ export default function StudentsTable({
         <TableRowSelection table={table} totalItems={totalItems} />
         {/* <TablePagination totalItems={totalItems} /> */}
       </TableFooter>
+
+      <div
+        className={clsx(
+          "fixed inset-x-0 bottom-14 mx-auto flex w-fit items-center space-x-2 rounded-lg border border-gray-200 bg-white p-2 shadow-md dark:border-gray-800 dark:bg-gray-950",
+          selectedRows > 0 ? "" : "hidden",
+        )}
+      >
+        <p className="select-none text-sm">
+          <span className="rounded bg-branding-light/10 px-2 py-1.5 font-medium tabular-nums text-branding-dark">
+            {selectedRows}
+          </span>
+          <span className="ml-2 font-medium text-gray-900 dark:text-gray-50">
+            geselecteerd
+          </span>
+        </p>
+        <div className="flex items-center space-x-4">
+          <Button plain onClick={() => setRowSelection({})}>
+            <XMarkIcon />
+          </Button>
+          <ActionButtons
+            rows={actionRows}
+            cohortId={cohortId}
+            locationRoles={locationRoles}
+          />
+        </div>
+      </div>
     </div>
   );
 }

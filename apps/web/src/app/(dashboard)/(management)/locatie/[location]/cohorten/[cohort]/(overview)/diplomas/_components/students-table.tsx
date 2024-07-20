@@ -244,16 +244,15 @@ export default function StudentsTable({
         // Generate new rowSelection object
         return Object.fromEntries(
           Object.keys(newSelectionValue).map((key) => {
+            const student = students.find((student) => student.id === key);
+
             return [
               key,
               rowSelection.hasOwnProperty(key)
                 ? rowSelection[key]!
                 : {
-                    certificate: students.find((student) => student.id === key)!
-                      .certificate,
-                    studentCurriculum: students.find(
-                      (student) => student.id === key,
-                    )!.studentCurriculum,
+                    certificate: student!.certificate,
+                    studentCurriculum: student!.studentCurriculum,
                   },
             ];
           }),
