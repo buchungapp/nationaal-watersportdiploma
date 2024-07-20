@@ -66,6 +66,10 @@ export const cohortAllocation = pgTable(
       .array()
       .notNull()
       .default(sql`ARRAY[]::text[]`),
+    progressVisibleBefore: timestamp('progress_visible_before', {
+      withTimezone: true,
+      mode: 'string',
+    }),
     ...timestamps,
   },
   (table) => {
