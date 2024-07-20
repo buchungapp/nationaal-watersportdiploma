@@ -7,7 +7,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import {
   Table,
@@ -23,6 +22,7 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { Code } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import type { listPersonsForLocation } from "~/lib/nwd";
 import PersonRoleBadge from "../../_components/person-role-badge";
 

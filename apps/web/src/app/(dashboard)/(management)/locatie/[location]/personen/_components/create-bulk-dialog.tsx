@@ -1,11 +1,11 @@
 "use client";
 
-import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
+import dayjs from "~/lib/dayjs";
 
 import {
   Dialog,

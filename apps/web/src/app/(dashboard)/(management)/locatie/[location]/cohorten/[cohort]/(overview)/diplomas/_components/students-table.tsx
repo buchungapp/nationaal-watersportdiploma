@@ -8,7 +8,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import React from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -30,6 +29,7 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { Code } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import type { listCertificateOverviewByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
 import { ActionButtons } from "./table-actions";

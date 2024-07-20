@@ -1,11 +1,11 @@
 import { constants } from "@nawadi/lib";
 import assert from "assert";
-import dayjs from "dayjs";
 import path from "path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import SVGtoPDF from "svg-to-pdfkit";
 import { generateAdvise } from "~/app/(certificate)/diploma/_utils/generate-advise";
+import dayjs from "~/lib/dayjs";
 import { listCertificatesByNumber } from "~/lib/nwd";
 
 const fontPaths = {

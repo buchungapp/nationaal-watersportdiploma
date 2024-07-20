@@ -1,8 +1,8 @@
 import { BarChart } from "@tremor/react";
-import dayjs from "dayjs";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
+import dayjs from "~/lib/dayjs";
 import {
   listCertificates,
   listDisciplines,

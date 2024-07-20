@@ -1,12 +1,7 @@
 import clsx from "clsx";
-import dayjs from "dayjs";
-import "dayjs/locale/nl";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "~/lib/dayjs";
 
 import React from "react";
-
-dayjs.locale("nl");
-dayjs.extend(relativeTime);
 
 export default function Feed({
   activities,

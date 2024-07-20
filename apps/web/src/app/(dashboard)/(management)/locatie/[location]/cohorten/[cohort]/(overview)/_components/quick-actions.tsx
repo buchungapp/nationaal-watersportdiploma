@@ -1,6 +1,5 @@
 "use client";
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
-import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
@@ -35,6 +34,7 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import { deleteCohort, updateCohort } from "../_actions/nwd";
 
 interface Props {

@@ -19,12 +19,12 @@ import {
 } from "@nawadi/core";
 import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
-import dayjs from "dayjs";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import packageInfo from "~/../package.json";
+import dayjs from "~/lib/dayjs";
 import posthog from "./posthog";
 
 export type ActorType = "student" | "instructor" | "location_admin";

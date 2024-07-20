@@ -4,13 +4,13 @@ import {
   ChevronLeftIcon,
   UsersIcon,
 } from "@heroicons/react/16/solid";
-import dayjs from "dayjs";
 import "dayjs/locale/nl";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
+import dayjs from "~/lib/dayjs";
 import {
   listPrivilegesForCohort,
   listRolesForLocation,
@@ -20,8 +20,6 @@ import {
 } from "~/lib/nwd";
 import { LayoutTabs } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
-
-dayjs.locale("nl");
 
 // We need this for the bulk actions
 export const maxDuration = 240;

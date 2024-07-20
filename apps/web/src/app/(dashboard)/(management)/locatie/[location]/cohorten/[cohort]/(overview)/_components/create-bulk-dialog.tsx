@@ -1,6 +1,5 @@
 "use client";
 
-import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -32,6 +31,7 @@ import {
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import { addStudentsToCohort } from "../_actions/create";
 import { listCountries } from "../_actions/nwd";
 

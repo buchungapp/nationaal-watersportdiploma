@@ -2,7 +2,6 @@
 
 import * as Headless from "@headlessui/react";
 import { clsx } from "clsx";
-import dayjs from "dayjs";
 import { useMemo, useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -29,6 +28,7 @@ import {
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import { createPerson } from "../_actions/create";
 import {
   addStudentToCohortByPersonId,

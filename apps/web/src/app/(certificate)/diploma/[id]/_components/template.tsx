@@ -1,5 +1,4 @@
 import { CheckIcon } from "@heroicons/react/16/solid";
-import dayjs from "dayjs";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +6,7 @@ import type { ReactNode } from "react";
 import { DialogBody, DialogTitle } from "~/app/(dashboard)/_components/dialog";
 import Logo from "~/app/_components/brand/logo";
 import Wordmark from "~/app/_components/brand/wordmark";
+import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import background from "../_assets/nwd-2024-cover-bahia-blue.png";
 import Module from "./module";

@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import React, { Suspense } from "react";
 import {
   DescriptionDetails,
@@ -8,6 +7,7 @@ import {
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import {
   getPersonByHandle,
   getUserOrThrow,

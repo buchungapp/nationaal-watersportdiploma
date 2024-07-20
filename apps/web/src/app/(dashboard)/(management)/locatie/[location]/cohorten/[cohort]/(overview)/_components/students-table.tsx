@@ -8,7 +8,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import React from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -29,6 +28,7 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
 import { ActionButtons } from "./table-actions";

@@ -1,7 +1,7 @@
 import { constants } from "@nawadi/lib";
 import slugify from "@sindresorhus/slugify";
-import dayjs from "dayjs";
 import type { NextRequest } from "next/server";
+import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
 import { retrieveCertificateHandles } from "~/lib/nwd";
 

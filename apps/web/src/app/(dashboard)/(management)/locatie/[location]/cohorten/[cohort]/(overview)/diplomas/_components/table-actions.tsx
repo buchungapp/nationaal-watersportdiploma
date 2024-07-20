@@ -8,7 +8,6 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 
-import dayjs from "dayjs";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -31,6 +30,7 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import { completeAllCoreCompetencies } from "../../_actions/nwd";
 import { kickOffGeneratePDF } from "../_actions/download";
 import {

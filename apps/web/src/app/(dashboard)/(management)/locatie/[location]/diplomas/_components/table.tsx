@@ -9,7 +9,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -35,6 +34,7 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { Code } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import type { listCertificates } from "~/lib/nwd";
 import { Download } from "./table-actions";
 

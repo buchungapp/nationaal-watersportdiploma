@@ -98,6 +98,9 @@ importers:
       '@nawadi/core':
         specifier: workspace:^
         version: link:../../packages/core
+      '@nawadi/dayjs':
+        specifier: workspace:^
+        version: link:../../packages/dayjs
       '@next/mdx':
         specifier: 14.2.5
         version: 14.2.5(@mdx-js/loader@3.0.1)(@mdx-js/react@3.0.1)
@@ -395,6 +398,19 @@ importers:
       type-fest:
         specifier: ^4.21.0
         version: 4.21.0
+      typescript:
+        specifier: 5.4.5
+        version: 5.4.5
+
+  packages/dayjs:
+    dependencies:
+      dayjs:
+        specifier: 1.11.12
+        version: 1.11.12
+    devDependencies:
+      '@tsconfig/node20':
+        specifier: ^20.1.4
+        version: 20.1.4
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -5582,6 +5598,10 @@ packages:
 
   /dayjs@1.11.11:
     resolution: {integrity: sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==}
+    dev: false
+
+  /dayjs@1.11.12:
+    resolution: {integrity: sha512-Rt2g+nTbLlDWZTwwrIXjy9MeiZmSDI375FvZs72ngxx8PDC6YXOeR3q5LAuPzjZQxhiWdRKac7RKV+YyQYfYIg==}
     dev: false
 
   /debug@3.2.7:

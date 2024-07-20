@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import React from "react";
 import {
@@ -8,6 +7,7 @@ import {
 } from "~/app/(dashboard)/_components/description-list";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import {
   listCompetencyProgressInCohortForStudent,
   listCompletedCompetenciesByStudentCurriculumId,

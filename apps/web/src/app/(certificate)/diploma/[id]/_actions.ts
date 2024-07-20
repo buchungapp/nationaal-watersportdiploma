@@ -1,7 +1,7 @@
 "use server";
 
-import dayjs from "dayjs";
 import { redirect } from "next/navigation";
+import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { safeParseCertificateParams } from "../_utils/parse-certificate-params";
 

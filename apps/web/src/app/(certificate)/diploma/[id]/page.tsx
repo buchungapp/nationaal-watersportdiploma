@@ -1,5 +1,4 @@
 import { constants } from "@nawadi/lib";
-import dayjs from "dayjs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,6 +11,7 @@ import {
   TikTok,
   YouTube,
 } from "~/app/_components/socials";
+import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { Text, TextLink } from "../../../(dashboard)/_components/text";
 import { generateAdvise } from "../_utils/generate-advise";

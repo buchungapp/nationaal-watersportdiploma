@@ -3,7 +3,6 @@ import {
   ChevronRightIcon,
   EllipsisHorizontalIcon,
 } from "@heroicons/react/16/solid";
-import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
@@ -23,6 +22,7 @@ import {
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import { Code, Strong } from "~/app/(dashboard)/_components/text";
+import dayjs from "~/lib/dayjs";
 import {
   isInstructorInCohort,
   listDistinctTagsForCohort,
