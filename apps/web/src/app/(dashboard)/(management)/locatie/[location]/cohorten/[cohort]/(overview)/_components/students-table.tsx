@@ -164,6 +164,7 @@ export default function StudentsTable({
         instructor: Student["instructor"];
         studentCurriculum: Student["studentCurriculum"];
         person: Student["person"];
+        tags: Student["tags"];
       }
     >
   >({});
@@ -196,6 +197,7 @@ export default function StudentsTable({
                     instructor: student!.instructor,
                     studentCurriculum: student!.studentCurriculum,
                     person: student!.person,
+                    tags: student!.tags,
                   },
             ];
           }),

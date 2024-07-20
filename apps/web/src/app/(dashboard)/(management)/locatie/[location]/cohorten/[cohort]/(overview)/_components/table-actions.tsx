@@ -1,9 +1,11 @@
-import { useState } from "react";
+import type { FormEventHandler } from "react";
+import { useCallback, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
 
+import { ReactTags, type Tag } from "react-tag-autocomplete";
 import { z } from "zod";
 import {
   Combobox,
@@ -36,11 +38,13 @@ import {
   enrollStudentsInCurriculumForCohort,
   isInstructorInCohort,
   listCurriculaByProgram,
+  listDistinctTagsForCohort,
   listGearTypesByCurriculum,
   listInstructorsInCohort,
   listPrivilegesForCohort,
   listPrograms,
   releaseStudent,
+  setTags,
 } from "../_actions/nwd";
 import type { Student } from "./students-table";
 
@@ -50,6 +54,7 @@ interface Props {
     instructor: Student["instructor"];
     studentCurriculum: Student["studentCurriculum"];
     person: Student["person"];
+    tags: Student["tags"];
   }[];
   cohortId: string;
   locationRoles: ("student" | "instructor" | "location_admin")[];
@@ -321,6 +326,7 @@ export function ActionButtons(props: Props) {
             {...props}
             openDialog={() => setIsDialogOpen("assign-instructor")}
           />
+          <AddTag {...props} openDialog={() => setIsDialogOpen("add-tag")} />
         </DropdownMenu>
       </Dropdown>
 
@@ -335,6 +341,11 @@ export function ActionButtons(props: Props) {
         setIsOpen={(value) =>
           setIsDialogOpen(value ? "assign-instructor" : null)
         }
+      />
+      <AddTagDialog
+        {...props}
+        isOpen={isDialogOpen === "add-tag"}
+        setIsOpen={(value) => setIsDialogOpen(value ? "add-tag" : null)}
       />
     </>
   );
@@ -496,6 +507,144 @@ function StudentSubmitButton() {
     <Button color="branding-dark" disabled={pending} type="submit">
       {pending ? <Spinner className="text-white" /> : null}
       Toewijzen
+    </Button>
+  );
+}
+
+function AddTag({
+  openDialog,
+  cohortId,
+  locationRoles,
+}: Props & { openDialog: () => void }) {
+  const { data: privileges } = useSWR(["permissionsInCohort", cohortId], () =>
+    listPrivilegesForCohort(cohortId),
+  );
+
+  if (!privileges) throw new Error("Data should be defined through fallback");
+
+  if (
+    !(
+      locationRoles.includes("location_admin") ||
+      privileges.includes("manage_cohort_students")
+    )
+  ) {
+    return null;
+  }
+
+  return (
+    <>
+      <DropdownItem onClick={openDialog}>Tag toevoegen</DropdownItem>
+    </>
+  );
+}
+
+function AddTagDialog({
+  rows,
+  cohortId,
+  isOpen,
+  setIsOpen,
+}: Props & {
+  isOpen: boolean;
+  setIsOpen: (value: boolean) => void;
+}) {
+  const [tagsToAdd, setTagsToAdd] = useState<Tag[]>([]);
+
+  const handleDelete = (index: number) => {
+    setTagsToAdd(tagsToAdd.filter((_, i) => i !== index));
+  };
+
+  const handleAddition = (tag: Tag) => {
+    setTagsToAdd((prevTags) => {
+      return [...prevTags, tag];
+    });
+  };
+
+  const submit: FormEventHandler<HTMLFormElement> = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      async function updateTags() {
+        for (const row of rows) {
+          const distinctTags = new Set<string>([
+            ...row.tags,
+            ...tagsToAdd.map(({ value }) => value as string),
+          ]);
+
+          await setTags({
+            cohortId,
+            allocationId: row.id,
+            tags: Array.from(distinctTags),
+          });
+        }
+      }
+
+      toast.promise(updateTags(), {
+        loading: "Tags toevoegen",
+        success: "Tags toegevoegd",
+        error: "Er is iets misgegaan",
+      });
+
+      setIsOpen(false);
+    },
+    [cohortId, rows, tagsToAdd],
+  );
+
+  const { data: allCohortTags } = useSWR(
+    ["distinctTagsForCohort", cohortId],
+    () => listDistinctTagsForCohort(cohortId),
+  );
+
+  if (!allCohortTags)
+    throw new Error("Data should be defined through fallback");
+
+  return (
+    <>
+      <Dialog open={isOpen} onClose={setIsOpen} size="md">
+        <DialogTitle>Tags toevoegen</DialogTitle>
+        <DialogDescription>
+          Welke tag(s) wil je toevoegen aan de geselecteerde cursisten? Om een
+          nieuwe tag aan te maken typ je de tag in het invoerveld en druk je op
+          enter.
+        </DialogDescription>
+        <form onSubmit={submit}>
+          <DialogBody>
+            <ReactTags
+              labelText={undefined}
+              selected={tagsToAdd}
+              suggestions={
+                allCohortTags
+                  .filter(
+                    (tag) => !tagsToAdd.some(({ value }) => value === tag),
+                  )
+                  .map((tag) => ({ label: tag, value: tag })) as Tag[]
+              }
+              onAdd={handleAddition}
+              onDelete={handleDelete}
+              newOptionText="%value% toevoegen"
+              placeholderText="Tag toevoegen"
+              onValidate={(tag) => tag.trim().length > 0}
+              allowNew
+              activateFirstOption
+            />
+          </DialogBody>
+          <DialogActions>
+            <Button plain onClick={() => setIsOpen(false)}>
+              Annuleren
+            </Button>
+            <TagSubmitButton />
+          </DialogActions>
+        </form>
+      </Dialog>
+    </>
+  );
+}
+
+function TagSubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button color="branding-dark" disabled={pending} type="submit">
+      {pending ? <Spinner className="text-white" /> : null}
+      Toevoegen
     </Button>
   );
 }

@@ -12,6 +12,7 @@ import {
   isInstructorInCohort as isInstructorInCohortInner,
   listCountries as listCountriesInner,
   listCurriculaByProgram as listCurriculaByProgramInner,
+  listDistinctTagsForCohort as listDistinctTagsForCohortInner,
   listGearTypesByCurriculum as listGearTypesByCurriculumInner,
   listInstructorsByCohortId,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
@@ -142,6 +143,10 @@ export async function listPrivilegesForCohort(cohortId: string) {
 
 export async function listInstructorsInCohort(cohortId: string) {
   return listInstructorsByCohortId(cohortId);
+}
+
+export async function listDistinctTagsForCohort(cohortId: string) {
+  return listDistinctTagsForCohortInner(cohortId);
 }
 
 export async function addStudentToCohortByPersonId(props: {
