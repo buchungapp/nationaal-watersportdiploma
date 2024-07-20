@@ -1,10 +1,5 @@
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  EllipsisHorizontalIcon,
-} from "@heroicons/react/16/solid";
+import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
-import type { PropsWithChildren } from "react";
 import { Suspense } from "react";
 import { SWRConfig } from "swr";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -20,7 +15,7 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { Link } from "~/app/(dashboard)/_components/link";
+import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import { Code, Strong } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
@@ -228,43 +223,6 @@ async function ManageStudentCurriculumActions({
   );
 }
 
-async function NextButton({
-  params,
-  children,
-}: PropsWithChildren<{
-  params: { location: string; cohort: string };
-}>) {
-  const location = await retrieveLocationByHandle(params.location);
-  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
-
-  if (!cohort) {
-    notFound();
-  }
-
-  const [locationRoles, privileges] = await Promise.all([
-    listRolesForLocation(location.id),
-    listPrivilegesForCohort(cohort.id),
-  ]);
-
-  const canManageCertificates =
-    locationRoles.includes("location_admin") ||
-    privileges.includes("manage_cohort_certificate");
-
-  if (!canManageCertificates) {
-    return null;
-  }
-
-  return (
-    <Link
-      href={`/locatie/${params.location}/cohorten/${params.cohort}/diplomas`}
-      className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
-    >
-      {children}
-      <ChevronRightIcon className="size-4 fill-zinc-400 dark:fill-zinc-500" />
-    </Link>
-  );
-}
-
 export default async function Page({
   params,
 }: {
@@ -297,18 +255,8 @@ export default async function Page({
         },
       }}
     >
-      <div className="max-lg:hidden flex items-center justify-between">
-        <Link
-          href={`/locatie/${params.location}/cohorten/${params.cohort}`}
-          className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
-        >
-          <ChevronLeftIcon className="size-4 fill-zinc-400 dark:fill-zinc-500" />
-          Cursistenoverzicht
-        </Link>
-
-        <Suspense fallback={null}>
-          <NextButton params={params}>Diplomaoverzicht</NextButton>
-        </Suspense>
+      <div className="max-lg:hidden">
+        <RouterPreviousButton>Overzicht</RouterPreviousButton>
       </div>
 
       <div className="mx-auto mt-8 grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
