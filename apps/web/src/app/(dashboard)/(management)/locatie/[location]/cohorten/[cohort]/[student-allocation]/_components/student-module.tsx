@@ -20,6 +20,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { toast } from "sonner";
+import { useDebouncedCallback } from "use-debounce";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -195,6 +196,11 @@ function ProgressInput({
 }>) {
   const { advancedMode } = useCourseCardSettings();
 
+  const [localValue, setLocalValue] = useState(value);
+
+  // Debounce the setCompleted call
+  const debouncedSetCompleted = useDebouncedCallback(setCompleted, 600);
+
   if (advancedMode) {
     return (
       <Field className="flex items-center gap-x-2">
@@ -205,15 +211,20 @@ function ProgressInput({
           step="1"
           disabled={disabled}
           className="max-w-[4rem] tabular-nums text-center"
-          value={value}
+          value={localValue}
           onChange={async (e) => {
             const newProgress = parseInt(e.target.value, 10);
 
-            if (Number.isNaN(newProgress)) {
+            if (
+              Number.isNaN(newProgress) ||
+              newProgress < 0 ||
+              newProgress > 100
+            ) {
               return toast.error("Voer een getal in van 0 tot 100.");
             }
 
-            await setCompleted(newProgress);
+            setLocalValue(newProgress); // Update local state immediately for responsive UI
+            await debouncedSetCompleted(newProgress); // Debounced API call
           }}
         />
         {children}
