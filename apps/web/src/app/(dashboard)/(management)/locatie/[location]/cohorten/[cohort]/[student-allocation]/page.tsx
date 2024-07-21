@@ -341,9 +341,9 @@ export default async function Page({
                 <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
                 <DescriptionDetails className="flex items-center justify-between gap-x-2">
                   {allocation.progressVisibleForStudentUpUntil ? (
-                    dayjs(allocation.progressVisibleForStudentUpUntil).format(
-                      "DD-MM-YYYY HH:mm",
-                    )
+                    dayjs(allocation.progressVisibleForStudentUpUntil)
+                      .tz()
+                      .format("DD-MM-YYYY HH:mm")
                   ) : (
                     <>
                       <span className="text-zinc-500">Niet zichtbaar</span>

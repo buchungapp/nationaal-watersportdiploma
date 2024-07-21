@@ -49,9 +49,9 @@ export default async function Page({
 
             <DescriptionTerm>Bijgewerkt tot</DescriptionTerm>
             <DescriptionDetails>
-              {dayjs(allocation.progressVisibleForStudentUpUntil).format(
-                "DD-MM-YYYY HH:mm",
-              )}
+              {dayjs(allocation.progressVisibleForStudentUpUntil)
+                .tz()
+                .format("DD-MM-YYYY HH:mm")}
             </DescriptionDetails>
           </DescriptionList>
         </div>

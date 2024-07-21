@@ -97,9 +97,9 @@ export async function CourseCard({
           <Text className="my-4">
             Dit diploma is uitgegeven op{" "}
             <Strong>
-              {dayjs(allocation.certificate!.issuedAt).format(
-                "DD-MM-YYYY HH:mm uur",
-              )}
+              {dayjs(allocation.certificate!.issuedAt)
+                .tz()
+                .format("DD-MM-YYYY HH:mm uur")}
             </Strong>
             . Om aanpassingen in de cursuskaart te kunnen doen moet een
             cohortbeheerder het diploma eerst verwijderen.
