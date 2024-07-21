@@ -47,9 +47,6 @@ export default async function Page({
             <DescriptionTerm>Vaarlocatie</DescriptionTerm>
             <DescriptionDetails>{allocation.location.name}</DescriptionDetails>
 
-            <DescriptionTerm>Cohort</DescriptionTerm>
-            <DescriptionDetails>{allocation.cohort.label}</DescriptionDetails>
-
             <DescriptionTerm>Bijgewerkt tot</DescriptionTerm>
             <DescriptionDetails>
               {dayjs(allocation.progressVisibleForStudentUpUntil).format(

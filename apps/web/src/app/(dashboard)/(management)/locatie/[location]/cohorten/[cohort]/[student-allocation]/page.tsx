@@ -16,7 +16,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
-import { Code, Strong } from "~/app/(dashboard)/_components/text";
+import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
   isInstructorInCohort,
@@ -283,15 +283,19 @@ export default async function Page({
 
             <DescriptionTerm>Naam</DescriptionTerm>
             <DescriptionDetails>
-              <Strong>
-                {[
-                  allocation.person.firstName,
-                  allocation.person.lastNamePrefix,
-                  allocation.person.lastName,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              </Strong>
+              <TextLink
+                href={`/locatie/${location.handle}/personen/${allocation.person.id}`}
+              >
+                <Strong>
+                  {[
+                    allocation.person.firstName,
+                    allocation.person.lastNamePrefix,
+                    allocation.person.lastName,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                </Strong>
+              </TextLink>
             </DescriptionDetails>
 
             <DescriptionTerm>Leeftijd</DescriptionTerm>

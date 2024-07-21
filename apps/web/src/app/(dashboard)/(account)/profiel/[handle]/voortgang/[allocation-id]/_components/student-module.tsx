@@ -6,7 +6,7 @@ import {
   DisclosurePanel,
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/16/solid";
-import { useState, type PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -15,7 +15,6 @@ import {
   CheckboxGroup,
 } from "~/app/(dashboard)/_components/checkbox";
 import { Description, Label } from "~/app/(dashboard)/_components/fieldset";
-import { Switch, SwitchField } from "~/app/(dashboard)/_components/switch";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import { Weight } from "~/app/_components/weight";
 import type { retrieveCurriculumById } from "~/lib/nwd";
@@ -55,8 +54,6 @@ export function Module({
   competenciesProgress: { id: string; progress: number }[];
   completedCompetencies: string[];
 }) {
-  const [showRequirements, setShowRequirements] = useState(false);
-
   const areAllCompetenciesCompleted = module.competencies.every((competency) =>
     completedCompetencies.includes(competency.id),
   );
@@ -110,17 +107,7 @@ export function Module({
             </div>
 
             <DisclosurePanel className="mt-2 pl-[52px] sm:pl-11">
-              <div className="flex">
-                <SwitchField>
-                  <Label>Toon eisen</Label>
-                  <Switch
-                    checked={showRequirements}
-                    onChange={setShowRequirements}
-                  />
-                </SwitchField>
-              </div>
-
-              <dl className="space-y-1 mt-4">
+              <dl className="space-y-1">
                 {module.competencies.map((competency) => {
                   const isCompletedInPreviousCertification =
                     completedCompetencies.includes(competency.id);
@@ -147,11 +134,9 @@ export function Module({
                         <Weight weight={competency.weight} />
                         <Label>{competency.title}</Label>
                       </div>
-                      {showRequirements ? (
-                        <Description className="text-justify">
-                          {competency.requirement}
-                        </Description>
-                      ) : null}
+                      <Description className="text-justify">
+                        {competency.requirement}
+                      </Description>
                     </CourseCardCheckbox>
                   );
                 })}
