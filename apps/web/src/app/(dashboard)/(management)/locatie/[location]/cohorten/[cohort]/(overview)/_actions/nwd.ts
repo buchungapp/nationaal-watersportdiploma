@@ -237,7 +237,7 @@ export async function removeCohortRole(props: {
 
 export async function setTags(props: {
   cohortId: string;
-  allocationId: string;
+  allocationId: string | string[];
   tags: string[];
 }) {
   await setAllocationTagsInner(props);

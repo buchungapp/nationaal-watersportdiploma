@@ -22,6 +22,7 @@ import {
   GridListItem,
 } from "../../_components/grid-list";
 import { EditDetails } from "./_components/action-buttons";
+import { PersonCohortProgress } from "./_components/cohort-progress";
 
 async function ExternalCertificates({ personId }: { personId: string }) {
   const certificates = await listExternalCertificatesForPerson(personId);
@@ -173,70 +174,79 @@ export default async function Page({
         overige certificaten. Ook kan je hier je personalia wijzigen.
       </Text>
 
-      <div className="mt-12">
-        <div className="flex items-center justify-between">
-          <Subheading>Personalia</Subheading>
-          <Suspense fallback={null}>
-            <ActionButton handle={params.handle} />
+      <div className="space-y-12 xl:space-y-16">
+        <div>
+          <div className="flex items-center justify-between">
+            <Subheading>Personalia</Subheading>
+            <Suspense fallback={null}>
+              <ActionButton handle={params.handle} />
+            </Suspense>
+          </div>
+          <Divider className="mt-4" />
+          <DescriptionList>
+            <DescriptionTerm>Voornaam</DescriptionTerm>
+            <DescriptionDetails>{person.firstName}</DescriptionDetails>
+
+            <DescriptionTerm>Tussenvoegsel</DescriptionTerm>
+            <DescriptionDetails>
+              {person.lastNamePrefix ?? "-"}
+            </DescriptionDetails>
+
+            <DescriptionTerm>Achternaam</DescriptionTerm>
+            <DescriptionDetails>{person.lastName ?? "-"}</DescriptionDetails>
+
+            <DescriptionTerm>Geboortedatum</DescriptionTerm>
+            <DescriptionDetails>
+              {person.dateOfBirth
+                ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
+                : "-"}
+            </DescriptionDetails>
+
+            <DescriptionTerm>Geboorteplaats</DescriptionTerm>
+            <DescriptionDetails>{person.birthCity ?? "-"}</DescriptionDetails>
+
+            <DescriptionTerm>Geboorteland</DescriptionTerm>
+            <DescriptionDetails>
+              {person.birthCountry?.name ?? "-"}
+            </DescriptionDetails>
+          </DescriptionList>
+        </div>
+
+        <PersonCohortProgress
+          person={{
+            id: person.id,
+            handle: person.handle,
+          }}
+        />
+
+        <div>
+          <Subheading>Jouw NWD-diploma's</Subheading>
+          <Text>
+            Hieronder vind je een overzicht van de NWD-diploma's die je hebt
+            behaald. Klik ze aan om er meer over te leren, en je succes nogmaals
+            te vieren! Mis je een diploma? Neem dan contact op met de{" "}
+            <TextLink href="/vaarlocaties" target="_blank">
+              vaarlocatie
+            </TextLink>{" "}
+            waar je de cursus hebt gevolgd.
+          </Text>
+          <Divider className="mt-2 mb-4" />
+          <Suspense>
+            <NWDCertificates personId={person.id} />
           </Suspense>
         </div>
-        <Divider className="mt-4" />
-        <DescriptionList>
-          <DescriptionTerm>Voornaam</DescriptionTerm>
-          <DescriptionDetails>{person.firstName}</DescriptionDetails>
 
-          <DescriptionTerm>Tussenvoegsel</DescriptionTerm>
-          <DescriptionDetails>
-            {person.lastNamePrefix ?? "-"}
-          </DescriptionDetails>
-
-          <DescriptionTerm>Achternaam</DescriptionTerm>
-          <DescriptionDetails>{person.lastName ?? "-"}</DescriptionDetails>
-
-          <DescriptionTerm>Geboortedatum</DescriptionTerm>
-          <DescriptionDetails>
-            {person.dateOfBirth
-              ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
-              : "-"}
-          </DescriptionDetails>
-
-          <DescriptionTerm>Geboorteplaats</DescriptionTerm>
-          <DescriptionDetails>{person.birthCity ?? "-"}</DescriptionDetails>
-
-          <DescriptionTerm>Geboorteland</DescriptionTerm>
-          <DescriptionDetails>
-            {person.birthCountry?.name ?? "-"}
-          </DescriptionDetails>
-        </DescriptionList>
-      </div>
-
-      <div className="mt-12">
-        <Subheading>Jouw NWD-diploma's</Subheading>
-        <Text>
-          Hieronder vind je een overzicht van de NWD-diploma's die je hebt
-          behaald. Klik ze aan om er meer over te leren, en je succes nogmaals
-          te vieren! Mis je een diploma? Neem dan contact op met de{" "}
-          <TextLink href="/vaarlocaties" target="_blank">
-            vaarlocatie
-          </TextLink>{" "}
-          waar je de cursus hebt gevolgd.
-        </Text>
-        <Divider className="mt-2 mb-4" />
-        <Suspense>
-          <NWDCertificates personId={person.id} />
-        </Suspense>
-      </div>
-
-      <div className="mt-12">
-        <Subheading>Jouw overige certificaten</Subheading>
-        <Text>
-          Hieronder vind je een overzicht van andere certificaten die je behaalt
-          hebt, zoals oude CWO diploma's.
-        </Text>
-        <Divider className="mt-2 mb-4" />
-        <Suspense>
-          <ExternalCertificates personId={person.id} />
-        </Suspense>
+        <div>
+          <Subheading>Jouw overige certificaten</Subheading>
+          <Text>
+            Hieronder vind je een overzicht van andere certificaten die je
+            behaalt hebt, zoals oude CWO diploma's.
+          </Text>
+          <Divider className="mt-2 mb-4" />
+          <Suspense>
+            <ExternalCertificates personId={person.id} />
+          </Suspense>
+        </div>
       </div>
     </div>
   );

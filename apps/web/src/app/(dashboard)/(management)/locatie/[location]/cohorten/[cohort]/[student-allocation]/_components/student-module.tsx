@@ -5,9 +5,17 @@ import {
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
-import { CheckIcon, MinusIcon, PlusIcon } from "@heroicons/react/16/solid";
 import {
+  AdjustmentsHorizontalIcon,
+  CheckIcon,
+  MinusIcon,
+  PlusIcon,
+} from "@heroicons/react/16/solid";
+import {
+  createContext,
+  useContext,
   useOptimistic,
+  useRef,
   useState,
   useTransition,
   type PropsWithChildren,
@@ -20,8 +28,22 @@ import {
   CheckboxField,
   CheckboxGroup,
 } from "~/app/(dashboard)/_components/checkbox";
-import { Description, Label } from "~/app/(dashboard)/_components/fieldset";
-import { Switch, SwitchField } from "~/app/(dashboard)/_components/switch";
+import {
+  Description,
+  Field,
+  Label,
+} from "~/app/(dashboard)/_components/fieldset";
+import { Input } from "~/app/(dashboard)/_components/input";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+} from "~/app/(dashboard)/_components/popover";
+import {
+  Switch,
+  SwitchField,
+  SwitchGroup,
+} from "~/app/(dashboard)/_components/switch";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import { Weight } from "~/app/_components/weight";
@@ -30,6 +52,94 @@ import {
   updateBulkCompetencyProgress,
   updateSingleCompetencyProgress,
 } from "../_actions/progress";
+
+const CourseCardContext = createContext<
+  | {
+      advancedMode: boolean;
+      toggleAdvancedMode: (value?: boolean) => void;
+      showRequirements: boolean;
+      toggleShowRequirements: (value?: boolean) => void;
+    }
+  | undefined
+>(undefined);
+
+export function CourseCardProvider({ children }: PropsWithChildren) {
+  const [state, setState] = useState({
+    advancedMode: false,
+    showRequirements: false,
+  });
+
+  return (
+    <CourseCardContext.Provider
+      value={{
+        advancedMode: state.advancedMode,
+        toggleAdvancedMode: (value) =>
+          setState((prev) => ({
+            ...prev,
+            advancedMode: value ?? !prev.advancedMode,
+          })),
+        showRequirements: state.showRequirements,
+        toggleShowRequirements: (value) =>
+          setState((prev) => ({
+            ...prev,
+            showRequirements: value ?? !prev.showRequirements,
+          })),
+      }}
+    >
+      {children}
+    </CourseCardContext.Provider>
+  );
+}
+
+function useCourseCardSettings() {
+  const context = useContext(CourseCardContext);
+
+  if (!context) {
+    throw new Error("useCourseCard must be used within a CourseCardProvider");
+  }
+
+  return context;
+}
+
+export function CourseCardViewSettings() {
+  const {
+    advancedMode,
+    toggleAdvancedMode,
+    showRequirements,
+    toggleShowRequirements,
+  } = useCourseCardSettings();
+
+  return (
+    <Popover>
+      <PopoverButton outline>
+        <AdjustmentsHorizontalIcon />
+        Weergave
+      </PopoverButton>
+      <PopoverPanel anchor="bottom end" className="p-4">
+        <SwitchGroup>
+          <SwitchField>
+            <Label>Toon eisen</Label>
+            <Description>
+              Toon de eisomschrijvingen bij de competenteis.
+            </Description>
+            <Switch
+              checked={showRequirements}
+              onChange={toggleShowRequirements}
+            />
+          </SwitchField>
+          <SwitchField>
+            <Label>Geavanceerde voortgang</Label>
+            <Description>
+              Voer een getal 0-100 in om de voortgang van een competentie bij te
+              houden.
+            </Description>
+            <Switch checked={advancedMode} onChange={toggleAdvancedMode} />
+          </SwitchField>
+        </SwitchGroup>
+      </PopoverPanel>
+    </Popover>
+  );
+}
 
 export function CompleteAllCoreModules({
   cohortAllocationId,
@@ -72,24 +182,60 @@ export function CompleteAllCoreModules({
   );
 }
 
-function CourseCardCheckbox({
+function ProgressInput({
   children,
-  checked,
+  value,
   disabled,
   indeterminate,
   setCompleted,
 }: PropsWithChildren<{
   disabled: boolean;
-  checked: boolean;
+  value: number;
   indeterminate: boolean;
-  setCompleted: (completed: boolean) => Promise<void>;
+  setCompleted: (newProgress: number) => Promise<void>;
 }>) {
+  const { advancedMode } = useCourseCardSettings();
+  const numberInputRef = useRef<HTMLInputElement>(null);
+
+  if (advancedMode) {
+    return (
+      <Field className="flex items-center gap-x-2">
+        <Input
+          ref={numberInputRef}
+          key={value}
+          type="number"
+          min="0"
+          max="100"
+          step="1"
+          disabled={disabled}
+          defaultValue={value}
+          className="max-w-[4rem] tabular-nums text-center"
+          onBlur={async (e) => {
+            const newProgress = parseInt(e.target.value, 10);
+
+            if (
+              Number.isNaN(newProgress) ||
+              newProgress < 0 ||
+              newProgress > 100
+            ) {
+              numberInputRef.current?.focus();
+              return toast.error("Voer een getal in van 0 tot 100.");
+            }
+
+            await setCompleted(newProgress);
+          }}
+        />
+        {children}
+      </Field>
+    );
+  }
+
   return (
-    <CheckboxField disabled={disabled} className="">
+    <CheckboxField disabled={disabled}>
       <Checkbox
-        checked={checked}
+        checked={value > 0}
         indeterminate={indeterminate}
-        onChange={setCompleted}
+        onChange={(checked) => setCompleted(checked ? 100 : 0)}
       />
       {children}
     </CheckboxField>
@@ -111,7 +257,7 @@ export function Module({
   completedCompetencies: string[];
   cohortAllocationId: string;
 }) {
-  const [showRequirements, setShowRequirements] = useState(false);
+  const { showRequirements } = useCourseCardSettings();
   const [optimisticProgress, setOptimisticProgress] = useOptimistic(
     competenciesProgress,
     (
@@ -172,41 +318,43 @@ export function Module({
                   {panelOpen ? <MinusIcon /> : <PlusIcon />}
                 </DisclosureButton>
 
-                <CourseCardCheckbox
+                <CheckboxField
                   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                   disabled={disabled || areAllCompetenciesCompleted}
-                  checked={
-                    areAllCompetenciesCompleted || areSomeCompetenciesSelected
-                  }
-                  indeterminate={!areAllCompetenciesSelected}
-                  setCompleted={async (completed) => {
-                    setOptimisticProgress(
-                      module.competencies.map((competency) => ({
-                        id: competency.id,
-                        progress: completed ? 100 : 0,
-                      })),
-                    );
-
-                    await updateBulkCompetencyProgress({
-                      cohortAllocationId,
-                      progressData: module.competencies.map((competency) => ({
-                        competencyId: competency.id,
-                        progress: completed ? 100 : 0,
-                      })),
-                    }).catch(() => {
-                      toast.error("Er is iets misgegaan.");
-                    });
-
-                    return;
-                  }}
                 >
+                  <Checkbox
+                    checked={
+                      areAllCompetenciesCompleted || areSomeCompetenciesSelected
+                    }
+                    indeterminate={!areAllCompetenciesSelected}
+                    onChange={async (checked) => {
+                      setOptimisticProgress(
+                        module.competencies.map((competency) => ({
+                          id: competency.id,
+                          progress: checked ? 100 : 0,
+                        })),
+                      );
+
+                      await updateBulkCompetencyProgress({
+                        cohortAllocationId,
+                        progressData: module.competencies.map((competency) => ({
+                          competencyId: competency.id,
+                          progress: checked ? 100 : 0,
+                        })),
+                      }).catch(() => {
+                        toast.error("Er is iets misgegaan.");
+                      });
+
+                      return;
+                    }}
+                  />
                   <div className="flex gap-x-2">
                     <Weight weight={module.weight} />
                     <Label>
                       <Strong>{module.title}</Strong>
                     </Label>
                   </div>
-                </CourseCardCheckbox>
+                </CheckboxField>
               </div>
               <div className="flex items-center justify-end gap-x-2">
                 <ModuleRequiredBadge
@@ -217,7 +365,7 @@ export function Module({
             </div>
 
             <DisclosurePanel className="mt-2 pl-[52px] sm:pl-11">
-              <div className="flex">
+              {/* <div className="flex">
                 <SwitchField>
                   <Label>Toon eisen</Label>
                   <Switch
@@ -225,7 +373,7 @@ export function Module({
                     onChange={setShowRequirements}
                   />
                 </SwitchField>
-              </div>
+              </div> */}
 
               <dl className="space-y-1 mt-4">
                 {module.competencies.map((competency) => {
@@ -237,31 +385,32 @@ export function Module({
                       ?.progress ?? 0;
 
                   return (
-                    <CourseCardCheckbox
+                    <ProgressInput
                       key={competency.id}
                       // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                       disabled={disabled || isCompletedInPreviousCertification}
-                      checked={
-                        isCompletedInPreviousCertification ||
-                        competencyProgress > 0
+                      value={
+                        isCompletedInPreviousCertification
+                          ? 100
+                          : competencyProgress
                       }
                       indeterminate={
                         !isCompletedInPreviousCertification &&
                         competencyProgress > 0 &&
                         competencyProgress < 100
                       }
-                      setCompleted={async (completed) => {
+                      setCompleted={async (newProgress) => {
                         setOptimisticProgress([
                           {
                             id: competency.id,
-                            progress: completed ? 100 : 0,
+                            progress: newProgress,
                           },
                         ]);
 
                         await updateSingleCompetencyProgress({
                           cohortAllocationId,
                           competencyId: competency.id,
-                          progress: completed ? 100 : 0,
+                          progress: newProgress,
                         }).catch(() => {
                           toast.error("Er is iets misgegaan.");
                         });
@@ -278,7 +427,7 @@ export function Module({
                           {competency.requirement}
                         </Description>
                       ) : null}
-                    </CourseCardCheckbox>
+                    </ProgressInput>
                   );
                 })}
               </dl>

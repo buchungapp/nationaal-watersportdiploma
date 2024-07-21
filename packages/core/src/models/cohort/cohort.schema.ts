@@ -14,6 +14,8 @@ export const insertSchema = createInsertSchema(s.cohort, {
 })
 export type Input = z.input<typeof insertSchema>
 
-export const selectSchema = createSelectSchema(s.cohort)
+export const selectSchema = createSelectSchema(s.cohort).omit({
+  _metadata: true,
+})
 
 export type Output = z.output<typeof selectSchema>

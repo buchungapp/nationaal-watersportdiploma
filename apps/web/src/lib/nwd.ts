@@ -1083,6 +1083,7 @@ export const updateLocationDetails = async (
     return;
   });
 };
+
 export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
@@ -1118,6 +1119,22 @@ export const listStudentsWithCurriculaByCohortId = cache(
     });
   },
 );
+
+export const listActiveCohortsForPerson = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const [authUser] = await Promise.all([getUserOrThrow()]);
+
+    if (!authUser.persons.some((p) => p.id === personId)) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Cohort.Allocation.listStudentsWithCurricula({
+      personId,
+      respectCohortVisibility: true,
+      respectProgressVisibility: true,
+    });
+  });
+});
 
 export const listCertificateOverviewByCohortId = cache(
   async (cohortId: string) => {
@@ -1195,7 +1212,32 @@ export const retrieveStudentAllocationWithCurriculum = cache(
       return await Cohort.Allocation.retrieveStudentWithCurriculum({
         cohortId,
         allocationId,
+        respectCohortVisibility: !isLocationAdmin,
       });
+    });
+  },
+);
+
+export const retrieveStudentAllocationWithCurriculumForPerson = cache(
+  async (allocationId: string) => {
+    return makeRequest(async () => {
+      const [authUser] = await Promise.all([getUserOrThrow()]);
+
+      const result = await Cohort.Allocation.retrieveStudentWithCurriculum({
+        allocationId,
+        respectCohortVisibility: true,
+        respectProgressVisibility: true,
+      });
+
+      if (!result) {
+        return null;
+      }
+
+      if (!authUser.persons.some((p) => p.id === result.person.id)) {
+        throw new Error("Unauthorized");
+      }
+
+      return result;
     });
   },
 );
@@ -1213,11 +1255,14 @@ export const listCompletedCompetenciesByStudentCurriculumId = cache(
 );
 
 export const listCompetencyProgressInCohortForStudent = cache(
-  async (allocationId: string) => {
+  async (allocationId: string, respectVisibility?: boolean) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
 
-      return await Cohort.StudentProgress.byAllocationId({ id: allocationId });
+      return await Cohort.StudentProgress.byAllocationId({
+        id: allocationId,
+        respectProgressVisibility: respectVisibility,
+      });
     });
   },
 );
@@ -1743,7 +1788,7 @@ export async function setAllocationTags({
   tags,
 }: {
   cohortId: string;
-  allocationId: string;
+  allocationId: string | string[];
   tags: string[];
 }) {
   return makeRequest(async () => {
@@ -2161,6 +2206,52 @@ export const retrieveCertificateHandles = async (uuid: string) => {
   return makeRequest(async () => {
     return await withRedisClient(redisConfig, async () => {
       return await Certificate.retrieveHandles({ uuid });
+    });
+  });
+};
+
+export const makeProgressVisible = async ({
+  cohortId,
+  allocationId,
+}: {
+  cohortId: string;
+  allocationId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+    if (!cohort) {
+      return null;
+    }
+
+    const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: cohort?.locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listByPersonId({
+        cohortId: cohort.id,
+        personId: primaryPerson.id,
+        actorType: "instructor",
+      }).then((actors) => actors.length > 0),
+    ]);
+
+    const canAccessCohort =
+      isLocationAdmin ||
+      (isInstructorInCohort &&
+        dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
+        dayjs().isBefore(dayjs(cohort.accessEndTime)));
+
+    if (!canAccessCohort) {
+      return null;
+    }
+
+    return await Cohort.Allocation.makeProgressVisible({
+      allocationId,
     });
   });
 };

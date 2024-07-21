@@ -15,7 +15,12 @@ import {
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
 import { StartStudentCurriculum } from "./start-curriculum";
-import { CompleteAllCoreModules, Module } from "./student-module";
+import {
+  CompleteAllCoreModules,
+  CourseCardProvider,
+  CourseCardViewSettings,
+  Module,
+} from "./student-module";
 
 export async function CourseCard({
   cohortAllocationId,
@@ -68,75 +73,81 @@ export async function CourseCard({
   const hasIssuedCertificate = !!allocation.certificate;
 
   return (
-    <div>
-      <DescriptionList>
-        <DescriptionTerm>Programma</DescriptionTerm>
-        <DescriptionDetails>
-          <TextLink
-            href={`/diplomalijn/consument/disciplines/${allocation.studentCurriculum.discipline.handle}/${allocation.studentCurriculum.course.handle}`}
-            target="_blank"
-          >
-            {allocation.studentCurriculum.program.title ??
-              `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
-          </TextLink>
-        </DescriptionDetails>
+    <CourseCardProvider>
+      <div>
+        <DescriptionList>
+          <DescriptionTerm>Programma</DescriptionTerm>
+          <DescriptionDetails>
+            <TextLink
+              href={`/diplomalijn/consument/disciplines/${allocation.studentCurriculum.discipline.handle}/${allocation.studentCurriculum.course.handle}`}
+              target="_blank"
+            >
+              {allocation.studentCurriculum.program.title ??
+                `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
+            </TextLink>
+          </DescriptionDetails>
 
-        <DescriptionTerm>Vaartuig</DescriptionTerm>
-        <DescriptionDetails>
-          {allocation.studentCurriculum.gearType.title}
-        </DescriptionDetails>
-      </DescriptionList>
+          <DescriptionTerm>Vaartuig</DescriptionTerm>
+          <DescriptionDetails>
+            {allocation.studentCurriculum.gearType.title}
+          </DescriptionDetails>
+        </DescriptionList>
 
-      {hasIssuedCertificate ? (
-        <Text className="my-4">
-          Dit diploma is uitgegeven op{" "}
-          <Strong>
-            {dayjs(allocation.certificate!.issuedAt).format(
-              "DD-MM-YYYY HH:mm uur",
-            )}
-          </Strong>
-          . Om aanpassingen in de cursuskaart te kunnen doen moet een
-          cohortbeheerder het diploma eerst verwijderen.
-        </Text>
-      ) : null}
+        {hasIssuedCertificate ? (
+          <Text className="my-4">
+            Dit diploma is uitgegeven op{" "}
+            <Strong>
+              {dayjs(allocation.certificate!.issuedAt).format(
+                "DD-MM-YYYY HH:mm uur",
+              )}
+            </Strong>
+            . Om aanpassingen in de cursuskaart te kunnen doen moet een
+            cohortbeheerder het diploma eerst verwijderen.
+          </Text>
+        ) : null}
 
-      <div className="flex flex-wrap mt-2 gap-x-2 gap-y-2">
-        <CompleteAllCoreModules
-          disabled={hasIssuedCertificate}
-          cohortAllocationId={cohortAllocationId}
-          competencyIds={curriculum.modules
-            .filter((m) => m.isRequired)
-            .flatMap((module) => module.competencies.map((c) => c.id))
-            .filter((c) => {
-              // Filter out if already in completedCompetencyIds or
-              // if progress is >= 100 in competencyProgressMap
-              const completed = completedCompetencyIds.includes(c);
-              const progress = competencyProgressMap.find((cp) => cp.id === c);
+        <div className="flex flex-wrap items-center justify-between mt-2 gap-x-2 gap-y-2">
+          <CompleteAllCoreModules
+            disabled={hasIssuedCertificate}
+            cohortAllocationId={cohortAllocationId}
+            competencyIds={curriculum.modules
+              .filter((m) => m.isRequired)
+              .flatMap((module) => module.competencies.map((c) => c.id))
+              .filter((c) => {
+                // Filter out if already in completedCompetencyIds or
+                // if progress is >= 100 in competencyProgressMap
+                const completed = completedCompetencyIds.includes(c);
+                const progress = competencyProgressMap.find(
+                  (cp) => cp.id === c,
+                );
 
-              return !completed && (!progress || progress.progress < 100);
-            })}
-        />
+                return !completed && (!progress || progress.progress < 100);
+              })}
+          />
+
+          <CourseCardViewSettings />
+        </div>
+
+        <div className="mt-6">
+          {curriculum.modules.map((module, index) => {
+            return (
+              <React.Fragment key={module.id}>
+                <Module
+                  disabled={hasIssuedCertificate}
+                  module={module}
+                  completedCompetencies={completedCompetencyIds}
+                  competenciesProgress={competencyProgressMap}
+                  cohortAllocationId={cohortAllocationId}
+                />
+
+                {index < curriculum.modules.length - 1 ? (
+                  <Divider soft className="my-2.5" />
+                ) : null}
+              </React.Fragment>
+            );
+          })}
+        </div>
       </div>
-
-      <div className="mt-6">
-        {curriculum.modules.map((module, index) => {
-          return (
-            <React.Fragment key={module.id}>
-              <Module
-                disabled={hasIssuedCertificate}
-                module={module}
-                completedCompetencies={completedCompetencyIds}
-                competenciesProgress={competencyProgressMap}
-                cohortAllocationId={cohortAllocationId}
-              />
-
-              {index < curriculum.modules.length - 1 ? (
-                <Divider soft className="my-2.5" />
-              ) : null}
-            </React.Fragment>
-          );
-        })}
-      </div>
-    </div>
+    </CourseCardProvider>
   );
 }

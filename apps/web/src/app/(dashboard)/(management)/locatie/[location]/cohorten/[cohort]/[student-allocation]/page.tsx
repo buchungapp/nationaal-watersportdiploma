@@ -16,7 +16,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
-import { Code, Strong } from "~/app/(dashboard)/_components/text";
+import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
   isInstructorInCohort,
@@ -35,6 +35,7 @@ import {
   WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
+import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
 
 async function InstructorField({
@@ -244,6 +245,8 @@ export default async function Page({
     notFound();
   }
 
+  const progressTrackingEnabled = params.location === "krekt-sailing";
+
   return (
     <SWRConfig
       value={{
@@ -280,15 +283,19 @@ export default async function Page({
 
             <DescriptionTerm>Naam</DescriptionTerm>
             <DescriptionDetails>
-              <Strong>
-                {[
-                  allocation.person.firstName,
-                  allocation.person.lastNamePrefix,
-                  allocation.person.lastName,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              </Strong>
+              <TextLink
+                href={`/locatie/${location.handle}/personen/${allocation.person.id}`}
+              >
+                <Strong>
+                  {[
+                    allocation.person.firstName,
+                    allocation.person.lastNamePrefix,
+                    allocation.person.lastName,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                </Strong>
+              </TextLink>
             </DescriptionDetails>
 
             <DescriptionTerm>Leeftijd</DescriptionTerm>
@@ -328,6 +335,27 @@ export default async function Page({
                 />
               </Suspense>
             </DescriptionDetails>
+
+            {progressTrackingEnabled ? (
+              <>
+                <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
+                <DescriptionDetails className="flex items-center justify-between gap-x-2">
+                  {allocation.progressVisibleForStudentUpUntil ? (
+                    dayjs(allocation.progressVisibleForStudentUpUntil).format(
+                      "DD-MM-YYYY HH:mm",
+                    )
+                  ) : (
+                    <>
+                      <span className="text-zinc-500">Niet zichtbaar</span>
+                    </>
+                  )}
+                  <UpdateProgressVisibility
+                    allocationId={allocation.id}
+                    cohortId={cohort.id}
+                  />
+                </DescriptionDetails>
+              </>
+            ) : null}
 
             <DescriptionTerm>Tags</DescriptionTerm>
             <DescriptionDetails>

@@ -323,9 +323,11 @@ function CreateDialogClient({
                                       "ml-2 truncate text-gray-500 group-data-[active]/option:text-white",
                                     )}
                                   >
-                                    {dayjs(person.dateOfBirth).format(
-                                      "DD-MM-YYYY",
-                                    )}
+                                    {person.dateOfBirth
+                                      ? dayjs(person.dateOfBirth).format(
+                                          "DD-MM-YYYY",
+                                        )
+                                      : null}
                                   </span>
                                 </div>
                               </ComboboxLabel>

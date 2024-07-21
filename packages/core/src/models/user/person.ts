@@ -273,6 +273,7 @@ export const list = withZod(
         and(
           eq(s.actor.personId, s.person.id),
           isNull(s.actor.deletedAt),
+          isNull(s.person.deletedAt),
           !!input.filter.locationId
             ? Array.isArray(input.filter.locationId)
               ? inArray(s.actor.locationId, input.filter.locationId)

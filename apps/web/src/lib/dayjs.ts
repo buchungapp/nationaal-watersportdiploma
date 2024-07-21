@@ -23,7 +23,9 @@ dayjs.extend(utc);
 dayjs.extend(minmax);
 dayjs.extend(duration);
 
+// Set defaults
 dayjs.locale("nl");
+dayjs.tz.setDefault("Europe/Amsterdam");
 
 export type Dayjs = dayjs.Dayjs;
 export type { ConfigType } from "dayjs";

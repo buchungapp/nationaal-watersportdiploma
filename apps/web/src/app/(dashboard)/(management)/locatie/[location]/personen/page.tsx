@@ -22,7 +22,7 @@ import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
 // We need this for the bulk import
-export const maxDuration = 60 * 5;
+export const maxDuration = 240;
 
 export default async function Page({
   params,

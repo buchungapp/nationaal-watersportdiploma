@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import dayjs from "~/lib/dayjs";
 import {
   getUserOrThrow,
   listLocationsWherePrimaryPersonHasManagementRole,
@@ -45,8 +46,14 @@ async function Persons() {
               <DescriptionList className="px-6">
                 <DescriptionTerm>NWD-id</DescriptionTerm>
                 <DescriptionDetails>
-                  {" "}
                   <Code>{person.handle}</Code>
+                </DescriptionDetails>
+
+                <DescriptionTerm>Geboortedatum</DescriptionTerm>
+                <DescriptionDetails>
+                  {person.dateOfBirth
+                    ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
+                    : null}
                 </DescriptionDetails>
               </DescriptionList>
             </GridListItem>

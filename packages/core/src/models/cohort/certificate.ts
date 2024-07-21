@@ -13,7 +13,9 @@ export const listStatus = withZod(
   async (input) => {
     const query = useQuery()
 
-    const { id, tags, createdAt } = getTableColumns(s.cohortAllocation)
+    const { id, tags, createdAt, progressVisibleUpUntil } = getTableColumns(
+      s.cohortAllocation,
+    )
 
     const instructorActor = alias(s.actor, 'instructor_actor')
     const instructorPerson = alias(s.person, 'instructor_person')
@@ -100,6 +102,7 @@ export const listStatus = withZod(
         id,
         tags,
         createdAt,
+        progressVisibleUpUntil,
         person: {
           id: s.person.id,
           firstName: s.person.firstName,
@@ -215,6 +218,7 @@ export const listStatus = withZod(
 
       return {
         id: student.id,
+        progressVisibleForStudentUpUntil: student.progressVisibleUpUntil,
         person: {
           id: student.person.id,
           firstName: student.person.firstName,
