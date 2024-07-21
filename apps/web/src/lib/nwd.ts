@@ -2209,3 +2209,49 @@ export const retrieveCertificateHandles = async (uuid: string) => {
     });
   });
 };
+
+export const makeProgressVisible = async ({
+  cohortId,
+  allocationId,
+}: {
+  cohortId: string;
+  allocationId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const cohort = await Cohort.byIdOrHandle({ id: cohortId });
+
+    if (!cohort) {
+      return null;
+    }
+
+    const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: cohort?.locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listByPersonId({
+        cohortId: cohort.id,
+        personId: primaryPerson.id,
+        actorType: "instructor",
+      }).then((actors) => actors.length > 0),
+    ]);
+
+    const canAccessCohort =
+      isLocationAdmin ||
+      (isInstructorInCohort &&
+        dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
+        dayjs().isBefore(dayjs(cohort.accessEndTime)));
+
+    if (!canAccessCohort) {
+      return null;
+    }
+
+    return await Cohort.Allocation.makeProgressVisible({
+      allocationId,
+    });
+  });
+};

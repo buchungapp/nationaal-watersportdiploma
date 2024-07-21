@@ -349,7 +349,10 @@ export default async function Page({
                       <span className="text-zinc-500">Niet zichtbaar</span>
                     </>
                   )}
-                  <UpdateProgressVisibility />
+                  <UpdateProgressVisibility
+                    allocationId={allocation.id}
+                    cohortId={cohort.id}
+                  />
                 </DescriptionDetails>
               </>
             ) : null}
