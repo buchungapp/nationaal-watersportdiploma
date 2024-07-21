@@ -3,7 +3,10 @@
 import { usePostHog } from "posthog-js/react";
 import type { Dispatch, PropsWithChildren, SetStateAction } from "react";
 import { createContext, useContext, useState } from "react";
-import { DropdownItem } from "~/app/(dashboard)/_components/dropdown";
+import {
+  DropdownItem,
+  DropdownLabel,
+} from "~/app/(dashboard)/_components/dropdown";
 import CreateBulkDialog from "./create-bulk-dialog";
 import CreateSingleDialog from "./create-single-dialog";
 
@@ -47,9 +50,11 @@ export function DialogButtons() {
 
   return (
     <>
-      <DropdownItem onClick={() => setIsOpen("single")}>Enkel</DropdownItem>
+      <DropdownItem onClick={() => setIsOpen("single")}>
+        <DropdownLabel>Enkel</DropdownLabel>
+      </DropdownItem>
       <DropdownItem onClick={() => setIsOpen("bulk")}>
-        Meerdere (bulk)
+        <DropdownLabel>Meerdere (bulk)</DropdownLabel>
       </DropdownItem>
     </>
   );

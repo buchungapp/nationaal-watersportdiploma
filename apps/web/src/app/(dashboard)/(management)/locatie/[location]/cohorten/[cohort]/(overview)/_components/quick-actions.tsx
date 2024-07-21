@@ -22,6 +22,7 @@ import {
   Dropdown,
   DropdownButton,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
@@ -57,10 +58,10 @@ export function CohortActions(props: Props) {
         </DropdownButton>
         <DropdownMenu anchor="bottom end">
           <DropdownItem onClick={() => setIsDialogOpen("edit")}>
-            Wijzig
+            <DropdownLabel>Wijzig</DropdownLabel>
           </DropdownItem>
           <DropdownItem onClick={() => setIsDialogOpen("remove")}>
-            Verwijder
+            <DropdownLabel>Verwijder</DropdownLabel>
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

@@ -5,6 +5,7 @@ import {
   Dropdown,
   DropdownButton,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 
@@ -102,7 +103,7 @@ export function ActionButtons(props: Props) {
                 : undefined
             }
           >
-            Diploma's uitgeven
+            <DropdownLabel>Diploma's uitgeven</DropdownLabel>
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("remove")}
@@ -113,7 +114,7 @@ export function ActionButtons(props: Props) {
                 : undefined
             }
           >
-            Diploma's verwijderen
+            <DropdownLabel>Diploma's verwijderen</DropdownLabel>
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("download")}
@@ -124,7 +125,7 @@ export function ActionButtons(props: Props) {
                 : undefined
             }
           >
-            Diploma's downloaden
+            <DropdownLabel>Diploma's downloaden</DropdownLabel>
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("complete-core-modules")}
@@ -137,7 +138,7 @@ export function ActionButtons(props: Props) {
                 : undefined
             }
           >
-            Kernmodules afronden
+            <DropdownLabel>Kernmodules afronden</DropdownLabel>
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

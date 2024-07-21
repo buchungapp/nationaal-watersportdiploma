@@ -23,6 +23,7 @@ import {
   Dropdown,
   DropdownButton,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
@@ -94,9 +95,11 @@ function Claim({ rows, cohortId }: Props) {
       disabled={!isInstructor}
       title={!isInstructor ? "Je bent geen instructeur in dit cohort" : ""}
     >
-      {doAllSelectedRowsBelongToThisInstructor
-        ? "Vergeef cursisten"
-        : "Claim cursisten"}
+      <DropdownLabel>
+        {doAllSelectedRowsBelongToThisInstructor
+          ? "Vergeef cursisten"
+          : "Claim cursisten"}
+      </DropdownLabel>
     </DropdownItem>
   );
 }
@@ -118,7 +121,7 @@ function StartProgram({
             : undefined
         }
       >
-        Start programma
+        <DropdownLabel>Start programma</DropdownLabel>
       </DropdownItem>
     </>
   );
@@ -373,7 +376,9 @@ function AssignInstructor({
 
   return (
     <>
-      <DropdownItem onClick={openDialog}>Instructeur toewijzen</DropdownItem>
+      <DropdownItem onClick={openDialog}>
+        <DropdownLabel>Instructeur toewijzen</DropdownLabel>
+      </DropdownItem>
     </>
   );
 }
@@ -533,7 +538,9 @@ function AddTag({
 
   return (
     <>
-      <DropdownItem onClick={openDialog}>Tag toevoegen</DropdownItem>
+      <DropdownItem onClick={openDialog}>
+        <DropdownLabel>Tag toevoegen</DropdownLabel>
+      </DropdownItem>
     </>
   );
 }

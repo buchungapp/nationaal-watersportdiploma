@@ -20,6 +20,7 @@ import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
   isInstructorInCohort,
+  listCompetencyProgressInCohortForStudent,
   listDistinctTagsForCohort,
   listPrivilegesForCohort,
   listPrograms,
@@ -195,8 +196,9 @@ async function ManageStudentCurriculumActions({
   studentAllocationId: string;
   locationId: string;
 }) {
-  const [allocation] = await Promise.all([
+  const [allocation, progress] = await Promise.all([
     retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    listCompetencyProgressInCohortForStudent(studentAllocationId),
   ]);
 
   if (!studentAllocationId) {
@@ -206,6 +208,8 @@ async function ManageStudentCurriculumActions({
   if (!allocation?.studentCurriculum) {
     return null;
   }
+
+  const notNullProgress = progress.filter((p) => Number(p.progress) > 0);
 
   return (
     <Dropdown>
@@ -217,7 +221,7 @@ async function ManageStudentCurriculumActions({
           cohortId={cohortId}
           studentAllocationId={studentAllocationId}
           locationId={locationId}
-          disabled={!!allocation.certificate}
+          disabled={!!allocation.certificate || notNullProgress.length > 0}
         />
       </DropdownMenu>
     </Dropdown>
@@ -341,9 +345,9 @@ export default async function Page({
                 <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
                 <DescriptionDetails className="flex items-center justify-between gap-x-2">
                   {allocation.progressVisibleForStudentUpUntil ? (
-                    dayjs(allocation.progressVisibleForStudentUpUntil).format(
-                      "DD-MM-YYYY HH:mm",
-                    )
+                    dayjs(allocation.progressVisibleForStudentUpUntil)
+                      .tz()
+                      .format("DD-MM-YYYY HH:mm")
                   ) : (
                     <>
                       <span className="text-zinc-500">Niet zichtbaar</span>

@@ -15,6 +15,7 @@ import {
   Dropdown,
   DropdownButton,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
@@ -134,17 +135,17 @@ export default function InstructorsTable({
                   </DropdownButton>
                   <DropdownMenu anchor="bottom end">
                     <DropdownItem onClick={deleteInstructor}>
-                      Verwijder uit cohort
+                      <DropdownLabel>Verwijder uit cohort</DropdownLabel>
                     </DropdownItem>
                     {row.original.roles.some(
                       (role) => role.handle === "cohort_admin",
                     ) ? (
                       <DropdownItem onClick={removeAdmin}>
-                        Verwijder als beheerder
+                        <DropdownLabel>Verwijder als beheerder</DropdownLabel>
                       </DropdownItem>
                     ) : (
                       <DropdownItem onClick={makeAdmin}>
-                        Maak beheerder
+                        <DropdownLabel>Maak beheerder</DropdownLabel>
                       </DropdownItem>
                     )}
                   </DropdownMenu>

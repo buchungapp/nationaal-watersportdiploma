@@ -80,15 +80,15 @@ export default async function Layout({
               <CalendarIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
               <div className="flex items-center gap-2">
                 <span>
-                  {dayjs(cohort.accessStartTime).format(
-                    "ddd DD-MM-YYYY HH:mm uur",
-                  )}
+                  {dayjs(cohort.accessStartTime)
+                    .tz()
+                    .format("ddd DD-MM-YYYY HH:mm uur")}
                 </span>
                 <ArrowRightIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
                 <span>
-                  {dayjs(cohort.accessEndTime).format(
-                    "ddd DD-MM-YYYY HH:mm uur",
-                  )}
+                  {dayjs(cohort.accessEndTime)
+                    .tz()
+                    .format("ddd DD-MM-YYYY HH:mm uur")}
                 </span>
               </div>
             </span>
