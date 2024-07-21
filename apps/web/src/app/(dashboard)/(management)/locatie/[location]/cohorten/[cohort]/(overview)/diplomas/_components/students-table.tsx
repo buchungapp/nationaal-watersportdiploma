@@ -225,7 +225,9 @@ export default function StudentsTable({
         header: "Diploma uitgegeven op",
         cell: ({ getValue }) => {
           const issuedAt = getValue();
-          return issuedAt ? dayjs(issuedAt).tz().format("DD-MM-YYYY HH:mm") : null;
+          return issuedAt
+            ? dayjs(issuedAt).tz().format("DD-MM-YYYY HH:mm")
+            : null;
         },
       }),
       ...(progressTrackingEnabled
