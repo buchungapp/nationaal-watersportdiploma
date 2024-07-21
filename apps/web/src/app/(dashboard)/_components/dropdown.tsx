@@ -66,7 +66,7 @@ export function DropdownItem({
     // Focus
     "data-[focus]:bg-blue-500 data-[focus]:text-white",
     // Disabled state
-    "data-[disabled]:opacity-50",
+    "data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
     // Forced colors mode
     "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText] forced-colors:[&>[data-slot=icon]]:data-[focus]:text-[HighlightText]",
     // Use subgrid when available but fallback to an explicit grid layout if not

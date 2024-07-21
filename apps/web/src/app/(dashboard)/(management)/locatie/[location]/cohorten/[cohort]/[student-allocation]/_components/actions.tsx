@@ -122,7 +122,7 @@ export function WithdrawStudentCurriculum({
     >
       <DropdownLabel>Verwijder programma</DropdownLabel>
       <DropdownDescription>
-        Je moet eerst alle voortgang verwijderen.
+        Verwijder eerst alle behaalde voortgang.
       </DropdownDescription>
     </DropdownItem>
   );
