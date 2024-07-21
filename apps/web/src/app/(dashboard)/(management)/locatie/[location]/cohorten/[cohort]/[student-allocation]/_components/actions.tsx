@@ -4,7 +4,11 @@ import { XMarkIcon } from "@heroicons/react/16/solid";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
-import { DropdownItem } from "~/app/(dashboard)/_components/dropdown";
+import {
+  DropdownDescription,
+  DropdownItem,
+  DropdownLabel,
+} from "~/app/(dashboard)/_components/dropdown";
 import {
   claimStudents,
   releaseStudent,
@@ -89,7 +93,7 @@ export function ReleaseStudentAllocation({
         }
       }}
     >
-      Verwijder uit cohort
+      <DropdownLabel>Verwijder uit cohort</DropdownLabel>
     </DropdownItem>
   );
 }
@@ -116,7 +120,10 @@ export function WithdrawStudentCurriculum({
         }
       }}
     >
-      Verwijder programma
+      <DropdownLabel>Verwijder programma</DropdownLabel>
+      <DropdownDescription>
+        Je moet eerst alle voortgang verwijderen.
+      </DropdownDescription>
     </DropdownItem>
   );
 }

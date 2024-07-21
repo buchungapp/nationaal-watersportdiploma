@@ -21,6 +21,7 @@ import {
   Dropdown,
   DropdownButton,
   DropdownItem,
+  DropdownLabel,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
@@ -93,7 +94,7 @@ export function EditDetails({
         </DropdownButton>
         <DropdownMenu anchor="bottom end">
           <DropdownItem onClick={() => setIsOpen(true)}>
-            Wijzig gegevens
+            <DropdownLabel> Wijzig gegevens</DropdownLabel>
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
