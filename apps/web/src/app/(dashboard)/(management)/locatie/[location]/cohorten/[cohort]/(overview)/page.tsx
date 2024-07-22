@@ -2,7 +2,11 @@ import { PlusIcon } from "@heroicons/react/16/solid";
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
-import { createSearchParamsCache, parseAsStringLiteral } from "nuqs/server";
+import {
+  createSearchParamsCache,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
 import { Suspense } from "react";
 import { SWRConfig, unstable_serialize } from "swr";
 import Search from "~/app/(dashboard)/(management)/_components/search";
@@ -90,15 +94,16 @@ export default async function Page({
   const defaultView =
     !!instructorAllocation && !isCohortAdmin ? "geclaimd" : "allen";
 
-  const parsedParams = createSearchParamsCache({
+  const parsedSq = createSearchParamsCache({
     overzicht: parseAsStringLiteral(["allen", "geclaimd"] as const).withDefault(
       defaultView,
     ),
+    query: parseAsString,
   }).parse(searchParams);
 
   let filteredStudents = students;
 
-  if (parsedParams.overzicht === "geclaimd" && !!instructorAllocation) {
+  if (parsedSq.overzicht === "geclaimd" && !!instructorAllocation) {
     filteredStudents = students.filter(
       (student) => student.instructor?.id === instructorAllocation.personId,
     );
@@ -145,11 +150,7 @@ export default async function Page({
     });
   });
 
-  const searchQuery = searchParams?.query
-    ? Array.isArray(searchParams.query)
-      ? searchParams.query.join(" ")
-      : searchParams.query
-    : null;
+  const searchQuery = parsedSq.query;
 
   let searchedStudents = filteredStudents;
 
@@ -160,6 +161,8 @@ export default async function Page({
       searchedStudents = filteredStudents.filter((student) =>
         searchResult.flatMap(({ result }) => result).includes(student.id),
       );
+    } else {
+      searchedStudents = [];
     }
   }
 
@@ -217,7 +220,9 @@ export default async function Page({
           // TODO: this can be optimized
           locationRoles={await listRolesForLocation(location.id)}
           noOptionsLabel={
-            parsedParams.overzicht === "allen" ? (
+            parsedSq.query && parsedSq.query.length > 2 ? (
+              "Geen resultaten gevonden"
+            ) : parsedSq.overzicht === "allen" ? (
               "Dit cohort heeft nog geen cursisten"
             ) : (
               <span>
@@ -225,7 +230,7 @@ export default async function Page({
                 <TextLink
                   href={`/locatie/${params.location}/cohorten/${params.cohort}?view=all`}
                 >
-                  Bekijk allene cursisten
+                  Bekijk alle cursisten
                 </TextLink>
                 .
               </span>
