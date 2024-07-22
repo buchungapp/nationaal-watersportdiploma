@@ -2,9 +2,9 @@ import { PlusIcon } from "@heroicons/react/16/solid";
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
+import { createSearchParamsCache, parseAsStringLiteral } from "nuqs/server";
 import { Suspense } from "react";
 import { SWRConfig, unstable_serialize } from "swr";
-import { z } from "zod";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
   Dropdown,
@@ -87,16 +87,18 @@ export default async function Page({
     ]);
 
   const isCohortAdmin = permissions.length > 0;
+  const defaultView =
+    !!instructorAllocation && !isCohortAdmin ? "geclaimd" : "allen";
 
-  // Filter
-  const viewParam = z
-    .enum(["all", "claimed"])
-    .catch(() => (!!instructorAllocation && !isCohortAdmin ? "claimed" : "all"))
-    .parse(searchParams.view);
+  const parsedParams = createSearchParamsCache({
+    overzicht: parseAsStringLiteral(["allen", "geclaimd"] as const).withDefault(
+      defaultView,
+    ),
+  }).parse(searchParams);
 
   let filteredStudents = students;
 
-  if (viewParam === "claimed" && !!instructorAllocation) {
+  if (parsedParams.overzicht === "geclaimd" && !!instructorAllocation) {
     filteredStudents = students.filter(
       (student) => student.instructor?.id === instructorAllocation.personId,
     );
@@ -195,9 +197,9 @@ export default async function Page({
 
               {!!instructorAllocation ? (
                 <div className="shrink-0">
-                  <SetView value={viewParam}>
-                    <option value="all">Alle cursisten</option>
-                    <option value="claimed">Mijn cursisten</option>
+                  <SetView defaultView={defaultView}>
+                    <option value="allen">Alle cursisten</option>
+                    <option value="geclaimd">Mijn cursisten</option>
                   </SetView>
                 </div>
               ) : null}
@@ -215,7 +217,7 @@ export default async function Page({
           // TODO: this can be optimized
           locationRoles={await listRolesForLocation(location.id)}
           noOptionsLabel={
-            viewParam === "all" ? (
+            parsedParams.overzicht === "allen" ? (
               "Dit cohort heeft nog geen cursisten"
             ) : (
               <span>
@@ -223,7 +225,7 @@ export default async function Page({
                 <TextLink
                   href={`/locatie/${params.location}/cohorten/${params.cohort}?view=all`}
                 >
-                  Bekijk alle cursisten
+                  Bekijk allene cursisten
                 </TextLink>
                 .
               </span>

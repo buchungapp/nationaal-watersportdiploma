@@ -1,24 +1,28 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import type { PropsWithChildren } from "react";
+import React from "react";
 import { Select } from "~/app/(dashboard)/_components/select";
 
 export function SetView({
-  value,
   children,
-}: PropsWithChildren<{ value: string }>) {
-  const params = useParams();
-  const router = useRouter();
+  defaultView,
+}: PropsWithChildren<{
+  defaultView: "allen" | "geclaimd";
+}>) {
+  const [_isLoading, startTransition] = React.useTransition();
+  const [value, setValue] = useQueryState(
+    "overzicht",
+    parseAsStringLiteral(["allen", "geclaimd"] as const)
+      .withDefault(defaultView)
+      .withOptions({
+        startTransition,
+      }),
+  );
 
   return (
-    <Select
-      value={value}
-      onChange={(newValue) => {
-        router.push(
-          `/locatie/${String(params.location)}/cohorten/${String(params.cohort)}?view=${newValue.target.value}`,
-        );
-      }}
-    >
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    <Select value={value} onChange={(e) => setValue(e.target.value as any)}>
       {children}
     </Select>
   );
