@@ -5,7 +5,12 @@ import {
   ArrowsUpDownIcon,
   XMarkIcon,
 } from "@heroicons/react/16/solid";
-import type { SortDirection } from "@tanstack/react-table";
+import type {
+  OnChangeFn,
+  RowSelectionState,
+  SortDirection,
+  SortingState,
+} from "@tanstack/react-table";
 import {
   createColumnHelper,
   flexRender,
@@ -16,7 +21,7 @@ import {
 import clsx from "clsx";
 import { useParams } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
-import React from "react";
+import React, { useMemo } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -37,7 +42,10 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
-import { transformSelectionState } from "~/utils/table-state";
+import {
+  generateSortingState,
+  transformSelectionState,
+} from "~/utils/table-state";
 import { ActionButtons } from "./table-actions";
 
 export type Student = Awaited<
@@ -191,38 +199,18 @@ export default function StudentsTable({
     parseAsArrayOf(parseAsString).withDefault(["cursist.az"]),
   );
 
-  const sortingState = React.useMemo(
+  const sortingState = useMemo(
     () =>
-      sort
-        .map((sort) => {
-          const [id, direction] = sort.split(".");
-          return {
-            id,
-            desc: direction === "za",
-          };
-        })
-        .filter(
-          (
-            sort,
-          ): sort is {
-            id: string;
-            desc: boolean;
-          } => columns.some((column) => column.id === sort.id),
-        ),
-    [sort],
+      generateSortingState(
+        sort,
+        columns.map((c) => c.id),
+      ),
+    // TODO: this feels a bit hacky, but we need a stable reference
+    [sort.join(":")],
   );
 
-  const table = useReactTable({
-    data: students,
-    columns,
-    state: {
-      rowSelection: transformSelectionState(rowSelection),
-      sorting: sortingState,
-    },
-    getRowId: (row) => row.id,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: (updater) => {
+  const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
+    (updater) => {
       setRowSelection((prev) => {
         const normalized = transformSelectionState(prev);
 
@@ -248,18 +236,46 @@ export default function StudentsTable({
         );
       });
     },
-    onSortingChange: (updater) => {
-      void setSort(() => {
+    [students],
+  );
+
+  const onSortingChange = React.useCallback<OnChangeFn<SortingState>>(
+    (updater) => {
+      void setSort((previousSort) => {
         const newSortValue =
-          updater instanceof Function ? updater(sortingState) : updater;
+          updater instanceof Function
+            ? updater(
+                generateSortingState(
+                  previousSort,
+                  columns.map((c) => c.id),
+                ),
+              )
+            : updater;
 
         return newSortValue.map(
           (sort) => `${sort.id}.${sort.desc ? "za" : "az"}`,
         );
       });
     },
+    [columns],
+  );
+
+  const table = useReactTable({
+    data: students,
+    columns,
+    state: {
+      rowSelection: transformSelectionState(rowSelection),
+      sorting: sortingState,
+    },
+    getRowId: (row) => row.id,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    onRowSelectionChange,
+    onSortingChange,
   });
   const params = useParams();
+
+  console.log("rerender");
 
   const selectedRows = Object.keys(rowSelection).length;
   const actionRows = Object.entries(rowSelection).map(([id, props]) => ({
