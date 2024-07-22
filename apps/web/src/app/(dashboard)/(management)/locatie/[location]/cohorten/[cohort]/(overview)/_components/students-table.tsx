@@ -275,8 +275,6 @@ export default function StudentsTable({
   });
   const params = useParams();
 
-  console.log("rerender");
-
   const selectedRows = Object.keys(rowSelection).length;
   const actionRows = Object.entries(rowSelection).map(([id, props]) => ({
     id,
