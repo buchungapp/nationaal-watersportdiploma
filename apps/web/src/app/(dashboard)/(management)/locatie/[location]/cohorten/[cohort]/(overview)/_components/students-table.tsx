@@ -1,5 +1,11 @@
 "use client";
-import { XMarkIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ArrowsUpDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/16/solid";
+import type { SortDirection } from "@tanstack/react-table";
 import {
   createColumnHelper,
   flexRender,
@@ -9,6 +15,7 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useParams } from "next/navigation";
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import React from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -73,9 +80,6 @@ const columns = [
       );
     },
     enableSorting: false,
-    meta: {
-      suppressLinkBehavior: true,
-    },
   }),
   columnHelper.accessor(
     (data) =>
@@ -83,13 +87,16 @@ const columns = [
         .filter(Boolean)
         .join(" "),
     {
+      id: "cursist",
       header: "Naam",
       cell: ({ getValue }) => (
         <span className="font-medium text-zinc-950">{getValue()}</span>
       ),
+      sortingFn: "text",
     },
   ),
   columnHelper.accessor("person.dateOfBirth", {
+    id: "leeftijd",
     header: "Leeftijd",
     cell: ({ getValue }) => {
       const dateOfBirth = getValue();
@@ -97,20 +104,25 @@ const columns = [
         ? `${dayjs().diff(dayjs(dateOfBirth), "year")} jr.`
         : null;
     },
+    sortingFn: "alphanumeric",
   }),
-  columnHelper.accessor(
-    (data) =>
-      data.studentCurriculum?.program.title ??
-      data.studentCurriculum?.course.title,
-    {
-      header: "Programma",
-    },
-  ),
+  columnHelper.accessor((data) => data.studentCurriculum?.course.title, {
+    id: "cursus",
+    header: "Cursus",
+    sortUndefined: "last",
+    sortingFn: "text",
+  }),
   columnHelper.accessor("studentCurriculum.degree.title", {
+    id: "niveau",
     header: "Niveau",
+    sortUndefined: "last",
+    sortingFn: "alphanumeric",
   }),
   columnHelper.accessor("studentCurriculum.gearType.title", {
+    id: "vaartuig",
     header: "Vaartuig",
+    sortUndefined: "last",
+    sortingFn: "text",
   }),
   columnHelper.accessor(
     (data) =>
@@ -122,15 +134,19 @@ const columns = [
           ]
             .filter(Boolean)
             .join(" ")
-        : null,
+        : undefined,
     {
+      id: "instructeur",
       header: "Instructeur",
       cell: ({ getValue }) => (
         <span className="font-medium text-zinc-950">{getValue()}</span>
       ),
+      sortUndefined: "last",
+      sortingFn: "text",
     },
   ),
   columnHelper.accessor("tags", {
+    id: "tags",
     header: "Tags",
     cell: ({ getValue }) => {
       return (
@@ -141,6 +157,7 @@ const columns = [
         </div>
       );
     },
+    enableSorting: false,
   }),
 ];
 
@@ -169,11 +186,38 @@ export default function StudentsTable({
     >
   >({});
 
+  const [sort, setSort] = useQueryState(
+    "sorteer",
+    parseAsArrayOf(parseAsString).withDefault(["cursist.az"]),
+  );
+
+  const sortingState = React.useMemo(
+    () =>
+      sort
+        .map((sort) => {
+          const [id, direction] = sort.split(".");
+          return {
+            id,
+            desc: direction === "za",
+          };
+        })
+        .filter(
+          (
+            sort,
+          ): sort is {
+            id: string;
+            desc: boolean;
+          } => columns.some((column) => column.id === sort.id),
+        ),
+    [sort],
+  );
+
   const table = useReactTable({
     data: students,
     columns,
     state: {
       rowSelection: transformSelectionState(rowSelection),
+      sorting: sortingState,
     },
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
@@ -204,6 +248,16 @@ export default function StudentsTable({
         );
       });
     },
+    onSortingChange: (updater) => {
+      void setSort(() => {
+        const newSortValue =
+          updater instanceof Function ? updater(sortingState) : updater;
+
+        return newSortValue.map(
+          (sort) => `${sort.id}.${sort.desc ? "za" : "az"}`,
+        );
+      });
+    },
   });
   const params = useParams();
 
@@ -222,17 +276,68 @@ export default function StudentsTable({
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHeader
-                  key={header.id}
-                  className={clsx(header.column.columnDef.meta?.align)}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </TableHeader>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const sortingHandler =
+                  header.column.getToggleSortingHandler?.();
+                const getAriaSortValue = (isSorted: false | SortDirection) => {
+                  switch (isSorted) {
+                    case "asc":
+                      return "ascending";
+                    case "desc":
+                      return "descending";
+                    case false:
+                    default:
+                      return "none";
+                  }
+                };
+
+                return (
+                  <TableHeader
+                    key={header.id}
+                    onClick={sortingHandler}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && sortingHandler) {
+                        sortingHandler(event);
+                      }
+                    }}
+                    className={clsx(
+                      header.column.getCanSort()
+                        ? "cursor-pointer select-none"
+                        : "",
+                    )}
+                    tabIndex={header.column.getCanSort() ? 0 : -1}
+                    aria-sort={getAriaSortValue(header.column.getIsSorted())}
+                  >
+                    <div
+                      className={clsx(
+                        header.column.columnDef.enableSorting === false
+                          ? header.column.columnDef.meta?.align
+                          : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
+                        "rounded-md",
+                      )}
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {header.column.getCanSort() &&
+                        (header.column.getIsSorted() === false ? (
+                          <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
+                        ) : header.column.getIsSorted() === "desc" ? (
+                          <ArrowUpIcon
+                            className="size-3 text-gray-900 dark:text-gray-50"
+                            aria-hidden={true}
+                          />
+                        ) : (
+                          <ArrowDownIcon
+                            className="size-3 text-gray-900 dark:text-gray-50"
+                            aria-hidden={true}
+                          />
+                        ))}
+                    </div>
+                  </TableHeader>
+                );
+              })}
             </TableRow>
           ))}
         </TableHead>
@@ -258,9 +363,6 @@ export default function StudentsTable({
                 <TableCell
                   key={cell.id}
                   className={clsx(cell.column.columnDef.meta?.align)}
-                  // suppressLinkBehavior={
-                  //   cell.column.columnDef.meta?.suppressLinkBehavior
-                  // }
                 >
                   {index === 0 && row.getIsSelected() && (
                     <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
@@ -275,7 +377,6 @@ export default function StudentsTable({
 
       <TableFooter>
         <TableRowSelection table={table} totalItems={totalItems} />
-        {/* <TablePagination totalItems={totalItems} /> */}
       </TableFooter>
 
       <div
