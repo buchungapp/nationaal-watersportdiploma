@@ -3,9 +3,10 @@ import assert from 'assert'
 import dayjs from 'dayjs'
 import {
   and,
+  asc,
   desc,
   eq,
-  exists,
+  getTableColumns,
   gte,
   inArray,
   isNull,
@@ -13,6 +14,7 @@ import {
   lte,
   sql,
 } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import crypto from 'node:crypto'
 import { z } from 'zod'
 import {
@@ -141,16 +143,49 @@ export const list = withZod(
           issuedBefore: z.string().datetime().optional(),
         })
         .default({}),
+      sort: z
+        .array(
+          z.union([
+            z.literal('createdAt'),
+            z.literal('student'),
+            z.literal('instructor'),
+          ]),
+        )
+        .default(['createdAt']),
       // TODO: alter this default value to be true
       respectVisibility: z.boolean().default(false),
     })
     .default({}),
-  async ({ filter, respectVisibility }) => {
+  async ({ filter, sort, respectVisibility }) => {
     const query = useQuery()
 
+    const studentPerson = alias(s.person, 'student_person')
+    const instructorActor = alias(s.actor, 'instructor_actor')
+    const instructorPerson = alias(s.person, 'instructor_person')
+
     const certificates = await query
-      .select()
+      .select(getTableColumns(s.certificate))
       .from(s.certificate)
+      .innerJoin(
+        s.studentCurriculum,
+        eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
+      )
+      .innerJoin(
+        studentPerson,
+        eq(studentPerson.id, s.studentCurriculum.personId),
+      )
+      .leftJoin(
+        s.cohortAllocation,
+        eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+      )
+      .leftJoin(
+        instructorActor,
+        eq(instructorActor.id, s.cohortAllocation.instructorId),
+      )
+      .leftJoin(
+        instructorPerson,
+        eq(instructorPerson.id, instructorActor.personId),
+      )
       .where(
         and(
           filter.id
@@ -175,22 +210,9 @@ export const list = withZod(
             ? lt(s.certificate.issuedAt, filter.issuedBefore)
             : undefined,
           filter.personId
-            ? exists(
-                query
-                  .select({ id: sql`1` })
-                  .from(s.studentCurriculum)
-                  .where(
-                    and(
-                      Array.isArray(filter.personId)
-                        ? inArray(s.studentCurriculum.personId, filter.personId)
-                        : eq(s.studentCurriculum.personId, filter.personId),
-                      eq(
-                        s.studentCurriculum.id,
-                        s.certificate.studentCurriculumId,
-                      ),
-                    ),
-                  ),
-              )
+            ? Array.isArray(filter.personId)
+              ? inArray(s.studentCurriculum.personId, filter.personId)
+              : eq(s.studentCurriculum.personId, filter.personId)
             : undefined,
           isNull(s.certificate.deletedAt),
           respectVisibility
@@ -198,7 +220,18 @@ export const list = withZod(
             : undefined,
         ),
       )
-      .orderBy(desc(s.certificate.createdAt))
+      .orderBy(
+        ...sort.map((sort) => {
+          switch (sort) {
+            case 'student':
+              return asc(sql`LOWER(${studentPerson.firstName})`)
+            case 'instructor':
+              return asc(sql`LOWER(${instructorPerson.firstName})`)
+            default:
+              return desc(s.certificate.createdAt)
+          }
+        }),
+      )
 
     if (certificates.length === 0) {
       return []
@@ -377,9 +410,12 @@ export const withdraw = withZod(uuidSchema, async (input) => {
 export const storeHandles = withZod(
   z.object({
     fileName: z.string().optional(),
+    sort: z
+      .union([z.literal('student'), z.literal('instructor')])
+      .default('student'),
     handles: z.array(z.string().length(10)).min(1),
   }),
-  async ({ fileName, handles }) => {
+  async ({ fileName, sort, handles }) => {
     const redis = useRedisClient()
     const uuid = crypto.randomUUID()
     const key = `c-export:${uuid}`
@@ -390,10 +426,11 @@ export const storeHandles = withZod(
     pipeline.sadd(`${key}:items`, handles)
     pipeline.expire(`${key}:items`, expirationTime)
 
-    if (fileName) {
-      pipeline.set(`${key}:file-name`, fileName)
-      pipeline.expire(`${key}:file-name`, expirationTime)
-    }
+    pipeline.hset(`${key}:settings`, {
+      fileName: fileName,
+      sort,
+    })
+    pipeline.expire(`${key}:settings`, expirationTime)
 
     await pipeline.exec()
 
@@ -406,7 +443,10 @@ export const retrieveHandles = withZod(
     uuid: z.string().uuid(),
   }),
   z.object({
-    fileName: z.string().optional(),
+    settings: z.object({
+      fileName: z.string().optional(),
+      sort: z.union([z.literal('student'), z.literal('instructor')]),
+    }),
     handles: z.array(z.string().length(10)),
   }),
   async ({ uuid }) => {
@@ -414,7 +454,7 @@ export const retrieveHandles = withZod(
     const key = `c-export:${uuid}`
     const results = await redis
       .pipeline()
-      .get(`${key}:file-name`)
+      .hgetall(`${key}:settings`)
       .smembers(`${key}:items`)
       .exec()
 
@@ -422,16 +462,16 @@ export const retrieveHandles = withZod(
       throw new Error('Failed to execute Redis pipeline')
     }
 
-    const [fileNameResult, handlesResult] = results
+    const [settingsResult, handlesResult] = results
 
-    if (!fileNameResult || !handlesResult) {
+    if (!settingsResult || !handlesResult) {
       throw new Error('Unexpected Redis pipeline result structure')
     }
 
-    const [fileNameError, fileName] = fileNameResult
+    const [settingsError, settings] = settingsResult
     const [handlesError, handles] = handlesResult
 
-    if (fileNameError || handlesError) {
+    if (settingsError || handlesError) {
       throw new Error('Redis operation failed')
     }
 
@@ -443,8 +483,13 @@ export const retrieveHandles = withZod(
       throw new Error('Export not found')
     }
 
+    const expectedSettingsSchema = z.object({
+      fileName: z.string().optional(),
+      sort: z.union([z.literal('student'), z.literal('instructor')]),
+    })
+
     return {
-      fileName: typeof fileName === 'string' ? fileName : undefined,
+      settings: expectedSettingsSchema.parse(settings),
       handles: handles as string[],
     }
   },

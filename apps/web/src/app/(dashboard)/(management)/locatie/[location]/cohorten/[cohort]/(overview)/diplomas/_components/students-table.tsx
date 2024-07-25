@@ -103,6 +103,7 @@ export default function StudentsTable({
         enableSorting: false,
       }),
       columnHelper.accessor("certificate.handle", {
+        id: "diploma",
         header: "Diploma",
         cell: ({ getValue }) => {
           const value = getValue();
@@ -120,6 +121,7 @@ export default function StudentsTable({
             .filter(Boolean)
             .join(" "),
         {
+          id: "cursist",
           header: "Naam",
           cell: ({ getValue }) => (
             <span className="font-medium text-zinc-950">{getValue()}</span>
@@ -159,7 +161,7 @@ export default function StudentsTable({
           return coreModulesCompleted;
         },
         {
-          id: "completedRequired",
+          id: "kernmodules",
           header: "Kernmodules",
           sortUndefined: "last",
           cell: ({ row }) => {
@@ -208,7 +210,7 @@ export default function StudentsTable({
           return electiveModulesCompleted;
         },
         {
-          id: "completedOptional",
+          id: "keuzemodules",
           header: "Keuzemodules",
           sortUndefined: "last",
           cell: ({ row }) => {
@@ -244,13 +246,16 @@ export default function StudentsTable({
           data.studentCurriculum?.program.title ??
           data.studentCurriculum?.course.title,
         {
+          id: "cursus",
           header: "Cursus",
         },
       ),
       columnHelper.accessor("studentCurriculum.degree.title", {
+        id: "niveau",
         header: "Niveau",
       }),
       columnHelper.accessor("studentCurriculum.gearType.title", {
+        id: "vaartuig",
         header: "Vaartuig",
       }),
       columnHelper.accessor(
@@ -265,6 +270,7 @@ export default function StudentsTable({
                 .join(" ")
             : null,
         {
+          id: "instructeur",
           header: "Instructeur",
           cell: ({ getValue }) => (
             <span className="font-medium text-zinc-950">{getValue()}</span>
@@ -272,6 +278,7 @@ export default function StudentsTable({
         },
       ),
       columnHelper.accessor("tags", {
+        id: "tags",
         header: "Tags",
         cell: ({ getValue }) => {
           return (
@@ -285,6 +292,7 @@ export default function StudentsTable({
         enableSorting: false,
       }),
       columnHelper.accessor("certificate.issuedAt", {
+        id: "uitgegevenOp",
         header: "Diploma uitgegeven op",
         cell: ({ getValue }) => {
           const issuedAt = getValue();
@@ -296,6 +304,7 @@ export default function StudentsTable({
       ...(progressTrackingEnabled
         ? [
             columnHelper.accessor("progressVisibleForStudentUpUntil", {
+              id: "voortgang",
               header: "Voortgang zichtbaar tot",
               cell: ({ getValue }) => {
                 const date = getValue();

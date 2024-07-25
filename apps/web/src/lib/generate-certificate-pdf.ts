@@ -39,9 +39,15 @@ async function fetchLogoWithCache(
 
 export async function generatePDF(
   certificateNumbers: string[],
-  { debug = false } = {},
+  {
+    debug = false,
+    sort = "student",
+  }: {
+    debug?: boolean;
+    sort?: "student" | "instructor";
+  } = {},
 ): Promise<ReadableStream> {
-  const data = await listCertificatesByNumber(certificateNumbers);
+  const data = await listCertificatesByNumber(certificateNumbers, sort);
 
   assert.strictEqual(
     data.length,
