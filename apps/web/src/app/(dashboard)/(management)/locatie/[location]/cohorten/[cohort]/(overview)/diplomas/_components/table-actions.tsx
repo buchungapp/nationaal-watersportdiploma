@@ -423,11 +423,21 @@ function DownloadCertificatesDialog({
   setIsOpen: (value: boolean) => void;
 }) {
   const submit = async (_prevState: unknown, formData: FormData) => {
+    const advancedOptionsSchema = z.object({
+      filename: z.string().catch(`${dayjs().toISOString()}-export-diplomas`),
+      sort: z.enum(["student", "instructor"]).catch("student"),
+    });
+
+    const advancedOptions = advancedOptionsSchema.parse({
+      filename: formData.get("filename"),
+      sort: formData.get("sort"),
+    });
+
     try {
       await kickOffGeneratePDF({
         handles: rows.map((row) => row.certificate!.handle),
-        fileName: formData.get("filename") as string,
-        sort: formData.get("sort") as "student" | "instructor",
+        fileName: advancedOptions.filename,
+        sort: advancedOptions.sort,
       });
 
       toast.success("Bestand gedownload");
