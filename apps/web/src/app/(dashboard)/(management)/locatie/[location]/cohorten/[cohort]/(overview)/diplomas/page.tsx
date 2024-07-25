@@ -10,6 +10,12 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 
+import {
+  createSearchParamsCache,
+  parseAsArrayOf,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
 import { FilterSelect } from "./_components/filter";
 import StudentsTable from "./_components/students-table";
 
@@ -37,16 +43,24 @@ export default async function Page({
     ),
   ]);
 
-  // Filter
-  const filterParams = searchParams?.filter
-    ? Array.isArray(searchParams.filter)
-      ? searchParams.filter
-      : [searchParams.filter]
-    : [];
+  const parsedSq = createSearchParamsCache({
+    weergave: parseAsArrayOf(
+      parseAsStringLiteral([
+        "uitgegeven",
+        "klaar-voor-uitgifte",
+        "geen-voortgang",
+      ] as const),
+    ),
+    query: parseAsString,
+  }).parse(searchParams);
 
   const filteredStudents =
-    filterParams.length > 0
+    parsedSq.weergave && parsedSq.weergave.length > 0
       ? students.filter((student) => {
+          if (!parsedSq.weergave) {
+            throw new Error("Unexpected missing parsedSq.weergave");
+          }
+
           const isIssued = !!student.certificate;
           const isReady =
             student.studentCurriculum?.moduleStatus.some(
@@ -54,11 +68,13 @@ export default async function Page({
             ) ?? false;
 
           return (
-            (filterParams.includes("uitgegeven") && isIssued) ||
-            (filterParams.includes("klaar-voor-uitgifte") &&
+            (parsedSq.weergave.includes("uitgegeven") && isIssued) ||
+            (parsedSq.weergave.includes("klaar-voor-uitgifte") &&
               !isIssued &&
               isReady) ||
-            (filterParams.includes("geen-voortgang") && !isIssued && !isReady)
+            (parsedSq.weergave.includes("geen-voortgang") &&
+              !isIssued &&
+              !isReady)
           );
         })
       : students;
@@ -77,6 +93,7 @@ export default async function Page({
         { field: "tags", tokenize: "forward" },
         { field: "instructor", tokenize: "full" },
         { field: "course", tokenize: "full" },
+        { field: "gearType", tokenize: "forward" },
       ],
     },
   });
@@ -101,14 +118,11 @@ export default async function Page({
       ]
         .filter(Boolean)
         .join(" "),
+      gearType: student.studentCurriculum?.gearType.title,
     });
   });
 
-  const searchQuery = searchParams?.query
-    ? Array.isArray(searchParams.query)
-      ? searchParams.query.join(" ")
-      : searchParams.query
-    : null;
+  const searchQuery = parsedSq.query;
 
   let searchedStudents = filteredStudents;
 
@@ -119,6 +133,8 @@ export default async function Page({
       searchedStudents = filteredStudents.filter((student) =>
         searchResult.flatMap(({ result }) => result).includes(student.id),
       );
+    } else {
+      searchedStudents = [];
     }
   }
 
@@ -132,7 +148,7 @@ export default async function Page({
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="max-sm:w-full sm:flex-1">
             <div className="mt-4 flex max-w-xl gap-4">
-              <Search placeholder="Zoek cursisten op naam, instructeur of tag" />
+              <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
 
               <FilterSelect />
             </div>
@@ -149,7 +165,11 @@ export default async function Page({
             (await retrieveDefaultCertificateVisibleFromDate(cohort.id)) ??
             undefined
           }
-          noOptionsLabel="Dit cohort heeft nog geen cursisten"
+          noOptionsLabel={
+            parsedSq.query && parsedSq.query.length > 2
+              ? "Geen resultaten gevonden"
+              : "Dit cohort heeft nog geen cursisten"
+          }
         />
       </>
     </SWRConfig>
