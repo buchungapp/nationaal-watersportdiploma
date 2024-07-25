@@ -219,27 +219,38 @@ export const listExternalCertificatesForPerson = cache(
   },
 );
 
-export const listCertificatesByNumber = cache(async (numbers: string[]) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+export const listCertificatesByNumber = cache(
+  async (
+    numbers: string[],
+    sort: "createdAt" | "student" | "instructor" = "createdAt",
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
 
-    // TODO: this authorization check should be more specific
-    const availableLocations = await User.Person.listLocationsByRole({
-      personId: person.id,
-      roles: ["location_admin", "instructor"],
+      // TODO: this authorization check should be more specific
+      const availableLocations = await User.Person.listLocationsByRole({
+        personId: person.id,
+        roles: ["location_admin", "instructor"],
+      });
+
+      const certificates = await Certificate.list({
+        filter: {
+          number: numbers,
+          locationId: availableLocations.map((l) => l.locationId),
+        },
+        sort:
+          sort === "createdAt"
+            ? [sort]
+            : sort === "student"
+              ? ["student", "createdAt"]
+              : ["instructor", "student", "createdAt"],
+      });
+
+      return certificates;
     });
-
-    const certificates = await Certificate.list({
-      filter: {
-        number: numbers,
-        locationId: availableLocations.map((l) => l.locationId),
-      },
-    });
-
-    return certificates;
-  });
-});
+  },
+);
 
 export const retrieveCertificateById = cache(async (id: string) => {
   return makeRequest(async () => {
@@ -2194,6 +2205,7 @@ export const updatePersonDetails = async ({
 export const storeCertificateHandles = async (props: {
   handles: string[];
   fileName?: string;
+  sort?: "student" | "instructor";
 }) => {
   return makeRequest(async () => {
     return await withRedisClient(redisConfig, async () => {

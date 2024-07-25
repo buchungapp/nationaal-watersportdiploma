@@ -22,7 +22,7 @@ export default function Search({ placeholder = "Zoeken..." }) {
   return (
     <div className="relative w-full">
       <Input
-        value={query}
+        value={decodeURIComponent(query)}
         onChange={(e) => {
           void setQuery({
             query: encodeURIComponent(e.target.value.trim()),

@@ -103,17 +103,21 @@ const columns = [
       sortingFn: "text",
     },
   ),
-  columnHelper.accessor("person.dateOfBirth", {
-    id: "leeftijd",
-    header: "Leeftijd",
-    cell: ({ getValue }) => {
-      const dateOfBirth = getValue();
-      return dateOfBirth
-        ? `${dayjs().diff(dayjs(dateOfBirth), "year")} jr.`
-        : null;
+  columnHelper.accessor(
+    (row) =>
+      row.person.dateOfBirth
+        ? dayjs().diff(dayjs(row.person.dateOfBirth), "year")
+        : null,
+    {
+      id: "leeftijd",
+      header: "Leeftijd",
+      cell: ({ getValue }) => {
+        const age = getValue();
+        return age ? `${age} jr.` : null;
+      },
+      sortingFn: "alphanumeric",
     },
-    sortingFn: "alphanumeric",
-  }),
+  ),
   columnHelper.accessor((data) => data.studentCurriculum?.course.title, {
     id: "cursus",
     header: "Cursus",

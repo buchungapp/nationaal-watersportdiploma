@@ -1,112 +1,87 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
-import clsx from "clsx";
-import { useRouter, useSearchParams } from "next/navigation";
-import type { ComponentProps } from "react";
-import { useOptimistic, useTransition } from "react";
-import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import { parseAsArrayOf, parseAsStringLiteral, useQueryState } from "nuqs";
+import { useTransition } from "react";
+import {
+  Checkbox,
+  CheckboxField,
+  CheckboxGroup,
+} from "~/app/(dashboard)/_components/checkbox";
+import { Description, Label } from "~/app/(dashboard)/_components/fieldset";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
-import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import Spinner from "~/app/_components/spinner";
 
-function CheckboxButton({
-  children,
-  className,
-  onClick,
-  ...props
-}: Pick<ComponentProps<"button">, "onClick" | "className" | "children"> &
-  ComponentProps<typeof Checkbox>) {
-  const [isPending, startTransition] = useTransition();
-
-  return (
-    <button
-      className={clsx([
-        className,
-
-        // Base
-        "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
-
-        // Sizing
-        "px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6",
-
-        // Disabled
-        "data-[disabled]:opacity-50",
-      ])}
-      onClick={(...e) => {
-        if (!onClick) return;
-
-        return startTransition(() => {
-          onClick(...e);
-        });
-      }}
-    >
-      {isPending ? (
-        <Spinner className="text-gray-700" size="sm" />
-      ) : (
-        <Checkbox {...props} />
-      )}
-      {children}
-    </button>
-  );
-}
-
-type FilterType = "uitgegeven" | "klaar-voor-uitgifte" | "geen-voortgang";
+const options = [
+  "uitgegeven",
+  "klaar-voor-uitgifte",
+  "geen-voortgang",
+] as const;
 
 export function FilterSelect() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const setQueryParams = useSetQueryParams();
+  const [isPending, startTransition] = useTransition();
 
-  const [optimisticSelectedStatus, setOptimisticSelectedStatus] = useOptimistic(
-    searchParams.has("filter") ? searchParams.getAll("filter") : [],
-    (current, toggle: FilterType) => {
-      return current.includes(toggle)
-        ? current.filter((item) => item !== toggle)
-        : [...current, toggle];
-    },
+  const [query, setQuery] = useQueryState(
+    "weergave",
+    parseAsArrayOf(parseAsStringLiteral(options)).withOptions({
+      startTransition,
+    }),
   );
 
-  const handleToggle = (toggle: FilterType) => {
-    setOptimisticSelectedStatus(toggle);
+  const toggleValue = (value: (typeof options)[number]) => {
+    const current = query ?? [];
 
-    router.push(
-      setQueryParams({
-        filter: optimisticSelectedStatus.includes(toggle)
-          ? optimisticSelectedStatus.filter((item) => item !== toggle)
-          : [...optimisticSelectedStatus, toggle],
-      }),
-    );
+    if (current.includes(value)) {
+      void setQuery(current.filter((v) => v !== value));
+    } else {
+      void setQuery([...current, value]);
+    }
   };
 
   return (
     <Popover className="relative">
       <PopoverButton outline>
+        {isPending ? <Spinner /> : null}
         Filter <ChevronDownIcon />
       </PopoverButton>
-      <PopoverPanel anchor="bottom end" className="flex flex-col gap-1">
-        <CheckboxButton
-          onClick={() => handleToggle("uitgegeven")}
-          checked={optimisticSelectedStatus.includes("uitgegeven")}
-        >
-          Uitgegeven
-        </CheckboxButton>
-        <CheckboxButton
-          onClick={() => handleToggle("klaar-voor-uitgifte")}
-          checked={optimisticSelectedStatus.includes("klaar-voor-uitgifte")}
-        >
-          Klaar voor uitgifte
-        </CheckboxButton>
-        <CheckboxButton
-          onClick={() => handleToggle("geen-voortgang")}
-          checked={optimisticSelectedStatus.includes("geen-voortgang")}
-        >
-          Geen voortgang
-        </CheckboxButton>
+      <PopoverPanel anchor="bottom" className="flex flex-col gap-1 p-4">
+        <CheckboxGroup>
+          <CheckboxField>
+            <Checkbox
+              onClick={() => toggleValue("uitgegeven")}
+              checked={query?.includes("uitgegeven")}
+            />
+            <Label>Uitgegeven</Label>
+            <Description>Toon regels met een uitgegeven diploma.</Description>
+          </CheckboxField>
+
+          <CheckboxField>
+            <Checkbox
+              onClick={() => toggleValue("klaar-voor-uitgifte")}
+              checked={query?.includes("klaar-voor-uitgifte")}
+            />
+            <Label>Klaar voor uitgifte</Label>
+            <Description>
+              Toon regels die nog geen diploma hebben, maar wel minimaal één
+              afgeronde module.
+            </Description>
+          </CheckboxField>
+
+          <CheckboxField>
+            <Checkbox
+              onClick={() => toggleValue("geen-voortgang")}
+              checked={query?.includes("geen-voortgang")}
+            />
+            <Label>Geen voortgang</Label>
+            <Description>
+              Toon regels zonder diploma, en zonder afgeronde modules.
+            </Description>
+          </CheckboxField>
+        </CheckboxGroup>
       </PopoverPanel>
     </Popover>
   );

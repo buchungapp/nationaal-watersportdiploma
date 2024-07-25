@@ -123,6 +123,7 @@ export default async function Page({
         { field: "tags", tokenize: "forward" },
         { field: "instructor", tokenize: "full" },
         { field: "course", tokenize: "full" },
+        { field: "gearType", tokenize: "forward" },
       ],
     },
   });
@@ -147,6 +148,7 @@ export default async function Page({
       ]
         .filter(Boolean)
         .join(" "),
+      gearType: student.studentCurriculum?.gearType.title,
     });
   });
 
@@ -195,7 +197,7 @@ export default async function Page({
           <div className="max-sm:w-full sm:flex-1">
             <div className="mt-4 flex gap-4">
               <div className="w-full max-w-xl">
-                <Search placeholder="Zoek cursisten op naam, instructeur of tag" />
+                <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
               </div>
 
               {!!instructorAllocation ? (

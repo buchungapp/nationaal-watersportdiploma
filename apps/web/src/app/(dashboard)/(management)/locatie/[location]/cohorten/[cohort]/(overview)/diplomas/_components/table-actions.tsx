@@ -2,13 +2,11 @@ import { useState, useTransition } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 
 import {
-  Dropdown,
-  DropdownButton,
-  DropdownItem,
-  DropdownLabel,
-  DropdownMenu,
-} from "~/app/(dashboard)/_components/dropdown";
-
+  Disclosure as HeadlessDisclosure,
+  DisclosureButton as HeadlessDisclosureButton,
+  DisclosurePanel as HeadlessDisclosurePanel,
+} from "@headlessui/react";
+import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { toast } from "sonner";
 import { z } from "zod";
 import {
@@ -24,11 +22,27 @@ import {
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 import {
+  Dropdown,
+  DropdownButton,
+  DropdownItem,
+  DropdownLabel,
+  DropdownMenu,
+} from "~/app/(dashboard)/_components/dropdown";
+import {
+  Description,
   ErrorMessage,
   Field,
+  Fieldset,
   Label,
+  Legend,
 } from "~/app/(dashboard)/_components/fieldset";
+import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
+import {
+  Radio,
+  RadioField,
+  RadioGroup,
+} from "~/app/(dashboard)/_components/radio";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
@@ -410,11 +424,10 @@ function DownloadCertificatesDialog({
 }) {
   const submit = async (_prevState: unknown, formData: FormData) => {
     try {
-      z.string().parse(formData.get("filename"));
-
       await kickOffGeneratePDF({
         handles: rows.map((row) => row.certificate!.handle),
         fileName: formData.get("filename") as string,
+        sort: formData.get("sort") as "student" | "instructor",
       });
 
       toast.success("Bestand gedownload");
@@ -436,15 +449,47 @@ function DownloadCertificatesDialog({
         </AlertDescription>
         <form action={formAction}>
           <AlertBody>
-            <Field>
-              <Label>Bestandsnaam</Label>
-              <Input
-                name="filename"
-                type="text"
-                required
-                defaultValue={`${dayjs().toISOString()}-export-diplomas`}
-              />
-            </Field>
+            <HeadlessDisclosure>
+              <HeadlessDisclosureButton className="flex">
+                <div className="mr-6 flex h-6 items-center justify-center">
+                  <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 transition-transform ui-open:rotate-90" />
+                </div>
+                <Subheading>Geavanceerde opties</Subheading>
+              </HeadlessDisclosureButton>
+              <HeadlessDisclosurePanel className="mt-2 pl-10">
+                <Field>
+                  <Label>Bestandsnaam</Label>
+                  <Input
+                    name="filename"
+                    type="text"
+                    required
+                    defaultValue={`${dayjs().toISOString()}-export-diplomas`}
+                  />
+                </Field>
+
+                <Fieldset className="mt-6">
+                  <Legend>Sortering</Legend>
+                  <Text>
+                    Hoe moeten de diploma's in de PDF gesorteerd zijn?
+                  </Text>
+                  <RadioGroup name="sort" defaultValue="student">
+                    <RadioField>
+                      <Radio value="student" />
+                      <Label>Naam cursist</Label>
+                      <Description>Sortering op voornaam, A tot Z.</Description>
+                    </RadioField>
+                    <RadioField>
+                      <Radio value="instructor" />
+                      <Label>Naam instructeur</Label>
+                      <Description>
+                        Sortering op voornaam instructeur, A tot Z. Diploma's
+                        zonder instructeur worden als laatste getoond.
+                      </Description>
+                    </RadioField>
+                  </RadioGroup>
+                </Fieldset>
+              </HeadlessDisclosurePanel>
+            </HeadlessDisclosure>
           </AlertBody>
           <AlertActions>
             <Button plain onClick={() => setIsOpen(false)}>

@@ -17,16 +17,16 @@ export async function GET(
     ? ("preview" as const)
     : ("download" as const);
 
-  const { handles, fileName } = await retrieveCertificateHandles(
+  const { handles, settings } = await retrieveCertificateHandles(
     context.params.id,
   );
 
   return presentPDF(
     `${
-      fileName ??
+      settings.fileName ??
       `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
     }.pdf`,
-    await generatePDF(handles),
+    await generatePDF(handles, { sort: settings.sort }),
     type,
   );
 }
