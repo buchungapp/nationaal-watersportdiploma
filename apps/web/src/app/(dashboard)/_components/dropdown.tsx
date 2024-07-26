@@ -3,6 +3,7 @@
 import * as Headless from "@headlessui/react";
 import clsx from "clsx";
 import type React from "react";
+import { forwardRef } from "react";
 import { Button } from "./button";
 import { Link } from "./link";
 
@@ -50,13 +51,16 @@ export function DropdownMenu({
   );
 }
 
-export function DropdownItem({
-  className,
-  ...props
-}: { className?: string } & (
-  | Omit<React.ComponentPropsWithoutRef<typeof Link>, "className">
-  | Omit<React.ComponentPropsWithoutRef<"button">, "className">
-)) {
+export const DropdownItem = forwardRef(function DropdownItem(
+  {
+    className,
+    ...props
+  }: { className?: string } & (
+    | Omit<React.ComponentPropsWithoutRef<typeof Link>, "className">
+    | Omit<React.ComponentPropsWithoutRef<"button">, "className">
+  ),
+  ref: React.ForwardedRef<HTMLElement>,
+) {
   const classes = clsx(
     className,
     // Base styles
@@ -79,7 +83,10 @@ export function DropdownItem({
   );
 
   return (
-    <Headless.MenuItem disabled={"disabled" in props && props.disabled}>
+    <Headless.MenuItem
+      disabled={"disabled" in props && props.disabled}
+      ref={ref}
+    >
       {"href" in props ? (
         <Link {...props} className={classes} />
       ) : (
@@ -87,7 +94,7 @@ export function DropdownItem({
       )}
     </Headless.MenuItem>
   );
-}
+});
 
 export function DropdownHeader({
   className,

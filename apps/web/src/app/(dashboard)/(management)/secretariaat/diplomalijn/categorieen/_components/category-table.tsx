@@ -96,6 +96,7 @@ export default function ModuleTable({
               {headerGroup.headers.map((header) => (
                 <TableHeader
                   key={header.id}
+                  header={header}
                   className={clsx(header.column.columnDef.meta?.align)}
                 >
                   {flexRender(
