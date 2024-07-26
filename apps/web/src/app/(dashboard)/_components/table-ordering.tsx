@@ -3,9 +3,9 @@
 import {
   closestCenter,
   DndContext,
-  DragEndEvent,
-  SensorDescriptor,
-  SensorOptions,
+  type DragEndEvent,
+  type SensorDescriptor,
+  type SensorOptions,
 } from "@dnd-kit/core";
 import {
   restrictToHorizontalAxis,
@@ -20,16 +20,16 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { Column, Table as TableType } from "@tanstack/react-table";
+import type { Column, Table as TableType } from "@tanstack/react-table";
 import { clsx } from "clsx";
 import {
-  ComponentProps,
+  type ComponentProps,
   createContext,
-  PropsWithChildren,
+  type PropsWithChildren,
   useContext,
 } from "react";
 import DragIcon from "~/app/_components/drag-icon";
-import { useColumnOrdering } from "../_hooks/use-column-ordering";
+import type { useColumnOrdering } from "../_hooks/use-column-ordering";
 import { useCustomSensors } from "../_hooks/use-custom-sensors";
 import { Checkbox } from "./checkbox";
 import {

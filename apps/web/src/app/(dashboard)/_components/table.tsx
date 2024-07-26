@@ -2,10 +2,10 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Cell, Header } from "@tanstack/react-table";
+import type { Cell, Header } from "@tanstack/react-table";
 import { clsx } from "clsx";
 import type React from "react";
-import { createContext, CSSProperties, useContext, useState } from "react";
+import { createContext, type CSSProperties, useContext, useState } from "react";
 import { Link } from "./link";
 
 const TableContext = createContext<{

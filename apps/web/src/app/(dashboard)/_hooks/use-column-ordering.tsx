@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 
 type ExtendedColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
