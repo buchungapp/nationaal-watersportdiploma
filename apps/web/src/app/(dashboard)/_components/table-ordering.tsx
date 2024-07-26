@@ -241,7 +241,7 @@ function SortableItem({
       <DragIcon isDragging={isDragging} />
       <span>
         {typeof column.columnDef.header === "function"
-          ? (column.columnDef.meta as { label?: string })?.label
+          ? column.columnDef.meta?.label
           : column.columnDef.header}
       </span>
 

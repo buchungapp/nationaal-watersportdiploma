@@ -70,7 +70,7 @@ export default function CohortsTable({
   cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>;
   totalItems: number;
 }) {
-  const options = useColumnOrdering({ columns });
+  const columnOrderingOptions = useColumnOrdering(columns);
 
   const table = useReactTable({
     data: cohorts,
@@ -78,14 +78,14 @@ export default function CohortsTable({
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    ...options,
+    ...columnOrderingOptions,
   });
 
   const params = useParams();
 
   return (
     <>
-      <TableOrderingContext options={options}>
+      <TableOrderingContext options={columnOrderingOptions}>
         <div className="mt-8 flex justify-end items-center gap-1">
           <TableDisplay table={table} />
         </div>
@@ -131,10 +131,11 @@ export default function CohortsTable({
                 key={row.id}
                 href={`/locatie/${params.location as string}/cohorten/${row.original.handle}`}
               >
-                <TableColumnOrderingContext>
-                  {row.getVisibleCells().map((cell, index) => (
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableColumnOrderingContext>
                     <TableCell
                       key={cell.id}
+                      cell={cell}
                       className={clsx(cell.column.columnDef.meta?.align)}
                       // suppressLinkBehavior={
                       //   cell.column.columnDef.meta?.suppressLinkBehavior
@@ -148,8 +149,8 @@ export default function CohortsTable({
                         cell.getContext(),
                       )}
                     </TableCell>
-                  ))}
-                </TableColumnOrderingContext>
+                  </TableColumnOrderingContext>
+                ))}
               </TableRow>
             ))}
           </TableBody>
