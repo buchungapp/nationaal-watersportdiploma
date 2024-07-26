@@ -21,7 +21,7 @@ import {
 import clsx from "clsx";
 import { useParams } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -361,12 +361,10 @@ export default function StudentsTable({
 
             return [
               key,
-              rowSelection.hasOwnProperty(key)
-                ? rowSelection[key]!
-                : {
-                    certificate: student!.certificate,
-                    studentCurriculum: student!.studentCurriculum,
-                  },
+              {
+                certificate: student!.certificate,
+                studentCurriculum: student!.studentCurriculum,
+              },
             ];
           }),
         );
@@ -374,6 +372,26 @@ export default function StudentsTable({
     },
     [students],
   );
+
+  useEffect(() => {
+    setRowSelection((prev) => {
+      const normalized = transformSelectionState(prev);
+
+      return Object.fromEntries(
+        Object.keys(normalized).map((key) => {
+          const student = students.find((student) => student.id === key);
+
+          return [
+            key,
+            {
+              certificate: student!.certificate,
+              studentCurriculum: student!.studentCurriculum,
+            },
+          ];
+        }),
+      );
+    });
+  }, [students]);
 
   const onSortingChange = React.useCallback<OnChangeFn<SortingState>>(
     (updater) => {
@@ -417,6 +435,8 @@ export default function StudentsTable({
     id,
     ...props,
   }));
+
+  console.log(students, table.getRowModel().rows, rowSelection);
 
   return (
     <div className="mt-8 relative">
