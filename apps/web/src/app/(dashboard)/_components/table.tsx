@@ -131,30 +131,32 @@ export function TableHeader<TData, _>({
   header,
   ...props
 }: React.ComponentPropsWithoutRef<"th"> & {
-  header: Header<TData, unknown>;
+  header?: Header<TData, unknown>;
 }) {
   const { bleed, grid } = useContext(TableContext);
 
   // Column Ordering
   const { attributes, isDragging, listeners, setNodeRef, transform } =
     useSortable({
-      id: header.column.id,
+      id: header?.id ?? "",
     });
 
-  const style: CSSProperties = {
-    opacity: isDragging ? 0.8 : 1,
-    position: "relative",
-    transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
-    transition: "width transform 0.2s ease-in-out",
-    whiteSpace: "nowrap",
-    width: header.column.getSize(),
-    zIndex: isDragging ? 1 : 0,
-  };
+  const style: CSSProperties = header
+    ? {
+        opacity: isDragging ? 0.8 : 1,
+        position: "relative",
+        transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
+        transition: "width transform 0.2s ease-in-out",
+        whiteSpace: "nowrap",
+        width: header.column.getSize(),
+        zIndex: isDragging ? 1 : 0,
+      }
+    : {};
 
   return (
     <th
       {...props}
-      colSpan={header.colSpan}
+      colSpan={header?.colSpan}
       className={clsx(
         className,
         "border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] dark:border-b-white/10",
