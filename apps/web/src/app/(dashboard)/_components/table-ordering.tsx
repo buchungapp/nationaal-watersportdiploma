@@ -54,11 +54,19 @@ const TableOrdering = createContext<{
   columnOrder: string[];
   handleDragEnd: (event: DragEndEvent) => void;
   sensors: SensorDescriptor<SensorOptions>[];
-}>({
-  columnOrder: [],
-  handleDragEnd: () => {},
-  sensors: [],
-});
+} | null>(null);
+
+function useTableOrdering() {
+  const context = useContext(TableOrdering);
+
+  if (!context) {
+    throw new Error(
+      "useTableOrdering must be used within a TableOrderingContext",
+    );
+  }
+
+  return context;
+}
 
 export function TableOrderingContext({
   options: {
@@ -100,7 +108,7 @@ export function TableOrderingContext({
 }
 
 export function TableColumnOrderingContext({ children }: PropsWithChildren) {
-  const { columnOrder } = useContext(TableOrdering);
+  const { columnOrder } = useTableOrdering();
 
   return (
     <SortableContext
@@ -119,7 +127,7 @@ export function TableDisplay<TData>({
   table: TableType<TData>;
   anchor?: ComponentProps<typeof DropdownMenu>["anchor"];
 }) {
-  const { columnOrder, handleDragEnd, sensors } = useContext(TableOrdering);
+  const { columnOrder, handleDragEnd, sensors } = useTableOrdering();
   const isLastColumnVisible = table.getVisibleLeafColumns().length === 1;
 
   return (
