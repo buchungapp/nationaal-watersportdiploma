@@ -22,7 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import type { Column, Table as TableType } from "@tanstack/react-table";
 import { clsx } from "clsx";
-import {
+import React, {
   createContext,
   useContext,
   type ComponentProps,
@@ -192,7 +192,9 @@ export function TableDisplay<TData>({
                 ? "cursor-not-allowed opacity-60"
                 : "cursor-pointer opacity-100",
             )}
-            onClick={() => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+              e.preventDefault();
+
               if (!table.getIsAllColumnsVisible())
                 table.toggleAllColumnsVisible();
             }}
@@ -242,7 +244,10 @@ function SortableItem({
       {...attributes}
       {...listeners}
       type="button"
-      onClick={() => !isDisabled && column.toggleVisibility()}
+      onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        if (!isDisabled) column.toggleVisibility();
+      }}
       className={isDisabled ? "opacity-50" : "opacity-100"}
       as={"div"}
     >
