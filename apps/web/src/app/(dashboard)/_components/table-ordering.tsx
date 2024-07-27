@@ -114,12 +114,14 @@ export function TableDisplay<TData>({
   anchor?: ComponentProps<typeof DropdownMenu>["anchor"];
 }) {
   const { columnOrder, handleDragEnd, sensors } = useTableOrdering();
-  const isLastColumnVisible = table.getVisibleLeafColumns().length === 1;
 
   const pinnedColumns = [
-    table.getState().columnPinning.left,
-    table.getState().columnPinning.right,
+    table.getState().columnPinning.left ?? [],
+    table.getState().columnPinning.right ?? [],
   ].flat();
+
+  const isLastColumnVisible =
+    table.getVisibleLeafColumns().length === pinnedColumns.length + 1;
   const ordableColumns = table
     .getAllLeafColumns()
     .filter((column) => !pinnedColumns.includes(column.id));

@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import {
+  createParser,
   parseAsArrayOf,
-  parseAsJson,
   parseAsString,
   useQueryState,
 } from "nuqs";
@@ -11,13 +11,34 @@ type OrderableColumn<TData, TValue> = ColumnDef<TData, TValue> & {
   id: string;
 };
 
+const parseAsColumnVisibility = (validColumnKeys: string[]) => {
+  return createParser<Record<string, boolean>>({
+    parse(queryValue) {
+      const colomnKeys = queryValue.split(",");
+      const actualColumnKeys = colomnKeys.filter((key) =>
+        validColumnKeys.includes(key),
+      );
+      if (actualColumnKeys.length < 1) return null;
+
+      return validColumnKeys.reduce<Record<string, boolean>>((acc, key) => {
+        acc[key] = colomnKeys.includes(key);
+        return acc;
+      }, {});
+    },
+    serialize(value) {
+      return validColumnKeys.filter((key) => value[key] !== false).join(",");
+    },
+  });
+};
+
 export function useColumnOrdering<TData, TValue>(
   orderableColumns: OrderableColumn<TData, TValue>[],
 ) {
   const defaultOrder = React.useMemo(
     () => orderableColumns.map((column) => column.id),
-    [],
+    [orderableColumns],
   );
+
   const defaultVisibility = React.useMemo(
     () =>
       orderableColumns.reduce(
@@ -34,11 +55,12 @@ export function useColumnOrdering<TData, TValue>(
           ) {
             acc[column.id] = column.isDefaultVisible;
           }
+
           return acc;
         },
         {},
       ),
-    [],
+    [orderableColumns],
   );
 
   const [columnOrder, setColumnOrder] = useQueryState(
@@ -48,7 +70,7 @@ export function useColumnOrdering<TData, TValue>(
 
   const [columnVisibility, setColumnVisibility] = useQueryState(
     "toon",
-    parseAsJson().withDefault(defaultVisibility),
+    parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
   );
 
   const options = {
