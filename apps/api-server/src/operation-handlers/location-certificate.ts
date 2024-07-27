@@ -4,8 +4,8 @@ import * as application from '../application/index.js'
 
 export const getLocationCertificates: api.server.GetLocationCertificatesOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
-  const { locationKey } = incomingRequest.parameters
+> = async (parameters) => {
+  const { locationKey } = parameters
 
   // TODO get type from core
   let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
@@ -19,11 +19,7 @@ export const getLocationCertificates: api.server.GetLocationCertificatesOperatio
   }
 
   if (locationItem == null) {
-    return {
-      parameters: {},
-      status: 404,
-      contentType: null,
-    }
+    return [404, undefined]
   }
 
   // TODO actually list certificates
@@ -37,20 +33,14 @@ export const getLocationCertificates: api.server.GetLocationCertificatesOperatio
     title: item.title,
   }))
 
-  return {
-    status: 200,
-    parameters: {},
-    contentType: 'application/json',
-    entity: () => responseEntity,
-  }
+  return [200, responseEntity]
 }
 
 export const createLocationCertificate: api.server.CreateLocationCertificateOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) =>
+> = async (parameters, requestEntity) =>
   core.withTransaction(async () => {
-    const { locationKey } = incomingRequest.parameters
-    const requestEntity = await incomingRequest.entity()
+    const { locationKey } = parameters
 
     // TODO get type from core
     let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>
@@ -64,11 +54,7 @@ export const createLocationCertificate: api.server.CreateLocationCertificateOper
     }
 
     if (locationItem == null) {
-      return {
-        parameters: {},
-        status: 404,
-        contentType: null,
-      }
+      return [404, undefined]
     }
 
     // TODO actually create a certificate
@@ -82,10 +68,5 @@ export const createLocationCertificate: api.server.CreateLocationCertificateOper
       id: certificateItem.id,
     }
 
-    return {
-      status: 201,
-      parameters: {},
-      contentType: 'application/json',
-      entity: () => responseItem,
-    }
+    return [201, responseItem]
   })

@@ -4,7 +4,7 @@ import * as application from '../application/index.js'
 
 export const getLocations: api.server.GetLocationsOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async () => {
   const list = await core.Location.list()
 
   const listEntity = list.map((item) => ({
@@ -13,21 +13,13 @@ export const getLocations: api.server.GetLocationsOperationHandler<
     title: item.name,
   }))
 
-  // TODO this could be easier
-  return {
-    status: 200,
-    parameters: {},
-    contentType: 'application/json',
-    entity: () => listEntity,
-  }
+  return listEntity
 }
 
 export const createLocation: api.server.CreateLocationOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) =>
+> = async (entity) =>
   core.withTransaction(async () => {
-    const entity = await incomingRequest.entity()
-
     const result = await core.Location.create({
       name: entity.title,
       handle: entity.handle,
@@ -38,10 +30,5 @@ export const createLocation: api.server.CreateLocationOperationHandler<
       id: result.id,
     }
 
-    return {
-      status: 201,
-      parameters: {},
-      contentType: 'application/json',
-      entity: () => resultEntity,
-    }
+    return [201, resultEntity]
   })

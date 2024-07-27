@@ -3,7 +3,7 @@ import * as application from '../application/index.js'
 
 export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDisciplineOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (parameters) => {
   // const { disciplineKey } = incomingRequest.parameters
 
   // // TODO get discipline type from core
@@ -35,10 +35,5 @@ export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDiscip
   //   id: item.id,
   // }))
 
-  return {
-    parameters: {},
-    status: 200,
-    contentType: 'application/json',
-    entity: () => [],
-  }
+  return [200, []]
 }

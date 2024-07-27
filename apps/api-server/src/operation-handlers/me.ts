@@ -4,7 +4,7 @@ import * as application from '../application/index.js'
 
 export const me: api.server.MeOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (authentication) => {
   let id: string | undefined
   // TODO make this more ergonomic
   if ('apiKey' in authentication && authentication.apiKey != null) {
@@ -19,12 +19,7 @@ export const me: api.server.MeOperationHandler<
   assert(id != null)
 
   return {
-    status: 200,
-    parameters: {},
-    contentType: 'application/json',
-    entity: () => ({
-      id,
-      handle: '',
-    }),
+    id,
+    handle: '',
   }
 }
