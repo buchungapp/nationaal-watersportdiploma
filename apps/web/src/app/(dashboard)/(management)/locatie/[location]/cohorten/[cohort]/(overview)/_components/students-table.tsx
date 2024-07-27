@@ -93,9 +93,6 @@ const columns = [
         </CheckboxField>
       );
     },
-    meta: {
-      label: "Selectie",
-    },
     enableSorting: false,
   }),
   columnHelper.accessor(
@@ -195,7 +192,7 @@ export default function StudentsTable({
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }) {
-  // @ts-expect-error @TODO: fix type in useColumnOrdering
+  // @ts-expect-error TODO: find out if we can type this
   const columnOrderingOptions = useColumnOrdering(columns);
 
   const [rowSelection, setRowSelection] = React.useState<
@@ -284,6 +281,11 @@ export default function StudentsTable({
       rowSelection: transformSelectionState(rowSelection),
       sorting: sortingState,
       ...columnOrderingOptions.state,
+    },
+    initialState: {
+      columnPinning: {
+        left: ["select"],
+      },
     },
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),

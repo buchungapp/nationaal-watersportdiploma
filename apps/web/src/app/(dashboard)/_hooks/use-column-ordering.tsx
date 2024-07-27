@@ -1,26 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 
-type ExtendedColumnDef<TData, TValue> = ColumnDef<TData, TValue> &
-  (
-    | {
-        id: string;
-        accessorKey?: string;
-      }
-    | {
-        id?: string;
-        accessorKey: string;
-      }
-  );
-
 export function useColumnOrdering<TData, TValue>(
-  columns: ExtendedColumnDef<TData, TValue>[],
+  columns: ColumnDef<TData, TValue>[],
 ) {
-  // NOTE: We need to replace `.` with `_` because `.` is not a valid key in React Table.
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
-    columns
-      .map((column) => (column.id ?? column.accessorKey)!)
-      .map((column) => column.replace(/\./g, "_")),
+    columns.filter((column) => !!column.id).map((column) => column.id!),
   );
 
   const [columnVisibility, setColumnVisibility] = useState<

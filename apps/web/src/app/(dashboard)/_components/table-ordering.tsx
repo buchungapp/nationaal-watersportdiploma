@@ -23,10 +23,10 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import type { Column, Table as TableType } from "@tanstack/react-table";
 import { clsx } from "clsx";
 import {
-  type ComponentProps,
   createContext,
-  type PropsWithChildren,
   useContext,
+  type ComponentProps,
+  type PropsWithChildren,
 } from "react";
 import DragIcon from "~/app/_components/drag-icon";
 import type { useColumnOrdering } from "../_hooks/use-column-ordering";
@@ -130,6 +130,14 @@ export function TableDisplay<TData>({
   const { columnOrder, handleDragEnd, sensors } = useTableOrdering();
   const isLastColumnVisible = table.getVisibleLeafColumns().length === 1;
 
+  const pinnedColumns = [
+    table.getState().columnPinning.left,
+    table.getState().columnPinning.right,
+  ].flat();
+  const ordableColumns = table
+    .getAllLeafColumns()
+    .filter((column) => !pinnedColumns.includes(column.id));
+
   return (
     <Dropdown>
       <DropdownButton
@@ -160,7 +168,7 @@ export function TableDisplay<TData>({
             onDragEnd={(event) => handleDragEnd(event)}
             sensors={sensors}
           >
-            {table.getAllLeafColumns().map((column) => {
+            {ordableColumns.map((column) => {
               return (
                 <SortableContext
                   key={column.id}

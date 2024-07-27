@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { Cell, Header } from "@tanstack/react-table";
 import { clsx } from "clsx";
 import type React from "react";
-import { createContext, type CSSProperties, useContext, useState } from "react";
+import { createContext, useContext, useState, type CSSProperties } from "react";
 import { Link } from "./link";
 
 const TableContext = createContext<{
