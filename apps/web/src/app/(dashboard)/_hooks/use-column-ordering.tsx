@@ -14,14 +14,14 @@ type OrderableColumn<TData, TValue> = ColumnDef<TData, TValue> & {
 const parseAsColumnVisibility = (validColumnKeys: string[]) => {
   return createParser<Record<string, boolean>>({
     parse(queryValue) {
-      const colomnKeys = queryValue.split(",");
-      const actualColumnKeys = colomnKeys.filter((key) =>
+      const columnKeys = queryValue.split(",");
+      const actualColumnKeys = columnKeys.filter((key) =>
         validColumnKeys.includes(key),
       );
       if (actualColumnKeys.length < 1) return null;
 
       return validColumnKeys.reduce<Record<string, boolean>>((acc, key) => {
-        acc[key] = colomnKeys.includes(key);
+        acc[key] = columnKeys.includes(key);
         return acc;
       }, {});
     },
