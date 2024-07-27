@@ -1,4 +1,5 @@
-import { useState, useTransition } from "react";
+"use client";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 
 import {
@@ -52,57 +53,86 @@ import {
   issueCertificates,
   withDrawCertificates,
 } from "../_actions/quick-actions";
-import type { Student } from "./students-table";
+import { retreiveSelectedRows } from "../_actions/retreive-selected-rows";
+import { Student } from "./students-table";
 
 interface Props {
-  rows: {
-    id: string;
-    certificate: Student["certificate"];
-    studentCurriculum: Student["studentCurriculum"];
-  }[];
+  selectedRows: string[];
   cohortId: string;
   defaultVisibleFrom?: string;
 }
 
+type Rows = {
+  id: string;
+  certificate: Student["certificate"];
+  studentCurriculum: Student["studentCurriculum"];
+}[];
+
 export function ActionButtons(props: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState<string | null>(null);
 
-  const allRowsHaveIssuedCertificates = props.rows.every(
-    (row) => !!row.certificate?.issuedAt,
+  const [isPending, startTransition] = useTransition();
+
+  const [allRowsHaveIssuedCertificates, setAllRowsHaveIssuedCertificates] =
+    useState(false);
+  const [noneRowsHaveIssuedCertificates, setNoneRowsHaveIssuedCertificates] =
+    useState(false);
+  const [allRowsHaveACurriculum, setAllRowsHaveACurriculum] = useState(false);
+  const [
+    allRowsHaveACurriculumWithAtLeastOneModule,
+    setAllRowsHaveACurriculumWithAtLeastOneModule,
+  ] = useState(false);
+
+  const [rows, setRows] = useState<Rows>([]);
+
+  const updateRows = useCallback(
+    () =>
+      startTransition(() =>
+        retreiveSelectedRows(props.cohortId, props.selectedRows)
+          .then((students) => {
+            setRows(students);
+            setAllRowsHaveIssuedCertificates(
+              students.every((row) => !!row.certificate?.issuedAt),
+            );
+            setNoneRowsHaveIssuedCertificates(
+              students.every((row) => !row.certificate),
+            );
+            setAllRowsHaveACurriculum(
+              students.every((row) => !!row.studentCurriculum),
+            );
+            setAllRowsHaveACurriculumWithAtLeastOneModule(
+              students.every((row) => {
+                if (!row.studentCurriculum) return false;
+                const completedModules =
+                  row.studentCurriculum.moduleStatus.filter(
+                    (status) =>
+                      status.completedCompetencies === status.totalCompetencies,
+                  ).length;
+                return completedModules > 0;
+              }),
+            );
+          })
+          .catch(() => {}),
+      ),
+    [props.selectedRows, props.cohortId],
   );
-  const noneRowsHaveIssuedCertificates = props.rows.every(
-    (row) => !row.certificate,
-  );
 
-  const allRowsHaveACurriculum = props.rows.every((row) => {
-    return !!row.studentCurriculum;
-  });
-
-  const allRowsHaveACurriculumWithAtLeastOneModule = props.rows.every((row) => {
-    if (!row.studentCurriculum) return false;
-
-    const completedModules = row.studentCurriculum.moduleStatus.filter(
-      (status) => status.completedCompetencies === status.totalCompetencies,
-    ).length;
-
-    return completedModules > 0;
-  });
-
-  const params = new URLSearchParams();
-
-  props.rows.forEach((row) => {
-    if (!row.certificate) return;
-    params.append("certificate[]", row.certificate.handle);
-  });
+  useEffect(() => {
+    updateRows();
+  }, [props.selectedRows, props.cohortId]);
 
   return (
     <>
       <Dropdown>
-        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
+        <DropdownButton aria-label="Bulk actie">
+          Bulk actie
+          {isPending ? <Spinner className="text-white" /> : null}
+        </DropdownButton>
         <DropdownMenu anchor="top">
           <DropdownItem
             onClick={() => setIsDialogOpen("issue")}
             disabled={
+              isPending ||
               !(
                 noneRowsHaveIssuedCertificates &&
                 allRowsHaveACurriculumWithAtLeastOneModule
@@ -121,7 +151,7 @@ export function ActionButtons(props: Props) {
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("remove")}
-            disabled={!allRowsHaveIssuedCertificates}
+            disabled={isPending || !allRowsHaveIssuedCertificates}
             title={
               !allRowsHaveIssuedCertificates
                 ? "Niet alle cursisten hebben een uitgegeven diploma"
@@ -132,7 +162,7 @@ export function ActionButtons(props: Props) {
           </DropdownItem>
           <DropdownItem
             onClick={() => setIsDialogOpen("download")}
-            disabled={!allRowsHaveIssuedCertificates}
+            disabled={isPending || !allRowsHaveIssuedCertificates}
             title={
               !allRowsHaveIssuedCertificates
                 ? "Niet alle cursisten hebben een uitgegeven diploma"
@@ -144,6 +174,7 @@ export function ActionButtons(props: Props) {
           <DropdownItem
             onClick={() => setIsDialogOpen("complete-core-modules")}
             disabled={
+              isPending ||
               !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
             }
             title={
@@ -159,18 +190,24 @@ export function ActionButtons(props: Props) {
 
       <IssueCertificateDialog
         {...props}
+        updateRows={updateRows}
+        rows={rows}
         isOpen={isDialogOpen === "issue"}
         setIsOpen={(value) => setIsDialogOpen(value ? "issue" : null)}
       />
 
       <RemoveCertificateDialog
         {...props}
+        updateRows={updateRows}
+        rows={rows}
         isOpen={isDialogOpen === "remove"}
         setIsOpen={(value) => setIsDialogOpen(value ? "remove" : null)}
       />
 
       <CompleteCoreModulesDialog
         {...props}
+        updateRows={updateRows}
+        rows={rows}
         isOpen={isDialogOpen === "complete-core-modules"}
         setIsOpen={(value) =>
           setIsDialogOpen(value ? "complete-core-modules" : null)
@@ -179,6 +216,8 @@ export function ActionButtons(props: Props) {
 
       <DownloadCertificatesDialog
         {...props}
+        updateRows={updateRows}
+        rows={rows}
         isOpen={isDialogOpen === "download"}
         setIsOpen={(value) => setIsDialogOpen(value ? "download" : null)}
       />
@@ -187,12 +226,15 @@ export function ActionButtons(props: Props) {
 }
 
 export function IssueCertificateDialog({
+  updateRows,
   rows,
   cohortId,
   defaultVisibleFrom,
   isOpen,
   setIsOpen,
 }: Props & {
+  updateRows: () => void;
+  rows: Rows;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
@@ -218,6 +260,7 @@ export function IssueCertificateDialog({
               cohortId,
             })
               .then(() => setIsOpen(false))
+              .then(() => updateRows())
               .catch((error) => {
                 if (error instanceof Error) {
                   return setError(error.message);
@@ -277,11 +320,14 @@ export function IssueCertificateDialog({
 }
 
 export function RemoveCertificateDialog({
+  updateRows,
   rows,
   isOpen,
   cohortId,
   setIsOpen,
 }: Props & {
+  updateRows: () => void;
+  rows: Rows;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
@@ -316,6 +362,7 @@ export function RemoveCertificateDialog({
                 cohortId,
               })
                 .then(() => setIsOpen(false))
+                .then(() => updateRows())
                 .catch((error) => {
                   if (error instanceof Error) {
                     return setError(error.message);
@@ -335,10 +382,13 @@ export function RemoveCertificateDialog({
 const CONFIRMATION_WORD = "begrepen";
 
 function CompleteCoreModulesDialog({
+  updateRows,
   rows,
   isOpen,
   setIsOpen,
 }: Props & {
+  updateRows: () => void;
+  rows: Rows;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
@@ -352,6 +402,7 @@ function CompleteCoreModulesDialog({
 
       toast.success("Kernmodules afgerond");
       setIsOpen(false);
+      updateRows();
     } catch (error) {
       toast.error("Er is iets misgegaan");
     }
@@ -415,10 +466,13 @@ function CoreModulesSubmitButton() {
 }
 
 function DownloadCertificatesDialog({
+  updateRows,
   rows,
   isOpen,
   setIsOpen,
 }: Props & {
+  updateRows: () => void;
+  rows: Rows;
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
@@ -442,6 +496,7 @@ function DownloadCertificatesDialog({
 
       toast.success("Bestand gedownload");
       setIsOpen(false);
+      updateRows();
     } catch (error) {
       toast.error("Er is iets misgegaan");
     }

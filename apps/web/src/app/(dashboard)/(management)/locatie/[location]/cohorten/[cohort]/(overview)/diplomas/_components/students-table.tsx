@@ -321,15 +321,7 @@ export default function StudentsTable({
     [progressTrackingEnabled],
   );
 
-  const [rowSelection, setRowSelection] = React.useState<
-    Record<
-      string,
-      {
-        certificate: Student["certificate"];
-        studentCurriculum: Student["studentCurriculum"];
-      }
-    >
-  >({});
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
   const [sort, setSort] = useQueryState(
     "sorteer",
@@ -344,35 +336,6 @@ export default function StudentsTable({
       ),
     // TODO: this feels a bit hacky, but we need a stable reference
     [sort.join(":")],
-  );
-
-  const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
-    (updater) => {
-      setRowSelection((prev) => {
-        const normalized = transformSelectionState(prev);
-
-        const newSelectionValue =
-          updater instanceof Function ? updater(normalized) : updater;
-
-        // Generate new rowSelection object
-        return Object.fromEntries(
-          Object.keys(newSelectionValue).map((key) => {
-            const student = students.find((student) => student.id === key);
-
-            return [
-              key,
-              rowSelection.hasOwnProperty(key)
-                ? rowSelection[key]!
-                : {
-                    certificate: student!.certificate,
-                    studentCurriculum: student!.studentCurriculum,
-                  },
-            ];
-          }),
-        );
-      });
-    },
-    [students],
   );
 
   const onSortingChange = React.useCallback<OnChangeFn<SortingState>>(
@@ -406,17 +369,13 @@ export default function StudentsTable({
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange,
+    onRowSelectionChange: setRowSelection,
     onSortingChange,
   });
 
   const params = useParams();
 
   const selectedRows = Object.keys(rowSelection).length;
-  const actionRows = Object.entries(rowSelection).map(([id, props]) => ({
-    id,
-    ...props,
-  }));
 
   return (
     <div className="mt-8 relative">
@@ -550,7 +509,9 @@ export default function StudentsTable({
             <XMarkIcon />
           </Button>
           <ActionButtons
-            rows={actionRows}
+            selectedRows={Object.keys(rowSelection).filter(
+              (id) => rowSelection[id],
+            )}
             cohortId={cohortId}
             defaultVisibleFrom={defaultCertificateVisibleFromDate}
           />
