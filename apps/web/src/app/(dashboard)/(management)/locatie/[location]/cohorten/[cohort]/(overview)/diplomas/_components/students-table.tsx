@@ -445,7 +445,6 @@ export default function StudentsTable({
                 return (
                   <TableHeader
                     key={header.id}
-                    header={header}
                     onClick={sortingHandler}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" && sortingHandler) {
