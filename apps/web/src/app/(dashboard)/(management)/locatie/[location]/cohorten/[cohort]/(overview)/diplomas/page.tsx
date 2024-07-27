@@ -52,6 +52,7 @@ export default async function Page({
       ] as const),
     ),
     query: parseAsString,
+    selectie: parseAsArrayOf(parseAsString),
   }).parse(searchParams);
 
   const filteredStudents =
@@ -138,6 +139,13 @@ export default async function Page({
     }
   }
 
+  // Add selection back to students
+  const selectedStudents =
+    parsedSq.selectie
+      ?.filter((id) => !searchedStudents.some((x) => x.id === id))
+      .map((id) => students.find((student) => student.id === id)!)
+      .filter(Boolean) ?? [];
+
   return (
     <SWRConfig
       value={{
@@ -158,6 +166,7 @@ export default async function Page({
         <StudentsTable
           progressTrackingEnabled={params.location === "krekt-sailing"}
           students={searchedStudents}
+          selectedStudents={selectedStudents}
           totalItems={searchedStudents.length}
           cohortId={cohort.id}
           // TODO: this can be optimized

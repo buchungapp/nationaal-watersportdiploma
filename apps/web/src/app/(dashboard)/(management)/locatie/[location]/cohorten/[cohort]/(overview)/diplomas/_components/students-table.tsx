@@ -20,7 +20,12 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { useParams } from "next/navigation";
-import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
+import {
+  createParser,
+  parseAsArrayOf,
+  parseAsString,
+  useQueryState,
+} from "nuqs";
 import React, { useMemo } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -53,11 +58,27 @@ export type Student = Awaited<
   ReturnType<typeof listCertificateOverviewByCohortId>
 >[number];
 
+const parseAsSelection = createParser<Record<string, boolean>>({
+  parse(queryValue) {
+    const columnKeys = queryValue.split(",");
+    return columnKeys.reduce<Record<string, boolean>>(
+      (acc, key) => ((acc[key] = true), acc),
+      {},
+    );
+  },
+  serialize(value) {
+    return Object.keys(value)
+      .filter((key) => !!value[key])
+      .join(",");
+  },
+});
+
 const columnHelper = createColumnHelper<Student>();
 
 export default function StudentsTable({
   cohortId,
   students,
+  selectedStudents,
   totalItems,
   noOptionsLabel = "Geen items gevonden",
   defaultCertificateVisibleFromDate,
@@ -65,6 +86,9 @@ export default function StudentsTable({
 }: {
   cohortId: string;
   students: Awaited<ReturnType<typeof listCertificateOverviewByCohortId>>;
+  selectedStudents: Awaited<
+    ReturnType<typeof listCertificateOverviewByCohortId>
+  >;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
   defaultCertificateVisibleFromDate?: string;
@@ -321,15 +345,10 @@ export default function StudentsTable({
     [progressTrackingEnabled],
   );
 
-  const [rowSelection, setRowSelection] = React.useState<
-    Record<
-      string,
-      {
-        certificate: Student["certificate"];
-        studentCurriculum: Student["studentCurriculum"];
-      }
-    >
-  >({});
+  const [rowSelection, setRowSelection] = useQueryState<RowSelectionState>(
+    "selectie",
+    parseAsSelection.withDefault({}),
+  );
 
   const [sort, setSort] = useQueryState(
     "sorteer",
@@ -344,35 +363,6 @@ export default function StudentsTable({
       ),
     // TODO: this feels a bit hacky, but we need a stable reference
     [sort.join(":")],
-  );
-
-  const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
-    (updater) => {
-      setRowSelection((prev) => {
-        const normalized = transformSelectionState(prev);
-
-        const newSelectionValue =
-          updater instanceof Function ? updater(normalized) : updater;
-
-        // Generate new rowSelection object
-        return Object.fromEntries(
-          Object.keys(newSelectionValue).map((key) => {
-            const student = students.find((student) => student.id === key);
-
-            return [
-              key,
-              rowSelection.hasOwnProperty(key)
-                ? rowSelection[key]!
-                : {
-                    certificate: student!.certificate,
-                    studentCurriculum: student!.studentCurriculum,
-                  },
-            ];
-          }),
-        );
-      });
-    },
-    [students],
   );
 
   const onSortingChange = React.useCallback<OnChangeFn<SortingState>>(
@@ -406,17 +396,26 @@ export default function StudentsTable({
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange,
+    onRowSelectionChange: setRowSelection,
     onSortingChange,
   });
 
   const params = useParams();
 
   const selectedRows = Object.keys(rowSelection).length;
-  const actionRows = Object.entries(rowSelection).map(([id, props]) => ({
-    id,
-    ...props,
-  }));
+  const actionRows = Object.entries(rowSelection)
+    .filter(([_, selected]) => selected)
+    .map(([id]) => {
+      const student =
+        students.find((student) => student.id === id) ??
+        selectedStudents.find((student) => student.id === id);
+
+      return {
+        id,
+        certificate: student?.certificate ?? null,
+        studentCurriculum: student?.studentCurriculum ?? null,
+      };
+    });
 
   return (
     <div className="mt-8 relative">
