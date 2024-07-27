@@ -356,17 +356,22 @@ export default function StudentsTable({
 
         // Generate new rowSelection object
         return Object.fromEntries(
-          Object.keys(newSelectionValue).map((key) => {
-            const student = students.find((student) => student.id === key);
+          Object.keys(newSelectionValue)
+            .map((key) => {
+              const student = students.find((student) => student.id === key);
+              if (!student && !rowSelection.hasOwnProperty(key)) return null;
 
-            return [
-              key,
-              {
-                certificate: student!.certificate,
-                studentCurriculum: student!.studentCurriculum,
-              },
-            ];
-          }),
+              return [
+                key,
+                student
+                  ? {
+                      certificate: student.certificate,
+                      studentCurriculum: student.studentCurriculum,
+                    }
+                  : rowSelection[key]!,
+              ];
+            })
+            .filter((x) => x !== null),
         );
       });
     },
@@ -377,18 +382,24 @@ export default function StudentsTable({
     setRowSelection((prev) => {
       const normalized = transformSelectionState(prev);
 
+      // Generate new rowSelection object
       return Object.fromEntries(
-        Object.keys(normalized).map((key) => {
-          const student = students.find((student) => student.id === key);
+        Object.keys(normalized)
+          .map((key) => {
+            const student = students.find((student) => student.id === key);
+            if (!student && !rowSelection.hasOwnProperty(key)) return null;
 
-          return [
-            key,
-            {
-              certificate: student!.certificate,
-              studentCurriculum: student!.studentCurriculum,
-            },
-          ];
-        }),
+            return [
+              key,
+              student
+                ? {
+                    certificate: student.certificate,
+                    studentCurriculum: student.studentCurriculum,
+                  }
+                : rowSelection[key]!,
+            ];
+          })
+          .filter((x) => x !== null),
       );
     });
   }, [students]);
@@ -436,7 +447,7 @@ export default function StudentsTable({
     ...props,
   }));
 
-  console.log(students, table.getRowModel().rows, rowSelection);
+  // console.log(students, table.getRowModel().rows, rowSelection);
 
   return (
     <div className="mt-8 relative">
