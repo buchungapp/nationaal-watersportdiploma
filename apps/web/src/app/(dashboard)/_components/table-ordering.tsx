@@ -13,7 +13,6 @@ import {
 } from "@dnd-kit/modifiers";
 import {
   arrayMove,
-  horizontalListSortingStrategy,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
@@ -104,19 +103,6 @@ export function TableOrderingContext({
         {children}
       </TableOrdering.Provider>
     </DndContext>
-  );
-}
-
-export function TableColumnOrderingContext({ children }: PropsWithChildren) {
-  const { columnOrder } = useTableOrdering();
-
-  return (
-    <SortableContext
-      items={columnOrder}
-      strategy={horizontalListSortingStrategy}
-    >
-      {children}
-    </SortableContext>
   );
 }
 

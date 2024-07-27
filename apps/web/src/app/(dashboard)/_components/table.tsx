@@ -1,11 +1,8 @@
 "use client";
 
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import type { Cell, Header } from "@tanstack/react-table";
 import { clsx } from "clsx";
 import type React from "react";
-import { createContext, useContext, useState, type CSSProperties } from "react";
+import { createContext, useContext, useState } from "react";
 import { Link } from "./link";
 
 const TableContext = createContext<{
@@ -126,37 +123,15 @@ export function TableRow({
   );
 }
 
-export function TableHeader<TData, _>({
+export function TableHeader({
   className,
-  header,
   ...props
-}: React.ComponentPropsWithoutRef<"th"> & {
-  header?: Header<TData, unknown>;
-}) {
+}: React.ComponentPropsWithoutRef<"th">) {
   const { bleed, grid } = useContext(TableContext);
-
-  // Column Ordering
-  const { attributes, isDragging, listeners, setNodeRef, transform } =
-    useSortable({
-      id: header?.id ?? "",
-    });
-
-  const style: CSSProperties = header
-    ? {
-        opacity: isDragging ? 0.8 : 1,
-        position: "relative",
-        transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
-        transition: "width transform 0.2s ease-in-out",
-        whiteSpace: "nowrap",
-        width: header.column.getSize(),
-        zIndex: isDragging ? 1 : 0,
-      }
-    : {};
 
   return (
     <th
       {...props}
-      colSpan={header?.colSpan}
       className={clsx(
         className,
         "border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] dark:border-b-white/10",
@@ -164,45 +139,22 @@ export function TableHeader<TData, _>({
           "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
         !bleed && "sm:first:pl-1 sm:last:pr-1",
       )}
-      // Column Ordering
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
     />
   );
 }
 
-export function TableCell<TData, _>({
+export function TableCell({
   className,
   children,
-  cell,
   ...props
-}: React.ComponentPropsWithoutRef<"td"> & {
-  cell?: Cell<TData, unknown>;
-}) {
+}: React.ComponentPropsWithoutRef<"td">) {
   const { bleed, dense, grid, striped } = useContext(TableContext);
   const { href, target, title } = useContext(TableRowContext);
   const [cellRef, setCellRef] = useState<HTMLElement | null>(null);
 
-  // Column Ordering
-  const { isDragging, setNodeRef, transform } = useSortable({
-    id: cell?.column?.id ?? "",
-  });
-
-  const style: CSSProperties = {
-    opacity: isDragging ? 0.8 : 1,
-    position: "relative",
-    transform: CSS.Translate.toString(transform),
-    transition: "width transform 0.2s ease-in-out",
-    width: cell?.column ? cell.column.getSize() : "100%",
-    zIndex: isDragging ? 1 : 0,
-  };
-
   return (
     <td
       ref={(el) => {
-        setNodeRef(el); // For column ordering
         if (href) setCellRef(el);
       }}
       {...props}
@@ -215,8 +167,6 @@ export function TableCell<TData, _>({
         dense ? "py-2.5" : "py-4",
         !bleed && "sm:first:pl-1 sm:last:pr-1",
       )}
-      // Column ordering
-      style={style}
     >
       {href && (
         <Link

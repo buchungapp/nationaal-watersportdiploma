@@ -42,7 +42,6 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import {
-  TableColumnOrderingContext,
   TableDisplay,
   TableOrderingContext,
 } from "~/app/(dashboard)/_components/table-ordering";
@@ -332,55 +331,50 @@ export default function StudentsTable({
                   };
 
                   return (
-                    <TableColumnOrderingContext>
-                      <TableHeader
-                        key={header.id}
-                        header={header}
-                        onClick={sortingHandler}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" && sortingHandler) {
-                            sortingHandler(event);
-                          }
-                        }}
+                    <TableHeader
+                      key={header.id}
+                      onClick={sortingHandler}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && sortingHandler) {
+                          sortingHandler(event);
+                        }
+                      }}
+                      className={clsx(
+                        header.column.getCanSort()
+                          ? "cursor-pointer select-none"
+                          : "",
+                      )}
+                      tabIndex={header.column.getCanSort() ? 0 : -1}
+                      aria-sort={getAriaSortValue(header.column.getIsSorted())}
+                    >
+                      <div
                         className={clsx(
-                          header.column.getCanSort()
-                            ? "cursor-pointer select-none"
-                            : "",
-                        )}
-                        tabIndex={header.column.getCanSort() ? 0 : -1}
-                        aria-sort={getAriaSortValue(
-                          header.column.getIsSorted(),
+                          header.column.columnDef.enableSorting === false
+                            ? header.column.columnDef.meta?.align
+                            : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
+                          "rounded-md",
                         )}
                       >
-                        <div
-                          className={clsx(
-                            header.column.columnDef.enableSorting === false
-                              ? header.column.columnDef.meta?.align
-                              : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
-                            "rounded-md",
-                          )}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {header.column.getCanSort() &&
-                            (header.column.getIsSorted() === false ? (
-                              <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
-                            ) : header.column.getIsSorted() === "desc" ? (
-                              <ArrowUpIcon
-                                className="size-3 text-gray-900 dark:text-gray-50"
-                                aria-hidden={true}
-                              />
-                            ) : (
-                              <ArrowDownIcon
-                                className="size-3 text-gray-900 dark:text-gray-50"
-                                aria-hidden={true}
-                              />
-                            ))}
-                        </div>
-                      </TableHeader>
-                    </TableColumnOrderingContext>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getCanSort() &&
+                          (header.column.getIsSorted() === false ? (
+                            <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowUpIcon
+                              className="size-3 text-gray-900 dark:text-gray-50"
+                              aria-hidden={true}
+                            />
+                          ) : (
+                            <ArrowDownIcon
+                              className="size-3 text-gray-900 dark:text-gray-50"
+                              aria-hidden={true}
+                            />
+                          ))}
+                      </div>
+                    </TableHeader>
                   );
                 })}
               </TableRow>
@@ -405,21 +399,15 @@ export default function StudentsTable({
                 href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
               >
                 {row.getVisibleCells().map((cell, index) => (
-                  <TableColumnOrderingContext>
-                    <TableCell
-                      key={cell.id}
-                      cell={cell}
-                      className={clsx(cell.column.columnDef.meta?.align)}
-                    >
-                      {index === 0 && row.getIsSelected() && (
-                        <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
-                      )}
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  </TableColumnOrderingContext>
+                  <TableCell
+                    key={cell.id}
+                    className={clsx(cell.column.columnDef.meta?.align)}
+                  >
+                    {index === 0 && row.getIsSelected() && (
+                      <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
+                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
                 ))}
               </TableRow>
             ))}
