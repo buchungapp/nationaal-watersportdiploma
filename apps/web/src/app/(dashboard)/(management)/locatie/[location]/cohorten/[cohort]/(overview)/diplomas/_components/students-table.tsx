@@ -545,7 +545,7 @@ export default function StudentsTable({
           </span>
         </p>
         <div className="flex items-center space-x-4">
-          <Button plain onClick={() => setRowSelection({})}>
+          <Button plain onClick={() => void setRowSelection({})}>
             <XMarkIcon />
           </Button>
           <ActionButtons
