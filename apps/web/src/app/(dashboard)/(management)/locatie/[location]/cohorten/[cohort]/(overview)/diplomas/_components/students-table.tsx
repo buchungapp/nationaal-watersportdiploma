@@ -396,7 +396,7 @@ export default function StudentsTable({
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: void setRowSelection,
     onSortingChange,
   });
 
