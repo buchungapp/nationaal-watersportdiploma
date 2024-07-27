@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 
 import {
@@ -54,7 +54,7 @@ import {
   withDrawCertificates,
 } from "../_actions/quick-actions";
 import { retreiveSelectedRows } from "../_actions/retreive-selected-rows";
-import { Student } from "./students-table";
+import type { Student } from "./students-table";
 
 interface Props {
   selectedRows: string[];
@@ -85,37 +85,40 @@ export function ActionButtons(props: Props) {
 
   const [rows, setRows] = useState<Rows>([]);
 
-  const updateRows = useCallback(
-    () =>
-      startTransition(() =>
-        retreiveSelectedRows(props.cohortId, props.selectedRows)
-          .then((students) => {
-            setRows(students);
-            setAllRowsHaveIssuedCertificates(
-              students.every((row) => !!row.certificate?.issuedAt),
-            );
-            setNoneRowsHaveIssuedCertificates(
-              students.every((row) => !row.certificate),
-            );
-            setAllRowsHaveACurriculum(
-              students.every((row) => !!row.studentCurriculum),
-            );
-            setAllRowsHaveACurriculumWithAtLeastOneModule(
-              students.every((row) => {
-                if (!row.studentCurriculum) return false;
-                const completedModules =
-                  row.studentCurriculum.moduleStatus.filter(
-                    (status) =>
-                      status.completedCompetencies === status.totalCompetencies,
-                  ).length;
-                return completedModules > 0;
-              }),
-            );
-          })
-          .catch(() => {}),
-      ),
-    [props.selectedRows, props.cohortId],
-  );
+  const updateRows = () =>
+    startTransition(() =>
+      retreiveSelectedRows(props.cohortId, props.selectedRows)
+        .then((students) => {
+          setRows(students);
+          setAllRowsHaveIssuedCertificates(
+            students.every((row) => !!row.certificate?.issuedAt),
+          );
+          setNoneRowsHaveIssuedCertificates(
+            students.every((row) => !row.certificate),
+          );
+          setAllRowsHaveACurriculum(
+            students.every((row) => !!row.studentCurriculum),
+          );
+          setAllRowsHaveACurriculumWithAtLeastOneModule(
+            students.every((row) => {
+              if (!row.studentCurriculum) return false;
+              const completedModules =
+                row.studentCurriculum.moduleStatus.filter(
+                  (status) =>
+                    status.completedCompetencies === status.totalCompetencies,
+                ).length;
+              return completedModules > 0;
+            }),
+          );
+        })
+        .catch(() => {
+          setRows([]);
+          setAllRowsHaveIssuedCertificates(false);
+          setNoneRowsHaveIssuedCertificates(false);
+          setAllRowsHaveACurriculum(false);
+          setAllRowsHaveACurriculumWithAtLeastOneModule(false);
+        }),
+    );
 
   useEffect(() => {
     updateRows();
