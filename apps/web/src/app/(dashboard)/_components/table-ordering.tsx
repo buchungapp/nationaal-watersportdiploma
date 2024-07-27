@@ -88,7 +88,7 @@ export function TableOrderingContext({
         over.id as string,
       );
 
-      setColumnOrder(newColumnOrder);
+      void setColumnOrder(newColumnOrder);
     }
   }
 
