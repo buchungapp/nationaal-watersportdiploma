@@ -19,7 +19,7 @@ export function useColumnOrdering<TData, TValue>(
   // NOTE: We need to replace `.` with `_` because `.` is not a valid key in React Table.
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
     columns
-      .map((column) => (column.id ?? column.accessorKey) as string)
+      .map((column) => (column.id ?? column.accessorKey)!)
       .map((column) => column.replace(/\./g, "_")),
   );
 
