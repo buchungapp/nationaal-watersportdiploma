@@ -62,6 +62,7 @@ interface Props {
   }[];
   cohortId: string;
   defaultVisibleFrom?: string;
+  resetSelection: () => void;
 }
 
 export function ActionButtons(props: Props) {
@@ -192,6 +193,7 @@ export function IssueCertificateDialog({
   defaultVisibleFrom,
   isOpen,
   setIsOpen,
+  resetSelection,
 }: Props & {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -218,6 +220,7 @@ export function IssueCertificateDialog({
               cohortId,
             })
               .then(() => setIsOpen(false))
+              .then(() => resetSelection())
               .catch((error) => {
                 if (error instanceof Error) {
                   return setError(error.message);
@@ -281,6 +284,7 @@ export function RemoveCertificateDialog({
   isOpen,
   cohortId,
   setIsOpen,
+  resetSelection,
 }: Props & {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -316,6 +320,7 @@ export function RemoveCertificateDialog({
                 cohortId,
               })
                 .then(() => setIsOpen(false))
+                .then(() => resetSelection())
                 .catch((error) => {
                   if (error instanceof Error) {
                     return setError(error.message);
@@ -338,6 +343,7 @@ function CompleteCoreModulesDialog({
   rows,
   isOpen,
   setIsOpen,
+  resetSelection,
 }: Props & {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -352,6 +358,7 @@ function CompleteCoreModulesDialog({
 
       toast.success("Kernmodules afgerond");
       setIsOpen(false);
+      resetSelection();
     } catch (error) {
       toast.error("Er is iets misgegaan");
     }
@@ -418,6 +425,7 @@ function DownloadCertificatesDialog({
   rows,
   isOpen,
   setIsOpen,
+  resetSelection,
 }: Props & {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
@@ -442,6 +450,7 @@ function DownloadCertificatesDialog({
 
       toast.success("Bestand gedownload");
       setIsOpen(false);
+      resetSelection();
     } catch (error) {
       toast.error("Er is iets misgegaan");
     }
