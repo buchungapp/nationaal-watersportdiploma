@@ -16,6 +16,8 @@ export default function Search({ placeholder = "Zoeken..." }) {
     },
     {
       startTransition,
+      // https://nuqs.47ng.com/docs/options#throttling-url-updates
+      throttleMs: 300,
     },
   );
 
