@@ -25,7 +25,7 @@ export default function Search({ placeholder = "Zoeken..." }) {
         value={decodeURIComponent(query)}
         onChange={(e) => {
           void setQuery({
-            query: encodeURIComponent(e.target.value.trim()),
+            query: encodeURIComponent(e.target.value),
             page: null,
             limit: null,
           });
