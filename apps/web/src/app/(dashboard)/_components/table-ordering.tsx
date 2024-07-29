@@ -198,7 +198,7 @@ function SortableItem({
       {...attributes}
       {...listeners}
       className={clsx(
-        "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100",
+        "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100 relative",
         isDisabled ? "opacity-50" : "opacity-100",
       )}
     >
