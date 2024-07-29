@@ -9,10 +9,7 @@ const nextConfig = {
     mdxRs: true,
     outputFileTracingIncludes: {
       "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
-
-      outputFileTracingIncludes: {
-        "/": ["./src/app/(public)/**/*.mdx"],
-      },
+      "/": ["./src/app/(public)/**/*.mdx"],
     },
     instrumentationHook: true,
   },
