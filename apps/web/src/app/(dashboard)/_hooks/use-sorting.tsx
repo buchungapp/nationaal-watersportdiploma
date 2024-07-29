@@ -2,10 +2,10 @@ import type { SortingState } from "@tanstack/react-table";
 import { createParser, useQueryState } from "nuqs";
 import { Optional } from "~/types/optional";
 
-type SortableColumn = {
+interface SortableColumn {
   id: string;
   enableSorting?: boolean;
-};
+}
 
 const parseAsSorting = (validSortingKeys: string[]) => {
   return createParser<SortingState>({

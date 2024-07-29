@@ -7,10 +7,10 @@ import {
 import React from "react";
 import { Optional } from "~/types/optional";
 
-type OrderableColumn = {
+interface OrderableColumn {
   id: string;
   isDefaultVisible?: boolean;
-};
+}
 
 const parseAsColumnVisibility = (validColumnKeys: string[]) => {
   return createParser<Record<string, boolean>>({
@@ -41,7 +41,7 @@ export function getOrderableColumnIds({
 }) {
   return columns.filter(
     (c): c is typeof c & { id: string } =>
-      !!c.id && (!excludeColumns || !excludeColumns.includes(c.id)),
+      !!c.id && !excludeColumns?.includes(c.id),
   );
 }
 
