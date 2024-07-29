@@ -51,9 +51,9 @@ export function CohortActions(props: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState<string | null>(null);
 
   return (
-    <>
+    <div className="flex items-center justify-center">
       <Dropdown>
-        <DropdownButton plain className="-my-1.5">
+        <DropdownButton outline className="-my-1.5">
           <EllipsisHorizontalIcon />
         </DropdownButton>
         <DropdownMenu anchor="bottom end">
@@ -77,7 +77,7 @@ export function CohortActions(props: Props) {
         isOpen={isDialogOpen === "remove"}
         setIsOpen={(value) => setIsDialogOpen(value ? "remove" : null)}
       />
-    </>
+    </div>
   );
 }
 

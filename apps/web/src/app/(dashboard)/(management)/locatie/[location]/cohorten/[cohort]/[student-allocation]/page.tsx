@@ -173,7 +173,7 @@ async function ManageStudentActions({
 
   return (
     <Dropdown>
-      <DropdownButton plain className="-my-1.5">
+      <DropdownButton outline className="-my-1.5">
         <EllipsisHorizontalIcon />
       </DropdownButton>
       <DropdownMenu anchor="bottom end">
@@ -213,7 +213,7 @@ async function ManageStudentCurriculumActions({
 
   return (
     <Dropdown>
-      <DropdownButton plain className="-my-1.5">
+      <DropdownButton outline className="-my-1.5">
         <EllipsisHorizontalIcon />
       </DropdownButton>
       <DropdownMenu anchor="bottom end">

@@ -89,7 +89,7 @@ export function EditDetails({
   return (
     <>
       <Dropdown>
-        <DropdownButton plain className="-my-1.5">
+        <DropdownButton outline className="-my-1.5">
           <EllipsisHorizontalIcon />
         </DropdownButton>
         <DropdownMenu anchor="bottom end">

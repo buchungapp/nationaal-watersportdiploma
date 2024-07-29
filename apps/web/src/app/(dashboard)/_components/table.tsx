@@ -154,7 +154,9 @@ export function TableCell({
 
   return (
     <td
-      ref={href ? setCellRef : undefined}
+      ref={(el) => {
+        if (href) setCellRef(el);
+      }}
       {...props}
       className={clsx(
         className,
