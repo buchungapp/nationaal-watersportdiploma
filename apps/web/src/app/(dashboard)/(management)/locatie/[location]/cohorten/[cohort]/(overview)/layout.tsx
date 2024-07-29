@@ -2,12 +2,18 @@ import {
   ArrowRightIcon,
   CalendarIcon,
   ChevronLeftIcon,
+  PlusIcon,
   UsersIcon,
 } from "@heroicons/react/16/solid";
 import "dayjs/locale/nl";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
+import {
+  Dropdown,
+  DropdownButton,
+  DropdownMenu,
+} from "~/app/(dashboard)/_components/dropdown";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import dayjs from "~/lib/dayjs";
@@ -18,6 +24,7 @@ import {
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { DialogButtons } from "./_components/dialog-context";
 import { LayoutTabs } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
 
@@ -28,6 +35,31 @@ async function StudentCount({ cohortId }: { cohortId: string }) {
   const count = (await listStudentsWithCurriculaByCohortId(cohortId)).length;
 
   return count;
+}
+
+async function QuickActionButtons({
+  locationId,
+}: {
+  cohortId: string;
+  locationId: string;
+}) {
+  const [roles] = await Promise.all([listRolesForLocation(locationId)]);
+
+  if (!roles.includes("location_admin")) {
+    return null;
+  }
+
+  return (
+    <Dropdown>
+      <DropdownButton color="branding-orange">
+        <PlusIcon />
+        Cursist toevoegen
+      </DropdownButton>
+      <DropdownMenu>
+        <DialogButtons />
+      </DropdownMenu>
+    </Dropdown>
+  );
 }
 
 export default async function Layout({
@@ -94,6 +126,12 @@ export default async function Layout({
             </span>
           </div>
           <div className="flex gap-4">
+            <Suspense fallback={null}>
+              <QuickActionButtons
+                locationId={location.id}
+                cohortId={cohort.id}
+              />
+            </Suspense>
             {roles.includes("location_admin") ? (
               <CohortActions
                 cohort={{

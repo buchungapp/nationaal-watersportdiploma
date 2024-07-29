@@ -1,4 +1,3 @@
-import { PlusIcon } from "@heroicons/react/16/solid";
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
@@ -7,14 +6,8 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
-import { Suspense } from "react";
 import { SWRConfig, unstable_serialize } from "swr";
 import Search from "~/app/(dashboard)/(management)/_components/search";
-import {
-  Dropdown,
-  DropdownButton,
-  DropdownMenu,
-} from "~/app/(dashboard)/_components/dropdown";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
@@ -29,38 +22,9 @@ import {
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
-import {
-  DialogButtons,
-  DialogWrapper,
-  Dialogs,
-} from "./_components/dialog-context";
+import { DialogWrapper, Dialogs } from "./_components/dialog-context";
 import { SetView } from "./_components/filters";
 import StudentsTable from "./_components/students-table";
-
-async function QuickActionButtons({
-  locationId,
-}: {
-  cohortId: string;
-  locationId: string;
-}) {
-  const [roles] = await Promise.all([listRolesForLocation(locationId)]);
-
-  if (!roles.includes("location_admin")) {
-    return null;
-  }
-
-  return (
-    <Dropdown>
-      <DropdownButton color="branding-orange">
-        <PlusIcon />
-        Cursist toevoegen
-      </DropdownButton>
-      <DropdownMenu>
-        <DialogButtons />
-      </DropdownMenu>
-    </Dropdown>
-  );
-}
 
 export default async function Page({
   params,
@@ -210,9 +174,6 @@ export default async function Page({
               ) : null}
             </div>
           </div>
-          <Suspense fallback={null}>
-            <QuickActionButtons locationId={location.id} cohortId={cohort.id} />
-          </Suspense>
         </div>
 
         <StudentsTable
