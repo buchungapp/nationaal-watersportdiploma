@@ -15,8 +15,6 @@ export async function getAllDiplomalijnInstructeurPages() {
     cwd: path.join(workingPath, contentPath, "diplomalijn/instructeur"),
   });
 
-  console.log("instructeur: pageFilenames", pageFilenames);
-
   const pages = await Promise.all(
     pageFilenames.map(async (pageFilename) => {
       const { page } = (await import(
@@ -38,8 +36,6 @@ export async function getAllDiplomalijnInstructeurPages() {
     }),
   );
 
-  console.log("instructeur: pages", pages);
-
   return pages.sort((a, z) => {
     // Sort on order if available
     if (a.order && z.order) return a.order - z.order;
@@ -56,8 +52,6 @@ export async function getAllDiplomalijnConsumentenPages() {
   const pageFilenames = await glob("**/page.mdx", {
     cwd: path.join(workingPath, contentPath, "diplomalijn/consument"),
   });
-
-  console.log("consument: pageFilenames", pageFilenames);
 
   const pages = await Promise.all(
     pageFilenames.map(async (pageFilename) => {
@@ -79,8 +73,6 @@ export async function getAllDiplomalijnConsumentenPages() {
       };
     }),
   );
-
-  console.log("consument: pages", pages);
 
   return pages.sort((a, z) => {
     // Sort on order if available
