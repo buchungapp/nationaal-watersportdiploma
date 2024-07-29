@@ -219,8 +219,10 @@ export function IssueCertificateDialog({
                 : null,
               cohortId,
             })
-              .then(() => setIsOpen(false))
-              .then(() => resetSelection())
+              .then(() => {
+                setIsOpen(false);
+                resetSelection();
+              })
               .catch((error) => {
                 if (error instanceof Error) {
                   return setError(error.message);
@@ -319,8 +321,10 @@ export function RemoveCertificateDialog({
                 certificateIds: rows.map((row) => row.certificate!.id),
                 cohortId,
               })
-                .then(() => setIsOpen(false))
-                .then(() => resetSelection())
+                .then(() => {
+                  setIsOpen(false);
+                  resetSelection();
+                })
                 .catch((error) => {
                   if (error instanceof Error) {
                     return setError(error.message);
