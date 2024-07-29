@@ -553,6 +553,7 @@ export default function StudentsTable({
             rows={actionRows}
             cohortId={cohortId}
             defaultVisibleFrom={defaultCertificateVisibleFromDate}
+            resetSelection={() => setRowSelection({})}
           />
         </div>
       </div>
