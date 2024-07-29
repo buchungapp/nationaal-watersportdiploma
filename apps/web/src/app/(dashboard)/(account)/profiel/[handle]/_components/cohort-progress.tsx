@@ -13,7 +13,7 @@ import {
   GridList,
   GridListHeader,
   GridListItem,
-} from "../../../_components/grid-list";
+} from "../../../../_components/grid-list";
 
 interface Props {
   person: {
