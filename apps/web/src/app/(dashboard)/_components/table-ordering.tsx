@@ -18,27 +18,19 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import type { PopoverPanelProps } from "@headlessui/react";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/16/solid";
 import type { Column, Table as TableType } from "@tanstack/react-table";
 import { clsx } from "clsx";
-import React, {
-  createContext,
-  useContext,
-  type ComponentProps,
-  type PropsWithChildren,
-} from "react";
+import { createContext, useContext, type PropsWithChildren } from "react";
 import DragIcon from "~/app/_components/drag-icon";
 import type { useColumnOrdering } from "../_hooks/use-column-ordering";
 import { useCustomSensors } from "../_hooks/use-custom-sensors";
-import { Checkbox } from "./checkbox";
-import {
-  Dropdown,
-  DropdownButton,
-  DropdownItem,
-  DropdownMenu,
-  DropdownSection,
-} from "./dropdown";
-
+import { Button } from "./button";
+import { Checkbox, CheckboxField } from "./checkbox";
+import { Divider } from "./divider";
+import { Label } from "./fieldset";
+import { Popover, PopoverButton, PopoverPanel } from "./popover";
 export function updateColumnOrder(
   columnOrder: string[],
   activeId: string,
@@ -111,7 +103,7 @@ export function TableDisplay<TData>({
   anchor = "bottom end",
 }: {
   table: TableType<TData>;
-  anchor?: ComponentProps<typeof DropdownMenu>["anchor"];
+  anchor?: PopoverPanelProps["anchor"];
 }) {
   const { columnOrder, handleDragEnd, sensors } = useTableOrdering();
 
@@ -127,29 +119,17 @@ export function TableDisplay<TData>({
     .filter((column) => !pinnedColumns.includes(column.id));
 
   return (
-    <Dropdown>
-      <DropdownButton
+    <Popover>
+      <PopoverButton
         outline
         className={clsx(
           !table.getIsAllColumnsVisible() && "border-branding-dark/10",
         )}
       >
-        <span
-          className={clsx(
-            "hidden sm:inline",
-            !table.getIsAllColumnsVisible() && "text-branding-dark",
-          )}
-        >
-          Weergave
-        </span>
-        {!table.getIsAllColumnsVisible() ? (
-          <EyeSlashIcon className="h-4 w-4 [--btn-icon:theme(colors.branding.dark)]" />
-        ) : (
-          <EyeIcon className="h-4 w-4" />
-        )}
-      </DropdownButton>
-      <DropdownMenu anchor={anchor} className="min-w-64">
-        <DropdownSection>
+        <AdjustmentsHorizontalIcon />
+      </PopoverButton>
+      <PopoverPanel anchor={anchor} className="min-w-64">
+        <div className="py-2.5">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -171,35 +151,21 @@ export function TableDisplay<TData>({
               );
             })}
           </DndContext>
-        </DropdownSection>
-        <DropdownSection>
-          <DropdownItem
-            className={clsx(
-              "!grid-cols-[1fr_1.5rem_0.5rem_auto]",
-              table.getIsAllColumnsVisible()
-                ? "cursor-not-allowed opacity-60"
-                : "cursor-pointer opacity-100",
-            )}
-            onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-              e.preventDefault();
-
-              if (!table.getIsAllColumnsVisible())
-                table.toggleAllColumnsVisible();
-            }}
-          >
-            <span className="font-medium">Toon alles</span>
-            <Checkbox
-              disabled={table.getIsAllColumnsVisible()}
-              checked={table.getIsAllColumnsVisible()}
-              onChange={() => {
-                if (!table.getIsAllColumnsVisible())
-                  table.toggleAllColumnsVisible();
-              }}
-            />
-          </DropdownItem>
-        </DropdownSection>
-      </DropdownMenu>
-    </Dropdown>
+        </div>
+        <Divider />
+        <Button
+          plain
+          className="w-full rounded-none"
+          onClick={() => {
+            if (!table.getIsAllColumnsVisible())
+              table.toggleAllColumnsVisible();
+          }}
+          disabled={table.getIsAllColumnsVisible()}
+        >
+          Toon alle kolommen
+        </Button>
+      </PopoverPanel>
+    </Popover>
   );
 }
 
@@ -226,31 +192,29 @@ function SortableItem({
   };
 
   return (
-    <DropdownItem
+    <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      type="button"
-      onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        e.preventDefault();
-        if (!isDisabled) column.toggleVisibility();
-      }}
-      className={isDisabled ? "opacity-50" : "opacity-100"}
-      as={"div"}
+      className={clsx(
+        "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100",
+        isDisabled ? "opacity-50" : "opacity-100",
+      )}
     >
       <DragIcon isDragging={isDragging} />
-      <span>
-        {typeof column.columnDef.header === "function"
-          ? column.columnDef.meta?.label
-          : column.columnDef.header}
-      </span>
+      <CheckboxField disabled={isDisabled} className={clsx("flex-1")}>
+        <Checkbox
+          checked={column.getIsVisible()}
+          onChange={() => column.toggleVisibility()}
+        />
 
-      <Checkbox
-        disabled={isDisabled}
-        checked={column.getIsVisible()}
-        onChange={() => column.toggleVisibility()}
-      />
-    </DropdownItem>
+        <Label className="w-full">
+          {typeof column.columnDef.header === "function"
+            ? column.columnDef.meta?.label
+            : column.columnDef.header}
+        </Label>
+      </CheckboxField>
+    </div>
   );
 }

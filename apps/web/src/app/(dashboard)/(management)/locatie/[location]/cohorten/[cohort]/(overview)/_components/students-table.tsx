@@ -191,8 +191,12 @@ export default function StudentsTable({
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }) {
-  // @ts-expect-error TODO: find out if we can type this
-  const columnOrderingOptions = useColumnOrdering(columns);
+  const columnOrderingOptions = useColumnOrdering(
+    // @ts-expect-error TODO: find out if we can type this
+    columns.filter(
+      (c): c is typeof c & { id: string } => !!c.id && c.id !== "select",
+    ),
+  );
 
   const [rowSelection, setRowSelection] = React.useState<
     Record<
