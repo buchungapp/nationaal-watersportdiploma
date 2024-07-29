@@ -230,7 +230,7 @@ export default async function Page({
               <span>
                 Je hebt nog geen cursisten geclaimd.{" "}
                 <TextLink
-                  href={`/locatie/${params.location}/cohorten/${params.cohort}?view=all`}
+                  href={`/locatie/${params.location}/cohorten/${params.cohort}?overzicht=allen`}
                 >
                   Bekijk alle cursisten
                 </TextLink>
