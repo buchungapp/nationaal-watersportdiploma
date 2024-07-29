@@ -16,6 +16,8 @@ export default function Search({ placeholder = "Zoeken..." }) {
     },
     {
       startTransition,
+      // https://nuqs.47ng.com/docs/options#throttling-url-updates
+      throttleMs: 300,
     },
   );
 
@@ -25,7 +27,7 @@ export default function Search({ placeholder = "Zoeken..." }) {
         value={decodeURIComponent(query)}
         onChange={(e) => {
           void setQuery({
-            query: encodeURIComponent(e.target.value.trim()),
+            query: encodeURIComponent(e.target.value),
             page: null,
             limit: null,
           });

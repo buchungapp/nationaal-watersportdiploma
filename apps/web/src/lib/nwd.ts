@@ -184,30 +184,111 @@ export const listCertificates = cache(async (locationId: string) => {
   });
 });
 
-export const listCertificatesForPerson = cache(async (personId: string) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
+async function validatePersonAccessCheck({
+  locationId,
+  requestingUser,
+  requestedPersonId,
+}: {
+  requestingUser: Awaited<ReturnType<typeof getUserOrThrow>>;
+  locationId: string;
+  requestedPersonId: string;
+}) {
+  const requestingUserPrimaryPerson = await getPrimaryPerson(requestingUser);
 
-    if (!user.persons.map((p) => p.id).includes(personId)) {
-      throw new Error("Unauthorized");
-    }
+  const isLocationAdminRequest = isActiveActorTypeInLocation({
+    actorType: ["location_admin"],
+    locationId,
+    personId: requestingUserPrimaryPerson.id,
+  }).catch(() => false);
 
-    const certificates = await Certificate.list({
-      filter: { personId },
-      respectVisibility: true,
+  const isInstructorInSameActiveCohortRequest = isActiveActorTypeInLocation({
+    actorType: ["instructor"],
+    locationId,
+    personId: requestingUserPrimaryPerson.id,
+  })
+    .catch(() => false)
+    .then(async (isInstructor) => {
+      if (!isInstructor) {
+        return false;
+      }
+
+      return await Cohort.Allocation.personsBelongTogetherInActiveCohort({
+        personId: [requestingUserPrimaryPerson.id, requestedPersonId],
+      });
+    })
+    .catch(() => false);
+
+  const isRequestedPersonAnActiveStudentOrInstructorForLocationRequest =
+    isActiveActorTypeInLocation({
+      actorType: ["instructor", "student"],
+      locationId,
+      personId: requestedPersonId,
     });
 
-    return certificates;
-  });
-});
+  const [
+    isLocationAdmin,
+    isInstructorInSameActiveCohort,
+    isRequestedPersonAnActiveStudentOrInstructorForLocation,
+  ] = await Promise.all([
+    isLocationAdminRequest,
+    isInstructorInSameActiveCohortRequest,
+    isRequestedPersonAnActiveStudentOrInstructorForLocationRequest,
+  ]);
+
+  if (
+    !isRequestedPersonAnActiveStudentOrInstructorForLocation ||
+    !(isLocationAdmin || isInstructorInSameActiveCohort)
+  ) {
+    throw new Error("Unauthorized");
+  }
+}
+
+export const listCertificatesForPerson = cache(
+  async (personId: string, locationId?: string) => {
+    return makeRequest(async () => {
+      const requestingUser = await getUserOrThrow();
+
+      const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+      if (!isSelf) {
+        if (!locationId) {
+          throw new Error("Unauthorized");
+        }
+
+        await validatePersonAccessCheck({
+          locationId,
+          requestedPersonId: personId,
+          requestingUser,
+        });
+      }
+
+      const certificates = await Certificate.list({
+        filter: { personId },
+        respectVisibility: true,
+      });
+
+      return certificates;
+    });
+  },
+);
 
 export const listExternalCertificatesForPerson = cache(
-  async (personId: string) => {
+  async (personId: string, locationId?: string) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
+      const requestingUser = await getUserOrThrow();
 
-      if (!user.persons.map((p) => p.id).includes(personId)) {
-        throw new Error("Unauthorized");
+      const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+      if (!isSelf) {
+        if (!locationId) {
+          throw new Error("Unauthorized");
+        }
+
+        await validatePersonAccessCheck({
+          locationId,
+          requestedPersonId: personId,
+          requestingUser,
+        });
       }
 
       const certificates = await Certificate.External.listForPerson({
@@ -446,11 +527,15 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
     const user = await getUserOrThrow();
     const person = await getPrimaryPerson(user);
 
-    await isActiveActorTypeInLocation({
+    const isLocationAdmin = await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId,
       personId: person.id,
-    }).catch(() => []);
+    }).catch(() => false);
+
+    if (!isLocationAdmin) {
+      return [];
+    }
 
     const persons = await User.Person.list({ filter: { locationId } });
 
@@ -462,13 +547,12 @@ export const getPersonById = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(user);
 
-      await isActiveActorTypeInLocation({
-        actorType: ["location_admin"],
+      await validatePersonAccessCheck({
         locationId,
-        personId: primaryPerson.id,
-      }).catch(() => []);
+        requestedPersonId: personId,
+        requestingUser: user,
+      });
 
       const person = await User.Person.byIdOrHandle({ id: personId });
       return person;
@@ -508,11 +592,15 @@ export const listPersonsForLocationByRole = cache(
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
 
-      await isActiveActorTypeInLocation({
+      const isLocationAdmin = await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId,
         personId: person.id,
-      }).catch(() => []);
+      }).catch(() => false);
+
+      if (!isLocationAdmin) {
+        return [];
+      }
 
       const persons = await Location.Person.list({
         locationId,
@@ -1538,10 +1626,10 @@ export const listRolesForLocation = cache(
       const primaryPerson = await getPrimaryPerson(authUser);
 
       if (!!personId) {
-        await isActiveActorTypeInLocation({
-          actorType: ["location_admin"],
+        await validatePersonAccessCheck({
           locationId,
-          personId: primaryPerson.id,
+          requestedPersonId: personId,
+          requestingUser: authUser,
         });
       }
 
