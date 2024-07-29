@@ -1,6 +1,7 @@
 import type { SortingState } from "@tanstack/react-table";
 import { createParser, useQueryState } from "nuqs";
-import { Optional } from "~/types/optional";
+import { useMemo } from "react";
+import type { Optional } from "~/types/optional";
 
 interface SortableColumn {
   id: string;
@@ -55,12 +56,15 @@ export function useSorting({
     parseAsSorting(sortableColumnIds).withDefault(defaultSorting),
   );
 
-  const options = {
-    state: {
-      sorting,
-    },
-    onSortingChange: setSorting,
-  };
+  const options = useMemo(
+    () => ({
+      state: {
+        sorting,
+      },
+      onSortingChange: setSorting,
+    }),
+    [JSON.stringify(sorting), setSorting],
+  );
 
   return options;
 }

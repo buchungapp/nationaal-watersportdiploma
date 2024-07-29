@@ -4,8 +4,8 @@ import {
   parseAsString,
   useQueryState,
 } from "nuqs";
-import React from "react";
-import { Optional } from "~/types/optional";
+import React, { useMemo } from "react";
+import type { Optional } from "~/types/optional";
 
 interface OrderableColumn {
   id: string;
@@ -85,14 +85,22 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
     parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
   );
 
-  const options = {
-    state: {
-      columnOrder,
-      columnVisibility,
-    },
-    onColumnOrderChange: setColumnOrder,
-    onColumnVisibilityChange: setColumnVisibility,
-  };
+  const options = useMemo(
+    () => ({
+      state: {
+        columnOrder,
+        columnVisibility,
+      },
+      onColumnOrderChange: setColumnOrder,
+      onColumnVisibilityChange: setColumnVisibility,
+    }),
+    [
+      JSON.stringify(columnOrder),
+      JSON.stringify(columnVisibility),
+      setColumnOrder,
+      setColumnVisibility,
+    ],
+  );
 
   return options;
 }
