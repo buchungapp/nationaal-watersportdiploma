@@ -130,7 +130,7 @@ export default function InstructorsTable({
             <>
               <div className="-mx-3 -my-1.5 sm:-mx-2.5">
                 <Dropdown>
-                  <DropdownButton plain aria-label="More options">
+                  <DropdownButton outline aria-label="Meer opties">
                     <EllipsisHorizontalIcon />
                   </DropdownButton>
                   <DropdownMenu anchor="bottom end">

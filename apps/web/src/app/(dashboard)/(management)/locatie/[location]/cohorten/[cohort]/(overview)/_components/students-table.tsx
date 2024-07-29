@@ -19,6 +19,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
+import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import React, { useMemo } from "react";
@@ -40,7 +41,11 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
-import dayjs from "~/lib/dayjs";
+import {
+  TableDisplay,
+  TableOrderingContext,
+} from "~/app/(dashboard)/_components/table-ordering";
+import { useColumnOrdering } from "~/app/(dashboard)/_hooks/use-column-ordering";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import {
   generateSortingState,
@@ -186,6 +191,13 @@ export default function StudentsTable({
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }) {
+  const columnOrderingOptions = useColumnOrdering(
+    // @ts-expect-error TODO: find out if we can type this
+    columns.filter(
+      (c): c is typeof c & { id: string } => !!c.id && c.id !== "select",
+    ),
+  );
+
   const [rowSelection, setRowSelection] = React.useState<
     Record<
       string,
@@ -265,11 +277,18 @@ export default function StudentsTable({
   );
 
   const table = useReactTable({
+    ...columnOrderingOptions,
     data: students,
     columns,
     state: {
       rowSelection: transformSelectionState(rowSelection),
       sorting: sortingState,
+      ...columnOrderingOptions.state,
+    },
+    initialState: {
+      columnPinning: {
+        left: ["select"],
+      },
     },
     getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
@@ -287,111 +306,118 @@ export default function StudentsTable({
 
   return (
     <div className="mt-8 relative">
-      <Table
-        className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
-        dense
-      >
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const sortingHandler =
-                  header.column.getToggleSortingHandler?.();
-                const getAriaSortValue = (isSorted: false | SortDirection) => {
-                  switch (isSorted) {
-                    case "asc":
-                      return "ascending";
-                    case "desc":
-                      return "descending";
-                    case false:
-                    default:
-                      return "none";
-                  }
-                };
+      <TableOrderingContext options={columnOrderingOptions}>
+        <div className="flex justify-end items-center gap-1">
+          <TableDisplay table={table} />
+        </div>
+        <Table
+          className="mt-1 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+          dense
+        >
+          <TableHead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const sortingHandler =
+                    header.column.getToggleSortingHandler?.();
+                  const getAriaSortValue = (
+                    isSorted: false | SortDirection,
+                  ) => {
+                    switch (isSorted) {
+                      case "asc":
+                        return "ascending";
+                      case "desc":
+                        return "descending";
+                      case false:
+                      default:
+                        return "none";
+                    }
+                  };
 
-                return (
-                  <TableHeader
-                    key={header.id}
-                    onClick={sortingHandler}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && sortingHandler) {
-                        sortingHandler(event);
-                      }
-                    }}
-                    className={clsx(
-                      header.column.getCanSort()
-                        ? "cursor-pointer select-none"
-                        : "",
-                    )}
-                    tabIndex={header.column.getCanSort() ? 0 : -1}
-                    aria-sort={getAriaSortValue(header.column.getIsSorted())}
-                  >
-                    <div
+                  return (
+                    <TableHeader
+                      key={header.id}
+                      onClick={sortingHandler}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && sortingHandler) {
+                          sortingHandler(event);
+                        }
+                      }}
                       className={clsx(
-                        header.column.columnDef.enableSorting === false
-                          ? header.column.columnDef.meta?.align
-                          : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
-                        "rounded-md",
+                        header.column.getCanSort()
+                          ? "cursor-pointer select-none"
+                          : "",
                       )}
+                      tabIndex={header.column.getCanSort() ? 0 : -1}
+                      aria-sort={getAriaSortValue(header.column.getIsSorted())}
                     >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {header.column.getCanSort() &&
-                        (header.column.getIsSorted() === false ? (
-                          <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
-                        ) : header.column.getIsSorted() === "desc" ? (
-                          <ArrowUpIcon
-                            className="size-3 text-gray-900 dark:text-gray-50"
-                            aria-hidden={true}
-                          />
-                        ) : (
-                          <ArrowDownIcon
-                            className="size-3 text-gray-900 dark:text-gray-50"
-                            aria-hidden={true}
-                          />
-                        ))}
-                    </div>
-                  </TableHeader>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {table.getRowCount() <= 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                {noOptionsLabel}
-              </TableCell>
-            </TableRow>
-          ) : null}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              className={clsx(
-                row.getIsSelected()
-                  ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
-                  : "",
-              )}
-              key={row.id}
-              href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell
-                  key={cell.id}
-                  className={clsx(cell.column.columnDef.meta?.align)}
-                >
-                  {index === 0 && row.getIsSelected() && (
-                    <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
-                  )}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      <div
+                        className={clsx(
+                          header.column.columnDef.enableSorting === false
+                            ? header.column.columnDef.meta?.align
+                            : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
+                          "rounded-md",
+                        )}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getCanSort() &&
+                          (header.column.getIsSorted() === false ? (
+                            <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowUpIcon
+                              className="size-3 text-gray-900 dark:text-gray-50"
+                              aria-hidden={true}
+                            />
+                          ) : (
+                            <ArrowDownIcon
+                              className="size-3 text-gray-900 dark:text-gray-50"
+                              aria-hidden={true}
+                            />
+                          ))}
+                      </div>
+                    </TableHeader>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHead>
+          <TableBody>
+            {table.getRowCount() <= 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  {noOptionsLabel}
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </TableRow>
+            ) : null}
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                className={clsx(
+                  row.getIsSelected()
+                    ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
+                    : "",
+                )}
+                key={row.id}
+                href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell
+                    key={cell.id}
+                    className={clsx(cell.column.columnDef.meta?.align)}
+                  >
+                    {index === 0 && row.getIsSelected() && (
+                      <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
+                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableOrderingContext>
 
       <TableFooter>
         <TableRowSelection table={table} totalItems={totalItems} />

@@ -48,7 +48,7 @@ export function PopoverPanel({
           "[--anchor-gap:theme(spacing.2)] [--anchor-padding:theme(spacing.3)] data-[anchor~=end]:[--anchor-offset:4px] data-[anchor~=start]:[--anchor-offset:-4px]",
 
           // Base styles
-          "isolate w-max rounded-xl p-1",
+          "isolate w-max rounded-xl",
 
           // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
           "outline outline-1 outline-transparent focus:outline-none",
