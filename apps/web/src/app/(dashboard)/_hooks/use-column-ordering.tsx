@@ -6,7 +6,7 @@ import {
   useQueryState,
 } from "nuqs";
 import { usePostHog } from "posthog-js/react";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Optional } from "~/types/optional";
 
 interface OrderableColumn {
@@ -90,6 +90,21 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
       parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
     );
 
+  const onColumnVisibilityChange = useCallback(
+    (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) =>
+      setColumnVisibility((columnVisibility) => {
+        const newVisibility =
+          typeof updater === "function" ? updater(columnVisibility) : updater;
+
+        posthog.capture("Column Visibility Changed", {
+          columns: newVisibility,
+        });
+
+        return newVisibility;
+      }),
+    [setColumnVisibility, posthog],
+  );
+
   const options = useMemo(
     () => ({
       state: {
@@ -97,25 +112,14 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
         columnVisibility,
       },
       onColumnOrderChange: setColumnOrder,
-      onColumnVisibilityChange: (
-        updater: VisibilityState | ((old: VisibilityState) => VisibilityState),
-      ) =>
-        setColumnVisibility((columnVisibility) => {
-          const newVisibility =
-            typeof updater === "function" ? updater(columnVisibility) : updater;
-
-          posthog.capture("Column Visibility Changed", {
-            columns: newVisibility,
-          });
-
-          return newVisibility;
-        }),
+      onColumnVisibilityChange,
     }),
     [
       JSON.stringify(columnOrder),
       JSON.stringify(columnVisibility),
       setColumnOrder,
       setColumnVisibility,
+      onColumnVisibilityChange,
     ],
   );
 
