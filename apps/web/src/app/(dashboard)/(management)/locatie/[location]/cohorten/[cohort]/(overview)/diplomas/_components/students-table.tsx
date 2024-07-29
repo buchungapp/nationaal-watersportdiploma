@@ -20,6 +20,7 @@ import {
 import clsx from "clsx";
 import { useParams } from "next/navigation";
 import React from "react";
+import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -38,7 +39,15 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import {
+  TableDisplay,
+  TableOrderingContext,
+} from "~/app/(dashboard)/_components/table-ordering";
 import { Code } from "~/app/(dashboard)/_components/text";
+import {
+  getOrderableColumnIds,
+  useColumnOrdering,
+} from "~/app/(dashboard)/_hooks/use-column-ordering";
 import {
   getSortableColumnIds,
   useSorting,
@@ -46,6 +55,7 @@ import {
 import dayjs from "~/lib/dayjs";
 import type { listCertificateOverviewByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
+import { FilterSelect } from "./filter";
 import { ActionButtons } from "./table-actions";
 
 export type Student = Awaited<
@@ -320,6 +330,13 @@ export default function StudentsTable({
     [progressTrackingEnabled],
   );
 
+  const columnOrderingOptions = useColumnOrdering(
+    getOrderableColumnIds({
+      columns,
+      excludeColumns: ["select"],
+    }),
+  );
+
   const sortingOptions = useSorting({
     sortableColumnIds: getSortableColumnIds(columns),
     defaultSorting: [{ id: "cursist", desc: false }],
@@ -365,11 +382,18 @@ export default function StudentsTable({
   );
 
   const table = useReactTable({
+    ...columnOrderingOptions,
     ...sortingOptions,
     data: students,
     columns,
+    initialState: {
+      columnPinning: {
+        left: ["select"],
+      },
+    },
     state: {
       rowSelection: transformSelectionState(rowSelection),
+      ...columnOrderingOptions.state,
       ...sortingOptions.state,
     },
     getRowId: (row) => row.id,
@@ -388,111 +412,124 @@ export default function StudentsTable({
 
   return (
     <div className="mt-8 relative">
-      <Table
-        className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
-        dense
-      >
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const sortingHandler =
-                  header.column.getToggleSortingHandler?.();
-                const getAriaSortValue = (isSorted: false | SortDirection) => {
-                  switch (isSorted) {
-                    case "asc":
-                      return "ascending";
-                    case "desc":
-                      return "descending";
-                    case false:
-                    default:
-                      return "none";
-                  }
-                };
+      <TableOrderingContext options={columnOrderingOptions}>
+        <div className="flex flex-col sm:flex-row items-start sm:justify-between sm:items-center gap-1">
+          <div className="w-full max-w-xl">
+            <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <FilterSelect />
+            <TableDisplay table={table} />
+          </div>
+        </div>
+        <Table
+          className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+          dense
+        >
+          <TableHead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const sortingHandler =
+                    header.column.getToggleSortingHandler?.();
+                  const getAriaSortValue = (
+                    isSorted: false | SortDirection,
+                  ) => {
+                    switch (isSorted) {
+                      case "asc":
+                        return "ascending";
+                      case "desc":
+                        return "descending";
+                      case false:
+                      default:
+                        return "none";
+                    }
+                  };
 
-                return (
-                  <TableHeader
-                    key={header.id}
-                    onClick={sortingHandler}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && sortingHandler) {
-                        sortingHandler(event);
-                      }
-                    }}
-                    className={clsx(
-                      header.column.getCanSort()
-                        ? "cursor-pointer select-none"
-                        : "",
-                    )}
-                    tabIndex={header.column.getCanSort() ? 0 : -1}
-                    aria-sort={getAriaSortValue(header.column.getIsSorted())}
-                  >
-                    <div
+                  return (
+                    <TableHeader
+                      key={header.id}
+                      onClick={sortingHandler}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && sortingHandler) {
+                          sortingHandler(event);
+                        }
+                      }}
                       className={clsx(
-                        header.column.columnDef.enableSorting === false
-                          ? header.column.columnDef.meta?.align
-                          : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
-                        "rounded-md",
+                        header.column.getCanSort()
+                          ? "cursor-pointer select-none"
+                          : "",
                       )}
+                      tabIndex={header.column.getCanSort() ? 0 : -1}
+                      aria-sort={getAriaSortValue(header.column.getIsSorted())}
                     >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {header.column.getCanSort() &&
-                        (header.column.getIsSorted() === false ? (
-                          <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
-                        ) : header.column.getIsSorted() === "desc" ? (
-                          <ArrowUpIcon
-                            className="size-3 text-gray-900 dark:text-gray-50"
-                            aria-hidden={true}
-                          />
-                        ) : (
-                          <ArrowDownIcon
-                            className="size-3 text-gray-900 dark:text-gray-50"
-                            aria-hidden={true}
-                          />
-                        ))}
-                    </div>
-                  </TableHeader>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHead>
-        <TableBody>
-          {table.getRowCount() <= 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                {noOptionsLabel}
-              </TableCell>
-            </TableRow>
-          ) : null}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              className={clsx(
-                row.getIsSelected()
-                  ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
-                  : "",
-              )}
-              key={row.id}
-              href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell
-                  key={cell.id}
-                  className={clsx(cell.column.columnDef.meta?.align)}
-                >
-                  {index === 0 && row.getIsSelected() && (
-                    <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
-                  )}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      <div
+                        className={clsx(
+                          header.column.columnDef.enableSorting === false
+                            ? header.column.columnDef.meta?.align
+                            : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
+                          "rounded-md",
+                        )}
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                        {header.column.getCanSort() &&
+                          (header.column.getIsSorted() === false ? (
+                            <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowUpIcon
+                              className="size-3 text-gray-900 dark:text-gray-50"
+                              aria-hidden={true}
+                            />
+                          ) : (
+                            <ArrowDownIcon
+                              className="size-3 text-gray-900 dark:text-gray-50"
+                              aria-hidden={true}
+                            />
+                          ))}
+                      </div>
+                    </TableHeader>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHead>
+          <TableBody>
+            {table.getRowCount() <= 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  {noOptionsLabel}
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </TableRow>
+            ) : null}
+            {table.getRowModel().rows.map((row) => (
+              <TableRow
+                className={clsx(
+                  row.getIsSelected()
+                    ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
+                    : "",
+                )}
+                key={row.id}
+                href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <TableCell
+                    key={cell.id}
+                    className={clsx(cell.column.columnDef.meta?.align)}
+                  >
+                    {index === 0 && row.getIsSelected() && (
+                      <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
+                    )}
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableOrderingContext>
 
       <TableFooter>
         <TableRowSelection table={table} totalItems={totalItems} />

@@ -1,8 +1,6 @@
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
-import { SWRConfig } from "swr";
-import Search from "~/app/(dashboard)/(management)/_components/search";
 import {
   listCertificateOverviewByCohortId,
   retrieveCohortByHandle,
@@ -16,7 +14,6 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
-import { FilterSelect } from "./_components/filter";
 import StudentsTable from "./_components/students-table";
 
 export default async function Page({
@@ -139,39 +136,21 @@ export default async function Page({
   }
 
   return (
-    <SWRConfig
-      value={{
-        fallback: {},
-      }}
-    >
-      <>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-sm:w-full sm:flex-1">
-            <div className="mt-4 flex max-w-xl gap-4">
-              <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
-
-              <FilterSelect />
-            </div>
-          </div>
-        </div>
-
-        <StudentsTable
-          progressTrackingEnabled={params.location === "krekt-sailing"}
-          students={searchedStudents}
-          totalItems={searchedStudents.length}
-          cohortId={cohort.id}
-          // TODO: this can be optimized
-          defaultCertificateVisibleFromDate={
-            (await retrieveDefaultCertificateVisibleFromDate(cohort.id)) ??
-            undefined
-          }
-          noOptionsLabel={
-            parsedSq.query && parsedSq.query.length > 2
-              ? "Geen resultaten gevonden"
-              : "Dit cohort heeft nog geen cursisten"
-          }
-        />
-      </>
-    </SWRConfig>
+    <StudentsTable
+      progressTrackingEnabled={params.location === "krekt-sailing"}
+      students={searchedStudents}
+      totalItems={searchedStudents.length}
+      cohortId={cohort.id}
+      // TODO: this can be optimized
+      defaultCertificateVisibleFromDate={
+        (await retrieveDefaultCertificateVisibleFromDate(cohort.id)) ??
+        undefined
+      }
+      noOptionsLabel={
+        parsedSq.query && parsedSq.query.length > 2
+          ? "Geen resultaten gevonden"
+          : "Dit cohort heeft nog geen cursisten"
+      }
+    />
   );
 }

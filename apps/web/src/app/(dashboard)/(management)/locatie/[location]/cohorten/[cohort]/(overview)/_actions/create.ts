@@ -48,6 +48,7 @@ export async function createPerson(
     const result = await createStudentForLocation(locationId, parsed);
 
     revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+    revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
 
     return {
       message: "Success",
@@ -118,6 +119,7 @@ export async function addStudentsToCohort(
   );
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
 
   const rowsWithError = result.filter(
     (result): result is PromiseRejectedResult => result.status === "rejected",

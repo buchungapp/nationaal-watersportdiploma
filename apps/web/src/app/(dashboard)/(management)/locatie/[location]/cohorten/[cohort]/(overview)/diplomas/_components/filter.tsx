@@ -48,7 +48,7 @@ export function FilterSelect() {
         {isPending ? <Spinner /> : null}
         Filter <ChevronDownIcon />
       </PopoverButton>
-      <PopoverPanel anchor="bottom" className="flex flex-col gap-1 p-4">
+      <PopoverPanel anchor="bottom end" className="flex flex-col gap-1 p-4">
         <CheckboxGroup>
           <CheckboxField>
             <Checkbox

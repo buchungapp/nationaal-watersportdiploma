@@ -21,6 +21,7 @@ import clsx from "clsx";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import React from "react";
+import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -53,6 +54,7 @@ import {
 } from "~/app/(dashboard)/_hooks/use-sorting";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
+import { SetView } from "./filters";
 import { ActionButtons } from "./table-actions";
 
 export type Student = Awaited<
@@ -186,12 +188,14 @@ export default function StudentsTable({
   totalItems,
   noOptionsLabel = "Geen items gevonden",
   locationRoles,
+  view,
 }: {
   cohortId: string;
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
+  view: "allen" | "geclaimd" | null;
 }) {
   const columnOrderingOptions = useColumnOrdering(
     getOrderableColumnIds({
@@ -278,11 +282,22 @@ export default function StudentsTable({
   return (
     <div className="mt-8 relative">
       <TableOrderingContext options={columnOrderingOptions}>
-        <div className="flex justify-end items-center gap-1">
-          <TableDisplay table={table} />
+        <div className="flex flex-col sm:flex-row items-start sm:justify-between sm:items-center gap-1">
+          <div className="w-full max-w-xl">
+            <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
+          </div>
+          <div className="flex items-center gap-1 sm:shrink-0">
+            {!!view ? (
+              <SetView defaultView={view}>
+                <option value="allen">Alle cursisten</option>
+                <option value="geclaimd">Mijn cursisten</option>
+              </SetView>
+            ) : null}
+            <TableDisplay table={table} />
+          </div>
         </div>
         <Table
-          className="mt-1 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+          className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
           dense
         >
           <TableHead>
