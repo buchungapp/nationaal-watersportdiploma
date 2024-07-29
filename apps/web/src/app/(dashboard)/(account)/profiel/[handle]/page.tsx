@@ -90,14 +90,12 @@ export default async function Page({
             </DescriptionDetails>
           </DescriptionList>
         </div>
-
         <PersonCohortProgress
           person={{
             id: person.id,
             handle: person.handle,
           }}
         />
-
         <div>
           <Subheading>Jouw NWD-diploma's</Subheading>
           <Text>

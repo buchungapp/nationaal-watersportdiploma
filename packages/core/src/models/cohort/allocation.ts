@@ -1049,3 +1049,48 @@ export const makeProgressVisible = withZod(
       .then(singleRow)
   },
 )
+
+export const personsBelongTogetherInActiveCohort = withZod(
+  z.object({
+    personId: uuidSchema.array().min(2),
+  }),
+  async (input) => {
+    const query = useQuery()
+
+    const result = await query
+      .select({
+        cohortId: s.cohort.id,
+        personIds: sql<string[]>`array_agg(${s.actor.personId})`,
+      })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.actor,
+        and(
+          eq(s.actor.id, s.cohortAllocation.actorId),
+          isNull(s.actor.deletedAt),
+          isNotNull(s.actor.personId),
+        ),
+      )
+      .innerJoin(
+        s.cohort,
+        and(
+          eq(s.cohort.id, s.cohortAllocation.cohortId),
+          isNull(s.cohort.deletedAt),
+          lte(s.cohort.accessStartTime, sql`NOW()`),
+          gte(s.cohort.accessEndTime, sql`NOW()`),
+        ),
+      )
+      .where(
+        and(
+          isNull(s.cohortAllocation.deletedAt),
+          inArray(s.actor.personId, input.personId),
+        ),
+      )
+      .groupBy(s.cohort.id)
+      .having(
+        sql`array_length(array_agg(${s.actor.personId}), 1) = ${input.personId.length}`,
+      )
+
+    return result.length > 0
+  },
+)

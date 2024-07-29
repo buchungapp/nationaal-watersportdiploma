@@ -13,12 +13,14 @@ import { GridList, GridListHeader, GridListItem } from "../grid-list";
 
 export async function NWDCertificates({
   personId,
+  locationId,
   noResults = null,
 }: {
   personId: string;
+  locationId?: string;
   noResults?: React.ReactNode;
 }) {
-  const certificates = await listCertificatesForPerson(personId);
+  const certificates = await listCertificatesForPerson(personId, locationId);
 
   if (certificates.length === 0) {
     return <>{noResults}</>;
@@ -64,12 +66,17 @@ export async function NWDCertificates({
 
 export async function ExternalCertificates({
   personId,
+  locationId,
   noResults = null,
 }: {
   personId: string;
+  locationId?: string;
   noResults?: React.ReactNode;
 }) {
-  const certificates = await listExternalCertificatesForPerson(personId);
+  const certificates = await listExternalCertificatesForPerson(
+    personId,
+    locationId,
+  );
 
   if (certificates.length === 0) {
     return <>{noResults}</>;
