@@ -9,7 +9,6 @@ import type {
   OnChangeFn,
   RowSelectionState,
   SortDirection,
-  SortingState,
 } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -21,8 +20,7 @@ import {
 import clsx from "clsx";
 import dayjs from "dayjs";
 import { useParams } from "next/navigation";
-import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
-import React, { useMemo } from "react";
+import React from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -45,12 +43,16 @@ import {
   TableDisplay,
   TableOrderingContext,
 } from "~/app/(dashboard)/_components/table-ordering";
-import { useColumnOrdering } from "~/app/(dashboard)/_hooks/use-column-ordering";
-import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import {
-  generateSortingState,
-  transformSelectionState,
-} from "~/utils/table-state";
+  getOrderableColumnIds,
+  useColumnOrdering,
+} from "~/app/(dashboard)/_hooks/use-column-ordering";
+import {
+  getSortableColumnIds,
+  useSorting,
+} from "~/app/(dashboard)/_hooks/use-sorting";
+import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
+import { transformSelectionState } from "~/utils/table-state";
 import { ActionButtons } from "./table-actions";
 
 export type Student = Awaited<
@@ -192,11 +194,16 @@ export default function StudentsTable({
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }) {
   const columnOrderingOptions = useColumnOrdering(
-    // @ts-expect-error TODO: find out if we can type this
-    columns.filter(
-      (c): c is typeof c & { id: string } => !!c.id && c.id !== "select",
-    ),
+    getOrderableColumnIds({
+      columns,
+      excludeColumns: ["select"],
+    }),
   );
+
+  const sortingOptions = useSorting({
+    sortableColumnIds: getSortableColumnIds(columns),
+    defaultSorting: [{ id: "cursist", desc: false }],
+  });
 
   const [rowSelection, setRowSelection] = React.useState<
     Record<
@@ -209,21 +216,6 @@ export default function StudentsTable({
       }
     >
   >({});
-
-  const [sort, setSort] = useQueryState(
-    "sorteer",
-    parseAsArrayOf(parseAsString).withDefault(["cursist.az"]),
-  );
-
-  const sortingState = useMemo(
-    () =>
-      generateSortingState(
-        sort,
-        columns.map((c) => c.id),
-      ),
-    // TODO: this feels a bit hacky, but we need a stable reference
-    [sort.join(":")],
-  );
 
   const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
     (updater) => {
@@ -255,35 +247,15 @@ export default function StudentsTable({
     [students],
   );
 
-  const onSortingChange = React.useCallback<OnChangeFn<SortingState>>(
-    (updater) => {
-      void setSort((previousSort) => {
-        const newSortValue =
-          updater instanceof Function
-            ? updater(
-                generateSortingState(
-                  previousSort,
-                  columns.map((c) => c.id),
-                ),
-              )
-            : updater;
-
-        return newSortValue.map(
-          (sort) => `${sort.id}.${sort.desc ? "za" : "az"}`,
-        );
-      });
-    },
-    [columns],
-  );
-
   const table = useReactTable({
     ...columnOrderingOptions,
+    ...sortingOptions,
     data: students,
     columns,
     state: {
       rowSelection: transformSelectionState(rowSelection),
-      sorting: sortingState,
       ...columnOrderingOptions.state,
+      ...sortingOptions.state,
     },
     initialState: {
       columnPinning: {
@@ -294,7 +266,6 @@ export default function StudentsTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onRowSelectionChange,
-    onSortingChange,
   });
   const params = useParams();
 

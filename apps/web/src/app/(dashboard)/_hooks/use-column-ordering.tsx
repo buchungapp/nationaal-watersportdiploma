@@ -1,4 +1,3 @@
-import type { ColumnDef } from "@tanstack/react-table";
 import {
   createParser,
   parseAsArrayOf,
@@ -6,9 +5,11 @@ import {
   useQueryState,
 } from "nuqs";
 import React from "react";
+import { Optional } from "~/types/optional";
 
-type OrderableColumn<TData, TValue> = ColumnDef<TData, TValue> & {
+type OrderableColumn = {
   id: string;
+  isDefaultVisible?: boolean;
 };
 
 const parseAsColumnVisibility = (validColumnKeys: string[]) => {
@@ -31,9 +32,20 @@ const parseAsColumnVisibility = (validColumnKeys: string[]) => {
   });
 };
 
-export function useColumnOrdering<TData, TValue>(
-  orderableColumns: OrderableColumn<TData, TValue>[],
-) {
+export function getOrderableColumnIds({
+  columns,
+  excludeColumns,
+}: {
+  columns: Optional<OrderableColumn, "id">[];
+  excludeColumns?: string[];
+}) {
+  return columns.filter(
+    (c): c is typeof c & { id: string } =>
+      !!c.id && (!excludeColumns || !excludeColumns.includes(c.id)),
+  );
+}
+
+export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
   const defaultOrder = React.useMemo(
     () => orderableColumns.map((column) => column.id),
     [orderableColumns],
