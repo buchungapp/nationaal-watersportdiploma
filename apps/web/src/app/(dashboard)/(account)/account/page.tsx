@@ -12,13 +12,13 @@ import {
   DescriptionTerm,
 } from "../../_components/description-list";
 import { Divider } from "../../_components/divider";
-import { Heading, Subheading } from "../../_components/heading";
-import { Code, Text, TextLink } from "../../_components/text";
 import {
   GridList,
   GridListHeader,
   GridListItem,
-} from "../_components/grid-list";
+} from "../../_components/grid-list";
+import { Heading, Subheading } from "../../_components/heading";
+import { Code, Text, TextLink } from "../../_components/text";
 
 async function Persons() {
   const persons = await listPersonsForUser();

@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -6,137 +6,16 @@ import {
 } from "~/app/(dashboard)/_components/description-list";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
+import {
+  ExternalCertificates,
+  NWDCertificates,
+} from "~/app/(dashboard)/_components/nwd/certificates";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import {
-  getPersonByHandle,
-  getUserOrThrow,
-  listCertificatesForPerson,
-  listCountries,
-  listExternalCertificatesForPerson,
-} from "~/lib/nwd";
+import { getPersonByHandle, getUserOrThrow, listCountries } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
-import {
-  GridList,
-  GridListHeader,
-  GridListItem,
-} from "../../_components/grid-list";
 import { EditDetails } from "./_components/action-buttons";
 import { PersonCohortProgress } from "./_components/cohort-progress";
-
-async function ExternalCertificates({ personId }: { personId: string }) {
-  const certificates = await listExternalCertificatesForPerson(personId);
-
-  if (certificates.length === 0) {
-    return (
-      <Text className="italic">
-        We hebben geen overige certificaten voor jou kunnen vinden.
-      </Text>
-    );
-  }
-
-  return (
-    <GridList>
-      {certificates.map((certificate) => {
-        const metadataEntries = certificate.metadata
-          ? Object.entries(certificate.metadata)
-          : [];
-
-        return (
-          <GridListItem key={certificate.id}>
-            <div className="flex items-center gap-x-4 border-b border-gray-900/5 bg-branding-light/10 p-6">
-              <div className="text-sm font-medium leading-6 text-gray-900">
-                {certificate.identifier}
-              </div>
-            </div>
-            <DescriptionList className="px-6">
-              {metadataEntries.length > 0 ? (
-                <>
-                  {metadataEntries.map(([key, value]) => (
-                    <React.Fragment key={key}>
-                      <DescriptionTerm>{key}</DescriptionTerm>
-                      <DescriptionDetails>{value}</DescriptionDetails>
-                    </React.Fragment>
-                  ))}
-                </>
-              ) : null}
-              {certificate.awardedAt ? (
-                <React.Fragment>
-                  <DescriptionTerm>Behaald op</DescriptionTerm>
-                  <DescriptionDetails>
-                    {dayjs(certificate.awardedAt).format("DD-MM-YYYY")}
-                  </DescriptionDetails>
-                </React.Fragment>
-              ) : null}
-              {certificate.location ? (
-                <React.Fragment>
-                  <DescriptionTerm>Behaald bij</DescriptionTerm>
-                  <DescriptionDetails>
-                    {certificate.location}
-                  </DescriptionDetails>
-                </React.Fragment>
-              ) : null}
-            </DescriptionList>
-          </GridListItem>
-        );
-      })}
-    </GridList>
-  );
-}
-
-async function NWDCertificates({ personId }: { personId: string }) {
-  const certificates = await listCertificatesForPerson(personId);
-
-  if (certificates.length === 0) {
-    return (
-      <Text className="italic">
-        Je hebt nog geen NWD-diploma's behaald. Klopt dit niet? Neem dan contact
-        op met de{" "}
-        <TextLink href="/vaarlocaties" target="_blank">
-          vaarlocatie
-        </TextLink>{" "}
-        waar je de cursus hebt gevolgd.
-      </Text>
-    );
-  }
-
-  return (
-    <GridList>
-      {certificates.map((certificate) => (
-        <GridListItem key={certificate.id}>
-          <GridListHeader
-            href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
-            target="_blank"
-          >
-            <div className="text-sm font-medium leading-6 text-gray-900">
-              {`#${certificate.handle}`}
-            </div>
-          </GridListHeader>
-          <DescriptionList className="px-6">
-            <DescriptionTerm>Programma</DescriptionTerm>
-            <DescriptionDetails>
-              {certificate.program.title ??
-                `${certificate.program.course.title} ${certificate.program.degree.title}`}
-            </DescriptionDetails>
-
-            <DescriptionTerm>Vaartuig</DescriptionTerm>
-            <DescriptionDetails>
-              {certificate.gearType.title}
-            </DescriptionDetails>
-
-            <DescriptionTerm>Behaald op</DescriptionTerm>
-            <DescriptionDetails>
-              {dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
-            </DescriptionDetails>
-
-            <DescriptionTerm>Behaald bij</DescriptionTerm>
-            <DescriptionDetails>{certificate.location.name}</DescriptionDetails>
-          </DescriptionList>
-        </GridListItem>
-      ))}
-    </GridList>
-  );
-}
 
 async function ActionButton({ handle }: { handle: string }) {
   const [person, countries] = await Promise.all([
@@ -211,14 +90,12 @@ export default async function Page({
             </DescriptionDetails>
           </DescriptionList>
         </div>
-
         <PersonCohortProgress
           person={{
             id: person.id,
             handle: person.handle,
           }}
         />
-
         <div>
           <Subheading>Jouw NWD-diploma's</Subheading>
           <Text>
@@ -232,7 +109,19 @@ export default async function Page({
           </Text>
           <Divider className="mt-2 mb-4" />
           <Suspense>
-            <NWDCertificates personId={person.id} />
+            <NWDCertificates
+              personId={person.id}
+              noResults={
+                <Text className="italic">
+                  Je hebt nog geen NWD-diploma's behaald. Klopt dit niet? Neem
+                  dan contact op met de{" "}
+                  <TextLink href="/vaarlocaties" target="_blank">
+                    vaarlocatie
+                  </TextLink>{" "}
+                  waar je de cursus hebt gevolgd.
+                </Text>
+              }
+            />
           </Suspense>
         </div>
 
@@ -244,7 +133,14 @@ export default async function Page({
           </Text>
           <Divider className="mt-2 mb-4" />
           <Suspense>
-            <ExternalCertificates personId={person.id} />
+            <ExternalCertificates
+              personId={person.id}
+              noResults={
+                <Text className="italic">
+                  We hebben geen overige certificaten voor jou kunnen vinden.
+                </Text>
+              }
+            />
           </Suspense>
         </div>
       </div>
