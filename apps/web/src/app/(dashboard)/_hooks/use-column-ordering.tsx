@@ -49,7 +49,7 @@ export function getOrderableColumnIds({
 
 export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
   const posthog = usePostHog();
-
+      
   const defaultOrder = React.useMemo(
     () => orderableColumns.map((column) => column.id),
     [orderableColumns],
@@ -112,14 +112,13 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
         columnVisibility,
       },
       onColumnOrderChange: setColumnOrder,
-      onColumnVisibilityChange,
+      onColumnVisibilityChange
     }),
     [
       JSON.stringify(columnOrder),
       JSON.stringify(columnVisibility),
       setColumnOrder,
-      setColumnVisibility,
-      onColumnVisibilityChange,
+      onColumnVisibilityChange
     ],
   );
 
