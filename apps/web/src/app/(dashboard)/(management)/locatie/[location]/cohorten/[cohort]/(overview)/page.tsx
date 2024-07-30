@@ -1,4 +1,3 @@
-import { PlusIcon } from "@heroicons/react/16/solid";
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
@@ -7,60 +6,16 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
-import { Suspense } from "react";
-import { SWRConfig, unstable_serialize } from "swr";
-import Search from "~/app/(dashboard)/(management)/_components/search";
-import {
-  Dropdown,
-  DropdownButton,
-  DropdownMenu,
-} from "~/app/(dashboard)/_components/dropdown";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
-  listCountries,
-  listDistinctTagsForCohort,
-  listInstructorsByCohortId,
-  listPersonsForLocationByRole,
   listPrivilegesForCohort,
-  listPrograms,
   listRolesForLocation,
   listStudentsWithCurriculaByCohortId,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
-import {
-  DialogButtons,
-  DialogWrapper,
-  Dialogs,
-} from "./_components/dialog-context";
-import { SetView } from "./_components/filters";
 import StudentsTable from "./_components/students-table";
-
-async function QuickActionButtons({
-  locationId,
-}: {
-  cohortId: string;
-  locationId: string;
-}) {
-  const [roles] = await Promise.all([listRolesForLocation(locationId)]);
-
-  if (!roles.includes("location_admin")) {
-    return null;
-  }
-
-  return (
-    <Dropdown>
-      <DropdownButton color="branding-orange">
-        <PlusIcon />
-        Cursist toevoegen
-      </DropdownButton>
-      <DropdownMenu>
-        <DialogButtons />
-      </DropdownMenu>
-    </Dropdown>
-  );
-}
 
 export default async function Page({
   params,
@@ -169,79 +124,30 @@ export default async function Page({
   }
 
   return (
-    <SWRConfig
-      value={{
-        fallback: {
-          // Note that there is no `await` here,
-          // so it only blocks rendering of components that
-          // actually rely on this data.
-          countries: listCountries(),
-          [unstable_serialize([`allStudents`, location.id])]:
-            listPersonsForLocationByRole(location.id, "student"),
-          [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
-            listInstructorsByCohortId(cohort.id),
-          [unstable_serialize(["isInstructorInCohort", cohort.id])]:
-            isInstructorInCohort(cohort.id),
-          [unstable_serialize(["permissionsInCohort", cohort.id])]:
-            listPrivilegesForCohort(cohort.id),
-          [unstable_serialize(["locationRoles", location.id])]:
-            listRolesForLocation(location.id),
-          [unstable_serialize(["distinctTagsForCohort", cohort.id])]:
-            listDistinctTagsForCohort(cohort.id),
-          allPrograms: listPrograms(),
-        },
-      }}
-    >
-      <DialogWrapper>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-sm:w-full sm:flex-1">
-            <div className="mt-4 flex gap-4">
-              <div className="w-full max-w-xl">
-                <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
-              </div>
-
-              {!!instructorAllocation ? (
-                <div className="shrink-0">
-                  <SetView defaultView={defaultView}>
-                    <option value="allen">Alle cursisten</option>
-                    <option value="geclaimd">Mijn cursisten</option>
-                  </SetView>
-                </div>
-              ) : null}
-            </div>
-          </div>
-          <Suspense fallback={null}>
-            <QuickActionButtons locationId={location.id} cohortId={cohort.id} />
-          </Suspense>
-        </div>
-
-        <StudentsTable
-          students={searchedStudents}
-          totalItems={searchedStudents.length}
-          cohortId={cohort.id}
-          // TODO: this can be optimized
-          locationRoles={await listRolesForLocation(location.id)}
-          noOptionsLabel={
-            parsedSq.query && parsedSq.query.length > 2 ? (
-              "Geen resultaten gevonden"
-            ) : parsedSq.overzicht === "allen" ? (
-              "Dit cohort heeft nog geen cursisten"
-            ) : (
-              <span>
-                Je hebt nog geen cursisten geclaimd.{" "}
-                <TextLink
-                  href={`/locatie/${params.location}/cohorten/${params.cohort}?overzicht=allen`}
-                >
-                  Bekijk alle cursisten
-                </TextLink>
-                .
-              </span>
-            )
-          }
-        />
-
-        <Dialogs locationId={location.id} cohortId={cohort.id} />
-      </DialogWrapper>
-    </SWRConfig>
+    <StudentsTable
+      view={instructorAllocation ? defaultView : null}
+      students={searchedStudents}
+      totalItems={searchedStudents.length}
+      cohortId={cohort.id}
+      // TODO: this can be optimized
+      locationRoles={await listRolesForLocation(location.id)}
+      noOptionsLabel={
+        parsedSq.query && parsedSq.query.length > 2 ? (
+          "Geen resultaten gevonden"
+        ) : parsedSq.overzicht === "allen" ? (
+          "Dit cohort heeft nog geen cursisten"
+        ) : (
+          <span>
+            Je hebt nog geen cursisten geclaimd.{" "}
+            <TextLink
+              href={`/locatie/${params.location}/cohorten/${params.cohort}?overzicht=allen`}
+            >
+              Bekijk alle cursisten
+            </TextLink>
+            .
+          </span>
+        )
+      }
+    />
   );
 }

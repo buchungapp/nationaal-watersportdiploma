@@ -35,6 +35,7 @@ export async function claimStudents(cohortId: string, studentIds: string[]) {
     action: "claim",
   });
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
@@ -48,6 +49,7 @@ export async function releaseStudent(cohortId: string, studentIds: string[]) {
     action: "release",
   });
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
@@ -78,6 +80,7 @@ export async function assignInstructorToStudents({
     });
   }
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
@@ -95,6 +98,7 @@ export async function enrollStudentsInCurriculumForCohort(props: {
 }) {
   await enrollStudentsInCurriculumForCohortInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
@@ -106,6 +110,7 @@ export async function withdrawStudentFromCurriculum(props: {
 }) {
   await withdrawStudentFromCurriculumInCohort(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
@@ -193,6 +198,7 @@ export async function removeAllocation(input: {
   await removeAllocationById(input);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
 
   return;
@@ -243,6 +249,7 @@ export async function setTags(props: {
   await setAllocationTagsInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
   revalidatePath(
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",

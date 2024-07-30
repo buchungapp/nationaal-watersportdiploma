@@ -15,11 +15,7 @@ type DialogStates = "single" | "bulk" | null;
 const DialogContext = createContext<{
   isOpen: DialogStates;
   setIsOpen: Dispatch<SetStateAction<DialogStates>>;
-}>({
-  isOpen: null,
-  //   eslint-disable-next-line @typescript-eslint/no-empty-function
-  setIsOpen: () => {},
-});
+} | null>(null);
 
 export function DialogWrapper({ children }: PropsWithChildren) {
   const [isOpen, setIsOpen] = useState<DialogStates>(null);
@@ -42,7 +38,13 @@ export function DialogWrapper({ children }: PropsWithChildren) {
 }
 
 export function useDialog() {
-  return useContext(DialogContext);
+  const context = useContext(DialogContext);
+
+  if (!context) {
+    throw new Error("useDialog must be used within a DialogWrapper");
+  }
+
+  return context;
 }
 
 export function DialogButtons() {

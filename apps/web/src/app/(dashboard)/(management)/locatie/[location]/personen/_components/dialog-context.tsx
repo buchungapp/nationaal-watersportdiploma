@@ -13,11 +13,7 @@ import CreateSingleDialog from "./create-single-dialog";
 const DialogContext = createContext<{
   isOpen: "single" | "bulk" | null;
   setIsOpen: Dispatch<SetStateAction<"single" | "bulk" | null>>;
-}>({
-  isOpen: null,
-  //   eslint-disable-next-line @typescript-eslint/no-empty-function
-  setIsOpen: () => {},
-});
+} | null>(null);
 
 export function DialogWrapper({ children }: PropsWithChildren) {
   const [isOpen, setIsOpen] = useState<"single" | "bulk" | null>(null);
@@ -38,7 +34,13 @@ export function DialogWrapper({ children }: PropsWithChildren) {
 }
 
 export function useDialog() {
-  return useContext(DialogContext);
+  const context = useContext(DialogContext);
+
+  if (!context) {
+    throw new Error("useDialog must be used within a DialogWrapper");
+  }
+
+  return context;
 }
 
 export function DialogButtons() {
