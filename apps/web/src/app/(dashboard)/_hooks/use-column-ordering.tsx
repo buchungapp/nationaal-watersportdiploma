@@ -1,10 +1,12 @@
+import type { ColumnOrderState, VisibilityState } from "@tanstack/react-table";
 import {
   createParser,
   parseAsArrayOf,
   parseAsString,
   useQueryState,
 } from "nuqs";
-import React, { useMemo } from "react";
+import { usePostHog } from "posthog-js/react";
+import React, { useCallback, useMemo } from "react";
 import type { Optional } from "~/types/optional";
 
 interface OrderableColumn {
@@ -13,7 +15,7 @@ interface OrderableColumn {
 }
 
 const parseAsColumnVisibility = (validColumnKeys: string[]) => {
-  return createParser<Record<string, boolean>>({
+  return createParser<VisibilityState>({
     parse(queryValue) {
       const columnKeys = queryValue.split(",");
       const actualColumnKeys = columnKeys.filter((key) =>
@@ -21,7 +23,7 @@ const parseAsColumnVisibility = (validColumnKeys: string[]) => {
       );
       if (actualColumnKeys.length < 1) return null;
 
-      return validColumnKeys.reduce<Record<string, boolean>>((acc, key) => {
+      return validColumnKeys.reduce<VisibilityState>((acc, key) => {
         acc[key] = columnKeys.includes(key);
         return acc;
       }, {});
@@ -46,6 +48,8 @@ export function getOrderableColumnIds({
 }
 
 export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
+  const posthog = usePostHog();
+
   const defaultOrder = React.useMemo(
     () => orderableColumns.map((column) => column.id),
     [orderableColumns],
@@ -55,7 +59,7 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
     () =>
       orderableColumns.reduce(
         (
-          acc: Record<string, boolean>,
+          acc: VisibilityState,
           column: {
             id?: string;
             isDefaultVisible?: boolean;
@@ -75,14 +79,30 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
     [orderableColumns],
   );
 
-  const [columnOrder, setColumnOrder] = useQueryState(
+  const [columnOrder, setColumnOrder] = useQueryState<ColumnOrderState>(
     "volgorde",
     parseAsArrayOf(parseAsString).withDefault(defaultOrder),
   );
 
-  const [columnVisibility, setColumnVisibility] = useQueryState(
-    "toon",
-    parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
+  const [columnVisibility, setColumnVisibility] =
+    useQueryState<VisibilityState>(
+      "toon",
+      parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
+    );
+
+  const onColumnVisibilityChange = useCallback(
+    (updater: VisibilityState | ((old: VisibilityState) => VisibilityState)) =>
+      setColumnVisibility((columnVisibility) => {
+        const newVisibility =
+          typeof updater === "function" ? updater(columnVisibility) : updater;
+
+        posthog.capture("Column Visibility Changed", {
+          columns: newVisibility,
+        });
+
+        return newVisibility;
+      }),
+    [setColumnVisibility, posthog],
   );
 
   const options = useMemo(
@@ -92,13 +112,13 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
         columnVisibility,
       },
       onColumnOrderChange: setColumnOrder,
-      onColumnVisibilityChange: setColumnVisibility,
+      onColumnVisibilityChange,
     }),
     [
       JSON.stringify(columnOrder),
       JSON.stringify(columnVisibility),
       setColumnOrder,
-      setColumnVisibility,
+      onColumnVisibilityChange,
     ],
   );
 
