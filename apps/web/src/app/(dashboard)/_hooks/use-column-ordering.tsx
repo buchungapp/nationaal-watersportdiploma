@@ -7,7 +7,7 @@ import {
 } from "nuqs";
 import { usePostHog } from "posthog-js/react";
 import React, { useCallback, useMemo } from "react";
-import { Optional } from "~/types/optional";
+import type { Optional } from "~/types/optional";
 
 interface OrderableColumn {
   id: string;
@@ -49,7 +49,7 @@ export function getOrderableColumnIds({
 
 export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
   const posthog = usePostHog();
-      
+
   const defaultOrder = React.useMemo(
     () => orderableColumns.map((column) => column.id),
     [orderableColumns],
@@ -112,13 +112,13 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
         columnVisibility,
       },
       onColumnOrderChange: setColumnOrder,
-      onColumnVisibilityChange
+      onColumnVisibilityChange,
     }),
     [
       JSON.stringify(columnOrder),
       JSON.stringify(columnVisibility),
       setColumnOrder,
-      onColumnVisibilityChange
+      onColumnVisibilityChange,
     ],
   );
 
