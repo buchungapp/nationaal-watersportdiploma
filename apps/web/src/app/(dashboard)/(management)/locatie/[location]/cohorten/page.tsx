@@ -29,10 +29,11 @@ export default async function Page({
 }) {
   const location = await retrieveLocationByHandle(params.location);
 
-  const rolesInCurrentLocation = await listRolesForLocation(location.id);
+  const [cohorts, rolesInCurrentLocation] = await Promise.all([
+    listCohortsForLocation(location.id),
+    listRolesForLocation(location.id),
+  ]);
   const isLocationAdmin = rolesInCurrentLocation.includes("location_admin");
-
-  const cohorts = await listCohortsForLocation(location.id);
 
   const parsedSq = createSearchParamsCache({
     weergave: parseAsArrayOf(
