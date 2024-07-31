@@ -24,7 +24,7 @@ export default async function Page({
 
   const parsedSq = createSearchParamsCache({
     weergave: parseAsArrayOf(
-      parseAsStringLiteral(["geendigd", "aankomend"] as const),
+      parseAsStringLiteral(["verleden", "aankomend"] as const),
     ),
     query: parseAsString,
   }).parse(searchParams);
@@ -59,13 +59,13 @@ export default async function Page({
 
 function filterCohorts(
   cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>,
-  weergave: ("geendigd" | "aankomend")[],
+  weergave: ("verleden" | "aankomend")[],
 ) {
-  if (weergave.includes("geendigd") && weergave.includes("aankomend")) {
+  if (weergave.includes("verleden") && weergave.includes("aankomend")) {
     return cohorts;
   }
 
-  if (weergave.includes("geendigd")) {
+  if (weergave.includes("verleden")) {
     return cohorts.filter(
       (cohort) => new Date(cohort.accessEndTime) < new Date(),
     );
