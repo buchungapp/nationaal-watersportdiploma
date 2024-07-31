@@ -1,19 +1,38 @@
+import {
+  createSearchParamsCache,
+  parseAsArrayOf,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listCohortsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
 import CreateDialog from "./_components/create-dialog";
+import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: {
     location: string;
   };
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
   const location = await retrieveLocationByHandle(params.location);
-
   const cohorts = await listCohortsForLocation(location.id);
+
+  const parsedSq = createSearchParamsCache({
+    weergave: parseAsArrayOf(
+      parseAsStringLiteral(["geendigd", "aankomend"] as const),
+    ),
+    query: parseAsString,
+  }).parse(searchParams);
+
+  const filteredCohorts =
+    parsedSq.weergave && parsedSq.weergave.length > 0
+      ? filterCohorts(cohorts, parsedSq.weergave)
+      : cohorts;
 
   return (
     <>
@@ -28,7 +47,35 @@ export default async function Page({
         <CreateDialog locationId={location.id} />
       </div>
 
-      <Table cohorts={cohorts} totalItems={cohorts.length} />
+      <div className="mt-8">
+        <div className="flex sm:justify-end">
+          <FilterSelect />
+        </div>
+        <Table cohorts={filteredCohorts} totalItems={filteredCohorts.length} />
+      </div>
     </>
   );
+}
+
+function filterCohorts(
+  cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>,
+  weergave: ("geendigd" | "aankomend")[],
+) {
+  if (weergave.includes("geendigd") && weergave.includes("aankomend")) {
+    return cohorts;
+  }
+
+  if (weergave.includes("geendigd")) {
+    return cohorts.filter(
+      (cohort) => new Date(cohort.accessEndTime) < new Date(),
+    );
+  }
+
+  if (weergave.includes("aankomend")) {
+    return cohorts.filter(
+      (cohort) => new Date(cohort.accessEndTime) > new Date(),
+    );
+  }
+
+  return [];
 }

@@ -77,7 +77,7 @@ export default function CohortsTable({
   return (
     <>
       <Table
-        className="mt-8 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
         dense
       >
         <TableHead>
