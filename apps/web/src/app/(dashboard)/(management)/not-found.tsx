@@ -17,7 +17,7 @@ export default function NotFound() {
         doordat de pagina niet bestaat, is verplaatst of je geen toegang hebt.
       </Text>
 
-      <Button onClick={router.back} className="mt-4">
+      <Button onClick={() => router.back()} className="mt-4">
         <ArrowLeftIcon />
         Terug naar de vorige pagina
       </Button>
