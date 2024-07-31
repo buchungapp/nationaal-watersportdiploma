@@ -100,8 +100,8 @@ export default async function Page({
           <Subheading>Jouw NWD-diploma's</Subheading>
           <Text>
             Hieronder vind je een overzicht van de NWD-diploma's die je hebt
-            behaald. Klik ze aan om er meer over te leren, en je succes nogmaals
-            te vieren! Mis je een diploma? Neem dan contact op met de{" "}
+            behaald. Klik ze aan en leer meer over je diploma en vier het succes
+            nog een keer! Mis je een diploma? Neem dan contact op met de{" "}
             <TextLink href="/vaarlocaties" target="_blank">
               vaarlocatie
             </TextLink>{" "}
@@ -129,7 +129,7 @@ export default async function Page({
           <Subheading>Jouw overige certificaten</Subheading>
           <Text>
             Hieronder vind je een overzicht van andere certificaten die je
-            behaalt hebt, zoals oude CWO diploma's.
+            behaalt hebt, zoals CWO diploma's.
           </Text>
           <Divider className="mt-2 mb-4" />
           <Suspense>

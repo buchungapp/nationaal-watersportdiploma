@@ -128,7 +128,7 @@ export function TableDisplay<TData>({
       >
         <AdjustmentsHorizontalIcon />
       </PopoverButton>
-      <PopoverPanel anchor={anchor} className="min-w-64">
+      <PopoverPanel anchor={anchor} modal className="min-w-64">
         <div className="py-2.5">
           <DndContext
             collisionDetection={closestCenter}
@@ -198,11 +198,10 @@ function SortableItem({
       {...attributes}
       {...listeners}
       className={clsx(
-        "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100 relative",
+        "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100 relative cursor-default",
         isDisabled ? "opacity-50" : "opacity-100",
       )}
     >
-      <DragIcon isDragging={isDragging} />
       <CheckboxField disabled={isDisabled} className={clsx("flex-1")}>
         <Checkbox
           checked={column.getIsVisible()}
@@ -215,6 +214,7 @@ function SortableItem({
             : column.columnDef.header}
         </Label>
       </CheckboxField>
+      <DragIcon isDragging={isDragging} />
     </div>
   );
 }
