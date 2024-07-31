@@ -128,7 +128,7 @@ export function TableDisplay<TData>({
       >
         <AdjustmentsHorizontalIcon />
       </PopoverButton>
-      <PopoverPanel anchor={anchor} className="min-w-64">
+      <PopoverPanel anchor={anchor} modal className="min-w-64">
         <div className="py-2.5">
           <DndContext
             collisionDetection={closestCenter}
