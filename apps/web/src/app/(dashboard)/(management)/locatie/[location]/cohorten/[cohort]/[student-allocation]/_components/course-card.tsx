@@ -1,3 +1,4 @@
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import React from "react";
 import {
@@ -81,9 +82,11 @@ export async function CourseCard({
             <TextLink
               href={`/diplomalijn/consument/disciplines/${allocation.studentCurriculum.discipline.handle}/${allocation.studentCurriculum.course.handle}`}
               target="_blank"
+              className="flex gap-1 items-center"
             >
               {allocation.studentCurriculum.program.title ??
                 `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
             </TextLink>
           </DescriptionDetails>
 
