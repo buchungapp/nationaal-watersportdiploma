@@ -16,7 +16,7 @@ import {
 } from "~/app/(dashboard)/_components/popover";
 import Spinner from "~/app/_components/spinner";
 
-const options = ["geendigd", "aankomend"] as const;
+const options = ["verleden", "aankomend"] as const;
 
 export function FilterSelect() {
   const [isPending, startTransition] = useTransition();
@@ -50,10 +50,10 @@ export function FilterSelect() {
         <CheckboxGroup>
           <CheckboxField>
             <Checkbox
-              onClick={() => toggleValue("geendigd")}
-              checked={query?.includes("geendigd")}
+              onClick={() => toggleValue("verleden")}
+              checked={query?.includes("verleden")}
             />
-            <Label>Geëndigd</Label>
+            <Label>Verleden</Label>
             <Description>Toon regels die gesloten zijn.</Description>
           </CheckboxField>
 
