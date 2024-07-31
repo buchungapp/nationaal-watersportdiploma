@@ -30,6 +30,7 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { type listInstructorsByCohortId } from "~/lib/nwd";
 import {
@@ -49,11 +50,13 @@ export default function InstructorsTable({
   instructors,
   totalItems,
   locationId,
+  locationHandle,
 }: {
   cohortId: string;
   instructors: Awaited<ReturnType<typeof listInstructorsByCohortId>>;
   totalItems: number;
   locationId: string;
+  locationHandle: string;
 }) {
   const columns = useMemo(
     () => [
@@ -68,8 +71,13 @@ export default function InstructorsTable({
             .join(" "),
         {
           header: "Naam",
-          cell: ({ getValue }) => (
-            <span className="font-medium text-zinc-950">{getValue()}</span>
+          cell: ({ getValue, row }) => (
+            <TextLink
+              href={`/locatie/${locationHandle}/personen/${row.original.person.id}`}
+              className="font-medium"
+            >
+              {getValue()}
+            </TextLink>
           ),
         },
       ),
@@ -83,6 +91,7 @@ export default function InstructorsTable({
             {getValue().map((tag) => (
               <Badge key={tag.id}>{tag.title ?? tag.handle}</Badge>
             ))}
+            <Badge>Instructeur</Badge>
           </div>
         ),
       }),
