@@ -218,9 +218,9 @@ async function validatePersonAccessCheck({
     })
     .catch(() => false);
 
-  const isRequestedPersonAnActiveStudentOrInstructorForLocationRequest =
+  const isRequestedPersonAnActivePersonForLocationRequest =
     isActiveActorTypeInLocation({
-      actorType: ["instructor", "student"],
+      actorType: ["instructor", "student", "location_admin"],
       locationId,
       personId: requestedPersonId,
     });
@@ -232,7 +232,7 @@ async function validatePersonAccessCheck({
   ] = await Promise.all([
     isLocationAdminRequest,
     isInstructorInSameActiveCohortRequest,
-    isRequestedPersonAnActiveStudentOrInstructorForLocationRequest,
+    isRequestedPersonAnActivePersonForLocationRequest,
   ]);
 
   if (
