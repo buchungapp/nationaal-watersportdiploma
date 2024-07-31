@@ -1,7 +1,7 @@
 import clsx from "clsx";
-import React, { PropsWithChildren } from "react";
+import React, { type PropsWithChildren } from "react";
 
-const DEFAULT_COMPONENT = "div" as const;
+const DEFAULT_COMPONENT = "div";
 export default function Breakout<
   TTag extends React.ElementType = typeof DEFAULT_COMPONENT,
 >({
