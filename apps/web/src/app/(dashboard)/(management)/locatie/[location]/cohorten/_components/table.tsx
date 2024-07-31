@@ -77,7 +77,7 @@ export default function CohortsTable({
   return (
     <>
       <Table
-        className="mt-8 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
         dense
       >
         <TableHead>
@@ -101,7 +101,7 @@ export default function CohortsTable({
           {table.getRowCount() <= 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center">
-                Geen items gevonden
+                Geen cohorten gevonden.
               </TableCell>
             </TableRow>
           ) : null}
