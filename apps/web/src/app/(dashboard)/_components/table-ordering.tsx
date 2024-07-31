@@ -189,14 +189,12 @@ function SortableItem({
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 1 : 0,
+    touchAction: "none",
   };
 
   return (
     <div
-      ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
       className={clsx(
         "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100 relative cursor-default",
         isDisabled ? "opacity-50" : "opacity-100",
@@ -214,7 +212,9 @@ function SortableItem({
             : column.columnDef.header}
         </Label>
       </CheckboxField>
-      <DragIcon isDragging={isDragging} />
+      <div ref={setNodeRef} {...attributes} {...listeners}>
+        <DragIcon isDragging={isDragging} />
+      </div>
     </div>
   );
 }
