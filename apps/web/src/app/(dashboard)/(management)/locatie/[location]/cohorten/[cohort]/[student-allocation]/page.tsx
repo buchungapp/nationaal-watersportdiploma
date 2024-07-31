@@ -1,4 +1,7 @@
-import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowTopRightOnSquareIcon,
+  EllipsisHorizontalIcon,
+} from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { SWRConfig } from "swr";
@@ -289,6 +292,7 @@ export default async function Page({
             <DescriptionDetails>
               <TextLink
                 href={`/locatie/${location.handle}/personen/${allocation.person.id}`}
+                className="flex gap-1 items-center"
               >
                 <Strong>
                   {[
@@ -299,6 +303,7 @@ export default async function Page({
                     .filter(Boolean)
                     .join(" ")}
                 </Strong>
+                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
               </TextLink>
             </DescriptionDetails>
 
