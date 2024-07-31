@@ -16,7 +16,7 @@ import {
 } from "~/app/(dashboard)/_components/popover";
 import Spinner from "~/app/_components/spinner";
 
-const options = ["verleden", "aankomend"] as const;
+const options = ["verleden", "aankomend", "open"] as const;
 
 export function FilterSelect() {
   const [isPending, startTransition] = useTransition();
@@ -27,7 +27,7 @@ export function FilterSelect() {
       .withOptions({
         startTransition,
       })
-      .withDefault(["aankomend"]),
+      .withDefault(["open", "aankomend"]),
   );
 
   const toggleValue = (value: (typeof options)[number]) => {
@@ -53,8 +53,19 @@ export function FilterSelect() {
               onClick={() => toggleValue("verleden")}
               checked={query?.includes("verleden")}
             />
-            <Label>Verleden</Label>
-            <Description>Toon regels die gesloten zijn.</Description>
+            <Label>Afgerond</Label>
+            <Description>Toon afgesloten cohorten.</Description>
+          </CheckboxField>
+
+          <CheckboxField>
+            <Checkbox
+              onClick={() => toggleValue("open")}
+              checked={query?.includes("open")}
+            />
+            <Label>Open</Label>
+            <Description>
+              Toon cohorten die op dit moment geopend zijn.
+            </Description>
           </CheckboxField>
 
           <CheckboxField>
@@ -63,7 +74,7 @@ export function FilterSelect() {
               checked={query?.includes("aankomend")}
             />
             <Label>Aankomend</Label>
-            <Description>Toon regels die nog niet gesloten zijn.</Description>
+            <Description>Toon cohorten die in de toekomst openen.</Description>
           </CheckboxField>
         </CheckboxGroup>
       </PopoverPanel>

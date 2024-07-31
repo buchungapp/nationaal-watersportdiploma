@@ -101,7 +101,7 @@ export default function CohortsTable({
           {table.getRowCount() <= 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center">
-                Geen items gevonden
+                Geen cohorten gevonden.
               </TableCell>
             </TableRow>
           ) : null}
