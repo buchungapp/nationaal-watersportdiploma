@@ -1,3 +1,5 @@
+import FlexSearch from "flexsearch";
+
 import dayjs from "dayjs";
 import {
   createSearchParamsCache,
@@ -6,7 +8,11 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listCohortsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listCohortsForLocation,
+  listRolesForLocation,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
@@ -22,6 +28,10 @@ export default async function Page({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const location = await retrieveLocationByHandle(params.location);
+
+  const rolesInCurrentLocation = await listRolesForLocation(location.id);
+  const isLocationAdmin = rolesInCurrentLocation.includes("location_admin");
+
   const cohorts = await listCohortsForLocation(location.id);
 
   const parsedSq = createSearchParamsCache({
@@ -31,10 +41,47 @@ export default async function Page({
     query: parseAsString,
   }).parse(searchParams);
 
-  const filteredCohorts =
+  let filteredCohorts =
     parsedSq.weergave && parsedSq.weergave.length > 0
       ? filterCohorts(cohorts, parsedSq.weergave)
       : cohorts;
+
+  const index = new FlexSearch.Document({
+    tokenize: "forward",
+    context: {
+      resolution: 9,
+      depth: 2,
+      bidirectional: true,
+    },
+    document: {
+      id: "id",
+      index: [{ field: "label", tokenize: "full" }],
+    },
+  });
+
+  // Add cohorts to the index
+  filteredCohorts.forEach((cohort) => {
+    index.add({
+      id: cohort.id,
+      label: cohort.label,
+    });
+  });
+
+  const searchQuery = parsedSq.query;
+
+  let searchedCohorts = filteredCohorts;
+
+  if (searchQuery && searchQuery.length >= 2) {
+    const searchResult = index.search(decodeURIComponent(searchQuery));
+
+    if (searchResult.length > 0) {
+      searchedCohorts = filteredCohorts.filter((cohort) =>
+        searchResult.flatMap(({ result }) => result).includes(cohort.id),
+      );
+    } else {
+      searchedCohorts = [];
+    }
+  }
 
   return (
     <>
@@ -50,12 +97,12 @@ export default async function Page({
           <Search placeholder="Doorzoek cohorten..." />
         </div>
         <div className="flex items-center gap-1 sm:shrink-0">
-          <FilterSelect />
+          {isLocationAdmin ? <FilterSelect /> : null}
         </div>
       </div>
 
       <div className="mt-4">
-        <Table cohorts={filteredCohorts} totalItems={filteredCohorts.length} />
+        <Table cohorts={searchedCohorts} totalItems={searchedCohorts.length} />
       </div>
     </>
   );
