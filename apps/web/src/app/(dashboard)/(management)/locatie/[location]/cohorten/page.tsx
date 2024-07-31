@@ -42,7 +42,7 @@ export default async function Page({
     query: parseAsString,
   }).parse(searchParams);
 
-  let filteredCohorts =
+  const filteredCohorts =
     parsedSq.weergave && parsedSq.weergave.length > 0
       ? filterCohorts(cohorts, parsedSq.weergave)
       : cohorts;
