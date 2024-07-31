@@ -113,15 +113,14 @@ export default async function Page() {
       <Heading>Welkom{user.displayName ? ` ${user.displayName}` : ""}!</Heading>
 
       <Text>
-        Dit is jouw NWD-omgeving. Aan jouw account zijn cursisten gekoppeld, die
-        NWD-cursussen volgen. Zie je hier niet de cursisten die je verwacht?
-        Neem dan contact op met de{" "}
+        Welkom in jouw NWD-omgeving. Op deze pagina vind je de cursisten die aan
+        jouw account zijn gekoppeld. Zie je hier niet de cursisten die je
+        verwacht? Neem dan contact op met de{" "}
         <TextLink href="/vaarlocaties" target="_blank">
           vaarlocatie
         </TextLink>{" "}
         waar de cursus is gevolgd.
       </Text>
-
       <Persons />
 
       <Suspense fallback={null}>

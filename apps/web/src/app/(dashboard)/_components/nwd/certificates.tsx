@@ -35,7 +35,7 @@ export async function NWDCertificates({
             target="_blank"
           >
             <div className="text-sm font-medium leading-6 text-gray-900">
-              {`#${certificate.handle}`}
+              {`Diplomanummer #${certificate.handle}`}
             </div>
           </GridListHeader>
           <DescriptionList className="px-6">
