@@ -2,6 +2,7 @@ import clsx from "clsx";
 import React, { type PropsWithChildren } from "react";
 
 const DEFAULT_COMPONENT = "div";
+
 export default function Breakout<
   TTag extends React.ElementType = typeof DEFAULT_COMPONENT,
 >({
@@ -19,7 +20,7 @@ export default function Breakout<
     <Cmp
       {...rest}
       className={clsx(
-        ...(rest.className ? [rest.className] : []),
+        rest.className,
         "lg:w-[calc(100vw-16rem-5rem)] lg:-ml-[max(calc(calc(100vw-72rem-16rem-5rem)/2),0px)]",
       )}
     >
@@ -45,7 +46,7 @@ export function BreakoutCenter<
     <Cmp
       {...rest}
       className={clsx(
-        ...(rest.className ? [rest.className] : []),
+        rest.className,
         "lg:px-[max(calc(calc(100vw-72rem-16rem-5rem)/2),0px)]",
       )}
     >
