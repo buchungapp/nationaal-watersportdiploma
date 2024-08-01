@@ -8,6 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
+import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -30,6 +31,7 @@ import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { type listInstructorsByCohortId } from "~/lib/nwd";
 import {
@@ -55,6 +57,8 @@ export default function InstructorsTable({
   totalItems: number;
   locationId: string;
 }) {
+  const params = useParams();
+
   const columns = useMemo(
     () => [
       columnHelper.accessor(
@@ -68,8 +72,13 @@ export default function InstructorsTable({
             .join(" "),
         {
           header: "Naam",
-          cell: ({ getValue }) => (
-            <span className="font-medium text-zinc-950">{getValue()}</span>
+          cell: ({ getValue, row }) => (
+            <TextLink
+              href={`/locatie/${params.location as string}/personen/${row.original.person.id}`}
+              className="font-medium"
+            >
+              {getValue()}
+            </TextLink>
           ),
         },
       ),
@@ -83,6 +92,7 @@ export default function InstructorsTable({
             {getValue().map((tag) => (
               <Badge key={tag.id}>{tag.title ?? tag.handle}</Badge>
             ))}
+            <Badge>Instructeur</Badge>
           </div>
         ),
       }),
