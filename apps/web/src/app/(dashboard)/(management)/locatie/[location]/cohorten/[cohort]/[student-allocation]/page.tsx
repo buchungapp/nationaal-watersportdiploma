@@ -41,41 +41,7 @@ import {
 import { CourseCard } from "./_components/course-card";
 import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
-import Timeline, { type TimelineEvent } from "./_components/timeline";
-
-const timeline: TimelineEvent[] = [
-  {
-    type: "added-to-cohort",
-    date: "2020-09-20",
-  },
-  {
-    type: "competencies-progress",
-    date: "2020-09-26",
-    by: "Thomas Brants",
-    competencies: [
-      {
-        module: "Basis",
-        competency: "Positie en houding",
-        progress: 70,
-      },
-      {
-        module: "Basis",
-        competency: "Windorientatie",
-        progress: 60,
-      },
-      {
-        module: "Basis",
-        competency: "Reven",
-        progress: 0,
-      },
-    ],
-  },
-  {
-    type: "certificate-achieved",
-    date: "2020-09-28",
-    certificateHandle: "d4gh68",
-  },
-];
+import Timeline from "./_components/timeline";
 
 async function InstructorField({
   cohortId,
@@ -426,7 +392,7 @@ export default async function Page({
             <Subheading>Tijdlijn</Subheading>
           </div>
           <Divider className="mt-4" />
-          <Timeline timeline={timeline} />
+          <Timeline cohortId={cohort.id} allocationId={allocation.id} />
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">

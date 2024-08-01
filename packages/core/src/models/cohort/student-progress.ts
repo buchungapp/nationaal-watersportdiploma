@@ -235,6 +235,7 @@ export const retrieveHistoryByAllocationId = withZod(
         progress,
         createdAt,
         person: {
+          id: s.person.id,
           firstName: s.person.firstName,
           lastNamePrefix: s.person.lastNamePrefix,
           lastName: s.person.lastName,
