@@ -1,6 +1,5 @@
 import FlexSearch from "flexsearch";
 
-import dayjs from "dayjs";
 import {
   createSearchParamsCache,
   parseAsArrayOf,
@@ -8,6 +7,7 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 import { Heading } from "~/app/(dashboard)/_components/heading";
+import dayjs from "~/lib/dayjs";
 import {
   listCohortsForLocation,
   listRolesForLocation,
