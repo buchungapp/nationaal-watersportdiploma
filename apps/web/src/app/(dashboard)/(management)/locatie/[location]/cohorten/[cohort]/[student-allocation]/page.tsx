@@ -41,7 +41,7 @@ import {
 import { CourseCard } from "./_components/course-card";
 import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
-import Timeline, { TimelineEvent } from "./_components/timeline";
+import Timeline, { type TimelineEvent } from "./_components/timeline";
 
 const timeline: TimelineEvent[] = [
   {

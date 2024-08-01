@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import dayjs from "dayjs";
-import { PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 
 export type TimelineEvent = { date: string } & (
   | {
