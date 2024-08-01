@@ -25,18 +25,16 @@ export type TimelineEvent = { date: string } & (
     }
   | {
       type: "competencies-progress";
-      competencies: {
-        module: {
-          id: string;
-          title: string | null;
-          weight: number;
-        };
-        competency: {
-          id: string;
-          title: string | null;
-          weight: number;
-        };
-        progress: number;
+      modules: {
+        module: { id: string; title: string | null; weight: number };
+        competencies: {
+          competency: {
+            id: string;
+            title: string | null;
+            weight: number;
+          };
+          progress: number;
+        }[];
       }[];
       by: string;
     }
@@ -46,104 +44,185 @@ export type TimelineEvent = { date: string } & (
     }
 );
 
-type ProgressTracked = NonNullable<
+type ProgressItem = NonNullable<
   Awaited<ReturnType<typeof listAllocationHistory>>
 >[number];
+
+type ProgressItemNumber = Omit<ProgressItem, "progress"> & { progress: number };
+
 const BATCH_TIME_DIFF = 1000 * 60 * 10; // 10 minutes
 
-function batchProgress(progress: ProgressTracked[]): ProgressTracked[][] {
-  const batchedByInstructor = progress.reduce<
-    | [
-        [ProgressTracked, ...ProgressTracked[]],
-        ...[ProgressTracked, ...ProgressTracked[]][],
-      ]
-    | null
-  >((acc, curr) => {
-    if (!acc) {
-      return [[curr]];
-    }
-
-    const previous = acc[acc.length - 1]!;
-    const lastInstructor = previous[0].person.id;
-    if (lastInstructor === curr.person.id) {
-      const lastProgress = previous[previous.length - 1]!;
-      const lastProgressDate = new Date(lastProgress.createdAt).getTime();
-      const currProgressDate = new Date(curr.createdAt).getTime();
-
-      if (Math.abs(currProgressDate - lastProgressDate) < BATCH_TIME_DIFF) {
-        previous.push(curr);
-        return acc;
-      } else {
-        acc.push([curr]);
-      }
-    } else {
-      acc.push([curr]);
-    }
-
-    return acc;
-  }, null);
-
-  if (!batchedByInstructor) return [];
-
-  const reduced = batchedByInstructor.map(
-    (batch) =>
-      batch.reduce<[ProgressTracked, ...ProgressTracked[]] | null>(
-        (acc, curr) => {
-          if (!acc) {
-            return [curr];
-          }
-
-          const sameCompetency = acc.find(
-            (x) =>
-              x.module.id === curr.module.id &&
-              x.competency.id === curr.competency.id,
-          );
-
-          if (!sameCompetency) {
-            acc.push(curr);
-          } else {
-            if (
-              new Date(curr.createdAt).getTime() >
-              new Date(sameCompetency.createdAt).getTime()
-            ) {
-              acc[acc.indexOf(sameCompetency)] = curr;
-            }
-          }
-
-          return acc;
-        },
-        null,
-      ) ?? [],
+function batchProgress(progress: ProgressItem[]) {
+  progress.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
-  return reduced ?? [];
+  const seperatedByInstructor: {
+    person: ProgressItem["person"];
+    items: ProgressItemNumber[];
+  }[] = [];
+  for (const progressItem of progress) {
+    const last = seperatedByInstructor[seperatedByInstructor.length - 1];
+    if (last && last.person.id === progressItem.person.id) {
+      last.items.push({
+        ...progressItem,
+        progress: Number(progressItem.progress),
+      });
+    } else {
+      seperatedByInstructor.push({
+        person: progressItem.person,
+        items: [
+          {
+            ...progressItem,
+            progress: Number(progressItem.progress),
+          },
+        ],
+      });
+    }
+  }
+
+  const batchedProgress = [];
+  const lastProgressState = new Map<string, number>();
+
+  for (const { person, items } of seperatedByInstructor) {
+    if (items.length < 1) {
+      continue;
+    }
+
+    // Batch per time interval
+    const batchedItems: ProgressItemNumber[][] = [];
+    let lastBatchDate = 0;
+
+    for (const progressItem of items) {
+      const createdAt = new Date(progressItem.createdAt).getTime();
+      if (Math.abs(createdAt - lastBatchDate) > BATCH_TIME_DIFF) {
+        batchedItems.push([progressItem]);
+        lastBatchDate = createdAt;
+        continue;
+      }
+
+      const lastBatch = batchedItems[batchedItems.length - 1]!;
+      lastBatch.push(progressItem);
+    }
+
+    // Last item per competency
+    const lastBatchedItems: ProgressItemNumber[][] = [];
+    for (const batch of batchedItems) {
+      const items = batch.filter((item) => {
+        const sameCompentency = batch.filter(
+          (other) =>
+            other.module.id === item.module.id &&
+            other.competency.id === item.competency.id,
+        );
+
+        const lastItem = Math.max(
+          ...sameCompentency.map((item) => new Date(item.createdAt).getTime()),
+        );
+        return new Date(item.createdAt).getTime() === lastItem;
+      });
+
+      if (items.length > 0) {
+        lastBatchedItems.push(items);
+      }
+    }
+
+    // Merge batched items
+    const mergedBatchedItems: ProgressItemNumber[][] = [];
+    for (const batch of lastBatchedItems) {
+      const mergedBatch: ProgressItemNumber[] = [];
+
+      for (const progressItem of batch) {
+        const lastProgress = lastProgressState.get(progressItem.competency.id);
+        if ((lastProgress ?? 0) === progressItem.progress) {
+          continue;
+        }
+
+        mergedBatch.push(progressItem);
+        lastProgressState.set(
+          progressItem.competency.id,
+          progressItem.progress,
+        );
+      }
+
+      if (mergedBatch.length > 0) {
+        mergedBatchedItems.push(mergedBatch);
+      }
+    }
+
+    if (mergedBatchedItems.length < 1) {
+      continue;
+    }
+
+    for (const batch of mergedBatchedItems) {
+      batchedProgress.push({
+        date: batch[0]!.createdAt,
+        modules: batch.reduce(
+          (acc, item) => {
+            const module = item.module;
+            const competencies = acc.find(
+              (item) => item.module.id === module.id,
+            );
+
+            if (competencies) {
+              competencies.competencies.push({
+                competency: item.competency,
+                progress: item.progress,
+              });
+            } else {
+              acc.push({
+                module,
+                competencies: [
+                  {
+                    competency: item.competency,
+                    progress: item.progress,
+                  },
+                ],
+              });
+            }
+
+            return acc;
+          },
+          [] as {
+            module: ProgressItem["module"];
+            competencies: {
+              competency: ProgressItem["competency"];
+              progress: number;
+            }[];
+          }[],
+        ),
+        person: person,
+      });
+    }
+  }
+
+  return batchedProgress;
 }
 
-function batchedProgressToTimelineEvent(batchedProgress: ProgressTracked[][]) {
-  return batchedProgress
-    .map((batch) => {
-      if (batch.length < 1) return null;
-
-      const event: TimelineEvent = {
-        type: "competencies-progress",
-        date: batch[0]!.createdAt,
-        competencies: batch.map((progress) => ({
-          module: progress.module,
-          competency: progress.competency,
-          progress: Number(progress.progress),
-        })),
-        by: [
-          batch[0]!.person.firstName,
-          batch[0]!.person.lastNamePrefix,
-          batch[0]!.person.lastName,
-        ]
-          .filter(Boolean)
-          .join(" "),
-      };
-
-      return event;
-    })
-    .filter(Boolean) as TimelineEvent[];
+function batchedProgressToTimelineEvent(
+  batchedProgress: {
+    date: string;
+    modules: {
+      module: ProgressItem["module"];
+      competencies: {
+        competency: ProgressItem["competency"];
+        progress: ProgressItemNumber["progress"];
+      }[];
+    }[];
+    person: ProgressItem["person"];
+  }[],
+) {
+  return batchedProgress.map((batch) => ({
+    type: "competencies-progress" as const,
+    date: batch.date,
+    modules: batch.modules,
+    by: [
+      batch.person.firstName,
+      batch.person.lastNamePrefix,
+      batch.person.lastName,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  }));
 }
 
 export default async function Timeline({
@@ -238,7 +317,7 @@ function TimelineEvent({
         </span>
       </div>
       <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-        <div className="text-zinc-500 text-sm">{children}</div>
+        <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
         <div className="whitespace-nowrap text-right text-sm text-gray-500">
           <time dateTime={date}>{dayjs(date).format("MMM DD")}</time>
         </div>
@@ -280,61 +359,31 @@ function TimelineEventCompetenciesProgress({
         </DisclosureButton>
         <DisclosurePanel>
           <ul>
-            {event.competencies
-              .reduce<
-                {
-                  module: {
-                    id: string;
-                    title: string | null;
-                    weight: number;
-                  };
-                  competencies: {
-                    competency: {
-                      id: string;
-                      title: string | null;
-                      weight: number;
-                    };
-                    progress: number;
-                  }[];
-                }[]
-              >((acc, curr) => {
-                const currModule = acc.find(
-                  (m) => m.module.id === curr.module.id,
-                );
-                if (currModule) {
-                  currModule.competencies.push({
-                    competency: curr.competency,
-                    progress: curr.progress,
-                  });
-                } else {
-                  acc.push({
-                    module: curr.module,
-                    competencies: [
-                      { competency: curr.competency, progress: curr.progress },
-                    ],
-                  });
-                }
-                return acc;
-              }, [])
+            {event.modules
               .toSorted((a, b) => a.module.weight - b.module.weight)
-              .map((competency) => (
-                <li key={competency.module.id} className="mt-1">
+              .map((module) => (
+                <li key={module.module.id} className="mt-1">
                   <span className="text-zinc-950 font-semibold">
-                    {competency.module.title ?? "Onbekend"}
+                    {module.module.title ?? "Onbekend"}
                   </span>
                   <ul>
-                    {competency.competencies
-                      .toSorted((a, b) => b.progress - a.progress)
+                    {module.competencies
+                      .toSorted(
+                        (a, b) => a.competency.weight - b.competency.weight,
+                      )
                       .map((competency) => (
+                        // TODO: fix overflow
                         <li
                           key={competency.competency.id}
-                          className="flex justify-between relative"
+                          className="flex justify-between relative gap-1"
                         >
                           {competency.progress <= 0 ? (
                             <div className="absolute top-1/2 -translate-y-1/2 w-full border-t border-zinc-950" />
                           ) : null}
-                          {"- "}
-                          {competency.competency.title ?? "Onbekend"}
+                          <span className="">
+                            {"- "}
+                            {competency.competency.title ?? "Onbekend"}
+                          </span>
                           <span className="font-medium">
                             {competency.progress}%
                           </span>
