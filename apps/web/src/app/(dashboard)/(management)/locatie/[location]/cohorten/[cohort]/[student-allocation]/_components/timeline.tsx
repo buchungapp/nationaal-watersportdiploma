@@ -157,9 +157,9 @@ function TimelineEventCompetenciesCompleted({
             {event.competencies
               .reduce<{ module: string; competencies: string[] }[]>(
                 (acc, curr) => {
-                  const module = acc.find((m) => m.module === curr.module);
-                  if (module) {
-                    module.competencies.push(curr.competency);
+                  const currModule = acc.find((m) => m.module === curr.module);
+                  if (currModule) {
+                    currModule.competencies.push(curr.competency);
                   } else {
                     acc.push({
                       module: curr.module,
@@ -221,9 +221,9 @@ function TimelineEventCompetenciesProgress({
                   competencies: { competency: string; progress: number }[];
                 }[]
               >((acc, curr) => {
-                const module = acc.find((m) => m.module === curr.module);
-                if (module) {
-                  module.competencies.push({
+                const currModule = acc.find((m) => m.module === curr.module);
+                if (currModule) {
+                  currModule.competencies.push({
                     competency: curr.competency,
                     progress: curr.progress,
                   });
@@ -288,9 +288,9 @@ function TimelineEventCompetenciesRemoved({
             {event.competencies
               .reduce<{ module: string; competencies: string[] }[]>(
                 (acc, curr) => {
-                  const module = acc.find((m) => m.module === curr.module);
-                  if (module) {
-                    module.competencies.push(curr.competency);
+                  const currModule = acc.find((m) => m.module === curr.module);
+                  if (currModule) {
+                    currModule.competencies.push(curr.competency);
                   } else {
                     acc.push({
                       module: curr.module,
