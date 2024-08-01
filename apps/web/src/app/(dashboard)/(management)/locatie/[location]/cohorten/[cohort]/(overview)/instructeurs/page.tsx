@@ -45,7 +45,6 @@ export default async function Page({
         totalItems={instructors.length}
         cohortId={cohort.id}
         locationId={location.id}
-        locationHandle={location.handle}
       />
     </div>
   );

@@ -8,6 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
+import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -50,14 +51,14 @@ export default function InstructorsTable({
   instructors,
   totalItems,
   locationId,
-  locationHandle,
 }: {
   cohortId: string;
   instructors: Awaited<ReturnType<typeof listInstructorsByCohortId>>;
   totalItems: number;
   locationId: string;
-  locationHandle: string;
 }) {
+  const params = useParams();
+
   const columns = useMemo(
     () => [
       columnHelper.accessor(
@@ -73,7 +74,7 @@ export default function InstructorsTable({
           header: "Naam",
           cell: ({ getValue, row }) => (
             <TextLink
-              href={`/locatie/${locationHandle}/personen/${row.original.person.id}`}
+              href={`/locatie/${params.location as string}/personen/${row.original.person.id}`}
               className="font-medium"
             >
               {getValue()}
