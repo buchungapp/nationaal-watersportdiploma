@@ -41,6 +41,86 @@ import {
 import { CourseCard } from "./_components/course-card";
 import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
+import Timeline, { TimelineEvent } from "./_components/timeline";
+
+const timeline: TimelineEvent[] = [
+  {
+    type: "added-to-cohort",
+    date: "2020-09-20",
+  },
+  {
+    type: "competencies-completed",
+    date: "2020-09-22",
+    by: "Thomas Brants",
+    competencies: [
+      {
+        module: "Basis",
+        competency: "Positie en houding",
+      },
+      {
+        module: "Basis",
+        competency: "Windorientatie",
+      },
+      {
+        module: "Basis",
+        competency: "Reven",
+      },
+      {
+        module: "Handeling",
+        competency: "Overstag",
+      },
+      {
+        module: "Handeling",
+        competency: "Gijpen",
+      },
+    ],
+  },
+  {
+    type: "competencies-removed",
+    date: "2020-09-24",
+    by: "Thomas Brants",
+    competencies: [
+      {
+        module: "Basis",
+        competency: "Positie en houding",
+      },
+      {
+        module: "Basis",
+        competency: "Windorientatie",
+      },
+      {
+        module: "Basis",
+        competency: "Reven",
+      },
+    ],
+  },
+  {
+    type: "competencies-progress",
+    date: "2020-09-26",
+    by: "Thomas Brants",
+    competencies: [
+      {
+        module: "Basis",
+        competency: "Positie en houding",
+        progress: 70,
+      },
+      {
+        module: "Basis",
+        competency: "Windorientatie",
+        progress: 60,
+      },
+      {
+        module: "Basis",
+        competency: "Reven",
+        progress: 30,
+      },
+    ],
+  },
+  {
+    type: "certificate-achieved",
+    date: "2020-09-28",
+  },
+];
 
 async function InstructorField({
   cohortId,
@@ -385,6 +465,13 @@ export default async function Page({
               </Suspense>
             </DescriptionDetails>
           </DescriptionList>
+        </div>
+        <div className="lg:col-start-3 lg:row-start-1">
+          <div className="flex items-center justify-between">
+            <Subheading>Tijdlijn</Subheading>
+          </div>
+          <Divider className="mt-4" />
+          <Timeline timeline={timeline} />
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
