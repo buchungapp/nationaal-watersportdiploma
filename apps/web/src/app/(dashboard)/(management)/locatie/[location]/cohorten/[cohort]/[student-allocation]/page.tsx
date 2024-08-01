@@ -49,52 +49,6 @@ const timeline: TimelineEvent[] = [
     date: "2020-09-20",
   },
   {
-    type: "competencies-completed",
-    date: "2020-09-22",
-    by: "Thomas Brants",
-    competencies: [
-      {
-        module: "Basis",
-        competency: "Positie en houding",
-      },
-      {
-        module: "Basis",
-        competency: "Windorientatie",
-      },
-      {
-        module: "Basis",
-        competency: "Reven",
-      },
-      {
-        module: "Handeling",
-        competency: "Overstag",
-      },
-      {
-        module: "Handeling",
-        competency: "Gijpen",
-      },
-    ],
-  },
-  {
-    type: "competencies-removed",
-    date: "2020-09-24",
-    by: "Thomas Brants",
-    competencies: [
-      {
-        module: "Basis",
-        competency: "Positie en houding",
-      },
-      {
-        module: "Basis",
-        competency: "Windorientatie",
-      },
-      {
-        module: "Basis",
-        competency: "Reven",
-      },
-    ],
-  },
-  {
     type: "competencies-progress",
     date: "2020-09-26",
     by: "Thomas Brants",
@@ -112,13 +66,14 @@ const timeline: TimelineEvent[] = [
       {
         module: "Basis",
         competency: "Reven",
-        progress: 30,
+        progress: 0,
       },
     ],
   },
   {
     type: "certificate-achieved",
     date: "2020-09-28",
+    certificateHandle: "d4gh68",
   },
 ];
 
