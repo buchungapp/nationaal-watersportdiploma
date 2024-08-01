@@ -158,9 +158,9 @@ function batchProgress(progress: ProgressItem[]) {
         date: batch[0]!.createdAt,
         modules: batch.reduce(
           (acc, item) => {
-            const module = item.module;
+            const currModule = item.module;
             const competencies = acc.find(
-              (item) => item.module.id === module.id,
+              (item) => item.module.id === currModule.id,
             );
 
             if (competencies) {
@@ -170,7 +170,7 @@ function batchProgress(progress: ProgressItem[]) {
               });
             } else {
               acc.push({
-                module,
+                module: currModule,
                 competencies: [
                   {
                     competency: item.competency,
@@ -257,7 +257,7 @@ export default async function Timeline({
     },
   ];
 
-  if (allocation.certificate && allocation.certificate.issuedAt) {
+  if (allocation.certificate?.issuedAt) {
     timeline.push({
       type: "certificate-achieved",
       certificateHandle: allocation.certificate.handle,
