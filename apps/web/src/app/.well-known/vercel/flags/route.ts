@@ -3,7 +3,6 @@ import { unstable_getProviderData as getProviderData } from "@vercel/flags/next"
 import { NextResponse, type NextRequest } from "next/server";
 import * as flags from "../../../../lib/flags";
 
-export const runtime = "edge";
 export const dynamic = "force-dynamic"; // defaults to auto
 
 export async function GET(request: NextRequest) {
