@@ -1,10 +1,10 @@
 import { withDatabase, withSupabaseClient, withTransaction } from '@nawadi/core'
 import 'dotenv/config'
 import assert from 'node:assert'
-import { addCountries } from './coutry.js'
-import { addCurriculumAndDepencies } from './curriculum/index.js'
+import { addCountries } from './country.js'
+import { addCurriculumAndDependencies } from './curriculum/index.js'
 import { addLocation } from './location.js'
-import { addRolesAndDepencies } from './roles/index.js'
+import { addRolesAndDependencies } from './roles/index.js'
 import { truncate } from './truncate.js'
 import { addUsers, deleteUsers } from './users.js'
 import { RESET, TEXT_CYAN, TEXT_GREEN } from './utils/colors.js'
@@ -48,14 +48,14 @@ async function seed() {
       console.log(
         '  🪪 ' + TEXT_CYAN + 'Adding roles and dependencies...' + RESET,
       )
-      await addRolesAndDepencies()
+      await addRolesAndDependencies()
 
       // Add curriculum and dependencies
       console.log()
       console.log(
         '  🏫 ' + TEXT_CYAN + 'Adding curriculum and dependencies...' + RESET,
       )
-      await addCurriculumAndDepencies()
+      await addCurriculumAndDependencies()
 
       // Add location
       console.log()
