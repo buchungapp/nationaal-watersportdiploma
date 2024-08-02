@@ -14,6 +14,7 @@ export const showAllocationTimeline: Flag<boolean> = flag({
   },
   defaultValue: false,
   description: "Show the timeline on the allocation page",
+  origin: "https://eu.posthog.com/project/18411/feature_flags/28008",
   options: [
     {
       value: true,
