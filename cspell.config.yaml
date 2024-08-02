@@ -69,6 +69,8 @@ ignoreWords:
   - LOSS
   - spandiensten
   - PDF
+  - GEWICHTSTRIM
+  - PICO
 allowCompoundWords: true
 useGitignore: true
 ignorePaths:
@@ -81,6 +83,8 @@ ignorePaths:
   - packages/db/migrations/
   - locations.ts
   - packages/scripts/src/**/*.txt
+  - packages/scripts/src/seed/countries.ts
+  - scripts/seed-local-db.js
 files:
   - '**'
 enableFiletypes:

@@ -10,7 +10,7 @@ import { addModules } from './modules.js'
 import { addPrograms } from './programs.js'
 
 const INDENTATION = 2
-export async function addCurriculumAndDepencies() {
+export async function addCurriculumAndDependencies() {
   // Add disciplines
   await processing(
     async () => {

@@ -3,7 +3,7 @@ import { addPrivileges } from './privileges.js'
 import { addRoles } from './roles.js'
 
 const INDENTATION = 2
-export async function addRolesAndDepencies() {
+export async function addRolesAndDependencies() {
   // Add privileges
   await processing(
     async () => {

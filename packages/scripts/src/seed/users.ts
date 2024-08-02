@@ -14,7 +14,7 @@ export async function deleteUsers() {
 export async function addUsers() {
   // Admin
   const adminUser = await User.getOrCreateFromEmail({
-    email: 'info@zeilschool-deoptimist.nl',
+    email: 'info@zeilschool-de-optimist.nl',
     displayName: 'Jan',
   })
 
@@ -47,7 +47,7 @@ export async function addUsers() {
 
   // Instructor
   const instructorUser = await User.getOrCreateFromEmail({
-    email: 'emma@zeilschool-deoptimist.nl',
+    email: 'emma@zeilschool-de-optimist.nl',
     displayName: 'Emma',
   })
 

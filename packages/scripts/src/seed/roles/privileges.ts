@@ -15,7 +15,7 @@ export async function addPrivileges() {
     {
       id: PRIVILEGE_MANAGE_COHORT_CERTIFICATE_ID,
       handle: 'manage_cohort_certificate',
-      description: "Kan diploma's accoderen.",
+      description: "Kan diploma's accorderen.",
     },
     {
       id: PRIVILEGE_MANAGE_COHORT_INSTRUCTORS_ID,
