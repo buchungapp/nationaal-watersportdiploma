@@ -1,8 +1,11 @@
 import { schema as s } from '@nawadi/db'
 import {
   and,
+  asc,
+  desc,
   eq,
   exists,
+  getTableColumns,
   inArray,
   isNull,
   lte,
@@ -10,7 +13,6 @@ import {
   notExists,
   sql,
 } from 'drizzle-orm'
-import { getTableColumns } from 'drizzle-orm/utils'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
@@ -213,5 +215,60 @@ export const completeAllCoreCompetencies = withZod(
       })
 
     return result
+  },
+)
+
+export const retrieveHistoryByAllocationId = withZod(
+  z.object({
+    allocationId: z.string().uuid(),
+  }),
+  async ({ allocationId }) => {
+    const query = useQuery()
+
+    const { competencyId, progress, createdAt } = getTableColumns(
+      s.studentCohortProgress,
+    )
+
+    const rows = await query
+      .select({
+        competencyId,
+        progress,
+        createdAt,
+        person: {
+          id: s.person.id,
+          firstName: s.person.firstName,
+          lastNamePrefix: s.person.lastNamePrefix,
+          lastName: s.person.lastName,
+        },
+        module: {
+          id: s.module.id,
+          title: s.module.title,
+          weight: s.module.weight,
+        },
+        competency: {
+          id: s.competency.id,
+          title: s.competency.title,
+          weight: s.competency.weight,
+        },
+      })
+      .from(s.studentCohortProgress)
+      .innerJoin(s.person, eq(s.studentCohortProgress.createdBy, s.person.id))
+      .innerJoin(
+        s.curriculumCompetency,
+        eq(s.studentCohortProgress.competencyId, s.curriculumCompetency.id),
+      )
+      .innerJoin(
+        s.competency,
+        eq(s.curriculumCompetency.competencyId, s.competency.id),
+      )
+      .innerJoin(s.module, eq(s.curriculumCompetency.moduleId, s.module.id))
+      .where(and(eq(s.studentCohortProgress.cohortAllocationId, allocationId)))
+      .orderBy(
+        desc(s.studentCohortProgress.createdAt),
+        asc(s.module.weight),
+        asc(s.competency.weight),
+      )
+
+    return rows
   },
 )

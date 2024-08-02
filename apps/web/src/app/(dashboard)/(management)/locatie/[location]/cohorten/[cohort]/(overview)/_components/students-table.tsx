@@ -18,7 +18,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import clsx from "clsx";
-import dayjs from "dayjs";
 import { useParams } from "next/navigation";
 import React from "react";
 import Search from "~/app/(dashboard)/(management)/_components/search";
@@ -52,6 +51,7 @@ import {
   getSortableColumnIds,
   useSorting,
 } from "~/app/(dashboard)/_hooks/use-sorting";
+import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
 import { SetView } from "./filters";

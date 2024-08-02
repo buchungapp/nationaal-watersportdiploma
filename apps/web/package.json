@@ -31,6 +31,7 @@
     "@supabase/supabase-js": "^2.44.3",
     "@tanstack/react-table": "^8.19.2",
     "@tremor/react": "^3.17.4",
+    "@vercel/flags": "^2.6.0",
     "@vercel/otel": "^1.9.1",
     "@vercel/speed-insights": "^1.0.12",
     "@vis.gl/react-google-maps": "^1.1.0",

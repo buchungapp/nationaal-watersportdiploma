@@ -21,6 +21,7 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
+import { showAllocationTimeline } from "~/lib/flags";
 import {
   isInstructorInCohort,
   listCompetencyProgressInCohortForStudent,
@@ -41,6 +42,7 @@ import {
 import { CourseCard } from "./_components/course-card";
 import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
+import Timeline from "./_components/timeline";
 
 async function InstructorField({
   cohortId,
@@ -236,6 +238,9 @@ export default async function Page({
 }: {
   params: { location: string; cohort: string; "student-allocation": string };
 }) {
+  // Kick-off the flag evaluation
+  const showTimelineFlag = showAllocationTimeline();
+
   const location = await retrieveLocationByHandle(params.location);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
@@ -386,6 +391,15 @@ export default async function Page({
             </DescriptionDetails>
           </DescriptionList>
         </div>
+        {(await showTimelineFlag) ? (
+          <div className="lg:col-start-3 lg:row-start-1">
+            <div className="flex items-center justify-between">
+              <Subheading>Tijdlijn</Subheading>
+            </div>
+            <Divider className="mt-4" />
+            <Timeline cohortId={cohort.id} allocationId={allocation.id} />
+          </div>
+        ) : null}
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
           <div className="flex items-center justify-between">
