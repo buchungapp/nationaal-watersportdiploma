@@ -38,6 +38,7 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
+import SmartDatetimePicker from "~/app/(dashboard)/_components/natural-language-input";
 import {
   Radio,
   RadioField,
@@ -252,13 +253,13 @@ export function IssueCertificateDialog({
                 werkt altijd.
               </Text>
               <div className="mt-4">
-                <Input
+                <SmartDatetimePicker
                   name="visibleFrom"
-                  type="datetime-local"
-                  aria-label="Zichtbaar vanaf"
                   required={true}
                   defaultValue={
-                    (defaultVisibleFrom ?? dayjs().toISOString()).split(".")[0]
+                    defaultVisibleFrom
+                      ? dayjs(defaultVisibleFrom).toDate()
+                      : dayjs().toDate()
                   }
                 />
               </div>
