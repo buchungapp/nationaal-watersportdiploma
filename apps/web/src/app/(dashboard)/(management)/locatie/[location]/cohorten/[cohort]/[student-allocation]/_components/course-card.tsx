@@ -1,4 +1,7 @@
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
+import {
+  ArrowTopRightOnSquareIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import React from "react";
 import {
@@ -61,6 +64,9 @@ export async function CourseCard({
   if (!curriculum) {
     throw new Error("Failed to retrieve curriculum");
   }
+
+  const hasFinishedCompetencesOnPreviousCertificate =
+    completedCompetencies.length > 0;
 
   const completedCompetencyIds = completedCompetencies.map(
     (cc) => cc.competencyId,
@@ -130,6 +136,27 @@ export async function CourseCard({
 
           <CourseCardViewSettings />
         </div>
+
+        {hasFinishedCompetencesOnPreviousCertificate &&
+        !hasIssuedCertificate ? (
+          <div className="rounded-md bg-blue-50 p-4 mt-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <ExclamationTriangleIcon
+                  aria-hidden="true"
+                  className="h-5 w-5 text-blue-400"
+                />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700">
+                  De cursist heeft al competenties afgerond voor dit programma
+                  via een eerder uitgegeven diploma, deze zijn niet opnieuw af
+                  te ronden en grijs weergegeven.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-6">
           {curriculum.modules.map((module, index) => {
