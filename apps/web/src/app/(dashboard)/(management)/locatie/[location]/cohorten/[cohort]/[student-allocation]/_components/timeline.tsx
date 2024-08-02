@@ -307,19 +307,22 @@ function TimelineEvent({
 }>) {
   return (
     <div className="relative flex space-x-3.5">
-      <div>
-        <span
-          className={clsx(
-            "text-zinc-400 flex h-6 w-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
-          )}
-        >
-          <Icon aria-hidden="true" className="h-4 w-4" />
-        </span>
-      </div>
+      <span
+        className={clsx(
+          "text-zinc-400 flex h-6 w-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+        )}
+      >
+        <Icon aria-hidden="true" className="h-4 w-4" />
+      </span>
       <div className="flex min-w-0 flex-1 justify-between space-x-4">
         <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
-        <div className="whitespace-nowrap text-right text-sm text-gray-500">
-          <time dateTime={date}>{dayjs(date).format("MMM DD")}</time>
+        <div className="text-right text-sm text-gray-500">
+          <time
+            dateTime={date}
+            title={dayjs(date).tz().format("dddd D MMMM YYYY [om] HH:mm")}
+          >
+            {dayjs(date).fromNow()}
+          </time>
         </div>
       </div>
     </div>
@@ -344,77 +347,97 @@ function TimelineEventCompetenciesProgress({
   event: TimelineEvent & { type: "competencies-progress" };
 }) {
   return (
-    <TimelineEvent icon={ChartBarIcon} date={event.date}>
-      <Disclosure>
-        <DisclosureButton className="group flex gap-1 text-left">
-          <div>
-            Voortgang bijgewerkt door{" "}
-            <span className="font-semibold text-zinc-950 whitespace-nowrap">
-              {event.by}
-            </span>
-          </div>
-          <ChevronDownIcon
-            className={
-              "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
-            }
-          />
-        </DisclosureButton>
-        <DisclosurePanel>
-          <ul className="space-y-2.5 mt-2">
-            {event.modules
-              .sort((a, b) => a.module.weight - b.module.weight)
-              .map((module, index) => {
-                return (
-                  <React.Fragment key={module.module.id}>
-                    <li className="">
-                      <Disclosure>
-                        <div className="flex items-center justify-between gap-x-2">
-                          <Strong>{module.module.title ?? ""}</Strong>
+    <div className="relative flex space-x-3.5">
+      <span
+        className={clsx(
+          "text-zinc-400 flex h-6 w-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+        )}
+      >
+        <ChartBarIcon aria-hidden="true" className="h-4 w-4" />
+      </span>
+      <div className="flex min-w-0 flex-1 justify-between space-x-4">
+        <div className="text-zinc-500 text-sm overflow-hidden">
+          <Disclosure>
+            <DisclosureButton className="group flex gap-1 text-left">
+              <div>
+                Voortgang bijgewerkt door{" "}
+                <span className="font-semibold text-zinc-950 whitespace-nowrap">
+                  {event.by}
+                </span>{" "}
+                <ChevronDownIcon
+                  className={
+                    "h-4 w-4 transition-transform inline-flex group-data-[open]:rotate-180 shrink-0 leading-5"
+                  }
+                />
+              </div>
+              <div className="text-right text-sm text-gray-500">
+                <time
+                  dateTime={event.date}
+                  title={dayjs(event.date)
+                    .tz()
+                    .format("dddd D MMMM YYYY [om] HH:mm")}
+                >
+                  {dayjs(event.date).fromNow()}
+                </time>
+              </div>
+            </DisclosureButton>
+            <DisclosurePanel>
+              <ul className="space-y-2.5 mt-4">
+                {event.modules
+                  .sort((a, b) => a.module.weight - b.module.weight)
+                  .map((module, index) => {
+                    return (
+                      <React.Fragment key={module.module.id}>
+                        <li className="">
+                          <Disclosure>
+                            <DisclosureButton className="group w-full gap-x-2 flex items-center justify-between">
+                              <Strong>{module.module.title ?? ""}</Strong>
 
-                          <DisclosureButton className="group flex gap-1 text-left">
-                            <ChevronDownIcon
-                              className={
-                                "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
-                              }
-                            />
-                          </DisclosureButton>
-                        </div>
-
-                        <DisclosurePanel>
-                          <ul className="space-y-0.5 mt-1">
-                            {module.competencies
-                              .sort(
-                                (a, b) =>
-                                  a.competency.weight - b.competency.weight,
-                              )
-                              .map((competency) => (
-                                <li
-                                  key={competency.competency.id}
-                                  className="flex justify-between max-w-full relative gap-1"
-                                >
-                                  {competency.progress <= 0 ? (
-                                    <div className="absolute top-1/2 -translate-y-1/2 w-full border-t border-zinc-950" />
-                                  ) : null}
-                                  <span className="hyphens-auto">
-                                    {competency.competency.title ?? ""}
-                                  </span>
-                                  <span className="">
-                                    {`${competency.progress}%`}
-                                  </span>
-                                </li>
-                              ))}
-                          </ul>
-                        </DisclosurePanel>
-                      </Disclosure>
-                    </li>
-                    {index < event.modules.length - 1 ? <Divider soft /> : null}
-                  </React.Fragment>
-                );
-              })}
-          </ul>
-        </DisclosurePanel>
-      </Disclosure>
-    </TimelineEvent>
+                              <ChevronDownIcon
+                                className={
+                                  "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
+                                }
+                              />
+                            </DisclosureButton>
+                            <DisclosurePanel>
+                              <ul className="space-y-0.5 mt-1">
+                                {module.competencies
+                                  .sort(
+                                    (a, b) =>
+                                      a.competency.weight - b.competency.weight,
+                                  )
+                                  .map((competency) => (
+                                    <li
+                                      key={competency.competency.id}
+                                      className="flex justify-between max-w-full relative gap-1"
+                                    >
+                                      {competency.progress <= 0 ? (
+                                        <div className="absolute top-1/2 -translate-y-1/2 w-full border-t border-zinc-950" />
+                                      ) : null}
+                                      <span className="hyphens-auto">
+                                        {competency.competency.title ?? ""}
+                                      </span>
+                                      <span className="">
+                                        {`${competency.progress}%`}
+                                      </span>
+                                    </li>
+                                  ))}
+                              </ul>
+                            </DisclosurePanel>
+                          </Disclosure>
+                        </li>
+                        {index < event.modules.length - 1 ? (
+                          <Divider soft />
+                        ) : null}
+                      </React.Fragment>
+                    );
+                  })}
+              </ul>
+            </DisclosurePanel>
+          </Disclosure>
+        </div>
+      </div>
+    </div>
   );
 }
 
