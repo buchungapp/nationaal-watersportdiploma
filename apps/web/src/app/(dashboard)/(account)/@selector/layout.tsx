@@ -1,5 +1,5 @@
 import { Suspense, type PropsWithChildren } from "react";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getAuthUserOrRedirect } from "~/lib/nwd";
 import {
   Dropdown,
   DropdownItem,
@@ -9,7 +9,7 @@ import {
 import { PersonItem } from "./_components/person-item";
 
 async function PersonsDropdownMenu() {
-  const { persons } = await getUserOrThrow();
+  const { persons } = await getAuthUserOrRedirect();
 
   if (persons.length === 0) {
     return (

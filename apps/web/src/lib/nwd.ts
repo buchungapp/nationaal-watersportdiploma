@@ -44,12 +44,14 @@ const dbConfig: DatabaseConfiguration = {
 };
 
 async function getPrimaryPerson<T extends boolean = true>(
-  user: Awaited<ReturnType<typeof getUserOrThrow>>,
+  user: Awaited<ReturnType<typeof getAuthUserOrRedirect>>,
   force = true as T,
 ): Promise<
   T extends true
-    ? Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number]
-    : Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number] | null
+    ? Awaited<ReturnType<typeof getAuthUserOrRedirect>>["persons"][number]
+    :
+        | Awaited<ReturnType<typeof getAuthUserOrRedirect>>["persons"][number]
+        | null
 > {
   if (user.persons.length === 0) {
     throw new Error("Expected at least one person for user");
@@ -60,7 +62,7 @@ async function getPrimaryPerson<T extends boolean = true>(
 
   if (!primaryPerson.isPrimary && !force) {
     return null as T extends true
-      ? Awaited<ReturnType<typeof getUserOrThrow>>["persons"][number]
+      ? Awaited<ReturnType<typeof getAuthUserOrRedirect>>["persons"][number]
       : null;
   }
 
@@ -105,7 +107,7 @@ async function makeRequest<T>(cb: () => Promise<T>) {
   }
 }
 
-export const getUserOrThrow = cache(async () => {
+export const getAuthUserOrRedirect = cache(async () => {
   const cookieStore = cookies();
 
   const supabase = createServerClient(
@@ -128,20 +130,33 @@ export const getUserOrThrow = cache(async () => {
 
   const { user: authUser } = userResponse.data;
 
-  return makeRequest(async () => {
-    const userData = await User.fromId(authUser.id);
-    // We can't run this in parallel, because fromId will create the user if it doesn't exist
-    const persons = await User.Person.list({ filter: { userId: authUser.id } });
+  return authUser;
+});
 
-    if (!userData) {
-      throw new Error("User not found");
-    }
+export const getUser = cache(async () => {
+  const cookieStore = cookies();
 
-    return {
-      ...userData,
-      persons,
-    };
-  });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+      },
+    },
+  );
+
+  const userResponse = await supabase.auth.getUser();
+
+  if (userResponse.error != null) {
+    redirect("/login");
+  }
+
+  const { user: authUser } = userResponse.data;
+
+  return authUser;
 });
 
 export const findCertificate = async ({
@@ -167,7 +182,7 @@ export const findCertificate = async ({
 
 export const listCertificates = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const user = await getAuthUserOrRedirect();
     const person = await getPrimaryPerson(user);
 
     await isActiveActorTypeInLocation({
@@ -189,7 +204,7 @@ async function validatePersonAccessCheck({
   requestingUser,
   requestedPersonId,
 }: {
-  requestingUser: Awaited<ReturnType<typeof getUserOrThrow>>;
+  requestingUser: Awaited<ReturnType<typeof getAuthUserOrRedirect>>;
   locationId: string;
   requestedPersonId: string;
 }) {
@@ -246,7 +261,7 @@ async function validatePersonAccessCheck({
 export const listCertificatesForPerson = cache(
   async (personId: string, locationId?: string) => {
     return makeRequest(async () => {
-      const requestingUser = await getUserOrThrow();
+      const requestingUser = await getAuthUserOrRedirect();
 
       const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
@@ -275,7 +290,7 @@ export const listCertificatesForPerson = cache(
 export const listExternalCertificatesForPerson = cache(
   async (personId: string, locationId?: string) => {
     return makeRequest(async () => {
-      const requestingUser = await getUserOrThrow();
+      const requestingUser = await getAuthUserOrRedirect();
 
       const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
@@ -306,7 +321,7 @@ export const listCertificatesByNumber = cache(
     sort: "createdAt" | "student" | "instructor" = "createdAt",
   ) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
+      const user = await getAuthUserOrRedirect();
       const person = await getPrimaryPerson(user);
 
       // TODO: this authorization check should be more specific
@@ -524,7 +539,7 @@ export const retrieveLocationByHandle = cache(async (handle: string) => {
 
 export const listPersonsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const user = await getAuthUserOrRedirect();
     const person = await getPrimaryPerson(user);
 
     const isLocationAdmin = await isActiveActorTypeInLocation({
@@ -546,7 +561,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 export const getPersonById = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
+      const user = await getAuthUserOrRedirect();
 
       await validatePersonAccessCheck({
         locationId,
@@ -562,7 +577,7 @@ export const getPersonById = cache(
 
 export const getPersonByHandle = cache(async (handle: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const user = await getAuthUserOrRedirect();
 
     const person = await User.Person.byIdOrHandle({ handle });
 
@@ -576,7 +591,7 @@ export const getPersonByHandle = cache(async (handle: string) => {
 
 export const listPersonsForUser = cache(async () => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const user = await getAuthUserOrRedirect();
 
     const persons = await User.Person.list({
       filter: { userId: user.authUserId },
@@ -589,7 +604,7 @@ export const listPersonsForUser = cache(async () => {
 export const listPersonsForLocationByRole = cache(
   async (locationId: string, role: ActorType) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
+      const user = await getAuthUserOrRedirect();
       const person = await getPrimaryPerson(user);
 
       const isLocationAdmin = await isActiveActorTypeInLocation({
@@ -614,7 +629,7 @@ export const listPersonsForLocationByRole = cache(
 
 export const listLocationsForPerson = cache(async (personId?: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const user = await getAuthUserOrRedirect();
     const person = await getPrimaryPerson(user);
 
     if (personId && person.id !== personId) {
@@ -634,7 +649,7 @@ export const listLocationsForPerson = cache(async (personId?: string) => {
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
+      const user = await getAuthUserOrRedirect();
       const person = await getPrimaryPerson(user);
 
       const locations = await User.Person.listLocationsByRole({
@@ -668,7 +683,7 @@ export const createStudentForLocation = async (
   },
 ) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     await isActiveActorTypeInLocation({
@@ -736,7 +751,7 @@ export const createCompletedCertificate = async (
 ) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      const authUser = await getUserOrThrow();
+      const authUser = await getAuthUserOrRedirect();
       const primaryPerson = await getPrimaryPerson(authUser);
 
       await isActiveActorTypeInLocation({
@@ -798,7 +813,7 @@ export const issueCertificatesInCohort = async ({
   return makeRequest(async () => {
     return withTransaction(async () => {
       const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
+        getAuthUserOrRedirect(),
         Cohort.byIdOrHandle({ id: cohortId }),
       ]);
 
@@ -932,7 +947,7 @@ export const withdrawCertificatesInCohort = async ({
   return makeRequest(async () => {
     return withTransaction(async () => {
       const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
+        getAuthUserOrRedirect(),
         Cohort.byIdOrHandle({ id: cohortId }),
       ]);
 
@@ -970,7 +985,7 @@ export const withdrawCertificatesInCohort = async ({
 
 export const listCohortsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const isLocationAdmin = await isActiveActorTypeInLocation({
@@ -991,7 +1006,7 @@ export const listCohortsForLocation = cache(async (locationId: string) => {
 export const retrieveCohortByHandle = cache(
   async (handle: string, locationId: string) => {
     return makeRequest(async () => {
-      const authUser = await getUserOrThrow();
+      const authUser = await getAuthUserOrRedirect();
       const primaryPerson = await getPrimaryPerson(authUser);
 
       const cohort = await Cohort.byIdOrHandle({ handle, locationId });
@@ -1040,7 +1055,7 @@ export const createCohort = async ({
   accessEndTimestamp: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     await isActiveActorTypeInLocation({
@@ -1087,7 +1102,7 @@ export const submitProductFeedback = async ({
   message: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
 
     const res = await Platform.Feedback.create({
       insertedBy: authUser.authUserId,
@@ -1119,7 +1134,7 @@ export const submitProductFeedback = async ({
 
 export const getIsActiveInstructor = cache(async () => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow().catch(() => null);
+    const user = await getAuthUserOrRedirect().catch(() => null);
 
     if (!user) {
       return false;
@@ -1160,7 +1175,7 @@ export const updateLocationDetails = async (
   }>,
 ) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     await isActiveActorTypeInLocation({
@@ -1187,7 +1202,7 @@ export const listStudentsWithCurriculaByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
       const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
+        getAuthUserOrRedirect(),
         Cohort.byIdOrHandle({ id: cohortId }),
       ]);
 
@@ -1221,7 +1236,7 @@ export const listStudentsWithCurriculaByCohortId = cache(
 
 export const listActiveCohortsForPerson = cache(async (personId: string) => {
   return makeRequest(async () => {
-    const [authUser] = await Promise.all([getUserOrThrow()]);
+    const [authUser] = await Promise.all([getAuthUserOrRedirect()]);
 
     if (!authUser.persons.some((p) => p.id === personId)) {
       throw new Error("Unauthorized");
@@ -1239,7 +1254,7 @@ export const listCertificateOverviewByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
       const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
+        getAuthUserOrRedirect(),
         Cohort.byIdOrHandle({ id: cohortId }),
       ]);
 
@@ -1281,7 +1296,7 @@ export const retrieveStudentAllocationWithCurriculum = cache(
   async (cohortId: string, allocationId: string) => {
     return makeRequest(async () => {
       const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
+        getAuthUserOrRedirect(),
         Cohort.byIdOrHandle({ id: cohortId }),
       ]);
 
@@ -1320,7 +1335,7 @@ export const retrieveStudentAllocationWithCurriculum = cache(
 export const retrieveStudentAllocationWithCurriculumForPerson = cache(
   async (allocationId: string) => {
     return makeRequest(async () => {
-      const [authUser] = await Promise.all([getUserOrThrow()]);
+      const [authUser] = await Promise.all([getAuthUserOrRedirect()]);
 
       const result = await Cohort.Allocation.retrieveStudentWithCurriculum({
         allocationId,
@@ -1377,7 +1392,7 @@ export async function updateCompetencyProgress({
   }[];
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // const availableLocations = await User.Person.listLocationsByRole({
@@ -1403,7 +1418,7 @@ export async function completeAllCoreCompetencies({
   cohortAllocationId: string | string[];
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // const availableLocations = await User.Person.listLocationsByRole({
@@ -1434,7 +1449,7 @@ export async function addStudentToCohortByPersonId({
   tags?: string[];
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     await isActiveActorTypeInLocation({
@@ -1479,7 +1494,7 @@ export async function releaseStudentFromCohortByAllocationId({
   allocationId: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const [isLocationAdmin, privileges] = await Promise.all([
@@ -1517,7 +1532,7 @@ export async function addInstructorToCohortByPersonId({
   personId: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const [isLocationAdmin, privileges] = await Promise.all([
@@ -1563,7 +1578,7 @@ export async function removeAllocationById({
   cohortId: string;
 }) {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const [isLocationAdmin, privileges] = await Promise.all([
@@ -1594,7 +1609,7 @@ export async function removeAllocationById({
 
 export const isInstructorInCohort = cache(async (cohortId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const [possibleInstructorActor] = await Cohort.Allocation.listByPersonId({
@@ -1622,7 +1637,7 @@ export const isInstructorInCohort = cache(async (cohortId: string) => {
 export const listRolesForLocation = cache(
   async (locationId: string, personId?: string) => {
     return makeRequest(async () => {
-      const authUser = await getUserOrThrow();
+      const authUser = await getAuthUserOrRedirect();
       const primaryPerson = await getPrimaryPerson(authUser);
 
       if (!!personId) {
@@ -1643,7 +1658,7 @@ export const listRolesForLocation = cache(
 
 export const listPrivilegesForCohort = cache(async (cohortId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     return await Cohort.Allocation.listPrivilegesForPerson({
@@ -1676,7 +1691,7 @@ export async function updateStudentInstructorAssignment({
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
     ]);
 
     const instructorId =
@@ -1721,7 +1736,7 @@ export const enrollStudentsInCurriculumForCohort = async ({
 }) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      const authUser = await getUserOrThrow();
+      const authUser = await getAuthUserOrRedirect();
       const _authPerson = await getPrimaryPerson(authUser);
 
       // TODO: Update authorization
@@ -1765,7 +1780,7 @@ export const withdrawStudentFromCurriculumInCohort = async ({
 }) => {
   return makeRequest(async () => {
     return withTransaction(async () => {
-      const authUser = await getUserOrThrow();
+      const authUser = await getAuthUserOrRedirect();
       const _primaryPerson = await getPrimaryPerson(authUser);
 
       // TODO: Update authorization
@@ -1806,7 +1821,7 @@ export async function addCohortRole({
 }) {
   return makeRequest(async () => {
     const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
+      getAuthUserOrRedirect(),
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
@@ -1849,7 +1864,7 @@ export async function removeCohortRole({
 }) {
   return makeRequest(async () => {
     const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
+      getAuthUserOrRedirect(),
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
@@ -1892,7 +1907,7 @@ export async function setAllocationTags({
 }) {
   return makeRequest(async () => {
     const [primaryPerson, cohort] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
@@ -1924,7 +1939,7 @@ export async function setAllocationTags({
 export const listDistinctTagsForCohort = async (cohortId: string) => {
   return makeRequest(async () => {
     const [primaryPerson, cohort] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
       Cohort.byIdOrHandle({ id: cohortId }).then(
         (cohort) => cohort ?? notFound(),
       ),
@@ -1963,7 +1978,7 @@ export async function upsertActorForLocation({
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
     ]);
 
     await isActiveActorTypeInLocation({
@@ -1991,7 +2006,7 @@ export async function dropActorForLocation({
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
     ]);
 
     await isActiveActorTypeInLocation({
@@ -2019,7 +2034,7 @@ export async function updateEmailForPerson({
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
     ]);
 
     await listRolesForLocation(locationId, personId).then((roles) => {
@@ -2043,7 +2058,7 @@ export async function updateEmailForPerson({
 
 export const listKnowledgeCenterDocuments = cache(async () => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const user = await getAuthUserOrRedirect();
 
     const activeActorTypes = await User.Actor.listActiveTypesForUser({
       userId: user.authUserId,
@@ -2064,7 +2079,7 @@ export const listKnowledgeCenterDocuments = cache(async () => {
 export const downloadKnowledgeCenterDocument = cache(
   async (documentId: string, forceDownload = true) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
+      const user = await getAuthUserOrRedirect();
 
       const activeActorTypes = await User.Actor.listActiveTypesForUser({
         userId: user.authUserId,
@@ -2090,7 +2105,7 @@ export const retrieveDefaultCertificateVisibleFromDate = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
       const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
+        getAuthUserOrRedirect(),
         Cohort.byIdOrHandle({ id: cohortId }),
       ]);
 
@@ -2135,7 +2150,7 @@ export const updateDefaultCertificateVisibleFromDate = async ({
 }) => {
   return makeRequest(async () => {
     const [authUser, cohort] = await Promise.all([
-      getUserOrThrow(),
+      getAuthUserOrRedirect(),
       Cohort.byIdOrHandle({ id: cohortId }),
     ]);
 
@@ -2180,7 +2195,7 @@ export const updateCohortDetails = async ({
   accessEndTimestamp?: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const cohort = await Cohort.byIdOrHandle({ id: cohortId });
@@ -2214,7 +2229,7 @@ export const updateCohortDetails = async ({
 
 export const deleteCohort = async (cohortId: string) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const cohort = await Cohort.byIdOrHandle({ id: cohortId });
@@ -2249,7 +2264,7 @@ export const updatePersonDetails = async ({
 }) => {
   return makeRequest(async () => {
     const [primaryPerson, person] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+      getAuthUserOrRedirect().then(getPrimaryPerson),
       User.Person.byIdOrHandle({ id: personId }),
     ]);
 
@@ -2318,7 +2333,7 @@ export const makeProgressVisible = async ({
   allocationId: string;
 }) => {
   return makeRequest(async () => {
-    const authUser = await getUserOrThrow();
+    const authUser = await getAuthUserOrRedirect();
     const primaryPerson = await getPrimaryPerson(authUser);
 
     const cohort = await Cohort.byIdOrHandle({ id: cohortId });
@@ -2359,7 +2374,7 @@ export const makeProgressVisible = async ({
 export const listAllocationHistory = cache(
   async (allocationId: string, cohortId: string) => {
     return makeRequest(async () => {
-      const authUser = await getUserOrThrow();
+      const authUser = await getAuthUserOrRedirect();
       const primaryPerson = await getPrimaryPerson(authUser);
 
       // TODO: check if allocation belongs to cohort

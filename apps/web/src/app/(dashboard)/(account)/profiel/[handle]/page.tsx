@@ -12,7 +12,11 @@ import {
 } from "~/app/(dashboard)/_components/nwd/certificates";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { getPersonByHandle, getUserOrThrow, listCountries } from "~/lib/nwd";
+import {
+  getAuthUserOrRedirect,
+  getPersonByHandle,
+  listCountries,
+} from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { EditDetails } from "./_components/action-buttons";
 import { PersonCohortProgress } from "./_components/cohort-progress";
@@ -30,7 +34,7 @@ export default async function Page({
   params,
 }: Readonly<{ params: { handle: string } }>) {
   const [user, person] = await Promise.all([
-    getUserOrThrow(),
+    getAuthUserOrRedirect(),
     getPersonByHandle(params.handle),
   ]);
 

@@ -8,7 +8,7 @@ import {
   completeAllCoreCompetencies as completeAllCoreCompetenciesInner,
   deleteCohort as deleteCohortInner,
   enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
-  getUserOrThrow,
+  getAuthUserOrRedirect,
   isInstructorInCohort as isInstructorInCohortInner,
   listCountries as listCountriesInner,
   listCurriculaByProgram as listCurriculaByProgramInner,
@@ -125,19 +125,19 @@ export async function listCurriculaByProgram(
   programId: string,
   onlyActive?: boolean,
 ) {
-  await getUserOrThrow();
+  await getAuthUserOrRedirect();
 
   return listCurriculaByProgramInner(programId, onlyActive);
 }
 
 export async function listGearTypesByCurriculum(curriculumId: string) {
-  await getUserOrThrow();
+  await getAuthUserOrRedirect();
 
   return listGearTypesByCurriculumInner(curriculumId);
 }
 
 export async function listPrograms() {
-  await getUserOrThrow();
+  await getAuthUserOrRedirect();
 
   return listProgramsInner();
 }
@@ -205,7 +205,7 @@ export async function removeAllocation(input: {
 }
 
 export async function listCountries() {
-  await getUserOrThrow();
+  await getAuthUserOrRedirect();
 
   return listCountriesInner();
 }
