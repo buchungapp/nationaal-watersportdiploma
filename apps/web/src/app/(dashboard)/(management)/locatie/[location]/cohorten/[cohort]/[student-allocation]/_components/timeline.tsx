@@ -5,14 +5,16 @@ import {
 } from "@headlessui/react";
 import {
   AcademicCapIcon,
+  ChartBarIcon,
   ChevronDownIcon,
-  ClipboardDocumentListIcon,
-  UserIcon,
+  UserPlusIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
-import { Code } from "~/app/(dashboard)/_components/text";
+import React from "react";
+import { Divider } from "~/app/(dashboard)/_components/divider";
+import { Code, Strong } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
   listAllocationHistory,
@@ -271,9 +273,7 @@ export default async function Timeline({
   return (
     <ul role="list" className="-mb-8 mt-4">
       {timeline
-        .toSorted(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-        )
+        .sort((a, b) => (dayjs(a.date).isAfter(dayjs(b.date)) ? -1 : 1))
         .map((event, eventIdx) => (
           <li key={event.type + event.date}>
             <div className="relative pb-8">
@@ -306,17 +306,17 @@ function TimelineEvent({
   date: string;
 }>) {
   return (
-    <div className="relative flex space-x-3">
+    <div className="relative flex space-x-3.5">
       <div>
         <span
           className={clsx(
-            "text-zinc-500 flex h-8 w-8 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+            "text-zinc-400 flex h-6 w-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
           )}
         >
-          <Icon aria-hidden="true" className="h-5 w-5" />
+          <Icon aria-hidden="true" className="h-4 w-4" />
         </span>
       </div>
-      <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+      <div className="flex min-w-0 flex-1 justify-between space-x-4">
         <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
         <div className="whitespace-nowrap text-right text-sm text-gray-500">
           <time dateTime={date}>{dayjs(date).format("MMM DD")}</time>
@@ -332,7 +332,7 @@ function TimelineEventAddedToCohort({
   event: TimelineEvent & { type: "added-to-cohort" };
 }) {
   return (
-    <TimelineEvent icon={UserIcon} date={event.date}>
+    <TimelineEvent icon={UserPlusIcon} date={event.date}>
       <span>Toegevoegd aan cohort</span>
     </TimelineEvent>
   );
@@ -344,54 +344,73 @@ function TimelineEventCompetenciesProgress({
   event: TimelineEvent & { type: "competencies-progress" };
 }) {
   return (
-    <TimelineEvent icon={ClipboardDocumentListIcon} date={event.date}>
+    <TimelineEvent icon={ChartBarIcon} date={event.date}>
       <Disclosure>
         <DisclosureButton className="group flex gap-1 text-left">
           <div>
-            Competenties voortgang bijgewerkt door{" "}
-            <span className="font-semibold text-zinc-950">{event.by}</span>
+            Voortgang bijgewerkt door{" "}
+            <span className="font-semibold text-zinc-950 whitespace-nowrap">
+              {event.by}
+            </span>
           </div>
           <ChevronDownIcon
             className={
-              "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-1"
+              "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
             }
           />
         </DisclosureButton>
         <DisclosurePanel>
-          <ul>
+          <ul className="space-y-2.5 mt-2">
             {event.modules
-              .toSorted((a, b) => a.module.weight - b.module.weight)
-              .map((module) => (
-                <li key={module.module.id} className="mt-1">
-                  <span className="text-zinc-950 font-semibold">
-                    {module.module.title ?? "Onbekend"}
-                  </span>
-                  <ul>
-                    {module.competencies
-                      .toSorted(
-                        (a, b) => a.competency.weight - b.competency.weight,
-                      )
-                      .map((competency) => (
-                        // TODO: fix overflow
-                        <li
-                          key={competency.competency.id}
-                          className="flex justify-between relative gap-1"
-                        >
-                          {competency.progress <= 0 ? (
-                            <div className="absolute top-1/2 -translate-y-1/2 w-full border-t border-zinc-950" />
-                          ) : null}
-                          <span className="">
-                            {"- "}
-                            {competency.competency.title ?? "Onbekend"}
-                          </span>
-                          <span className="font-medium">
-                            {competency.progress}%
-                          </span>
-                        </li>
-                      ))}
-                  </ul>
-                </li>
-              ))}
+              .sort((a, b) => a.module.weight - b.module.weight)
+              .map((module, index) => {
+                return (
+                  <React.Fragment key={module.module.id}>
+                    <li className="">
+                      <Disclosure>
+                        <div className="flex items-center justify-between gap-x-2">
+                          <Strong>{module.module.title ?? ""}</Strong>
+
+                          <DisclosureButton className="group flex gap-1 text-left">
+                            <ChevronDownIcon
+                              className={
+                                "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
+                              }
+                            />
+                          </DisclosureButton>
+                        </div>
+
+                        <DisclosurePanel>
+                          <ul className="space-y-0.5 mt-1">
+                            {module.competencies
+                              .sort(
+                                (a, b) =>
+                                  a.competency.weight - b.competency.weight,
+                              )
+                              .map((competency) => (
+                                <li
+                                  key={competency.competency.id}
+                                  className="flex justify-between max-w-full relative gap-1"
+                                >
+                                  {competency.progress <= 0 ? (
+                                    <div className="absolute top-1/2 -translate-y-1/2 w-full border-t border-zinc-950" />
+                                  ) : null}
+                                  <span className="hyphens-auto">
+                                    {competency.competency.title ?? ""}
+                                  </span>
+                                  <span className="">
+                                    {`${competency.progress}%`}
+                                  </span>
+                                </li>
+                              ))}
+                          </ul>
+                        </DisclosurePanel>
+                      </Disclosure>
+                    </li>
+                    {index < event.modules.length - 1 ? <Divider soft /> : null}
+                  </React.Fragment>
+                );
+              })}
           </ul>
         </DisclosurePanel>
       </Disclosure>
@@ -406,7 +425,7 @@ function TimelineEventCertificateAchieved({
 }) {
   return (
     <TimelineEvent icon={AcademicCapIcon} date={event.date}>
-      <span className="text-zinc-950 font-semibold">Diploma behaald! 🎉</span>
+      <span className="text-zinc-950 font-semibold">Diploma uitgegeven 🎉</span>
       <br />
       <Code>{event.certificateHandle}</Code>
     </TimelineEvent>
