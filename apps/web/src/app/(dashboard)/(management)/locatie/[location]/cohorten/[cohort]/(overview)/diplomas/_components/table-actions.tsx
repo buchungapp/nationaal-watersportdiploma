@@ -326,11 +326,10 @@ export function RemoveCertificateDialog({
                   setIsOpen(false);
                   resetSelection();
                 })
-                .catch((error) => {
-                  if (error instanceof Error) {
-                    return setError(error.message);
-                  }
-                  setError("Er is een fout opgetreden.");
+                .catch(() => {
+                  setError(
+                    "Er is een fout opgetreden, mogelijk is het diploma meer dan 72 uur geleden uitgegeven. Neem in dat geval contact op met het Secretariaat.",
+                  );
                 });
             });
           }}
