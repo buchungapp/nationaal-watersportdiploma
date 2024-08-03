@@ -667,6 +667,37 @@ export const createStudentForLocation = async (
     birthCountry: string;
   },
 ) => {
+  return createPersonForLocation(locationId, ["student"], personInput);
+};
+
+export const createInstructorForLocation = async (
+  locationId: string,
+  personInput: {
+    email: string;
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string;
+    dateOfBirth: Date;
+    birthCity: string;
+    birthCountry: string;
+  },
+) => {
+  return createPersonForLocation(locationId, ["instructor"], personInput);
+};
+
+export const createPersonForLocation = async (
+  locationId: string,
+  roles: Exclude<ActorType, "location_admin">[],
+  personInput: {
+    email: string;
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string;
+    dateOfBirth: Date;
+    birthCity: string;
+    birthCountry: string;
+  },
+) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
@@ -701,11 +732,21 @@ export const createStudentForLocation = async (
       locationId: locationId,
     });
 
-    await User.Actor.upsert({
-      locationId: locationId,
-      type: "student",
-      personId: person.id,
-    });
+    if (roles.includes("student")) {
+      await User.Actor.upsert({
+        locationId: locationId,
+        type: "student",
+        personId: person.id,
+      });
+    }
+
+    if (roles.includes("instructor")) {
+      await User.Actor.upsert({
+        locationId: locationId,
+        type: "instructor",
+        personId: person.id,
+      });
+    }
 
     posthog.capture({
       distinctId: authUser.authUserId,

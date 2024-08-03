@@ -4,11 +4,14 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
+  type ActorType,
+  createPersonForLocation,
   createStudentForLocation,
   updateEmailForPerson,
   updatePersonDetails,
 } from "~/lib/nwd";
 
+export type Role = Exclude<ActorType, "location_admin">;
 export async function createPerson(
   locationId: string,
   _prevState: unknown,
@@ -75,6 +78,7 @@ export async function createPerson(
 
 export async function createPersonBulk(
   locationId: string,
+  roles: [Role, ...Role[]],
   persons: {
     email: string;
     firstName: string;
@@ -86,9 +90,7 @@ export async function createPersonBulk(
   }[],
 ) {
   const result = await Promise.allSettled(
-    persons.map(async (row) => {
-      return createStudentForLocation(locationId, row);
-    }),
+    persons.map(async (row) => createPersonForLocation(locationId, roles, row)),
   );
 
   revalidatePath("/locatie/[location]/personen", "page");
