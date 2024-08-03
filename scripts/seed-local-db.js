@@ -4,7 +4,11 @@ const cp = require('child_process')
 
 const options = { shell: true, stdio: 'inherit' }
 
-cp.execFileSync('pnpm', ['--filter', 'scripts', 'build'], options)
+cp.execFileSync(
+  'pnpm',
+  ['--filter', 'core', '--filter', 'scripts', 'build'],
+  options,
+)
 cp.execFileSync('node', ['./packages/scripts/out/seed/seed'], {
   ...options,
   env: {
