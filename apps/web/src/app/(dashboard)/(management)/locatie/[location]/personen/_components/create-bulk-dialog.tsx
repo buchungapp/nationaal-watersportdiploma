@@ -3,10 +3,15 @@
 import { useRef, useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { ZodError, z } from "zod";
+import { z, ZodError } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
 import dayjs from "~/lib/dayjs";
 
+import {
+  Checkbox,
+  CheckboxField,
+  CheckboxGroup,
+} from "~/app/(dashboard)/_components/checkbox";
 import {
   Dialog,
   DialogActions,
@@ -15,8 +20,10 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
+  Description,
   ErrorMessage,
   Fieldset,
+  Label,
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Select } from "~/app/(dashboard)/_components/select";
@@ -36,9 +43,14 @@ import {
 } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
-import { createPersonBulk } from "../_actions/create";
+import { createPersonBulk, type Role } from "../_actions/create";
 
-const _ROLES = [
+const ROLES: {
+  type: Role;
+  label: string;
+  description: string;
+  defaultChecked?: boolean;
+}[] = [
   {
     type: "student",
     label: "Cursist",
@@ -97,11 +109,23 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   const [isUpload, setIsUpload] = useState(true);
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
 
+  const [hasSelectedRole, setHasSelectedRole] = useState(true);
+  const [roles, setRoles] = useState<[Role, ...Role[]] | null>(null);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
     const raw = formData.get("data") as string;
+    const roles = ROLES.filter((role) => formData.has(`role-${role.type}`)).map(
+      (role) => role.type,
+    );
+
+    if (roles.length < 1) {
+      setHasSelectedRole(false);
+      setRoles(null);
+      return;
+    }
 
     const data = raw
       // Splits the raw TSV data into an array of lines
@@ -124,6 +148,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     });
 
     setData({ labels, rows: data });
+    setRoles(roles as [Role, ...Role[]]);
     setIsUpload(false);
   };
 
@@ -157,11 +182,16 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                 <Textarea name="data" required />
               </Fieldset>
 
-              {/* <Fieldset className="mt-6">
+              <Fieldset className="mt-6">
                 <Legend>Rollen</Legend>
                 <Text>
                   Welke rol(len) vervullen deze personen in jullie locatie?
                 </Text>
+                {!hasSelectedRole && (
+                  <ErrorMessage>
+                    Selecteer minimaal één rol voor de personen.
+                  </ErrorMessage>
+                )}
                 <CheckboxGroup>
                   {ROLES.map((role) => (
                     <CheckboxField key={role.type}>
@@ -176,7 +206,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     </CheckboxField>
                   ))}
                 </CheckboxGroup>
-              </Fieldset> */}
+              </Fieldset>
             </DialogBody>
             <DialogActions>
               <Button plain onClick={() => setIsOpen(false)}>
@@ -191,6 +221,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
           <SubmitForm
             data={data}
             countries={countries}
+            roles={roles!}
             locationId={locationId}
             setIsOpen={setIsOpen}
           />
@@ -202,11 +233,13 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
 function SubmitForm({
   data,
+  roles,
   locationId,
   countries,
   setIsOpen,
 }: {
   data: CSVData;
+  roles: [Role, ...Role[]];
   locationId: string;
   countries: { code: string; name: string }[];
   setIsOpen: (value: boolean) => void;
@@ -231,7 +264,11 @@ function SubmitForm({
     formData: FormData,
   ) => {
     if (!!prevState?.success) {
-      const result = await createPersonBulk(locationId, prevState.persons!);
+      const result = await createPersonBulk(
+        locationId,
+        roles,
+        prevState.persons!,
+      );
       setIsOpen(false);
 
       if (result.message === "Success") {
