@@ -9,7 +9,7 @@
     "build:packages": "pnpm --recursive --filter './packages/**' build",
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
-    "db:seed": "snaplet ss restore --latest --no-reset --no-schema"
+    "db:seed": "node ./scripts/seed-local-db.js"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",

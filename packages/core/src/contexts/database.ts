@@ -10,6 +10,7 @@ import postgres from 'postgres'
 export interface DatabaseConfiguration {
   pgUri: string
   serverless?: boolean
+  onnotice?: (notice: postgres.Notice) => void
 }
 
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
@@ -30,10 +31,11 @@ export async function withDatabase<T>(
   configuration: DatabaseConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { pgUri, serverless = false } = configuration
+  const { pgUri, serverless = false, onnotice } = configuration
 
   const pgSql = postgres(pgUri, {
     prepare: !serverless,
+    onnotice,
   })
   try {
     const database = db.createDatabase(pgSql)
