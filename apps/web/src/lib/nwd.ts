@@ -738,6 +738,14 @@ export const createPersonForLocation = async (
         type: "student",
         personId: person.id,
       });
+
+      posthog.capture({
+        distinctId: authUser.authUserId,
+        event: "create_student_for_location",
+        properties: {
+          $set: { email: authUser.email, displayName: authUser.displayName },
+        },
+      });
     }
 
     if (roles.includes("instructor")) {
@@ -746,15 +754,15 @@ export const createPersonForLocation = async (
         type: "instructor",
         personId: person.id,
       });
-    }
 
-    posthog.capture({
-      distinctId: authUser.authUserId,
-      event: "create_student_for_location",
-      properties: {
-        $set: { email: authUser.email, displayName: authUser.displayName },
-      },
-    });
+      posthog.capture({
+        distinctId: authUser.authUserId,
+        event: "create_instructor_for_location",
+        properties: {
+          $set: { email: authUser.email, displayName: authUser.displayName },
+        },
+      });
+    }
 
     await posthog.shutdown();
 
