@@ -1,4 +1,4 @@
-version: '0.2'
+version: "0.2"
 words:
   - ABCDEFGHJKLMNPQRSTVWXY
   - afrondingsdag
@@ -18,6 +18,7 @@ words:
   - INGB
   - INGBNL
   - intructeursdiploma's
+  - isail
   - Krekt
   - kwaliteitspeilers
   - lpignore
@@ -73,17 +74,17 @@ ignorePaths:
   - generated/
   - apps/nwd-web/src/app/
   - apps/docs/
-  - '*.svg'
+  - "*.svg"
   - supabase/config.toml
   - packages/db/migrations/
   - locations.ts
   - packages/scripts/src/**/*.txt
 files:
-  - '**'
+  - "**"
 enableFiletypes:
-  - '*'
+  - "*"
 dictionaries:
   - sql
   - nl-nl
 import:
-  - '@cspell/dict-nl-nl/cspell-ext.json'
+  - "@cspell/dict-nl-nl/cspell-ext.json"
