@@ -1,0 +1,81 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.png";
+
+export const article = {
+  date: "2024-06-01T08:00:00Z",
+  category: "consument",
+  title: "Ontdek ons online Helpcentrum: Jouw gids voor NWD én de watersport",
+  description:
+    "Vind antwoorden op al je vragen over NWD, watersport, zeilkampen, en meer in het nieuwe online Helpcentrum van het Nationaal Watersportdiploma.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/Z9ggik8p-ontdekt-ons-online-helpcentrum-jouw-gids-voor-nwd-en-de-watersport",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/Z9ggik8p-ontdekt-ons-online-helpcentrum-jouw-gids-voor-nwd-en-de-watersport",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het vaarseizoen is in volle gang en de zomervakantie staat voor de deur! Om je
+goed voor te bereiden op al je wateravonturen, hebben we een gloednieuw
+Helpcentrum gelanceerd op <Link href={"/help"}>www.nwd.nl/help</Link>. Dit
+centrum is ontworpen om je snel en gemakkelijk toegang te geven tot een schat
+aan informatie over verschillende watersportonderwerpen.
+
+## Wat kun je vinden in ons Helpcentrum?
+
+We hebben het Helpcentrum onderverdeeld in categorieën, zodat je snel kunt
+vinden wat je zoekt. Enkele voorbeelden zijn:
+
+- <Link href={"/help/categorie/diplomalijn"}>Diplomalijn</Link>: Ontdek hoe de
+  NWD diplomalijn werkt en wat de verschillen zijn met andere systemen.
+- <Link href={"/help/categorie/vereniging"}>Vereniging NWD</Link>: Leer meer
+  over onze koepelorganisatie voor commerciële vaarscholen, en hoe je lid kunt
+  worden.
+- <Link href={"/help/categorie/zeilkampen"}>Zeilkampen</Link>: Krijg inzicht in
+  hoe een zeilkamp werkt en welke het beste bij jou past.
+
+## Populaire artikelen
+
+Enkele van onze meest gelezen artikelen tot nu toe zijn:
+
+- <Link href={"/help/artikel/nwd-of-cwo-wat-is-het-beste-voor-jou"}>
+    "NWD vs CWO: Wat is het beste voor jou?" - Een handig overzicht van de
+    verschillen tussen deze twee belangrijke opleidingssystemen.
+  </Link>
+- <Link href={"/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd"}>
+    "Hoe is de diplomalijn van het Nationaal Watersportdiploma opgebouwd?" - Een
+    diepgaande uitleg over onze flexibele en modulaire aanpak.
+  </Link>
+- <Link
+    href={"/help/artikel/5-tips-om-je-te-helpen-de-juiste-zeilschool-te-kiezen"}
+  >
+    "5 tips om je te helpen de juiste zeilschool te kiezen!" - Praktisch advies
+    voor het maken van de beste keuze voor jouw watersportavontuur.
+  </Link>
+
+## Altijd up-to-date
+
+We werken continu aan het uitbreiden en verbeteren van ons Helpcentrum. Zo
+hebben we onlangs nieuwe artikelen toegevoegd over het gebruik van onze app voor
+instructeurs en locatiebeheerders. Deze gidsen helpen je om efficiënt te werken
+binnen het NWD-systeem, van het beheren van cohorten tot het bijhouden van
+cursistenvoortgang.
+
+## Jouw vragen, onze antwoorden
+
+Mis je nog informatie of heb je een vraag die niet in het Helpcentrum wordt
+beantwoord? <Link href={"/contact"}>Laat het ons weten!</Link> We staan altijd
+open voor suggesties om ons Helpcentrum nog beter te maken.

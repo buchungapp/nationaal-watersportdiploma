@@ -1,0 +1,91 @@
+import Link from "next/link";
+import Image from "../../../_components/mdx-image";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.png";
+
+export const article = {
+  date: "2024-08-03T08:00:00Z",
+  category: "consument",
+  title:
+    "NWD verwelkomt iSail als nieuwe vaarlocatie: Een boost voor watersport in Zuid-Holland!",
+  description:
+    "Gelegen in Hellevoetsluis, biedt iSail een breed scala aan zeilopleidingen en jeugdkampen. We zijn dan ook trots om hen te verwelkomen als nieuwste NWD vaarlocatie!",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical: "/actueel/an2ByMtx-nwd-verwelkomt-isail-als-nieuwe-vaarlocatie",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/an2ByMtx-nwd-verwelkomt-isail-als-nieuwe-vaarlocatie",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het Nationaal Watersportdiploma (NWD) is verheugd om de toetreding van <Link
+href={"https://www.zeilschoolisail.nl/"}>iSail</Link> als nieuwste vaarlocatie
+aan te kondigen. Gelegen in Hellevoetsluis aan het Haringvliet, brengt deze
+moderne zeilschool frisse energie en expertise naar ons groeiende netwerk van
+kwaliteitsgerichte watersportlocaties.
+
+Onder leiding van de jonge ondernemer Brent Biesheuvel heeft iSail recent een
+gloednieuwe accommodatie geopend. Over de keuze tot aansluiting bij het NWD zegt
+Brent: “We zijn enthousiast om ons bij het NWD aan te sluiten vanwege hun
+innovatieve diplomalijn. De modulaire opbouw en de specifieke erkenning van
+verschillende boottypen maken het leren voor cursisten leuker en inzichtelijker,
+terwijl we tegelijkertijd de kwaliteit en veiligheid waarborgen die essentieel
+zijn in de watersport.”
+
+“We zijn enorm blij met de komst van iSail,” zegt Jeroen Wolthuis, voorzitter
+van het NWD. “Tijdens het aansluitingsproces hebben we ervaren hoe serieus zij
+kwaliteit en veiligheid nemen. Hun bereidheid om direct onze helmenrichtlijn
+over te nemen, evenals hun sterke opleidingsplan en recente investeringen in
+faciliteiten en vlootvernieuwing, tonen aan dat zij perfect aansluiten bij de
+NWD-filosofie.”
+
+iSail biedt een breed scala aan disciplines, waaronder zwaardboot, catamaran,
+kielboot en kajuitjachtzeilen. Met wekelijkse lessen van april tot oktober en
+populaire jeugdzeilkampen tijdens de schoolvakanties, maakt iSail de watersport
+toegankelijk voor een brede groep enthousiastelingen.
+
+Brent Biesheuvel’s visie op kwalitatief en plezierig zeilen past naadloos bij
+het NWD. Hij wordt ondersteund door een divers team van zowel jonge,
+enthousiaste instructeurs als ervaren krachten, allen gecertificeerd volgens de
+Kwalificatiestructuur Sport (KSS).
+
+De komende maanden zal iSail verder investeren in hun vloot, met plannen voor
+nieuwe boten. Dit past in hun streven naar continue verbetering en kwaliteit.
+Bovendien zullen ze, in lijn met de NWD-filosofie, deelnemen aan gezamenlijke
+trainingen en opleidingen van het NWD.
+
+De toetreding van iSail versterkt de aanwezigheid van het NWD in Zuid-Holland en
+biedt nieuwe mogelijkheden voor watersporters in de regio, inclusief het
+nabijgelegen Zeeland. Het Haringvliet, waar iSail gevestigd is, biedt
+uitstekende omstandigheden voor zowel beginnende als gevorderde zeilers.
+
+Het grondige aansluitingsproces dat iSail heeft doorlopen, inclusief een
+uitgebreide evaluatie door de Kwaliteitscommissie, benadrukt de hoge standaarden
+die het NWD hanteert voor alle aangesloten locaties. Lees de <Link
+href={"/vaarlocaties/kwaliteitseisen"}>kwaliteitseisen</Link> voor meer
+informatie over hoe kwaliteit en plezier hand-in-hand gaan bij het NWD.
+
+Het NWD staat altijd open voor andere kwaliteitsgerichte vaarlocaties die zich
+willen aansluiten bij ons netwerk. Geïnteresseerde locaties kunnen <Link
+href={"/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd"}>hier</Link>
+meer informatie vinden over de aansluitprocedure, lidmaatschapskosten en onze
+benadering van locaties die momenteel aangesloten zijn bij CWO en HISWA.
+Het&#32;<Link href={"/contact"}>Secretariaat</Link> staat klaar om alle verdere
+vragen te beantwoorden.
+
+Met de toevoeging van iSail breidt het NWD zijn netwerk verder uit, waarmee we
+onze missie voortzetten om veilig, kwalitatief en plezierig watersportonderwijs
+toegankelijk te maken voor heel Nederland!
+
+<Image src={featuredImage} />
