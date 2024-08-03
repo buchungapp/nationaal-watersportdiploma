@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import { Github } from "~/app/_components/socials";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getAuthUserOrRedirect } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../../../_components/auth";
 import { Avatar } from "../../../_components/avatar";
 import {
@@ -20,7 +20,7 @@ import {
 import { SidebarItem } from "../../../_components/sidebar";
 
 export async function UserSelector() {
-  const currentUser = await getUserOrThrow();
+  const currentUser = await getAuthUserOrRedirect();
 
   return (
     <Dropdown>

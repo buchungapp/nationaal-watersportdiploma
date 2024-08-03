@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import dayjs from "~/lib/dayjs";
 import {
-  getUserOrThrow,
+  getAuthUserOrRedirect,
   listLocationsWherePrimaryPersonHasManagementRole,
   listPersonsForUser,
 } from "~/lib/nwd";
@@ -106,7 +106,7 @@ async function InstructionLocations() {
 }
 
 export default async function Page() {
-  const user = await getUserOrThrow();
+  const user = await getAuthUserOrRedirect();
 
   return (
     <div className="p-4 max-w-3xl mx-auto">

@@ -5,7 +5,7 @@ import { constants } from "@nawadi/lib";
 import { DataInteractive } from "@headlessui/react";
 import { ArrowRightIcon } from "@heroicons/react/16/solid";
 import { Suspense } from "react";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getAuthUserOrRedirect } from "~/lib/nwd";
 import {
   Facebook,
   Instagram,
@@ -15,7 +15,7 @@ import {
 } from "../../../_components/socials";
 
 async function AccountButton() {
-  const isLoggedIn = await getUserOrThrow()
+  const isLoggedIn = await getAuthUserOrRedirect()
     .then((res) => !!res)
     .catch(() => false);
 

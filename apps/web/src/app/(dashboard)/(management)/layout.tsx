@@ -6,7 +6,7 @@ import {
 import { constants } from "@nawadi/lib";
 import React from "react";
 import { Github } from "~/app/_components/socials";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getAuthUserOrRedirect } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
@@ -32,7 +32,7 @@ export default async function Layout({
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
-  const user = await getUserOrThrow();
+  const user = await getAuthUserOrRedirect();
 
   return (
     <SidebarLayout

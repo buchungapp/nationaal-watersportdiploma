@@ -5,7 +5,7 @@ import {
   UserIcon,
 } from "@heroicons/react/16/solid";
 import Logo from "~/app/_components/brand/logo";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getAuthUserOrRedirect } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import { Avatar } from "../_components/avatar";
 import {
@@ -41,7 +41,7 @@ export default async function Layout({
   children: React.ReactNode;
   selector: React.ReactNode;
 }>) {
-  const user = await getUserOrThrow();
+  const user = await getAuthUserOrRedirect();
 
   return (
     <StackedLayout
