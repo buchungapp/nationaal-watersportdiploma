@@ -384,8 +384,8 @@ export const withdraw = withZod(uuidSchema, async (input) => {
         and(
           eq(s.certificate.id, input),
           isNull(s.certificate.deletedAt),
-          // Must be maximum 24 hours after the certificate was issued
-          gte(s.certificate.createdAt, dayjs().subtract(24, 'h').toISOString()),
+          // Must be maximum 72 hours after the certificate was issued
+          gte(s.certificate.createdAt, dayjs().subtract(72, 'h').toISOString()),
         ),
       )
       .then(singleRow)
