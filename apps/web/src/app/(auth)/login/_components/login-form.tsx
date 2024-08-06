@@ -70,7 +70,16 @@ export function OtpForm({
           pushPasswordManagerStrategy="none"
           data-lpignore="true"
           data-1p-ignore="true"
-          onComplete={() => formRef.current?.requestSubmit()}
+          onComplete={() => {
+            try {
+              formRef.current?.requestSubmit();
+            } catch (error) {
+              // Handle support for older browsers
+              formRef.current?.dispatchEvent(
+                new Event("submit", { cancelable: true }),
+              );
+            }
+          }}
           render={({ slots }) => (
             <>
               {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
