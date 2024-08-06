@@ -71,13 +71,21 @@ export function OtpForm({
           data-lpignore="true"
           data-1p-ignore="true"
           onComplete={() => {
+            const formElement = formRef.current;
+
+            if (!formElement) return; // Safeguard against null reference
+
             try {
-              formRef.current?.requestSubmit();
+              // Attempt to use requestSubmit if available
+              if (typeof formElement.requestSubmit === "function") {
+                formElement.requestSubmit();
+              } else {
+                // Fallback for older browsers
+                const submitEvent = new Event("submit", { cancelable: true });
+                formElement.dispatchEvent(submitEvent);
+              }
             } catch (error) {
-              // Handle support for older browsers
-              formRef.current?.dispatchEvent(
-                new Event("submit", { cancelable: true }),
-              );
+              console.error("Form submission error:", error);
             }
           }}
           render={({ slots }) => (
