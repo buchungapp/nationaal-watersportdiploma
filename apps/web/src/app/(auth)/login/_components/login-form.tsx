@@ -70,7 +70,24 @@ export function OtpForm({
           pushPasswordManagerStrategy="none"
           data-lpignore="true"
           data-1p-ignore="true"
-          onComplete={() => formRef.current?.requestSubmit()}
+          onComplete={() => {
+            const formElement = formRef.current;
+
+            if (!formElement) return; // Safeguard against null reference
+
+            try {
+              // Attempt to use requestSubmit if available
+              if (typeof formElement.requestSubmit === "function") {
+                formElement.requestSubmit();
+              } else {
+                // Fallback for older browsers
+                const submitEvent = new Event("submit", { cancelable: true });
+                formElement.dispatchEvent(submitEvent);
+              }
+            } catch (error) {
+              console.error("Form submission error:", error);
+            }
+          }}
           render={({ slots }) => (
             <>
               {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
