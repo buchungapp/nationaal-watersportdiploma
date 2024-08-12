@@ -18,28 +18,20 @@ export async function createPerson(
   const expectedSchema = z.object({
     email: z.string().trim().toLowerCase().email().optional(),
     firstName: z.string().trim().min(1),
-    lastNamePrefix: z
-      .string()
-      .trim()
-      .nullable()
-      .transform((tussenvoegsel) =>
-        tussenvoegsel === "" ? null : tussenvoegsel,
-      )
-      .optional(),
+    lastNamePrefix: z.string().trim().nullable().default(null),
     lastName: z.string().min(1).optional(),
     dateOfBirth: z.string().pipe(z.coerce.date()).optional(),
     birthCity: z.string().optional(),
     birthCountry: z.string().length(2).toLowerCase().optional(),
   });
 
-  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
-    formData.entries(),
-  );
+  const data: Record<string, FormDataEntryValue | undefined> =
+    Object.fromEntries(formData.entries());
 
-  // Set all empty strings to null
+  // Set all empty strings to undefined
   for (const key in data) {
     if (data[key] === "") {
-      data[key] = null;
+      data[key] = undefined;
     }
   }
 

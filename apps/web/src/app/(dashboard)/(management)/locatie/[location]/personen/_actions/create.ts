@@ -19,7 +19,7 @@ export async function createPerson(
     .object({
       email: z.string().trim().toLowerCase().email().optional(),
       firstName: z.string().trim().min(1),
-      lastNamePrefix: z.string().trim().nullable().optional(),
+      lastNamePrefix: z.string().trim().nullable().default(null),
       lastName: z.string().min(1).optional(),
       dateOfBirth: z.string().pipe(z.coerce.date()).optional(),
       birthCity: z.string().optional(),
@@ -172,7 +172,7 @@ export async function updatePerson(
 ) {
   const expectedSchema = z.object({
     firstName: z.string().trim().min(1),
-    lastNamePrefix: z.string().trim().nullable().optional(),
+    lastNamePrefix: z.string().trim().nullable().default(null),
     lastName: z.string().min(1).optional(),
     dateOfBirth: z.string().pipe(z.coerce.date()).optional(),
     birthCity: z.string().optional(),
@@ -185,10 +185,6 @@ export async function updatePerson(
   // Set all empty strings to undefined
   for (const key in data) {
     if (data[key] === "") {
-      data[key] = undefined;
-    }
-
-    if (data[key] === null && key !== "lastNamePrefix") {
       data[key] = undefined;
     }
   }
