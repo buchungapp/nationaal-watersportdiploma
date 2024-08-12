@@ -19,14 +19,7 @@ export async function createPerson(
     .object({
       email: z.string().trim().toLowerCase().email().optional(),
       firstName: z.string().trim().min(1),
-      lastNamePrefix: z
-        .string()
-        .trim()
-        .nullable()
-        .transform((tussenvoegsel) =>
-          tussenvoegsel === "" ? null : tussenvoegsel,
-        )
-        .optional(),
+      lastNamePrefix: z.string().trim().nullable().optional(),
       lastName: z.string().min(1).optional(),
       dateOfBirth: z.string().pipe(z.coerce.date()).optional(),
       birthCity: z.string().optional(),
@@ -63,14 +56,13 @@ export async function createPerson(
       };
     });
 
-  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
-    formData.entries(),
-  );
+  const data: Record<string, FormDataEntryValue | undefined> =
+    Object.fromEntries(formData.entries());
 
-  // Set all empty strings to null
+  // Set all empty strings to undefined
   for (const key in data) {
     if (data[key] === "") {
-      data[key] = null;
+      data[key] = undefined;
     }
   }
 
@@ -180,27 +172,24 @@ export async function updatePerson(
 ) {
   const expectedSchema = z.object({
     firstName: z.string().trim().min(1),
-    lastNamePrefix: z
-      .string()
-      .trim()
-      .nullable()
-      .transform((tussenvoegsel) =>
-        tussenvoegsel === "" ? null : tussenvoegsel,
-      ),
-    lastName: z.string().min(1),
-    dateOfBirth: z.string().pipe(z.coerce.date()),
-    birthCity: z.string(),
-    birthCountry: z.string().length(2).toLowerCase(),
+    lastNamePrefix: z.string().trim().nullable().optional(),
+    lastName: z.string().min(1).optional(),
+    dateOfBirth: z.string().pipe(z.coerce.date()).optional(),
+    birthCity: z.string().optional(),
+    birthCountry: z.string().length(2).toLowerCase().optional(),
   });
 
-  const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
-    formData.entries(),
-  );
+  const data: Record<string, FormDataEntryValue | undefined> =
+    Object.fromEntries(formData.entries());
 
-  // Set all empty strings to null
+  // Set all empty strings to undefined
   for (const key in data) {
     if (data[key] === "") {
-      data[key] = null;
+      data[key] = undefined;
+    }
+
+    if (data[key] === null && key !== "lastNamePrefix") {
+      data[key] = undefined;
     }
   }
 
