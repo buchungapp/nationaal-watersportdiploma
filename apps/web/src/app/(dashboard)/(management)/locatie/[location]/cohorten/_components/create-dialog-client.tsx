@@ -94,7 +94,7 @@ function CreateDialogClient({
                       minLength={1}
                     />
                   </Field>
-                  <Field className="relative">
+                  <Field className="relative max-sm:col-span-2">
                     <Label>Opent op</Label>
                     <SmartDatetimePicker
                       name="accessStartTime"
@@ -102,7 +102,7 @@ function CreateDialogClient({
                       required
                     />
                   </Field>
-                  <Field className="relative">
+                  <Field className="relative max-sm:col-span-2">
                     <Label>Sluit op</Label>
                     <SmartDatetimePicker
                       name="accessEndTime"
