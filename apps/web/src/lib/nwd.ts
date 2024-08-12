@@ -658,13 +658,13 @@ export const listAllLocations = cache(async () => {
 export const createStudentForLocation = async (
   locationId: string,
   personInput: {
-    email: string;
+    email?: string;
     firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
+    lastNamePrefix?: string | null;
+    lastName?: string;
+    dateOfBirth?: Date;
+    birthCity?: string;
+    birthCountry?: string;
   },
 ) => {
   return createPersonForLocation(locationId, ["student"], personInput);
@@ -673,13 +673,13 @@ export const createStudentForLocation = async (
 export const createInstructorForLocation = async (
   locationId: string,
   personInput: {
-    email: string;
+    email?: string;
     firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
+    lastNamePrefix?: string | null;
+    lastName?: string;
+    dateOfBirth?: Date;
+    birthCity?: string;
+    birthCountry?: string;
   },
 ) => {
   return createPersonForLocation(locationId, ["instructor"], personInput);
@@ -689,13 +689,13 @@ export const createPersonForLocation = async (
   locationId: string,
   roles: ActorType[],
   personInput: {
-    email: string;
+    email?: string;
     firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
+    lastNamePrefix?: string | null;
+    lastName?: string;
+    dateOfBirth?: Date;
+    birthCity?: string;
+    birthCountry?: string;
   },
 ) => {
   return makeRequest(async () => {
@@ -722,7 +722,7 @@ export const createPersonForLocation = async (
       firstName: personInput.firstName,
       lastName: personInput.lastName,
       lastNamePrefix: personInput.lastNamePrefix,
-      dateOfBirth: personInput.dateOfBirth.toISOString(),
+      dateOfBirth: personInput.dateOfBirth?.toISOString(),
       birthCity: personInput.birthCity,
       birthCountry: personInput.birthCountry,
     });
