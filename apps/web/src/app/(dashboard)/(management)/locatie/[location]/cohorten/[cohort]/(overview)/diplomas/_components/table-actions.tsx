@@ -60,6 +60,7 @@ interface Props {
     id: string;
     certificate: Student["certificate"];
     studentCurriculum: Student["studentCurriculum"];
+    person: Student["person"];
   }[];
   cohortId: string;
   defaultVisibleFrom?: string;
@@ -200,8 +201,16 @@ export function IssueCertificateDialog({
   setIsOpen: (value: boolean) => void;
 }) {
   const [delayVisibility, setDelayVisibility] = useState(!!defaultVisibleFrom);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    failedRows: {
+      message: string;
+      studentAllocationId: string;
+    }[];
+  } | null>(null);
   const [pending, startTransition] = useTransition();
+
+  console.log(error);
 
   return (
     <Alert open={isOpen} onClose={setIsOpen} size="lg">
@@ -220,15 +229,35 @@ export function IssueCertificateDialog({
                 : null,
               cohortId,
             })
-              .then(() => {
+              .then((result) => {
+                if (result?.some((r) => !r.certificateId)) {
+                  setError({
+                    message: "Niet alle diploma's konden worden uitgegeven",
+                    failedRows: result
+                      .filter((r) => !r.certificateId)
+                      .map((r) => ({
+                        message: r.message,
+                        studentAllocationId: r.studentAllocationId,
+                      })),
+                  });
+                  resetSelection();
+                  return;
+                }
+
                 setIsOpen(false);
                 resetSelection();
               })
               .catch((error) => {
                 if (error instanceof Error) {
-                  return setError(error.message);
+                  return setError({
+                    message: error.message,
+                    failedRows: [],
+                  });
                 }
-                setError("Er is een fout opgetreden.");
+                setError({
+                  message: "Er is een fout opgetreden.",
+                  failedRows: [],
+                });
               });
           });
         }}
@@ -266,7 +295,34 @@ export function IssueCertificateDialog({
             </>
           ) : null}
 
-          {error ? <ErrorMessage>{error}</ErrorMessage> : null}
+          {error ? (
+            <ErrorMessage>
+              {error.message}
+              {error.failedRows.length > 0 ? (
+                <ul>
+                  {error.failedRows.map((row) => {
+                    const person = rows.find(
+                      (r) => r.id === row.studentAllocationId,
+                    )?.person;
+                    if (!person) return null;
+
+                    return (
+                      <li key={row.studentAllocationId}>
+                        {[
+                          person.firstName,
+                          person.lastNamePrefix,
+                          person.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}{" "}
+                        : {row.message}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </ErrorMessage>
+          ) : null}
         </AlertBody>
         <AlertActions>
           <Button plain onClick={() => setIsOpen(false)}>

@@ -124,8 +124,16 @@ export const completeCertificate = withZod(
       )
       .then(singleRow)
 
-    if (!person.lastName || !person.dateOfBirth || !person.birthCity) {
-      throw new Error('Person data incomplete')
+    if (!person.lastName) {
+      throw new Error('Person is missing last name')
+    }
+
+    if (!person.dateOfBirth) {
+      throw new Error('Person is missing date of birth')
+    }
+
+    if (!person.birthCity) {
+      throw new Error('Person is missing birth city')
     }
 
     const [res] = await query
