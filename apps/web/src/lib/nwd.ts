@@ -870,137 +870,130 @@ export const issueCertificatesInCohort = async ({
   visibleFrom?: string;
 }) => {
   return makeRequest(async () => {
-    return withTransaction(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
-      ]);
+    const [authUser, cohort] = await Promise.all([
+      getUserOrThrow(),
+      Cohort.byIdOrHandle({ id: cohortId }),
+    ]);
 
-      if (!cohort) {
-        throw new Error("Cohort not found");
-      }
+    if (!cohort) {
+      throw new Error("Cohort not found");
+    }
 
-      const primaryPerson = await getPrimaryPerson(authUser);
+    const primaryPerson = await getPrimaryPerson(authUser);
 
-      const listCohortStatusPromise = Cohort.Certificate.listStatus({
-        cohortId,
-      });
+    const listCohortStatusPromise = Cohort.Certificate.listStatus({
+      cohortId,
+    });
 
-      const [isLocationAdmin, privileges, allocationData, curricula] =
-        await Promise.all([
-          isActiveActorTypeInLocation({
-            actorType: ["location_admin"],
-            locationId: cohort.locationId,
-            personId: primaryPerson.id,
-          }).catch(() => false),
-          Cohort.Allocation.listPrivilegesForPerson({
-            cohortId,
-            personId: primaryPerson.id,
-          }),
-          listCohortStatusPromise,
-          listCohortStatusPromise.then((status) =>
-            Curriculum.list({
-              filter: {
-                id: Array.from(
-                  new Set(
-                    status
-                      .map((s) => s.studentCurriculum?.curriculumId)
-                      .filter(Boolean) as string[],
-                  ),
+    const [isLocationAdmin, privileges, allocationData, curricula] =
+      await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId,
+          personId: primaryPerson.id,
+        }),
+        listCohortStatusPromise,
+        listCohortStatusPromise.then((status) =>
+          Curriculum.list({
+            filter: {
+              id: Array.from(
+                new Set(
+                  status
+                    .map((s) => s.studentCurriculum?.curriculumId)
+                    .filter(Boolean) as string[],
                 ),
-              },
-            }),
-          ),
-        ]);
-
-      if (
-        !isLocationAdmin &&
-        !privileges.includes("manage_cohort_certificate")
-      ) {
-        throw new Error("Unauthorized");
-      }
-
-      const result = await Promise.allSettled(
-        studentAllocationIds.map(async (allocationId) =>
-          withTransaction(async () => {
-            const allocation = allocationData.find(
-              (d) => d.id === allocationId,
-            );
-            if (!allocation?.studentCurriculum || allocation.certificate) {
-              throw new Error(`Invalid allocation: ${allocationId}`);
-            }
-
-            const completedModules =
-              allocation.studentCurriculum.moduleStatus.filter(
-                ({ totalCompetencies, completedCompetencies }) =>
-                  completedCompetencies >= totalCompetencies,
-              );
-
-            if (completedModules.length < 1) {
-              throw new Error(
-                `No completed modules for allocation: ${allocationId}`,
-              );
-            }
-
-            const curriculum = curricula.find(
-              (c) => c.id === allocation.studentCurriculum!.curriculumId,
-            );
-
-            if (!curriculum) {
-              throw new Error("Curriculum not found");
-            }
-
-            const { id: certificateId } =
-              await Student.Certificate.startCertificate({
-                locationId: cohort.locationId,
-                studentCurriculumId: allocation.studentCurriculum.id,
-              });
-
-            const competencyIds = curriculum.modules
-              .filter(({ id }) =>
-                completedModules.some(({ module }) => module.id === id),
-              )
-              .flatMap(({ competencies }) => competencies.map(({ id }) => id));
-
-            await Student.Certificate.completeCompetency({
-              certificateId,
-              studentCurriculumId: allocation.studentCurriculum.id,
-              competencyId: competencyIds,
-            });
-
-            await Student.Certificate.completeCertificate({
-              certificateId,
-              visibleFrom: visibleFrom ?? new Date().toISOString(),
-            });
-
-            await Certificate.assignToCohortAllocation({
-              certificateId,
-              cohortAllocationId: allocationId,
-            });
-
-            return { id: certificateId };
+              ),
+            },
           }),
         ),
-      );
+      ]);
 
-      posthog.capture({
-        distinctId: authUser.authUserId,
-        event: "create_completed_certificate_bulk",
-        properties: {
-          $set: { email: authUser.email, displayName: authUser.displayName },
-          cohortId,
-          certificateCount: result.length,
-        },
-      });
+    if (!isLocationAdmin && !privileges.includes("manage_cohort_certificate")) {
+      throw new Error("Unauthorized");
+    }
 
-      await posthog.shutdown();
+    const result = await Promise.allSettled(
+      studentAllocationIds.map(async (allocationId) =>
+        withTransaction(async () => {
+          const allocation = allocationData.find((d) => d.id === allocationId);
+          if (!allocation?.studentCurriculum || allocation.certificate) {
+            throw new Error(`Invalid allocation: ${allocationId}`);
+          }
 
-      return result.map((r, index) => ({
-        studentAllocationId: studentAllocationIds[index]!,
-        certificateId: r.status === "fulfilled" ? r.value : null,
-        message: r.status === "rejected" ? r.reason.message : null,
-      }));
+          const completedModules =
+            allocation.studentCurriculum.moduleStatus.filter(
+              ({ totalCompetencies, completedCompetencies }) =>
+                completedCompetencies >= totalCompetencies,
+            );
+
+          if (completedModules.length < 1) {
+            throw new Error(
+              `No completed modules for allocation: ${allocationId}`,
+            );
+          }
+
+          const curriculum = curricula.find(
+            (c) => c.id === allocation.studentCurriculum!.curriculumId,
+          );
+
+          if (!curriculum) {
+            throw new Error("Curriculum not found");
+          }
+
+          const { id: certificateId } =
+            await Student.Certificate.startCertificate({
+              locationId: cohort.locationId,
+              studentCurriculumId: allocation.studentCurriculum.id,
+            });
+
+          const competencyIds = curriculum.modules
+            .filter(({ id }) =>
+              completedModules.some(({ module }) => module.id === id),
+            )
+            .flatMap(({ competencies }) => competencies.map(({ id }) => id));
+
+          await Student.Certificate.completeCompetency({
+            certificateId,
+            studentCurriculumId: allocation.studentCurriculum.id,
+            competencyId: competencyIds,
+          });
+
+          await Student.Certificate.completeCertificate({
+            certificateId,
+            visibleFrom: visibleFrom ?? new Date().toISOString(),
+          });
+
+          await Certificate.assignToCohortAllocation({
+            certificateId,
+            cohortAllocationId: allocationId,
+          });
+
+          return { id: certificateId };
+        }),
+      ),
+    );
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "create_completed_certificate_bulk",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+        cohortId,
+        certificateCount: result.length,
+      },
     });
+
+    await posthog.shutdown();
+
+    return result.map((r, index) => ({
+      studentAllocationId: studentAllocationIds[index]!,
+      certificateId: r.status === "fulfilled" ? r.value : null,
+      message: r.status === "rejected" ? r.reason.message : null,
+    }));
   });
 };
 

@@ -44,6 +44,12 @@ import {
   RadioField,
   RadioGroup,
 } from "~/app/(dashboard)/_components/radio";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "~/app/(dashboard)/_components/table";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
@@ -206,14 +212,20 @@ export function IssueCertificateDialog({
     failedRows: {
       message: string;
       studentAllocationId: string;
+      person: Student["person"];
     }[];
   } | null>(null);
   const [pending, startTransition] = useTransition();
 
-  console.log(error);
+  const onClose = (value: boolean) => {
+    setIsOpen(value);
+    if (!value) {
+      setError(null);
+    }
+  };
 
   return (
-    <Alert open={isOpen} onClose={setIsOpen} size="lg">
+    <Alert open={isOpen} onClose={onClose} size="lg">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -236,15 +248,26 @@ export function IssueCertificateDialog({
                     failedRows: result
                       .filter((r) => !r.certificateId)
                       .map((r) => ({
-                        message: r.message,
+                        message:
+                          r.message === "Person is missing last name"
+                            ? "De cursist heeft geen achternaam"
+                            : r.message === "Person is missing date of birth"
+                              ? "De cursist heeft geen geboortedatum"
+                              : r.message === "Person is missing birth city"
+                                ? "De cursist heeft geen geboorteplaats"
+                                : r.message,
                         studentAllocationId: r.studentAllocationId,
+                        person: rows.find(
+                          (row) => row.id === r.studentAllocationId,
+                        )?.person!,
                       })),
                   });
+
                   resetSelection();
                   return;
                 }
 
-                setIsOpen(false);
+                onClose(false);
                 resetSelection();
               })
               .catch((error) => {
@@ -299,36 +322,35 @@ export function IssueCertificateDialog({
             <ErrorMessage>
               {error.message}
               {error.failedRows.length > 0 ? (
-                <ul>
-                  {error.failedRows.map((row) => {
-                    const person = rows.find(
-                      (r) => r.id === row.studentAllocationId,
-                    )?.person;
-                    if (!person) return null;
-
-                    return (
-                      <li key={row.studentAllocationId}>
-                        {[
-                          person.firstName,
-                          person.lastNamePrefix,
-                          person.lastName,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}{" "}
-                        : {row.message}
-                      </li>
-                    );
-                  })}
-                </ul>
+                <Table dense>
+                  <TableBody>
+                    {error.failedRows.map(
+                      ({ message, studentAllocationId, person }) => (
+                        <TableRow key={studentAllocationId}>
+                          <TableCell>
+                            {[
+                              person.firstName,
+                              person.lastNamePrefix,
+                              person.lastName,
+                            ]
+                              .filter(Boolean)
+                              .join(" ")}
+                          </TableCell>
+                          <TableCell>{message}</TableCell>
+                        </TableRow>
+                      ),
+                    )}
+                  </TableBody>
+                </Table>
               ) : null}
             </ErrorMessage>
           ) : null}
         </AlertBody>
         <AlertActions>
-          <Button plain onClick={() => setIsOpen(false)}>
+          <Button plain onClick={() => onClose(false)}>
             Annuleren
           </Button>
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" disabled={pending || rows.length < 1}>
             {pending ? <Spinner className="text-white" /> : null}
             Uitgeven
           </Button>
