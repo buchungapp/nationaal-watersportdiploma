@@ -992,6 +992,7 @@ export const issueCertificatesInCohort = async ({
     return result.map((r, index) => ({
       studentAllocationId: studentAllocationIds[index]!,
       certificateId: r.status === "fulfilled" ? r.value : null,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       message: r.status === "rejected" ? (r.reason.message as string) : null,
     }));
   });

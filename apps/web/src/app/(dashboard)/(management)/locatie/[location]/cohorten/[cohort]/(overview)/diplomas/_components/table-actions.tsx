@@ -259,7 +259,7 @@ export function IssueCertificateDialog({
                         studentAllocationId: r.studentAllocationId,
                         person: rows.find(
                           (row) => row.id === r.studentAllocationId,
-                        )?.person!,
+                        )!.person,
                       })),
                   });
 
