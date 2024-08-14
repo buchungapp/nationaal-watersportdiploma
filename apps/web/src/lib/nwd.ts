@@ -983,7 +983,7 @@ export const issueCertificatesInCohort = async ({
       properties: {
         $set: { email: authUser.email, displayName: authUser.displayName },
         cohortId,
-        certificateCount: result.length,
+        certificateCount: result.filter((r) => r.status === "fulfilled").length,
       },
     });
 
@@ -992,7 +992,7 @@ export const issueCertificatesInCohort = async ({
     return result.map((r, index) => ({
       studentAllocationId: studentAllocationIds[index]!,
       certificateId: r.status === "fulfilled" ? r.value : null,
-      message: r.status === "rejected" ? r.reason.message : null,
+      message: r.status === "rejected" ? (r.reason.message as string) : null,
     }));
   });
 };

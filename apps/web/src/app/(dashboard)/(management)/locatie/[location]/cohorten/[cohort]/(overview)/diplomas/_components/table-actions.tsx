@@ -255,7 +255,7 @@ export function IssueCertificateDialog({
                               ? "De cursist heeft geen geboortedatum"
                               : r.message === "Person is missing birth city"
                                 ? "De cursist heeft geen geboorteplaats"
-                                : r.message,
+                                : r.message!,
                         studentAllocationId: r.studentAllocationId,
                         person: rows.find(
                           (row) => row.id === r.studentAllocationId,
