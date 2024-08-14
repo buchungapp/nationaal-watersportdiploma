@@ -51,6 +51,7 @@ export function OtpForm({
   email,
   ...formProps
 }: { email: string } & Exclude<React.ComponentProps<"form">, "action">) {
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction] = useActionState(
     verify.bind(null, email),
@@ -59,6 +60,7 @@ export function OtpForm({
 
   return (
     <form ref={formRef} action={formAction} {...formProps}>
+      <button type="submit" className="hidden" ref={submitButtonRef} />
       <OTPInputWithPending>
         <OTPInput
           maxLength={6}
@@ -81,8 +83,7 @@ export function OtpForm({
                 formElement.requestSubmit();
               } else {
                 // Fallback for older browsers
-                const submitEvent = new Event("submit", { cancelable: true });
-                formElement.dispatchEvent(submitEvent);
+                submitButtonRef.current?.click();
               }
             } catch (error) {
               console.error("Form submission error:", error);
