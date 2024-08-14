@@ -7,7 +7,8 @@ export default async function Locations() {
   const locations = await retrieveLocations();
 
   return (
-    <section className="grid w-full items-center overflow-hidden rounded-[3rem] bg-branding-orange lg:grid-cols-2">
+    // Z-index is required to make the overflow-hidden work on safari
+    <section className="grid w-full items-center overflow-hidden z-0 h-fit rounded-[3rem] bg-branding-orange lg:grid-cols-2">
       <div className="px-4 py-12 text-white lg:p-16">
         <div className="flex items-center gap-x-3 font-bold uppercase text-white">
           Vaarlocaties
