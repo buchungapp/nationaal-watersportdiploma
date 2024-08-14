@@ -10,6 +10,7 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
+  addStudentToCohortByPersonId,
   claimStudents,
   releaseStudent,
   releaseStudentFromCohortByAllocationId,
@@ -57,6 +58,43 @@ export function ReleaseInstructorAllocation({
     >
       <XMarkIcon />
     </Button>
+  );
+}
+
+export function DuplicateStudentAllocation({
+  cohortId,
+  personId,
+  locationId,
+}: {
+  cohortId: string;
+  personId: string;
+  locationId: string;
+}) {
+  const router = useRouter();
+  const params = useParams();
+
+  return (
+    <DropdownItem
+      onClick={async () => {
+        try {
+          const { id: allocationId } = await addStudentToCohortByPersonId({
+            personId,
+            cohortId,
+            locationId,
+          });
+
+          // We create a new allocation, so we redirect to the new allocation
+          router.push(
+            `/locatie/${params.location as string}/cohorten/${params.cohort as string}/${allocationId}`,
+          );
+          toast.success("Cursist gedupliceerd");
+        } catch (error) {
+          toast.error("Er is iets misgegaan");
+        }
+      }}
+    >
+      <DropdownLabel>Dupliceer cursist in cohort</DropdownLabel>
+    </DropdownItem>
   );
 }
 
