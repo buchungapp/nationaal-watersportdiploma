@@ -36,7 +36,7 @@ export default async function Locations() {
           </div>
         </div>
       </div>
-      <div className="h-full min-h-[24rem] w-full lg:w-1/2">
+      <div className="h-full min-h-[24rem] w-full">
         <LocationsMap locations={locations} />
       </div>
     </section>
