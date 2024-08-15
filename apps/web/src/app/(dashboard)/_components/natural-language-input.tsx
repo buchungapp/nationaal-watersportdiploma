@@ -50,9 +50,9 @@ export default function SmartDatetimePicker({
           dateRef.current?.focus();
         }}
         type="button"
-        className="bg-white text-gray-500 rounded-sm p-1 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px]"
+        className="bg-white text-gray-500 rounded-sm p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
       >
-        <CalendarDaysIcon className="w-6 h-6" />
+        <CalendarDaysIcon className="size-5 sm:size-4" />
       </button>
 
       <input
