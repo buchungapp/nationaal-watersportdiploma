@@ -24,6 +24,7 @@ import dayjs from "~/lib/dayjs";
 import { showAllocationTimeline } from "~/lib/flags";
 import {
   isInstructorInCohort,
+  listCohortsForLocation,
   listCompetencyProgressInCohortForStudent,
   listDistinctTagsForCohort,
   listPrivilegesForCohort,
@@ -36,11 +37,10 @@ import {
 import {
   ClaimInstructorAllocation,
   ReleaseInstructorAllocation,
-  ReleaseStudentAllocation,
-  StartExtraProgramForStudentAllocation,
   WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
+import ManageStudentActionsDropdown from "./_components/manage-student-actions-dropdown";
 import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
 import Timeline from "./_components/timeline";
@@ -166,10 +166,14 @@ async function ManageStudentActions({
   locationId: string;
   personId: string;
 }) {
-  const [locationRoles, privileges] = await Promise.all([
-    listRolesForLocation(locationId),
-    listPrivilegesForCohort(cohortId),
-  ]);
+  const [locationRoles, privileges, cohorts, allocation, progress] =
+    await Promise.all([
+      listRolesForLocation(locationId),
+      listPrivilegesForCohort(cohortId),
+      listCohortsForLocation(locationId),
+      retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+      listCompetencyProgressInCohortForStudent(studentAllocationId),
+    ]);
 
   const canManageStudent =
     locationRoles.includes("location_admin") ||
@@ -180,23 +184,24 @@ async function ManageStudentActions({
   }
 
   return (
-    <Dropdown>
-      <DropdownButton outline className="-my-1.5">
-        <EllipsisHorizontalIcon />
-      </DropdownButton>
-      <DropdownMenu anchor="bottom end">
-        <StartExtraProgramForStudentAllocation
-          cohortId={cohortId}
-          personId={personId}
-          locationId={locationId}
-        />
-        <ReleaseStudentAllocation
-          cohortId={cohortId}
-          studentAllocationId={studentAllocationId}
-          locationId={locationId}
-        />
-      </DropdownMenu>
-    </Dropdown>
+    <ManageStudentActionsDropdown
+      cohortId={cohortId}
+      studentAllocationId={studentAllocationId}
+      locationId={locationId}
+      personId={personId}
+      moveStudentAllocation={
+        locationRoles.includes("location_admin") &&
+        allocation &&
+        !allocation.certificate
+          ? {
+              cohorts,
+              curriculumId: allocation.studentCurriculum?.curriculumId,
+              gearTypeId: allocation.studentCurriculum?.gearType.id,
+              progress,
+            }
+          : null
+      }
+    />
   );
 }
 
