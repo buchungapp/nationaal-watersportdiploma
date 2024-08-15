@@ -37,6 +37,7 @@ import {
   ClaimInstructorAllocation,
   ReleaseInstructorAllocation,
   ReleaseStudentAllocation,
+  StartExtraProgramForStudentAllocation,
   WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
@@ -158,10 +159,12 @@ async function ManageStudentActions({
   cohortId,
   studentAllocationId,
   locationId,
+  personId,
 }: {
   cohortId: string;
   studentAllocationId: string;
   locationId: string;
+  personId: string;
 }) {
   const [locationRoles, privileges] = await Promise.all([
     listRolesForLocation(locationId),
@@ -182,6 +185,11 @@ async function ManageStudentActions({
         <EllipsisHorizontalIcon />
       </DropdownButton>
       <DropdownMenu anchor="bottom end">
+        <StartExtraProgramForStudentAllocation
+          cohortId={cohortId}
+          personId={personId}
+          locationId={locationId}
+        />
         <ReleaseStudentAllocation
           cohortId={cohortId}
           studentAllocationId={studentAllocationId}
@@ -283,6 +291,7 @@ export default async function Page({
                 locationId={location.id}
                 cohortId={cohort.id}
                 studentAllocationId={allocation.id}
+                personId={allocation.person.id}
               />
             </Suspense>
           </div>
