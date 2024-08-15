@@ -9,7 +9,7 @@ export default async function Locations() {
   return (
     // Z-index is required to make the overflow-hidden work on safari
     <section className="grid w-full overflow-hidden z-0 rounded-[3rem] bg-branding-orange lg:grid-cols-2">
-      <div className="flex h-full items-center">
+      <div className="flex items-center">
         <div className="px-4 py-12 text-white lg:p-16">
           <div className="flex items-center gap-x-3 font-bold uppercase text-white">
             Vaarlocaties
