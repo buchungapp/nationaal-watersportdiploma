@@ -2,6 +2,7 @@
 
 // Credits to: https://dub.co/blog/smart-datetime-picker
 
+import { CalendarDaysIcon } from "@heroicons/react/16/solid";
 import { dateTime as dateTimeUtils } from "@nawadi/lib";
 import React from "react";
 import { Input } from "./input";
@@ -17,6 +18,7 @@ export default function SmartDatetimePicker({
   invalid?: boolean;
   defaultValue?: Date;
 }) {
+  const dateRef = React.useRef<HTMLInputElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [dateTime, setDateTime] = React.useState<Date | null>(
     defaultValue ?? null,
@@ -42,8 +44,20 @@ export default function SmartDatetimePicker({
         }}
       />
 
+      <button
+        onClick={() => {
+          dateRef.current?.showPicker();
+          dateRef.current?.focus();
+        }}
+        type="button"
+        className="bg-white text-gray-500 rounded-sm p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
+      >
+        <CalendarDaysIcon className="size-5 sm:size-4" />
+      </button>
+
       <input
         type="datetime-local"
+        ref={dateRef}
         step={60 * 15}
         tabIndex={-1}
         required={required}
@@ -57,9 +71,9 @@ export default function SmartDatetimePicker({
             inputRef.current.value = dateTimeUtils.formatDateTime(expiryDate);
           }
         }}
-        // we intentionally make the datetime-local input field with a width of 30px
-        // to only show the calendar icon and hide the input field
-        className="w-[30px] pr-[10px] h-[36px] border-none bg-transparent text-gray-500 focus:outline-none focus:ring-0 sm:text-sm absolute right-0 bottom-0"
+        // we intentionally make the datetime-local input field with a width of 0px
+        // to hide the input field
+        className="w-[0px] opacity-0 overflow-hidden border-none bg-transparent text-gray-500 focus:outline-none focus:ring-0 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px] mr-[10px]"
       />
     </>
   );
