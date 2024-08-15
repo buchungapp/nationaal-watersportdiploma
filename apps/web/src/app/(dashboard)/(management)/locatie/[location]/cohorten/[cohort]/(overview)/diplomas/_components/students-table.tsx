@@ -355,6 +355,7 @@ export default function StudentsTable({
       {
         certificate: Student["certificate"];
         studentCurriculum: Student["studentCurriculum"];
+        person: Student["person"];
       }
     >
   >({});
@@ -379,6 +380,7 @@ export default function StudentsTable({
                 : {
                     certificate: student!.certificate,
                     studentCurriculum: student!.studentCurriculum,
+                    person: student!.person,
                   },
             ];
           }),

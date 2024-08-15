@@ -658,13 +658,13 @@ export const listAllLocations = cache(async () => {
 export const createStudentForLocation = async (
   locationId: string,
   personInput: {
-    email: string;
+    email?: string;
     firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
+    lastNamePrefix?: string | null;
+    lastName?: string;
+    dateOfBirth?: Date;
+    birthCity?: string;
+    birthCountry?: string;
   },
 ) => {
   return createPersonForLocation(locationId, ["student"], personInput);
@@ -673,13 +673,13 @@ export const createStudentForLocation = async (
 export const createInstructorForLocation = async (
   locationId: string,
   personInput: {
-    email: string;
+    email?: string;
     firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
+    lastNamePrefix?: string | null;
+    lastName?: string;
+    dateOfBirth?: Date;
+    birthCity?: string;
+    birthCountry?: string;
   },
 ) => {
   return createPersonForLocation(locationId, ["instructor"], personInput);
@@ -689,13 +689,13 @@ export const createPersonForLocation = async (
   locationId: string,
   roles: ActorType[],
   personInput: {
-    email: string;
+    email?: string;
     firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string;
-    dateOfBirth: Date;
-    birthCity: string;
-    birthCountry: string;
+    lastNamePrefix?: string | null;
+    lastName?: string;
+    dateOfBirth?: Date;
+    birthCity?: string;
+    birthCountry?: string;
   },
 ) => {
   return makeRequest(async () => {
@@ -722,7 +722,7 @@ export const createPersonForLocation = async (
       firstName: personInput.firstName,
       lastName: personInput.lastName,
       lastNamePrefix: personInput.lastNamePrefix,
-      dateOfBirth: personInput.dateOfBirth.toISOString(),
+      dateOfBirth: personInput.dateOfBirth?.toISOString(),
       birthCity: personInput.birthCity,
       birthCountry: personInput.birthCountry,
     });
@@ -870,58 +870,55 @@ export const issueCertificatesInCohort = async ({
   visibleFrom?: string;
 }) => {
   return makeRequest(async () => {
-    return withTransaction(async () => {
-      const [authUser, cohort] = await Promise.all([
-        getUserOrThrow(),
-        Cohort.byIdOrHandle({ id: cohortId }),
+    const [authUser, cohort] = await Promise.all([
+      getUserOrThrow(),
+      Cohort.byIdOrHandle({ id: cohortId }),
+    ]);
+
+    if (!cohort) {
+      throw new Error("Cohort not found");
+    }
+
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const listCohortStatusPromise = Cohort.Certificate.listStatus({
+      cohortId,
+    });
+
+    const [isLocationAdmin, privileges, allocationData, curricula] =
+      await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId: cohort.locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId,
+          personId: primaryPerson.id,
+        }),
+        listCohortStatusPromise,
+        listCohortStatusPromise.then((status) =>
+          Curriculum.list({
+            filter: {
+              id: Array.from(
+                new Set(
+                  status
+                    .map((s) => s.studentCurriculum?.curriculumId)
+                    .filter(Boolean) as string[],
+                ),
+              ),
+            },
+          }),
+        ),
       ]);
 
-      if (!cohort) {
-        throw new Error("Cohort not found");
-      }
+    if (!isLocationAdmin && !privileges.includes("manage_cohort_certificate")) {
+      throw new Error("Unauthorized");
+    }
 
-      const primaryPerson = await getPrimaryPerson(authUser);
-
-      const listCohortStatusPromise = Cohort.Certificate.listStatus({
-        cohortId,
-      });
-
-      const [isLocationAdmin, privileges, allocationData, curricula] =
-        await Promise.all([
-          isActiveActorTypeInLocation({
-            actorType: ["location_admin"],
-            locationId: cohort.locationId,
-            personId: primaryPerson.id,
-          }).catch(() => false),
-          Cohort.Allocation.listPrivilegesForPerson({
-            cohortId,
-            personId: primaryPerson.id,
-          }),
-          listCohortStatusPromise,
-          listCohortStatusPromise.then((status) =>
-            Curriculum.list({
-              filter: {
-                id: Array.from(
-                  new Set(
-                    status
-                      .map((s) => s.studentCurriculum?.curriculumId)
-                      .filter(Boolean) as string[],
-                  ),
-                ),
-              },
-            }),
-          ),
-        ]);
-
-      if (
-        !isLocationAdmin &&
-        !privileges.includes("manage_cohort_certificate")
-      ) {
-        throw new Error("Unauthorized");
-      }
-
-      const result = await Promise.all(
-        studentAllocationIds.map(async (allocationId) => {
+    const result = await Promise.allSettled(
+      studentAllocationIds.map(async (allocationId) =>
+        withTransaction(async () => {
           const allocation = allocationData.find((d) => d.id === allocationId);
           if (!allocation?.studentCurriculum || allocation.certificate) {
             throw new Error(`Invalid allocation: ${allocationId}`);
@@ -977,22 +974,27 @@ export const issueCertificatesInCohort = async ({
 
           return { id: certificateId };
         }),
-      );
+      ),
+    );
 
-      posthog.capture({
-        distinctId: authUser.authUserId,
-        event: "create_completed_certificate_bulk",
-        properties: {
-          $set: { email: authUser.email, displayName: authUser.displayName },
-          cohortId,
-          certificateCount: result.length,
-        },
-      });
-
-      await posthog.shutdown();
-
-      return result;
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "create_completed_certificate_bulk",
+      properties: {
+        $set: { email: authUser.email, displayName: authUser.displayName },
+        cohortId,
+        certificateCount: result.filter((r) => r.status === "fulfilled").length,
+      },
     });
+
+    await posthog.shutdown();
+
+    return result.map((r, index) => ({
+      studentAllocationId: studentAllocationIds[index]!,
+      certificateId: r.status === "fulfilled" ? r.value : null,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      message: r.status === "rejected" ? (r.reason.message as string) : null,
+    }));
   });
 };
 

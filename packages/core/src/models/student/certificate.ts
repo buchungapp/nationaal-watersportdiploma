@@ -1,10 +1,11 @@
 import { schema as s } from '@nawadi/db'
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq, exists, isNull, sql } from 'drizzle-orm'
 import { customAlphabet } from 'nanoid'
 import { z } from 'zod'
 import { useQuery } from '../../contexts/index.js'
 import {
   singleOrArray,
+  singleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -95,6 +96,45 @@ export const completeCertificate = withZod(
   z.void(),
   async (input) => {
     const query = useQuery()
+
+    const person = await query
+      .select({
+        firstName: s.person.firstName,
+        lastName: s.person.lastName,
+        dateOfBirth: s.person.dateOfBirth,
+        birthCity: s.person.birthCity,
+      })
+      .from(s.person)
+      .where(
+        exists(
+          query
+            .select({ id: sql`1` })
+            .from(s.certificate)
+            .innerJoin(
+              s.studentCurriculum,
+              eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
+            )
+            .where(
+              and(
+                eq(s.certificate.id, input.certificateId),
+                eq(s.person.id, s.studentCurriculum.personId),
+              ),
+            ),
+        ),
+      )
+      .then(singleRow)
+
+    if (!person.lastName) {
+      throw new Error('Person is missing last name')
+    }
+
+    if (!person.dateOfBirth) {
+      throw new Error('Person is missing date of birth')
+    }
+
+    if (!person.birthCity) {
+      throw new Error('Person is missing birth city')
+    }
 
     const [res] = await query
       .update(s.certificate)

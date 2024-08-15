@@ -343,7 +343,6 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                     <Input
                       name="lastName"
                       invalid={!!state?.errors.lastName}
-                      required
                       minLength={1}
                     />
                   </Field>
@@ -356,7 +355,6 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                       name="email"
                       type="email"
                       invalid={!!state?.errors.email}
-                      required
                     />
                   </Field>
                   <Field className="sm:col-span-2">
@@ -365,7 +363,6 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                       name="dateOfBirth"
                       type="date"
                       invalid={!!state?.errors.dateOfBirth}
-                      required
                     />
                   </Field>
                 </div>

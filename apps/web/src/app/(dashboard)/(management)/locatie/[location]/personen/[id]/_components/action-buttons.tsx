@@ -181,7 +181,6 @@ export function EditDetails({
                       name="lastName"
                       invalid={!!state?.errors.lastName}
                       defaultValue={person.lastName ?? undefined}
-                      required
                       minLength={1}
                     />
                   </Field>
@@ -195,7 +194,6 @@ export function EditDetails({
                       type="date"
                       invalid={!!state?.errors.dateOfBirth}
                       defaultValue={person.dateOfBirth ?? undefined}
-                      required
                     />
                   </Field>
                 </div>
