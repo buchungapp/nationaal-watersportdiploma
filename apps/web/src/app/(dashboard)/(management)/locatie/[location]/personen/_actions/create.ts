@@ -6,32 +6,61 @@ import { z } from "zod";
 import {
   type ActorType,
   createPersonForLocation,
-  createStudentForLocation,
   updateEmailForPerson,
   updatePersonDetails,
 } from "~/lib/nwd";
 
-export type Role = Exclude<ActorType, "location_admin">;
 export async function createPerson(
   locationId: string,
   _prevState: unknown,
   formData: FormData,
 ) {
-  const expectedSchema = z.object({
-    email: z.string().trim().toLowerCase().email(),
-    firstName: z.string().trim().min(1),
-    lastNamePrefix: z
-      .string()
-      .trim()
-      .nullable()
-      .transform((tussenvoegsel) =>
-        tussenvoegsel === "" ? null : tussenvoegsel,
-      ),
-    lastName: z.string().min(1),
-    dateOfBirth: z.string().pipe(z.coerce.date()),
-    birthCity: z.string(),
-    birthCountry: z.string().length(2).toLowerCase(),
-  });
+  const expectedSchema = z
+    .object({
+      email: z.string().trim().toLowerCase().email(),
+      firstName: z.string().trim().min(1),
+      lastNamePrefix: z
+        .string()
+        .trim()
+        .nullable()
+        .transform((tussenvoegsel) =>
+          tussenvoegsel === "" ? null : tussenvoegsel,
+        ),
+      lastName: z.string().min(1),
+      dateOfBirth: z.string().pipe(z.coerce.date()),
+      birthCity: z.string(),
+      birthCountry: z.string().length(2).toLowerCase(),
+      ["role-student"]: z.string().optional(),
+      ["role-instructor"]: z.string().optional(),
+      ["role-location_admin"]: z.string().optional(),
+    })
+    .refine(
+      (data) =>
+        !!data["role-student"] ||
+        !!data["role-instructor"] ||
+        !!data["role-location_admin"],
+      {
+        message: "At least one role must be selected",
+        path: ["roles"],
+      },
+    )
+    .transform((parsed) => {
+      const roles: ActorType[] = [];
+      if (parsed["role-student"]) {
+        roles.push("student");
+      }
+      if (parsed["role-instructor"]) {
+        roles.push("instructor");
+      }
+      if (parsed["role-location_admin"]) {
+        roles.push("location_admin");
+      }
+
+      return {
+        ...parsed,
+        roles,
+      };
+    });
 
   const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(
     formData.entries(),
@@ -46,8 +75,7 @@ export async function createPerson(
 
   try {
     const parsed = expectedSchema.parse(data);
-
-    await createStudentForLocation(locationId, parsed);
+    await createPersonForLocation(locationId, parsed.roles, parsed);
 
     revalidatePath("/locatie/[location]/personen", "page");
 
@@ -78,7 +106,7 @@ export async function createPerson(
 
 export async function createPersonBulk(
   locationId: string,
-  roles: [Role, ...Role[]],
+  roles: [ActorType, ...ActorType[]],
   persons: {
     email: string;
     firstName: string;

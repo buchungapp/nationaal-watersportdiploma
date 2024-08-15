@@ -43,10 +43,11 @@ import {
 } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
-import { createPersonBulk, type Role } from "../_actions/create";
+import type { ActorType } from "~/lib/nwd";
+import { createPersonBulk } from "../_actions/create";
 
 const ROLES: {
-  type: Role;
+  type: ActorType;
   label: string;
   description: string;
   defaultChecked?: boolean;
@@ -110,7 +111,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
 
   const [hasSelectedRole, setHasSelectedRole] = useState(true);
-  const [roles, setRoles] = useState<[Role, ...Role[]] | null>(null);
+  const [roles, setRoles] = useState<[ActorType, ...ActorType[]] | null>(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -148,7 +149,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     });
 
     setData({ labels, rows: data });
-    setRoles(roles as [Role, ...Role[]]);
+    setRoles(roles as [ActorType, ...ActorType[]]);
     setIsUpload(false);
   };
 
@@ -239,7 +240,7 @@ function SubmitForm({
   setIsOpen,
 }: {
   data: CSVData;
-  roles: [Role, ...Role[]];
+  roles: [ActorType, ...ActorType[]];
   locationId: string;
   countries: { code: string; name: string }[];
   setIsOpen: (value: boolean) => void;

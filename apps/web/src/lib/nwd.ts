@@ -687,7 +687,7 @@ export const createInstructorForLocation = async (
 
 export const createPersonForLocation = async (
   locationId: string,
-  roles: Exclude<ActorType, "location_admin">[],
+  roles: ActorType[],
   personInput: {
     email: string;
     firstName: string;
@@ -732,6 +732,15 @@ export const createPersonForLocation = async (
       locationId: locationId,
     });
 
+    if (
+      roles.length < 1 ||
+      (!roles.includes("student") &&
+        !roles.includes("instructor") &&
+        !roles.includes("location_admin"))
+    ) {
+      throw new Error("Invalid roles");
+    }
+
     if (roles.includes("student")) {
       await User.Actor.upsert({
         locationId: locationId,
@@ -758,6 +767,22 @@ export const createPersonForLocation = async (
       posthog.capture({
         distinctId: authUser.authUserId,
         event: "create_instructor_for_location",
+        properties: {
+          $set: { email: authUser.email, displayName: authUser.displayName },
+        },
+      });
+    }
+
+    if (roles.includes("location_admin")) {
+      await User.Actor.upsert({
+        locationId: locationId,
+        type: "location_admin",
+        personId: person.id,
+      });
+
+      posthog.capture({
+        distinctId: authUser.authUserId,
+        event: "create_location_admin_for_location",
         properties: {
           $set: { email: authUser.email, displayName: authUser.displayName },
         },
