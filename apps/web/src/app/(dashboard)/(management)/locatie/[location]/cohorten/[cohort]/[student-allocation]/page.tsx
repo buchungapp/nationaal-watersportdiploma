@@ -35,9 +35,9 @@ import {
 } from "~/lib/nwd";
 import {
   ClaimInstructorAllocation,
-  DuplicateStudentAllocation,
   ReleaseInstructorAllocation,
   ReleaseStudentAllocation,
+  StartExtraProgramForStudentAllocation,
   WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
@@ -185,7 +185,7 @@ async function ManageStudentActions({
         <EllipsisHorizontalIcon />
       </DropdownButton>
       <DropdownMenu anchor="bottom end">
-        <DuplicateStudentAllocation
+        <StartExtraProgramForStudentAllocation
           cohortId={cohortId}
           personId={personId}
           locationId={locationId}

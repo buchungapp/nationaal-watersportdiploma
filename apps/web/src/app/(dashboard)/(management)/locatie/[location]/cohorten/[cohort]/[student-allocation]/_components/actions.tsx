@@ -61,7 +61,7 @@ export function ReleaseInstructorAllocation({
   );
 }
 
-export function DuplicateStudentAllocation({
+export function StartExtraProgramForStudentAllocation({
   cohortId,
   personId,
   locationId,
@@ -93,7 +93,7 @@ export function DuplicateStudentAllocation({
         }
       }}
     >
-      <DropdownLabel>Dupliceer cursist in cohort</DropdownLabel>
+      <DropdownLabel>Start extra programma</DropdownLabel>
     </DropdownItem>
   );
 }
