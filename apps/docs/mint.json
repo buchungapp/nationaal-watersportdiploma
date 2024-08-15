@@ -18,7 +18,7 @@
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "https://www.nationaalwatersportdiploma.nl/contact"
+      "url": "/support"
     }
   ],
   "topbarCtaButton": {
@@ -33,6 +33,11 @@
   ],
   "anchors": [
     {
+      "name": "Repository",
+      "icon": "github",
+      "url": "https://github.com/buchungapp/nationaal-watersportdiploma"
+    },
+    {
       "name": "Community",
       "icon": "discord",
       "url": "https://discord.gg/RBTCNNt9bm"
@@ -41,18 +46,15 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction", "quickstart", "development"]
+      "pages": ["introduction"]
     },
     {
-      "group": "Essentials",
-      "pages": [
-        "essentials/markdown",
-        "essentials/code",
-        "essentials/images",
-        "essentials/settings",
-        "essentials/navigation",
-        "essentials/reusable-snippets"
-      ]
+      "group": "Development",
+      "pages": ["development/quickstart"]
+    },
+    {
+      "group": "API Usage",
+      "pages": ["api-usage/quickstart"]
     },
     {
       "group": "API Documentation",
