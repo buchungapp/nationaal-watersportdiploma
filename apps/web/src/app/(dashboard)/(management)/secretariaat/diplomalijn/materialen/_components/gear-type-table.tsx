@@ -38,6 +38,9 @@ const columns = [
   columnHelper.accessor("title", {
     header: "Naam",
   }),
+  columnHelper.accessor("handle", {
+    header: "Handle",
+  }),
 ];
 
 export default function ModuleTable({
@@ -114,7 +117,7 @@ export default function ModuleTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`/secretariaat/diplomalijn/materialen?bewerken=${row.id}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

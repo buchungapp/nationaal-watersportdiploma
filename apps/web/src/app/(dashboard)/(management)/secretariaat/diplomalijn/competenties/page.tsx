@@ -2,6 +2,7 @@ import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listCompetencies } from "~/lib/nwd";
 import Search from "../../../_components/search";
+import EditDialog from "./_components/edit-dialog";
 import ProgramCompetencyClient from "./_components/program-table";
 
 async function CompetencyTable({
@@ -11,6 +12,11 @@ async function CompetencyTable({
 }) {
   const competencies = await listCompetencies();
   const searchQuery = searchParams?.query?.toString() ?? null;
+
+  const editCompetencyId = searchParams?.bewerken?.toString() ?? null;
+  const editCompetency =
+    competencies.find((competency) => competency.id === editCompetencyId) ??
+    null;
 
   // Create a FlexSearch index
   const index = new FlexSearch.Index({
@@ -46,10 +52,13 @@ async function CompetencyTable({
   );
 
   return (
-    <ProgramCompetencyClient
-      competencies={paginatedPrograms}
-      totalItems={filteredCompetencies.length}
-    />
+    <>
+      <ProgramCompetencyClient
+        competencies={paginatedPrograms}
+        totalItems={filteredCompetencies.length}
+      />
+      <EditDialog editCompetency={editCompetency} />
+    </>
   );
 }
 

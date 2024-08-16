@@ -34,6 +34,32 @@ export const create = withZod(
     }),
 )
 
+export const update = withZod(
+  insertSchema
+    .pick({
+      id: true,
+      title: true,
+      handle: true,
+    })
+    .required({ id: true }),
+  successfulCreateResponse,
+  async (item) => {
+    const query = useQuery()
+
+    const row = await query
+      .update(s.gearType)
+      .set({
+        title: item.title,
+        handle: item.handle,
+      })
+      .where(eq(s.gearType.id, item.id))
+      .returning({ id: s.gearType.id })
+      .then(singleRow)
+
+    return row
+  },
+)
+
 export const list = withZod(
   z
     .object({

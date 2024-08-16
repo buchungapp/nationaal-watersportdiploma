@@ -2,6 +2,7 @@ import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listModules } from "~/lib/nwd";
 import Search from "../../../_components/search";
+import EditDialog from "./_components/edit-dialog";
 import ModuleTableCLient from "./_components/module-table";
 
 async function ModuleTable({
@@ -11,6 +12,10 @@ async function ModuleTable({
 }) {
   const modules = await listModules();
   const searchQuery = searchParams?.query?.toString() ?? null;
+
+  const editModuleId = searchParams?.bewerken?.toString() ?? null;
+  const editModule =
+    modules.find((module) => module.id === editModuleId) ?? null;
 
   // Create a FlexSearch index
   const index = new FlexSearch.Index({
@@ -46,10 +51,13 @@ async function ModuleTable({
   );
 
   return (
-    <ModuleTableCLient
-      modules={paginatedModules}
-      totalItems={filteredModules.length}
-    />
+    <>
+      <ModuleTableCLient
+        modules={paginatedModules}
+        totalItems={filteredModules.length}
+      />
+      <EditDialog editModule={editModule} />
+    </>
   );
 }
 

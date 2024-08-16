@@ -2,6 +2,7 @@ import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listGearTypes } from "~/lib/nwd";
 import Search from "../../../_components/search";
+import EditDialog from "./_components/edit-dialog";
 import GearTypeTableCLient from "./_components/gear-type-table";
 
 async function GearTypeTable({
@@ -11,6 +12,10 @@ async function GearTypeTable({
 }) {
   const gearTypes = await listGearTypes();
   const searchQuery = searchParams?.query?.toString() ?? null;
+
+  const editGearTypeId = searchParams?.bewerken?.toString() ?? null;
+  const editGearType =
+    gearTypes.find((gearType) => gearType.id === editGearTypeId) ?? null;
 
   // Create a FlexSearch index
   const index = new FlexSearch.Index({
@@ -46,10 +51,13 @@ async function GearTypeTable({
   );
 
   return (
-    <GearTypeTableCLient
-      gearTypes={paginatedGearTypes}
-      totalItems={filteredGearTypes.length}
-    />
+    <>
+      <GearTypeTableCLient
+        gearTypes={paginatedGearTypes}
+        totalItems={filteredGearTypes.length}
+      />
+      <EditDialog editGearType={editGearType} />
+    </>
   );
 }
 

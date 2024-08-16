@@ -369,6 +369,32 @@ export const listModules = cache(async () => {
   });
 });
 
+export const updateModule = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    weight: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Module.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+      weight: fields.weight,
+    });
+
+    return;
+  });
+};
+
 export const listCompetencies = cache(async () => {
   return makeRequest(async () => {
     const competencies = await Course.Competency.list();
@@ -377,6 +403,34 @@ export const listCompetencies = cache(async () => {
   });
 });
 
+export const updateCompetency = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    weight: number;
+    type: "knowledge" | "skill";
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Competency.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+      weight: fields.weight,
+      type: fields.type,
+    });
+
+    return;
+  });
+};
+
 export const listGearTypes = cache(async () => {
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list();
@@ -384,6 +438,30 @@ export const listGearTypes = cache(async () => {
     return gearTypes;
   });
 });
+
+export const updateGearType = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+    });
+
+    return;
+  });
+};
 
 export const listCategories = cache(async () => {
   return makeRequest(async () => {
