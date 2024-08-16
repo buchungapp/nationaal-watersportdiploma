@@ -11,6 +11,7 @@ import {
   AlertTitle,
 } from "~/app/(dashboard)/_components/alert";
 import { Button } from "~/app/(dashboard)/_components/button";
+import { ErrorMessage } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { copyCurriculumAction } from "../_actions/mutations";
 
@@ -24,13 +25,14 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
     if (!!result.id) {
       setIsOpen(false);
       toast.success(`Curriculum ${result.id} aangemaakt`);
-      return;
+    } else {
+      toast.error("Er is iets misgegaan");
     }
 
-    toast.error("Er is iets misgegaan");
+    return result;
   };
 
-  const [_state, action] = useFormState(submit, undefined);
+  const [state, action] = useFormState(submit, undefined);
 
   return (
     <>
@@ -46,7 +48,14 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
             programma, maar staat dan nog in concept.
           </AlertDescription>
           <AlertBody>
-            <Input name="revision" required />
+            <Input
+              name="revision"
+              required
+              invalid={!!state?.errors.revision}
+            />
+            {state?.errors.revision && (
+              <ErrorMessage>{state.errors.revision}</ErrorMessage>
+            )}
           </AlertBody>
           <AlertActions>
             <Button plain onClick={() => setIsOpen(false)}>
