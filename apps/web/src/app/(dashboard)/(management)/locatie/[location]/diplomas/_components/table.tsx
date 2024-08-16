@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
+import { XMarkIcon } from "@heroicons/react/16/solid";
 import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -11,15 +11,11 @@ import {
 import clsx from "clsx";
 import Link from "next/link";
 import { useState } from "react";
+import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
-import {
-  Popover,
-  PopoverButton,
-  PopoverPanel,
-} from "~/app/(dashboard)/_components/popover";
 import {
   Table,
   TableBody,
@@ -36,7 +32,7 @@ import {
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import type { listCertificates } from "~/lib/nwd";
-import { Download } from "./table-actions";
+import { ActionButtons } from "./table-actions";
 
 type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 
@@ -150,8 +146,7 @@ export default function CertificateTable({
     },
   });
 
-  const anyRowSelected =
-    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
+  const selectedRows = Object.keys(rowSelection).length;
 
   return (
     <div className="mt-8 relative">
@@ -159,16 +154,6 @@ export default function CertificateTable({
         dense
         className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
       >
-        {anyRowSelected ? (
-          <Popover className="absolute left-12 top-0 flex items-center space-x-2">
-            <PopoverButton color="branding-orange">
-              Acties <ChevronDownIcon />
-            </PopoverButton>
-            <PopoverPanel anchor="bottom start">
-              <Download rows={table.getSelectedRowModel().rows} />
-            </PopoverPanel>
-          </Popover>
-        ) : null}
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -231,6 +216,30 @@ export default function CertificateTable({
         />
         <TablePagination totalItems={totalItems} />
       </TableFooter>
+
+      <div
+        className={clsx(
+          "fixed inset-x-0 bottom-14 mx-auto flex w-fit items-center space-x-2 rounded-lg border border-gray-200 bg-white p-2 shadow-md dark:border-gray-800 dark:bg-gray-950",
+          selectedRows > 0 ? "" : "hidden",
+        )}
+      >
+        <p className="select-none text-sm">
+          <span className="rounded bg-branding-light/10 px-2 py-1.5 font-medium tabular-nums text-branding-dark">
+            {selectedRows}
+          </span>
+          <span className="ml-2 font-medium text-gray-900 dark:text-gray-50">
+            geselecteerd
+          </span>
+        </p>
+        <div className="flex items-center space-x-4">
+          <Button plain onClick={() => setRowSelection({})}>
+            <XMarkIcon />
+          </Button>
+          <ActionButtons
+            rows={table.getRowModel().rows.map((row) => row.original)}
+          />
+        </div>
+      </div>
     </div>
   );
 }
