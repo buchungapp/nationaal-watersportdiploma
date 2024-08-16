@@ -626,6 +626,69 @@ export const retrieveCurriculumById = cache(async (id: string) => {
   });
 });
 
+export const linkGearTypeToCurriculum = async ({
+  curriculumId,
+  gearTypeId,
+}: {
+  curriculumId: string;
+  gearTypeId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.linkToCurriculum({ curriculumId, gearTypeId });
+
+    return;
+  });
+};
+
+export const unlinkGearTypeFromCurriculum = async ({
+  curriculumId,
+  gearTypeId,
+}: {
+  curriculumId: string;
+  gearTypeId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.unlinkFromCurriculum({
+      curriculumId,
+      gearTypeId,
+    });
+
+    return;
+  });
+};
+
+export const startCurriculum = async ({
+  curriculumId,
+  startAt,
+}: {
+  curriculumId: string;
+  startAt: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.start({ curriculumId, startAt });
+
+    return;
+  });
+};
+
 export const countStartedStudentsForCurriculum = cache(
   async (curriculumId: string) => {
     return makeRequest(async () => {
@@ -638,6 +701,30 @@ export const countStartedStudentsForCurriculum = cache(
   },
 );
 
+export const retreiveCurriculumEditable = async (curriculumId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    return await Curriculum.isEditable({ curriculumId });
+  });
+};
+
+export const removeCurriculum = async (curriculumId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.remove({ curriculumId });
+  });
+};
+
 export const copyCurriculum = async ({
   curriculumId,
   revision,
@@ -646,6 +733,12 @@ export const copyCurriculum = async ({
   revision?: string;
 }) => {
   return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
     return Curriculum.copy({
       curriculumId,
       revision: revision ?? `Copy of ${new Date().toISOString()}`,

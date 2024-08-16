@@ -11,6 +11,7 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/index.js'
+import { isEditable } from './curriculum.js'
 import { insertSchema, selectSchema } from './gear-type.schema.js'
 
 export const create = withZod(
@@ -163,6 +164,10 @@ export const linkToCurriculum = withZod(
   async (input) => {
     const query = useQuery()
 
+    if (!(await isEditable({ curriculumId: input.curriculumId }))) {
+      throw new Error('Curriculum is not editable')
+    }
+
     await query
       .insert(s.curriculumGearLink)
       .values({
@@ -175,5 +180,29 @@ export const linkToCurriculum = withZod(
           s.curriculumGearLink.curriculumId,
         ],
       })
+  },
+)
+
+export const unlinkFromCurriculum = withZod(
+  z.object({
+    gearTypeId: z.string(),
+    curriculumId: z.string(),
+  }),
+  z.void(),
+  async (input) => {
+    const query = useQuery()
+
+    if (!(await isEditable({ curriculumId: input.curriculumId }))) {
+      throw new Error('Curriculum is not editable')
+    }
+
+    await query
+      .delete(s.curriculumGearLink)
+      .where(
+        and(
+          eq(s.curriculumGearLink.gearTypeId, input.gearTypeId),
+          eq(s.curriculumGearLink.curriculumId, input.curriculumId),
+        ),
+      )
   },
 )

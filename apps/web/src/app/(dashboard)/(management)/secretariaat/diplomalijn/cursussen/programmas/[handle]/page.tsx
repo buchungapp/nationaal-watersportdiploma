@@ -35,7 +35,10 @@ export default async function Page({
         if (!b.startedAt) return 1;
         return b.startedAt.localeCompare(a.startedAt);
       })
-      .find((curriculum) => curriculum.startedAt);
+      .find(
+        (curriculum) =>
+          curriculum.startedAt && new Date(curriculum.startedAt) < new Date(),
+      );
 
   return (
     <>

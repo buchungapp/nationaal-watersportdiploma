@@ -14,9 +14,17 @@ import dayjs from "~/lib/dayjs";
 import type { listCurriculaByProgram } from "~/lib/nwd";
 import {
   countStartedStudentsForCurriculum,
+  listGearTypes,
   listGearTypesByCurriculum,
+  retreiveCurriculumEditable,
 } from "~/lib/nwd";
-import { CopyCurriculum } from "./action-buttons";
+import {
+  CopyCurriculum,
+  LinkGearTypeToCurriculum,
+  RemoveCurriculum,
+  StartCurriculum,
+  UnlinkGearTypeFromCurriculum,
+} from "./action-buttons";
 
 type Curriculum = Awaited<ReturnType<typeof listCurriculaByProgram>>[number];
 
@@ -27,10 +35,17 @@ export default async function Curriculum({
   curriculum: Curriculum;
   isCurrent: boolean;
 }) {
-  const [gearTypes, count] = await Promise.all([
+  const [allGearTypes, gearTypes, count, editable] = await Promise.all([
+    listGearTypes(),
     listGearTypesByCurriculum(curriculum.id),
     countStartedStudentsForCurriculum(curriculum.id),
+    retreiveCurriculumEditable(curriculum.id),
   ]);
+
+  const availableGearTypes = allGearTypes.filter(
+    (x) => !gearTypes.some((y) => y.id === x.id),
+  );
+
   return (
     <Disclosure
       heading={
@@ -46,8 +61,15 @@ export default async function Curriculum({
     >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-12">
         <div>
-          <div>
-            <CopyCurriculum curriculumId={curriculum.id} />
+          <div className="grid gap-1 w-fit">
+            {editable ? <StartCurriculum curriculumId={curriculum.id} /> : null}
+
+            <div className="flex gap-1 max-xl:flex-col w-fit">
+              <CopyCurriculum curriculumId={curriculum.id} />
+              {editable ? (
+                <RemoveCurriculum curriculumId={curriculum.id} />
+              ) : null}
+            </div>
           </div>
           <Divider soft className="my-6" />
 
@@ -72,11 +94,24 @@ export default async function Curriculum({
             <Subheading level={3}>Boottypen</Subheading>
             <ul className="">
               {gearTypes.map((gearType) => (
-                <li key={gearType.id}>
+                <li
+                  key={gearType.id}
+                  className="flex justify-between items-center gap-1"
+                >
                   <Text>{gearType.title}</Text>
+                  <UnlinkGearTypeFromCurriculum
+                    curriculumId={curriculum.id}
+                    gearTypeId={gearType.id}
+                  />
                 </li>
               ))}
             </ul>
+
+            <LinkGearTypeToCurriculum
+              key={availableGearTypes.map((x) => x.id).join(",")}
+              curriculumId={curriculum.id}
+              availableGearTypes={availableGearTypes}
+            />
           </div>
         </div>
 
