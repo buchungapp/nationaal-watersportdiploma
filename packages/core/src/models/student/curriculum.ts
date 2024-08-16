@@ -41,6 +41,33 @@ export const start = withZod(
   },
 )
 
+export const find = withZod(
+  insertSchema.pick({
+    personId: true,
+    curriculumId: true,
+    gearTypeId: true,
+  }),
+  successfulCreateResponse.nullable(),
+  async (input) => {
+    const query = useQuery()
+
+    const studentCurriculum = await query
+      .select({ id: s.studentCurriculum.id })
+      .from(s.studentCurriculum)
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, input.personId),
+          eq(s.studentCurriculum.curriculumId, input.curriculumId),
+          eq(s.studentCurriculum.gearTypeId, input.gearTypeId),
+          isNull(s.studentCurriculum.deletedAt),
+        ),
+      )
+      .then(possibleSingleRow)
+
+    return studentCurriculum ?? null
+  },
+)
+
 export const findOrEnroll = withZod(
   insertSchema.pick({
     personId: true,

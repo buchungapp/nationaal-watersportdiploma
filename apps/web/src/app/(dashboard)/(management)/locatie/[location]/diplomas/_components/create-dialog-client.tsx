@@ -46,6 +46,7 @@ import type {
 } from "~/lib/nwd";
 import { createCertificate } from "../_actions/create";
 import {
+  getCompletedCompetencies,
   getCurriculaByProgram,
   getGearTypesByCurriculum,
 } from "../_actions/fetch";
@@ -93,16 +94,26 @@ function CreateDialogClient({
       setIsOpen(false);
     }
 
+    if (result.message === "Error" && Object.keys(result.errors).length < 1) {
+      toast.error("Er is iets misgegaan");
+    }
+
     return result;
   };
 
   const [state, formAction] = useActionState(submit, undefined);
 
+  const [selectedPerson, setSelectedPerson] = useState<
+    (typeof persons)[number] | null
+  >(null);
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [selectedGearType, setSelectedGearType] = useState<string | null>(null);
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     Awaited<ReturnType<typeof listCurriculaByProgram>>[number] | null
   >(null);
+  const [completedCompetencies, setCompletedCompetencies] = useState<Awaited<
+    ReturnType<typeof getCompletedCompetencies>
+  > | null>(null);
 
   const [programQuery, setProgramQuery] = useState("");
   const [personQuery, setPersonQuery] = useState("");
@@ -131,6 +142,7 @@ function CreateDialogClient({
       const [curriculum] = await getCurriculaByProgram(selectedProgram);
 
       if (!curriculum) {
+        setCompletedCompetencies(null);
         setSelectedCurriculum(null);
         setGearTypes([]);
         return;
@@ -143,6 +155,24 @@ function CreateDialogClient({
 
     void fetchCurricula();
   }, [selectedProgram]);
+
+  useEffect(() => {
+    async function fetchCompletedCompetencies() {
+      if (!selectedPerson || !selectedCurriculum || !selectedGearType) {
+        return;
+      }
+
+      const completedCompetencies = await getCompletedCompetencies(
+        selectedPerson.id,
+        selectedCurriculum.id,
+        selectedGearType,
+      );
+
+      setCompletedCompetencies(completedCompetencies ?? []);
+    }
+
+    void fetchCompletedCompetencies();
+  }, [selectedPerson, selectedCurriculum, selectedGearType]);
 
   return (
     <>
@@ -171,6 +201,8 @@ function CreateDialogClient({
                     onClose={() => setPersonQuery("")}
                     virtual={{ options: filteredPersons }}
                     multiple={false}
+                    value={selectedPerson}
+                    onChange={(value) => setSelectedPerson(value)}
                   >
                     <div
                       className={clsx([
@@ -369,6 +401,7 @@ function CreateDialogClient({
                         setSelectedGearType(null);
                         setGearTypes([]);
                         setSelectedCurriculum(null);
+                        setCompletedCompetencies(null);
                       }}
                       invalid={!!state?.errors.curriculumId}
                     >
@@ -414,7 +447,7 @@ function CreateDialogClient({
 
                 <Fieldset>
                   <Legend>Modules</Legend>
-                  {selectedCurriculum ? (
+                  {selectedCurriculum && completedCompetencies !== null ? (
                     <div className="grid grid-cols-1 lg:grid-cols-2 mt-2 gap-x-4">
                       <CheckboxGroup>
                         <Legend>Kernmodules</Legend>
@@ -422,7 +455,12 @@ function CreateDialogClient({
                           .sort((a, b) => a.weight - b.weight)
                           .filter((module) => module.isRequired)
                           .map((module) => (
-                            <CheckboxField key={module.id}>
+                            <CheckboxField
+                              key={module.id}
+                              disabled={module.competencies.every((c) =>
+                                completedCompetencies?.includes(c.id),
+                              )}
+                            >
                               <Checkbox
                                 name="competencies[]"
                                 value={module.competencies
