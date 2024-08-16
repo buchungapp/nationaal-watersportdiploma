@@ -11,6 +11,7 @@ import {
   uuidSchema,
   withZod,
 } from '../../utils/index.js'
+import { isEditable } from './curriculum.js'
 import { insertSchema, selectSchema } from './gear-type.schema.js'
 
 export const create = withZod(
@@ -32,6 +33,32 @@ export const create = withZod(
       const row = singleRow(rows)
       return row
     }),
+)
+
+export const update = withZod(
+  insertSchema
+    .pick({
+      id: true,
+      title: true,
+      handle: true,
+    })
+    .required({ id: true }),
+  successfulCreateResponse,
+  async (item) => {
+    const query = useQuery()
+
+    const row = await query
+      .update(s.gearType)
+      .set({
+        title: item.title,
+        handle: item.handle,
+      })
+      .where(eq(s.gearType.id, item.id))
+      .returning({ id: s.gearType.id })
+      .then(singleRow)
+
+    return row
+  },
 )
 
 export const list = withZod(
@@ -137,6 +164,10 @@ export const linkToCurriculum = withZod(
   async (input) => {
     const query = useQuery()
 
+    if (!(await isEditable({ curriculumId: input.curriculumId }))) {
+      throw new Error('Curriculum is not editable')
+    }
+
     await query
       .insert(s.curriculumGearLink)
       .values({
@@ -149,5 +180,29 @@ export const linkToCurriculum = withZod(
           s.curriculumGearLink.curriculumId,
         ],
       })
+  },
+)
+
+export const unlinkFromCurriculum = withZod(
+  z.object({
+    gearTypeId: z.string(),
+    curriculumId: z.string(),
+  }),
+  z.void(),
+  async (input) => {
+    const query = useQuery()
+
+    if (!(await isEditable({ curriculumId: input.curriculumId }))) {
+      throw new Error('Curriculum is not editable')
+    }
+
+    await query
+      .delete(s.curriculumGearLink)
+      .where(
+        and(
+          eq(s.curriculumGearLink.gearTypeId, input.gearTypeId),
+          eq(s.curriculumGearLink.curriculumId, input.curriculumId),
+        ),
+      )
   },
 )

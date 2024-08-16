@@ -1,16 +1,24 @@
 import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listCategories } from "~/lib/nwd";
+import { listCategories, listParentCategories } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CategoryTableCLient from "./_components/category-table";
+import EditDialog from "./_components/edit-dialog";
 
 async function CategoryTable({
   searchParams,
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
-  const categories = await listCategories();
+  const [categories, parentCategories] = await Promise.all([
+    listCategories(),
+    listParentCategories(),
+  ]);
   const searchQuery = searchParams?.query?.toString() ?? null;
+
+  const editCategoryId = searchParams?.bewerken?.toString() ?? null;
+  const editCategory =
+    categories.find((category) => category.id === editCategoryId) ?? null;
 
   // Create a FlexSearch index
   const index = new FlexSearch.Index({
@@ -46,10 +54,17 @@ async function CategoryTable({
   );
 
   return (
-    <CategoryTableCLient
-      categories={paginatedCategories}
-      totalItems={filteredCategories.length}
-    />
+    <>
+      <CategoryTableCLient
+        categories={paginatedCategories}
+        totalItems={filteredCategories.length}
+      />
+      <EditDialog
+        key={editCategory?.id}
+        editCategory={editCategory}
+        parentCategories={parentCategories}
+      />
+    </>
   );
 }
 
