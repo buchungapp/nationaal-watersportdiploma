@@ -157,7 +157,7 @@ export const fromHandle = withZod(
     const rows = await query
       .select()
       .from(s.category)
-      .leftJoin(self, eq(s.category.id, self.id))
+      .leftJoin(self, eq(s.category.parentCategoryId, self.id))
       .where(eq(s.category.handle, handle))
 
     const row = possibleSingleRow(rows)
