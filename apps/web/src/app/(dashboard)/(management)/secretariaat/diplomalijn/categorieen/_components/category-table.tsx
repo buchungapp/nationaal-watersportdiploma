@@ -123,7 +123,7 @@ export default function ModuleTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={`/secretariaat/diplomalijn/categorieen?bewerken=${row.id}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

@@ -63,7 +63,7 @@ export default function CourseTable({
               {row.original.categories
                 .filter((c) => c.parent?.id === category.id)
                 .map((c) => (
-                  <Badge>{c.title}</Badge>
+                  <Badge key={c.id}>{c.title}</Badge>
                 ))}
             </div>
           ),

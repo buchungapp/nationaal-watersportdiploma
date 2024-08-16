@@ -56,7 +56,7 @@ async function GearTypeTable({
         gearTypes={paginatedGearTypes}
         totalItems={filteredGearTypes.length}
       />
-      <EditDialog editGearType={editGearType} />
+      <EditDialog key={editGearType?.id} editGearType={editGearType} />
     </>
   );
 }

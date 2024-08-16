@@ -2,8 +2,8 @@ import FlexSearch from "flexsearch";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listCompetencies } from "~/lib/nwd";
 import Search from "../../../_components/search";
+import CompetencyTableClient from "./_components/competencies-table";
 import EditDialog from "./_components/edit-dialog";
-import ProgramCompetencyClient from "./_components/program-table";
 
 async function CompetencyTable({
   searchParams,
@@ -53,11 +53,11 @@ async function CompetencyTable({
 
   return (
     <>
-      <ProgramCompetencyClient
+      <CompetencyTableClient
         competencies={paginatedPrograms}
         totalItems={filteredCompetencies.length}
       />
-      <EditDialog editCompetency={editCompetency} />
+      <EditDialog key={editCompetency?.id} editCompetency={editCompetency} />
     </>
   );
 }

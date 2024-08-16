@@ -56,7 +56,7 @@ async function ModuleTable({
         modules={paginatedModules}
         totalItems={filteredModules.length}
       />
-      <EditDialog editModule={editModule} />
+      <EditDialog key={editModule?.id} editModule={editModule} />
     </>
   );
 }

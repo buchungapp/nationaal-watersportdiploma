@@ -353,6 +353,32 @@ export const listDisciplines = cache(async () => {
   });
 });
 
+export const updateDiscipline = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    weight: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Discipline.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+      weight: fields.weight,
+    });
+
+    return;
+  });
+};
+
 export const listDegrees = cache(async () => {
   return makeRequest(async () => {
     const degrees = await Course.Degree.list();
@@ -470,6 +496,51 @@ export const listCategories = cache(async () => {
     return categories;
   });
 });
+
+export const updateCategory = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    description?: string | null;
+    parentCategoryId?: string | null;
+    weight: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    if (fields.parentCategoryId) {
+      const parentCategories = await listParentCategories();
+
+      if (!parentCategories.some((c) => c.id === fields.parentCategoryId)) {
+        throw new Error("Invalid parent category");
+      }
+
+      const isParentCategory = parentCategories.find((c) => c.id === id);
+      if (isParentCategory?.hasActiveChildren) {
+        throw new Error(
+          "A parent category with active children cannot be a child category",
+        );
+      }
+    }
+
+    await Course.Category.update({
+      id: id,
+      title: fields.title,
+      description: fields.description,
+      handle: fields.handle,
+      parentCategoryId: fields.parentCategoryId,
+      weight: fields.weight,
+    });
+
+    return;
+  });
+};
 
 export const listParentCategories = cache(async () => {
   return makeRequest(async () => {
