@@ -38,12 +38,13 @@ export default async function CertificateAdvise({ id }: { id: string }) {
         modules die je tot nu toe hebt voltooid. {advise}
       </Text>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 p-2.5 sm:p-6 sm:-mx-6 border border-zinc-900/10 rounded-lg">
         <div>
           <Subheading>Kernmodules</Subheading>
           <ul className="space-y-2 mt-2.5">
             {certificate.curriculum.modules
               .filter((module) => module.isRequired)
+              .sort((a, b) => a.weight - b.weight)
               .map((module, index, filteredArray) => {
                 const isModuleCompleted = uniqueCompletedModules.includes(
                   module.id,
@@ -76,6 +77,7 @@ export default async function CertificateAdvise({ id }: { id: string }) {
           <ul className="space-y-2 mt-2.5">
             {certificate.curriculum.modules
               .filter((module) => !module.isRequired)
+              .sort((a, b) => a.weight - b.weight)
               .map((module, index, filteredArray) => {
                 const isModuleCompleted = uniqueCompletedModules.includes(
                   module.id,
