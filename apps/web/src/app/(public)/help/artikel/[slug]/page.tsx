@@ -63,17 +63,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Page({ params }: Props) {
-  const [post, relatedArticles, categories] = await Promise.all([
+  const [post, allArticles, categories] = await Promise.all([
     findPost(params.slug),
-    getHelpArticles().then((articles) =>
-      articles.filter((x) => x.slug !== params.slug),
-    ),
+    getHelpArticles(),
     getHelpCategories(),
   ]);
 
   if (!post) {
     notFound();
   }
+
+  const relatedArticles = allArticles.filter(
+    (x) => x.slug !== params.slug && x.category === post.category,
+  );
 
   return (
     <>
@@ -147,27 +149,27 @@ export default async function Page({ params }: Props) {
         </div>
 
         <div className="flex flex-col divide-y divide-gray-200 space-y-8 lg:border-l lg:border-gray-200 lg:pl-6">
-          {/* Related articles */}
-          <div className="grid gap-4">
-            <h2 className="text-gray-600 text-sm font-semibold">Gerelateerd</h2>
-            <ul className="space-y-3.5 -mx-4">
-              {relatedArticles
-                .filter((article) => article.category !== "vereniging")
-                .slice(0, 3)
-                .map((article) => (
-                  <li key={article.slug}>
-                    <BoxedButton
-                      href={`/help/artikel/${article.slug}`}
-                      className="text-branding-dark"
-                    >
-                      <p className="text-sm/5 font-semibold">
-                        {article.metadata.title}
-                      </p>
-                    </BoxedButton>
-                  </li>
-                ))}
-            </ul>
-          </div>
+          {relatedArticles.length > 0 && (
+            <div className="grid gap-4">
+              <h2 className="text-gray-600 text-sm font-semibold">Gerelateerd</h2>
+              <ul className="space-y-3.5 -mx-4">
+                {relatedArticles
+                  .slice(0, 3)
+                  .map((article) => (
+                    <li key={article.slug}>
+                      <BoxedButton
+                        href={`/help/artikel/${article.slug}`}
+                        className="text-branding-dark"
+                      >
+                        <p className="text-sm/5 font-semibold">
+                          {article.metadata.title}
+                        </p>
+                      </BoxedButton>
+                    </li>
+                  ))}
+              </ul>
+            </div>
+          )}
 
           {/* Socials */}
           <div className="grid gap-4 pt-8">

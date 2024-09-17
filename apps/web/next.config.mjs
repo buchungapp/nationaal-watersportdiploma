@@ -33,6 +33,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/help/categorie/app-vaarlocaties/:path*",
+        destination: "/help/categorie/vaarlocaties/:path*",
+        permanent: true,
+      },
+      {
         source: "/profiel",
         destination: "/account",
         permanent: true,
