@@ -21,17 +21,8 @@ import { usePostHog } from "posthog-js/react";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 export default function SearchClient({
-  questions,
   articles,
 }: {
-  questions: {
-    metadata: {
-      question: string;
-      lastUpdatedAt: string;
-    };
-    slug: string;
-    content: string;
-  }[];
   articles: {
     metadata: {
       lastUpdatedAt: string;
@@ -81,17 +72,6 @@ export default function SearchClient({
   }, [articles]);
 
   useEffect(() => {
-    questions.forEach((question) => {
-      index.add({
-        url: question.slug,
-        title: question.metadata.question,
-        type: "question",
-        content: [question.metadata.question, question.content].join("\\n"),
-      });
-    });
-  }, [questions]);
-
-  useEffect(() => {
     posthog.capture("searched_faq", {
       query: deferredQuery,
     });
@@ -106,15 +86,9 @@ export default function SearchClient({
 
     return searchResult[0]!.result.map(
       // @ts-expect-error Type does not account for the enrich option
-      (article: {
-        id: string;
-        doc: { type: "article" | "question"; title: string };
-      }) => {
+      (article: { id: string; doc: { type: "article"; title: string } }) => {
         return {
-          url:
-            article.doc.type === "article"
-              ? `/help/artikel/${article.id}`
-              : `/help/veelgestelde-vragen/${article.id}`,
+          url: `/help/artikel/${article.id}`,
           title: article.doc.title,
           type: article.doc.type,
         };

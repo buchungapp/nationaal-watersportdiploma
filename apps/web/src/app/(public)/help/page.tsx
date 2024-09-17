@@ -76,17 +76,11 @@ export default async function Page() {
       </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <CategorieCard
-          category={{
-            slug: "veelgestelde-vragen",
-            title: "Veelgestelde vragen",
-            description: "Ontdek antwoorden op veelgestelde vragen.",
-          }}
-          base="/help"
-        />
-        {categories.map((category) => (
-          <CategorieCard key={category.slug} category={category} />
-        ))}
+        {categories
+          .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+          .map((category) => (
+            <CategorieCard key={category.slug} category={category} />
+          ))}
       </div>
     </>
   );

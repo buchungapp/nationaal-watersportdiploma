@@ -1,11 +1,8 @@
-import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
+import { getHelpArticles } from "~/lib/article-2";
 import SearchClient from "./search-client";
 
 export default async function Search() {
-  const [questions, articles] = await Promise.all([
-    getHelpFaqs(),
-    getHelpArticles(),
-  ]);
+  const [articles] = await Promise.all([getHelpArticles()]);
 
-  return <SearchClient questions={questions} articles={articles} />;
+  return <SearchClient articles={articles} />;
 }

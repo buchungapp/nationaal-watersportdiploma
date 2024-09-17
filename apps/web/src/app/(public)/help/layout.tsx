@@ -2,13 +2,10 @@ import PageHero from "../_components/style/page-hero";
 import SearchClient from "./_components/search-client";
 
 import type { PropsWithChildren } from "react";
-import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
+import { getHelpArticles } from "~/lib/article-2";
 
 export default async function Layout({ children }: PropsWithChildren) {
-  const [questions, articles] = await Promise.all([
-    getHelpFaqs(),
-    getHelpArticles(),
-  ]);
+  const [articles] = await Promise.all([getHelpArticles()]);
 
   return (
     <main className="flex flex-col items-center">
@@ -18,7 +15,7 @@ export default async function Layout({ children }: PropsWithChildren) {
             Hoe kunnen we helpen?
           </h2>
           <div className="mt-6">
-            <SearchClient questions={questions} articles={articles} />
+            <SearchClient articles={articles} />
           </div>
         </div>
       </PageHero>

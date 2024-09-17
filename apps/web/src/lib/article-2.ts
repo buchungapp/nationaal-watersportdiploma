@@ -79,23 +79,6 @@ export const getHelpArticles = cache(async function () {
   });
 });
 
-export const getHelpFaqs = cache(async function () {
-  const articles = await getMDXData(
-    path.join(
-      process.cwd(),
-      "./src/app/(public)/help/veelgestelde-vragen/_content",
-    ),
-    z.object({
-      question: z.string(),
-      lastUpdatedAt: z.string().date(),
-    }),
-  );
-
-  return articles.map(({ pathSegments: _p, ...article }) => {
-    return article;
-  });
-});
-
 export const getHelpCategories = cache(async function () {
   const categories = await glob("**/_meta.yaml", {
     cwd: path.join(process.cwd(), "./src/app/(public)/help/artikel/_content"),
@@ -114,6 +97,7 @@ export const getHelpCategories = cache(async function () {
       .object({
         title: z.string(),
         description: z.string().optional(),
+        order: z.number().optional(),
       })
       .parse(matter(rawContent).data);
 
