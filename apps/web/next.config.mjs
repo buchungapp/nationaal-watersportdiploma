@@ -1,5 +1,5 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import nextMDX from "@next/mdx";
+import { withSentryConfig } from "@sentry/nextjs";
 import remarkGfm from "remark-gfm";
 
 /** @type {import('next').NextConfig} */
@@ -62,7 +62,7 @@ const withMDX = nextMDX({
   },
 });
 
-export default withSentryConfig(withMDX(nextConfig), {
+export default withMDX(withSentryConfig(nextConfig), {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
