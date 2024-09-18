@@ -68,7 +68,10 @@ export default withMDX(withSentryConfig(nextConfig), {
 
   org: "frontend070",
   project: "javascript-nextjs",
-  sentryUrl: "https://sentry.io/",
+  // sentryUrl: "https://sentry.io/",
+
+  // An auth token is required for uploading source maps.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -91,7 +94,7 @@ export default withMDX(withSentryConfig(nextConfig), {
   // tunnelRoute: "/monitoring",
 
   // Hides source maps from generated client bundles
-  hideSourceMaps: true,
+  // hideSourceMaps: true,
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
   disableLogger: true,
