@@ -7,7 +7,7 @@
     "formatting": "prettier --check *",
     "formatting:fix": "prettier --write *",
     "build:packages": "pnpm --recursive --filter './packages/**' build",
-    "initialize": "node ./scripts/initialize.js",
+    "initialize": "node ./scripts/initialize.mjs",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
     "db:seed": "node ./scripts/seed-local-db.js"
   },

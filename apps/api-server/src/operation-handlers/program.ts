@@ -3,7 +3,7 @@ import * as application from '../application/index.js'
 
 export const listPrograms: api.server.ListProgramsOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async () => {
   // const list = await core.Program.list()
 
   // const listEntity = list.map((item) => ({
@@ -16,10 +16,5 @@ export const listPrograms: api.server.ListProgramsOperationHandler<
   //   disciplineTitle: item.discipline.title,
   // }))
 
-  return {
-    status: 200,
-    parameters: {},
-    contentType: 'application/json',
-    entity: () => [],
-  }
+  return []
 }
