@@ -4,16 +4,12 @@ import * as application from '../application/index.js'
 
 export const getLocationCohorts: api.server.GetLocationCohortsOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
-  const { locationKey } = incomingRequest.parameters
-
+> = async ({ locationKey }) => {
   // TODO list cohorts
 
-  return {
-    status: 200,
-    parameters: {},
-    contentType: 'application/json',
-    entity: () => [
+  return [
+    200,
+    [
       {
         id: '',
         handle: '',
@@ -25,24 +21,14 @@ export const getLocationCohorts: api.server.GetLocationCohortsOperationHandler<
         title: '',
       },
     ],
-  }
+  ]
 }
 
 export const createLocationCohort: api.server.CreateLocationCohortOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) =>
+> = async ({ locationKey }, entity) =>
   core.withTransaction(async () => {
-    const { locationKey } = incomingRequest.parameters
-    const entity = await incomingRequest.entity()
-
     // TODO create cohort
 
-    return {
-      status: 201,
-      parameters: {},
-      contentType: 'application/json',
-      entity: () => ({
-        id: '',
-      }),
-    }
+    return [201, { id: '' }]
   })

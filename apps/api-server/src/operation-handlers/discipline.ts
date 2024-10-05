@@ -3,7 +3,7 @@ import * as application from '../application/index.js'
 
 export const listDisciplines: api.server.ListDisciplinesOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async () => {
   // const disciplineList = await core.Program.Discipline.list()
 
   // const responseEntity = disciplineList.map((item) => ({
@@ -11,19 +11,12 @@ export const listDisciplines: api.server.ListDisciplinesOperationHandler<
   //   handle: item.handle,
   // }))
 
-  return {
-    parameters: {},
-    status: 200,
-    contentType: 'application/json',
-    entity: () => [],
-  }
+  return []
 }
 
 export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
-  // const { disciplineKey } = incomingRequest.parameters
-
+> = async ({ disciplineKey }) => {
   // // TODO get discipline type from core
   // let disciplineItem: Awaited<
   //   ReturnType<typeof core.Program.Discipline.fromHandle>
@@ -57,9 +50,5 @@ export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
   //   entity: () => responseEntity,
   // }
 
-  return {
-    parameters: {},
-    status: 404,
-    contentType: null,
-  }
+  return [404, undefined]
 }
