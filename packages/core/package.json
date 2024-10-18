@@ -20,6 +20,7 @@
     "test": "node --test './out/**/*.test.js'"
   },
   "dependencies": {
+    "@appsignal/nodejs": "^3.5.1",
     "@nawadi/db": "workspace:*",
     "@nawadi/lib": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
@@ -33,6 +34,7 @@
     "image-size": "^1.1.1",
     "ioredis": "^5.4.1",
     "nanoid": "^5.0.7",
+    "pino": "^9.5.0",
     "postgres": "^3.4.4",
     "zod": "^3.23.8"
   },

@@ -68,7 +68,7 @@ export class CoreError extends Error {
       return this.fromError(error)
     }
 
-    return
+    return new CoreError(CoreErrorType.Unexpected)
   }
 
   public static fromError(error: Error) {

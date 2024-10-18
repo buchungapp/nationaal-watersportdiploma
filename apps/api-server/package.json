@@ -32,7 +32,7 @@
   },
   "keywords": [],
   "dependencies": {
-    "@appsignal/nodejs": "^3.4.8",
+    "@appsignal/nodejs": "^3.5.1",
     "@nawadi/api": "workspace:*",
     "@nawadi/core": "workspace:^",
     "@nawadi/db": "workspace:^",
