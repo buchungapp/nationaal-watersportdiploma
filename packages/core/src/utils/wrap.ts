@@ -2,7 +2,7 @@ import * as opentelemetry from '@opentelemetry/api'
 import { CoreError } from './error.js'
 
 import Appsignal from '@appsignal/nodejs'
-import { useLogger } from './log.js'
+import { useLogger } from '../contexts/index.js'
 
 const commandTracer = opentelemetry.trace.getTracer('command')
 const queryTracer = opentelemetry.trace.getTracer('query')
@@ -14,6 +14,8 @@ type TracerFunction = <R, A extends unknown[]>(
 
 const createWrapper = (tracer: opentelemetry.Tracer): TracerFunction => {
   return (name, task) => {
+    console.log('starting ', name)
+
     return async (...args) => {
       return tracer.startActiveSpan(name, async (span) => {
         Appsignal.setRootName(name)
@@ -22,6 +24,9 @@ const createWrapper = (tracer: opentelemetry.Tracer): TracerFunction => {
           //   span.setAttribute("args", JSON.stringify(args));
           const result = await task(...args)
           //   span.setAttribute("result", JSON.stringify(result));
+
+          useLogger().info(`${name} completed`)
+
           return result
         } catch (error) {
           const coreError = CoreError.fromUnknown(error)

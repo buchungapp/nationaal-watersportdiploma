@@ -12,6 +12,7 @@ const nextConfig = {
       "/": ["./src/app/(public)/**/*.mdx"],
     },
     instrumentationHook: true,
+    serverComponentsExternalPackages: ["@appsignal/nodejs"],
   },
   transpilePackages: ["next-mdx-remote"],
   async redirects() {

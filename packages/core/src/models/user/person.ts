@@ -21,6 +21,7 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
+  wrapQuery,
 } from '../../utils/index.js'
 import { insertSchema, personSchema } from './person.schema.js'
 import { getOrCreateFromEmail } from './user.js'
@@ -140,53 +141,56 @@ export const createLocationLink = withZod(
   },
 )
 
-export const byIdOrHandle = withZod(
-  z.union([z.object({ id: uuidSchema }), z.object({ handle: z.string() })]),
-  personSchema,
-  async (input) => {
-    const query = useQuery()
+export const byIdOrHandle = wrapQuery(
+  'user.person.byIdOrHandle',
+  withZod(
+    z.union([z.object({ id: uuidSchema }), z.object({ handle: z.string() })]),
+    personSchema,
+    async (input) => {
+      const query = useQuery()
 
-    const whereClausules: (SQL | undefined)[] = [isNull(s.person.deletedAt)]
+      const whereClausules: (SQL | undefined)[] = [isNull(s.person.deletedAt)]
 
-    if ('id' in input) {
-      whereClausules.push(eq(s.person.id, input.id))
-    }
+      if ('id' in input) {
+        whereClausules.push(eq(s.person.id, input.id))
+      }
 
-    if ('handle' in input) {
-      whereClausules.push(eq(s.person.handle, input.handle))
-    }
+      if ('handle' in input) {
+        whereClausules.push(eq(s.person.handle, input.handle))
+      }
 
-    const res = await query
-      .select({
-        ...getTableColumns(s.person),
-        email: s.user.email,
-        birthCountry: {
-          code: s.country.alpha_2,
-          name: s.country.nl,
-        },
-      })
-      .from(s.person)
-      .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-      .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
-      .where(and(...whereClausules))
-      .then((rows) => {
-        const result = singleRow(rows)
-        if (result.birthCountry?.code === null) {
-          return {
-            ...result,
-            birthCountry: null,
+      const res = await query
+        .select({
+          ...getTableColumns(s.person),
+          email: s.user.email,
+          birthCountry: {
+            code: s.country.alpha_2,
+            name: s.country.nl,
+          },
+        })
+        .from(s.person)
+        .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+        .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+        .where(and(...whereClausules))
+        .then((rows) => {
+          const result = singleRow(rows)
+          if (result.birthCountry?.code === null) {
+            return {
+              ...result,
+              birthCountry: null,
+            }
           }
-        }
-        return result
-      })
+          return result
+        })
 
-    return {
-      ...res,
-      handle: res.handle!,
-      createdAt: dayjs(res.createdAt).toISOString(),
-      updatedAt: dayjs(res.updatedAt).toISOString(),
-    }
-  },
+      return {
+        ...res,
+        handle: res.handle!,
+        createdAt: dayjs(res.createdAt).toISOString(),
+        updatedAt: dayjs(res.updatedAt).toISOString(),
+      }
+    },
+  ),
 )
 
 export const list = withZod(

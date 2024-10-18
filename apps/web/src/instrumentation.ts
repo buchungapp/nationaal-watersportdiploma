@@ -1,5 +1,5 @@
-import { registerOTel } from "@vercel/otel";
-
 export function register() {
-  registerOTel("nawadi-web");
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    require("./appsignal.cjs");
+  }
 }

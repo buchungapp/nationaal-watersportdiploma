@@ -1,3 +1,4 @@
+import { Appsignal, AppsignalPinoTransport } from "@appsignal/nodejs";
 import type {
   DatabaseConfiguration,
   RedisConfiguration,
@@ -12,7 +13,9 @@ import {
   Platform,
   Student,
   User,
+  prettyStream,
   withDatabase,
+  withLogger,
   withRedisClient,
   withSupabaseClient,
   withTransaction,
@@ -94,11 +97,25 @@ async function isActiveActorTypeInLocation({
   return true as const;
 }
 
+const appsignalTransport = {
+  ...AppsignalPinoTransport({
+    client: Appsignal.client,
+    group: "core-test",
+  }),
+  requestId: crypto.randomUUID(),
+};
+
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
-    return await withSupabaseClient(supabaseConfig, async () => {
-      return await withDatabase(dbConfig, cb);
-    });
+    return await withLogger(
+      async () => {
+        return await withSupabaseClient(supabaseConfig, async () => {
+          return await withDatabase(dbConfig, cb);
+        });
+      },
+      { level: "debug" },
+      prettyStream,
+    );
   } catch (error) {
     console.error(error);
     throw error;

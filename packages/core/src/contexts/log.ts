@@ -1,46 +1,83 @@
-import { AsyncLocalStorage } from 'async_hooks'
+import { AsyncLocalStorage } from 'node:async_hooks'
+import { pino, type LoggerOptions } from 'pino'
+import pretty from 'pino-pretty'
 
-export interface LogConfiguration {
-  error?: (message: unknown) => void
-  warn?: (message: unknown) => void
-  info?: (message: unknown) => void
+type Logger = pino.Logger
+
+interface LoggerContext {
+  requestId?: string
+  logger: Logger
 }
 
-export function consoleLogConfiguration(): LogConfiguration {
-  return {
-    error(message) {
-      console.error(message)
-    },
-    warn(message) {
-      console.warn(message)
-    },
-    info(message) {
-      console.info(message)
-    },
+const asyncLocalStorage = new AsyncLocalStorage<LoggerContext>()
+
+interface CreateLoggerOptions extends LoggerOptions {
+  requestId?: string
+}
+
+const prettyOptions = {
+  colorize: true,
+  levelFirst: true,
+  translateTime: 'SYS:standard',
+  ignore: 'pid,hostname',
+  messageFormat: '{requestId} - {msg}',
+}
+
+export const pinoPrettyConfiguration: LoggerOptions = {
+  transport: {
+    target: 'pino-pretty',
+    options: prettyOptions,
+  },
+  level: 'debug',
+}
+
+export const prettyStream = pretty(prettyOptions)
+
+function createLogger(
+  options: CreateLoggerOptions = {},
+  stream?: pino.DestinationStream,
+): Logger {
+  const { requestId, ...loggerOptions } = options
+  return pino({ ...loggerOptions, base: { requestId } }, stream)
+}
+
+export function useLogger(): Logger {
+  const context = asyncLocalStorage.getStore()
+  if (!context) {
+    throw new Error(
+      'Logger context not found. Make sure to wrap your code with withLogger()',
+    )
   }
+  return context.logger
 }
 
-const storage = new AsyncLocalStorage<LogConfiguration>()
-
-export async function withLog<T>(
-  configuration: LogConfiguration,
-  job: () => Promise<T>,
-): Promise<T> {
-  const result = await storage.run(configuration, job)
-  return result
+interface withLoggerOptions extends CreateLoggerOptions {
+  requestId?: string
 }
 
-export function error(message: unknown) {
-  const configuration = storage.getStore()
-  configuration?.error?.(message)
-}
+export function withLogger<T>(
+  fn: () => T,
+  ...pinoArgs: Parameters<typeof createLogger>
+): T {
+  const existingContext = asyncLocalStorage.getStore()
+  let logger: Logger
 
-export function warn(message: unknown) {
-  const configuration = storage.getStore()
-  configuration?.warn?.(message)
-}
+  const options = pinoArgs[0]!
 
-export function info(message: unknown) {
-  const configuration = storage.getStore()
-  configuration?.info?.(message)
+  if (existingContext) {
+    // If there's an existing context, create a child logger
+    const childOptions = {
+      ...options,
+      requestId: options.requestId,
+    }
+    logger = existingContext.logger.child(childOptions)
+  } else {
+    // If no existing context, create a new logger
+    logger = createLogger(...pinoArgs)
+  }
+
+  return asyncLocalStorage.run(
+    { requestId: logger.bindings().requestId, logger },
+    fn,
+  )
 }
