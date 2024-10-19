@@ -16,14 +16,10 @@ test('api-key authentication', () =>
       userId: userItem.id,
     })
 
-    const result = await api.client.me(
-      {
-        contentType: null,
-        parameters: {},
-      },
-      { apiKey: apiKeyItem.token },
-      { baseUrl },
-    )
+    const result = await api.client.me({
+      apiKey: apiKeyItem.token,
+      baseUrl,
+    })
 
     assert(result.status === 200)
 
