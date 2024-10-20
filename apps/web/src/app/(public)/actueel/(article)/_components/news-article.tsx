@@ -43,7 +43,7 @@ export function ArticleLayout({
               Terug naar alle artikelen
             </TekstButton>
 
-            <h1 className="text-4xl font-bold lg:leading-[1.15] lg:text-5xl max-w-prose">
+            <h1 className="text-4xl font-bold lg:leading-[1.15] lg:text-5xl max-w-prose break-words hyphens-auto">
               {article.title}
             </h1>
           </div>
