@@ -5,17 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  braces@<3.0.3: '>=3.0.3'
-  '@grpc/grpc-js@>=1.10.0 <1.10.9': '>=1.10.9'
-  ws@>=8.0.0 <8.17.1: '>=8.17.1'
-  axios@>=1.3.2 <=1.7.3: '>=1.7.4'
-  micromatch@<4.0.8: '>=4.0.8'
-  body-parser@<1.20.3: '>=1.20.3'
-  send@<0.19.0: '>=0.19.0'
-  serve-static@<1.16.0: '>=1.16.0'
-  express@<4.20.0: '>=4.20.0'
-  path-to-regexp@<0.1.10: '>=0.1.10'
-  rollup@>=4.0.0 <4.22.4: '>=4.22.4'
   cookie@<0.7.0: '>=0.7.0'
 
 importers:
@@ -368,7 +357,7 @@ importers:
         specifier: ^18.2.4
         version: 18.2.4
       rollup:
-        specifier: '>=4.22.4'
+        specifier: ^4.18.0
         version: 4.24.0
       typescript:
         specifier: ^5.5.2
@@ -4350,7 +4339,7 @@ packages:
       '@supabase/supabase-js': ^2.43.4
     dependencies:
       '@supabase/supabase-js': 2.45.6
-      cookie: 1.0.1
+      cookie: 0.7.2
     optionalDependencies:
       '@rollup/rollup-linux-x64-gnu': 4.24.0
     dev: false
@@ -6233,12 +6222,6 @@ packages:
   /cookie@0.7.2:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
-    dev: true
-
-  /cookie@1.0.1:
-    resolution: {integrity: sha512-Xd8lFX4LM9QEEwxQpF9J9NTUh8pmdJO0cyRJhFiDoLTk2eH8FXlRv2IFGYVadZpqI3j8fhNrSdKCeYPxiAhLXw==}
-    engines: {node: '>=18'}
-    dev: false
 
   /core-js@3.38.1:
     resolution: {integrity: sha512-OP35aUorbU3Zvlx7pjsFdu1rGNnD4pgw/CWoYzRY3t2EzoVT7shKHY1dlAy3f41cGIO7ZDPQimhGFTlEYkG/Hw==}
@@ -12828,7 +12811,7 @@ packages:
     resolution: {integrity: sha512-pOLi+Gdll3JekwuFjXO3fTq+L9lzMQGcSq7M5gIjExcl3Gu1hd4XXuf5o3+LuSBsaULQH7DiNbsqPd1chVpQGQ==}
     engines: {node: '>=10.7.0'}
     peerDependencies:
-      axios: '>=1.7.4'
+      axios: '*'
     dependencies:
       axios: 1.7.7
     dev: false
