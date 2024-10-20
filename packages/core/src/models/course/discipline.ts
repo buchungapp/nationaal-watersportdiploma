@@ -41,6 +41,34 @@ export const create = withZod(
     }),
 )
 
+export const update = withZod(
+  insertSchema
+    .pick({
+      id: true,
+      title: true,
+      handle: true,
+      weight: true,
+    })
+    .required({ id: true }),
+  successfulCreateResponse,
+  async (item) => {
+    const query = useQuery()
+
+    const row = await query
+      .update(s.discipline)
+      .set({
+        title: item.title,
+        handle: item.handle,
+        weight: item.weight,
+      })
+      .where(eq(s.discipline.id, item.id))
+      .returning({ id: s.discipline.id })
+      .then(singleRow)
+
+    return row
+  },
+)
+
 export const list = withZod(z.void(), selectSchema.array(), async () => {
   const query = useQuery()
 

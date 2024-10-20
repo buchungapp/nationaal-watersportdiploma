@@ -2,6 +2,7 @@ import { schema as s } from '@nawadi/db'
 import {
   SQLWrapper,
   and,
+  count,
   countDistinct,
   desc,
   eq,
@@ -409,6 +410,100 @@ export const countStartedStudents = withZod(
       .then((rows) => rows[0]?.count ?? 0)
 
     return count
+  },
+)
+
+export const start = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+    startAt: z.string().datetime(),
+  }),
+  async ({ curriculumId, startAt }) => {
+    const query = useQuery()
+
+    if (
+      !(await isEditable({
+        curriculumId,
+      }))
+    ) {
+      throw new Error(
+        'Curriculum cannot be started because it has students or is already started',
+      )
+    }
+
+    await query
+      .update(s.curriculum)
+      .set({
+        startedAt: dayjs(startAt).toISOString(),
+      })
+      .where(eq(s.curriculum.id, curriculumId))
+
+    return { id: curriculumId }
+  },
+)
+
+export const isEditable = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+  }),
+  z.boolean(),
+  async ({ curriculumId }) => {
+    const query = useQuery()
+
+    const isStarted = await query
+      .select({ count: count() })
+      .from(s.curriculum)
+      .where(
+        and(
+          eq(s.curriculum.id, curriculumId),
+          isNotNull(s.curriculum.startedAt),
+          lte(s.curriculum.startedAt, new Date().toISOString()),
+        ),
+      )
+      .then(singleRow)
+
+    if (isStarted.count > 0) {
+      return false
+    }
+
+    const numberOfStartedStudents = await countStartedStudents({ curriculumId })
+    if (numberOfStartedStudents > 0) {
+      return false
+    }
+
+    return true
+  },
+)
+
+export const remove = withZod(
+  z.object({
+    curriculumId: uuidSchema,
+  }),
+  async ({ curriculumId }) => {
+    const query = useQuery()
+
+    if (
+      !(await isEditable({
+        curriculumId,
+      }))
+    ) {
+      throw new Error(
+        'Curriculum cannot be removed because it has students or is already started',
+      )
+    }
+
+    await query
+      .delete(s.curriculumCompetency)
+      .where(eq(s.curriculumCompetency.curriculumId, curriculumId))
+    await query
+      .delete(s.curriculumModule)
+      .where(eq(s.curriculumModule.curriculumId, curriculumId))
+    await query
+      .delete(s.curriculumGearLink)
+      .where(eq(s.curriculumGearLink.curriculumId, curriculumId))
+    await query.delete(s.curriculum).where(eq(s.curriculum.id, curriculumId))
+
+    return { id: curriculumId }
   },
 )
 

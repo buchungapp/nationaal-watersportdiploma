@@ -353,6 +353,32 @@ export const listDisciplines = cache(async () => {
   });
 });
 
+export const updateDiscipline = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    weight: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Discipline.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+      weight: fields.weight,
+    });
+
+    return;
+  });
+};
+
 export const listDegrees = cache(async () => {
   return makeRequest(async () => {
     const degrees = await Course.Degree.list();
@@ -369,6 +395,32 @@ export const listModules = cache(async () => {
   });
 });
 
+export const updateModule = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    weight: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Module.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+      weight: fields.weight,
+    });
+
+    return;
+  });
+};
+
 export const listCompetencies = cache(async () => {
   return makeRequest(async () => {
     const competencies = await Course.Competency.list();
@@ -376,6 +428,34 @@ export const listCompetencies = cache(async () => {
     return competencies;
   });
 });
+
+export const updateCompetency = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    weight: number;
+    type: "knowledge" | "skill";
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Competency.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+      weight: fields.weight,
+      type: fields.type,
+    });
+
+    return;
+  });
+};
 
 export const listGearTypes = cache(async () => {
   return makeRequest(async () => {
@@ -385,6 +465,30 @@ export const listGearTypes = cache(async () => {
   });
 });
 
+export const updateGearType = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.update({
+      id: id,
+      title: fields.title,
+      handle: fields.handle,
+    });
+
+    return;
+  });
+};
+
 export const listCategories = cache(async () => {
   return makeRequest(async () => {
     const categories = await Course.Category.list();
@@ -392,6 +496,51 @@ export const listCategories = cache(async () => {
     return categories;
   });
 });
+
+export const updateCategory = async (
+  id: string,
+  fields: {
+    handle: string;
+    title?: string | null;
+    description?: string | null;
+    parentCategoryId?: string | null;
+    weight: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    if (fields.parentCategoryId) {
+      const parentCategories = await listParentCategories();
+
+      if (!parentCategories.some((c) => c.id === fields.parentCategoryId)) {
+        throw new Error("Invalid parent category");
+      }
+
+      const isParentCategory = parentCategories.find((c) => c.id === id);
+      if (isParentCategory?.hasActiveChildren) {
+        throw new Error(
+          "A parent category with active children cannot be a child category",
+        );
+      }
+    }
+
+    await Course.Category.update({
+      id: id,
+      title: fields.title,
+      description: fields.description,
+      handle: fields.handle,
+      parentCategoryId: fields.parentCategoryId,
+      weight: fields.weight,
+    });
+
+    return;
+  });
+};
 
 export const listParentCategories = cache(async () => {
   return makeRequest(async () => {
@@ -477,6 +626,69 @@ export const retrieveCurriculumById = cache(async (id: string) => {
   });
 });
 
+export const linkGearTypeToCurriculum = async ({
+  curriculumId,
+  gearTypeId,
+}: {
+  curriculumId: string;
+  gearTypeId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.linkToCurriculum({ curriculumId, gearTypeId });
+
+    return;
+  });
+};
+
+export const unlinkGearTypeFromCurriculum = async ({
+  curriculumId,
+  gearTypeId,
+}: {
+  curriculumId: string;
+  gearTypeId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.unlinkFromCurriculum({
+      curriculumId,
+      gearTypeId,
+    });
+
+    return;
+  });
+};
+
+export const startCurriculum = async ({
+  curriculumId,
+  startAt,
+}: {
+  curriculumId: string;
+  startAt: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.start({ curriculumId, startAt });
+
+    return;
+  });
+};
+
 export const countStartedStudentsForCurriculum = cache(
   async (curriculumId: string) => {
     return makeRequest(async () => {
@@ -489,6 +701,30 @@ export const countStartedStudentsForCurriculum = cache(
   },
 );
 
+export const retreiveCurriculumEditable = async (curriculumId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    return await Curriculum.isEditable({ curriculumId });
+  });
+};
+
+export const removeCurriculum = async (curriculumId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.remove({ curriculumId });
+  });
+};
+
 export const copyCurriculum = async ({
   curriculumId,
   revision,
@@ -497,6 +733,12 @@ export const copyCurriculum = async ({
   revision?: string;
 }) => {
   return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (authUser.email !== "info@nationaalwatersportdiploma.nl") {
+      throw new Error("Unauthorized");
+    }
+
     return Curriculum.copy({
       curriculumId,
       revision: revision ?? `Copy of ${new Date().toISOString()}`,
