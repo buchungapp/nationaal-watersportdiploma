@@ -18,18 +18,21 @@ export async function addCategories() {
     },
     {
       id: JEUGD_CATEGORY_ID,
+      parentCategoryId: AGE_CATEGORY_ID,
       handle: 'jeugd',
       title: 'Jeugd',
       weight: 2,
     },
     {
       id: JONGEREN_CATEGORY_ID,
+      parentCategoryId: AGE_CATEGORY_ID,
       handle: 'jongeren',
       title: 'Jongeren',
       weight: 2,
     },
     {
       id: VOLWASSENEN_CATEGORY_ID,
+      parentCategoryId: AGE_CATEGORY_ID,
       handle: 'volwassenen',
       title: 'Volwassenen',
       weight: 2,

@@ -1088,7 +1088,8 @@ export const personsBelongTogetherInActiveCohort = withZod(
       )
       .groupBy(s.cohort.id)
       .having(
-        sql`array_length(array_agg(${s.actor.personId}), 1) = ${input.personId.length}`,
+        // GTE because a person can appear multiple times in the same cohort
+        sql`array_length(array_agg(${s.actor.personId}), 1) >= ${input.personId.length}`,
       )
 
     return result.length > 0
