@@ -202,7 +202,8 @@ export default function CertificateTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              target="_blank"
+              href={`/diploma/${row.original.id}?nummer=${row.original.handle}&datum=${dayjs(row.original.issuedAt).format("YYYYMMDD")}`}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell
