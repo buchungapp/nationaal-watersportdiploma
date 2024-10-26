@@ -1,0 +1,76 @@
+import { constants } from "@nawadi/lib";
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  date: "2024-10-17T17:00:00Z",
+  category: "achterban",
+  title:
+    "Online informatiebijeenkomst vaarschoolhouders op woensdag 23 oktober",
+  description:
+    "We nodigen vaarschoolhouders uit voor een online informatiebijeenkomst op 23 oktober, waar we terugblikken op 2024, vooruitkijken naar 2025, en de technische systemen en aansluitprocedure zullen bespreken.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/5UhH3VTM-online-informatiebijeenkomst-vaarschoolhouders-woensdag-23-oktober",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/5UhH3VTM-online-informatiebijeenkomst-vaarschoolhouders-woensdag-23-oktober",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Nu het vaarseizoen ten einde loopt en velen van jullie zich voorbereiden op de
+herfstvakantie, is het een goed moment om terug te blikken en vooruit te kijken.
+
+Het Nationaal Watersportdiploma (NWD) zet haar missie in 2025 voort. Mede
+ingegeven door verzoeken van enkele vaarscholen, maar ook vanuit onze eigen wens
+om jullie tijdig te informeren, nodigen we alle geïnteresseerde
+vaarschoolhouders uit voor een online informatiebijeenkomst op **woensdag 23
+oktober** om **10.00 uur**.
+
+Tijdens deze 1,5 uur durende bijeenkomst zullen we de volgende onderwerpen
+behandelen:
+
+- **Terugblik op het seizoen 2024** (15 min)
+  - Cijfers en statistieken
+  - Ervaringen en inzichten
+- **Deep-dive in het technische systeem** (30 min)
+  - Live demo
+  - Gebruikerservaringen
+  - Geplande ontwikkelingen voor 2025
+- **Vooruitblik naar seizoen 2025** (20 min)
+  - Doelstellingen en ontwikkelingen NWD
+  - Financieel overzicht
+  - Ontwikkelingen in het watersportlandschap
+- **Toelichting aansluitprocedure** (15 min)
+  - Overzicht van de procedure
+  - Delen van ervaringen vanuit iSail
+  - Overgang vanaf de CWO
+- **Vraag-ons-alles sessie** (10 min)
+
+Wil jullie locatie deelnemen? Stuur dan een mail naar
+[info@nationaalwatersportdiploma.nl](mailto:info@nationaalwatersportdiploma.nl)
+met de naam van de vaarlocatie. Jullie ontvangen dan 24 uur voor aanvang de
+vergaderlink.
+
+Kunnen jullie niet aanwezig zijn maar zijn jullie wel geïnteresseerd? Laat het
+ons weten, dan sturen we na afloop een samenvatting van de belangrijkste punten.
+
+We hopen velen van jullie te zien en te spreken!
+
+## Alvast inlezen?
+
+- [9 maanden NWD: Mijlpalen en ambities](/actueel/TKFTErzR-9-maanden-nwd-mijlpalen-en-ambities)
+- [Hoe werkt de aansluitingsprocedure van het NWD?](/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd)
+- [Neem alvast een kijkje achter de schermen van de NWD website](https://youtu.be/15yeTO_zPxA)
