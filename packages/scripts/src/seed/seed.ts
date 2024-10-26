@@ -7,7 +7,13 @@ import { addLocation } from './location.js'
 import { addRolesAndDependencies } from './roles/index.js'
 import { truncate } from './truncate.js'
 import { addUsers, deleteUsers } from './users.js'
-import { RESET, TEXT_CYAN, TEXT_GREEN } from './utils/colors.js'
+import {
+  RESET,
+  TEXT_CYAN,
+  TEXT_GREEN,
+  TEXT_RED,
+  TEXT_YELLOW,
+} from './utils/colors.js'
 import { processing } from './utils/processing.js'
 
 async function seed() {
@@ -95,6 +101,35 @@ assert(
   supabaseKey,
   'SUPABASE_SERVICE_ROLE_KEY environment variable is required',
 )
+
+if (!(pgUri.includes('127.0.0.1') || pgUri.includes('localhost'))) {
+  console.log(
+    TEXT_YELLOW + 'Current PG_URI is not on localhost:' + RESET,
+    pgUri,
+  )
+  console.log(
+    TEXT_YELLOW +
+      'Are you sure you want to proceed? This may affect a production database.' +
+      RESET,
+  )
+
+  const readline = await import('node:readline')
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  const answer = await new Promise<string>((resolve) => {
+    rl.question(TEXT_CYAN + 'Type "yes" to continue: ' + RESET, resolve)
+  })
+
+  rl.close()
+
+  if (answer.toLowerCase() !== 'yes') {
+    console.log(TEXT_RED + 'Seed operation cancelled.' + RESET)
+    process.exit(0)
+  }
+}
 
 withSupabaseClient(
   {

@@ -35,13 +35,7 @@ async function retrieveLocationsWithAllMeta() {
             place_id: location.googlePlaceId,
             language: Language.nl,
             key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-            fields: [
-              "rating",
-              "user_ratings_total",
-              "address_components",
-              "geometry",
-              "url",
-            ],
+            fields: ["address_components", "geometry", "url"],
           },
         })
         .catch((error) => {
@@ -49,13 +43,12 @@ async function retrieveLocationsWithAllMeta() {
           throw error;
         });
 
-      const { rating, user_ratings_total, address_components, geometry, url } =
-        placeDetails.data.result;
+      const { address_components, geometry, url } = placeDetails.data.result;
 
       return {
         ...location,
-        rating,
-        user_ratings_total,
+        rating: undefined,
+        user_ratings_total: undefined,
         geometry,
         googleUrl: url,
         province: address_components?.find(

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Nationaal Watersportdiploma",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0047ab",
+    "light": "#007FFF",
+    "dark": "#0047ab",
+    "anchors": {
+      "from": "#0047ab",
+      "to": "#007FFF"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "/support"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Dashboard",
+    "url": "https://www.nationaalwatersportdiploma.nl/login"
+  },
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Repository",
+      "icon": "github",
+      "url": "https://github.com/buchungapp/nationaal-watersportdiploma"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/RBTCNNt9bm"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": ["introduction"]
+    },
+    {
+      "group": "Development",
+      "pages": ["development/quickstart"]
+    },
+    {
+      "group": "API Usage",
+      "pages": ["api-usage/quickstart"]
+    },
+    {
+      "group": "API Documentation",
+      "pages": ["api-reference/introduction"]
+    },
+    {
+      "group": "Endpoint Examples",
+      "pages": [
+        "api-reference/endpoint/get",
+        "api-reference/endpoint/create",
+        "api-reference/endpoint/delete"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/buchungapp",
+    "linkedin": "https://www.linkedin.com/company/buchung"
+  }
+}

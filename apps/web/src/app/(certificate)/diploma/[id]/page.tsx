@@ -14,8 +14,8 @@ import {
 import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { Text, TextLink } from "../../../(dashboard)/_components/text";
-import { generateAdvise } from "../_utils/generate-advise";
 import { safeParseCertificateParams } from "../_utils/parse-certificate-params";
+import CertificateAdvise from "./_components/advise";
 import { Confetti } from "./_components/confetti";
 import { ShareCertificate } from "./_components/share";
 import CertificateTemplate from "./_components/template";
@@ -48,9 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function Page({ params, searchParams }: Props) {
-  const [certificate, advice] = await Promise.all([
+  const [certificate] = await Promise.all([
     retrieveCertificateById(params.id).catch(() => notFound()),
-    generateAdvise(params.id),
   ]);
 
   const result = safeParseCertificateParams({
@@ -136,13 +135,9 @@ export default async function Page({ params, searchParams }: Props) {
       <div className="text-center py-8">
         <h2 className="text-2xl font-semibold text-gray-950">En nu?</h2>
 
-        <Text className="max-w-prose mx-auto mt-1.5">{advice}</Text>
-
-        <Text className="max-w-prose mx-auto mt-2">
-          Leer meer over alle verschillende diploma's op{" "}
-          <TextLink href="/diplomalijn/consument">onze diplomalijn</TextLink>{" "}
-          pagina!
-        </Text>
+        <Suspense>
+          <CertificateAdvise id={params.id} />
+        </Suspense>
       </div>
 
       <div className="mt-10 pb-8 lg:pb-12 xl:pb-16">
