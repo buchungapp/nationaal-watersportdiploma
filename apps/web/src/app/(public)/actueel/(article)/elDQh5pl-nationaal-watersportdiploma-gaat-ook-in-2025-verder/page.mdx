@@ -1,0 +1,91 @@
+import { constants } from "@nawadi/lib";
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  date: "2024-11-07T16:00:00Z",
+  category: "achterban",
+  title: "Terugblik online informatiebijeenkomst NWD - Oktober 2024",
+  description:
+    "Afgelopen woensdag 23 oktober vond onze online informatiebijeenkomst plaats voor geïnteresseerde vaarschoolhouders. We delen graag de belangrijkste inzichten en ontwikkelingen met onze hele achterban.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/elDQh5pl-nationaal-watersportdiploma-gaat-ook-in-2025-verder",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/elDQh5pl-nationaal-watersportdiploma-gaat-ook-in-2025-verder",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Afgelopen woensdag 23 oktober vond onze online informatiebijeenkomst plaats voor
+geïnteresseerde vaarschoolhouders. We delen graag de belangrijkste inzichten en
+ontwikkelingen met onze hele achterban.
+
+## Een succesvol eerste seizoen
+
+Het eerste jaar van het Nationaal Watersportdiploma heeft onze verwachtingen
+overtroffen. Met **5.503** uitgegeven diploma's en meer dan **110.000**
+weergaven op onze sociale mediakanalen sinds onze lancering op 22 maart, hebben
+we een sterke basis gelegd voor de toekomst van watersportopleidingen in
+Nederland. Wat ons vooral verheugt is de positieve ontvangst van onze nieuwe
+aanpak:
+
+- **Voor cursisten**: De modulaire opbouw van onze diploma's wordt zeer
+  gewaardeerd. Het neemt de stress van verlopende vorderingenstaten weg en biedt
+  flexibiliteit in het leertraject.
+- **Voor instructeurs**: Ons online systeem blijkt een schot in de roos, vooral
+  bij het efficiënt verwerken van diploma's en cursistgegevens.
+- **Voor vaarlocaties**: De overgang vanaf het CWO-systeem is soepel verlopen en
+  de transparantie en inspraak die een vereniging biedt, is een verademing voor
+  de vaarlocaties.
+
+## Technische ontwikkelingen
+
+We hebben op [YouTube](https://www.youtube.com/watch?v=15yeTO_zPxA) een
+gedetailleerde video-walkthrough gepubliceerd van ons systeem.
+
+Voor het komende winterseizoen staan verschillende belangrijke ontwikkelingen op
+de planning:
+
+- Digitalisering van het PvB-proces
+- Implementatie van een intelligente adviesmodule voor aspirant-watersporters
+- Het beschikbaar stellen van onze API voor integratie met externe systemen
+
+## Vooruitblik 2025
+
+Het NWD blijft koersvast op haar missie van veiligheid, kwaliteit en plezier op
+het water. Als vereniging blijven we inzetten op:
+
+- Transparante besluitvorming met actieve ledeninspraak
+- Verdere professionalisering van de sector
+- Constructieve samenwerkingen binnen het watersportlandschap
+
+Met een gezonde financiële basis kunnen we blijven investeren in zowel
+technische innovatie als marketingontwikkeling.
+
+## Aansluiten bij het NWD
+
+Tijdens de bijeenkomst deelde Brent Biesheuvel van zeilschool iSail zijn
+ervaringen met het aansluitproces. Zijn verhaal onderstreept onze aanpak van
+persoonlijke begeleiding en praktische ondersteuning. Voor geïnteresseerde
+vaarlocaties zijn alle details over de aansluitprocedure en kwaliteitseisen te
+vinden op
+[onze website](/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd).
+
+## Contact
+
+Heeft uw vaarlocatie interesse in het NWD of behoefte aan meer informatie? We
+gaan graag met u in gesprek over de mogelijkheden. Neem contact op met ons
+Secretariaat via info@nationaalwatersportdiploma.nl.
