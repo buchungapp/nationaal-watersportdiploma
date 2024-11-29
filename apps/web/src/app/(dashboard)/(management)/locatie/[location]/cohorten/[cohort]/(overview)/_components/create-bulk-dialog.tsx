@@ -193,14 +193,14 @@ function SubmitForm({
       | {
           success: boolean;
           persons?: {
-            email: string;
+            email?: string;
             firstName: string;
-            lastNamePrefix: string | null;
-            lastName: string;
-            dateOfBirth: Date;
-            birthCity: string;
-            birthCountry: string;
-            tags: string[];
+            lastNamePrefix?: string | null;
+            lastName?: string;
+            dateOfBirth?: Date;
+            birthCity?: string;
+            birthCountry?: string;
+            tags?: string[];
           }[];
           message?: string;
         }
@@ -297,15 +297,16 @@ function SubmitForm({
 
       const personRowSchema = z
         .tuple([
-          z.string().trim().toLowerCase().email(),
+          z.string().trim().toLowerCase().email().optional(),
           z.string().trim(),
           z
             .string()
             .trim()
-            .transform((v) => v || null),
-          z.string(),
-          z.string().pipe(z.coerce.date()),
-          z.string(),
+            .transform((v) => v || null)
+            .optional(),
+          z.string().optional(),
+          z.string().pipe(z.coerce.date()).optional(),
+          z.string().optional(),
           z
             .preprocess(
               (value) => (value === "" ? "nl" : value),

@@ -143,7 +143,6 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <Input
                       name="lastName"
                       invalid={!!state?.errors.lastName}
-                      required
                       minLength={1}
                     />
                   </Field>
@@ -156,7 +155,6 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                       name="email"
                       type="email"
                       invalid={!!state?.errors.email}
-                      required
                     />
                   </Field>
                   <Field className="sm:col-span-2">
@@ -165,7 +163,6 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                       name="dateOfBirth"
                       type="date"
                       invalid={!!state?.errors.dateOfBirth}
-                      required
                     />
                   </Field>
                 </div>
