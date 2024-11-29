@@ -3,6 +3,7 @@ import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listDisciplines } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import DisciplineTableCLient from "./_components/discipline-table";
+import EditDialog from "./_components/edit-dialog";
 
 async function DisciplineTable({
   searchParams,
@@ -11,6 +12,11 @@ async function DisciplineTable({
 }) {
   const disciplines = await listDisciplines();
   const searchQuery = searchParams?.query?.toString() ?? null;
+
+  const editDisciplineId = searchParams?.bewerken?.toString() ?? null;
+  const editDiscipline =
+    disciplines.find((discipline) => discipline.id === editDisciplineId) ??
+    null;
 
   // Create a FlexSearch index
   const index = new FlexSearch.Index({
@@ -46,10 +52,13 @@ async function DisciplineTable({
   );
 
   return (
-    <DisciplineTableCLient
-      disciplines={paginatedDisciplines}
-      totalItems={filteredDisciplines.length}
-    />
+    <>
+      <DisciplineTableCLient
+        disciplines={paginatedDisciplines}
+        totalItems={filteredDisciplines.length}
+      />
+      <EditDialog key={editDiscipline?.id} editDiscipline={editDiscipline} />
+    </>
   );
 }
 
