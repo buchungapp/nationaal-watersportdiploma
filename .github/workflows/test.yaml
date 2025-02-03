@@ -46,6 +46,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
       - run: corepack enable
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
