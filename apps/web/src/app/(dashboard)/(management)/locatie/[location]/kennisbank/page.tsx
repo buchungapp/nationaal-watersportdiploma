@@ -17,11 +17,11 @@ import dayjs from "~/lib/dayjs";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
 
 export default async function Page(
-  _props: Readonly<{
-    params: {
-      location: string;
-    };
-  }>,
+  _props: {
+    params: Promise<{ 
+      location: string; 
+    }>;
+  }
 ) {
   const documents = await listKnowledgeCenterDocuments();
 

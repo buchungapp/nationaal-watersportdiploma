@@ -26,7 +26,12 @@ async function ActionButton({ handle }: { handle: string }) {
   return <EditDetails person={person} countries={countries} />;
 }
 
-export default async function Page(props: Readonly<{ params: { handle: string } }>) {
+export default async function Page(
+  props: {
+    params: Promise<{ 
+      handle: string; 
+    }>;
+  }) {
   const params = await props.params;
   const [user, person] = await Promise.all([
     getUserOrThrow(),

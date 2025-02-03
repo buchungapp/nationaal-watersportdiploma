@@ -26,6 +26,7 @@ export async function updateSession(request: NextRequest) {
             request,
           });
           for (const { name, value, options } of cookiesToSet) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             supabaseResponse.cookies.set(name, value, options);
           }
         },

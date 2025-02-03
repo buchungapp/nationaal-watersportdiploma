@@ -1,7 +1,7 @@
 "use client";
 import clsx from "clsx";
-import type { MotionStyle } from "framer-motion";
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import type { MotionStyle } from "motion/react";
+import { motion, useMotionTemplate, useMotionValue } from "motion/react";
 import Link from "next/link";
 import { Wave } from "../../_assets/wave";
 

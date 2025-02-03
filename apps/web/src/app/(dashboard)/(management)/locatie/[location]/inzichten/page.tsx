@@ -13,11 +13,11 @@ import {
 dayjs.extend(weekOfYear);
 
 export default async function Page(
-  props: Readonly<{
-    params: {
-      location: string;
-    };
-  }>
+  props: {
+    params: Promise<{ 
+      location: string; 
+    }>;
+  }
 ) {
   const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);

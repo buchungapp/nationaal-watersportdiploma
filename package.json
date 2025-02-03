@@ -19,7 +19,6 @@
   },
   "pnpm": {
     "overrides": {
-      "cookie@<0.7.0": ">=0.7.0",
       "@types/react": "19.0.8",
       "@types/react-dom": "19.0.3"
     }
