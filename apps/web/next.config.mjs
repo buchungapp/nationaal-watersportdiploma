@@ -6,12 +6,11 @@ const nextConfig = {
   // Configure `pageExtensions` to include MDX files
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   experimental: {
-    mdxRs: true,
-    outputFileTracingIncludes: {
-      "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
-      "/": ["./src/app/(public)/**/*.mdx"],
-    },
-    instrumentationHook: true,
+    mdxRs: true
+  },
+  outputFileTracingIncludes: {
+    "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
+    "/": ["./src/app/(public)/**/*.mdx"],
   },
   transpilePackages: ["next-mdx-remote"],
   async redirects() {
