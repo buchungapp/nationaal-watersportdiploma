@@ -26,9 +26,8 @@ import {
 } from "~/lib/nwd";
 import { Weight } from "../../../../../../_components/weight";
 
-export default async function Page({
-  params,
-}: Readonly<{ params: { handle: string } }>) {
+export default async function Page(props: Readonly<{ params: { handle: string } }>) {
+  const params = await props.params;
   const [course, parentCategories] = await Promise.all([
     listCourses().then((courses) =>
       courses.find((course) => course.handle === params.handle),

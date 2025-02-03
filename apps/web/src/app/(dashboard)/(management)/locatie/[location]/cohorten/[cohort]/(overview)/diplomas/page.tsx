@@ -16,13 +16,14 @@ import {
 } from "nuqs/server";
 import StudentsTable from "./_components/students-table";
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { location: string; cohort: string };
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
+export default async function Page(
+  props: {
+    params: Promise<{ location: string; cohort: string }>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const cohortPromise = retrieveLocationByHandle(params.location).then(
     (location) =>
       retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {

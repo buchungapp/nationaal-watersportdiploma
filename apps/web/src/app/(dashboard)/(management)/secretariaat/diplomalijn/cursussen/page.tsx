@@ -57,11 +57,12 @@ async function ProgramTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
+export default async function Page(
+  props: {
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
+  }
+) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

@@ -21,13 +21,14 @@ import { ShareCertificate } from "./_components/share";
 import CertificateTemplate from "./_components/template";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: Record<string, string | string[] | undefined>;
+  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   // read route params
   const id = params.id;
 
@@ -47,7 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const [certificate] = await Promise.all([
     retrieveCertificateById(params.id).catch(() => notFound()),
   ]);
