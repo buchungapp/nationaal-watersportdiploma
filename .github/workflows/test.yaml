@@ -9,7 +9,7 @@ jobs:
   build-lts:
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [22]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
@@ -35,7 +35,7 @@ jobs:
   test:
     strategy:
       matrix:
-        node-version: [21]
+        node-version: [22]
         runs-on: [ubuntu-latest]
     runs-on: ${{ matrix.runs-on }}
     steps:
