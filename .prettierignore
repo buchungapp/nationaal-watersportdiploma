@@ -4,4 +4,4 @@ migrations/
 !packages/scripts/src/migrations
 pnpm-lock.yaml
 LICENSE
-.dockerfile
+*.dockerfile
