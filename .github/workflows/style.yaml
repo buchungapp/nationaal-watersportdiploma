@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:21.5.0-alpine3.19
     steps:
-      - run: corepack enable
+      # - run: corepack enable
       - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run formatting
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:21.5.0-alpine3.19
     steps:
-      - run: corepack enable
+      # - run: corepack enable
       - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run spelling
