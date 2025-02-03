@@ -1,7 +1,6 @@
 "use client";
 
-import { type PropsWithChildren } from "react";
-import { useFormState as useActionState } from "react-dom";
+import { type PropsWithChildren, useActionState } from "react";
 import { toast } from "sonner";
 import { updateSettings } from "../_actions/update";
 

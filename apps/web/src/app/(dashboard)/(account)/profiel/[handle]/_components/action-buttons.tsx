@@ -1,8 +1,8 @@
 "use client";
 
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
-import { useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -69,7 +69,7 @@ export function EditDetails({
     return result;
   };
 
-  const [state, action] = useFormState(submit, undefined);
+  const [state, action] = useActionState(submit, undefined);
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(
     person.birthCountry?.code ?? null,

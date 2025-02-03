@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import {
   Alert,
@@ -57,7 +57,7 @@ export function ChangeEmail({
     return res;
   };
 
-  const [_state, action] = useFormState(submit, undefined);
+  const [_state, action] = useActionState(submit, undefined);
 
   return (
     <>
@@ -123,7 +123,7 @@ export function EditDetails({
     return result;
   };
 
-  const [state, action] = useFormState(submit, undefined);
+  const [state, action] = useActionState(submit, undefined);
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(
     person.birthCountry?.code ?? null,
