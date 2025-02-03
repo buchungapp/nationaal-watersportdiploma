@@ -2,7 +2,7 @@ import { cache } from "react";
 import { createClient } from "~/lib/supabase/server";
 
 async function currentSession() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   return data.user;
 }

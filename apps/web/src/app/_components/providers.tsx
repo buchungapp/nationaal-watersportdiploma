@@ -8,7 +8,7 @@ import type { PropsWithChildren } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
-import { supabaseBrowser } from "~/lib/supabase/client";
+import { createClient } from "~/lib/supabase/client";
 import { LocationsMapContainer } from "../(public)/_components/locations-map";
 
 if (typeof window !== "undefined") {
@@ -70,7 +70,7 @@ function SessionProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabaseBrowser.auth.onAuthStateChange((event, session) => {
+    } = createClient().auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         setSession(null);
         posthog.reset();

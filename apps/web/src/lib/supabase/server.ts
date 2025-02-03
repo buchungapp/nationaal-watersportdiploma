@@ -1,32 +1,30 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies, type UnsafeUnwrappedCookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { cache } from "react";
+import { invariant } from "~/utils/invariant";
 
-export function createClient() {
-  const cookieStore = (cookies() as unknown as UnsafeUnwrappedCookies);
+async function createClientInner() {
+  const cookieStore = await cookies();
+
+  invariant(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  invariant(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({ name, value, ...options });
-          } catch (error) {
-            // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ name, value: "", ...options });
-          } catch (error) {
-            // The `delete` method was called from a Server Component.
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, options);
+            }
+          } catch {
+            // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
@@ -35,3 +33,5 @@ export function createClient() {
     },
   );
 }
+
+export const createClient = cache(createClientInner);
