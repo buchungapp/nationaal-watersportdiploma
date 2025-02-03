@@ -55,7 +55,7 @@ jobs:
       - run: pnpm db:reset
       # node test runner seems to support globs since v21
       - if: ${{ matrix.node-version >= 21 }}
-        run: pnpm --recursive test
+        run: pnpm test
       - run: pnpm --filter supabase run stop
 
   audit:
