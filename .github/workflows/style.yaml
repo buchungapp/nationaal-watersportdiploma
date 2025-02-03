@@ -3,34 +3,19 @@ on:
 
 jobs:
   formatting:
-    strategy:
-      matrix:
-        node-version: [22]
-        runs-on: [ubuntu-latest]
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ubuntu-latest
+    container: node:21.5.0-alpine3.19
     steps:
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
-      # - run: corepack enable
+      - uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run formatting
 
   spelling:
-    strategy:
-      matrix:
-        node-version: [22]
-        runs-on: [ubuntu-latest]
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ubuntu-latest
+    container: node:21.5.0-alpine3.19
     steps:
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+      - uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4
       - run: pnpm install --frozen-lockfile --workspace-root
       - run: pnpm run spelling
