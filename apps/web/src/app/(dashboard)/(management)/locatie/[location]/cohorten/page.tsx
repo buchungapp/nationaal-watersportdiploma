@@ -18,14 +18,12 @@ import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
-export default async function Page(
-  props: {
-    params: Promise<{
-      location: string;
-    }>;
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{
+    location: string;
+  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);

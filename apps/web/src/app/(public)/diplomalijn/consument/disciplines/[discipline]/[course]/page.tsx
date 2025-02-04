@@ -11,14 +11,12 @@ import {
 } from "~/lib/nwd";
 import Program from "./_components/program";
 
-export default async function Page(
-  props: {
-    params: Promise<{
-      discipline: string;
-      course: string;
-    }>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{
+    discipline: string;
+    course: string;
+  }>;
+}) {
   const params = await props.params;
   const [discipline, course] = await Promise.all([
     retrieveDisciplineByHandle(params.discipline),

@@ -53,11 +53,9 @@ async function CompetencyTable({
   );
 }
 
-export default async function Page(
-  props: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   return (
     <>

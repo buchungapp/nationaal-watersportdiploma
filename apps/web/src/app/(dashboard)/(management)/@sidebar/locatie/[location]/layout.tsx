@@ -22,9 +22,7 @@ interface LayoutProps {
 export default async function SidebarLayout(props: LayoutProps) {
   const params = await props.params;
 
-  const {
-    children
-  } = props;
+  const { children } = props;
 
   const location = await retrieveLocationByHandle(params.location);
   const rolesForPerson = await listRolesForLocation(location.id);

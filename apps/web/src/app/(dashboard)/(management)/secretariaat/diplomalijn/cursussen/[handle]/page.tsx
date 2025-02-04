@@ -27,10 +27,10 @@ import {
 import { Weight } from "../../../../../../_components/weight";
 
 export default async function Page(props: {
-    params: Promise<{ 
-      handle: string; 
-    }>;
-  }) {
+  params: Promise<{
+    handle: string;
+  }>;
+}) {
   const params = await props.params;
   const [course, parentCategories] = await Promise.all([
     listCourses().then((courses) =>

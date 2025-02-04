@@ -23,7 +23,10 @@ export default function About() {
         </p>
 
         <div className="mt-6 mx-auto flex flex-col md:flex-row items-center gap-x-6 gap-y-4">
-          <BoxedButton href="/vaarlocaties/kwaliteitseisen" className="text-white bg-branding-light">
+          <BoxedButton
+            href="/vaarlocaties/kwaliteitseisen"
+            className="text-white bg-branding-light"
+          >
             Kwaliteitseisen voor locaties
           </BoxedButton>
           <BoxedButton

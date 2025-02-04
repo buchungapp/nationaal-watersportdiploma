@@ -5,12 +5,12 @@
  * @throws {Error} If the condition is falsy.
  */
 export function invariant(
-    condition: unknown,
-    message?: string | (() => string),
-  ): asserts condition {
-    // biome-ignore lint/complexity/noExtraBooleanCast: <explanation>
-    if (!Boolean(condition)) {
-      const errorMessage = typeof message === "function" ? message() : message;
-      throw new Error(`Invariant violation: ${errorMessage}`);
-    }
+  condition: unknown,
+  message?: string | (() => string),
+): asserts condition {
+  // biome-ignore lint/complexity/noExtraBooleanCast: <explanation>
+  if (!Boolean(condition)) {
+    const errorMessage = typeof message === "function" ? message() : message;
+    throw new Error(`Invariant violation: ${errorMessage}`);
   }
+}

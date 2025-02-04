@@ -8,22 +8,22 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
-    Combobox,
-    ComboboxLabel,
-    ComboboxOption,
+  Combobox,
+  ComboboxLabel,
+  ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
 import {
-    Dialog,
-    DialogActions,
-    DialogBody,
-    DialogTitle,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
-    Field,
-    FieldGroup,
-    Fieldset,
-    Label,
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
@@ -31,9 +31,9 @@ import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import { createPerson } from "../_actions/create";
 import {
-    addStudentToCohortByPersonId,
-    listCountries,
-    listPersonsForLocationByRole,
+  addStudentToCohortByPersonId,
+  listCountries,
+  listPersonsForLocationByRole,
 } from "../_actions/nwd";
 
 interface Props {

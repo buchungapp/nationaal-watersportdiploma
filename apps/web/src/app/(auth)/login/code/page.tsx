@@ -3,11 +3,9 @@ import { z } from "zod";
 import Logo from "~/app/_components/brand/logo";
 import { OtpForm } from "../_components/login-form";
 
-export default async function Page(
-  props: {
-    searchParams: Promise<Record<string, string | string[] | undefined>>;
-  }
-) {
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const searchParams = await props.searchParams;
   const _email = z.string().email().safeParse(searchParams.email);
 

@@ -148,10 +148,10 @@ async function Curriculum({
 }
 
 export default async function Page(props: {
-    params: Promise<{ 
-      handle: string; 
-    }>;
-  }) {
+  params: Promise<{
+    handle: string;
+  }>;
+}) {
   const params = await props.params;
   const program = await listPrograms().then((programs) =>
     programs.find((program) => program.handle === params.handle),

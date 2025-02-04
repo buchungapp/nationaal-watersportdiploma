@@ -7,26 +7,26 @@ import useSWR from "swr";
 import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
-    Dialog,
-    DialogActions,
-    DialogBody,
-    DialogDescription,
-    DialogTitle,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogDescription,
+  DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
-    ErrorMessage,
-    Field,
-    Fieldset,
-    Label,
+  ErrorMessage,
+  Field,
+  Fieldset,
+  Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Select } from "~/app/(dashboard)/_components/select";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "~/app/(dashboard)/_components/table";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";

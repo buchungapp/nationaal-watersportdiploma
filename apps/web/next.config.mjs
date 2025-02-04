@@ -6,7 +6,7 @@ const nextConfig = {
   // Configure `pageExtensions` to include MDX files
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   experimental: {
-    mdxRs: true
+    mdxRs: true,
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],

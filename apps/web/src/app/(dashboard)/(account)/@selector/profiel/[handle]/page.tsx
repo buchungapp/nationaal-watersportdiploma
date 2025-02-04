@@ -4,11 +4,9 @@ import { DropdownButton } from "~/app/(dashboard)/_components/dropdown";
 import { NavbarItem, NavbarLabel } from "~/app/(dashboard)/_components/navbar";
 import { getPersonByHandle } from "~/lib/nwd";
 
-export default async function PersonSelector(
-  props: {
-    params: Promise<{ handle: string }>;
-  }
-) {
+export default async function PersonSelector(props: {
+  params: Promise<{ handle: string }>;
+}) {
   const params = await props.params;
   const person = await getPersonByHandle(params.handle);
 

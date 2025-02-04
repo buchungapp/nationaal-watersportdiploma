@@ -17,12 +17,13 @@ async function findCategory(slug: string) {
   return categories.find((category) => category.slug === slug);
 }
 
-export async function generateMetadata(props: PageProps, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const params = await props.params;
 
-  const {
-    slug
-  } = params;
+  const { slug } = params;
 
   const [parentMeta, category] = await Promise.all([
     parent,
@@ -51,9 +52,7 @@ export async function generateMetadata(props: PageProps, parent: ResolvingMetada
 export default async function Page(props: PageProps) {
   const params = await props.params;
 
-  const {
-    slug
-  } = params;
+  const { slug } = params;
 
   const [category, articles] = await Promise.all([
     findCategory(slug),

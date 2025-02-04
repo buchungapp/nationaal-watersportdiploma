@@ -16,13 +16,11 @@ import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
 
-export default async function Page(
-  _props: {
-    params: Promise<{ 
-      location: string; 
-    }>;
-  }
-) {
+export default async function Page(_props: {
+  params: Promise<{
+    location: string;
+  }>;
+}) {
   const documents = await listKnowledgeCenterDocuments();
 
   return (

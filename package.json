@@ -4,8 +4,8 @@
   "packageManager": "pnpm@9.15.5",
   "scripts": {
     "spelling": "cspell",
-    "formatting": "prettier --check *",
-    "formatting:fix": "prettier --write *",
+    "formatting": "prettier --check \"**/*\"",
+    "formatting:fix": "prettier --write \"**/*\"",
     "build:packages": "pnpm --recursive --filter {packages/**} build",
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",

@@ -8,11 +8,9 @@ import {
 import { AddInstructor } from "./_components/add-instructor";
 import StudentsTable from "./_components/instructors-table";
 
-export default async function Page(
-  props: {
-    params: Promise<{ location: string; cohort: string }>;
-  }
-) {
+export default async function Page(props: {
+  params: Promise<{ location: string; cohort: string }>;
+}) {
   const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 

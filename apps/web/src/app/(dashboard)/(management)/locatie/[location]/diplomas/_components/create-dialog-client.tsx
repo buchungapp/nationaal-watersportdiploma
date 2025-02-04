@@ -7,47 +7,47 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
-    Checkbox,
-    CheckboxField,
-    CheckboxGroup,
+  Checkbox,
+  CheckboxField,
+  CheckboxGroup,
 } from "~/app/(dashboard)/_components/checkbox";
 import {
-    Combobox,
-    ComboboxLabel,
-    ComboboxOption,
+  Combobox,
+  ComboboxLabel,
+  ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
 import {
-    Dialog,
-    DialogActions,
-    DialogBody,
-    DialogDescription,
-    DialogTitle,
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogDescription,
+  DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
-    Field,
-    FieldGroup,
-    Fieldset,
-    Label,
-    Legend,
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
+  Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import {
-    Listbox,
-    ListboxLabel,
-    ListboxOption,
+  Listbox,
+  ListboxLabel,
+  ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import type {
-    listCurriculaByProgram,
-    listGearTypesByCurriculum,
-    listPersonsForLocationByRole,
-    listPrograms,
+  listCurriculaByProgram,
+  listGearTypesByCurriculum,
+  listPersonsForLocationByRole,
+  listPrograms,
 } from "~/lib/nwd";
 import { createCertificate } from "../_actions/create";
 import {
-    getCurriculaByProgram,
-    getGearTypesByCurriculum,
+  getCurriculaByProgram,
+  getGearTypesByCurriculum,
 } from "../_actions/fetch";
 
 interface Props {
