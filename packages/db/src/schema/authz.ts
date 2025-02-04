@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql } from "drizzle-orm";
 import {
   foreignKey,
   pgEnum,
@@ -7,49 +7,49 @@ import {
   text,
   uniqueIndex,
   uuid,
-} from 'drizzle-orm/pg-core'
-import { timestamps } from '../utils/sql.js'
-import { token } from './authn.js'
-import { cohortAllocation } from './cohort.js'
-import { location } from './location.js'
-import { person } from './user.js'
+} from "drizzle-orm/pg-core";
+import { timestamps } from "../utils/sql.js";
+import { token } from "./authn.js";
+import { cohortAllocation } from "./cohort.js";
+import { location } from "./location.js";
+import { person } from "./user.js";
 
 export const privilege = pgTable(
-  'privilege',
+  "privilege",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    description: text('description'),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    description: text("description"),
   },
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-    }
+    };
   },
-)
+);
 
-export const roleType = pgEnum('role_type', [
-  'organization',
-  'location',
-  'cohort',
-])
+export const roleType = pgEnum("role_type", [
+  "organization",
+  "location",
+  "cohort",
+]);
 
 export const role = pgTable(
-  'role',
+  "role",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    description: text('description'),
-    locationId: uuid('location_id'),
-    type: roleType('type').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    description: text("description"),
+    locationId: uuid("location_id"),
+    type: roleType("type").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -58,71 +58,71 @@ export const role = pgTable(
       locationReference: foreignKey({
         columns: [table.locationId],
         foreignColumns: [location.id],
-        name: 'role_location_id_fk',
+        name: "role_location_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const tokenPrivilege = pgTable(
-  'token_privilege',
+  "token_privilege",
   {
-    tokenId: uuid('token_id').notNull(),
-    privilegeId: uuid('privilege_id').notNull(),
+    tokenId: uuid("token_id").notNull(),
+    privilegeId: uuid("privilege_id").notNull(),
     ...timestamps,
   },
   (table) => {
     return {
       pk: primaryKey({
         columns: [table.tokenId, table.privilegeId],
-        name: 'token_privilege_pk',
+        name: "token_privilege_pk",
       }),
       tokenReference: foreignKey({
         columns: [table.tokenId],
         foreignColumns: [token.id],
-        name: 'token_privilege_token_id_fk',
+        name: "token_privilege_token_id_fk",
       }),
       privilegeReference: foreignKey({
         columns: [table.privilegeId],
         foreignColumns: [privilege.id],
-        name: 'token_privilege_privilege_id_fk',
+        name: "token_privilege_privilege_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const rolePrivilege = pgTable(
-  'role_privilege',
+  "role_privilege",
   {
-    roleId: uuid('role_id').notNull(),
-    privilegeId: uuid('privilege_id').notNull(),
+    roleId: uuid("role_id").notNull(),
+    privilegeId: uuid("privilege_id").notNull(),
     ...timestamps,
   },
   (table) => {
     return {
       pk: primaryKey({
         columns: [table.roleId, table.privilegeId],
-        name: 'role_privilege_pk',
+        name: "role_privilege_pk",
       }),
       roleReference: foreignKey({
         columns: [table.roleId],
         foreignColumns: [role.id],
-        name: 'role_privilege_role_id_fk',
+        name: "role_privilege_role_id_fk",
       }),
       privilegeReference: foreignKey({
         columns: [table.privilegeId],
         foreignColumns: [privilege.id],
-        name: 'role_privilege_privilege_id_fk',
+        name: "role_privilege_privilege_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const personRole = pgTable(
-  'person_role',
+  "person_role",
   {
-    personId: uuid('person_id').notNull(),
-    roleId: uuid('role_id').notNull(),
+    personId: uuid("person_id").notNull(),
+    roleId: uuid("role_id").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -131,22 +131,22 @@ export const personRole = pgTable(
       actorReference: foreignKey({
         columns: [table.personId],
         foreignColumns: [person.id],
-        name: 'person_role_person_id_fk',
+        name: "person_role_person_id_fk",
       }),
       roleReference: foreignKey({
         columns: [table.roleId],
         foreignColumns: [role.id],
-        name: 'user_role_role_id_fk',
+        name: "user_role_role_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const cohortAllocationRole = pgTable(
-  'cohort_allocation_role',
+  "cohort_allocation_role",
   {
-    cohortAllocationId: uuid('cohort_allocation_id').notNull(),
-    roleId: uuid('role_id').notNull(),
+    cohortAllocationId: uuid("cohort_allocation_id").notNull(),
+    roleId: uuid("role_id").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -155,13 +155,13 @@ export const cohortAllocationRole = pgTable(
       allocationReference: foreignKey({
         columns: [table.cohortAllocationId],
         foreignColumns: [cohortAllocation.id],
-        name: 'cohort_allocation_role_allocation_id_fk',
+        name: "cohort_allocation_role_allocation_id_fk",
       }),
       roleReference: foreignKey({
         columns: [table.roleId],
         foreignColumns: [role.id],
-        name: 'user_role_role_id_fk',
+        name: "user_role_role_id_fk",
       }),
-    }
+    };
   },
-)
+);

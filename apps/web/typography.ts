@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type PluginUtils } from "tailwindcss/types/config";
+import type { PluginUtils } from "tailwindcss/types/config";
 
 export default function typographyStyles({ theme }: PluginUtils) {
   return {

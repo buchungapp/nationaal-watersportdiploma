@@ -9,7 +9,8 @@ import { HomeIcon, SparklesIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { Fragment, useCallback, useRef, useState } from "react";
+import type React from "react";
+import { Fragment, useCallback, useRef, useState } from "react";
 import Logo from "../../../../_components/brand/logo";
 import Wordmark from "../../../../_components/brand/wordmark";
 import { logo, wordmark } from "./media-kit-svgs";
@@ -19,6 +20,7 @@ export default function MediaKit() {
   const router = useRouter();
   const intent = useRef<"homepage" | "context">("homepage");
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (intent.current === "homepage") {
@@ -29,6 +31,7 @@ export default function MediaKit() {
     [router, intent.current],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const handleContextMenu = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       intent.current = "context";
@@ -140,6 +143,7 @@ function CopyButton({
       )}
     >
       <button
+        type="button"
         onClick={async () => {
           if (typeof navigator.clipboard === "undefined") return;
           await navigator.clipboard.writeText(value);

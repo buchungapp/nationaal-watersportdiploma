@@ -114,7 +114,7 @@ export default function ModuleTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={"#TODO"}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

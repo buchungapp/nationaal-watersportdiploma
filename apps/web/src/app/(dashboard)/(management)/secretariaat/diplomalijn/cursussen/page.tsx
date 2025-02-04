@@ -26,15 +26,18 @@ async function ProgramTable({
   });
 
   // Add programs to the index
-  courses.forEach((course) => {
-    index.add(course.id, course.title!);
-  });
+  for (const course of courses) {
+    if (course.title) {
+      index.add(course.id, course.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredCourses = courses;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCourses = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => courses.find((course) => course.id === result)!,
     );
   }

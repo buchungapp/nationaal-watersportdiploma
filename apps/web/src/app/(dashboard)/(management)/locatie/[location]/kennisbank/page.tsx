@@ -47,7 +47,7 @@ export default async function Page(_props: {
           <TableRow>
             <TableHeader>Naam</TableHeader>
             <TableHeader>Laatste update</TableHeader>
-            <TableHeader></TableHeader>
+            <TableHeader />
           </TableRow>
         </TableHead>
         <TableBody>

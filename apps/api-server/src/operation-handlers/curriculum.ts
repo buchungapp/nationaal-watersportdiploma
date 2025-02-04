@@ -1,5 +1,5 @@
-import * as api from '@nawadi/api'
-import * as application from '../application/index.js'
+import type * as api from "@nawadi/api";
+import type * as application from "../application/index.js";
 
 export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDisciplineOperationHandler<
   application.Authentication
@@ -38,7 +38,7 @@ export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDiscip
   return {
     parameters: {},
     status: 200,
-    contentType: 'application/json',
+    contentType: "application/json",
     entity: () => [],
-  }
-}
+  };
+};

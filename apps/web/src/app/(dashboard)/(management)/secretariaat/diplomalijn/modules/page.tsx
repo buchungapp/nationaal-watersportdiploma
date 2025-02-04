@@ -23,15 +23,18 @@ async function ModuleTable({
   });
 
   // Add programs to the index
-  modules.forEach((module) => {
-    index.add(module.id, module.title!);
-  });
+  for (const module of modules) {
+    if (module.title) {
+      index.add(module.id, module.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredModules = modules;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredModules = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => modules.find((module) => module.id === result)!,
     );
   }

@@ -1,16 +1,16 @@
-import { schema as s } from '@nawadi/db'
-import { and, eq, isNotNull, isNull } from 'drizzle-orm'
-import { exists } from 'drizzle-orm/expressions'
-import { sql } from 'drizzle-orm/sql/sql'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { schema as s } from "@nawadi/db";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
+import { exists } from "drizzle-orm/expressions";
+import { sql } from "drizzle-orm/sql/sql";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
 import {
   possibleSingleRow,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { insertSchema } from './curriculum.schema.js'
+} from "../../utils/index.js";
+import { insertSchema } from "./curriculum.schema.js";
 
 export const start = withZod(
   insertSchema.pick({
@@ -21,7 +21,7 @@ export const start = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const [insert] = await query
       .insert(s.studentCurriculum)
@@ -31,15 +31,15 @@ export const start = withZod(
         gearTypeId: input.gearTypeId,
         startedAt: input.startedAt,
       })
-      .returning({ id: s.studentCurriculum.id })
+      .returning({ id: s.studentCurriculum.id });
 
     if (!insert) {
-      throw new Error('Failed to start program')
+      throw new Error("Failed to start program");
     }
 
-    return insert
+    return insert;
   },
-)
+);
 
 export const findOrEnroll = withZod(
   insertSchema.pick({
@@ -50,7 +50,7 @@ export const findOrEnroll = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     // Check for existing student curriculum
     const existingCurriculum = await query
@@ -64,10 +64,10 @@ export const findOrEnroll = withZod(
           isNull(s.studentCurriculum.deletedAt),
         ),
       )
-      .then(possibleSingleRow)
+      .then(possibleSingleRow);
 
-    if (!!existingCurriculum) {
-      return existingCurriculum
+    if (existingCurriculum) {
+      return existingCurriculum;
     }
 
     const [insert] = await query
@@ -78,22 +78,22 @@ export const findOrEnroll = withZod(
         gearTypeId: input.gearTypeId,
         startedAt: input.startedAt,
       })
-      .returning({ id: s.studentCurriculum.id })
+      .returning({ id: s.studentCurriculum.id });
 
     if (!insert) {
-      throw new Error('Failed to start program')
+      throw new Error("Failed to start program");
     }
 
-    return insert
+    return insert;
   },
-)
+);
 
 export const listCompletedCompetenciesById = withZod(
   z.object({
     id: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const rows = await query
       .select()
@@ -129,13 +129,13 @@ export const listCompletedCompetenciesById = withZod(
               ),
           ),
         ),
-      )
+      );
 
     return rows.map((row) => ({
       certificateId: row.certificateId,
       competencyId: row.competencyId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-    }))
+    }));
   },
-)
+);

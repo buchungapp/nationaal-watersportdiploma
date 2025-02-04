@@ -1,9 +1,9 @@
-import { schema as s } from '@nawadi/db'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { singleRow } from '../../utils/data-helpers.js'
-import { successfulCreateResponse, withZod } from '../../utils/zod.js'
-import { insertSchema, selectSchema } from './competency.schema.js'
+import { schema as s } from "@nawadi/db";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { singleRow } from "../../utils/data-helpers.js";
+import { successfulCreateResponse, withZod } from "../../utils/zod.js";
+import { insertSchema, selectSchema } from "./competency.schema.js";
 
 export const create = withZod(
   insertSchema.pick({
@@ -15,7 +15,7 @@ export const create = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const result = await query
       .insert(s.curriculumCompetency)
@@ -26,16 +26,16 @@ export const create = withZod(
         isRequired: input.isRequired,
         requirement: input.requirement,
       })
-      .returning({ id: s.curriculumCompetency.id })
+      .returning({ id: s.curriculumCompetency.id });
 
-    const insert = singleRow(result)
+    const insert = singleRow(result);
 
-    return insert
+    return insert;
   },
-)
+);
 
 export const list = withZod(z.void(), selectSchema.array(), async () => {
-  const query = useQuery()
+  const query = useQuery();
 
-  return await query.select().from(s.curriculumCompetency)
-})
+  return await query.select().from(s.curriculumCompetency);
+});

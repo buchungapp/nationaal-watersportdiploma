@@ -60,7 +60,7 @@ export async function verify(
   } catch (error) {}
 
   revalidatePath("/", "layout");
-  redirect(`/profiel`);
+  redirect("/profiel");
 }
 
 export async function logout() {
@@ -82,5 +82,5 @@ export async function logout() {
   }
 
   revalidatePath("/", "layout");
-  redirect(`/`);
+  redirect("/");
 }

@@ -57,14 +57,13 @@ export async function generateAdvise(
     }
 
     // Capitalize the first letter of the first advice
-    advice[0] = advice[0]!.charAt(0).toUpperCase() + advice[0]!.slice(1);
+    advice[0] = advice[0]?.charAt(0).toUpperCase() + advice[0]?.slice(1);
 
     if (advice.length > 1) {
       const lastAdvice = advice.pop();
       return `${advice.join(", ")} of ${lastAdvice}!`;
-    } else {
-      return `${advice[0]}.`;
     }
+    return `${advice[0]}.`;
   };
 
   return formatAdvice(adviceStrings);

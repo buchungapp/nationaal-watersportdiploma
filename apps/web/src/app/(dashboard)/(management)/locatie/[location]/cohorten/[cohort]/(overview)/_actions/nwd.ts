@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  type ActorType,
   addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
@@ -25,7 +26,6 @@ import {
   updateCohortDetails,
   updateStudentInstructorAssignment,
   withdrawStudentFromCurriculumInCohort,
-  type ActorType,
 } from "~/lib/nwd";
 
 export async function claimStudents(cohortId: string, studentIds: string[]) {
@@ -65,7 +65,7 @@ export async function assignInstructorToStudents({
   studentIds: string[];
   instructorPersonId: string | null;
 }) {
-  if (!!instructorPersonId) {
+  if (instructorPersonId) {
     await updateStudentInstructorAssignment({
       cohortId,
       studentAllocationIds: studentIds,

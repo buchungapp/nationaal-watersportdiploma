@@ -11,7 +11,7 @@ interface PageProps {
 }
 
 export async function generateMetadata(
-  {}: PageProps,
+  _: PageProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const [parentMeta] = await Promise.all([parent]);
@@ -20,13 +20,13 @@ export async function generateMetadata(
     title: "Veelgestelde vragen",
     description: "Ontdek antwoorden op veelgestelde vragen.",
     alternates: {
-      canonical: `/help/veelgestelde-vragen`,
+      canonical: "/help/veelgestelde-vragen",
     },
     openGraph: {
       ...parentMeta.openGraph,
       title: "Veelgestelde vragen",
       description: parentMeta.openGraph?.description,
-      url: `/help/veelgestelde-vragen`,
+      url: "/help/veelgestelde-vragen",
     },
   };
 }

@@ -11,20 +11,22 @@ export const useSetQueryParams = () => {
     (paramsObj: Record<string, string | string[] | undefined>): string => {
       const params = new URLSearchParams(searchParams.toString());
 
-      Object.entries(paramsObj).forEach(([key, value]) => {
+      for (const [key, value] of Object.entries(paramsObj)) {
         if (Array.isArray(value)) {
           params.delete(key);
-          value.forEach((item) => params.append(key, item));
+          for (const item of value) {
+            params.append(key, item);
+          }
         } else {
           if (value === undefined) {
             params.delete(key);
-            return;
+            continue;
           }
 
           params.set(key, value);
         }
-      });
-      return pathname + "?" + params.toString();
+      }
+      return `${pathname}?${params.toString()}`;
     },
     [pathname, searchParams],
   );
@@ -45,8 +47,7 @@ export const setRadioFieldParams = (
 ) => {
   if (params.includes(field)) {
     return params.filter((item) => item !== field);
-  } else {
-    const filteredParams = params.filter((param) => !options.includes(param));
-    return [field, ...filteredParams];
   }
+  const filteredParams = params.filter((param) => !options.includes(param));
+  return [field, ...filteredParams];
 };

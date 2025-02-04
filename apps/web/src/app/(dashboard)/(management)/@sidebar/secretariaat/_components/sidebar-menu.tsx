@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 "use client";
 
 import { useSelectedLayoutSegments } from "next/navigation";
@@ -22,40 +21,40 @@ export function SecretariaatSidebarMenu() {
         {[
           {
             name: "Cursussen",
-            href: `/secretariaat/diplomalijn/cursussen`,
+            href: "/secretariaat/diplomalijn/cursussen",
             current: segments.slice(0, 2).join("/") === "diplomalijn/cursussen",
           },
           {
             name: "Modules",
-            href: `/secretariaat/diplomalijn/modules`,
+            href: "/secretariaat/diplomalijn/modules",
             current: segments.slice(0, 2).join("/") === "diplomalijn/modules",
           },
           {
             name: "Competenties",
-            href: `/secretariaat/diplomalijn/competenties`,
+            href: "/secretariaat/diplomalijn/competenties",
             current:
               segments.slice(0, 2).join("/") === "diplomalijn/competenties",
           },
           {
             name: "Materialen",
-            href: `/secretariaat/diplomalijn/materialen`,
+            href: "/secretariaat/diplomalijn/materialen",
             current:
               segments.slice(0, 2).join("/") === "diplomalijn/materialen",
           },
           {
             name: "Disciplines",
-            href: `/secretariaat/diplomalijn/disciplines`,
+            href: "/secretariaat/diplomalijn/disciplines",
             current:
               segments.slice(0, 2).join("/") === "diplomalijn/disciplines",
           },
           {
             name: "Niveaus",
-            href: `/secretariaat/diplomalijn/niveaus`,
+            href: "/secretariaat/diplomalijn/niveaus",
             current: segments.slice(0, 2).join("/") === "diplomalijn/niveaus",
           },
           {
             name: "Categorieën",
-            href: `/secretariaat/diplomalijn/categorieen`,
+            href: "/secretariaat/diplomalijn/categorieen",
             current:
               segments.slice(0, 2).join("/") === "diplomalijn/categorieen",
           },
@@ -71,7 +70,7 @@ export function SecretariaatSidebarMenu() {
         {[
           {
             name: "Overzicht",
-            href: `/secretariaat/locaties`,
+            href: "/secretariaat/locaties",
             current: lastSegment === "cohorten",
           },
         ].map((item) => (
@@ -86,7 +85,7 @@ export function SecretariaatSidebarMenu() {
         {[
           {
             name: "Overzicht",
-            href: `/secretariaat/gebruikers`,
+            href: "/secretariaat/gebruikers",
             current: lastSegment === "cohorten",
           },
         ].map((item) => (
@@ -101,7 +100,7 @@ export function SecretariaatSidebarMenu() {
         {[
           {
             name: "Diploma's",
-            href: `/secretariaat/opleidingen/diplomas`,
+            href: "/secretariaat/opleidingen/diplomas",
             current: lastSegment === "diplomas",
           },
         ].map((item) => (

@@ -4,12 +4,13 @@ import {
   Popover as HeadlessPopover,
   PopoverButton as HeadlessPopoverButton,
   PopoverPanel as HeadlessPopoverPanel,
-  Transition as HeadlessTransition,
   type PopoverPanelProps as HeadlessPopoverPanelProps,
   type PopoverProps as HeadlessPopoverProps,
+  Transition as HeadlessTransition,
 } from "@headlessui/react";
 import clsx from "clsx";
-import React, { Fragment } from "react";
+import type React from "react";
+import { Fragment } from "react";
 import { Button } from "./button";
 
 export { HeadlessPopoverButton };

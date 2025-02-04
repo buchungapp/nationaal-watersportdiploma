@@ -4,7 +4,7 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import type React from "react";
 
 import { useMobileMenuState } from "~/app/_components/providers";
 
@@ -55,7 +55,7 @@ export function MobileNavButton() {
   const [_, setOpen] = useMobileMenuState();
 
   return (
-    <button onClick={() => setOpen(true)}>
+    <button type="button" onClick={() => setOpen(true)}>
       <Bars3Icon className="h-7 w-7" />
     </button>
   );

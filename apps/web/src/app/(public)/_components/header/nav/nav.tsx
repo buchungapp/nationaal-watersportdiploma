@@ -34,9 +34,9 @@ export default function Nav({ items }: { items: NavItem[] }) {
   return (
     <>
       <MobileNav>
-        <ul role="list" className="flex flex-1 flex-col px-4 py-2.5 gap-6">
+        <ul className="flex flex-1 flex-col px-4 py-2.5 gap-6">
           <li>
-            <ul role="list" className="-mx-2 space-y-1">
+            <ul className="-mx-2 space-y-1">
               <li>
                 <Link
                   href="/login"

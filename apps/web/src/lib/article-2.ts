@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import assert from "assert";
+import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import glob from "fast-glob";
-import fs from "fs";
 import matter from "gray-matter";
-import path from "path";
 import { cache } from "react";
 import { z } from "zod";
 
@@ -26,11 +24,14 @@ interface MDXData<T> {
   pathSegments: string[];
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 async function getMDXData<T extends z.ZodSchema<any>>(
   dir: string,
   metadataSchema: T,
 ): Promise<MDXData<z.infer<T>>[]>;
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 async function getMDXData(dir: string): Promise<MDXData<Record<string, any>>[]>;
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 async function getMDXData<T extends z.ZodSchema<any>>(
   dir: string,
   metadataSchema?: T,
@@ -53,7 +54,7 @@ async function getMDXData<T extends z.ZodSchema<any>>(
   });
 }
 
-export const getHelpArticles = cache(async function () {
+export const getHelpArticles = cache(async () => {
   const articles = await getMDXData(
     path.join(process.cwd(), "./src/app/(public)/help/artikel/_content"),
     z.object({
@@ -71,6 +72,7 @@ export const getHelpArticles = cache(async function () {
       1,
       "Help articles should be in a category folder",
     );
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     const category = pathSegments[0]!;
     return {
       category,
@@ -79,7 +81,7 @@ export const getHelpArticles = cache(async function () {
   });
 });
 
-export const getHelpFaqs = cache(async function () {
+export const getHelpFaqs = cache(async () => {
   const articles = await getMDXData(
     path.join(
       process.cwd(),
@@ -96,7 +98,7 @@ export const getHelpFaqs = cache(async function () {
   });
 });
 
-export const getHelpCategories = cache(async function () {
+export const getHelpCategories = cache(async () => {
   const categories = await glob("**/_meta.yaml", {
     cwd: path.join(process.cwd(), "./src/app/(public)/help/artikel/_content"),
   });

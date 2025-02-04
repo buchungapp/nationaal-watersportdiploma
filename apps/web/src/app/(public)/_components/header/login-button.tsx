@@ -21,9 +21,8 @@ async function ConditionalButton() {
 
   if (possibleSession) {
     return <ToAccount />;
-  } else {
-    return <LoginButton />;
   }
+  return <LoginButton />;
 }
 
 export default function ConditionalWithFallback() {

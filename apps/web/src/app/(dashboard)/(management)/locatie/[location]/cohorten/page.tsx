@@ -60,12 +60,12 @@ export default async function Page(props: {
   });
 
   // Add cohorts to the index
-  filteredCohorts.forEach((cohort) => {
+  for (const cohort of filteredCohorts) {
     index.add({
       id: cohort.id,
       label: cohort.label,
     });
-  });
+  }
 
   const searchQuery = parsedSq.query;
 

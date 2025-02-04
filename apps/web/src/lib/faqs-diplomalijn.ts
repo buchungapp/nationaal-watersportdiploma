@@ -67,9 +67,7 @@ async function retrieveQuestions({
         }
 
         validQuestions.push(parsed);
-      } catch (err) {
-        continue;
-      }
+      } catch (err) {}
     }
 
     return validQuestions.map(([category, question, answer]) => ({
@@ -91,6 +89,6 @@ export function listFaqs({
 } = {}) {
   return unstable_cache(
     () => retrieveQuestions({ filter }),
-    [`faq-diplomalijn`, `faq-diplomalijn-${JSON.stringify(filter)}`],
+    ["faq-diplomalijn", `faq-diplomalijn-${JSON.stringify(filter)}`],
   )();
 }

@@ -124,7 +124,7 @@ export default function CompetencyTable({
                   : "",
               )}
               key={row.id}
-              href={`#TODO`}
+              href={"#TODO"}
             >
               {row.getVisibleCells().map((cell, index) => (
                 <TableCell

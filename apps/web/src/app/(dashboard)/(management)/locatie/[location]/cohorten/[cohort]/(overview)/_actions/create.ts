@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 "use server";
 
 import { revalidatePath } from "next/cache";

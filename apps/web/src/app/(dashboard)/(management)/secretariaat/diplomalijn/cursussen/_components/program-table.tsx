@@ -52,7 +52,7 @@ export default function ProgramTable({
         header: "Niveau",
       }),
     ];
-  }, [programs]);
+  }, []);
 
   const table = useReactTable({
     data: programs,

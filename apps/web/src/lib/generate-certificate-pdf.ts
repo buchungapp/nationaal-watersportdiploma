@@ -1,6 +1,6 @@
+import assert from "node:assert";
+import path from "node:path";
 import { constants } from "@nawadi/lib";
-import assert from "assert";
-import path from "path";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import SVGtoPDF from "svg-to-pdfkit";
@@ -34,6 +34,7 @@ async function fetchLogoWithCache(
     );
   }
 
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
   return cache.get(cacheKey)!;
 }
 
@@ -66,9 +67,9 @@ export async function generatePDF(
     },
   });
 
-  Object.entries(fontPaths).forEach(([key, value]) =>
-    doc.registerFont(key, path.join(process.cwd(), value)),
-  );
+  for (const [key, value] of Object.entries(fontPaths)) {
+    doc.registerFont(key, path.join(process.cwd(), value));
+  }
 
   for await (const certificate of data) {
     const degree = certificate.program.degree.title;
@@ -290,7 +291,6 @@ export async function generatePDF(
         y = y + gapY + height;
       } else {
         x = x + gapX + width;
-        y = y;
       }
     });
 

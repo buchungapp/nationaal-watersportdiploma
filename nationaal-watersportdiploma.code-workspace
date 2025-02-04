@@ -2,43 +2,43 @@
   "folders": [
     {
       "name": "specifications",
-      "path": "./specifications",
+      "path": "./specifications"
     },
     {
       "name": "apps/web",
-      "path": "./apps/web",
+      "path": "./apps/web"
     },
     {
       "name": "apps/api-server",
-      "path": "./apps/api-server",
+      "path": "./apps/api-server"
     },
     {
       "name": "packages/db",
-      "path": "./packages/db",
+      "path": "./packages/db"
     },
     {
       "name": "packages/core",
-      "path": "./packages/core",
+      "path": "./packages/core"
     },
     {
       "name": "packages/lib",
-      "path": "./packages/lib",
+      "path": "./packages/lib"
     },
     {
       "name": "packages/scripts",
-      "path": "./packages/scripts",
+      "path": "./packages/scripts"
     },
     {
       "name": "supabase",
-      "path": "./supabase",
-    },
+      "path": "./supabase"
+    }
   ],
   "settings": {
     "window.title": "Nationaal Watersportdiploma",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.fixAll": "always",
-      "source.organizeImports": "always",
+      "source.organizeImports": "always"
     },
     "editor.rulers": [100],
     "typescript.tsdk": "node_modules/typescript/lib"
@@ -47,8 +47,8 @@
     "recommendations": [
       "ryanluker.vscode-coverage-gutters",
       "streetsidesoftware.code-spell-checker",
-      "42crunch.vscode-openapi",
+      "42crunch.vscode-openapi"
     ],
-    "unwantedRecommendations": [],
-  },
+    "unwantedRecommendations": []
+  }
 }

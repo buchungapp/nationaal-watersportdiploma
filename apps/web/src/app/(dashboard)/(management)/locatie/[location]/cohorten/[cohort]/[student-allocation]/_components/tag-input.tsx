@@ -23,6 +23,7 @@ export function ManageAllocationTags({
     (_current, newTags: string[]) => newTags,
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onAdd = useCallback(
     async (tag: Tag) => {
       const newTags = [...optimisticTags, tag.label];
@@ -41,6 +42,7 @@ export function ManageAllocationTags({
     [optimisticTags],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onDelete = useCallback(
     async (index: number) => {
       const newTags = [...optimisticTags];
@@ -53,7 +55,7 @@ export function ManageAllocationTags({
         cohortId,
         tags: newTags,
       }).catch(() => {
-        toast.error(`Er is iets misgegaan bij het verwijderen van de tag`);
+        toast.error("Er is iets misgegaan bij het verwijderen van de tag");
       });
     },
     [optimisticTags],

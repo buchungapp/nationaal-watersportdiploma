@@ -1,10 +1,10 @@
-import { schema as s } from '@nawadi/db'
-import { and, eq, isNull, lte, or } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { hashToken } from '../../utils/crypto.js'
-import { possibleSingleRow, singleRow, withZod } from '../../utils/index.js'
+import { schema as s } from "@nawadi/db";
+import { and, eq, isNull, lte, or } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { hashToken } from "../../utils/crypto.js";
+import { possibleSingleRow, singleRow, withZod } from "../../utils/index.js";
 
 export const createForUser = withZod(
   z.object({
@@ -16,12 +16,12 @@ export const createForUser = withZod(
     token: z.string(),
   }),
   async (input) => {
-    const query = useQuery()
-    const token = nanoid(24)
+    const query = useQuery();
+    const token = nanoid(24);
 
-    const hashedKey = hashToken(token)
+    const hashedKey = hashToken(token);
     // take first 2 and last 4 characters of the key
-    const partialKey = `${token.slice(0, 2)}...${token.slice(-4)}`
+    const partialKey = `${token.slice(0, 2)}...${token.slice(-4)}`;
 
     const row = await query
       .insert(s.token)
@@ -32,11 +32,11 @@ export const createForUser = withZod(
         userId: input.userId,
       })
       .returning({ id: s.token.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return { id: row.id, token }
+    return { id: row.id, token };
   },
-)
+);
 
 export const byToken = withZod(
   z.string(),
@@ -45,9 +45,9 @@ export const byToken = withZod(
     userId: z.string(),
   }),
   async (token) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const hashedKey = hashToken(token)
+    const hashedKey = hashToken(token);
 
     const row = await query
       .select()
@@ -62,12 +62,12 @@ export const byToken = withZod(
           ),
         ),
       )
-      .then(possibleSingleRow)
+      .then(possibleSingleRow);
 
     if (row != null && row.userId === null) {
-      throw new Error('Unassociated tokens are not supported at this time.')
+      throw new Error("Unassociated tokens are not supported at this time.");
     }
 
-    return row as { id: string; userId: string }
+    return row as { id: string; userId: string };
   },
-)
+);

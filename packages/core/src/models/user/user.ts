@@ -1,17 +1,17 @@
-import { schema as s, uncontrolledSchema } from '@nawadi/db'
-import { AuthApiError, AuthError } from '@supabase/supabase-js'
-import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm'
-import postgres from 'postgres'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { createAuthUser } from '../../services/auth/handlers.js'
+import { schema as s, uncontrolledSchema } from "@nawadi/db";
+import { AuthApiError, AuthError } from "@supabase/supabase-js";
+import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import postgres from "postgres";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { createAuthUser } from "../../services/auth/handlers.js";
 import {
   possibleSingleRow,
   singleRow,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { selectSchema } from './user.schema.js'
+} from "../../utils/index.js";
+import { selectSchema } from "./user.schema.js";
 
 /**
  * Get or create a user from an email address.
@@ -38,15 +38,15 @@ export const getOrCreateFromEmail = withZod(
     id: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const getExistingUser = async () => {
       return query
         .select({ authUserId: s.user.authUserId })
         .from(s.user)
         .where(eq(s.user.email, input.email))
-        .then(possibleSingleRow)
-    }
+        .then(possibleSingleRow);
+    };
 
     const createUserInPublicSchema = async (authUserId: string) => {
       return query
@@ -57,30 +57,30 @@ export const getOrCreateFromEmail = withZod(
           displayName: input.displayName,
         })
         .returning({ authUserId: s.user.authUserId })
-        .then(singleRow)
-    }
+        .then(singleRow);
+    };
 
     const handleUniqueViolation = async (error: unknown) => {
-      if (error instanceof postgres.PostgresError && error.code === '23505') {
-        const existing = await getExistingUser()
-        if (existing) return { id: existing.authUserId }
+      if (error instanceof postgres.PostgresError && error.code === "23505") {
+        const existing = await getExistingUser();
+        if (existing) return { id: existing.authUserId };
       }
-      throw new Error('Failed to create user')
-    }
+      throw new Error("Failed to create user");
+    };
 
     // Check for existing user
-    const existing = await getExistingUser()
-    if (existing) return { id: existing.authUserId }
+    const existing = await getExistingUser();
+    if (existing) return { id: existing.authUserId };
 
     try {
       // Try to create auth user
-      const newAuthUserId = await createAuthUser({ email: input.email })
-      const newUser = await createUserInPublicSchema(newAuthUserId)
-      return { id: newUser.authUserId }
+      const newAuthUserId = await createAuthUser({ email: input.email });
+      const newUser = await createUserInPublicSchema(newAuthUserId);
+      return { id: newUser.authUserId };
     } catch (error) {
       if (
         (error instanceof AuthError || error instanceof AuthApiError) &&
-        (error.code === 'email_exists' || error.code === 'unexpected_failure')
+        (error.code === "email_exists" || error.code === "unexpected_failure")
       ) {
         const existingInAuthTable = await query
           .select({ id: uncontrolledSchema._usersTable.id })
@@ -89,40 +89,43 @@ export const getOrCreateFromEmail = withZod(
           .then(singleRow)
           .catch(() => {
             throw new Error(
-              'Inconsistent state: Auth user exists but not found in Supabase schema',
-            )
-          })
+              "Inconsistent state: Auth user exists but not found in Supabase schema",
+            );
+          });
 
         try {
-          const newUser = await createUserInPublicSchema(existingInAuthTable.id)
-          return { id: newUser.authUserId }
+          const newUser = await createUserInPublicSchema(
+            existingInAuthTable.id,
+          );
+          return { id: newUser.authUserId };
         } catch (insertError) {
-          return handleUniqueViolation(insertError)
+          return handleUniqueViolation(insertError);
         }
       }
 
       if (error instanceof postgres.PostgresError) {
-        return handleUniqueViolation(error)
+        return handleUniqueViolation(error);
       }
 
-      throw error
+      throw error;
     }
   },
-)
+);
 
 export const fromId = withZod(uuidSchema, selectSchema, async (id) => {
-  const query = useQuery()
+  const query = useQuery();
 
   try {
     return (await query
       .select()
       .from(s.user)
       .where(eq(s.user.authUserId, id))
-      .then(singleRow)) as any // Metadata does not match the type,  but we have Zod to validate
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      .then(singleRow)) as any; // Metadata does not match the type,  but we have Zod to validate
   } catch (error) {
     if (
       error instanceof TypeError &&
-      error.message === 'Expected 1 row, got 0'
+      error.message === "Expected 1 row, got 0"
     ) {
       const authUser = await query
         .select({
@@ -131,18 +134,20 @@ export const fromId = withZod(uuidSchema, selectSchema, async (id) => {
         })
         .from(uncontrolledSchema._usersTable)
         .where(eq(uncontrolledSchema._usersTable.id, id))
-        .then(singleRow)
+        .then(singleRow);
 
       return (await query
         .insert(s.user)
         .values({
           authUserId: authUser.id,
+          // biome-ignore lint/style/noNonNullAssertion: <explanation>
           email: authUser.email!,
         })
-        .returning()) as any // Metadata does not match the type,  but we have Zod to validate
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        .returning()) as any; // Metadata does not match the type,  but we have Zod to validate
     }
   }
-})
+});
 
 export const canUserAccessLocation = withZod(
   z.object({
@@ -151,7 +156,7 @@ export const canUserAccessLocation = withZod(
   }),
   z.boolean(),
   async ({ userId, locationId }) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const rows = await query
       .select({ number: sql<number>`1` })
@@ -165,10 +170,10 @@ export const canUserAccessLocation = withZod(
           eq(s.actor.personId, userId),
           eq(s.actor.locationId, locationId),
           isNotNull(s.actor.deletedAt),
-          inArray(s.actor.type, ['instructor', 'location_admin']),
+          inArray(s.actor.type, ["instructor", "location_admin"]),
         ),
-      )
+      );
 
-    return rows.length > 0
+    return rows.length > 0;
   },
-)
+);

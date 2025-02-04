@@ -4,10 +4,10 @@ import {
   Combobox as HeadlessCombobox,
   ComboboxButton as HeadlessComboboxButton,
   ComboboxInput as HeadlessComboboxInput,
-  ComboboxOption as HeadlessComboboxOption,
-  ComboboxOptions as HeadlessComboboxOptions,
   type ComboboxInputProps as HeadlessComboboxInputProps,
+  ComboboxOption as HeadlessComboboxOption,
   type ComboboxOptionProps as HeadlessComboboxOptionProps,
+  ComboboxOptions as HeadlessComboboxOptions,
   type ComboboxOptionsProps as HeadlessComboboxOptionsProps,
   type ComboboxProps as HeadlessComboboxProps,
 } from "@headlessui/react";
@@ -53,11 +53,11 @@ export function Combobox<T>({
       value={value}
       immediate
       onChange={(value) => {
-        setQuery && setQuery("");
+        setQuery?.("");
         setValue(value);
         theirOnChange?.(value);
       }}
-      onClose={() => setQuery && setQuery("")}
+      onClose={() => setQuery?.("")}
       multiple={false}
     >
       <div
@@ -90,8 +90,8 @@ export function Combobox<T>({
           {...(invalid && { "data-invalid": true })}
           displayValue={displayValue}
           placeholder={placeholder}
-          onChange={(e) => setQuery && setQuery(e.target.value)}
-          onBlur={() => setQuery && setQuery("")}
+          onChange={(e) => setQuery?.(e.target.value)}
+          onBlur={() => setQuery?.("")}
           className={clsx([
             // Basic layout
             "relative block w-full appearance-none rounded-lg py-[calc(theme(spacing[2.5])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]",

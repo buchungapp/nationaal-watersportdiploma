@@ -25,21 +25,32 @@ import { cache } from "react";
 import "server-only";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
+import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
 
 export type ActorType = "student" | "instructor" | "location_admin";
 
-const supabaseConfig: SupabaseConfiguration = {
-  url: process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-};
+invariant(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  "Missing NEXT_PUBLIC_SUPABASE_URL",
+);
+invariant(
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  "Missing SUPABASE_SERVICE_ROLE_KEY",
+);
+invariant(process.env.REDIS_URL, "Missing REDIS_URL");
+invariant(process.env.PGURI, "Missing PGURI");
 
+const supabaseConfig: SupabaseConfiguration = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+};
 const redisConfig: RedisConfiguration = {
-  url: process.env.REDIS_URL!,
+  url: process.env.REDIS_URL,
 };
 
 const dbConfig: DatabaseConfiguration = {
-  pgUri: process.env.PGURI!,
+  pgUri: process.env.PGURI,
   serverless: true,
 };
 
@@ -56,6 +67,7 @@ async function getPrimaryPerson<T extends boolean = true>(
   }
 
   const primaryPerson =
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     user.persons.find((person) => person.isPrimary) ?? user.persons[0]!;
 
   if (!primaryPerson.isPrimary && !force) {
@@ -108,9 +120,18 @@ async function makeRequest<T>(cb: () => Promise<T>) {
 export const getUserOrThrow = cache(async () => {
   const cookieStore = await cookies();
 
+  invariant(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    "Missing NEXT_PUBLIC_SUPABASE_URL",
+  );
+  invariant(
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    "Missing NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  );
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -677,6 +698,7 @@ export const createStudentForLocation = async (
       personId: primaryPerson.id,
     });
 
+    // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
     let user;
 
     if (personInput.email) {
@@ -866,7 +888,7 @@ export const issueCertificatesInCohort = async ({
           }
 
           const curriculum = curricula.find(
-            (c) => c.id === allocation.studentCurriculum!.curriculumId,
+            (c) => c.id === allocation.studentCurriculum?.curriculumId,
           );
 
           if (!curriculum) {
@@ -1625,7 +1647,7 @@ export const listRolesForLocation = cache(
       const authUser = await getUserOrThrow();
       const primaryPerson = await getPrimaryPerson(authUser);
 
-      if (!!personId) {
+      if (personId) {
         await validatePersonAccessCheck({
           locationId,
           requestedPersonId: personId,

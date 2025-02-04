@@ -150,8 +150,8 @@ export default async function Page(props: Props) {
           </Link>
 
           <ul className="flex items-center gap-6 justify-start">
-            {socials.map((social, i) => (
-              <li key={i}>
+            {socials.map((social) => (
+              <li key={social.name}>
                 <Link
                   href={social.link}
                   className="text-branding-dark hover:text-branding-light"

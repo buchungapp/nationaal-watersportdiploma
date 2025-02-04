@@ -33,8 +33,8 @@ import {
 } from "~/lib/nwd";
 import {
   DialogButtons,
-  Dialogs,
   DialogWrapper,
+  Dialogs,
 } from "./_components/dialog-context";
 import { LayoutTabs } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
@@ -101,7 +101,7 @@ export default async function Layout(props: {
           // so it only blocks rendering of components that
           // actually rely on this data.
           countries: listCountries(),
-          [unstable_serialize([`allStudents`, location.id])]:
+          [unstable_serialize(["allStudents", location.id])]:
             listPersonsForLocationByRole(location.id, "student"),
           [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
             listInstructorsByCohortId(cohort.id),

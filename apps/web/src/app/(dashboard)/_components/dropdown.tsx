@@ -203,6 +203,7 @@ export function DropdownShortcut({
     >
       {(Array.isArray(keys) ? keys : keys.split("")).map((char, index) => (
         <kbd
+          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
           key={index}
           className={clsx([
             "min-w-[2ch] text-center font-sans capitalize text-zinc-400 group-data-[focus]:text-white forced-colors:group-data-[focus]:text-[HighlightText]",

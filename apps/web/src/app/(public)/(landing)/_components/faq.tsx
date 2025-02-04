@@ -14,6 +14,7 @@ export default async function Faq() {
       }),
   );
 
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
   const featuredArticle = articles.shift()!;
 
   return (

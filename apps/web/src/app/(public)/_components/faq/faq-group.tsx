@@ -7,6 +7,7 @@ export default function FaqGroup({ faqs }: { faqs: FaqType[] }) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -31,6 +32,7 @@ export default function FaqGroup({ faqs }: { faqs: FaqType[] }) {
         ) : null}
         {faqs.map(({ answer, question }) => (
           <Faq key={question} question={question}>
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation> */}
             <div dangerouslySetInnerHTML={{ __html: answer }} />
           </Faq>
         ))}

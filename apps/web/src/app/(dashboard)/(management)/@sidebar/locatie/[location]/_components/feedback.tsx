@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { Suspense, useState, useActionState } from "react";
+import { Suspense, useActionState, useState } from "react";
 import {
   SidebarItem,
   SidebarLabel,
@@ -65,11 +65,11 @@ function urlSearchParamsToObject(
   const obj: Record<string, string | string[]> = {};
 
   urlSearchParams.forEach((value, key) => {
-    if (obj.hasOwnProperty(key)) {
-      const currentValue = obj[key]!;
+    if (Object.hasOwn(obj, key)) {
+      const currentValue = obj[key];
       if (Array.isArray(currentValue)) {
         currentValue.push(value);
-      } else {
+      } else if (typeof currentValue !== "undefined") {
         obj[key] = [currentValue, value];
       }
     } else {
@@ -104,7 +104,7 @@ function FeedbackTab({
 
       await productFeedbackAction({
         type: type === "feedback" ? "product-feedback" : type,
-        priority: !!urgent ? "high" : "normal",
+        priority: urgent ? "high" : "normal",
         message: comment,
         path: pathname,
         query: urlSearchParamsToObject(searchParams),

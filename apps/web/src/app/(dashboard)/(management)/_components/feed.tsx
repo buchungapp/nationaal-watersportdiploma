@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import dayjs from "~/lib/dayjs";
 
-import React from "react";
+import type React from "react";
 
 export default function Feed({
   activities,
@@ -14,7 +14,7 @@ export default function Feed({
 }) {
   return (
     <>
-      <ul role="list" className="space-y-6">
+      <ul className="space-y-6">
         {activities.map((activityItem, activityItemIdx) => (
           <li key={activityItem.id} className="relative flex gap-x-4">
             <div

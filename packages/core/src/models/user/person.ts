@@ -1,7 +1,7 @@
-import { schema as s } from '@nawadi/db'
-import dayjs from 'dayjs'
+import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
 import {
-  SQL,
+  type SQL,
   and,
   eq,
   exists,
@@ -9,11 +9,11 @@ import {
   inArray,
   isNull,
   sql,
-} from 'drizzle-orm'
-import { aggregate } from 'drizzle-toolbelt'
-import { customAlphabet } from 'nanoid'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+} from "drizzle-orm";
+import { aggregate } from "drizzle-toolbelt";
+import { customAlphabet } from "nanoid";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
 import {
   possibleSingleRow,
   singleOrArray,
@@ -21,16 +21,16 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { insertSchema, personSchema } from './person.schema.js'
-import { getOrCreateFromEmail } from './user.js'
-import { selectSchema } from './user.schema.js'
+} from "../../utils/index.js";
+import { insertSchema, personSchema } from "./person.schema.js";
+import { getOrCreateFromEmail } from "./user.js";
+import { selectSchema } from "./user.schema.js";
 
 export function generatePersonID() {
-  const dictionary = '6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz'
-  const nanoid = customAlphabet(dictionary, 10)
+  const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
+  const nanoid = customAlphabet(dictionary, 10);
 
-  return nanoid()
+  return nanoid();
 }
 
 export const getOrCreate = withZod(
@@ -48,42 +48,42 @@ export const getOrCreate = withZod(
     }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const conditions: SQL[] = []
+    const conditions: SQL[] = [];
 
     if (input.userId) {
-      conditions.push(eq(s.person.userId, input.userId))
+      conditions.push(eq(s.person.userId, input.userId));
     } else {
-      conditions.push(isNull(s.person.userId))
+      conditions.push(isNull(s.person.userId));
     }
 
     // Add conditions dynamically based on defined inputs
     if (input.firstName) {
       conditions.push(
         eq(sql`LOWER(${s.person.firstName})`, input.firstName.toLowerCase()),
-      )
+      );
     }
     if (input.lastName) {
       conditions.push(
         eq(sql`LOWER(${s.person.lastName})`, input.lastName.toLowerCase()),
-      )
+      );
     }
     if (input.dateOfBirth) {
       conditions.push(
-        eq(s.person.dateOfBirth, dayjs(input.dateOfBirth).format('YYYY-MM-DD')),
-      )
+        eq(s.person.dateOfBirth, dayjs(input.dateOfBirth).format("YYYY-MM-DD")),
+      );
     }
 
     const [existing] = await query
       .select({ id: s.person.id })
       .from(s.person)
-      .where(and(...conditions))
+      .where(and(...conditions));
 
     if (existing) {
       return {
         id: existing.id,
-      }
+      };
     }
 
     const [newPerson] = await query
@@ -95,22 +95,22 @@ export const getOrCreate = withZod(
         lastName: input.lastName,
         lastNamePrefix: input.lastNamePrefix,
         dateOfBirth: input.dateOfBirth
-          ? dayjs(input.dateOfBirth).format('YYYY-MM-DD')
+          ? dayjs(input.dateOfBirth).format("YYYY-MM-DD")
           : undefined,
         birthCity: input.birthCity,
         birthCountry: input.birthCountry,
       })
-      .returning({ id: s.person.id })
+      .returning({ id: s.person.id });
 
     if (!newPerson) {
-      throw new Error('Failed to create actor')
+      throw new Error("Failed to create actor");
     }
 
     return {
       id: newPerson.id,
-    }
+    };
   },
-)
+);
 
 export const createLocationLink = withZod(
   z.object({
@@ -119,41 +119,41 @@ export const createLocationLink = withZod(
   }),
   z.void(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     await query
       .insert(s.personLocationLink)
       .values({
         personId: input.personId,
         locationId: input.locationId,
-        status: 'linked',
-        permissionLevel: 'none',
+        status: "linked",
+        permissionLevel: "none",
       })
       .onConflictDoNothing({
         target: [
           s.personLocationLink.personId,
           s.personLocationLink.locationId,
         ],
-      })
+      });
 
-    return
+    return;
   },
-)
+);
 
 export const byIdOrHandle = withZod(
   z.union([z.object({ id: uuidSchema }), z.object({ handle: z.string() })]),
   personSchema,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const whereClausules: (SQL | undefined)[] = [isNull(s.person.deletedAt)]
+    const whereClausules: (SQL | undefined)[] = [isNull(s.person.deletedAt)];
 
-    if ('id' in input) {
-      whereClausules.push(eq(s.person.id, input.id))
+    if ("id" in input) {
+      whereClausules.push(eq(s.person.id, input.id));
     }
 
-    if ('handle' in input) {
-      whereClausules.push(eq(s.person.handle, input.handle))
+    if ("handle" in input) {
+      whereClausules.push(eq(s.person.handle, input.handle));
     }
 
     const res = await query
@@ -170,24 +170,25 @@ export const byIdOrHandle = withZod(
       .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
       .where(and(...whereClausules))
       .then((rows) => {
-        const result = singleRow(rows)
+        const result = singleRow(rows);
         if (result.birthCountry?.code === null) {
           return {
             ...result,
             birthCountry: null,
-          }
+          };
         }
-        return result
-      })
+        return result;
+      });
 
     return {
       ...res,
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       handle: res.handle!,
       createdAt: dayjs(res.createdAt).toISOString(),
       updatedAt: dayjs(res.updatedAt).toISOString(),
-    }
+    };
   },
-)
+);
 
 export const list = withZod(
   z
@@ -207,11 +208,11 @@ export const list = withZod(
           id: uuidSchema,
           createdAt: z.string(),
           type: z.enum([
-            'student',
-            'instructor',
-            'location_admin',
-            'application',
-            'system',
+            "student",
+            "instructor",
+            "location_admin",
+            "application",
+            "system",
           ]),
           locationId: uuidSchema,
         })
@@ -219,12 +220,12 @@ export const list = withZod(
     })
     .array(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const conditions: SQL[] = []
+    const conditions: SQL[] = [];
 
     if (input.filter.userId != null) {
-      conditions.push(eq(s.person.userId, input.filter.userId))
+      conditions.push(eq(s.person.userId, input.filter.userId));
     }
 
     if (input.filter.locationId) {
@@ -235,11 +236,11 @@ export const list = withZod(
           .where(
             and(
               inArray(s.personLocationLink.locationId, input.filter.locationId),
-              eq(s.personLocationLink.status, 'linked'),
+              eq(s.personLocationLink.status, "linked"),
               eq(s.personLocationLink.personId, s.person.id),
             ),
-          )
-        conditions.push(exists(existsQuery))
+          );
+        conditions.push(exists(existsQuery));
       } else {
         const existsQuery = query
           .select({ personId: s.personLocationLink.personId })
@@ -247,11 +248,11 @@ export const list = withZod(
           .where(
             and(
               eq(s.personLocationLink.locationId, input.filter.locationId),
-              eq(s.personLocationLink.status, 'linked'),
+              eq(s.personLocationLink.status, "linked"),
               eq(s.personLocationLink.personId, s.person.id),
             ),
-          )
-        conditions.push(exists(existsQuery))
+          );
+        conditions.push(exists(existsQuery));
       }
     }
 
@@ -274,7 +275,7 @@ export const list = withZod(
           eq(s.actor.personId, s.person.id),
           isNull(s.actor.deletedAt),
           isNull(s.person.deletedAt),
-          !!input.filter.locationId
+          input.filter.locationId
             ? Array.isArray(input.filter.locationId)
               ? inArray(s.actor.locationId, input.filter.locationId)
               : eq(s.actor.locationId, input.filter.locationId)
@@ -282,32 +283,33 @@ export const list = withZod(
         ),
       )
       .where(and(...conditions))
-      .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+      .then(aggregate({ pkey: "id", fields: { actors: "actor.id" } }));
 
     return rows.map((row) => ({
       ...row,
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       handle: row.handle!,
       createdAt: dayjs(row.createdAt).toISOString(),
       updatedAt: dayjs(row.updatedAt).toISOString(),
-    }))
+    }));
   },
-)
+);
 
 export const listLocationsByRole = withZod(
   z.object({
     personId: uuidSchema,
     roles: z
-      .array(z.enum(['student', 'instructor', 'location_admin']))
-      .default(['instructor', 'student', 'location_admin']),
+      .array(z.enum(["student", "instructor", "location_admin"]))
+      .default(["instructor", "student", "location_admin"]),
   }),
   z.array(
     z.object({
       locationId: uuidSchema,
-      roles: z.array(z.enum(['student', 'instructor', 'location_admin'])),
+      roles: z.array(z.enum(["student", "instructor", "location_admin"])),
     }),
   ),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const result = await query
       .select({
@@ -327,14 +329,15 @@ export const listLocationsByRole = withZod(
       .where(
         and(
           eq(s.personLocationLink.personId, input.personId),
-          eq(s.personLocationLink.status, 'linked'),
+          eq(s.personLocationLink.status, "linked"),
         ),
       )
-      .then(aggregate({ pkey: 'locationId', fields: { roles: 'role' } }))
+      .then(aggregate({ pkey: "locationId", fields: { roles: "role" } }));
 
-    return result as any
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    return result as any;
   },
-)
+);
 
 export const setPrimary = withZod(
   z.object({
@@ -342,7 +345,7 @@ export const setPrimary = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const result = await query
       .update(s.person)
@@ -352,11 +355,11 @@ export const setPrimary = withZod(
       })
       .where(and(eq(s.person.id, input.personId), isNull(s.person.deletedAt)))
       .returning({ id: s.person.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return result
+    return result;
   },
-)
+);
 
 export const replaceMetadata = withZod(
   z.object({
@@ -365,7 +368,7 @@ export const replaceMetadata = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .update(s.person)
@@ -375,18 +378,18 @@ export const replaceMetadata = withZod(
       })
       .where(eq(s.person.id, input.personId))
       .returning({ id: s.person.id })
-      .then(singleRow)
+      .then(singleRow);
   },
-)
+);
 
 export const listActiveRolesForLocation = withZod(
   z.object({
     personId: uuidSchema,
     locationId: uuidSchema,
   }),
-  z.array(z.enum(['student', 'instructor', 'location_admin'])),
+  z.array(z.enum(["student", "instructor", "location_admin"])),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .select({
@@ -403,14 +406,14 @@ export const listActiveRolesForLocation = withZod(
       .then((rows) =>
         rows
           .filter(({ type }) =>
-            ['student', 'instructor', 'location_admin'].includes(type),
+            ["student", "instructor", "location_admin"].includes(type),
           )
           .map(
-            ({ type }) => type as 'student' | 'instructor' | 'location_admin',
+            ({ type }) => type as "student" | "instructor" | "location_admin",
           ),
-      )
+      );
   },
-)
+);
 
 export const moveToAccountByEmail = withZod(
   z.object({
@@ -419,7 +422,7 @@ export const moveToAccountByEmail = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     async function findUserForPerson(personId: string) {
       return query
@@ -439,7 +442,7 @@ export const moveToAccountByEmail = withZod(
               ),
           ),
         )
-        .then(possibleSingleRow)
+        .then(possibleSingleRow);
     }
 
     async function updatePersonUser(personId: string, userId: string) {
@@ -448,18 +451,18 @@ export const moveToAccountByEmail = withZod(
         .set({ userId: userId, updatedAt: sql`NOW()` })
         .where(eq(s.person.id, personId))
         .returning({ id: s.person.id })
-        .then(singleRow)
+        .then(singleRow);
     }
 
-    const user = await findUserForPerson(input.personId)
+    const user = await findUserForPerson(input.personId);
 
     const newUser = await getOrCreateFromEmail({
       email: input.email,
       displayName: user?.displayName ?? undefined,
-    })
-    return await updatePersonUser(input.personId, newUser.id)
+    });
+    return await updatePersonUser(input.personId, newUser.id);
   },
-)
+);
 
 export const updateDetails = withZod(
   z.object({
@@ -477,7 +480,7 @@ export const updateDetails = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .update(s.person)
@@ -486,7 +489,7 @@ export const updateDetails = withZod(
         lastName: input.data.lastName,
         lastNamePrefix: input.data.lastNamePrefix,
         dateOfBirth: input.data.dateOfBirth
-          ? dayjs(input.data.dateOfBirth).format('YYYY-MM-DD')
+          ? dayjs(input.data.dateOfBirth).format("YYYY-MM-DD")
           : undefined,
         birthCity: input.data.birthCity,
         birthCountry: input.data.birthCountry,
@@ -494,6 +497,6 @@ export const updateDetails = withZod(
       })
       .where(eq(s.person.id, input.personId))
       .returning({ id: s.person.id })
-      .then(singleRow)
+      .then(singleRow);
   },
-)
+);

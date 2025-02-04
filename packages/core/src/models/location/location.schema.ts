@@ -1,7 +1,7 @@
-import { schema as s } from '@nawadi/db'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { z } from 'zod'
-import { outputSchema as mediaOutputSchema } from '../platform/media.schema.js'
+import { schema as s } from "@nawadi/db";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+import { outputSchema as mediaOutputSchema } from "../platform/media.schema.js";
 export const insertSchema = createInsertSchema(s.location, {
   handle: (schema) =>
     schema.handle
@@ -11,12 +11,12 @@ export const insertSchema = createInsertSchema(s.location, {
       .regex(/^[a-z0-9\-]+$/),
   name: (schema) => schema.name.trim(),
   websiteUrl: (schema) => schema.websiteUrl.url(),
-})
-export type Input = z.input<typeof insertSchema>
+});
+export type Input = z.input<typeof insertSchema>;
 
 export const selectSchema = createSelectSchema(s.location, {
   _metadata: z.any(),
-})
+});
 
 export const locationMetadataSchema = z.object({
   googlePlaceId: z
@@ -26,21 +26,21 @@ export const locationMetadataSchema = z.object({
   socialMedia: z
     .object({
       platform: z.union([
-        z.literal('facebook'),
-        z.literal('instagram'),
-        z.literal('linkedin'),
-        z.literal('tiktok'),
-        z.literal('whatsapp'),
-        z.literal('x'),
-        z.literal('youtube'),
+        z.literal("facebook"),
+        z.literal("instagram"),
+        z.literal("linkedin"),
+        z.literal("tiktok"),
+        z.literal("whatsapp"),
+        z.literal("x"),
+        z.literal("youtube"),
       ]),
       url: z.string().url(),
     })
     .array()
     .catch(() => []),
-})
+});
 
-export type LocationMetadata = z.infer<typeof locationMetadataSchema>
+export type LocationMetadata = z.infer<typeof locationMetadataSchema>;
 
 export const outputSchema = selectSchema
   .omit({
@@ -55,6 +55,6 @@ export const outputSchema = selectSchema
     logoSquare: mediaOutputSchema.nullable(),
     logoCertificate: mediaOutputSchema.nullable(),
   })
-  .merge(locationMetadataSchema)
+  .merge(locationMetadataSchema);
 
-export type Output = z.output<typeof outputSchema>
+export type Output = z.output<typeof outputSchema>;

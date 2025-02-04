@@ -56,6 +56,7 @@ export function useSorting({
     parseAsSorting(sortableColumnIds).withDefault(defaultSorting),
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const options = useMemo(
     () => ({
       state: {

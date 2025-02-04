@@ -24,9 +24,9 @@ export default function Spinner({
         }}
         className={clsx("loading-spinner", sizeToClassName[size], className)}
       >
-        {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
         {[...Array(12)].map((_, i) => (
           <div
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={i}
             style={{
               animationDelay: `${-1.2 + 0.1 * i}s`,

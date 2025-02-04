@@ -1,10 +1,10 @@
-import { SupabaseClient, createClient } from '@supabase/supabase-js'
-import { AsyncLocalStorage } from 'async_hooks'
+import { AsyncLocalStorage } from "node:async_hooks";
+import { type SupabaseClient, createClient } from "@supabase/supabase-js";
 
 /**
  * A context-based storage for SupabaseClient instances.
  */
-const storage = new AsyncLocalStorage<SupabaseClient>()
+const storage = new AsyncLocalStorage<SupabaseClient>();
 
 /**
  * A configuration interface for the SupabaseClient.
@@ -13,11 +13,11 @@ export interface SupabaseConfiguration {
   /**
    * The URL of the Supabase API.
    */
-  url: string
+  url: string;
   /**
    * The service role key for authentication.
    */
-  serviceRoleKey: string
+  serviceRoleKey: string;
 }
 
 /**
@@ -30,18 +30,18 @@ export async function withSupabaseClient<T>(
   configuration: SupabaseConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { url, serviceRoleKey } = configuration
+  const { url, serviceRoleKey } = configuration;
   const client = createClient(url, serviceRoleKey, {
     // customize supabase configuration here
     auth: {
       autoRefreshToken: false,
       detectSessionInUrl: false,
       persistSession: false,
-      flowType: 'pkce',
+      flowType: "pkce",
     },
-  })
-  const result = await storage.run(client, job)
-  return result
+  });
+  const result = await storage.run(client, job);
+  return result;
 }
 
 /**
@@ -50,9 +50,9 @@ export async function withSupabaseClient<T>(
  * @throws TypeError if no SupabaseClient instance is found in the context.
  */
 export function useSupabaseClient(): SupabaseClient {
-  const client = storage.getStore()
+  const client = storage.getStore();
   if (client == null) {
-    throw new TypeError('Supabase client not in context')
+    throw new TypeError("Supabase client not in context");
   }
-  return client
+  return client;
 }

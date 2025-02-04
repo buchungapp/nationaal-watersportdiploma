@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import { OTPInput } from "input-otp";
-import { useRef, type PropsWithChildren, useActionState } from "react";
+import { type PropsWithChildren, useActionState, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { login, verify } from "~/app/_actions/auth";
@@ -94,6 +94,7 @@ export function OtpForm({
               {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
                 return (
                   <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                     key={idx}
                     className={clsx([
                       // Basic layout

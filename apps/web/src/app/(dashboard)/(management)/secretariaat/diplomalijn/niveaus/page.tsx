@@ -23,15 +23,18 @@ async function DegreesTable({
   });
 
   // Add programs to the index
-  degrees.forEach((degree) => {
-    index.add(degree.id, degree.title!);
-  });
+  for (const degree of degrees) {
+    if (degree.title) {
+      index.add(degree.id, degree.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredGearTypes = degrees;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredGearTypes = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => degrees.find((degree) => degree.id === result)!,
     );
   }

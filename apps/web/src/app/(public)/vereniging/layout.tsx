@@ -19,7 +19,7 @@ export const metadata: Metadata = {
       template: `%s | Verenigingszaken | ${constants.APP_NAME}`,
       default: "Verenigingszaken",
     },
-    description: `Opzet en werking van de vereniging.`,
+    description: "Opzet en werking van de vereniging.",
     url: "/vereniging",
     siteName: constants.APP_NAME,
     locale: "nl_NL",

@@ -61,7 +61,7 @@ export default async function Page(props: {
 
   return (
     <>
-      <BackButton href={`/secretariaat/diplomalijn/cursussen`}>
+      <BackButton href={"/secretariaat/diplomalijn/cursussen"}>
         Cursussen
       </BackButton>
       <Heading>{course.title}</Heading>

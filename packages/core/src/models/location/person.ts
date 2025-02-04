@@ -1,22 +1,22 @@
-import { schema as s } from '@nawadi/db'
+import { schema as s } from "@nawadi/db";
 import {
-  SQL,
+  type SQL,
   and,
   eq,
   exists,
   getTableColumns,
   inArray,
   isNull,
-} from 'drizzle-orm'
-import { aggregate } from 'drizzle-toolbelt'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+} from "drizzle-orm";
+import { aggregate } from "drizzle-toolbelt";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
 import {
   possibleSingleRow,
   singleOrArray,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
+} from "../../utils/index.js";
 
 export const list = withZod(
   z.object({
@@ -24,15 +24,15 @@ export const list = withZod(
     filter: z
       .object({
         type: singleOrArray(
-          z.enum(['student', 'instructor', 'location_admin']),
+          z.enum(["student", "instructor", "location_admin"]),
         ).optional(),
       })
       .default({}),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const conditions: SQL[] = []
+    const conditions: SQL[] = [];
 
     const existsQuery = query
       .select({ personId: s.personLocationLink.personId })
@@ -40,11 +40,11 @@ export const list = withZod(
       .where(
         and(
           eq(s.personLocationLink.locationId, input.locationId),
-          eq(s.personLocationLink.status, 'linked'),
+          eq(s.personLocationLink.status, "linked"),
           eq(s.personLocationLink.personId, s.person.id),
         ),
-      )
-    conditions.push(exists(existsQuery))
+      );
+    conditions.push(exists(existsQuery));
 
     return await query
       .select({
@@ -71,18 +71,18 @@ export const list = withZod(
         ),
       )
       .where(and(...conditions))
-      .then(aggregate({ pkey: 'id', fields: { actors: 'actor.id' } }))
+      .then(aggregate({ pkey: "id", fields: { actors: "actor.id" } }));
   },
-)
+);
 
 export const getActorByPersonIdAndType = withZod(
   z.object({
     locationId: uuidSchema,
     personId: uuidSchema,
-    actorType: z.enum(['student', 'instructor', 'location_admin']),
+    actorType: z.enum(["student", "instructor", "location_admin"]),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const actor = await query
       .select({ id: s.actor.id })
@@ -95,8 +95,8 @@ export const getActorByPersonIdAndType = withZod(
           isNull(s.actor.deletedAt),
         ),
       )
-      .then(possibleSingleRow)
+      .then(possibleSingleRow);
 
-    return actor
+    return actor;
   },
-)
+);

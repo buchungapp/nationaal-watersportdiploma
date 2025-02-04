@@ -18,6 +18,7 @@ export function ArticleLayout({
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -53,7 +54,7 @@ export function ArticleLayout({
         <div className="mx-auto max-w-2xl">
           <article>
             <div className="flex items-center gap-x-4 text-gray-400">
-              <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
+              <span className="h-4 w-0.5 rounded-full bg-zinc-200" />
               <time dateTime={article.date}>{formatDate(article.date)}</time>
               <span className="text-xl leading-4">&middot;</span>
               <span className="capitalize">{article.category}</span>

@@ -226,7 +226,6 @@ export default async function CertificateTemplate({
                 >
                   {certificate.location.logoCertificate ? (
                     <span className="p-2.5 inline-block bg-white max-w-64">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         className="w-full h-auto object-contain"
                         src={certificate.location.logoCertificate.url}

@@ -1,12 +1,12 @@
 "use client";
 
 import {
+  type PropsWithChildren,
   Suspense,
   createContext,
   useActionState,
   useContext,
   useState,
-  type PropsWithChildren,
 } from "react";
 
 import {
@@ -41,11 +41,11 @@ function urlSearchParamsToObject(
   const obj: Record<string, string | string[]> = {};
 
   urlSearchParams.forEach((value, key) => {
-    if (obj.hasOwnProperty(key)) {
-      const currentValue = obj[key]!;
+    if (Object.hasOwn(obj, key)) {
+      const currentValue = obj[key];
       if (Array.isArray(currentValue)) {
         currentValue.push(value);
-      } else {
+      } else if (typeof currentValue !== "undefined") {
         obj[key] = [currentValue, value];
       }
     } else {

@@ -1,25 +1,25 @@
-import { schema as s } from '@nawadi/db'
-import { sql } from 'drizzle-orm'
-import { z } from 'zod'
-import { useQuery } from '../../main.js'
+import { schema as s } from "@nawadi/db";
+import { sql } from "drizzle-orm";
+import { z } from "zod";
+import { useQuery } from "../../main.js";
 import {
   singleRow,
   successfulCreateResponse,
   withZod,
-} from '../../utils/index.js'
+} from "../../utils/index.js";
 
 const mapToPriorityNumber = (priority: string) => {
   switch (priority) {
-    case 'low':
-      return 0
-    case 'normal':
-      return 1
-    case 'high':
-      return 2
+    case "low":
+      return 0;
+    case "normal":
+      return 1;
+    case "high":
+      return 2;
     default:
-      return 1
+      return 1;
   }
-}
+};
 
 const baseFeedbackSchema = z.object({
   message: z.string().nullish(),
@@ -30,27 +30,27 @@ const baseFeedbackSchema = z.object({
   headers: z.record(z.string().nullish()).optional(),
   base: z.record(z.string().nullish()).optional(),
   priority: z
-    .union([z.literal('low'), z.literal('normal'), z.literal('high')])
-    .default('normal'),
+    .union([z.literal("low"), z.literal("normal"), z.literal("high")])
+    .default("normal"),
   insertedBy: z.string().uuid(),
-})
+});
 
 export const create = withZod(
-  z.discriminatedUnion('type', [
+  z.discriminatedUnion("type", [
     baseFeedbackSchema.extend({
-      type: z.literal('bug'),
+      type: z.literal("bug"),
     }),
     baseFeedbackSchema.extend({
-      type: z.literal('product-feedback'),
+      type: z.literal("product-feedback"),
     }),
     baseFeedbackSchema.extend({
-      type: z.literal('question'),
+      type: z.literal("question"),
     }),
     baseFeedbackSchema.extend({
-      type: z.literal('other'),
+      type: z.literal("other"),
     }),
     baseFeedbackSchema.extend({
-      type: z.literal('program-feedback'),
+      type: z.literal("program-feedback"),
       programId: z.string().uuid(),
       moduleId: z.string().uuid().optional(),
       competencyId: z.string().uuid().optional(),
@@ -58,7 +58,7 @@ export const create = withZod(
   ]),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const insert = await query
       .insert(s.feedback)
@@ -70,7 +70,7 @@ export const create = withZod(
         headers: sql`(((${JSON.stringify(input.headers)})::jsonb)#>> '{}')::jsonb`,
         base: sql`(((${JSON.stringify(input.base)})::jsonb)#>> '{}')::jsonb`,
         metadata: sql`(((${JSON.stringify(
-          input.type === 'program-feedback'
+          input.type === "program-feedback"
             ? {
                 programId: input.programId,
                 moduleId: input.moduleId,
@@ -82,8 +82,8 @@ export const create = withZod(
         insertedBy: input.insertedBy,
       })
       .returning({ id: s.feedback.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return insert
+    return insert;
   },
-)
+);

@@ -1,7 +1,7 @@
-import { schema as s } from '@nawadi/db'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { z } from 'zod'
-import { uuidSchema } from '../../utils/index.js'
+import { schema as s } from "@nawadi/db";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+import { uuidSchema } from "../../utils/index.js";
 
 export const insertSchema = createInsertSchema(s.person, {
   firstName: (schema) => schema.firstName.trim(),
@@ -9,9 +9,9 @@ export const insertSchema = createInsertSchema(s.person, {
   lastNamePrefix: (schema) => schema.lastNamePrefix.trim(),
   dateOfBirth: (schema) => schema.dateOfBirth.pipe(z.coerce.date()),
   birthCountry: (schema) =>
-    schema.birthCountry.length(2).toLowerCase().default('nl'),
-})
-export const selectSchema = createSelectSchema(s.person)
+    schema.birthCountry.length(2).toLowerCase().default("nl"),
+});
+export const selectSchema = createSelectSchema(s.person);
 
 export const personSchema = z.object({
   id: uuidSchema,
@@ -32,4 +32,4 @@ export const personSchema = z.object({
   isPrimary: z.boolean(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
-})
+});

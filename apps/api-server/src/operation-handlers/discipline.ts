@@ -1,5 +1,5 @@
-import * as api from '@nawadi/api'
-import * as application from '../application/index.js'
+import type * as api from "@nawadi/api";
+import type * as application from "../application/index.js";
 
 export const listDisciplines: api.server.ListDisciplinesOperationHandler<
   application.Authentication
@@ -14,10 +14,10 @@ export const listDisciplines: api.server.ListDisciplinesOperationHandler<
   return {
     parameters: {},
     status: 200,
-    contentType: 'application/json',
+    contentType: "application/json",
     entity: () => [],
-  }
-}
+  };
+};
 
 export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
   application.Authentication
@@ -61,5 +61,5 @@ export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
     parameters: {},
     status: 404,
     contentType: null,
-  }
-}
+  };
+};

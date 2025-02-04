@@ -92,13 +92,11 @@ export default function Page() {
               </p>
 
               <h3>Icoon</h3>
-              {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
               <Image className="rounded-none" src={icon} alt="" width={300} />
 
               <h3>Woordmerk</h3>
               <Image
                 className="rounded-none"
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 src={wordmark}
                 alt=""
                 width={300}

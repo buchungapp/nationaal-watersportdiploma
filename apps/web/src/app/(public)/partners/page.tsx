@@ -65,7 +65,11 @@ export default function Page() {
           </p>
           <p>
             Lees meer op:{" "}
-            <a href="https://www.watersportverbond.nl" target="_blank">
+            <a
+              href="https://www.watersportverbond.nl"
+              target="_blank"
+              rel="noreferrer"
+            >
               www.watersportverbond.nl
             </a>
             .

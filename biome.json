@@ -16,8 +16,7 @@
       "_deprecated/*",
       ".snaplet/*",
       "pnpm-lock.yaml",
-	     "!packages/scripts/src/migrations"
-
+      "!packages/scripts/src/migrations"
     ]
   },
   "linter": {
