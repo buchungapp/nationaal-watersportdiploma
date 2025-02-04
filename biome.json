@@ -13,7 +13,11 @@
       ".next/*",
       ".turbo/*",
       "generated/*",
-      "_deprecated/*"
+      "_deprecated/*",
+      ".snaplet/*",
+      "pnpm-lock.yaml",
+	     "!packages/scripts/src/migrations"
+
     ]
   },
   "linter": {

@@ -4,8 +4,8 @@
   "packageManager": "pnpm@9.15.5",
   "scripts": {
     "spelling": "cspell",
-    "formatting": "pnpm biome check \"**/*\"",
-    "formatting:fix": "pnpm biome check \"**/*\" --write",
+    "formatting": "pnpm biome check ./",
+    "formatting:fix": "pnpm biome check ./ --write",
     "build:packages": "pnpm --recursive --filter {packages/**} build",
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
