@@ -41,13 +41,11 @@
       "source.organizeImports": "always",
     },
     "editor.rulers": [100],
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "typescript.tsdk": "node_modules/typescript/lib"
   },
   "extensions": {
     "recommendations": [
       "ryanluker.vscode-coverage-gutters",
-      "esbenp.prettier-vscode",
       "streetsidesoftware.code-spell-checker",
       "42crunch.vscode-openapi",
     ],

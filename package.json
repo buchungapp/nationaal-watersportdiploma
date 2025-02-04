@@ -4,8 +4,8 @@
   "packageManager": "pnpm@9.15.5",
   "scripts": {
     "spelling": "cspell",
-    "formatting": "prettier --check \"**/*\"",
-    "formatting:fix": "prettier --write \"**/*\"",
+    "formatting": "pnpm biome format \"**/*\"",
+    "formatting:fix": "pnpm biome format --write \"**/*\"",
     "build:packages": "pnpm --recursive --filter {packages/**} build",
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
@@ -15,7 +15,6 @@
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",
     "cspell": "^8.10.4",
-    "prettier": "^3.3.3",
     "typescript": "5.4.5"
   },
   "pnpm": {
