@@ -24,15 +24,14 @@ import Table from "./_components/table";
 // We need this for the bulk import
 export const maxDuration = 240;
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-  searchParams?: Record<string, string | string[] | undefined>;
+  }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const [location, countries] = await Promise.all([
     retrieveLocationByHandle(params.location),
     listCountries(),

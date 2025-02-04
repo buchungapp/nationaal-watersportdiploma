@@ -15,11 +15,15 @@ import { LocationSidebarMenu } from "./_components/sidebar-menu";
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     location: string;
-  };
+  }>;
 }
-export default async function SidebarLayout({ params, children }: LayoutProps) {
+export default async function SidebarLayout(props: LayoutProps) {
+  const params = await props.params;
+
+  const { children } = props;
+
   const location = await retrieveLocationByHandle(params.location);
   const rolesForPerson = await listRolesForLocation(location.id);
 

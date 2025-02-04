@@ -3,8 +3,9 @@ import { findArticleById } from "~/lib/articles";
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string[] } },
+  props: { params: Promise<{ slug: string[] }> },
 ) {
+  const params = await props.params;
   const slug = params.slug.at(0);
 
   if (!slug) {

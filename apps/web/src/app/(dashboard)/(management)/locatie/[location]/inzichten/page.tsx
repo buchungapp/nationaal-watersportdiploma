@@ -12,13 +12,12 @@ import {
 
 dayjs.extend(weekOfYear);
 
-export default async function Page({
-  params,
-}: Readonly<{
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-}>) {
+  }>;
+}) {
+  const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 
   const [persons, certificates, disciplines] = await Promise.all([

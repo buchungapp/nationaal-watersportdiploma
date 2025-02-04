@@ -241,11 +241,14 @@ async function ManageStudentCurriculumActions({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: { location: string; cohort: string; "student-allocation": string };
+export default async function Page(props: {
+  params: Promise<{
+    location: string;
+    cohort: string;
+    "student-allocation": string;
+  }>;
 }) {
+  const params = await props.params;
   // Kick-off the flag evaluation
   const showTimelineFlag = showAllocationTimeline();
 

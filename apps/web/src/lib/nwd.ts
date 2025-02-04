@@ -106,7 +106,7 @@ async function makeRequest<T>(cb: () => Promise<T>) {
 }
 
 export const getUserOrThrow = cache(async () => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

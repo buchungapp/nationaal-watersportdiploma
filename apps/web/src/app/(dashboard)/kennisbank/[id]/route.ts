@@ -4,14 +4,14 @@ import { downloadKnowledgeCenterDocument } from "~/lib/nwd";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   const { searchParams } = new URL(request.url);
 
   const forceDownload = searchParams.has("download");
 
   const url = await downloadKnowledgeCenterDocument(
-    context.params.id,
+    (await context.params).id,
     forceDownload,
   ).catch(() => notFound());
 

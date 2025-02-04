@@ -73,13 +73,14 @@ async function QuickActionButtons({
   );
 }
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: { location: string; cohort: string };
+export default async function Layout(props: {
+  params: Promise<{ location: string; cohort: string }>;
   children: React.ReactNode;
 }) {
+  const params = await props.params;
+
+  const { children } = props;
+
   const location = await retrieveLocationByHandle(params.location);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 

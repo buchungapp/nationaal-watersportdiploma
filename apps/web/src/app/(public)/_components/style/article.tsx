@@ -21,7 +21,10 @@ export default function Article({
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
       ? // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        cloneElement(child as ReactElement<any>, { justify, ...child.props })
+        cloneElement(child as ReactElement<any>, {
+          justify,
+          ...(child.props as object),
+        })
       : child,
   );
 

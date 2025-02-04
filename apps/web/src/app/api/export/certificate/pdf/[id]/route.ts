@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   const { searchParams } = new URL(request.url);
 
@@ -18,7 +18,7 @@ export async function GET(
     : ("download" as const);
 
   const { handles, settings } = await retrieveCertificateHandles(
-    context.params.id,
+    (await context.params).id,
   );
 
   return presentPDF(

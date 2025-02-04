@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useActionState } from "react";
 import {
   SidebarItem,
   SidebarLabel,
@@ -39,7 +39,7 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { z } from "zod";
 import { productFeedbackAction } from "~/app/(dashboard)/_actions/feedback";
 import Spinner from "~/app/_components/spinner";

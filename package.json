@@ -1,15 +1,16 @@
 {
   "name": "@nawadi/nationaal-watersportdiploma",
   "private": true,
-  "packageManager": "pnpm@8.14.3",
+  "packageManager": "pnpm@9.15.5",
   "scripts": {
     "spelling": "cspell",
-    "formatting": "prettier --check *",
-    "formatting:fix": "prettier --write *",
-    "build:packages": "pnpm --recursive --filter './packages/**' build",
+    "formatting": "prettier --check \"**/*\"",
+    "formatting:fix": "prettier --write \"**/*\"",
+    "build:packages": "pnpm --recursive --filter {packages/**} build",
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
-    "db:seed": "node ./scripts/seed-local-db.js"
+    "db:seed": "node ./scripts/seed-local-db.js",
+    "test": "pnpm --recursive test"
   },
   "devDependencies": {
     "@cspell/dict-nl-nl": "^2.3.0",
@@ -19,7 +20,10 @@
   },
   "pnpm": {
     "overrides": {
-      "cookie@<0.7.0": ">=0.7.0"
+      "@types/react": "19.0.8",
+      "@types/react-dom": "19.0.3",
+      "cookie@<0.7.0": ">=0.7.0",
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5"
     }
   }
 }

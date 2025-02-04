@@ -5,9 +5,9 @@ import { getHelpFaqs } from "~/lib/article-2";
 import Breadcrumb from "../../_components/breadcrumb";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata(

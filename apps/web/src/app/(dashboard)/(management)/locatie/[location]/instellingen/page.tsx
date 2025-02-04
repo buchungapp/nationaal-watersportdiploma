@@ -54,13 +54,12 @@ function FieldSection({
   );
 }
 
-export default async function Page({
-  params,
-}: Readonly<{
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-}>) {
+  }>;
+}) {
+  const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 
   const {

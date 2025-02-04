@@ -12,11 +12,10 @@ import dayjs from "~/lib/dayjs";
 import { retrieveStudentAllocationWithCurriculumForPerson } from "~/lib/nwd";
 import { CourseCard } from "./_components/course-card";
 
-export default async function Page({
-  params,
-}: {
-  params: { handle: string; "allocation-id": string };
+export default async function Page(props: {
+  params: Promise<{ handle: string; "allocation-id": string }>;
 }) {
+  const params = await props.params;
   const allocation = await retrieveStudentAllocationWithCurriculumForPerson(
     params["allocation-id"],
   );

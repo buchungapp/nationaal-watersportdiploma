@@ -49,14 +49,13 @@ const ROLES = [
   },
 ] as const;
 
-export default async function Page({
-  params,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
     id: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const retrieveLocationPromise = retrieveLocationByHandle(params.location);
   const retrievePersonPromise = retrieveLocationPromise.then(
     async (location) => {

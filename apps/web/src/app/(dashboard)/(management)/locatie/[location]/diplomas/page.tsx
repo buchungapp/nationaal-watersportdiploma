@@ -4,15 +4,14 @@ import { listCertificates, retrieveLocationByHandle } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-  searchParams?: Record<string, string | string[] | undefined>;
+  }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
   const certificates = await listCertificates(location.id);
 

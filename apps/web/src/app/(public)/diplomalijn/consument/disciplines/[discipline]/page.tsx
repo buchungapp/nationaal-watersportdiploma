@@ -3,13 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listCourses, retrieveDisciplineByHandle } from "~/lib/nwd";
 
-export default async function Page({
-  params,
-}: {
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     discipline: string;
-  };
+  }>;
 }) {
+  const params = await props.params;
   const [discipline, courses] = await Promise.all([
     retrieveDisciplineByHandle(params.discipline),
     listCourses(),

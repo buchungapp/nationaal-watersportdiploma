@@ -6,9 +6,9 @@ import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import Breadcrumb from "../../../_components/breadcrumb";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 async function findCategory(slug: string) {
@@ -18,9 +18,13 @@ async function findCategory(slug: string) {
 }
 
 export async function generateMetadata(
-  { params: { slug } }: PageProps,
+  props: PageProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
+  const params = await props.params;
+
+  const { slug } = params;
+
   const [parentMeta, category] = await Promise.all([
     parent,
     findCategory(slug),
@@ -45,7 +49,11 @@ export async function generateMetadata(
   };
 }
 
-export default async function Page({ params: { slug } }: PageProps) {
+export default async function Page(props: PageProps) {
+  const params = await props.params;
+
+  const { slug } = params;
+
   const [category, articles] = await Promise.all([
     findCategory(slug),
     getHelpArticles().then((articles) =>

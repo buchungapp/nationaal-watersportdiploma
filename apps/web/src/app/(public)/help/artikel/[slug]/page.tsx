@@ -30,10 +30,11 @@ async function findPost(slug: string) {
 }
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const post = await findPost(params.slug);
 
   if (!post) {
@@ -62,7 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   const [post, relatedArticles, categories] = await Promise.all([
     findPost(params.slug),
     getHelpArticles().then((articles) =>
