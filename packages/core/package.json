@@ -34,11 +34,11 @@
     "ioredis": "^5.4.1",
     "nanoid": "^5.0.7",
     "postgres": "^3.4.4",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "type-fest": "^4.21.0",
-    "typescript": "5.4.5"
+    "typescript": "catalog:"
   }
 }

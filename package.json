@@ -15,8 +15,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@cspell/dict-nl-nl": "^2.3.0",
-    "cspell": "^8.10.4",
-    "typescript": "5.4.5"
+    "cspell": "^8.10.4"
   },
   "pnpm": {
     "overrides": {

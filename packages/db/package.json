@@ -49,6 +49,6 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "drizzle-kit": "^0.22.8",
-    "typescript": "5.4.5"
+    "typescript": "catalog:"
   }
 }

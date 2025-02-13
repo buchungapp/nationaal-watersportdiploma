@@ -1,4 +1,5 @@
-import { z } from "zod";
+import { SpanStatusCode, trace } from "@opentelemetry/api";
+import { z, type ZodError } from "zod";
 
 export const handleSchema = z
   .string()
@@ -33,61 +34,112 @@ export const successfulCreateResponse = z.object({
   id: uuidSchema,
 });
 
-// Define function overloads
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-export function withZod<InputSchema extends z.ZodSchema<any, any, any>, Return>(
-  inputSchema: InputSchema,
-  func: (value: z.output<InputSchema>) => Return,
-): (input: z.input<InputSchema> | undefined) => Return;
+export function withZod<
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  TInput extends z.ZodType<any, any>,
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  TOutput extends z.ZodType<any, any>,
+  F extends (input: z.output<TInput>) => Promise<z.input<TOutput>>,
+>(
+  inputSchema: TInput,
+  outputSchema: TOutput,
+  func: F,
+): (input: z.input<TInput>) => Promise<z.output<TOutput>>;
 
 export function withZod<
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  InputSchema extends z.ZodSchema<any, any, any>,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  OutputSchema extends z.ZodSchema<any, any, any>,
-  Return,
->(
-  inputSchema: InputSchema,
-  outputSchema: OutputSchema,
-  func: (value: z.output<InputSchema>) => Promise<z.output<OutputSchema>>,
-): (input: z.input<InputSchema> | undefined) => Promise<z.output<OutputSchema>>;
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  TInput extends z.ZodType<any, any>,
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  F extends (input: z.output<TInput>) => any,
+>(inputSchema: TInput, func: F): (input: z.input<TInput>) => ReturnType<F>;
 
-// Implement the function
 export function withZod<
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  InputSchema extends z.ZodSchema<any, any, any>,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  OutputSchema extends z.ZodSchema<any, any, any> | undefined,
-  Return,
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  TInput extends z.ZodType<any, any>,
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  TOutput extends z.ZodType<any, any>,
+  F extends (input: z.output<TInput>) => Promise<z.input<TOutput>>,
 >(
-  inputSchema: InputSchema,
-  secondArgument: OutputSchema | ((value: z.output<InputSchema>) => Return),
-  thirdArgument?: (
-    value: z.output<InputSchema>,
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  ) => OutputSchema extends z.ZodSchema<any, any, any>
-    ? Promise<z.input<OutputSchema>>
-    : never,
-) {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const func: any =
-    typeof secondArgument === "function" ? secondArgument : thirdArgument;
-  const outputSchema: OutputSchema | undefined =
-    typeof secondArgument === "function" ? undefined : secondArgument;
+  inputSchema: TInput,
+  outputSchemaOrFunc: TOutput | F,
+  maybeFunc?: F,
+): (input: z.input<TInput>) => Promise<z.output<TOutput>> {
+  const func = maybeFunc || (outputSchemaOrFunc as F);
+  const outputSchema = maybeFunc ? (outputSchemaOrFunc as TOutput) : undefined;
 
-  const result = async (input: z.input<InputSchema> | undefined) => {
-    const parsed = inputSchema.parse(input);
-    const result = await func(parsed);
-    if (outputSchema) {
-      return outputSchema.parse(result); // Validate the result if outputSchema is defined
-    }
-    return result;
+  const wrappedFunc = async (...args: Parameters<F>) => {
+    const tracer = trace.getTracer("withZod");
+
+    return await tracer.startActiveSpan("withZod", async (span) => {
+      try {
+        const input = args.length > 0 ? args[0] : undefined;
+
+        let parsedInput: z.output<TInput> | undefined;
+        await tracer.startActiveSpan("inputParsing", async (inputSpan) => {
+          try {
+            parsedInput = await inputSchema.parseAsync(input);
+            inputSpan.setStatus({ code: SpanStatusCode.OK });
+          } catch (error) {
+            inputSpan.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: (error as ZodError).message,
+            });
+            throw error;
+          } finally {
+            inputSpan.end();
+          }
+        });
+
+        if (parsedInput === undefined) {
+          throw new Error("Failed to parse input");
+        }
+
+        const result = await func(parsedInput);
+
+        if (outputSchema) {
+          return await tracer.startActiveSpan(
+            "outputParsing",
+            async (outputSpan) => {
+              try {
+                const parsedOutput = await outputSchema.parseAsync(result);
+                outputSpan.setStatus({ code: SpanStatusCode.OK });
+                return parsedOutput;
+              } catch (error) {
+                outputSpan.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: (error as ZodError).message,
+                });
+                throw error;
+              } finally {
+                outputSpan.end();
+              }
+            },
+          );
+        }
+
+        return result;
+      } catch (error) {
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: (error as Error).message,
+        });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
   };
 
-  result.inputSchema = inputSchema;
+  // Preserve the original function's properties
+  Object.assign(wrappedFunc, func);
+
+  // Add schema information
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+  (wrappedFunc as any).inputSchema = inputSchema;
   if (outputSchema) {
-    result.outputSchema = outputSchema;
+    // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+    (wrappedFunc as any).outputSchema = outputSchema;
   }
 
-  return result;
+  return wrappedFunc as F;
 }

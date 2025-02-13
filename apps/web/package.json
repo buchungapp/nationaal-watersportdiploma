@@ -72,7 +72,7 @@
     "swr": "2.2.6-beta.4",
     "tailwind-merge": "^2.5.2",
     "use-debounce": "^10.0.3",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@nawadi/lib": "workspace:^",
@@ -87,6 +87,6 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.11",
-    "typescript": "5.4.5"
+    "typescript": "catalog:"
   }
 }

@@ -4,6 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    typescript:
+      specifier: 5.6.3
+      version: 5.6.3
+    zod:
+      specifier: 3.23.8
+      version: 3.23.8
+
 overrides:
   '@types/react': 19.0.8
   '@types/react-dom': 19.0.3
@@ -23,9 +32,6 @@ importers:
       cspell:
         specifier: ^8.10.4
         version: 8.15.4
-      typescript:
-        specifier: 5.4.5
-        version: 5.4.5
 
   apps/api-server:
     dependencies:
@@ -70,8 +76,8 @@ importers:
         specifier: ^20.1.4
         version: 20.1.4
       typescript:
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 'catalog:'
+        version: 5.6.3
 
   apps/docs:
     devDependencies:
@@ -268,7 +274,7 @@ importers:
         specifier: ^10.0.3
         version: 10.0.4(react@19.0.0)
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@nawadi/lib':
@@ -308,8 +314,8 @@ importers:
         specifier: ^3.4.11
         version: 3.4.14
       typescript:
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 'catalog:'
+        version: 5.6.3
 
   generated/api:
     dependencies:
@@ -378,7 +384,7 @@ importers:
         specifier: ^3.4.4
         version: 3.4.5
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@tsconfig/node20':
@@ -388,8 +394,8 @@ importers:
         specifier: ^4.21.0
         version: 4.26.1
       typescript:
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 'catalog:'
+        version: 5.6.3
 
   packages/db:
     dependencies:
@@ -422,8 +428,8 @@ importers:
         specifier: ^0.22.8
         version: 0.22.8
       typescript:
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 'catalog:'
+        version: 5.6.3
 
   packages/lib:
     dependencies:
@@ -434,15 +440,15 @@ importers:
         specifier: ^2.7.6
         version: 2.7.8
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@tsconfig/node20':
         specifier: ^20.1.4
         version: 20.1.4
       typescript:
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 'catalog:'
+        version: 5.6.3
 
   packages/scripts:
     dependencies:
@@ -498,7 +504,7 @@ importers:
         specifier: ^4.16.2
         version: 4.19.2
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
       '@tsconfig/node20':
@@ -517,8 +523,8 @@ importers:
         specifier: ^3.4.4
         version: 3.4.5
       typescript:
-        specifier: 5.4.5
-        version: 5.4.5
+        specifier: 'catalog:'
+        version: 5.6.3
 
   supabase:
     devDependencies:
@@ -6939,11 +6945,6 @@ packages:
   typedarray.prototype.slice@1.0.5:
     resolution: {integrity: sha512-q7QNVDGTdl702bVFiI5eY4l/HkgCM6at9KhcFbgUAzezHFbOVy4+0O/lCjsABEQwbZPravVfBIiBVGo89yzHFg==}
     engines: {node: '>= 0.4'}
-
-  typescript@5.4.5:
-    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
 
   typescript@5.6.3:
     resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
@@ -15171,8 +15172,6 @@ snapshots:
       math-intrinsics: 1.1.0
       typed-array-buffer: 1.0.3
       typed-array-byte-offset: 1.0.4
-
-  typescript@5.4.5: {}
 
   typescript@5.6.3: {}
 
