@@ -141,7 +141,7 @@ export default function Footer() {
             className="min-w-[200px] rounded border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-gray-400"
             placeholder="Je e-mailadres"
           />
-          <input type="hidden" name="userGroup" value="Website footer"></input>
+          <input type="hidden" name="userGroup" value="Website footer" />
           <button
             type="submit"
             className="group flex w-fit items-center gap-1 rounded-lg bg-branding-light px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-branding-dark"
@@ -158,8 +158,8 @@ export default function Footer() {
           {`© ${new Date().getFullYear()} ${constants.APP_NAME}`}
         </p>
         <ul className="flex flex-1 items-center justify-center gap-6 lg:justify-end">
-          {socials.map((social, i) => (
-            <li key={i}>
+          {socials.map((social) => (
+            <li key={social.name}>
               <Link
                 href={social.link}
                 className="hover:text-white"

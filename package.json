@@ -4,8 +4,8 @@
   "packageManager": "pnpm@9.15.5",
   "scripts": {
     "spelling": "cspell",
-    "formatting": "prettier --check \"**/*\"",
-    "formatting:fix": "prettier --write \"**/*\"",
+    "formatting": "pnpm biome check ./",
+    "formatting:fix": "pnpm biome check ./ --write",
     "build:packages": "pnpm --recursive --filter {packages/**} build",
     "initialize": "node ./scripts/initialize.js",
     "db:reset": "node ./scripts/reset-migrate-local-db.js",
@@ -13,15 +13,14 @@
     "test": "pnpm --recursive test"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@cspell/dict-nl-nl": "^2.3.0",
-    "cspell": "^8.10.4",
-    "prettier": "^3.3.3",
-    "typescript": "5.4.5"
+    "cspell": "^8.14.4"
   },
   "pnpm": {
     "overrides": {
-      "@types/react": "19.0.8",
-      "@types/react-dom": "19.0.3",
+      "@types/react": "catalog:",
+      "@types/react-dom": "catalog:",
       "cookie@<0.7.0": ">=0.7.0",
       "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5"
     }

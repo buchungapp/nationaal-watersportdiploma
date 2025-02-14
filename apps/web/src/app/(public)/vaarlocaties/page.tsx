@@ -61,15 +61,15 @@ export default async function Page() {
   // for each possible color in the badge component, we want to assign a color to a province
   const provinceColors = {
     Friesland: "blue",
-    ["Noord-Holland"]: "orange",
-    ["Zuid-Holland"]: "green",
+    "Noord-Holland": "orange",
+    "Zuid-Holland": "green",
     Utrecht: "yellow",
     Flevoland: "sky",
     Overijssel: "rose",
     Gelderland: "purple",
     Drenthe: "violet",
     Groningen: "cyan",
-    ["Noord-Brabant"]: "amber",
+    "Noord-Brabant": "amber",
     Limburg: "red",
     Zeeland: "teal",
   } as const;

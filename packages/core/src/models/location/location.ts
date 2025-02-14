@@ -1,30 +1,30 @@
-import { schema as s } from '@nawadi/db'
-import { asc, eq } from 'drizzle-orm'
-import { sql } from 'drizzle-orm/sql'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { findItem, singleRow } from '../../utils/data-helpers.js'
-import { wrapCommand, wrapQuery } from '../../utils/wrap.js'
+import { schema as s } from "@nawadi/db";
+import { asc, eq } from "drizzle-orm";
+import { sql } from "drizzle-orm/sql";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { findItem, singleRow } from "../../utils/data-helpers.js";
+import { wrapCommand, wrapQuery } from "../../utils/wrap.js";
 import {
   handleSchema,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/zod.js'
-import { Platform } from '../index.js'
+} from "../../utils/zod.js";
+import { Platform } from "../index.js";
 import {
-  LocationMetadata,
+  type LocationMetadata,
   insertSchema,
   locationMetadataSchema,
   outputSchema,
-} from './location.schema.js'
+} from "./location.schema.js";
 
 function mapMetaForLocation(metadata: unknown): LocationMetadata {
-  return locationMetadataSchema.parse(metadata ?? {})
+  return locationMetadataSchema.parse(metadata ?? {});
 }
 
 export const create = wrapCommand(
-  'createLocation',
+  "createLocation",
   withZod(
     insertSchema.pick({
       handle: true,
@@ -33,25 +33,25 @@ export const create = wrapCommand(
     }),
     successfulCreateResponse,
     async (input) => {
-      const query = useQuery()
+      const query = useQuery();
       const [insert] = await query
         .insert(s.location)
         .values({
           ...input,
         })
-        .returning({ id: s.location.id })
+        .returning({ id: s.location.id });
 
       if (!insert) {
-        throw new Error('Failed to insert location')
+        throw new Error("Failed to insert location");
       }
 
-      return insert
+      return insert;
     },
   ),
-)
+);
 
 export const updateDetails = wrapCommand(
-  'updateLocationDetails',
+  "updateLocationDetails",
   withZod(
     insertSchema
       .pick({
@@ -66,13 +66,13 @@ export const updateDetails = wrapCommand(
         socialMedia: z
           .object({
             platform: z.union([
-              z.literal('facebook'),
-              z.literal('instagram'),
-              z.literal('linkedin'),
-              z.literal('tiktok'),
-              z.literal('whatsapp'),
-              z.literal('x'),
-              z.literal('youtube'),
+              z.literal("facebook"),
+              z.literal("instagram"),
+              z.literal("linkedin"),
+              z.literal("tiktok"),
+              z.literal("whatsapp"),
+              z.literal("x"),
+              z.literal("youtube"),
             ]),
             url: z.string().url(),
           })
@@ -82,13 +82,13 @@ export const updateDetails = wrapCommand(
       .required({ id: true }),
     z.void(),
     async (input) => {
-      const query = useQuery()
+      const query = useQuery();
 
       const existing = await query
         .select()
         .from(s.location)
         .where(eq(s.location.id, input.id))
-        .then(singleRow)
+        .then(singleRow);
 
       await query
         .update(s.location)
@@ -107,20 +107,20 @@ export const updateDetails = wrapCommand(
             }),
           })})::jsonb)#>> '{}')::jsonb`,
         })
-        .where(eq(s.location.id, input.id))
+        .where(eq(s.location.id, input.id));
     },
   ),
-)
+);
 
 export const list = wrapQuery(
-  'listLocations',
+  "listLocations",
   withZod(z.void(), outputSchema.array(), async () => {
-    const query = useQuery()
+    const query = useQuery();
     const locations = await query
       .select()
       .from(s.location)
-      .where(eq(s.location.status, 'active'))
-      .orderBy(asc(s.location.name))
+      .where(eq(s.location.status, "active"))
+      .orderBy(asc(s.location.name));
 
     // const uniqueMediaIds = Array.from(
     //   new Set(
@@ -134,7 +134,7 @@ export const list = wrapQuery(
     //   ),
     // ).filter((id): id is string => !!id)
 
-    const allImages = await Platform.Media.listImages()
+    const allImages = await Platform.Media.listImages();
 
     return locations.map((row) => {
       const logo = row.logoMediaId
@@ -143,7 +143,7 @@ export const list = wrapQuery(
             predicate: (media) => media.id === row.logoMediaId,
             enforce: true,
           })
-        : null
+        : null;
 
       const logoSquare = row.squareLogoMediaId
         ? findItem({
@@ -151,7 +151,7 @@ export const list = wrapQuery(
             predicate: (media) => media.id === row.squareLogoMediaId,
             enforce: true,
           })
-        : null
+        : null;
 
       const logoCertificate = row.certificateMediaId
         ? findItem({
@@ -159,7 +159,7 @@ export const list = wrapQuery(
             predicate: (media) => media.id === row.certificateMediaId,
             enforce: true,
           })
-        : null
+        : null;
 
       return {
         ...row,
@@ -167,20 +167,20 @@ export const list = wrapQuery(
         logoSquare,
         logoCertificate,
         ...mapMetaForLocation(row._metadata),
-      }
-    })
+      };
+    });
   }),
-)
+);
 
 export const fromId = wrapQuery(
-  'getLocationFromId',
+  "getLocationFromId",
   withZod(uuidSchema, outputSchema, async (id) => {
-    const query = useQuery()
+    const query = useQuery();
     const location = await query
       .select()
       .from(s.location)
       .where(eq(s.location.id, id))
-      .then((rows) => singleRow(rows))
+      .then((rows) => singleRow(rows));
 
     const [logo, squareLogo, certificateLogo] = await Promise.all([
       location.logoMediaId ? Platform.Media.fromId(location.logoMediaId) : null,
@@ -190,7 +190,7 @@ export const fromId = wrapQuery(
       location.certificateMediaId
         ? Platform.Media.fromId(location.certificateMediaId)
         : null,
-    ])
+    ]);
 
     return {
       ...location,
@@ -198,20 +198,20 @@ export const fromId = wrapQuery(
       logoSquare: squareLogo,
       logoCertificate: certificateLogo,
       ...mapMetaForLocation(location._metadata),
-    }
+    };
   }),
-)
+);
 
 export const fromHandle = wrapQuery(
-  'getLocationFromHandle',
+  "getLocationFromHandle",
   withZod(handleSchema, outputSchema, async (handle) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const location = await query
       .select()
       .from(s.location)
       .where(eq(s.location.handle, handle))
-      .then((rows) => singleRow(rows))
+      .then((rows) => singleRow(rows));
 
     const [logo, squareLogo, certificateLogo] = await Promise.all([
       location.logoMediaId ? Platform.Media.fromId(location.logoMediaId) : null,
@@ -221,7 +221,7 @@ export const fromHandle = wrapQuery(
       location.certificateMediaId
         ? Platform.Media.fromId(location.certificateMediaId)
         : null,
-    ])
+    ]);
 
     return {
       ...location,
@@ -229,6 +229,6 @@ export const fromHandle = wrapQuery(
       logoSquare: squareLogo,
       logoCertificate: certificateLogo,
       ...mapMetaForLocation(location._metadata),
-    }
+    };
   }),
-)
+);

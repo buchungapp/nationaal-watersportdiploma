@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -120,6 +119,7 @@ export async function updateSocials(
         )
         .map(([key, url]) => ({
           platform: key.replace("socials-", "") as SocialPlatform,
+          // biome-ignore lint/style/noNonNullAssertion: <explanation>
           url: url!,
         })),
       googlePlaceId: parsed.googlePlaceId,

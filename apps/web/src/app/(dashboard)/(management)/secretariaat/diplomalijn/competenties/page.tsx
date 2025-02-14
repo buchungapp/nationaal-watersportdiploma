@@ -23,15 +23,18 @@ async function CompetencyTable({
   });
 
   // Add programs to the index
-  competencies.forEach((competency) => {
-    index.add(competency.id, competency.title!);
-  });
+  for (const competency of competencies) {
+    if (competency.title) {
+      index.add(competency.id, competency.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredCompetencies = competencies;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCompetencies = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => competencies.find((competency) => competency.id === result)!,
     );
   }

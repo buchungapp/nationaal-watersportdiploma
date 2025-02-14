@@ -225,6 +225,7 @@ export default function StudentsTable({
     >
   >({});
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
     (updater) => {
       setRowSelection((prev) => {
@@ -239,12 +240,17 @@ export default function StudentsTable({
             const student = students.find((student) => student.id === key);
             return [
               key,
-              rowSelection.hasOwnProperty(key)
-                ? rowSelection[key]!
+              Object.hasOwn(rowSelection, key)
+                ? // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  rowSelection[key]!
                 : {
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     instructor: student!.instructor,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     studentCurriculum: student!.studentCurriculum,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     person: student!.person,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     tags: student!.tags,
                   },
             ];
@@ -291,7 +297,7 @@ export default function StudentsTable({
             <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
           </div>
           <div className="flex items-center gap-1 sm:shrink-0">
-            {!!view ? (
+            {view ? (
               <SetView defaultView={view}>
                 <option value="allen">Alle cursisten</option>
                 <option value="geclaimd">Mijn cursisten</option>
@@ -318,7 +324,6 @@ export default function StudentsTable({
                         return "ascending";
                       case "desc":
                         return "descending";
-                      case false:
                       default:
                         return "none";
                     }

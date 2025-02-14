@@ -1,8 +1,8 @@
-import * as opentelemetry from '@opentelemetry/api'
-import { CoreError } from './error.js'
+import * as opentelemetry from "@opentelemetry/api";
+import { CoreError } from "./error.js";
 
-const commandTracer = opentelemetry.trace.getTracer('command')
-const queryTracer = opentelemetry.trace.getTracer('query')
+const commandTracer = opentelemetry.trace.getTracer("command");
+const queryTracer = opentelemetry.trace.getTracer("query");
 
 /**
  * Wrap a command to support error handling and telemetry
@@ -14,8 +14,8 @@ export function wrapCommand<R, A extends unknown[]>(
   name: string,
   task: (...args: A) => Promise<R>,
 ) {
-  const result = wrap(commandTracer, name, task)
-  return result
+  const result = wrap(commandTracer, name, task);
+  return result;
 }
 
 /**
@@ -28,8 +28,8 @@ export function wrapQuery<R, A extends unknown[]>(
   name: string,
   task: (...args: A) => Promise<R>,
 ) {
-  const result = wrap(queryTracer, name, task)
-  return result
+  const result = wrap(queryTracer, name, task);
+  return result;
 }
 
 function wrap<R, A extends unknown[]>(
@@ -40,19 +40,19 @@ function wrap<R, A extends unknown[]>(
   return async (...args: A): Promise<R> => {
     const result = await tracer.startActiveSpan(name, async (span) => {
       try {
-        const result = await task(...args)
-        return result
+        const result = await task(...args);
+        return result;
       } catch (error) {
-        const coreError = CoreError.fromUnknown(error)
+        const coreError = CoreError.fromUnknown(error);
         if (coreError != null) {
-          throw coreError
+          throw coreError;
         }
-        throw error
+        throw error;
       } finally {
-        span.end()
+        span.end();
       }
-    })
+    });
 
-    return result
-  }
+    return result;
+  };
 }

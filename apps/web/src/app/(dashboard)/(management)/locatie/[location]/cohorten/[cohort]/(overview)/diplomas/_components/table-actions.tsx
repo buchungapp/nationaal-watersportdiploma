@@ -1,4 +1,4 @@
-import { useState, useTransition, useActionState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
@@ -92,10 +92,10 @@ export function ActionButtons(props: Props) {
 
   const params = new URLSearchParams();
 
-  props.rows.forEach((row) => {
-    if (!row.certificate) return;
+  for (const row of props.rows) {
+    if (!row.certificate) continue;
     params.append("certificate[]", row.certificate.handle);
-  });
+  }
 
   return (
     <>
@@ -319,6 +319,7 @@ export function RemoveCertificateDialog({
           onClick={() => {
             startTransition(async () => {
               await withDrawCertificates({
+                // biome-ignore lint/style/noNonNullAssertion: <explanation>
                 certificateIds: rows.map((row) => row.certificate!.id),
                 cohortId,
               })
@@ -447,6 +448,7 @@ function DownloadCertificatesDialog({
 
     try {
       await kickOffGeneratePDF({
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         handles: rows.map((row) => row.certificate!.handle),
         fileName: advancedOptions.filename,
         sort: advancedOptions.sort,

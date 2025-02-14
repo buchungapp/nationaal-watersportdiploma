@@ -25,6 +25,7 @@ function CheckboxButton({
 
   return (
     <button
+      type="button"
       className={clsx([
         className,
 

@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { invariant } from "~/utils/invariant";
 
 export async function updateSession(request: NextRequest) {
@@ -26,7 +26,6 @@ export async function updateSession(request: NextRequest) {
             request,
           });
           for (const { name, value, options } of cookiesToSet) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             supabaseResponse.cookies.set(name, value, options);
           }
         },

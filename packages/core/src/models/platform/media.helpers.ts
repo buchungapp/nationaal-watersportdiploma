@@ -1,27 +1,27 @@
-import { useSupabaseClient } from '../../contexts/index.js'
+import { useSupabaseClient } from "../../contexts/index.js";
 
 export function constructBaseUrl(bucketId: string, objectName: string) {
-  const supabase = useSupabaseClient()
+  const supabase = useSupabaseClient();
 
   const url = supabase.storage.from(bucketId).getPublicUrl(objectName)
-    .data.publicUrl
+    .data.publicUrl;
 
-  return url
+  return url;
 }
 
 export function constructTransformBaseUrl(
   bucketId: string,
   objectName: string,
 ) {
-  const supabase = useSupabaseClient()
+  const supabase = useSupabaseClient();
 
   const url = supabase.storage.from(bucketId).getPublicUrl(objectName, {
     transform: {},
-  }).data.publicUrl
+  }).data.publicUrl;
 
-  return url
+  return url;
 }
 
 export function getNameFromObjectName(objectName: string) {
-  return objectName.split('/').pop() ?? ''
+  return objectName.split("/").pop() ?? "";
 }

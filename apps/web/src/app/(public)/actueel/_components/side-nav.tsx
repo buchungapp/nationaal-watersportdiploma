@@ -39,7 +39,7 @@ export default function SideNavActueel() {
               </div>
             ),
             href: ({ isActive, searchParams }) => {
-              const baseUrl = `/actueel`;
+              const baseUrl = "/actueel";
 
               const newParams = new URLSearchParams(searchParams.toString());
 
@@ -48,9 +48,9 @@ export default function SideNavActueel() {
                   .getAll("filter")
                   .filter((param) => param !== page.param);
                 newParams.delete("filter");
-                filteredParams.forEach((param) =>
-                  newParams.append("filter", param),
-                );
+                for (const param of filteredParams) {
+                  newParams.append("filter", param);
+                }
               } else {
                 newParams.append("filter", page.param);
               }

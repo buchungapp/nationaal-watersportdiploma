@@ -45,14 +45,14 @@ async function CohortProgressList({ person }: Props) {
               href={`/profiel/${person.handle}/voortgang/${allocation.id}`}
             >
               <div className="text-sm font-medium leading-6 text-gray-900">
-                {allocation.studentCurriculum!.program.title ??
-                  `${allocation.studentCurriculum!.course.title} ${allocation.studentCurriculum!.degree.title}`}
+                {allocation.studentCurriculum?.program.title ??
+                  `${allocation.studentCurriculum?.course.title} ${allocation.studentCurriculum?.degree.title}`}
               </div>
             </GridListHeader>
             <DescriptionList className="px-6">
               <DescriptionTerm>Vaartuig</DescriptionTerm>
               <DescriptionDetails>
-                {allocation.studentCurriculum!.gearType.title}
+                {allocation.studentCurriculum?.gearType.title}
               </DescriptionDetails>
 
               <DescriptionTerm>Vaarlocatie</DescriptionTerm>

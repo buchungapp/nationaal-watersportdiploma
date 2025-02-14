@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useActionState, useState } from "react";
 import { toast } from "sonner";
 import {
   Alert,
@@ -20,7 +20,7 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await actionWithId(prevState, formData);
 
-    if (!!result.id) {
+    if (result.id) {
       setIsOpen(false);
       toast.success(`Curriculum ${result.id} aangemaakt`);
       return;

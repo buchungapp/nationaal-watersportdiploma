@@ -6,7 +6,7 @@ import {
   DisclosurePanel,
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/16/solid";
-import { type PropsWithChildren } from "react";
+import type { PropsWithChildren } from "react";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -76,6 +76,7 @@ export function Module({
     <Disclosure>
       {({ open: panelOpen }) => (
         <>
+          {/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
           <CheckboxGroup role="group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-x-2">

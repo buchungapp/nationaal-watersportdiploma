@@ -1,9 +1,9 @@
-import { schema as s } from '@nawadi/db'
-import dayjs from 'dayjs'
-import { SQL, and, asc, eq, gte, isNull, lte, sql } from 'drizzle-orm'
-import { exists } from 'drizzle-orm/mysql-core/expressions'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
+import { type SQL, and, asc, eq, gte, isNull, lte, sql } from "drizzle-orm";
+import { exists } from "drizzle-orm/mysql-core/expressions";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
 import {
   handleSchema,
   possibleSingleRow,
@@ -11,8 +11,8 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { insertSchema, selectSchema } from './cohort.schema.js'
+} from "../../utils/index.js";
+import { insertSchema, selectSchema } from "./cohort.schema.js";
 
 export const create = withZod(
   insertSchema
@@ -24,15 +24,15 @@ export const create = withZod(
       accessEndTime: true,
     })
     .refine((data) => {
-      return data.accessStartTime < data.accessEndTime
-    }, 'accessStartTime should be before accessEndTime'),
+      return data.accessStartTime < data.accessEndTime;
+    }, "accessStartTime should be before accessEndTime"),
   successfulCreateResponse,
   async (item) => {
-    const query = useQuery()
+    const query = useQuery();
 
     // Make sure accessStartTime is before accessEndTime
     if (item.accessStartTime >= item.accessEndTime) {
-      throw new Error('accessStartTime should be before accessEndTime')
+      throw new Error("accessStartTime should be before accessEndTime");
     }
 
     const row = await query
@@ -45,11 +45,11 @@ export const create = withZod(
         accessEndTime: item.accessEndTime,
       })
       .returning({ id: s.cohort.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return row
+    return row;
   },
-)
+);
 
 export const update = withZod(
   z.object({
@@ -62,11 +62,11 @@ export const update = withZod(
   }),
   successfulCreateResponse,
   async (item) => {
-    const query = useQuery()
+    const query = useQuery();
 
     // Make sure accessStartTime is before accessEndTime
     if (item.data.accessStartTime >= item.data.accessEndTime) {
-      throw new Error('accessStartTime should be before accessEndTime')
+      throw new Error("accessStartTime should be before accessEndTime");
     }
 
     const row = await query
@@ -78,11 +78,11 @@ export const update = withZod(
       })
       .where(eq(s.cohort.id, item.id))
       .returning({ id: s.cohort.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return row
+    return row;
   },
-)
+);
 
 export const remove = withZod(
   z.object({
@@ -90,7 +90,7 @@ export const remove = withZod(
   }),
   z.object({ id: uuidSchema }),
   async (item) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const res = await query
       .update(s.cohort)
@@ -99,11 +99,11 @@ export const remove = withZod(
       })
       .where(eq(s.cohort.id, item.id))
       .returning({ id: s.cohort.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return res
+    return res;
   },
-)
+);
 
 export const listByLocationId = withZod(
   z.object({
@@ -112,7 +112,7 @@ export const listByLocationId = withZod(
   }),
   selectSchema.array(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const rows = await query
       .select()
@@ -155,11 +155,11 @@ export const listByLocationId = withZod(
             : undefined,
         ),
       )
-      .orderBy(asc(s.cohort.accessStartTime), asc(s.cohort.accessEndTime))
+      .orderBy(asc(s.cohort.accessStartTime), asc(s.cohort.accessEndTime));
 
-    return rows
+    return rows;
   },
-)
+);
 
 export const byIdOrHandle = withZod(
   z.union([
@@ -168,29 +168,29 @@ export const byIdOrHandle = withZod(
   ]),
   selectSchema.nullable(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const whereClausules: (SQL | undefined)[] = [isNull(s.cohort.deletedAt)]
+    const whereClausules: (SQL | undefined)[] = [isNull(s.cohort.deletedAt)];
 
-    if ('id' in input) {
-      whereClausules.push(eq(s.cohort.id, input.id))
+    if ("id" in input) {
+      whereClausules.push(eq(s.cohort.id, input.id));
     }
 
-    if ('handle' in input) {
-      whereClausules.push(eq(s.cohort.handle, input.handle))
-      whereClausules.push(eq(s.cohort.locationId, input.locationId))
+    if ("handle" in input) {
+      whereClausules.push(eq(s.cohort.handle, input.handle));
+      whereClausules.push(eq(s.cohort.locationId, input.locationId));
     }
 
     const rows = await query
       .select()
       .from(s.cohort)
-      .where(and(...whereClausules))
+      .where(and(...whereClausules));
 
-    const row = possibleSingleRow(rows)
+    const row = possibleSingleRow(rows);
 
-    return row ?? null
+    return row ?? null;
   },
-)
+);
 
 export const listDistinctTags = withZod(
   z.object({
@@ -198,11 +198,11 @@ export const listDistinctTags = withZod(
   }),
   z.array(z.string()),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const tagsSubquery = query
       .select({
-        tag: sql<string>`UNNEST(${s.cohortAllocation.tags})`.as('tag'),
+        tag: sql<string>`UNNEST(${s.cohortAllocation.tags})`.as("tag"),
       })
       .from(s.cohortAllocation)
       .where(
@@ -211,18 +211,18 @@ export const listDistinctTags = withZod(
           isNull(s.cohortAllocation.deletedAt),
         ),
       )
-      .as('tags')
+      .as("tags");
 
     const rows = await query
       .selectDistinct({
         tag: tagsSubquery.tag,
       })
       .from(tagsSubquery)
-      .orderBy(asc(tagsSubquery.tag))
+      .orderBy(asc(tagsSubquery.tag));
 
-    return rows.map((row) => row.tag)
+    return rows.map((row) => row.tag);
   },
-)
+);
 
 export const getDefaultVisibleFromDate = withZod(
   z.object({
@@ -230,7 +230,7 @@ export const getDefaultVisibleFromDate = withZod(
   }),
   z.string().datetime().nullable(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const row = await query
       .select({
@@ -238,11 +238,13 @@ export const getDefaultVisibleFromDate = withZod(
       })
       .from(s.cohort)
       .where(and(eq(s.cohort.id, input.cohortId), isNull(s.cohort.deletedAt)))
-      .then(singleRow)
+      .then(singleRow);
 
-    return row.visibleFromDate ? dayjs(row.visibleFromDate).toISOString() : null
+    return row.visibleFromDate
+      ? dayjs(row.visibleFromDate).toISOString()
+      : null;
   },
-)
+);
 
 export const setDefaultVisibleFromDate = withZod(
   z.object({
@@ -253,7 +255,7 @@ export const setDefaultVisibleFromDate = withZod(
     visibleFromDate: z.string().datetime(),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const result = await query
       .update(s.cohort)
@@ -264,10 +266,10 @@ export const setDefaultVisibleFromDate = withZod(
       .returning({
         visibleFromDate: s.cohort.certificatesVisibleFrom,
       })
-      .then(singleRow)
+      .then(singleRow);
 
     return {
       visibleFromDate: dayjs(result.visibleFromDate).toISOString(),
-    }
+    };
   },
-)
+);

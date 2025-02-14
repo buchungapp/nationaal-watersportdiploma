@@ -95,6 +95,7 @@ export default async function Page(props: {
   });
 
   // Add students to the index
+  // biome-ignore lint/complexity/noForEach: <explanation>
   filteredStudents.forEach((student) => {
     index.add({
       id: student.id,

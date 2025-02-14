@@ -6,11 +6,11 @@ type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 export function Download({ rows }: { rows: Row<Certificate>[] }) {
   const params = new URLSearchParams();
 
-  rows.forEach((row) => {
+  for (const row of rows) {
     if (row.getIsSelected()) {
       params.append("certificate[]", row.original.handle);
     }
-  });
+  }
 
   return (
     <Button

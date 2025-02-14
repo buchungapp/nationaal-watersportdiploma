@@ -29,6 +29,7 @@ export default function WaveAnimation({
 
   const isClient = typeof window !== "undefined";
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!ref.current || !isClient) return;
 

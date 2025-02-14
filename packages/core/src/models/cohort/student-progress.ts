@@ -1,4 +1,4 @@
-import { schema as s } from '@nawadi/db'
+import { schema as s } from "@nawadi/db";
 import {
   and,
   asc,
@@ -12,15 +12,15 @@ import {
   max,
   notExists,
   sql,
-} from 'drizzle-orm'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+} from "drizzle-orm";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
 import {
   enforceArray,
   singleOrArray,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
+} from "../../utils/index.js";
 
 export const byAllocationId = withZod(
   z.object({
@@ -28,14 +28,14 @@ export const byAllocationId = withZod(
     respectProgressVisibility: z.boolean().default(false),
   }),
   async ({ id: cohortAllocationId, respectProgressVisibility }) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const subquery = query
       .select({
         cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
         competencyId: s.studentCohortProgress.competencyId,
         maxCreatedAt: max(s.studentCohortProgress.createdAt).as(
-          'max_created_at',
+          "max_created_at",
         ),
       })
       .from(s.studentCohortProgress)
@@ -66,7 +66,7 @@ export const byAllocationId = withZod(
         s.studentCohortProgress.cohortAllocationId,
         s.studentCohortProgress.competencyId,
       )
-      .as('latest')
+      .as("latest");
 
     const rows = await query
       .select(getTableColumns(s.studentCohortProgress))
@@ -84,15 +84,15 @@ export const byAllocationId = withZod(
       )
       .where(
         and(eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId)),
-      )
+      );
 
     return rows.map((row) => ({
       competencyId: row.competencyId,
       progress: row.progress,
       createdAt: row.createdAt,
-    }))
+    }));
   },
-)
+);
 
 export const upsertProgress = withZod(
   z.object({
@@ -106,11 +106,11 @@ export const upsertProgress = withZod(
     createdBy: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     // TODO: We should check whether the competency belongs to the student curriculum
 
-    const progressArray = enforceArray(input.competencyProgress)
+    const progressArray = enforceArray(input.competencyProgress);
 
     const result = await query
       .insert(s.studentCohortProgress)
@@ -125,11 +125,11 @@ export const upsertProgress = withZod(
       .returning({
         cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
         competencyId: s.studentCohortProgress.competencyId,
-      })
+      });
 
-    return result
+    return result;
   },
-)
+);
 
 export const completeAllCoreCompetencies = withZod(
   z.object({
@@ -137,7 +137,7 @@ export const completeAllCoreCompetencies = withZod(
     createdBy: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const uncompletedCoreCompetencies = await query
       .select({
@@ -195,7 +195,7 @@ export const completeAllCoreCompetencies = withZod(
           ),
           isNull(s.cohortAllocation.deletedAt),
         ),
-      )
+      );
 
     const result = await query
       .insert(s.studentCohortProgress)
@@ -204,7 +204,7 @@ export const completeAllCoreCompetencies = withZod(
           ({ competencyId, cohortAllocationId }) => ({
             cohortAllocationId,
             competencyId,
-            progress: '100',
+            progress: "100",
             createdBy: input.createdBy,
           }),
         ),
@@ -212,22 +212,22 @@ export const completeAllCoreCompetencies = withZod(
       .returning({
         cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
         competencyId: s.studentCohortProgress.competencyId,
-      })
+      });
 
-    return result
+    return result;
   },
-)
+);
 
 export const retrieveHistoryByAllocationId = withZod(
   z.object({
     allocationId: z.string().uuid(),
   }),
   async ({ allocationId }) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const { competencyId, progress, createdAt } = getTableColumns(
       s.studentCohortProgress,
-    )
+    );
 
     const rows = await query
       .select({
@@ -267,8 +267,8 @@ export const retrieveHistoryByAllocationId = withZod(
         desc(s.studentCohortProgress.createdAt),
         asc(s.module.weight),
         asc(s.competency.weight),
-      )
+      );
 
-    return rows
+    return rows;
   },
-)
+);

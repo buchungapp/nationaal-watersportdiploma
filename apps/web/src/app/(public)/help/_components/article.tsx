@@ -1,18 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Partially taken from https://github.com/leerob/leerob.io/blob/main/app/components/mdx.tsx#L168
 
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import { MDXRemote } from "next-mdx-remote/rsc";
+import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import FaqDisclosure from "../../_components/faq/faq";
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function CustomLink(props: any) {
   const href = typeof props.href === "string" ? props.href : props.href.href;
 
@@ -97,7 +94,7 @@ const components = {
   Note: Note,
 };
 
-export function HelpArticle(props: any) {
+export function HelpArticle(props: MDXRemoteProps) {
   return (
     <div className="">
       <MDXRemote

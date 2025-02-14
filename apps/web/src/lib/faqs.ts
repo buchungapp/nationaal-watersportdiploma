@@ -72,16 +72,14 @@ async function retrieveQuestions({
           }
         }
 
-        if (!!filter?.featured) {
+        if (filter?.featured) {
           if (parsed[3] !== "TRUE") {
             continue;
           }
         }
 
         validQuestions.push(parsed);
-      } catch (err) {
-        continue;
-      }
+      } catch (err) {}
     }
 
     return validQuestions.map(([category, question, answer, featured]) => ({
@@ -104,6 +102,6 @@ export function listFaqs({
 } = {}) {
   return unstable_cache(
     () => retrieveQuestions({ filter }),
-    [`faq`, `faq-${JSON.stringify(filter)}`],
+    ["faq", `faq-${JSON.stringify(filter)}`],
   )();
 }

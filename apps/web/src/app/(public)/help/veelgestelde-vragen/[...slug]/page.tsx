@@ -36,6 +36,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     redirect("/help/veelgestelde-vragen");
   }
 
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
   const question = await findQuestion(params.slug[0]!);
 
   if (!question) {
@@ -69,6 +70,7 @@ export default async function Page(props: Props) {
     redirect("/help/veelgestelde-vragen");
   }
 
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
   const question = await findQuestion(params.slug[0]!);
 
   if (!question) {
@@ -80,6 +82,7 @@ export default async function Page(props: Props) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -122,7 +125,7 @@ export default async function Page(props: Props) {
 
       <article className="flex flex-col gap-y-10">
         <div className="flex items-center gap-x-4 text-gray-500">
-          <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
+          <span className="h-4 w-0.5 rounded-full bg-zinc-200" />
           <span className="flex gap-x-1.5">
             <p>Laatste update</p>
 

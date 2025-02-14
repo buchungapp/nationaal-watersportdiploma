@@ -26,7 +26,7 @@ export async function issueCertificates({
     visibleFrom: visibleFrom ?? undefined,
   });
 
-  if (!!visibleFrom) {
+  if (visibleFrom) {
     await updateDefaultCertificateVisibleFromDate({
       cohortId,
       visibleFrom,

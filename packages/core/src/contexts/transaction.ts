@@ -1,10 +1,10 @@
-import * as db from '@nawadi/db'
-import { AsyncLocalStorage } from 'async_hooks'
-import postgres from 'postgres'
-import { useDatabase, withDatabase } from './database.js'
+import { AsyncLocalStorage } from "node:async_hooks";
+import * as db from "@nawadi/db";
+import postgres from "postgres";
+import { useDatabase, withDatabase } from "./database.js";
 
 // Initializes an instance of AsyncLocalStorage to store database transaction contexts.
-const storage = new AsyncLocalStorage<db.Transaction>()
+const storage = new AsyncLocalStorage<db.Transaction>();
 
 /**
  * Executes a given job within a database transaction.
@@ -23,30 +23,24 @@ const storage = new AsyncLocalStorage<db.Transaction>()
 export async function withTransaction<T>(
   job: (tx: db.Transaction) => Promise<T>,
 ): Promise<T> {
-  const existingTransaction = useTransaction()
+  const existingTransaction = useTransaction();
 
   if (existingTransaction) {
     // If an existing transaction is found, run the job within it
-    return job(existingTransaction)
-  } else {
-    // If no existing transaction is found, create a new transaction
-    const database = useDatabase()
-    return database.transaction(
-      async (transaction) => {
-        try {
-          // Run the job within the newly created transaction context
-          const result = await storage.run(transaction, () => job(transaction))
-          return result
-        } catch (error) {
-          // If the job throws an error, rethrow it to ensure the transaction is rolled back
-          throw error
-        }
-      },
-      {
-        isolationLevel: 'serializable',
-      },
-    )
+    return job(existingTransaction);
   }
+  // If no existing transaction is found, create a new transaction
+  const database = useDatabase();
+  return database.transaction(
+    async (transaction) => {
+      // Run the job within the newly created transaction context
+      const result = await storage.run(transaction, () => job(transaction));
+      return result;
+    },
+    {
+      isolationLevel: "serializable",
+    },
+  );
 }
 
 /**
@@ -60,8 +54,8 @@ export async function withTransaction<T>(
  *          otherwise undefined.
  */
 export function useTransaction(): db.Transaction | undefined {
-  const context = storage.getStore()
-  return context
+  const context = storage.getStore();
+  return context;
 }
 
 /**
@@ -79,42 +73,43 @@ export async function withTestTransaction<T>(
 ): Promise<T> {
   const pgUri =
     process.env.PGURI ??
-    'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
+    "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
 
   {
     // use a single connection pool for the migration
     const pgSql = postgres(pgUri.toString(), {
       max: 1,
       onnotice: () => {},
-    })
+    });
     try {
-      const database = db.createDatabase(pgSql)
+      const database = db.createDatabase(pgSql);
       // migrate (set up) the database
-      await db.migrateDatabase(database)
+      await db.migrateDatabase(database);
     } finally {
-      await pgSql.end()
+      await pgSql.end();
     }
   }
 
   const result = await withDatabase({ pgUri }, async () => {
-    const rollback = Symbol()
-    let result: T
+    const rollback = Symbol();
+    let result: T;
     try {
       await withTransaction(async () => {
-        result = await job()
+        result = await job();
         // the transaction is aborted when an error is thrown! There is also a rollback
         // method on the transaction. This will not rollback the transaction, this method will
         // throw.
         // We throw our own symbol so we can easily recognize it in the catch block
-        throw rollback
-      })
+        throw rollback;
+      });
     } catch (error) {
       if (error !== rollback) {
-        throw error
+        throw error;
       }
     }
-    return result!
-  })
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    return result!;
+  });
 
-  return result
+  return result;
 }

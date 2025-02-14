@@ -1,8 +1,8 @@
-import { ExtractTablesWithRelations } from 'drizzle-orm'
-import { PostgresJsTransaction } from 'drizzle-orm/postgres-js'
-import * as schema from './schema/index.js'
+import type { ExtractTablesWithRelations } from "drizzle-orm";
+import type { PostgresJsTransaction } from "drizzle-orm/postgres-js";
+import type * as schema from "./schema/index.js";
 
 export type Transaction = PostgresJsTransaction<
   typeof schema,
   ExtractTablesWithRelations<typeof schema>
->
+>;

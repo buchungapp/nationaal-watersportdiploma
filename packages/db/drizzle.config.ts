@@ -1,8 +1,8 @@
-import type { Config } from 'drizzle-kit'
+import type { Config } from "drizzle-kit";
 
 export default {
-  schema: './out/schema/index.js',
-  out: './migrations',
-  dialect: 'postgresql',
+  schema: "./out/schema/index.js",
+  out: "./migrations",
+  dialect: "postgresql",
   breakpoints: false,
-} satisfies Config
+} satisfies Config;

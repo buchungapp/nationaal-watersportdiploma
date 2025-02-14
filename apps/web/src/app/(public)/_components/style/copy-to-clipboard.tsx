@@ -1,7 +1,7 @@
 "use client";
 
 import { Transition } from "@headlessui/react";
-import { Fragment, useState, type ComponentPropsWithoutRef } from "react";
+import { type ComponentPropsWithoutRef, Fragment, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export default function CopyToClipboard({

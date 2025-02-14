@@ -1,0 +1,37 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "files": {
+    "ignore": [
+      "dist/*",
+      "node_modules/*",
+      "*.tsconfig.json",
+      "migrations/*",
+      "out/*",
+      ".next/*",
+      ".turbo/*",
+      "generated/*",
+      "_deprecated/*",
+      ".snaplet/*",
+      "pnpm-lock.yaml",
+      "!packages/scripts/src/migrations"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "correctness": {
+        "noUnusedImports": "error"
+      }
+    }
+  },
+  "formatter": {
+    "indentStyle": "space"
+  }
+}

@@ -1,68 +1,69 @@
-import * as api from '@nawadi/api'
-import * as core from '@nawadi/core'
-import { URL } from 'node:url'
-import * as application from '../application/index.js'
+import { URL } from "node:url";
+import * as api from "@nawadi/api";
+import * as core from "@nawadi/core";
+import * as application from "../application/index.js";
 
 export interface TestEnvironmentConfiguration {
-  isolation: 'supabase' | 'transaction'
+  isolation: "supabase" | "transaction";
 }
 export interface TestEnvironmentContext {
-  server: application.Server
-  baseUrl: URL
+  server: application.Server;
+  baseUrl: URL;
 }
 export async function withTestEnvironment<T>(
   configuration: TestEnvironmentConfiguration,
   job: (context: TestEnvironmentContext) => Promise<T>,
 ): Promise<T> {
-  let lastError
+  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+  let lastError;
   const logConfiguration: core.LogConfiguration = {
     error: (error) => {
-      lastError = error
+      lastError = error;
     },
-  }
+  };
 
   const jobWrapper = async () => {
-    const server = application.createApplicationServer()
-    await using listener = await api.lib.listen(server, {})
+    const server = application.createApplicationServer();
+    await using listener = await api.lib.listen(server, {});
 
-    const { port } = listener
-    const baseUrl = new URL(`http://localhost:${port}`)
+    const { port } = listener;
+    const baseUrl = new URL(`http://localhost:${port}`);
 
-    const result = await job({ server, baseUrl })
-    return result
-  }
+    const result = await job({ server, baseUrl });
+    return result;
+  };
 
-  let transactionWrapper: () => Promise<T>
+  let transactionWrapper: () => Promise<T>;
   switch (configuration.isolation) {
-    case 'supabase':
-      transactionWrapper = async () => await core.withTestDatabase(jobWrapper)
-      break
+    case "supabase":
+      transactionWrapper = async () => await core.withTestDatabase(jobWrapper);
+      break;
 
-    case 'transaction':
+    case "transaction":
       transactionWrapper = async () =>
-        await core.withTestTransaction(jobWrapper)
-      break
+        await core.withTestTransaction(jobWrapper);
+      break;
 
     default:
-      throw 'impossible'
+      throw "impossible";
   }
 
   const supabaseWrapper = async () =>
     await core.withSupabaseClient(
       {
         serviceRoleKey:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU', // cspell:disable-line
-        url: 'http://localhost:54321',
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU", // cspell:disable-line
+        url: "http://localhost:54321",
       },
       transactionWrapper,
-    )
+    );
 
   const logWrapper = async () =>
-    await core.withLog(logConfiguration, supabaseWrapper)
+    await core.withLog(logConfiguration, supabaseWrapper);
 
   try {
-    const result = await logWrapper()
-    return result
+    const result = await logWrapper();
+    return result;
   } finally {
   }
 }

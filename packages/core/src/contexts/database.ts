@@ -1,20 +1,20 @@
-import * as db from '@nawadi/db'
-import { AsyncLocalStorage } from 'async_hooks'
-import cp from 'child_process'
-import postgres from 'postgres'
+import { AsyncLocalStorage } from "node:async_hooks";
+import cp from "node:child_process";
+import * as db from "@nawadi/db";
+import postgres from "postgres";
 
 /**
  * Interface representing the configuration required for setting up the database connection.
  * @property {string} pgUri - The PostgreSQL connection URI.
  */
 export interface DatabaseConfiguration {
-  pgUri: string
-  serverless?: boolean
-  onnotice?: (notice: postgres.Notice) => void
+  pgUri: string;
+  serverless?: boolean;
+  onnotice?: (notice: postgres.Notice) => void;
 }
 
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
-const storage = new AsyncLocalStorage<db.Database>()
+const storage = new AsyncLocalStorage<db.Database>();
 
 /**
  * Executes a given job with a database connection.
@@ -31,18 +31,18 @@ export async function withDatabase<T>(
   configuration: DatabaseConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { pgUri, serverless = false, onnotice } = configuration
+  const { pgUri, serverless = false, onnotice } = configuration;
 
   const pgSql = postgres(pgUri, {
     prepare: !serverless,
     onnotice,
-  })
+  });
   try {
-    const database = db.createDatabase(pgSql)
-    const result = await storage.run(database, job)
-    return result
+    const database = db.createDatabase(pgSql);
+    const result = await storage.run(database, job);
+    return result;
   } finally {
-    await pgSql.end()
+    await pgSql.end();
   }
 }
 
@@ -55,37 +55,37 @@ export async function withDatabase<T>(
  * @throws {TypeError} If called outside of a `withDatabase` context.
  */
 export function useDatabase(): db.Database {
-  const database = storage.getStore()
+  const database = storage.getStore();
   if (database == null) {
-    throw new TypeError('Database not in context')
+    throw new TypeError("Database not in context");
   }
-  return database
+  return database;
 }
 
 export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
   const pgUri =
     process.env.PGURI ??
-    'postgresql://postgres:postgres@127.0.0.1:54322/postgres'
+    "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
 
   try {
     // use a single connection pool for the migration
     const pgSql = postgres(pgUri.toString(), {
       max: 1,
       onnotice: () => {},
-    })
+    });
     try {
-      const database = db.createDatabase(pgSql)
+      const database = db.createDatabase(pgSql);
       // migrate (set up) the database
-      await db.migrateDatabase(database)
+      await db.migrateDatabase(database);
     } finally {
-      await pgSql.end()
+      await pgSql.end();
     }
 
-    const result = await withDatabase({ pgUri }, job)
-    return result
+    const result = await withDatabase({ pgUri }, job);
+    return result;
   } finally {
     // reset database
-    const options = { shell: true, stdio: 'inherit' } as const
-    cp.execFileSync('pnpm', ['--filter', 'supabase', 'reset'], options)
+    const options = { shell: true, stdio: "inherit" } as const;
+    cp.execFileSync("pnpm", ["--filter", "supabase", "reset"], options);
   }
 }

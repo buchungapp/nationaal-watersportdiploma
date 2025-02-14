@@ -359,6 +359,7 @@ export default function StudentsTable({
     >
   >({});
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
     (updater) => {
       setRowSelection((prev) => {
@@ -374,10 +375,13 @@ export default function StudentsTable({
 
             return [
               key,
-              rowSelection.hasOwnProperty(key)
-                ? rowSelection[key]!
+              Object.hasOwn(rowSelection, key)
+                ? // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  rowSelection[key]!
                 : {
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     certificate: student!.certificate,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     studentCurriculum: student!.studentCurriculum,
                   },
             ];
@@ -446,7 +450,6 @@ export default function StudentsTable({
                             return "ascending";
                           case "desc":
                             return "descending";
-                          case false:
                           default:
                             return "none";
                         }

@@ -27,7 +27,8 @@ export const metadata: Metadata = {
     template: `%s | ${constants.APP_NAME}`,
   },
   applicationName: constants.APP_NAME,
-  description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+  description:
+    "Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.",
   metadataBase: BASE_URL,
   icons: {
     shortcut: "/favicon.ico",
@@ -40,7 +41,8 @@ export const metadata: Metadata = {
       default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,
       template: `%s | ${constants.APP_NAME}`,
     },
-    description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+    description:
+      "Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.",
     url: "/",
     siteName: constants.APP_NAME,
     locale: "nl_NL",

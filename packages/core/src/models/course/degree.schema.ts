@@ -1,6 +1,6 @@
-import { schema as s } from '@nawadi/db'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import { z } from 'zod'
+import { schema as s } from "@nawadi/db";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import type { z } from "zod";
 
 // Should normalization be part of this core? Or do we only validate
 export const insertSchema = createInsertSchema(s.degree, {
@@ -12,8 +12,8 @@ export const insertSchema = createInsertSchema(s.degree, {
       .regex(/^[a-z0-9\-]+$/),
   title: (schema) => schema.title.trim(),
   rang: (schema) => schema.rang.int().positive(),
-})
-export type Input = z.input<typeof insertSchema>
+});
+export type Input = z.input<typeof insertSchema>;
 
-export const selectSchema = createSelectSchema(s.degree)
-export type Output = z.output<typeof selectSchema>
+export const selectSchema = createSelectSchema(s.degree);
+export type Output = z.output<typeof selectSchema>;

@@ -2,7 +2,7 @@
 
 import * as Headless from "@headlessui/react";
 import { clsx } from "clsx";
-import { useMemo, useRef, useState, useActionState } from "react";
+import { useActionState, useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -72,12 +72,15 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
     if (!existingPersonId) {
       const result = await createPerson(locationId, prevState, formData);
 
-      if (result.message !== "Success") {
+      if (
+        result.message !== "Success" ||
+        typeof result.data?.id === "undefined"
+      ) {
         toast.error("Er is iets misgegaan.");
         return result;
       }
 
-      existingPersonId = result.data!.id;
+      existingPersonId = result.data.id;
     }
 
     await addStudentToCohortByPersonId({
@@ -102,7 +105,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
   const [countryQuery, setCountryQuery] = useState("");
 
   const { data: countries } = useSWR("countries", listCountries);
-  const { data: allStudents } = useSWR([`allStudents`, locationId], async () =>
+  const { data: allStudents } = useSWR(["allStudents", locationId], async () =>
     listPersonsForLocationByRole(locationId, "student"),
   );
 

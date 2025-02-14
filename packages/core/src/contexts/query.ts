@@ -1,5 +1,5 @@
-import { useDatabase } from './database.js'
-import { useTransaction } from './transaction.js'
+import { useDatabase } from "./database.js";
+import { useTransaction } from "./transaction.js";
 
 /**
  * Attempts to use a transaction, falling back to using the database directly if no transaction is available.
@@ -11,5 +11,5 @@ import { useTransaction } from './transaction.js'
  * @returns {any} The result of `useTransaction` if it returns a truthy value, otherwise the result of `useDatabase`.
  */
 export function useQuery() {
-  return useTransaction() ?? useDatabase()
+  return useTransaction() ?? useDatabase();
 }

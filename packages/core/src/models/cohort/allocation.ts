@@ -1,7 +1,7 @@
-import { schema as s } from '@nawadi/db'
-import { enums } from '@nawadi/lib'
+import { schema as s } from "@nawadi/db";
+import { enums } from "@nawadi/lib";
 import {
-  SQL,
+  type SQL,
   and,
   arrayContains,
   asc,
@@ -13,11 +13,11 @@ import {
   isNull,
   lte,
   sql,
-} from 'drizzle-orm'
-import { alias } from 'drizzle-orm/pg-core/alias'
-import { inArray } from 'drizzle-orm/sql/expressions'
-import { z } from 'zod'
-import { useQuery, withTransaction } from '../../contexts/index.js'
+} from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core/alias";
+import { inArray } from "drizzle-orm/sql/expressions";
+import { z } from "zod";
+import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   applyArrayOrEqual,
   possibleSingleRow,
@@ -26,10 +26,10 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { selectSchema as actorSelectSchema } from '../user/actor.schema.js'
-import { selectSchema as personSelectSchema } from '../user/person.schema.js'
-import { insertSchema, selectSchema } from './allocation.schema.js'
+} from "../../utils/index.js";
+import { selectSchema as actorSelectSchema } from "../user/actor.schema.js";
+import { selectSchema as personSelectSchema } from "../user/person.schema.js";
+import { insertSchema, selectSchema } from "./allocation.schema.js";
 
 export const create = withZod(
   insertSchema.pick({
@@ -40,7 +40,7 @@ export const create = withZod(
   }),
   successfulCreateResponse,
   async (item) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const actorType = await query
       .select({ type: s.actor.type })
@@ -50,12 +50,12 @@ export const create = withZod(
           eq(s.actor.id, item.actorId),
           isNull(s.actor.deletedAt),
           // Only allow students and instructors
-          inArray(s.actor.type, ['student', 'instructor']),
+          inArray(s.actor.type, ["student", "instructor"]),
         ),
       )
-      .then(singleRow)
+      .then(singleRow);
 
-    if (actorType.type === 'instructor') {
+    if (actorType.type === "instructor") {
       // We don't want duplicate instructors in a cohort
       const exists = await query
         .select({ id: s.cohortAllocation.id })
@@ -67,10 +67,10 @@ export const create = withZod(
             isNull(s.cohortAllocation.deletedAt),
           ),
         )
-        .then(possibleSingleRow)
+        .then(possibleSingleRow);
 
       if (exists) {
-        return exists
+        return exists;
       }
     }
 
@@ -83,11 +83,11 @@ export const create = withZod(
         tags: item.tags,
       })
       .returning({ id: s.cohortAllocation.id })
-      .then(singleRow)
+      .then(singleRow);
 
-    return row
+    return row;
   },
-)
+);
 
 export const remove = withZod(
   z.object({
@@ -95,7 +95,7 @@ export const remove = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .update(s.cohortAllocation)
@@ -107,9 +107,9 @@ export const remove = withZod(
         ),
       )
       .returning({ id: s.cohortAllocation.id })
-      .then(singleRow)
+      .then(singleRow);
   },
-)
+);
 
 export const listAndCountForCohort = withZod(
   z.object({
@@ -143,7 +143,7 @@ export const listAndCountForCohort = withZod(
     count: z.number(),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const whereClausules: (SQL | undefined)[] = [
       isNull(s.cohortAllocation.deletedAt),
@@ -170,10 +170,10 @@ export const listAndCountForCohort = withZod(
               ),
           )
         : undefined,
-    ]
+    ];
 
     const { id, tags, actorId, createdAt, studentCurriculumId } =
-      getTableColumns(s.cohortAllocation)
+      getTableColumns(s.cohortAllocation);
 
     const rows = await query
       .select({
@@ -204,33 +204,33 @@ export const listAndCountForCohort = withZod(
         s.person,
         and(eq(s.person.id, s.actor.personId), isNull(s.person.deletedAt)),
       )
-      .where(and(...whereClausules))
+      .where(and(...whereClausules));
 
     return {
       rows,
       count: rows.length,
-    }
+    };
   },
-)
+);
 
 export const listByPersonId = withZod(
   z.object({
     cohortId: uuidSchema,
     personId: uuidSchema,
-    actorType: singleOrArray(z.enum(['student', 'instructor'])).default([
-      'student',
-      'instructor',
+    actorType: singleOrArray(z.enum(["student", "instructor"])).default([
+      "student",
+      "instructor",
     ]),
   }),
   z
     .object({
       allocationId: uuidSchema,
       actorId: uuidSchema,
-      type: z.enum(['student', 'instructor']),
+      type: z.enum(["student", "instructor"]),
     })
     .array(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const rows = await query
       .select({
@@ -262,15 +262,15 @@ export const listByPersonId = withZod(
           eq(s.cohortAllocation.cohortId, input.cohortId),
           isNull(s.cohortAllocation.deletedAt),
         ),
-      )
+      );
 
     return rows as {
-      allocationId: string
-      actorId: string
-      type: 'student' | 'instructor'
-    }[]
+      allocationId: string;
+      actorId: string;
+      type: "student" | "instructor";
+    }[];
   },
-)
+);
 
 export const isActorInCohortById = withZod(
   z.object({
@@ -278,7 +278,7 @@ export const isActorInCohortById = withZod(
     actorId: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const exists = await query
       .select({ id: sql`1` })
@@ -290,11 +290,11 @@ export const isActorInCohortById = withZod(
           isNull(s.cohortAllocation.deletedAt),
         ),
       )
-      .then(possibleSingleRow)
+      .then(possibleSingleRow);
 
-    return !!exists
+    return !!exists;
   },
-)
+);
 
 export const setInstructorForStudent = withZod(
   z.object({
@@ -303,9 +303,9 @@ export const setInstructorForStudent = withZod(
     studentAllocationId: singleOrArray(uuidSchema),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    if (!!input.instructorActorId) {
+    if (input.instructorActorId) {
       // Make sure the instructorId belong to an actor with type instructor and is in the cohort
       await query
         .select({ id: sql`1` })
@@ -315,7 +315,7 @@ export const setInstructorForStudent = withZod(
           and(
             eq(s.actor.id, s.cohortAllocation.actorId),
             isNull(s.actor.deletedAt),
-            eq(s.actor.type, 'instructor'),
+            eq(s.actor.type, "instructor"),
             eq(s.actor.id, input.instructorActorId),
           ),
         )
@@ -326,7 +326,7 @@ export const setInstructorForStudent = withZod(
             isNull(s.cohortAllocation.deletedAt),
           ),
         )
-        .then(singleRow)
+        .then(singleRow);
     }
 
     return await query
@@ -340,9 +340,9 @@ export const setInstructorForStudent = withZod(
           eq(s.cohortAllocation.cohortId, input.cohortId),
         ),
       )
-      .returning({ id: s.cohortAllocation.id })
+      .returning({ id: s.cohortAllocation.id });
   },
-)
+);
 
 export const setStudentCurriculum = withZod(
   z.object({
@@ -351,7 +351,7 @@ export const setStudentCurriculum = withZod(
     studentAllocationId: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .update(s.cohortAllocation)
@@ -368,15 +368,15 @@ export const setStudentCurriculum = withZod(
                 and(
                   eq(s.actor.id, s.cohortAllocation.actorId),
                   isNull(s.actor.deletedAt),
-                  eq(s.actor.type, 'student'),
+                  eq(s.actor.type, "student"),
                 ),
               ),
           ),
         ),
       )
-      .returning({ id: s.cohortAllocation.id })
+      .returning({ id: s.cohortAllocation.id });
   },
-)
+);
 
 export const releaseStudentCurriculum = withZod(
   z.object({
@@ -402,12 +402,12 @@ export const releaseStudentCurriculum = withZod(
               ),
             ),
           ),
-      ])
+      ]);
 
-      return
-    })
+      return;
+    });
   },
-)
+);
 
 export const listPrivilegesForPerson = withZod(
   z.object({
@@ -416,7 +416,7 @@ export const listPrivilegesForPerson = withZod(
   }),
   enums.Privilege.array(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const rows = await query
       .selectDistinct({
@@ -463,11 +463,11 @@ export const listPrivilegesForPerson = withZod(
           eq(s.cohortAllocation.cohortId, input.cohortId),
           isNull(s.cohortAllocation.deletedAt),
         ),
-      )
+      );
 
-    return enums.Privilege.array().parse(rows.map((row) => row.handle))
+    return enums.Privilege.array().parse(rows.map((row) => row.handle));
   },
-)
+);
 
 export const listStudentsWithCurricula = withZod(
   z.object({
@@ -477,14 +477,14 @@ export const listStudentsWithCurricula = withZod(
     respectProgressVisibility: z.boolean().default(false),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const { id, tags, createdAt, progressVisibleUpUntil } = getTableColumns(
       s.cohortAllocation,
-    )
+    );
 
-    const instructorActor = alias(s.actor, 'instructor_actor')
-    const instructorPerson = alias(s.person, 'instructor_person')
+    const instructorActor = alias(s.actor, "instructor_actor");
+    const instructorPerson = alias(s.person, "instructor_person");
 
     const rows = await query
       .select({
@@ -551,7 +551,7 @@ export const listStudentsWithCurricula = withZod(
         s.actor,
         and(
           eq(s.actor.id, s.cohortAllocation.actorId),
-          eq(s.actor.type, 'student'),
+          eq(s.actor.type, "student"),
         ),
       )
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
@@ -597,13 +597,14 @@ export const listStudentsWithCurricula = withZod(
       .orderBy(
         asc(sql`LOWER(${s.person.firstName})`),
         asc(sql`LOWER(${s.person.lastName})`),
-      )
+      );
 
     return rows.map((row) => ({
       id: row.id,
       progressVisibleForStudentUpUntil: row.progressVisibleUpUntil,
       person: {
         id: row.person.id,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         handle: row.person.handle!,
         firstName: row.person.firstName,
         lastNamePrefix: row.person.lastNamePrefix,
@@ -629,19 +630,24 @@ export const listStudentsWithCurricula = withZod(
       studentCurriculum: row.studentCurriculumId
         ? {
             id: row.studentCurriculumId,
-            curriculumId: row.curriculum!.id,
+            curriculumId: row.curriculum?.id,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             program: row.program!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             course: row.course!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             degree: row.degree!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             discipline: row.discipline!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             gearType: row.gearType!,
           }
         : null,
       createdAt: row.createdAt,
       tags: row.tags,
-    }))
+    }));
   },
-)
+);
 
 export const retrieveStudentWithCurriculum = withZod(
   z.object({
@@ -651,14 +657,14 @@ export const retrieveStudentWithCurriculum = withZod(
     respectProgressVisibility: z.boolean().default(false),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const { id, tags, createdAt, progressVisibleUpUntil } = getTableColumns(
       s.cohortAllocation,
-    )
+    );
 
-    const instructorActor = alias(s.actor, 'instructor_actor')
-    const instructorPerson = alias(s.person, 'instructor_person')
+    const instructorActor = alias(s.actor, "instructor_actor");
+    const instructorPerson = alias(s.person, "instructor_person");
 
     const row = await query
       .select({
@@ -729,7 +735,7 @@ export const retrieveStudentWithCurriculum = withZod(
         s.actor,
         and(
           eq(s.actor.id, s.cohortAllocation.actorId),
-          eq(s.actor.type, 'student'),
+          eq(s.actor.type, "student"),
         ),
       )
       .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
@@ -782,10 +788,10 @@ export const retrieveStudentWithCurriculum = withZod(
             : undefined,
         ),
       )
-      .then(possibleSingleRow)
+      .then(possibleSingleRow);
 
     if (!row) {
-      return null
+      return null;
     }
 
     return {
@@ -801,6 +807,7 @@ export const retrieveStudentWithCurriculum = withZod(
       },
       person: {
         id: row.person.id,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         handle: row.person.handle!,
         firstName: row.person.firstName,
         lastNamePrefix: row.person.lastNamePrefix,
@@ -818,11 +825,16 @@ export const retrieveStudentWithCurriculum = withZod(
       studentCurriculum: row.studentCurriculumId
         ? {
             id: row.studentCurriculumId,
-            curriculumId: row.curriculum!.id,
+            curriculumId: row.curriculum?.id,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             program: row.program!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             course: row.course!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             degree: row.degree!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             discipline: row.discipline!,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             gearType: row.gearType!,
           }
         : null,
@@ -836,18 +848,18 @@ export const retrieveStudentWithCurriculum = withZod(
             visibleFrom: row.certificate.visibleFrom,
           }
         : null,
-    }
+    };
   },
-)
+);
 
 export const listInstructors = withZod(
   z.object({
     cohortId: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const { id, createdAt } = getTableColumns(s.cohortAllocation)
+    const { id, createdAt } = getTableColumns(s.cohortAllocation);
 
     const rows = await query
       .select({
@@ -873,7 +885,7 @@ export const listInstructors = withZod(
         s.actor,
         and(
           eq(s.actor.id, s.cohortAllocation.actorId),
-          eq(s.actor.type, 'instructor'),
+          eq(s.actor.type, "instructor"),
           isNull(s.actor.deletedAt),
         ),
       )
@@ -898,30 +910,30 @@ export const listInstructors = withZod(
           isNull(s.cohortAllocation.deletedAt),
           eq(s.cohortAllocation.cohortId, input.cohortId),
         ),
-      )
+      );
 
     // Group the results by instructor
     const instructorsMap = new Map<
       string,
       {
-        id: string
+        id: string;
         person: {
-          id: string
-          handle: string
-          firstName: string
-          lastNamePrefix: string | null
-          lastName: string | null
-          dateOfBirth: string | null
-          email: string | null
-        }
+          id: string;
+          handle: string;
+          firstName: string;
+          lastNamePrefix: string | null;
+          lastName: string | null;
+          dateOfBirth: string | null;
+          email: string | null;
+        };
         roles: {
-          id: string
-          handle: string
-          title: string | null
-        }[]
-        createdAt: string
+          id: string;
+          handle: string;
+          title: string | null;
+        }[];
+        createdAt: string;
       }
-    >()
+    >();
 
     for (const row of rows) {
       if (!instructorsMap.has(row.person.id)) {
@@ -929,6 +941,7 @@ export const listInstructors = withZod(
           id: row.id,
           person: {
             id: row.person.id,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             handle: row.person.handle!,
             firstName: row.person.firstName,
             lastNamePrefix: row.person.lastNamePrefix,
@@ -938,22 +951,23 @@ export const listInstructors = withZod(
           },
           roles: [],
           createdAt: row.createdAt,
-        })
+        });
       }
 
-      const instructor = instructorsMap.get(row.person.id)!
-      if (row.role && !instructor.roles.some((r) => r.id === row.role!.id)) {
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      const instructor = instructorsMap.get(row.person.id)!;
+      if (row.role && !instructor.roles.some((r) => r.id === row.role?.id)) {
         instructor.roles.push({
           id: row.role.id,
           handle: row.role.handle,
           title: row.role.title,
-        })
+        });
       }
     }
 
-    return Array.from(instructorsMap.values())
+    return Array.from(instructorsMap.values());
   },
-)
+);
 
 export const addRole = withZod(
   z.object({
@@ -962,13 +976,13 @@ export const addRole = withZod(
     roleHandle: z.string(),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const role = await query
       .select({ id: s.role.id })
       .from(s.role)
       .where(and(eq(s.role.handle, input.roleHandle), isNull(s.role.deletedAt)))
-      .then(singleRow)
+      .then(singleRow);
 
     return await query
       .insert(s.cohortAllocationRole)
@@ -976,9 +990,9 @@ export const addRole = withZod(
         cohortAllocationId: input.allocationId,
         roleId: role.id,
       })
-      .onConflictDoNothing()
+      .onConflictDoNothing();
   },
-)
+);
 
 export const withdrawlRole = withZod(
   z.object({
@@ -987,13 +1001,13 @@ export const withdrawlRole = withZod(
     roleHandle: z.string(),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const role = await query
       .select({ id: s.role.id })
       .from(s.role)
       .where(and(eq(s.role.handle, input.roleHandle), isNull(s.role.deletedAt)))
-      .then(singleRow)
+      .then(singleRow);
 
     // TODO: this is a hard delete, since our PK is a composite key
     return await query
@@ -1003,9 +1017,9 @@ export const withdrawlRole = withZod(
           eq(s.cohortAllocationRole.cohortAllocationId, input.allocationId),
           eq(s.cohortAllocationRole.roleId, role.id),
         ),
-      )
+      );
   },
-)
+);
 
 export const setTags = withZod(
   z.object({
@@ -1014,7 +1028,7 @@ export const setTags = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .update(s.cohortAllocation)
@@ -1025,9 +1039,9 @@ export const setTags = withZod(
           : eq(s.cohortAllocation.id, input.allocationId),
       )
       .returning({ id: s.cohortAllocation.id })
-      .then(singleRow)
+      .then(singleRow);
   },
-)
+);
 
 export const makeProgressVisible = withZod(
   z.object({
@@ -1035,7 +1049,7 @@ export const makeProgressVisible = withZod(
     visibleUpUntil: z.string().datetime().optional(),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     return await query
       .update(s.cohortAllocation)
@@ -1046,16 +1060,16 @@ export const makeProgressVisible = withZod(
           : eq(s.cohortAllocation.id, input.allocationId),
       )
       .returning({ id: s.cohortAllocation.id })
-      .then(singleRow)
+      .then(singleRow);
   },
-)
+);
 
 export const personsBelongTogetherInActiveCohort = withZod(
   z.object({
     personId: uuidSchema.array().min(2),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const result = await query
       .select({
@@ -1090,8 +1104,8 @@ export const personsBelongTogetherInActiveCohort = withZod(
       .having(
         // GTE because a person can appear multiple times in the same cohort
         sql`array_length(array_agg(${s.actor.personId}), 1) >= ${input.personId.length}`,
-      )
+      );
 
-    return result.length > 0
+    return result.length > 0;
   },
-)
+);

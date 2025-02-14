@@ -21,7 +21,7 @@ export function SetView({
   );
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     <Select value={value} onChange={(e) => setValue(e.target.value as any)}>
       {children}
     </Select>

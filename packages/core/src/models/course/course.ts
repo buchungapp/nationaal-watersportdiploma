@@ -1,9 +1,16 @@
-import { schema as s } from '@nawadi/db'
-import assert from 'assert'
-import { SQL, SQLWrapper, and, eq, getTableColumns, inArray } from 'drizzle-orm'
-import { aggregate } from 'drizzle-toolbelt'
-import { z } from 'zod'
-import { useQuery, withTransaction } from '../../contexts/index.js'
+import assert from "node:assert";
+import { schema as s } from "@nawadi/db";
+import {
+  type SQL,
+  type SQLWrapper,
+  and,
+  eq,
+  getTableColumns,
+  inArray,
+} from "drizzle-orm";
+import { aggregate } from "drizzle-toolbelt";
+import { z } from "zod";
+import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   findItem,
   handleSchema,
@@ -13,9 +20,9 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { insertSchema, outputSchema } from './course.schema.js'
-import { Category, Discipline } from './index.js'
+} from "../../utils/index.js";
+import { insertSchema, outputSchema } from "./course.schema.js";
+import { Category, Discipline } from "./index.js";
 
 export const create = withZod(
   insertSchema.extend({
@@ -33,7 +40,7 @@ export const create = withZod(
           disciplineId: item.disciplineId,
         })
         .returning({ id: s.course.id })
-        .then(singleRow)
+        .then(singleRow);
 
       if (!!item.categories && item.categories.length > 0) {
         await tx.insert(s.courseCategory).values(
@@ -41,12 +48,12 @@ export const create = withZod(
             courseId: row.id,
             categoryId,
           })),
-        )
+        );
       }
 
-      return row
+      return row;
     }),
-)
+);
 
 export const list = withZod(
   z
@@ -60,15 +67,15 @@ export const list = withZod(
     .default({}),
   outputSchema.array(),
   async ({ filter }) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const whereClausules: SQLWrapper[] = []
+    const whereClausules: SQLWrapper[] = [];
 
     if (filter.id) {
       if (Array.isArray(filter.id)) {
-        whereClausules.push(inArray(s.course.id, filter.id))
+        whereClausules.push(inArray(s.course.id, filter.id));
       } else {
-        whereClausules.push(eq(s.course.id, filter.id))
+        whereClausules.push(eq(s.course.id, filter.id));
       }
     }
 
@@ -86,33 +93,33 @@ export const list = withZod(
                 acc[course.id] = {
                   ...course,
                   categories: [],
-                }
+                };
               }
 
-              if (!!course_category) {
-                acc[course.id]!.categories.push(course_category)
+              if (course_category) {
+                acc[course.id]?.categories.push(course_category);
               }
 
-              return acc
+              return acc;
             },
             {} as Record<
               string,
-              (typeof rows)[number]['course'] & {
+              (typeof rows)[number]["course"] & {
                 categories: NonNullable<
-                  (typeof rows)[number]['course_category']
-                >[]
+                  (typeof rows)[number]["course_category"]
+                >[];
               }
             >,
           ),
-        )
-      }) // Transform joined rows into a structured format with programs and their categories.
+        );
+      }); // Transform joined rows into a structured format with programs and their categories.
 
     // Fetch additional lists of categories, degrees, and disciplines in parallel to optimize loading times.
     const [courses, categories, disciplines] = await Promise.all([
       coursesPromise,
       Category.list(),
       Discipline.list(),
-    ])
+    ]);
 
     // Map over the programs to enrich them with additional data like degree, discipline, and categories.
     return courses
@@ -121,16 +128,16 @@ export const list = withZod(
         const discipline = findItem({
           items: disciplines,
           predicate(item) {
-            return item.id === course.disciplineId
+            return item.id === course.disciplineId;
           },
           enforce: true, // Enforce finding the discipline, throw error if not found.
-        })
+        });
 
         const {
           categories: courseCategories,
           disciplineId,
           ...courseProperties
-        } = course
+        } = course;
 
         // Construct the final program object with additional details.
         return {
@@ -141,13 +148,13 @@ export const list = withZod(
               category, // Filter categories relevant to the current program.
             ) => courseCategories.some((pc) => pc.categoryId === category.id),
           ),
-        }
+        };
       })
       .sort((a, b) => {
-        return a.discipline.weight - b.discipline.weight
-      })
+        return a.discipline.weight - b.discipline.weight;
+      });
   },
-)
+);
 
 export const findOne = withZod(
   z.object({
@@ -159,34 +166,34 @@ export const findOne = withZod(
   }),
   outputSchema.nullable(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const whereClausules: (SQL | undefined)[] = []
+    const whereClausules: (SQL | undefined)[] = [];
 
     if (input.id) {
-      whereClausules.push(eq(s.course.id, input.id))
+      whereClausules.push(eq(s.course.id, input.id));
     }
 
     if (input.handle) {
-      whereClausules.push(eq(s.course.handle, input.handle))
+      whereClausules.push(eq(s.course.handle, input.handle));
     }
 
     if (input.disciplineId) {
-      whereClausules.push(eq(s.course.disciplineId, input.disciplineId))
+      whereClausules.push(eq(s.course.disciplineId, input.disciplineId));
     }
 
     if (input.title) {
-      whereClausules.push(eq(s.course.title, input.title))
+      whereClausules.push(eq(s.course.title, input.title));
     }
 
-    let _query = query
+    const _query = query
       .select({
         ...getTableColumns(s.course),
         category: s.courseCategory,
       })
       .from(s.course)
       .leftJoin(s.courseCategory, eq(s.courseCategory.courseId, s.course.id))
-      .where(and(...whereClausules))
+      .where(and(...whereClausules));
 
     if (input.categoryId) {
       if (Array.isArray(input.categoryId)) {
@@ -195,38 +202,38 @@ export const findOne = withZod(
             inArray(s.courseCategory.categoryId, input.categoryId),
             eq(s.courseCategory.courseId, s.course.id),
           ),
-        )
+        );
       } else {
         whereClausules.push(
           and(
             eq(s.courseCategory.categoryId, input.categoryId),
             eq(s.courseCategory.courseId, s.course.id),
           ),
-        )
+        );
       }
     }
 
     const course = await _query
       .then(
         aggregate({
-          pkey: 'id',
-          fields: { categories: 'category.id' },
+          pkey: "id",
+          fields: { categories: "category.id" },
         }),
       )
-      .then(possibleSingleRow)
+      .then(possibleSingleRow);
 
     if (!course) {
-      return null
+      return null;
     }
 
     const [allCategories, discipline] = await Promise.all([
       Category.list(),
       Discipline.fromId(course.disciplineId),
-    ])
+    ]);
 
-    assert(discipline, 'Discipline not found')
+    assert(discipline, "Discipline not found");
 
-    const { categories, disciplineId, ...courseProperties } = course
+    const { categories, disciplineId, ...courseProperties } = course;
 
     return {
       ...courseProperties,
@@ -234,6 +241,6 @@ export const findOne = withZod(
       categories: allCategories.filter((category) =>
         categories.some((pc) => pc.categoryId === category.id),
       ),
-    }
+    };
   },
-)
+);

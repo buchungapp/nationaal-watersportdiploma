@@ -49,6 +49,8 @@ export function SetActiveLocationButton({
   const { setSelectedLocation } = useSelectedLocation();
 
   return (
-    <button onClick={() => setSelectedLocation(location)}>{children}</button>
+    <button type="button" onClick={() => setSelectedLocation(location)}>
+      {children}
+    </button>
   );
 }

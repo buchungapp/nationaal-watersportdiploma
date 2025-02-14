@@ -341,17 +341,15 @@ export default async function Page(props: {
             <DescriptionDetails>
               <Suspense
                 fallback={
-                  <>
-                    {allocation.instructor
-                      ? [
-                          allocation.instructor.firstName,
-                          allocation.instructor.lastNamePrefix,
-                          allocation.instructor.lastName,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")
-                      : null}
-                  </>
+                  allocation.instructor
+                    ? [
+                        allocation.instructor.firstName,
+                        allocation.instructor.lastNamePrefix,
+                        allocation.instructor.lastName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")
+                    : null
                 }
               >
                 <InstructorField

@@ -52,6 +52,10 @@ export async function CourseCard({
     );
   }
 
+  if (!allocation.studentCurriculum.curriculumId) {
+    throw new Error("Failed to retrieve curriculum");
+  }
+
   const [curriculum, completedCompetencies, allCompetencyProgress] =
     await Promise.all([
       retrieveCurriculumById(allocation.studentCurriculum.curriculumId),
@@ -106,7 +110,7 @@ export async function CourseCard({
           <Text className="my-4">
             Dit diploma is uitgegeven op{" "}
             <Strong>
-              {dayjs(allocation.certificate!.issuedAt)
+              {dayjs(allocation.certificate?.issuedAt)
                 .tz()
                 .format("DD-MM-YYYY HH:mm uur")}
             </Strong>

@@ -42,6 +42,7 @@ export function ShareCertificate({ id }: { id: string }) {
               <p className="whitespace-nowrap text-gray-600">{shareUrl}</p>
             </div>
             <button
+              type="button"
               className="h-8 flex-none border-l bg-white px-2 hover:bg-gray-50 active:bg-gray-100"
               onClick={() => {
                 void navigator.clipboard.writeText(shareUrl);

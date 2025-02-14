@@ -45,17 +45,20 @@ export default async function Page(props: {
             count: 0,
             certificates: [],
             ...disciplines.reduce(
-              (perDiscipline, discipline) => ({
-                ...perDiscipline,
-                [discipline.title!]: 0,
-              }),
+              (perDiscipline, discipline) => {
+                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                perDiscipline[discipline.title!] = 0;
+                return perDiscipline;
+              },
               {} as Record<string, number>,
             ),
           };
         }
 
-        acc[week]!.certificates.push(certificate);
+        acc[week]?.certificates.push(certificate);
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         acc[week]!.count += 1;
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         (acc[week]![certificate.program.course.discipline.title!] as number) +=
           1;
 
@@ -172,6 +175,7 @@ export default async function Page(props: {
           disciplines
             .filter((discipline) => {
               return certificatesPerWeek.some(
+                // biome-ignore lint/style/noNonNullAssertion: <explanation>
                 (week) => (week[discipline.title!]! as number) > 0,
               );
             })

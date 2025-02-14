@@ -3,8 +3,8 @@
 import {
   APIProvider,
   AdvancedMarker,
+  Map as GoogleMapsMap,
   InfoWindow,
-  Map,
   Pin,
   useAdvancedMarkerRef,
   useMap,
@@ -51,9 +51,11 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
     if (map) {
       if (!bounds) {
         const bounds = new google.maps.LatLngBounds();
-        locations.forEach(
-          ({ geometry }) => !!geometry && bounds.extend(geometry.location),
-        );
+        for (const { geometry } of locations) {
+          if (geometry) {
+            bounds.extend(geometry.location);
+          }
+        }
         setBounds(bounds);
         map.fitBounds(bounds);
       } else {
@@ -62,6 +64,7 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
     }
   }, [map, locations, bounds]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     setBoundsCallback();
   }, [map, locations, setBoundsCallback]);
@@ -79,6 +82,7 @@ export function SelectedLocationProvider({
   const map = useMap();
   const resetBounds = useBounds(map, locations);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const setSelectedLocationAndZoom = useCallback(
     (location: Location | null) => {
       if (location === null) {
@@ -127,7 +131,7 @@ export function LocationsMap({ locations }: Props) {
   const isContextDefined = useContext(SelectedLocationContext) !== undefined;
 
   const MapComponent = (
-    <Map
+    <GoogleMapsMap
       mapId="ea3856b90f7238a7"
       defaultCenter={center.current}
       defaultZoom={10}
@@ -137,7 +141,7 @@ export function LocationsMap({ locations }: Props) {
       {locations.map((location) => (
         <GoogleMapsMarker key={location.id} location={location} />
       ))}
-    </Map>
+    </GoogleMapsMap>
   );
 
   return isContextDefined ? (

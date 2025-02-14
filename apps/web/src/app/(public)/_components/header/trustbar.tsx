@@ -63,8 +63,8 @@ export default function Trustbar() {
   return (
     <section className="flex items-center justify-center gap-2 py-2 text-white sm:px-28 lg:justify-between">
       <ul className="hidden flex-1 items-center gap-6 lg:flex">
-        {socials.map((social, i) => (
-          <li key={i}>
+        {socials.map((social) => (
+          <li key={social.name}>
             <Link
               className="group relative"
               href={social.link}

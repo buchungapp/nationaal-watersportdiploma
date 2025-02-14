@@ -33,7 +33,7 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { type listInstructorsByCohortId } from "~/lib/nwd";
+import type { listInstructorsByCohortId } from "~/lib/nwd";
 import {
   addCohortRole,
   removeAllocation,
@@ -59,6 +59,7 @@ export default function InstructorsTable({
 }) {
   const params = useParams();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const columns = useMemo(
     () => [
       columnHelper.accessor(

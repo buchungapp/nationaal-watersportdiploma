@@ -23,15 +23,18 @@ async function DisciplineTable({
   });
 
   // Add programs to the index
-  disciplines.forEach((discipline) => {
-    index.add(discipline.id, discipline.title!);
-  });
+  for (const discipline of disciplines) {
+    if (discipline.title) {
+      index.add(discipline.id, discipline.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredDisciplines = disciplines;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredDisciplines = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => disciplines.find((discipline) => discipline.id === result)!,
     );
   }

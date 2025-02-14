@@ -25,7 +25,7 @@ export function ImageUpload() {
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
       maxFiles: 1,
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
       onDrop,
       onDropRejected: ([reject]) => {
         if (reject?.errors.find(({ code }) => code === "file-invalid-type")) {

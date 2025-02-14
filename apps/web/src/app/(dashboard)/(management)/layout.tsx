@@ -4,7 +4,7 @@ import {
   UserIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
-import React from "react";
+import type React from "react";
 import { Github } from "~/app/_components/socials";
 import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";

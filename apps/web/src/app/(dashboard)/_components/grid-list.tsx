@@ -1,13 +1,10 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import React from "react";
+import type React from "react";
 
 export function GridList({ children }: PropsWithChildren) {
   return (
-    <ul
-      role="list"
-      className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2 xl:gap-x-6"
-    >
+    <ul className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2 xl:gap-x-6">
       {children}
     </ul>
   );

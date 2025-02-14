@@ -103,6 +103,7 @@ function batchProgress(progress: ProgressItem[]) {
         continue;
       }
 
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       const lastBatch = batchedItems[batchedItems.length - 1]!;
       lastBatch.push(progressItem);
     }
@@ -157,6 +158,7 @@ function batchProgress(progress: ProgressItem[]) {
 
     for (const batch of mergedBatchedItems) {
       batchedProgress.push({
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         date: batch[0]!.createdAt,
         modules: batch.reduce(
           (acc, item) => {
@@ -271,7 +273,7 @@ export default async function Timeline({
   timeline.push(...batchedProgressToTimelineEvent(batchedProgress));
 
   return (
-    <ul role="list" className="-mb-8 mt-4">
+    <ul className="-mb-8 mt-4">
       {timeline
         .sort((a, b) => (dayjs(a.date).isAfter(dayjs(b.date)) ? -1 : 1))
         .map((event, eventIdx) => (

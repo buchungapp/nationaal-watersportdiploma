@@ -83,7 +83,7 @@ export default async function Page(props: {
   });
 
   // Add students to the index
-  filteredStudents.forEach((student) => {
+  for (const student of filteredStudents) {
     index.add({
       id: student.id,
       name: [
@@ -104,7 +104,7 @@ export default async function Page(props: {
         .join(" "),
       gearType: student.studentCurriculum?.gearType.title,
     });
-  });
+  }
 
   const searchQuery = parsedSq.query;
 

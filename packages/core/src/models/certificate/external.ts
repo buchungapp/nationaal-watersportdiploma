@@ -1,9 +1,9 @@
-import { schema as s } from '@nawadi/db'
-import dayjs from 'dayjs'
-import { and, desc, eq, isNull } from 'drizzle-orm'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { uuidSchema, withZod } from '../../utils/index.js'
+import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { uuidSchema, withZod } from "../../utils/index.js";
 
 export const listForPerson = withZod(
   z.object({
@@ -20,7 +20,7 @@ export const listForPerson = withZod(
     })
     .array(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const certificates = await query
       .select()
@@ -35,7 +35,7 @@ export const listForPerson = withZod(
       .orderBy(
         desc(s.externalCertificate.awardedAt),
         desc(s.externalCertificate.createdAt),
-      )
+      );
 
     return certificates.map(({ external_certificate, location }) => ({
       id: external_certificate.id,
@@ -45,7 +45,8 @@ export const listForPerson = withZod(
         : null,
       location: location ? location.name : null,
       identifier: external_certificate.identifier,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       metadata: external_certificate._metadata as any,
-    }))
+    }));
   },
-)
+);

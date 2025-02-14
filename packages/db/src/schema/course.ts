@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm'
+import { sql } from "drizzle-orm";
 import {
   foreignKey,
   pgEnum,
@@ -7,104 +7,104 @@ import {
   text,
   uniqueIndex,
   uuid,
-} from 'drizzle-orm/pg-core'
-import { timestamps } from '../utils/sql.js'
+} from "drizzle-orm/pg-core";
+import { timestamps } from "../utils/sql.js";
 
-export const competencyType = pgEnum('competency_type', ['knowledge', 'skill'])
+export const competencyType = pgEnum("competency_type", ["knowledge", "skill"]);
 
 export const competency = pgTable(
-  'competency',
+  "competency",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    type: competencyType('type').notNull(),
-    weight: smallint('weight').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    type: competencyType("type").notNull(),
+    weight: smallint("weight").notNull(),
     ...timestamps,
   },
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-    }
+    };
   },
-)
+);
 
 export const module = pgTable(
-  'module',
+  "module",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    weight: smallint('weight').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    weight: smallint("weight").notNull(),
     ...timestamps,
   },
 
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-    }
+    };
   },
-)
+);
 
 export const discipline = pgTable(
-  'discipline',
+  "discipline",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    weight: smallint('weight').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    weight: smallint("weight").notNull(),
     ...timestamps,
   },
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-    }
+    };
   },
-)
+);
 
 export const degree = pgTable(
-  'degree',
+  "degree",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    rang: smallint('rang').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    rang: smallint("rang").notNull(),
     ...timestamps,
   },
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
       unqRang: uniqueIndex().on(table.rang),
-    }
+    };
   },
-)
+);
 
 // type Degree = degree.$inferSelect
 
 export const category = pgTable(
-  'category',
+  "category",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    parentCategoryId: uuid('parent_category_id'),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    description: text('description'),
-    weight: smallint('weight').notNull(),
+    parentCategoryId: uuid("parent_category_id"),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    description: text("description"),
+    weight: smallint("weight").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -113,23 +113,23 @@ export const category = pgTable(
       parentCategoryReference: foreignKey({
         columns: [table.parentCategoryId],
         foreignColumns: [table.id],
-        name: 'category_parent_category_id_fk',
+        name: "category_parent_category_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const course = pgTable(
-  'course',
+  "course",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    description: text('description'),
-    disciplineId: uuid('discipline_id').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    description: text("description"),
+    disciplineId: uuid("discipline_id").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -138,21 +138,21 @@ export const course = pgTable(
       disciplineReference: foreignKey({
         columns: [table.disciplineId],
         foreignColumns: [discipline.id],
-        name: 'course_discipline_id_fk',
+        name: "course_discipline_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const courseCategory = pgTable(
-  'course_category',
+  "course_category",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    courseId: uuid('course_id').notNull(),
-    categoryId: uuid('category_id').notNull(),
+    courseId: uuid("course_id").notNull(),
+    categoryId: uuid("category_id").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -160,29 +160,29 @@ export const courseCategory = pgTable(
       courseReference: foreignKey({
         columns: [table.courseId],
         foreignColumns: [course.id],
-        name: 'course_category_course_id_fk',
+        name: "course_category_course_id_fk",
       }),
       categoryReference: foreignKey({
         columns: [table.categoryId],
         foreignColumns: [category.id],
-        name: 'course_category_category_id_fk',
+        name: "course_category_category_id_fk",
       }),
       unqCourseCategory: uniqueIndex().on(table.categoryId, table.courseId),
-    }
+    };
   },
-)
+);
 
 export const program = pgTable(
-  'program',
+  "program",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
-    courseId: uuid('course_id').notNull(),
-    degreeId: uuid('degree_id').notNull(),
+    handle: text("handle").notNull(),
+    title: text("title"),
+    courseId: uuid("course_id").notNull(),
+    degreeId: uuid("degree_id").notNull(),
     ...timestamps,
   },
   (table) => {
@@ -191,31 +191,31 @@ export const program = pgTable(
       courseReference: foreignKey({
         columns: [table.courseId],
         foreignColumns: [course.id],
-        name: 'program_course_id_fk',
+        name: "program_course_id_fk",
       }),
       degreeReference: foreignKey({
         columns: [table.degreeId],
         foreignColumns: [degree.id],
-        name: 'program_degree_id_fk',
+        name: "program_degree_id_fk",
       }),
-    }
+    };
   },
-)
+);
 
 export const gearType = pgTable(
-  'gear_type',
+  "gear_type",
   {
-    id: uuid('id')
+    id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    handle: text('handle').notNull(),
-    title: text('title'),
+    handle: text("handle").notNull(),
+    title: text("title"),
     ...timestamps,
   },
   (table) => {
     return {
       unqHandle: uniqueIndex().on(table.handle),
-    }
+    };
   },
-)
+);

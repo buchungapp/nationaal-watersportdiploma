@@ -1,9 +1,9 @@
-import { schema as s } from '@nawadi/db'
-import { and, asc, eq, getTableColumns, isNull, sql } from 'drizzle-orm'
-import { alias } from 'drizzle-orm/pg-core'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { uuidSchema, withZod } from '../../utils/index.js'
+import { schema as s } from "@nawadi/db";
+import { and, asc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { uuidSchema, withZod } from "../../utils/index.js";
 
 // TODO: There will come a day that I will simplify this query
 export const listStatus = withZod(
@@ -11,14 +11,14 @@ export const listStatus = withZod(
     cohortId: uuidSchema,
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const { id, tags, createdAt, progressVisibleUpUntil } = getTableColumns(
       s.cohortAllocation,
-    )
+    );
 
-    const instructorActor = alias(s.actor, 'instructor_actor')
-    const instructorPerson = alias(s.person, 'instructor_person')
+    const instructorActor = alias(s.actor, "instructor_actor");
+    const instructorPerson = alias(s.person, "instructor_person");
 
     const rankedSq = query
       .select({
@@ -30,12 +30,12 @@ export const listStatus = withZod(
     ORDER BY ${s.studentCohortProgress.createdAt} DESC
   )`
           .mapWith(Number)
-          .as('rn'),
+          .as("rn"),
       })
       .from(s.studentCohortProgress)
-      .as('ranked')
+      .as("ranked");
 
-    const latestProgress = query.$with('latest_progress').as(
+    const latestProgress = query.$with("latest_progress").as(
       query
         .select({
           cohortAllocationId: rankedSq.cohortAllocationId,
@@ -44,7 +44,7 @@ export const listStatus = withZod(
         })
         .from(rankedSq)
         .where(eq(rankedSq.rn, 1)),
-    )
+    );
 
     const moduleStatusQuery = query
       .with(latestProgress)
@@ -95,7 +95,7 @@ export const listStatus = withZod(
           isNull(s.cohortAllocation.deletedAt),
           eq(s.cohortAllocation.cohortId, input.cohortId),
         ),
-      )
+      );
 
     const studentsQuery = query
       .select({
@@ -157,7 +157,7 @@ export const listStatus = withZod(
         s.actor,
         and(
           eq(s.actor.id, s.cohortAllocation.actorId),
-          eq(s.actor.type, 'student'),
+          eq(s.actor.type, "student"),
         ),
       )
       .innerJoin(s.person, eq(s.person.id, s.actor.personId))
@@ -198,22 +198,22 @@ export const listStatus = withZod(
       .orderBy(
         asc(sql`LOWER(${s.person.firstName})`),
         asc(sql`LOWER(${s.person.lastName})`),
-      )
+      );
 
     const [students, moduleStatus] = await Promise.all([
       studentsQuery,
       moduleStatusQuery,
-    ])
+    ]);
 
     return students.map((student) => {
       const moduleStatusForStudent = moduleStatus.filter(
         (status) => status.studentCurriculumId === student.studentCurriculumId,
-      )
+      );
 
       if (student.studentCurriculumId && moduleStatusForStudent.length < 1) {
         throw new Error(
           `Module status not found for student curriculum ${student.studentCurriculumId}`,
-        )
+        );
       }
 
       return {
@@ -237,11 +237,16 @@ export const listStatus = withZod(
         studentCurriculum: student.studentCurriculumId
           ? {
               id: student.studentCurriculumId,
-              curriculumId: student.curriculum!.id,
+              curriculumId: student.curriculum?.id,
+              // biome-ignore lint/style/noNonNullAssertion: <explanation>
               program: student.program!,
+              // biome-ignore lint/style/noNonNullAssertion: <explanation>
               course: student.course!,
+              // biome-ignore lint/style/noNonNullAssertion: <explanation>
               degree: student.degree!,
+              // biome-ignore lint/style/noNonNullAssertion: <explanation>
               discipline: student.discipline!,
+              // biome-ignore lint/style/noNonNullAssertion: <explanation>
               gearType: student.gearType!,
               moduleStatus: moduleStatusForStudent.map((status) => ({
                 module: status.module,
@@ -261,7 +266,7 @@ export const listStatus = withZod(
               visibleFrom: student.certificate.visibleFrom,
             }
           : null,
-      }
-    })
+      };
+    });
   },
-)
+);

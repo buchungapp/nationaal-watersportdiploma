@@ -1,8 +1,8 @@
 import {
+  type FormEventHandler,
   useActionState,
   useCallback,
   useState,
-  type FormEventHandler,
 } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -570,35 +570,33 @@ function AddTagDialog({
     });
   };
 
-  const submit: FormEventHandler<HTMLFormElement> = useCallback(
-    (event) => {
-      event.preventDefault();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  const submit: FormEventHandler<HTMLFormElement> = useCallback((event) => {
+    event.preventDefault();
 
-      async function updateTags() {
-        for (const row of rows) {
-          const distinctTags = new Set<string>([
-            ...row.tags,
-            ...tagsToAdd.map(({ value }) => value as string),
-          ]);
+    async function updateTags() {
+      for (const row of rows) {
+        const distinctTags = new Set<string>([
+          ...row.tags,
+          ...tagsToAdd.map(({ value }) => value as string),
+        ]);
 
-          await setTags({
-            cohortId,
-            allocationId: row.id,
-            tags: Array.from(distinctTags),
-          });
-        }
+        await setTags({
+          cohortId,
+          allocationId: row.id,
+          tags: Array.from(distinctTags),
+        });
       }
+    }
 
-      toast.promise(updateTags(), {
-        loading: "Tags toevoegen",
-        success: "Tags toegevoegd",
-        error: "Er is iets misgegaan",
-      });
+    toast.promise(updateTags(), {
+      loading: "Tags toevoegen",
+      success: "Tags toegevoegd",
+      error: "Er is iets misgegaan",
+    });
 
-      setIsOpen(false);
-    },
-    [cohortId, rows, tagsToAdd],
-  );
+    setIsOpen(false);
+  }, []);
 
   const { data: allCohortTags } = useSWR(
     ["distinctTagsForCohort", cohortId],

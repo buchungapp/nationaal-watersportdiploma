@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
 import {
@@ -65,8 +62,9 @@ export default function SearchClient({
     });
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    articles.forEach((article) => {
+    for (const article of articles) {
       index.add({
         url: article.slug,
         title: article.metadata.title,
@@ -77,26 +75,29 @@ export default function SearchClient({
           article.content,
         ].join("\\n"),
       });
-    });
+    }
   }, [articles]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    questions.forEach((question) => {
+    for (const question of questions) {
       index.add({
         url: question.slug,
         title: question.metadata.question,
         type: "question",
         content: [question.metadata.question, question.content].join("\\n"),
       });
-    });
+    }
   }, [questions]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     posthog.capture("searched_faq", {
       query: deferredQuery,
     });
   }, [deferredQuery]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const filteredArticles = useMemo(() => {
     if (query === "") return [];
 
@@ -104,6 +105,7 @@ export default function SearchClient({
 
     if (searchResult.length === 0) return [];
 
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     return searchResult[0]!.result.map(
       // @ts-expect-error Type does not account for the enrich option
       (article: {

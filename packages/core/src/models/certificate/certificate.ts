@@ -1,6 +1,7 @@
-import { schema as s } from '@nawadi/db'
-import assert from 'assert'
-import dayjs from 'dayjs'
+import assert from "node:assert";
+import crypto from "node:crypto";
+import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
 import {
   and,
   asc,
@@ -13,23 +14,22 @@ import {
   lt,
   lte,
   sql,
-} from 'drizzle-orm'
-import { alias } from 'drizzle-orm/pg-core'
-import crypto from 'node:crypto'
-import { z } from 'zod'
+} from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
+import { z } from "zod";
 import {
   useQuery,
   useRedisClient,
   withTransaction,
-} from '../../contexts/index.js'
+} from "../../contexts/index.js";
 import {
   findItem,
   singleOrArray,
   singleRow,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { Course, Curriculum, Location, User } from '../index.js'
+} from "../../utils/index.js";
+import { Course, Curriculum, Location, User } from "../index.js";
 
 export const find = withZod(
   z.object({
@@ -37,7 +37,7 @@ export const find = withZod(
     issuedAt: z.string().datetime(),
   }),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const resultQuery = query
       .select()
@@ -47,37 +47,37 @@ export const find = withZod(
           eq(s.certificate.handle, input.handle),
           isNull(s.certificate.deletedAt),
         ),
-      )
+      );
 
-    const [result] = await resultQuery
+    const [result] = await resultQuery;
 
     if (!result) {
-      throw new Error('Failed to find certificate')
+      throw new Error("Failed to find certificate");
     }
 
-    return result
+    return result;
   },
-)
+);
 
 export const byId = withZod(uuidSchema, async (input) => {
-  const query = useQuery()
+  const query = useQuery();
 
   const resultQuery = query
     .select()
     .from(s.certificate)
-    .where(and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)))
+    .where(and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)));
 
-  const [result] = await resultQuery
+  const [result] = await resultQuery;
 
   if (!result) {
-    throw new Error('Failed to find certificate')
+    throw new Error("Failed to find certificate");
   }
 
   const studentCurriculumQuery = query
     .select()
     .from(s.studentCurriculum)
     .where(eq(s.studentCurriculum.id, result.studentCurriculumId))
-    .then(singleRow)
+    .then(singleRow);
 
   const completedCompetencyQuery = query
     .select()
@@ -94,30 +94,30 @@ export const byId = withZod(uuidSchema, async (input) => {
         ),
         eq(s.studentCompletedCompetency.certificateId, result.id),
       ),
-    )
+    );
 
   const [location, studentCurriculum, completedCompetencies] =
     await Promise.all([
       Location.fromId(result.locationId),
       studentCurriculumQuery,
       completedCompetencyQuery,
-    ])
+    ]);
 
-  assert(location)
+  assert(location);
 
   const [student, gearType, [curriculum]] = await Promise.all([
     User.Person.byIdOrHandle({ id: studentCurriculum.personId }),
     Curriculum.GearType.fromId(studentCurriculum.gearTypeId),
     Curriculum.list({ filter: { id: studentCurriculum.curriculumId } }),
-  ])
+  ]);
 
-  assert(student)
-  assert(gearType)
-  assert(curriculum)
+  assert(student);
+  assert(gearType);
+  assert(curriculum);
 
-  const program = await Course.Program.fromId(curriculum.programId)
+  const program = await Course.Program.fromId(curriculum.programId);
 
-  assert(program)
+  assert(program);
 
   return {
     ...result,
@@ -127,8 +127,8 @@ export const byId = withZod(uuidSchema, async (input) => {
     gearType,
     curriculum,
     program,
-  }
-})
+  };
+});
 
 export const list = withZod(
   z
@@ -146,22 +146,22 @@ export const list = withZod(
       sort: z
         .array(
           z.union([
-            z.literal('createdAt'),
-            z.literal('student'),
-            z.literal('instructor'),
+            z.literal("createdAt"),
+            z.literal("student"),
+            z.literal("instructor"),
           ]),
         )
-        .default(['createdAt']),
+        .default(["createdAt"]),
       // TODO: alter this default value to be true
       respectVisibility: z.boolean().default(false),
     })
     .default({}),
   async ({ filter, sort, respectVisibility }) => {
-    const query = useQuery()
+    const query = useQuery();
 
-    const studentPerson = alias(s.person, 'student_person')
-    const instructorActor = alias(s.actor, 'instructor_actor')
-    const instructorPerson = alias(s.person, 'instructor_person')
+    const studentPerson = alias(s.person, "student_person");
+    const instructorActor = alias(s.actor, "instructor_actor");
+    const instructorPerson = alias(s.person, "instructor_person");
 
     const certificates = await query
       .select(getTableColumns(s.certificate))
@@ -223,32 +223,32 @@ export const list = withZod(
       .orderBy(
         ...sort.map((sort) => {
           switch (sort) {
-            case 'student':
-              return asc(sql`LOWER(${studentPerson.firstName})`)
-            case 'instructor':
-              return asc(sql`LOWER(${instructorPerson.firstName})`)
+            case "student":
+              return asc(sql`LOWER(${studentPerson.firstName})`);
+            case "instructor":
+              return asc(sql`LOWER(${instructorPerson.firstName})`);
             default:
-              return desc(s.certificate.createdAt)
+              return desc(s.certificate.createdAt);
           }
         }),
-      )
+      );
 
     if (certificates.length === 0) {
-      return []
+      return [];
     }
 
     const uniqueStudentCurriculumIds = Array.from(
       new Set(certificates.map((c) => c.studentCurriculumId)),
-    )
+    );
 
     const uniqueCertificateIds = Array.from(
       new Set(certificates.map((c) => c.id)),
-    )
+    );
 
     const studentCurriculaQuery = query
       .select()
       .from(s.studentCurriculum)
-      .where(inArray(s.studentCurriculum.id, uniqueStudentCurriculumIds))
+      .where(inArray(s.studentCurriculum.id, uniqueStudentCurriculumIds));
 
     const completedCompetenciesQuery = query
       .select()
@@ -271,7 +271,7 @@ export const list = withZod(
             uniqueCertificateIds,
           ),
         ),
-      )
+      );
 
     const [
       locations,
@@ -285,62 +285,62 @@ export const list = withZod(
       completedCompetenciesQuery,
       User.Person.list({ filter: { locationId: filter.locationId } }),
       Curriculum.GearType.list(),
-    ])
+    ]);
 
     const curricula = await Curriculum.list({
       filter: {
         id: Array.from(new Set(studentCurricula.map((sc) => sc.curriculumId))),
       },
-    })
+    });
 
     const programs = await Course.Program.list({
       filter: {
         id: Array.from(new Set(curricula.map((c) => c.programId))),
       },
-    })
+    });
 
     return certificates.map((certificate) => {
       const location = findItem({
         items: locations,
         predicate: (l) => l.id === certificate.locationId,
         enforce: true,
-      })
+      });
 
       const studentCurriculum = findItem({
         items: studentCurricula,
         predicate: (sc) => sc.id === certificate.studentCurriculumId,
         enforce: true,
-      })
+      });
 
       const student = findItem({
         items: users,
         predicate: (u) => u.id === studentCurriculum.personId,
         enforce: true,
-      })
+      });
 
       const relevantCompletedCompetencies = completedCompetencies.filter(
         (cc) =>
           cc.student_completed_competency.studentCurriculumId ===
           studentCurriculum.id,
-      )
+      );
 
       const gearType = findItem({
         items: gearTypes,
         predicate: (gt) => gt.id === studentCurriculum.gearTypeId,
         enforce: true,
-      })
+      });
 
       const curriculum = findItem({
         items: curricula,
         predicate: (c) => c.id === studentCurriculum.curriculumId,
         enforce: true,
-      })
+      });
 
       const program = findItem({
         items: programs,
         predicate: (p) => p.id === curriculum.programId,
         enforce: true,
-      })
+      });
 
       return {
         ...certificate,
@@ -350,10 +350,10 @@ export const list = withZod(
         curriculum,
         program,
         completedCompetencies: relevantCompletedCompetencies,
-      }
-    })
+      };
+    });
   },
-)
+);
 
 export const assignToCohortAllocation = withZod(
   z.object({
@@ -361,7 +361,7 @@ export const assignToCohortAllocation = withZod(
     cohortAllocationId: uuidSchema.nullable(),
   }),
   async ({ certificateId, cohortAllocationId }) => {
-    const query = useQuery()
+    const query = useQuery();
 
     await query
       .update(s.certificate)
@@ -371,9 +371,9 @@ export const assignToCohortAllocation = withZod(
           eq(s.certificate.id, certificateId),
           isNull(s.certificate.deletedAt),
         ),
-      )
+      );
   },
-)
+);
 
 export const withdraw = withZod(uuidSchema, async (input) => {
   return withTransaction(async (tx) => {
@@ -385,10 +385,10 @@ export const withdraw = withZod(uuidSchema, async (input) => {
           eq(s.certificate.id, input),
           isNull(s.certificate.deletedAt),
           // Must be maximum 72 hours after the certificate was issued
-          gte(s.certificate.createdAt, dayjs().subtract(72, 'h').toISOString()),
+          gte(s.certificate.createdAt, dayjs().subtract(72, "h").toISOString()),
         ),
       )
-      .then(singleRow)
+      .then(singleRow);
 
     await Promise.all([
       tx
@@ -403,40 +403,40 @@ export const withdraw = withZod(uuidSchema, async (input) => {
       tx
         .delete(s.studentCompletedCompetency)
         .where(eq(s.studentCompletedCompetency.certificateId, certificate.id)),
-    ])
-  })
-})
+    ]);
+  });
+});
 
 export const storeHandles = withZod(
   z.object({
     fileName: z.string().optional(),
     sort: z
-      .union([z.literal('student'), z.literal('instructor')])
-      .default('student'),
+      .union([z.literal("student"), z.literal("instructor")])
+      .default("student"),
     handles: z.array(z.string().length(10)).min(1),
   }),
   async ({ fileName, sort, handles }) => {
-    const redis = useRedisClient()
-    const uuid = crypto.randomUUID()
-    const key = `c-export:${uuid}`
-    const expirationTime = 60 * 60 * 24 // 24 hours in seconds
+    const redis = useRedisClient();
+    const uuid = crypto.randomUUID();
+    const key = `c-export:${uuid}`;
+    const expirationTime = 60 * 60 * 24; // 24 hours in seconds
 
-    const pipeline = redis.pipeline()
+    const pipeline = redis.pipeline();
 
-    pipeline.sadd(`${key}:items`, handles)
-    pipeline.expire(`${key}:items`, expirationTime)
+    pipeline.sadd(`${key}:items`, handles);
+    pipeline.expire(`${key}:items`, expirationTime);
 
     pipeline.hset(`${key}:settings`, {
       fileName: fileName,
       sort,
-    })
-    pipeline.expire(`${key}:settings`, expirationTime)
+    });
+    pipeline.expire(`${key}:settings`, expirationTime);
 
-    await pipeline.exec()
+    await pipeline.exec();
 
-    return uuid
+    return uuid;
   },
-)
+);
 
 export const retrieveHandles = withZod(
   z.object({
@@ -445,52 +445,52 @@ export const retrieveHandles = withZod(
   z.object({
     settings: z.object({
       fileName: z.string().optional(),
-      sort: z.union([z.literal('student'), z.literal('instructor')]),
+      sort: z.union([z.literal("student"), z.literal("instructor")]),
     }),
     handles: z.array(z.string().length(10)),
   }),
   async ({ uuid }) => {
-    const redis = useRedisClient()
-    const key = `c-export:${uuid}`
+    const redis = useRedisClient();
+    const key = `c-export:${uuid}`;
     const results = await redis
       .pipeline()
       .hgetall(`${key}:settings`)
       .smembers(`${key}:items`)
-      .exec()
+      .exec();
 
     if (!results || results.length !== 2) {
-      throw new Error('Failed to execute Redis pipeline')
+      throw new Error("Failed to execute Redis pipeline");
     }
 
-    const [settingsResult, handlesResult] = results
+    const [settingsResult, handlesResult] = results;
 
     if (!settingsResult || !handlesResult) {
-      throw new Error('Unexpected Redis pipeline result structure')
+      throw new Error("Unexpected Redis pipeline result structure");
     }
 
-    const [settingsError, settings] = settingsResult
-    const [handlesError, handles] = handlesResult
+    const [settingsError, settings] = settingsResult;
+    const [handlesError, handles] = handlesResult;
 
     if (settingsError || handlesError) {
-      throw new Error('Redis operation failed')
+      throw new Error("Redis operation failed");
     }
 
     if (!Array.isArray(handles)) {
-      throw new Error('Invalid handles data')
+      throw new Error("Invalid handles data");
     }
 
     if (handles.length === 0) {
-      throw new Error('Export not found')
+      throw new Error("Export not found");
     }
 
     const expectedSettingsSchema = z.object({
       fileName: z.string().optional(),
-      sort: z.union([z.literal('student'), z.literal('instructor')]),
-    })
+      sort: z.union([z.literal("student"), z.literal("instructor")]),
+    });
 
     return {
       settings: expectedSettingsSchema.parse(settings),
       handles: handles as string[],
-    }
+    };
   },
-)
+);

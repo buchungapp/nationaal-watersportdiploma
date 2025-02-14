@@ -1,21 +1,21 @@
-import { schema as s } from '@nawadi/db'
-import { and, eq, isNull } from 'drizzle-orm'
-import { customAlphabet } from 'nanoid'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
+import { schema as s } from "@nawadi/db";
+import { and, eq, isNull } from "drizzle-orm";
+import { customAlphabet } from "nanoid";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
 import {
   singleOrArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
-} from '../../utils/index.js'
-import { insertSchema } from './certificate.schema.js'
+} from "../../utils/index.js";
+import { insertSchema } from "./certificate.schema.js";
 
 function generateCertificateID() {
-  const dictionary = '6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz'
-  const nanoid = customAlphabet(dictionary, 10)
+  const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
+  const nanoid = customAlphabet(dictionary, 10);
 
-  return nanoid()
+  return nanoid();
 }
 
 export const startCertificate = withZod(
@@ -25,7 +25,7 @@ export const startCertificate = withZod(
   }),
   successfulCreateResponse,
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const [insert] = await query
       .insert(s.certificate)
@@ -34,15 +34,15 @@ export const startCertificate = withZod(
         studentCurriculumId: input.studentCurriculumId,
         locationId: input.locationId,
       })
-      .returning({ id: s.certificate.id })
+      .returning({ id: s.certificate.id });
 
     if (!insert) {
-      throw new Error('Failed to start certificate')
+      throw new Error("Failed to start certificate");
     }
 
-    return insert
+    return insert;
   },
-)
+);
 
 export const completeCompetency = withZod(
   z.object({
@@ -52,7 +52,7 @@ export const completeCompetency = withZod(
   }),
   z.void(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const certificate = await query
       .select({ id: s.certificate.id })
@@ -62,15 +62,15 @@ export const completeCompetency = withZod(
           eq(s.certificate.id, input.certificateId),
           isNull(s.certificate.issuedAt),
         ),
-      )
+      );
 
     if (certificate.length < 1) {
-      throw new Error('No (mutable) certificate found')
+      throw new Error("No (mutable) certificate found");
     }
 
     const competencies = Array.isArray(input.competencyId)
       ? input.competencyId
-      : [input.competencyId]
+      : [input.competencyId];
 
     await query.insert(s.studentCompletedCompetency).values(
       competencies.map((competencyId) => ({
@@ -78,11 +78,11 @@ export const completeCompetency = withZod(
         competencyId,
         certificateId: input.certificateId,
       })),
-    )
+    );
 
-    return
+    return;
   },
-)
+);
 
 export const completeCertificate = withZod(
   insertSchema
@@ -94,7 +94,7 @@ export const completeCertificate = withZod(
     }),
   z.void(),
   async (input) => {
-    const query = useQuery()
+    const query = useQuery();
 
     const [res] = await query
       .update(s.certificate)
@@ -103,12 +103,12 @@ export const completeCertificate = withZod(
         visibleFrom: input.visibleFrom,
       })
       .where(eq(s.certificate.id, input.certificateId))
-      .returning({ id: s.certificate.id })
+      .returning({ id: s.certificate.id });
 
     if (!res) {
-      throw new Error('Failed to complete certificate')
+      throw new Error("Failed to complete certificate");
     }
 
-    return
+    return;
   },
-)
+);
