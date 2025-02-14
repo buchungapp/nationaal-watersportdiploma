@@ -7,9 +7,5 @@
   },
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
-  "deno.enable": true,
-  "deno.lint": true,
-  "deno.unstable": true,
-  "deno.enablePaths": ["./supabase/functions"],
   "typescript.preferences.importModuleSpecifier": "shortest"
 }
