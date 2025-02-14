@@ -1,5 +1,6 @@
 import "dotenv/config";
 
+import path from "node:path";
 import { Course, Curriculum, withDatabase } from "@nawadi/core";
 import {
   Document,
@@ -12,7 +13,6 @@ import {
   View,
   renderToFile,
 } from "@react-pdf/renderer";
-import path from "node:path";
 // biome-ignore lint/style/useImportType: <explanation>
 import React, { Fragment, type PropsWithChildren } from "react";
 import { projectRoot } from "./utils/root.js";

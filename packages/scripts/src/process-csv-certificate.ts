@@ -10,9 +10,9 @@ import {
 import { array } from "@nawadi/lib";
 import csv from "csvtojson";
 import "dotenv/config";
-import inquirer from "inquirer";
 import assert from "node:assert";
 import path from "node:path";
+import inquirer from "inquirer";
 import { z } from "zod";
 async function parseCsv(filePath: string) {
   try {
