@@ -13,9 +13,10 @@ test("location crud", () =>
     });
 
     const list = await Location.list();
-
     assert.equal(list.length, 1);
+
     const [item] = list;
+    assert.ok(item);
 
     assert.deepStrictEqual(item, {
       id,
@@ -24,8 +25,8 @@ test("location crud", () =>
       websiteUrl: "https://example.com",
       email: null,
       shortDescription: null,
-      createdAt: item?.createdAt,
-      updatedAt: item?.updatedAt,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
       deletedAt: null,
       logo: null,
       logoCertificate: null,

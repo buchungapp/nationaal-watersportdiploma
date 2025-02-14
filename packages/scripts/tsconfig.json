@@ -1,5 +1,5 @@
 {
-  "extends": "@tsconfig/node20",
+  "extends": "@tsconfig/node22",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./out",
@@ -9,7 +9,8 @@
     "lib": ["es2023"],
     "jsx": "react",
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "references": [

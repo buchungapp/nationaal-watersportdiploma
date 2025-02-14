@@ -71,9 +71,10 @@ test("competency crud", () =>
     });
 
     const list = await Competency.list();
+    assert.equal(list.length, 1);
 
-    assert.strictEqual(list.length, 1);
     const [item] = list;
+    assert.ok(item);
 
     assert.deepStrictEqual(item, {
       id,
@@ -83,7 +84,7 @@ test("competency crud", () =>
       isRequired: false,
       requirement: "You should be awesome!",
       deletedAt: null,
-      createdAt: item?.createdAt,
-      updatedAt: item?.updatedAt,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
     } satisfies Output);
   }));

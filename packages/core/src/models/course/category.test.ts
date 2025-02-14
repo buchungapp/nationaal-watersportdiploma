@@ -12,16 +12,17 @@ test("category crud", () =>
     });
 
     const list = await Category.list();
-
     assert.equal(list.length, 1);
+
     const [item] = list;
+    assert.ok(item);
 
     assert.deepStrictEqual(item, {
       id,
       title: "title-1",
       handle: "handle-1",
-      createdAt: item?.createdAt,
-      updatedAt: item?.updatedAt,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
       deletedAt: null,
       description: null,
       parent: null,

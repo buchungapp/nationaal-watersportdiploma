@@ -9,7 +9,10 @@ export async function throttlePromises<T>(
   const executeNext = (): Promise<void> => {
     if (index >= funcs.length) return Promise.resolve();
     const i = index++;
-    const promise = funcs[i]?.()
+    const promiseGetter = funcs[i];
+    if (!promiseGetter) return Promise.resolve();
+
+    const promise = promiseGetter()
       .then((result) => {
         results[i] = result;
       })

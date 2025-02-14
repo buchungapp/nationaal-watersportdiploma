@@ -10,9 +10,9 @@ import {
 import { array } from "@nawadi/lib";
 import csv from "csvtojson";
 import "dotenv/config";
+import inquirer from "inquirer";
 import assert from "node:assert";
 import path from "node:path";
-import inquirer from "inquirer";
 import { z } from "zod";
 async function parseCsv(filePath: string) {
   try {
@@ -142,6 +142,8 @@ async function main(filePath: string) {
       });
 
       assert(gearTypes.length === 1, "Gear type not found for curriculum");
+      const [gearType] = gearTypes;
+      assert.ok(gearType, "Gear type not found for curriculum");
 
       // Add new line to console
       console.log("-----------------------------------");
@@ -165,7 +167,7 @@ async function main(filePath: string) {
       const { id: studentCurriculumId } = await Student.Curriculum.start({
         curriculumId: curriculum.id,
         personId: person.id,
-        gearTypeId: gearTypes[0]?.id,
+        gearTypeId: gearType.id,
       });
 
       // Start certificate

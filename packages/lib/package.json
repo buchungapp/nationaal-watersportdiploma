@@ -33,12 +33,12 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.14.10",
+    "@types/node": "catalog:",
     "chrono-node": "^2.7.6",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
+    "@tsconfig/node22": "catalog:",
     "typescript": "catalog:"
   }
 }
