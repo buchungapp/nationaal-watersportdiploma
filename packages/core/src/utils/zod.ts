@@ -116,6 +116,8 @@ export function withZod<
           }
         });
 
+        // Removed this check because it is not always valid
+        // @TODO: remove in the future, after tests
         // if (parsedInput === undefined) {
         //   throw new Error("Failed to parse input");
         // }
