@@ -8,6 +8,7 @@ import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { BASE_URL } from "~/constants";
 
 import Analytics from "../_components/analytics";
@@ -66,14 +67,16 @@ export default function RootLayout({
       <body className="h-full">
         <CommonProviders>
           <MarketingProviders>
-            {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
-            <div>
-              <Header />
-              <div id="content" className="[--header-height:112px]">
-                {children}
+            <NuqsAdapter>
+              {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
+              <div>
+                <Header />
+                <div id="content" className="[--header-height:112px]">
+                  {children}
+                </div>
+                <Footer />
               </div>
-              <Footer />
-            </div>
+            </NuqsAdapter>
           </MarketingProviders>
 
           <Toaster richColors />
