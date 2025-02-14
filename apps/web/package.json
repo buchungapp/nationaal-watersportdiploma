@@ -17,7 +17,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@googlemaps/google-maps-services-js": "^3.4.0",
     "@headlessui/react": "2.2.0",
-    "@headlessui/tailwindcss": "^0.2.1",
+    "@headlessui/tailwindcss": "^0.2.2",
     "@heroicons/react": "^2.1.5",
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
@@ -71,13 +71,13 @@
     "sonner": "^1.5.0",
     "svg-to-pdfkit": "^0.1.8",
     "swr": "2.2.6-beta.4",
-    "tailwind-merge": "^2.5.2",
+    "tailwind-merge": "^3.0.1",
     "use-debounce": "^10.0.3",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@nawadi/lib": "workspace:^",
-    "@tailwindcss/typography": "^0.5.15",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/mdx": "^2.0.13",
     "@types/node": "catalog:",
     "@types/pdfkit": "^0.13.4",
@@ -87,7 +87,7 @@
     "@types/svg-to-pdfkit": "^0.1.3",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.11",
+    "tailwindcss": "^4.0.6",
     "typescript": "catalog:"
   }
 }
