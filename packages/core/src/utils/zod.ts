@@ -1,5 +1,5 @@
 import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { z, type ZodError } from "zod";
+import { type ZodError, z } from "zod";
 
 export const handleSchema = z
   .string()
@@ -34,6 +34,23 @@ export const successfulCreateResponse = z.object({
   id: uuidSchema,
 });
 
+const test = z
+  .object({
+    filter: z
+      .object({
+        id: singleOrArray(uuidSchema).optional(),
+        number: singleOrArray(z.string().length(10)).optional(),
+        locationId: singleOrArray(uuidSchema).optional(),
+        personId: singleOrArray(uuidSchema).optional(),
+        issuedAfter: z.string().datetime().optional(),
+        issuedBefore: z.string().datetime().optional(),
+      })
+      .default({}),
+  })
+  .default({});
+
+const a: z.input<typeof test> = undefined;
+
 export function withZod<
   // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
   TInput extends z.ZodType<any, any>,
@@ -44,14 +61,23 @@ export function withZod<
   inputSchema: TInput,
   outputSchema: TOutput,
   func: F,
-): (input: z.input<TInput>) => Promise<z.output<TOutput>>;
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+): TInput extends z.ZodDefault<any>
+  ? (input?: z.input<TInput>) => Promise<z.output<TOutput>>
+  : (input: z.input<TInput>) => Promise<z.output<TOutput>>;
 
 export function withZod<
   // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
   TInput extends z.ZodType<any, any>,
   // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
   F extends (input: z.output<TInput>) => any,
->(inputSchema: TInput, func: F): (input: z.input<TInput>) => ReturnType<F>;
+>(
+  inputSchema: TInput,
+  func: F,
+  // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
+): TInput extends z.ZodDefault<any>
+  ? (input?: z.input<TInput>) => ReturnType<F>
+  : (input: z.input<TInput>) => ReturnType<F>;
 
 export function withZod<
   // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work
