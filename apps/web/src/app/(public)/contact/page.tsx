@@ -98,7 +98,7 @@ export default function Contact() {
             alt="Contact"
             width={contact.width}
             height={contact.height}
-            placeholder="blur-sm"
+            placeholder="blur"
             className="h-full rounded-3xl object-cover"
           />
           <div className="flex flex-col gap-8">

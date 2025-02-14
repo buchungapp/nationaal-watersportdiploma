@@ -107,7 +107,7 @@ export default function Page() {
         src={vertrouwenspersoon}
         width={vertrouwenspersoon.width}
         height={vertrouwenspersoon.height}
-        placeholder="blur-sm"
+        placeholder="blur"
         alt="Evert-Jan van den Brink"
         className="aspect-square w-56 object-cover"
       />

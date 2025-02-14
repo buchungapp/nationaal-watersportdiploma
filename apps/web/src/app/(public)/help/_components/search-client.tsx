@@ -125,7 +125,7 @@ export default function SearchClient({
   }, [query, articles, index]);
 
   return (
-    <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded-sm bg-white ring-1 ring-branding-light ring-opacity-95 transition-all">
+    <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded-sm bg-white ring-1 ring-branding-light/95 transition-all">
       <Combobox
         multiple={false}
         onChange={(value: { url: string }) => {

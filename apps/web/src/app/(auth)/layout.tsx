@@ -74,7 +74,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   className="absolute inset-0 h-full w-full object-cover"
                   priority
                   src={coverImage}
-                  placeholder="blur-sm"
+                  placeholder="blur"
                   alt=""
                 />
               </div>

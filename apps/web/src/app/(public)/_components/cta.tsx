@@ -7,7 +7,7 @@ export function FindNWDCourse() {
     <div className="relative bg-branding-dark rounded-3xl overflow-hidden">
       <div className="relative h-80 overflow-hidden md:absolute md:left-0 md:h-full md:w-1/3 lg:w-1/2">
         <Image
-          placeholder="blur-sm"
+          placeholder="blur"
           className="h-full w-full object-cover"
           src={Bahia}
           alt=""

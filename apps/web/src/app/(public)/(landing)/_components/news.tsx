@@ -50,7 +50,7 @@ export default async function News() {
                   alt={""}
                   width={news.featuredImage.width}
                   height={news.featuredImage.height}
-                  placeholder="blur-sm"
+                  placeholder="blur"
                   className="aspect-video rounded-2xl object-cover"
                 />
               ) : null}
