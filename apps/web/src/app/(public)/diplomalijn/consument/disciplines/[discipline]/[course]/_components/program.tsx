@@ -86,7 +86,7 @@ export default async function Program({
                 <li className="py-1.5 px-0">
                   <div className="flex items-center justify-between bg-gray-100 py-1 px-1.5 rounded-lg">
                     <div className="flex items-baseline gap-x-2">
-                      <div className="flex-shrink-0 w-12">
+                      <div className="shrink-0 w-12">
                         <Weight weight={module.weight} />
                       </div>
                       <h3 className="font-semibold text-gray-700">
@@ -104,7 +104,7 @@ export default async function Program({
                   <dl className="mt-2 space-y-1 px-1.5">
                     {module.competencies.map((competency) => (
                       <div key={competency.id} className="flex gap-x-2">
-                        <div className="flex-shrink-0 w-12">
+                        <div className="shrink-0 w-12">
                           <Weight weight={competency.weight} />
                         </div>
                         <div>

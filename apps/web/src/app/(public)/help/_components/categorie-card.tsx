@@ -35,7 +35,7 @@ export default function CategorieCard({
       onMouseMove={onMouseMove}
     >
       <motion.div
-        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-branding-light/20 to-branding-light/10 opacity-0 transition duration-300 group-hover:opacity-100"
+        className="absolute inset-0 rounded-2xl bg-linear-to-r from-branding-light/20 to-branding-light/10 opacity-0 transition duration-300 group-hover:opacity-100"
         style={style}
       />
       <Pattern

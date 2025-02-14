@@ -32,7 +32,7 @@ export function StickyNavDiv({
   const isSticky = useIsSticky();
 
   return (
-    <div className={clsx(isSticky && "shadow", className)}>{children}</div>
+    <div className={clsx(isSticky && "shadow-sm", className)}>{children}</div>
   );
 }
 

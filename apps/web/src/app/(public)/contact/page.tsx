@@ -98,7 +98,7 @@ export default function Contact() {
             alt="Contact"
             width={contact.width}
             height={contact.height}
-            placeholder="blur"
+            placeholder="blur-sm"
             className="h-full rounded-3xl object-cover"
           />
           <div className="flex flex-col gap-8">
@@ -140,7 +140,7 @@ export default function Contact() {
                 </InlineButton>
               </li>
               <li className="flex items-start gap-4">
-                <EnvelopeIcon className="h-6 w-5 flex-shrink-0" />
+                <EnvelopeIcon className="h-6 w-5 shrink-0" />
                 Wilhelmina van Pruisenweg 35 <br />
                 2595AN Den Haag
               </li>

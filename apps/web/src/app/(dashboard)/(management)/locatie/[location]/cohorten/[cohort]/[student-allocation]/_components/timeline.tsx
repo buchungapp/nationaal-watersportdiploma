@@ -368,7 +368,7 @@ function TimelineEventCompetenciesProgress({
                 </span>{" "}
                 <ChevronDownIcon
                   className={
-                    "h-4 w-4 transition-transform inline-flex group-data-[open]:rotate-180 shrink-0 leading-5"
+                    "h-4 w-4 transition-transform inline-flex group-data-open:rotate-180 shrink-0 leading-5"
                   }
                 />
               </div>
@@ -397,7 +397,7 @@ function TimelineEventCompetenciesProgress({
 
                               <ChevronDownIcon
                                 className={
-                                  "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
+                                  "h-4 w-4 transition-transform group-data-open:rotate-180 shrink-0 mt-0"
                                 }
                               />
                             </DisclosureButton>

@@ -138,7 +138,7 @@ export default function Footer() {
             type="email"
             name="email"
             required
-            className="min-w-[200px] rounded border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-gray-400"
+            className="min-w-[200px] rounded-sm border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-gray-400"
             placeholder="Je e-mailadres"
           />
           <input type="hidden" name="userGroup" value="Website footer" />

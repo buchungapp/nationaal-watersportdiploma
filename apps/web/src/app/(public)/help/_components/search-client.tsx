@@ -125,7 +125,7 @@ export default function SearchClient({
   }, [query, articles, index]);
 
   return (
-    <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded bg-white ring-1 ring-branding-light ring-opacity-95 transition-all">
+    <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded-sm bg-white ring-1 ring-branding-light ring-opacity-95 transition-all">
       <Combobox
         multiple={false}
         onChange={(value: { url: string }) => {
@@ -155,7 +155,7 @@ export default function SearchClient({
             "isolate w-[var(--input-width)] empty:invisible select-none scroll-py-1 rounded-xl p-1",
 
             // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-            "outline outline-1 outline-transparent focus:outline-none",
+            "outline outline-1 outline-transparent focus:outline-hidden",
 
             // Handle scrolling when menu won't fit in viewport
             "overflow-y-scroll overscroll-contain",
@@ -167,7 +167,7 @@ export default function SearchClient({
             "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
 
             // Transitions
-            "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0",
+            "transition duration-100 ease-in data-leave:data-closed:opacity-0",
           )}
         >
           {filteredArticles.map((article) => {
@@ -175,7 +175,7 @@ export default function SearchClient({
               <ComboboxOption
                 key={article.url}
                 value={article}
-                className="cursor-default select-none px-4 py-2 flex gap-1 data-[active]:bg-branding-light data-[active]:text-white"
+                className="cursor-default select-none px-4 py-2 flex gap-1 data-active:bg-branding-light data-active:text-white"
               >
                 {article.type === "article" ? (
                   <NewspaperIcon className="w-6 h-6 shrink-0" />

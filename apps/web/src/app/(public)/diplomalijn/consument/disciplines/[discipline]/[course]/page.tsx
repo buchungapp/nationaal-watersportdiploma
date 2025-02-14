@@ -82,7 +82,7 @@ export default async function Page(props: {
                 <thead>
                   <tr>
                     <th className="whitespace-nowrap text-right w-8" />
-                    <th className="flex-grow w-auto whitespace-nowrap">
+                    <th className="grow w-auto whitespace-nowrap">
                       Module
                     </th>
                     {programs.map((program) => (
@@ -154,13 +154,13 @@ export default async function Page(props: {
               </table>
               <div className="text-right flex justify-end mt-4 gap-x-4">
                 <div className="text-sm text-gray-700 mt-2">
-                  <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
+                  <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded-sm mr-2">
                     ✔
                   </span>
                   Kern
                 </div>
                 <div className="text-sm text-gray-700 mt-2">
-                  <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
+                  <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded-sm mr-2">
                     ❍
                   </span>
                   Keuze

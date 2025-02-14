@@ -60,7 +60,7 @@ export default async function Page(props: {
           </div>
         </div>
       </PageHero>
-      <div className="mt-12 grid grid-cols-1 gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
+      <div className="mt-12 grid grid-cols-1 gap-12 px-4 sm:grid-cols-[1fr_3fr] lg:px-16">
         <div className="flex justify-end">
           <SideNavActueel />
         </div>
@@ -73,7 +73,7 @@ export default async function Page(props: {
           {articles.map((article) => (
             <div
               key={article.slug}
-              className="grid gap-2 sm:grid-cols-[12rem,1fr]"
+              className="grid gap-2 sm:grid-cols-[12rem_1fr]"
             >
               <p className="text-xs text-gray-400">
                 {formatDate(article.date)}

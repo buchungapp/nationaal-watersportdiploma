@@ -28,7 +28,7 @@ export default function Welcome() {
           </BoxedButton>
         </div>
       </div>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
+      <div className="relative aspect-4/3 w-full overflow-hidden rounded-3xl">
         <MuxVideo
           style={{
             position: "absolute",

@@ -80,7 +80,7 @@ export const AvatarButton = React.forwardRef(function AvatarButton(
   const classes = clsx(
     className,
     square ? "rounded-lg" : "rounded-full",
-    "relative focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-branding-light",
+    "relative focus:outline-hidden data-focus:outline data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
   );
 
   return "href" in props ? (

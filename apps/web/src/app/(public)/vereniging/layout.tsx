@@ -35,7 +35,7 @@ export default function Layout({
   return (
     <main>
       <MdxPageHeader pages={verenigingSegments} />
-      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
+      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr_3fr] lg:px-16">
         <div className="flex justify-end h-full">
           <SideNavVereniging />
         </div>

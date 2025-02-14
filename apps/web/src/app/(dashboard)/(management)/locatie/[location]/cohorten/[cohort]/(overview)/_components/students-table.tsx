@@ -307,7 +307,7 @@ export default function StudentsTable({
           </div>
         </div>
         <Table
-          className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+          className="mt-4 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
           dense
         >
           <TableHead>
@@ -350,7 +350,7 @@ export default function StudentsTable({
                         className={clsx(
                           header.column.columnDef.enableSorting === false
                             ? header.column.columnDef.meta?.align
-                            : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
+                            : "flex items-center justify-between gap-2 hover:bg-gray-50 dark:hover:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
                           "rounded-md",
                         )}
                       >
@@ -425,7 +425,7 @@ export default function StudentsTable({
         )}
       >
         <p className="select-none text-sm">
-          <span className="rounded bg-branding-light/10 px-2 py-1.5 font-medium tabular-nums text-branding-dark">
+          <span className="rounded-sm bg-branding-light/10 px-2 py-1.5 font-medium tabular-nums text-branding-dark">
             {selectedRows}
           </span>
           <span className="ml-2 font-medium text-gray-900 dark:text-gray-50">

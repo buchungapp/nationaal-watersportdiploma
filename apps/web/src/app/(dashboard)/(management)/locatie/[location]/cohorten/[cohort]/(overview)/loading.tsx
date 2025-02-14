@@ -8,13 +8,13 @@ export default function Loading() {
           <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
         </div>
         <div className="flex items-center gap-1 shrink-0 animate-pulse">
-          <div className="rounded bg-gray-200 h-9 w-9" />
+          <div className="rounded-sm bg-gray-200 h-9 w-9" />
         </div>
       </div>
       <div className="grid gap-2 mt-4 animate-pulse">
-        <div className="w-full rounded bg-gray-200 h-8" />
-        <div className="w-full rounded bg-gray-100 h-8" />
-        <div className="w-full rounded bg-gray-200 h-8" />
+        <div className="w-full rounded-sm bg-gray-200 h-8" />
+        <div className="w-full rounded-sm bg-gray-100 h-8" />
+        <div className="w-full rounded-sm bg-gray-200 h-8" />
       </div>
     </div>
   );

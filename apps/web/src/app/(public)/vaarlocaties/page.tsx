@@ -203,7 +203,7 @@ export default async function Page() {
                   </LocationCard>
                 ))}
             </div>
-            <div className="w-full lg:col-span-2 h-[80vh] rounded overflow-hidden">
+            <div className="w-full lg:col-span-2 h-[80vh] rounded-sm overflow-hidden">
               <LocationsMap locations={locations} />
             </div>
           </div>

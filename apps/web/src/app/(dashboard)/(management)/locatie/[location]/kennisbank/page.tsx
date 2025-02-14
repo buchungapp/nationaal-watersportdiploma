@@ -40,7 +40,7 @@ export default async function Page(_props: {
       </Text>
 
       <Table
-        className="mt-8 [--gutter:theme(spacing.6)] sm:[--gutter:theme(spacing.8)]"
+        className="mt-8 [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]"
         dense
       >
         <TableHead>

@@ -74,7 +74,7 @@ export default function ProgramTable({
     <div className="mt-8 relative">
       <Table
         dense
-        className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="[--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
       >
         {anyRowSelected ? (
           <Popover className="absolute left-12 top-0 flex items-center space-x-2">

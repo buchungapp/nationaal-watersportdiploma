@@ -131,7 +131,7 @@ export default async function Page(props: Props) {
         </div>
       </div>
 
-      <div className="rounded-sm -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-gray-200">
+      <div className="rounded-xs -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-gray-200">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 

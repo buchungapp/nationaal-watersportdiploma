@@ -44,13 +44,13 @@ export function Table({
           {...props}
           className={clsx(
             className,
-            "-mx-[--gutter] overflow-x-auto whitespace-nowrap",
+            "-mx-(--gutter) overflow-x-auto whitespace-nowrap",
           )}
         >
           <div
             className={clsx(
               "inline-block min-w-full align-middle",
-              !bleed && "sm:px-[--gutter]",
+              !bleed && "sm:px-(--gutter)",
             )}
           >
             <table className="min-w-full text-left text-sm/6">{children}</table>
@@ -134,7 +134,7 @@ export function TableHeader({
       {...props}
       className={clsx(
         className,
-        "border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))] dark:border-b-white/10",
+        "border-b border-b-zinc-950/10 px-4 py-2 font-medium first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2)) dark:border-b-white/10",
         grid &&
           "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
         !bleed && "sm:first:pl-1 sm:last:pr-1",
@@ -160,7 +160,7 @@ export function TableCell({
       {...props}
       className={clsx(
         className,
-        "relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))]",
+        "relative px-4 first:pl-(--gutter,--spacing(2)) last:pr-(--gutter,--spacing(2))",
         !striped && "border-b border-zinc-950/5 dark:border-white/5",
         grid &&
           "border-l border-l-zinc-950/5 first:border-l-0 dark:border-l-white/5",
@@ -175,7 +175,7 @@ export function TableCell({
           target={target}
           aria-label={title}
           tabIndex={cellRef?.previousElementSibling === null ? 0 : -1}
-          className="absolute inset-0 focus:outline-none"
+          className="absolute inset-0 focus:outline-hidden"
         />
       )}
       {children}
