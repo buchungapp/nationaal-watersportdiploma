@@ -57,7 +57,7 @@ importers:
         specifier: ^2.3.0
         version: 2.3.3
       cspell:
-        specifier: ^8.10.4
+        specifier: ^8.14.4
         version: 8.15.4
 
   apps/api-server:
