@@ -116,9 +116,9 @@ export function withZod<
           }
         });
 
-        if (parsedInput === undefined) {
-          throw new Error("Failed to parse input");
-        }
+        // if (parsedInput === undefined) {
+        //   throw new Error("Failed to parse input");
+        // }
 
         const result = await func(parsedInput);
 
