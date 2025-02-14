@@ -52,6 +52,10 @@ export async function CourseCard({
     );
   }
 
+  if (!allocation.studentCurriculum.curriculumId) {
+    throw new Error("Failed to retrieve curriculum");
+  }
+
   const [curriculum, completedCompetencies, allCompetencyProgress] =
     await Promise.all([
       retrieveCurriculumById(allocation.studentCurriculum.curriculumId),

@@ -319,7 +319,8 @@ export function RemoveCertificateDialog({
           onClick={() => {
             startTransition(async () => {
               await withDrawCertificates({
-                certificateIds: rows.map((row) => row.certificate?.id),
+                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                certificateIds: rows.map((row) => row.certificate!.id),
                 cohortId,
               })
                 .then(() => {
@@ -447,7 +448,8 @@ function DownloadCertificatesDialog({
 
     try {
       await kickOffGeneratePDF({
-        handles: rows.map((row) => row.certificate?.handle),
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        handles: rows.map((row) => row.certificate!.handle),
         fileName: advancedOptions.filename,
         sort: advancedOptions.sort,
       });

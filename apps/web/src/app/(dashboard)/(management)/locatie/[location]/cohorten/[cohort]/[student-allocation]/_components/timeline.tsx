@@ -158,7 +158,8 @@ function batchProgress(progress: ProgressItem[]) {
 
     for (const batch of mergedBatchedItems) {
       batchedProgress.push({
-        date: batch[0]?.createdAt,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        date: batch[0]!.createdAt,
         modules: batch.reduce(
           (acc, item) => {
             const currModule = item.module;

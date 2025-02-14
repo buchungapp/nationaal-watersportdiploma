@@ -35,6 +35,10 @@ export async function CourseCard({
     throw new Error("Certificate already issued");
   }
 
+  if (!allocation.studentCurriculum.curriculumId) {
+    throw new Error("Failed to retrieve curriculum");
+  }
+
   const [curriculum, completedCompetencies, allCompetencyProgress] =
     await Promise.all([
       retrieveCurriculumById(allocation.studentCurriculum.curriculumId),

@@ -72,12 +72,15 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
     if (!existingPersonId) {
       const result = await createPerson(locationId, prevState, formData);
 
-      if (result.message !== "Success") {
+      if (
+        result.message !== "Success" ||
+        typeof result.data?.id === "undefined"
+      ) {
         toast.error("Er is iets misgegaan.");
         return result;
       }
 
-      existingPersonId = result.data?.id;
+      existingPersonId = result.data.id;
     }
 
     await addStudentToCohortByPersonId({
