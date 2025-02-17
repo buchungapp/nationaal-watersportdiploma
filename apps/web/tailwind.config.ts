@@ -5,8 +5,4 @@ export default {
   theme: {
     typography: typographyStyles,
   },
-  plugins: [
-    require("@tailwindcss/typography"),
-    require("@headlessui/tailwindcss"),
-  ],
 } satisfies Config;

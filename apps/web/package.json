@@ -31,7 +31,7 @@
     "@supabase/supabase-js": "^2.45.4",
     "@tailwindcss/postcss": "^4.0.6",
     "@tanstack/react-table": "^8.20.5",
-    "@tremor/react": "^3.18.2",
+    "@tremor/react": "4.0.0-beta-tremor-v4.4",
     "@vercel/flags": "^2.6.0",
     "@vercel/otel": "^1.10.0",
     "@vercel/speed-insights": "^1.0.12",

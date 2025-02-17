@@ -1,3 +1,4 @@
+import { BarChart } from "@tremor/react";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
@@ -167,8 +168,7 @@ export default async function Page(props: {
         })}
       </div>
 
-      {/* TODO: tremor is currently not compatible with tailwind v4 / react v19*/}
-      {/* <BarChart
+      <BarChart
         data={certificatesPerWeek}
         index="week"
         categories={
@@ -182,11 +182,11 @@ export default async function Page(props: {
             .map((discipline) => discipline.title) as string[]
         }
         colors={["blue", "violet", "fuchsia", "cyan"]}
-        yAxisWidth={30}
+        yAxisWidth={60}
         showLegend={false}
         stack={true}
         className="mt-12 h-72"
-      /> */}
+      />
     </>
   );
 }
