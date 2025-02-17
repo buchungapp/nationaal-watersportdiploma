@@ -22,7 +22,7 @@ export default function Breadcrumb({
             </Link>
             {index < items.length - 1 && (
               <ChevronRightIcon
-                className="h-5 w-5 shrink-0 text-gray-400"
+                className="h-5 w-5 shrink-0 text-slate-400"
                 aria-hidden="true"
               />
             )}

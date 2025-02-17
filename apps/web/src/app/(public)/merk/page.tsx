@@ -123,7 +123,9 @@ export default function Page() {
                       value="#FF8000"
                     >
                       <div className="w-10 h-10 bg-branding-orange rounded-full" />
-                      <span className="text-gray-700 font-medium">#FF8000</span>
+                      <span className="text-slate-700 font-medium">
+                        #FF8000
+                      </span>
                     </CopyToClipboard>
                   </div>
                 </div>
@@ -135,7 +137,9 @@ export default function Page() {
                       value="#007FFF"
                     >
                       <div className="w-10 h-10 bg-branding-light rounded-full" />
-                      <span className="text-gray-700 font-medium">#007FFF</span>
+                      <span className="text-slate-700 font-medium">
+                        #007FFF
+                      </span>
                     </CopyToClipboard>
                   </div>
                 </div>
@@ -147,7 +151,9 @@ export default function Page() {
                       value="#0047AB"
                     >
                       <div className="w-10 h-10 bg-branding-dark rounded-full" />
-                      <span className="text-gray-700 font-medium">#0047AB</span>
+                      <span className="text-slate-700 font-medium">
+                        #0047AB
+                      </span>
                     </CopyToClipboard>
                   </div>
                 </div>

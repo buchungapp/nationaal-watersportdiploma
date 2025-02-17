@@ -81,7 +81,7 @@ export default async function Page(props: PageProps) {
         <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl text-branding-dark">
           {category.title}
         </h1>
-        <p className="text-lg/6 text-gray-800 mt-4">{category.description}</p>
+        <p className="text-lg/6 text-slate-800 mt-4">{category.description}</p>
       </div>
 
       <ul className="space-y-3.5 w-full">
@@ -89,13 +89,13 @@ export default async function Page(props: PageProps) {
           <li key={article.slug}>
             <Link
               href={`/help/artikel/${article.slug}`}
-              className="group flex w-full gap-1 justify-between bg-gray-100 hover:bg-branding-dark/10 rounded-2xl px-6 py-4 text-sm transition-colors"
+              className="group flex w-full gap-1 justify-between bg-slate-100 hover:bg-branding-dark/10 rounded-2xl px-6 py-4 text-sm transition-colors"
             >
               <div className="mr-2">
                 <p className="text-lg/6 text-branding-dark font-semibold">
                   {article.metadata.title}
                 </p>
-                <p className="text-gray-800 mt-1 font-normal max-w-prose">
+                <p className="text-slate-800 mt-1 font-normal max-w-prose">
                   {article.metadata.summary}
                 </p>
               </div>

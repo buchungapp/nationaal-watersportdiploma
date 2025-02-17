@@ -24,7 +24,7 @@ export default async function Page(props: {
 
   return (
     <div className="w-full">
-      <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">
+      <h1 className="text-lg sm:text-xl lg:text-2xl font-semibold text-slate-900">
         Cursussen
       </h1>
       <p>
@@ -38,10 +38,10 @@ export default async function Page(props: {
               href={`/diplomalijn/consument/disciplines/${params.discipline}/${course.handle}`}
               className="flex justify-between items-center"
             >
-              <h2 className="text-lg/6 font-semibold my-0 text-gray-900">
+              <h2 className="text-lg/6 font-semibold my-0 text-slate-900">
                 {course.title}
               </h2>
-              <ChevronRightIcon className="w-6 h-6 text-gray-900" />
+              <ChevronRightIcon className="w-6 h-6 text-slate-900" />
             </Link>
           </li>
         ))}

@@ -350,7 +350,7 @@ export default function StudentsTable({
                         className={clsx(
                           header.column.columnDef.enableSorting === false
                             ? header.column.columnDef.meta?.align
-                            : "flex items-center justify-between gap-2 hover:bg-gray-50 dark:hover:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
+                            : "flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-1.5 -mx-3 -my-1.5",
                           "rounded-md",
                         )}
                       >
@@ -360,15 +360,15 @@ export default function StudentsTable({
                         )}
                         {header.column.getCanSort() &&
                           (header.column.getIsSorted() === false ? (
-                            <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
+                            <ArrowsUpDownIcon className="size-3 text-slate-900 dark:text-slate-50 opacity-30" />
                           ) : header.column.getIsSorted() === "desc" ? (
                             <ArrowUpIcon
-                              className="size-3 text-gray-900 dark:text-gray-50"
+                              className="size-3 text-slate-900 dark:text-slate-50"
                               aria-hidden={true}
                             />
                           ) : (
                             <ArrowDownIcon
-                              className="size-3 text-gray-900 dark:text-gray-50"
+                              className="size-3 text-slate-900 dark:text-slate-50"
                               aria-hidden={true}
                             />
                           ))}
@@ -420,7 +420,7 @@ export default function StudentsTable({
 
       <div
         className={clsx(
-          "fixed inset-x-0 bottom-14 mx-auto flex w-fit items-center space-x-2 rounded-lg border border-gray-200 bg-white p-2 shadow-md dark:border-gray-800 dark:bg-gray-950",
+          "fixed inset-x-0 bottom-14 mx-auto flex w-fit items-center space-x-2 rounded-lg border border-slate-200 bg-white p-2 shadow-md dark:border-slate-800 dark:bg-slate-950",
           selectedRows > 0 ? "" : "hidden",
         )}
       >
@@ -428,7 +428,7 @@ export default function StudentsTable({
           <span className="rounded-sm bg-branding-light/10 px-2 py-1.5 font-medium tabular-nums text-branding-dark">
             {selectedRows}
           </span>
-          <span className="ml-2 font-medium text-gray-900 dark:text-gray-50">
+          <span className="ml-2 font-medium text-slate-900 dark:text-slate-50">
             geselecteerd
           </span>
         </p>

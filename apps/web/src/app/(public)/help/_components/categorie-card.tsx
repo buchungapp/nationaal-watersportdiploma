@@ -31,7 +31,7 @@ export default function CategorieCard({
   return (
     <Link
       href={`${base}/${category.slug}`}
-      className="bg-gray-100 transition-shadow group hover:shadow-md hover:shadow-zinc-900/5 rounded-2xl pt-16 p-6 relative overflow-hidden ring-1 ring-zinc-900/10"
+      className="bg-slate-100 transition-shadow group hover:shadow-md hover:shadow-zinc-900/5 rounded-2xl pt-16 p-6 relative overflow-hidden ring-1 ring-zinc-900/10"
       onMouseMove={onMouseMove}
     >
       <motion.div

@@ -66,7 +66,7 @@ export default async function Page(props: {
         </div>
         <div className="flex flex-col justify-center gap-16">
           {articles.length < 1 ? (
-            <p className="text-2xl text-gray-500">
+            <p className="text-2xl text-slate-500">
               Er zijn geen artikelen gevonden.
             </p>
           ) : null}
@@ -75,20 +75,20 @@ export default async function Page(props: {
               key={article.slug}
               className="grid gap-2 sm:grid-cols-[12rem_1fr]"
             >
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-400">
                 {formatDate(article.date)}
               </p>
 
               <Link
                 href={`/actueel/${article.slug}`}
-                className="-m-4 rounded-3xl p-4 transition-colors hover:bg-gray-100 max-w-xl"
+                className="-m-4 rounded-3xl p-4 transition-colors hover:bg-slate-100 max-w-xl"
               >
                 <Article>
-                  <Article.Heading className="text-xs text-gray-400">
+                  <Article.Heading className="text-xs text-slate-400">
                     {article.category}
                   </Article.Heading>
                   <Article.Title>{article.title}</Article.Title>
-                  <Article.Paragraph className="text-gray-700">
+                  <Article.Paragraph className="text-slate-700">
                     {article.description}
                   </Article.Paragraph>
                   <div

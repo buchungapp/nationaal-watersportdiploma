@@ -91,7 +91,7 @@ export function AddInstructor({
                     <span className={clsx("truncate")}>{fullName}</span>
                     <span
                       className={clsx(
-                        "ml-2 truncate text-gray-500 group-data-active/option:text-white",
+                        "ml-2 truncate text-slate-500 group-data-active/option:text-white",
                       )}
                     >
                       {person.dateOfBirth

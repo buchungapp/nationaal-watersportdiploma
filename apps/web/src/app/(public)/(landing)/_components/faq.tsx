@@ -24,8 +24,10 @@ export default async function Faq() {
           Hoe zit het?
           <Double />
         </div>
-        <h3 className="mt-1.5 text-2xl font-bold text-gray-900">Helpcentrum</h3>
-        <p className="mt-2.5 max-w-prose text-gray-700">
+        <h3 className="mt-1.5 text-2xl font-bold text-slate-900">
+          Helpcentrum
+        </h3>
+        <p className="mt-2.5 max-w-prose text-slate-700">
           Het NWD is nieuw, dus het is niet gek dat dit wat vragen bij je
           oproept. De artikelen in ons helpcentrum helpen je op weg.
         </p>
@@ -40,11 +42,11 @@ export default async function Faq() {
           <article className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-lg">
             <h2
               id="featured-post"
-              className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+              className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"
             >
               {featuredArticle.metadata.title}
             </h2>
-            <p className="mt-4 text-lg leading-8 text-gray-600">
+            <p className="mt-4 text-lg leading-8 text-slate-600">
               {featuredArticle.metadata.summary}
             </p>
             <div className="mt-4 flex flex-col justify-between gap-6 sm:mt-8 sm:flex-row-reverse sm:gap-8 lg:mt-4 lg:flex-col">
@@ -59,18 +61,18 @@ export default async function Faq() {
               </div>
             </div>
           </article>
-          <div className="mx-auto w-full max-w-2xl border-t border-gray-900/10 pt-12 sm:pt-16 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-0">
-            <div className="-my-12 divide-y divide-gray-900/10">
+          <div className="mx-auto w-full max-w-2xl border-t border-slate-900/10 pt-12 sm:pt-16 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-0">
+            <div className="-my-12 divide-y divide-slate-900/10">
               {articles.map((article) => (
                 <article key={article.slug} className="py-12">
                   <div className="group relative max-w-xl">
-                    <h2 className="mt-2 text-lg font-semibold text-gray-900 group-hover:text-gray-600">
+                    <h2 className="mt-2 text-lg font-semibold text-slate-900 group-hover:text-slate-600">
                       <a href={`/help/artikel/${article.slug}`}>
                         <span className="absolute inset-0" />
                         {article.metadata.title}
                       </a>
                     </h2>
-                    <p className="mt-4 text-sm leading-6 text-gray-600">
+                    <p className="mt-4 text-sm leading-6 text-slate-600">
                       {article.metadata.summary}
                     </p>
                   </div>

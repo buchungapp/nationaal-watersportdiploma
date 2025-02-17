@@ -318,7 +318,7 @@ function TimelineEvent({
       </span>
       <div className="flex min-w-0 flex-1 justify-between space-x-4">
         <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
-        <div className="text-right text-sm text-gray-500">
+        <div className="text-right text-sm text-slate-500">
           <time
             dateTime={date}
             title={dayjs(date).tz().format("dddd D MMMM YYYY [om] HH:mm")}
@@ -372,7 +372,7 @@ function TimelineEventCompetenciesProgress({
                   }
                 />
               </div>
-              <div className="text-right text-sm text-gray-500">
+              <div className="text-right text-sm text-slate-500">
                 <time
                   dateTime={event.date}
                   title={dayjs(event.date)

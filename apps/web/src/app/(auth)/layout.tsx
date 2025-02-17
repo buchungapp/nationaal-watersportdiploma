@@ -58,7 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       lang="nl"
       className={clsx(
         inter.variable,
-        "h-full scroll-smooth antialiased text-gray-900 bg-white",
+        "h-full scroll-smooth antialiased text-slate-900 bg-white",
       )}
     >
       <body className="h-full">

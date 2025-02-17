@@ -47,7 +47,7 @@ function CheckboxButton({
       }}
     >
       {isPending ? (
-        <Spinner className="text-gray-700" size="sm" />
+        <Spinner className="text-slate-700" size="sm" />
       ) : (
         <Checkbox {...props} />
       )}

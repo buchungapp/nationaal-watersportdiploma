@@ -124,7 +124,7 @@ export default async function Page(props: Props) {
       </h1>
 
       <article className="flex flex-col gap-y-10">
-        <div className="flex items-center gap-x-4 text-gray-500">
+        <div className="flex items-center gap-x-4 text-slate-500">
           <span className="h-4 w-0.5 rounded-full bg-zinc-200" />
           <span className="flex gap-x-1.5">
             <p>Laatste update</p>
@@ -139,7 +139,7 @@ export default async function Page(props: Props) {
         </div>
 
         <Prose data-mdx-content>
-          <span className="font-semibold text-base text-gray-600">
+          <span className="font-semibold text-base text-slate-600">
             Antwoord:
           </span>
           <HelpArticle source={question.content} />
@@ -148,13 +148,13 @@ export default async function Page(props: Props) {
 
       <Link
         href={"/contact"}
-        className="flex items-center transition-colors text-base w-fit mx-auto px-6 py-4 bg-branding-light/10 hover:bg-branding-light/30 rounded-2xl text-gray-700"
+        className="flex items-center transition-colors text-base w-fit mx-auto px-6 py-4 bg-branding-light/10 hover:bg-branding-light/30 rounded-2xl text-slate-700"
       >
         <div>
           <h3 className="font-semibold">Vraag niet beantwoord?</h3>
           <p className="">Neem contact op met het secretariaat!</p>
         </div>
-        <ChevronRightIcon className="h-6 w-6 ml-6 text-gray-500" />
+        <ChevronRightIcon className="h-6 w-6 ml-6 text-slate-500" />
       </Link>
 
       <FindNWDCourse />

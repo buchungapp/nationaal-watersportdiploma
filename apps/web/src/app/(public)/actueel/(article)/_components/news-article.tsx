@@ -53,7 +53,7 @@ export function ArticleLayout({
       <Container className="mt-16 lg:mt-24">
         <div className="mx-auto max-w-2xl">
           <article>
-            <div className="flex items-center gap-x-4 text-gray-400">
+            <div className="flex items-center gap-x-4 text-slate-400">
               <span className="h-4 w-0.5 rounded-full bg-zinc-200" />
               <time dateTime={article.date}>{formatDate(article.date)}</time>
               <span className="text-xl leading-4">&middot;</span>

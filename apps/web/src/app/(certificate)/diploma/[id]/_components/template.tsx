@@ -137,7 +137,7 @@ export default async function CertificateTemplate({
                   </p>
 
                   <DialogBody className="text-sm/6 text-zinc-900">
-                    <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 pt-2 pb-8">
+                    <ul className="flex flex-col gap-y-3.5 divide-y divide-slate-200 pt-2 pb-8">
                       {module.competencies.map((competency) => {
                         return (
                           <li

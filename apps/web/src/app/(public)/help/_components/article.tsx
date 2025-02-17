@@ -61,7 +61,7 @@ function createHeading(level: number) {
           {
             href: `#${slug}`,
             key: `link-${slug}`,
-            className: "anchor text-gray-800 break-words hyphens-auto",
+            className: "anchor text-slate-800 break-words hyphens-auto",
           },
           children,
         ),

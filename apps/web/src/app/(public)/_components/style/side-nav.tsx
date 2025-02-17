@@ -139,7 +139,7 @@ function SideNavInner({
                             "text-left text-base/6 text-branding-dark sm:text-sm/6 forced-colors:text-[CanvasText]",
 
                             // Focus
-                            "data-focus:bg-gray-100",
+                            "data-focus:bg-slate-100",
 
                             // Disabled state
                             "data-disabled:opacity-50",
@@ -184,7 +184,7 @@ function SideNavInner({
                         "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors tabular-nums",
                         isActive
                           ? "bg-branding-dark/10 font-semibold"
-                          : "hover:bg-gray-100",
+                          : "hover:bg-slate-100",
                       )}
                     >
                       {label}

@@ -182,7 +182,7 @@ function GoogleMapsMarker({ location }: { location: Location }) {
           maxWidth={200}
           onCloseClick={() => setSelectedLocation(null)}
         >
-          <h3 className="text-lg mt-1.5 font-semibold leading-5 text-gray-900">
+          <h3 className="text-lg mt-1.5 font-semibold leading-5 text-slate-900">
             {location.name}
           </h3>
           {location.websiteUrl ? (
@@ -194,7 +194,7 @@ function GoogleMapsMarker({ location }: { location: Location }) {
               {normalizeUrl(location.websiteUrl).split("//")[1]}
             </Link>
           ) : null}
-          <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-gray-600">
+          <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-slate-600">
             <p>{location.city}</p>
           </address>
         </InfoWindow>

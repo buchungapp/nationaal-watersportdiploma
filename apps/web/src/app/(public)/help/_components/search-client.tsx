@@ -125,7 +125,7 @@ export default function SearchClient({
   }, [query, articles, index]);
 
   return (
-    <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded-sm bg-white ring-1 ring-branding-light/95 transition-all">
+    <div className="relative mx-auto w-full transform divide-y divide-slate-100 rounded-sm bg-white ring-1 ring-branding-light/95 transition-all">
       <Combobox
         multiple={false}
         onChange={(value: { url: string }) => {
@@ -136,12 +136,12 @@ export default function SearchClient({
       >
         <div className="relative">
           <MagnifyingGlassIcon
-            className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-500 md:top-3 md:h-6 md:w-6"
+            className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-slate-500 md:top-3 md:h-6 md:w-6"
             aria-hidden="true"
           />
           <ComboboxInput
             //   We can't have a smaller font on mobile, because iOS Safari would zoom in on the input
-            className="h-10 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-500 focus:ring-0 sm:text-sm md:h-12 md:pl-12 lg:pl-14 lg:text-lg"
+            className="h-10 w-full border-0 bg-transparent pl-11 pr-4 text-slate-900 placeholder:text-slate-500 focus:ring-0 sm:text-sm md:h-12 md:pl-12 lg:pl-14 lg:text-lg"
             placeholder="Typ een vraag, onderwerp of trefwoord.."
             onChange={(event) => setQuery(event.target.value)}
           />

@@ -62,7 +62,7 @@ export default function Footer() {
         <div>
           <div className="grid gap-6">
             <Wordmark className="h-12 w-48 text-white" />
-            <p className="text-sm text-gray-200">{constants.APP_SLOGAN}</p>
+            <p className="text-sm text-slate-200">{constants.APP_SLOGAN}</p>
           </div>
 
           <div className="mt-12">
@@ -83,7 +83,7 @@ export default function Footer() {
             <h3 className="font-semibold uppercase text-white">
               Diplomeringslijn
             </h3>
-            <ul className="grid gap-6 text-gray-200">
+            <ul className="grid gap-6 text-slate-200">
               <FooterLink href="/diplomalijn/consument">Consumenten</FooterLink>
               <FooterLink href="/diplomalijn/instructeur">
                 Instructeurs
@@ -92,7 +92,7 @@ export default function Footer() {
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Locaties</h3>
-            <ul className="grid gap-6 text-gray-200">
+            <ul className="grid gap-6 text-slate-200">
               <FooterLink href="/vaarlocaties">
                 Aangesloten vaarlocaties
               </FooterLink>
@@ -103,7 +103,7 @@ export default function Footer() {
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
-            <ul className="grid gap-6 text-gray-200">
+            <ul className="grid gap-6 text-slate-200">
               <FooterLink href="/vereniging/manifest">Manifest</FooterLink>
               <FooterLink href="/help">Helpcentrum</FooterLink>
               <FooterLink href="/vereniging/bestuur">Bestuur</FooterLink>
@@ -125,7 +125,7 @@ export default function Footer() {
           <p className="font-semibold text-white">
             Schrijf je in voor de NWD-nieuwsbrief
           </p>
-          <p className="text-gray-200">
+          <p className="text-slate-200">
             Ontvang nieuws, updates en leuk beeldmateriaal in je inbox.
           </p>
         </div>
@@ -138,7 +138,7 @@ export default function Footer() {
             type="email"
             name="email"
             required
-            className="min-w-[200px] rounded-sm border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-gray-400"
+            className="min-w-[200px] rounded-sm border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-slate-400"
             placeholder="Je e-mailadres"
           />
           <input type="hidden" name="userGroup" value="Website footer" />
@@ -153,7 +153,7 @@ export default function Footer() {
 
       <LineWave progress="60%" />
 
-      <div className="flex flex-col gap-4 text-gray-200 lg:flex-row">
+      <div className="flex flex-col gap-4 text-slate-200 lg:flex-row">
         <p className="flex-1 text-center text-sm lg:text-start">
           {`© ${new Date().getFullYear()} ${constants.APP_NAME}`}
         </p>

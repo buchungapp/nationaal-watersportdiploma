@@ -28,7 +28,7 @@ export default function Disclosure({
       defaultOpen={defaultOpen}
     >
       <dt>
-        <HeadlessDisclosureButton className="flex p-4 hover:bg-gray-100 w-full items-start justify-start text-left">
+        <HeadlessDisclosureButton className="flex p-4 hover:bg-slate-100 w-full items-start justify-start text-left">
           <div className="mr-6 flex h-6 items-center justify-center">
             <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 transition-transform ui-open:rotate-90" />
           </div>
