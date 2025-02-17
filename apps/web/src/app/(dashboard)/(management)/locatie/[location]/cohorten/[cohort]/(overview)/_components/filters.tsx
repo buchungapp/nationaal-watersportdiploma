@@ -17,6 +17,7 @@ export function SetView({
       .withDefault(defaultView)
       .withOptions({
         startTransition,
+        shallow: false,
       }),
   );
 

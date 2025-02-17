@@ -29,6 +29,7 @@ export function FilterSelect() {
     "weergave",
     parseAsArrayOf(parseAsStringLiteral(options)).withOptions({
       startTransition,
+      shallow: false,
     }),
   );
 

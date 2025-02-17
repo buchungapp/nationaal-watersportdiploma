@@ -53,7 +53,12 @@ export function useSorting({
 }) {
   const [sorting, setSorting] = useQueryState<SortingState>(
     "sorteer",
-    parseAsSorting(sortableColumnIds).withDefault(defaultSorting),
+    parseAsSorting(sortableColumnIds)
+      .withOptions({
+        clearOnDefault: false,
+        shallow: false,
+      })
+      .withDefault(defaultSorting),
   );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>

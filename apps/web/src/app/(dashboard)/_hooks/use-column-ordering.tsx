@@ -81,13 +81,22 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
 
   const [columnOrder, setColumnOrder] = useQueryState<ColumnOrderState>(
     "volgorde",
-    parseAsArrayOf(parseAsString).withDefault(defaultOrder),
+    parseAsArrayOf(parseAsString)
+      .withOptions({
+        clearOnDefault: false,
+      })
+      .withDefault(defaultOrder),
   );
 
   const [columnVisibility, setColumnVisibility] =
     useQueryState<VisibilityState>(
       "toon",
-      parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
+      parseAsColumnVisibility(defaultOrder)
+        .withOptions({
+          clearOnDefault: false,
+          shallow: false,
+        })
+        .withDefault(defaultVisibility),
     );
 
   const onColumnVisibilityChange = useCallback(

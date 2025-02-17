@@ -26,6 +26,7 @@ export function FilterSelect() {
     parseAsArrayOf(parseAsStringLiteral(options))
       .withOptions({
         startTransition,
+        shallow: false,
       })
       .withDefault(["open", "aankomend"]),
   );
