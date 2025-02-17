@@ -33,10 +33,10 @@ function CheckboxButton({
         "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
 
         // Sizing
-        "px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6",
+        "px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
 
         // Disabled
-        "data-[disabled]:opacity-50",
+        "data-disabled:opacity-50",
       ])}
       onClick={(...e) => {
         if (!onClick) return;
@@ -47,7 +47,7 @@ function CheckboxButton({
       }}
     >
       {isPending ? (
-        <Spinner className="text-gray-700" size="sm" />
+        <Spinner className="text-slate-700" size="sm" />
       ) : (
         <Checkbox {...props} />
       )}

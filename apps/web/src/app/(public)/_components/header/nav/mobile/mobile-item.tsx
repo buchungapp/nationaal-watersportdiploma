@@ -15,7 +15,7 @@ export default function MobileItem({ item }: { item: NavItem }) {
       className={clsx(
         segment && item.href.includes(segment)
           ? "bg-branding-dark/10"
-          : "hover:bg-gray-100",
+          : "hover:bg-slate-100",
         "group flex gap-x-3 rounded-lg p-2 text-sm leading-6 font-semibold text-branding-dark",
       )}
     >

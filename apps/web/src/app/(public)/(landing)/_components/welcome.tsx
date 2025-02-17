@@ -9,7 +9,7 @@ export default function Welcome() {
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
             Welkom bij het Nationaal Watersportdiploma.
           </h1>
-          <p className="text-xl text-gray-100">
+          <p className="text-xl text-slate-100">
             Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?
           </p>
         </div>
@@ -28,7 +28,7 @@ export default function Welcome() {
           </BoxedButton>
         </div>
       </div>
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl">
+      <div className="relative aspect-4/3 w-full overflow-hidden rounded-3xl">
         <MuxVideo
           style={{
             position: "absolute",

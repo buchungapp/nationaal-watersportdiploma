@@ -43,7 +43,7 @@ export default async function Page() {
 
   return (
     <>
-      <div className="grid break-inside-avoid gap-2 max-w-2xl mx-auto rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full ring-1 ring-zinc-900/10">
+      <div className="grid break-inside-avoid gap-2 max-w-2xl mx-auto rounded-2xl bg-slate-100 px-6 pt-8 pb-10 w-full ring-1 ring-zinc-900/10">
         <h2 className="text-lg font-semibold px-4">Populaire artikelen</h2>
         <ul className="space-y-3.5">
           {articles
@@ -58,7 +58,7 @@ export default async function Page() {
                     <p className="text-lg/6 text-branding-dark font-semibold">
                       {article.metadata.title}
                     </p>
-                    <p className="text-gray-800 mt-1 font-normal">
+                    <p className="text-slate-800 mt-1 font-normal">
                       {article.metadata.summary}
                     </p>
                   </div>

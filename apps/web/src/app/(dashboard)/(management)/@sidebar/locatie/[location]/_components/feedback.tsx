@@ -179,17 +179,17 @@ function Feedback() {
         <DialogTitle>Neem contact op</DialogTitle>
 
         <TabGroup className="mt-4">
-          <TabList className="bg-gray-100 border border-gray-300 rounded-lg w-full grid grid-cols-3 p-[2px]">
-            <Tab className="p-2 data-[selected]:bg-white flex items-center text-gray-900 gap-x-2 data-[selected]:opacity-100 opacity-50 justify-center rounded-md text-xs data-[selected]:shadow">
-              <BugAntIcon className="h-4 w-4 text-gray-400" />
+          <TabList className="bg-slate-100 border border-slate-300 rounded-lg w-full grid grid-cols-3 p-[2px]">
+            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+              <BugAntIcon className="h-4 w-4 text-slate-400" />
               Bug
             </Tab>
-            <Tab className="p-2 data-[selected]:bg-white flex items-center text-gray-900 gap-x-2 data-[selected]:opacity-100 opacity-50 justify-center rounded-md text-xs data-[selected]:shadow">
-              <ChatBubbleOvalLeftIconSm className="h-4 w-4 text-gray-400" />
+            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+              <ChatBubbleOvalLeftIconSm className="h-4 w-4 text-slate-400" />
               Feedback
             </Tab>
-            <Tab className="p-2 data-[selected]:bg-white flex items-center text-gray-900 gap-x-2 data-[selected]:opacity-100 opacity-50 justify-center rounded-md text-xs data-[selected]:shadow">
-              <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400" />
+            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+              <QuestionMarkCircleIcon className="h-4 w-4 text-slate-400" />
               Vraag
             </Tab>
           </TabList>

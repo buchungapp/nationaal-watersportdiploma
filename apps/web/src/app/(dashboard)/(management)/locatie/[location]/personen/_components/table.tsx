@@ -95,7 +95,7 @@ export default function PersonsTable({
   return (
     <>
       <Table
-        className="mt-8 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="mt-8 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
         dense
       >
         <TableHead>

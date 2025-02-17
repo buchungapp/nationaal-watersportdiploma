@@ -79,10 +79,10 @@ export default async function CertificateTemplate({
           </div>
           <div className="flex gap-4 pr-4">
             <div className="flex flex-col justify-center text-end">
-              <p className="text-lg sm:text-xl leading-1 lg:text-2xl font-bold">
+              <p className="text-lg sm:text-xl lg:text-2xl leading-5 font-bold">
                 {certificate.gearType.title}
               </p>
-              <p className="text-sm sm:text-base leading-1 lg:text-lg">
+              <p className="text-sm sm:text-base leading-5 lg:text-lg">
                 {certificate.program.title ?? certificate.program.course.title}
               </p>
             </div>
@@ -96,7 +96,7 @@ export default async function CertificateTemplate({
           <div className="bg-white h-1 w-full" />
         </div>
       </header>
-      <section className="grid aspect-[2/1] w-full relative flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
+      <section className="grid aspect-2/1 w-full relative flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
         <div className="absolute inset-0 overflow-hidden">
           <div className="relative h-full w-full">
             <Image
@@ -137,7 +137,7 @@ export default async function CertificateTemplate({
                   </p>
 
                   <DialogBody className="text-sm/6 text-zinc-900">
-                    <ul className="flex flex-col gap-y-3.5 divide-y divide-gray-200 pt-2 pb-8">
+                    <ul className="flex flex-col gap-y-3.5 divide-y divide-slate-200 pt-2 pb-8">
                       {module.competencies.map((competency) => {
                         return (
                           <li

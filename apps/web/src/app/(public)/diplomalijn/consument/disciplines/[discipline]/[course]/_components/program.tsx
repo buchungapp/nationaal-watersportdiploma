@@ -60,7 +60,7 @@ export default async function Program({
     <li className="pl-0">
       <Disclosure
         button={
-          <span className="font-medium text-gray-900">
+          <span className="font-medium text-slate-900">
             {program.title ?? `${course.title} ${program.degree.title}`}
           </span>
         }
@@ -84,12 +84,12 @@ export default async function Program({
             .map((module) => (
               <div key={module.id} className="not-prose">
                 <li className="py-1.5 px-0">
-                  <div className="flex items-center justify-between bg-gray-100 py-1 px-1.5 rounded-lg">
+                  <div className="flex items-center justify-between bg-slate-100 py-1 px-1.5 rounded-lg">
                     <div className="flex items-baseline gap-x-2">
-                      <div className="flex-shrink-0 w-12">
+                      <div className="shrink-0 w-12">
                         <Weight weight={module.weight} />
                       </div>
-                      <h3 className="font-semibold text-gray-700">
+                      <h3 className="font-semibold text-slate-700">
                         {module.title}
                       </h3>
                     </div>
@@ -104,7 +104,7 @@ export default async function Program({
                   <dl className="mt-2 space-y-1 px-1.5">
                     {module.competencies.map((competency) => (
                       <div key={competency.id} className="flex gap-x-2">
-                        <div className="flex-shrink-0 w-12">
+                        <div className="shrink-0 w-12">
                           <Weight weight={competency.weight} />
                         </div>
                         <div>

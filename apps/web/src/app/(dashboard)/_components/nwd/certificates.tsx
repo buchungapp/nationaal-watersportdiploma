@@ -34,7 +34,7 @@ export async function NWDCertificates({
             href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
             target="_blank"
           >
-            <div className="text-sm font-medium leading-6 text-gray-900">
+            <div className="text-sm font-medium leading-6 text-slate-900">
               {`Diplomanummer #${certificate.handle}`}
             </div>
           </GridListHeader>
@@ -91,8 +91,8 @@ export async function ExternalCertificates({
 
         return (
           <GridListItem key={certificate.id}>
-            <div className="flex items-center gap-x-4 border-b border-gray-900/5 bg-branding-light/10 p-6">
-              <div className="text-sm font-medium leading-6 text-gray-900">
+            <div className="flex items-center gap-x-4 border-b border-slate-900/5 bg-branding-light/10 p-6">
+              <div className="text-sm font-medium leading-6 text-slate-900">
                 {certificate.identifier}
               </div>
             </div>

@@ -182,7 +182,7 @@ export default async function Page(props: {
             .map((discipline) => discipline.title) as string[]
         }
         colors={["blue", "violet", "fuchsia", "cyan"]}
-        yAxisWidth={30}
+        yAxisWidth={60}
         showLegend={false}
         stack={true}
         className="mt-12 h-72"

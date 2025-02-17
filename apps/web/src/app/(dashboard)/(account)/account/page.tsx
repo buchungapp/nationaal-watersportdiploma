@@ -37,7 +37,7 @@ async function Persons() {
                   initials={person.firstName.slice(0, 2)}
                   className="size-8 bg-zinc-900 text-white"
                 />
-                <div className="text-sm font-medium leading-6 text-gray-900">
+                <div className="text-sm font-medium leading-6 text-slate-900">
                   {[person.firstName, person.lastNamePrefix, person.lastName]
                     .filter(Boolean)
                     .join(" ")}
@@ -94,7 +94,7 @@ async function InstructionLocations() {
                 initials={location.name?.slice(0, 2)}
                 className="size-8 bg-zinc-900 text-white"
               />
-              <div className="text-sm font-medium leading-6 text-gray-900">
+              <div className="text-sm font-medium leading-6 text-slate-900">
                 {location.name}
               </div>
             </GridListHeader>

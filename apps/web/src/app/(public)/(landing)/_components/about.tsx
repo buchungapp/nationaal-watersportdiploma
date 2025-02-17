@@ -7,14 +7,14 @@ import AboutSection from "./about-section";
 export default function About() {
   return (
     <section className="container mx-auto flex flex-col gap-12 px-4 lg:px-16">
-      <div className="grid max-w-screen-lg gap-4 self-center text-center">
-        <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+      <div className="grid max-w-(--breakpoint-lg) gap-4 self-center text-center">
+        <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
           <Balancer>
             Dé nieuwe standaard in veiligheid, kwaliteit en plezier op het
             water.
           </Balancer>
         </h2>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-slate-600">
           <Balancer>
             Nu is het moment om de lat hoger te leggen als het aankomt op
             kwaliteitseisen en diplomalijnen binnen de Nederlandse watersport.

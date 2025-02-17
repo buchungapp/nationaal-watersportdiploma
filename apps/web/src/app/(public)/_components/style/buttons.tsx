@@ -70,7 +70,7 @@ export function InlineButton({
     <Link
       {...props}
       className={clsx(
-        "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2",
+        "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-slate-100 hover:px-2",
         className,
       )}
     >

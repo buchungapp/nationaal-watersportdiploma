@@ -21,7 +21,7 @@ export function FindNWDCourse() {
           <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Boek een NWD cursus!
           </p>
-          <p className="mt-6 text-base leading-7 text-gray-300">
+          <p className="mt-6 text-base leading-7 text-slate-300">
             Wil je op zeilkamp, leren windsurfen of gaan jachtvaren? Boek een
             cursus bij een NWD aangesloten vaarschool!
           </p>

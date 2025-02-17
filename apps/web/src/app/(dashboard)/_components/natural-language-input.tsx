@@ -50,7 +50,7 @@ export default function SmartDatetimePicker({
           dateRef.current?.focus();
         }}
         type="button"
-        className="bg-white text-gray-500 rounded-sm p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
+        className="bg-white text-slate-500 rounded-xs p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
       >
         <CalendarDaysIcon className="size-5 sm:size-4" />
       </button>
@@ -73,7 +73,7 @@ export default function SmartDatetimePicker({
         }}
         // we intentionally make the datetime-local input field with a width of 0px
         // to hide the input field
-        className="w-[0px] opacity-0 overflow-hidden border-none bg-transparent text-gray-500 focus:outline-none focus:ring-0 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px] mr-[10px]"
+        className="w-[0px] opacity-0 overflow-hidden border-none bg-transparent text-slate-500 focus:outline-hidden focus:ring-0 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px] mr-[10px]"
       />
     </>
   );

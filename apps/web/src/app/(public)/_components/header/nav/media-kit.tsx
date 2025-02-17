@@ -62,14 +62,14 @@ export default function MediaKit() {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <PopoverPanel className="absolute -left-4 top-full z-10 mt-3 w-screen max-w-xs rounded-xl px-2.5 py-4 bg-white shadow-lg ring-1 ring-gray-900/5">
+        <PopoverPanel className="absolute -left-4 top-full z-10 mt-3 w-screen max-w-xs rounded-xl px-2.5 py-4 bg-white shadow-lg ring-1 ring-slate-900/5">
           <CopyButton
             label={(active) => (
               <div className="flex items-center gap-x-2.5">
                 <span
                   className={clsx(
                     "border-2 block h-4 w-4 rounded-full transition-colors",
-                    active ? "border-white" : "border-gray-600",
+                    active ? "border-white" : "border-slate-600",
                   )}
                 />
                 <p>Kopieer logo als SVG</p>
@@ -83,7 +83,7 @@ export default function MediaKit() {
                 <span
                   className={clsx(
                     "font-serif leading-5 w-4 text-center transition-colors",
-                    active ? "text-white" : "text-gray-600",
+                    active ? "text-white" : "text-slate-600",
                   )}
                 >
                   N
@@ -95,28 +95,28 @@ export default function MediaKit() {
           />
           <Link
             href="/merk"
-            className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-gray-50"
+            className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-slate-50"
             onClick={() => {
               ref.current?.click();
             }}
           >
             <SparklesIcon
-              className="h-4 w-4 text-gray-600"
+              className="h-4 w-4 text-slate-600"
               aria-hidden={true}
             />
-            <p className="block font-semibold text-gray-900">
+            <p className="block font-semibold text-slate-900">
               Brand guidelines
             </p>
           </Link>
           <Link
             href="/"
-            className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-gray-50"
+            className="relative flex items-center gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 hover:bg-slate-50"
             onClick={() => {
               ref.current?.click();
             }}
           >
-            <HomeIcon className="h-4 w-4 text-gray-600" aria-hidden={true} />
-            <p className="block font-semibold text-gray-900">Homepagina</p>
+            <HomeIcon className="h-4 w-4 text-slate-600" aria-hidden={true} />
+            <p className="block font-semibold text-slate-900">Homepagina</p>
           </Link>
         </PopoverPanel>
       </Transition>
@@ -139,7 +139,7 @@ function CopyButton({
         "relative flex gap-x-2.5 rounded-lg px-4 py-2 text-sm leading-6 transition-colors",
         showing
           ? "bg-branding-dark text-white"
-          : "hover:bg-gray-50 text-gray-900",
+          : "hover:bg-slate-50 text-slate-900",
       )}
     >
       <button

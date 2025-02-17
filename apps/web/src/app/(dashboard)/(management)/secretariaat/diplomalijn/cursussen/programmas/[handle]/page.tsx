@@ -95,7 +95,7 @@ async function Curriculum({
                 <div className="">
                   <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-x-2">
-                      <div className="flex-shrink-0 w-12">
+                      <div className="shrink-0 w-12">
                         <Weight weight={module.weight} />
                       </div>
                       <Heading level={3}>
@@ -115,7 +115,7 @@ async function Curriculum({
                   <dl className="mt-2 space-y-1">
                     {module.competencies.map((competency) => (
                       <div key={competency.id} className="flex gap-x-2">
-                        <div className="flex-shrink-0 w-12">
+                        <div className="shrink-0 w-12">
                           <Weight weight={competency.weight} />
                         </div>
                         <div>

@@ -46,7 +46,7 @@ export async function UserSelector() {
         </span>
         <ChevronUpIcon />
       </DropdownButton>
-      <DropdownMenu className="min-w-[--button-width] z-50">
+      <DropdownMenu className="min-w-(--button-width) z-50">
         <DropdownItem href="/account">
           <UserIcon />
           <DropdownLabel>Mijn account</DropdownLabel>

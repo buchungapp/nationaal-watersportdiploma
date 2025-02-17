@@ -87,7 +87,7 @@ function SideNavInner({
         className="relative inline-block sm:hidden text-left w-full"
       >
         <div>
-          <MenuButton className="inline-flex w-full truncate justify-between rounded-xl bg-branding-dark/10 px-4 py-2 text-sm font-medium text-branding-dark group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75">
+          <MenuButton className="inline-flex w-full truncate justify-between rounded-xl bg-branding-dark/10 px-4 py-2 text-sm font-medium text-branding-dark group focus:outline-hidden focus-visible:ring-2 focus-visible:ring-white/75">
             {active.length === 1 && typeof active[0]?.label === "string"
               ? active[0]?.label
               : (label ?? "Menu")}
@@ -103,11 +103,11 @@ function SideNavInner({
           className={clsx(
             className,
             // Anchor positioning
-            "[--anchor-gap:theme(spacing.2)] [--anchor-padding:theme(spacing.1)] data-[anchor~=start]:[--anchor-offset:-6px] data-[anchor~=end]:[--anchor-offset:6px] sm:data-[anchor~=start]:[--anchor-offset:-4px] sm:data-[anchor~=end]:[--anchor-offset:4px]",
+            "[--anchor-gap:--spacing(2)] [--anchor-padding:--spacing(1)] data-[anchor~=start]:[--anchor-offset:-6px] data-[anchor~=end]:[--anchor-offset:6px] sm:data-[anchor~=start]:[--anchor-offset:-4px] sm:data-[anchor~=end]:[--anchor-offset:4px]",
             // Base styles
             "isolate w-full rounded-xl p-1 space-y-6",
             // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-            "outline outline-1 outline-transparent focus:outline-none",
+            "outline outline-1 outline-transparent focus:outline-hidden",
             // Handle scrolling when menu won't fit in viewport
             "overflow-y-auto",
             // Popover background
@@ -115,7 +115,7 @@ function SideNavInner({
             // Shadows
             "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
             // Transitions
-            "transition data-[closed]:data-[leave]:opacity-0 data-[leave]:duration-100 data-[leave]:ease-in",
+            "transition data-closed:data-leave:opacity-0 data-leave:duration-100 data-leave:ease-in",
           )}
         >
           {computedSections.map(({ items, label }) => {
@@ -133,19 +133,19 @@ function SideNavInner({
                           scroll={scroll ?? true}
                           className={clsx(
                             // Base styles
-                            "group cursor-default block rounded-lg px-3.5 py-2.5 focus:outline-none sm:px-3 sm:py-1.5 inset-x-0",
+                            "group cursor-default block rounded-lg px-3.5 py-2.5 focus:outline-hidden sm:px-3 sm:py-1.5 inset-x-0",
 
                             // Text styles
                             "text-left text-base/6 text-branding-dark sm:text-sm/6 forced-colors:text-[CanvasText]",
 
                             // Focus
-                            "data-[focus]:bg-gray-100",
+                            "data-focus:bg-slate-100",
 
                             // Disabled state
-                            "data-[disabled]:opacity-50",
+                            "data-disabled:opacity-50",
 
                             // Forced colors mode
-                            "forced-color-adjust-none forced-colors:data-[focus]:bg-[Highlight] forced-colors:data-[focus]:text-[HighlightText] forced-colors:[&>[data-slot=icon]]:data-[focus]:text-[HighlightText]",
+                            "forced-color-adjust-none forced-colors:data-focus:bg-[Highlight] forced-colors:data-focus:text-[HighlightText] forced-colors:data-focus:*:data-[slot=icon]:text-[HighlightText]",
 
                             isActive && "bg-branding-dark/10 font-semibold",
                           )}
@@ -184,7 +184,7 @@ function SideNavInner({
                         "block rounded-lg px-4 py-1.5 text-branding-dark transition-colors tabular-nums",
                         isActive
                           ? "bg-branding-dark/10 font-semibold"
-                          : "hover:bg-gray-100",
+                          : "hover:bg-slate-100",
                       )}
                     >
                       {label}

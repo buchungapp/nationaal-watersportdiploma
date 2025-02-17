@@ -8,7 +8,7 @@ const sizeToClassName = {
 } as const;
 
 export default function Spinner({
-  className = "text-gray-700",
+  className = "text-slate-700",
   size = "md",
 }: {
   className?: string;

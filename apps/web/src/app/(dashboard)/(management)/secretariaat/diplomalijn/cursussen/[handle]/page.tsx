@@ -133,7 +133,7 @@ export default async function Page(props: {
                         ? programModule.isRequired
                           ? "bg-pink-100"
                           : "bg-blue-100"
-                        : "bg-gray-100",
+                        : "bg-slate-100",
                     )}
                   >
                     {programModule

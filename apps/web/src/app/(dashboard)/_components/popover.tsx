@@ -46,13 +46,13 @@ export function PopoverPanel({
           props.className,
 
           // Anchor positioning
-          "[--anchor-gap:theme(spacing.2)] [--anchor-padding:theme(spacing.3)] data-[anchor~=end]:[--anchor-offset:4px] data-[anchor~=start]:[--anchor-offset:-4px]",
+          "[--anchor-gap:--spacing(2)] [--anchor-padding:--spacing(3)] data-[anchor~=end]:[--anchor-offset:4px] data-[anchor~=start]:[--anchor-offset:-4px]",
 
           // Base styles
           "isolate w-max rounded-xl",
 
           // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-          "outline outline-1 outline-transparent focus:outline-none",
+          "outline outline-1 outline-transparent focus:outline-hidden",
 
           // Handle scrolling when menu won't fit in viewport
           "overflow-y-auto",

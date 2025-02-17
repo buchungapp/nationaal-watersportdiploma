@@ -44,7 +44,7 @@ export function ImageUpload() {
     <div
       className={clsx(
         "w-full border border-dashed h-[160px] rounded-md flex items-center justify-center",
-        isDragActive && "bg-gray-100",
+        isDragActive && "bg-slate-100",
         isDragReject && "border-destructive",
       )}
       {...getRootProps()}

@@ -58,13 +58,13 @@ export default async function Page(props: {
           },
         ]}
       />
-      <h1 className="mt-4 text-xl font-semibold text-gray-900">
+      <h1 className="mt-4 text-xl font-semibold text-slate-900">
         {course.title}
       </h1>
 
       <div className="mt-8">
         <div>
-          <h2 className="text-gray-700">Moduleoverzicht</h2>
+          <h2 className="text-slate-700">Moduleoverzicht</h2>
           <p className="text-sm">
             Een overzicht van modules die op verschillende niveaus worden
             aangeboden, en of deze tot de kern behoren, of een keuze zijn voor
@@ -82,9 +82,7 @@ export default async function Page(props: {
                 <thead>
                   <tr>
                     <th className="whitespace-nowrap text-right w-8" />
-                    <th className="flex-grow w-auto whitespace-nowrap">
-                      Module
-                    </th>
+                    <th className="grow w-auto whitespace-nowrap">Module</th>
                     {programs.map((program) => (
                       <th
                         key={program.id}
@@ -94,7 +92,7 @@ export default async function Page(props: {
                           style={{
                             writingMode: "vertical-rl",
                           }}
-                          className="rotate-180 relative whitespace-nowrap text-center font-semibold text-gray-800 leading-none left-[calc(50%-0.5em)]"
+                          className="rotate-180 relative whitespace-nowrap text-center font-semibold text-slate-800 leading-none left-[calc(50%-0.5em)]"
                         >
                           {program.degree.title}
                         </div>
@@ -109,7 +107,7 @@ export default async function Page(props: {
                         <td>
                           <Weight weight={module.weight} />
                         </td>
-                        <td className="text-gray-900 border-t border-slate-20 whitespace-nowrap">
+                        <td className="text-slate-900 border-t border-slate-20 whitespace-nowrap">
                           {module.title}
                         </td>
                         {programs.map((program) => {
@@ -153,14 +151,14 @@ export default async function Page(props: {
                 </tbody>
               </table>
               <div className="text-right flex justify-end mt-4 gap-x-4">
-                <div className="text-sm text-gray-700 mt-2">
-                  <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
+                <div className="text-sm text-slate-700 mt-2">
+                  <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded-sm mr-2">
                     ✔
                   </span>
                   Kern
                 </div>
-                <div className="text-sm text-gray-700 mt-2">
-                  <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded mr-2">
+                <div className="text-sm text-slate-700 mt-2">
+                  <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded-sm mr-2">
                     ❍
                   </span>
                   Keuze
@@ -172,8 +170,8 @@ export default async function Page(props: {
       </div>
 
       <div className="mt-12 pb-4">
-        <div className="border-t border-gray-300 pt-2">
-          <h2 className="text-gray-700">Programmaoverzicht</h2>
+        <div className="border-t border-slate-300 pt-2">
+          <h2 className="text-slate-700">Programmaoverzicht</h2>
           <p className="text-sm">
             Een overzicht van de verschillende niveaus (programma's) voor deze
             cursus, met de bijbehorende competenties die per module worden

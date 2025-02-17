@@ -318,7 +318,7 @@ function TimelineEvent({
       </span>
       <div className="flex min-w-0 flex-1 justify-between space-x-4">
         <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
-        <div className="text-right text-sm text-gray-500">
+        <div className="text-right text-sm text-slate-500">
           <time
             dateTime={date}
             title={dayjs(date).tz().format("dddd D MMMM YYYY [om] HH:mm")}
@@ -368,11 +368,11 @@ function TimelineEventCompetenciesProgress({
                 </span>{" "}
                 <ChevronDownIcon
                   className={
-                    "h-4 w-4 transition-transform inline-flex group-data-[open]:rotate-180 shrink-0 leading-5"
+                    "h-4 w-4 transition-transform inline-flex group-data-open:rotate-180 shrink-0 leading-5"
                   }
                 />
               </div>
-              <div className="text-right text-sm text-gray-500">
+              <div className="text-right text-sm text-slate-500">
                 <time
                   dateTime={event.date}
                   title={dayjs(event.date)
@@ -397,7 +397,7 @@ function TimelineEventCompetenciesProgress({
 
                               <ChevronDownIcon
                                 className={
-                                  "h-4 w-4 transition-transform group-data-[open]:rotate-180 shrink-0 mt-0"
+                                  "h-4 w-4 transition-transform group-data-open:rotate-180 shrink-0 mt-0"
                                 }
                               />
                             </DisclosureButton>

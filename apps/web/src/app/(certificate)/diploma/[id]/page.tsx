@@ -104,7 +104,7 @@ export default async function Page(props: Props) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="text-center py-8 lg:py-12 max-w-prose mx-auto">
-        <h2 className="text-2xl font-bold text-gray-950">
+        <h2 className="text-2xl font-bold text-slate-950">
           {`Gefeliciteerd, ${certificate.student.firstName}! Een nieuw diploma!`}
         </h2>
 
@@ -131,12 +131,12 @@ export default async function Page(props: Props) {
         </div>
       </div>
 
-      <div className="rounded-sm -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-gray-200">
+      <div className="rounded-xs -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-slate-200">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 
       <div className="text-center py-8">
-        <h2 className="text-2xl font-semibold text-gray-950">En nu?</h2>
+        <h2 className="text-2xl font-semibold text-slate-950">En nu?</h2>
 
         <Suspense>
           <CertificateAdvise id={params.id} />

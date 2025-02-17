@@ -50,7 +50,7 @@ export default async function Page() {
         <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl text-branding-dark">
           Veelgestelde vragen
         </h1>
-        <p className="text-lg/6 text-gray-800 mt-4">
+        <p className="text-lg/6 text-slate-800 mt-4">
           Ontdek antwoorden op veelgestelde vragen.
         </p>
       </div>
@@ -60,7 +60,7 @@ export default async function Page() {
           <li key={question.slug}>
             <Link
               href={`/help/veelgestelde-vragen/${question.slug}`}
-              className="group flex gap-1 justify-between text-base font-semibold transition-colors text-branding-dark hover:bg-branding-dark/10 w-full rounded-2xl bg-gray-100 px-6 py-4"
+              className="group flex gap-1 justify-between text-base font-semibold transition-colors text-branding-dark hover:bg-branding-dark/10 w-full rounded-2xl bg-slate-100 px-6 py-4"
             >
               <span className="mr-2">{question.metadata.question}</span>
               <ArrowLongRightIcon

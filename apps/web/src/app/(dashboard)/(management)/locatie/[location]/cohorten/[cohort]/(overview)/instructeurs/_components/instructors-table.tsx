@@ -181,7 +181,7 @@ export default function InstructorsTable({
   return (
     <div className="mt-8 relative">
       <Table
-        className="[--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="[--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
         dense
       >
         <TableHead>

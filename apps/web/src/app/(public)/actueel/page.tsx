@@ -60,35 +60,35 @@ export default async function Page(props: {
           </div>
         </div>
       </PageHero>
-      <div className="mt-12 grid grid-cols-1 gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
+      <div className="mt-12 grid grid-cols-1 gap-12 px-4 sm:grid-cols-[1fr_3fr] lg:px-16">
         <div className="flex justify-end">
           <SideNavActueel />
         </div>
         <div className="flex flex-col justify-center gap-16">
           {articles.length < 1 ? (
-            <p className="text-2xl text-gray-500">
+            <p className="text-2xl text-slate-500">
               Er zijn geen artikelen gevonden.
             </p>
           ) : null}
           {articles.map((article) => (
             <div
               key={article.slug}
-              className="grid gap-2 sm:grid-cols-[12rem,1fr]"
+              className="grid gap-2 sm:grid-cols-[12rem_1fr]"
             >
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-400">
                 {formatDate(article.date)}
               </p>
 
               <Link
                 href={`/actueel/${article.slug}`}
-                className="-m-4 rounded-3xl p-4 transition-colors hover:bg-gray-100 max-w-xl"
+                className="-m-4 rounded-3xl p-4 transition-colors hover:bg-slate-100 max-w-xl"
               >
                 <Article>
-                  <Article.Heading className="text-xs text-gray-400">
+                  <Article.Heading className="text-xs text-slate-400">
                     {article.category}
                   </Article.Heading>
                   <Article.Title>{article.title}</Article.Title>
-                  <Article.Paragraph className="text-gray-700">
+                  <Article.Paragraph className="text-slate-700">
                     {article.description}
                   </Article.Paragraph>
                   <div

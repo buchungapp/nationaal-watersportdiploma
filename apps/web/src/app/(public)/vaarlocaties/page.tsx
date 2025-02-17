@@ -127,7 +127,7 @@ export default async function Page() {
                       >
                         <StarIcon className="w-4 h-4 text-branding-dark" />
                         <span className="font-semibold">{location.rating}</span>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-slate-600">
                           ({location.user_ratings_total} reviews)
                         </span>
                       </Link> */}
@@ -147,7 +147,7 @@ export default async function Page() {
 
                     <div className="block">
                       <SetActiveLocationButton location={location}>
-                        <h3 className="text-lg mt-1.5 font-semibold leading-6 text-gray-900">
+                        <h3 className="text-lg mt-1.5 font-semibold leading-6 text-slate-900">
                           {location.name}
                         </h3>
                       </SetActiveLocationButton>
@@ -161,7 +161,7 @@ export default async function Page() {
                         {normalizeUrl(location.websiteUrl).split("//")[1]}
                       </Link>
                     ) : null}
-                    <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-gray-600">
+                    <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-slate-600">
                       <p>{location.city}</p>
                     </address>
 
@@ -203,7 +203,7 @@ export default async function Page() {
                   </LocationCard>
                 ))}
             </div>
-            <div className="w-full lg:col-span-2 h-[80vh] rounded overflow-hidden">
+            <div className="w-full lg:col-span-2 h-[80vh] rounded-sm overflow-hidden">
               <LocationsMap locations={locations} />
             </div>
           </div>

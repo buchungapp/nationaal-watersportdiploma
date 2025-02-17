@@ -6,6 +6,10 @@ import Image from "next/image";
 
 export default function MdxImage({ className, ...props }: ImageProps) {
   return (
-    <Image {...props} alt={props.alt} className={clsx(className, "shadow")} />
+    <Image
+      {...props}
+      alt={props.alt}
+      className={clsx(className, "shadow-sm")}
+    />
   );
 }

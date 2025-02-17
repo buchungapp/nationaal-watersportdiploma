@@ -20,8 +20,8 @@ export default function MobileDisclosure({ item }: { item: NavItem }) {
               item.active && segment && item.active.includes(segment)
                 ? "bg-branding-dark/10"
                 : open
-                  ? "bg-gray-100"
-                  : "hover:bg-gray-100",
+                  ? "bg-slate-100"
+                  : "hover:bg-slate-100",
               "flex items-center w-full text-left rounded-lg p-2 gap-x-3 text-sm leading-6 font-semibold text-branding-dark",
             )}
           >
@@ -41,7 +41,7 @@ export default function MobileDisclosure({ item }: { item: NavItem }) {
                   as="a"
                   href={subItem.href}
                   className={clsx(
-                    "hover:bg-gray-50",
+                    "hover:bg-slate-50",
                     "block rounded-md py-2 px-2 text-sm leading-6 text-branding-dark font-semibold",
                   )}
                 >

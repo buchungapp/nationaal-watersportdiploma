@@ -19,10 +19,10 @@ export default async function Page(props: {
     <div className="mx-auto w-full max-w-sm lg:w-96">
       <div>
         <Logo className="h-20 w-auto text-white" />
-        <h2 className="mt-8 text-2xl font-bold leading-8 tracking-tight text-gray-900">
+        <h2 className="mt-8 text-2xl font-bold leading-8 tracking-tight text-slate-900">
           Laten we je e-mailadres verifiëren
         </h2>
-        <p className="mt-2 text-sm leading-6 text-gray-500">
+        <p className="mt-2 text-sm leading-6 text-slate-500">
           Controleer je inbox voor de pincode die we je hebben gestuurd.
         </p>
       </div>
