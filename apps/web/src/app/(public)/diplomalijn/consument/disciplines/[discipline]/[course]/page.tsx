@@ -82,9 +82,7 @@ export default async function Page(props: {
                 <thead>
                   <tr>
                     <th className="whitespace-nowrap text-right w-8" />
-                    <th className="grow w-auto whitespace-nowrap">
-                      Module
-                    </th>
+                    <th className="grow w-auto whitespace-nowrap">Module</th>
                     {programs.map((program) => (
                       <th
                         key={program.id}
