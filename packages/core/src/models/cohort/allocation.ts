@@ -89,6 +89,71 @@ export const create = withZod(
   },
 );
 
+export const move = withZod(
+  z.object({
+    id: uuidSchema,
+    cohortId: uuidSchema,
+  }),
+  successfulCreateResponse,
+  async (item) => {
+    const query = useQuery();
+
+    const cohortAllocation = await query
+      .select({
+        allocationId: s.cohortAllocation.id,
+        actorId: s.actor.id,
+        type: s.actor.type,
+      })
+      .from(s.cohortAllocation)
+      .innerJoin(
+        s.actor,
+        and(
+          eq(s.actor.id, s.cohortAllocation.actorId),
+          isNull(s.actor.deletedAt),
+        ),
+      )
+      .where(eq(s.cohortAllocation.id, item.id))
+      .then(singleRow);
+
+    if (cohortAllocation.type === "instructor") {
+      // We don't want duplicate instructors in a cohort
+      const exists = await query
+        .select({ id: s.cohortAllocation.id })
+        .from(s.cohortAllocation)
+        .where(
+          and(
+            eq(s.cohortAllocation.actorId, cohortAllocation.actorId),
+            eq(s.cohortAllocation.cohortId, item.cohortId),
+            isNull(s.cohortAllocation.deletedAt),
+          ),
+        )
+        .then(possibleSingleRow);
+
+      if (exists) {
+        return exists;
+      }
+
+      // TODO: remove all instructor relations with this instructor in old cohort?
+    } else if (cohortAllocation.type === "student") {
+      // TODO: remove instructor if there is one?
+    }
+
+    // TODO: check if the cohort belongs to the same location? or should this be done in the nwd.ts file?
+
+    return await query
+      .update(s.cohortAllocation)
+      .set({ cohortId: item.cohortId })
+      .where(
+        and(
+          eq(s.cohortAllocation.id, item.id),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .returning({ id: s.cohortAllocation.id })
+      .then(singleRow);
+  },
+);
+
 export const remove = withZod(
   z.object({
     id: uuidSchema,

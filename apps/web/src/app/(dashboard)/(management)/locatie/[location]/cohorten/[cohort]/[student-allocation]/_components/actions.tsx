@@ -32,12 +32,11 @@ import type {
 import {
   addStudentToCohortByPersonId,
   claimStudents,
-  enrollStudentsInCurriculumForCohort,
+  moveAllocationById,
   releaseStudent,
   releaseStudentFromCohortByAllocationId,
   withdrawStudentFromCurriculum,
 } from "../../(overview)/_actions/nwd";
-import { updateBulkCompetencyProgress } from "../_actions/progress";
 
 export function ClaimInstructorAllocation({
   cohortId,
@@ -144,46 +143,54 @@ export function MoveStudentAllocationDialog({
         return;
       }
 
-      const { id: allocationId } = await addStudentToCohortByPersonId({
-        cohortId: newCohortId,
+      // The old code:
+      // const { id: allocationId } = await addStudentToCohortByPersonId({
+      //   cohortId: newCohortId,
+      //   locationId,
+      //   personId,
+      // });
+
+      // if (curriculumId && gearTypeId) {
+      //   await enrollStudentsInCurriculumForCohort({
+      //     cohortId: newCohortId,
+      //     curriculumId,
+      //     gearTypeId,
+      //     students: [
+      //       {
+      //         allocationId,
+      //         personId,
+      //       },
+      //     ],
+      //   });
+
+      //   if (progress.length > 0) {
+      //     await updateBulkCompetencyProgress({
+      //       cohortAllocationId: allocationId,
+      //       progressData: progress.map((p) => ({
+      //         competencyId: p.competencyId,
+      //         progress: Number(p.progress),
+      //       })),
+      //     });
+      //   }
+      // }
+
+      // await releaseStudentFromCohortByAllocationId({
+      //   allocationId: studentAllocationId,
+      //   cohortId,
+      //   locationId,
+      // });
+
+      const { id: newAllocationId } = await moveAllocationById({
         locationId,
-        personId,
-      });
-
-      if (curriculumId && gearTypeId) {
-        await enrollStudentsInCurriculumForCohort({
-          cohortId: newCohortId,
-          curriculumId,
-          gearTypeId,
-          students: [
-            {
-              allocationId,
-              personId,
-            },
-          ],
-        });
-
-        if (progress.length > 0) {
-          await updateBulkCompetencyProgress({
-            cohortAllocationId: allocationId,
-            progressData: progress.map((p) => ({
-              competencyId: p.competencyId,
-              progress: Number(p.progress),
-            })),
-          });
-        }
-      }
-
-      await releaseStudentFromCohortByAllocationId({
         allocationId: studentAllocationId,
         cohortId,
-        locationId,
+        newCohortId,
       });
 
       // We deleted the allocation, so the page does not exist anymore
       // We need to redirect to the new allocation overview
       router.push(
-        `/locatie/${params.location as string}/cohorten/${newCohort.handle}/${allocationId}`,
+        `/locatie/${params.location as string}/cohorten/${newCohort.handle}/${newAllocationId}`,
       );
       toast.success("Cursist verplaatst");
     } catch (error) {
