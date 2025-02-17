@@ -79,10 +79,10 @@ export default async function CertificateTemplate({
           </div>
           <div className="flex gap-4 pr-4">
             <div className="flex flex-col justify-center text-end">
-              <p className="text-lg sm:text-xl lg:text-2xl leading-4 font-bold">
+              <p className="text-lg sm:text-xl lg:text-2xl leading-5 font-bold">
                 {certificate.gearType.title}
               </p>
-              <p className="text-sm sm:text-base leading-4 lg:text-lg">
+              <p className="text-sm sm:text-base leading-5 lg:text-lg">
                 {certificate.program.title ?? certificate.program.course.title}
               </p>
             </div>
