@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { BASE_URL } from "~/constants";
 
 import { constants } from "@nawadi/lib";
@@ -64,7 +65,7 @@ export default function DashboardLayout({
     >
       <body>
         <CommonProviders>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
 
           <Toaster richColors />
           <SpeedInsights />
