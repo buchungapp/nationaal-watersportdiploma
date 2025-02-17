@@ -84,6 +84,7 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
     parseAsArrayOf(parseAsString)
       .withOptions({
         clearOnDefault: false,
+        shallow: false,
       })
       .withDefault(defaultOrder),
   );
