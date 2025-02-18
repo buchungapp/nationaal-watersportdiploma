@@ -22,9 +22,6 @@
     "@mdx-js/loader": "^3.0.1",
     "@mdx-js/react": "^3.0.1",
     "@mux/mux-player-react": "^3.2.4",
-    "@nawadi/core": "workspace:*",
-    "@nawadi/db": "workspace:*",
-    "@nawadi/lib": "workspace:*",
     "@next/mdx": "15.1.6",
     "@opentelemetry/api": "^1.9.0",
     "@react-google-maps/api": "^2.19.3",
@@ -79,7 +76,9 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@nawadi/lib": "workspace:^",
+    "@nawadi/core": "workspace:*",
+    "@nawadi/db": "workspace:*",
+    "@nawadi/lib": "workspace:*",
     "@tailwindcss/typography": "^0.5.16",
     "@types/mdx": "^2.0.13",
     "@types/node": "catalog:",
