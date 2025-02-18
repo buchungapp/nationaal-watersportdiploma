@@ -68,15 +68,6 @@ importers:
       '@appsignal/nodejs':
         specifier: ^3.4.8
         version: 3.5.5
-      '@nawadi/api':
-        specifier: workspace:*
-        version: link:../../generated/api
-      '@nawadi/core':
-        specifier: workspace:^
-        version: link:../../packages/core
-      '@nawadi/db':
-        specifier: workspace:^
-        version: link:../../packages/db
       '@skiffa/appsignal':
         specifier: ^0.2.5
         version: 0.2.6
@@ -102,6 +93,15 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
     devDependencies:
+      '@nawadi/api':
+        specifier: workspace:*
+        version: link:../../generated/api
+      '@nawadi/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@nawadi/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@tsconfig/node22':
         specifier: 'catalog:'
         version: 22.0.0
