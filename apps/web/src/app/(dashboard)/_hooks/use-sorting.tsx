@@ -1,6 +1,6 @@
 import type { SortingState } from "@tanstack/react-table";
-import { createParser, useQueryState } from "nuqs";
-import { useMemo } from "react";
+import { createParser } from "nuqs";
+import { useMemo, useState } from "react";
 import type { Optional } from "~/types/optional";
 
 interface SortableColumn {
@@ -51,15 +51,13 @@ export function useSorting({
   sortableColumnIds: SortableColumn["id"][];
   defaultSorting?: SortingState;
 }) {
-  const [sorting, setSorting] = useQueryState<SortingState>(
-    "sorteer",
-    parseAsSorting(sortableColumnIds)
-      .withOptions({
-        clearOnDefault: false,
-        shallow: false,
-      })
-      .withDefault(defaultSorting),
-  );
+  // TODO: fix use query state causes infinite loop
+  // const [sorting, setSorting] = useQueryState<SortingState>(
+  //   "sorteer",
+  //   parseAsSorting(sortableColumnIds).withDefault(defaultSorting),
+  // );
+
+  const [sorting, setSorting] = useState(defaultSorting);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const options = useMemo(
@@ -69,7 +67,7 @@ export function useSorting({
       },
       onSortingChange: setSorting,
     }),
-    [JSON.stringify(sorting), setSorting],
+    [sorting, setSorting],
   );
 
   return options;
