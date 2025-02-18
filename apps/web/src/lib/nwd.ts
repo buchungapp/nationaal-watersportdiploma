@@ -1620,8 +1620,6 @@ export async function moveAllocationById({
       throw new Error("Unauthorized");
     }
 
-    // TODO: check if the cohort belongs to the same location? or should this be done in the allocation.ts file?
-
     return await Cohort.Allocation.move({
       id: allocationId,
       cohortId: newCohortId,

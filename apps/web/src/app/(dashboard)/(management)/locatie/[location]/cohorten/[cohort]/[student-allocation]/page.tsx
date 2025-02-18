@@ -166,14 +166,12 @@ async function ManageStudentActions({
   locationId: string;
   personId: string;
 }) {
-  const [locationRoles, privileges, cohorts, allocation, progress] =
-    await Promise.all([
-      listRolesForLocation(locationId),
-      listPrivilegesForCohort(cohortId),
-      listCohortsForLocation(locationId),
-      retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
-      listCompetencyProgressInCohortForStudent(studentAllocationId),
-    ]);
+  const [locationRoles, privileges, cohorts, allocation] = await Promise.all([
+    listRolesForLocation(locationId),
+    listPrivilegesForCohort(cohortId),
+    listCohortsForLocation(locationId),
+    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+  ]);
 
   const canManageStudent =
     locationRoles.includes("location_admin") ||
@@ -189,18 +187,8 @@ async function ManageStudentActions({
       studentAllocationId={studentAllocationId}
       locationId={locationId}
       personId={personId}
-      moveStudentAllocation={
-        locationRoles.includes("location_admin") &&
-        allocation &&
-        !allocation.certificate
-          ? {
-              cohorts,
-              curriculumId: allocation.studentCurriculum?.curriculumId,
-              gearTypeId: allocation.studentCurriculum?.gearType.id,
-              progress,
-            }
-          : null
-      }
+      cohorts={cohorts}
+      canMoveStudentAllocation={allocation ? !allocation.certificate : false}
     />
   );
 }

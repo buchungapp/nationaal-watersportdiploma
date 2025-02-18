@@ -8,10 +8,7 @@ import {
   DropdownDivider,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
-import type {
-  listCohortsForLocation,
-  listCompetencyProgressInCohortForStudent,
-} from "~/lib/nwd";
+import type { listCohortsForLocation } from "~/lib/nwd";
 import {
   MoveStudentAllocation,
   MoveStudentAllocationDialog,
@@ -24,21 +21,15 @@ export default function ManageStudentActionsDropdown({
   studentAllocationId,
   locationId,
   personId,
-  moveStudentAllocation,
+  cohorts,
+  canMoveStudentAllocation,
 }: {
   cohortId: string;
   studentAllocationId: string;
   locationId: string;
   personId: string;
-
-  moveStudentAllocation: {
-    cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>;
-    curriculumId?: string;
-    gearTypeId?: string;
-    progress: Awaited<
-      ReturnType<typeof listCompetencyProgressInCohortForStudent>
-    >;
-  } | null;
+  cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>;
+  canMoveStudentAllocation: boolean;
 }) {
   const [openDialog, setOpenDialog] = useState<"move-student" | null>(null);
 
@@ -59,7 +50,7 @@ export default function ManageStudentActionsDropdown({
             studentAllocationId={studentAllocationId}
             locationId={locationId}
           />
-          {moveStudentAllocation ? (
+          {canMoveStudentAllocation ? (
             <>
               <DropdownDivider />
               <MoveStudentAllocation
@@ -72,16 +63,12 @@ export default function ManageStudentActionsDropdown({
         </DropdownMenu>
       </Dropdown>
 
-      {moveStudentAllocation ? (
+      {canMoveStudentAllocation ? (
         <MoveStudentAllocationDialog
           cohortId={cohortId}
           studentAllocationId={studentAllocationId}
           locationId={locationId}
-          personId={personId}
-          cohorts={moveStudentAllocation.cohorts}
-          curriculumId={moveStudentAllocation.curriculumId}
-          gearTypeId={moveStudentAllocation.gearTypeId}
-          progress={moveStudentAllocation.progress}
+          cohorts={cohorts}
           isOpen={openDialog === "move-student"}
           setIsOpen={(value) => setOpenDialog(value ? "move-student" : null)}
         />

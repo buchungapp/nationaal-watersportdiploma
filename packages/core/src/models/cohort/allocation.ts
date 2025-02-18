@@ -15,7 +15,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core/alias";
-import { inArray } from "drizzle-orm/sql/expressions";
+import { inArray, notExists } from "drizzle-orm/sql/expressions";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
@@ -103,8 +103,16 @@ export const move = withZod(
         allocationId: s.cohortAllocation.id,
         actorId: s.actor.id,
         type: s.actor.type,
+        locationId: s.cohort.locationId,
       })
       .from(s.cohortAllocation)
+      .innerJoin(
+        s.cohort,
+        and(
+          eq(s.cohort.id, s.cohortAllocation.cohortId),
+          isNull(s.cohort.deletedAt),
+        ),
+      )
       .innerJoin(
         s.actor,
         and(
@@ -112,37 +120,45 @@ export const move = withZod(
           isNull(s.actor.deletedAt),
         ),
       )
-      .where(eq(s.cohortAllocation.id, item.id))
+      .where(
+        and(
+          eq(s.cohortAllocation.id, item.id),
+          isNull(s.cohortAllocation.deletedAt),
+          notExists(
+            query
+              .select({ id: sql`1` })
+              .from(s.certificate)
+              .where(
+                and(
+                  eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+                ),
+              ),
+          ),
+        ),
+      )
       .then(singleRow);
 
-    if (cohortAllocation.type === "instructor") {
-      // We don't want duplicate instructors in a cohort
-      const exists = await query
-        .select({ id: s.cohortAllocation.id })
-        .from(s.cohortAllocation)
-        .where(
-          and(
-            eq(s.cohortAllocation.actorId, cohortAllocation.actorId),
-            eq(s.cohortAllocation.cohortId, item.cohortId),
-            isNull(s.cohortAllocation.deletedAt),
-          ),
-        )
-        .then(possibleSingleRow);
-
-      if (exists) {
-        return exists;
-      }
-
-      // TODO: remove all instructor relations with this instructor in old cohort?
-    } else if (cohortAllocation.type === "student") {
-      // TODO: remove instructor if there is one?
+    if (cohortAllocation.type !== "student") {
+      throw new Error("Only students can be moved to another cohort");
     }
 
-    // TODO: check if the cohort belongs to the same location? or should this be done in the nwd.ts file?
+    const newCohort = await query
+      .select({
+        locationId: s.cohort.locationId,
+      })
+      .from(s.cohort)
+      .where(eq(s.cohort.id, item.cohortId))
+      .then(singleRow);
+
+    if (cohortAllocation.locationId !== newCohort.locationId) {
+      throw new Error(
+        "Cannot move student to a cohort in a different location",
+      );
+    }
 
     return await query
       .update(s.cohortAllocation)
-      .set({ cohortId: item.cohortId })
+      .set({ cohortId: item.cohortId, instructorId: null })
       .where(
         and(
           eq(s.cohortAllocation.id, item.id),

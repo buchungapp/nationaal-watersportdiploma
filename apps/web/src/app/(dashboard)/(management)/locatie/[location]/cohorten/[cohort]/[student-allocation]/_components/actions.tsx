@@ -25,10 +25,7 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 import Spinner from "~/app/_components/spinner";
-import type {
-  listCohortsForLocation,
-  listCompetencyProgressInCohortForStudent,
-} from "~/lib/nwd";
+import type { listCohortsForLocation } from "~/lib/nwd";
 import {
   addStudentToCohortByPersonId,
   claimStudents,
@@ -98,11 +95,6 @@ export function MoveStudentAllocationDialog({
   cohortId,
   studentAllocationId,
   locationId,
-  personId,
-
-  curriculumId,
-  gearTypeId,
-  progress,
 
   cohorts,
 
@@ -112,13 +104,6 @@ export function MoveStudentAllocationDialog({
   cohortId: string;
   studentAllocationId: string;
   locationId: string;
-  personId: string;
-
-  curriculumId?: string;
-  gearTypeId?: string;
-  progress: Awaited<
-    ReturnType<typeof listCompetencyProgressInCohortForStudent>
-  >;
 
   cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>;
 
@@ -142,43 +127,6 @@ export function MoveStudentAllocationDialog({
         toast.error("Cohort niet gevonden");
         return;
       }
-
-      // The old code:
-      // const { id: allocationId } = await addStudentToCohortByPersonId({
-      //   cohortId: newCohortId,
-      //   locationId,
-      //   personId,
-      // });
-
-      // if (curriculumId && gearTypeId) {
-      //   await enrollStudentsInCurriculumForCohort({
-      //     cohortId: newCohortId,
-      //     curriculumId,
-      //     gearTypeId,
-      //     students: [
-      //       {
-      //         allocationId,
-      //         personId,
-      //       },
-      //     ],
-      //   });
-
-      //   if (progress.length > 0) {
-      //     await updateBulkCompetencyProgress({
-      //       cohortAllocationId: allocationId,
-      //       progressData: progress.map((p) => ({
-      //         competencyId: p.competencyId,
-      //         progress: Number(p.progress),
-      //       })),
-      //     });
-      //   }
-      // }
-
-      // await releaseStudentFromCohortByAllocationId({
-      //   allocationId: studentAllocationId,
-      //   cohortId,
-      //   locationId,
-      // });
 
       const { id: newAllocationId } = await moveAllocationById({
         locationId,
