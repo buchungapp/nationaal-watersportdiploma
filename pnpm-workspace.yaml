@@ -19,7 +19,7 @@ catalog:
   drizzle-orm: 0.38.3
 
   next: 15.1.6
-  nuqs: 2.3.0
+  nuqs: 2.4.0
   react: 19.0.0
   react-dom: 19.0.0
   "@types/react": 19.0.8

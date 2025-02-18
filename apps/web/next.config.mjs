@@ -50,6 +50,12 @@ const nextConfig = {
       },
     ];
   },
+  /** Uncomment to enable WhyDidYouRender */
+  // webpack: (config, context) => {
+  //   injectWhyDidYouRender(config, context);
+
+  //   return config;
+  // },
 };
 
 const withMDX = nextMDX({

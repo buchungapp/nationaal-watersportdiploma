@@ -9,12 +9,23 @@ import {
 } from "~/lib/nwd";
 
 import {
-  createSearchParamsCache,
+  createLoader,
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
 import StudentsTable from "./_components/students-table";
+
+const searchParamsParser = createLoader({
+  weergave: parseAsArrayOf(
+    parseAsStringLiteral([
+      "uitgegeven",
+      "klaar-voor-uitgifte",
+      "geen-voortgang",
+    ] as const),
+  ),
+  query: parseAsString,
+});
 
 export default async function Page(props: {
   params: Promise<{ location: string; cohort: string }>;
@@ -39,16 +50,7 @@ export default async function Page(props: {
     ),
   ]);
 
-  const parsedSq = createSearchParamsCache({
-    weergave: parseAsArrayOf(
-      parseAsStringLiteral([
-        "uitgegeven",
-        "klaar-voor-uitgifte",
-        "geen-voortgang",
-      ] as const),
-    ),
-    query: parseAsString,
-  }).parse(searchParams);
+  const parsedSq = searchParamsParser(searchParams);
 
   const filteredStudents =
     parsedSq.weergave && parsedSq.weergave.length > 0

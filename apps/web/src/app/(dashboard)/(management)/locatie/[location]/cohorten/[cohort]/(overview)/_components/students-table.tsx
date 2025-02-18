@@ -225,7 +225,6 @@ export default function StudentsTable({
     >
   >({});
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
     (updater) => {
       setRowSelection((prev) => {
@@ -240,9 +239,9 @@ export default function StudentsTable({
             const student = students.find((student) => student.id === key);
             return [
               key,
-              Object.hasOwn(rowSelection, key)
+              Object.hasOwn(prev, key)
                 ? // biome-ignore lint/style/noNonNullAssertion: <explanation>
-                  rowSelection[key]!
+                  prev[key]!
                 : {
                     // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     instructor: student!.instructor,

@@ -1,11 +1,7 @@
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
-import {
-  createSearchParamsCache,
-  parseAsString,
-  parseAsStringLiteral,
-} from "nuqs/server";
+import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
@@ -16,6 +12,14 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import StudentsTable from "./_components/students-table";
+
+const searchParamsParser = (defaultValue: "allen" | "geclaimd") =>
+  createLoader({
+    overzicht: parseAsStringLiteral(["allen", "geclaimd"] as const).withDefault(
+      defaultValue,
+    ),
+    query: parseAsString,
+  });
 
 export default async function Page(props: {
   params: Promise<{ location: string; cohort: string }>;
@@ -48,12 +52,7 @@ export default async function Page(props: {
   const defaultView =
     !!instructorAllocation && !isCohortAdmin ? "geclaimd" : "allen";
 
-  const parsedSq = createSearchParamsCache({
-    overzicht: parseAsStringLiteral(["allen", "geclaimd"] as const).withDefault(
-      defaultView,
-    ),
-    query: parseAsString,
-  }).parse(searchParams);
+  const parsedSq = searchParamsParser(defaultView)(searchParams);
 
   let filteredStudents = students;
 
@@ -124,7 +123,7 @@ export default async function Page(props: {
 
   return (
     <StudentsTable
-      view={instructorAllocation ? defaultView : null}
+      view={instructorAllocation ? parsedSq.overzicht : null}
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}

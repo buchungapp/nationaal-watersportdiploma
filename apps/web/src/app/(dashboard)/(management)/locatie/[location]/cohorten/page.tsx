@@ -1,7 +1,7 @@
 import FlexSearch from "flexsearch";
 
 import {
-  createSearchParamsCache,
+  createLoader,
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
@@ -17,6 +17,13 @@ import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
+
+const searchParamsParser = createLoader({
+  weergave: parseAsArrayOf(
+    parseAsStringLiteral(["verleden", "aankomend", "open"] as const),
+  ).withDefault(["open", "aankomend"]),
+  query: parseAsString,
+});
 
 export default async function Page(props: {
   params: Promise<{
@@ -34,12 +41,7 @@ export default async function Page(props: {
   ]);
   const isLocationAdmin = rolesInCurrentLocation.includes("location_admin");
 
-  const parsedSq = createSearchParamsCache({
-    weergave: parseAsArrayOf(
-      parseAsStringLiteral(["verleden", "aankomend", "open"] as const),
-    ).withDefault(["open", "aankomend"]),
-    query: parseAsString,
-  }).parse(searchParams);
+  const parsedSq = searchParamsParser(searchParams);
 
   const filteredCohorts =
     parsedSq.weergave && parsedSq.weergave.length > 0
