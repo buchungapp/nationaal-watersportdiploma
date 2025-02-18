@@ -150,15 +150,6 @@ importers:
       '@mux/mux-player-react':
         specifier: ^3.2.4
         version: 3.2.4(@types/react-dom@19.0.3(@types/react@19.0.8))(@types/react@19.0.8)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@nawadi/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@nawadi/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@nawadi/lib':
-        specifier: workspace:*
-        version: link:../../packages/lib
       '@next/mdx':
         specifier: 15.1.6
         version: 15.1.6(@mdx-js/loader@3.1.0(acorn@8.13.0))(@mdx-js/react@3.1.0(@types/react@19.0.8)(react@19.0.0))
@@ -316,6 +307,15 @@ importers:
         specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
+      '@nawadi/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@nawadi/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@nawadi/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.16(tailwindcss@4.0.6)
@@ -380,12 +380,6 @@ importers:
 
   packages/core:
     dependencies:
-      '@nawadi/db':
-        specifier: workspace:*
-        version: link:../db
-      '@nawadi/lib':
-        specifier: workspace:*
-        version: link:../lib
       '@opentelemetry/api':
         specifier: ^1.9.0
         version: 1.9.0
@@ -426,6 +420,12 @@ importers:
         specifier: 'catalog:'
         version: 3.23.8
     devDependencies:
+      '@nawadi/db':
+        specifier: workspace:*
+        version: link:../db
+      '@nawadi/lib':
+        specifier: workspace:*
+        version: link:../lib
       '@tsconfig/node22':
         specifier: 'catalog:'
         version: 22.0.0
