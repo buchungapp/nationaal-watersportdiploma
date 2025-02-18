@@ -4,12 +4,9 @@
   "private": true,
   "description": "",
   "type": "module",
-  "main": "./out/main.js",
-  "module": "./out/main.js",
-  "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "types": "./out/main.d.ts",
+      "types": "./src/main.ts",
       "default": "./out/main.js"
     }
   },
@@ -17,6 +14,7 @@
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
+    "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test './out/**/*.test.js'",
     "generate:custom": "drizzle-kit generate --custom",

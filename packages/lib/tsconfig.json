@@ -3,11 +3,10 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./out",
-    "sourceMap": true,
-    "declaration": true,
-    "composite": true,
-    "lib": ["es2023"],
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "lib": ["ESNext", "DOM"],
+    "composite": false,
+    "declaration": false
   },
   "include": ["src/**/*"]
 }

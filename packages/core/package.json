@@ -3,19 +3,17 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./out/main.js",
-  "module": "./out/main.js",
-  "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "types": "./out/main.d.ts",
-      "default": "./out/main.js"
+      "import": "./out/main.js",
+      "types": "./src/main.ts"
     }
   },
   "scripts": {
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
+    "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test \"./out/**/*.test.js\""
   },
