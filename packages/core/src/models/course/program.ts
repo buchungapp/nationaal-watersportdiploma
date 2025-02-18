@@ -94,7 +94,7 @@ export const list = withZod(
     const [programs, degrees, courses] = await Promise.all([
       programsPromise,
       Degree.list(),
-      listCourse({}),
+      listCourse(),
     ]);
 
     // Map over the programs to enrich them with additional data like degree, discipline, and categories.
