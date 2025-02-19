@@ -15,18 +15,15 @@ export function CWOType() {
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-5 sm:gap-4">
         <Field className="sm:col-span-3">
           <Label>Discipline</Label>
-          {/* TODO: change to combobox with search */}
           <Input name="metadata_discipline" required />
         </Field>
         <Field className="sm:col-span-2 relative">
           <Label>Niveau</Label>
-          {/* TODO: change to combobox with search */}
           <Input name="metadata_niveau" required />
         </Field>
 
         <Field className="sm:col-span-5">
           <Label>Boottype</Label>
-          {/* TODO: change to combobox with search */}
           <Input name="metadata_boattype" required />
         </Field>
 
