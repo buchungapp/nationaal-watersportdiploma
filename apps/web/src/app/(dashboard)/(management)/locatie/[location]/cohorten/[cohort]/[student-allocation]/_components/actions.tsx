@@ -114,6 +114,14 @@ export function MoveStudentAllocationDialog({
   const params = useParams();
 
   const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
+  const [cohortQuery, setCohortQuery] = useState("");
+
+  const filteredCohorts =
+    cohortQuery === ""
+      ? cohorts
+      : cohorts.filter((cohort) => {
+          return cohort.label.toLowerCase().includes(cohortQuery.toLowerCase());
+        });
 
   const moveStudentAllocation = async (
     _prevState: unknown,
@@ -165,12 +173,13 @@ export function MoveStudentAllocationDialog({
               name="cohort"
               value={selectedCohortId}
               onChange={(value) => setSelectedCohortId(value)}
+              setQuery={setCohortQuery}
               displayValue={(value) =>
                 cohorts.find((x) => x.id === value)?.label ?? ""
               }
               placeholder="Selecteer een cohort"
             >
-              {cohorts.map((cohort) => (
+              {filteredCohorts.map((cohort) => (
                 <ComboboxOption
                   key={cohort.id}
                   value={cohort.id}
