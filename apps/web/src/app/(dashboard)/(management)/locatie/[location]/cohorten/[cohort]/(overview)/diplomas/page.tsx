@@ -14,6 +14,7 @@ import {
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
+import { showProgressTracking } from "~/lib/flags";
 import StudentsTable from "./_components/students-table";
 
 const searchParamsParser = createLoader({
@@ -33,6 +34,12 @@ export default async function Page(props: {
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
+
+  // Kick-off the flag evaluation
+  const showProgressTrackingFlag = showProgressTracking.run({
+    identify: params,
+  });
+
   const cohortPromise = retrieveLocationByHandle(params.location).then(
     (location) =>
       retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
@@ -139,7 +146,7 @@ export default async function Page(props: {
 
   return (
     <StudentsTable
-      progressTrackingEnabled={params.location === "krekt-sailing"}
+      progressTrackingEnabled={await showProgressTrackingFlag}
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}

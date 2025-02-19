@@ -21,7 +21,7 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { showAllocationTimeline } from "~/lib/flags";
+import { showAllocationTimeline, showProgressTracking } from "~/lib/flags";
 import {
   isInstructorInCohort,
   listCohortsForLocation,
@@ -251,6 +251,9 @@ export default async function Page(props: {
   const params = await props.params;
   // Kick-off the flag evaluation
   const showTimelineFlag = showAllocationTimeline();
+  const showProgressTrackingFlag = showProgressTracking.run({
+    identify: params,
+  });
 
   const location = await retrieveLocationByHandle(params.location);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
@@ -267,8 +270,6 @@ export default async function Page(props: {
   if (!allocation) {
     notFound();
   }
-
-  const progressTrackingEnabled = params.location === "krekt-sailing";
 
   return (
     <SWRConfig
@@ -360,7 +361,7 @@ export default async function Page(props: {
               </Suspense>
             </DescriptionDetails>
 
-            {progressTrackingEnabled ? (
+            {(await showProgressTrackingFlag) ? (
               <>
                 <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
                 <DescriptionDetails className="flex items-center justify-between gap-x-2">
@@ -373,10 +374,12 @@ export default async function Page(props: {
                       <span className="text-zinc-500">Niet zichtbaar</span>
                     </>
                   )}
-                  <UpdateProgressVisibility
-                    allocationId={allocation.id}
-                    cohortId={cohort.id}
-                  />
+                  <div className="-my-2">
+                    <UpdateProgressVisibility
+                      allocationId={allocation.id}
+                      cohortId={cohort.id}
+                    />
+                  </div>
                 </DescriptionDetails>
               </>
             ) : null}
