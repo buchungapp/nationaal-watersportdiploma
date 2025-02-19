@@ -7,6 +7,11 @@ import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
+  Combobox,
+  ComboboxLabel,
+  ComboboxOption,
+} from "~/app/(dashboard)/_components/combobox";
+import {
   Dialog,
   DialogActions,
   DialogBody,
@@ -19,11 +24,6 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
-import {
-  Listbox,
-  ListboxLabel,
-  ListboxOption,
-} from "~/app/(dashboard)/_components/listbox";
 import Spinner from "~/app/_components/spinner";
 import type { listCohortsForLocation } from "~/lib/nwd";
 import {
@@ -113,7 +113,7 @@ export function MoveStudentAllocationDialog({
   const router = useRouter();
   const params = useParams();
 
-  const [selectedCohortId, setSelectedCohortId] = useState(cohortId);
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
 
   const moveStudentAllocation = async (
     _prevState: unknown,
@@ -161,21 +161,25 @@ export function MoveStudentAllocationDialog({
         <DialogBody>
           <Field>
             <Label>Cohort</Label>
-            <Listbox
+            <Combobox
               name="cohort"
               value={selectedCohortId}
               onChange={(value) => setSelectedCohortId(value)}
+              displayValue={(value) =>
+                cohorts.find((x) => x.id === value)?.label ?? ""
+              }
+              placeholder="Selecteer een cohort"
             >
               {cohorts.map((cohort) => (
-                <ListboxOption
+                <ComboboxOption
                   key={cohort.id}
                   value={cohort.id}
                   disabled={cohort.id === cohortId}
                 >
-                  <ListboxLabel>{cohort.label}</ListboxLabel>
-                </ListboxOption>
+                  <ComboboxLabel>{cohort.label}</ComboboxLabel>
+                </ComboboxOption>
               ))}
-            </Listbox>
+            </Combobox>
           </Field>
         </DialogBody>
         <DialogActions>
@@ -183,7 +187,9 @@ export function MoveStudentAllocationDialog({
             Annuleren
           </Button>
           <MoveStudentAllocationSubmitButton
-            disabled={selectedCohortId === cohortId}
+            disabled={
+              selectedCohortId === cohortId || selectedCohortId === null
+            }
           />
         </DialogActions>
       </form>

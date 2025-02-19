@@ -34,6 +34,7 @@ import {
   retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
+import { filterCohorts } from "~/utils/filter-cohorts";
 import {
   ClaimInstructorAllocation,
   ReleaseInstructorAllocation,
@@ -166,13 +167,15 @@ async function ManageStudentActions({
   locationId: string;
   personId: string;
 }) {
-  const [locationRoles, privileges, cohorts, allocation] = await Promise.all([
-    listRolesForLocation(locationId),
-    listPrivilegesForCohort(cohortId),
-    listCohortsForLocation(locationId),
-    retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
-  ]);
-
+  const [locationRoles, privileges, filteredCohorts, allocation] =
+    await Promise.all([
+      listRolesForLocation(locationId),
+      listPrivilegesForCohort(cohortId),
+      listCohortsForLocation(locationId).then((cohorts) =>
+        filterCohorts(cohorts, ["open", "aankomend"]),
+      ),
+      retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    ]);
   const canManageStudent =
     locationRoles.includes("location_admin") ||
     privileges.includes("manage_cohort_students");
@@ -187,7 +190,7 @@ async function ManageStudentActions({
       studentAllocationId={studentAllocationId}
       locationId={locationId}
       personId={personId}
-      cohorts={cohorts}
+      cohorts={filteredCohorts}
       canMoveStudentAllocation={allocation ? !allocation.certificate : false}
     />
   );

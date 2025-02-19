@@ -7,12 +7,12 @@ import {
   parseAsStringLiteral,
 } from "nuqs/server";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import dayjs from "~/lib/dayjs";
 import {
   listCohortsForLocation,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { filterCohorts } from "~/utils/filter-cohorts";
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
@@ -108,23 +108,4 @@ export default async function Page(props: {
       </div>
     </>
   );
-}
-
-function filterCohorts(
-  cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>,
-  weergave: ("verleden" | "aankomend" | "open")[],
-) {
-  const now = dayjs();
-
-  return cohorts.filter((cohort) => {
-    const startTime = dayjs(cohort.accessStartTime);
-    const endTime = dayjs(cohort.accessEndTime);
-    return (
-      (weergave.includes("verleden") && now.isAfter(endTime)) ||
-      (weergave.includes("aankomend") && now.isBefore(startTime)) ||
-      (weergave.includes("open") &&
-        now.isAfter(startTime) &&
-        now.isBefore(endTime))
-    );
-  });
 }
