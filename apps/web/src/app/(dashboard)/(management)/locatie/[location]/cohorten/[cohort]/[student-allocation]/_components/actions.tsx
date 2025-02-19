@@ -137,7 +137,7 @@ export function MoveStudentAllocationDialog({
 
       // We deleted the allocation, so the page does not exist anymore
       // We need to redirect to the new allocation overview
-      router.push(
+      router.replace(
         `/locatie/${params.location as string}/cohorten/${newCohort.handle}/${newAllocationId}`,
       );
       toast.success("Cursist verplaatst");
