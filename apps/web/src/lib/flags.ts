@@ -25,3 +25,26 @@ export const showAllocationTimeline: Flag<boolean> = flag({
     },
   ],
 });
+
+export const waterSportCertificates: Flag<boolean> = flag({
+  key: "water-sport-certificates",
+  async decide() {
+    const key = this.key;
+    const user = await getUserOrThrow();
+    const flag = await posthog.getFeatureFlag(key, user.authUserId);
+
+    return !!flag;
+  },
+  defaultValue: false,
+  description: "Show the new water sport certificates on the person page",
+  options: [
+    {
+      value: true,
+      label: "With water sport certificates",
+    },
+    {
+      value: false,
+      label: "Without water sport certificates",
+    },
+  ],
+});
