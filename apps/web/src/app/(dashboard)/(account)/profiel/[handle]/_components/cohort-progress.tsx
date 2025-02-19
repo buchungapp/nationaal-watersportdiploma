@@ -47,7 +47,7 @@ async function CohortProgressList({ person }: Props) {
   }
 
   return (
-    <div>
+    <div className="lg:col-start-2 lg:col-span-2">
       <Subheading>Jouw NWD-voortgang</Subheading>
       <Text>
         Op dit moment zit je in de volgende actieve NWD-cursussen, waarbij de
