@@ -321,7 +321,7 @@ export default async function Page(props: {
                     .filter(Boolean)
                     .join(" ")}
                 </Strong>
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                <ArrowTopRightOnSquareIcon className="size-4" />
               </TextLink>
             </DescriptionDetails>
 

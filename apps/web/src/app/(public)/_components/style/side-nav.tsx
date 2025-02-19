@@ -92,7 +92,7 @@ function SideNavInner({
               ? active[0]?.label
               : (label ?? "Menu")}
             <ChevronDownIcon
-              className="-mr-1 ml-2 h-5 w-5 group-hover:translate-y-0.5 transition-transform"
+              className="-mr-1 ml-2 size-5 group-hover:translate-y-0.5 transition-transform"
               aria-hidden="true"
             />
           </MenuButton>

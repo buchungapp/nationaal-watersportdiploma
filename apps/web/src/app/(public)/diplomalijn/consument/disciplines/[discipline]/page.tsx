@@ -41,7 +41,7 @@ export default async function Page(props: {
               <h2 className="text-lg/6 font-semibold my-0 text-slate-900">
                 {course.title}
               </h2>
-              <ChevronRightIcon className="w-6 h-6 text-slate-900" />
+              <ChevronRightIcon className="size-6 text-slate-900" />
             </Link>
           </li>
         ))}

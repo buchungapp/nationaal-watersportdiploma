@@ -20,7 +20,7 @@ export default function Module({
         <div className="w-full flex items-center justify-between text-left leading-tight font-medium">
           {button}
           <span className="ml-6 flex h-7 items-center">
-            <PlusIcon className="h-5 w-5" aria-hidden="true" />
+            <PlusIcon className="size-5" aria-hidden="true" />
           </span>
         </div>
 

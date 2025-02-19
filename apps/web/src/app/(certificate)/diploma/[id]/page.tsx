@@ -158,7 +158,7 @@ export default async function Page(props: Props) {
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="size-5" />
                 </Link>
               </li>
             ))}

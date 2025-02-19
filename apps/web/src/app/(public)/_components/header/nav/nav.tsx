@@ -79,7 +79,7 @@ export default function Nav({ items }: { items: NavItem[] }) {
                         className="group relative flex gap-x-6 rounded-lg p-4 text-sm leading-6 hover:bg-slate-50"
                       >
                         {/* <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-slate-50 group-hover:bg-white">
-                        <item.icon className="h-6 w-6 text-slate-600 group-hover:text-indigo-600" aria-hidden="true" />
+                        <item.icon className="size-6 text-slate-600 group-hover:text-indigo-600" aria-hidden="true" />
                       </div> */}
                         <div className="flex-auto">
                           <a

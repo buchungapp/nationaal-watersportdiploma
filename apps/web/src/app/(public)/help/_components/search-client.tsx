@@ -136,7 +136,7 @@ export default function SearchClient({
       >
         <div className="relative">
           <MagnifyingGlassIcon
-            className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-slate-500 md:top-3 md:h-6 md:w-6"
+            className="pointer-events-none absolute left-4 top-2.5 size-5 text-slate-500 md:top-3 md:h-6 md:w-6"
             aria-hidden="true"
           />
           <ComboboxInput
@@ -178,9 +178,9 @@ export default function SearchClient({
                 className="cursor-default select-none px-4 py-2 flex gap-1 data-active:bg-branding-light data-active:text-white"
               >
                 {article.type === "article" ? (
-                  <NewspaperIcon className="w-6 h-6 shrink-0" />
+                  <NewspaperIcon className="size-6 shrink-0" />
                 ) : (
-                  <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" />
+                  <QuestionMarkCircleIcon className="size-6 shrink-0" />
                 )}
                 {article.title}
               </ComboboxOption>

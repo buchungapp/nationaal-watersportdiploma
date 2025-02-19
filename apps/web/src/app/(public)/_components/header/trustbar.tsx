@@ -73,7 +73,7 @@ export default function Trustbar() {
             >
               {/* Background on hover */}
               <div className="absolute inset-0 scale-150 rounded-sm bg-white/0 transition-opacity group-hover:bg-white" />
-              <social.icon className="relative h-4 w-4 group-hover:text-(--brand-color)" />
+              <social.icon className="relative size-4 group-hover:text-(--brand-color)" />
             </Link>
           </li>
         ))}

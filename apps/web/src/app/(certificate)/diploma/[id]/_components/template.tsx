@@ -145,7 +145,7 @@ export default async function CertificateTemplate({
                             className="flex flex-col pt-3.5"
                           >
                             <div className="flex items-center">
-                              <CheckIcon className="h-4 w-4 mr-2 text-green-500" />
+                              <CheckIcon className="size-4 mr-2 text-green-500" />
                               <span className="font-semibold">
                                 {competency.title}
                               </span>

@@ -29,7 +29,7 @@ export default function MobileDisclosure({ item }: { item: NavItem }) {
             <ChevronRightIcon
               className={clsx(
                 open && "rotate-90",
-                "transition-transform ml-auto h-5 w-5 shrink-0",
+                "transition-transform ml-auto size-5 shrink-0",
               )}
               aria-hidden="true"
             />
