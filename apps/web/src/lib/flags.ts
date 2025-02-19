@@ -1,5 +1,5 @@
 import type { Flag } from "@vercel/flags/next";
-import { unstable_flag as flag } from "@vercel/flags/next";
+import { flag } from "@vercel/flags/next";
 import { getUserOrThrow } from "./nwd";
 import posthog from "./posthog";
 
@@ -26,7 +26,7 @@ export const showAllocationTimeline: Flag<boolean> = flag({
   ],
 });
 
-export const waterSportCertificates: Flag<boolean> = flag({
+export const showNewWaterSportCertificates: Flag<boolean> = flag({
   key: "water-sport-certificates",
   async decide() {
     const key = this.key;
