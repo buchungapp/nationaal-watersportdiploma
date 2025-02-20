@@ -1575,6 +1575,58 @@ export async function addInstructorToCohortByPersonId({
   });
 }
 
+export async function moveAllocationById({
+  locationId,
+  allocationId,
+  cohortId,
+  newCohortId,
+}: {
+  locationId: string;
+  allocationId: string;
+  cohortId: string;
+  newCohortId: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const [isLocationAdmin, privilegesInCohort, privilegesInNewCohort] =
+      await Promise.all([
+        isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId,
+          personId: primaryPerson.id,
+        }).catch(() => false),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId,
+          personId: primaryPerson.id,
+        }),
+        Cohort.Allocation.listPrivilegesForPerson({
+          cohortId: newCohortId,
+          personId: primaryPerson.id,
+        }),
+      ]);
+
+    if (
+      !isLocationAdmin &&
+      // TODO: This should be a separate check, but for now we only have one role
+      (!privilegesInCohort.some((p) =>
+        ["manage_cohort_students", "manage_cohort_instructors"].includes(p),
+      ) ||
+        !privilegesInNewCohort.some((p) =>
+          ["manage_cohort_students", "manage_cohort_instructors"].includes(p),
+        ))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Cohort.Allocation.move({
+      id: allocationId,
+      cohortId: newCohortId,
+    });
+  });
+}
+
 export async function removeAllocationById({
   locationId,
   allocationId,

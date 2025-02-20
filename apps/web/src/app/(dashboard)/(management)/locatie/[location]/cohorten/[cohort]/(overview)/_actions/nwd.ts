@@ -19,6 +19,7 @@ import {
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrivilegesForCohort as listPrivilegesForCohortInner,
   listPrograms as listProgramsInner,
+  moveAllocationById as moveAllocationByIdInner,
   releaseStudentFromCohortByAllocationId as releaseStudentFromCohortByAllocationIdInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
@@ -187,6 +188,21 @@ export async function addInstructorToCohortByPersonId(props: {
 }) {
   const result = addInstructorToCohortByPersonIdInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+  return result;
+}
+
+export async function moveAllocationById(input: {
+  locationId: string;
+  allocationId: string;
+  cohortId: string;
+  newCohortId: string;
+}) {
+  const result = moveAllocationByIdInner(input);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+
   return result;
 }
 

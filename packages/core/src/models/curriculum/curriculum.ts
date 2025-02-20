@@ -341,7 +341,7 @@ export const getById = withZod(
         }
       }
 
-      return acc;
+      return curriculaAcc;
     }, null);
 
     if (!normalizedCurriculum) {
