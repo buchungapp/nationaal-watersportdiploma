@@ -94,6 +94,7 @@ export function SmartDatePicker({
 }) {
   const dateRef = React.useRef<HTMLInputElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [invalidInput, setInvalidInput] = React.useState(false);
   const [dateTime, setDateTime] = React.useState<Date | null>(
     defaultValue ?? null,
   );
@@ -105,7 +106,7 @@ export function SmartDatePicker({
         type="text"
         placeholder='bv. "over 2 weken" of "morgen"'
         defaultValue={dateTime ? dateTimeUtils.formatDate(dateTime) : ""}
-        invalid={invalid}
+        invalid={invalid || invalidInput}
         onBlur={(e) => {
           // parse the date string when the input field loses focus
           if (e.target.value.length > 0) {
@@ -113,12 +114,12 @@ export function SmartDatePicker({
               dateTimeUtils.parseDateTimeLanguage(e.target.value),
             );
 
+            setInvalidInput(!parsedDateTime);
             if (parsedDateTime) {
               setDateTime(parsedDateTime);
               e.target.value = dateTimeUtils.formatDate(parsedDateTime);
             } else {
               setDateTime(null);
-              e.target.value = "";
             }
           }
         }}
@@ -172,6 +173,7 @@ export function SmartTimePicker({
 }) {
   const dateRef = React.useRef<HTMLInputElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const [invalidInput, setInvalidInput] = React.useState(false);
   const [dateTime, setDateTime] = React.useState<Date | null>(
     defaultValue ?? null,
   );
@@ -183,7 +185,7 @@ export function SmartTimePicker({
         type="text"
         placeholder='bv. "nu" of "over 2 uur"'
         defaultValue={dateTime ? dateTimeUtils.formatTime(dateTime) : ""}
-        invalid={invalid}
+        invalid={invalid || invalidInput}
         onBlur={(e) => {
           // parse the date string when the input field loses focus
           if (e.target.value.length > 0) {
@@ -191,12 +193,12 @@ export function SmartTimePicker({
               dateTimeUtils.parseDateTimeLanguage(e.target.value),
             );
 
+            setInvalidInput(!parsedDateTime);
             if (parsedDateTime) {
               setDateTime(parsedDateTime);
               e.target.value = dateTimeUtils.formatTime(parsedDateTime);
             } else {
               setDateTime(null);
-              e.target.value = "";
             }
           }
         }}
