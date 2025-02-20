@@ -15,7 +15,8 @@ import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import Spinner from "~/app/_components/spinner";
-import { CertificateTemplate } from "./certificate-template";
+import { CertificateTemplatePicker } from "./certificate-template-picker";
+import type { CertificateTemplate } from "./certificate-templates";
 import Media from "./media";
 import { Metadata } from "./metadata";
 
@@ -92,7 +93,7 @@ export function AddCertificate({
                   small={!validMedia && currentStep !== "media"}
                 />
                 <div className={currentStep === "media" ? "hidden" : ""}>
-                  <CertificateTemplate
+                  <CertificateTemplatePicker
                     selectedCertificateTemplate={selectedCertificateTemplate}
                     setSelectedCertificateTemplate={
                       setSelectedCertificateTemplate

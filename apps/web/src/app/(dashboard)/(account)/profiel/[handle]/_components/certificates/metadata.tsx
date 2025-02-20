@@ -10,7 +10,7 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import {
   type CertificateTemplate,
   certificateTemplates,
-} from "./certificate-template";
+} from "./certificate-templates";
 
 export function Metadata({
   selectedCertificateTemplate,
