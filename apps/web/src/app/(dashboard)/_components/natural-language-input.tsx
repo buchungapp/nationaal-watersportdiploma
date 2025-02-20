@@ -35,7 +35,9 @@ export default function SmartDatetimePicker({
         onBlur={(e) => {
           // parse the date string when the input field loses focus
           if (e.target.value.length > 0) {
-            const parsedDateTime = dateTimeUtils.parseDateTime(e.target.value);
+            const parsedDateTime = dateTimeUtils.parseDateTimeLanguage(
+              e.target.value,
+            );
             if (parsedDateTime) {
               setDateTime(parsedDateTime);
               e.target.value = dateTimeUtils.formatDateTime(parsedDateTime);
@@ -108,7 +110,7 @@ export function SmartDatePicker({
           // parse the date string when the input field loses focus
           if (e.target.value.length > 0) {
             const parsedDateTime = dateTimeUtils.stripTime(
-              dateTimeUtils.parseDateTime(e.target.value),
+              dateTimeUtils.parseDateTimeLanguage(e.target.value),
             );
 
             if (parsedDateTime) {
@@ -139,7 +141,7 @@ export function SmartDatePicker({
         name={name}
         value={dateTime ? dateTimeUtils.getDateLocal(dateTime) : ""}
         onChange={(e) => {
-          const expiryDate = dateTimeUtils.stripTime(new Date(e.target.value));
+          const expiryDate = new Date(e.target.value);
           setDateTime(expiryDate);
           // set the formatted date string in the text input field to keep them in sync
           if (inputRef.current) {
@@ -183,7 +185,7 @@ export function SmartTimePicker({
           // parse the date string when the input field loses focus
           if (e.target.value.length > 0) {
             const parsedDateTime = dateTimeUtils.stripDate(
-              dateTimeUtils.parseDateTime(e.target.value),
+              dateTimeUtils.parseDateTimeLanguage(e.target.value),
             );
 
             if (parsedDateTime) {
@@ -214,7 +216,9 @@ export function SmartTimePicker({
         name={name}
         value={dateTime ? dateTimeUtils.getTimeLocal(dateTime) : ""}
         onChange={(e) => {
-          const expiryDate = dateTimeUtils.stripDate(new Date(e.target.value));
+          const expiryDate = new Date(
+            dateTimeUtils.parseTimeString(e.target.value),
+          );
           setDateTime(expiryDate);
           // set the formatted date string in the text input field to keep them in sync
           if (inputRef.current) {
