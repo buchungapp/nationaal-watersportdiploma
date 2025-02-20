@@ -184,6 +184,10 @@ async function ManageStudentActions({
     return null;
   }
 
+  if (!allocation) {
+    throw new Error("Student allocation not found");
+  }
+
   return (
     <ManageStudentActionsDropdown
       cohortId={cohortId}
@@ -191,7 +195,7 @@ async function ManageStudentActions({
       locationId={locationId}
       personId={personId}
       cohorts={filteredCohorts}
-      canMoveStudentAllocation={allocation ? !allocation.certificate : false}
+      canMoveStudentAllocation={!allocation.certificate}
     />
   );
 }
