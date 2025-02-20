@@ -3,15 +3,8 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./out",
-    "sourceMap": true,
-    "declaration": true,
-    "composite": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "composite": true
   },
-  "include": ["src/**/*"],
-  "references": [
-    { "path": "../../packages/core" },
-    { "path": "../../packages/lib" },
-    { "path": "../../packages/db" }
-  ]
+  "include": ["src/**/*"]
 }

@@ -30,9 +30,6 @@
   "keywords": [],
   "dependencies": {
     "@appsignal/nodejs": "^3.4.8",
-    "@nawadi/api": "workspace:*",
-    "@nawadi/core": "workspace:^",
-    "@nawadi/db": "workspace:^",
     "@skiffa/appsignal": "^0.2.5",
     "@types/node": "catalog:",
     "@types/yargs": "^17.0.32",
@@ -43,6 +40,9 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@nawadi/api": "workspace:*",
+    "@nawadi/core": "workspace:*",
+    "@nawadi/db": "workspace:*",
     "@tsconfig/node22": "catalog:",
     "typescript": "catalog:"
   }
