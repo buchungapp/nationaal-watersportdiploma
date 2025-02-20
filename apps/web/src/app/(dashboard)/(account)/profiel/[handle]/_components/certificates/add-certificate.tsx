@@ -15,15 +15,9 @@ import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import Spinner from "~/app/_components/spinner";
+import { CertificateTemplate } from "./certificate-template";
 import Media from "./media";
-import { type CertificateTypes, Type } from "./type";
-import {
-  CWOType,
-  MarifoonType,
-  OtherType,
-  TKNType,
-  VaarbewijsType,
-} from "./types";
+import { Metadata } from "./metadata";
 
 export function AddCertificate({
   personId,
@@ -31,10 +25,9 @@ export function AddCertificate({
   personId: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState<"media" | "type" | "metadata">(
-    "media",
-  );
-  const [type, setType] = useState<CertificateTypes | null>(null);
+  const [currentStep, setCurrentStep] = useState<"media" | "metadata">("media");
+  const [selectedCertificateTemplate, setSelectedCertificateTemplate] =
+    useState<CertificateTemplate["id"] | null>(null);
   const [validMedia, setValidMedia] = useState(false);
 
   const submit = async (prevState: unknown, formData: FormData) => {
@@ -63,7 +56,7 @@ export function AddCertificate({
 
           setTimeout(() => {
             setValidMedia(false);
-            setType(null);
+            setSelectedCertificateTemplate(null);
             setCurrentStep("media");
           }, 100);
         }}
@@ -99,21 +92,22 @@ export function AddCertificate({
                   small={!validMedia && currentStep !== "media"}
                 />
                 <div className={currentStep === "media" ? "hidden" : ""}>
-                  <Type type={type} setType={setType} />
+                  <CertificateTemplate
+                    selectedCertificateTemplate={selectedCertificateTemplate}
+                    setSelectedCertificateTemplate={
+                      setSelectedCertificateTemplate
+                    }
+                  />
                 </div>
 
-                <div className={currentStep === "media" ? "hidden" : ""}>
-                  {type === "cwo" ? (
-                    <CWOType />
-                  ) : type === "vaarbewijs" ? (
-                    <VaarbewijsType />
-                  ) : type === "marifoon" ? (
-                    <MarifoonType />
-                  ) : type === "tkn" ? (
-                    <TKNType />
-                  ) : type === "other" ? (
-                    <OtherType />
-                  ) : null}
+                <div
+                  className={
+                    selectedCertificateTemplate === null ? "hidden" : ""
+                  }
+                >
+                  <Metadata
+                    selectedCertificateTemplate={selectedCertificateTemplate}
+                  />
                 </div>
               </FieldGroup>
             </Fieldset>
@@ -126,7 +120,7 @@ export function AddCertificate({
                 setTimeout(() => {
                   setCurrentStep("media");
                   setValidMedia(false);
-                  setType(null);
+                  setSelectedCertificateTemplate(null);
                 }, 100);
               }}
             >
@@ -135,14 +129,16 @@ export function AddCertificate({
 
             {currentStep === "media" ? (
               validMedia ? (
-                <Button onClick={() => setCurrentStep("type")}>Volgende</Button>
+                <Button onClick={() => setCurrentStep("metadata")}>
+                  Volgende
+                </Button>
               ) : (
-                <Button plain onClick={() => setCurrentStep("type")}>
+                <Button plain onClick={() => setCurrentStep("metadata")}>
                   Doorgaan zonder foto
                 </Button>
               )
             ) : (
-              <SubmitButton />
+              <SubmitButton invalid={!selectedCertificateTemplate} />
             )}
           </DialogActions>
         </form>
@@ -151,10 +147,10 @@ export function AddCertificate({
   );
 }
 
-function SubmitButton() {
+function SubmitButton({ invalid }: { invalid?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button color="branding-dark" disabled={pending} type="submit">
+    <Button color="branding-dark" disabled={pending || invalid} type="submit">
       {pending ? <Spinner className="text-white" /> : null}
       Opslaan
     </Button>
