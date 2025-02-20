@@ -32,12 +32,22 @@ export function Metadata({
             defaultValue={template?.issuingAuthority}
           />
         </Field>
+
         <Field className="sm:col-span-4 relative">
           <Label>Titel</Label>
           <Input
             name="metadata_title"
             required
             defaultValue={template?.title}
+          />
+        </Field>
+
+        <Field className="sm:col-span-4 relative">
+          <Label>Identificatie</Label>
+          <Input
+            name="metadata_identifier"
+            required
+            placeholder="bv. diploma nummer"
           />
         </Field>
 

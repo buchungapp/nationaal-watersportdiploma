@@ -3,7 +3,12 @@ import dayjs from "dayjs";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
-import { uuidSchema, withZod } from "../../utils/index.js";
+import {
+  singleRow,
+  successfulCreateResponse,
+  uuidSchema,
+  withZod,
+} from "../../utils/index.js";
 
 export const listForPerson = withZod(
   z.object({
@@ -16,7 +21,9 @@ export const listForPerson = withZod(
       identifier: z.string().nullable(),
       location: z.string().nullable(),
       awardedAt: z.string().datetime().nullable(),
-      metadata: z.record(z.string(), z.string()).nullable(),
+      issuingAuthority: z.string().nullable(),
+      title: z.string(),
+      mediaId: z.string().nullable(),
     })
     .array(),
   async (input) => {
@@ -43,10 +50,49 @@ export const listForPerson = withZod(
       awardedAt: external_certificate.awardedAt
         ? dayjs(external_certificate.awardedAt).toISOString()
         : null,
-      location: location ? location.name : null,
+      location: location
+        ? location.name
+        : (external_certificate.issuingLocation ?? null),
       identifier: external_certificate.identifier,
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      metadata: external_certificate._metadata as any,
+      issuingAuthority: external_certificate.issuingAuthority,
+      title: external_certificate.title,
+      mediaId: external_certificate.mediaId,
+      additionalComments: external_certificate.additionalComments,
     }));
+  },
+);
+
+export const createExternalCertificate = withZod(
+  z.object({
+    personId: uuidSchema,
+    identifier: z.string().nullable(),
+    awardedAt: z.string().date().nullable(),
+    issuingAuthority: z.string().nullable(),
+    issuingLocation: z.string().nullable(),
+    title: z.string(),
+    mediaId: uuidSchema.nullable(),
+    additionalComments: z.string().nullable(),
+  }),
+  successfulCreateResponse,
+  async (input) => {
+    const query = useQuery();
+
+    const rows = await query
+      .insert(s.externalCertificate)
+      .values({
+        personId: input.personId,
+        identifier: input.identifier,
+        awardedAt: input.awardedAt,
+        issuingAuthority: input.issuingAuthority,
+        issuingLocation: input.issuingLocation,
+        title: input.title,
+        mediaId: input.mediaId,
+        additionalComments: input.additionalComments,
+      })
+      .returning({
+        id: s.externalCertificate.id,
+      });
+
+    return singleRow(rows);
   },
 );

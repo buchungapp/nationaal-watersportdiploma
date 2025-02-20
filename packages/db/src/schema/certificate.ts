@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   foreignKey,
-  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -18,6 +18,7 @@ import {
   curriculumGearLink,
 } from "./curriculum.js";
 import { location } from "./location.js";
+import { media } from "./media.js";
 import { person } from "./user.js";
 
 export const studentCurriculum = pgTable(
@@ -154,13 +155,20 @@ export const externalCertificate = pgTable(
       .primaryKey()
       .notNull(),
     personId: uuid("person_id").notNull(),
+
     identifier: text("identifier"),
+    issuingAuthority: text("issuing_authority"),
+    title: text("title").notNull(),
+    issuingLocation: text("issuing_location"),
     awardedAt: timestamp("awarded_at", {
       withTimezone: true,
       mode: "string",
     }),
+    additionalComments: text("additional_comments"),
+
+    // To prevent a circular dependency, we use a function to reference the media table
+    mediaId: uuid("logo_media_id").references((): AnyPgColumn => media.id),
     locationId: uuid("location_id"),
-    _metadata: jsonb("_metadata"),
     ...timestamps,
   },
   (table) => {

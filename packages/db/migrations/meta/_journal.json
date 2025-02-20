@@ -155,6 +155,13 @@
       "when": 1721509764649,
       "tag": "0021_regular_blink",
       "breakpoints": false
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1740091190641,
+      "tag": "0022_nostalgic_hellcat",
+      "breakpoints": false
     }
   ]
 }
