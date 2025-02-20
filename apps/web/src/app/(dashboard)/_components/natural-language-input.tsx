@@ -116,6 +116,9 @@ export function SmartDatePicker({
             if (parsedDateTime) {
               setDateTime(parsedDateTime);
               e.target.value = dateTimeUtils.formatDate(parsedDateTime);
+            } else {
+              setDateTime(null);
+              e.target.value = "";
             }
           }
         }}
@@ -191,6 +194,9 @@ export function SmartTimePicker({
             if (parsedDateTime) {
               setDateTime(parsedDateTime);
               e.target.value = dateTimeUtils.formatTime(parsedDateTime);
+            } else {
+              setDateTime(null);
+              e.target.value = "";
             }
           }
         }}

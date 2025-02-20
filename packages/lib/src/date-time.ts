@@ -10,11 +10,13 @@ export const parseTimeString = (str: string) => {
   return new Date(`1970-01-01T${str}`);
 };
 
-export const stripTime = (datetime: Date) => {
+export const stripTime = (datetime: Date | null) => {
+  if (!datetime) return null;
   return new Date(datetime.toDateString());
 };
 
-export const stripDate = (datetime: Date) => {
+export const stripDate = (datetime: Date | null) => {
+  if (!datetime) return null;
   return new Date(`1970-01-01T${datetime.toISOString().split("T")[1]}`);
 };
 
