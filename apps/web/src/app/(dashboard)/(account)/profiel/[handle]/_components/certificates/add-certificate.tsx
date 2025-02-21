@@ -51,7 +51,7 @@ export function AddCertificate({
 
     if (result.message === "Success") {
       close();
-      toast.success("Gegevens bijgewerkt.");
+      toast.success("Certificaat toegevoegd.");
     }
 
     return result;
@@ -99,6 +99,7 @@ export function AddCertificate({
               <FieldGroup>
                 <Media
                   setValidMedia={setValidMedia}
+                  errors={state?.errors}
                   small={!validMedia && currentStep !== "media"}
                 />
                 <div className={currentStep === "media" ? "hidden" : ""}>
@@ -116,6 +117,7 @@ export function AddCertificate({
                   }
                 >
                   <Metadata
+                    errors={state?.errors}
                     selectedCertificateTemplate={selectedCertificateTemplate}
                   />
                 </div>
