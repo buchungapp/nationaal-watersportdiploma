@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
   foreignKey,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -169,6 +170,8 @@ export const externalCertificate = pgTable(
     // To prevent a circular dependency, we use a function to reference the media table
     mediaId: uuid("logo_media_id").references((): AnyPgColumn => media.id),
     locationId: uuid("location_id"),
+
+    _metadata: jsonb("_metadata"),
     ...timestamps,
   },
   (table) => {

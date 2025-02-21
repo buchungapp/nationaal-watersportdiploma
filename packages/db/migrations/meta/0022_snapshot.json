@@ -845,6 +845,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "_metadata": {
+          "name": "_metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",

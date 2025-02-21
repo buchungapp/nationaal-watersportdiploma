@@ -10,6 +10,4 @@ UPDATE
 SET
     "issuing_authority" = _metadata ->> 'Uitgever',
     "title" = _metadata ->> 'Opleiding';
-
-ALTER TABLE "external_certificate" DROP COLUMN "_metadata";
-
+    "_metadata" = _metadata - 'Uitgever' - 'Opleiding';
