@@ -24,6 +24,7 @@ export const listForPerson = withZod(
       issuingAuthority: z.string().nullable(),
       title: z.string(),
       mediaId: z.string().nullable(),
+      metadata: z.record(z.string(), z.string()).nullable(),
     })
     .array(),
   async (input) => {
@@ -58,6 +59,8 @@ export const listForPerson = withZod(
       title: external_certificate.title,
       mediaId: external_certificate.mediaId,
       additionalComments: external_certificate.additionalComments,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      metadata: external_certificate._metadata as any,
     }));
   },
 );

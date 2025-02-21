@@ -9,5 +9,5 @@ UPDATE
     "external_certificate"
 SET
     "issuing_authority" = _metadata ->> 'Uitgever',
-    "title" = _metadata ->> 'Opleiding';
+    "title" = _metadata ->> 'Opleiding',
     "_metadata" = _metadata - 'Uitgever' - 'Opleiding';
