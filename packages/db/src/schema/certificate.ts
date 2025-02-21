@@ -168,7 +168,7 @@ export const externalCertificate = pgTable(
     additionalComments: text("additional_comments"),
 
     // To prevent a circular dependency, we use a function to reference the media table
-    mediaId: uuid("logo_media_id").references((): AnyPgColumn => media.id),
+    mediaId: uuid("media_id").references((): AnyPgColumn => media.id),
     locationId: uuid("location_id"),
 
     _metadata: jsonb("_metadata"),

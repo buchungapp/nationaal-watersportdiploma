@@ -833,8 +833,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "logo_media_id": {
-          "name": "logo_media_id",
+        "media_id": {
+          "name": "media_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -874,12 +874,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "external_certificate_logo_media_id_media_id_fk": {
-          "name": "external_certificate_logo_media_id_media_id_fk",
+        "external_certificate_media_id_media_id_fk": {
+          "name": "external_certificate_media_id_media_id_fk",
           "tableFrom": "external_certificate",
           "tableTo": "media",
           "columnsFrom": [
-            "logo_media_id"
+            "media_id"
           ],
           "columnsTo": [
             "id"
