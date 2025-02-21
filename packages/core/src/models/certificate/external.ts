@@ -9,6 +9,8 @@ import {
   uuidSchema,
   withZod,
 } from "../../utils/index.js";
+import { Platform } from "../index.js";
+import { outputSchema } from "../platform/media.schema.js";
 
 export const listForPerson = withZod(
   z.object({
@@ -25,6 +27,7 @@ export const listForPerson = withZod(
       title: z.string(),
       mediaId: z.string().nullable(),
       metadata: z.record(z.string(), z.string()).nullable(),
+      media: outputSchema.nullable(),
     })
     .array(),
   async (input) => {
@@ -45,23 +48,39 @@ export const listForPerson = withZod(
         desc(s.externalCertificate.createdAt),
       );
 
-    return certificates.map(({ external_certificate, location }) => ({
-      id: external_certificate.id,
-      createdAt: dayjs(external_certificate.createdAt).toISOString(),
-      awardedAt: external_certificate.awardedAt
-        ? dayjs(external_certificate.awardedAt).toISOString()
-        : null,
-      location: location
-        ? location.name
-        : (external_certificate.issuingLocation ?? null),
-      identifier: external_certificate.identifier,
-      issuingAuthority: external_certificate.issuingAuthority,
-      title: external_certificate.title,
-      mediaId: external_certificate.mediaId,
-      additionalComments: external_certificate.additionalComments,
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      metadata: external_certificate._metadata as any,
-    }));
+    return await Promise.all(
+      certificates.map(async ({ external_certificate, location }) => {
+        let media = null;
+        if (external_certificate.mediaId) {
+          media = await Platform.Media.fromId(external_certificate.mediaId);
+
+          if (media) {
+            media.url = await Platform.Media.createSignedUrl({
+              id: external_certificate.mediaId,
+            });
+          }
+        }
+
+        return {
+          id: external_certificate.id,
+          createdAt: dayjs(external_certificate.createdAt).toISOString(),
+          awardedAt: external_certificate.awardedAt
+            ? dayjs(external_certificate.awardedAt).toISOString()
+            : null,
+          location: location
+            ? location.name
+            : (external_certificate.issuingLocation ?? null),
+          identifier: external_certificate.identifier,
+          issuingAuthority: external_certificate.issuingAuthority,
+          title: external_certificate.title,
+          mediaId: external_certificate.mediaId,
+          additionalComments: external_certificate.additionalComments,
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          metadata: external_certificate._metadata as any,
+          media,
+        };
+      }),
+    );
   },
 );
 

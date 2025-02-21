@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import Image from "next/image";
 import { Suspense } from "react";
 import {
   DescriptionDetails,
@@ -12,7 +13,7 @@ import {
   GridListItem,
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { Code, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,
@@ -77,12 +78,12 @@ async function Certificates({
   const allCertificateIds = [
     ...certificates.map((x) => ({
       id: x.id,
-      awardedAt: x.issuedAt,
+      awardedAt: x.issuedAt ?? x.createdAt,
       issuingAuthority: "NWD",
     })),
     ...externalCertificates.map((x) => ({
       id: x.id,
-      awardedAt: x.awardedAt,
+      awardedAt: x.awardedAt ?? x.createdAt,
       issuingAuthority: x.issuingAuthority,
     })),
   ].sort((a, b) => (dayjs(a.awardedAt).isAfter(dayjs(b.awardedAt)) ? -1 : 1));
@@ -170,19 +171,44 @@ function ExternalCertificate({
         // href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
         target="_blank"
       >
-        <div className="text-sm font-medium leading-6 text-slate-900">
-          {`Diplomanummer #${certificate.identifier}`}
-        </div>
+        {certificate.media?.url ? (
+          <div className="h-full -m-4 w-[calc(100%+var(--spacing)*8)] flex justify-center">
+            <Image
+              src={certificate.media?.url}
+              alt={certificate.title}
+              width={certificate.media.width || 100}
+              height={certificate.media.height || 100}
+              className="rounded-lg w-auto h-auto object-contain max-h-36"
+            />
+          </div>
+        ) : (
+          <div className="text-sm font-medium leading-6 text-slate-900">
+            {certificate.title}
+          </div>
+        )}
       </GridListHeader>
       <DescriptionList className="px-6">
-        <DescriptionTerm>Programma</DescriptionTerm>
-        <DescriptionDetails>{certificate.title}</DescriptionDetails>
+        {certificate.media ? (
+          <>
+            <DescriptionTerm>Programma</DescriptionTerm>
+            <DescriptionDetails>{certificate.title}</DescriptionDetails>
+          </>
+        ) : null}
 
         {certificate.issuingAuthority ? (
           <>
             <DescriptionTerm>Uitgevende instantie</DescriptionTerm>
             <DescriptionDetails>
               {certificate.issuingAuthority}
+            </DescriptionDetails>
+          </>
+        ) : null}
+
+        {certificate.identifier ? (
+          <>
+            <DescriptionTerm>Identificatie</DescriptionTerm>
+            <DescriptionDetails>
+              <Code>{certificate.identifier}</Code>
             </DescriptionDetails>
           </>
         ) : null}
