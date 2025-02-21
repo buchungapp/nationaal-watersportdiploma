@@ -13,7 +13,10 @@ import {
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { listCertificatesForPerson } from "~/lib/nwd";
+import {
+  listCertificatesForPerson,
+  listExternalCertificatesForPerson,
+} from "~/lib/nwd";
 import { AddCertificate } from "./certificates/add-certificate";
 
 interface Props {
@@ -44,7 +47,7 @@ export default async function PersonCertificates({ person }: Props) {
         <Certificates
           personId={person.id}
           noResults={
-            <Text className="italic">
+            <Text className="italic mb-2">
               Je hebt nog geen NWD-diploma's behaald. Klopt dit niet? Neem dan
               contact op met de{" "}
               <TextLink href="/vaarlocaties" target="_blank">
@@ -61,56 +64,145 @@ export default async function PersonCertificates({ person }: Props) {
 
 async function Certificates({
   personId,
-  locationId,
   noResults = null,
 }: {
   personId: string;
-  locationId?: string;
   noResults?: React.ReactNode;
 }) {
-  const certificates = await listCertificatesForPerson(personId, locationId);
+  const certificates = await listCertificatesForPerson(personId);
 
-  if (certificates.length === 0) {
-    return <>{noResults}</>;
-  }
+  const externalCertificates =
+    await listExternalCertificatesForPerson(personId);
+
+  const allCertificateIds = [
+    ...certificates.map((x) => ({
+      id: x.id,
+      awardedAt: x.issuedAt,
+      issuingAuthority: "NWD",
+    })),
+    ...externalCertificates.map((x) => ({
+      id: x.id,
+      awardedAt: x.awardedAt,
+      issuingAuthority: x.issuingAuthority,
+    })),
+  ].sort((a, b) => (dayjs(a.awardedAt).isAfter(dayjs(b.awardedAt)) ? -1 : 1));
 
   return (
-    <GridList>
-      {certificates.map((certificate) => (
-        <GridListItem key={certificate.id}>
-          <GridListHeader
-            href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
-            target="_blank"
-          >
-            <div className="text-sm font-medium leading-6 text-slate-900">
-              {`Diplomanummer #${certificate.handle}`}
-            </div>
-          </GridListHeader>
-          <DescriptionList className="px-6">
-            <DescriptionTerm>Programma</DescriptionTerm>
-            <DescriptionDetails>
-              {certificate.program.title ??
-                `${certificate.program.course.title} ${certificate.program.degree.title}`}
-            </DescriptionDetails>
+    <>
+      {certificates.length === 0 ? noResults : null}
+      <GridList>
+        {allCertificateIds.map(({ id, awardedAt, issuingAuthority }) => {
+          if (issuingAuthority === "NWD") {
+            // biome-ignore lint/style/noNonNullAssertion: Array is constructed from certificates
+            const certificate = certificates.find((x) => x.id === id)!;
 
-            <DescriptionTerm>Vaartuig</DescriptionTerm>
-            <DescriptionDetails>
-              {certificate.gearType.title}
-            </DescriptionDetails>
+            return (
+              <NWDCertificate key={certificate.id} certificate={certificate} />
+            );
+          }
 
+          // biome-ignore lint/style/noNonNullAssertion: Array is constructed from externalCertificates
+          const certificate = externalCertificates.find((x) => x.id === id)!;
+
+          return (
+            <ExternalCertificate
+              key={certificate.id}
+              certificate={certificate}
+            />
+          );
+        })}
+        <li>
+          <AddCertificate personId={personId} />
+        </li>
+      </GridList>
+    </>
+  );
+}
+
+function NWDCertificate({
+  certificate,
+}: {
+  certificate: Awaited<ReturnType<typeof listCertificatesForPerson>>[number];
+}) {
+  return (
+    <GridListItem key={certificate.id}>
+      <GridListHeader
+        href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+        target="_blank"
+      >
+        <div className="text-sm font-medium leading-6 text-slate-900">
+          {`Diplomanummer #${certificate.handle}`}
+        </div>
+      </GridListHeader>
+      <DescriptionList className="px-6">
+        <DescriptionTerm>Programma</DescriptionTerm>
+        <DescriptionDetails>
+          {certificate.program.title ??
+            `${certificate.program.course.title} ${certificate.program.degree.title}`}
+        </DescriptionDetails>
+
+        <DescriptionTerm>Vaartuig</DescriptionTerm>
+        <DescriptionDetails>{certificate.gearType.title}</DescriptionDetails>
+
+        <DescriptionTerm>Behaald op</DescriptionTerm>
+        <DescriptionDetails>
+          {dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
+        </DescriptionDetails>
+
+        <DescriptionTerm>Behaald bij</DescriptionTerm>
+        <DescriptionDetails>{certificate.location.name}</DescriptionDetails>
+      </DescriptionList>
+    </GridListItem>
+  );
+}
+
+function ExternalCertificate({
+  certificate,
+}: {
+  certificate: Awaited<
+    ReturnType<typeof listExternalCertificatesForPerson>
+  >[number];
+}) {
+  return (
+    <GridListItem key={certificate.id}>
+      <GridListHeader
+        href={"#TODO"}
+        // href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+        target="_blank"
+      >
+        <div className="text-sm font-medium leading-6 text-slate-900">
+          {`Diplomanummer #${certificate.identifier}`}
+        </div>
+      </GridListHeader>
+      <DescriptionList className="px-6">
+        <DescriptionTerm>Programma</DescriptionTerm>
+        <DescriptionDetails>{certificate.title}</DescriptionDetails>
+
+        {certificate.issuingAuthority ? (
+          <>
+            <DescriptionTerm>Uitgevende instantie</DescriptionTerm>
+            <DescriptionDetails>
+              {certificate.issuingAuthority}
+            </DescriptionDetails>
+          </>
+        ) : null}
+
+        {certificate.awardedAt ? (
+          <>
             <DescriptionTerm>Behaald op</DescriptionTerm>
             <DescriptionDetails>
-              {dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
+              {dayjs(certificate.awardedAt).format("DD-MM-YYYY")}
             </DescriptionDetails>
+          </>
+        ) : null}
 
+        {certificate.location ? (
+          <>
             <DescriptionTerm>Behaald bij</DescriptionTerm>
-            <DescriptionDetails>{certificate.location.name}</DescriptionDetails>
-          </DescriptionList>
-        </GridListItem>
-      ))}
-      <li>
-        <AddCertificate personId={personId} />
-      </li>
-    </GridList>
+            <DescriptionDetails>{certificate.location}</DescriptionDetails>
+          </>
+        ) : null}
+      </DescriptionList>
+    </GridListItem>
   );
 }

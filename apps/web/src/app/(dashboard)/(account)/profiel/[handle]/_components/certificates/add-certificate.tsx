@@ -3,6 +3,7 @@ import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import Spinner from "~/app/_components/spinner";
+import { addExternalCertificate } from "../../_actions/certificate";
 import { CertificateTemplatePicker } from "./certificate-template-picker";
 import type { CertificateTemplate } from "./certificate-templates";
 import Media from "./media";
@@ -31,10 +33,28 @@ export function AddCertificate({
     useState<CertificateTemplate["id"] | null>(null);
   const [validMedia, setValidMedia] = useState(false);
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    console.log(prevState, formData.entries().toArray());
+  const close = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      setValidMedia(false);
+      setSelectedCertificateTemplate(null);
+      setCurrentStep("media");
+    }, 100);
+  };
 
-    return null;
+  const submit = async (prevState: unknown, formData: FormData) => {
+    const result = await addExternalCertificate(
+      { personId },
+      prevState,
+      formData,
+    );
+
+    if (result.message === "Success") {
+      close();
+      toast.success("Gegevens bijgewerkt.");
+    }
+
+    return result;
   };
 
   const [state, action] = useActionState(submit, undefined);
@@ -43,25 +63,14 @@ export function AddCertificate({
     <>
       <button
         type="button"
-        className="overflow-hidden w-full h-full rounded-xl border border-dashed border-slate-200 flex items-center justify-center flex-col text-zinc-500 cursor-pointer p-4"
+        className="overflow-hidden w-full h-full min-h-67 min-w-87 rounded-xl border border-dashed border-slate-200 flex items-center justify-center flex-col text-zinc-500 cursor-pointer p-4"
         onClick={() => setIsOpen(true)}
       >
         <PlusIcon className="size-8" />
         Voeg een nieuw diploma, bewijs of certificaat toe
       </button>
 
-      <Dialog
-        open={isOpen}
-        onClose={(value) => {
-          setIsOpen(value);
-
-          setTimeout(() => {
-            setValidMedia(false);
-            setSelectedCertificateTemplate(null);
-            setCurrentStep("media");
-          }, 100);
-        }}
-      >
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>
           Voeg een nieuw diploma, bewijs of certificaat toe
         </DialogTitle>
@@ -114,17 +123,7 @@ export function AddCertificate({
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button
-              plain
-              onClick={() => {
-                setIsOpen(false);
-                setTimeout(() => {
-                  setCurrentStep("media");
-                  setValidMedia(false);
-                  setSelectedCertificateTemplate(null);
-                }, 100);
-              }}
-            >
+            <Button plain onClick={close}>
               Sluiten
             </Button>
 

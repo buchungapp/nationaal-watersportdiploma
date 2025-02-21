@@ -14,7 +14,11 @@ import {
 
 export function Metadata({
   selectedCertificateTemplate,
-}: { selectedCertificateTemplate: CertificateTemplate["id"] | null }) {
+  errors,
+}: {
+  selectedCertificateTemplate: CertificateTemplate["id"] | null;
+  errors?: Record<string, string>;
+}) {
   const template = certificateTemplates.find(
     (template) => template.id === selectedCertificateTemplate,
   );
@@ -27,43 +31,47 @@ export function Metadata({
         <Field className="sm:col-span-4">
           <Label>Uitgevende instantie</Label>
           <Input
-            name="metadata_issuing_authority"
-            required
+            name="issuingAuthority"
             defaultValue={template?.issuingAuthority}
+            invalid={!!errors?.issuingAuthority}
           />
         </Field>
 
         <Field className="sm:col-span-4 relative">
           <Label>Titel</Label>
           <Input
-            name="metadata_title"
+            name="title"
             required
             defaultValue={template?.title}
+            invalid={!!errors?.title}
           />
         </Field>
 
         <Field className="sm:col-span-4 relative">
           <Label>Identificatie</Label>
           <Input
-            name="metadata_identifier"
-            required
+            name="identifier"
             placeholder="bv. diploma nummer"
+            invalid={!!errors?.identifier}
           />
         </Field>
 
         <Field className="sm:col-span-3">
           <Label>Behaald bij</Label>
-          <Input name="metadata_issuing_location" required />
+          <Input name="issuingLocation" invalid={!!errors?.issuingLocation} />
         </Field>
 
         <Field className="sm:col-span-2 relative">
           <Label>Behaald op</Label>
-          <SmartDatePicker name="awardedAt" required />
+          <SmartDatePicker name="awardedAt" invalid={!!errors?.awardedAt} />
         </Field>
 
         <Field className="sm:col-span-5">
           <Label>Overige opmerkingen</Label>
-          <Textarea name="metadata_additional" required />
+          <Textarea
+            name="additionalComments"
+            invalid={!!errors?.additionalComments}
+          />
         </Field>
       </div>
     </Fieldset>

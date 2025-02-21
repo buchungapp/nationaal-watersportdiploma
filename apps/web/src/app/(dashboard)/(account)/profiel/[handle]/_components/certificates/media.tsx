@@ -11,12 +11,22 @@ import {
 export default function Media({
   setValidMedia,
   small,
-}: { setValidMedia: (valid: boolean) => void; small?: boolean }) {
+  errors,
+}: {
+  setValidMedia: (valid: boolean) => void;
+  small?: boolean;
+  errors?: Record<string, string>;
+}) {
   return (
     <Fieldset>
       <Legend className="mb-3">1. Upload een foto of scan</Legend>
       <Field>
-        <Dropzone name="media" setValidMedia={setValidMedia} small={small} />
+        <Dropzone
+          name="media"
+          setValidMedia={setValidMedia}
+          invalid={!!errors?.media}
+          small={small}
+        />
       </Field>
     </Fieldset>
   );
@@ -27,11 +37,13 @@ function Dropzone({
   name,
   setValidMedia,
   small,
+  invalid,
 }: {
   required?: boolean;
   name: string;
   setValidMedia?: (valid: boolean) => void;
   small?: boolean;
+  invalid?: boolean;
 }) {
   const hiddenInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +92,7 @@ function Dropzone({
         "w-full mt-3 border border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer",
         !preview && small ? "h-15" : "h-50",
         isDragActive && "bg-slate-100",
-        isDragReject && "border-destructive",
+        (isDragReject || invalid) && "border-destructive",
       )}
       {...getRootProps()}
     >

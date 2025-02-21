@@ -321,6 +321,56 @@ export const listExternalCertificatesForPerson = cache(
   },
 );
 
+export const createExternalCertificate = async ({
+  personId,
+  media,
+  externalCertificate,
+}: {
+  personId: string;
+  media: File | Buffer<ArrayBuffer> | null;
+  externalCertificate: {
+    title: string;
+    awardedAt: string | null;
+    issuingAuthority: string | null;
+    issuingLocation: string | null;
+    identifier: string | null;
+    metadata: Record<string, string> | null;
+    additionalComments: string | null;
+  };
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    let mediaId = null;
+    if (media) {
+      const buffer =
+        media instanceof File
+          ? Buffer.from(new Uint8Array(await media.arrayBuffer()))
+          : media;
+
+      const { id } = await Platform.Media.create({
+        file: buffer,
+        isPublic: false,
+      });
+      mediaId = id;
+    }
+
+    const certificate = await Certificate.External.create({
+      personId,
+      mediaId,
+      ...externalCertificate,
+    });
+
+    return certificate;
+  });
+};
+
 export const listCertificatesByNumber = cache(
   async (
     numbers: string[],

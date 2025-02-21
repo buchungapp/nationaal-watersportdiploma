@@ -65,7 +65,7 @@ export const listForPerson = withZod(
   },
 );
 
-export const createExternalCertificate = withZod(
+export const create = withZod(
   z.object({
     personId: uuidSchema,
     identifier: z.string().nullable(),
