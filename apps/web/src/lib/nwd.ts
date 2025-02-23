@@ -327,7 +327,7 @@ export const createExternalCertificate = async ({
   externalCertificate,
 }: {
   personId: string;
-  media: File | Buffer<ArrayBuffer> | null;
+  media: File | Buffer | null;
   externalCertificate: {
     title: string;
     awardedAt: string | null;
@@ -349,10 +349,11 @@ export const createExternalCertificate = async ({
 
     let mediaId = null;
     if (media) {
-      const buffer =
-        media instanceof File
-          ? Buffer.from(new Uint8Array(await media.arrayBuffer()))
-          : media;
+      const buffer = Buffer.from(
+        new Uint8Array(
+          media instanceof File ? await media.arrayBuffer() : media,
+        ),
+      );
 
       const { id } = await Platform.Media.create({
         file: buffer,
