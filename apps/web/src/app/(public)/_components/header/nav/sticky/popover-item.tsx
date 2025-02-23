@@ -18,7 +18,7 @@ export default function PopoverNavItem({
     <Popover className="group relative">
       <PopoverButton className="flex items-center gap-x-1 text-sm font-medium uppercase leading-6">
         {label}
-        <ChevronDownIcon className="h-5 w-5 flex-none" aria-hidden="true" />
+        <ChevronDownIcon className="size-5 flex-none" aria-hidden="true" />
         <ActiveHover active={active} />
       </PopoverButton>
       <PopoverPanel

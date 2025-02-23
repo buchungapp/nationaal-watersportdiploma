@@ -65,7 +65,7 @@ export default async function Page() {
 
                   <div className="h-6 flex items-center justify-center">
                     <ArrowLongRightIcon
-                      className="h-5 w-5 shrink-0 text-branding-dark transition-transform group-hover:translate-x-1"
+                      className="size-5 shrink-0 text-branding-dark transition-transform group-hover:translate-x-1"
                       strokeWidth={2.5}
                     />
                   </div>

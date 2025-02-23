@@ -166,7 +166,7 @@ export default function Footer() {
                 target="_blank"
                 referrerPolicy="no-referrer"
               >
-                <social.icon className="h-4 w-4" />
+                <social.icon className="size-4" />
               </Link>
             </li>
           ))}

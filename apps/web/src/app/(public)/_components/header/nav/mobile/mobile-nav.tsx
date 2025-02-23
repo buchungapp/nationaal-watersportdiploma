@@ -41,7 +41,7 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
             >
               <span className="absolute -inset-0.5" />
               <span className="sr-only">Sluit menu</span>
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+              <XMarkIcon className="size-6" aria-hidden="true" />
             </button>
           </div>
           <div className="overflow-y-auto">{children}</div>
@@ -56,7 +56,7 @@ export function MobileNavButton() {
 
   return (
     <button type="button" onClick={() => setOpen(true)}>
-      <Bars3Icon className="h-7 w-7" />
+      <Bars3Icon className="size-7" />
     </button>
   );
 }

@@ -4,13 +4,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { DialogBody, DialogTitle } from "~/app/(dashboard)/_components/dialog";
-import Logo from "~/app/_components/brand/logo";
-import Wordmark from "~/app/_components/brand/wordmark";
 import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import background from "../_assets/nwd-2024-cover-bahia-blue.png";
 import Module from "./module";
+import { TemplateHeader } from "./template-header";
 import { TogglePiiButton } from "./toggle-pii";
+
+export type TemplateData = Awaited<ReturnType<typeof retrieveCertificateById>>;
 
 const DataLabel = ({ children }: { children: ReactNode }) => (
   <p className="text-branding-dark font-semibold uppercase">{children}</p>
@@ -55,8 +56,6 @@ export default async function CertificateTemplate({
 }) {
   const certificate = await retrieveCertificateById(id).catch(() => notFound());
 
-  const degree = certificate.program.degree.rang;
-
   const uniqueCompletedModules = Array.from(
     new Set(
       certificate.completedCompetencies.map(
@@ -70,32 +69,13 @@ export default async function CertificateTemplate({
   );
 
   return (
-    <div className="min-h-full flex flex-col">
-      <header className="bg-branding-light space-y-4 flex justify-center flex-col py-4">
-        <div className="bg-white flex justify-between rounded-full my-1 mx-4 items-center p-2">
-          <div className="flex shrink-0">
-            <Logo className="h-24 w-24 p-2 text-white" />
-            <Wordmark className="h-24 hidden lg:block" />
-          </div>
-          <div className="flex gap-4 pr-4">
-            <div className="flex flex-col justify-center text-end">
-              <p className="text-lg sm:text-xl lg:text-2xl leading-5 font-bold">
-                {certificate.gearType.title}
-              </p>
-              <p className="text-sm sm:text-base leading-5 lg:text-lg">
-                {certificate.program.title ?? certificate.program.course.title}
-              </p>
-            </div>
-            <p className="text-6xl font-black text-branding-orange align-text-bottom">
-              {degree}
-            </p>
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="bg-white h-1 w-full" />
-          <div className="bg-white h-1 w-full" />
-        </div>
-      </header>
+    <div className="min-h-full flex flex-col @container">
+      <TemplateHeader
+        gearTypeTitle={certificate.gearType.title}
+        programTitle={certificate.program.title}
+        courseTitle={certificate.program.course.title}
+        degreeRang={certificate.program.degree.rang}
+      />
       <section className="grid aspect-2/1 w-full relative flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
         <div className="absolute inset-0 overflow-hidden">
           <div className="relative h-full w-full">
@@ -145,7 +125,7 @@ export default async function CertificateTemplate({
                             className="flex flex-col pt-3.5"
                           >
                             <div className="flex items-center">
-                              <CheckIcon className="h-4 w-4 mr-2 text-green-500" />
+                              <CheckIcon className="size-4 mr-2 text-green-500" />
                               <span className="font-semibold">
                                 {competency.title}
                               </span>

@@ -624,6 +624,10 @@ export const listStudentsWithCurricula = withZod(
           handle: s.gearType.handle,
           title: s.gearType.title,
         },
+        certificate: {
+          id: s.certificate.id,
+          visibleFrom: s.certificate.visibleFrom,
+        },
       })
       .from(s.cohortAllocation)
       .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
@@ -657,6 +661,10 @@ export const listStudentsWithCurricula = withZod(
       .leftJoin(s.degree, eq(s.degree.id, s.program.degreeId))
       .leftJoin(s.discipline, eq(s.discipline.id, s.course.disciplineId))
       .leftJoin(s.gearType, eq(s.gearType.id, s.studentCurriculum.gearTypeId))
+      .leftJoin(
+        s.certificate,
+        eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+      )
       .where(
         and(
           isNull(s.cohortAllocation.deletedAt),
@@ -726,6 +734,12 @@ export const listStudentsWithCurricula = withZod(
         : null,
       createdAt: row.createdAt,
       tags: row.tags,
+      certificate: row.certificate
+        ? {
+            id: row.certificate.id,
+            visibleFrom: row.certificate.visibleFrom,
+          }
+        : null,
     }));
   },
 );

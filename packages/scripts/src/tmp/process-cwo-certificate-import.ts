@@ -127,10 +127,8 @@ async function processRow(row: z.infer<typeof rowSchema>, locationId: string) {
     locationId,
     identifier: row.DiplomaNummer,
     awardedAt: row.DatumBehaald,
-    _metadata: sql`(((${JSON.stringify({
-      Uitgever: "CWO",
-      Opleiding: row.Opleiding,
-    })})::jsonb)#>> '{}')::jsonb`,
+    issuingAuthority: "CWO",
+    title: row.Opleiding,
   });
 }
 

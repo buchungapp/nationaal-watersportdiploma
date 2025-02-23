@@ -51,9 +51,9 @@ export function ShareCertificate({ id }: { id: string }) {
               }}
             >
               {copied ? (
-                <CheckIcon className="h-4 w-4 text-slate-500" />
+                <CheckIcon className="size-4 text-slate-500" />
               ) : (
-                <ClipboardDocumentListIcon className="h-4 w-4 text-slate-500" />
+                <ClipboardDocumentListIcon className="size-4 text-slate-500" />
               )}
             </button>
           </div>

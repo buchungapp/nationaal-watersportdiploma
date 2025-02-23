@@ -35,7 +35,7 @@ export default function SideNavActueel() {
             label: ({ isActive }) => (
               <div className="flex items-center justify-between">
                 {page.label}
-                {isActive ? <XMarkIcon className="w-4 h-4" /> : null}
+                {isActive ? <XMarkIcon className="size-4" /> : null}
               </div>
             ),
             href: ({ isActive, searchParams }) => {

@@ -178,8 +178,8 @@ importers:
         specifier: 4.0.0-beta-tremor-v4.4
         version: 4.0.0-beta-tremor-v4.4(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(tailwindcss@4.0.6)
       '@vercel/flags':
-        specifier: ^2.6.0
-        version: 2.6.1(next@15.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^3.1.1
+        version: 3.1.1(@opentelemetry/api@1.9.0)(next@15.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@vercel/otel':
         specifier: ^1.10.0
         version: 1.10.0(@opentelemetry/api@1.9.0)(@opentelemetry/resources@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-metrics@1.27.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.27.0(@opentelemetry/api@1.9.0))
@@ -909,6 +909,10 @@ packages:
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
+
+  '@edge-runtime/cookies@5.0.2':
+    resolution: {integrity: sha512-Sd8LcWpZk/SWEeKGE8LT6gMm5MGfX/wm+GPnh1eBEtCpya3vYqn37wYknwAHw92ONoyyREl1hJwxV/Qx2DWNOg==}
+    engines: {node: '>=16'}
 
   '@emnapi/runtime@1.3.1':
     resolution: {integrity: sha512-kEBmG8KyqtxJZv+ygbEim+KCGtIq1fC22Ms3S4ziXmYKm8uyoLX0MHONVKwp+9opg390VaKRNt4a7A9NwmpNhw==}
@@ -2704,14 +2708,17 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
-  '@vercel/flags@2.6.1':
-    resolution: {integrity: sha512-K+jSQAXZj2hBEtwyE/DwKX5atMlwoFoKe+2MIw8vNpYAMyVvEyyLFbbVjtmZWKRLW1k/bnbY71rsUI3ocEqsiQ==}
+  '@vercel/flags@3.1.1':
+    resolution: {integrity: sha512-JM0xXRCHvN5wiSr9C2u6PSbXMnqN/0IXyNEOob6UYWB70vBWVLUKM96wgSuj6orRzRTowItmja2RTYyRvVhuQg==}
     peerDependencies:
+      '@opentelemetry/api': ^1.7.0
       '@sveltejs/kit': '*'
       next: '*'
       react: '*'
       react-dom: '*'
     peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
       '@sveltejs/kit':
         optional: true
       next:
@@ -4736,8 +4743,8 @@ packages:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
 
-  jose@5.2.1:
-    resolution: {integrity: sha512-qiaQhtQRw6YrOaOj0v59h3R6hUY9NvxBmmnMfKemkqYmBB0tEc97NbLP7ix44VP5p9/0YHG8Vyhzuo5YBNwviA==}
+  jose@5.10.0:
+    resolution: {integrity: sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==}
 
   jpeg-exif@1.1.4:
     resolution: {integrity: sha512-a+bKEcCjtuW5WTdgeXFzswSrdqi0jk4XlEtZlx5A94wCoBpFjfFTbo/Tra5SpNCl/YFZPvcV1dJc+TAYeg6ROQ==}
@@ -7447,6 +7454,8 @@ snapshots:
 
   '@drizzle-team/brocli@0.10.2': {}
 
+  '@edge-runtime/cookies@5.0.2': {}
+
   '@emnapi/runtime@1.3.1':
     dependencies:
       tslib: 2.8.1
@@ -9597,10 +9606,12 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
-  '@vercel/flags@2.6.1(next@15.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@vercel/flags@3.1.1(@opentelemetry/api@1.9.0)(next@15.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      jose: 5.2.1
+      '@edge-runtime/cookies': 5.0.2
+      jose: 5.10.0
     optionalDependencies:
+      '@opentelemetry/api': 1.9.0
       next: 15.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -11883,7 +11894,7 @@ snapshots:
 
   jiti@2.4.2: {}
 
-  jose@5.2.1: {}
+  jose@5.10.0: {}
 
   jpeg-exif@1.1.4: {}
 

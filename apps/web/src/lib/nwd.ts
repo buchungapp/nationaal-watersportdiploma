@@ -321,6 +321,101 @@ export const listExternalCertificatesForPerson = cache(
   },
 );
 
+export const createExternalCertificate = async ({
+  personId,
+  media,
+  externalCertificate,
+}: {
+  personId: string;
+  media: File | Buffer | null;
+  externalCertificate: {
+    title: string;
+    awardedAt: string | null;
+    issuingAuthority: string | null;
+    issuingLocation: string | null;
+    identifier: string | null;
+    metadata: Record<string, string> | null;
+    additionalComments: string | null;
+  };
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    let mediaId = null;
+    if (media) {
+      const buffer = Buffer.from(
+        new Uint8Array(
+          media instanceof File ? await media.arrayBuffer() : media,
+        ),
+      );
+
+      const { id } = await Platform.Media.create({
+        file: buffer,
+        isPublic: false,
+      });
+      mediaId = id;
+    }
+
+    const certificate = await Certificate.External.create({
+      personId,
+      mediaId,
+      ...externalCertificate,
+    });
+
+    return certificate;
+  });
+};
+
+export const addMediaToExternalCertificate = async ({
+  personId,
+  media,
+  externalCertificateId,
+}: {
+  personId: string;
+  externalCertificateId: string;
+  media: File | Buffer;
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    const { mediaId } = await Certificate.External.byId({
+      id: externalCertificateId,
+    });
+
+    if (mediaId !== null) {
+      await Platform.Media.remove(mediaId);
+    }
+
+    const buffer = Buffer.from(
+      new Uint8Array(media instanceof File ? await media.arrayBuffer() : media),
+    );
+
+    const { id } = await Platform.Media.create({
+      file: buffer,
+      isPublic: false,
+    });
+
+    const certificate = await Certificate.External.update({
+      mediaId: id,
+      id: externalCertificateId,
+    });
+
+    return certificate;
+  });
+};
+
 export const listCertificatesByNumber = cache(
   async (
     numbers: string[],

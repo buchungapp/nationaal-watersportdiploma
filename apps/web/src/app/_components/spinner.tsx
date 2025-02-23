@@ -1,10 +1,10 @@
 import clsx from "clsx";
 
 const sizeToClassName = {
-  xs: "h-3 w-3",
-  sm: "h-4 w-4",
-  md: "h-5 w-5",
-  lg: "h-6 w-6",
+  xs: "size-3",
+  sm: "size-4",
+  md: "size-5",
+  lg: "size-6",
 } as const;
 
 export default function Spinner({

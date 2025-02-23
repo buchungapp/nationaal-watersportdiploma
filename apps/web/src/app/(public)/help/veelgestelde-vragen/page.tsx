@@ -64,7 +64,7 @@ export default async function Page() {
             >
               <span className="mr-2">{question.metadata.question}</span>
               <ArrowLongRightIcon
-                className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1"
+                className="size-5 shrink-0 transition-transform group-hover:translate-x-1"
                 strokeWidth={2.5}
               />
             </Link>

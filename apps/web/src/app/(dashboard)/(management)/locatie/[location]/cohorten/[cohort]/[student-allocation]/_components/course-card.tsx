@@ -96,7 +96,7 @@ export async function CourseCard({
             >
               {allocation.studentCurriculum.program.title ??
                 `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
-              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+              <ArrowTopRightOnSquareIcon className="size-4" />
             </TextLink>
           </DescriptionDetails>
 
@@ -148,7 +148,7 @@ export async function CourseCard({
               <div className="shrink-0">
                 <ExclamationTriangleIcon
                   aria-hidden="true"
-                  className="h-5 w-5 text-blue-400"
+                  className="size-5 text-blue-400"
                 />
               </div>
               <div className="ml-3">

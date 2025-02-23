@@ -12,6 +12,9 @@ const nextConfig = {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
     "/": ["./src/app/(public)/**/*.mdx"],
   },
+  images: {
+    domains: ["127.0.0.1", "kfwvxetvsoujgiighiqx.supabase.co"],
+  },
   transpilePackages: ["next-mdx-remote"],
   async redirects() {
     return [

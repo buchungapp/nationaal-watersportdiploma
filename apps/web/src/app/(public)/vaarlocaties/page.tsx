@@ -125,7 +125,7 @@ export default async function Page() {
                         target="_blank"
                         className="inline-flex items-center space-x-1"
                       >
-                        <StarIcon className="w-4 h-4 text-branding-dark" />
+                        <StarIcon className="size-4 text-branding-dark" />
                         <span className="font-semibold">{location.rating}</span>
                         <span className="text-sm text-slate-600">
                           ({location.user_ratings_total} reviews)
@@ -193,7 +193,7 @@ export default async function Page() {
                                 rel="noopener noreferrer"
                               >
                                 <TouchTarget>
-                                  <IconComponent className="w-4 h-4 text-branding-light/70 hover:text-branding-light" />
+                                  <IconComponent className="size-4 text-branding-light/70 hover:text-branding-light" />
                                 </TouchTarget>
                               </a>
                             </li>

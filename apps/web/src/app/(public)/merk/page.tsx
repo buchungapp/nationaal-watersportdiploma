@@ -122,7 +122,7 @@ export default function Page() {
                       className="flex items-center gap-2"
                       value="#FF8000"
                     >
-                      <div className="w-10 h-10 bg-branding-orange rounded-full" />
+                      <div className="size-10 bg-branding-orange rounded-full" />
                       <span className="text-slate-700 font-medium">
                         #FF8000
                       </span>
@@ -136,7 +136,7 @@ export default function Page() {
                       className="flex items-center gap-2"
                       value="#007FFF"
                     >
-                      <div className="w-10 h-10 bg-branding-light rounded-full" />
+                      <div className="size-10 bg-branding-light rounded-full" />
                       <span className="text-slate-700 font-medium">
                         #007FFF
                       </span>
@@ -150,7 +150,7 @@ export default function Page() {
                       className="flex items-center gap-2"
                       value="#0047AB"
                     >
-                      <div className="w-10 h-10 bg-branding-dark rounded-full" />
+                      <div className="size-10 bg-branding-dark rounded-full" />
                       <span className="text-slate-700 font-medium">
                         #0047AB
                       </span>

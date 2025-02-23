@@ -126,7 +126,7 @@ export default function Contact() {
                   value={"info@nationaalwatersportdiploma.nl"}
                   className="flex items-center gap-4 underline"
                 >
-                  <AtSymbolIcon className="h-5 w-5" />
+                  <AtSymbolIcon className="size-5" />
                   info@nationaalwatersportdiploma.nl
                 </CopyToClipboard>
               </li>
@@ -135,7 +135,7 @@ export default function Contact() {
                   href="tel:0857822777"
                   className="flex items-center gap-4 underline"
                 >
-                  <PhoneIcon className="h-5 w-5" />
+                  <PhoneIcon className="size-5" />
                   085 - 782 27 77
                 </InlineButton>
               </li>

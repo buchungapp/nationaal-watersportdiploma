@@ -25,7 +25,7 @@ export default function Feed({
             >
               <div className="w-px bg-slate-200" />
             </div>
-            <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-white">
+            <div className="relative flex size-6 flex-none items-center justify-center bg-white">
               <div className="h-1.5 w-1.5 rounded-full bg-slate-100 ring-1 ring-slate-300" />
             </div>
             <p className="flex-auto py-0.5 text-xs leading-5 text-slate-500">

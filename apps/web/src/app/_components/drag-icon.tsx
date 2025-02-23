@@ -4,7 +4,7 @@ export default function DragIcon({ isDragging }: { isDragging: boolean }) {
   return (
     <svg
       className={clsx(
-        "-ml-2.5 h-6 w-6",
+        "-ml-2.5 size-6",
         isDragging ? "cursor-grabbing opacity-80" : "cursor-grab",
       )}
       fill="#a1a1aa"
