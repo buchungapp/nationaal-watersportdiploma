@@ -75,14 +75,14 @@ export const certificateTemplates: CertificateTemplate[] = [
 
   // All EHBO from: https://www.rijksoverheid.nl/documenten/regelingen/2017/09/19/lijst-certificaten-kinder-ehbo
   {
-    id: "orangje-kruis-eerste-hulp-aan-kinderen",
+    id: "oranje-kruis-eerste-hulp-aan-kinderen",
     issuingAuthority: "Het Oranje Kruis",
     title: "Eerste Hulp aan Kinderen",
     additionalSearchTag: "EHBO",
     category: "veiligheid",
   },
   {
-    id: "orangje-kruis-eerste-hulp",
+    id: "oranje-kruis-eerste-hulp",
     issuingAuthority: "Het Oranje Kruis",
     title: "Eerste Hulp",
     additionalSearchTag: "EHBO",

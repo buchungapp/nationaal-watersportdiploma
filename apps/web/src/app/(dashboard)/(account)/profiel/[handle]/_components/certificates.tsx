@@ -18,7 +18,7 @@ import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,
 } from "~/lib/nwd";
-import { AddCertificate } from "./certificates/add-certificate";
+import { AddCertificate } from "./add-certificate/add-certificate";
 
 interface Props {
   person: {
