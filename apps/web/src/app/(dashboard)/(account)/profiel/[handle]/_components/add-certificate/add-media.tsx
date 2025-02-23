@@ -17,11 +17,9 @@ import Media from "./media";
 export function AddMedia({
   personId,
   externalCertificateId,
-  className,
 }: {
   personId: string;
   externalCertificateId: string;
-  className?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [validMedia, setValidMedia] = useState(false);
@@ -52,17 +50,17 @@ export function AddMedia({
 
   return (
     <>
-      <Button plain onClick={() => setIsOpen(true)} className={className}>
-        <div
-          className={
-            "w-full border border-dashed rounded-md flex flex-col items-center justify-center"
-          }
-        >
-          <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2 py-6">
-            Klik om een afbeelding te uploaden.
-          </div>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className={
+          "w-full h-full border border-dashed rounded-md flex flex-col items-center justify-center hover:bg-slate-100"
+        }
+      >
+        <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2 py-6">
+          Klik om een afbeelding te uploaden.
         </div>
-      </Button>
+      </button>
 
       <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Voeg een afbeelding aan je certificaat toe</DialogTitle>

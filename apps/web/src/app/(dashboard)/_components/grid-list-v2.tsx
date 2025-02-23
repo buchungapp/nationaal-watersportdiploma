@@ -28,16 +28,26 @@ export function GridListItemHeader({ children }: PropsWithChildren) {
   );
 }
 
+const gridListItemTitleClassNames =
+  "text-sm font-medium leading-6 text-slate-900";
 export function GridListItemTitle({
   children,
   ...linkProps
-}: Omit<React.ComponentPropsWithoutRef<typeof Link>, "className">) {
+}:
+  | Omit<React.ComponentPropsWithoutRef<typeof Link>, "className">
+  | Omit<React.ComponentPropsWithRef<"h3">, "className">) {
+  if ("href" in linkProps) {
+    return (
+      <Link {...linkProps}>
+        <h3 className={gridListItemTitleClassNames}>{children}</h3>
+      </Link>
+    );
+  }
+
   return (
-    <Link {...linkProps}>
-      <h3 className="text-sm font-medium leading-6 text-slate-900">
-        {children}
-      </h3>
-    </Link>
+    <h3 {...linkProps} className={gridListItemTitleClassNames}>
+      {children}
+    </h3>
   );
 }
 
