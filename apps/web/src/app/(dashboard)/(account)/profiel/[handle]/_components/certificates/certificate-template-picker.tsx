@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
+import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   Field,
   Fieldset,
@@ -24,6 +25,7 @@ function filterTemplates(
       template.id.toLowerCase().includes(lowerCaseQuery) ||
       template.title?.toLowerCase().includes(lowerCaseQuery) ||
       template.issuingAuthority?.toLowerCase().includes(lowerCaseQuery) ||
+      template.category?.toLowerCase().includes(lowerCaseQuery) ||
       template.additionalSearchTag?.toLowerCase().includes(lowerCaseQuery)
     );
   });
@@ -60,6 +62,11 @@ export function CertificateTemplatePicker({
     certificateTemplates,
     templateQuery,
   );
+  const categories = [
+    ...new Set(
+      filteredTemplates.map((template) => template.category).filter(Boolean),
+    ),
+  ] as string[];
 
   return (
     <Fieldset>
@@ -84,10 +91,28 @@ export function CertificateTemplatePicker({
           <ComboboxOption value={"other"}>
             <ComboboxLabel>Anders</ComboboxLabel>
           </ComboboxOption>
-          {filteredTemplates.map((template) => (
-            <ComboboxOption key={template.id} value={template.id}>
-              <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
-            </ComboboxOption>
+          {filteredTemplates
+            .filter((x) => !x.category)
+            .map((template) => (
+              <ComboboxOption key={template.id} value={template.id}>
+                <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
+              </ComboboxOption>
+            ))}
+          <Divider className="mt-1 mb-2" />
+          {categories.map((category) => (
+            <Fragment key={category}>
+              <p className="ml-2 font-semibold text-xs text-zinc-500 mb-1 uppercase">
+                {category}
+              </p>
+              {filteredTemplates
+                .filter((x) => x.category === category)
+                .map((template) => (
+                  <ComboboxOption key={template.id} value={template.id}>
+                    <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
+                  </ComboboxOption>
+                ))}
+              <Divider className="mt-1 mb-2 last:hidden" />
+            </Fragment>
           ))}
         </Combobox>
       </Field>
