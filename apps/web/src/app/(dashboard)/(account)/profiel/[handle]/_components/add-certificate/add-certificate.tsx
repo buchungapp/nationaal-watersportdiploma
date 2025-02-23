@@ -23,8 +23,10 @@ import { Metadata } from "./metadata";
 
 export function AddCertificate({
   personId,
+  className,
 }: {
   personId: string;
+  className?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<"media" | "metadata">("media");
@@ -60,7 +62,7 @@ export function AddCertificate({
 
   return (
     <>
-      <Button outline onClick={() => setIsOpen(true)}>
+      <Button outline onClick={() => setIsOpen(true)} className={className}>
         <PlusIcon className="size-8" />
         <span className="hidden sm:inline">Voeg diploma toe</span>
       </Button>

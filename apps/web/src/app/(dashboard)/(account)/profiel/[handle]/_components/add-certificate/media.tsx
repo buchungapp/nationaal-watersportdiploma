@@ -21,7 +21,7 @@ export default function Media({
     <Fieldset>
       <Legend className="mb-3">1. Upload een foto of scan</Legend>
       <Field>
-        <Dropzone
+        <MediaDropzone
           name="media"
           setValidMedia={setValidMedia}
           invalid={!!errors?.media}
@@ -32,7 +32,7 @@ export default function Media({
   );
 }
 
-function Dropzone({
+function MediaDropzone({
   required,
   name,
   setValidMedia,
