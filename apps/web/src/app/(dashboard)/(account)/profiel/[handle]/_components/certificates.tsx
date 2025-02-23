@@ -246,36 +246,24 @@ function ExternalCertificateDescriptionList({
 }: { certificate: ExternalCertificate }) {
   return (
     <>
-      {certificate.issuingAuthority ? (
-        <>
-          <DescriptionTerm>Uitgevende instantie</DescriptionTerm>
-          <DescriptionDetails>
-            {certificate.issuingAuthority}
-          </DescriptionDetails>
-        </>
-      ) : null}
-      {certificate.identifier ? (
-        <>
-          <DescriptionTerm>Diplomanummer</DescriptionTerm>
-          <DescriptionDetails>
-            <Code>{certificate.identifier}</Code>
-          </DescriptionDetails>
-        </>
-      ) : null}
-      {certificate.awardedAt ? (
-        <>
-          <DescriptionTerm>Behaald op</DescriptionTerm>
-          <DescriptionDetails>
-            {dayjs(certificate.awardedAt).format("DD-MM-YYYY")}
-          </DescriptionDetails>
-        </>
-      ) : null}
-      {certificate.location ? (
-        <>
-          <DescriptionTerm>Behaald bij</DescriptionTerm>
-          <DescriptionDetails>{certificate.location}</DescriptionDetails>
-        </>
-      ) : null}
+      <DescriptionTerm>Uitgevende instantie</DescriptionTerm>
+      <DescriptionDetails>
+        {certificate.issuingAuthority ? certificate.issuingAuthority : null}
+      </DescriptionDetails>
+      <DescriptionTerm>Diplomanummer</DescriptionTerm>
+      <DescriptionDetails>
+        {certificate.identifier ? <Code>certificate.identifier</Code> : null}
+      </DescriptionDetails>
+      <DescriptionTerm>Behaald op</DescriptionTerm>
+      <DescriptionDetails>
+        {certificate.awardedAt
+          ? dayjs(certificate.awardedAt).format("DD-MM-YYYY")
+          : null}
+      </DescriptionDetails>
+      <DescriptionTerm>Behaald bij</DescriptionTerm>
+      <DescriptionDetails>
+        {certificate.location ? certificate.location : null}
+      </DescriptionDetails>
     </>
   );
 }
