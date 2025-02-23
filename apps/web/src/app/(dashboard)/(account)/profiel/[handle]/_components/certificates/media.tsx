@@ -100,7 +100,7 @@ function Dropzone({
         type="file"
         name={name}
         required={required}
-        className="opacity-0 h-0 w-0"
+        className="hidden h-0 w-0"
         ref={hiddenInputRef}
       />
       {isLoading ? (
