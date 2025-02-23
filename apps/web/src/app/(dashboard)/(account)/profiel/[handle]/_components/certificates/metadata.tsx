@@ -27,38 +27,46 @@ export function Metadata({
     <Fieldset>
       <Legend className="mb-3">3. Vul de details over dit diploma in</Legend>
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-5 sm:gap-4">
-        <Field className="sm:col-span-4">
-          <Label>Uitgevende instantie</Label>
-          <Input
-            name="issuingAuthority"
-            defaultValue={template?.issuingAuthority}
-            invalid={!!errors?.issuingAuthority}
-          />
-        </Field>
-
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-4 sm:gap-4">
         <Field className="sm:col-span-4 relative">
-          <Label>Titel</Label>
+          <Label>
+            Titel <span className="text-branding-orange">*</span>
+          </Label>
           <Input
             name="title"
             required
+            placeholder="bv. Vaarbewijs I"
             defaultValue={template?.title}
             invalid={!!errors?.title}
           />
         </Field>
 
-        <Field className="sm:col-span-4 relative">
-          <Label>Identificatie</Label>
+        <Field className="sm:col-span-2">
+          <Label>Uitgevende instantie</Label>
+          <Input
+            name="issuingAuthority"
+            placeholder="bv. CBR"
+            defaultValue={template?.issuingAuthority}
+            invalid={!!errors?.issuingAuthority}
+          />
+        </Field>
+
+        <Field className="sm:col-span-2 relative">
+          <Label>Identificatie / Diplomanummer</Label>
           <Input
             name="identifier"
-            placeholder="bv. diploma nummer"
+            placeholder="bv. N3E345F"
             invalid={!!errors?.identifier}
           />
         </Field>
 
-        <Field className="sm:col-span-3">
+        <Field className="sm:col-span-2">
           <Label>Behaald bij</Label>
-          <Input name="issuingLocation" invalid={!!errors?.issuingLocation} />
+          <Input
+            name="issuingLocation"
+            placeholder="bv. CBR Utrecht"
+            invalid={!!errors?.issuingLocation}
+          />
         </Field>
 
         <Field className="sm:col-span-2 relative">
@@ -66,7 +74,7 @@ export function Metadata({
           <SmartDatePicker name="awardedAt" invalid={!!errors?.awardedAt} />
         </Field>
 
-        <Field className="sm:col-span-5">
+        <Field className="sm:col-span-4">
           <Label>Overige opmerkingen</Label>
           <Textarea
             name="additionalComments"
