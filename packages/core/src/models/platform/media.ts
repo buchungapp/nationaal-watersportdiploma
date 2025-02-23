@@ -99,24 +99,54 @@ export const create = withZod(
   },
 );
 
+export const remove = withZod(uuidSchema, z.void(), async (id) => {
+  const query = useQuery();
+  const supabase = useSupabaseClient();
+
+  const mediaRow = await query
+    .select()
+    .from(s.media)
+    .innerJoin(
+      uncontrolledSchema._objectTable,
+      eq(s.media.object_id, uncontrolledSchema._objectTable.id),
+    )
+    .where(eq(s.media.id, id))
+    .then(singleRow);
+
+  const bucketId = mediaRow.objects.bucket_id;
+  const objectName = mediaRow.objects.name;
+
+  assert(bucketId, "Bucket ID is expected");
+  assert(objectName, "Object name is expected");
+
+  const { error } = await supabase.storage.from(bucketId).remove([objectName]);
+  if (error) {
+    throw error;
+  }
+
+  await query
+    .update(s.media)
+    .set({ deletedAt: sql`NOW()` })
+    .where(eq(s.media.id, id));
+
+  return;
+});
+
 export const fromId = withZod(
   uuidSchema,
   outputSchema.nullable(),
   async (id) => {
     const query = useQuery();
 
-    const [mediaRow] = await query
+    const mediaRow = await query
       .select()
       .from(s.media)
       .innerJoin(
         uncontrolledSchema._objectTable,
         eq(s.media.object_id, uncontrolledSchema._objectTable.id),
       )
-      .where(eq(s.media.id, id));
-
-    if (!mediaRow) {
-      return null;
-    }
+      .where(eq(s.media.id, id))
+      .then(singleRow);
 
     const expectedMetadataSchema = z.object({
       width: z
