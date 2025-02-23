@@ -29,15 +29,13 @@ interface Props {
 export default async function PersonCertificates({ person }: Props) {
   return (
     <div className="lg:col-span-2">
-      <Subheading>Jouw Watersportcertificaten</Subheading>
+      <div className="w-full flex justify-between items-center mb-1">
+        <Subheading>Jouw Watersportcertificaten</Subheading>
+        <AddCertificate personId={person.id} />
+      </div>
       <Text>
         Hieronder vind je een overzicht van de Watersportcertificaten die je
-        hebt behaald. Klik ze aan en leer meer over je diploma en vier het
-        succes nog een keer! Mis je een NWD-diploma? Neem dan contact op met de{" "}
-        <TextLink href="/vaarlocaties" target="_blank">
-          vaarlocatie
-        </TextLink>{" "}
-        waar je de cursus hebt gevolgd.
+        hebt behaald.
       </Text>
       <Divider className="mt-2 mb-4" />
       <Suspense
@@ -112,9 +110,6 @@ async function Certificates({
             />
           );
         })}
-        <li>
-          <AddCertificate personId={personId} />
-        </li>
       </GridList>
     </>
   );

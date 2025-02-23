@@ -1,6 +1,5 @@
 "use client";
-import { InformationCircleIcon } from "@heroicons/react/16/solid";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { InformationCircleIcon, PlusIcon } from "@heroicons/react/16/solid";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -61,14 +60,10 @@ export function AddCertificate({
 
   return (
     <>
-      <button
-        type="button"
-        className="overflow-hidden w-full h-full min-h-67 min-w-87 rounded-xl border border-dashed border-slate-200 flex items-center justify-center flex-col text-zinc-500 cursor-pointer p-4"
-        onClick={() => setIsOpen(true)}
-      >
+      <Button outline onClick={() => setIsOpen(true)}>
         <PlusIcon className="size-8" />
-        Voeg een nieuw diploma, bewijs of certificaat toe
-      </button>
+        <span className="hidden sm:inline">Voeg diploma toe</span>
+      </Button>
 
       <Dialog open={isOpen} onClose={close}>
         <DialogTitle>

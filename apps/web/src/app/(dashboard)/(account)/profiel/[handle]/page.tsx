@@ -55,7 +55,6 @@ export default async function Page(props: {
     <div className="mx-auto grid max-w-3xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
       <div className="mt-4 mb-8 lg:col-span-3">
         <Heading>Welkom {person.firstName}!</Heading>
-
         <Text>
           Op deze pagina vind je jouw persoonlijke gegevens, NWD-diploma's en
           overige certificaten. Ook kan je hier je personalia wijzigen.
