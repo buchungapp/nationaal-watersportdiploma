@@ -113,6 +113,9 @@ export const remove = withZod(uuidSchema, z.void(), async (id) => {
     .where(eq(s.media.id, id))
     .then(singleRow);
 
+  // TODO: Use soft delete, then object_id needs to be set to null
+  await query.delete(s.media).where(eq(s.media.id, id));
+
   const bucketId = mediaRow.objects.bucket_id;
   const objectName = mediaRow.objects.name;
 
@@ -123,12 +126,6 @@ export const remove = withZod(uuidSchema, z.void(), async (id) => {
   if (error) {
     throw error;
   }
-
-  await query
-    .update(s.media)
-    .set({ deletedAt: sql`NOW()` })
-    .where(eq(s.media.id, id));
-
   return;
 });
 

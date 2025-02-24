@@ -68,7 +68,11 @@ export function AddMedia({
           <DialogBody>
             <Fieldset>
               <FieldGroup>
-                <Media setValidMedia={setValidMedia} errors={state?.errors} />
+                <Media
+                  stepIndex={1}
+                  setValidMedia={setValidMedia}
+                  errors={state?.errors}
+                />
               </FieldGroup>
             </Fieldset>
           </DialogBody>

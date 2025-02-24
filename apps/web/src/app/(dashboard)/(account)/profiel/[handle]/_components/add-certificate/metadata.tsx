@@ -7,25 +7,21 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { SmartDatePicker } from "~/app/(dashboard)/_components/natural-language-input";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import {
-  type CertificateTemplate,
-  certificateTemplates,
-} from "./certificate-templates";
 
 export function Metadata({
-  selectedCertificateTemplate,
+  stepIndex,
   errors,
+  defaultValues,
 }: {
-  selectedCertificateTemplate: CertificateTemplate["id"] | null;
+  stepIndex: number;
   errors?: Record<string, string>;
+  defaultValues?: Record<string, string | null | undefined>;
 }) {
-  const template = certificateTemplates.find(
-    (template) => template.id === selectedCertificateTemplate,
-  );
-
   return (
     <Fieldset>
-      <Legend className="mb-3">3. Vul de details over dit diploma in</Legend>
+      <Legend className="mb-3">
+        {stepIndex}. Vul de details over dit diploma in
+      </Legend>
 
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-4 sm:gap-4">
         <Field className="sm:col-span-4 relative">
@@ -36,7 +32,7 @@ export function Metadata({
             name="title"
             required
             placeholder="bv. Vaarbewijs I"
-            defaultValue={template?.title}
+            defaultValue={defaultValues?.title ?? undefined}
             invalid={!!errors?.title}
           />
         </Field>
@@ -46,7 +42,7 @@ export function Metadata({
           <Input
             name="issuingAuthority"
             placeholder="bv. CBR"
-            defaultValue={template?.issuingAuthority}
+            defaultValue={defaultValues?.issuingAuthority ?? undefined}
             invalid={!!errors?.issuingAuthority}
           />
         </Field>
@@ -56,6 +52,7 @@ export function Metadata({
           <Input
             name="identifier"
             placeholder="bv. N3E345F"
+            defaultValue={defaultValues?.identifier ?? undefined}
             invalid={!!errors?.identifier}
           />
         </Field>
@@ -65,19 +62,29 @@ export function Metadata({
           <Input
             name="issuingLocation"
             placeholder="bv. CBR Utrecht"
+            defaultValue={defaultValues?.issuingLocation ?? undefined}
             invalid={!!errors?.issuingLocation}
           />
         </Field>
 
         <Field className="sm:col-span-2 relative">
           <Label>Behaald op</Label>
-          <SmartDatePicker name="awardedAt" invalid={!!errors?.awardedAt} />
+          <SmartDatePicker
+            name="awardedAt"
+            defaultValue={
+              defaultValues?.awardedAt
+                ? new Date(defaultValues.awardedAt)
+                : undefined
+            }
+            invalid={!!errors?.awardedAt}
+          />
         </Field>
 
         <Field className="sm:col-span-4">
           <Label>Overige opmerkingen</Label>
           <Textarea
             name="additionalComments"
+            defaultValue={defaultValues?.additionalComments ?? undefined}
             invalid={!!errors?.additionalComments}
           />
         </Field>

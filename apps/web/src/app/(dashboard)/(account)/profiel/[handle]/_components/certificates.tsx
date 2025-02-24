@@ -27,6 +27,11 @@ import {
 } from "~/lib/nwd";
 import { AddCertificate } from "./add-certificate/add-certificate";
 import { AddMedia } from "./add-certificate/add-media";
+import {
+  EditCertificate,
+  EditCertificateButton,
+  EditCertificateProvider,
+} from "./add-certificate/edit-certificate";
 
 interface Props {
   person: {
@@ -111,7 +116,11 @@ async function Certificates({
       {certificates.length === 0 ? noResults : null}
       <GridList>
         {allCertificates.map((certificate) => (
-          <Certificate key={certificate.id} certificate={certificate} />
+          <Certificate
+            key={certificate.id}
+            certificate={certificate}
+            personId={personId}
+          />
         ))}
       </GridList>
     </>
@@ -120,8 +129,10 @@ async function Certificates({
 
 function Certificate({
   certificate,
+  personId,
 }: {
   certificate: NWDCertificate | ExternalCertificate;
+  personId: string;
 }) {
   const isNWD = "program" in certificate;
 
@@ -132,7 +143,10 @@ function Certificate({
           {isNWD ? (
             <NWDCertificateHeader certificate={certificate} />
           ) : (
-            <ExternalCertificateHeader certificate={certificate} />
+            <ExternalCertificateHeader
+              certificate={certificate}
+              personId={personId}
+            />
           )}
 
           <DescriptionList className="px-6">
@@ -149,7 +163,7 @@ function Certificate({
         ) : (
           <ExternalCertificateFooter
             certificate={certificate as ExternalCertificate}
-            personId="1"
+            personId={personId}
           />
         )}
       </div>
@@ -226,17 +240,20 @@ function NWDCertificateFooter({
 
 function ExternalCertificateHeader({
   certificate,
+  personId,
 }: {
   certificate: ExternalCertificate;
+  personId: string;
 }) {
   return (
     <GridListItemHeader>
       <GridListItemTitle>{certificate.title}</GridListItemTitle>
-      <GirdListItemOptions>
-        <DropdownItem>
-          <DropdownLabel>Diploma bewerken</DropdownLabel>
-        </DropdownItem>
-      </GirdListItemOptions>
+      <EditCertificateProvider>
+        <GirdListItemOptions>
+          <EditCertificateButton />
+        </GirdListItemOptions>
+        <EditCertificate personId={personId} certificate={certificate} />
+      </EditCertificateProvider>
     </GridListItemHeader>
   );
 }
@@ -252,7 +269,7 @@ function ExternalCertificateDescriptionList({
       </DescriptionDetails>
       <DescriptionTerm>Diplomanummer</DescriptionTerm>
       <DescriptionDetails>
-        {certificate.identifier ? <Code>certificate.identifier</Code> : null}
+        {certificate.identifier ? <Code>{certificate.identifier}</Code> : null}
       </DescriptionDetails>
       <DescriptionTerm>Behaald op</DescriptionTerm>
       <DescriptionDetails>

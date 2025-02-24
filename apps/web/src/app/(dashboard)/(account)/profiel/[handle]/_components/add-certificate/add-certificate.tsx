@@ -15,9 +15,12 @@ import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import Spinner from "~/app/_components/spinner";
-import { addExternalCertificate } from "../../_actions/certificate";
+import { createExternalCertificateAction } from "../../_actions/certificate";
 import { CertificateTemplatePicker } from "./certificate-template-picker";
-import type { CertificateTemplate } from "./certificate-templates";
+import {
+  type CertificateTemplate,
+  certificateTemplates,
+} from "./certificate-templates";
 import Media from "./media";
 import { Metadata } from "./metadata";
 
@@ -44,7 +47,7 @@ export function AddCertificate({
   };
 
   const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await addExternalCertificate(
+    const result = await createExternalCertificateAction(
       { personId },
       prevState,
       formData,
@@ -59,6 +62,10 @@ export function AddCertificate({
   };
 
   const [state, action] = useActionState(submit, undefined);
+
+  const template = certificateTemplates.find(
+    (template) => template.id === selectedCertificateTemplate,
+  );
 
   return (
     <>
@@ -95,12 +102,14 @@ export function AddCertificate({
             <Fieldset>
               <FieldGroup>
                 <Media
+                  stepIndex={1}
                   setValidMedia={setValidMedia}
                   errors={state?.errors}
                   small={!validMedia && currentStep !== "media"}
                 />
                 <div className={currentStep === "media" ? "hidden" : ""}>
                   <CertificateTemplatePicker
+                    stepIndex={2}
                     selectedCertificateTemplate={selectedCertificateTemplate}
                     setSelectedCertificateTemplate={
                       setSelectedCertificateTemplate
@@ -114,8 +123,12 @@ export function AddCertificate({
                   }
                 >
                   <Metadata
+                    stepIndex={3}
                     errors={state?.errors}
-                    selectedCertificateTemplate={selectedCertificateTemplate}
+                    defaultValues={{
+                      title: template?.title,
+                      issuingAuthority: template?.issuingAuthority,
+                    }}
                   />
                 </div>
               </FieldGroup>

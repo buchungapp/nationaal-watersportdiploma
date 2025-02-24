@@ -50,11 +50,13 @@ function templateLabel(template: CertificateTemplate) {
 export function CertificateTemplatePicker({
   selectedCertificateTemplate,
   setSelectedCertificateTemplate,
+  stepIndex,
 }: {
   selectedCertificateTemplate: CertificateTemplate["id"] | null;
   setSelectedCertificateTemplate: (
     template: CertificateTemplate["id"] | null,
   ) => void;
+  stepIndex: number;
 }) {
   const [templateQuery, setTemplateQuery] = useState("");
 
@@ -70,7 +72,7 @@ export function CertificateTemplatePicker({
 
   return (
     <Fieldset>
-      <Legend>2. Wat voor soort diploma is dit?</Legend>
+      <Legend>{stepIndex}. Wat voor soort diploma is dit?</Legend>
 
       <Field>
         <Combobox

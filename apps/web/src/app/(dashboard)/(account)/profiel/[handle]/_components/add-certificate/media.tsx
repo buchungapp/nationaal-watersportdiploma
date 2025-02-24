@@ -5,29 +5,48 @@ import { toast } from "sonner";
 import {
   Field,
   Fieldset,
+  Label,
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 
+import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
 export default function Media({
   setValidMedia,
   small,
   errors,
+  stepIndex,
+  allowRemove,
 }: {
-  setValidMedia: (valid: boolean) => void;
+  setValidMedia?: (valid: boolean) => void;
   small?: boolean;
   errors?: Record<string, string>;
+  allowRemove?: boolean;
+  stepIndex: number;
 }) {
+  const [removeMedia, setRemoveMedia] = useState(false);
+
   return (
     <Fieldset>
-      <Legend className="mb-3">1. Upload een foto of scan</Legend>
-      <Field>
-        <MediaDropzone
-          name="media"
-          setValidMedia={setValidMedia}
-          invalid={!!errors?.media}
-          small={small}
-        />
-      </Field>
+      <Legend className="mb-3">{stepIndex}. Upload een foto of scan</Legend>
+      {!removeMedia ? (
+        <Field>
+          <MediaDropzone
+            name="media"
+            setValidMedia={setValidMedia}
+            invalid={!!errors?.media}
+            small={small}
+          />
+        </Field>
+      ) : null}
+      {allowRemove ? (
+        <CheckboxField className="mt-3">
+          <Checkbox name="removeMedia" onChange={setRemoveMedia} />
+          <Label>Verwijder geüploade foto</Label>
+        </CheckboxField>
+      ) : null}
     </Fieldset>
   );
 }
