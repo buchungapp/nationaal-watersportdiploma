@@ -1,13 +1,12 @@
 import dayjs from "dayjs";
 import Image from "next/image";
-import { Suspense, cache } from "react";
+import { cache } from "react";
 import { TemplateHeader } from "~/app/(certificate)/diploma/[id]/_components/template-header";
 import {
   DescriptionDetails,
   DescriptionList,
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list-condensed";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   DropdownItem,
   DropdownLabel,
@@ -19,13 +18,11 @@ import {
   GridListItemHeader,
   GridListItemTitle,
 } from "~/app/(dashboard)/_components/grid-list-v2";
-import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { Code, Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { Code } from "~/app/(dashboard)/_components/text";
 import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,
 } from "~/lib/nwd";
-import { AddCertificate } from "./add-certificate/add-certificate";
 import { AddMedia } from "./add-certificate/add-media";
 import {
   EditCertificate,
@@ -33,53 +30,12 @@ import {
   EditCertificateProvider,
 } from "./add-certificate/edit-certificate";
 
-interface Props {
-  person: {
-    id: string;
-  };
-}
-
-type NWDCertificate = Awaited<
+export type NWDCertificate = Awaited<
   ReturnType<typeof listCertificatesForPerson>
 >[number];
-type ExternalCertificate = Awaited<
+export type ExternalCertificate = Awaited<
   ReturnType<typeof listExternalCertificatesForPerson>
 >[number];
-
-export default async function PersonCertificates({ person }: Props) {
-  return (
-    <div className="lg:col-span-2">
-      <div className="w-full flex justify-between items-center mb-1">
-        <Subheading>Jouw Watersportcertificaten</Subheading>
-        <AddCertificate className="-my-1.5" personId={person.id} />
-      </div>
-      <Text>
-        Hieronder vind je een overzicht van de Watersportcertificaten die je
-        hebt behaald.
-      </Text>
-      <Divider className="mt-2 mb-4" />
-      <Suspense
-        fallback={
-          <div className="animate-pulse h-67 w-87 bg-slate-200 rounded-xl -my-1.5" />
-        }
-      >
-        <Certificates
-          personId={person.id}
-          noResults={
-            <Text className="italic mb-2">
-              Je hebt nog geen NWD-diploma's behaald. Klopt dit niet? Neem dan
-              contact op met de{" "}
-              <TextLink href="/vaarlocaties" target="_blank">
-                vaarlocatie
-              </TextLink>{" "}
-              waar je de cursus hebt gevolgd.
-            </Text>
-          }
-        />
-      </Suspense>
-    </div>
-  );
-}
 
 const getAllCertificates = cache(async (personId: string) => {
   const certificates = await listCertificatesForPerson(personId);
@@ -102,7 +58,7 @@ const getAllCertificates = cache(async (personId: string) => {
   };
 });
 
-async function Certificates({
+export async function Certificates({
   personId,
   noResults = null,
 }: {
@@ -116,6 +72,31 @@ async function Certificates({
       {certificates.length === 0 ? noResults : null}
       <GridList>
         {allCertificates.map((certificate) => (
+          <Certificate
+            key={certificate.id}
+            certificate={certificate}
+            personId={personId}
+          />
+        ))}
+      </GridList>
+    </>
+  );
+}
+
+export async function NWDCertificates({
+  personId,
+  noResults = null,
+}: {
+  personId: string;
+  noResults?: React.ReactNode;
+}) {
+  const { certificates } = await getAllCertificates(personId);
+
+  return (
+    <>
+      {certificates.length === 0 ? noResults : null}
+      <GridList>
+        {certificates.map((certificate) => (
           <Certificate
             key={certificate.id}
             certificate={certificate}

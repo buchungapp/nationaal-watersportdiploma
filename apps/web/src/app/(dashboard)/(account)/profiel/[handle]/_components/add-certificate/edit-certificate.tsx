@@ -21,14 +21,10 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
 import Spinner from "~/app/_components/spinner";
-import type { listExternalCertificatesForPerson } from "~/lib/nwd";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
+import type { ExternalCertificate } from "../certificates";
 import Media from "./media";
 import { Metadata } from "./metadata";
-
-type ExternalCertificate = Awaited<
-  ReturnType<typeof listExternalCertificatesForPerson>
->[number];
 
 interface EditCertificateContextValue {
   isOpen: boolean;

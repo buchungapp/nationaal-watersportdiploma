@@ -14,7 +14,8 @@ import { EditDetails } from "./_components/action-buttons";
 import { PersonCohortProgress } from "./_components/cohort-progress";
 
 import { showNewWaterSportCertificates } from "~/lib/flags";
-import PersonCertificates from "./_components/certificates";
+import NWDCertificatesSection from "./_components/nwd-certificates-section";
+import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import PageWithoutNewWaterSportCertificates from "./old-page";
 
 async function ActionButton({ handle }: { handle: string }) {
@@ -109,7 +110,8 @@ export default async function Page(props: {
         }}
       />
 
-      <PersonCertificates person={person} />
+      <NWDCertificatesSection person={person} />
+      <WatersportCertificatesSection person={person} />
       <div className="lg:col-span-2">Logboek</div>
       {/* 
       <div className="space-y-12 xl:space-y-16">
