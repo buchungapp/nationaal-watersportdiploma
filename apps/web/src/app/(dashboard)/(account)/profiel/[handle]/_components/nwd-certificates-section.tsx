@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
+import { GridList } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { NWDCertificates } from "./certificates";
@@ -26,7 +27,10 @@ export default async function NWDCertificatesSection({
       <Divider className="mt-2 mb-4" />
       <Suspense
         fallback={
-          <div className="animate-pulse h-67 w-87 bg-slate-200 rounded-xl -my-1.5" />
+          <GridList>
+            <li className="animate-pulse h-107 sm:h-78.5 w-full bg-slate-200 rounded-xl" />
+            <li className="hidden sm:block animate-pulse h-107 sm:h-78.5 w-full bg-slate-200 rounded-xl delay-500" />
+          </GridList>
         }
       >
         <NWDCertificates
