@@ -32,7 +32,7 @@ export default function MediaViewer({
             <XMarkIcon />
           </Button>
         </div>
-        <DialogBody>
+        <DialogBody className="flex justify-center">
           <Image
             src={media.url}
             alt={media.alt || "Media"}
