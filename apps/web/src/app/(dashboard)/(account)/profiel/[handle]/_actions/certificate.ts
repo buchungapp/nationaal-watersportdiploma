@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  addMediaToExternalCertificate,
   createExternalCertificate,
   updateExternalCertificate,
 } from "~/lib/nwd";
@@ -251,7 +250,7 @@ export async function addMediaToExternalCertificateAction(
   try {
     const parsed = expectedSchema.parse(data);
 
-    await addMediaToExternalCertificate({
+    await updateExternalCertificate({
       personId,
       media: parsed.media,
       id: externalCertificateId,

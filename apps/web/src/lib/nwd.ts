@@ -379,7 +379,7 @@ export const updateExternalCertificate = async ({
   id: string;
   personId: string;
   media?: File | Buffer | null;
-  fields: {
+  fields?: {
     title?: string;
     awardedAt?: string | null;
     issuingAuthority?: string | null;
@@ -438,48 +438,6 @@ export const updateExternalCertificate = async ({
     }
 
     return certificate;
-  });
-};
-
-export const addMediaToExternalCertificate = async ({
-  personId,
-  media,
-  id,
-}: {
-  personId: string;
-  id: string;
-  media: File | Buffer;
-}) => {
-  return makeRequest(async () => {
-    const requestingUser = await getUserOrThrow();
-
-    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
-
-    if (!isSelf) {
-      throw new Error("Unauthorized");
-    }
-
-    const { mediaId: oldMediaId } = await Certificate.External.byId({
-      id,
-    });
-
-    if (oldMediaId !== null) {
-      await Platform.Media.remove(oldMediaId);
-    }
-
-    const buffer = Buffer.from(
-      new Uint8Array(media instanceof File ? await media.arrayBuffer() : media),
-    );
-
-    const { id: mediaId } = await Platform.Media.create({
-      file: buffer,
-      isPublic: false,
-    });
-
-    return await Certificate.External.update({
-      mediaId,
-      id,
-    });
   });
 };
 
