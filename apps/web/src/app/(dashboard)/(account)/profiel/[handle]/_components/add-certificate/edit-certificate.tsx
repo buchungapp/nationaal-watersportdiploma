@@ -105,7 +105,13 @@ export function EditCertificate({
         <DialogBody>
           <Fieldset>
             <FieldGroup>
-              <Media stepIndex={1} small errors={state?.errors} allowRemove />
+              <Media
+                stepIndex={1}
+                small
+                errors={state?.errors}
+                allowRemove
+                defaultValue={certificate.media?.url}
+              />
               <Metadata
                 stepIndex={2}
                 errors={state?.errors}

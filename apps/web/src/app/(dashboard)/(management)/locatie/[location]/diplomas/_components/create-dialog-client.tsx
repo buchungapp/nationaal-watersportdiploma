@@ -150,7 +150,7 @@ function CreateDialogClient({
         color="branding-orange"
         type="button"
         onClick={() => setIsOpen(true)}
-        className={"whitespace-nowrap"}
+        className="whitespace-nowrap"
       >
         <PlusIcon />
         Diploma toevoegen

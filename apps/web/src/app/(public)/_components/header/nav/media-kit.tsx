@@ -43,7 +43,7 @@ export default function MediaKit() {
   );
 
   return (
-    <Popover className={"relative inline"}>
+    <Popover className="relative inline">
       <PopoverButton
         ref={ref}
         onClick={handleClick}

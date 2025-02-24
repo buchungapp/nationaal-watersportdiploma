@@ -9,6 +9,8 @@ import {
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 
+import { ArrowPathIcon } from "@heroicons/react/16/solid";
+import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
@@ -19,12 +21,14 @@ export default function Media({
   errors,
   stepIndex,
   allowRemove,
+  defaultValue,
 }: {
   setValidMedia?: (valid: boolean) => void;
   small?: boolean;
   errors?: Record<string, string>;
   allowRemove?: boolean;
   stepIndex: number;
+  defaultValue?: string;
 }) {
   const [removeMedia, setRemoveMedia] = useState(false);
 
@@ -38,15 +42,36 @@ export default function Media({
             setValidMedia={setValidMedia}
             invalid={!!errors?.media}
             small={small}
+            defaultValue={defaultValue}
           />
         </Field>
       ) : null}
-      {allowRemove ? (
-        <CheckboxField className="mt-3">
-          <Checkbox name="removeMedia" onChange={setRemoveMedia} />
-          <Label>Verwijder geüploade foto</Label>
-        </CheckboxField>
-      ) : null}
+      <div className="flex flex-col sm:flex-row gap-1 justify-between sm:items-center">
+        {allowRemove ? (
+          <CheckboxField className="mt-3">
+            <Checkbox
+              name="removeMedia"
+              onChange={setRemoveMedia}
+              checked={removeMedia}
+            />
+            <Label>Verwijder geüploade foto</Label>
+          </CheckboxField>
+        ) : null}
+        <Button
+          className="mt-3"
+          outline
+          onClick={() => {
+            setRemoveMedia(true);
+            setValidMedia?.(false);
+            setTimeout(() => {
+              setRemoveMedia(false);
+            }, 100);
+          }}
+        >
+          <ArrowPathIcon />
+          Wijziging ongedaan maken
+        </Button>
+      </div>
     </Fieldset>
   );
 }
@@ -57,16 +82,18 @@ function MediaDropzone({
   setValidMedia,
   small,
   invalid,
+  defaultValue,
 }: {
   required?: boolean;
   name: string;
   setValidMedia?: (valid: boolean) => void;
   small?: boolean;
   invalid?: boolean;
+  defaultValue?: string;
 }) {
   const hiddenInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(defaultValue ?? null);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
