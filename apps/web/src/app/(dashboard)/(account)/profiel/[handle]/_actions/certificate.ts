@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   createExternalCertificate,
+  removeExternalCertificate,
   updateExternalCertificate,
 } from "~/lib/nwd";
 
@@ -179,8 +180,46 @@ export async function updateExternalCertificateAction(
       errors: {},
     };
   } catch (error) {
-    console.log(error);
+    if (error instanceof z.ZodError) {
+      return {
+        message: "Error",
+        errors: error.issues.reduce(
+          (acc, issue) => {
+            acc[issue.path.join(".")] = issue.message;
+            return acc;
+          },
+          {} as Record<string, string>,
+        ),
+      };
+    }
 
+    return {
+      message: "Error",
+      errors: {},
+    };
+  }
+}
+
+export async function removeExternalCertificateAction({
+  personId,
+  externalCertificateId,
+}: {
+  personId: string;
+  externalCertificateId: string;
+}) {
+  try {
+    await removeExternalCertificate({
+      personId,
+      id: externalCertificateId,
+    });
+
+    revalidatePath("/profiel/[handle]", "page");
+
+    return {
+      message: "Success",
+      errors: {},
+    };
+  } catch (error) {
     if (error instanceof z.ZodError) {
       return {
         message: "Error",

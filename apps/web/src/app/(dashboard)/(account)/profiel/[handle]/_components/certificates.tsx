@@ -19,16 +19,20 @@ import {
   GridListItemTitle,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Code } from "~/app/(dashboard)/_components/text";
+import { DialogProvider } from "~/app/(dashboard)/_hooks/use-dialog";
 import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,
 } from "~/lib/nwd";
-import { AddMedia } from "./add-certificate/add-media";
+import { AddMedia } from "./certificate/add-media";
 import {
   EditCertificate,
   EditCertificateButton,
-  EditCertificateProvider,
-} from "./add-certificate/edit-certificate";
+} from "./certificate/edit-certificate";
+import {
+  RemoveCertificate,
+  RemoveCertificateButton,
+} from "./certificate/remove-certificate";
 import MediaViewer from "./media-viewer";
 
 export type NWDCertificate = Awaited<
@@ -230,12 +234,14 @@ function ExternalCertificateHeader({
   return (
     <GridListItemHeader>
       <GridListItemTitle>{certificate.title}</GridListItemTitle>
-      <EditCertificateProvider>
+      <DialogProvider>
         <GirdListItemOptions>
           <EditCertificateButton />
+          <RemoveCertificateButton />
         </GirdListItemOptions>
+        <RemoveCertificate personId={personId} certificateId={certificate.id} />
         <EditCertificate personId={personId} certificate={certificate} />
-      </EditCertificateProvider>
+      </DialogProvider>
     </GridListItemHeader>
   );
 }

@@ -220,3 +220,28 @@ export const update = withZod(
     return row;
   },
 );
+
+export const remove = withZod(uuidSchema, z.void(), async (input) => {
+  const query = useQuery();
+
+  const { mediaId } = await query
+    .select({
+      mediaId: s.externalCertificate.mediaId,
+    })
+    .from(s.externalCertificate)
+    .where(
+      and(
+        eq(s.externalCertificate.id, input),
+        isNull(s.externalCertificate.deletedAt),
+      ),
+    )
+    .then(singleRow);
+
+  if (mediaId) {
+    await Platform.Media.remove(mediaId);
+  }
+
+  await query
+    .delete(s.externalCertificate)
+    .where(and(eq(s.externalCertificate.id, input)));
+});

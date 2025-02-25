@@ -441,6 +441,26 @@ export const updateExternalCertificate = async ({
   });
 };
 
+export const removeExternalCertificate = async ({
+  personId,
+  id,
+}: {
+  personId: string;
+  id: string;
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Certificate.External.remove(id);
+  });
+};
+
 export const listCertificatesByNumber = cache(
   async (
     numbers: string[],

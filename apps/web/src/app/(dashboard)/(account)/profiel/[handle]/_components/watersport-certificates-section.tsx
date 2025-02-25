@@ -3,7 +3,7 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { GridList } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { AddCertificate } from "./add-certificate/add-certificate";
+import { AddCertificate } from "./certificate/add-certificate";
 import { Certificates } from "./certificates";
 
 export default async function WatersportCertificatesSection({

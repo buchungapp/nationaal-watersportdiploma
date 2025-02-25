@@ -1,11 +1,5 @@
 "use client";
-import {
-  type PropsWithChildren,
-  createContext,
-  useActionState,
-  useContext,
-  useState,
-} from "react";
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -20,47 +14,17 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
+import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
 import Media from "./media";
 import { Metadata } from "./metadata";
 
-interface EditCertificateContextValue {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}
-
-const EditCertificateContext = createContext<EditCertificateContextValue>(
-  {} as EditCertificateContextValue,
-);
-
-export function EditCertificateProvider({ children }: PropsWithChildren) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  return (
-    <EditCertificateContext.Provider value={{ isOpen, setIsOpen }}>
-      {children}
-    </EditCertificateContext.Provider>
-  );
-}
-
-function useEditCertificateDialog() {
-  const context = useContext(EditCertificateContext);
-  if (context === undefined) {
-    throw new Error(
-      "useEditCertificateDialog must be used within a EditCertificateProvider",
-    );
-  }
-
-  return context;
-}
-
 export function EditCertificateButton() {
-  const { setIsOpen } = useEditCertificateDialog();
-
+  const { open } = useDialog("edit-certificate");
   return (
-    <DropdownItem onClick={() => setIsOpen(true)}>
+    <DropdownItem onClick={open}>
       <DropdownLabel>Diploma bewerken</DropdownLabel>
     </DropdownItem>
   );
@@ -73,11 +37,7 @@ export function EditCertificate({
   personId: string;
   certificate: ExternalCertificate;
 }) {
-  const { isOpen, setIsOpen } = useEditCertificateDialog();
-
-  const close = () => {
-    setIsOpen(false);
-  };
+  const { isOpen, close } = useDialog("edit-certificate");
 
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await updateExternalCertificateAction(
