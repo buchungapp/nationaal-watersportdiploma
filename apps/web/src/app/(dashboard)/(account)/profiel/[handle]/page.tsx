@@ -112,30 +112,7 @@ export default async function Page(props: {
 
       <NWDCertificatesSection person={person} />
       <WatersportCertificatesSection person={person} />
-      <div className="lg:col-span-2">Logboek</div>
-      {/* 
-      <div className="space-y-12 xl:space-y-16">
-        
-
-        <div>
-          <Subheading>Jouw overige certificaten</Subheading>
-          <Text>
-            Hieronder vind je een overzicht van andere certificaten die je
-            behaalt hebt, zoals CWO diploma's.
-          </Text>
-          <Divider className="mt-2 mb-4" />
-          <Suspense>
-            <ExternalCertificates
-              personId={person.id}
-              noResults={
-                <Text className="italic">
-                  We hebben geen overige certificaten voor jou kunnen vinden.
-                </Text>
-              }
-            />
-          </Suspense>
-        </div>
-      </div> */}
+      {/* <div className="lg:col-span-2">Logboek</div> */}
     </div>
   );
 }
