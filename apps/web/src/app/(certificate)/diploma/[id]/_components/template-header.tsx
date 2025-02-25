@@ -14,8 +14,8 @@ export function TemplateHeader({
   degreeRang: TemplateData["program"]["degree"]["rang"];
 }) {
   return (
-    <header className="bg-branding-light space-y-4 flex justify-center flex-col py-4">
-      <div className="bg-white flex justify-between rounded-full my-1 mx-4 items-center p-2">
+    <header className="bg-branding-light space-y-3 flex justify-center flex-col py-4">
+      <div className="bg-white flex justify-between rounded-full mx-4 items-center p-2">
         <div className="flex shrink-0">
           <Logo className="h-24 w-24 p-2 hidden @sm:block text-white" />
           <Wordmark className="h-24 hidden @lg:block" />
