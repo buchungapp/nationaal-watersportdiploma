@@ -101,32 +101,13 @@ export const create = withZod(
 
 export const remove = withZod(uuidSchema, z.void(), async (id) => {
   const query = useQuery();
-  const supabase = useSupabaseClient();
 
-  const mediaRow = await query
-    .select()
-    .from(s.media)
-    .innerJoin(
-      uncontrolledSchema._objectTable,
-      eq(s.media.object_id, uncontrolledSchema._objectTable.id),
-    )
-    .where(eq(s.media.id, id))
-    .then(singleRow);
-
-  // TODO: Use soft delete, then object_id needs to be set to null
-  await query.delete(s.media).where(eq(s.media.id, id));
-
-  const bucketId = mediaRow.objects.bucket_id;
-  const objectName = mediaRow.objects.name;
-
-  assert(bucketId, "Bucket ID is expected");
-  assert(objectName, "Object name is expected");
-
-  const { error } = await supabase.storage.from(bucketId).remove([objectName]);
-  if (error) {
-    throw error;
-  }
-  return;
+  await query
+    .update(s.media)
+    .set({
+      deletedAt: sql`NOW()`,
+    })
+    .where(and(eq(s.media.id, id), isNull(s.media.deletedAt)));
 });
 
 export const fromId = withZod(
@@ -142,7 +123,7 @@ export const fromId = withZod(
         uncontrolledSchema._objectTable,
         eq(s.media.object_id, uncontrolledSchema._objectTable.id),
       )
-      .where(eq(s.media.id, id))
+      .where(and(eq(s.media.id, id), isNull(s.media.deletedAt)))
       .then(singleRow);
 
     const expectedMetadataSchema = z.object({

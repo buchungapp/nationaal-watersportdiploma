@@ -70,11 +70,11 @@ export async function Certificates({
   personId: string;
   noResults?: React.ReactNode;
 }) {
-  const { allCertificates, certificates } = await getAllCertificates(personId);
+  const { allCertificates } = await getAllCertificates(personId);
 
   return (
     <>
-      {certificates.length === 0 ? noResults : null}
+      {allCertificates.length === 0 ? noResults : null}
       <GridList>
         {allCertificates.map((certificate) => (
           <Certificate

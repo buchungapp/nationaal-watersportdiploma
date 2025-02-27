@@ -75,13 +75,10 @@ export function AddCertificate({
       </Button>
 
       <Dialog open={isOpen} onClose={close}>
-        <DialogTitle>
-          Voeg een nieuw diploma, bewijs of certificaat toe
-        </DialogTitle>
+        <DialogTitle>Voeg een nieuw diploma toe</DialogTitle>
         <Text>
-          Hier kan je je diploma uploaden super leuk dat betekent dit en klik op
-          dit helpartikel voor meer info
-          {/* TODO: change */}
+          Upload een kopie van je diploma en vul de details in. Alleen de titel
+          is verplicht.
         </Text>
         {currentStep === "media" ? (
           <Notification color="blue" className="justify-between mt-3">

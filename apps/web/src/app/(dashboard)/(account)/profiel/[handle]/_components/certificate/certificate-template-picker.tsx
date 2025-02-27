@@ -70,6 +70,9 @@ export function CertificateTemplatePicker({
     ),
   ] as string[];
 
+  const hasQuery = templateQuery !== "";
+  const templatesWithoutCategory = filteredTemplates.filter((x) => !x.category);
+
   return (
     <Fieldset>
       <Legend>{stepIndex}. Wat voor soort diploma is dit?</Legend>
@@ -80,7 +83,7 @@ export function CertificateTemplatePicker({
           setQuery={setTemplateQuery}
           onChange={(value) => setSelectedCertificateTemplate(value)}
           displayValue={(value) => {
-            if (value === "other") return "Anders";
+            if (value === "other") return "Overig";
 
             const template = certificateTemplates.find(
               (template) => template.id === value,
@@ -90,17 +93,15 @@ export function CertificateTemplatePicker({
             return templateLabel(template);
           }}
         >
-          <ComboboxOption value={"other"}>
-            <ComboboxLabel>Anders</ComboboxLabel>
-          </ComboboxOption>
-          {filteredTemplates
-            .filter((x) => !x.category)
-            .map((template) => (
-              <ComboboxOption key={template.id} value={template.id}>
-                <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
-              </ComboboxOption>
-            ))}
-          <Divider className="mt-1 mb-2" />
+          {!hasQuery ? <OtherTemplateOption /> : null}
+          {templatesWithoutCategory.map((template) => (
+            <ComboboxOption key={template.id} value={template.id}>
+              <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
+            </ComboboxOption>
+          ))}
+          {!hasQuery || templatesWithoutCategory.length > 0 ? (
+            <Divider className="mt-1 mb-2" />
+          ) : null}
           {categories.map((category) => (
             <Fragment key={category}>
               <p className="ml-2 font-semibold text-xs text-zinc-500 mb-1 uppercase">
@@ -116,8 +117,17 @@ export function CertificateTemplatePicker({
               <Divider className="mt-1 mb-2 last:hidden" />
             </Fragment>
           ))}
+          {hasQuery ? <OtherTemplateOption /> : null}
         </Combobox>
       </Field>
     </Fieldset>
+  );
+}
+
+function OtherTemplateOption() {
+  return (
+    <ComboboxOption value={"other"}>
+      <ComboboxLabel>Overig</ComboboxLabel>
+    </ComboboxOption>
   );
 }

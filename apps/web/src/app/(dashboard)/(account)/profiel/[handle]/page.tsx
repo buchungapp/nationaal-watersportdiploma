@@ -53,8 +53,8 @@ export default async function Page(props: {
   await posthog.shutdown();
 
   return (
-    <div className="mx-auto grid max-w-3xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-      <div className="mt-4 mb-8 lg:col-span-3">
+    <div className="mx-auto grid max-w-3xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+      <div className="mt-4 lg:col-span-3">
         <Heading>Welkom {person.firstName}!</Heading>
         <Text>
           Op deze pagina vind je jouw persoonlijke gegevens, NWD-diploma's en
@@ -62,7 +62,7 @@ export default async function Page(props: {
         </Text>
       </div>
 
-      <div className="lg:row-start-2 lg:row-span-3">
+      <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3">
         <div className="flex items-center justify-between">
           <Subheading>Personalia</Subheading>
           <Suspense

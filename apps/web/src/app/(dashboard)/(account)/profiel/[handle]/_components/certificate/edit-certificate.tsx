@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -18,7 +19,6 @@ import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
-import Media from "./media";
 import { Metadata } from "./metadata";
 
 export function EditCertificateButton() {
@@ -65,15 +65,20 @@ export function EditCertificate({
         <DialogBody>
           <Fieldset>
             <FieldGroup>
-              <Media
-                stepIndex={1}
-                small
-                errors={state?.errors}
-                allowRemove
-                defaultValue={certificate.media?.url}
-              />
+              {media ? (
+                <div className="p-1 w-full flex justify-center rounded-md bg-slate-100">
+                  <Image
+                    src={media.url}
+                    alt={media.alt ?? media.name}
+                    width={media.width ?? 100}
+                    height={media.height ?? 100}
+                    className="rounded w-auto h-auto max-h-45 object-contain"
+                  />
+                </div>
+              ) : null}
+
               <Metadata
-                stepIndex={2}
+                stepIndex={1}
                 errors={state?.errors}
                 defaultValues={{ issuingLocation: location, ...defaultValues }}
               />

@@ -1,6 +1,6 @@
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
@@ -27,6 +27,7 @@ export const byId = withZod(
     mediaId: z.string().nullable(),
     metadata: z.record(z.string(), z.string()).nullable(),
     media: outputSchema.nullable(),
+    additionalComments: z.string().nullable(),
   }),
   async (input) => {
     const query = useQuery();
@@ -91,6 +92,7 @@ export const listForPerson = withZod(
       mediaId: z.string().nullable(),
       metadata: z.record(z.string(), z.string()).nullable(),
       media: outputSchema.nullable(),
+      additionalComments: z.string().nullable(),
     })
     .array(),
   async (input) => {
@@ -242,6 +244,9 @@ export const remove = withZod(uuidSchema, z.void(), async (input) => {
   }
 
   await query
-    .delete(s.externalCertificate)
+    .update(s.externalCertificate)
+    .set({
+      deletedAt: sql`NOW()`,
+    })
     .where(and(eq(s.externalCertificate.id, input)));
 });

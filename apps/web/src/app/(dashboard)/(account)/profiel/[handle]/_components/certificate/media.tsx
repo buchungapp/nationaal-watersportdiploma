@@ -31,21 +31,32 @@ export default function Media({
   defaultValue?: string;
 }) {
   const [removeMedia, setRemoveMedia] = useState(false);
+  const [filled, setFilled] = useState(false);
 
   return (
     <Fieldset>
-      <Legend className="mb-3">{stepIndex}. Upload een foto of scan</Legend>
+      <Legend className="mb-3">
+        {stepIndex}. Upload een kopie van je certificaat (jpg, png of pdf)
+      </Legend>
       {!removeMedia ? (
         <Field>
           <MediaDropzone
             name="media"
             setValidMedia={setValidMedia}
+            setFilled={setFilled}
             invalid={!!errors?.media}
             small={small}
             defaultValue={defaultValue}
           />
         </Field>
-      ) : null}
+      ) : (
+        <div className="w-full mt-3 border border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer h-50">
+          <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2">
+            Sleep hier je afbeelding heen, of klik om te uploaden.
+            <span>Max 5MB.</span>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-1 justify-between sm:items-center">
         {allowRemove ? (
           <CheckboxField className="mt-3">
@@ -57,20 +68,23 @@ export default function Media({
             <Label>Verwijder geüploade foto</Label>
           </CheckboxField>
         ) : null}
-        <Button
-          className="mt-3"
-          outline
-          onClick={() => {
-            setRemoveMedia(true);
-            setValidMedia?.(false);
-            setTimeout(() => {
-              setRemoveMedia(false);
-            }, 100);
-          }}
-        >
-          <ArrowPathIcon />
-          Wijziging ongedaan maken
-        </Button>
+        {filled ? (
+          <Button
+            className="mt-3"
+            outline
+            onClick={() => {
+              setRemoveMedia(true);
+              setFilled(false);
+              setValidMedia?.(false);
+              setTimeout(() => {
+                setRemoveMedia(false);
+              }, 1000);
+            }}
+          >
+            <ArrowPathIcon />
+            Verwijder upload
+          </Button>
+        ) : null}
       </div>
     </Fieldset>
   );
@@ -82,11 +96,13 @@ function MediaDropzone({
   setValidMedia,
   small,
   invalid,
+  setFilled,
   defaultValue,
 }: {
   required?: boolean;
   name: string;
   setValidMedia?: (valid: boolean) => void;
+  setFilled?: (filled: boolean) => void;
   small?: boolean;
   invalid?: boolean;
   defaultValue?: string;
@@ -99,6 +115,7 @@ function MediaDropzone({
     useDropzone({
       maxFiles: 1,
       onDropRejected: ([reject]) => {
+        setFilled?.(true);
         setValidMedia?.(false);
         setPreview(null);
 
@@ -114,6 +131,7 @@ function MediaDropzone({
       accept: { "image/png": [".png"], "image/jpeg": [".jpg", ".jpeg"] },
 
       onDropAccepted: (acceptedFiles) => {
+        setFilled?.(true);
         setIsLoading(true);
         setValidMedia?.(true);
 
