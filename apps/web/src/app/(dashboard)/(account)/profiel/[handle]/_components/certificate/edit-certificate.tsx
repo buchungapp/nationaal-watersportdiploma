@@ -19,6 +19,7 @@ import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
+import { PDFViewer } from "../pdf-viewer";
 import { Metadata } from "./metadata";
 
 export function EditCertificateButton() {
@@ -67,13 +68,19 @@ export function EditCertificate({
             <FieldGroup>
               {media ? (
                 <div className="p-1 w-full flex justify-center rounded-md bg-slate-100">
-                  <Image
-                    src={media.url}
-                    alt={media.alt ?? media.name}
-                    width={media.width ?? 100}
-                    height={media.height ?? 100}
-                    className="rounded w-auto h-auto max-h-45 object-contain"
-                  />
+                  {media.type === "image" ? (
+                    <Image
+                      src={media.url}
+                      alt={media.alt ?? media.name}
+                      width={media.width ?? 100}
+                      height={media.height ?? 100}
+                      className="rounded w-auto h-auto max-h-45 object-contain"
+                    />
+                  ) : (
+                    <div className="h-45 w-full">
+                      <PDFViewer file={media.url} />
+                    </div>
+                  )}
                 </div>
               ) : null}
 
