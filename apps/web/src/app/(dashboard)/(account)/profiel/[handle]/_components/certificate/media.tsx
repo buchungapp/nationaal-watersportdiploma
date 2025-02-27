@@ -8,13 +8,16 @@ import {
   Label,
   Legend,
 } from "~/app/(dashboard)/_components/fieldset";
-
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
 import { ArrowPathIcon } from "@heroicons/react/16/solid";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
+import { PDFViewer } from "../pdf-viewer";
+
 export default function Media({
   setValidMedia,
   small,
@@ -110,6 +113,7 @@ function MediaDropzone({
   const hiddenInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(defaultValue ?? null);
+  const [type, setType] = useState<"image" | "pdf" | null>(null);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
@@ -128,7 +132,11 @@ function MediaDropzone({
         }
       },
       maxSize: 5_000_000, // 5MB
-      accept: { "image/png": [".png"], "image/jpeg": [".jpg", ".jpeg"] },
+      accept: {
+        "image/png": [".png"],
+        "image/jpeg": [".jpg", ".jpeg"],
+        "application/pdf": [".pdf"],
+      },
 
       onDropAccepted: (acceptedFiles) => {
         setFilled?.(true);
@@ -142,6 +150,7 @@ function MediaDropzone({
           for (const file of acceptedFiles) {
             dataTransfer.items.add(file);
             setPreview(URL.createObjectURL(file));
+            setType(file.type.includes("pdf") ? "pdf" : "image");
           }
           hiddenInputRef.current.files = dataTransfer.files;
         }
@@ -174,12 +183,19 @@ function MediaDropzone({
       ) : (
         <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2">
           <input {...getInputProps()} />
+
           {preview ? (
-            <img
-              src={preview}
-              alt="certificaat voorbeeld"
-              className="rounded max-h-45"
-            />
+            type === "image" ? (
+              <img
+                src={preview}
+                alt="certificaat voorbeeld"
+                className="rounded max-h-45"
+              />
+            ) : (
+              <div className="h-45 w-full">
+                <PDFViewer file={preview} />
+              </div>
+            )
           ) : (
             <>
               Sleep hier je afbeelding heen, of klik om te uploaden.

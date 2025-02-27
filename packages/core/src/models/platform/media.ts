@@ -37,7 +37,10 @@ export const create = withZod(
       throw new Error("Failed to determine file type");
     }
 
-    if (!type.mime.startsWith("image/")) {
+    const isImage = type.mime.startsWith("image/");
+    const isPdf = type.mime.startsWith("application/pdf");
+
+    if (!isImage && !isPdf) {
       throw new Error("Unsupported file type");
     }
 
@@ -69,7 +72,14 @@ export const create = withZod(
       throw new Error("Failed to upload file");
     }
 
-    const dimensions = imageSize(input.file);
+    let metadata: unknown;
+    if (isImage) {
+      const dimensions = imageSize(input.file);
+      metadata = sql`(((${JSON.stringify({
+        width: dimensions.width,
+        height: dimensions.height,
+      })})::jsonb)#>> '{}')::jsonb`;
+    }
 
     const query = useQuery();
 
@@ -81,13 +91,10 @@ export const create = withZod(
         size: input.file.length,
         mimeType: type.mime,
         status: "ready",
-        type: "image",
+        type: isPdf ? "file" : "image",
         actorId: input.actorId,
         locationId: input.locationId,
-        _metadata: sql`(((${JSON.stringify({
-          width: dimensions.width,
-          height: dimensions.height,
-        })})::jsonb)#>> '{}')::jsonb`,
+        _metadata: metadata,
       })
       .returning({ id: s.media.id });
 
@@ -126,18 +133,23 @@ export const fromId = withZod(
       .where(and(eq(s.media.id, id), isNull(s.media.deletedAt)))
       .then(singleRow);
 
-    const expectedMetadataSchema = z.object({
-      width: z
-        .number()
-        .int()
-        .nullable()
-        .catch(() => null),
-      height: z
-        .number()
-        .int()
-        .nullable()
-        .catch(() => null),
-    });
+    const expectedMetadataSchema = z
+      .object({
+        width: z
+          .number()
+          .int()
+          .nullable()
+          .catch(() => null),
+        height: z
+          .number()
+          .int()
+          .nullable()
+          .catch(() => null),
+      })
+      .catch(() => ({
+        width: null,
+        height: null,
+      }));
     const { height, width } = expectedMetadataSchema.parse(
       mediaRow.media._metadata,
     );
@@ -150,7 +162,7 @@ export const fromId = withZod(
 
     return {
       id: mediaRow.media.id,
-      type: "image" as const,
+      type: mediaRow.media.type,
       url: constructBaseUrl(bucketId, objectName),
       transformUrl: constructTransformBaseUrl(bucketId, objectName),
       name: getNameFromObjectName(objectName),

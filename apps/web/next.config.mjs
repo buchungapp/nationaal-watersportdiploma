@@ -7,6 +7,9 @@ const nextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   experimental: {
     mdxRs: true,
+    serverActions: {
+      bodySizeLimit: "6mb",
+    },
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
@@ -53,12 +56,13 @@ const nextConfig = {
       },
     ];
   },
-  /** Uncomment to enable WhyDidYouRender */
-  // webpack: (config, context) => {
-  //   injectWhyDidYouRender(config, context);
+  webpack: (config, context) => {
+    /** Uncomment to enable WhyDidYouRender */
+    // injectWhyDidYouRender(config, context);
 
-  //   return config;
-  // },
+    config.resolve.alias.canvas = false;
+    return config;
+  },
 };
 
 const withMDX = nextMDX({

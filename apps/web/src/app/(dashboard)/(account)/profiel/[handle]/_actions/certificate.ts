@@ -12,6 +12,7 @@ const MAX_FILE_SIZE = 5_000_000;
 const ACCEPTED_IMAGE_TYPES = {
   "image/png": [".png"],
   "image/jpeg": [".jpg", ".jpeg"],
+  "application/pdf": [".pdf"],
 };
 
 function extractFileExtension(file: File) {
@@ -47,7 +48,7 @@ export async function createExternalCertificateAction(
               file.type as keyof typeof ACCEPTED_IMAGE_TYPES
             ].includes(extractFileExtension(file))),
         {
-          message: "Only images are allowed to be sent.",
+          message: "Only images or pdfs are allowed to be sent.",
         },
       ),
     awardedAt: z.string().date().nullable().default(null),
@@ -136,7 +137,7 @@ export async function updateExternalCertificateAction(
               file.type as keyof typeof ACCEPTED_IMAGE_TYPES
             ].includes(extractFileExtension(file))),
         {
-          message: "Only images are allowed to be sent.",
+          message: "Only images or pdfs are allowed to be sent.",
         },
       )
       .optional(),
@@ -270,7 +271,7 @@ export async function addMediaToExternalCertificateAction(
             file.type as keyof typeof ACCEPTED_IMAGE_TYPES
           ].includes(extractFileExtension(file)),
         {
-          message: "Only images are allowed to be sent.",
+          message: "Only images or pdfs are allowed to be sent.",
         },
       ),
   });

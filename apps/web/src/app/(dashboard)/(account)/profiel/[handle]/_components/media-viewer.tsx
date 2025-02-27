@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import type { ExternalCertificate } from "./certificates";
+import { PDFViewer } from "./pdf-viewer";
 
 type Media = NonNullable<ExternalCertificate["media"]>;
 
@@ -33,13 +34,17 @@ export default function MediaViewer({
           </Button>
         </div>
         <DialogBody className="flex justify-center">
-          <Image
-            src={media.url}
-            alt={media.alt || "Media"}
-            width={media.width || 100}
-            height={media.height || 100}
-            className="rounded-xs w-auto object-contain h-auto"
-          />
+          {media.type === "image" ? (
+            <Image
+              src={media.url}
+              alt={media.alt || "Media"}
+              width={media.width || 100}
+              height={media.height || 100}
+              className="rounded-xs w-auto object-contain h-auto"
+            />
+          ) : (
+            <PDFViewer file={media.url} />
+          )}
         </DialogBody>
       </Dialog>
     </>

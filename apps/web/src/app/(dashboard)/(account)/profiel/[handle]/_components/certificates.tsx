@@ -34,6 +34,7 @@ import {
   RemoveCertificateButton,
 } from "./certificate/remove-certificate";
 import MediaViewer from "./media-viewer";
+import { PDFViewer } from "./pdf-viewer";
 
 export type NWDCertificate = Awaited<
   ReturnType<typeof listCertificatesForPerson>
@@ -284,13 +285,19 @@ function ExternalCertificateFooter({
     return (
       <MediaViewer media={certificate.media}>
         <div className="mx-3 mt-2 p-1 w-[calc(100%---spacing(6))] flex justify-center rounded-md bg-slate-100">
-          <Image
-            src={certificate.media.url}
-            alt={`${certificate.media.alt} ${certificate.title}`}
-            width={certificate.media.width || 100}
-            height={certificate.media.height || 100}
-            className="rounded-xs w-auto h-auto object-contain max-h-31"
-          />
+          {certificate.media.type === "image" ? (
+            <Image
+              src={certificate.media.url}
+              alt={`${certificate.media.alt} ${certificate.title}`}
+              width={certificate.media.width || 100}
+              height={certificate.media.height || 100}
+              className="rounded-xs w-auto h-auto object-contain max-h-31"
+            />
+          ) : (
+            <div className="h-31 w-full">
+              <PDFViewer file={certificate.media.url} />
+            </div>
+          )}
         </div>
       </MediaViewer>
     );
