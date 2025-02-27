@@ -1,5 +1,6 @@
 "use client";
-import { InformationCircleIcon, PlusIcon } from "@heroicons/react/16/solid";
+import { PlusIcon } from "@heroicons/react/16/solid";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -13,7 +14,6 @@ import {
 import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
 import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import Spinner from "~/app/_components/spinner";
 import { createExternalCertificateAction } from "../../_actions/certificate";
 import { CertificateTemplatePicker } from "./certificate-template-picker";
@@ -80,20 +80,6 @@ export function AddCertificate({
           Upload een kopie van je diploma en vul de details in. Alleen de titel
           is verplicht.
         </Text>
-        {currentStep === "media" ? (
-          <Notification color="blue" className="justify-between mt-3">
-            <div className="flex gap-1 items-center">
-              <InformationCircleIcon className="size-4 shrink-0" />
-              Disclaimer! Bla bla bla
-              {/* TODO: change */}
-            </div>
-            <div className="flex gap-1 items-center font-semibold">
-              <TekstButton href={"#TODO"} target="_blank">
-                Details
-              </TekstButton>
-            </div>
-          </Notification>
-        ) : null}
         <form action={action}>
           <DialogBody>
             <Fieldset>
@@ -130,6 +116,21 @@ export function AddCertificate({
                 </div>
               </FieldGroup>
             </Fieldset>
+            {currentStep === "metadata" ? (
+              <>
+                <Notification color="zinc" className="justify-between mt-3">
+                  <InformationCircleIcon /> Je gegevens worden veilig opgeslagen
+                  en zijn alleen zichtbaar voor jou. Je kunt later kiezen om
+                  specifieke diploma's te delen met anderen.
+                  <br />
+                  <br /> Let op: Dit overzicht is alleen bedoeld voor je
+                  persoonlijke administratie. Deze digitale registraties worden
+                  niet geaccepteerd als geldig bewijs door officiële instanties
+                  - je moet altijd je originele diploma's of officieel
+                  gewaarmerkte kopieën kunnen tonen.
+                </Notification>
+              </>
+            ) : null}
           </DialogBody>
           <DialogActions>
             <Button plain onClick={close}>

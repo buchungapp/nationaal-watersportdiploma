@@ -44,7 +44,8 @@ export function Notification({
       {...props}
       className={clsx(
         className,
-        "flex items-center gap-x-1.5 rounded-md px-2.5 py-2 text-base/5 sm:text-sm/5 forced-colors:outline",
+        "flex gap-x-1.5 rounded-md px-2.5 py-2 text-base/5 sm:text-sm/5 forced-colors:outline",
+        "[&>[data-slot=icon]:first-child]:size-4 [&>[data-slot=icon]:first-child]:shrink-0",
         colors[color],
       )}
     />
