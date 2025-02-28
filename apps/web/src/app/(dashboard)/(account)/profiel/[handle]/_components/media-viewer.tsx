@@ -35,9 +35,20 @@ export default function MediaViewer({
       <Dialog size="4xl" onClose={() => setIsOpen(false)} open={isOpen}>
         <div className="flex justify-between items-center gap-1">
           <DialogTitle>Media bekijken</DialogTitle>
-          <Button outline onClick={() => setIsOpen(false)} className="-my-1.5">
-            <XMarkIcon />
-          </Button>
+          <div className="flex gap-1 -my-1.5">
+            <Button
+              outline
+              onClick={() => {
+                const ext = media.type === "image" ? "jpg" : "pdf";
+                window.open(`${media.url}&download=media.${ext}`, "_blank");
+              }}
+            >
+              Download
+            </Button>
+            <Button outline onClick={() => setIsOpen(false)}>
+              <XMarkIcon />
+            </Button>
+          </div>
         </div>
         <DialogBody className="flex justify-center">
           {media.type === "image" ? (
