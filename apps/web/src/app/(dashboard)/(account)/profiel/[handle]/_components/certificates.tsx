@@ -71,11 +71,16 @@ export async function Certificates({
   personId: string;
   noResults?: React.ReactNode;
 }) {
-  const { allCertificates } = await getAllCertificates(personId);
+  const { allCertificates, externalCertificates } =
+    await getAllCertificates(personId);
 
   return (
     <>
       {allCertificates.length === 0 ? noResults : null}
+      <EditCertificate
+        personId={personId}
+        certificates={externalCertificates}
+      />
       <GridList>
         {allCertificates.map((certificate) => (
           <Certificate
@@ -237,11 +242,10 @@ function ExternalCertificateHeader({
       <GridListItemTitle>{certificate.title}</GridListItemTitle>
       <DialogProvider>
         <GirdListItemOptions>
-          <EditCertificateButton />
+          <EditCertificateButton certificate={certificate} />
           <RemoveCertificateButton />
         </GirdListItemOptions>
         <RemoveCertificate personId={personId} certificateId={certificate.id} />
-        <EditCertificate personId={personId} certificate={certificate} />
       </DialogProvider>
     </GridListItemHeader>
   );

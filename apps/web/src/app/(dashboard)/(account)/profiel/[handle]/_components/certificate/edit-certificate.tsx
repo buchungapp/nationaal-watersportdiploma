@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { parseAsString, useQueryState } from "nuqs";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -15,7 +16,6 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
-import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
@@ -23,10 +23,20 @@ import MediaViewer from "../media-viewer";
 import { PDFViewer, PDFViewerText } from "../pdf-viewer";
 import { Metadata } from "./metadata";
 
-export function EditCertificateButton() {
-  const { open } = useDialog("edit-certificate");
+export function EditCertificateButton({
+  certificate,
+}: {
+  certificate: ExternalCertificate;
+}) {
+  const [_, setIsOpen] = useQueryState(
+    "edit-certificate",
+    parseAsString.withOptions({
+      shallow: false,
+    }),
+  );
+
   return (
-    <DropdownItem onClick={open}>
+    <DropdownItem onClick={() => setIsOpen(certificate.id)}>
       <DropdownLabel>Diploma bewerken</DropdownLabel>
     </DropdownItem>
   );
@@ -34,12 +44,25 @@ export function EditCertificateButton() {
 
 export function EditCertificate({
   personId,
-  certificate,
+  certificates,
 }: {
   personId: string;
-  certificate: ExternalCertificate;
+  certificates: ExternalCertificate[];
 }) {
-  const { isOpen, close } = useDialog("edit-certificate");
+  const [isOpen, setIsOpen] = useQueryState(
+    "edit-certificate",
+    parseAsString.withOptions({
+      shallow: false,
+    }),
+  );
+
+  const close = () => {
+    setIsOpen(null);
+  };
+
+  const certificate = certificates.find(
+    (certificate) => certificate.id === isOpen,
+  );
 
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await updateExternalCertificateAction(
@@ -58,10 +81,14 @@ export function EditCertificate({
 
   const [state, action] = useActionState(submit, undefined);
 
+  if (!certificate) {
+    return null;
+  }
+
   const { metadata, media, location, ...defaultValues } = certificate;
 
   return (
-    <Dialog open={isOpen} onClose={close}>
+    <Dialog onClose={close}>
       <DialogTitle>Bewerk je certificaat</DialogTitle>
       <form action={action}>
         <DialogBody>
