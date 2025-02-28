@@ -16,18 +16,24 @@ type Media = NonNullable<ExternalCertificate["media"]>;
 export default function MediaViewer({
   media,
   children,
+  className,
 }: PropsWithChildren<{
   media: Media;
+  className?: string;
 }>) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <button type="button" onClick={() => setIsOpen(true)}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className={className}
+      >
         {children}
       </button>
       <Dialog size="4xl" onClose={() => setIsOpen(false)} open={isOpen}>
-        <div className="flex justify-between gap-1 items-center">
+        <div className="flex justify-between items-center gap-1">
           <DialogTitle>Media bekijken</DialogTitle>
           <Button outline onClick={() => setIsOpen(false)} className="-my-1.5">
             <XMarkIcon />
@@ -40,10 +46,10 @@ export default function MediaViewer({
               alt={media.alt || "Media"}
               width={media.width || 100}
               height={media.height || 100}
-              className="rounded-xs w-auto object-contain h-auto"
+              className="rounded-xs w-auto h-auto object-contain"
             />
           ) : (
-            <PDFViewer file={media.url} />
+            <PDFViewer file={media.url} multiplePages={true} />
           )}
         </DialogBody>
       </Dialog>

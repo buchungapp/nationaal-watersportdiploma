@@ -34,7 +34,7 @@ import {
   RemoveCertificateButton,
 } from "./certificate/remove-certificate";
 import MediaViewer from "./media-viewer";
-import { PDFViewer } from "./pdf-viewer";
+import { PDFViewer, PDFViewerText } from "./pdf-viewer";
 
 export type NWDCertificate = Awaited<
   ReturnType<typeof listCertificatesForPerson>
@@ -214,7 +214,7 @@ function NWDCertificateFooter({
   certificate: NWDCertificate;
 }) {
   return (
-    <div className="@container mx-3 rounded-md overflow-hidden mt-3">
+    <div className="@container mx-3 mt-3 rounded-md overflow-hidden">
       <TemplateHeader
         gearTypeTitle={certificate.gearType.title}
         programTitle={certificate.program.title}
@@ -284,18 +284,20 @@ function ExternalCertificateFooter({
   if (certificate.media) {
     return (
       <MediaViewer media={certificate.media}>
-        <div className="mx-3 mt-2 p-1 w-[calc(100%---spacing(6))] flex justify-center rounded-md bg-slate-100">
+        <div className="flex justify-center bg-slate-100 mx-3 mt-2 p-1 rounded-md w-[calc(100%---spacing(6))]">
           {certificate.media.type === "image" ? (
             <Image
               src={certificate.media.url}
               alt={`${certificate.media.alt} ${certificate.title}`}
               width={certificate.media.width || 100}
               height={certificate.media.height || 100}
-              className="rounded-xs w-auto h-auto object-contain max-h-31"
+              className="rounded-xs w-auto h-auto max-h-31 object-contain"
             />
           ) : (
-            <div className="h-31 w-full">
-              <PDFViewer file={certificate.media.url} />
+            <div className="w-full h-31">
+              <PDFViewer file={certificate.media.url}>
+                <PDFViewerText>Klik om meer pagina's te bekijken</PDFViewerText>
+              </PDFViewer>
             </div>
           )}
         </div>
@@ -304,7 +306,7 @@ function ExternalCertificateFooter({
   }
 
   return (
-    <div className="mx-3 mt-2 h-full w-[calc(100%---spacing(6))] max-h-33">
+    <div className="mx-3 mt-2 w-[calc(100%---spacing(6))] h-full max-h-33">
       <AddMedia personId={personId} externalCertificateId={certificate.id} />
     </div>
   );

@@ -51,6 +51,7 @@ export const byId = withZod(
       if (media) {
         media.url = await Platform.Media.createSignedUrl({
           id: external_certificate.mediaId,
+          download: false,
         });
       }
     }
@@ -122,6 +123,7 @@ export const listForPerson = withZod(
           if (media) {
             media.url = await Platform.Media.createSignedUrl({
               id: external_certificate.mediaId,
+              download: false,
             });
           }
         }

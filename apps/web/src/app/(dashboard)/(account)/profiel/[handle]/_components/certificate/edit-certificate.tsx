@@ -19,7 +19,8 @@ import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
-import { PDFViewer } from "../pdf-viewer";
+import MediaViewer from "../media-viewer";
+import { PDFViewer, PDFViewerText } from "../pdf-viewer";
 import { Metadata } from "./metadata";
 
 export function EditCertificateButton() {
@@ -67,21 +68,27 @@ export function EditCertificate({
           <Fieldset>
             <FieldGroup>
               {media ? (
-                <div className="p-1 w-full flex justify-center rounded-md bg-slate-100">
-                  {media.type === "image" ? (
-                    <Image
-                      src={media.url}
-                      alt={media.alt ?? media.name}
-                      width={media.width ?? 100}
-                      height={media.height ?? 100}
-                      className="rounded w-auto h-auto max-h-45 object-contain"
-                    />
-                  ) : (
-                    <div className="h-45 w-full">
-                      <PDFViewer file={media.url} />
-                    </div>
-                  )}
-                </div>
+                <MediaViewer media={media} className="w-full">
+                  <div className="flex justify-center bg-slate-100 p-1 rounded-md w-full">
+                    {media.type === "image" ? (
+                      <Image
+                        src={media.url}
+                        alt={media.alt ?? media.name}
+                        width={media.width ?? 100}
+                        height={media.height ?? 100}
+                        className="rounded w-auto h-auto max-h-45 object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-45">
+                        <PDFViewer file={media.url}>
+                          <PDFViewerText>
+                            Klik om meer pagina's te bekijken
+                          </PDFViewerText>
+                        </PDFViewer>
+                      </div>
+                    )}
+                  </div>
+                </MediaViewer>
               ) : null}
 
               <Metadata

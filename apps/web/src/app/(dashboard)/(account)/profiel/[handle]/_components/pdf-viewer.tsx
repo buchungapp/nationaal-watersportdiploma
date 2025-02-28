@@ -1,7 +1,7 @@
 "use client";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { useEffect, useRef, useState } from "react";
+import { type PropsWithChildren, useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -11,11 +11,15 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 export function PDFViewer({
   file,
-}: {
-  file?: string | File | undefined;
-}) {
+  multiplePages = false,
+  children,
+}: PropsWithChildren<{
+  file?: string | undefined;
+  multiplePages?: boolean;
+}>) {
   const [width, setWidth] = useState<number | null>(null);
   const pdfWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [numPages, setNumPages] = useState<number | null>(null);
 
   const setDivSize = () => {
     if (pdfWrapperRef.current) {
@@ -33,10 +37,32 @@ export function PDFViewer({
   }, []);
 
   return (
-    <div className="w-full overflow-y-auto h-full" ref={pdfWrapperRef}>
-      <Document file={file} loading="Laden...">
-        <Page pageNumber={1} width={width || 200} />
+    <div className="w-full h-full overflow-y-auto" ref={pdfWrapperRef}>
+      <Document
+        file={file}
+        loading={<PDFViewerText>Laden...</PDFViewerText>}
+        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+      >
+        {multiplePages ? (
+          Array.apply(null, Array(numPages))
+            .map((_, i) => i + 1)
+            .map((page) => (
+              <Page key={page} pageNumber={page} width={width || 200} />
+            ))
+        ) : (
+          <Page
+            pageNumber={1}
+            width={width || 200}
+            className="rounded-md overflow-hidden"
+          />
+        )}
+
+        {children}
       </Document>
     </div>
   );
+}
+
+export function PDFViewerText({ children }: PropsWithChildren) {
+  return <p className="my-2 text-gray-500 text-xs text-center">{children}</p>;
 }
