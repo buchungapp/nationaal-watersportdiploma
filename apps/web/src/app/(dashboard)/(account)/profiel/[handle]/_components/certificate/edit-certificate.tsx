@@ -49,12 +49,7 @@ export function EditCertificate({
   personId: string;
   certificates: ExternalCertificate[];
 }) {
-  const [isOpen, setIsOpen] = useQueryState(
-    "edit-certificate",
-    parseAsString.withOptions({
-      shallow: false,
-    }),
-  );
+  const [isOpen, setIsOpen] = useQueryState("edit-certificate", parseAsString);
 
   const close = () => {
     setIsOpen(null);
@@ -65,6 +60,10 @@ export function EditCertificate({
   );
 
   const submit = async (prevState: unknown, formData: FormData) => {
+    if (!certificate) {
+      return;
+    }
+
     const result = await updateExternalCertificateAction(
       { personId, externalCertificateId: certificate.id },
       prevState,
@@ -88,7 +87,7 @@ export function EditCertificate({
   const { metadata, media, location, ...defaultValues } = certificate;
 
   return (
-    <Dialog onClose={close}>
+    <Dialog onClose={close} open={!!certificate}>
       <DialogTitle>Bewerk je certificaat</DialogTitle>
       <form action={action}>
         <DialogBody>

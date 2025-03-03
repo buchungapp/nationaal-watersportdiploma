@@ -116,7 +116,8 @@ export function AddCertificate({
                 </div>
               </FieldGroup>
             </Fieldset>
-            {currentStep === "metadata" ? (
+            {currentStep === "metadata" &&
+            selectedCertificateTemplate !== null ? (
               <>
                 <Notification color="zinc" className="justify-between mt-3">
                   <InformationCircleIcon /> Je gegevens worden veilig opgeslagen
