@@ -9,3 +9,4 @@ export * from "./media.js";
 export * from "./platform.js";
 export * from "./progress.js";
 export * from "./user.js";
+export * from "./logbook.js";
