@@ -19,7 +19,7 @@ import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
-import MediaViewer from "../media-viewer";
+import { MediaViewerButton } from "../media-viewer";
 import { PDFViewer, PDFViewerText } from "../pdf-viewer";
 import { Metadata } from "./metadata";
 
@@ -94,7 +94,7 @@ export function EditCertificate({
           <Fieldset>
             <FieldGroup>
               {media ? (
-                <MediaViewer media={media} className="w-full">
+                <MediaViewerButton media={media} className="w-full">
                   <div className="flex justify-center bg-slate-100 p-1 rounded-md w-full">
                     {media.type === "image" ? (
                       <Image
@@ -114,7 +114,7 @@ export function EditCertificate({
                       </div>
                     )}
                   </div>
-                </MediaViewer>
+                </MediaViewerButton>
               ) : null}
 
               <Metadata

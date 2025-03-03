@@ -33,7 +33,7 @@ import {
   RemoveCertificate,
   RemoveCertificateButton,
 } from "./certificate/remove-certificate";
-import MediaViewer from "./media-viewer";
+import MediaViewer, { MediaViewerButton } from "./media-viewer";
 import { PDFViewer, PDFViewerText } from "./pdf-viewer";
 
 export type NWDCertificate = Awaited<
@@ -80,6 +80,9 @@ export async function Certificates({
       <EditCertificate
         personId={personId}
         certificates={externalCertificates}
+      />
+      <MediaViewer
+        medias={externalCertificates.map((certificate) => certificate.media)}
       />
       <GridList>
         {allCertificates.map((certificate) => (
@@ -287,7 +290,7 @@ function ExternalCertificateFooter({
 }) {
   if (certificate.media) {
     return (
-      <MediaViewer media={certificate.media}>
+      <MediaViewerButton media={certificate.media}>
         <div className="flex justify-center bg-slate-100 mx-3 mt-2 p-1 rounded-md w-[calc(100%---spacing(6))]">
           {certificate.media.type === "image" ? (
             <Image
@@ -305,7 +308,7 @@ function ExternalCertificateFooter({
             </div>
           )}
         </div>
-      </MediaViewer>
+      </MediaViewerButton>
     );
   }
 
