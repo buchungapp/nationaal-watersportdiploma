@@ -83,3 +83,30 @@ export const showNewWaterSportCertificates: Flag<boolean> = flag({
     },
   ],
 });
+
+export const showNewLogBook: Flag<boolean> = flag({
+  key: "logbook",
+  async decide() {
+    if (process.env.NODE_ENV === "development") {
+      return true;
+    }
+
+    const key = this.key;
+    const user = await getUserOrThrow();
+    const flag = await posthog.getFeatureFlag(key, user.authUserId);
+
+    return !!flag;
+  },
+  defaultValue: false,
+  description: "Show the new logbook on the person page",
+  options: [
+    {
+      value: true,
+      label: "With logbook",
+    },
+    {
+      value: false,
+      label: "Without logbook",
+    },
+  ],
+});
