@@ -1,50 +1,59 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-
 import type { RowSelectionState, Table } from "@tanstack/react-table";
+import { parseAsInteger, useQueryState } from "nuqs";
 import type { PropsWithChildren } from "react";
 import { Select } from "~/app/(dashboard)/_components/select";
-import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import { PaginationNext, PaginationPrevious } from "./pagination";
 
-const pageSizes = [25, 50, 100, 250];
+const pageSizes =
+  process.env.NODE_ENV === "development"
+    ? [1, 2, 3, 5, 10, 25, 50, 100, 250]
+    : [25, 50, 100, 250];
 
-export function TablePagination({ totalItems }: { totalItems: number }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const setQueryParams = useSetQueryParams();
+export function TablePagination({
+  totalItems,
+  paramPrefix = "",
+}: {
+  totalItems: number;
+  paramPrefix?: string;
+}) {
+  const pageParam = `${paramPrefix ? `${paramPrefix}_` : ""}page`;
+  const limitParam = `${paramPrefix ? `${paramPrefix}_` : ""}limit`;
 
-  const currentPage = searchParams.has("page")
-    ? Number(searchParams.get("page"))
-    : 1;
+  const [page, setPage] = useQueryState(
+    pageParam,
+    parseAsInteger.withDefault(1).withOptions({
+      shallow: false,
+    }),
+  );
+  const [limit, setLimit] = useQueryState(
+    limitParam,
+    parseAsInteger.withDefault(25).withOptions({
+      shallow: false,
+    }),
+  );
 
-  const limit = searchParams.has("limit")
-    ? Number(searchParams.get("limit"))
-    : 25;
-
-  const totalPages = Math.ceil(totalItems / limit);
+  const currentPage = page ?? 1;
+  const itemsPerPage = limit ?? 25;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const isFirstPage = currentPage === 1;
   const isLastPage = currentPage === totalPages;
 
   return (
-    <div className="flex items-center space-x-1 sm:space-x-2 leading-6 ml-auto">
+    <div className="flex items-center space-x-1 sm:space-x-2 ml-auto leading-6">
       <span className="hidden sm:inline">Items per pagina:</span>
 
       <div>
         <Select
-          value={limit}
+          value={itemsPerPage}
           onChange={(event) => {
-            router.push(
-              setQueryParams({
-                page: String(1),
-                limit: String(event.target.value),
-              }),
-            );
+            setPage(1);
+            setLimit(Number(event.target.value));
           }}
         >
-          {!pageSizes.includes(limit) ? (
-            <option key={limit} value={limit}>
+          {!pageSizes.includes(itemsPerPage) ? (
+            <option key={itemsPerPage} value={itemsPerPage}>
               -
             </option>
           ) : null}
@@ -62,20 +71,14 @@ export function TablePagination({ totalItems }: { totalItems: number }) {
 
       <div className="flex space-x-1">
         <PaginationPrevious
-          href={
-            !isFirstPage
-              ? setQueryParams({ page: String(currentPage - 1) })
-              : null
-          }
+          disabled={isFirstPage}
+          onClick={() => !isFirstPage && setPage(currentPage - 1)}
         >
           Vorige
         </PaginationPrevious>
         <PaginationNext
-          href={
-            !isLastPage
-              ? setQueryParams({ page: String(currentPage + 1) })
-              : null
-          }
+          disabled={isLastPage}
+          onClick={() => !isLastPage && setPage(currentPage + 1)}
         >
           Volgende
         </PaginationNext>
@@ -105,7 +108,7 @@ export function TableRowSelection<T>({
 
 export function TableFooter({ children }: PropsWithChildren) {
   return (
-    <div className="py-4 px-2 flex w-full sm:flex-row flex-col justify-between gap-4 items-center text-xs">
+    <div className="flex sm:flex-row flex-col justify-between items-center gap-4 px-2 py-4 w-full text-xs">
       {children}
     </div>
   );
