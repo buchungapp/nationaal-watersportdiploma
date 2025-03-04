@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { parseAsString, useQueryState } from "nuqs";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -21,6 +21,7 @@ import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
 import { MediaViewerButton } from "../media-viewer";
 import { PDFViewer, PDFViewerText } from "../pdf-viewer";
+import Media from "./media";
 import { Metadata } from "./metadata";
 
 export function EditCertificateButton({
@@ -50,9 +51,13 @@ export function EditCertificate({
   certificates: ExternalCertificate[];
 }) {
   const [isOpen, setIsOpen] = useQueryState("edit-certificate", parseAsString);
+  const [validMedia, setValidMedia] = useState(false);
 
   const close = () => {
     setIsOpen(null);
+    setTimeout(() => {
+      setValidMedia(false);
+    }, 100);
   };
 
   const certificate = certificates.find(
@@ -115,10 +120,17 @@ export function EditCertificate({
                     )}
                   </div>
                 </MediaViewerButton>
-              ) : null}
+              ) : (
+                <Media
+                  stepIndex={1}
+                  setValidMedia={setValidMedia}
+                  errors={state?.errors}
+                  small={validMedia}
+                />
+              )}
 
               <Metadata
-                stepIndex={1}
+                stepIndex={media ? 1 : 2}
                 errors={state?.errors}
                 defaultValues={{ issuingLocation: location, ...defaultValues }}
               />
