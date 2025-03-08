@@ -11,7 +11,7 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
+import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
 import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
@@ -82,40 +82,36 @@ export function AddCertificate({
         </Text>
         <form action={action}>
           <DialogBody>
-            <Fieldset>
-              <FieldGroup>
-                <Media
-                  stepIndex={1}
-                  setValidMedia={setValidMedia}
-                  errors={state?.errors}
-                  small={!validMedia && currentStep !== "media"}
-                />
-                <div className={currentStep === "media" ? "hidden" : ""}>
-                  <CertificateTemplatePicker
-                    stepIndex={2}
-                    selectedCertificateTemplate={selectedCertificateTemplate}
-                    setSelectedCertificateTemplate={
-                      setSelectedCertificateTemplate
-                    }
-                  />
-                </div>
-
-                <div
-                  className={
-                    selectedCertificateTemplate === null ? "hidden" : ""
+            <FieldGroup>
+              <Media
+                stepIndex={1}
+                setValidMedia={setValidMedia}
+                errors={state?.errors}
+                small={!validMedia && currentStep !== "media"}
+              />
+              <div className={currentStep === "media" ? "hidden" : ""}>
+                <CertificateTemplatePicker
+                  stepIndex={2}
+                  selectedCertificateTemplate={selectedCertificateTemplate}
+                  setSelectedCertificateTemplate={
+                    setSelectedCertificateTemplate
                   }
-                >
-                  <Metadata
-                    stepIndex={3}
-                    errors={state?.errors}
-                    defaultValues={{
-                      title: template?.title,
-                      issuingAuthority: template?.issuingAuthority,
-                    }}
-                  />
-                </div>
-              </FieldGroup>
-            </Fieldset>
+                />
+              </div>
+
+              <div
+                className={selectedCertificateTemplate === null ? "hidden" : ""}
+              >
+                <Metadata
+                  stepIndex={3}
+                  errors={state?.errors}
+                  defaultValues={{
+                    title: template?.title,
+                    issuingAuthority: template?.issuingAuthority,
+                  }}
+                />
+              </div>
+            </FieldGroup>
             {currentStep === "metadata" &&
             selectedCertificateTemplate !== null ? (
               <>

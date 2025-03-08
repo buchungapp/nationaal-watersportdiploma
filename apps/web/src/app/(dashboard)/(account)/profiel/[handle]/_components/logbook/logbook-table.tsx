@@ -21,31 +21,13 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { TableFooter } from "~/app/(dashboard)/_components/table-footer";
+import type { listLogbooksForPerson } from "~/lib/nwd";
 
-export type MockLogbookType = {
-  id: string;
-  personId: string;
-  startedAt: string;
-  endedAt?: string | null;
-  departurePort?: string | null;
-  arrivalPort?: string | null;
-  windPower?: number | null;
-  windDirection?: string | null;
-  boatType?: string | null;
-  boatLength?: number | null;
-  location?: string | null;
-  sailedNauticalMiles?: number | null;
-  sailedHoursInDark?: number | null;
-  primaryRole?: string | null;
-  crewNames?: string | null;
-  conditions?: string | null;
-  additionalComments?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt?: string | null;
-};
+export type LogbookType = Awaited<
+  ReturnType<typeof listLogbooksForPerson>
+>[number];
 
-const columnHelper = createColumnHelper<MockLogbookType>();
+const columnHelper = createColumnHelper<LogbookType>();
 
 const columns = [
   columnHelper.accessor("startedAt", {
@@ -93,7 +75,7 @@ export function LogbookTable({
   logbooks,
   totalItems,
 }: {
-  logbooks: MockLogbookType[];
+  logbooks: LogbookType[];
   totalItems: number;
 }) {
   const table = useReactTable({
@@ -131,7 +113,7 @@ export function LogbookTable({
           {table.getRowCount() <= 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center">
-                Geen cohorten gevonden.
+                Geen logboek regels gevonden.
               </TableCell>
             </TableRow>
           ) : null}
