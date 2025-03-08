@@ -19,7 +19,7 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import SmartDatetimePicker from "~/app/(dashboard)/_components/natural-language-input";
+import { SmartDatetimePicker } from "~/app/(dashboard)/_components/natural-language-input";
 import Spinner from "~/app/_components/spinner";
 import type { listPrograms } from "~/lib/nwd";
 import { createCohortAction } from "../_actions/create";
@@ -84,7 +84,7 @@ function CreateDialogClient({
           <DialogBody>
             <Fieldset>
               <FieldGroup>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <Field className="col-span-2">
                     <Label>Naam</Label>
                     <Input

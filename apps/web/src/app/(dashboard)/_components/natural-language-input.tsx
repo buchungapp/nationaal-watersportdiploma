@@ -7,7 +7,7 @@ import { dateTime as dateTimeUtils } from "@nawadi/lib";
 import React from "react";
 import { Input } from "./input";
 
-export default function SmartDatetimePicker({
+export function SmartDatetimePicker({
   name,
   required,
   invalid,
@@ -52,7 +52,7 @@ export default function SmartDatetimePicker({
           dateRef.current?.focus();
         }}
         type="button"
-        className="bg-white text-slate-500 rounded-xs p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
+        className="right-1 bottom-[6px] sm:bottom-[4px] absolute bg-white p-1.5 rounded-xs text-slate-500 sm:text-sm"
       >
         <CalendarDaysIcon className="size-5 sm:size-4" />
       </button>
@@ -75,7 +75,7 @@ export default function SmartDatetimePicker({
         }}
         // we intentionally make the datetime-local input field with a width of 0px
         // to hide the input field
-        className="w-[0px] opacity-0 overflow-hidden border-none bg-transparent text-slate-500 focus:outline-hidden focus:ring-0 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px] mr-[10px]"
+        className="right-1 bottom-[6px] sm:bottom-[2px] absolute bg-transparent opacity-0 mr-[10px] border-none focus:outline-hidden focus:ring-0 w-[0px] overflow-hidden text-slate-500 sm:text-sm"
       />
     </>
   );
@@ -131,7 +131,7 @@ export function SmartDatePicker({
           dateRef.current?.focus();
         }}
         type="button"
-        className="bg-white text-slate-500 rounded-xs p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
+        className="right-1 bottom-[6px] sm:bottom-[4px] absolute bg-white p-1.5 rounded-xs text-slate-500 sm:text-sm"
       >
         <CalendarDaysIcon className="size-5 sm:size-4" />
       </button>
@@ -154,7 +154,7 @@ export function SmartDatePicker({
         }}
         // we intentionally make the date input field with a width of 0px
         // to hide the input field
-        className="w-[0px] opacity-0 overflow-hidden border-none bg-transparent text-slate-500 focus:outline-hidden focus:ring-0 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px] mr-[10px]"
+        className="right-1 bottom-[6px] sm:bottom-[2px] absolute bg-transparent opacity-0 mr-[10px] border-none focus:outline-hidden focus:ring-0 w-[0px] overflow-hidden text-slate-500 sm:text-sm"
       />
     </>
   );
@@ -210,7 +210,7 @@ export function SmartTimePicker({
           dateRef.current?.focus();
         }}
         type="button"
-        className="bg-white text-slate-500 rounded-xs p-1.5 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[4px]"
+        className="right-1 bottom-[6px] sm:bottom-[4px] absolute bg-white p-1.5 rounded-xs text-slate-500 sm:text-sm"
       >
         <CalendarDaysIcon className="size-5 sm:size-4" />
       </button>
@@ -235,7 +235,7 @@ export function SmartTimePicker({
         }}
         // we intentionally make the time input field with a width of 0px
         // to hide the input field
-        className="w-[0px] opacity-0 overflow-hidden border-none bg-transparent text-slate-500 focus:outline-hidden focus:ring-0 sm:text-sm absolute right-1 bottom-[6px] sm:bottom-[2px] mr-[10px]"
+        className="right-1 bottom-[6px] sm:bottom-[2px] absolute bg-transparent opacity-0 mr-[10px] border-none focus:outline-hidden focus:ring-0 w-[0px] overflow-hidden text-slate-500 sm:text-sm"
       />
     </>
   );
