@@ -7,3 +7,4 @@ export * as Location from "./location/index.js";
 export * as Platform from "./platform/index.js";
 export * as Student from "./student/index.js";
 export * as User from "./user/index.js";
+export * as Logbook from "./logbook/index.js";

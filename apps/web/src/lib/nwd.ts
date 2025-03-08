@@ -9,6 +9,7 @@ import {
   Course,
   Curriculum,
   Location,
+  Logbook,
   Platform,
   Student,
   User,
@@ -2615,3 +2616,121 @@ export const listAllocationHistory = cache(
     });
   },
 );
+
+export const listLogbooksForPerson = async ({
+  personId,
+}: {
+  personId: string;
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.listForPerson({ personId });
+  });
+};
+
+export const createLogbook = async ({
+  personId,
+  fields,
+}: {
+  personId: string;
+  fields: {
+    startedAt: string;
+    endedAt: string | null;
+    departurePort: string | null;
+    arrivalPort: string | null;
+    windPower: number | null;
+    windDirection: string | null;
+    boatType: string | null;
+    boatLength: number | null;
+    location: string | null;
+    sailedNauticalMiles: number | null;
+    sailedHoursInDark: number | null;
+    primaryRole: string | null;
+    crewNames: string | null;
+    conditions: string | null;
+    additionalComments: string | null;
+  };
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.create({
+      personId,
+      ...fields,
+    });
+  });
+};
+
+export const updateLogbook = async ({
+  id,
+  personId,
+  fields,
+}: {
+  id: string;
+  personId: string;
+  fields: {
+    startedAt?: string;
+    endedAt?: string | null;
+    departurePort?: string | null;
+    arrivalPort?: string | null;
+    windPower?: number | null;
+    windDirection?: string | null;
+    boatType?: string | null;
+    boatLength?: number | null;
+    location?: string | null;
+    sailedNauticalMiles?: number | null;
+    sailedHoursInDark?: number | null;
+    primaryRole?: string | null;
+    crewNames?: string | null;
+    conditions?: string | null;
+    additionalComments?: string | null;
+  };
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.update({
+      id,
+      ...fields,
+    });
+  });
+};
+
+export const removeLogbook = async ({
+  id,
+  personId,
+}: {
+  id: string;
+  personId: string;
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.remove(id);
+  });
+};
