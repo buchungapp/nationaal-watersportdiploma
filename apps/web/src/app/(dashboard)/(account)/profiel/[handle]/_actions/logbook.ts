@@ -48,10 +48,7 @@ export async function createLogbookAction(
   }
 
   try {
-    console.log(data);
     const parsed = expectedSchema.parse(data);
-
-    console.log(parsed);
 
     await createLogbook({
       personId,
@@ -176,13 +173,24 @@ export async function removeLogbookAction({
   logbookId,
 }: {
   personId: string;
-  logbookId: string;
+  logbookId: string | string[];
 }) {
   try {
-    await removeLogbook({
-      id: logbookId,
-      personId,
-    });
+    if (Array.isArray(logbookId)) {
+      await Promise.all(
+        logbookId.map((id) =>
+          removeLogbook({
+            id,
+            personId,
+          }),
+        ),
+      );
+    } else {
+      await removeLogbook({
+        id: logbookId,
+        personId,
+      });
+    }
 
     revalidatePath("/profiel/[handle]", "page");
 

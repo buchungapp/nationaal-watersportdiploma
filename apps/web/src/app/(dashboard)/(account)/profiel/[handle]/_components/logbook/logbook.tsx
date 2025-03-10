@@ -37,7 +37,11 @@ export async function Logbook({
       </div>
       <Text>Hieronder vind je een overzicht van alle vaaractiviteiten.</Text>
       <Divider className="mt-2 mb-4" />
-      <LogbookTable logbooks={logbooks} totalItems={data.length} />
+      <LogbookTable
+        logbooks={logbooks}
+        totalItems={data.length}
+        personId={person.id}
+      />
     </div>
   );
 }

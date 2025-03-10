@@ -1,5 +1,12 @@
 "use client";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ArrowsUpDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/16/solid";
+import type { RowSelectionState, SortDirection } from "@tanstack/react-table";
+import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -7,6 +14,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { clsx } from "clsx";
+import dayjs from "dayjs";
+import { useState } from "react";
+import { Button } from "~/app/(dashboard)/_components/button";
+import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
 
 import {
   Table,
@@ -21,7 +35,14 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { TableFooter } from "~/app/(dashboard)/_components/table-footer";
+import {
+  getOrderableColumnIds,
+  useColumnOrdering,
+} from "~/app/(dashboard)/_hooks/use-column-ordering";
+import { useSorting } from "~/app/(dashboard)/_hooks/use-sorting";
+import { getSortableColumnIds } from "~/app/(dashboard)/_hooks/use-sorting";
 import type { listLogbooksForPerson } from "~/lib/nwd";
+import { LogbookTableActionsButton } from "./logbook-table-actions";
 
 export type LogbookType = Awaited<
   ReturnType<typeof listLogbooksForPerson>
@@ -30,61 +51,150 @@ export type LogbookType = Awaited<
 const columnHelper = createColumnHelper<LogbookType>();
 
 const columns = [
+  columnHelper.display({
+    id: "select",
+    cell: ({ row }) => (
+      <CheckboxField className="relative">
+        <span
+          className="top-1/2 left-1/2 absolute size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2"
+          aria-hidden="true"
+        />
+        <Checkbox
+          {...{
+            checked: row.getIsSelected(),
+            disabled: !row.getCanSelect(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+          className="-translate-y-[1px]"
+        />
+      </CheckboxField>
+    ),
+    header: ({ table }) => {
+      return (
+        <CheckboxField>
+          <Checkbox
+            {...{
+              disabled: false,
+              checked:
+                table.getIsSomePageRowsSelected() ||
+                table.getIsAllPageRowsSelected(),
+              indeterminate: !table.getIsAllPageRowsSelected(),
+              onChange: (checked) => table.toggleAllPageRowsSelected(checked),
+            }}
+            className="-translate-y-[1px]"
+          />
+        </CheckboxField>
+      );
+    },
+    enableSorting: false,
+  }),
   columnHelper.accessor("startedAt", {
     id: "startedAt",
     header: "Start datum",
-    cell: ({ getValue }) => new Date(getValue()).toLocaleDateString("nl-NL"),
-    sortingFn: "datetime",
+    cell: ({ getValue }) => {
+      const dateTime = getValue();
+      const hasTime =
+        typeof dateTime === "string" && !dateTime.includes("T00:00:00");
+
+      return dateTime ? (
+        <time dateTime={dateTime}>
+          {hasTime
+            ? dayjs(dateTime).format("DD-MM-YYYY HH:mm")
+            : dayjs(dateTime).format("DD-MM-YYYY")}
+        </time>
+      ) : (
+        "-"
+      );
+    },
   }),
   columnHelper.accessor("endedAt", {
     id: "endedAt",
     header: "Eind datum",
-    cell: ({ getValue }) =>
-      getValue()
-        ? new Date(getValue() as string).toLocaleDateString("nl-NL")
-        : "-",
-    sortingFn: "datetime",
+    cell: ({ getValue }) => {
+      const dateTime = getValue();
+      const hasTime =
+        typeof dateTime === "string" && !dateTime.includes("T00:00:00");
+
+      return dateTime ? (
+        <time dateTime={dateTime}>
+          {hasTime
+            ? dayjs(dateTime).format("DD-MM-YYYY HH:mm")
+            : dayjs(dateTime).format("DD-MM-YYYY")}
+        </time>
+      ) : (
+        "-"
+      );
+    },
   }),
   columnHelper.accessor("departurePort", {
     id: "departurePort",
     header: "Vertrekhaven",
     cell: ({ getValue }) => getValue() || "-",
-    sortingFn: "alphanumeric",
   }),
   columnHelper.accessor("arrivalPort", {
     id: "arrivalPort",
     header: "Aankomsthaven",
     cell: ({ getValue }) => getValue() || "-",
-    sortingFn: "alphanumeric",
   }),
   columnHelper.accessor("sailedNauticalMiles", {
     id: "sailedNauticalMiles",
     header: "Gevaren Nautisch mijlen",
     cell: ({ getValue }) => (getValue() ? `${getValue()} nm` : "-"),
-    sortingFn: "alphanumeric",
   }),
   columnHelper.accessor("primaryRole", {
     id: "primaryRole",
     header: "Primaire rol",
     cell: ({ getValue }) => getValue() || "-",
-    sortingFn: "alphanumeric",
   }),
 ];
 
 export function LogbookTable({
   logbooks,
+  personId,
   totalItems,
 }: {
   logbooks: LogbookType[];
+  personId: string;
   totalItems: number;
 }) {
+  const columnOrderingOptions = useColumnOrdering(
+    getOrderableColumnIds({
+      columns,
+      excludeColumns: ["select"],
+    }),
+  );
+
+  const sortingOptions = useSorting({
+    sortableColumnIds: getSortableColumnIds(columns),
+    defaultSorting: [{ id: "startedAt", desc: false }],
+  });
+
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const table = useReactTable({
+    ...columnOrderingOptions,
+    ...sortingOptions,
     data: logbooks,
     columns,
     getRowId: (row) => row.id,
+    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    state: {
+      ...columnOrderingOptions.state,
+      ...sortingOptions.state,
+      rowSelection,
+    },
+    initialState: {
+      columnPinning: {
+        left: ["select"],
+      },
+    },
   });
+
+  const selectedRows = Object.keys(rowSelection).length;
+  const actionRows = logbooks.filter((logbook) => rowSelection[logbook.id]);
 
   return (
     <>
@@ -95,17 +205,67 @@ export function LogbookTable({
         <TableHead>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHeader
-                  key={header.id}
-                  className={clsx(header.column.columnDef.meta?.align)}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </TableHeader>
-              ))}
+              {headerGroup.headers.map((header) => {
+                const sortingHandler =
+                  header.column.getToggleSortingHandler?.();
+                const getAriaSortValue = (isSorted: false | SortDirection) => {
+                  switch (isSorted) {
+                    case "asc":
+                      return "ascending";
+                    case "desc":
+                      return "descending";
+                    default:
+                      return "none";
+                  }
+                };
+
+                return (
+                  <TableHeader
+                    key={header.id}
+                    onClick={sortingHandler}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" && sortingHandler) {
+                        sortingHandler(event);
+                      }
+                    }}
+                    className={clsx(
+                      header.column.getCanSort()
+                        ? "cursor-pointer select-none"
+                        : "",
+                    )}
+                    tabIndex={header.column.getCanSort() ? 0 : -1}
+                    aria-sort={getAriaSortValue(header.column.getIsSorted())}
+                  >
+                    <div
+                      className={clsx(
+                        header.column.columnDef.enableSorting === false
+                          ? header.column.columnDef.meta?.align
+                          : "flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-1.5 -mx-3 -my-1.5",
+                        "rounded-md",
+                      )}
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {header.column.getCanSort() &&
+                        (header.column.getIsSorted() === false ? (
+                          <ArrowsUpDownIcon className="opacity-30 size-3 text-slate-900 dark:text-slate-50" />
+                        ) : header.column.getIsSorted() === "desc" ? (
+                          <ArrowUpIcon
+                            className="size-3 text-slate-900 dark:text-slate-50"
+                            aria-hidden={true}
+                          />
+                        ) : (
+                          <ArrowDownIcon
+                            className="size-3 text-slate-900 dark:text-slate-50"
+                            aria-hidden={true}
+                          />
+                        ))}
+                    </div>
+                  </TableHeader>
+                );
+              })}
             </TableRow>
           ))}
         </TableHead>
@@ -150,6 +310,32 @@ export function LogbookTable({
         <TableRowSelection table={table} totalItems={totalItems} />
         <TablePagination totalItems={totalItems} paramPrefix="logbook" />
       </TableFooter>
+
+      <div
+        className={clsx(
+          "bottom-14 fixed inset-x-0 flex items-center space-x-2 bg-white dark:bg-slate-950 shadow-md mx-auto p-2 border border-slate-200 dark:border-slate-800 rounded-lg w-fit",
+          selectedRows > 0 ? "" : "hidden",
+        )}
+      >
+        <p className="text-sm select-none">
+          <span className="bg-branding-light/10 px-2 py-1.5 rounded-sm font-medium tabular-nums text-branding-dark">
+            {selectedRows}
+          </span>
+          <span className="ml-2 font-medium text-slate-900 dark:text-slate-50">
+            geselecteerd
+          </span>
+        </p>
+        <div className="flex items-center space-x-4">
+          <Button plain onClick={() => setRowSelection({})}>
+            <XMarkIcon />
+          </Button>
+          <LogbookTableActionsButton
+            rows={actionRows}
+            personId={personId}
+            resetRowSelection={() => setRowSelection({})}
+          />
+        </div>
+      </div>
     </>
   );
 }
