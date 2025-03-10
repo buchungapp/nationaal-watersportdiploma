@@ -47,7 +47,10 @@ export function getOrderableColumnIds({
   );
 }
 
-export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
+export function useColumnOrdering(
+  orderableColumns: OrderableColumn[],
+  paramPrefix?: string,
+) {
   const posthog = usePostHog();
 
   const defaultOrder = React.useMemo(
@@ -80,13 +83,13 @@ export function useColumnOrdering(orderableColumns: OrderableColumn[]) {
   );
 
   const [columnOrder, setColumnOrder] = useQueryState<ColumnOrderState>(
-    "volgorde",
+    `${paramPrefix ? `${paramPrefix}_` : ""}volgorde`,
     parseAsArrayOf(parseAsString).withDefault(defaultOrder),
   );
 
   const [columnVisibility, setColumnVisibility] =
     useQueryState<VisibilityState>(
-      "toon",
+      `${paramPrefix ? `${paramPrefix}_` : ""}toon`,
       parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
     );
 
