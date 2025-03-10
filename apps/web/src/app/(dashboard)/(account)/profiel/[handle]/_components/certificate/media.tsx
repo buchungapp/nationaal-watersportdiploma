@@ -10,7 +10,7 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { ArrowPathIcon } from "@heroicons/react/16/solid";
+import { XMarkIcon } from "@heroicons/react/16/solid";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -53,16 +53,16 @@ export default function Media({
           />
         </Field>
       ) : (
-        <div className="w-full mt-3 border border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer h-50">
-          <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2">
+        <div className="flex flex-col justify-center items-center mt-3 border border-dashed rounded-md w-full h-50 cursor-pointer">
+          <div className="flex flex-col justify-center items-center p-2 text-[#878787] text-xs text-center">
             Sleep hier je afbeelding heen, of klik om te uploaden.
             <span>Max 5MB.</span>
           </div>
         </div>
       )}
-      <div className="flex flex-col sm:flex-row gap-1 justify-between sm:items-center">
+      <div className="flex sm:flex-row flex-col justify-between sm:items-center gap-1 mt-3">
         {allowRemove ? (
-          <CheckboxField className="mt-3">
+          <CheckboxField>
             <Checkbox
               name="removeMedia"
               onChange={setRemoveMedia}
@@ -73,7 +73,7 @@ export default function Media({
         ) : null}
         {filled ? (
           <Button
-            className="mt-3"
+            className="ml-auto"
             outline
             onClick={() => {
               setRemoveMedia(true);
@@ -84,7 +84,7 @@ export default function Media({
               }, 1000);
             }}
           >
-            <ArrowPathIcon />
+            <XMarkIcon />
             Verwijder upload
           </Button>
         ) : null}
@@ -162,7 +162,7 @@ function MediaDropzone({
   return (
     <div
       className={clsx(
-        "w-full mt-3 border border-dashed rounded-md flex flex-col items-center justify-center cursor-pointer",
+        "flex flex-col justify-center items-center mt-3 border border-dashed rounded-md w-full cursor-pointer",
         !preview && small ? "h-15" : "h-50",
         isDragActive && "bg-slate-100",
         (isDragReject || invalid) && "border-destructive",
@@ -173,15 +173,15 @@ function MediaDropzone({
         type="file"
         name={name}
         required={required}
-        className="hidden h-0 w-0"
+        className="hidden w-0 h-0"
         ref={hiddenInputRef}
       />
       {isLoading ? (
         <div className="flex items-center">
-          <span className="text-sm text-[#606060]">Uploaden...</span>
+          <span className="text-[#606060] text-sm">Uploaden...</span>
         </div>
       ) : (
-        <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2">
+        <div className="flex flex-col justify-center items-center p-2 w-full text-[#878787] text-xs text-center">
           <input {...getInputProps()} />
 
           {preview ? (
@@ -192,8 +192,8 @@ function MediaDropzone({
                 className="rounded max-h-45"
               />
             ) : (
-              <div className="h-45 w-full">
-                <PDFViewer file={preview} />
+              <div className="w-full h-45">
+                <PDFViewer file={preview} multiplePages={true} />
               </div>
             )
           ) : (
