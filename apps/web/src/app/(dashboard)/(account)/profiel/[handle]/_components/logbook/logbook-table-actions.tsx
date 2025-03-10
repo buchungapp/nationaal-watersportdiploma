@@ -16,7 +16,7 @@ function RemoveLogbookRows() {
 
   return (
     <DropdownItem onClick={open}>
-      <DropdownLabel>Verwijder logboek regels</DropdownLabel>
+      <DropdownLabel>Verwijderen</DropdownLabel>
     </DropdownItem>
   );
 }
