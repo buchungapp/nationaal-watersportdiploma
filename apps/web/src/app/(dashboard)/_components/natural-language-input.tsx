@@ -73,9 +73,9 @@ export function SmartDatetimePicker({
             inputRef.current.value = dateTimeUtils.formatDateTime(expiryDate);
           }
         }}
-        // we intentionally make the datetime-local input field with a width of 0px
-        // to hide the input field
-        className="right-1 bottom-[6px] sm:bottom-[2px] absolute bg-transparent opacity-0 mr-[10px] border-none focus:outline-hidden focus:ring-0 w-[0px] overflow-hidden text-slate-500 sm:text-sm"
+        // we intentionally make the datetime-local input field with a width of 1px
+        // to hide the input field, but allow for browser form validation
+        className="bottom-[6px] sm:bottom-[2px] left-1/2 absolute bg-transparent opacity-0 border-none focus:outline-hidden focus:ring-0 w-[1px] overflow-hidden text-slate-500 sm:text-sm"
       />
     </>
   );
@@ -152,9 +152,9 @@ export function SmartDatePicker({
             inputRef.current.value = dateTimeUtils.formatDate(expiryDate);
           }
         }}
-        // we intentionally make the date input field with a width of 0px
-        // to hide the input field
-        className="right-1 bottom-[6px] sm:bottom-[2px] absolute bg-transparent opacity-0 mr-[10px] border-none focus:outline-hidden focus:ring-0 w-[0px] overflow-hidden text-slate-500 sm:text-sm"
+        // we intentionally make the datetime-local input field with a width of 1px
+        // to hide the input field, but allow for browser form validation
+        className="bottom-[6px] sm:bottom-[2px] left-1/2 absolute bg-transparent opacity-0 border-none focus:outline-hidden focus:ring-0 w-[1px] overflow-hidden text-slate-500 sm:text-sm"
       />
     </>
   );
@@ -233,9 +233,9 @@ export function SmartTimePicker({
             inputRef.current.value = dateTimeUtils.formatTime(expiryDate);
           }
         }}
-        // we intentionally make the time input field with a width of 0px
-        // to hide the input field
-        className="right-1 bottom-[6px] sm:bottom-[2px] absolute bg-transparent opacity-0 mr-[10px] border-none focus:outline-hidden focus:ring-0 w-[0px] overflow-hidden text-slate-500 sm:text-sm"
+        // we intentionally make the datetime-local input field with a width of 1px
+        // to hide the input field, but allow for browser form validation
+        className="bottom-[6px] sm:bottom-[2px] left-1/2 absolute bg-transparent opacity-0 border-none focus:outline-hidden focus:ring-0 w-[1px] overflow-hidden text-slate-500 sm:text-sm"
       />
     </>
   );
