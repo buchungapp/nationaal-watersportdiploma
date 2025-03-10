@@ -399,15 +399,21 @@ export const updateExternalCertificate = async ({
       throw new Error("Unauthorized");
     }
 
+    const oldCertificate = await Certificate.External.byId({ id });
+
+    if (!oldCertificate) {
+      throw new Error("Certificate not found");
+    }
+
+    if (oldCertificate.personId !== personId) {
+      throw new Error("Unauthorized");
+    }
+
     let mediaId = undefined;
     let removeMediaId = undefined;
     if (typeof media !== "undefined") {
-      const { mediaId: oldMediaId } = await Certificate.External.byId({
-        id,
-      });
-
-      if (oldMediaId !== null) {
-        removeMediaId = oldMediaId;
+      if (oldCertificate.mediaId !== null) {
+        removeMediaId = oldCertificate.mediaId;
       }
 
       if (media) {
@@ -455,6 +461,16 @@ export const removeExternalCertificate = async ({
     const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
     if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    const certificate = await Certificate.External.byId({ id });
+
+    if (!certificate) {
+      throw new Error("Certificate not found");
+    }
+
+    if (certificate.personId !== personId) {
       throw new Error("Unauthorized");
     }
 
@@ -2619,8 +2635,10 @@ export const listAllocationHistory = cache(
 
 export const listLogbooksForPerson = async ({
   personId,
+  locationId,
 }: {
   personId: string;
+  locationId?: string;
 }) => {
   return makeRequest(async () => {
     const requestingUser = await getUserOrThrow();
@@ -2628,7 +2646,15 @@ export const listLogbooksForPerson = async ({
     const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
     if (!isSelf) {
-      throw new Error("Unauthorized");
+      if (!locationId) {
+        throw new Error("Unauthorized");
+      }
+
+      await validatePersonAccessCheck({
+        locationId,
+        requestedPersonId: personId,
+        requestingUser,
+      });
     }
 
     return await Logbook.listForPerson({ personId });
@@ -2708,6 +2734,16 @@ export const updateLogbook = async ({
       throw new Error("Unauthorized");
     }
 
+    const logbook = await Logbook.byId({ id });
+
+    if (!logbook) {
+      throw new Error("Logbook not found");
+    }
+
+    if (logbook.personId !== personId) {
+      throw new Error("Unauthorized");
+    }
+
     return await Logbook.update({
       id,
       ...fields,
@@ -2728,6 +2764,16 @@ export const removeLogbook = async ({
     const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
     if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    const logbook = await Logbook.byId({ id });
+
+    if (!logbook) {
+      throw new Error("Logbook not found");
+    }
+
+    if (logbook.personId !== personId) {
       throw new Error("Unauthorized");
     }
 

@@ -18,6 +18,7 @@ export const byId = withZod(
   }),
   z.object({
     id: uuidSchema,
+    personId: uuidSchema,
     createdAt: z.string().datetime(),
     identifier: z.string().nullable(),
     location: z.string().nullable(),
@@ -58,6 +59,7 @@ export const byId = withZod(
 
     return {
       id: external_certificate.id,
+      personId: external_certificate.personId,
       createdAt: dayjs(external_certificate.createdAt).toISOString(),
       awardedAt: external_certificate.awardedAt
         ? dayjs(external_certificate.awardedAt).toISOString()
