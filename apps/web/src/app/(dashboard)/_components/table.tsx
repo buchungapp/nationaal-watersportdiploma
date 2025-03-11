@@ -53,7 +53,7 @@ export function Table({
               !bleed && "sm:px-(--gutter)",
             )}
           >
-            <table className="min-w-full text-left text-sm/6">{children}</table>
+            <table className="min-w-full text-sm/6 text-left">{children}</table>
           </div>
         </div>
       </div>
@@ -89,6 +89,7 @@ const TableRowContext = createContext<{
 
 export function TableRow({
   href,
+  selected,
   target,
   title,
   className,
@@ -97,6 +98,7 @@ export function TableRow({
   href?: string;
   target?: string;
   title?: string;
+  selected?: boolean;
 } & React.ComponentPropsWithoutRef<"tr">) {
   const { striped } = useContext(TableContext);
 
@@ -111,12 +113,13 @@ export function TableRow({
         className={clsx(
           className,
           href &&
-            "has-[[data-row-link][data-focus]]:outline has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-blue-500 dark:focus-within:bg-white/[2.5%]",
+            "has-[[data-row-link][data-focus]]:outline-2 has-[[data-row-link][data-focus]]:-outline-offset-2 has-[[data-row-link][data-focus]]:outline-blue-500 dark:focus-within:bg-white/[2.5%]",
           striped && "even:bg-zinc-950/[2.5%] dark:even:bg-white/[2.5%]",
           href && striped && "hover:bg-zinc-950/5 dark:hover:bg-white/5",
           href &&
             !striped &&
             "hover:bg-zinc-950/[2.5%] dark:hover:bg-white/[2.5%]",
+          selected && "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]",
         )}
       />
     </TableRowContext.Provider>

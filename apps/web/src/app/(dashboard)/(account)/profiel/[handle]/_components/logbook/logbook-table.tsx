@@ -1,14 +1,8 @@
 "use client";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  ArrowsUpDownIcon,
-  XMarkIcon,
-} from "@heroicons/react/16/solid";
-import type { RowSelectionState, SortDirection } from "@tanstack/react-table";
+import { XMarkIcon } from "@heroicons/react/16/solid";
+import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
@@ -22,19 +16,18 @@ import {
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 
+import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/app/(dashboard)/_components/table";
+  DefaultTableCell,
+  DefaultTableRows,
+  NoTableRows,
+} from "~/app/(dashboard)/_components/table-content";
 import {
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { TableFooter } from "~/app/(dashboard)/_components/table-footer";
+import { SortableTableHead } from "~/app/(dashboard)/_components/table-head";
 import {
   getOrderableColumnIds,
   useColumnOrdering,
@@ -163,11 +156,13 @@ export function LogbookTable({
       columns,
       excludeColumns: ["select"],
     }),
+    "logboek",
   );
 
   const sortingOptions = useSorting({
     sortableColumnIds: getSortableColumnIds(columns),
     defaultSorting: [{ id: "startedAt", desc: false }],
+    paramPrefix: "logboek",
   });
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -202,113 +197,25 @@ export function LogbookTable({
         className="mt-4 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
         dense
       >
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const sortingHandler =
-                  header.column.getToggleSortingHandler?.();
-                const getAriaSortValue = (isSorted: false | SortDirection) => {
-                  switch (isSorted) {
-                    case "asc":
-                      return "ascending";
-                    case "desc":
-                      return "descending";
-                    default:
-                      return "none";
-                  }
-                };
-
-                return (
-                  <TableHeader
-                    key={header.id}
-                    onClick={sortingHandler}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" && sortingHandler) {
-                        sortingHandler(event);
-                      }
-                    }}
-                    className={clsx(
-                      header.column.getCanSort()
-                        ? "cursor-pointer select-none"
-                        : "",
-                    )}
-                    tabIndex={header.column.getCanSort() ? 0 : -1}
-                    aria-sort={getAriaSortValue(header.column.getIsSorted())}
-                  >
-                    <div
-                      className={clsx(
-                        header.column.columnDef.enableSorting === false
-                          ? header.column.columnDef.meta?.align
-                          : "flex items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-900 px-3 py-1.5 -mx-3 -my-1.5",
-                        "rounded-md",
-                      )}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {header.column.getCanSort() &&
-                        (header.column.getIsSorted() === false ? (
-                          <ArrowsUpDownIcon className="opacity-30 size-3 text-slate-900 dark:text-slate-50" />
-                        ) : header.column.getIsSorted() === "desc" ? (
-                          <ArrowUpIcon
-                            className="size-3 text-slate-900 dark:text-slate-50"
-                            aria-hidden={true}
-                          />
-                        ) : (
-                          <ArrowDownIcon
-                            className="size-3 text-slate-900 dark:text-slate-50"
-                            aria-hidden={true}
-                          />
-                        ))}
-                    </div>
-                  </TableHeader>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHead>
+        <SortableTableHead table={table} />
         <TableBody>
-          {table.getRowCount() <= 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                Geen logboek regels gevonden.
-              </TableCell>
-            </TableRow>
-          ) : null}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              className={clsx(
-                row.getIsSelected()
-                  ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
-                  : "",
-              )}
-              key={row.id}
-              //   href={`/locatie/${params.location as string}/cohorten/${row.original.handle}`}
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell
-                  key={cell.id}
-                  className={clsx(cell.column.columnDef.meta?.align)}
-                  // suppressLinkBehavior={
-                  //   cell.column.columnDef.meta?.suppressLinkBehavior
-                  // }
-                >
-                  {index === 0 && row.getIsSelected() && (
-                    <div className="left-0 absolute inset-y-0 bg-branding-light w-0.5" />
-                  )}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
+          <NoTableRows table={table}>Geen logboek regels gevonden.</NoTableRows>
+          <DefaultTableRows table={table}>
+            {(cell, index, row) => (
+              <DefaultTableCell
+                key={cell.id}
+                cell={cell}
+                index={index}
+                row={row}
+              />
+            )}
+          </DefaultTableRows>
         </TableBody>
       </Table>
 
       <TableFooter>
         <TableRowSelection table={table} totalItems={totalItems} />
-        <TablePagination totalItems={totalItems} paramPrefix="logbook" />
+        <TablePagination totalItems={totalItems} paramPrefix="logboek" />
       </TableFooter>
 
       <div
