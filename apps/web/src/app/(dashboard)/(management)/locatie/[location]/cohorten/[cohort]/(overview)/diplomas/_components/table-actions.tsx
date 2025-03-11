@@ -22,11 +22,8 @@ import {
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 import {
-  Dropdown,
-  DropdownButton,
   DropdownItem,
   DropdownLabel,
-  DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
   Description,
@@ -44,6 +41,7 @@ import {
   RadioField,
   RadioGroup,
 } from "~/app/(dashboard)/_components/radio";
+import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
@@ -99,65 +97,60 @@ export function ActionButtons(props: Props) {
 
   return (
     <>
-      <Dropdown>
-        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
-        <DropdownMenu anchor="top">
-          <DropdownItem
-            onClick={() => setIsDialogOpen("issue")}
-            disabled={
-              !(
-                noneRowsHaveIssuedCertificates &&
-                allRowsHaveACurriculumWithAtLeastOneModule
-              )
-            }
-            title={
-              !(
-                noneRowsHaveIssuedCertificates &&
-                allRowsHaveACurriculumWithAtLeastOneModule
-              )
-                ? "Niet alle cursisten hebben minimaal één module afgerond"
-                : undefined
-            }
-          >
-            <DropdownLabel>Diploma's uitgeven</DropdownLabel>
-          </DropdownItem>
-          <DropdownItem
-            onClick={() => setIsDialogOpen("remove")}
-            disabled={!allRowsHaveIssuedCertificates}
-            title={
-              !allRowsHaveIssuedCertificates
-                ? "Niet alle cursisten hebben een uitgegeven diploma"
-                : undefined
-            }
-          >
-            <DropdownLabel>Diploma's verwijderen</DropdownLabel>
-          </DropdownItem>
-          <DropdownItem
-            onClick={() => setIsDialogOpen("download")}
-            disabled={!allRowsHaveIssuedCertificates}
-            title={
-              !allRowsHaveIssuedCertificates
-                ? "Niet alle cursisten hebben een uitgegeven diploma"
-                : undefined
-            }
-          >
-            <DropdownLabel>Diploma's downloaden</DropdownLabel>
-          </DropdownItem>
-          <DropdownItem
-            onClick={() => setIsDialogOpen("complete-core-modules")}
-            disabled={
-              !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
-            }
-            title={
-              !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
-                ? "Niet alle cursisten zijn gekoppeld aan een curriculum"
-                : undefined
-            }
-          >
-            <DropdownLabel>Kernmodules afronden</DropdownLabel>
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
+      <TableSelectionButton>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("issue")}
+          disabled={
+            !(
+              noneRowsHaveIssuedCertificates &&
+              allRowsHaveACurriculumWithAtLeastOneModule
+            )
+          }
+          title={
+            !(
+              noneRowsHaveIssuedCertificates &&
+              allRowsHaveACurriculumWithAtLeastOneModule
+            )
+              ? "Niet alle cursisten hebben minimaal één module afgerond"
+              : undefined
+          }
+        >
+          <DropdownLabel>Diploma's uitgeven</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("remove")}
+          disabled={!allRowsHaveIssuedCertificates}
+          title={
+            !allRowsHaveIssuedCertificates
+              ? "Niet alle cursisten hebben een uitgegeven diploma"
+              : undefined
+          }
+        >
+          <DropdownLabel>Diploma's verwijderen</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("download")}
+          disabled={!allRowsHaveIssuedCertificates}
+          title={
+            !allRowsHaveIssuedCertificates
+              ? "Niet alle cursisten hebben een uitgegeven diploma"
+              : undefined
+          }
+        >
+          <DropdownLabel>Diploma's downloaden</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("complete-core-modules")}
+          disabled={!(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)}
+          title={
+            !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
+              ? "Niet alle cursisten zijn gekoppeld aan een curriculum"
+              : undefined
+          }
+        >
+          <DropdownLabel>Kernmodules afronden</DropdownLabel>
+        </DropdownItem>
+      </TableSelectionButton>
 
       <IssueCertificateDialog
         {...props}

@@ -1,24 +1,32 @@
-import type { Row } from "@tanstack/react-table";
-import { Button } from "~/app/(dashboard)/_components/button";
+import {
+  DropdownItem,
+  DropdownLabel,
+} from "~/app/(dashboard)/_components/dropdown";
+import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import type { listCertificates } from "~/lib/nwd";
 
 type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
-export function Download({ rows }: { rows: Row<Certificate>[] }) {
+export function Download({ rows }: { rows: Certificate[] }) {
   const params = new URLSearchParams();
 
   for (const row of rows) {
-    if (row.getIsSelected()) {
-      params.append("certificate[]", row.original.handle);
-    }
+    params.append("certificate", row.handle);
   }
 
   return (
-    <Button
-      plain
+    <DropdownItem
       href={`/api/export/certificate/pdf?${params.toString()}`}
       target="_blank"
     >
-      Download PDF
-    </Button>
+      <DropdownLabel>Download PDF</DropdownLabel>
+    </DropdownItem>
+  );
+}
+
+export function ActionButtons({ rows }: { rows: Certificate[] }) {
+  return (
+    <TableSelectionButton>
+      <Download rows={rows} />
+    </TableSelectionButton>
   );
 }

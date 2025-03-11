@@ -1,10 +1,8 @@
 import {
-  Dropdown,
-  DropdownButton,
   DropdownItem,
   DropdownLabel,
-  DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
+import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import { DialogProvider } from "~/app/(dashboard)/_hooks/use-dialog";
 import { EditLogbook } from "./edit-logbook";
@@ -38,27 +36,24 @@ function EditLogbookButton({ rows }: { rows: LogbookType[] }) {
 export function LogbookTableActionsButton({
   rows,
   personId,
-  resetRowSelection,
+  clearRowSelection,
 }: {
   rows: LogbookType[];
   personId: string;
-  resetRowSelection: () => void;
+  clearRowSelection: () => void;
 }) {
   return (
     <DialogProvider>
-      <Dropdown>
-        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
-        <DropdownMenu anchor="top">
-          <EditLogbookButton rows={rows} />
-          <RemoveLogbookRows />
-        </DropdownMenu>
-      </Dropdown>
+      <TableSelectionButton>
+        <EditLogbookButton rows={rows} />
+        <RemoveLogbookRows />
+      </TableSelectionButton>
 
       <EditLogbook rows={rows} personId={personId} />
       <RemoveLogbook
         logbookId={rows.map((row) => row.id)}
         personId={personId}
-        onSuccess={resetRowSelection}
+        onSuccess={clearRowSelection}
       />
     </DialogProvider>
   );

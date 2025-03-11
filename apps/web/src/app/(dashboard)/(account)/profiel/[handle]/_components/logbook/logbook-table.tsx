@@ -1,5 +1,4 @@
 "use client";
-import { XMarkIcon } from "@heroicons/react/16/solid";
 import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -7,16 +6,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { clsx } from "clsx";
 import dayjs from "dayjs";
 import { useState } from "react";
-import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
+import { TableSelection } from "~/app/(dashboard)/_components/table-action";
 import {
   DefaultTableCell,
   DefaultTableRows,
@@ -218,31 +216,16 @@ export function LogbookTable({
         <TablePagination totalItems={totalItems} paramPrefix="logboek" />
       </TableFooter>
 
-      <div
-        className={clsx(
-          "bottom-14 fixed inset-x-0 flex items-center space-x-2 bg-white dark:bg-slate-950 shadow-md mx-auto p-2 border border-slate-200 dark:border-slate-800 rounded-lg w-fit",
-          selectedRows > 0 ? "" : "hidden",
-        )}
+      <TableSelection
+        selectedRows={selectedRows}
+        clearRowSelection={() => setRowSelection({})}
       >
-        <p className="text-sm select-none">
-          <span className="bg-branding-light/10 px-2 py-1.5 rounded-sm font-medium tabular-nums text-branding-dark">
-            {selectedRows}
-          </span>
-          <span className="ml-2 font-medium text-slate-900 dark:text-slate-50">
-            geselecteerd
-          </span>
-        </p>
-        <div className="flex items-center space-x-4">
-          <Button plain onClick={() => setRowSelection({})}>
-            <XMarkIcon />
-          </Button>
-          <LogbookTableActionsButton
-            rows={actionRows}
-            personId={personId}
-            resetRowSelection={() => setRowSelection({})}
-          />
-        </div>
-      </div>
+        <LogbookTableActionsButton
+          rows={actionRows}
+          personId={personId}
+          clearRowSelection={() => setRowSelection({})}
+        />
+      </TableSelection>
     </>
   );
 }

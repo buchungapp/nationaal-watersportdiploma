@@ -1,5 +1,4 @@
 "use client";
-import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -13,12 +12,8 @@ import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
-import {
-  Popover,
-  PopoverButton,
-  PopoverPanel,
-} from "~/app/(dashboard)/_components/popover";
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
+import { TableSelection } from "~/app/(dashboard)/_components/table-action";
 import {
   DefaultTableCell,
   DefaultTableRows,
@@ -33,7 +28,7 @@ import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import type { listCertificates } from "~/lib/nwd";
-import { Download } from "./table-actions";
+import { ActionButtons } from "./table-actions";
 
 type Certificate = Awaited<ReturnType<typeof listCertificates>>[number];
 
@@ -141,8 +136,10 @@ export default function CertificateTable({
     },
   });
 
-  const anyRowSelected =
-    table.getIsAllRowsSelected() || table.getIsSomeRowsSelected();
+  const selectedRows = Object.keys(rowSelection).length;
+  const actionRows = certificates.filter(
+    (certificate) => rowSelection[certificate.id],
+  );
 
   return (
     <div className="relative mt-8">
@@ -150,16 +147,6 @@ export default function CertificateTable({
         dense
         className="[--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
       >
-        {anyRowSelected ? (
-          <Popover className="top-0 left-12 absolute flex items-center space-x-2">
-            <PopoverButton color="branding-orange">
-              Acties <ChevronDownIcon />
-            </PopoverButton>
-            <PopoverPanel anchor="bottom start">
-              <Download rows={table.getSelectedRowModel().rows} />
-            </PopoverPanel>
-          </Popover>
-        ) : null}
         <DefaultTableHead table={table} />
         <TableBody>
           <NoTableRows table={table}>Geen items gevonden</NoTableRows>
@@ -189,6 +176,13 @@ export default function CertificateTable({
         />
         <TablePagination totalItems={totalItems} />
       </TableFooter>
+
+      <TableSelection
+        selectedRows={selectedRows}
+        clearRowSelection={() => setRowSelection({})}
+      >
+        <ActionButtons rows={actionRows} />
+      </TableSelection>
     </div>
   );
 }

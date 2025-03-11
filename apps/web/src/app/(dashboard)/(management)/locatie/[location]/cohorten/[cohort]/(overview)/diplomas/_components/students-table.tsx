@@ -1,5 +1,4 @@
 "use client";
-import { XMarkIcon } from "@heroicons/react/16/solid";
 import type { OnChangeFn, RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -7,7 +6,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import clsx from "clsx";
 import { useParams } from "next/navigation";
 import React from "react";
 import Search from "~/app/(dashboard)/(management)/_components/search";
@@ -15,7 +13,6 @@ import { Badge } from "~/app/(dashboard)/_components/badge";
 import Breakout, {
   BreakoutCenter,
 } from "~/app/(dashboard)/_components/breakout";
-import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
@@ -47,6 +44,7 @@ import { ActionButtons } from "./table-actions";
 export type Student = Awaited<
   ReturnType<typeof listCertificateOverviewByCohortId>
 >[number];
+import { TableSelection } from "~/app/(dashboard)/_components/table-action";
 import {
   DefaultTableCell,
   DefaultTableRows,
@@ -453,32 +451,17 @@ export default function StudentsTable({
         {/* <TablePagination totalItems={totalItems} /> */}
       </TableFooter>
 
-      <div
-        className={clsx(
-          "bottom-14 fixed inset-x-0 flex items-center space-x-2 bg-white dark:bg-slate-950 shadow-md mx-auto p-2 border border-slate-200 dark:border-slate-800 rounded-lg w-fit",
-          selectedRows > 0 ? "" : "hidden",
-        )}
+      <TableSelection
+        selectedRows={selectedRows}
+        clearRowSelection={() => setRowSelection({})}
       >
-        <p className="text-sm select-none">
-          <span className="bg-branding-light/10 px-2 py-1.5 rounded-sm font-medium tabular-nums text-branding-dark">
-            {selectedRows}
-          </span>
-          <span className="ml-2 font-medium text-slate-900 dark:text-slate-50">
-            geselecteerd
-          </span>
-        </p>
-        <div className="flex items-center space-x-4">
-          <Button plain onClick={() => setRowSelection({})}>
-            <XMarkIcon />
-          </Button>
-          <ActionButtons
-            rows={actionRows}
-            cohortId={cohortId}
-            defaultVisibleFrom={defaultCertificateVisibleFromDate}
-            resetSelection={() => setRowSelection({})}
-          />
-        </div>
-      </div>
+        <ActionButtons
+          rows={actionRows}
+          cohortId={cohortId}
+          defaultVisibleFrom={defaultCertificateVisibleFromDate}
+          resetSelection={() => setRowSelection({})}
+        />
+      </TableSelection>
     </div>
   );
 }
