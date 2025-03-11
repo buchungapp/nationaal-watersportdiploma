@@ -38,6 +38,8 @@ export function EditLogbook({
       formData,
     );
 
+    console.log(result);
+
     if (result.message === "Success") {
       close();
       toast.success("Logboekregel bijgewerkt.");
@@ -59,6 +61,7 @@ export function EditLogbook({
       <form action={action}>
         <DialogBody>
           <LogbookFields
+            errors={state?.errors}
             defaultValues={{
               ...logbook,
             }}

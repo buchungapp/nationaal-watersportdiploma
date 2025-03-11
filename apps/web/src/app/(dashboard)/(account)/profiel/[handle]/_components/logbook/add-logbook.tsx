@@ -54,7 +54,7 @@ export function AddLogbook({
         <Text>Vul de details in van je vaaractiviteit.</Text>
         <form action={action}>
           <DialogBody>
-            <LogbookFields />
+            <LogbookFields errors={state?.errors} />
           </DialogBody>
           <DialogActions>
             <Button plain onClick={close}>

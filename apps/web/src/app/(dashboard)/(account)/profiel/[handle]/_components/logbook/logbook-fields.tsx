@@ -146,6 +146,7 @@ export function LogbookFields({
           type="number"
           name="windPower"
           placeholder="bv. 4"
+          step=".01"
           invalid={!!errors?.windPower}
           defaultValue={defaultValues?.windPower ?? undefined}
         />
@@ -166,6 +167,7 @@ export function LogbookFields({
         <Input
           type="number"
           name="boatLength"
+          step=".01"
           invalid={!!errors?.boatLength}
           defaultValue={defaultValues?.boatLength ?? undefined}
         />
@@ -176,6 +178,7 @@ export function LogbookFields({
         <Input
           type="number"
           name="sailedNauticalMiles"
+          step=".01"
           invalid={!!errors?.sailedNauticalMiles}
           defaultValue={defaultValues?.sailedNauticalMiles ?? undefined}
         />
@@ -186,6 +189,7 @@ export function LogbookFields({
         <Input
           type="number"
           name="sailedHoursInDark"
+          step=".01"
           invalid={!!errors?.sailedHoursInDark}
           defaultValue={defaultValues?.sailedHoursInDark ?? undefined}
         />
