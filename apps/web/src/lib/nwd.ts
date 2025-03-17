@@ -9,6 +9,7 @@ import {
   Course,
   Curriculum,
   Location,
+  Logbook,
   Platform,
   Student,
   User,
@@ -398,15 +399,21 @@ export const updateExternalCertificate = async ({
       throw new Error("Unauthorized");
     }
 
+    const oldCertificate = await Certificate.External.byId({ id });
+
+    if (!oldCertificate) {
+      throw new Error("Certificate not found");
+    }
+
+    if (oldCertificate.personId !== personId) {
+      throw new Error("Unauthorized");
+    }
+
     let mediaId = undefined;
     let removeMediaId = undefined;
     if (typeof media !== "undefined") {
-      const { mediaId: oldMediaId } = await Certificate.External.byId({
-        id,
-      });
-
-      if (oldMediaId !== null) {
-        removeMediaId = oldMediaId;
+      if (oldCertificate.mediaId !== null) {
+        removeMediaId = oldCertificate.mediaId;
       }
 
       if (media) {
@@ -454,6 +461,16 @@ export const removeExternalCertificate = async ({
     const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
     if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    const certificate = await Certificate.External.byId({ id });
+
+    if (!certificate) {
+      throw new Error("Certificate not found");
+    }
+
+    if (certificate.personId !== personId) {
       throw new Error("Unauthorized");
     }
 
@@ -2615,3 +2632,151 @@ export const listAllocationHistory = cache(
     });
   },
 );
+
+export const listLogbooksForPerson = async ({
+  personId,
+  locationId,
+}: {
+  personId: string;
+  locationId?: string;
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      if (!locationId) {
+        throw new Error("Unauthorized");
+      }
+
+      await validatePersonAccessCheck({
+        locationId,
+        requestedPersonId: personId,
+        requestingUser,
+      });
+    }
+
+    return await Logbook.listForPerson({ personId });
+  });
+};
+
+export const createLogbook = async ({
+  personId,
+  fields,
+}: {
+  personId: string;
+  fields: {
+    startedAt: string;
+    endedAt: string | null;
+    departurePort: string | null;
+    arrivalPort: string | null;
+    windPower: number | null;
+    windDirection: string | null;
+    boatType: string | null;
+    boatLength: number | null;
+    location: string | null;
+    sailedNauticalMiles: number | null;
+    sailedHoursInDark: number | null;
+    primaryRole: string | null;
+    crewNames: string | null;
+    conditions: string | null;
+    additionalComments: string | null;
+  };
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.create({
+      personId,
+      ...fields,
+    });
+  });
+};
+
+export const updateLogbook = async ({
+  id,
+  personId,
+  fields,
+}: {
+  id: string;
+  personId: string;
+  fields: {
+    startedAt?: string;
+    endedAt?: string | null;
+    departurePort?: string | null;
+    arrivalPort?: string | null;
+    windPower?: number | null;
+    windDirection?: string | null;
+    boatType?: string | null;
+    boatLength?: number | null;
+    location?: string | null;
+    sailedNauticalMiles?: number | null;
+    sailedHoursInDark?: number | null;
+    primaryRole?: string | null;
+    crewNames?: string | null;
+    conditions?: string | null;
+    additionalComments?: string | null;
+  };
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    const logbook = await Logbook.byId({ id });
+
+    if (!logbook) {
+      throw new Error("Logbook not found");
+    }
+
+    if (logbook.personId !== personId) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.update({
+      id,
+      ...fields,
+    });
+  });
+};
+
+export const removeLogbook = async ({
+  id,
+  personId,
+}: {
+  id: string;
+  personId: string;
+}) => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+
+    const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
+
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    const logbook = await Logbook.byId({ id });
+
+    if (!logbook) {
+      throw new Error("Logbook not found");
+    }
+
+    if (logbook.personId !== personId) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Logbook.remove(id);
+  });
+};

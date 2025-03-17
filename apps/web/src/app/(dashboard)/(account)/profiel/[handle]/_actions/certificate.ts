@@ -145,12 +145,12 @@ export async function updateExternalCertificateAction(
       .string()
       .transform((value) => value === "on")
       .optional(),
-    awardedAt: z.string().date().nullable().default(null).optional(),
-    identifier: z.string().nullable().default(null).optional(),
-    issuingAuthority: z.string().nullable().default(null).optional(),
-    issuingLocation: z.string().nullable().default(null).optional(),
+    awardedAt: z.string().date().nullable().optional(),
+    identifier: z.string().nullable().optional(),
+    issuingAuthority: z.string().nullable().optional(),
+    issuingLocation: z.string().nullable().optional(),
     title: z.string().optional(),
-    additionalComments: z.string().nullable().default(null).optional(),
+    additionalComments: z.string().nullable().optional(),
   });
 
   const data: Record<string, FormDataEntryValue | null> = Object.fromEntries(

@@ -1,5 +1,4 @@
 import nextMDX from "@next/mdx";
-import remarkGfm from "remark-gfm";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -10,13 +9,27 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "6mb",
     },
+    turbo: {
+      resolveAlias: {
+        canvas: "./empty-module.ts",
+      },
+    },
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
     "/": ["./src/app/(public)/**/*.mdx"],
   },
   images: {
-    domains: ["127.0.0.1", "kfwvxetvsoujgiighiqx.supabase.co"],
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      {
+        protocol: "https",
+        hostname: "kfwvxetvsoujgiighiqx.supabase.co",
+      },
+    ],
   },
   transpilePackages: ["next-mdx-remote"],
   async redirects() {
@@ -68,7 +81,7 @@ const nextConfig = {
 const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: [["remark-gfm", {}]],
     rehypePlugins: [],
   },
 });

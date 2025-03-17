@@ -12,7 +12,7 @@ export const parseTimeString = (str: string) => {
 
 export const stripTime = (datetime: Date | null) => {
   if (!datetime) return null;
-  return new Date(datetime.toDateString());
+  return new Date(`${datetime.toISOString().split("T")[0]}T00:00:00`);
 };
 
 export const stripDate = (datetime: Date | null) => {

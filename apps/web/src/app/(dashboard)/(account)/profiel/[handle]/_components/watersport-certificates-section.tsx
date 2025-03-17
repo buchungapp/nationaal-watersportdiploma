@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
-import { GridList } from "~/app/(dashboard)/_components/grid-list-v2";
+import {
+  GridList,
+  gridContainer,
+} from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { AddCertificate } from "./certificate/add-certificate";
@@ -14,8 +17,8 @@ export default async function WatersportCertificatesSection({
   };
 }) {
   return (
-    <div className="lg:col-span-2">
-      <div className="w-full flex justify-between items-center mb-2">
+    <div className={`${gridContainer} lg:col-span-3`}>
+      <div className="flex justify-between items-center mb-2 w-full">
         <Subheading>Jouw Watersportcertificaten</Subheading>
         <AddCertificate className="-my-1.5" personId={person.id} />
       </div>
@@ -27,8 +30,8 @@ export default async function WatersportCertificatesSection({
       <Suspense
         fallback={
           <GridList>
-            <li className="animate-pulse h-107 sm:h-78.5 w-full bg-slate-200 rounded-xl" />
-            <li className="hidden sm:block animate-pulse h-107 sm:h-78.5 w-full bg-slate-200 rounded-xl delay-500" />
+            <li className="bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse" />
+            <li className="hidden sm:block bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse delay-500" />
           </GridList>
         }
       >

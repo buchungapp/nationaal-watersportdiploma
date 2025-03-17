@@ -4,9 +4,11 @@ import type { PropsWithChildren } from "react";
 import type React from "react";
 import { Dropdown, DropdownButton, DropdownMenu } from "./dropdown";
 
+export const gridContainer = "@container/grid-list";
+
 export function GridList({ children }: PropsWithChildren) {
   return (
-    <ul className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2 xl:gap-x-6">
+    <ul className="gap-x-4 gap-y-4 xl:gap-x-6 grid grid-cols-1 @xl/grid-list:grid-cols-2 @4xl/grid-list:grid-cols-3">
       {children}
     </ul>
   );
@@ -14,7 +16,7 @@ export function GridList({ children }: PropsWithChildren) {
 
 export function GridListItem({ children }: PropsWithChildren) {
   return (
-    <li className="overflow-hidden rounded-xl border border-slate-200 py-3">
+    <li className="py-3 border border-slate-200 rounded-xl overflow-hidden">
       {children}
     </li>
   );
@@ -22,7 +24,7 @@ export function GridListItem({ children }: PropsWithChildren) {
 
 export function GridListItemHeader({ children }: PropsWithChildren) {
   return (
-    <div className="flex items-center justify-between gap-x-4 px-6 pt-3 pb-3">
+    <div className="flex justify-between items-center gap-x-4 px-6 pt-3 pb-3">
       {children}
     </div>
   );

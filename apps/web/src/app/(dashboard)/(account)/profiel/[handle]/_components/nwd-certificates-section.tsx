@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
-import { GridList } from "~/app/(dashboard)/_components/grid-list-v2";
+import {
+  GridList,
+  gridContainer,
+} from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { NWDCertificates } from "./certificates";
@@ -13,7 +16,7 @@ export default async function NWDCertificatesSection({
   };
 }) {
   return (
-    <div className="lg:col-span-2">
+    <div className={`${gridContainer} lg:col-span-2`}>
       <Subheading>Jouw NWD-diploma's</Subheading>
       <Text>
         Hieronder vind je een overzicht van de NWD-diploma's die je hebt
@@ -28,15 +31,15 @@ export default async function NWDCertificatesSection({
       <Suspense
         fallback={
           <GridList>
-            <li className="animate-pulse h-107 sm:h-78.5 w-full bg-slate-200 rounded-xl" />
-            <li className="hidden sm:block animate-pulse h-107 sm:h-78.5 w-full bg-slate-200 rounded-xl delay-500" />
+            <li className="bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse" />
+            <li className="hidden sm:block bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse delay-500" />
           </GridList>
         }
       >
         <NWDCertificates
           personId={person.id}
           noResults={
-            <Text className="italic mb-2">
+            <Text className="mb-2 italic">
               Je hebt nog geen NWD-diploma's behaald. Klopt dit niet? Neem dan
               contact op met de{" "}
               <TextLink href="/vaarlocaties" target="_blank">

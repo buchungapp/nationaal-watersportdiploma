@@ -2,12 +2,10 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import clsx from "clsx";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
@@ -19,18 +17,17 @@ import {
   DropdownLabel,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
+import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/app/(dashboard)/_components/table";
+  DefaultTableCell,
+  DefaultTableRows,
+  NoTableRows,
+} from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import type { listInstructorsByCohortId } from "~/lib/nwd";
@@ -89,7 +86,7 @@ export default function InstructorsTable({
       columnHelper.accessor("roles", {
         header: "Rollen",
         cell: ({ getValue }) => (
-          <div className="flex gap-x-2 items-center">
+          <div className="flex items-center gap-x-2">
             {getValue().map((tag) => (
               <Badge key={tag.id}>{tag.title ?? tag.handle}</Badge>
             ))}
@@ -139,7 +136,7 @@ export default function InstructorsTable({
 
           return (
             <>
-              <div className="-mx-3 -my-1.5 sm:-mx-2.5">
+              <div className="-mx-3 sm:-mx-2.5 -my-1.5">
                 <Dropdown>
                   <DropdownButton outline aria-label="Meer opties">
                     <EllipsisHorizontalIcon />
@@ -179,58 +176,24 @@ export default function InstructorsTable({
   });
 
   return (
-    <div className="mt-8 relative">
+    <div className="relative mt-8">
       <Table
         className="[--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
         dense
       >
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHeader
-                  key={header.id}
-                  className={clsx(header.column.columnDef.meta?.align)}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </TableHeader>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
+        <DefaultTableHead table={table} />
         <TableBody>
-          {table.getRowCount() <= 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                Geen items gevonden
-              </TableCell>
-            </TableRow>
-          ) : null}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              className={clsx(
-                row.getIsSelected()
-                  ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
-                  : "",
-              )}
-              key={row.id}
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell
-                  key={cell.id}
-                  className={clsx(cell.column.columnDef.meta?.align)}
-                >
-                  {index === 0 && row.getIsSelected() && (
-                    <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
-                  )}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
+          <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+          <DefaultTableRows table={table}>
+            {(cell, index, row) => (
+              <DefaultTableCell
+                key={cell.id}
+                cell={cell}
+                index={index}
+                row={row}
+              />
+            )}
+          </DefaultTableRows>
         </TableBody>
       </Table>
 

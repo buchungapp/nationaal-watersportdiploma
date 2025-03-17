@@ -22,11 +22,8 @@ import {
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
 import {
-  Dropdown,
-  DropdownButton,
   DropdownItem,
   DropdownLabel,
-  DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import {
   Description,
@@ -38,12 +35,13 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
-import SmartDatetimePicker from "~/app/(dashboard)/_components/natural-language-input";
+import { SmartDatetimePicker } from "~/app/(dashboard)/_components/natural-language-input";
 import {
   Radio,
   RadioField,
   RadioGroup,
 } from "~/app/(dashboard)/_components/radio";
+import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
@@ -99,65 +97,60 @@ export function ActionButtons(props: Props) {
 
   return (
     <>
-      <Dropdown>
-        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
-        <DropdownMenu anchor="top">
-          <DropdownItem
-            onClick={() => setIsDialogOpen("issue")}
-            disabled={
-              !(
-                noneRowsHaveIssuedCertificates &&
-                allRowsHaveACurriculumWithAtLeastOneModule
-              )
-            }
-            title={
-              !(
-                noneRowsHaveIssuedCertificates &&
-                allRowsHaveACurriculumWithAtLeastOneModule
-              )
-                ? "Niet alle cursisten hebben minimaal één module afgerond"
-                : undefined
-            }
-          >
-            <DropdownLabel>Diploma's uitgeven</DropdownLabel>
-          </DropdownItem>
-          <DropdownItem
-            onClick={() => setIsDialogOpen("remove")}
-            disabled={!allRowsHaveIssuedCertificates}
-            title={
-              !allRowsHaveIssuedCertificates
-                ? "Niet alle cursisten hebben een uitgegeven diploma"
-                : undefined
-            }
-          >
-            <DropdownLabel>Diploma's verwijderen</DropdownLabel>
-          </DropdownItem>
-          <DropdownItem
-            onClick={() => setIsDialogOpen("download")}
-            disabled={!allRowsHaveIssuedCertificates}
-            title={
-              !allRowsHaveIssuedCertificates
-                ? "Niet alle cursisten hebben een uitgegeven diploma"
-                : undefined
-            }
-          >
-            <DropdownLabel>Diploma's downloaden</DropdownLabel>
-          </DropdownItem>
-          <DropdownItem
-            onClick={() => setIsDialogOpen("complete-core-modules")}
-            disabled={
-              !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
-            }
-            title={
-              !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
-                ? "Niet alle cursisten zijn gekoppeld aan een curriculum"
-                : undefined
-            }
-          >
-            <DropdownLabel>Kernmodules afronden</DropdownLabel>
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
+      <TableSelectionButton>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("issue")}
+          disabled={
+            !(
+              noneRowsHaveIssuedCertificates &&
+              allRowsHaveACurriculumWithAtLeastOneModule
+            )
+          }
+          title={
+            !(
+              noneRowsHaveIssuedCertificates &&
+              allRowsHaveACurriculumWithAtLeastOneModule
+            )
+              ? "Niet alle cursisten hebben minimaal één module afgerond"
+              : undefined
+          }
+        >
+          <DropdownLabel>Diploma's uitgeven</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("remove")}
+          disabled={!allRowsHaveIssuedCertificates}
+          title={
+            !allRowsHaveIssuedCertificates
+              ? "Niet alle cursisten hebben een uitgegeven diploma"
+              : undefined
+          }
+        >
+          <DropdownLabel>Diploma's verwijderen</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("download")}
+          disabled={!allRowsHaveIssuedCertificates}
+          title={
+            !allRowsHaveIssuedCertificates
+              ? "Niet alle cursisten hebben een uitgegeven diploma"
+              : undefined
+          }
+        >
+          <DropdownLabel>Diploma's downloaden</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem
+          onClick={() => setIsDialogOpen("complete-core-modules")}
+          disabled={!(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)}
+          title={
+            !(allRowsHaveACurriculum && noneRowsHaveIssuedCertificates)
+              ? "Niet alle cursisten zijn gekoppeld aan een curriculum"
+              : undefined
+          }
+        >
+          <DropdownLabel>Kernmodules afronden</DropdownLabel>
+        </DropdownItem>
+      </TableSelectionButton>
 
       <IssueCertificateDialog
         {...props}
@@ -378,7 +371,7 @@ function CompleteCoreModulesDialog({
         <AlertDescription>
           With great power comes great responsibility. Houd rekening met het
           volgende:
-          <ul className="list-inside list-disc mt-2 mb-4">
+          <ul className="mt-2 mb-4 list-disc list-inside">
             <li>
               Niet alle kernmodules zijn vereist voor het behalen van een
               diploma.
@@ -476,8 +469,8 @@ function DownloadCertificatesDialog({
           <AlertBody>
             <HeadlessDisclosure>
               <HeadlessDisclosureButton className="flex">
-                <div className="mr-6 flex h-6 items-center justify-center">
-                  <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 transition-transform ui-open:rotate-90" />
+                <div className="flex justify-center items-center mr-6 h-6">
+                  <ChevronRightIcon className="w-3.5 h-3.5 ui-open:rotate-90 transition-transform shrink-0" />
                 </div>
                 <Subheading>Geavanceerde opties</Subheading>
               </HeadlessDisclosureButton>

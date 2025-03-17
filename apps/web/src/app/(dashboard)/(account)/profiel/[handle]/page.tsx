@@ -13,9 +13,11 @@ import posthog from "~/lib/posthog";
 import { EditDetails } from "./_components/action-buttons";
 import { PersonCohortProgress } from "./_components/cohort-progress";
 
-import { showNewWaterSportCertificates } from "~/lib/flags";
+import { showNewLogBook, showNewWaterSportCertificates } from "~/lib/flags";
+import { Logbook } from "./_components/logbook/logbook";
 import NWDCertificatesSection from "./_components/nwd-certificates-section";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
+import { pageParamsCache } from "./_searchParams";
 import PageWithoutNewWaterSportCertificates from "./old-page";
 
 async function ActionButton({ handle }: { handle: string }) {
@@ -31,15 +33,20 @@ export default async function Page(props: {
   params: Promise<{
     handle: string;
   }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   if (!(await showNewWaterSportCertificates())) {
     return await PageWithoutNewWaterSportCertificates(props);
   }
 
+  // Kick-off the flag evaluation
+  const showLogBook = showNewLogBook();
+
   const params = await props.params;
   const [user, person] = await Promise.all([
     getUserOrThrow(),
     getPersonByHandle(params.handle),
+    pageParamsCache.parse(props.searchParams),
   ]);
 
   posthog.capture({
@@ -53,8 +60,8 @@ export default async function Page(props: {
   await posthog.shutdown();
 
   return (
-    <div className="mx-auto grid max-w-3xl grid-cols-1 grid-rows-1 items-start gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-      <div className="mt-4 lg:col-span-3">
+    <div className="items-start gap-x-8 gap-y-16 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
+      <div className="lg:col-span-3 mt-4">
         <Heading>Welkom {person.firstName}!</Heading>
         <Text>
           Op deze pagina vind je jouw persoonlijke gegevens, NWD-diploma's en
@@ -62,12 +69,12 @@ export default async function Page(props: {
         </Text>
       </div>
 
-      <div className="lg:col-start-3 lg:row-start-2 lg:row-span-3">
-        <div className="flex items-center justify-between">
+      <div className="lg:col-start-3 lg:row-start-2">
+        <div className="flex justify-between items-center">
           <Subheading>Personalia</Subheading>
           <Suspense
             fallback={
-              <div className="animate-pulse size-9 bg-slate-200 rounded-lg -my-1.5" />
+              <div className="bg-slate-200 -my-1.5 rounded-lg size-9 animate-pulse" />
             }
           >
             <ActionButton handle={params.handle} />
@@ -112,7 +119,8 @@ export default async function Page(props: {
 
       <NWDCertificatesSection person={person} />
       <WatersportCertificatesSection person={person} />
-      {/* <div className="lg:col-span-2">Logboek</div> */}
+
+      {(await showLogBook) ? <Logbook person={person} /> : null}
     </div>
   );
 }
