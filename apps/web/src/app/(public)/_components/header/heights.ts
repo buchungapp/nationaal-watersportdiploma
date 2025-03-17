@@ -1,0 +1,2 @@
+export const TRUSTBAR_HEIGHT = 36;
+export const NOTIFICATIONBAR_HEIGHT = 36;

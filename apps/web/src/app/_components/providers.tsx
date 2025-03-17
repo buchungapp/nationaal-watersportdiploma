@@ -10,6 +10,10 @@ import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
 import { createClient } from "~/lib/supabase/client";
 import { invariant } from "~/utils/invariant";
+import {
+  NOTIFICATIONBAR_HEIGHT,
+  TRUSTBAR_HEIGHT,
+} from "../(public)/_components/header/heights";
 import { LocationsMapContainer } from "../(public)/_components/locations-map";
 
 if (typeof window !== "undefined") {
@@ -46,12 +50,14 @@ export function useMobileMenuState() {
 }
 
 // @TODO see if we can move these to CSS-variables
-export const TRUSTBAR_HEIGHT = 36;
 const STICKY_NAV_OFFSET = 16;
 
 export function useIsSticky() {
   const { scrollPosition } = useContext(AppContext);
-  return scrollPosition > TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
+  return (
+    scrollPosition >
+    TRUSTBAR_HEIGHT + NOTIFICATIONBAR_HEIGHT - STICKY_NAV_OFFSET
+  );
 }
 
 export function CommonProviders({ children }: { children: React.ReactNode }) {
