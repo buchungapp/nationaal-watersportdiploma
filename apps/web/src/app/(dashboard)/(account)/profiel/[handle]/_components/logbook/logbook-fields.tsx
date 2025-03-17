@@ -28,9 +28,11 @@ export function LogbookFields({
   const [useDateTime, setUseDateTime] = useState(hasTime);
 
   return (
-    <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-4">
-      <Field className="relative col-span-2">
-        <Label>Startdatum</Label>
+    <div className="gap-8 @xl/logbook-fields:gap-4 grid grid-cols-1 @xl/logbook-fields:grid-cols-4">
+      <Field className="relative @xl/logbook-fields:col-span-2">
+        <Label>
+          Startdatum <span className="text-branding-orange">*</span>
+        </Label>
         {useDateTime ? (
           <SmartDatetimePicker
             name="startedAt"
@@ -56,7 +58,7 @@ export function LogbookFields({
         )}
       </Field>
       {showEndDate ? (
-        <Field className="relative col-span-2">
+        <Field className="relative @xl/logbook-fields:col-span-2">
           <Label>Einddatum</Label>
           {useDateTime ? (
             <SmartDatetimePicker
@@ -81,7 +83,7 @@ export function LogbookFields({
           )}
         </Field>
       ) : null}
-      <div className="col-span-4">
+      <div className="@xl/logbook-fields:col-span-4">
         <CheckboxField>
           <Checkbox
             name="isMultipleDays"
@@ -100,7 +102,7 @@ export function LogbookFields({
         </CheckboxField>
       </div>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Vertrekhaven</Label>
         <Input
           name="departurePort"
@@ -110,7 +112,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Aankomsthaven</Label>
         <Input
           name="arrivalPort"
@@ -120,7 +122,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-3">
+      <Field className="@xl/logbook-fields:col-span-3">
         <Label>Organisatie</Label>
         <Input
           name="location"
@@ -130,7 +132,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Windrichting</Label>
         <Input
           name="windDirection"
@@ -140,7 +142,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Windkracht (knopen)</Label>
         <Input
           type="number"
@@ -152,7 +154,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Type boot</Label>
         <Input
           name="boatType"
@@ -162,7 +164,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Bootlengte (meters)</Label>
         <Input
           type="number"
@@ -173,7 +175,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Gevaren nautische mijlen</Label>
         <Input
           type="number"
@@ -184,7 +186,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-2">
+      <Field className="@xl/logbook-fields:col-span-2">
         <Label>Uren in donker</Label>
         <Input
           type="number"
@@ -195,7 +197,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-3">
+      <Field className="@xl/logbook-fields:col-span-3">
         <Label>Primaire rol</Label>
         <Listbox
           name="primaryRole"
@@ -210,7 +212,7 @@ export function LogbookFields({
         </Listbox>
       </Field>
 
-      <Field className="col-span-4">
+      <Field className="@xl/logbook-fields:col-span-4">
         <Label>Bemanningsnamen</Label>
         <Textarea
           name="crewNames"
@@ -220,7 +222,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-4">
+      <Field className="@xl/logbook-fields:col-span-4">
         <Label>Omstandigheden</Label>
         <Textarea
           name="conditions"
@@ -230,7 +232,7 @@ export function LogbookFields({
         />
       </Field>
 
-      <Field className="col-span-4">
+      <Field className="@xl/logbook-fields:col-span-4">
         <Label>Bijzonderheden / Opmerkingen</Label>
         <Textarea
           name="additionalComments"

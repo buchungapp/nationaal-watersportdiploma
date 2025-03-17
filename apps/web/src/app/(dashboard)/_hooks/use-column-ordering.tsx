@@ -83,13 +83,13 @@ export function useColumnOrdering(
   );
 
   const [columnOrder, setColumnOrder] = useQueryState<ColumnOrderState>(
-    `${paramPrefix ? `${paramPrefix}_` : ""}volgorde`,
+    `${paramPrefix ? `${paramPrefix}-` : ""}volgorde`,
     parseAsArrayOf(parseAsString).withDefault(defaultOrder),
   );
 
   const [columnVisibility, setColumnVisibility] =
     useQueryState<VisibilityState>(
-      `${paramPrefix ? `${paramPrefix}_` : ""}toon`,
+      `${paramPrefix ? `${paramPrefix}-` : ""}toon`,
       parseAsColumnVisibility(defaultOrder).withDefault(defaultVisibility),
     );
 

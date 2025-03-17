@@ -24,6 +24,7 @@ import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,
 } from "~/lib/nwd";
+import { pageParamsCache } from "../_searchParams";
 import { AddMedia } from "./certificate/add-media";
 import {
   EditCertificate,
@@ -74,16 +75,23 @@ export async function Certificates({
   const { allCertificates, externalCertificates } =
     await getAllCertificates(personId);
 
+  const parsedSq = pageParamsCache.all();
+
+  const editCertificate = externalCertificates.find(
+    (certificate) => certificate.id === parsedSq["edit-certificate"],
+  );
+
+  const media = externalCertificates.find(
+    (certificate) => certificate.media?.id === parsedSq["media-viewer"],
+  )?.media;
+
   return (
     <>
       {allCertificates.length === 0 ? noResults : null}
-      <EditCertificate
-        personId={personId}
-        certificates={externalCertificates}
-      />
-      <MediaViewer
-        medias={externalCertificates.map((certificate) => certificate.media)}
-      />
+      {editCertificate ? (
+        <EditCertificate personId={personId} certificate={editCertificate} />
+      ) : null}
+      {media ? <MediaViewer media={media} /> : null}
       <GridList>
         {allCertificates.map((certificate) => (
           <Certificate

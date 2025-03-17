@@ -154,13 +154,13 @@ export function LogbookTable({
       columns,
       excludeColumns: ["select"],
     }),
-    "logboek",
+    "logbook",
   );
 
   const sortingOptions = useSorting({
     sortableColumnIds: getSortableColumnIds(columns),
     defaultSorting: [{ id: "startedAt", desc: false }],
-    paramPrefix: "logboek",
+    paramPrefix: "logbook",
   });
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -213,7 +213,7 @@ export function LogbookTable({
 
       <TableFooter>
         <TableRowSelection table={table} totalItems={totalItems} />
-        <TablePagination totalItems={totalItems} paramPrefix="logboek" />
+        <TablePagination totalItems={totalItems} paramPrefix="logbook" />
       </TableFooter>
 
       <TableSelection

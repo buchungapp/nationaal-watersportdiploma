@@ -55,11 +55,11 @@ export function EditLogbook({
   }
 
   return (
-    <Dialog open={isOpen} onClose={close}>
+    <Dialog size="2xl" open={isOpen} onClose={close}>
       <DialogTitle>Bewerk je logboekregel</DialogTitle>
       <Text>Vul de details in van je vaaractiviteit.</Text>
       <form action={action}>
-        <DialogBody>
+        <DialogBody className="@container/logbook-fields">
           <LogbookFields
             errors={state?.errors}
             defaultValues={{

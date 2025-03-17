@@ -77,7 +77,7 @@ export function useSorting({
 }) {
   // TODO: using the parseAsSorting function, causes an infinite loop with tanstack table, this work around is not nice
   const [sorting, setSorting] = useQueryState(
-    `${paramPrefix ? `${paramPrefix}_` : ""}sorteer`,
+    `${paramPrefix ? `${paramPrefix}-` : ""}sorteer`,
     parseAsString.withDefault(serializeSorting(defaultSorting)),
   );
 

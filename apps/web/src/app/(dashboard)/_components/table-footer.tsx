@@ -18,8 +18,8 @@ export function TablePagination({
   totalItems: number;
   paramPrefix?: string;
 }) {
-  const pageParam = `${paramPrefix ? `${paramPrefix}_` : ""}page`;
-  const limitParam = `${paramPrefix ? `${paramPrefix}_` : ""}limit`;
+  const pageParam = `${paramPrefix ? `${paramPrefix}-` : ""}page`;
+  const limitParam = `${paramPrefix ? `${paramPrefix}-` : ""}limit`;
 
   const [page, setPage] = useQueryState(
     pageParam,

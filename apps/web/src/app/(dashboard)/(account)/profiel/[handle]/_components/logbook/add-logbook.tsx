@@ -49,11 +49,11 @@ export function AddLogbook({
         <span className="hidden sm:inline">Voeg regel toe</span>
       </Button>
 
-      <Dialog open={isOpen} onClose={close}>
+      <Dialog size="2xl" open={isOpen} onClose={close}>
         <DialogTitle>Voeg een nieuw regel toe</DialogTitle>
         <Text>Vul de details in van je vaaractiviteit.</Text>
         <form action={action}>
-          <DialogBody>
+          <DialogBody className="@container/logbook-fields">
             <LogbookFields errors={state?.errors} />
           </DialogBody>
           <DialogActions>

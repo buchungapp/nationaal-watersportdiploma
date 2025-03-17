@@ -1,32 +1,25 @@
-import { createLoader, parseAsInteger } from "nuqs/server";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { listLogbooksForPerson } from "~/lib/nwd";
+import { pageParamsCache } from "../../_searchParams";
 import { AddLogbook } from "./add-logbook";
 import { LogbookTable } from "./logbook-table";
 
-const searchParamsParser = createLoader({
-  logbook_page: parseAsInteger.withDefault(1),
-  logbook_limit: parseAsInteger.withDefault(25),
-});
-
 export async function Logbook({
   person,
-  searchParams,
 }: {
   person: {
     id: string;
   };
-  searchParams: Record<string, string | string[] | undefined>;
 }) {
   const data = await listLogbooksForPerson({ personId: person.id });
 
-  const parsedSq = searchParamsParser(searchParams);
+  const parsedSq = pageParamsCache.all();
 
   const logbooks = data.slice(
-    (parsedSq.logbook_page - 1) * parsedSq.logbook_limit,
-    parsedSq.logbook_page * parsedSq.logbook_limit,
+    (parsedSq["logbook-page"] - 1) * parsedSq["logbook-limit"],
+    parsedSq["logbook-page"] * parsedSq["logbook-limit"],
   );
 
   return (

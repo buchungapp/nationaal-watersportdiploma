@@ -17,6 +17,7 @@ import { showNewLogBook, showNewWaterSportCertificates } from "~/lib/flags";
 import { Logbook } from "./_components/logbook/logbook";
 import NWDCertificatesSection from "./_components/nwd-certificates-section";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
+import { pageParamsCache } from "./_searchParams";
 import PageWithoutNewWaterSportCertificates from "./old-page";
 
 async function ActionButton({ handle }: { handle: string }) {
@@ -38,8 +39,6 @@ export default async function Page(props: {
     return await PageWithoutNewWaterSportCertificates(props);
   }
 
-  const searchParams = await props.searchParams;
-
   // Kick-off the flag evaluation
   const showLogBook = showNewLogBook();
 
@@ -47,6 +46,7 @@ export default async function Page(props: {
   const [user, person] = await Promise.all([
     getUserOrThrow(),
     getPersonByHandle(params.handle),
+    pageParamsCache.parse(props.searchParams),
   ]);
 
   posthog.capture({
@@ -120,9 +120,7 @@ export default async function Page(props: {
       <NWDCertificatesSection person={person} />
       <WatersportCertificatesSection person={person} />
 
-      {(await showLogBook) ? (
-        <Logbook person={person} searchParams={searchParams} />
-      ) : null}
+      {(await showLogBook) ? <Logbook person={person} /> : null}
     </div>
   );
 }

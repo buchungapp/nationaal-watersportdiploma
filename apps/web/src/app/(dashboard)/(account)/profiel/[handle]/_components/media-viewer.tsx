@@ -42,9 +42,9 @@ export function MediaViewerButton({
 }
 
 export default function MediaViewer({
-  medias,
+  media,
 }: {
-  medias: (Media | null)[];
+  media: Media;
 }) {
   const [isOpen, setIsOpen] = useQueryState("media-viewer", parseAsString);
 
@@ -52,13 +52,8 @@ export default function MediaViewer({
     setIsOpen(null);
   };
 
-  const media = medias.find((media) => media?.id === isOpen);
-  if (!media) {
-    return null;
-  }
-
   return (
-    <Dialog size="4xl" onClose={close} open={!!media}>
+    <Dialog size="4xl" onClose={close} open={isOpen === media.id}>
       <div className="flex justify-between items-center gap-1">
         <DialogTitle>Media bekijken</DialogTitle>
         <div className="flex gap-1 -my-1.5">
