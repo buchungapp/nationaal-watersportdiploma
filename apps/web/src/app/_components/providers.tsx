@@ -55,10 +55,10 @@ export function useMobileMenuState() {
 const STICKY_NAV_OFFSET = 16;
 
 export function useIsSticky() {
-  const { scrollPosition, windowWidth } = useContext(AppContext);
+  const { scrollPosition } = useContext(AppContext);
   return (
     scrollPosition >
-    TRUSTBAR_HEIGHT + NOTIFICATIONBAR_HEIGHT(windowWidth) - STICKY_NAV_OFFSET
+    TRUSTBAR_HEIGHT + NOTIFICATIONBAR_HEIGHT - STICKY_NAV_OFFSET
   );
 }
 
