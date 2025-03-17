@@ -311,10 +311,10 @@ function TimelineEvent({
     <div className="relative flex space-x-3.5">
       <span
         className={clsx(
-          "text-zinc-400 flex h-6 w-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+          "text-zinc-400 flex size-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
         )}
       >
-        <Icon aria-hidden="true" className="h-4 w-4" />
+        <Icon aria-hidden="true" className="size-4" />
       </span>
       <div className="flex min-w-0 flex-1 justify-between space-x-4">
         <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
@@ -352,10 +352,10 @@ function TimelineEventCompetenciesProgress({
     <div className="relative flex space-x-3.5">
       <span
         className={clsx(
-          "text-zinc-400 flex h-6 w-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+          "text-zinc-400 flex size-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
         )}
       >
-        <ChartBarIcon aria-hidden="true" className="h-4 w-4" />
+        <ChartBarIcon aria-hidden="true" className="size-4" />
       </span>
       <div className="flex min-w-0 flex-1 justify-between space-x-4">
         <div className="text-zinc-500 text-sm overflow-hidden">
@@ -368,7 +368,7 @@ function TimelineEventCompetenciesProgress({
                 </span>{" "}
                 <ChevronDownIcon
                   className={
-                    "h-4 w-4 transition-transform inline-flex group-data-open:rotate-180 shrink-0 leading-5"
+                    "size-4 transition-transform inline-flex group-data-open:rotate-180 shrink-0 leading-5"
                   }
                 />
               </div>
@@ -397,7 +397,7 @@ function TimelineEventCompetenciesProgress({
 
                               <ChevronDownIcon
                                 className={
-                                  "h-4 w-4 transition-transform group-data-open:rotate-180 shrink-0 mt-0"
+                                  "size-4 transition-transform group-data-open:rotate-180 shrink-0 mt-0"
                                 }
                               />
                             </DisclosureButton>

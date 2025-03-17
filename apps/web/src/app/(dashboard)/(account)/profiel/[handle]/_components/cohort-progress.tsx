@@ -22,15 +22,32 @@ interface Props {
   };
 }
 
+function filterAllocations(
+  allocations: Awaited<ReturnType<typeof listActiveCohortsForPerson>>,
+) {
+  const now = dayjs();
+
+  return allocations.filter((allocation) => {
+    if (!allocation.certificate?.visibleFrom) {
+      return false;
+    }
+
+    const certificateVisibleFrom = dayjs(allocation.certificate?.visibleFrom);
+    return now.isAfter(certificateVisibleFrom);
+  });
+}
+
 async function CohortProgressList({ person }: Props) {
-  const allocations = await listActiveCohortsForPerson(person.id);
+  const allocations = await listActiveCohortsForPerson(person.id).then(
+    filterAllocations,
+  );
 
   if (allocations.length === 0) {
     return null;
   }
 
   return (
-    <div>
+    <div className="lg:col-span-2">
       <Subheading>Jouw NWD-voortgang</Subheading>
       <Text>
         Op dit moment zit je in de volgende actieve NWD-cursussen, waarbij de

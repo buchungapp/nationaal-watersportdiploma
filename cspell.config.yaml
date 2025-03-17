@@ -65,6 +65,8 @@ words:
   - Wytse
   - Zabcdefghijkmnpqrstvwxyz
   - HLVXVGGi
+  - kfwvxetvsoujgiighiqx
+  - Dehler
 ignoreWords:
   - TERMS
   - transform
@@ -88,6 +90,7 @@ ignorePaths:
   - packages/scripts/src/**/*.txt
   - packages/scripts/src/seed/countries.ts
   - scripts/seed-local-db.js
+  - certificate-templates.ts
 files:
   - '**'
 enableFiletypes:

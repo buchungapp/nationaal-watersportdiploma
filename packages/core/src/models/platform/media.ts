@@ -37,7 +37,10 @@ export const create = withZod(
       throw new Error("Failed to determine file type");
     }
 
-    if (!type.mime.startsWith("image/")) {
+    const isImage = type.mime.startsWith("image/");
+    const isPdf = type.mime.startsWith("application/pdf");
+
+    if (!isImage && !isPdf) {
       throw new Error("Unsupported file type");
     }
 
@@ -69,7 +72,14 @@ export const create = withZod(
       throw new Error("Failed to upload file");
     }
 
-    const dimensions = imageSize(input.file);
+    let metadata: unknown;
+    if (isImage) {
+      const dimensions = imageSize(input.file);
+      metadata = sql`(((${JSON.stringify({
+        width: dimensions.width,
+        height: dimensions.height,
+      })})::jsonb)#>> '{}')::jsonb`;
+    }
 
     const query = useQuery();
 
@@ -81,13 +91,10 @@ export const create = withZod(
         size: input.file.length,
         mimeType: type.mime,
         status: "ready",
-        type: "image",
+        type: isPdf ? "file" : "image",
         actorId: input.actorId,
         locationId: input.locationId,
-        _metadata: sql`(((${JSON.stringify({
-          width: dimensions.width,
-          height: dimensions.height,
-        })})::jsonb)#>> '{}')::jsonb`,
+        _metadata: metadata,
       })
       .returning({ id: s.media.id });
 
@@ -99,37 +106,50 @@ export const create = withZod(
   },
 );
 
+export const remove = withZod(uuidSchema, z.void(), async (id) => {
+  const query = useQuery();
+
+  await query
+    .update(s.media)
+    .set({
+      deletedAt: sql`NOW()`,
+    })
+    .where(and(eq(s.media.id, id), isNull(s.media.deletedAt)));
+});
+
 export const fromId = withZod(
   uuidSchema,
   outputSchema.nullable(),
   async (id) => {
     const query = useQuery();
 
-    const [mediaRow] = await query
+    const mediaRow = await query
       .select()
       .from(s.media)
       .innerJoin(
         uncontrolledSchema._objectTable,
         eq(s.media.object_id, uncontrolledSchema._objectTable.id),
       )
-      .where(eq(s.media.id, id));
+      .where(and(eq(s.media.id, id), isNull(s.media.deletedAt)))
+      .then(singleRow);
 
-    if (!mediaRow) {
-      return null;
-    }
-
-    const expectedMetadataSchema = z.object({
-      width: z
-        .number()
-        .int()
-        .nullable()
-        .catch(() => null),
-      height: z
-        .number()
-        .int()
-        .nullable()
-        .catch(() => null),
-    });
+    const expectedMetadataSchema = z
+      .object({
+        width: z
+          .number()
+          .int()
+          .nullable()
+          .catch(() => null),
+        height: z
+          .number()
+          .int()
+          .nullable()
+          .catch(() => null),
+      })
+      .catch(() => ({
+        width: null,
+        height: null,
+      }));
     const { height, width } = expectedMetadataSchema.parse(
       mediaRow.media._metadata,
     );
@@ -142,7 +162,7 @@ export const fromId = withZod(
 
     return {
       id: mediaRow.media.id,
-      type: "image" as const,
+      type: mediaRow.media.type,
       url: constructBaseUrl(bucketId, objectName),
       transformUrl: constructTransformBaseUrl(bucketId, objectName),
       name: getNameFromObjectName(objectName),

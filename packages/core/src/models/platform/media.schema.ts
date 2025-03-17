@@ -16,7 +16,7 @@ export const outputSchema = selectSchema
     updatedAt: true,
   })
   .extend({
-    type: z.literal("image"),
+    type: z.enum(["image", "file"]),
     url: z.string().url(),
     /** The URL of the image which serves as the basis for the image transformations. */
     transformUrl: z.string().url(),

@@ -43,7 +43,7 @@ export default function MediaKit() {
   );
 
   return (
-    <Popover className={"relative inline"}>
+    <Popover className="relative inline">
       <PopoverButton
         ref={ref}
         onClick={handleClick}
@@ -68,7 +68,7 @@ export default function MediaKit() {
               <div className="flex items-center gap-x-2.5">
                 <span
                   className={clsx(
-                    "border-2 block h-4 w-4 rounded-full transition-colors",
+                    "border-2 block size-4 rounded-full transition-colors",
                     active ? "border-white" : "border-slate-600",
                   )}
                 />
@@ -101,7 +101,7 @@ export default function MediaKit() {
             }}
           >
             <SparklesIcon
-              className="h-4 w-4 text-slate-600"
+              className="size-4 text-slate-600"
               aria-hidden={true}
             />
             <p className="block font-semibold text-slate-900">
@@ -115,7 +115,7 @@ export default function MediaKit() {
               ref.current?.click();
             }}
           >
-            <HomeIcon className="h-4 w-4 text-slate-600" aria-hidden={true} />
+            <HomeIcon className="size-4 text-slate-600" aria-hidden={true} />
             <p className="block font-semibold text-slate-900">Homepagina</p>
           </Link>
         </PopoverPanel>

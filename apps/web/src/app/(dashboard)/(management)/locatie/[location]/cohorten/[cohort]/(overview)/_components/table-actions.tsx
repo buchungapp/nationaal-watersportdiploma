@@ -24,11 +24,8 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
-  Dropdown,
-  DropdownButton,
   DropdownItem,
   DropdownLabel,
-  DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import {
@@ -36,6 +33,7 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
+import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import Spinner from "~/app/_components/spinner";
 import {
   assignInstructorToStudents,
@@ -221,7 +219,7 @@ function StartProgramDialog({
               name="curriculumId"
               value={activeCurriculumForProgram?.curriculum?.id ?? ""}
             />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
+            <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
               <Field>
                 <Label>Programma</Label>
                 {/* TODO: this combobox is temporary used should be from catalyst */}
@@ -321,21 +319,18 @@ export function ActionButtons(props: Props) {
 
   return (
     <>
-      <Dropdown>
-        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
-        <DropdownMenu anchor="top">
-          <Claim {...props} />
-          <StartProgram
-            {...props}
-            openDialog={() => setIsDialogOpen("start-program")}
-          />
-          <AssignInstructor
-            {...props}
-            openDialog={() => setIsDialogOpen("assign-instructor")}
-          />
-          <AddTag {...props} openDialog={() => setIsDialogOpen("add-tag")} />
-        </DropdownMenu>
-      </Dropdown>
+      <TableSelectionButton>
+        <Claim {...props} />
+        <StartProgram
+          {...props}
+          openDialog={() => setIsDialogOpen("start-program")}
+        />
+        <AssignInstructor
+          {...props}
+          openDialog={() => setIsDialogOpen("assign-instructor")}
+        />
+        <AddTag {...props} openDialog={() => setIsDialogOpen("add-tag")} />
+      </TableSelectionButton>
 
       <StartProgramDialog
         {...props}

@@ -55,7 +55,7 @@ export default async function Page(_props: {
             <TableRow key={document.id}>
               <TableCell>
                 <div className="flex items-center gap-4">
-                  <DocumentTextIcon className="w-6 h-6 text-zinc-500" />
+                  <DocumentTextIcon className="size-6 text-zinc-500" />
                   <div>
                     <TextLink
                       href={`/kennisbank/${document.id}`}

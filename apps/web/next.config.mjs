@@ -1,5 +1,4 @@
 import nextMDX from "@next/mdx";
-import remarkGfm from "remark-gfm";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,10 +6,30 @@ const nextConfig = {
   pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
   experimental: {
     mdxRs: true,
+    serverActions: {
+      bodySizeLimit: "6mb",
+    },
+    turbo: {
+      resolveAlias: {
+        canvas: "./empty-module.ts",
+      },
+    },
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
     "/": ["./src/app/(public)/**/*.mdx"],
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      {
+        protocol: "https",
+        hostname: "kfwvxetvsoujgiighiqx.supabase.co",
+      },
+    ],
   },
   transpilePackages: ["next-mdx-remote"],
   async redirects() {
@@ -50,18 +69,19 @@ const nextConfig = {
       },
     ];
   },
-  /** Uncomment to enable WhyDidYouRender */
-  // webpack: (config, context) => {
-  //   injectWhyDidYouRender(config, context);
+  webpack: (config, context) => {
+    /** Uncomment to enable WhyDidYouRender */
+    // injectWhyDidYouRender(config, context);
 
-  //   return config;
-  // },
+    config.resolve.alias.canvas = false;
+    return config;
+  },
 };
 
 const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: [["remark-gfm", {}]],
     rehypePlugins: [],
   },
 });

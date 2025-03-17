@@ -69,13 +69,15 @@ export function getSortableColumnIds(
 export function useSorting({
   sortableColumnIds,
   defaultSorting = [],
+  paramPrefix,
 }: {
   sortableColumnIds: SortableColumn["id"][];
   defaultSorting?: SortingState;
+  paramPrefix?: string;
 }) {
   // TODO: using the parseAsSorting function, causes an infinite loop with tanstack table, this work around is not nice
   const [sorting, setSorting] = useQueryState(
-    "sorteer",
+    `${paramPrefix ? `${paramPrefix}-` : ""}sorteer`,
     parseAsString.withDefault(serializeSorting(defaultSorting)),
   );
 

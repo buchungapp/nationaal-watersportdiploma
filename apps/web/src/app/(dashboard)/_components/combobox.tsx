@@ -120,7 +120,7 @@ export function Combobox<T>({
         />
         <HeadlessComboboxButton
           className={
-            "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
+            "absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 focus:outline-hidden"
           }
         >
           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">

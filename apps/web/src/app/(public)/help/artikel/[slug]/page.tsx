@@ -187,7 +187,7 @@ export default async function Page(props: Props) {
                   title="Deel via WhatsApp"
                   target="_blank"
                 >
-                  <Whatsapp className="text-branding-dark h-5 w-5" />
+                  <Whatsapp className="text-branding-dark size-5" />
                 </Link>
               </li>
 
@@ -198,7 +198,7 @@ export default async function Page(props: Props) {
                   title="Deel via LinkedIn"
                   target="_blank"
                 >
-                  <LinkedIn className="text-branding-dark h-5 w-5" />
+                  <LinkedIn className="text-branding-dark size-5" />
                 </Link>
               </li>
 
@@ -209,7 +209,7 @@ export default async function Page(props: Props) {
                   title="Deel via X"
                   target="_blank"
                 >
-                  <X className="text-branding-dark h-5 w-5" />
+                  <X className="text-branding-dark size-5" />
                 </Link>
               </li>
 
@@ -218,14 +218,14 @@ export default async function Page(props: Props) {
                 <CopyToClipboard
                   copyValue={`${constants.WEBSITE_URL}/help/artikel/${post.slug}`}
                 >
-                  <LinkIcon className="h-5 w-5 text-branding-dark" />
+                  <LinkIcon className="size-5 text-branding-dark" />
                 </CopyToClipboard>
               </li>
 
               {/* Print */}
               <li>
                 <PrintPage>
-                  <PrinterIcon className="h-5 w-5 text-branding-dark" />
+                  <PrinterIcon className="size-5 text-branding-dark" />
                 </PrintPage>
               </li>
             </ul>
