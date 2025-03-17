@@ -12,7 +12,7 @@ const notification = {
 
 export default function NotificationBar() {
   return (
-    <section className="flex justify-center lg:justify-between items-center gap-2 bg-white sm:px-28 py-2 text-branding-orange">
+    <section className="flex lg:flex-row flex-col justify-center lg:justify-between items-center gap-2 bg-white sm:px-28 py-2 text-branding-orange">
       <p className="flex flex-1 items-center gap-x-1.5 font-bold text-sm uppercase leading-none">
         <BellIcon className="size-4" strokeWidth={3} />
         {notification.title}
