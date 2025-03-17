@@ -1,5 +1,5 @@
 ALTER TABLE "external_certificate" ADD COLUMN "issuing_authority" text;
-ALTER TABLE "external_certificate" ADD COLUMN "title" text NOT NULL;
+ALTER TABLE "external_certificate" ADD COLUMN "title" text;
 ALTER TABLE "external_certificate" ADD COLUMN "issuing_location" text;
 ALTER TABLE "external_certificate" ADD COLUMN "additional_comments" text;
 ALTER TABLE "external_certificate" ADD COLUMN "media_id" uuid;
@@ -11,3 +11,5 @@ SET
     "issuing_authority" = _metadata ->> 'Uitgever',
     "title" = _metadata ->> 'Opleiding',
     "_metadata" = _metadata - 'Uitgever' - 'Opleiding';
+
+ALTER TABLE "external_certificate" ALTER COLUMN "title" SET NOT NULL;
