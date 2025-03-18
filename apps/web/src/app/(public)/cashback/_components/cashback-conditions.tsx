@@ -14,7 +14,7 @@ export default function CashbackConditions() {
             Actievoorwaarden
           </h3>
         </div>
-        <ul className="space-y-2 p-8 border-2 border-branding-light rounded-xl list-disc list-inside">
+        <ul className="space-y-4 lg:space-y-2 p-8 border-2 border-branding-light rounded-xl list-disc list-inside">
           <li>De cashback actie loopt van X t/m X.</li>
           <li>Je moet in het bezit zijn van een geldig X.</li>
           <li>
