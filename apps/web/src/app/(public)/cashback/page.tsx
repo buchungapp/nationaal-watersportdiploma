@@ -1,5 +1,7 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import PageHero from "../_components/style/page-hero";
+import CashbackConditions from "./_components/cashback-conditions";
+import CashbackFaq from "./_components/cashback-faq";
 import CashbackForm from "./_components/cashback-form";
 import CashbackHow from "./_components/cashback-how";
 import CashbackWelcome from "./_components/cashback-welcome";
@@ -33,6 +35,8 @@ export default function Cashback() {
       </PageHero>
       <CashbackHow />
       <CashbackForm />
+      <CashbackConditions />
+      <CashbackFaq />
     </main>
   );
 }

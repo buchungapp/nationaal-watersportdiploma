@@ -11,7 +11,7 @@ import { SubmitButton } from "./cashback-form-client";
 
 export default function CashbackForm() {
   return (
-    <section className="flex flex-col items-center gap-8 bg-branding-light px-8 lg:px-16 py-20 rounded-[3rem] w-full">
+    <section className="flex flex-col items-center gap-8 bg-branding-light px-4 lg:px-16 py-20 rounded-[3rem] w-full">
       <div className="flex flex-col gap-4">
         <h2 className="font-bold text-white text-3xl sm:text-4xl text-center">
           Vraag je cashback aan
@@ -23,7 +23,7 @@ export default function CashbackForm() {
           </Balancer>
         </p>
       </div>
-      <form className="@container/cashback-fields bg-white p-8 rounded-xl w-full max-w-4xl">
+      <form className="@container/cashback-fields bg-white p-4 lg:p-8 rounded-xl w-full max-w-5xl">
         <div className="gap-8 @2xl/cashback-fields:gap-x-4 grid grid-cols-1 @xl/cashback-fields:grid-cols-12">
           <Field className="@2xl/cashback-fields:col-span-4 @xl/cashback-fields:col-span-6">
             <Label>

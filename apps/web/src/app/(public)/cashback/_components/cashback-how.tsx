@@ -37,7 +37,9 @@ function Step({
         {number}
       </span>
       <h3 className="font-bold text-branding-light text-2xl">{title}</h3>
-      <p className="text-slate-600 text-sm">{description}</p>
+      <p className="text-slate-600 text-sm">
+        <Balancer>{description}</Balancer>
+      </p>
     </article>
   );
 }
