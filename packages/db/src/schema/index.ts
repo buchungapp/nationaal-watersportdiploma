@@ -10,3 +10,4 @@ export * from "./platform.js";
 export * from "./progress.js";
 export * from "./user.js";
 export * from "./logbook.js";
+export * from "./marketing/index.js";
