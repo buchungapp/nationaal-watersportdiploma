@@ -21,14 +21,12 @@ export default function Media({
   errors,
   stepIndex,
   allowRemove,
-  defaultValue,
 }: {
   setValidMedia?: (valid: boolean) => void;
   small?: boolean;
   errors?: Record<string, string>;
   allowRemove?: boolean;
   stepIndex: number;
-  defaultValue?: string;
 }) {
   const [removeMedia, setRemoveMedia] = useState(false);
   const [filled, setFilled] = useState(false);
@@ -46,7 +44,6 @@ export default function Media({
             setFilled={setFilled}
             invalid={!!errors?.media}
             small={small}
-            defaultValue={defaultValue}
           />
         </Field>
       ) : (

@@ -12,7 +12,6 @@ export function MediaDropzone({
   small,
   invalid,
   setFilled,
-  defaultValue,
 }: {
   required?: boolean;
   name: string;
@@ -20,11 +19,10 @@ export function MediaDropzone({
   setFilled?: (filled: boolean) => void;
   small?: boolean;
   invalid?: boolean;
-  defaultValue?: string;
 }) {
   const hiddenInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(defaultValue ?? null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [type, setType] = useState<"image" | "pdf" | null>(null);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
@@ -85,7 +83,7 @@ export function MediaDropzone({
         type="file"
         name={name}
         required={required}
-        className="hidden w-0 h-0"
+        className="opacity-0 w-[1px] h-[1px]"
         ref={hiddenInputRef}
       />
       {isLoading ? (
