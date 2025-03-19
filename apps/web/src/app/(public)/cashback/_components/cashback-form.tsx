@@ -13,9 +13,9 @@ export default async function CashbackForm() {
         </h2>
         <p className="max-w-2xl text-white/80 text-center">
           <Balancer>
-            Vul onderstaand formulier in om je cashback aan te vragen. Let op:
-            je moet het formulier <strong>per deelnemer invullen</strong>. Zorg
-            dat je je boekingsbevestiging en een kopie van je X bij de hand
+            Let op: je moet het formulier{" "}
+            <strong>per deelnemer invullen</strong>. Zorg dat je je
+            boekingsbevestiging en een kopie van je CWO-diploma bij de hand
             hebt.
           </Balancer>
         </p>

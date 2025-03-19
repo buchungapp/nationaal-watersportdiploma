@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Balancer from "react-wrap-balancer";
 
 export default function CashbackHow() {
@@ -14,11 +15,21 @@ export default function CashbackHow() {
             title="Boek een curus"
             description="Boek een nieuwe NWD-cursus bij een van onze erkende vaarscholen."
           />
-          <Step number={2} title="Doe stap 2" description="zo doe je stap 2" />
+          <Step
+            number={2}
+            title="Upload je bewijsstuk"
+            description="Vul het onderstaande formulier in en upload je bewijsstuk."
+          />
           <Step
             number={3}
-            title="Ontvang €X,-"
-            description="Na verificatie storten wij €X,- terug op je rekening binnen 30 dagen na de cursus"
+            title="Ontvang €50,-"
+            description={
+              <>
+                Na verificatie storten wij €50,- terug op je rekening
+                <br />
+                <span className="text-xs">uiterlijk op 31 oktober 2025</span>
+              </>
+            }
           />
         </div>
       </div>
@@ -30,7 +41,7 @@ function Step({
   number,
   title,
   description,
-}: { number: number; title: string; description: string }) {
+}: { number: number; title: ReactNode; description: ReactNode }) {
   return (
     <article className="flex flex-col items-center gap-2 px-4 py-12 border-2 border-branding-light rounded-xl">
       <span className="flex justify-center items-center bg-branding-orange mb-4 p-4 rounded-full size-15 aspect-square text-white text-2xl">

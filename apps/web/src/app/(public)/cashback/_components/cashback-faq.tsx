@@ -3,43 +3,39 @@ import FaqGroup from "../../_components/faq/faq-group";
 
 const faqs = [
   {
-    question: "Wanneer is de cashback actie geldig?",
-    answer: "De cashback actie loopt van X t/m X.",
+    question: "Wanneer is de cashback-actie geldig?",
+    answer:
+      "De actie loopt van 22 maart t/m 1 september 2025. Je komt in aanmerking als je in 2024 een CWO-diploma of vorderingenstaat hebt behaald én een meerdaagse cursus of zeilkamp boekt bij een erkende NWD-locatie.",
     categories: ["cashback"],
   },
   {
     question: "Welke vereisten zijn er voor de cashback?",
     answer:
-      "Je moet in het bezit zijn van een geldig X en een nieuwe NWD-cursus boeken met een minimale waarde van X.",
+      "Om in aanmerking te komen voor de cashback:\nHeb je in 2024 een CWO-diploma of vorderingenstaat behaald.\nUpload je een duidelijke foto of pdf met zichtbare uitgiftedatum.\nBoek je een meerdaagse cursus of zeilkamp bij een NWD-locatie.\nVermeld je het boekingsnummer van je cursus bij aanmelding.\n Let op: eendaagse cursussen zijn uitgesloten van deze actie.",
     categories: ["cashback"],
   },
   {
     question: "Hoe lang heb ik om de cashback aan te vragen?",
     answer:
-      "Je hebt 30 dagen na het boeken van de cursus om de cashback aan te vragen.",
+      "Je kunt je aanvraag indienen tot en met 1 september 2025. Na die datum is deelname niet meer mogelijk.",
     categories: ["cashback"],
   },
   {
     question: "Kan ik meerdere cashbacks aanvragen?",
     answer:
-      "Per persoon kan maximaal één cashback per cursus worden aangevraagd.",
+      "De cashback is persoonlijk per cursist. Per cursist kan je slechts één keer deelnemen aan deze actie, ongeacht het aantal cursussen of boekingen. Als ouder kun je voor meerdere individuele cursisten een cashback aanvragen. Vul voor elke cursist afzonderlijk het formulier in.",
     categories: ["cashback"],
   },
   {
     question: "Wanneer wordt de cashback uitbetaald?",
     answer:
-      "De cashback wordt uitbetaald na verificatie van de boeking en het X.",
+      "De cashback van €50 per persoon wordt uitgekeerd door het NWD in de maand september 2025, uiterlijk op 31 oktober 2025.",
     categories: ["cashback"],
   },
   {
     question: "Wat gebeurt er met mijn cashback als ik de cursus annuleer?",
-    answer: "Bij annulering van de cursus vervalt het recht op de cashback.",
-    categories: ["cashback"],
-  },
-  {
-    question: "Kan de actie worden gewijzigd of beëindigd?",
     answer:
-      "Ja, Nationaal Watersportdiploma behoudt zich het recht voor om de actie op elk moment te wijzigen of te beëindigen.",
+      "Bij annulering van je cursus of zeilkamp vervalt het recht op cashback. Alleen deelnemers met een bevestigde en betaalde boeking komen in aanmerking.",
     categories: ["cashback"],
   },
 ];

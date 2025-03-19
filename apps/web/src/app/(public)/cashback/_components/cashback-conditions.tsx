@@ -1,4 +1,5 @@
 import Double from "~/app/_components/brand/double-line";
+import { TekstButton } from "../../_components/style/buttons";
 
 export default function CashbackConditions() {
   return (
@@ -14,30 +15,37 @@ export default function CashbackConditions() {
             Actievoorwaarden
           </h3>
         </div>
-        <ul className="space-y-4 lg:space-y-2 p-8 border-2 border-branding-light rounded-xl list-disc list-inside">
-          <li>De cashback actie loopt van X t/m X.</li>
-          <li>Je moet in het bezit zijn van een geldig X.</li>
+        <ul className="space-y-4 lg:space-y-2 p-8 pl-16 border-2 border-branding-light rounded-xl list-disc">
+          <li>Actieperiode: 22 maart t/m 1 september 2025</li>
+          <li>De cursus wordt gestart voor 1 september 2025</li>
           <li>
-            De cashback is alleen geldig bij het boeken van een nieuwe
-            NWD-cursus met een minimale waarde van X.
+            Iedereen die in 2024 een CWO-diploma of -vorderingenstaat heeft
+            behaald
           </li>
           <li>
-            De aanvraag moet binnen 30 dagen na het boeken van de cursus worden
-            ingediend.
+            Boek een meerdaagse cursus of zeilkamp bij een erkende NWD-locatie
           </li>
           <li>
-            Per persoon kan maximaal één cashback per cursus worden aangevraagd.
+            Upload een duidelijk leesbare foto of pdf van je CWO-diploma of
+            -vorderingenstaat
+            <br />
+            <em>Let op: de datum van uitgifte in 2024 moet zichtbaar zijn</em>
           </li>
+          <li>Eendaagse cursussen vallen buiten de actie</li>
           <li>
-            De cashback wordt uitbetaald na verificatie van de boeking en het x.
+            Kortingen zijn niet stapelbaar: deze actie is niet te combineren met
+            andere kortingsacties van de zeilschool
           </li>
+          <li>Cashback van €50 per persoon, maximaal één keer per deelnemer</li>
           <li>
-            Bij annulering van de cursus vervalt het recht op de cashback.
+            Uitkering in september 2025, uiterlijk op 31 oktober 2025, door het
+            Nationaal Watersportdiploma
           </li>
-          <li>
-            Nationaal Watersportdiploma behoudt zich het recht voor om de actie
-            op elk moment te wijzigen of te beëindigen.
-          </li>
+          <br />
+
+          <TekstButton href="/cashback/voorwaarden">
+            Bekijk de volledige voorwaarden
+          </TekstButton>
         </ul>
       </div>
     </section>
