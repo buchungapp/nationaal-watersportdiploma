@@ -88,7 +88,8 @@ const expectedSchema = z.object({
   applicantIban: z
     .string()
     .refine((str) => smellsLikeIban(str), "Ongeldig IBAN formaat")
-    .refine((str) => validateIbanChecksum(str), "Ongeldig IBAN nummer"),
+    .refine((str) => validateIbanChecksum(str), "Ongeldig IBAN nummer")
+    .transform((str) => str.replace(/[\s-]/g, "")),
   terms: z.literal("on", {
     errorMap: () => ({ message: "Je moet akkoord gaan met de voorwaarden" }),
   }),

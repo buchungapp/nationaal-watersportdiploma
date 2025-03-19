@@ -37,11 +37,13 @@ const AppContext = createContext<{
   isMobileMenuOpen: boolean;
   setMobileMenuOpen: (open?: boolean) => void;
   scrollPosition: number;
+  windowWidth: number;
 }>({
   isMobileMenuOpen: false,
 
   setMobileMenuOpen: () => {},
   scrollPosition: 0,
+  windowWidth: 0,
 });
 
 export function useMobileMenuState() {
@@ -53,10 +55,10 @@ export function useMobileMenuState() {
 const STICKY_NAV_OFFSET = 16;
 
 export function useIsSticky() {
-  const { scrollPosition } = useContext(AppContext);
+  const { scrollPosition, windowWidth } = useContext(AppContext);
   return (
     scrollPosition >
-    TRUSTBAR_HEIGHT + NOTIFICATIONBAR_HEIGHT - STICKY_NAV_OFFSET
+    TRUSTBAR_HEIGHT + NOTIFICATIONBAR_HEIGHT(windowWidth) - STICKY_NAV_OFFSET
   );
 }
 
@@ -122,9 +124,13 @@ export function MarketingProviders({
   }
 
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(0);
   const handleScroll = () => {
     const position = window.scrollY;
     setScrollPosition(position);
+  };
+  const handleResize = () => {
+    setWindowWidth(window.innerWidth);
   };
 
   const isClient = typeof window !== "undefined";
@@ -134,9 +140,11 @@ export function MarketingProviders({
     if (!isClient) return;
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
     };
   }, [isClient]);
 
@@ -154,6 +162,7 @@ export function MarketingProviders({
           return;
         },
         scrollPosition,
+        windowWidth,
       }}
     >
       <LocationsMapContainer>
