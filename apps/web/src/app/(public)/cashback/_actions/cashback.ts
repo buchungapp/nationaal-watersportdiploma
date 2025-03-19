@@ -107,8 +107,6 @@ export async function createCashbackAction(
     formData.entries(),
   );
 
-  console.log(data);
-
   // Set all empty strings to null
   for (const key in data) {
     if (data[key] === "") {

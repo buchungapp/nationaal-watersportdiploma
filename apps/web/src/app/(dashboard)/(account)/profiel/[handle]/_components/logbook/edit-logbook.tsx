@@ -38,8 +38,6 @@ export function EditLogbook({
       formData,
     );
 
-    console.log(result);
-
     if (result.message === "Success") {
       close();
       toast.success("Logboekregel bijgewerkt.");

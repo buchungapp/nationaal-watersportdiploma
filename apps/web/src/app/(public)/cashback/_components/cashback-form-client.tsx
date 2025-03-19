@@ -40,7 +40,6 @@ export function CashbackFormClient({
   };
 
   const [state, action] = useActionState(submit, undefined);
-  console.log("Form state:", state);
 
   return (
     <form
