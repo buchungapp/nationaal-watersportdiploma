@@ -46,14 +46,10 @@ function validateIbanChecksum(iban: string): boolean {
 
   return mod97 === "1";
 }
-
 const expectedSchema = z.object({
-  fullName: z.string().min(1, "Naam is verplicht"),
-  email: z.string().email("Ongeldig e-mailadres"),
-  phone: z.string().min(1, "Telefoonnummer is verplicht"),
-  address: z.string().min(1, "Adres is verplicht"),
-  postalCode: z.string().min(1, "Postcode is verplicht"),
-  city: z.string().min(1, "Plaats is verplicht"),
+  applicantFullName: z.string().min(1, "Naam is verplicht"),
+  applicantEmail: z.string().email("Ongeldig e-mailadres"),
+  studentFullName: z.string().min(1, "Naam is verplicht"),
   verificationMedia: z
     .custom<File>()
     .transform((file) =>
@@ -89,7 +85,7 @@ const expectedSchema = z.object({
       },
     ),
   bookingNumber: z.string().min(1, "Boekingsnummer is verplicht"),
-  iban: z
+  applicantIban: z
     .string()
     .refine((str) => smellsLikeIban(str), "Ongeldig IBAN formaat")
     .refine((str) => validateIbanChecksum(str), "Ongeldig IBAN nummer"),

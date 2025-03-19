@@ -1,5 +1,5 @@
 {
-  "id": "d6b723c4-31e6-4788-8490-c9668389b6c2",
+  "id": "25591fca-f840-4b91-8643-603e3e380ae9",
   "prevId": "3f6ed85e-5991-41ff-9540-f567cabafc3d",
   "version": "7",
   "dialect": "postgresql",
@@ -4082,38 +4082,26 @@
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
         },
-        "full_name": {
-          "name": "full_name",
+        "applicant_full_name": {
+          "name": "applicant_full_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "email": {
-          "name": "email",
+        "applicant_email": {
+          "name": "applicant_email",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "phone": {
-          "name": "phone",
+        "applicant_iban": {
+          "name": "applicant_iban",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "address": {
-          "name": "address",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "postal_code": {
-          "name": "postal_code",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "city": {
-          "name": "city",
+        "student_full_name": {
+          "name": "student_full_name",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -4138,12 +4126,6 @@
         },
         "booking_number": {
           "name": "booking_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "iban": {
-          "name": "iban",
           "type": "text",
           "primaryKey": false,
           "notNull": true

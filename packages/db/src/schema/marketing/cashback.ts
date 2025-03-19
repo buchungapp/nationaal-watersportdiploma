@@ -12,13 +12,13 @@ export const cashback = marketingSchema.table(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-    // Personal information
-    fullName: text("full_name").notNull(),
-    email: text("email").notNull(),
-    phone: text("phone").notNull(),
-    address: text("address").notNull(),
-    postalCode: text("postal_code").notNull(),
-    city: text("city").notNull(),
+    // Applicant information
+    applicantFullName: text("applicant_full_name").notNull(),
+    applicantEmail: text("applicant_email").notNull(),
+    applicantIban: text("applicant_iban").notNull(),
+
+    // Student information
+    studentFullName: text("student_full_name").notNull(),
 
     // Verification information
     // To prevent a circular dependency, we use a function to reference the media table
@@ -32,9 +32,6 @@ export const cashback = marketingSchema.table(
       .references((): AnyPgColumn => location.id)
       .notNull(),
     bookingNumber: text("booking_number").notNull(),
-
-    // Bank information
-    iban: text("iban").notNull(),
 
     ...timestamps,
   },

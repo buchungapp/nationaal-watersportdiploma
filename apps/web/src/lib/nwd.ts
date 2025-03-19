@@ -2788,16 +2788,14 @@ export const createCashback = async ({
 }: {
   media: File | Buffer;
   fields: {
-    fullName: string;
-    email: string;
-    phone: string;
-    address: string;
-    postalCode: string;
-    city: string;
+    applicantFullName: string;
+    applicantEmail: string;
+    studentFullName: string;
     verificationLocation: string;
     bookingLocationId: string;
     bookingNumber: string;
-    iban: string;
+    applicantIban: string;
+    newsletter: boolean;
   };
 }) => {
   return makeRequest(async () => {

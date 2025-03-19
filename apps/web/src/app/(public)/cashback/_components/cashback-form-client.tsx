@@ -19,7 +19,6 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Listbox, ListboxOption } from "~/app/(dashboard)/_components/listbox";
 import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
-import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
 import type { listAllLocations } from "~/lib/nwd";
 import { createCashbackAction } from "../_actions/cashback";
@@ -44,115 +43,66 @@ export function CashbackFormClient({
   return (
     <form
       action={action}
-      className="@container/cashback-fields bg-white p-4 lg:p-8 rounded-xl w-full max-w-5xl"
+      className="@container/cashback-fields bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl"
     >
       <div className="gap-8 grid grid-cols-1">
         <Fieldset>
-          <Legend>Persoonlijke gegevens</Legend>
-          <div className="gap-8 @2xl/cashback-fields:gap-x-4 grid grid-cols-1 @xl/cashback-fields:grid-cols-12">
-            <Field className="@2xl/cashback-fields:col-span-4 @xl/cashback-fields:col-span-6">
+          <Legend>Gegevens aanvrager</Legend>
+          <div className="gap-8 grid grid-cols-1 @xl/cashback-fields:grid-cols-4">
+            <Field className="@2xl/cashback-fields:col-span-2">
               <Label>
                 Naam <span className="text-branding-orange">*</span>
               </Label>
               <Input
-                name="fullName"
+                name="applicantFullName"
                 placeholder="Volledige naam"
                 required
-                invalid={!!state?.errors?.fullName}
-                defaultValue={state?.fields?.fullName as string}
+                invalid={!!state?.errors?.applicantFullName}
+                defaultValue={state?.fields?.applicantFullName as string}
               />
-              {state?.errors?.fullName ? (
-                <ErrorMessage>{state.errors.fullName}</ErrorMessage>
+              {state?.errors?.applicantFullName ? (
+                <ErrorMessage>{state.errors.applicantFullName}</ErrorMessage>
               ) : null}
             </Field>
 
-            <Field className="@2xl/cashback-fields:col-span-4 @xl/cashback-fields:col-span-6">
+            <Field className="@2xl/cashback-fields:col-span-2">
               <Label>
                 E-mail <span className="text-branding-orange">*</span>
               </Label>
               <Input
-                name="email"
+                name="applicantEmail"
                 type="email"
                 placeholder="naam@voorbeeld.nl"
                 required
-                invalid={!!state?.errors?.email}
-                defaultValue={state?.fields?.email as string}
+                invalid={!!state?.errors?.applicantEmail}
+                defaultValue={state?.fields?.applicantEmail as string}
               />
-              {state?.errors?.email ? (
-                <ErrorMessage>{state.errors.email}</ErrorMessage>
-              ) : null}
-            </Field>
-
-            <Field className="@2xl/cashback-fields:col-span-4 @xl/cashback-fields:col-span-6">
-              <Label>
-                Telefoonnummer <span className="text-branding-orange">*</span>
-              </Label>
-              <Input
-                name="phone"
-                type="tel"
-                placeholder="06 12345678"
-                required
-                invalid={!!state?.errors?.phone}
-                defaultValue={state?.fields?.phone as string}
-              />
-              {state?.errors?.phone ? (
-                <ErrorMessage>{state.errors.phone}</ErrorMessage>
-              ) : null}
-            </Field>
-
-            <Field className="@2xl/cashback-fields:col-span-6 @xl/cashback-fields:col-span-6">
-              <Label>
-                Adres <span className="text-branding-orange">*</span>
-              </Label>
-              <Input
-                name="address"
-                placeholder="Straatnaam en huisnummer"
-                required
-                invalid={!!state?.errors?.address}
-                defaultValue={state?.fields?.address as string}
-              />
-              {state?.errors?.address ? (
-                <ErrorMessage>{state.errors.address}</ErrorMessage>
-              ) : null}
-            </Field>
-
-            <Field className="@2xl/cashback-fields:col-span-3 @xl/cashback-fields:col-span-6">
-              <Label>
-                Postcode <span className="text-branding-orange">*</span>
-              </Label>
-              <Input
-                name="postalCode"
-                placeholder="1234 AB"
-                required
-                invalid={!!state?.errors?.postalCode}
-                defaultValue={state?.fields?.postalCode as string}
-              />
-              {state?.errors?.postalCode ? (
-                <ErrorMessage>{state.errors.postalCode}</ErrorMessage>
-              ) : null}
-            </Field>
-
-            <Field className="@2xl/cashback-fields:col-span-3 @xl/cashback-fields:col-span-6">
-              <Label>
-                Plaats <span className="text-branding-orange">*</span>
-              </Label>
-              <Input
-                name="city"
-                placeholder="Plaatsnaam"
-                required
-                invalid={!!state?.errors?.city}
-                defaultValue={state?.fields?.city as string}
-              />
-              {state?.errors?.city ? (
-                <ErrorMessage>{state.errors.city}</ErrorMessage>
+              {state?.errors?.applicantEmail ? (
+                <ErrorMessage>{state.errors.applicantEmail}</ErrorMessage>
               ) : null}
             </Field>
           </div>
         </Fieldset>
         <Fieldset>
-          <Legend>X cursus 2024</Legend>
-          <div className="gap-8 @2xl/cashback-fields:gap-x-4 grid grid-cols-1 @xl/cashback-fields:grid-cols-12">
-            <Field className="@2xl/cashback-fields:col-span-5 @xl/cashback-fields:col-span-6">
+          <Legend>CWO cursus 2024</Legend>
+          <div className="gap-8 grid grid-cols-1 @xl/cashback-fields:grid-cols-4">
+            <Field className="@2xl/cashback-fields:col-span-2">
+              <Label>
+                Naam deelnemer op certificaat{" "}
+                <span className="text-branding-orange">*</span>
+              </Label>
+              <Input
+                name="studentFullName"
+                placeholder="Volledige naam"
+                required
+                invalid={!!state?.errors?.studentFullName}
+                defaultValue={state?.fields?.studentFullName as string}
+              />
+              {state?.errors?.studentFullName ? (
+                <ErrorMessage>{state.errors.studentFullName}</ErrorMessage>
+              ) : null}
+            </Field>
+            <Field className="@2xl/cashback-fields:col-span-2">
               <Label>
                 Vaarlocatie behaald{" "}
                 <span className="text-branding-orange">*</span>
@@ -169,9 +119,10 @@ export function CashbackFormClient({
               ) : null}
             </Field>
 
-            <Field className="@xl/cashback-fields:col-span-12">
+            <Field className="@xl/cashback-fields:col-span-4">
               <Label>
-                Upload @TODO <span className="text-branding-orange">*</span>
+                Upload CWO certificaat{" "}
+                <span className="text-branding-orange">*</span>
               </Label>
               <MediaDropzone
                 name="verificationMedia"
@@ -187,8 +138,8 @@ export function CashbackFormClient({
         </Fieldset>
         <Fieldset>
           <Legend>Geboekte cursus bij NWD vaarlocatie</Legend>
-          <div className="gap-8 @2xl/cashback-fields:gap-x-4 grid grid-cols-1 @xl/cashback-fields:grid-cols-12">
-            <Field className="@2xl/cashback-fields:col-span-5 @xl/cashback-fields:col-span-6">
+          <div className="gap-8 grid grid-cols-1 @xl/cashback-fields:grid-cols-4">
+            <Field className="@2xl/cashback-fields:col-span-2">
               <Label>
                 Vaarlocatie <span className="text-branding-orange">*</span>
               </Label>
@@ -209,7 +160,7 @@ export function CashbackFormClient({
               ) : null}
             </Field>
 
-            <Field className="@2xl/cashback-fields:col-span-3 @xl/cashback-fields:col-span-6">
+            <Field>
               <Label>
                 Boekingsnummer <span className="text-branding-orange">*</span>
               </Label>
@@ -228,38 +179,25 @@ export function CashbackFormClient({
         </Fieldset>
         <Fieldset>
           <Legend>Bank gegevens</Legend>
-          <div className="gap-8 @2xl/cashback-fields:gap-x-4 grid grid-cols-1 @xl/cashback-fields:grid-cols-12">
-            <Field className="@xl/cashback-fields:col-span-6">
+          <div className="gap-8 grid grid-cols-1 @xl/cashback-fields:grid-cols-4">
+            <Field className="@2xl/cashback-fields:col-span-2">
               <Label>
                 IBAN Rekeningnummer{" "}
                 <span className="text-branding-orange">*</span>
               </Label>
               <Input
-                name="iban"
+                name="applicantIban"
                 placeholder="NL12 ABCD 1234 5678 90"
                 required
-                invalid={!!state?.errors?.iban}
-                defaultValue={state?.fields?.iban as string}
+                invalid={!!state?.errors?.applicantIban}
+                defaultValue={state?.fields?.applicantIban as string}
               />
-              {state?.errors?.iban ? (
-                <ErrorMessage>{state.errors.iban}</ErrorMessage>
+              {state?.errors?.applicantIban ? (
+                <ErrorMessage>{state.errors.applicantIban}</ErrorMessage>
               ) : null}
             </Field>
 
-            <Field className="@xl/cashback-fields:col-span-12">
-              <Label>Opmerking</Label>
-              <Textarea
-                name="comments"
-                placeholder="Eventuele opmerkingen"
-                invalid={!!state?.errors?.comments}
-                defaultValue={state?.fields?.comments as string}
-              />
-              {state?.errors?.comments ? (
-                <ErrorMessage>{state.errors.comments}</ErrorMessage>
-              ) : null}
-            </Field>
-
-            <CheckboxField className="@xl/cashback-fields:col-span-12">
+            <CheckboxField className="@xl/cashback-fields:col-span-4">
               <Label>
                 Ik ga akkoord met de voorwaarden{" "}
                 <span className="text-branding-orange">*</span>
@@ -278,7 +216,7 @@ export function CashbackFormClient({
                 ) : null}
               </Description>
             </CheckboxField>
-            <CheckboxField className="@xl/cashback-fields:col-span-12">
+            <CheckboxField className="@xl/cashback-fields:col-span-4">
               <Label>
                 Ik wil me graag inschrijven voor de nieuwsbrief van NWD
               </Label>

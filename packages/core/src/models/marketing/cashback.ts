@@ -6,17 +6,14 @@ import { singleRow } from "../../utils/data-helpers.js";
 import { successfulCreateResponse, withZod } from "../../utils/zod.js";
 
 const cashbackSchema = z.object({
-  fullName: z.string(),
-  email: z.string().email(),
-  phone: z.string(),
-  address: z.string(),
-  postalCode: z.string(),
-  city: z.string(),
+  applicantFullName: z.string(),
+  applicantEmail: z.string().email(),
+  studentFullName: z.string(),
   verificationMediaId: z.string().uuid(),
   verificationLocation: z.string(),
   bookingLocationId: z.string().uuid(),
   bookingNumber: z.string(),
-  iban: z.string(),
+  applicantIban: z.string(),
 });
 
 export const create = withZod(

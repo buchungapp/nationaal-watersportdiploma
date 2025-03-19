@@ -2,17 +2,14 @@ CREATE SCHEMA "marketing";
 
 CREATE TABLE "marketing"."cashback" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
-	"full_name" text NOT NULL,
-	"email" text NOT NULL,
-	"phone" text NOT NULL,
-	"address" text NOT NULL,
-	"postal_code" text NOT NULL,
-	"city" text NOT NULL,
+	"applicant_full_name" text NOT NULL,
+	"applicant_email" text NOT NULL,
+	"applicant_iban" text NOT NULL,
+	"student_full_name" text NOT NULL,
 	"verification_media_id" uuid NOT NULL,
 	"verification_location" text NOT NULL,
 	"booking_location_id" uuid NOT NULL,
 	"booking_number" text NOT NULL,
-	"iban" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"deleted_at" timestamp with time zone
