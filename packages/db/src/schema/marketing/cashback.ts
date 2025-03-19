@@ -12,27 +12,26 @@ export const cashback = marketingSchema.table(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
-
     // Personal information
-    full_name: text("full_name").notNull(),
+    fullName: text("full_name").notNull(),
     email: text("email").notNull(),
     phone: text("phone").notNull(),
     address: text("address").notNull(),
-    postal_code: text("postal_code").notNull(),
+    postalCode: text("postal_code").notNull(),
     city: text("city").notNull(),
 
     // Verification information
     // To prevent a circular dependency, we use a function to reference the media table
-    verification_media_id: uuid("verification_media_id").references(
-      (): AnyPgColumn => media.id,
-    ),
-    verification_location: text("verification_location").notNull(),
+    verificationMediaId: uuid("verification_media_id")
+      .references((): AnyPgColumn => media.id)
+      .notNull(),
+    verificationLocation: text("verification_location").notNull(),
 
     // Booking information
-    booking_location_id: uuid("booking_location_id").references(
-      (): AnyPgColumn => location.id,
-    ),
-    booking_number: text("booking_number").notNull(),
+    bookingLocationId: uuid("booking_location_id")
+      .references((): AnyPgColumn => location.id)
+      .notNull(),
+    bookingNumber: text("booking_number").notNull(),
 
     // Bank information
     iban: text("iban").notNull(),
@@ -41,12 +40,12 @@ export const cashback = marketingSchema.table(
   },
   (table) => {
     return {
-      verification_media_fk: foreignKey({
-        columns: [table.verification_media_id],
+      verificationMediaFk: foreignKey({
+        columns: [table.verificationMediaId],
         foreignColumns: [media.id],
       }),
-      booking_location_fk: foreignKey({
-        columns: [table.booking_location_id],
+      bookingLocationFk: foreignKey({
+        columns: [table.bookingLocationId],
         foreignColumns: [location.id],
       }),
     };

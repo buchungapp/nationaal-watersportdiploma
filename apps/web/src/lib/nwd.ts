@@ -10,6 +10,7 @@ import {
   Curriculum,
   Location,
   Logbook,
+  Marketing,
   Platform,
   Student,
   User,
@@ -2780,3 +2781,53 @@ export const removeLogbook = async ({
     return await Logbook.remove(id);
   });
 };
+
+export const createCashback = async ({
+  media,
+  fields,
+}: {
+  media: File | Buffer;
+  fields: {
+    fullName: string;
+    email: string;
+    phone: string;
+    address: string;
+    postalCode: string;
+    city: string;
+    verificationLocation: string;
+    bookingLocationId: string;
+    bookingNumber: string;
+    iban: string;
+  };
+}) => {
+  return makeRequest(async () => {
+    const buffer = Buffer.from(
+      new Uint8Array(media instanceof File ? await media.arrayBuffer() : media),
+    );
+
+    const { id: mediaId } = await Platform.Media.create({
+      file: buffer,
+      isPublic: false,
+    });
+
+    return await Marketing.Cashback.create({
+      ...fields,
+      verificationMediaId: mediaId,
+    });
+  });
+};
+
+export const listAllCashbacks = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    // Check if user is super admin
+    const isSuperAdmin = user.email === "info@nationaalwatersportdiploma.nl";
+
+    if (!isSuperAdmin) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Marketing.Cashback.listAll();
+  });
+});
