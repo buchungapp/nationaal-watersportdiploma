@@ -1,3 +1,5 @@
+"use cache";
+import { unstable_cacheLife } from "next/cache";
 import PageHero from "../_components/style/page-hero";
 import SearchClient from "./_components/search-client";
 
@@ -5,6 +7,8 @@ import type { PropsWithChildren } from "react";
 import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
 
 export default async function Layout({ children }: PropsWithChildren) {
+  unstable_cacheLife("days");
+
   const [questions, articles] = await Promise.all([
     getHelpFaqs(),
     getHelpArticles(),

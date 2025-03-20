@@ -1,6 +1,8 @@
+"use cache";
 import { constants } from "@nawadi/lib";
 
 import type { Metadata } from "next";
+import { unstable_cacheLife } from "next/cache";
 import MdxPageHeader from "~/app/(public)/_components/mdx-page-header";
 import { Prose } from "~/app/(public)/_components/prose";
 import { getAllDiplomalijnInstructeurPages } from "~/lib/mdx-pages";
@@ -19,6 +21,8 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  unstable_cacheLife("days");
+
   const pages = await getAllDiplomalijnInstructeurPages();
 
   return (

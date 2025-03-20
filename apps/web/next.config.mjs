@@ -15,7 +15,6 @@ const nextConfig = {
       },
     },
     useCache: true,
-    dynamicIO: true,
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
