@@ -1,5 +1,6 @@
 import path from "node:path";
 import glob from "fast-glob";
+import { unstable_cacheLife } from "next/cache";
 import type { Page } from "~/types";
 
 // Maurits: I know this is ugly, but need to move fast
@@ -8,6 +9,9 @@ import type { Page } from "~/types";
 // TODO
 
 export async function getAllDiplomalijnInstructeurPages() {
+  "use cache";
+  unstable_cacheLife("days");
+
   const workingPath = process.cwd();
   const contentPath = "./src/app/(public)";
 
@@ -47,6 +51,9 @@ export async function getAllDiplomalijnInstructeurPages() {
 }
 
 export async function getAllDiplomalijnConsumentenPages() {
+  "use cache";
+  unstable_cacheLife("days");
+
   const workingPath = process.cwd();
   const contentPath = "./src/app/(public)";
 

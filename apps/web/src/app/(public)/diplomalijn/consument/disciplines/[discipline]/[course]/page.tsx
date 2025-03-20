@@ -1,4 +1,7 @@
+"use cache";
+
 import clsx from "clsx";
+import { unstable_cacheLife } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumb from "~/app/(public)/_components/breadcrumb";
@@ -17,6 +20,8 @@ export default async function Page(props: {
     course: string;
   }>;
 }) {
+  unstable_cacheLife("days");
+
   const params = await props.params;
   const [discipline, course] = await Promise.all([
     retrieveDisciplineByHandle(params.discipline),

@@ -4,6 +4,7 @@ import {
   ShieldCheckIcon,
   UserIcon,
 } from "@heroicons/react/16/solid";
+import { connection } from "next/server";
 import Logo from "~/app/_components/brand/logo";
 import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
@@ -41,6 +42,7 @@ export default async function Layout({
   children: React.ReactNode;
   selector: React.ReactNode;
 }>) {
+  await connection();
   const user = await getUserOrThrow();
 
   return (

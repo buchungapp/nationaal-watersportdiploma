@@ -7,6 +7,8 @@ import {
 import PageHero from "../_components/style/page-hero";
 
 import type { Metadata, ResolvingMetadata } from "next";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { TouchTarget } from "~/app/(dashboard)/_components/button";
 import type { SocialPlatform } from "~/lib/nwd";
@@ -58,22 +60,6 @@ const platformComponents = {
 export default async function Page() {
   const locations = await retrieveLocations();
 
-  // for each possible color in the badge component, we want to assign a color to a province
-  const provinceColors = {
-    Friesland: "blue",
-    "Noord-Holland": "orange",
-    "Zuid-Holland": "green",
-    Utrecht: "yellow",
-    Flevoland: "sky",
-    Overijssel: "rose",
-    Gelderland: "purple",
-    Drenthe: "violet",
-    Groningen: "cyan",
-    "Noord-Brabant": "amber",
-    Limburg: "red",
-    Zeeland: "teal",
-  } as const;
-
   return (
     <>
       <PageHero>
@@ -109,17 +95,52 @@ export default async function Page() {
 
         <SelectedLocationProvider locations={locations}>
           <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <div className="flex flex-col space-y-4 h-full lg:max-h-[80vh] lg:overflow-y-auto">
-              {[...locations]
-                .sort(() => {
-                  // Random sort
-                  return Math.random() - 0.5;
-                })
-                .map((location) => (
-                  <LocationCard key={location.id} location={location}>
-                    <div className="flex items-center justify-between">
-                      {/* Star rating */}
-                      {/* <Link
+            <Suspense fallback={<LocationListSkeleton />}>
+              <RandomLocationList />
+            </Suspense>
+            <div className="w-full lg:col-span-2 h-[80vh] rounded-sm overflow-hidden">
+              <LocationsMap locations={locations} />
+            </div>
+          </div>
+        </SelectedLocationProvider>
+      </div>
+    </>
+  );
+}
+
+async function RandomLocationList() {
+  // This is necessary to enable dynamic IO
+  await connection();
+  const locations = await retrieveLocations();
+
+  // for each possible color in the badge component, we want to assign a color to a province
+  const provinceColors = {
+    Friesland: "blue",
+    "Noord-Holland": "orange",
+    "Zuid-Holland": "green",
+    Utrecht: "yellow",
+    Flevoland: "sky",
+    Overijssel: "rose",
+    Gelderland: "purple",
+    Drenthe: "violet",
+    Groningen: "cyan",
+    "Noord-Brabant": "amber",
+    Limburg: "red",
+    Zeeland: "teal",
+  } as const;
+
+  return (
+    <div className="flex flex-col space-y-4 h-full lg:max-h-[80vh] lg:overflow-y-auto">
+      {[...locations]
+        .sort(() => {
+          // Random sort
+          return Math.random() - 0.5;
+        })
+        .map((location) => (
+          <LocationCard key={location.id} location={location}>
+            <div className="flex items-center justify-between">
+              {/* Star rating */}
+              {/* <Link
                         // Link to Google Maps page
                         href={location.googleUrl!}
                         target="_blank"
@@ -132,83 +153,102 @@ export default async function Page() {
                         </span>
                       </Link> */}
 
-                      {location.province ? (
-                        <Badge
-                          color={
-                            provinceColors[
-                              location.province as keyof typeof provinceColors
-                            ]
-                          }
-                        >
-                          {location.province}
-                        </Badge>
-                      ) : null}
-                    </div>
-
-                    <div className="block">
-                      <SetActiveLocationButton location={location}>
-                        <h3 className="text-lg mt-1.5 font-semibold leading-6 text-slate-900">
-                          {location.name}
-                        </h3>
-                      </SetActiveLocationButton>
-                    </div>
-                    {location.websiteUrl ? (
-                      <Link
-                        className="text-branding-dark hover:text-branding-light text-sm"
-                        href={location.websiteUrl}
-                        target="_blank"
-                      >
-                        {normalizeUrl(location.websiteUrl).split("//")[1]}
-                      </Link>
-                    ) : null}
-                    <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-slate-600">
-                      <p>{location.city}</p>
-                    </address>
-
-                    {/* Socials */}
-                    <ul className="flex gap-x-5 mt-6">
-                      {location.socialMedia
-                        .sort((a, b) => {
-                          const order: SocialPlatform[] = [
-                            "whatsapp",
-                            "instagram",
-                            "tiktok",
-                            "facebook",
-                            "youtube",
-                            "linkedin",
-                            "x",
-                          ];
-                          return (
-                            order.indexOf(a.platform) -
-                            order.indexOf(b.platform)
-                          );
-                        })
-                        .map(({ platform, url }) => {
-                          const IconComponent = platformComponents[platform];
-                          return IconComponent ? (
-                            <li key={platform}>
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <TouchTarget>
-                                  <IconComponent className="size-4 text-branding-light/70 hover:text-branding-light" />
-                                </TouchTarget>
-                              </a>
-                            </li>
-                          ) : null;
-                        })}
-                    </ul>
-                  </LocationCard>
-                ))}
+              {location.province ? (
+                <Badge
+                  color={
+                    provinceColors[
+                      location.province as keyof typeof provinceColors
+                    ]
+                  }
+                >
+                  {location.province}
+                </Badge>
+              ) : null}
             </div>
-            <div className="w-full lg:col-span-2 h-[80vh] rounded-sm overflow-hidden">
-              <LocationsMap locations={locations} />
+
+            <div className="block">
+              <SetActiveLocationButton location={location}>
+                <h3 className="text-lg mt-1.5 font-semibold leading-6 text-slate-900">
+                  {location.name}
+                </h3>
+              </SetActiveLocationButton>
             </div>
+            {location.websiteUrl ? (
+              <Link
+                className="text-branding-dark hover:text-branding-light text-sm"
+                href={location.websiteUrl}
+                target="_blank"
+              >
+                {normalizeUrl(location.websiteUrl).split("//")[1]}
+              </Link>
+            ) : null}
+            <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-slate-600">
+              <p>{location.city}</p>
+            </address>
+
+            {/* Socials */}
+            <ul className="flex gap-x-5 mt-6">
+              {location.socialMedia
+                .sort((a, b) => {
+                  const order: SocialPlatform[] = [
+                    "whatsapp",
+                    "instagram",
+                    "tiktok",
+                    "facebook",
+                    "youtube",
+                    "linkedin",
+                    "x",
+                  ];
+                  return order.indexOf(a.platform) - order.indexOf(b.platform);
+                })
+                .map(({ platform, url }) => {
+                  const IconComponent = platformComponents[platform];
+                  return IconComponent ? (
+                    <li key={platform}>
+                      <a href={url} target="_blank" rel="noopener noreferrer">
+                        <TouchTarget>
+                          <IconComponent className="size-4 text-branding-light/70 hover:text-branding-light" />
+                        </TouchTarget>
+                      </a>
+                    </li>
+                  ) : null;
+                })}
+            </ul>
+          </LocationCard>
+        ))}
+    </div>
+  );
+}
+
+function LocationListSkeleton() {
+  return (
+    <div className="flex flex-col space-y-4 h-full lg:max-h-[80vh] lg:overflow-y-auto">
+      {[...Array(6)].map((_, i) => (
+        <div
+          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+          key={i}
+          className="p-6 rounded-lg border border-slate-200 bg-white animate-pulse"
+        >
+          <div className="flex items-center justify-between">
+            <div className="h-6 w-20 bg-slate-200 rounded" />
           </div>
-        </SelectedLocationProvider>
-      </div>
-    </>
+          <div className="mt-4">
+            <div className="h-6 w-48 bg-slate-200 rounded" />
+          </div>
+          <div className="mt-2">
+            <div className="h-4 w-32 bg-slate-200 rounded" />
+          </div>
+          <div className="mt-4">
+            <div className="h-4 w-24 bg-slate-200 rounded" />
+          </div>
+          <div className="flex gap-x-5 mt-6">
+            {[...Array(4)].map((_, j) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              <div key={j} className="h-4 w-4 bg-slate-200 rounded" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

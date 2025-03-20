@@ -4,6 +4,7 @@ import {
   UserIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
+import { connection } from "next/server";
 import type React from "react";
 import { Github } from "~/app/_components/socials";
 import { getUserOrThrow } from "~/lib/nwd";
@@ -32,6 +33,7 @@ export default async function Layout({
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
+  await connection();
   const user = await getUserOrThrow();
 
   return (

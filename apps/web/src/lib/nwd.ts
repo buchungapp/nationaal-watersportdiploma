@@ -25,6 +25,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
@@ -512,7 +513,10 @@ export const listCertificatesByNumber = cache(
   },
 );
 
-export const retrieveCertificateById = cache(async (id: string) => {
+export const retrieveCertificateById = async (id: string) => {
+  "use cache";
+  cacheLife("minutes");
+
   return makeRequest(async () => {
     const certificate = await Certificate.byId(id);
 
@@ -522,113 +526,155 @@ export const retrieveCertificateById = cache(async (id: string) => {
 
     return certificate;
   });
-});
+};
 
-export const listDisciplines = cache(async () => {
+export const listDisciplines = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const disciplines = await Course.Discipline.list();
 
     return disciplines;
   });
-});
+};
 
-export const listDegrees = cache(async () => {
+export const listDegrees = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const degrees = await Course.Degree.list();
 
     return degrees;
   });
-});
+};
 
-export const listModules = cache(async () => {
+export const listModules = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const modules = await Course.Module.list();
 
     return modules;
   });
-});
+};
 
-export const listCompetencies = cache(async () => {
+export const listCompetencies = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const competencies = await Course.Competency.list();
 
     return competencies;
   });
-});
+};
 
-export const listGearTypes = cache(async () => {
+export const listGearTypes = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list();
 
     return gearTypes;
   });
-});
+};
 
-export const listCategories = cache(async () => {
+export const listCategories = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const categories = await Course.Category.list();
 
     return categories;
   });
-});
+};
 
-export const listParentCategories = cache(async () => {
+export const listParentCategories = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const categories = await Course.Category.listParentCategories();
 
     return categories;
   });
-});
+};
 
-export const listCountries = cache(async () => {
+export const listCountries = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const countries = await Platform.Country.list();
 
     return countries;
   });
-});
+};
 
-export const retrieveDisciplineByHandle = cache(async (handle: string) => {
+export const retrieveDisciplineByHandle = async (handle: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const disciplines = await Course.Discipline.fromHandle(handle);
 
     return disciplines;
   });
-});
+};
 
-export const listCourses = cache(async () => {
+export const listCourses = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const courses = await Course.list();
 
     return courses;
   });
-});
+};
 
-export const retrieveCourseByHandle = cache(async (handle: string) => {
+export const retrieveCourseByHandle = async (handle: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const courses = await Course.list();
 
     return courses.find((course) => course.handle === handle);
   });
-});
+};
 
-export const listPrograms = cache(async () => {
+export const listPrograms = async () => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const programs = await Course.Program.list();
 
     return programs;
   });
-});
+};
 
-export const listProgramsForCourse = cache(async (courseId: string) => {
+export const listProgramsForCourse = async (courseId: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const programs = await Course.Program.list({ filter: { courseId } });
 
     return programs;
   });
-});
+};
 
-export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
+export const listCurriculaByDiscipline = async (disciplineId: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
       filter: { onlyCurrentActive: true, disciplineId },
@@ -636,25 +682,32 @@ export const listCurriculaByDiscipline = cache(async (disciplineId: string) => {
 
     return curricula;
   });
-});
+};
 
-export const listCurriculaByProgram = cache(
-  async (programId: string, onlyCurrentActive = true) => {
-    return makeRequest(async () => {
-      const curricula = await Curriculum.list({
-        filter: { onlyCurrentActive, programId },
-      });
+export const listCurriculaByProgram = async (
+  programId: string,
+  onlyCurrentActive = true,
+) => {
+  "use cache";
+  cacheLife("days");
 
-      return curricula;
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list({
+      filter: { onlyCurrentActive, programId },
     });
-  },
-);
 
-export const retrieveCurriculumById = cache(async (id: string) => {
+    return curricula;
+  });
+};
+
+export const retrieveCurriculumById = async (id: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     return await Curriculum.getById({ id });
   });
-});
+};
 
 export const countStartedStudentsForCurriculum = cache(
   async (curriculumId: string) => {
@@ -683,7 +736,10 @@ export const copyCurriculum = async ({
   });
 };
 
-export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
+export const listGearTypesByCurriculum = async (curriculumId: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list({
       filter: {
@@ -693,13 +749,16 @@ export const listGearTypesByCurriculum = cache(async (curriculumId: string) => {
 
     return gearTypes;
   });
-});
+};
 
-export const retrieveLocationByHandle = cache(async (handle: string) => {
+export const retrieveLocationByHandle = async (handle: string) => {
+  "use cache";
+  cacheLife("days");
+
   return makeRequest(async () => {
     return await Location.fromHandle(handle);
   });
-});
+};
 
 export const listPersonsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
