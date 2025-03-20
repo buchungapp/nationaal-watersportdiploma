@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-white.png";
 
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import Image from "next/image";
 import { Line, LineWave } from "~/app/(public)/_assets/wave";
 import Wordmark from "~/app/_components/brand/wordmark";
@@ -27,7 +28,14 @@ function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   );
 }
 
-export default function Footer() {
+async function getYear() {
+  "use cache";
+  cacheLife("weeks");
+
+  return new Date().getFullYear();
+}
+
+export default async function Footer() {
   const socials = [
     {
       name: "Facebook",
@@ -155,7 +163,7 @@ export default function Footer() {
 
       <div className="flex flex-col gap-4 text-slate-200 lg:flex-row">
         <p className="flex-1 text-center text-sm lg:text-start">
-          {`© ${new Date().getFullYear()} ${constants.APP_NAME}`}
+          {`© ${await getYear()} ${constants.APP_NAME}`}
         </p>
         <ul className="flex flex-1 items-center justify-center gap-6 lg:justify-end">
           {socials.map((social) => (

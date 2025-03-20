@@ -5,8 +5,6 @@ import { z } from "zod";
 import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
 
-export const runtime = "nodejs";
-
 export async function GET(request: NextRequest) {
   const query = new URL(request.url).searchParams;
 

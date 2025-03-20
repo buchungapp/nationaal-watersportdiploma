@@ -1,5 +1,6 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { DocumentTextIcon } from "@heroicons/react/20/solid";
+import { connection } from "next/server";
 import prettyBytes from "pretty-bytes";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -21,6 +22,7 @@ export default async function Page(_props: {
     location: string;
   }>;
 }) {
+  await connection();
   const documents = await listKnowledgeCenterDocuments();
 
   return (

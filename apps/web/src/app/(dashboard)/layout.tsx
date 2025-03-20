@@ -48,8 +48,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const runtime = "nodejs";
-
 export default function DashboardLayout({
   children,
 }: Readonly<{

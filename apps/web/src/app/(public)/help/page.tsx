@@ -1,5 +1,7 @@
+"use cache";
 import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
+import { unstable_cacheLife } from "next/cache";
 import Link from "next/link";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import CategorieCard from "./_components/categorie-card";
@@ -36,6 +38,8 @@ export async function generateMetadata(
 }
 
 export default async function Page() {
+  unstable_cacheLife("days");
+
   const [articles, categories] = await Promise.all([
     getHelpArticles(),
     getHelpCategories(),

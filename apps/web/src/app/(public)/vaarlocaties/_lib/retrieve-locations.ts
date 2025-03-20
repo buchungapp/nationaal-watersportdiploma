@@ -3,12 +3,16 @@ import {
   Client,
   Language,
 } from "@googlemaps/google-maps-services-js";
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import { cache } from "react";
 import { listAllLocations } from "~/lib/nwd";
 
 const mapsClient = new Client({});
 
 async function retrieveLocationsWithAllMeta() {
+  "use cache";
+  cacheLife("weeks");
+
   const locations = await listAllLocations();
 
   const locationsWithCity = await Promise.all(

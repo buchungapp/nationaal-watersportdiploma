@@ -5,8 +5,6 @@ import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
 import { retrieveCertificateHandles } from "~/lib/nwd";
 
-export const runtime = "nodejs";
-
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
