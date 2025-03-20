@@ -12,6 +12,7 @@ import { BASE_URL } from "~/constants";
 
 import Analytics from "../_components/analytics";
 import "../globals.css";
+import { Suspense } from "react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,8 +49,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const runtime = "nodejs";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -64,22 +63,23 @@ export default function RootLayout({
       )}
     >
       <body className="h-full">
-        <CommonProviders>
-          <MarketingProviders>
-            {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
-            <div>
-              <Header />
-              <div id="content" className="[--header-height:112px]">
-                {children}
-              </div>
-              <Footer />
+        <Suspense>
+          <CommonProviders />
+        </Suspense>
+        <MarketingProviders>
+          {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
+          <div>
+            <Header />
+            <div id="content" className="[--header-height:112px]">
+              {children}
             </div>
-          </MarketingProviders>
+            <Footer />
+          </div>
+        </MarketingProviders>
 
-          <Toaster richColors />
-          <SpeedInsights />
-          <Analytics />
-        </CommonProviders>
+        <Toaster richColors />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

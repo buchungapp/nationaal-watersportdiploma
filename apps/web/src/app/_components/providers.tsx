@@ -54,7 +54,7 @@ export function useIsSticky() {
   return scrollPosition > TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
 }
 
-export function CommonProviders({ children }: { children: React.ReactNode }) {
+export function CommonProviders({ children }: { children?: React.ReactNode }) {
   return (
     <PHProvider>
       <SessionProvider>{children}</SessionProvider>
