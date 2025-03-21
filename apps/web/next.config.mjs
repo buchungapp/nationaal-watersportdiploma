@@ -47,6 +47,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/help/artikel/nwd-of-cwo-wat-is-het-beste-voor-jou",
+        destination: "/help/artikel/nwd-vervangt-cwo-als-nationale-standaard",
+        permanent: true,
+      },
+      {
         source: "/helpcentrum/:path*",
         destination: "/help/:path*",
         permanent: true,

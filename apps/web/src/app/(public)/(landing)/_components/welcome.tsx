@@ -16,7 +16,7 @@ export default function Welcome() {
             border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           >
             <MegaphoneIcon className="h-4 w-4" /> Het Watersportverbond kiest
-            voor NWD als nieuwe standaard
+            voor het NWD als nieuwe standaard!
             <span className="text-xs">→</span>
           </Link>
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
