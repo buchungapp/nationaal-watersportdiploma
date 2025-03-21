@@ -52,6 +52,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/de-nieuwe-standaard",
+        destination: "/help/artikel/nwd-vervangt-cwo-als-nationale-standaard",
+        permanent: true,
+      },
+      {
         source: "/helpcentrum/:path*",
         destination: "/help/:path*",
         permanent: true,
