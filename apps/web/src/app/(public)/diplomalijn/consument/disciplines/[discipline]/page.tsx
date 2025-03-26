@@ -2,6 +2,7 @@
 
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { unstable_cacheLife } from "next/cache";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listCourses, retrieveDisciplineByHandle } from "~/lib/nwd";
@@ -51,6 +52,18 @@ export default async function Page(props: {
           </li>
         ))}
       </ul>
+
+      {params.discipline === "jachtzeilen" && (
+        <div className="mt-12">
+          <Image
+            src={
+              (await import("../../_assets/vaarwateren-jachtzeilen.png"))
+                .default
+            }
+            alt="Vaarwateren jachtzeilen"
+          />
+        </div>
+      )}
     </div>
   );
 }
