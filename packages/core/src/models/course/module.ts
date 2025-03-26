@@ -15,23 +15,28 @@ export const create = withZod(
   insertSchema.pick({
     title: true,
     handle: true,
+    weight: true,
   }),
   successfulCreateResponse,
   async (item) =>
     withTransaction(async (tx) => {
-      const currentHeighestWeight = await tx
-        .select({ weight: s.module.weight })
-        .from(s.module)
-        .orderBy(desc(s.module.weight))
-        .limit(1)
-        .then((rows) => rows[0]?.weight ?? 0);
+      if (item.weight === undefined) {
+        const currentHeighestWeight = await tx
+          .select({ weight: s.module.weight })
+          .from(s.module)
+          .orderBy(desc(s.module.weight))
+          .limit(1)
+          .then((rows) => rows[0]?.weight ?? 0);
+
+        item.weight = currentHeighestWeight + 1;
+      }
 
       const rows = await tx
         .insert(s.module)
         .values({
           title: item.title,
           handle: item.handle,
-          weight: currentHeighestWeight + 1,
+          weight: item.weight,
         })
         .returning({ id: s.module.id });
 
