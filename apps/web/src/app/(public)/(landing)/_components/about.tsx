@@ -120,7 +120,7 @@ export default function About() {
               />
             </svg>
           }
-          title="Scherp toezicht op accomodaties"
+          title="Scherp toezicht op accommodaties"
           description="Strenge controles op o.a. brand- en voedselveiligheid zorgen voor een zorgeloos verblijf, ook buiten het water."
         />
 
