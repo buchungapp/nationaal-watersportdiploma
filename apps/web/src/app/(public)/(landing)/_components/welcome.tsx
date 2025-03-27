@@ -16,15 +16,16 @@ export default function Welcome() {
         <div className="flex sm:flex-row flex-col items-center sm:items-start gap-x-6 gap-y-4">
           <BoxedButton
             href="/vaarlocaties"
+            href="/vaarlocaties"
             className="bg-white text-branding-dark"
           >
-            Vind een NWD vaarschool
+            Vind een NWD vaarschool Vind een NWD vaarschool
           </BoxedButton>
           <BoxedButton
             href="/diplomalijn/consument"
-            className="hover:bg-white/10 text-white"
+            className="text-white hover:bg-white/10"
           >
-            Over de NWD diploma's
+            Ontdek de diplomalijn
           </BoxedButton>
         </div>
       </div>

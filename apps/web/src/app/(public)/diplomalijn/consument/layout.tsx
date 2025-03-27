@@ -36,9 +36,16 @@ export default async function Layout({
         <div className="flex justify-end h-full">
           <SideNavDiplomalijn
             pages={{
-              general: pages.filter((page) => {
-                return page.pathSegments.length === 0;
-              }),
+              general: [
+                ...pages.filter((page) => {
+                  return page.pathSegments.length === 0;
+                }),
+                {
+                  type: "external",
+                  href: "/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd#veelgestelde-vragen",
+                  title: "Veelgestelde vragen",
+                },
+              ],
             }}
             disciplines={disciplines}
           />

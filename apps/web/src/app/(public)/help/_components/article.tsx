@@ -7,6 +7,7 @@ import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import Disclosure from "../../_components/disclosure";
 import FaqDisclosure from "../../_components/faq/faq";
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -92,6 +93,7 @@ const components = {
   a: CustomLink,
   Faq: FaqDisclosure,
   Note: Note,
+  Disclosure: Disclosure,
 };
 
 export function HelpArticle(props: MDXRemoteProps) {

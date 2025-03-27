@@ -9,7 +9,10 @@ export default function SideNavDiplomalijn({
   disciplines,
 }: {
   pages: {
-    general: PageWithMeta[];
+    general: (
+      | PageWithMeta
+      | { type: "external"; href: string; title: string }
+    )[];
   };
   disciplines: Awaited<ReturnType<typeof listDisciplines>>;
 }) {
@@ -19,13 +22,25 @@ export default function SideNavDiplomalijn({
         {
           items: general.map((page) => ({
             isActive(ctx) {
-              if (page.slug === null)
+              if ("type" in page && page.type === "external") {
+                return false;
+              }
+
+              if (!("slug" in page)) {
+                return false;
+              }
+
+              if (page.slug === null) {
                 return ctx.selectedLayoutSegments.length < 1;
+              }
 
               return ctx.selectedLayoutSegments[0] === page.slug;
             },
             label: page.title,
-            href: `/diplomalijn/consument/${page.slug ? page.slug : ""}`,
+            href:
+              "type" in page && page.type === "external"
+                ? page.href
+                : `/diplomalijn/consument/${"slug" in page && page.slug ? page.slug : ""}`,
           })),
         },
         {
