@@ -41,8 +41,8 @@ export default function Page() {
       <div className="px-6 max-w-prose mx-auto py-20 lg:px-8">
         <Prose>
           <p>
-            Nationaal Watersportdiploma, gevestigd aan Wilhelmina van Pruisenweg
-            35, 2595AN Den Haag, is verantwoordelijk voor de verwerking van
+            Nationaal Watersportdiploma, gevestigd aan Waldropstraat 5, 2521CA
+            Den Haag, is verantwoordelijk voor de verwerking van
             persoonsgegevens zoals weergegeven in deze privacyverklaring.
           </p>
 
@@ -52,9 +52,9 @@ export default function Page() {
               https://www.nationaalwatersportdiploma.nl
             </a>
             <br />
-            Wilhelmina van Pruisenweg 35
+            Waldorpstraat 5
             <br />
-            2595AN Den Haag
+            2521CA Den Haag
             <br />
             085 - 782 27 77
           </p>

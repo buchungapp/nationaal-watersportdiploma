@@ -141,8 +141,8 @@ export default function Contact() {
               </li>
               <li className="flex items-start gap-4">
                 <EnvelopeIcon className="h-6 w-5 shrink-0" />
-                Wilhelmina van Pruisenweg 35 <br />
-                2595AN Den Haag
+                Waldorpstraat 5 <br />
+                2521CA Den Haag
               </li>
             </ul>
             <p>

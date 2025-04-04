@@ -6,7 +6,7 @@ import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-whi
 import { unstable_cacheLife as cacheLife } from "next/cache";
 import Image from "next/image";
 import { Line, LineWave } from "~/app/(public)/_assets/wave";
-import Wordmark from "~/app/_components/brand/wordmark";
+import NWDPreviousCWO from "~/app/_components/brand/nwd-previous-cwo";
 import {
   Facebook,
   Instagram,
@@ -68,8 +68,8 @@ export default async function Footer() {
     <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 pb-12 pt-20 lg:px-16">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
         <div>
-          <div className="grid gap-6">
-            <Wordmark className="h-12 w-48 text-white" />
+          <div className="grid gap-6 justify-start">
+            <NWDPreviousCWO className="h-16 w-fit text-white" />
             <p className="text-sm text-slate-200">{constants.APP_SLOGAN}</p>
           </div>
 
