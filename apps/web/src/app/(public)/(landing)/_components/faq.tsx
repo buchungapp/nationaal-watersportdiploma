@@ -28,8 +28,8 @@ export default async function Faq() {
           Helpcentrum
         </h3>
         <p className="mt-2.5 max-w-prose text-slate-700">
-          Het NWD is nieuw, dus het is niet gek dat dit wat vragen bij je
-          oproept. De artikelen in ons helpcentrum helpen je op weg.
+          Heb je vragen over het NWD? De artikelen in ons helpcentrum helpen je
+          op weg.
         </p>
 
         <BoxedButton href="/help" className="mt-8 bg-branding-dark text-white">

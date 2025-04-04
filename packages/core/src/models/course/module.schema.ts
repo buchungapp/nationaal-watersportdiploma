@@ -10,6 +10,7 @@ export const insertSchema = createInsertSchema(s.module, {
       .min(3)
       .regex(/^[a-z0-9\-]+$/),
   title: (schema) => schema.title.trim(),
+  weight: (schema) => schema.weight.int().min(1).optional(),
 });
 export type Input = z.input<typeof insertSchema>;
 

@@ -1,4 +1,5 @@
 import { constants } from "@nawadi/lib";
+import Image from "next/image";
 import { Prose } from "~/app/(public)/_components/prose";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import PageHero from "~/app/(public)/_components/style/page-hero";
@@ -38,16 +39,29 @@ export function ArticleLayout({
       />
 
       <PageHero>
-        <div className="px-4 lg:px-16">
-          <div className="grid gap-6 text-white">
+        <div className="grid grid-cols-1 items-center gap-8 px-4 lg:grid-cols-2 lg:px-16 min-w-0">
+          <div
+            className={`grid gap-6 text-white min-w-0 ${!article.featuredImage ? "lg:col-span-2" : ""}`}
+          >
             <TekstButton backwards href="/actueel" className="text-white">
               Terug naar alle artikelen
             </TekstButton>
 
-            <h1 className="text-4xl font-bold lg:leading-[1.15] lg:text-5xl max-w-prose break-words hyphens-auto">
+            <h1 className="text-3xl font-bold lg:text-4xl break-words min-w-0 overflow-hidden">
               {article.title}
             </h1>
           </div>
+          {article.featuredImage && (
+            <div className="relative aspect-[1.91/1] w-full overflow-hidden rounded-3xl border-2 border-white/20 shadow-lg">
+              <Image
+                src={article.featuredImage}
+                alt={article.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
         </div>
       </PageHero>
       <Container className="mt-16 lg:mt-24">
