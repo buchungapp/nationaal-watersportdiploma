@@ -66,6 +66,12 @@ const nextConfig = {
         destination: "/account",
         permanent: true,
       },
+      {
+        source: "/aansluiten",
+        destination:
+          "/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {
