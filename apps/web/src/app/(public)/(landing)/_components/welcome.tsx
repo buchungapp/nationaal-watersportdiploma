@@ -15,8 +15,8 @@ export default function Welcome() {
             flex items-center gap-2 mb-4 font-medium leading-tight mx-auto sm:mx-0
             border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
           >
-            <MegaphoneIcon className="h-4 w-4" /> Het Watersportverbond kiest
-            voor het NWD als nationale diplomalijn!
+            <MegaphoneIcon className="h-4 w-4" /> Lees: Vernieuwd
+            watersportdiploma voor Nederland
             <span className="text-xs">→</span>
           </Link>
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
