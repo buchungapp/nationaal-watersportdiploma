@@ -51,11 +51,12 @@ const nextConfig = {
       //   destination: "/help/artikel/nwd-vervangt-cwo-als-nationale-standaard",
       //   permanent: true,
       // },
-      // {
-      //   source: "/de-nieuwe-standaard",
-      //   destination: "/help/artikel/nwd-vervangt-cwo-als-nationale-standaard",
-      //   permanent: true,
-      // },
+      {
+        source: "/de-nieuwe-standaard",
+        destination:
+          "/help/artikel/watersportverbond-kiest-voor-het-nwd-wat-betekent-dit-voor-jou",
+        permanent: true,
+      },
       {
         source: "/helpcentrum/:path*",
         destination: "/help/:path*",
