@@ -117,13 +117,13 @@ const nextConfig = {
         source: "/(.*)",
         headers: [
           {
-            key: "Content-Security-Policy",
+            key: "Content-Security-Policy-Report-Only",
             value: cspHeader.replace(/\n/g, ""),
           },
           {
             key: "Reporting-Endpoints",
             value:
-              'csp-endpoint="https://www.nationalwatersportdiploma.nl/api/csp-report"',
+              'csp-endpoint="https://www.nationaalwatersportdiploma.nl/api/csp-report"',
           },
         ],
       },
