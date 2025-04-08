@@ -6,13 +6,15 @@ export default function CashbackWelcome() {
     <div className="flex flex-col gap-6 px-4 lg:px-16">
       <div className="gap-6 grid max-w-4xl text-white">
         <h1 className="font-bold text-4xl lg:text-5xl xl:text-6xl">
-          <Balancer>€50 Cashback bij inlevering van je CWO-diploma!</Balancer>
+          <Balancer>
+            Ontvang €50 cashback bij inlevering van je CWO-diploma!<sup>*</sup>
+          </Balancer>
         </h1>
         <p className="text-xl">
           <Balancer>
-            Ter ere van de overgang van CWO naar NWD ontvang je €50 cashback
-            wanneer je in 2024 een CWO-diploma behaalt én een meerdaagse cursus
-            of zeilkamp boekt bij een NWD-locatie.
+            De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe
+            landelijke standaard, en we helpen je graag om deze overstap te
+            maken.
           </Balancer>
         </p>
       </div>

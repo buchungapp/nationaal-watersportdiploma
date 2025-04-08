@@ -11,12 +11,11 @@ export default async function CashbackForm() {
         <h2 className="font-bold text-white text-3xl sm:text-4xl text-center">
           Vraag je cashback aan
         </h2>
-        <p className="max-w-2xl text-white/80 text-center">
+        <p className="max-w-2xl text-white text-center">
           <Balancer>
-            Let op: je moet het formulier{" "}
-            <strong>per deelnemer invullen</strong>. Zorg dat je je
-            boekingsbevestiging en een kopie van je CWO-diploma bij de hand
-            hebt.
+            Let op: je vult het formulier <strong>per deelnemer</strong> in.
+            Zorg dat je je boekingsnummer van je zeilkamp of zeilcursus voor
+            2025 en een kopie van je CWO-diploma uit 2024 bij de hand hebt.
           </Balancer>
         </p>
       </div>

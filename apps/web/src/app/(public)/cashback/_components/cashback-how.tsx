@@ -12,24 +12,19 @@ export default function CashbackHow() {
         <div className="gap-4 grid grid-cols-1 lg:grid-cols-3">
           <Step
             number={1}
-            title="Boek een curus"
-            description="Boek een nieuwe NWD-cursus bij een van onze erkende vaarscholen."
+            title="Boek een zeilkamp of zeilcursus"
+            description="Bij één van de NWD-erkende vaarlocaties, voor minimaal 2 dagen."
           />
           <Step
             number={2}
-            title="Upload je bewijsstuk"
+            title="Upload je CWO-bewijs uit 2024"
             description="Vul het onderstaande formulier in en upload je bewijsstuk."
           />
           <Step
             number={3}
-            title="Ontvang €50,-"
-            description={
-              <>
-                Na verificatie storten wij €50,- terug op je rekening
-                <br />
-                <span className="text-xs">uiterlijk op 31 oktober 2025</span>
-              </>
-            }
+            title="Ontvang €50 cashback!"
+            description="Nadat je cursus is afgerond, stort het Nationaal Watersportdiploma wij €50,- terug op je
+                rekening."
           />
         </div>
       </div>
@@ -47,7 +42,9 @@ function Step({
       <span className="flex justify-center items-center bg-branding-orange mb-4 p-4 rounded-full size-15 aspect-square text-white text-2xl">
         {number}
       </span>
-      <h3 className="font-bold text-branding-light text-2xl">{title}</h3>
+      <h3 className="font-bold text-branding-light text-2xl">
+        <Balancer>{title}</Balancer>
+      </h3>
       <p className="text-slate-600 text-sm">
         <Balancer>{description}</Balancer>
       </p>

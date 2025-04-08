@@ -1,5 +1,5 @@
 import Double from "~/app/_components/brand/double-line";
-import { TekstButton } from "../../_components/style/buttons";
+import { BoxedButton } from "../../_components/style/buttons";
 
 export default function CashbackConditions() {
   return (
@@ -8,44 +8,49 @@ export default function CashbackConditions() {
         <div className="flex flex-col items-center w-full text-center">
           <div className="flex items-center gap-x-3 w-full font-bold text-branding-orange uppercase">
             <Double />
-            Cashback
+            Actievoorwaarden
             <Double />
           </div>
           <h3 className="mt-1.5 font-bold text-slate-900 text-2xl">
-            Actievoorwaarden
+            De actie in het kort
           </h3>
         </div>
         <ul className="space-y-4 lg:space-y-2 p-8 pl-16 border-2 border-branding-light rounded-xl list-disc">
-          <li>Actieperiode: 22 maart t/m 1 september 2025</li>
-          <li>De cursus wordt gestart voor 1 september 2025</li>
+          <li>Je krijgt €50 cashback op je nieuwe zeilcursus of zeilkamp</li>
+          <li>De actie loopt van 9 april t/m 1 september 2025</li>
           <li>
-            Iedereen die in 2024 een CWO-diploma of -vorderingenstaat heeft
-            behaald
+            Je kunt meedoen als je in 2024 een CWO-diploma of vorderingsstaat
+            hebt behaald
           </li>
           <li>
-            Boek een meerdaagse cursus of zeilkamp bij een erkende NWD-locatie
+            Je moet een meerdaagse cursus of kamp boeken (minimaal 2 dagen)
           </li>
           <li>
-            Upload een duidelijk leesbare foto of pdf van je CWO-diploma of
-            -vorderingenstaat
-            <br />
-            <em>Let op: de datum van uitgifte in 2024 moet zichtbaar zijn</em>
+            Je boeking moet bij een erkende vaarlocatie zijn (zie
+            nwd.nl/vaarlocaties)
           </li>
-          <li>Eendaagse cursussen vallen buiten de actie</li>
+          <li>De cursus moet vóór 1 september 2025 plaatsvinden</li>
           <li>
-            Kortingen zijn niet stapelbaar: deze actie is niet te combineren met
-            andere kortingsacties van de zeilschool
+            Upload je diploma/vorderingsstaat en boekingsnummer via het
+            aanmeldformulier
           </li>
-          <li>Cashback van €50 per persoon, maximaal één keer per deelnemer</li>
+          <li>Je kunt maar één keer meedoen aan de actie</li>
+          <li>Je kunt de cashback niet combineren met andere kortingen</li>
           <li>
-            Uitkering in september 2025, uiterlijk op 31 oktober 2025, door het
-            Nationaal Watersportdiploma
+            De €50 wordt na je cursus overgemaakt (uiterlijk 31 oktober 2025)
+          </li>
+          <li>Bij annulering van je cursus vervalt het recht op cashback</li>
+          <li>
+            Je gaat akkoord met de verwerking van je gegevens voor deze actie
           </li>
           <br />
 
-          <TekstButton href="/cashback/voorwaarden">
+          <BoxedButton
+            href="/cashback/voorwaarden"
+            className="text-white bg-branding-dark hover:bg-branding-dark/90 w-full text-center justify-center"
+          >
             Bekijk de volledige voorwaarden
-          </TekstButton>
+          </BoxedButton>
         </ul>
       </div>
     </section>

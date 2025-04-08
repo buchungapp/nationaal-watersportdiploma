@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -199,8 +200,16 @@ export function CashbackFormClient({
 
             <CheckboxField className="@xl/cashback-fields:col-span-4">
               <Label>
-                Ik ga akkoord met de voorwaarden{" "}
-                <span className="text-branding-orange">*</span>
+                Ik ga akkoord met de{" "}
+                <Link
+                  href="/cashback/voorwaarden"
+                  target="_blank"
+                  className="text-branding-orange"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  actievoorwaarden
+                </Link>
+                .
               </Label>
               <Checkbox
                 name="terms"
@@ -218,7 +227,8 @@ export function CashbackFormClient({
             </CheckboxField>
             <CheckboxField className="@xl/cashback-fields:col-span-4">
               <Label>
-                Ik wil me graag inschrijven voor de nieuwsbrief van NWD
+                Ik schrijf me in voor de nieuwsbrief van het Nationaal
+                Watersportdiploma
               </Label>
               <Checkbox
                 name="newsletter"
