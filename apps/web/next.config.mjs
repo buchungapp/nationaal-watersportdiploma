@@ -4,7 +4,7 @@ const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.usefathom.com https://maps.googleapis.com https://vercel.live https://www.gstatic.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live;
-    img-src 'self' blob: data: https://*.mux.com https://*.googleapis.com https://*.gstatic.com https://vercel.live https://vercel.com https://cdn.usefathom.com;
+    img-src 'self' blob: data: https://*.mux.com https://*.googleapis.com https://*.gstatic.com https://vercel.live https://vercel.com https://cdn.usefathom.com https://service.nwd.nl;
     font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://vercel.live https://assets.vercel.com;
     connect-src 'self' 
         https://cdn.usefathom.com
@@ -13,8 +13,9 @@ const cspHeader = `
         https://*.googleapis.com
         https://*.gstatic.com
         wss://ws-us3.pusher.com
-        https://vercel.live;
-    media-src 'self' https://*.mux.com;
+        https://vercel.live
+        https://service.nwd.nl;
+    media-src 'self' blob: https://*.mux.com https://service.nwd.nl;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
@@ -117,7 +118,7 @@ const nextConfig = {
         source: "/(.*)",
         headers: [
           {
-            key: "Content-Security-Policy-Report-Only",
+            key: "Content-Security-Policy",
             value: cspHeader.replace(/\n/g, ""),
           },
           {
