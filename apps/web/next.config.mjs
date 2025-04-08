@@ -1,5 +1,29 @@
 import nextMDX from "@next/mdx";
 
+const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.usefathom.com https://maps.googleapis.com https://vercel.live;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live;
+    img-src 'self' blob: data: https://*.mux.com https://*.googleapis.com https://*.gstatic.com https://vercel.live https://vercel.com;
+    font-src 'self' https://fonts.googleapis.com https://vercel.live https://assets.vercel.com;
+    connect-src 'self' 
+        https://cdn.usefathom.com
+        https://*.fastly.mux.com
+        https://*.mux.com
+        https://*.googleapis.com
+        https://*.gstatic.com
+        wss://ws-us3.pusher.com
+        https://vercel.live;
+    media-src 'self' https://*.mux.com;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-src https://vercel.live;
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+    report-to csp-endpoint;
+`;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Configure `pageExtensions` to include MDX files
@@ -84,6 +108,24 @@ const nextConfig = {
       {
         source: "/ingest/:path*",
         destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: cspHeader.replace(/\n/g, ""),
+          },
+          {
+            key: "Reporting-Endpoints",
+            value:
+              'csp-endpoint="https://www.nationalwatersportdiploma.nl/api/csp-report"',
+          },
+        ],
       },
     ];
   },
