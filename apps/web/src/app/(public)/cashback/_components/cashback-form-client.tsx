@@ -1,7 +1,14 @@
 "use client";
 
+import JSConfetti from "js-confetti";
 import Link from "next/link";
-import { useActionState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -29,17 +36,62 @@ export function CashbackFormClient({
 }: {
   locations: Awaited<ReturnType<typeof listAllLocations>>;
 }) {
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const confettiClient = useMemo(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return new JSConfetti();
+  }, []);
+
+  const showConfetti = useCallback(() => {
+    if (!confettiClient) {
+      console.info("Confetti client not initialized");
+      return;
+    }
+
+    void confettiClient.addConfetti({
+      confettiColors: ["#ff8000", "#007FFF", "#0047ab"],
+      confettiRadius: 6,
+      confettiNumber: 500,
+    });
+  }, [confettiClient]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      showConfetti();
+    }
+  }, [isSuccess, showConfetti]);
+
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await createCashbackAction(prevState, formData);
 
     if (result.message === "Success") {
       toast.success("Cashback aangevraagd.");
+      setIsSuccess(true);
     }
 
     return result;
   };
 
   const [state, action] = useActionState(submit, undefined);
+
+  if (isSuccess) {
+    return (
+      <div className="bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl text-center">
+        <h2 className="text-2xl font-bold text-slate-900 mb-4">Gelukt!</h2>
+        <p className="text-slate-600 mb-8 max-w-prose mx-auto">
+          We hebben je cashback aanvraag ontvangen. <br /> Als we vragen hebben
+          nemen we contact met je op.
+        </p>
+        <Button color="branding-dark" onClick={() => setIsSuccess(false)}>
+          Nieuwe aanvraag indienen
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -190,6 +242,7 @@ export function CashbackFormClient({
                 name="applicantIban"
                 placeholder="NL12 ABCD 1234 5678 90"
                 required
+                pattern="^(?:IT|SM)\d{2}[A-Z]\d{3}(?:\d{4}){4}\d{3}|CY\d{2}[A-Z]\d{3}(?:\d{4}){5}|NL\d{2}[A-Z]{4}(?:\d{4}){2}\d{2}|LV\d{2}[A-Z]{4}(?:\d{4}){3}\d|(?:BG|BH|GB|IE)\d{2}[A-Z]{4}(?:\d{4}){3}\d{2}|GI\d{2}[A-Z]{4}(?:\d{4}){3}\d{3}|RO\d{2}[A-Z]{4}(?:\d{4}){4}|KW\d{2}[A-Z]{4}(?:\d{4}){5}\d{2}|MT\d{2}[A-Z]{4}(?:\d{4}){5}\d{3}|NO\d{2}(?:\d{4}){4}|(?:DK|FI|GL|FO)\d{2}(?:\d{4}){3}\d{2}|MK\d{2}(?:\d{4}){3}\d{3}|(?:AT|EE|KZ|LU|XK)\d{2}(?:\d{4}){4}|(?:BA|HR|LI|CH|CR)\d{2}(?:\d{4}){4}\d|(?:GE|DE|LT|ME|RS)\d{2}(?:\d{4}){4}\d{2}|IL\d{2}(?:\d{4}){4}\d{3}|(?:AD|CZ|ES|MD|SA)\d{2}(?:\d{4}){5}|PT\d{2}(?:\d{4}){5}\d|(?:BE|IS)\d{2}(?:\d{4}){5}\d{2}|(?:FR|MR|MC)\d{2}(?:\d{4}){5}\d{3}|(?:AL|DO|LB|PL)\d{2}(?:\d{4}){6}|(?:AZ|HU)\d{2}(?:\d{4}){6}\d|(?:GR|MU)\d{2}(?:\d{4}){6}\d{2}$"
                 invalid={!!state?.errors?.applicantIban}
                 defaultValue={state?.fields?.applicantIban as string}
               />
