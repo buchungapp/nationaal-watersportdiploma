@@ -1,5 +1,4 @@
 import Nav from "./nav/nav";
-import NotificationBar from "./notificationbar";
 import Trustbar from "./trustbar";
 
 export default function Header() {
@@ -7,11 +6,10 @@ export default function Header() {
     <header className="bg-branding-light">
       <a
         href="#content"
-        className="top-4 left-4 z-50 fixed bg-white shadow-lg p-4 border-2 border-branding text-branding transition-transform -translate-x-[calc(100%+2rem)] focus:translate-x-0"
+        className="border-branding text-branding fixed left-4 top-4 z-50 -translate-x-[calc(100%+2rem)] border-2 bg-white p-4 shadow-lg transition-transform focus:translate-x-0"
       >
         Naar de inhoud gaan
       </a>
-      <NotificationBar />
       <Trustbar />
       {/* TODO: I don't find this 'active' prop intuitive. 
       It's also not flexibel enough, the help & contact section is currently not highlighted for example.

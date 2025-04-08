@@ -10,10 +10,6 @@ import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
 import { createClient } from "~/lib/supabase/client";
 import { invariant } from "~/utils/invariant";
-import {
-  NOTIFICATIONBAR_HEIGHT,
-  TRUSTBAR_HEIGHT,
-} from "../(public)/_components/header/heights";
 import { LocationsMapContainer } from "../(public)/_components/locations-map";
 
 if (typeof window !== "undefined") {
@@ -37,13 +33,11 @@ const AppContext = createContext<{
   isMobileMenuOpen: boolean;
   setMobileMenuOpen: (open?: boolean) => void;
   scrollPosition: number;
-  windowWidth: number;
 }>({
   isMobileMenuOpen: false,
 
   setMobileMenuOpen: () => {},
   scrollPosition: 0,
-  windowWidth: 0,
 });
 
 export function useMobileMenuState() {
@@ -52,14 +46,12 @@ export function useMobileMenuState() {
 }
 
 // @TODO see if we can move these to CSS-variables
+export const TRUSTBAR_HEIGHT = 36;
 const STICKY_NAV_OFFSET = 16;
 
 export function useIsSticky() {
   const { scrollPosition } = useContext(AppContext);
-  return (
-    scrollPosition >
-    TRUSTBAR_HEIGHT + NOTIFICATIONBAR_HEIGHT - STICKY_NAV_OFFSET
-  );
+  return scrollPosition > TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
 }
 
 export function CommonProviders({ children }: { children?: React.ReactNode }) {
@@ -124,13 +116,9 @@ export function MarketingProviders({
   }
 
   const [scrollPosition, setScrollPosition] = useState(0);
-  const [windowWidth, setWindowWidth] = useState(0);
   const handleScroll = () => {
     const position = window.scrollY;
     setScrollPosition(position);
-  };
-  const handleResize = () => {
-    setWindowWidth(window.innerWidth);
   };
 
   const isClient = typeof window !== "undefined";
@@ -140,11 +128,9 @@ export function MarketingProviders({
     if (!isClient) return;
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
     };
   }, [isClient]);
 
@@ -162,7 +148,6 @@ export function MarketingProviders({
           return;
         },
         scrollPosition,
-        windowWidth,
       }}
     >
       <LocationsMapContainer>
