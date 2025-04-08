@@ -4,10 +4,16 @@ export async function POST(request: Request) {
 
     // Log the CSP violation report
     console.error("CSP Violation Report:", {
-      "document-uri": report["document-uri"],
-      "violated-directive": report["violated-directive"],
-      "blocked-uri": report["blocked-uri"],
-      "original-policy": report["original-policy"],
+      "document-uri": report.body?.documentURL,
+      "violated-directive": report.body?.effectiveDirective,
+      "blocked-uri": report.body?.blockedURL,
+      "original-policy": report.body?.originalPolicy,
+      "line-number": report.body?.lineNumber,
+      "column-number": report.body?.columnNumber,
+      "source-file": report.body?.sourceFile,
+      sample: report.body?.sample,
+      disposition: report.body?.disposition,
+      "user-agent": report.user_agent,
       timestamp: new Date().toISOString(),
     });
 
