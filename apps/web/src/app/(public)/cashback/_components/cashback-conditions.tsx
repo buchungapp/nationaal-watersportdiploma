@@ -26,8 +26,8 @@ export default function CashbackConditions() {
             Je moet een meerdaagse cursus of kamp boeken (minimaal 2 dagen)
           </li>
           <li>
-            Je boeking moet bij een erkende vaarlocatie zijn (zie
-            nwd.nl/vaarlocaties)
+            Je cursus voor 2025 moet bij een NWD-erkende vaarlocatie zijn
+            geboekt (zie nwd.nl/vaarlocaties)
           </li>
           <li>De cursus moet vóór 1 september 2025 plaatsvinden</li>
           <li>
@@ -38,6 +38,7 @@ export default function CashbackConditions() {
           <li>Je kunt de cashback niet combineren met andere kortingen</li>
           <li>
             De €50 wordt na je cursus overgemaakt (uiterlijk 31 oktober 2025)
+            door het Nationaal Watersportdiploma
           </li>
           <li>Bij annulering van je cursus vervalt het recht op cashback</li>
           <li>
