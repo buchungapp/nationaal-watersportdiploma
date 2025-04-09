@@ -2,7 +2,7 @@ import Image from "next/image";
 import Balancer from "react-wrap-balancer";
 import { TekstButton } from "~/app/(public)/_components/style/buttons";
 import { BoxedButton } from "../../_components/style/buttons";
-import featuredImage from "../opengraph-image.jpg";
+import featuredImage from "../opengraph-image.jpeg";
 
 export default function CashbackWelcome() {
   return (

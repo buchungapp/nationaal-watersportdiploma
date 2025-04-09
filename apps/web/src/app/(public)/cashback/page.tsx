@@ -25,6 +25,14 @@ export async function generateMetadata(
       description:
         "De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe landelijke standaard, en we helpen je graag om deze overstap te maken!",
       url: "/cashback",
+      images: [
+        {
+          url: "/cashback/opengraph-image.jpeg",
+          width: 1200,
+          height: 630,
+          alt: "€50 cashback bij inlevering van je CWO-diploma!",
+        },
+      ],
     },
   };
 }

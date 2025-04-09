@@ -49,7 +49,7 @@
     "marked": "^12.0.2",
     "micromark": "^4.0.0",
     "motion": "^12.0.8",
-    "next": "catalog:",
+    "next": "15.3.0-canary.45",
     "next-mdx-remote": "5.0.0",
     "next-safe-action": "7.0.0-next.47",
     "nuqs": "catalog:",
