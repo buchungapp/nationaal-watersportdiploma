@@ -88,6 +88,10 @@ const base = [
   // Forced colors mode
   "forced-colors:[--checkbox-check:HighlightText] forced-colors:[--checkbox-checked-bg:Highlight] forced-colors:group-data-disabled:[--checkbox-check:Highlight]",
   "dark:forced-colors:[--checkbox-check:HighlightText] dark:forced-colors:[--checkbox-checked-bg:Highlight] dark:forced-colors:group-data-disabled:[--checkbox-check:Highlight]",
+
+  // Invalid state
+  "group-data-invalid:not-group-data-checked:before:shadow-red-500/10 group-data-invalid:not-group-data-checked:after:shadow-red-500/10",
+  "group-data-invalid:not-group-data-checked:border-red-500 group-data-invalid:not-group-data-checked:group-data-hover:border-red-500 dark:group-data-invalid:not-group-data-checked:border-red-500 dark:group-data-invalid:not-group-data-checked:group-data-hover:border-red-500",
 ];
 
 const colors = {
@@ -136,20 +140,23 @@ type Color = keyof typeof colors;
 export function Checkbox({
   color = "dark/zinc",
   className,
+  invalid,
   ...props
 }: {
   color?: Color;
   className?: string;
+  invalid?: boolean;
 } & Omit<Headless.CheckboxProps, "className">) {
   return (
     <Headless.Checkbox
       data-slot="control"
+      {...(invalid ? { "data-invalid": "true" } : {})}
       className={clsx(className, "group inline-flex focus:outline-hidden")}
       {...props}
     >
       <span className={clsx([base, colors[color]])}>
         <svg
-          className="size-4 stroke-(--checkbox-check) opacity-0 group-data-checked:opacity-100 sm:h-3.5 sm:w-3.5"
+          className="opacity-0 group-data-checked:opacity-100 stroke-(--checkbox-check) sm:w-3.5 sm:h-3.5 size-4"
           viewBox="0 0 14 14"
           fill="none"
         >

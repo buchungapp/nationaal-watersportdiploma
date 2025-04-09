@@ -10,8 +10,8 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
+import { PDFViewer } from "~/app/(dashboard)/_components/pdf-viewer";
 import type { ExternalCertificate } from "./certificates";
-import { PDFViewer } from "./pdf-viewer";
 
 type Media = NonNullable<ExternalCertificate["media"]>;
 

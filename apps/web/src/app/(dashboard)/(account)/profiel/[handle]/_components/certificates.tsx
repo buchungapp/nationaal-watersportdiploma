@@ -18,6 +18,10 @@ import {
   GridListItemHeader,
   GridListItemTitle,
 } from "~/app/(dashboard)/_components/grid-list-v2";
+import {
+  PDFViewer,
+  PDFViewerText,
+} from "~/app/(dashboard)/_components/pdf-viewer";
 import { Code } from "~/app/(dashboard)/_components/text";
 import { DialogProvider } from "~/app/(dashboard)/_hooks/use-dialog";
 import {
@@ -35,7 +39,6 @@ import {
   RemoveCertificateButton,
 } from "./certificate/remove-certificate";
 import MediaViewer, { MediaViewerButton } from "./media-viewer";
-import { PDFViewer, PDFViewerText } from "./pdf-viewer";
 
 export type NWDCertificate = Awaited<
   ReturnType<typeof listCertificatesForPerson>

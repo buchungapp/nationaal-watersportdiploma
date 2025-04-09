@@ -16,11 +16,15 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
+import "~/app/(dashboard)/_components/pdf-viewer";
+import {
+  PDFViewer,
+  PDFViewerText,
+} from "~/app/(dashboard)/_components/pdf-viewer";
 import Spinner from "~/app/_components/spinner";
 import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
 import { MediaViewerButton } from "../media-viewer";
-import { PDFViewer, PDFViewerText } from "../pdf-viewer";
 import Media from "./media";
 import { Metadata } from "./metadata";
 

@@ -19,6 +19,17 @@ export default function Welcome() {
             watersportdiploma voor Nederland
             <span className="text-xs">→</span>
           </Link>
+          {/* <Link
+            href="/cashback"
+            className="w-fit rounded-full bg-white/15 px-6 py-2 text-sm text-white 
+            hover:bg-white/25 transition-colors duration-200 backdrop-blur-sm
+            flex items-center gap-2 mb-4 font-medium leading-tight mx-auto sm:mx-0
+            border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+          >
+            <MegaphoneIcon className="h-4 w-4" /> Ontvang €50 cashback bij
+            inlevering van je CWO-diploma
+            <span className="text-xs">→</span>
+          </Link> */}
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
             Welkom bij het Nationaal Watersportdiploma.
           </h1>

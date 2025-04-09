@@ -169,6 +169,13 @@
       "when": 1741012165206,
       "tag": "0023_next_silk_fever",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1742397703717,
+      "tag": "0024_secret_thing",
+      "breakpoints": false
     }
   ]
 }

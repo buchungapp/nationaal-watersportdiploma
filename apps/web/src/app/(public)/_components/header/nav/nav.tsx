@@ -64,7 +64,7 @@ export default function Nav({ items }: { items: NavItem[] }) {
           <div className="flex items-center pr-8 lg:hidden">
             <MobileNavButton />
           </div>
-          <StickyNavItemsContainer className="hidden pr-[48px] lg:flex lg:items-center lg:justify-end lg:gap-x-12">
+          <StickyNavItemsContainer className="hidden pr-[48px] lg:flex lg:items-center lg:justify-end lg:gap-x-10">
             {items.map((item) =>
               "component" in item ? (
                 <PopoverNavItem
