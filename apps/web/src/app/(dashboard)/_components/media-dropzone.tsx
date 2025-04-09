@@ -59,13 +59,23 @@ export function MediaDropzone({
           const dataTransfer = new DataTransfer();
           for (const file of acceptedFiles) {
             dataTransfer.items.add(file);
-            setPreview(URL.createObjectURL(file));
-            setType(file.type.includes("pdf") ? "pdf" : "image");
+
+            if (file.type.includes("pdf")) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                setPreview(e.target?.result as string);
+                setType("pdf");
+                setIsLoading(false);
+              };
+              reader.readAsDataURL(file);
+            } else {
+              setPreview(URL.createObjectURL(file));
+              setType("image");
+              setIsLoading(false);
+            }
           }
           hiddenInputRef.current.files = dataTransfer.files;
         }
-
-        setIsLoading(false);
       },
     });
 

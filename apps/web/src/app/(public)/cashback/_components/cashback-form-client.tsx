@@ -80,7 +80,7 @@ export function CashbackFormClient({
 
   if (isSuccess) {
     return (
-      <div className="bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl text-center">
+      <div className="bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl text-center min-h-[600px] flex flex-col items-center justify-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-4">Gelukt!</h2>
         <p className="text-slate-600 mb-8 max-w-prose mx-auto">
           We hebben je cashback aanvraag ontvangen. <br /> Als we vragen hebben
@@ -251,51 +251,53 @@ export function CashbackFormClient({
               ) : null}
             </Field>
 
-            <CheckboxField className="@xl/cashback-fields:col-span-4">
-              <Label>
-                Ik ga akkoord met de{" "}
-                <Link
-                  href="/cashback/voorwaarden"
-                  target="_blank"
-                  className="text-branding-orange"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  actievoorwaarden
-                </Link>
-                .
-              </Label>
-              <Checkbox
-                name="terms"
-                defaultChecked={
-                  state?.fields?.terms ? state?.fields?.terms === "on" : false
-                }
-                key={state?.fields?.terms as string} // Checkbox do not allow defaultValue so reset field by changing key
-                invalid={!!state?.errors?.terms}
-              />
-              <Description>
-                {state?.errors?.terms ? (
-                  <ErrorMessage>{state.errors.terms}</ErrorMessage>
+            <div className="@xl/cashback-fields:col-span-4 flex flex-col gap-y-2">
+              <CheckboxField>
+                <Label>
+                  Ik ga akkoord met de{" "}
+                  <Link
+                    href="/cashback/voorwaarden"
+                    target="_blank"
+                    className="text-branding-orange"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    actievoorwaarden
+                  </Link>
+                  .
+                </Label>
+                <Checkbox
+                  name="terms"
+                  defaultChecked={
+                    state?.fields?.terms ? state?.fields?.terms === "on" : false
+                  }
+                  key={state?.fields?.terms as string} // Checkbox do not allow defaultValue so reset field by changing key
+                  invalid={!!state?.errors?.terms}
+                />
+                <Description>
+                  {state?.errors?.terms ? (
+                    <ErrorMessage>{state.errors.terms}</ErrorMessage>
+                  ) : null}
+                </Description>
+              </CheckboxField>
+              <CheckboxField>
+                <Label>
+                  Ik schrijf me in voor de nieuwsbrief van het Nationaal
+                  Watersportdiploma.
+                </Label>
+                <Checkbox
+                  name="newsletter"
+                  defaultChecked={
+                    state?.fields?.newsletter
+                      ? state?.fields?.newsletter === "on"
+                      : false
+                  }
+                  key={state?.fields?.newsletter as string} // Checkbox do not allow defaultValue so reset field by changing key
+                />
+                {state?.errors?.newsletter ? (
+                  <ErrorMessage>{state.errors.newsletter}</ErrorMessage>
                 ) : null}
-              </Description>
-            </CheckboxField>
-            <CheckboxField className="@xl/cashback-fields:col-span-4">
-              <Label>
-                Ik schrijf me in voor de nieuwsbrief van het Nationaal
-                Watersportdiploma
-              </Label>
-              <Checkbox
-                name="newsletter"
-                defaultChecked={
-                  state?.fields?.newsletter
-                    ? state?.fields?.newsletter === "on"
-                    : true
-                }
-                key={state?.fields?.newsletter as string} // Checkbox do not allow defaultValue so reset field by changing key
-              />
-              {state?.errors?.newsletter ? (
-                <ErrorMessage>{state.errors.newsletter}</ErrorMessage>
-              ) : null}
-            </CheckboxField>
+              </CheckboxField>
+            </div>
           </div>
         </Fieldset>
       </div>

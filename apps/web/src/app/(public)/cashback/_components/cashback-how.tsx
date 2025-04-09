@@ -23,8 +23,7 @@ export default function CashbackHow() {
           <Step
             number={3}
             title="Ontvang €50 cashback!"
-            description="Nadat je cursus is afgerond, stort het Nationaal Watersportdiploma wij €50,- terug op je
-                rekening."
+            description="Nadat je cursus heeft plaatsgevonden, stort het Nationaal Watersportdiploma €50,- terug op je rekening."
           />
         </div>
       </div>
@@ -42,7 +41,7 @@ function Step({
       <span className="flex justify-center items-center bg-branding-orange mb-4 p-4 rounded-full size-15 aspect-square text-white text-2xl">
         {number}
       </span>
-      <h3 className="font-bold text-branding-light text-2xl">
+      <h3 className="font-bold text-branding-light text-2xl leading-tight">
         <Balancer>{title}</Balancer>
       </h3>
       <p className="text-slate-600 text-sm">
