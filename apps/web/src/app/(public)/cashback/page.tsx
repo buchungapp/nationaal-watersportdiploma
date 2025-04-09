@@ -13,15 +13,17 @@ export async function generateMetadata(
   const parentOpenGraph = (await parent).openGraph;
 
   return {
-    title: "Cashback",
-    description: "@TODO: update description",
+    title: "€50 cashback bij inlevering van je CWO-diploma!",
+    description:
+      "De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe landelijke standaard, en we helpen je graag om deze overstap te maken!",
     alternates: {
       canonical: "/cashback",
     },
     openGraph: {
       ...parentOpenGraph,
-      title: "Cashback",
-      description: "@TODO: update description",
+      title: "€50 cashback bij inlevering van je CWO-diploma!",
+      description:
+        "De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe landelijke standaard, en we helpen je graag om deze overstap te maken!",
       url: "/cashback",
     },
   };
