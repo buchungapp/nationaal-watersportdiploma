@@ -9,27 +9,13 @@ export default function Welcome() {
       <div className="grid justify-center gap-10 lg:justify-start">
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
-            href="/actueel/jh38UnmG-persbericht-samenwerking-watersportverbond-en-nationaal-watersportdiploma"
-            className="w-fit rounded-full bg-white/15 px-6 py-2 text-sm text-white 
-            hover:bg-white/25 transition-colors duration-200 backdrop-blur-sm
-            flex items-center gap-2 mb-4 font-medium leading-tight mx-auto sm:mx-0
-            border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
+            href="/cashback"
+            className="w-fit rounded-full px-6 py-3 text-sm sm:text-base text-branding-dark font-bold bg-white transition-all duration-200 transform hover:scale-105 flex items-center gap-2 mb-4 leading-tight mx-auto sm:mx-0 shadow-xl"
           >
-            <MegaphoneIcon className="h-4 w-4" /> Lees: Vernieuwd
-            watersportdiploma voor Nederland
+            <MegaphoneIcon className="h-4 w-4" />
+            Actie: €50 cashback op je zeilcursus!
             <span className="text-xs">→</span>
           </Link>
-          {/* <Link
-            href="/cashback"
-            className="w-fit rounded-full bg-white/15 px-6 py-2 text-sm text-white 
-            hover:bg-white/25 transition-colors duration-200 backdrop-blur-sm
-            flex items-center gap-2 mb-4 font-medium leading-tight mx-auto sm:mx-0
-            border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-          >
-            <MegaphoneIcon className="h-4 w-4" /> Ontvang €50 cashback bij
-            inlevering van je CWO-diploma
-            <span className="text-xs">→</span>
-          </Link> */}
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
             Welkom bij het Nationaal Watersportdiploma.
           </h1>

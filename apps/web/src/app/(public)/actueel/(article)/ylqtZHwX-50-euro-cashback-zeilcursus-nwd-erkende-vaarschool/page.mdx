@@ -1,0 +1,61 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  date: "2025-04-09T15:00:00Z",
+  category: "consument",
+  title:
+    "€50 cashback op je zeilcursus of zeilkamp bij een NWD-erkende vaarschool!",
+  description:
+    "Heb je in 2024 je CWO-diploma gehaald? Maak nu de overstap naar een NWD-erkende vaarschool en krijg €50 terug op je volgende watersportactiviteit!",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/ylqtZHwX-50-euro-cashback-zeilcursus-nwd-erkende-vaarschool",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/ylqtZHwX-50-euro-cashback-zeilcursus-nwd-erkende-vaarschool",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Goed nieuws voor alle watersportliefhebbers! Het Watersportverbond [kiest de NWD-diplomalijn als nieuwe standaard](/actueel/jh38UnmG-persbericht-samenwerking-watersportverbond-en-nationaal-watersportdiploma) voor watersportopleidingen in Nederland. Een belangrijke stap, waardoor nog meer watersporters gebruik kunnen maken van onze moderne lesmethode.
+
+Als Nationaal Watersportdiploma zijn we trots op deze erkenning. En nog trotser zijn we op onze NWD-erkende vaarlocaties, die nét dat stapje extra zetten. Zij bieden naast de moderne diplomalijn een totaalpakket aan kwaliteit en zekerheid.
+
+## Speciale cashback-actie
+
+Heb jij in 2024 een CWO-diploma of vorderingenstaat behaald? Kom dan veilig en met veel plezier varen bij een NWD-erkende vaarlocatie en ontvang €50 cashback op je meerdaagse zeilcursus of zeilkamp!
+
+## Waarom een NWD-erkende vaarlocatie?
+
+Bij onze NWD-erkende vaarlocaties krijg je meer dan alleen een moderne opleiding. Je kunt rekenen op:
+
+- Een sociaal veiligheidsbeleid met gedragscodes en vertrouwenspersonen
+- Verplichte her- en bijscholing voor al het personeel
+- Scherp toezicht op brand- en voedselveiligheid bij verblijfsaccommodaties
+- Volledige verzekeringsdekking, ook voor pakketreizen
+- Periodieke controles conform de geldende wetgeving
+
+## Hoe werkt het?
+
+1. Boek een zeilcursus of zeilkamp bij een NWD-erkende vaarlocatie
+2. Upload je CWO-diploma of vorderingenstaat uit 2024
+3. Ontvang €50 op je rekening na afloop van je cursus
+
+## Meer weten?
+
+- Bekijk alle actievoorwaarden op [www.nationaalwatersportdiploma.nl/cashback](/cashback)
+- Vind een NWD-erkende vaarlocatie bij jou in de buurt op [www.nationaalwatersportdiploma.nl/vaarlocaties](/vaarlocaties)
+
+Ben je een vaarlocatie en wil je meer weten over de mogelijkheden om je bij het Nationaal Watersportdiploma aan te sluiten? Kijk dan op [www.nationaalwatersportdiploma.nl/aansluiten](/aansluiten) voor meer informatie.
