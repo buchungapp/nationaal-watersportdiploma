@@ -22,7 +22,7 @@ export default function CashbackWelcome() {
         </p>
         <div className="flex gap-x-6 items-center">
           <BoxedButton
-            href="/actueel/#TODO"
+            href="/actueel/ylqtZHwX-50-euro-cashback-zeilcursus-nwd-erkende-vaarschool"
             className="bg-white text-branding-dark"
           >
             Lees de aankondiging

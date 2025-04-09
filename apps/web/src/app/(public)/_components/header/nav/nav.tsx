@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import clsx from "clsx";
 import MediaKit from "./media-kit";
 import MobileDisclosure from "./mobile/mobile-disclosure";
 import MobileItem from "./mobile/mobile-item";
@@ -82,13 +83,18 @@ export default function Nav({ items }: { items: NavItem[] }) {
                         <item.icon className="size-6 text-slate-600 group-hover:text-indigo-600" aria-hidden="true" />
                       </div> */}
                         <div className="flex-auto">
-                          <a
+                          <Link
                             href={item.href}
-                            className="block font-semibold text-slate-900"
+                            className={clsx(
+                              "block font-semibold",
+                              item.href === "/cashback"
+                                ? "text-branding-orange"
+                                : "text-slate-900",
+                            )}
                           >
                             {item.label}
                             <span className="absolute inset-0" />
-                          </a>
+                          </Link>
                           {item.description ? (
                             <p className="mt-1 font-normal text-slate-600">
                               {item.description}
@@ -103,7 +109,12 @@ export default function Nav({ items }: { items: NavItem[] }) {
                 <li key={item.label}>
                   <Link
                     href={item.href}
-                    className="group relative flex flex-nowrap gap-1 py-0.5 text-sm uppercase"
+                    className={clsx(
+                      "group relative flex flex-nowrap gap-1 py-0.5 text-sm uppercase",
+                      item.href === "/cashback"
+                        ? "text-branding-orange font-semibold"
+                        : "",
+                    )}
                   >
                     {item.label}
                     <ActiveHover active={item.href} />
