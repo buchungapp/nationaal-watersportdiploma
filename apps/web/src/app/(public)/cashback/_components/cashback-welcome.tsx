@@ -17,7 +17,7 @@ export default function CashbackWelcome() {
           <Balancer>
             De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe
             landelijke standaard, en we helpen je graag om deze overstap te
-            maken.
+            maken!
           </Balancer>
         </p>
         <div className="flex gap-x-6 items-center">
