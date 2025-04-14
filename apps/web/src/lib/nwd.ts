@@ -985,11 +985,13 @@ export const createCompletedCertificate = async (
       });
 
       // Start student curriculum
-      const { id: studentCurriculumId } = await Student.Curriculum.start({
-        curriculumId,
-        personId,
-        gearTypeId,
-      });
+      const { id: studentCurriculumId } = await Student.Curriculum.findOrEnroll(
+        {
+          curriculumId,
+          personId,
+          gearTypeId,
+        },
+      );
 
       // Start certificate
       const { id: certificateId } = await Student.Certificate.startCertificate({
@@ -1576,6 +1578,18 @@ export const retrieveStudentAllocationWithCurriculumForPerson = cache(
       }
 
       return result;
+    });
+  },
+);
+
+export const retrieveStudentCurriculumByPersonIdAndCurriculumId = cache(
+  async (personId: string, curriculumId: string, gearTypeId: string) => {
+    return makeRequest(async () => {
+      return await Student.Curriculum.find({
+        personId,
+        curriculumId,
+        gearTypeId,
+      });
     });
   },
 );
