@@ -22,25 +22,8 @@ interface Props {
   };
 }
 
-function filterAllocations(
-  allocations: Awaited<ReturnType<typeof listActiveCohortsForPerson>>,
-) {
-  const now = dayjs();
-
-  return allocations.filter((allocation) => {
-    if (!allocation.certificate?.visibleFrom) {
-      return false;
-    }
-
-    const certificateVisibleFrom = dayjs(allocation.certificate?.visibleFrom);
-    return now.isAfter(certificateVisibleFrom);
-  });
-}
-
 async function CohortProgressList({ person }: Props) {
-  const allocations = await listActiveCohortsForPerson(person.id).then(
-    filterAllocations,
-  );
+  const allocations = await listActiveCohortsForPerson(person.id);
 
   if (allocations.length === 0) {
     return null;
@@ -61,7 +44,7 @@ async function CohortProgressList({ person }: Props) {
             <GridListHeader
               href={`/profiel/${person.handle}/voortgang/${allocation.id}`}
             >
-              <div className="text-sm font-medium leading-6 text-slate-900">
+              <div className="font-medium text-slate-900 text-sm leading-6">
                 {allocation.studentCurriculum?.program.title ??
                   `${allocation.studentCurriculum?.course.title} ${allocation.studentCurriculum?.degree.title}`}
               </div>
