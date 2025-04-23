@@ -39,7 +39,7 @@ const nextConfig = {
         canvas: "./empty-module.ts",
       },
     },
-    useCache: true,
+    dynamicIO: true,
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
