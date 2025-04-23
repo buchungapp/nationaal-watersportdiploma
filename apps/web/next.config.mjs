@@ -34,12 +34,12 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "6mb",
     },
-    turbo: {
-      resolveAlias: {
-        canvas: "./empty-module.ts",
-      },
+    useCache: true,
+  },
+  turbo: {
+    resolveAlias: {
+      canvas: "./empty-module.ts",
     },
-    dynamicIO: true,
   },
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
