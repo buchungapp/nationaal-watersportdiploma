@@ -33,5 +33,6 @@ test("location crud", () =>
       logoSquare: null,
       socialMedia: [],
       googlePlaceId: null,
+      googlePlaceData: null,
     } satisfies Output);
   }));
