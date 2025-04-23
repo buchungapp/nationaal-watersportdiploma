@@ -2,40 +2,51 @@ import { schema as s } from "@nawadi/db";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { singleRow } from "../../utils/data-helpers.js";
-import { successfulCreateResponse, withZod } from "../../utils/zod.js";
+import {
+  successfulCreateResponse,
+  withZod,
+  wrapCommand,
+  wrapQuery,
+} from "../../utils/index.js";
 import { insertSchema, selectSchema } from "./competency.schema.js";
 
-export const create = withZod(
-  insertSchema.pick({
-    curriculumId: true,
-    moduleId: true,
-    competencyId: true,
-    isRequired: true,
-    requirement: true,
-  }),
-  successfulCreateResponse,
-  async (input) => {
-    const query = useQuery();
+export const create = wrapCommand(
+  "curriculum.competency.create",
+  withZod(
+    insertSchema.pick({
+      curriculumId: true,
+      moduleId: true,
+      competencyId: true,
+      isRequired: true,
+      requirement: true,
+    }),
+    successfulCreateResponse,
+    async (input) => {
+      const query = useQuery();
 
-    const result = await query
-      .insert(s.curriculumCompetency)
-      .values({
-        competencyId: input.competencyId,
-        curriculumId: input.curriculumId,
-        moduleId: input.moduleId,
-        isRequired: input.isRequired,
-        requirement: input.requirement,
-      })
-      .returning({ id: s.curriculumCompetency.id });
+      const result = await query
+        .insert(s.curriculumCompetency)
+        .values({
+          competencyId: input.competencyId,
+          curriculumId: input.curriculumId,
+          moduleId: input.moduleId,
+          isRequired: input.isRequired,
+          requirement: input.requirement,
+        })
+        .returning({ id: s.curriculumCompetency.id });
 
-    const insert = singleRow(result);
+      const insert = singleRow(result);
 
-    return insert;
-  },
+      return insert;
+    },
+  ),
 );
 
-export const list = withZod(z.void(), selectSchema.array(), async () => {
-  const query = useQuery();
+export const list = wrapQuery(
+  "curriculum.competency.list",
+  withZod(z.void(), selectSchema.array(), async () => {
+    const query = useQuery();
 
-  return await query.select().from(s.curriculumCompetency);
-});
+    return await query.select().from(s.curriculumCompetency);
+  }),
+);

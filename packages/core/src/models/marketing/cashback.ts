@@ -3,7 +3,12 @@ import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../main.js";
 import { singleRow } from "../../utils/data-helpers.js";
-import { successfulCreateResponse, withZod } from "../../utils/zod.js";
+import {
+  successfulCreateResponse,
+  withZod,
+  wrapCommand,
+  wrapQuery,
+} from "../../utils/index.js";
 
 const cashbackSchema = z.object({
   applicantFullName: z.string(),
@@ -16,10 +21,9 @@ const cashbackSchema = z.object({
   applicantIban: z.string(),
 });
 
-export const create = withZod(
-  cashbackSchema,
-  successfulCreateResponse,
-  async (input) => {
+export const create = wrapCommand(
+  "marketing.cashback.create",
+  withZod(cashbackSchema, successfulCreateResponse, async (input) => {
     const query = useQuery();
 
     const rows = await query.insert(s.cashback).values(input).returning({
@@ -27,34 +31,40 @@ export const create = withZod(
     });
 
     return singleRow(rows);
-  },
+  }),
 );
 
-export const byId = withZod(
-  z.object({
-    id: z.string().uuid(),
-  }),
-  cashbackSchema,
-  async (input) => {
+export const byId = wrapQuery(
+  "marketing.cashback.byId",
+  withZod(
+    z.object({
+      id: z.string().uuid(),
+    }),
+    cashbackSchema,
+    async (input) => {
+      const query = useQuery();
+
+      const cashback = await query
+        .select()
+        .from(s.cashback)
+        .where(eq(s.cashback.id, input.id))
+        .then(singleRow);
+
+      return cashback;
+    },
+  ),
+);
+
+export const listAll = wrapQuery(
+  "marketing.cashback.listAll",
+  withZod(z.void(), cashbackSchema.array(), async () => {
     const query = useQuery();
 
-    const cashback = await query
+    const cashbacks = await query
       .select()
       .from(s.cashback)
-      .where(eq(s.cashback.id, input.id))
-      .then(singleRow);
+      .orderBy(desc(s.cashback.createdAt));
 
-    return cashback;
-  },
+    return cashbacks;
+  }),
 );
-
-export const listAll = withZod(z.void(), cashbackSchema.array(), async () => {
-  const query = useQuery();
-
-  const cashbacks = await query
-    .select()
-    .from(s.cashback)
-    .orderBy(desc(s.cashback.createdAt));
-
-  return cashbacks;
-});

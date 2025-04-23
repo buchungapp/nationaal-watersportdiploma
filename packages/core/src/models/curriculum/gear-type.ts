@@ -10,33 +10,37 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
+  wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
 import { insertSchema, selectSchema } from "./gear-type.schema.js";
 
-export const create = withZod(
-  insertSchema.pick({
-    title: true,
-    handle: true,
-  }),
-  successfulCreateResponse,
-  async (item) =>
-    withTransaction(async (tx) => {
-      const rows = await tx
-        .insert(s.gearType)
-        .values({
-          title: item.title,
-          handle: item.handle,
-        })
-        .returning({ id: s.gearType.id });
-
-      const row = singleRow(rows);
-      return row;
+export const create = wrapCommand(
+  "curriculum.gear-type.create",
+  withZod(
+    insertSchema.pick({
+      title: true,
+      handle: true,
     }),
+    successfulCreateResponse,
+    async (item) =>
+      withTransaction(async (tx) => {
+        const rows = await tx
+          .insert(s.gearType)
+          .values({
+            title: item.title,
+            handle: item.handle,
+          })
+          .returning({ id: s.gearType.id });
+
+        const row = singleRow(rows);
+        return row;
+      }),
+  ),
 );
 
 export const list = wrapQuery(
-  "gear-type.list",
+  "curriculum.gear-type.list",
   withZod(
     z
       .object({
@@ -105,10 +109,9 @@ export const list = wrapQuery(
   ),
 );
 
-export const fromHandle = withZod(
-  handleSchema,
-  selectSchema.nullable(),
-  async (handle) => {
+export const fromHandle = wrapQuery(
+  "curriculum.gear-type.fromHandle",
+  withZod(handleSchema, selectSchema.nullable(), async (handle) => {
     const query = useQuery();
 
     const rows = await query
@@ -117,13 +120,12 @@ export const fromHandle = withZod(
       .where(eq(s.gearType.handle, handle));
 
     return possibleSingleRow(rows) ?? null;
-  },
+  }),
 );
 
-export const fromId = withZod(
-  uuidSchema,
-  selectSchema.nullable(),
-  async (id) => {
+export const fromId = wrapQuery(
+  "curriculum.gear-type.fromId",
+  withZod(uuidSchema, selectSchema.nullable(), async (id) => {
     const query = useQuery();
 
     const rows = await query
@@ -132,29 +134,32 @@ export const fromId = withZod(
       .where(eq(s.gearType.id, id));
 
     return possibleSingleRow(rows) ?? null;
-  },
+  }),
 );
 
-export const linkToCurriculum = withZod(
-  z.object({
-    gearTypeId: z.string(),
-    curriculumId: z.string(),
-  }),
-  z.void(),
-  async (input) => {
-    const query = useQuery();
+export const linkToCurriculum = wrapCommand(
+  "curriculum.gear-type.linkToCurriculum",
+  withZod(
+    z.object({
+      gearTypeId: z.string(),
+      curriculumId: z.string(),
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
 
-    await query
-      .insert(s.curriculumGearLink)
-      .values({
-        gearTypeId: input.gearTypeId,
-        curriculumId: input.curriculumId,
-      })
-      .onConflictDoNothing({
-        target: [
-          s.curriculumGearLink.gearTypeId,
-          s.curriculumGearLink.curriculumId,
-        ],
-      });
-  },
+      await query
+        .insert(s.curriculumGearLink)
+        .values({
+          gearTypeId: input.gearTypeId,
+          curriculumId: input.curriculumId,
+        })
+        .onConflictDoNothing({
+          target: [
+            s.curriculumGearLink.gearTypeId,
+            s.curriculumGearLink.curriculumId,
+          ],
+        });
+    },
+  ),
 );

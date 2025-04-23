@@ -19,6 +19,7 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
+  wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
 import {
@@ -28,10 +29,9 @@ import {
 } from "./index.js";
 import { insertSchema, outputSchema } from "./program.schema.js";
 
-export const create = withZod(
-  insertSchema,
-  successfulCreateResponse,
-  async (item) =>
+export const create = wrapCommand(
+  "course.program.create",
+  withZod(insertSchema, successfulCreateResponse, async (item) =>
     withTransaction(async (tx) => {
       const rows = await tx
         .insert(s.program)
@@ -47,10 +47,11 @@ export const create = withZod(
 
       return row;
     }),
+  ),
 );
 
 export const list = wrapQuery(
-  "program.list",
+  "course.program.list",
   withZod(
     z
       .object({
@@ -133,16 +134,14 @@ export const list = wrapQuery(
   ),
 );
 
-export const fromHandle = withZod(
-  handleSchema,
-  outputSchema.nullable(),
-  async (handle) => {
+export const fromHandle = wrapQuery(
+  "course.program.fromHandle",
+  withZod(handleSchema, outputSchema.nullable(), async (handle) => {
     const query = useQuery();
 
     const program = await query
       .select()
       .from(s.program)
-
       .where(eq(s.program.handle, handle))
       .then(possibleSingleRow);
 
@@ -168,19 +167,17 @@ export const fromHandle = withZod(
       degree,
       course,
     };
-  },
+  }),
 );
 
-export const fromId = withZod(
-  uuidSchema,
-  outputSchema.nullable(),
-  async (id) => {
+export const fromId = wrapQuery(
+  "course.program.fromId",
+  withZod(uuidSchema, outputSchema.nullable(), async (id) => {
     const query = useQuery();
 
     const program = await query
       .select()
       .from(s.program)
-
       .where(eq(s.program.id, id))
       .then(possibleSingleRow);
 
@@ -204,5 +201,5 @@ export const fromId = withZod(
       degree,
       course,
     };
-  },
+  }),
 );

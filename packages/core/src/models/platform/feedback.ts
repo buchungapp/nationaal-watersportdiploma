@@ -6,6 +6,7 @@ import {
   singleRow,
   successfulCreateResponse,
   withZod,
+  wrapCommand,
 } from "../../utils/index.js";
 
 const mapToPriorityNumber = (priority: string) => {
@@ -35,55 +36,58 @@ const baseFeedbackSchema = z.object({
   insertedBy: z.string().uuid(),
 });
 
-export const create = withZod(
-  z.discriminatedUnion("type", [
-    baseFeedbackSchema.extend({
-      type: z.literal("bug"),
-    }),
-    baseFeedbackSchema.extend({
-      type: z.literal("product-feedback"),
-    }),
-    baseFeedbackSchema.extend({
-      type: z.literal("question"),
-    }),
-    baseFeedbackSchema.extend({
-      type: z.literal("other"),
-    }),
-    baseFeedbackSchema.extend({
-      type: z.literal("program-feedback"),
-      programId: z.string().uuid(),
-      moduleId: z.string().uuid().optional(),
-      competencyId: z.string().uuid().optional(),
-    }),
-  ]),
-  successfulCreateResponse,
-  async (input) => {
-    const query = useQuery();
+export const create = wrapCommand(
+  "platform.feedback.create",
+  withZod(
+    z.discriminatedUnion("type", [
+      baseFeedbackSchema.extend({
+        type: z.literal("bug"),
+      }),
+      baseFeedbackSchema.extend({
+        type: z.literal("product-feedback"),
+      }),
+      baseFeedbackSchema.extend({
+        type: z.literal("question"),
+      }),
+      baseFeedbackSchema.extend({
+        type: z.literal("other"),
+      }),
+      baseFeedbackSchema.extend({
+        type: z.literal("program-feedback"),
+        programId: z.string().uuid(),
+        moduleId: z.string().uuid().optional(),
+        competencyId: z.string().uuid().optional(),
+      }),
+    ]),
+    successfulCreateResponse,
+    async (input) => {
+      const query = useQuery();
 
-    const insert = await query
-      .insert(s.feedback)
-      .values({
-        type: input.type,
-        message: input.message,
-        path: input.path,
-        query: sql`(((${JSON.stringify(input.query)})::jsonb)#>> '{}')::jsonb`,
-        headers: sql`(((${JSON.stringify(input.headers)})::jsonb)#>> '{}')::jsonb`,
-        base: sql`(((${JSON.stringify(input.base)})::jsonb)#>> '{}')::jsonb`,
-        metadata: sql`(((${JSON.stringify(
-          input.type === "program-feedback"
-            ? {
-                programId: input.programId,
-                moduleId: input.moduleId,
-                competencyId: input.competencyId,
-              }
-            : {},
-        )})::jsonb)#>> '{}')::jsonb`,
-        priority: mapToPriorityNumber(input.priority),
-        insertedBy: input.insertedBy,
-      })
-      .returning({ id: s.feedback.id })
-      .then(singleRow);
+      const insert = await query
+        .insert(s.feedback)
+        .values({
+          type: input.type,
+          message: input.message,
+          path: input.path,
+          query: sql`(((${JSON.stringify(input.query)})::jsonb)#>> '{}')::jsonb`,
+          headers: sql`(((${JSON.stringify(input.headers)})::jsonb)#>> '{}')::jsonb`,
+          base: sql`(((${JSON.stringify(input.base)})::jsonb)#>> '{}')::jsonb`,
+          metadata: sql`(((${JSON.stringify(
+            input.type === "program-feedback"
+              ? {
+                  programId: input.programId,
+                  moduleId: input.moduleId,
+                  competencyId: input.competencyId,
+                }
+              : {},
+          )})::jsonb)#>> '{}')::jsonb`,
+          priority: mapToPriorityNumber(input.priority),
+          insertedBy: input.insertedBy,
+        })
+        .returning({ id: s.feedback.id })
+        .then(singleRow);
 
-    return insert;
-  },
+      return insert;
+    },
+  ),
 );

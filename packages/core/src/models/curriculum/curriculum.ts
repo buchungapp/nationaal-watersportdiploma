@@ -16,7 +16,7 @@ import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import { findItem, singleRow } from "../../utils/data-helpers.js";
 import dayjs from "../../utils/dayjs.js";
-import { wrapQuery } from "../../utils/index.js";
+import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
   singleOrArray,
   successfulCreateResponse,
@@ -29,35 +29,38 @@ import { insertSchema, outputSchema } from "./curriculum.schema.js";
 
 export * as Curriculum from "./curriculum.js";
 
-export const create = withZod(
-  insertSchema.pick({
-    programId: true,
-    revision: true,
-    startedAt: true,
-  }),
-  successfulCreateResponse,
-  async (input) => {
-    const query = useQuery();
+export const create = wrapCommand(
+  "curriculum.curriculum.create",
+  withZod(
+    insertSchema.pick({
+      programId: true,
+      revision: true,
+      startedAt: true,
+    }),
+    successfulCreateResponse,
+    async (input) => {
+      const query = useQuery();
 
-    const [insert] = await query
-      .insert(s.curriculum)
-      .values({
-        programId: input.programId,
-        revision: input.revision,
-        startedAt: input.startedAt,
-      })
-      .returning({ id: s.curriculum.id });
+      const [insert] = await query
+        .insert(s.curriculum)
+        .values({
+          programId: input.programId,
+          revision: input.revision,
+          startedAt: input.startedAt,
+        })
+        .returning({ id: s.curriculum.id });
 
-    if (!insert) {
-      throw new Error("Failed to insert curriculum");
-    }
+      if (!insert) {
+        throw new Error("Failed to insert curriculum");
+      }
 
-    return insert;
-  },
+      return insert;
+    },
+  ),
 );
 
 export const list = wrapQuery(
-  "curriculum.list",
+  "curriculum.curriculum.list",
   withZod(
     z
       .object({
@@ -281,239 +284,250 @@ export const list = wrapQuery(
   ),
 );
 
-export const getById = withZod(
-  z.object({
-    id: uuidSchema,
-  }),
-  outputSchema.nullable(),
-  async ({ id }) => {
-    const query = useQuery();
+export const getById = wrapQuery(
+  "curriculum.curriculum.getById",
+  withZod(
+    z.object({
+      id: uuidSchema,
+    }),
+    outputSchema.nullable(),
+    async ({ id }) => {
+      const query = useQuery();
 
-    // Initialize the curricula query to fetch curriculum details along with joined module and competency data.
-    const curriculaQuery = query
-      .select()
-      .from(s.curriculum)
-      .leftJoin(
-        s.curriculumModule,
-        eq(s.curriculum.id, s.curriculumModule.curriculumId),
-      )
-      .leftJoin(
-        s.curriculumCompetency,
-        and(
-          eq(s.curriculum.id, s.curriculumCompetency.curriculumId),
-          eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
-        ),
-      )
-      .where(eq(s.curriculum.id, id));
-
-    // Fetch curricula, modules, and competencies data concurrently for efficiency.
-    const [curricula, modules, competencies] = await Promise.all([
-      curriculaQuery,
-      Module.list(),
-      Course.Competency.list(),
-    ]);
-
-    const normalizedCurriculum = curricula.reduce<
-      | ((typeof curricula)[number]["curriculum"] & {
-          modules: (NonNullable<
-            (typeof curricula)[number]["curriculum_module"]
-          > & {
-            competencies: NonNullable<
-              (typeof curricula)[number]["curriculum_competency"]
-            >[];
-          })[];
-        })
-      | null
-    >((acc, { curriculum, curriculum_competency, curriculum_module }) => {
-      let curriculaAcc = acc;
-      if (!curriculaAcc) {
-        curriculaAcc = { ...curriculum, modules: [] };
-      }
-
-      if (curriculum_module) {
-        let module = curriculaAcc.modules.find(
-          (m) => m.moduleId === curriculum_module.moduleId,
-        );
-
-        if (!module) {
-          module = { ...curriculum_module, competencies: [] };
-          curriculaAcc.modules.push(module);
-        }
-
-        if (curriculum_competency) {
-          module.competencies.push(curriculum_competency);
-        }
-      }
-
-      return curriculaAcc;
-    }, null);
-
-    if (!normalizedCurriculum) {
-      return null;
-    }
-
-    // Map normalized data to the final structure with date formatting and module aggregation.
-    const mapped = {
-      ...normalizedCurriculum,
-      startedAt: normalizedCurriculum.startedAt
-        ? dayjs(normalizedCurriculum.startedAt).toISOString()
-        : null,
-      modules: normalizedCurriculum.modules
-        .map((curriculumModule) => {
-          const module = findItem({
-            items: modules,
-            predicate(item) {
-              return item.id === curriculumModule.moduleId;
-            },
-            enforce: true,
-          });
-
-          const competenciesFormatted = curriculumModule.competencies
-            .map(({ isRequired, requirement, competencyId, id }) => {
-              const competency = findItem({
-                items: competencies,
-                predicate: (item) => item.id === competencyId,
-                enforce: true,
-              });
-
-              return {
-                ...competency,
-                id,
-                competencyId,
-                isRequired,
-                requirement,
-              };
-            })
-            .sort((a, b) => a.weight - b.weight);
-
-          return {
-            ...module,
-            competencies: competenciesFormatted,
-            isRequired: competenciesFormatted.every((c) => c.isRequired),
-            // As for now, a module can only have one type of competencies
-            type: competenciesFormatted[0]?.type || null,
-          };
-        })
-        .sort((a, b) => a.weight - b.weight),
-    };
-
-    return mapped;
-  },
-);
-
-export const countStartedStudents = withZod(
-  z.object({
-    curriculumId: uuidSchema,
-  }),
-  z.number(),
-  async ({ curriculumId }) => {
-    const query = useQuery();
-
-    const count = await query
-      .select({ count: countDistinct(s.studentCurriculum.personId) })
-      .from(s.studentCurriculum)
-      .where(eq(s.studentCurriculum.curriculumId, curriculumId))
-      .then((rows) => rows[0]?.count ?? 0);
-
-    return count;
-  },
-);
-
-export const copy = withZod(
-  z.object({
-    curriculumId: uuidSchema,
-    revision: z.string(),
-  }),
-  successfulCreateResponse,
-  async ({ curriculumId, revision }) => {
-    return withTransaction(async (tx) => {
-      const curriculum = await tx
-        .select({
-          id: s.curriculum.id,
-          programId: s.curriculum.programId,
-        })
+      // Initialize the curricula query to fetch curriculum details along with joined module and competency data.
+      const curriculaQuery = query
+        .select()
         .from(s.curriculum)
+        .leftJoin(
+          s.curriculumModule,
+          eq(s.curriculum.id, s.curriculumModule.curriculumId),
+        )
+        .leftJoin(
+          s.curriculumCompetency,
+          and(
+            eq(s.curriculum.id, s.curriculumCompetency.curriculumId),
+            eq(s.curriculumModule.moduleId, s.curriculumCompetency.moduleId),
+          ),
+        )
+        .where(eq(s.curriculum.id, id));
 
-        .where(eq(s.curriculum.id, curriculumId))
-        .then(singleRow);
-
-      // Insert a new curriculum with the same program ID.
-      const { id: newCurriculum } = await tx
-        .insert(s.curriculum)
-        .values({
-          programId: curriculum.programId,
-          revision,
-          startedAt: null,
-        })
-        .returning({ id: s.curriculum.id })
-        .then(singleRow);
-
-      // Copy modules, competencies and gear types from the old curriculum to the new one.
-      const [oldModules, oldCompetencies, oldGearTypes] = await Promise.all([
-        tx
-          .select()
-          .from(s.curriculumModule)
-          .where(eq(s.curriculumModule.curriculumId, curriculumId)),
-        tx
-          .select()
-          .from(s.curriculumCompetency)
-          .where(eq(s.curriculumCompetency.curriculumId, curriculumId)),
-        tx
-          .select()
-          .from(s.curriculumGearLink)
-          .where(eq(s.curriculumGearLink.curriculumId, curriculumId)),
+      // Fetch curricula, modules, and competencies data concurrently for efficiency.
+      const [curricula, modules, competencies] = await Promise.all([
+        curriculaQuery,
+        Module.list(),
+        Course.Competency.list(),
       ]);
 
-      // Insert modules
-      await tx.insert(s.curriculumModule).values(
-        oldModules.map((module) => ({
-          curriculumId: newCurriculum,
-          moduleId: module.moduleId,
-        })),
-      );
+      const normalizedCurriculum = curricula.reduce<
+        | ((typeof curricula)[number]["curriculum"] & {
+            modules: (NonNullable<
+              (typeof curricula)[number]["curriculum_module"]
+            > & {
+              competencies: NonNullable<
+                (typeof curricula)[number]["curriculum_competency"]
+              >[];
+            })[];
+          })
+        | null
+      >((acc, { curriculum, curriculum_competency, curriculum_module }) => {
+        let curriculaAcc = acc;
+        if (!curriculaAcc) {
+          curriculaAcc = { ...curriculum, modules: [] };
+        }
 
-      // Insert competencies
-      await tx.insert(s.curriculumCompetency).values(
-        oldCompetencies.map((competency) => ({
-          curriculumId: newCurriculum,
-          moduleId: competency.moduleId,
-          competencyId: competency.competencyId,
-          isRequired: competency.isRequired,
-          requirement: competency.requirement,
-        })),
-      );
+        if (curriculum_module) {
+          let module = curriculaAcc.modules.find(
+            (m) => m.moduleId === curriculum_module.moduleId,
+          );
 
-      // Insert gear types
-      await tx.insert(s.curriculumGearLink).values(
-        oldGearTypes.map((gearType) => ({
-          curriculumId: newCurriculum,
-          gearTypeId: gearType.gearTypeId,
-        })),
-      );
+          if (!module) {
+            module = { ...curriculum_module, competencies: [] };
+            curriculaAcc.modules.push(module);
+          }
 
-      return { id: newCurriculum };
-    });
-  },
+          if (curriculum_competency) {
+            module.competencies.push(curriculum_competency);
+          }
+        }
+
+        return curriculaAcc;
+      }, null);
+
+      if (!normalizedCurriculum) {
+        return null;
+      }
+
+      // Map normalized data to the final structure with date formatting and module aggregation.
+      const mapped = {
+        ...normalizedCurriculum,
+        startedAt: normalizedCurriculum.startedAt
+          ? dayjs(normalizedCurriculum.startedAt).toISOString()
+          : null,
+        modules: normalizedCurriculum.modules
+          .map((curriculumModule) => {
+            const module = findItem({
+              items: modules,
+              predicate(item) {
+                return item.id === curriculumModule.moduleId;
+              },
+              enforce: true,
+            });
+
+            const competenciesFormatted = curriculumModule.competencies
+              .map(({ isRequired, requirement, competencyId, id }) => {
+                const competency = findItem({
+                  items: competencies,
+                  predicate: (item) => item.id === competencyId,
+                  enforce: true,
+                });
+
+                return {
+                  ...competency,
+                  id,
+                  competencyId,
+                  isRequired,
+                  requirement,
+                };
+              })
+              .sort((a, b) => a.weight - b.weight);
+
+            return {
+              ...module,
+              competencies: competenciesFormatted,
+              isRequired: competenciesFormatted.every((c) => c.isRequired),
+              // As for now, a module can only have one type of competencies
+              type: competenciesFormatted[0]?.type || null,
+            };
+          })
+          .sort((a, b) => a.weight - b.weight),
+      };
+
+      return mapped;
+    },
+  ),
 );
 
-export const linkModule = withZod(
-  z.object({
-    curriculumId: uuidSchema,
-    moduleId: uuidSchema,
-  }),
-  async ({ curriculumId, moduleId }) => {
-    const query = useQuery();
-    await query
-      .insert(s.curriculumModule)
-      .values({
-        moduleId,
-        curriculumId,
-      })
-      .onConflictDoNothing();
+export const countStartedStudents = wrapQuery(
+  "curriculum.curriculum.countStartedStudents",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+    }),
+    z.number(),
+    async ({ curriculumId }) => {
+      const query = useQuery();
 
-    return {
-      curriculumId,
-      moduleId,
-    };
-  },
+      const count = await query
+        .select({ count: countDistinct(s.studentCurriculum.personId) })
+        .from(s.studentCurriculum)
+        .where(eq(s.studentCurriculum.curriculumId, curriculumId))
+        .then((rows) => rows[0]?.count ?? 0);
+
+      return count;
+    },
+  ),
+);
+
+export const copy = wrapCommand(
+  "curriculum.curriculum.copy",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+      revision: z.string(),
+    }),
+    successfulCreateResponse,
+    async ({ curriculumId, revision }) => {
+      return withTransaction(async (tx) => {
+        const curriculum = await tx
+          .select({
+            id: s.curriculum.id,
+            programId: s.curriculum.programId,
+          })
+          .from(s.curriculum)
+          .where(eq(s.curriculum.id, curriculumId))
+          .then(singleRow);
+
+        // Insert a new curriculum with the same program ID.
+        const { id: newCurriculum } = await tx
+          .insert(s.curriculum)
+          .values({
+            programId: curriculum.programId,
+            revision,
+            startedAt: null,
+          })
+          .returning({ id: s.curriculum.id })
+          .then(singleRow);
+
+        // Copy modules, competencies and gear types from the old curriculum to the new one.
+        const [oldModules, oldCompetencies, oldGearTypes] = await Promise.all([
+          tx
+            .select()
+            .from(s.curriculumModule)
+            .where(eq(s.curriculumModule.curriculumId, curriculumId)),
+          tx
+            .select()
+            .from(s.curriculumCompetency)
+            .where(eq(s.curriculumCompetency.curriculumId, curriculumId)),
+          tx
+            .select()
+            .from(s.curriculumGearLink)
+            .where(eq(s.curriculumGearLink.curriculumId, curriculumId)),
+        ]);
+
+        // Insert modules
+        await tx.insert(s.curriculumModule).values(
+          oldModules.map((module) => ({
+            curriculumId: newCurriculum,
+            moduleId: module.moduleId,
+          })),
+        );
+
+        // Insert competencies
+        await tx.insert(s.curriculumCompetency).values(
+          oldCompetencies.map((competency) => ({
+            curriculumId: newCurriculum,
+            moduleId: competency.moduleId,
+            competencyId: competency.competencyId,
+            isRequired: competency.isRequired,
+            requirement: competency.requirement,
+          })),
+        );
+
+        // Insert gear types
+        await tx.insert(s.curriculumGearLink).values(
+          oldGearTypes.map((gearType) => ({
+            curriculumId: newCurriculum,
+            gearTypeId: gearType.gearTypeId,
+          })),
+        );
+
+        return { id: newCurriculum };
+      });
+    },
+  ),
+);
+
+export const linkModule = wrapCommand(
+  "curriculum.curriculum.linkModule",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+      moduleId: uuidSchema,
+    }),
+    async ({ curriculumId, moduleId }) => {
+      const query = useQuery();
+      await query
+        .insert(s.curriculumModule)
+        .values({
+          moduleId,
+          curriculumId,
+        })
+        .onConflictDoNothing();
+
+      return {
+        curriculumId,
+        moduleId,
+      };
+    },
+  ),
 );

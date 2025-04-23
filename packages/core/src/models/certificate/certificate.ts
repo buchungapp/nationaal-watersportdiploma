@@ -28,27 +28,51 @@ import {
   singleRow,
   uuidSchema,
   withZod,
+  wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
 import { Course, Curriculum, Location, User } from "../index.js";
 
-export const find = withZod(
-  z.object({
-    handle: z.string(),
-    issuedAt: z.string().datetime(),
-  }),
-  async (input) => {
+export const find = wrapQuery(
+  "certificate.find",
+  withZod(
+    z.object({
+      handle: z.string(),
+      issuedAt: z.string().datetime(),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      const resultQuery = query
+        .select()
+        .from(s.certificate)
+        .where(
+          and(
+            eq(s.certificate.handle, input.handle),
+            isNull(s.certificate.deletedAt),
+          ),
+        );
+
+      const [result] = await resultQuery;
+
+      if (!result) {
+        throw new Error("Failed to find certificate");
+      }
+
+      return result;
+    },
+  ),
+);
+
+export const byId = wrapQuery(
+  "certificate.byId",
+  withZod(uuidSchema, async (input) => {
     const query = useQuery();
 
     const resultQuery = query
       .select()
       .from(s.certificate)
-      .where(
-        and(
-          eq(s.certificate.handle, input.handle),
-          isNull(s.certificate.deletedAt),
-        ),
-      );
+      .where(and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)));
 
     const [result] = await resultQuery;
 
@@ -56,80 +80,66 @@ export const find = withZod(
       throw new Error("Failed to find certificate");
     }
 
-    return result;
-  },
-);
+    const studentCurriculumQuery = query
+      .select()
+      .from(s.studentCurriculum)
+      .where(eq(s.studentCurriculum.id, result.studentCurriculumId))
+      .then(singleRow);
 
-export const byId = withZod(uuidSchema, async (input) => {
-  const query = useQuery();
-
-  const resultQuery = query
-    .select()
-    .from(s.certificate)
-    .where(and(eq(s.certificate.id, input), isNull(s.certificate.deletedAt)));
-
-  const [result] = await resultQuery;
-
-  if (!result) {
-    throw new Error("Failed to find certificate");
-  }
-
-  const studentCurriculumQuery = query
-    .select()
-    .from(s.studentCurriculum)
-    .where(eq(s.studentCurriculum.id, result.studentCurriculumId))
-    .then(singleRow);
-
-  const completedCompetencyQuery = query
-    .select()
-    .from(s.studentCompletedCompetency)
-    .innerJoin(
-      s.curriculumCompetency,
-      eq(s.studentCompletedCompetency.competencyId, s.curriculumCompetency.id),
-    )
-    .where(
-      and(
+    const completedCompetencyQuery = query
+      .select()
+      .from(s.studentCompletedCompetency)
+      .innerJoin(
+        s.curriculumCompetency,
         eq(
-          s.studentCompletedCompetency.studentCurriculumId,
-          result.studentCurriculumId,
+          s.studentCompletedCompetency.competencyId,
+          s.curriculumCompetency.id,
         ),
-        eq(s.studentCompletedCompetency.certificateId, result.id),
-      ),
-    );
+      )
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            result.studentCurriculumId,
+          ),
+          eq(s.studentCompletedCompetency.certificateId, result.id),
+        ),
+      );
 
-  const [location, studentCurriculum, completedCompetencies] =
-    await Promise.all([
-      Location.fromId(result.locationId),
-      studentCurriculumQuery,
-      completedCompetencyQuery,
+    const [location, studentCurriculum, completedCompetencies] =
+      await Promise.all([
+        Location.fromId(result.locationId),
+        studentCurriculumQuery,
+        completedCompetencyQuery,
+      ]);
+
+    assert(location);
+
+    const [student, gearType, [curriculum]] = await Promise.all([
+      User.Person.byIdOrHandle({ id: studentCurriculum.personId }),
+      Curriculum.GearType.fromId(studentCurriculum.gearTypeId),
+      Curriculum.list({ filter: { id: studentCurriculum.curriculumId } }),
     ]);
 
-  assert(location);
+    assert(student);
+    assert(gearType);
+    assert(curriculum);
 
-  const [student, gearType, [curriculum]] = await Promise.all([
-    User.Person.byIdOrHandle({ id: studentCurriculum.personId }),
-    Curriculum.GearType.fromId(studentCurriculum.gearTypeId),
-    Curriculum.list({ filter: { id: studentCurriculum.curriculumId } }),
-  ]);
+    const program = await Course.Program.fromId(curriculum.programId);
 
-  assert(student);
-  assert(gearType);
-  assert(curriculum);
+    assert(program);
 
-  const program = await Course.Program.fromId(curriculum.programId);
-
-  assert(program);
-
-  return {
-    ...result,
-    completedCompetencies,
-    location,
-    student,
-    gearType,
-    curriculum,
-    program,
-  };
-});
+    return {
+      ...result,
+      completedCompetencies,
+      location,
+      student,
+      gearType,
+      curriculum,
+      program,
+    };
+  }),
+);
 
 export const list = wrapQuery(
   "certificate.list",
@@ -355,142 +365,159 @@ export const list = wrapQuery(
   ),
 );
 
-export const assignToCohortAllocation = withZod(
-  z.object({
-    certificateId: uuidSchema,
-    cohortAllocationId: uuidSchema.nullable(),
-  }),
-  async ({ certificateId, cohortAllocationId }) => {
-    const query = useQuery();
+export const assignToCohortAllocation = wrapCommand(
+  "certificate.assignToCohortAllocation",
+  withZod(
+    z.object({
+      certificateId: uuidSchema,
+      cohortAllocationId: uuidSchema.nullable(),
+    }),
+    async ({ certificateId, cohortAllocationId }) => {
+      const query = useQuery();
 
-    await query
-      .update(s.certificate)
-      .set({ cohortAllocationId: cohortAllocationId })
-      .where(
-        and(
-          eq(s.certificate.id, certificateId),
-          isNull(s.certificate.deletedAt),
-        ),
-      );
-  },
-);
-
-export const withdraw = withZod(uuidSchema, async (input) => {
-  return withTransaction(async (tx) => {
-    const certificate = await tx
-      .select()
-      .from(s.certificate)
-      .where(
-        and(
-          eq(s.certificate.id, input),
-          isNull(s.certificate.deletedAt),
-          // Must be maximum 72 hours after the certificate was issued
-          gte(s.certificate.createdAt, dayjs().subtract(72, "h").toISOString()),
-        ),
-      )
-      .then(singleRow);
-
-    await Promise.all([
-      tx
+      await query
         .update(s.certificate)
-        .set({ deletedAt: new Date().toISOString() })
+        .set({ cohortAllocationId: cohortAllocationId })
         .where(
           and(
-            eq(s.certificate.id, certificate.id),
+            eq(s.certificate.id, certificateId),
             isNull(s.certificate.deletedAt),
           ),
-        ),
-      tx
-        .delete(s.studentCompletedCompetency)
-        .where(eq(s.studentCompletedCompetency.certificateId, certificate.id)),
-    ]);
-  });
-});
-
-export const storeHandles = withZod(
-  z.object({
-    fileName: z.string().optional(),
-    sort: z
-      .union([z.literal("student"), z.literal("instructor")])
-      .default("student"),
-    handles: z.array(z.string().length(10)).min(1),
-  }),
-  async ({ fileName, sort, handles }) => {
-    const redis = useRedisClient();
-    const uuid = crypto.randomUUID();
-    const key = `c-export:${uuid}`;
-    const expirationTime = 60 * 60 * 24; // 24 hours in seconds
-
-    const pipeline = redis.pipeline();
-
-    pipeline.sadd(`${key}:items`, handles);
-    pipeline.expire(`${key}:items`, expirationTime);
-
-    pipeline.hset(`${key}:settings`, {
-      fileName: fileName,
-      sort,
-    });
-    pipeline.expire(`${key}:settings`, expirationTime);
-
-    await pipeline.exec();
-
-    return uuid;
-  },
+        );
+    },
+  ),
 );
 
-export const retrieveHandles = withZod(
-  z.object({
-    uuid: z.string().uuid(),
-  }),
-  z.object({
-    settings: z.object({
-      fileName: z.string().optional(),
-      sort: z.union([z.literal("student"), z.literal("instructor")]),
-    }),
-    handles: z.array(z.string().length(10)),
-  }),
-  async ({ uuid }) => {
-    const redis = useRedisClient();
-    const key = `c-export:${uuid}`;
-    const results = await redis
-      .pipeline()
-      .hgetall(`${key}:settings`)
-      .smembers(`${key}:items`)
-      .exec();
+export const withdraw = wrapCommand(
+  "certificate.withdraw",
+  withZod(uuidSchema, async (input) => {
+    return withTransaction(async (tx) => {
+      const certificate = await tx
+        .select()
+        .from(s.certificate)
+        .where(
+          and(
+            eq(s.certificate.id, input),
+            isNull(s.certificate.deletedAt),
+            // Must be maximum 72 hours after the certificate was issued
+            gte(
+              s.certificate.createdAt,
+              dayjs().subtract(72, "h").toISOString(),
+            ),
+          ),
+        )
+        .then(singleRow);
 
-    if (!results || results.length !== 2) {
-      throw new Error("Failed to execute Redis pipeline");
-    }
-
-    const [settingsResult, handlesResult] = results;
-
-    if (!settingsResult || !handlesResult) {
-      throw new Error("Unexpected Redis pipeline result structure");
-    }
-
-    const [settingsError, settings] = settingsResult;
-    const [handlesError, handles] = handlesResult;
-
-    if (settingsError || handlesError) {
-      throw new Error("Redis operation failed");
-    }
-
-    if (!Array.isArray(handles)) {
-      throw new Error("Invalid handles data");
-    }
-
-    if (handles.length === 0) {
-      throw new Error("Export not found");
-    }
-
-    const expectedSettingsSchema = z.object({
-      fileName: z.string().optional(),
-      sort: z.union([z.literal("student"), z.literal("instructor")]),
+      await Promise.all([
+        tx
+          .update(s.certificate)
+          .set({ deletedAt: new Date().toISOString() })
+          .where(
+            and(
+              eq(s.certificate.id, certificate.id),
+              isNull(s.certificate.deletedAt),
+            ),
+          ),
+        tx
+          .delete(s.studentCompletedCompetency)
+          .where(
+            eq(s.studentCompletedCompetency.certificateId, certificate.id),
+          ),
+      ]);
     });
+  }),
+);
 
-    return {
-      settings: expectedSettingsSchema.parse(settings),
-      handles: handles as string[],
-    };
-  },
+export const storeHandles = wrapCommand(
+  "certificate.storeHandles",
+  withZod(
+    z.object({
+      fileName: z.string().optional(),
+      sort: z
+        .union([z.literal("student"), z.literal("instructor")])
+        .default("student"),
+      handles: z.array(z.string().length(10)).min(1),
+    }),
+    async ({ fileName, sort, handles }) => {
+      const redis = useRedisClient();
+      const uuid = crypto.randomUUID();
+      const key = `c-export:${uuid}`;
+      const expirationTime = 60 * 60 * 24; // 24 hours in seconds
+
+      const pipeline = redis.pipeline();
+
+      pipeline.sadd(`${key}:items`, handles);
+      pipeline.expire(`${key}:items`, expirationTime);
+
+      pipeline.hset(`${key}:settings`, {
+        fileName: fileName,
+        sort,
+      });
+      pipeline.expire(`${key}:settings`, expirationTime);
+
+      await pipeline.exec();
+
+      return uuid;
+    },
+  ),
+);
+
+export const retrieveHandles = wrapQuery(
+  "certificate.retrieveHandles",
+  withZod(
+    z.object({
+      uuid: z.string().uuid(),
+    }),
+    z.object({
+      settings: z.object({
+        fileName: z.string().optional(),
+        sort: z.union([z.literal("student"), z.literal("instructor")]),
+      }),
+      handles: z.array(z.string().length(10)),
+    }),
+    async ({ uuid }) => {
+      const redis = useRedisClient();
+      const key = `c-export:${uuid}`;
+      const results = await redis
+        .pipeline()
+        .hgetall(`${key}:settings`)
+        .smembers(`${key}:items`)
+        .exec();
+
+      if (!results || results.length !== 2) {
+        throw new Error("Failed to execute Redis pipeline");
+      }
+
+      const [settingsResult, handlesResult] = results;
+
+      if (!settingsResult || !handlesResult) {
+        throw new Error("Unexpected Redis pipeline result structure");
+      }
+
+      const [settingsError, settings] = settingsResult;
+      const [handlesError, handles] = handlesResult;
+
+      if (settingsError || handlesError) {
+        throw new Error("Redis operation failed");
+      }
+
+      if (!Array.isArray(handles)) {
+        throw new Error("Invalid handles data");
+      }
+
+      if (handles.length === 0) {
+        throw new Error("Export not found");
+      }
+
+      const expectedSettingsSchema = z.object({
+        fileName: z.string().optional(),
+        sort: z.union([z.literal("student"), z.literal("instructor")]),
+      });
+
+      return {
+        settings: expectedSettingsSchema.parse(settings),
+        handles: handles as string[],
+      };
+    },
+  ),
 );

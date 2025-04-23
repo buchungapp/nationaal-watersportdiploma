@@ -24,7 +24,7 @@ function mapMetaForLocation(metadata: unknown): LocationMetadata {
 }
 
 export const create = wrapCommand(
-  "createLocation",
+  "location.create",
   withZod(
     insertSchema.pick({
       handle: true,
@@ -51,7 +51,7 @@ export const create = wrapCommand(
 );
 
 export const updateDetails = wrapCommand(
-  "updateLocationDetails",
+  "location.updateDetails",
   withZod(
     insertSchema
       .pick({
@@ -173,7 +173,7 @@ export const list = wrapQuery(
 );
 
 export const fromId = wrapQuery(
-  "getLocationFromId",
+  "location.fromId",
   withZod(uuidSchema, outputSchema, async (id) => {
     const query = useQuery();
     const location = await query
@@ -203,7 +203,7 @@ export const fromId = wrapQuery(
 );
 
 export const fromHandle = wrapQuery(
-  "getLocationFromHandle",
+  "location.fromHandle",
   withZod(handleSchema, outputSchema, async (handle) => {
     const query = useQuery();
 
