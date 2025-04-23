@@ -30,7 +30,7 @@ import { insertSchema, outputSchema } from "./curriculum.schema.js";
 export * as Curriculum from "./curriculum.js";
 
 export const create = wrapCommand(
-  "curriculum.curriculum.create",
+  "curriculum.create",
   withZod(
     insertSchema.pick({
       programId: true,
@@ -60,7 +60,7 @@ export const create = wrapCommand(
 );
 
 export const list = wrapQuery(
-  "curriculum.curriculum.list",
+  "curriculum.list",
   withZod(
     z
       .object({

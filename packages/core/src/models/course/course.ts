@@ -27,7 +27,7 @@ import { insertSchema, outputSchema } from "./course.schema.js";
 import { Category, Discipline } from "./index.js";
 
 export const create = wrapCommand(
-  "course.course.create",
+  "course.create",
   withZod(
     insertSchema.extend({
       categories: uuidSchema.array().optional(),
@@ -61,7 +61,7 @@ export const create = wrapCommand(
 );
 
 export const list = wrapQuery(
-  "course.course.list",
+  "course.list",
   withZod(
     z
       .object({
@@ -165,7 +165,7 @@ export const list = wrapQuery(
 );
 
 export const findOne = wrapQuery(
-  "course.course.findOne",
+  "course.findOne",
   withZod(
     z.object({
       id: uuidSchema.optional(),
