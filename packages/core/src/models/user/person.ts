@@ -21,6 +21,7 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
+  wrapQuery,
 } from "../../utils/index.js";
 import { insertSchema, personSchema } from "./person.schema.js";
 import { getOrCreateFromEmail } from "./user.js";
@@ -190,109 +191,115 @@ export const byIdOrHandle = withZod(
   },
 );
 
-export const list = withZod(
-  z
-    .object({
-      filter: z
-        .object({
-          userId: z.string().uuid().optional(),
-          locationId: singleOrArray(uuidSchema).optional(),
-        })
-        .default({}),
-    })
-    .default({}),
-  personSchema
-    .extend({
-      actors: z
-        .object({
-          id: uuidSchema,
-          createdAt: z.string(),
-          type: z.enum([
-            "student",
-            "instructor",
-            "location_admin",
-            "application",
-            "system",
-          ]),
-          locationId: uuidSchema,
-        })
-        .array(),
-    })
-    .array(),
-  async (input) => {
-    const query = useQuery();
-
-    const conditions: SQL[] = [];
-
-    if (input.filter.userId != null) {
-      conditions.push(eq(s.person.userId, input.filter.userId));
-    }
-
-    if (input.filter.locationId) {
-      if (Array.isArray(input.filter.locationId)) {
-        const existsQuery = query
-          .select({ personId: s.personLocationLink.personId })
-          .from(s.personLocationLink)
-          .where(
-            and(
-              inArray(s.personLocationLink.locationId, input.filter.locationId),
-              eq(s.personLocationLink.status, "linked"),
-              eq(s.personLocationLink.personId, s.person.id),
-            ),
-          );
-        conditions.push(exists(existsQuery));
-      } else {
-        const existsQuery = query
-          .select({ personId: s.personLocationLink.personId })
-          .from(s.personLocationLink)
-          .where(
-            and(
-              eq(s.personLocationLink.locationId, input.filter.locationId),
-              eq(s.personLocationLink.status, "linked"),
-              eq(s.personLocationLink.personId, s.person.id),
-            ),
-          );
-        conditions.push(exists(existsQuery));
-      }
-    }
-
-    const rows = await query
-      .select({
-        ...getTableColumns(s.person),
-        birthCountry: {
-          code: s.country.alpha_2,
-          name: s.country.nl,
-        },
-        email: s.user.email,
-        actor: s.actor,
+export const list = wrapQuery(
+  "person.list",
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            userId: z.string().uuid().optional(),
+            locationId: singleOrArray(uuidSchema).optional(),
+          })
+          .default({}),
       })
-      .from(s.person)
-      .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
-      .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-      .innerJoin(
-        s.actor,
-        and(
-          eq(s.actor.personId, s.person.id),
-          isNull(s.actor.deletedAt),
-          isNull(s.person.deletedAt),
-          input.filter.locationId
-            ? Array.isArray(input.filter.locationId)
-              ? inArray(s.actor.locationId, input.filter.locationId)
-              : eq(s.actor.locationId, input.filter.locationId)
-            : undefined,
-        ),
-      )
-      .where(and(...conditions))
-      .then(aggregate({ pkey: "id", fields: { actors: "actor.id" } }));
+      .default({}),
+    personSchema
+      .extend({
+        actors: z
+          .object({
+            id: uuidSchema,
+            createdAt: z.string(),
+            type: z.enum([
+              "student",
+              "instructor",
+              "location_admin",
+              "application",
+              "system",
+            ]),
+            locationId: uuidSchema,
+          })
+          .array(),
+      })
+      .array(),
+    async (input) => {
+      const query = useQuery();
 
-    return rows.map((row) => ({
-      ...row,
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
-      handle: row.handle!,
-      createdAt: dayjs(row.createdAt).toISOString(),
-      updatedAt: dayjs(row.updatedAt).toISOString(),
-    }));
-  },
+      const conditions: SQL[] = [];
+
+      if (input.filter.userId != null) {
+        conditions.push(eq(s.person.userId, input.filter.userId));
+      }
+
+      if (input.filter.locationId) {
+        if (Array.isArray(input.filter.locationId)) {
+          const existsQuery = query
+            .select({ personId: s.personLocationLink.personId })
+            .from(s.personLocationLink)
+            .where(
+              and(
+                inArray(
+                  s.personLocationLink.locationId,
+                  input.filter.locationId,
+                ),
+                eq(s.personLocationLink.status, "linked"),
+                eq(s.personLocationLink.personId, s.person.id),
+              ),
+            );
+          conditions.push(exists(existsQuery));
+        } else {
+          const existsQuery = query
+            .select({ personId: s.personLocationLink.personId })
+            .from(s.personLocationLink)
+            .where(
+              and(
+                eq(s.personLocationLink.locationId, input.filter.locationId),
+                eq(s.personLocationLink.status, "linked"),
+                eq(s.personLocationLink.personId, s.person.id),
+              ),
+            );
+          conditions.push(exists(existsQuery));
+        }
+      }
+
+      const rows = await query
+        .select({
+          ...getTableColumns(s.person),
+          birthCountry: {
+            code: s.country.alpha_2,
+            name: s.country.nl,
+          },
+          email: s.user.email,
+          actor: s.actor,
+        })
+        .from(s.person)
+        .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+        .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+        .innerJoin(
+          s.actor,
+          and(
+            eq(s.actor.personId, s.person.id),
+            isNull(s.actor.deletedAt),
+            isNull(s.person.deletedAt),
+            input.filter.locationId
+              ? Array.isArray(input.filter.locationId)
+                ? inArray(s.actor.locationId, input.filter.locationId)
+                : eq(s.actor.locationId, input.filter.locationId)
+              : undefined,
+          ),
+        )
+        .where(and(...conditions))
+        .then(aggregate({ pkey: "id", fields: { actors: "actor.id" } }));
+
+      return rows.map((row) => ({
+        ...row,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        handle: row.handle!,
+        createdAt: dayjs(row.createdAt).toISOString(),
+        updatedAt: dayjs(row.updatedAt).toISOString(),
+      }));
+    },
+  ),
 );
 
 export const listLocationsByRole = withZod(

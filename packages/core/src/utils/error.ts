@@ -36,6 +36,11 @@ export enum CoreErrorType {
    * Validation failed
    */
   Validation = 6,
+
+  /**
+   * The error is due to a missing value
+   */
+  MissingValue = 7,
 }
 
 /**
@@ -45,17 +50,23 @@ export enum CoreErrorType {
 export class CoreError extends Error {
   constructor(
     public readonly type: CoreErrorType,
-    public readonly antecedentError?: Error,
+    options?: ErrorOptions & { cause?: unknown },
   ) {
     const message =
-      antecedentError == null
-        ? CoreErrorType[type]
-        : `${CoreErrorType[type]} / ${antecedentError.message}`;
+      options?.cause instanceof Error
+        ? `${CoreErrorType[type]} / ${options.cause.message}`
+        : CoreErrorType[type];
 
-    super(message);
+    super(message, { cause: options?.cause });
+
+    this.name = "CoreError";
   }
 
   public static fromUnknown(error: unknown) {
+    if (error instanceof CoreError) {
+      return error; // Return the original CoreError to preserve its stack and cause
+    }
+
     if (error instanceof postgres.PostgresError) {
       return CoreError.fromPostgresError(error);
     }
@@ -68,37 +79,37 @@ export class CoreError extends Error {
       return CoreError.fromError(error);
     }
 
-    return;
+    return new CoreError(CoreErrorType.Unexpected, { cause: error });
   }
 
   public static fromError(error: Error) {
-    return new CoreError(CoreErrorType.Unexpected, error);
+    return new CoreError(CoreErrorType.Unexpected, { cause: error });
   }
 
   public static fromPostgresError(error: postgres.PostgresError) {
     // https://www.postgresql.org/docs/current/errcodes-appendix.html
     switch (error.code) {
       case "23000": // integrity_constraint_violation
-        return new CoreError(CoreErrorType.Other, error);
+        return new CoreError(CoreErrorType.Other, { cause: error });
       case "23001": // restrict_violation
-        return new CoreError(CoreErrorType.Other, error);
+        return new CoreError(CoreErrorType.Other, { cause: error });
       case "23502": // not_null_violation
-        return new CoreError(CoreErrorType.NotNull, error);
+        return new CoreError(CoreErrorType.NotNull, { cause: error });
       case "23503": // foreign_key_violation
-        return new CoreError(CoreErrorType.ForeignKey, error);
+        return new CoreError(CoreErrorType.ForeignKey, { cause: error });
       case "23505": // unique_violation
-        return new CoreError(CoreErrorType.UniqueKey, error);
+        return new CoreError(CoreErrorType.UniqueKey, { cause: error });
       case "23514": // check_violation
-        return new CoreError(CoreErrorType.Check, error);
+        return new CoreError(CoreErrorType.Check, { cause: error });
       case "23P01": // exclusion_violation
-        return new CoreError(CoreErrorType.Other, error);
+        return new CoreError(CoreErrorType.Other, { cause: error });
 
       default:
-        return new CoreError(CoreErrorType.Unexpected, error);
+        return new CoreError(CoreErrorType.Unexpected, { cause: error });
     }
   }
 
   public static fromZodError(error: zod.ZodError) {
-    return new CoreError(CoreErrorType.Validation, error);
+    return new CoreError(CoreErrorType.Validation, { cause: error });
   }
 }

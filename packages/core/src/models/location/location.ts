@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm/sql";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { findItem, singleRow } from "../../utils/data-helpers.js";
-import { wrapCommand, wrapQuery } from "../../utils/wrap.js";
+import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
   handleSchema,
   successfulCreateResponse,
@@ -113,7 +113,7 @@ export const updateDetails = wrapCommand(
 );
 
 export const list = wrapQuery(
-  "listLocations",
+  "location.list",
   withZod(z.void(), outputSchema.array(), async () => {
     const query = useQuery();
     const locations = await query

@@ -28,6 +28,7 @@ import {
   singleRow,
   uuidSchema,
   withZod,
+  wrapQuery,
 } from "../../utils/index.js";
 import { Course, Curriculum, Location, User } from "../index.js";
 
@@ -130,229 +131,228 @@ export const byId = withZod(uuidSchema, async (input) => {
   };
 });
 
-export const list = withZod(
-  z
-    .object({
-      filter: z
-        .object({
-          id: singleOrArray(uuidSchema).optional(),
-          number: singleOrArray(z.string().length(10)).optional(),
-          locationId: singleOrArray(uuidSchema).optional(),
-          personId: singleOrArray(uuidSchema).optional(),
-          issuedAfter: z.string().datetime().optional(),
-          issuedBefore: z.string().datetime().optional(),
-        })
-        .default({}),
-      sort: z
-        .array(
-          z.union([
-            z.literal("createdAt"),
-            z.literal("student"),
-            z.literal("instructor"),
-          ]),
+export const list = wrapQuery(
+  "certificate.list",
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            id: singleOrArray(uuidSchema).optional(),
+            number: singleOrArray(z.string().length(10)).optional(),
+            locationId: singleOrArray(uuidSchema).optional(),
+            personId: singleOrArray(uuidSchema).optional(),
+            issuedAfter: z.string().datetime().optional(),
+            issuedBefore: z.string().datetime().optional(),
+          })
+          .default({}),
+        sort: z
+          .array(
+            z.union([
+              z.literal("createdAt"),
+              z.literal("student"),
+              z.literal("instructor"),
+            ]),
+          )
+          .default(["createdAt"]),
+        // TODO: alter this default value to be true
+        respectVisibility: z.boolean().default(false),
+      })
+      .default({}),
+    async ({ filter, sort, respectVisibility }) => {
+      const query = useQuery();
+
+      const studentPerson = alias(s.person, "student_person");
+      const instructorActor = alias(s.actor, "instructor_actor");
+      const instructorPerson = alias(s.person, "instructor_person");
+
+      const certificates = await query
+        .select(getTableColumns(s.certificate))
+        .from(s.certificate)
+        .innerJoin(
+          s.studentCurriculum,
+          eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
         )
-        .default(["createdAt"]),
-      // TODO: alter this default value to be true
-      respectVisibility: z.boolean().default(false),
-    })
-    .default({}),
-  async ({ filter, sort, respectVisibility }) => {
-    const query = useQuery();
+        .innerJoin(
+          studentPerson,
+          eq(studentPerson.id, s.studentCurriculum.personId),
+        )
+        .leftJoin(
+          s.cohortAllocation,
+          eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+        )
+        .leftJoin(
+          instructorActor,
+          eq(instructorActor.id, s.cohortAllocation.instructorId),
+        )
+        .leftJoin(
+          instructorPerson,
+          eq(instructorPerson.id, instructorActor.personId),
+        )
+        .where(
+          and(
+            filter.id
+              ? Array.isArray(filter.id)
+                ? inArray(s.certificate.id, filter.id)
+                : eq(s.certificate.id, filter.id)
+              : undefined,
+            filter.number
+              ? Array.isArray(filter.number)
+                ? inArray(s.certificate.handle, filter.number)
+                : eq(s.certificate.handle, filter.number)
+              : undefined,
+            filter.locationId
+              ? Array.isArray(filter.locationId)
+                ? inArray(s.certificate.locationId, filter.locationId)
+                : eq(s.certificate.locationId, filter.locationId)
+              : undefined,
+            filter.issuedAfter
+              ? gte(s.certificate.issuedAt, filter.issuedAfter)
+              : undefined,
+            filter.issuedBefore
+              ? lt(s.certificate.issuedAt, filter.issuedBefore)
+              : undefined,
+            filter.personId
+              ? Array.isArray(filter.personId)
+                ? inArray(s.studentCurriculum.personId, filter.personId)
+                : eq(s.studentCurriculum.personId, filter.personId)
+              : undefined,
+            isNull(s.certificate.deletedAt),
+            respectVisibility
+              ? lte(s.certificate.visibleFrom, sql`NOW()`)
+              : undefined,
+          ),
+        )
+        .orderBy(
+          ...sort.map((sort) => {
+            switch (sort) {
+              case "student":
+                return asc(sql`LOWER(${studentPerson.firstName})`);
+              case "instructor":
+                return asc(sql`LOWER(${instructorPerson.firstName})`);
+              default:
+                return desc(s.certificate.createdAt);
+            }
+          }),
+        );
 
-    const studentPerson = alias(s.person, "student_person");
-    const instructorActor = alias(s.actor, "instructor_actor");
-    const instructorPerson = alias(s.person, "instructor_person");
+      if (certificates.length === 0) {
+        return [];
+      }
 
-    const certificates = await query
-      .select(getTableColumns(s.certificate))
-      .from(s.certificate)
-      .innerJoin(
-        s.studentCurriculum,
-        eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
-      )
-      .innerJoin(
-        studentPerson,
-        eq(studentPerson.id, s.studentCurriculum.personId),
-      )
-      .leftJoin(
-        s.cohortAllocation,
-        eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
-      )
-      .leftJoin(
-        instructorActor,
-        eq(instructorActor.id, s.cohortAllocation.instructorId),
-      )
-      .leftJoin(
-        instructorPerson,
-        eq(instructorPerson.id, instructorActor.personId),
-      )
-      .where(
-        and(
-          filter.id
-            ? Array.isArray(filter.id)
-              ? inArray(s.certificate.id, filter.id)
-              : eq(s.certificate.id, filter.id)
-            : undefined,
-          filter.number
-            ? Array.isArray(filter.number)
-              ? inArray(s.certificate.handle, filter.number)
-              : eq(s.certificate.handle, filter.number)
-            : undefined,
-          filter.locationId
-            ? Array.isArray(filter.locationId)
-              ? inArray(s.certificate.locationId, filter.locationId)
-              : eq(s.certificate.locationId, filter.locationId)
-            : undefined,
-          filter.issuedAfter
-            ? gte(s.certificate.issuedAt, filter.issuedAfter)
-            : undefined,
-          filter.issuedBefore
-            ? lt(s.certificate.issuedAt, filter.issuedBefore)
-            : undefined,
-          filter.personId
-            ? Array.isArray(filter.personId)
-              ? inArray(s.studentCurriculum.personId, filter.personId)
-              : eq(s.studentCurriculum.personId, filter.personId)
-            : undefined,
-          isNull(s.certificate.deletedAt),
-          respectVisibility
-            ? lte(s.certificate.visibleFrom, sql`NOW()`)
-            : undefined,
-        ),
-      )
-      .orderBy(
-        ...sort.map((sort) => {
-          switch (sort) {
-            case "student":
-              return asc(sql`LOWER(${studentPerson.firstName})`);
-            case "instructor":
-              return asc(sql`LOWER(${instructorPerson.firstName})`);
-            default:
-              return desc(s.certificate.createdAt);
-          }
+      const uniqueStudentCurriculumIds = Array.from(
+        new Set(certificates.map((c) => c.studentCurriculumId)),
+      );
+
+      const uniqueCertificateIds = Array.from(
+        new Set(certificates.map((c) => c.id)),
+      );
+
+      const studentCurriculaQuery = query
+        .select()
+        .from(s.studentCurriculum)
+        .where(inArray(s.studentCurriculum.id, uniqueStudentCurriculumIds));
+
+      const completedCompetenciesQuery = query
+        .select()
+        .from(s.studentCompletedCompetency)
+        .innerJoin(
+          s.curriculumCompetency,
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            s.curriculumCompetency.id,
+          ),
+        )
+        .where(
+          and(
+            inArray(
+              s.studentCompletedCompetency.studentCurriculumId,
+              uniqueStudentCurriculumIds,
+            ),
+            inArray(
+              s.studentCompletedCompetency.certificateId,
+              uniqueCertificateIds,
+            ),
+          ),
+        );
+
+      const [locations, studentCurricula, completedCompetencies, gearTypes] =
+        await Promise.all([
+          Location.list(),
+          studentCurriculaQuery,
+          completedCompetenciesQuery,
+          Curriculum.GearType.list(),
+        ]);
+
+      const curricula = await Curriculum.list({
+        filter: {
+          id: Array.from(
+            new Set(studentCurricula.map((sc) => sc.curriculumId)),
+          ),
+        },
+      });
+
+      const programs = await Course.Program.list({
+        filter: {
+          id: Array.from(new Set(curricula.map((c) => c.programId))),
+        },
+      });
+
+      return await Promise.all(
+        certificates.map(async (certificate) => {
+          const location = findItem({
+            items: locations,
+            predicate: (l) => l.id === certificate.locationId,
+            enforce: true,
+          });
+
+          const studentCurriculum = findItem({
+            items: studentCurricula,
+            predicate: (sc) => sc.id === certificate.studentCurriculumId,
+            enforce: true,
+          });
+
+          const student = await User.Person.byIdOrHandle({
+            id: studentCurriculum.personId,
+          });
+
+          const relevantCompletedCompetencies = completedCompetencies.filter(
+            (cc) =>
+              cc.student_completed_competency.studentCurriculumId ===
+              studentCurriculum.id,
+          );
+
+          const gearType = findItem({
+            items: gearTypes,
+            predicate: (gt) => gt.id === studentCurriculum.gearTypeId,
+            enforce: true,
+          });
+
+          const curriculum = findItem({
+            items: curricula,
+            predicate: (c) => c.id === studentCurriculum.curriculumId,
+            enforce: true,
+          });
+
+          const program = findItem({
+            items: programs,
+            predicate: (p) => p.id === curriculum.programId,
+            enforce: true,
+          });
+
+          return {
+            ...certificate,
+            location,
+            student,
+            gearType,
+            curriculum,
+            program,
+            completedCompetencies: relevantCompletedCompetencies,
+          };
         }),
       );
-
-    if (certificates.length === 0) {
-      return [];
-    }
-
-    const uniqueStudentCurriculumIds = Array.from(
-      new Set(certificates.map((c) => c.studentCurriculumId)),
-    );
-
-    const uniqueCertificateIds = Array.from(
-      new Set(certificates.map((c) => c.id)),
-    );
-
-    const studentCurriculaQuery = query
-      .select()
-      .from(s.studentCurriculum)
-      .where(inArray(s.studentCurriculum.id, uniqueStudentCurriculumIds));
-
-    const completedCompetenciesQuery = query
-      .select()
-      .from(s.studentCompletedCompetency)
-      .innerJoin(
-        s.curriculumCompetency,
-        eq(
-          s.studentCompletedCompetency.competencyId,
-          s.curriculumCompetency.id,
-        ),
-      )
-      .where(
-        and(
-          inArray(
-            s.studentCompletedCompetency.studentCurriculumId,
-            uniqueStudentCurriculumIds,
-          ),
-          inArray(
-            s.studentCompletedCompetency.certificateId,
-            uniqueCertificateIds,
-          ),
-        ),
-      );
-
-    const [
-      locations,
-      studentCurricula,
-      completedCompetencies,
-      users,
-      gearTypes,
-    ] = await Promise.all([
-      Location.list(),
-      studentCurriculaQuery,
-      completedCompetenciesQuery,
-      User.Person.list({ filter: { locationId: filter.locationId } }),
-      Curriculum.GearType.list(),
-    ]);
-
-    const curricula = await Curriculum.list({
-      filter: {
-        id: Array.from(new Set(studentCurricula.map((sc) => sc.curriculumId))),
-      },
-    });
-
-    const programs = await Course.Program.list({
-      filter: {
-        id: Array.from(new Set(curricula.map((c) => c.programId))),
-      },
-    });
-
-    return certificates.map((certificate) => {
-      const location = findItem({
-        items: locations,
-        predicate: (l) => l.id === certificate.locationId,
-        enforce: true,
-      });
-
-      const studentCurriculum = findItem({
-        items: studentCurricula,
-        predicate: (sc) => sc.id === certificate.studentCurriculumId,
-        enforce: true,
-      });
-
-      const student = findItem({
-        items: users,
-        predicate: (u) => u.id === studentCurriculum.personId,
-        enforce: true,
-      });
-
-      const relevantCompletedCompetencies = completedCompetencies.filter(
-        (cc) =>
-          cc.student_completed_competency.studentCurriculumId ===
-          studentCurriculum.id,
-      );
-
-      const gearType = findItem({
-        items: gearTypes,
-        predicate: (gt) => gt.id === studentCurriculum.gearTypeId,
-        enforce: true,
-      });
-
-      const curriculum = findItem({
-        items: curricula,
-        predicate: (c) => c.id === studentCurriculum.curriculumId,
-        enforce: true,
-      });
-
-      const program = findItem({
-        items: programs,
-        predicate: (p) => p.id === curriculum.programId,
-        enforce: true,
-      });
-
-      return {
-        ...certificate,
-        location,
-        student,
-        gearType,
-        curriculum,
-        program,
-        completedCompetencies: relevantCompletedCompetencies,
-      };
-    });
-  },
+    },
+  ),
 );
 
 export const assignToCohortAllocation = withZod(

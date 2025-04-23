@@ -10,6 +10,7 @@ import {
   successfulCreateResponse,
   uuidSchema,
   withZod,
+  wrapQuery,
 } from "../../utils/index.js";
 import { insertSchema, selectSchema } from "./gear-type.schema.js";
 
@@ -34,68 +35,74 @@ export const create = withZod(
     }),
 );
 
-export const list = withZod(
-  z
-    .object({
-      filter: z
-        .object({
-          id: singleOrArray(uuidSchema).optional(),
-          handle: singleOrArray(handleSchema).optional(),
-          curriculumId: singleOrArray(uuidSchema).optional(),
-        })
-        .default({}),
-    })
-    .default({}),
-  selectSchema.array(),
-  async ({ filter }) => {
-    const query = useQuery();
-    const filters: SQLWrapper[] = [];
+export const list = wrapQuery(
+  "gear-type.list",
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            id: singleOrArray(uuidSchema).optional(),
+            handle: singleOrArray(handleSchema).optional(),
+            curriculumId: singleOrArray(uuidSchema).optional(),
+          })
+          .default({}),
+      })
+      .default({}),
+    selectSchema.array(),
+    async ({ filter }) => {
+      const query = useQuery();
+      const filters: SQLWrapper[] = [];
 
-    const gearTypeQuery = query.select().from(s.gearType);
+      const gearTypeQuery = query.select().from(s.gearType);
 
-    if (filter.curriculumId) {
-      filters.push(
-        exists(
-          query
-            .select()
-            .from(s.curriculumGearLink)
-            .where(
-              and(
-                eq(s.curriculumGearLink.gearTypeId, s.gearType.id),
-                Array.isArray(filter.curriculumId)
-                  ? inArray(
-                      s.curriculumGearLink.curriculumId,
-                      filter.curriculumId,
-                    )
-                  : eq(s.curriculumGearLink.curriculumId, filter.curriculumId),
+      if (filter.curriculumId) {
+        filters.push(
+          exists(
+            query
+              .select()
+              .from(s.curriculumGearLink)
+              .where(
+                and(
+                  eq(s.curriculumGearLink.gearTypeId, s.gearType.id),
+                  Array.isArray(filter.curriculumId)
+                    ? inArray(
+                        s.curriculumGearLink.curriculumId,
+                        filter.curriculumId,
+                      )
+                    : eq(
+                        s.curriculumGearLink.curriculumId,
+                        filter.curriculumId,
+                      ),
+                ),
               ),
-            ),
-        ),
-      );
-    }
+          ),
+        );
+      }
 
-    if (filter.id) {
-      filters.push(
-        Array.isArray(filter.id)
-          ? inArray(s.gearType.id, filter.id)
-          : eq(s.gearType.id, filter.id),
-      );
-    }
+      if (filter.id) {
+        filters.push(
+          Array.isArray(filter.id)
+            ? inArray(s.gearType.id, filter.id)
+            : eq(s.gearType.id, filter.id),
+        );
+      }
 
-    if (filter.handle) {
-      filters.push(
-        Array.isArray(filter.handle)
-          ? inArray(s.gearType.handle, filter.handle)
-          : eq(s.gearType.handle, filter.handle),
-      );
-    }
+      if (filter.handle) {
+        filters.push(
+          Array.isArray(filter.handle)
+            ? inArray(s.gearType.handle, filter.handle)
+            : eq(s.gearType.handle, filter.handle),
+        );
+      }
 
-    const rows = await gearTypeQuery
-      .where(and(...filters))
-      .orderBy(asc(s.gearType.title));
+      const rows = await gearTypeQuery
+        .where(and(...filters))
+        .orderBy(asc(s.gearType.title));
 
-    return rows;
-  },
+      return rows;
+    },
+  ),
 );
 
 export const fromHandle = withZod(

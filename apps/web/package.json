@@ -50,7 +50,7 @@
     "google-auth-library": "^9.14.1",
     "googleapis": "^140.0.1",
     "gray-matter": "^4.0.3",
-    "import-in-the-middle": "1.7.1",
+    "import-in-the-middle": "1.12.0",
     "input-otp": "^1.2.4",
     "js-confetti": "^0.12.0",
     "marked": "^12.0.2",
