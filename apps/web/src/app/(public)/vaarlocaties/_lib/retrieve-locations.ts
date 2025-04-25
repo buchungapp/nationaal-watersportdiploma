@@ -10,7 +10,6 @@ async function retrieveLocationsWithAllMeta() {
   cacheLife("weeks");
 
   const locations = await listAllLocations();
-  console.log(locations);
   const locationsWithCity = await Promise.all(
     locations.map(async (location) => {
       if (
