@@ -36,7 +36,7 @@ if (!pgUri) {
 
 withDatabase(
   {
-    pgUri,
+    connectionString: pgUri,
   },
   async () => await main(),
 )
