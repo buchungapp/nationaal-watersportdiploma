@@ -4,7 +4,7 @@ import { sql } from "drizzle-orm/sql";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { findItem, singleRow } from "../../utils/data-helpers.js";
-import { wrapCommand, wrapQuery } from "../../utils/wrap.js";
+import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
   handleSchema,
   successfulCreateResponse,
@@ -24,7 +24,7 @@ function mapMetaForLocation(metadata: unknown): LocationMetadata {
 }
 
 export const create = wrapCommand(
-  "createLocation",
+  "location.create",
   withZod(
     insertSchema.pick({
       handle: true,
@@ -51,7 +51,7 @@ export const create = wrapCommand(
 );
 
 export const updateDetails = wrapCommand(
-  "updateLocationDetails",
+  "location.updateDetails",
   withZod(
     insertSchema
       .pick({
@@ -113,7 +113,7 @@ export const updateDetails = wrapCommand(
 );
 
 export const list = wrapQuery(
-  "listLocations",
+  "location.list",
   withZod(z.void(), outputSchema.array(), async () => {
     const query = useQuery();
     const locations = await query
@@ -173,7 +173,7 @@ export const list = wrapQuery(
 );
 
 export const fromId = wrapQuery(
-  "getLocationFromId",
+  "location.fromId",
   withZod(uuidSchema, outputSchema, async (id) => {
     const query = useQuery();
     const location = await query
@@ -203,7 +203,7 @@ export const fromId = wrapQuery(
 );
 
 export const fromHandle = wrapQuery(
-  "getLocationFromHandle",
+  "location.fromHandle",
   withZod(handleSchema, outputSchema, async (handle) => {
     const query = useQuery();
 

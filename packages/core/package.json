@@ -26,6 +26,7 @@
     "drizzle-toolbelt": "^1.2.0",
     "drizzle-zod": "^0.5.1",
     "file-type": "^19.1.1",
+    "flat": "^6.0.1",
     "image-size": "^1.1.1",
     "ioredis": "^5.4.1",
     "nanoid": "^5.0.7",
