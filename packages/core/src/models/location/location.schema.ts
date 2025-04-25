@@ -38,6 +38,35 @@ export const locationMetadataSchema = z.object({
     })
     .array()
     .catch(() => []),
+  googlePlaceData: z
+    .object({
+      address_components: z.array(
+        z.object({
+          long_name: z.string(),
+          short_name: z.string(),
+          types: z.array(z.string()),
+        }),
+      ),
+      geometry: z.object({
+        location: z.object({
+          lat: z.number(),
+          lng: z.number(),
+        }),
+        viewport: z.object({
+          northeast: z.object({
+            lat: z.number(),
+            lng: z.number(),
+          }),
+          southwest: z.object({
+            lat: z.number(),
+            lng: z.number(),
+          }),
+        }),
+      }),
+      url: z.string().url(),
+    })
+    .nullable()
+    .catch(() => null),
 });
 
 export type LocationMetadata = z.infer<typeof locationMetadataSchema>;
