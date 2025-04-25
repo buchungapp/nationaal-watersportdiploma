@@ -1,20 +1,11 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import cp from "node:child_process";
 import * as db from "@nawadi/db";
-import postgres from "postgres";
 
-/**
- * Interface representing the configuration required for setting up the database connection.
- * @property {string} pgUri - The PostgreSQL connection URI.
- */
-export interface DatabaseConfiguration {
-  pgUri: string;
-  serverless?: boolean;
-  onnotice?: (notice: postgres.Notice) => void;
-}
+export type DatabaseConfiguration = db.CreateDatabaseOptions;
 
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
-const storage = new AsyncLocalStorage<db.Database>();
+const storage = new AsyncLocalStorage<ReturnType<typeof db.createDatabase>>();
 
 /**
  * Executes a given job with a database connection.
@@ -28,22 +19,58 @@ const storage = new AsyncLocalStorage<db.Database>();
  * @returns {Promise<T>} A promise that resolves with the result of the job function.
  */
 export async function withDatabase<T>(
-  configuration: DatabaseConfiguration,
+  options: DatabaseConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { pgUri, serverless = false, onnotice } = configuration;
-
-  const pgSql = postgres(pgUri, {
-    prepare: !serverless,
-    onnotice,
-  });
+  const database = db.createDatabase(options);
   try {
-    const database = db.createDatabase(pgSql);
     const result = await storage.run(database, job);
     return result;
   } finally {
-    await pgSql.end();
+    await database.$client.end();
   }
+}
+
+/**
+ * Sets up a global database connection for the current process if one doesn't already exist.
+ * Automatically cleans up the connection when the process exits.
+ *
+ * @param {DatabaseConfiguration} configuration - The database configuration.
+ */
+export function initializeProcessScopedDatabase(
+  options: DatabaseConfiguration,
+): () => Promise<void> {
+  // Helper function to create and setup database connection
+  const setupDatabase = () => {
+    const database = db.createDatabase(options);
+
+    // @ts-expect-error find a way to type global accross packages
+    globalThis.__serverlessPool = database;
+
+    storage.enterWith(database);
+    return database;
+  };
+
+  // Helper function to setup cleanup handlers
+  const setupCleanupHandlers = (
+    database: ReturnType<typeof db.createDatabase>,
+  ) => {
+    return async () => {
+      await database.$client.end();
+      // @ts-expect-error find a way to type global accross packages
+      globalThis.__serverlessPool = null;
+    };
+  };
+
+  // @ts-expect-error find a way to type global accross packages
+  const existingDb = globalThis.__serverlessPool;
+
+  if (existingDb) {
+    return setupCleanupHandlers(existingDb);
+  }
+
+  const database = setupDatabase();
+  return setupCleanupHandlers(database);
 }
 
 /**
@@ -69,19 +96,17 @@ export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
 
   try {
     // use a single connection pool for the migration
-    const pgSql = postgres(pgUri.toString(), {
+    const database = db.createDatabase({
+      connectionString: pgUri,
       max: 1,
-      onnotice: () => {},
     });
     try {
-      const database = db.createDatabase(pgSql);
-      // migrate (set up) the database
       await db.migrateDatabase(database);
     } finally {
-      await pgSql.end();
+      await database.$client.end();
     }
 
-    const result = await withDatabase({ pgUri }, job);
+    const result = await withDatabase(pgUri, job);
     return result;
   } finally {
     // reset database

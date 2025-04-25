@@ -1,7 +1,10 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+
 import * as db from "@nawadi/db";
-import postgres from "postgres";
+import { trace } from "@opentelemetry/api";
 import { useDatabase, withDatabase } from "./database.js";
+
+import type { PgTransactionConfig } from "drizzle-orm/pg-core";
 
 // Initializes an instance of AsyncLocalStorage to store database transaction contexts.
 const storage = new AsyncLocalStorage<db.Transaction>();
@@ -22,6 +25,7 @@ const storage = new AsyncLocalStorage<db.Transaction>();
  */
 export async function withTransaction<T>(
   job: (tx: db.Transaction) => Promise<T>,
+  config?: PgTransactionConfig,
 ): Promise<T> {
   const existingTransaction = useTransaction();
 
@@ -39,6 +43,7 @@ export async function withTransaction<T>(
     },
     {
       isolationLevel: "serializable",
+      ...config,
     },
   );
 }
@@ -54,8 +59,17 @@ export async function withTransaction<T>(
  *          otherwise undefined.
  */
 export function useTransaction(): db.Transaction | undefined {
-  const context = storage.getStore();
-  return context;
+  const tracer = trace.getTracer("useTransaction");
+
+  return tracer.startActiveSpan("useTransaction", (span) => {
+    try {
+      const context = storage.getStore();
+      span.setAttribute("transaction.exists", context != null);
+      return context;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -77,20 +91,18 @@ export async function withTestTransaction<T>(
 
   {
     // use a single connection pool for the migration
-    const pgSql = postgres(pgUri.toString(), {
+    const pgSql = db.createDatabase({
+      connectionString: pgUri,
       max: 1,
-      onnotice: () => {},
     });
     try {
-      const database = db.createDatabase(pgSql);
-      // migrate (set up) the database
-      await db.migrateDatabase(database);
+      await db.migrateDatabase(pgSql);
     } finally {
-      await pgSql.end();
+      await pgSql.$client.end();
     }
   }
 
-  const result = await withDatabase({ pgUri }, async () => {
+  const result = await withDatabase(pgUri, async () => {
     const rollback = Symbol();
     let result: T;
     try {

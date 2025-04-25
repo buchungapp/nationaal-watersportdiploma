@@ -39,7 +39,6 @@
     "@types/node": "catalog:",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "catalog:",
-    "postgres": "catalog:",
     "tslib": "^2.6.3",
     "type-fest": "^4.21.0",
     "yargs": "^17.7.2"
@@ -47,6 +46,8 @@
   "devDependencies": {
     "@tsconfig/node22": "catalog:",
     "drizzle-kit": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "@types/pg": "catalog:",
+    "pg": "catalog:"
   }
 }

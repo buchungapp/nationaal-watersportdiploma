@@ -30,7 +30,6 @@
     "image-size": "^1.1.1",
     "ioredis": "^5.4.1",
     "nanoid": "^5.0.7",
-    "postgres": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
