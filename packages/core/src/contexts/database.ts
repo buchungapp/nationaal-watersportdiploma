@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import cp from "node:child_process";
 import * as db from "@nawadi/db";
+import { trace } from "@opentelemetry/api";
 
 export type DatabaseConfiguration = db.CreateDatabaseOptions;
 
@@ -82,11 +83,22 @@ export function initializeProcessScopedDatabase(
  * @throws {TypeError} If called outside of a `withDatabase` context.
  */
 export function useDatabase(): db.Database {
-  const database = storage.getStore();
-  if (database == null) {
-    throw new TypeError("Database not in context");
-  }
-  return database;
+  const tracer = trace.getTracer("useDatabase");
+
+  return tracer.startActiveSpan("useDatabase", (span) => {
+    try {
+      // @ts-expect-error find a way to type global accross packages
+      const database = storage.getStore() ?? globalThis.__serverlessPool;
+      if (database == null) {
+        span.setAttribute("database.error", "not_in_context");
+        throw new TypeError("Database not in context");
+      }
+      span.setAttribute("database.exists", true);
+      return database;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {

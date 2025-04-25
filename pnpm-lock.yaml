@@ -274,6 +274,9 @@ importers:
       pdfkit:
         specifier: ^0.16.0
         version: 0.16.0
+      pg:
+        specifier: 'catalog:'
+        version: 8.13.1
       posthog-js:
         specifier: ^1.161.4
         version: 1.174.2

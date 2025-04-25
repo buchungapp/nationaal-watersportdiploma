@@ -1,11 +1,10 @@
 export async function register() {
-  //   if (process.env.TURBOPACK && process.env.NEXT_RUNTIME === "nodejs") {
-  //     const { $withContexts } = await import(
-  //       "@buchungapp/next-core/server-utils"
-  //     );
-  //     $withContexts();
-  //     return;
-  //   }
+  if (process.env.TURBOPACK && process.env.NEXT_RUNTIME === "nodejs") {
+    // @ts-expect-error - This is a dynamic import
+    const { withContexts } = await import("./lib/with-contexts.ts");
+    withContexts();
+    return;
+  }
 
   if (process.env.NEXT_RUNTIME === "nodejs") {
     // @ts-expect-error - This is a dynamic import

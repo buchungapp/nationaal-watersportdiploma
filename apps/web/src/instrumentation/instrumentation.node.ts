@@ -5,6 +5,7 @@ import { Resource } from "@opentelemetry/resources";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { withContexts } from "~/lib/with-contexts";
 
 const sdk = new NodeSDK({
   resource: new Resource({
@@ -30,4 +31,4 @@ const sdk = new NodeSDK({
 
 sdk.start();
 
-// $withContexts();
+withContexts();
