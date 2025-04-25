@@ -13,7 +13,7 @@ import {
 } from "../../utils/index.js";
 
 export const createForUser = wrapCommand(
-  "api-key.createForUser",
+  "apiKey.createForUser",
   withZod(
     z.object({
       name: z.string(),
@@ -48,7 +48,7 @@ export const createForUser = wrapCommand(
 );
 
 export const byToken = wrapQuery(
-  "api-key.byToken",
+  "apiKey.byToken",
   withZod(
     z.string(),
     z.object({
