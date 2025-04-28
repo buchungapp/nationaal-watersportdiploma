@@ -20,6 +20,7 @@ test("error", () =>
       if (!(error instanceof CoreError)) {
         throw error;
       }
+
       assert.equal(error.type, CoreErrorType.UniqueKey);
     }
   }));

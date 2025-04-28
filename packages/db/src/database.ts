@@ -10,7 +10,8 @@ import * as uncontrolledSchema from "./uncontrolled_schema/index.js";
 
 export type Database = NodePgDatabase<FullSchema>;
 export type CreateDatabaseOptions = string | PoolConfig;
-export class DatabaseError extends pg.DatabaseError {}
+export type DatabaseError = pg.DatabaseError;
+export const DatabaseError = pg.DatabaseError;
 
 export function createDatabase(options: CreateDatabaseOptions) {
   const pool =
