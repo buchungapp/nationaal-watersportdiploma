@@ -2,6 +2,7 @@
   "name": "@nawadi/nationaal-watersportdiploma",
   "private": true,
   "packageManager": "pnpm@9.15.5",
+  "type": "module",
   "scripts": {
     "spelling": "cspell",
     "formatting": "pnpm biome check ./",

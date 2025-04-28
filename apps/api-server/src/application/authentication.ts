@@ -1,10 +1,5 @@
 export type Authentication = {
-  apiKey: {
-    apiKey: string;
+  token: {
     user: string;
-  };
-  openId: {
-    user: string;
-    persons: string[];
   };
 };

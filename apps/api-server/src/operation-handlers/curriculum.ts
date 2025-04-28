@@ -1,44 +1,18 @@
-import type * as api from "@nawadi/api";
-import type * as application from "../application/index.js";
+// import type * as api from "@nawadi/api";
+// import type * as application from "../application/index.js";
 
-export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDisciplineOperationHandler<
-  application.Authentication
-> = async (incomingRequest, authentication) => {
-  // const { disciplineKey } = incomingRequest.parameters
+// export const retrieveCurriculaByDiscipline: api.server.RetrieveCurriculaByDisciplineOperationHandler<
+//   application.Authentication
+// > = async ({ disciplineKey }) => {
+//   // Mock curriculum data
+//   const mockCurriculum = {
+//     id: "mock-curriculum-1",
+//     title: "Mock Curriculum",
+//     description: "A mock curriculum for testing purposes",
+//     disciplineId: disciplineKey,
+//     createdAt: new Date().toISOString(),
+//     updatedAt: new Date().toISOString(),
+//   };
 
-  // // TODO get discipline type from core
-  // let disciplineItem: Awaited<
-  //   ReturnType<typeof core.Program.Discipline.fromHandle>
-  // >
-
-  // if (api.validators.isHandle(disciplineKey)) {
-  //   disciplineItem = await core.Program.Discipline.fromHandle(disciplineKey)
-  // } else if (api.validators.isId(disciplineKey)) {
-  //   disciplineItem = await core.Program.Discipline.fromId(disciplineKey)
-  // } else {
-  //   throw 'impossible'
-  // }
-
-  // if (disciplineItem == null) {
-  //   return {
-  //     parameters: {},
-  //     status: 404,
-  //     contentType: null,
-  //   }
-  // }
-
-  // const curriculumList = await core.Curriculum.list({
-  //   filter: { onlyCurrentActive: true, disciplineId: disciplineItem.id },
-  // })
-
-  // const responseEntity = curriculumList.map((item) => ({
-  //   id: item.id,
-  // }))
-
-  return {
-    parameters: {},
-    status: 200,
-    contentType: "application/json",
-    entity: () => [],
-  };
-};
+//   return [200, [mockCurriculum]];
+// };

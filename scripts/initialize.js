@@ -1,21 +1,24 @@
 #!/usr/bin/env node
+import { execFileSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const cp = require("node:child_process");
-const path = require("node:path");
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = path.resolve(dirname, "..");
 
-const options = { shell: true, stdio: "inherit" };
+const options = { shell: true, stdio: "inherit", env: process.env };
 
-cp.execFileSync(
+execFileSync(
   "pnpm",
   [
     "--package",
-    "@skiffa/generator@0.11.1",
+    "@skiffa/generator@0.13.34",
     "dlx",
     "skiffa-generator",
     "package",
-    path.resolve("specifications", "api.yaml"),
+    path.resolve(workspaceRoot, "specifications", "api.yaml"),
     "--package-directory",
-    path.resolve("generated", "api"),
+    path.resolve(workspaceRoot, "generated", "api"),
     "--package-name",
     "@nawadi/api",
     "--package-version",
@@ -24,20 +27,5 @@ cp.execFileSync(
   options,
 );
 
-cp.execFileSync("pnpm", ["--filter", "@nawadi/api", "install"], options);
-cp.execFileSync("pnpm", ["--filter", "@nawadi/api", "build"], options);
-
-cp.execFileSync(
-  "pnpm",
-  [
-    "--package",
-    "@redocly/cli@1.11.0",
-    "dlx",
-    "redocly",
-    "build-docs",
-    path.resolve("specifications", "api.yaml"),
-    "--output",
-    path.resolve("generated", "api-docs", "index.html"),
-  ],
-  options,
-);
+execFileSync("pnpm", ["--filter", "@nawadi/api", "install"], options);
+execFileSync("pnpm", ["--filter", "@nawadi/api", "build"], options);

@@ -1,0 +1,58 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+$defs:
+  Id:
+    type: string
+    format: uuid
+    description: A globally-unique identifier
+
+  Code:
+    type: string
+    description: A code
+
+  Text:
+    type: string
+    minLength: 1
+    description: non empty text
+
+  Url:
+    type: string
+    format: uri
+    description: A string representation (RFC 3986 and RFC 3987 compliant) of a URI string.
+
+  Email:
+    type: string
+    format: email
+    description: An email address.
+
+  Handle:
+    type: string
+    pattern: ^[a-z0-9\-]+$
+    minLength: 3
+    description: A human-friendly and URI safe unique string. Also referred to as slug.
+    not:
+      $ref: "#/$defs/Id"
+
+  HandleOrId:
+    oneOf:
+      - $ref: "#/$defs/Id"
+      - $ref: "#/$defs/Handle"
+
+  Date:
+    type: string
+    format: date
+
+  DateTime:
+    type: string
+    format: date-time
+
+  PositiveInteger:
+    type: integer
+    minimum: 0
+    exclusiveMinimum: true
+
+  Title:
+    type: string
+    minLength: 1
+    nullable: true
+    description: A title (may be null)

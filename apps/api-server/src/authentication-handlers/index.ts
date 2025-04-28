@@ -1,2 +1,1 @@
-export * from "./api-key.js";
-export * from "./open-id.js";
+export * from "./token.js";

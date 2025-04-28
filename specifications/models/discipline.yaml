@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+$defs:
+  DisciplineModel:
+    type: object
+    required:
+      - id
+      - handle
+    properties:
+      id:
+        $ref: '../fields.yaml#/$defs/Id'
+      handle:
+        $ref: '../fields.yaml#/$defs/Handle'
