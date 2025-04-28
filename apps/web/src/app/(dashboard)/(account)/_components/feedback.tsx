@@ -1,7 +1,13 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
-import { Suspense, createContext, useContext, useState } from "react";
+import {
+  type PropsWithChildren,
+  Suspense,
+  createContext,
+  useActionState,
+  useContext,
+  useState,
+} from "react";
 
 import {
   Dialog,
@@ -23,7 +29,7 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 
 import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { z } from "zod";
 import Spinner from "~/app/_components/spinner";
 import { productFeedbackAction } from "../../_actions/feedback";
@@ -35,11 +41,11 @@ function urlSearchParamsToObject(
   const obj: Record<string, string | string[]> = {};
 
   urlSearchParams.forEach((value, key) => {
-    if (obj.hasOwnProperty(key)) {
-      const currentValue = obj[key]!;
+    if (Object.hasOwn(obj, key)) {
+      const currentValue = obj[key];
       if (Array.isArray(currentValue)) {
         currentValue.push(value);
-      } else {
+      } else if (typeof currentValue !== "undefined") {
         obj[key] = [currentValue, value];
       }
     } else {

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
 import {
@@ -65,8 +62,9 @@ export default function SearchClient({
     });
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    articles.forEach((article) => {
+    for (const article of articles) {
       index.add({
         url: article.slug,
         title: article.metadata.title,
@@ -77,26 +75,29 @@ export default function SearchClient({
           article.content,
         ].join("\\n"),
       });
-    });
+    }
   }, [articles]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    questions.forEach((question) => {
+    for (const question of questions) {
       index.add({
         url: question.slug,
         title: question.metadata.question,
         type: "question",
         content: [question.metadata.question, question.content].join("\\n"),
       });
-    });
+    }
   }, [questions]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     posthog.capture("searched_faq", {
       query: deferredQuery,
     });
   }, [deferredQuery]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const filteredArticles = useMemo(() => {
     if (query === "") return [];
 
@@ -104,6 +105,7 @@ export default function SearchClient({
 
     if (searchResult.length === 0) return [];
 
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     return searchResult[0]!.result.map(
       // @ts-expect-error Type does not account for the enrich option
       (article: {
@@ -123,7 +125,7 @@ export default function SearchClient({
   }, [query, articles, index]);
 
   return (
-    <div className="relative mx-auto w-full transform divide-y divide-gray-100 rounded bg-white ring-1 ring-branding-light ring-opacity-95 transition-all">
+    <div className="relative mx-auto w-full transform divide-y divide-slate-100 rounded-sm bg-white ring-1 ring-branding-light/95 transition-all">
       <Combobox
         multiple={false}
         onChange={(value: { url: string }) => {
@@ -134,12 +136,12 @@ export default function SearchClient({
       >
         <div className="relative">
           <MagnifyingGlassIcon
-            className="pointer-events-none absolute left-4 top-2.5 h-5 w-5 text-gray-500 md:top-3 md:h-6 md:w-6"
+            className="pointer-events-none absolute left-4 top-2.5 size-5 text-slate-500 md:top-3 md:h-6 md:w-6"
             aria-hidden="true"
           />
           <ComboboxInput
             //   We can't have a smaller font on mobile, because iOS Safari would zoom in on the input
-            className="h-10 w-full border-0 bg-transparent pl-11 pr-4 text-gray-900 placeholder:text-gray-500 focus:ring-0 sm:text-sm md:h-12 md:pl-12 lg:pl-14 lg:text-lg"
+            className="h-10 w-full border-0 bg-transparent pl-11 pr-4 text-slate-900 placeholder:text-slate-500 focus:ring-0 sm:text-sm md:h-12 md:pl-12 lg:pl-14 lg:text-lg"
             placeholder="Typ een vraag, onderwerp of trefwoord.."
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -153,7 +155,7 @@ export default function SearchClient({
             "isolate w-[var(--input-width)] empty:invisible select-none scroll-py-1 rounded-xl p-1",
 
             // Invisible border that is only visible in `forced-colors` mode for accessibility purposes
-            "outline outline-1 outline-transparent focus:outline-none",
+            "outline outline-1 outline-transparent focus:outline-hidden",
 
             // Handle scrolling when menu won't fit in viewport
             "overflow-y-scroll overscroll-contain",
@@ -165,7 +167,7 @@ export default function SearchClient({
             "shadow-lg ring-1 ring-zinc-950/10 dark:ring-inset dark:ring-white/10",
 
             // Transitions
-            "transition duration-100 ease-in data-[leave]:data-[closed]:opacity-0",
+            "transition duration-100 ease-in data-leave:data-closed:opacity-0",
           )}
         >
           {filteredArticles.map((article) => {
@@ -173,12 +175,12 @@ export default function SearchClient({
               <ComboboxOption
                 key={article.url}
                 value={article}
-                className="cursor-default select-none px-4 py-2 flex gap-1 data-[active]:bg-branding-light data-[active]:text-white"
+                className="cursor-default select-none px-4 py-2 flex gap-1 data-active:bg-branding-light data-active:text-white"
               >
                 {article.type === "article" ? (
-                  <NewspaperIcon className="w-6 h-6 shrink-0" />
+                  <NewspaperIcon className="size-6 shrink-0" />
                 ) : (
-                  <QuestionMarkCircleIcon className="w-6 h-6 shrink-0" />
+                  <QuestionMarkCircleIcon className="size-6 shrink-0" />
                 )}
                 {article.title}
               </ComboboxOption>

@@ -23,15 +23,18 @@ async function CategoryTable({
   });
 
   // Add programs to the index
-  categories.forEach((category) => {
-    index.add(category.id, category.title!);
-  });
+  for (const category of categories) {
+    if (category.title) {
+      index.add(category.id, category.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredCategories = categories;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCategories = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => categories.find((category) => category.id === result)!,
     );
   }
@@ -53,11 +56,10 @@ async function CategoryTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

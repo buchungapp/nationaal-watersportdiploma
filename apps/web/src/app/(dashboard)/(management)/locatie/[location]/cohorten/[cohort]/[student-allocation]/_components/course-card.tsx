@@ -52,6 +52,10 @@ export async function CourseCard({
     );
   }
 
+  if (!allocation.studentCurriculum.curriculumId) {
+    throw new Error("Failed to retrieve curriculum");
+  }
+
   const [curriculum, completedCompetencies, allCompetencyProgress] =
     await Promise.all([
       retrieveCurriculumById(allocation.studentCurriculum.curriculumId),
@@ -92,7 +96,7 @@ export async function CourseCard({
             >
               {allocation.studentCurriculum.program.title ??
                 `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
-              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+              <ArrowTopRightOnSquareIcon className="size-4" />
             </TextLink>
           </DescriptionDetails>
 
@@ -106,7 +110,7 @@ export async function CourseCard({
           <Text className="my-4">
             Dit diploma is uitgegeven op{" "}
             <Strong>
-              {dayjs(allocation.certificate!.issuedAt)
+              {dayjs(allocation.certificate?.issuedAt)
                 .tz()
                 .format("DD-MM-YYYY HH:mm uur")}
             </Strong>
@@ -141,10 +145,10 @@ export async function CourseCard({
         !hasIssuedCertificate ? (
           <div className="rounded-md bg-blue-50 p-4 mt-6">
             <div className="flex">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <ExclamationTriangleIcon
                   aria-hidden="true"
-                  className="h-5 w-5 text-blue-400"
+                  className="size-5 text-blue-400"
                 />
               </div>
               <div className="ml-3">

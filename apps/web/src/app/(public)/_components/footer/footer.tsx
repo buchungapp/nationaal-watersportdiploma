@@ -3,9 +3,10 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-white.png";
 
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import Image from "next/image";
 import { Line, LineWave } from "~/app/(public)/_assets/wave";
-import Wordmark from "~/app/_components/brand/wordmark";
+import NWDPreviousCWO from "~/app/_components/brand/nwd-previous-cwo";
 import {
   Facebook,
   Instagram,
@@ -27,7 +28,14 @@ function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   );
 }
 
-export default function Footer() {
+async function getYear() {
+  "use cache";
+  cacheLife("weeks");
+
+  return new Date().getFullYear();
+}
+
+export default async function Footer() {
   const socials = [
     {
       name: "Facebook",
@@ -60,9 +68,9 @@ export default function Footer() {
     <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 pb-12 pt-20 lg:px-16">
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
         <div>
-          <div className="grid gap-6">
-            <Wordmark className="h-12 w-48 text-white" />
-            <p className="text-sm text-gray-200">{constants.APP_SLOGAN}</p>
+          <div className="grid gap-6 justify-start">
+            <NWDPreviousCWO className="h-16 w-fit text-white" />
+            <p className="text-sm text-slate-200">{constants.APP_SLOGAN}</p>
           </div>
 
           <div className="mt-12">
@@ -83,7 +91,7 @@ export default function Footer() {
             <h3 className="font-semibold uppercase text-white">
               Diplomeringslijn
             </h3>
-            <ul className="grid gap-6 text-gray-200">
+            <ul className="grid gap-6 text-slate-200">
               <FooterLink href="/diplomalijn/consument">Consumenten</FooterLink>
               <FooterLink href="/diplomalijn/instructeur">
                 Instructeurs
@@ -92,7 +100,7 @@ export default function Footer() {
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Locaties</h3>
-            <ul className="grid gap-6 text-gray-200">
+            <ul className="grid gap-6 text-slate-200">
               <FooterLink href="/vaarlocaties">
                 Aangesloten vaarlocaties
               </FooterLink>
@@ -103,7 +111,7 @@ export default function Footer() {
           </div>
           <div className="grid gap-6">
             <h3 className="font-semibold uppercase text-white">Over NWD</h3>
-            <ul className="grid gap-6 text-gray-200">
+            <ul className="grid gap-6 text-slate-200">
               <FooterLink href="/vereniging/manifest">Manifest</FooterLink>
               <FooterLink href="/help">Helpcentrum</FooterLink>
               <FooterLink href="/vereniging/bestuur">Bestuur</FooterLink>
@@ -125,7 +133,7 @@ export default function Footer() {
           <p className="font-semibold text-white">
             Schrijf je in voor de NWD-nieuwsbrief
           </p>
-          <p className="text-gray-200">
+          <p className="text-slate-200">
             Ontvang nieuws, updates en leuk beeldmateriaal in je inbox.
           </p>
         </div>
@@ -138,10 +146,10 @@ export default function Footer() {
             type="email"
             name="email"
             required
-            className="min-w-[200px] rounded border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-gray-400"
+            className="min-w-[200px] rounded-sm border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-slate-400"
             placeholder="Je e-mailadres"
           />
-          <input type="hidden" name="userGroup" value="Website footer"></input>
+          <input type="hidden" name="userGroup" value="Website footer" />
           <button
             type="submit"
             className="group flex w-fit items-center gap-1 rounded-lg bg-branding-light px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-branding-dark"
@@ -153,20 +161,20 @@ export default function Footer() {
 
       <LineWave progress="60%" />
 
-      <div className="flex flex-col gap-4 text-gray-200 lg:flex-row">
+      <div className="flex flex-col gap-4 text-slate-200 lg:flex-row">
         <p className="flex-1 text-center text-sm lg:text-start">
-          {`© ${new Date().getFullYear()} ${constants.APP_NAME}`}
+          {`© ${await getYear()} ${constants.APP_NAME}`}
         </p>
         <ul className="flex flex-1 items-center justify-center gap-6 lg:justify-end">
-          {socials.map((social, i) => (
-            <li key={i}>
+          {socials.map((social) => (
+            <li key={social.name}>
               <Link
                 href={social.link}
                 className="hover:text-white"
                 target="_blank"
                 referrerPolicy="no-referrer"
               >
-                <social.icon className="h-4 w-4" />
+                <social.icon className="size-4" />
               </Link>
             </li>
           ))}

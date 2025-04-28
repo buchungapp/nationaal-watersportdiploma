@@ -1,10 +1,10 @@
-import { AsyncLocalStorage } from 'async_hooks'
-import { Redis } from 'ioredis'
+import { AsyncLocalStorage } from "node:async_hooks";
+import { Redis } from "ioredis";
 
 /**
  * A context-based storage for RedisInstance instances.
  */
-const storage = new AsyncLocalStorage<Redis>()
+const storage = new AsyncLocalStorage<Redis>();
 
 /**
  * A configuration interface for the RedisInstance.
@@ -13,7 +13,7 @@ export interface RedisConfiguration {
   /**
    * The URL of the Redis instance.
    */
-  url: string
+  url: string;
 }
 
 /**
@@ -26,14 +26,14 @@ export async function withRedisClient<T>(
   configuration: RedisConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { url } = configuration
-  const client = new Redis(url)
+  const { url } = configuration;
+  const client = new Redis(url);
 
-  const result = await storage.run(client, job)
+  const result = await storage.run(client, job);
 
-  await client.quit()
+  await client.quit();
 
-  return result
+  return result;
 }
 
 /**
@@ -42,9 +42,9 @@ export async function withRedisClient<T>(
  * @throws TypeError if no RedisInstance instance is found in the context.
  */
 export function useRedisClient(): Redis {
-  const client = storage.getStore()
+  const client = storage.getStore();
   if (client == null) {
-    throw new TypeError('RedisInstance not in context')
+    throw new TypeError("RedisInstance not in context");
   }
-  return client
+  return client;
 }

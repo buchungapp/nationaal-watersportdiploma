@@ -10,7 +10,7 @@ import { createClient } from "~/lib/supabase/server";
 export async function login(_prevState: unknown, formData: FormData) {
   let email: string;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     email = z.string().email().parse(formData.get("email"));
 
@@ -38,7 +38,7 @@ export async function verify(
   formData: FormData,
 ) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const otp = z.coerce.string().length(6).parse(formData.get("otp"));
 
@@ -60,12 +60,12 @@ export async function verify(
   } catch (error) {}
 
   revalidatePath("/", "layout");
-  redirect(`/profiel`);
+  redirect("/profiel");
 }
 
 export async function logout() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -82,5 +82,5 @@ export async function logout() {
   }
 
   revalidatePath("/", "layout");
-  redirect(`/`);
+  redirect("/");
 }

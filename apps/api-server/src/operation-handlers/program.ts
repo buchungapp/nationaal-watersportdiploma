@@ -1,5 +1,5 @@
-import * as api from '@nawadi/api'
-import * as application from '../application/index.js'
+import type * as api from "@nawadi/api";
+import type * as application from "../application/index.js";
 
 export const listPrograms: api.server.ListProgramsOperationHandler<
   application.Authentication
@@ -19,7 +19,7 @@ export const listPrograms: api.server.ListProgramsOperationHandler<
   return {
     status: 200,
     parameters: {},
-    contentType: 'application/json',
+    contentType: "application/json",
     entity: () => [],
-  }
-}
+  };
+};

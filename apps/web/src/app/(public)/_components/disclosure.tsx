@@ -7,7 +7,7 @@ import {
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import type { PropsWithChildren } from "react";
-import React from "react";
+import type React from "react";
 
 export default function Disclosure({
   button,
@@ -18,10 +18,10 @@ export default function Disclosure({
   size?: "base" | "sm" | "xs" | "lg";
 }>) {
   const buttonSize = {
-    base: "h-6 w-6",
-    sm: "h-5 w-5",
-    xs: "h-4 w-4",
-    lg: "h-8 w-8",
+    base: "size-6",
+    sm: "size-5",
+    xs: "size-4",
+    lg: "size-8",
   }[size];
 
   return (

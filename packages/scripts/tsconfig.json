@@ -1,23 +1,16 @@
 {
-  "extends": "@tsconfig/node20",
+  "extends": "@tsconfig/node22",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./out",
     "sourceMap": true,
-    "declaration": true,
-    "composite": true,
+    "declaration": false,
+    "composite": false,
     "lib": ["es2023"],
     "jsx": "react",
     "strict": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true
   },
-  "include": ["src/**/*"],
-  "references": [
-    {
-      "path": "../../packages/core"
-    },
-    {
-      "path": "../../packages/lib"
-    }
-  ]
+  "include": ["src/**/*"]
 }

@@ -37,12 +37,13 @@ export function ShareCertificate({ id }: { id: string }) {
           link! Wel zo veilig.
         </DialogDescription>
         <DialogBody>
-          <div className="divide-x-200 mt-2 flex items-center justify-between divide-x overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+          <div className="divide-x-200 mt-2 flex items-center justify-between divide-x overflow-hidden rounded-md border border-slate-200 bg-slate-100">
             <div className="scrollbar-none overflow-scroll pl-2">
-              <p className="whitespace-nowrap text-gray-600">{shareUrl}</p>
+              <p className="whitespace-nowrap text-slate-600">{shareUrl}</p>
             </div>
             <button
-              className="h-8 flex-none border-l bg-white px-2 hover:bg-gray-50 active:bg-gray-100"
+              type="button"
+              className="h-8 flex-none border-l bg-white px-2 hover:bg-slate-50 active:bg-slate-100"
               onClick={() => {
                 void navigator.clipboard.writeText(shareUrl);
                 setCopied(true);
@@ -50,9 +51,9 @@ export function ShareCertificate({ id }: { id: string }) {
               }}
             >
               {copied ? (
-                <CheckIcon className="h-4 w-4 text-gray-500" />
+                <CheckIcon className="size-4 text-slate-500" />
               ) : (
-                <ClipboardDocumentListIcon className="h-4 w-4 text-gray-500" />
+                <ClipboardDocumentListIcon className="size-4 text-slate-500" />
               )}
             </button>
           </div>

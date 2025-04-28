@@ -21,13 +21,14 @@ import { ShareCertificate } from "./_components/share";
 import CertificateTemplate from "./_components/template";
 
 interface Props {
-  params: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: Record<string, string | string[] | undefined>;
+  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   // read route params
   const id = params.id;
 
@@ -47,7 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params, searchParams }: Props) {
+export default async function Page(props: Props) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const [certificate] = await Promise.all([
     retrieveCertificateById(params.id).catch(() => notFound()),
   ]);
@@ -101,7 +104,7 @@ export default async function Page({ params, searchParams }: Props) {
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="text-center py-8 lg:py-12 max-w-prose mx-auto">
-        <h2 className="text-2xl font-bold text-gray-950">
+        <h2 className="text-2xl font-bold text-slate-950">
           {`Gefeliciteerd, ${certificate.student.firstName}! Een nieuw diploma!`}
         </h2>
 
@@ -128,12 +131,12 @@ export default async function Page({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <div className="rounded-sm -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-gray-200">
+      <div className="rounded-xs -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-slate-200">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 
       <div className="text-center py-8">
-        <h2 className="text-2xl font-semibold text-gray-950">En nu?</h2>
+        <h2 className="text-2xl font-semibold text-slate-950">En nu?</h2>
 
         <Suspense>
           <CertificateAdvise id={params.id} />
@@ -147,15 +150,15 @@ export default async function Page({ params, searchParams }: Props) {
           </Link>
 
           <ul className="flex items-center gap-6 justify-start">
-            {socials.map((social, i) => (
-              <li key={i}>
+            {socials.map((social) => (
+              <li key={social.name}>
                 <Link
                   href={social.link}
                   className="text-branding-dark hover:text-branding-light"
                   target="_blank"
                   referrerPolicy="no-referrer"
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="size-5" />
                 </Link>
               </li>
             ))}

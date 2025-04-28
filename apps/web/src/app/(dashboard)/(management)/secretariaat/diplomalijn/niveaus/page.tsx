@@ -23,15 +23,18 @@ async function DegreesTable({
   });
 
   // Add programs to the index
-  degrees.forEach((degree) => {
-    index.add(degree.id, degree.title!);
-  });
+  for (const degree of degrees) {
+    if (degree.title) {
+      index.add(degree.id, degree.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredGearTypes = degrees;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredGearTypes = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => degrees.find((degree) => degree.id === result)!,
     );
   }
@@ -53,11 +56,10 @@ async function DegreesTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

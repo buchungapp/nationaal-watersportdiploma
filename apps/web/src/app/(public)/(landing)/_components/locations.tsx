@@ -29,7 +29,7 @@ export default async function Locations() {
           <div className="mt-8 flex items-center gap-x-6">
             <BoxedButton
               href="/vaarlocaties"
-              className="bg-white text-gray-900"
+              className="bg-white text-slate-900"
             >
               Bekijk NWD vaarlocaties
             </BoxedButton>

@@ -1,13 +1,11 @@
 .*
+!.env.example
 
 *.tsbuildinfo
 
 !.gitignore
-!.prettierignore
-!.prettierrc
 !.editorconfig
 !.npmrc
-!.eslintrc.json
 
 node_modules/
 out/

@@ -1,11 +1,14 @@
-version: '0.2'
+version: "0.2"
 words:
   - ABCDEFGHJKLMNPQRSTVWXY
   - afrondingsdag
   - Axwo
   - BCDFGHJKLMNPQRT
+  - brondbestand
+  - Buchung
   - buchungapp
   - clsx
+  - Dehler
   - diplomeringslijn
   - esbenp
   - Gelicentieerd
@@ -14,6 +17,7 @@ words:
   - headlessui
   - hgetall
   - HISWA
+  - HLVXVGGi
   - hset
   - ianvs
   - Imuqgg
@@ -21,6 +25,7 @@ words:
   - INGBNL
   - intructeursdiploma's
   - isail
+  - kfwvxetvsoujgiighiqx
   - Krekt
   - kwaliteitspeilers
   - lpignore
@@ -53,6 +58,7 @@ words:
   - supabase
   - svgs
   - tailwindcss
+  - techmaus
   - Tera
   - TKFT
   - trivago
@@ -60,8 +66,10 @@ words:
   - veiligheids
   - Wavie
   - Wbcdfghjkmnpqrtwz
+  - wingfoilen
   - WQGR
   - Wytse
+  - ylqt
   - Zabcdefghijkmnpqrstvwxyz
 ignoreWords:
   - TERMS
@@ -79,19 +87,20 @@ ignorePaths:
   - generated/
   - apps/nwd-web/src/app/
   - apps/docs/
-  - '*.svg'
+  - "*.svg"
   - supabase/config.toml
   - packages/db/migrations/
   - locations.ts
   - packages/scripts/src/**/*.txt
   - packages/scripts/src/seed/countries.ts
   - scripts/seed-local-db.js
+  - certificate-templates.ts
 files:
-  - '**'
+  - "**"
 enableFiletypes:
-  - '*'
+  - "*"
 dictionaries:
   - sql
   - nl-nl
 import:
-  - '@cspell/dict-nl-nl/cspell-ext.json'
+  - "@cspell/dict-nl-nl/cspell-ext.json"

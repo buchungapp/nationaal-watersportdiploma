@@ -23,15 +23,18 @@ async function GearTypeTable({
   });
 
   // Add programs to the index
-  gearTypes.forEach((gearType) => {
-    index.add(gearType.id, gearType.title!);
-  });
+  for (const gearType of gearTypes) {
+    if (gearType.title) {
+      index.add(gearType.id, gearType.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredGearTypes = gearTypes;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredGearTypes = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => gearTypes.find((gearType) => gearType.id === result)!,
     );
   }
@@ -53,11 +56,10 @@ async function GearTypeTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

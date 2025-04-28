@@ -30,10 +30,11 @@ async function findPost(slug: string) {
 }
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const post = await findPost(params.slug);
 
   if (!post) {
@@ -62,7 +63,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Page({ params }: Props) {
+export default async function Page(props: Props) {
+  const params = await props.params;
   const [post, relatedArticles, categories] = await Promise.all([
     findPost(params.slug),
     getHelpArticles().then((articles) =>
@@ -80,6 +82,7 @@ export default async function Page({ params }: Props) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -121,13 +124,13 @@ export default async function Page({ params }: Props) {
               <h1 className="text-3xl font-bold lg:text-4xl text-branding-dark break-words hyphens-auto">
                 {post.metadata.title}
               </h1>
-              <p className="text-lg/6 text-gray-800 mt-4 text-justify break-words hyphens-auto">
+              <p className="text-lg/6 text-slate-800 mt-4 text-justify break-words hyphens-auto">
                 {post.metadata.summary}
               </p>
             </div>
 
-            <div className="flex items-center gap-x-4 text-gray-500">
-              <span className="h-4 w-0.5 rounded-full bg-zinc-200"></span>
+            <div className="flex items-center gap-x-4 text-slate-500">
+              <span className="h-4 w-0.5 rounded-full bg-zinc-200" />
               <span className="flex gap-x-1.5">
                 <p>Laatste update</p>
 
@@ -146,10 +149,12 @@ export default async function Page({ params }: Props) {
           </article>
         </div>
 
-        <div className="flex flex-col divide-y divide-gray-200 space-y-8 lg:border-l lg:border-gray-200 lg:pl-6">
+        <div className="flex flex-col divide-y divide-slate-200 space-y-8 lg:border-l lg:border-slate-200 lg:pl-6">
           {/* Related articles */}
           <div className="grid gap-4">
-            <h2 className="text-gray-600 text-sm font-semibold">Gerelateerd</h2>
+            <h2 className="text-slate-600 text-sm font-semibold">
+              Gerelateerd
+            </h2>
             <ul className="space-y-3.5 -mx-4">
               {relatedArticles
                 .filter((article) => article.category !== "vereniging")
@@ -171,7 +176,7 @@ export default async function Page({ params }: Props) {
 
           {/* Socials */}
           <div className="grid gap-4 pt-8">
-            <h2 className="text-gray-600 text-sm font-semibold">
+            <h2 className="text-slate-600 text-sm font-semibold">
               Deel dit artikel
             </h2>
             <ul className="flex items-center gap-x-5">
@@ -182,7 +187,7 @@ export default async function Page({ params }: Props) {
                   title="Deel via WhatsApp"
                   target="_blank"
                 >
-                  <Whatsapp className="text-branding-dark h-5 w-5" />
+                  <Whatsapp className="text-branding-dark size-5" />
                 </Link>
               </li>
 
@@ -193,7 +198,7 @@ export default async function Page({ params }: Props) {
                   title="Deel via LinkedIn"
                   target="_blank"
                 >
-                  <LinkedIn className="text-branding-dark h-5 w-5" />
+                  <LinkedIn className="text-branding-dark size-5" />
                 </Link>
               </li>
 
@@ -204,7 +209,7 @@ export default async function Page({ params }: Props) {
                   title="Deel via X"
                   target="_blank"
                 >
-                  <X className="text-branding-dark h-5 w-5" />
+                  <X className="text-branding-dark size-5" />
                 </Link>
               </li>
 
@@ -213,14 +218,14 @@ export default async function Page({ params }: Props) {
                 <CopyToClipboard
                   copyValue={`${constants.WEBSITE_URL}/help/artikel/${post.slug}`}
                 >
-                  <LinkIcon className="h-5 w-5 text-branding-dark" />
+                  <LinkIcon className="size-5 text-branding-dark" />
                 </CopyToClipboard>
               </li>
 
               {/* Print */}
               <li>
                 <PrintPage>
-                  <PrinterIcon className="h-5 w-5 text-branding-dark" />
+                  <PrinterIcon className="size-5 text-branding-dark" />
                 </PrintPage>
               </li>
             </ul>

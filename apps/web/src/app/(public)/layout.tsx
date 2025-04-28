@@ -12,6 +12,7 @@ import { BASE_URL } from "~/constants";
 
 import Analytics from "../_components/analytics";
 import "../globals.css";
+import { Suspense } from "react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,7 +26,8 @@ export const metadata: Metadata = {
     template: `%s | ${constants.APP_NAME}`,
   },
   applicationName: constants.APP_NAME,
-  description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+  description:
+    "Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.",
   metadataBase: BASE_URL,
   icons: {
     shortcut: "/favicon.ico",
@@ -38,15 +40,14 @@ export const metadata: Metadata = {
       default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,
       template: `%s | ${constants.APP_NAME}`,
     },
-    description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+    description:
+      "Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.",
     url: "/",
     siteName: constants.APP_NAME,
     locale: "nl_NL",
     type: "website",
   },
 };
-
-export const runtime = "nodejs";
 
 export default function RootLayout({
   children,
@@ -58,26 +59,27 @@ export default function RootLayout({
       lang="nl"
       className={clsx(
         inter.variable,
-        "h-full scroll-smooth antialiased text-gray-900 bg-white",
+        "h-full scroll-smooth antialiased text-slate-900 bg-white",
       )}
     >
       <body className="h-full">
-        <CommonProviders>
-          <MarketingProviders>
-            {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
-            <div>
-              <Header />
-              <div id="content" className="[--header-height:112px]">
-                {children}
-              </div>
-              <Footer />
+        <Suspense>
+          <CommonProviders />
+        </Suspense>
+        <MarketingProviders>
+          {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
+          <div>
+            <Header />
+            <div id="content" className="[--header-height:112px]">
+              {children}
             </div>
-          </MarketingProviders>
+            <Footer />
+          </div>
+        </MarketingProviders>
 
-          <Toaster richColors />
-          <SpeedInsights />
-          <Analytics />
-        </CommonProviders>
+        <Toaster richColors />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

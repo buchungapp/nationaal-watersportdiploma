@@ -8,14 +8,17 @@ import type { PropsWithChildren } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
-import { supabaseBrowser } from "~/lib/supabase/client";
+import { createClient } from "~/lib/supabase/client";
+import { invariant } from "~/utils/invariant";
 import { LocationsMapContainer } from "../(public)/_components/locations-map";
 
 if (typeof window !== "undefined") {
   const currentUrl = new URL(BASE_URL);
   currentUrl.pathname = "/ingest";
 
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+  invariant(process.env.NEXT_PUBLIC_POSTHOG_KEY, "Missing PostHog key");
+
+  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
     ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     api_host: `${currentUrl.toString().replace(/\/$/, "")}`,
     capture_pageview: false, // Disable automatic pageview capture, as we capture manually
@@ -32,7 +35,7 @@ const AppContext = createContext<{
   scrollPosition: number;
 }>({
   isMobileMenuOpen: false,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   setMobileMenuOpen: () => {},
   scrollPosition: 0,
 });
@@ -51,7 +54,7 @@ export function useIsSticky() {
   return scrollPosition > TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
 }
 
-export function CommonProviders({ children }: { children: React.ReactNode }) {
+export function CommonProviders({ children }: { children?: React.ReactNode }) {
   return (
     <PHProvider>
       <SessionProvider>{children}</SessionProvider>
@@ -67,10 +70,11 @@ function SessionProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const posthog = usePostHog();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabaseBrowser.auth.onAuthStateChange((event, session) => {
+    } = createClient().auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
         setSession(null);
         posthog.reset();
@@ -119,6 +123,7 @@ export function MarketingProviders({
 
   const isClient = typeof window !== "undefined";
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!isClient) return;
 

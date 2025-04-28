@@ -1,19 +1,19 @@
 "use client";
 
 import {
-  closestCenter,
   DndContext,
   type DragEndEvent,
   type SensorDescriptor,
   type SensorOptions,
+  closestCenter,
 } from "@dnd-kit/core";
 import {
   restrictToHorizontalAxis,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -22,7 +22,7 @@ import type { PopoverPanelProps } from "@headlessui/react";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/16/solid";
 import type { Column, Table as TableType } from "@tanstack/react-table";
 import { clsx } from "clsx";
-import { createContext, useContext, type PropsWithChildren } from "react";
+import { type PropsWithChildren, createContext, useContext } from "react";
 import DragIcon from "~/app/_components/drag-icon";
 import type { useColumnOrdering } from "../_hooks/use-column-ordering";
 import { useCustomSensors } from "../_hooks/use-custom-sensors";
@@ -155,7 +155,7 @@ export function TableDisplay<TData>({
         <Divider />
         <Button
           plain
-          className="w-full rounded-none"
+          className="rounded-none w-full"
           onClick={() => {
             if (!table.getIsAllColumnsVisible())
               table.toggleAllColumnsVisible();
@@ -196,7 +196,7 @@ function SortableItem({
     <div
       style={style}
       className={clsx(
-        "flex items-center justify-between px-4 py-1.5 gap-x-2.5 hover:bg-slate-100 relative cursor-default",
+        "relative flex justify-between items-center gap-x-2.5 hover:bg-slate-100 px-4 py-1.5 cursor-default",
         isDisabled ? "opacity-50" : "opacity-100",
       )}
     >
@@ -208,7 +208,7 @@ function SortableItem({
 
         <Label className="w-full">
           {typeof column.columnDef.header === "function"
-            ? column.columnDef.meta?.label
+            ? column.columnDef.meta?.header?.label
             : column.columnDef.header}
         </Label>
       </CheckboxField>

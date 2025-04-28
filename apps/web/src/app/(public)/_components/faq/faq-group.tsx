@@ -7,6 +7,7 @@ export default function FaqGroup({ faqs }: { faqs: FaqType[] }) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
@@ -23,14 +24,15 @@ export default function FaqGroup({ faqs }: { faqs: FaqType[] }) {
         }}
       />
 
-      <dl className="divide-y divide-gray-900/10 rounded-lg border border-gray-900/10">
+      <dl className="divide-y divide-slate-900/10 rounded-lg border border-slate-900/10">
         {faqs.length < 1 ? (
-          <div className="p-4 text-center text-gray-900/50">
+          <div className="p-4 text-center text-slate-900/50">
             Er zijn geen vragen gevonden.
           </div>
         ) : null}
         {faqs.map(({ answer, question }) => (
           <Faq key={question} question={question}>
+            {/* biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation> */}
             <div dangerouslySetInnerHTML={{ __html: answer }} />
           </Faq>
         ))}

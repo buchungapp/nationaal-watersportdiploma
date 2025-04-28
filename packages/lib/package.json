@@ -4,13 +4,9 @@
   "private": true,
   "description": "",
   "type": "module",
-  "main": "./out/main.js",
-  "module": "./out/main.js",
-  "browser": "./out/browser.js",
-  "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "types": "./out/main.d.ts",
+      "types": "./src/main.ts",
       "browser": "./out/browser.js",
       "default": "./out/main.js"
     }
@@ -23,6 +19,7 @@
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
+    "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test ./out/**/*.test.js"
   },
@@ -33,12 +30,12 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.14.10",
+    "@types/node": "catalog:",
     "chrono-node": "^2.7.6",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
-    "typescript": "5.4.5"
+    "@tsconfig/node22": "catalog:",
+    "typescript": "catalog:"
   }
 }

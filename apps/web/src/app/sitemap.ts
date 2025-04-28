@@ -1,5 +1,5 @@
 import { constants } from "@nawadi/lib";
-import { type MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 import {
   getHelpArticles,
   getHelpCategories,
@@ -97,6 +97,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
       {
         url: `${BASE_URL}/actueel`,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      },
+      {
+        url: `${BASE_URL}/cashback`,
         changeFrequency: "weekly",
         priority: 0.8,
       },

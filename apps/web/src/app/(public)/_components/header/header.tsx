@@ -17,6 +17,10 @@ export default function Header() {
       <Nav
         items={[
           {
+            label: "Cashback",
+            href: "/cashback",
+          },
+          {
             label: "Vaarlocaties",
             href: "/vaarlocaties",
           },

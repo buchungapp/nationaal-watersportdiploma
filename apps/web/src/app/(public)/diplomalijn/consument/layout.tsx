@@ -1,6 +1,8 @@
+"use cache";
 import { constants } from "@nawadi/lib";
 
 import type { Metadata } from "next";
+import { unstable_cacheLife } from "next/cache";
 import MdxPageHeader from "~/app/(public)/_components/mdx-page-header";
 import { Prose } from "~/app/(public)/_components/prose";
 import { getAllDiplomalijnConsumentenPages } from "~/lib/mdx-pages";
@@ -20,6 +22,8 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  unstable_cacheLife("days");
+
   const [pages, disciplines] = await Promise.all([
     getAllDiplomalijnConsumentenPages(),
     listDisciplines(),
@@ -28,13 +32,20 @@ export default async function Layout({
   return (
     <main>
       <MdxPageHeader pages={pages} />
-      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
+      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr_3fr] lg:px-16">
         <div className="flex justify-end h-full">
           <SideNavDiplomalijn
             pages={{
-              general: pages.filter((page) => {
-                return page.pathSegments.length === 0;
-              }),
+              general: [
+                ...pages.filter((page) => {
+                  return page.pathSegments.length === 0;
+                }),
+                {
+                  type: "external",
+                  href: "/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd#veelgestelde-vragen",
+                  title: "Veelgestelde vragen",
+                },
+              ],
             }}
             disciplines={disciplines}
           />

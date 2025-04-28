@@ -1,11 +1,7 @@
 import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
-import {
-  createSearchParamsCache,
-  parseAsString,
-  parseAsStringLiteral,
-} from "nuqs/server";
+import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
@@ -17,13 +13,20 @@ import {
 } from "~/lib/nwd";
 import StudentsTable from "./_components/students-table";
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { location: string; cohort: string };
-  searchParams: Record<string, string | string[] | undefined>;
+const searchParamsParser = (defaultValue: "allen" | "geclaimd") =>
+  createLoader({
+    overzicht: parseAsStringLiteral(["allen", "geclaimd"] as const).withDefault(
+      defaultValue,
+    ),
+    query: parseAsString,
+  });
+
+export default async function Page(props: {
+  params: Promise<{ location: string; cohort: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const cohortPromise = retrieveLocationByHandle(params.location).then(
     (location) =>
       retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
@@ -49,12 +52,7 @@ export default async function Page({
   const defaultView =
     !!instructorAllocation && !isCohortAdmin ? "geclaimd" : "allen";
 
-  const parsedSq = createSearchParamsCache({
-    overzicht: parseAsStringLiteral(["allen", "geclaimd"] as const).withDefault(
-      defaultView,
-    ),
-    query: parseAsString,
-  }).parse(searchParams);
+  const parsedSq = searchParamsParser(defaultView)(searchParams);
 
   let filteredStudents = students;
 
@@ -84,7 +82,7 @@ export default async function Page({
   });
 
   // Add students to the index
-  filteredStudents.forEach((student) => {
+  for (const student of filteredStudents) {
     index.add({
       id: student.id,
       name: [
@@ -105,7 +103,7 @@ export default async function Page({
         .join(" "),
       gearType: student.studentCurriculum?.gearType.title,
     });
-  });
+  }
 
   const searchQuery = parsedSq.query;
 
@@ -125,7 +123,7 @@ export default async function Page({
 
   return (
     <StudentsTable
-      view={instructorAllocation ? defaultView : null}
+      view={instructorAllocation ? parsedSq.overzicht : null}
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}

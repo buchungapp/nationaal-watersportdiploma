@@ -1,7 +1,7 @@
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { micromark } from "micromark";
-import { unstable_cache } from "next/cache";
+import { unstable_cacheLife } from "next/cache";
 import slugify from "slugify";
 import { z } from "zod";
 
@@ -67,9 +67,7 @@ async function retrieveQuestions({
         }
 
         validQuestions.push(parsed);
-      } catch (err) {
-        continue;
-      }
+      } catch (err) {}
     }
 
     return validQuestions.map(([category, question, answer]) => ({
@@ -84,13 +82,13 @@ async function retrieveQuestions({
   }
 }
 
-export function listFaqs({
+export async function listFaqs({
   filter,
 }: {
   filter?: FaqFilters;
 } = {}) {
-  return unstable_cache(
-    () => retrieveQuestions({ filter }),
-    [`faq-diplomalijn`, `faq-diplomalijn-${JSON.stringify(filter)}`],
-  )();
+  "use cache";
+  unstable_cacheLife("days");
+
+  return retrieveQuestions({ filter });
 }

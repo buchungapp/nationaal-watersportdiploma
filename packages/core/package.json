@@ -3,42 +3,40 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./out/main.js",
-  "module": "./out/main.js",
-  "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "types": "./out/main.d.ts",
-      "default": "./out/main.js"
+      "import": "./out/main.js",
+      "types": "./src/main.ts"
     }
   },
   "scripts": {
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
+    "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test './out/**/*.test.js'"
+    "test": "node --test \"./out/**/*.test.js\""
   },
   "dependencies": {
-    "@nawadi/db": "workspace:*",
-    "@nawadi/lib": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
     "@supabase/supabase-js": "^2.44.3",
-    "@types/node": "^20.14.10",
+    "@types/node": "catalog:",
     "dayjs": "^1.11.11",
-    "drizzle-orm": "^0.31.4",
+    "drizzle-orm": "catalog:",
     "drizzle-toolbelt": "^1.2.0",
     "drizzle-zod": "^0.5.1",
     "file-type": "^19.1.1",
+    "flat": "^6.0.1",
     "image-size": "^1.1.1",
     "ioredis": "^5.4.1",
     "nanoid": "^5.0.7",
-    "postgres": "^3.4.4",
-    "zod": "^3.23.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
+    "@nawadi/db": "workspace:*",
+    "@nawadi/lib": "workspace:*",
+    "@tsconfig/node22": "catalog:",
     "type-fest": "^4.21.0",
-    "typescript": "5.4.5"
+    "typescript": "catalog:"
   }
 }

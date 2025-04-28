@@ -1,26 +1,23 @@
 "use client";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import clsx from "clsx";
 import { useParams } from "next/navigation";
+import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/app/(dashboard)/_components/table";
+  DefaultTableCell,
+  DefaultTableRows,
+  NoTableRows,
+} from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import dayjs from "~/lib/dayjs";
 import type { listCohortsForLocation } from "~/lib/nwd";
 
@@ -77,60 +74,27 @@ export default function CohortsTable({
   return (
     <>
       <Table
-        className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+        className="mt-4 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
         dense
       >
-        <TableHead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHeader
-                  key={header.id}
-                  className={clsx(header.column.columnDef.meta?.align)}
-                >
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext(),
-                  )}
-                </TableHeader>
-              ))}
-            </TableRow>
-          ))}
-        </TableHead>
+        <DefaultTableHead table={table} />
         <TableBody>
-          {table.getRowCount() <= 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                Geen cohorten gevonden.
-              </TableCell>
-            </TableRow>
-          ) : null}
-          {table.getRowModel().rows.map((row) => (
-            <TableRow
-              className={clsx(
-                row.getIsSelected()
-                  ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
-                  : "",
-              )}
-              key={row.id}
-              href={`/locatie/${params.location as string}/cohorten/${row.original.handle}`}
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <TableCell
-                  key={cell.id}
-                  className={clsx(cell.column.columnDef.meta?.align)}
-                  // suppressLinkBehavior={
-                  //   cell.column.columnDef.meta?.suppressLinkBehavior
-                  // }
-                >
-                  {index === 0 && row.getIsSelected() && (
-                    <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
-                  )}
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
+          <NoTableRows table={table}>Geen cohorten gevonden.</NoTableRows>
+          <DefaultTableRows
+            table={table}
+            href={(row) =>
+              `/locatie/${params.location as string}/cohorten/${row.original.handle}`
+            }
+          >
+            {(cell, index, row) => (
+              <DefaultTableCell
+                key={cell.id}
+                cell={cell}
+                index={index}
+                row={row}
+              />
+            )}
+          </DefaultTableRows>
         </TableBody>
       </Table>
 

@@ -5,13 +5,13 @@ import { getHelpFaqs } from "~/lib/article-2";
 import Breadcrumb from "../../_components/breadcrumb";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata(
-  {}: PageProps,
+  _: PageProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const [parentMeta] = await Promise.all([parent]);
@@ -20,13 +20,13 @@ export async function generateMetadata(
     title: "Veelgestelde vragen",
     description: "Ontdek antwoorden op veelgestelde vragen.",
     alternates: {
-      canonical: `/help/veelgestelde-vragen`,
+      canonical: "/help/veelgestelde-vragen",
     },
     openGraph: {
       ...parentMeta.openGraph,
       title: "Veelgestelde vragen",
       description: parentMeta.openGraph?.description,
-      url: `/help/veelgestelde-vragen`,
+      url: "/help/veelgestelde-vragen",
     },
   };
 }
@@ -50,7 +50,7 @@ export default async function Page() {
         <h1 className="text-3xl font-bold lg:text-4xl xl:text-5xl text-branding-dark">
           Veelgestelde vragen
         </h1>
-        <p className="text-lg/6 text-gray-800 mt-4">
+        <p className="text-lg/6 text-slate-800 mt-4">
           Ontdek antwoorden op veelgestelde vragen.
         </p>
       </div>
@@ -60,11 +60,11 @@ export default async function Page() {
           <li key={question.slug}>
             <Link
               href={`/help/veelgestelde-vragen/${question.slug}`}
-              className="group flex gap-1 justify-between text-base font-semibold transition-colors text-branding-dark hover:bg-branding-dark/10 w-full rounded-2xl bg-gray-100 px-6 py-4"
+              className="group flex gap-1 justify-between text-base font-semibold transition-colors text-branding-dark hover:bg-branding-dark/10 w-full rounded-2xl bg-slate-100 px-6 py-4"
             >
               <span className="mr-2">{question.metadata.question}</span>
               <ArrowLongRightIcon
-                className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1"
+                className="size-5 shrink-0 transition-transform group-hover:translate-x-1"
                 strokeWidth={2.5}
               />
             </Link>

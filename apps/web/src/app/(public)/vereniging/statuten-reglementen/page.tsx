@@ -43,7 +43,7 @@ export default function Page() {
           target="_blank"
           className="flex w-fit text-sm items-center gap-2 transition-colors rounded-full bg-branding-light hover:bg-branding-dark px-3.5 py-1.5 text-white"
         >
-          <ArrowDownTrayIcon className="h-4 w-4" strokeWidth={2} />
+          <ArrowDownTrayIcon className="size-4" strokeWidth={2} />
           Download Verenigingsstatuten
         </Link>
       </div>

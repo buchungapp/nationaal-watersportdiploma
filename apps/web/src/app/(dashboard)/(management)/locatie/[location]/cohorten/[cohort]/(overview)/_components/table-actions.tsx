@@ -1,6 +1,10 @@
-import type { FormEventHandler } from "react";
-import { useCallback, useState } from "react";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import {
+  type FormEventHandler,
+  useActionState,
+  useCallback,
+  useState,
+} from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -20,11 +24,8 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
-  Dropdown,
-  DropdownButton,
   DropdownItem,
   DropdownLabel,
-  DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import {
@@ -32,6 +33,7 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
+import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import Spinner from "~/app/_components/spinner";
 import {
   assignInstructorToStudents,
@@ -217,7 +219,7 @@ function StartProgramDialog({
               name="curriculumId"
               value={activeCurriculumForProgram?.curriculum?.id ?? ""}
             />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
+            <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
               <Field>
                 <Label>Programma</Label>
                 {/* TODO: this combobox is temporary used should be from catalyst */}
@@ -317,21 +319,18 @@ export function ActionButtons(props: Props) {
 
   return (
     <>
-      <Dropdown>
-        <DropdownButton aria-label="Bulk actie">Bulk actie</DropdownButton>
-        <DropdownMenu anchor="top">
-          <Claim {...props} />
-          <StartProgram
-            {...props}
-            openDialog={() => setIsDialogOpen("start-program")}
-          />
-          <AssignInstructor
-            {...props}
-            openDialog={() => setIsDialogOpen("assign-instructor")}
-          />
-          <AddTag {...props} openDialog={() => setIsDialogOpen("add-tag")} />
-        </DropdownMenu>
-      </Dropdown>
+      <TableSelectionButton>
+        <Claim {...props} />
+        <StartProgram
+          {...props}
+          openDialog={() => setIsDialogOpen("start-program")}
+        />
+        <AssignInstructor
+          {...props}
+          openDialog={() => setIsDialogOpen("assign-instructor")}
+        />
+        <AddTag {...props} openDialog={() => setIsDialogOpen("add-tag")} />
+      </TableSelectionButton>
 
       <StartProgramDialog
         {...props}
@@ -566,35 +565,33 @@ function AddTagDialog({
     });
   };
 
-  const submit: FormEventHandler<HTMLFormElement> = useCallback(
-    (event) => {
-      event.preventDefault();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  const submit: FormEventHandler<HTMLFormElement> = useCallback((event) => {
+    event.preventDefault();
 
-      async function updateTags() {
-        for (const row of rows) {
-          const distinctTags = new Set<string>([
-            ...row.tags,
-            ...tagsToAdd.map(({ value }) => value as string),
-          ]);
+    async function updateTags() {
+      for (const row of rows) {
+        const distinctTags = new Set<string>([
+          ...row.tags,
+          ...tagsToAdd.map(({ value }) => value as string),
+        ]);
 
-          await setTags({
-            cohortId,
-            allocationId: row.id,
-            tags: Array.from(distinctTags),
-          });
-        }
+        await setTags({
+          cohortId,
+          allocationId: row.id,
+          tags: Array.from(distinctTags),
+        });
       }
+    }
 
-      toast.promise(updateTags(), {
-        loading: "Tags toevoegen",
-        success: "Tags toegevoegd",
-        error: "Er is iets misgegaan",
-      });
+    toast.promise(updateTags(), {
+      loading: "Tags toevoegen",
+      success: "Tags toegevoegd",
+      error: "Er is iets misgegaan",
+    });
 
-      setIsOpen(false);
-    },
-    [cohortId, rows, tagsToAdd],
-  );
+    setIsOpen(false);
+  }, []);
 
   const { data: allCohortTags } = useSWR(
     ["distinctTagsForCohort", cohortId],

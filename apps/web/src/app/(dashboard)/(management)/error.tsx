@@ -6,6 +6,7 @@ import { Button } from "../_components/button";
 import { Heading, Subheading } from "../_components/heading";
 import { Code, Text } from "../_components/text";
 
+// biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
 export default function Error({
   error,
   reset,

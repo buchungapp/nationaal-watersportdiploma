@@ -26,15 +26,18 @@ async function ProgramTable({
   });
 
   // Add programs to the index
-  courses.forEach((course) => {
-    index.add(course.id, course.title!);
-  });
+  for (const course of courses) {
+    if (course.title) {
+      index.add(course.id, course.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredCourses = courses;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCourses = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => courses.find((course) => course.id === result)!,
     );
   }
@@ -57,11 +60,10 @@ async function ProgramTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

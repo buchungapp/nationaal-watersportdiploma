@@ -3,11 +3,11 @@ import { Suspense } from "react";
 import { createClient } from "~/lib/supabase/server";
 
 async function SessionCheckLogic() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await supabase.auth.getUser();
 
-  if (!!data.user) {
+  if (data.user) {
     redirect("/account");
   }
 

@@ -1,13 +1,10 @@
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import React from "react";
+import type React from "react";
 
 export function GridList({ children }: PropsWithChildren) {
   return (
-    <ul
-      role="list"
-      className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2 xl:gap-x-6"
-    >
+    <ul className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2 xl:gap-x-6">
       {children}
     </ul>
   );
@@ -15,7 +12,7 @@ export function GridList({ children }: PropsWithChildren) {
 
 export function GridListItem({ children }: PropsWithChildren) {
   return (
-    <li className="overflow-hidden rounded-xl border border-gray-200">
+    <li className="overflow-hidden rounded-xl border border-slate-200">
       {children}
     </li>
   );
@@ -30,7 +27,7 @@ export function GridListHeader({
   return (
     <Link
       {...linkProps}
-      className="flex items-center gap-x-4 border-b border-gray-900/5 bg-branding-light/10 p-6"
+      className="flex items-center gap-x-4 border-b border-slate-900/5 bg-branding-light/10 p-6"
     >
       {children}
     </Link>

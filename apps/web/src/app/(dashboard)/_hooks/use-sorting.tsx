@@ -1,6 +1,6 @@
 import type { SortingState } from "@tanstack/react-table";
-import { createParser, useQueryState } from "nuqs";
-import { useMemo } from "react";
+import { parseAsString, useQueryState } from "nuqs";
+import { useCallback, useMemo } from "react";
 import type { Optional } from "~/types/optional";
 
 interface SortableColumn {
@@ -8,30 +8,52 @@ interface SortableColumn {
   enableSorting?: boolean;
 }
 
-const parseAsSorting = (validSortingKeys: string[]) => {
-  return createParser<SortingState>({
-    parse(queryValue) {
-      const sorting = queryValue.split(",");
-      const sortingState = sorting.map((sort) => {
-        const [id, direction] = sort.split(".");
+function parseSorting(queryValue: string, validSortingKeys: string[]) {
+  const sorting = queryValue.split(",");
+  const sortingState = sorting.map((sort) => {
+    const [id, direction] = sort.split(".");
 
-        return {
-          id,
-          desc: direction === "za",
-        };
-      });
-
-      return sortingState.filter(
-        (sort) => sort.id && validSortingKeys.includes(sort.id),
-      ) as SortingState;
-    },
-    serialize(value) {
-      return value
-        .map((sort) => `${sort.id}.${sort.desc ? "za" : "az"}`)
-        .join(",");
-    },
+    return {
+      id,
+      desc: direction === "za",
+    };
   });
-};
+
+  return sortingState.filter(
+    (sort) => sort.id && validSortingKeys.includes(sort.id),
+  ) as SortingState;
+}
+
+function serializeSorting(value: SortingState | null) {
+  if (!value) return "";
+  return value.map((sort) => `${sort.id}.${sort.desc ? "za" : "az"}`).join(",");
+}
+
+// TODO: using the parseAsSorting function, causes an infinite loop with tanstack table, this work around is not nice
+// const parseAsSorting = (validSortingKeys: string[]) => {
+//   return createParser<SortingState>({
+//     parse(queryValue) {
+//       const sorting = queryValue.split(",");
+//       const sortingState = sorting.map((sort) => {
+//         const [id, direction] = sort.split(".");
+
+//         return {
+//           id,
+//           desc: direction === "za",
+//         };
+//       });
+
+//       return sortingState.filter(
+//         (sort) => sort.id && validSortingKeys.includes(sort.id),
+//       ) as SortingState;
+//     },
+//     serialize(value) {
+//       return value
+//         .map((sort) => `${sort.id}.${sort.desc ? "za" : "az"}`)
+//         .join(",");
+//     },
+//   });
+// };
 
 export function getSortableColumnIds(
   columns: Optional<SortableColumn, "id">[],
@@ -47,23 +69,42 @@ export function getSortableColumnIds(
 export function useSorting({
   sortableColumnIds,
   defaultSorting = [],
+  paramPrefix,
 }: {
   sortableColumnIds: SortableColumn["id"][];
   defaultSorting?: SortingState;
+  paramPrefix?: string;
 }) {
-  const [sorting, setSorting] = useQueryState<SortingState>(
-    "sorteer",
-    parseAsSorting(sortableColumnIds).withDefault(defaultSorting),
+  // TODO: using the parseAsSorting function, causes an infinite loop with tanstack table, this work around is not nice
+  const [sorting, setSorting] = useQueryState(
+    `${paramPrefix ? `${paramPrefix}-` : ""}sorteer`,
+    parseAsString.withDefault(serializeSorting(defaultSorting)),
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  const wrapper = useCallback(
+    (
+      value: SortingState | ((old: SortingState) => SortingState | null) | null,
+    ) => {
+      const newValue =
+        typeof value === "function"
+          ? value(parseSorting(sorting, sortableColumnIds))
+          : value;
+
+      setSorting(serializeSorting(newValue));
+    },
+    [setSorting, sorting],
+  );
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const options = useMemo(
     () => ({
       state: {
-        sorting,
+        sorting: parseSorting(sorting, sortableColumnIds),
       },
-      onSortingChange: setSorting,
+      onSortingChange: wrapper,
     }),
-    [JSON.stringify(sorting), setSorting],
+    [sorting, wrapper],
   );
 
   return options;

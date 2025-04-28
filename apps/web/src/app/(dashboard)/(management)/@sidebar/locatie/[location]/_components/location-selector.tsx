@@ -41,7 +41,7 @@ export async function LocationSelector({
         disabled={disabled}
       >
         <Avatar
-          className="size-6 flex-shrink-0"
+          className="size-6 shrink-0"
           initials={(currentLocation.name ?? currentLocation.handle).slice(
             0,
             2,

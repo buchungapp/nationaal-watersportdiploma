@@ -1,4 +1,3 @@
-import { BarChart } from "@tremor/react";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
@@ -12,13 +11,12 @@ import {
 
 dayjs.extend(weekOfYear);
 
-export default async function Page({
-  params,
-}: Readonly<{
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-}>) {
+  }>;
+}) {
+  const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 
   const [persons, certificates, disciplines] = await Promise.all([
@@ -46,17 +44,20 @@ export default async function Page({
             count: 0,
             certificates: [],
             ...disciplines.reduce(
-              (perDiscipline, discipline) => ({
-                ...perDiscipline,
-                [discipline.title!]: 0,
-              }),
+              (perDiscipline, discipline) => {
+                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                perDiscipline[discipline.title!] = 0;
+                return perDiscipline;
+              },
               {} as Record<string, number>,
             ),
           };
         }
 
-        acc[week]!.certificates.push(certificate);
+        acc[week]?.certificates.push(certificate);
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         acc[week]!.count += 1;
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         (acc[week]![certificate.program.course.discipline.title!] as number) +=
           1;
 
@@ -84,7 +85,7 @@ export default async function Page({
         <Subheading>Personen</Subheading>
       </div>
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-3">
+      <div className="gap-8 grid lg:grid-cols-3 mt-4">
         {[
           {
             id: "students",
@@ -111,10 +112,10 @@ export default async function Page({
           return (
             <div key={stat.id}>
               <Divider />
-              <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">
+              <div className="mt-6 font-medium sm:text-sm/6 text-lg/6">
                 {stat.title}
               </div>
-              <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8 tabular-nums">
+              <div className="mt-3 font-semibold tabular-nums sm:text-2xl/8 text-3xl/8">
                 {stat.count}
               </div>
             </div>
@@ -126,7 +127,7 @@ export default async function Page({
         <Subheading>Diploma's</Subheading>
       </div>
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-3">
+      <div className="gap-8 grid lg:grid-cols-3 mt-4">
         {[
           {
             id: "year",
@@ -155,10 +156,10 @@ export default async function Page({
           return (
             <div key={stat.id}>
               <Divider />
-              <div className="mt-6 text-lg/6 font-medium sm:text-sm/6">
+              <div className="mt-6 font-medium sm:text-sm/6 text-lg/6">
                 {stat.title}
               </div>
-              <div className="mt-3 text-3xl/8 font-semibold sm:text-2xl/8 tabular-nums">
+              <div className="mt-3 font-semibold tabular-nums sm:text-2xl/8 text-3xl/8">
                 {stat.count}
               </div>
             </div>
@@ -166,24 +167,25 @@ export default async function Page({
         })}
       </div>
 
-      <BarChart
+      {/* <BarChart
         data={certificatesPerWeek}
         index="week"
         categories={
           disciplines
             .filter((discipline) => {
               return certificatesPerWeek.some(
+                // biome-ignore lint/style/noNonNullAssertion: <explanation>
                 (week) => (week[discipline.title!]! as number) > 0,
               );
             })
             .map((discipline) => discipline.title) as string[]
         }
         colors={["blue", "violet", "fuchsia", "cyan"]}
-        yAxisWidth={30}
+        yAxisWidth={60}
         showLegend={false}
         stack={true}
         className="mt-12 h-72"
-      />
+      /> */}
     </>
   );
 }

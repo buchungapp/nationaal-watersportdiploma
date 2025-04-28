@@ -1,8 +1,8 @@
-import { ExtractTablesWithRelations } from 'drizzle-orm'
-import { PostgresJsTransaction } from 'drizzle-orm/postgres-js'
-import * as schema from './schema/index.js'
+import type { ExtractTablesWithRelations } from "drizzle-orm";
+import type { NodePgTransaction } from "drizzle-orm/node-postgres";
+import type { FullSchema } from "./types.js";
 
-export type Transaction = PostgresJsTransaction<
-  typeof schema,
-  ExtractTablesWithRelations<typeof schema>
->
+export type Transaction = NodePgTransaction<
+  FullSchema,
+  ExtractTablesWithRelations<FullSchema>
+>;

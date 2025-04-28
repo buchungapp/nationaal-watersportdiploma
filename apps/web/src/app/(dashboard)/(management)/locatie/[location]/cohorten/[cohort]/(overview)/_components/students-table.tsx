@@ -1,44 +1,31 @@
 "use client";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  ArrowsUpDownIcon,
-  XMarkIcon,
-} from "@heroicons/react/16/solid";
-import type {
-  OnChangeFn,
-  RowSelectionState,
-  SortDirection,
-} from "@tanstack/react-table";
+import type { OnChangeFn, RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import clsx from "clsx";
 import { useParams } from "next/navigation";
 import React from "react";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
-import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
+import { Table, TableBody } from "~/app/(dashboard)/_components/table";
+import { TableSelection } from "~/app/(dashboard)/_components/table-action";
+import { DefaultTableCell } from "~/app/(dashboard)/_components/table-content";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "~/app/(dashboard)/_components/table";
+  DefaultTableRows,
+  NoTableRows,
+} from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
+import { SortableTableHead } from "~/app/(dashboard)/_components/table-head";
 import {
   TableDisplay,
   TableOrderingContext,
@@ -69,7 +56,7 @@ const columns = [
     cell: ({ row }) => (
       <CheckboxField className="relative">
         <span
-          className="absolute left-1/2 top-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2"
+          className="top-1/2 left-1/2 absolute size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2"
           aria-hidden="true"
         />
         <Checkbox
@@ -175,7 +162,7 @@ const columns = [
     header: "Tags",
     cell: ({ getValue }) => {
       return (
-        <div className="flex gap-x-2 items-center">
+        <div className="flex items-center gap-x-2">
           {getValue().map((tag) => (
             <Badge key={tag}>{tag}</Badge>
           ))}
@@ -239,12 +226,17 @@ export default function StudentsTable({
             const student = students.find((student) => student.id === key);
             return [
               key,
-              rowSelection.hasOwnProperty(key)
-                ? rowSelection[key]!
+              Object.hasOwn(prev, key)
+                ? // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  prev[key]!
                 : {
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     instructor: student!.instructor,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     studentCurriculum: student!.studentCurriculum,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     person: student!.person,
+                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
                     tags: student!.tags,
                   },
             ];
@@ -284,14 +276,14 @@ export default function StudentsTable({
   }));
 
   return (
-    <div className="mt-8 relative">
+    <div className="relative mt-8">
       <TableOrderingContext options={columnOrderingOptions}>
-        <div className="flex flex-col sm:flex-row items-start sm:justify-between sm:items-center gap-1">
+        <div className="flex sm:flex-row flex-col sm:justify-between items-start sm:items-center gap-1">
           <div className="w-full max-w-xl">
             <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
           </div>
           <div className="flex items-center gap-1 sm:shrink-0">
-            {!!view ? (
+            {view ? (
               <SetView defaultView={view}>
                 <option value="allen">Alle cursisten</option>
                 <option value="geclaimd">Mijn cursisten</option>
@@ -301,110 +293,27 @@ export default function StudentsTable({
           </div>
         </div>
         <Table
-          className="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]"
+          className="mt-4 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
           dense
         >
-          <TableHead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  const sortingHandler =
-                    header.column.getToggleSortingHandler?.();
-                  const getAriaSortValue = (
-                    isSorted: false | SortDirection,
-                  ) => {
-                    switch (isSorted) {
-                      case "asc":
-                        return "ascending";
-                      case "desc":
-                        return "descending";
-                      case false:
-                      default:
-                        return "none";
-                    }
-                  };
-
-                  return (
-                    <TableHeader
-                      key={header.id}
-                      onClick={sortingHandler}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && sortingHandler) {
-                          sortingHandler(event);
-                        }
-                      }}
-                      className={clsx(
-                        header.column.getCanSort()
-                          ? "cursor-pointer select-none"
-                          : "",
-                      )}
-                      tabIndex={header.column.getCanSort() ? 0 : -1}
-                      aria-sort={getAriaSortValue(header.column.getIsSorted())}
-                    >
-                      <div
-                        className={clsx(
-                          header.column.columnDef.enableSorting === false
-                            ? header.column.columnDef.meta?.align
-                            : "flex items-center justify-between gap-2 hover:bg-gray-50 hover:dark:bg-gray-900 px-3 py-1.5 -mx-3 -my-1.5",
-                          "rounded-md",
-                        )}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {header.column.getCanSort() &&
-                          (header.column.getIsSorted() === false ? (
-                            <ArrowsUpDownIcon className="size-3 text-gray-900 dark:text-gray-50 opacity-30" />
-                          ) : header.column.getIsSorted() === "desc" ? (
-                            <ArrowUpIcon
-                              className="size-3 text-gray-900 dark:text-gray-50"
-                              aria-hidden={true}
-                            />
-                          ) : (
-                            <ArrowDownIcon
-                              className="size-3 text-gray-900 dark:text-gray-50"
-                              aria-hidden={true}
-                            />
-                          ))}
-                      </div>
-                    </TableHeader>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHead>
+          <SortableTableHead table={table} />
           <TableBody>
-            {table.getRowCount() <= 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="text-center">
-                  {noOptionsLabel}
-                </TableCell>
-              </TableRow>
-            ) : null}
-            {table.getRowModel().rows.map((row) => (
-              <TableRow
-                className={clsx(
-                  row.getIsSelected()
-                    ? "bg-zinc-950/[1.5%] dark:bg-zinc-950/[1.5%]"
-                    : "",
-                )}
-                key={row.id}
-                href={`/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`}
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell
-                    key={cell.id}
-                    className={clsx(cell.column.columnDef.meta?.align)}
-                  >
-                    {index === 0 && row.getIsSelected() && (
-                      <div className="absolute inset-y-0 left-0 w-0.5 bg-branding-light" />
-                    )}
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+            <NoTableRows table={table}>{noOptionsLabel}</NoTableRows>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/locatie/${params.location as string}/cohorten/${params.cohort as string}/${row.id}`
+              }
+            >
+              {(cell, index, row) => (
+                <DefaultTableCell
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  row={row}
+                />
+              )}
+            </DefaultTableRows>
           </TableBody>
         </Table>
       </TableOrderingContext>
@@ -413,31 +322,16 @@ export default function StudentsTable({
         <TableRowSelection table={table} totalItems={totalItems} />
       </TableFooter>
 
-      <div
-        className={clsx(
-          "fixed inset-x-0 bottom-14 mx-auto flex w-fit items-center space-x-2 rounded-lg border border-gray-200 bg-white p-2 shadow-md dark:border-gray-800 dark:bg-gray-950",
-          selectedRows > 0 ? "" : "hidden",
-        )}
+      <TableSelection
+        selectedRows={selectedRows}
+        clearRowSelection={() => setRowSelection({})}
       >
-        <p className="select-none text-sm">
-          <span className="rounded bg-branding-light/10 px-2 py-1.5 font-medium tabular-nums text-branding-dark">
-            {selectedRows}
-          </span>
-          <span className="ml-2 font-medium text-gray-900 dark:text-gray-50">
-            geselecteerd
-          </span>
-        </p>
-        <div className="flex items-center space-x-4">
-          <Button plain onClick={() => setRowSelection({})}>
-            <XMarkIcon />
-          </Button>
-          <ActionButtons
-            rows={actionRows}
-            cohortId={cohortId}
-            locationRoles={locationRoles}
-          />
-        </div>
-      </div>
+        <ActionButtons
+          rows={actionRows}
+          cohortId={cohortId}
+          locationRoles={locationRoles}
+        />
+      </TableSelection>
     </div>
   );
 }

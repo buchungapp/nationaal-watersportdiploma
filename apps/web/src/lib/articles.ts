@@ -1,6 +1,6 @@
+import path from "node:path";
 import glob from "fast-glob";
 import type { StaticImageData } from "next/image";
-import path from "path";
 
 export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";
 
@@ -30,6 +30,7 @@ async function importArticle(
   const slug = articleFilename.replace(/\/page.mdx$/, "");
 
   return {
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
     id: slug.split("-").at(0)!,
     slug,
     ...article,

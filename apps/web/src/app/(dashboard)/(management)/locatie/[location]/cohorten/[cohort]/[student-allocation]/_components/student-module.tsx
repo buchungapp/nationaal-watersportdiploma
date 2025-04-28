@@ -13,13 +13,13 @@ import {
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import {
+  type PropsWithChildren,
   createContext,
   useContext,
   useOptimistic,
   useRef,
   useState,
   useTransition,
-  type PropsWithChildren,
 } from "react";
 import { toast } from "sonner";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
@@ -160,7 +160,6 @@ export function CompleteAllCoreModules({
   return (
     <Button
       outline
-      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
       disabled={disabled || isBusy}
       onClick={() => {
         startTransition(
@@ -206,16 +205,16 @@ function ProgressInput({
           "grid grid-cols-[4rem_1fr] items-center gap-x-4 gap-y-1 sm:grid-cols-[4rem_1fr]",
 
           // Control layout
-          "[&>[data-slot=control]]:col-start-1 [&>[data-slot=control]]:row-start-1 [&>[data-slot=control]]:justify-self-center",
+          "*:data-[slot=control]:col-start-1 *:data-[slot=control]:row-start-1 *:data-[slot=control]:justify-self-center",
 
           // Label layout
-          "[&>[data-slot=label]]:col-start-2 [&>[data-slot=label]]:row-start-1 [&>[data-slot=label]]:justify-self-start",
+          "*:data-[slot=label]:col-start-2 *:data-[slot=label]:row-start-1 *:data-[slot=label]:justify-self-start",
 
           // Description layout
-          "[&>[data-slot=description]]:col-start-2 [&>[data-slot=description]]:row-start-2",
+          "*:data-[slot=description]:col-start-2 *:data-[slot=description]:row-start-2",
 
           // With description
-          "[&_[data-slot=label]]:has-[[data-slot=description]]:font-medium",
+          "has-data-[slot=description]:**:data-[slot=label]:font-medium",
         )}
       >
         <Input
@@ -229,7 +228,7 @@ function ProgressInput({
           defaultValue={value}
           className="max-w-[4rem] tabular-nums text-center"
           onBlur={async (e) => {
-            const newProgress = parseInt(e.target.value, 10);
+            const newProgress = Number.parseInt(e.target.value, 10);
 
             if (
               Number.isNaN(newProgress) ||
@@ -329,6 +328,7 @@ export function Module({
     <Disclosure>
       {({ open: panelOpen }) => (
         <>
+          {/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
           <CheckboxGroup role="group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-x-2">
@@ -337,7 +337,6 @@ export function Module({
                 </DisclosureButton>
 
                 <CheckboxField
-                  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                   disabled={disabled || areAllCompetenciesCompleted}
                 >
                   <Checkbox
@@ -405,7 +404,6 @@ export function Module({
                   return (
                     <ProgressInput
                       key={competency.id}
-                      // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
                       disabled={disabled || isCompletedInPreviousCertification}
                       value={
                         isCompletedInPreviousCertification

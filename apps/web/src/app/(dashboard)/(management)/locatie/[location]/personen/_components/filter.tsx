@@ -2,7 +2,8 @@
 
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
-import { useRouter, useSearchParams } from "next/navigation";
+import { parseAsString, useQueryState } from "nuqs";
+import { parseAsArrayOf } from "nuqs";
 import type { ComponentProps } from "react";
 import { useOptimistic, useTransition } from "react";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
@@ -11,7 +12,6 @@ import {
   PopoverButton,
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
-import { useSetQueryParams } from "~/app/(dashboard)/_utils/set-query-params";
 import Spinner from "~/app/_components/spinner";
 
 function CheckboxButton({
@@ -25,6 +25,7 @@ function CheckboxButton({
 
   return (
     <button
+      type="button"
       className={clsx([
         className,
 
@@ -32,10 +33,10 @@ function CheckboxButton({
         "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
 
         // Sizing
-        "px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6",
+        "px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
 
         // Disabled
-        "data-[disabled]:opacity-50",
+        "data-disabled:opacity-50",
       ])}
       onClick={(...e) => {
         if (!onClick) return;
@@ -46,7 +47,7 @@ function CheckboxButton({
       }}
     >
       {isPending ? (
-        <Spinner className="text-gray-700" size="sm" />
+        <Spinner className="text-slate-700" size="sm" />
       ) : (
         <Checkbox {...props} />
       )}
@@ -56,12 +57,27 @@ function CheckboxButton({
 }
 
 export function FilterSelect() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const setQueryParams = useSetQueryParams();
+  const [filter, setFilter] = useQueryState(
+    "filter",
+    parseAsArrayOf(parseAsString).withOptions({
+      shallow: false,
+    }),
+  );
+  const [, setPage] = useQueryState(
+    "page",
+    parseAsString.withOptions({
+      shallow: false,
+    }),
+  );
+  const [, setLimit] = useQueryState(
+    "limit",
+    parseAsString.withOptions({
+      shallow: false,
+    }),
+  );
 
   const [optimisticSelectedStatus, setOptimisticSelectedStatus] = useOptimistic(
-    searchParams.has("filter") ? searchParams.getAll("filter") : [],
+    filter ?? [],
     (current, toggle: "student" | "instructor" | "location_admin") => {
       return current.includes(toggle)
         ? current.filter((item) => item !== toggle)
@@ -74,15 +90,14 @@ export function FilterSelect() {
   ) => {
     setOptimisticSelectedStatus(toggle);
 
-    router.push(
-      setQueryParams({
-        filter: optimisticSelectedStatus.includes(toggle)
-          ? optimisticSelectedStatus.filter((item) => item !== toggle)
-          : [...optimisticSelectedStatus, toggle],
-        page: undefined,
-        limit: undefined,
-      }),
+    setFilter(
+      optimisticSelectedStatus.includes(toggle)
+        ? optimisticSelectedStatus.filter((item) => item !== toggle)
+        : [...optimisticSelectedStatus, toggle],
     );
+
+    setPage(null);
+    setLimit(null);
   };
 
   return (

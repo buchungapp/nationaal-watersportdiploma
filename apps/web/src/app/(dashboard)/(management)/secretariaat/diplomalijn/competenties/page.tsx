@@ -23,15 +23,18 @@ async function CompetencyTable({
   });
 
   // Add programs to the index
-  competencies.forEach((competency) => {
-    index.add(competency.id, competency.title!);
-  });
+  for (const competency of competencies) {
+    if (competency.title) {
+      index.add(competency.id, competency.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredCompetencies = competencies;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCompetencies = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => competencies.find((competency) => competency.id === result)!,
     );
   }
@@ -53,11 +56,10 @@ async function CompetencyTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

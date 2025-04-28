@@ -1,10 +1,10 @@
-import { schema as s } from '@nawadi/db'
-import { createSelectSchema } from 'drizzle-zod'
-import { z } from 'zod'
+import { schema as s } from "@nawadi/db";
+import { createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 export const selectSchema = createSelectSchema(s.media, {
-  alt: (schema) => schema.alt.default(''),
-})
+  alt: (schema) => schema.alt.default(""),
+});
 
 export const outputSchema = selectSchema
   .pick({
@@ -16,7 +16,7 @@ export const outputSchema = selectSchema
     updatedAt: true,
   })
   .extend({
-    type: z.literal('image'),
+    type: z.enum(["image", "file"]),
     url: z.string().url(),
     /** The URL of the image which serves as the basis for the image transformations. */
     transformUrl: z.string().url(),
@@ -24,4 +24,4 @@ export const outputSchema = selectSchema
     height: z.number().int().nullable(),
     /** The filename of the media object. */
     name: z.string(),
-  })
+  });

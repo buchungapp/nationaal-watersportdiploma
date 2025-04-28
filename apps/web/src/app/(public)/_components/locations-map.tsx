@@ -3,8 +3,8 @@
 import {
   APIProvider,
   AdvancedMarker,
+  Map as GoogleMapsMap,
   InfoWindow,
-  Map,
   Pin,
   useAdvancedMarkerRef,
   useMap,
@@ -51,9 +51,11 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
     if (map) {
       if (!bounds) {
         const bounds = new google.maps.LatLngBounds();
-        locations.forEach(
-          ({ geometry }) => !!geometry && bounds.extend(geometry.location),
-        );
+        for (const { geometry } of locations) {
+          if (geometry) {
+            bounds.extend(geometry.location);
+          }
+        }
         setBounds(bounds);
         map.fitBounds(bounds);
       } else {
@@ -62,6 +64,7 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
     }
   }, [map, locations, bounds]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     setBoundsCallback();
   }, [map, locations, setBoundsCallback]);
@@ -79,6 +82,7 @@ export function SelectedLocationProvider({
   const map = useMap();
   const resetBounds = useBounds(map, locations);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const setSelectedLocationAndZoom = useCallback(
     (location: Location | null) => {
       if (location === null) {
@@ -127,7 +131,7 @@ export function LocationsMap({ locations }: Props) {
   const isContextDefined = useContext(SelectedLocationContext) !== undefined;
 
   const MapComponent = (
-    <Map
+    <GoogleMapsMap
       mapId="ea3856b90f7238a7"
       defaultCenter={center.current}
       defaultZoom={10}
@@ -137,7 +141,7 @@ export function LocationsMap({ locations }: Props) {
       {locations.map((location) => (
         <GoogleMapsMarker key={location.id} location={location} />
       ))}
-    </Map>
+    </GoogleMapsMap>
   );
 
   return isContextDefined ? (
@@ -178,7 +182,7 @@ function GoogleMapsMarker({ location }: { location: Location }) {
           maxWidth={200}
           onCloseClick={() => setSelectedLocation(null)}
         >
-          <h3 className="text-lg mt-1.5 font-semibold leading-5 text-gray-900">
+          <h3 className="text-lg mt-1.5 font-semibold leading-5 text-slate-900">
             {location.name}
           </h3>
           {location.websiteUrl ? (
@@ -190,7 +194,7 @@ function GoogleMapsMarker({ location }: { location: Location }) {
               {normalizeUrl(location.websiteUrl).split("//")[1]}
             </Link>
           ) : null}
-          <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-gray-600">
+          <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-slate-600">
             <p>{location.city}</p>
           </address>
         </InfoWindow>

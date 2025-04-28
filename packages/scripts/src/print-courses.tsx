@@ -1,64 +1,65 @@
-import 'dotenv/config'
+import "dotenv/config";
 
-import { Course, Curriculum, withDatabase } from '@nawadi/core'
+import path from "node:path";
+import { Course, Curriculum, withDatabase } from "@nawadi/core";
 import {
   Document,
   Font,
   Image,
   Page,
-  PageProps,
+  type PageProps,
   StyleSheet,
   Text,
   View,
   renderToFile,
-} from '@react-pdf/renderer'
-import path from 'path'
-import React, { Fragment, PropsWithChildren } from 'react'
-import { projectRoot } from './utils/root.js'
+} from "@react-pdf/renderer";
+// biome-ignore lint/style/useImportType: <explanation>
+import React, { Fragment, type PropsWithChildren } from "react";
+import { projectRoot } from "./utils/root.js";
 
 async function main() {
   const [allActiveCurricula, allCourses, allPrograms] = await Promise.all([
     Curriculum.list({ filter: { onlyCurrentActive: true } }),
     Course.list(),
     Course.Program.list(),
-  ])
+  ]);
 
   Font.register({
-    family: 'Inter',
-    src: 'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf',
-  })
+    family: "Inter",
+    src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf",
+  });
 
   Font.register({
-    family: 'Inter Bold',
-    src: 'https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYMZhrib2Bg-4.ttf',
-  })
+    family: "Inter Bold",
+    src: "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYMZhrib2Bg-4.ttf",
+  });
 
   // Create styles
   const styles = StyleSheet.create({
     page: {
-      fontFamily: 'Inter',
+      fontFamily: "Inter",
       fontSize: 14,
       paddingTop: 60,
       paddingBottom: 65,
       paddingHorizontal: 35,
     },
     image: {
-      position: 'absolute',
+      position: "absolute",
       left: 35,
       top: 15,
-      height: '35px',
-      width: 'auto',
+      height: "35px",
+      width: "auto",
     },
     footer: {
-      position: 'absolute',
+      position: "absolute",
       fontSize: 10,
       bottom: 30,
       left: 0,
       right: 0,
       paddingHorizontal: 35,
-      color: 'grey',
+      color: "grey",
     },
-  })
+  });
 
   function PageLayout({
     children,
@@ -67,8 +68,9 @@ async function main() {
     ...pageProps
   }: PropsWithChildren<
     {
-      style?: any
-      footerTitle?: string | undefined
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      style?: any;
+      footerTitle?: string | undefined;
     } & PageProps
   >) {
     return (
@@ -90,7 +92,7 @@ async function main() {
           <Text
             style={{
               ...styles.footer,
-              textAlign: 'left',
+              textAlign: "left",
             }}
             fixed
           >
@@ -100,7 +102,7 @@ async function main() {
         <Text
           style={{
             ...styles.footer,
-            textAlign: 'right',
+            textAlign: "right",
           }}
           render={({ pageNumber, totalPages }) =>
             `${pageNumber} / ${totalPages}`
@@ -108,54 +110,54 @@ async function main() {
           fixed
         />
       </Page>
-    )
+    );
   }
 
   const programStyles = StyleSheet.create({
     title: {
-      fontFamily: 'Inter Bold',
+      fontFamily: "Inter Bold",
       fontSize: 20,
       marginBottom: 16,
     },
     moduleTitleSection: {
-      fontFamily: 'Inter Bold',
-      backgroundColor: '#EEE',
+      fontFamily: "Inter Bold",
+      backgroundColor: "#EEE",
       borderBottomWidth: 1,
-      borderBottomColor: '#6b7280',
-      borderBottomStyle: 'solid',
+      borderBottomColor: "#6b7280",
+      borderBottomStyle: "solid",
       fontSize: 12,
       paddingVertical: 2,
     },
     moduleTitle: {
-      textAlign: 'center',
+      textAlign: "center",
     },
     moduleSection: {
       marginVertical: 4,
-      borderColor: '#374151',
+      borderColor: "#374151",
       borderWidth: 1,
-      borderStyle: 'solid',
+      borderStyle: "solid",
     },
     competencySection: {
       marginVertical: 4,
     },
     comptencyTitle: {
-      fontFamily: 'Inter Bold',
+      fontFamily: "Inter Bold",
     },
     comptencyContent: {
       marginTop: 2,
     },
     moduleCardRow: {
-      flexDirection: 'row',
+      flexDirection: "row",
       marginVertical: 4,
       paddingHorizontal: 6,
     },
     moduleCardRowLabel: {
       fontSize: 10,
-      fontFamily: 'Inter Bold',
-      width: '20%',
+      fontFamily: "Inter Bold",
+      width: "20%",
     },
-    moduleCardRowContent: { width: '80%', fontSize: 10 },
-  })
+    moduleCardRowContent: { width: "80%", fontSize: 10 },
+  });
 
   function ModuleCardRow({
     label,
@@ -166,13 +168,13 @@ async function main() {
         <Text style={programStyles.moduleCardRowLabel}>{label}</Text>
         <View style={programStyles.moduleCardRowContent}>{children}</View>
       </View>
-    )
+    );
   }
 
   function ProgramPage({ program }: { program: (typeof allPrograms)[0] }) {
     const curriculum = allActiveCurricula.find(
       (c) => c.programId === program.id,
-    )
+    );
 
     return (
       <PageLayout
@@ -220,49 +222,49 @@ async function main() {
           ))}
         </View>
       </PageLayout>
-    )
+    );
   }
 
   const coverPageStyles = StyleSheet.create({
     title: {
-      fontFamily: 'Inter Bold',
-      textAlign: 'center',
+      fontFamily: "Inter Bold",
+      textAlign: "center",
       fontSize: 24,
     },
     summary: {
       marginVertical: 20,
     },
     summaryRow: {
-      flexDirection: 'row',
+      flexDirection: "row",
     },
-  })
+  });
 
   function SummaryRow({
     label,
     description,
   }: {
-    label: string
-    description: React.ReactNode
+    label: string;
+    description: React.ReactNode;
   }) {
     return (
       <View style={coverPageStyles.summaryRow}>
-        <Text style={{ width: '30%' }}>{`${label}: `}</Text>
+        <Text style={{ width: "30%" }}>{`${label}: `}</Text>
 
-        <Text style={{ width: '70%' }}>{description}</Text>
+        <Text style={{ width: "70%" }}>{description}</Text>
       </View>
-    )
+    );
   }
 
   function formatDate(date: string) {
-    let d = new Date(date),
-      day = '' + d.getDate(),
-      month = '' + (d.getMonth() + 1),
-      year = d.getFullYear()
+    const d = new Date(date);
+    let day = `${d.getDate()}`;
+    let month = `${d.getMonth() + 1}`;
+    const year = d.getFullYear();
 
-    if (day.length < 2) day = '0' + day
-    if (month.length < 2) month = '0' + month
+    if (day.length < 2) day = `0${day}`;
+    if (month.length < 2) month = `0${month}`;
 
-    return [day, month, year].join('-')
+    return [day, month, year].join("-");
   }
 
   const programSummaryStyles = StyleSheet.create({
@@ -270,35 +272,35 @@ async function main() {
       marginVertical: 20,
     },
     row: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      alignItems: "center",
       fontSize: 12,
     },
     title: {
-      width: '52%',
+      width: "52%",
     },
     degree: {
-      width: '16%',
+      width: "16%",
     },
     revision: {
-      width: '16%',
+      width: "16%",
     },
     startedAt: {
-      width: '16%',
+      width: "16%",
     },
-  })
+  });
 
   function ProgramsSummary({ programs }: { programs: typeof allPrograms }) {
     return (
       <View style={programSummaryStyles.container}>
-        <Text style={{ marginBottom: 5, textDecoration: 'underline' }}>
+        <Text style={{ marginBottom: 5, textDecoration: "underline" }}>
           Programmaoverzicht
         </Text>
         <View style={programSummaryStyles.row}>
           <Text
             style={{
               ...programSummaryStyles.title,
-              fontFamily: 'Inter Bold',
+              fontFamily: "Inter Bold",
               paddingBottom: 2,
             }}
           >
@@ -307,7 +309,7 @@ async function main() {
           <Text
             style={{
               ...programSummaryStyles.degree,
-              fontFamily: 'Inter Bold',
+              fontFamily: "Inter Bold",
               paddingBottom: 2,
             }}
           >
@@ -316,7 +318,7 @@ async function main() {
           <Text
             style={{
               ...programSummaryStyles.revision,
-              fontFamily: 'Inter Bold',
+              fontFamily: "Inter Bold",
               paddingBottom: 2,
             }}
           >
@@ -325,7 +327,7 @@ async function main() {
           <Text
             style={{
               ...programSummaryStyles.startedAt,
-              fontFamily: 'Inter Bold',
+              fontFamily: "Inter Bold",
               paddingBottom: 2,
             }}
           >
@@ -337,14 +339,14 @@ async function main() {
           .map((program, index) => {
             const curriculum = allActiveCurricula.find(
               (c) => c.programId === program.id,
-            )
+            );
 
             return (
               <View
                 key={program.id}
                 style={{
                   ...programSummaryStyles.row,
-                  backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
+                  backgroundColor: index % 2 !== 0 ? "#f3f4f6" : "white",
                 }}
               >
                 <Text style={programSummaryStyles.title}>
@@ -359,13 +361,13 @@ async function main() {
                 <Text style={programSummaryStyles.startedAt}>
                   {curriculum?.startedAt
                     ? formatDate(curriculum.startedAt)
-                    : '-'}
+                    : "-"}
                 </Text>
               </View>
-            )
+            );
           })}
       </View>
-    )
+    );
   }
 
   const programMatrixStyles = StyleSheet.create({
@@ -373,25 +375,25 @@ async function main() {
       marginVertical: 20,
     },
     row: {
-      flexDirection: 'row',
-      alignItems: 'flex-end',
+      flexDirection: "row",
+      alignItems: "flex-end",
       fontSize: 12,
     },
     index: {
-      width: '5%',
-      fontVariantNumeric: 'tabular-nums',
+      width: "5%",
+      fontVariantNumeric: "tabular-nums",
     },
     title: {
-      width: '45%',
+      width: "45%",
     },
     type: {
-      width: '18%',
+      width: "18%",
     },
     status: {
-      width: '8%',
-      textAlign: 'center',
+      width: "8%",
+      textAlign: "center",
     },
-  })
+  });
 
   function ProgramMatrix({ programs }: { programs: typeof allPrograms }) {
     // Create a unique set of modules with the complete module object
@@ -404,14 +406,14 @@ async function main() {
         (module, index, self) =>
           self.findIndex((m) => m.id === module.id) === index,
       )
-      .sort((a, b) => (a.title ?? a.handle).localeCompare(b.title ?? b.handle))
+      .sort((a, b) => (a.title ?? a.handle).localeCompare(b.title ?? b.handle));
 
     // Create a matrix where each row is a module and each column is a program
     // Inside each cell, we will show weather the module is available and if so if it is required for the program
 
     return (
       <View style={programMatrixStyles.container}>
-        <Text style={{ marginBottom: 5, textDecoration: 'underline' }}>
+        <Text style={{ marginBottom: 5, textDecoration: "underline" }}>
           Module-overzicht
         </Text>
         <View style={programMatrixStyles.row}>
@@ -421,7 +423,7 @@ async function main() {
             style={{
               ...programMatrixStyles.title,
               paddingBottom: 2,
-              fontFamily: 'Inter Bold',
+              fontFamily: "Inter Bold",
             }}
           >
             Module
@@ -430,7 +432,7 @@ async function main() {
             style={{
               ...programMatrixStyles.type,
               paddingBottom: 2,
-              fontFamily: 'Inter Bold',
+              fontFamily: "Inter Bold",
             }}
           >
             Type
@@ -440,19 +442,19 @@ async function main() {
               key={program.id}
               style={{
                 ...programMatrixStyles.status,
-                height: '75px',
-                position: 'relative',
+                height: "75px",
+                position: "relative",
               }}
             >
               <Text
                 style={{
-                  bottom: '50%',
-                  left: '-46%',
-                  width: '80px',
-                  position: 'absolute',
-                  textAlign: 'left',
-                  fontFamily: 'Inter Bold',
-                  transform: 'rotate(-90deg)',
+                  bottom: "50%",
+                  left: "-46%",
+                  width: "80px",
+                  position: "absolute",
+                  textAlign: "left",
+                  fontFamily: "Inter Bold",
+                  transform: "rotate(-90deg)",
                 }}
               >
                 {program.degree.title}
@@ -465,28 +467,28 @@ async function main() {
             key={module.id}
             style={{
               ...programMatrixStyles.row,
-              backgroundColor: index % 2 !== 0 ? '#f3f4f6' : 'white',
+              backgroundColor: index % 2 !== 0 ? "#f3f4f6" : "white",
             }}
           >
             <Text style={programMatrixStyles.index}>{`${module.weight}.`}</Text>
             <Text style={programMatrixStyles.title}>{module.title}</Text>
             <Text style={programMatrixStyles.type}>
-              {module.type === 'skill' ? 'Praktijk' : 'Theorie'}
+              {module.type === "skill" ? "Praktijk" : "Theorie"}
             </Text>
             {programs.map((program) => {
               const curriculum = allActiveCurricula.find(
                 (c) => c.programId === program.id,
-              )
+              );
 
               const programModule = curriculum?.modules.find(
                 (m) => m.id === module.id,
-              )
+              );
 
               return (
                 <Text key={program.id} style={programMatrixStyles.status}>
-                  {programModule ? (programModule.isRequired ? 'X' : 'O') : '-'}
+                  {programModule ? (programModule.isRequired ? "X" : "O") : "-"}
                 </Text>
-              )
+              );
             })}
           </View>
         ))}
@@ -495,19 +497,19 @@ async function main() {
           style={{
             marginTop: 15,
             fontSize: 10,
-            textAlign: 'right',
+            textAlign: "right",
           }}
         >
           <Text>'X' = Kernmodule</Text>
           <Text>'O' = Keuzemodule</Text>
         </View>
       </View>
-    )
+    );
   }
   function CoverPage({ course }: { course: (typeof allCourses)[number] }) {
     const programsForCourse = allPrograms.filter(
       (program) => program.course.id === course.id,
-    )
+    );
 
     return (
       <PageLayout bookmark="Voorblad">
@@ -516,19 +518,19 @@ async function main() {
         </View>
 
         <View style={coverPageStyles.summary}>
-          <SummaryRow label={'Titel'} description={course.title} />
+          <SummaryRow label={"Titel"} description={course.title} />
           <SummaryRow
-            label={'Discipline'}
+            label={"Discipline"}
             description={course.discipline.title}
           />
           {course.categories.map((category) => {
             return (
               <SummaryRow
                 key={category.id}
-                label={category.parent?.title ?? ''}
+                label={category.parent?.title ?? ""}
                 description={category.title}
               />
-            )
+            );
           })}
         </View>
 
@@ -536,7 +538,7 @@ async function main() {
 
         <ProgramMatrix programs={programsForCourse} />
 
-        <Text style={{ marginTop: 40, fontSize: 8, color: 'grey' }}>
+        <Text style={{ marginTop: 40, fontSize: 8, color: "grey" }}>
           ©️ 2024 Nationaal Watersportdiploma. Alle rechten voorbehouden. Geen
           enkel deel van deze diplomalijn mag worden gereproduceerd,
           gedistribueerd, of overgedragen in enige vorm of op enige wijze,
@@ -546,15 +548,15 @@ async function main() {
           van de licentievoorwaarden kunt u contact opnemen met de vereniging.
         </Text>
       </PageLayout>
-    )
+    );
   }
 
   const createDocumentPromises = allCourses.map((course) => {
-    const documentName = course.title
+    const documentName = course.title;
 
     const programsForCourse = allPrograms.filter(
       (program) => program.course.id === course.id,
-    )
+    );
 
     return renderToFile(
       <Document>
@@ -567,34 +569,34 @@ async function main() {
       </Document>,
       path.join(
         projectRoot,
-        '..',
-        'generated',
-        'cursusoverzicht',
+        "..",
+        "generated",
+        "cursusoverzicht",
         `${documentName}.pdf`,
       ),
-    )
-  })
+    );
+  });
 
-  await Promise.all(createDocumentPromises)
+  await Promise.all(createDocumentPromises);
 }
 
-const pgUri = process.env.PGURI
+const pgUri = process.env.PGURI;
 
 if (!pgUri) {
-  throw new Error('PGURI environment variable is required')
+  throw new Error("PGURI environment variable is required");
 }
 
 withDatabase(
   {
-    pgUri,
+    connectionString: pgUri,
   },
   async () => await main(),
 )
   .then(() => {
-    console.log('Done!')
-    process.exit(0)
+    console.log("Done!");
+    process.exit(0);
   })
   .catch((error) => {
-    console.error('Error:', error)
-    process.exit(1)
-  })
+    console.error("Error:", error);
+    process.exit(1);
+  });

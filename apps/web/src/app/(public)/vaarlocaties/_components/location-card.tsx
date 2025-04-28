@@ -33,8 +33,8 @@ export default function LocationCard({
     <div
       ref={cardRef}
       className={clsx(
-        "rounded-2xl bg-gray-50 p-10 break-inside-avoid border-2",
-        isSelected ? "border-branding-orange" : "border-gray-200",
+        "rounded-2xl bg-slate-50 p-10 break-inside-avoid border-2",
+        isSelected ? "border-branding-orange" : "border-slate-200",
       )}
     >
       {children}
@@ -49,6 +49,8 @@ export function SetActiveLocationButton({
   const { setSelectedLocation } = useSelectedLocation();
 
   return (
-    <button onClick={() => setSelectedLocation(location)}>{children}</button>
+    <button type="button" onClick={() => setSelectedLocation(location)}>
+      {children}
+    </button>
   );
 }

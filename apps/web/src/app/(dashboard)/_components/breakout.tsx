@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import React, { type PropsWithChildren } from "react";
+import type React from "react";
+import type { PropsWithChildren } from "react";
 
 const DEFAULT_COMPONENT = "div";
 

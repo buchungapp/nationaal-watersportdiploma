@@ -1,4 +1,4 @@
-import { Suspense, type PropsWithChildren } from "react";
+import { type PropsWithChildren, Suspense } from "react";
 import { getUserOrThrow } from "~/lib/nwd";
 import {
   Dropdown,

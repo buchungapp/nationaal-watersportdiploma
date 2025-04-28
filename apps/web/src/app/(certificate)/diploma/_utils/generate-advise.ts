@@ -1,8 +1,10 @@
+import { unstable_cacheLife as cacheLife } from "next/cache";
 import { retrieveCertificateById } from "~/lib/nwd";
-
 export async function generateAdvise(
   input: string | Awaited<ReturnType<typeof retrieveCertificateById>>,
 ) {
+  "use cache";
+  cacheLife("minutes");
   let certificate = input;
 
   if (typeof certificate === "string") {
@@ -56,15 +58,20 @@ export async function generateAdvise(
       return ""; // No advice to give
     }
 
+    const firstAdvice = advice[0];
+    if (typeof firstAdvice === "undefined") {
+      return ""; // No advice to give
+    }
+
     // Capitalize the first letter of the first advice
-    advice[0] = advice[0]!.charAt(0).toUpperCase() + advice[0]!.slice(1);
+    advice[0] = firstAdvice.charAt(0).toUpperCase() + firstAdvice.slice(1);
 
     if (advice.length > 1) {
       const lastAdvice = advice.pop();
       return `${advice.join(", ")} of ${lastAdvice}!`;
-    } else {
-      return `${advice[0]}.`;
     }
+
+    return `${advice[0]}.`;
   };
 
   return formatAdvice(adviceStrings);

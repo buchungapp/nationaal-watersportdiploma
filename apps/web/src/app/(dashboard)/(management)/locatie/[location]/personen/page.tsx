@@ -7,6 +7,13 @@ import {
 
 import { PlusIcon } from "@heroicons/react/16/solid";
 import {
+  createLoader,
+  parseAsArrayOf,
+  parseAsInteger,
+  parseAsString,
+} from "nuqs/server";
+
+import {
   Dropdown,
   DropdownButton,
   DropdownMenu,
@@ -24,15 +31,21 @@ import Table from "./_components/table";
 // We need this for the bulk import
 export const maxDuration = 240;
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {
+const searchParamsParser = createLoader({
+  filter: parseAsArrayOf(parseAsString),
+  query: parseAsString,
+  page: parseAsInteger.withDefault(1),
+  limit: parseAsInteger.withDefault(25),
+});
+
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-  searchParams?: Record<string, string | string[] | undefined>;
+  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const [location, countries] = await Promise.all([
     retrieveLocationByHandle(params.location),
     listCountries(),
@@ -40,11 +53,13 @@ export default async function Page({
 
   const persons = await listPersonsForLocation(location.id);
 
+  const parsedSq = searchParamsParser(searchParams);
+
   // Filter
-  const filterParams = searchParams?.filter
-    ? Array.isArray(searchParams.filter)
-      ? searchParams.filter
-      : [searchParams.filter]
+  const filterParams = parsedSq.filter
+    ? Array.isArray(parsedSq.filter)
+      ? parsedSq.filter
+      : [parsedSq.filter]
     : [];
 
   const filteredPersons =
@@ -63,10 +78,10 @@ export default async function Page({
     threshold: 0.3, // Lower threshold for more specific matches
   });
 
-  const searchQuery = searchParams?.query
-    ? Array.isArray(searchParams.query)
-      ? searchParams.query.join(" ")
-      : searchParams.query
+  const searchQuery = parsedSq.query
+    ? Array.isArray(parsedSq.query)
+      ? parsedSq.query.join(" ")
+      : parsedSq.query
     : null;
 
   const searchedPersons =
@@ -77,8 +92,8 @@ export default async function Page({
       : filteredPersons;
 
   // Pagination
-  const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
-  const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
+  const paginationLimit = parsedSq.limit;
+  const currentPage = parsedSq.page;
 
   const paginatedPersons = searchedPersons.slice(
     (currentPage - 1) * paginationLimit,
@@ -87,10 +102,10 @@ export default async function Page({
 
   return (
     <DialogWrapper>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-sm:w-full sm:flex-1">
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div className="sm:flex-1 max-sm:w-full">
           <Heading>Personen</Heading>
-          <div className="mt-4 flex max-w-xl gap-4">
+          <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek personen..." />
             <FilterSelect />
           </div>

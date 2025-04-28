@@ -23,15 +23,18 @@ async function DisciplineTable({
   });
 
   // Add programs to the index
-  disciplines.forEach((discipline) => {
-    index.add(discipline.id, discipline.title!);
-  });
+  for (const discipline of disciplines) {
+    if (discipline.title) {
+      index.add(discipline.id, discipline.title);
+    }
+  }
 
   // Search programs using FlexSearch
   let filteredDisciplines = disciplines;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredDisciplines = results.map(
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => disciplines.find((discipline) => discipline.id === result)!,
     );
   }
@@ -53,11 +56,10 @@ async function DisciplineTable({
   );
 }
 
-export default function Page({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+export default async function Page(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   return (
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">

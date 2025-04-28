@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { Suspense, useState } from "react";
+import { Suspense, useActionState, useState } from "react";
 import {
   SidebarItem,
   SidebarLabel,
@@ -39,7 +39,7 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { z } from "zod";
 import { productFeedbackAction } from "~/app/(dashboard)/_actions/feedback";
 import Spinner from "~/app/_components/spinner";
@@ -65,11 +65,11 @@ function urlSearchParamsToObject(
   const obj: Record<string, string | string[]> = {};
 
   urlSearchParams.forEach((value, key) => {
-    if (obj.hasOwnProperty(key)) {
-      const currentValue = obj[key]!;
+    if (Object.hasOwn(obj, key)) {
+      const currentValue = obj[key];
       if (Array.isArray(currentValue)) {
         currentValue.push(value);
-      } else {
+      } else if (typeof currentValue !== "undefined") {
         obj[key] = [currentValue, value];
       }
     } else {
@@ -104,7 +104,7 @@ function FeedbackTab({
 
       await productFeedbackAction({
         type: type === "feedback" ? "product-feedback" : type,
-        priority: !!urgent ? "high" : "normal",
+        priority: urgent ? "high" : "normal",
         message: comment,
         path: pathname,
         query: urlSearchParamsToObject(searchParams),
@@ -179,17 +179,17 @@ function Feedback() {
         <DialogTitle>Neem contact op</DialogTitle>
 
         <TabGroup className="mt-4">
-          <TabList className="bg-gray-100 border border-gray-300 rounded-lg w-full grid grid-cols-3 p-[2px]">
-            <Tab className="p-2 data-[selected]:bg-white flex items-center text-gray-900 gap-x-2 data-[selected]:opacity-100 opacity-50 justify-center rounded-md text-xs data-[selected]:shadow">
-              <BugAntIcon className="h-4 w-4 text-gray-400" />
+          <TabList className="bg-slate-100 border border-slate-300 rounded-lg w-full grid grid-cols-3 p-[2px]">
+            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+              <BugAntIcon className="size-4 text-slate-400" />
               Bug
             </Tab>
-            <Tab className="p-2 data-[selected]:bg-white flex items-center text-gray-900 gap-x-2 data-[selected]:opacity-100 opacity-50 justify-center rounded-md text-xs data-[selected]:shadow">
-              <ChatBubbleOvalLeftIconSm className="h-4 w-4 text-gray-400" />
+            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+              <ChatBubbleOvalLeftIconSm className="size-4 text-slate-400" />
               Feedback
             </Tab>
-            <Tab className="p-2 data-[selected]:bg-white flex items-center text-gray-900 gap-x-2 data-[selected]:opacity-100 opacity-50 justify-center rounded-md text-xs data-[selected]:shadow">
-              <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400" />
+            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+              <QuestionMarkCircleIcon className="size-4 text-slate-400" />
               Vraag
             </Tab>
           </TabList>

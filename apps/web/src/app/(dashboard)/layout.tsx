@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { BASE_URL } from "~/constants";
 
 import { constants } from "@nawadi/lib";
@@ -23,7 +24,8 @@ export const metadata: Metadata = {
     template: `%s | ${constants.APP_NAME}`,
   },
   applicationName: constants.APP_NAME,
-  description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+  description:
+    "Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.",
   metadataBase: BASE_URL,
   icons: {
     shortcut: "/favicon.ico",
@@ -33,7 +35,8 @@ export const metadata: Metadata = {
       default: `${constants.APP_NAME} | ${constants.APP_SLOGAN}`,
       template: `%s | ${constants.APP_NAME}`,
     },
-    description: `Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.`,
+    description:
+      "Dé standaard voor veiligheid, kwaliteit en plezier op het water. Diplomalijn erkend door het Watersportverbond, met hoge kwaliteitseisen aan vaarlocaties.",
     url: "/",
     siteName: constants.APP_NAME,
     locale: "nl_NL",
@@ -44,8 +47,6 @@ export const metadata: Metadata = {
     follow: false,
   },
 };
-
-export const runtime = "nodejs";
 
 export default function DashboardLayout({
   children,
@@ -62,7 +63,7 @@ export default function DashboardLayout({
     >
       <body>
         <CommonProviders>
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
 
           <Toaster richColors />
           <SpeedInsights />

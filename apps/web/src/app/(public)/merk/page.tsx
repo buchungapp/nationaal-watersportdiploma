@@ -42,7 +42,7 @@ export default function Page() {
           </div>
         </div>
       </PageHero>
-      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
+      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr_3fr] lg:px-16">
         <div className="flex h-full justify-end">
           <SideNav
             sections={[
@@ -92,13 +92,11 @@ export default function Page() {
               </p>
 
               <h3>Icoon</h3>
-              {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
               <Image className="rounded-none" src={icon} alt="" width={300} />
 
               <h3>Woordmerk</h3>
               <Image
                 className="rounded-none"
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 src={wordmark}
                 alt=""
                 width={300}
@@ -124,8 +122,10 @@ export default function Page() {
                       className="flex items-center gap-2"
                       value="#FF8000"
                     >
-                      <div className="w-10 h-10 bg-branding-orange rounded-full" />
-                      <span className="text-gray-700 font-medium">#FF8000</span>
+                      <div className="size-10 bg-branding-orange rounded-full" />
+                      <span className="text-slate-700 font-medium">
+                        #FF8000
+                      </span>
                     </CopyToClipboard>
                   </div>
                 </div>
@@ -136,8 +136,10 @@ export default function Page() {
                       className="flex items-center gap-2"
                       value="#007FFF"
                     >
-                      <div className="w-10 h-10 bg-branding-light rounded-full" />
-                      <span className="text-gray-700 font-medium">#007FFF</span>
+                      <div className="size-10 bg-branding-light rounded-full" />
+                      <span className="text-slate-700 font-medium">
+                        #007FFF
+                      </span>
                     </CopyToClipboard>
                   </div>
                 </div>
@@ -148,8 +150,10 @@ export default function Page() {
                       className="flex items-center gap-2"
                       value="#0047AB"
                     >
-                      <div className="w-10 h-10 bg-branding-dark rounded-full" />
-                      <span className="text-gray-700 font-medium">#0047AB</span>
+                      <div className="size-10 bg-branding-dark rounded-full" />
+                      <span className="text-slate-700 font-medium">
+                        #0047AB
+                      </span>
                     </CopyToClipboard>
                   </div>
                 </div>

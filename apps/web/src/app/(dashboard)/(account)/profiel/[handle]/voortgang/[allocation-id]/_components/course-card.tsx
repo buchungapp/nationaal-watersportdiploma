@@ -31,8 +31,12 @@ export async function CourseCard({
     throw new Error("Allocation has no student curriculum");
   }
 
-  if (!!allocation.certificate) {
+  if (allocation.certificate) {
     throw new Error("Certificate already issued");
+  }
+
+  if (!allocation.studentCurriculum.curriculumId) {
+    throw new Error("Failed to retrieve curriculum");
   }
 
   const [curriculum, completedCompetencies, allCompetencyProgress] =

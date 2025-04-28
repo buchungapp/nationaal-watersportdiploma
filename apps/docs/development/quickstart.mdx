@@ -1,0 +1,114 @@
+---
+title: Quickstart
+description: 'Get started with local development'
+---
+
+## Cloning the repository
+
+To get started with the development environment, clone the repository to your local machine.
+
+```bash
+git clone https://github.com/buchungapp/nationaal-watersportdiploma.git ./nwd
+```
+
+Navigate to the project directory.
+
+```bash
+cd nwd
+```
+
+## Installing dependencies
+
+### Package manager
+
+The NWD project uses [pnpm v9](https://pnpm.io/9.x/installation) as the package manager.
+Please make sure you are using the correct version, to prevent any issues.
+
+Alternatively, you can use: `npx pnpm@v9 <command>`, but we do not recommend it.
+
+### Initialization
+
+To install the dependencies and build the api, run the following command:
+
+```bash
+pnpm initialize
+```
+
+## Setting up Supabase
+
+The NWD project uses [Supabase](https://supabase.io/) as the database and auth provider.
+You can follow the quide at [supabase.io/docs](https://supabase.com/docs/guides/cli/getting-started) to get started.
+
+We also provide a simplified guide below.
+
+<Accordion title="Setting up Supabase for local development">
+
+To get started, you need to install the [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started).
+And install [Docker](https://docs.docker.com/engine/install/) or [Docker Desktop](https://docs.docker.com/desktop/) for supabase to run locally.
+
+</Accordion>
+
+Then you are ready to start the Supabase server.
+
+```bash
+supabase start
+```
+
+## Setting up the database
+
+To set up the database, run the following command:
+
+<Warning>
+  This command will run database migrations and **reset** the database.
+</Warning>
+
+```bash
+pnpm db:reset
+```
+
+After this we want to seed the database with some initial data. This will add a simple course and sailing school to the database.
+
+<Note>
+  None of the course requirements and users are real and are only for testing
+  purposes.
+</Note>
+
+```bash
+pnpm db:seed
+```
+
+### Example users add by the seed
+
+| Name          | E-mail                             | Role                       |
+| :------------ | :--------------------------------- | :------------------------- |
+| Jan Jansen    | info@zeilschool-de-optimist.nl     | Location admin, instructor |
+| Emma de Vries | emma@zeilschool-de-optimist.nl     | Instructor                 |
+| Timo Peters   | ouder@email.nl                     | Cursist                    |
+| Lisa Peters   | ouder@email.nl                     | Cursist                    |
+| Lars Peters   | ouder@email.nl                     | Cursist                    |
+| -             | info@nationaalwatersportdiploma.nl | Secretariaat               |
+
+### Logging in
+
+To log in to the application, you can use the users above. When you input the email address, you will receive a magic link in the inbox.
+The inbox for local supabase development can be found at [http://localhost:54324/monitor](http://localhost:54324/monitor).
+
+## Building the core package
+
+If you made changes to the core package, you need to build it.
+
+```bash
+cd packages/core
+pnpm build
+```
+
+## Starting NWD website
+
+To start the NDW website, open up a new terminal and run the following command:
+
+```bash
+cd apps/web
+pnpm dev
+```
+
+The site should now be running on [http://localhost:3000](http://localhost:3000).

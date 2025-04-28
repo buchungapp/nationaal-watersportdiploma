@@ -1,41 +1,52 @@
-import { schema as s } from '@nawadi/db'
-import { z } from 'zod'
-import { useQuery } from '../../contexts/index.js'
-import { singleRow } from '../../utils/data-helpers.js'
-import { successfulCreateResponse, withZod } from '../../utils/zod.js'
-import { insertSchema, selectSchema } from './competency.schema.js'
-
-export const create = withZod(
-  insertSchema.pick({
-    curriculumId: true,
-    moduleId: true,
-    competencyId: true,
-    isRequired: true,
-    requirement: true,
-  }),
+import { schema as s } from "@nawadi/db";
+import { z } from "zod";
+import { useQuery } from "../../contexts/index.js";
+import { singleRow } from "../../utils/data-helpers.js";
+import {
   successfulCreateResponse,
-  async (input) => {
-    const query = useQuery()
+  withZod,
+  wrapCommand,
+  wrapQuery,
+} from "../../utils/index.js";
+import { insertSchema, selectSchema } from "./competency.schema.js";
 
-    const result = await query
-      .insert(s.curriculumCompetency)
-      .values({
-        competencyId: input.competencyId,
-        curriculumId: input.curriculumId,
-        moduleId: input.moduleId,
-        isRequired: input.isRequired,
-        requirement: input.requirement,
-      })
-      .returning({ id: s.curriculumCompetency.id })
+export const create = wrapCommand(
+  "curriculum.competency.create",
+  withZod(
+    insertSchema.pick({
+      curriculumId: true,
+      moduleId: true,
+      competencyId: true,
+      isRequired: true,
+      requirement: true,
+    }),
+    successfulCreateResponse,
+    async (input) => {
+      const query = useQuery();
 
-    const insert = singleRow(result)
+      const result = await query
+        .insert(s.curriculumCompetency)
+        .values({
+          competencyId: input.competencyId,
+          curriculumId: input.curriculumId,
+          moduleId: input.moduleId,
+          isRequired: input.isRequired,
+          requirement: input.requirement,
+        })
+        .returning({ id: s.curriculumCompetency.id });
 
-    return insert
-  },
-)
+      const insert = singleRow(result);
 
-export const list = withZod(z.void(), selectSchema.array(), async () => {
-  const query = useQuery()
+      return insert;
+    },
+  ),
+);
 
-  return await query.select().from(s.curriculumCompetency)
-})
+export const list = wrapQuery(
+  "curriculum.competency.list",
+  withZod(z.void(), selectSchema.array(), async () => {
+    const query = useQuery();
+
+    return await query.select().from(s.curriculumCompetency);
+  }),
+);

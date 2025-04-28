@@ -79,7 +79,7 @@ export default function Contact() {
           ].map((item) => (
             <article
               key={item.href}
-              className="grid break-inside-avoid gap-2 rounded-2xl bg-gray-100 p-10"
+              className="grid break-inside-avoid gap-2 rounded-2xl bg-slate-100 p-10"
             >
               <h2 className="text-lg font-semibold">{item.title}</h2>
               <p>{item.description}</p>
@@ -107,7 +107,7 @@ export default function Contact() {
                 Secretariaat
               </Article.Heading>
               <Article.Title>Neem contact op</Article.Title>
-              <Article.Paragraph className="text-gray-700">
+              <Article.Paragraph className="text-slate-700">
                 Het{" "}
                 <Link
                   href={"/vereniging/secretariaat"}
@@ -120,13 +120,13 @@ export default function Contact() {
                 binnen het Nationaal Watersportdiploma.
               </Article.Paragraph>
             </Article>
-            <ul className="flex flex-col gap-4 text-gray-700">
+            <ul className="flex flex-col gap-4 text-slate-700">
               <li className="w-fit">
                 <CopyToClipboard
                   value={"info@nationaalwatersportdiploma.nl"}
                   className="flex items-center gap-4 underline"
                 >
-                  <AtSymbolIcon className="h-5 w-5" />
+                  <AtSymbolIcon className="size-5" />
                   info@nationaalwatersportdiploma.nl
                 </CopyToClipboard>
               </li>
@@ -135,14 +135,14 @@ export default function Contact() {
                   href="tel:0857822777"
                   className="flex items-center gap-4 underline"
                 >
-                  <PhoneIcon className="h-5 w-5" />
+                  <PhoneIcon className="size-5" />
                   085 - 782 27 77
                 </InlineButton>
               </li>
               <li className="flex items-start gap-4">
-                <EnvelopeIcon className="h-6 w-5 flex-shrink-0" />
-                Wilhelmina van Pruisenweg 35 <br />
-                2595AN Den Haag
+                <EnvelopeIcon className="h-6 w-5 shrink-0" />
+                Waldorpstraat 5 <br />
+                2521CA Den Haag
               </li>
             </ul>
             <p>

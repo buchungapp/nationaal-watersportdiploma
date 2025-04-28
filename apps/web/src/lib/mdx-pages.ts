@@ -1,5 +1,6 @@
+import path from "node:path";
 import glob from "fast-glob";
-import path from "path";
+import { unstable_cacheLife } from "next/cache";
 import type { Page } from "~/types";
 
 // Maurits: I know this is ugly, but need to move fast
@@ -8,8 +9,11 @@ import type { Page } from "~/types";
 // TODO
 
 export async function getAllDiplomalijnInstructeurPages() {
+  "use cache";
+  unstable_cacheLife("days");
+
   const workingPath = process.cwd();
-  const contentPath = `./src/app/(public)`;
+  const contentPath = "./src/app/(public)";
 
   const pageFilenames = await glob("**/page.mdx", {
     cwd: path.join(workingPath, contentPath, "diplomalijn/instructeur"),
@@ -26,6 +30,7 @@ export async function getAllDiplomalijnInstructeurPages() {
 
       const filePath = pageFilename.replace(/\/page.mdx$/, "");
 
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       const slug = filePath === "page.mdx" ? null : filePath.split("/").at(-1)!;
 
       return {
@@ -46,8 +51,11 @@ export async function getAllDiplomalijnInstructeurPages() {
 }
 
 export async function getAllDiplomalijnConsumentenPages() {
+  "use cache";
+  unstable_cacheLife("days");
+
   const workingPath = process.cwd();
-  const contentPath = `./src/app/(public)`;
+  const contentPath = "./src/app/(public)";
 
   const pageFilenames = await glob("**/page.mdx", {
     cwd: path.join(workingPath, contentPath, "diplomalijn/consument"),
@@ -64,6 +72,7 @@ export async function getAllDiplomalijnConsumentenPages() {
 
       const filePath = pageFilename.replace(/\/page.mdx$/, "");
 
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
       const slug = filePath === "page.mdx" ? null : filePath.split("/").at(-1)!;
 
       return {

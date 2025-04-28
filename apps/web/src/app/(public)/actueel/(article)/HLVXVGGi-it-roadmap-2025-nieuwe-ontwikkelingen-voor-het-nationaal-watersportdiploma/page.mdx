@@ -1,0 +1,149 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  date: "2025-02-06T08:00:00Z",
+  category: "achterban",
+  title:
+    "IT Roadmap 2025: Nieuwe ontwikkelingen voor het Nationaal Watersportdiploma",
+  description:
+    "Het NWD presenteert haar IT roadmap voor 2025, met verbeteringen voor consumenten, instructeurs en vaarlocaties. Lees hier wat er op de planning staat!",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/HLVXVGGi-it-roadmap-2025-nieuwe-ontwikkelingen-voor-het-nationaal-watersportdiploma",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/HLVXVGGi-it-roadmap-2025-nieuwe-ontwikkelingen-voor-het-nationaal-watersportdiploma",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het Nationaal Watersportdiploma (NWD) heeft technologie hoog in het vaandel
+staan. Na een succesvol eerste jaar waarin we onze nieuwe applicatie hebben
+gelanceerd voor consumenten, instructeurs en vaarlocaties, is het tijd om
+vooruit te kijken. Samen met onze
+ontwikkelingspartner&#32;<Link href="https://www.buchung.nl/" target="_blank">Buchung</Link>
+&#32;hebben we een ambitieuze roadmap opgesteld voor 2025. In dit artikel delen
+we graag onze plannen met je.
+
+## Voor de watersporter
+
+Bij het NWD geloven we dat plezier in de watersport hand in hand gaat met
+persoonlijke ontwikkeling. De watersportwereld is enorm divers - van
+verschillende boottypen en disciplines tot specifieke vaardigheden en
+vaarwateren. Deze rijkdom aan mogelijkheden maakt de watersport zo boeiend, maar
+kan ook overweldigend zijn voor watersporters die hun weg zoeken in hun
+ontwikkeling.
+
+### Beter overzicht en persoonlijk vervolgadvies
+
+Een NWD-diploma behalen is een belangrijke mijlpaal, maar het is ook een
+startpunt voor nieuwe avonturen op het water. We merken dat veel watersporters
+na het behalen van een diploma vragen hebben: Wat betekent dit diploma precies
+voor mijn ontwikkeling? Welke mogelijkheden opent dit? En vooral: wat past er
+bij mij?
+
+Om deze vragen te beantwoorden, ontwikkelen we een systeem dat niet alleen laat
+zien waar je staat met je huidige competenties, maar ook helpt bij het maken van
+weloverwogen keuzes voor je verdere ontwikkeling. Of je nu geïnteresseerd bent
+in het verkennen van nieuwe disciplines, het oppakken van specifieke
+keuzemodules, of het overstappen naar een ander type boot - we willen je helpen
+de weg te vinden die het beste bij jouw ambities en interesses past.
+
+Omdat naast NWD-diploma's ook historische CWO-diploma's zichtbaar zijn in de
+applicatie, werken we aan een compleet "watersportpaspoort". Hierin worden al je
+watersportprestaties gebundeld op één plek - makkelijk te beheren en te delen
+wanneer nodig.
+
+## Voor de instructeur
+
+### Verbeterde gebruikersinterface
+
+Op basis van de waardevolle feedback van onze instructeurs tijdens het afgelopen
+vaarseizoen, gaan we de cohortfunctionaliteit verder verbeteren. We maken het
+werken met groepen cursisten nog intuïtiever en efficiënter.
+
+### Digitaal instructeurspaspoort
+
+We introduceren een instructeurspaspoort waarin alle behaalde kwalificaties
+overzichtelijk worden weergegeven - van eigenvaardigheid tot didactische
+diploma's. Vanuit je persoonlijke instructeursomgeving kun je een digitaal
+gewaarmerkte versie downloaden, handig voor sollicitaties of vervolgopleidingen.
+
+## Voor vaarlocaties
+
+### Verbeterd cursistenbeheer
+
+Voor vaarlocaties komen er verschillende verbeteringen in het cursistenbeheer:
+
+- **Bulk-overzicht historische kwalificaties**: Snel inzicht in het startniveau
+  van alle cursisten in een cohort, zodat lessen vanaf dag één optimaal kunnen
+  worden afgestemd.
+- **Slimmere importfunctie**: Verbeterde functionaliteit voor het importeren van
+  cursisten, inclusief automatische herkenning van dubbele inschrijvingen.
+- **Flexibel cohortbeheer**: Mogelijkheid om cursisten tussen cohorten te
+  verplaatsen.
+
+### Digitalisering PvB-proces
+
+Het complete proces van Proeven van Bekwaamheid (PvB) wordt geïntegreerd in
+nwd.nl. Van aanvraag tot afronding verloopt straks volledig digitaal, zonder
+gebruik van externe formulieren of e-mails.
+
+## Veilige gegevensuitwisseling met andere systemen
+
+Een belangrijke ontwikkeling voor 2025 is het mogelijk maken van veilige
+gegevensuitwisseling tussen het NWD-platform en andere systemen die vaarlocaties
+gebruiken. Dit klinkt misschien technisch, maar het levert praktische voordelen
+op voor iedereen:
+
+### Wat betekent dit in de praktijk?
+
+Stel je voor: je schrijft je in voor een zeilcursus via het boekingssysteem van
+een vaarlocatie. Met de nieuwe ontwikkelingen wordt het mogelijk om:
+
+- Direct in te loggen met je NWD-account, zonder een nieuw account aan te maken
+- Je historische diploma's automatisch te delen met de vaarlocatie
+- Je nieuwe diploma automatisch toe te voegen aan je watersportpaspoort
+
+### Privacy en veiligheid voorop
+
+Bij deze ontwikkelingen staat de bescherming van jouw gegevens centraal:
+
+- **Jij hebt de controle**: Je bepaalt zelf welke gegevens je wilt delen
+- **Expliciete toestemming**: Voordat gegevens worden gedeeld, vragen we altijd
+  eerst je toestemming
+- **Veilige standaarden**: We gebruiken moderne, bewezen beveiligingsstandaarden
+  voor alle gegevensuitwisseling
+- **Transparantie**: Je kunt altijd zien welke systemen toegang hebben tot jouw
+  gegevens en deze toegang intrekken
+
+### Voor ontwikkelaars
+
+Voor technische partners en ontwikkelaars maken we het mogelijk om veilig aan te
+sluiten op het NWD-platform via:
+
+- Een Open API voor gestructureerde gegevensuitwisseling
+- OAuth 2.0 voor veilige authenticatie
+- Uitgebreide technische documentatie en ondersteuning
+
+## Meedenken?
+
+We staan altijd open voor suggesties en feedback op onze plannen. Heb je ideeën
+of wensen voor nieuwe functionaliteit? Laat het ons weten via het secretariaat:
+info@nationaalwatersportdiploma.nl.
+
+Voor ontwikkelaars die geïnteresseerd zijn in de technische mogelijkheden: neem
+contact op met het secretariaat voor meer informatie over de developer
+resources.

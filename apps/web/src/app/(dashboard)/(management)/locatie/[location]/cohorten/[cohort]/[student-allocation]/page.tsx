@@ -21,9 +21,10 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { showAllocationTimeline } from "~/lib/flags";
+import { showAllocationTimeline, showProgressTracking } from "~/lib/flags";
 import {
   isInstructorInCohort,
+  listCohortsForLocation,
   listCompetencyProgressInCohortForStudent,
   listDistinctTagsForCohort,
   listPrivilegesForCohort,
@@ -33,13 +34,14 @@ import {
   retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
+import { filterCohorts } from "~/utils/filter-cohorts";
 import {
   ClaimInstructorAllocation,
   ReleaseInstructorAllocation,
-  ReleaseStudentAllocation,
   WithdrawStudentCurriculum,
 } from "./_components/actions";
 import { CourseCard } from "./_components/course-card";
+import ManageStudentActionsDropdown from "./_components/manage-student-actions-dropdown";
 import { UpdateProgressVisibility } from "./_components/progress";
 import { ManageAllocationTags } from "./_components/tag-input";
 import Timeline from "./_components/timeline";
@@ -158,16 +160,22 @@ async function ManageStudentActions({
   cohortId,
   studentAllocationId,
   locationId,
+  personId,
 }: {
   cohortId: string;
   studentAllocationId: string;
   locationId: string;
+  personId: string;
 }) {
-  const [locationRoles, privileges] = await Promise.all([
-    listRolesForLocation(locationId),
-    listPrivilegesForCohort(cohortId),
-  ]);
-
+  const [locationRoles, privileges, filteredCohorts, allocation] =
+    await Promise.all([
+      listRolesForLocation(locationId),
+      listPrivilegesForCohort(cohortId),
+      listCohortsForLocation(locationId).then((cohorts) =>
+        filterCohorts(cohorts, ["open", "aankomend"]),
+      ),
+      retrieveStudentAllocationWithCurriculum(cohortId, studentAllocationId),
+    ]);
   const canManageStudent =
     locationRoles.includes("location_admin") ||
     privileges.includes("manage_cohort_students");
@@ -176,19 +184,19 @@ async function ManageStudentActions({
     return null;
   }
 
+  if (!allocation) {
+    throw new Error("Student allocation not found");
+  }
+
   return (
-    <Dropdown>
-      <DropdownButton outline className="-my-1.5">
-        <EllipsisHorizontalIcon />
-      </DropdownButton>
-      <DropdownMenu anchor="bottom end">
-        <ReleaseStudentAllocation
-          cohortId={cohortId}
-          studentAllocationId={studentAllocationId}
-          locationId={locationId}
-        />
-      </DropdownMenu>
-    </Dropdown>
+    <ManageStudentActionsDropdown
+      cohortId={cohortId}
+      studentAllocationId={studentAllocationId}
+      locationId={locationId}
+      personId={personId}
+      cohorts={filteredCohorts}
+      canMoveStudentAllocation={!allocation.certificate}
+    />
   );
 }
 
@@ -233,13 +241,19 @@ async function ManageStudentCurriculumActions({
   );
 }
 
-export default async function Page({
-  params,
-}: {
-  params: { location: string; cohort: string; "student-allocation": string };
+export default async function Page(props: {
+  params: Promise<{
+    location: string;
+    cohort: string;
+    "student-allocation": string;
+  }>;
 }) {
+  const params = await props.params;
   // Kick-off the flag evaluation
   const showTimelineFlag = showAllocationTimeline();
+  const showProgressTrackingFlag = showProgressTracking.run({
+    identify: params,
+  });
 
   const location = await retrieveLocationByHandle(params.location);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
@@ -256,8 +270,6 @@ export default async function Page({
   if (!allocation) {
     notFound();
   }
-
-  const progressTrackingEnabled = params.location === "krekt-sailing";
 
   return (
     <SWRConfig
@@ -283,6 +295,7 @@ export default async function Page({
                 locationId={location.id}
                 cohortId={cohort.id}
                 studentAllocationId={allocation.id}
+                personId={allocation.person.id}
               />
             </Suspense>
           </div>
@@ -308,7 +321,7 @@ export default async function Page({
                     .filter(Boolean)
                     .join(" ")}
                 </Strong>
-                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                <ArrowTopRightOnSquareIcon className="size-4" />
               </TextLink>
             </DescriptionDetails>
 
@@ -329,17 +342,15 @@ export default async function Page({
             <DescriptionDetails>
               <Suspense
                 fallback={
-                  <>
-                    {allocation.instructor
-                      ? [
-                          allocation.instructor.firstName,
-                          allocation.instructor.lastNamePrefix,
-                          allocation.instructor.lastName,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")
-                      : null}
-                  </>
+                  allocation.instructor
+                    ? [
+                        allocation.instructor.firstName,
+                        allocation.instructor.lastNamePrefix,
+                        allocation.instructor.lastName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")
+                    : null
                 }
               >
                 <InstructorField
@@ -350,7 +361,7 @@ export default async function Page({
               </Suspense>
             </DescriptionDetails>
 
-            {progressTrackingEnabled ? (
+            {(await showProgressTrackingFlag) ? (
               <>
                 <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
                 <DescriptionDetails className="flex items-center justify-between gap-x-2">
@@ -363,10 +374,12 @@ export default async function Page({
                       <span className="text-zinc-500">Niet zichtbaar</span>
                     </>
                   )}
-                  <UpdateProgressVisibility
-                    allocationId={allocation.id}
-                    cohortId={cohort.id}
-                  />
+                  <div className="-my-2">
+                    <UpdateProgressVisibility
+                      allocationId={allocation.id}
+                      cohortId={cohort.id}
+                    />
+                  </div>
                 </DescriptionDetails>
               </>
             ) : null}

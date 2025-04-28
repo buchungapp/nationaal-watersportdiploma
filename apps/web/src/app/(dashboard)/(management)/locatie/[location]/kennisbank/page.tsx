@@ -1,5 +1,6 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { DocumentTextIcon } from "@heroicons/react/20/solid";
+import { connection } from "next/server";
 import prettyBytes from "pretty-bytes";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -16,13 +17,12 @@ import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
 
-export default async function Page(
-  _props: Readonly<{
-    params: {
-      location: string;
-    };
-  }>,
-) {
+export default async function Page(_props: {
+  params: Promise<{
+    location: string;
+  }>;
+}) {
+  await connection();
   const documents = await listKnowledgeCenterDocuments();
 
   return (
@@ -42,14 +42,14 @@ export default async function Page(
       </Text>
 
       <Table
-        className="mt-8 [--gutter:theme(spacing.6)] sm:[--gutter:theme(spacing.8)]"
+        className="mt-8 [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]"
         dense
       >
         <TableHead>
           <TableRow>
             <TableHeader>Naam</TableHeader>
             <TableHeader>Laatste update</TableHeader>
-            <TableHeader></TableHeader>
+            <TableHeader />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -57,7 +57,7 @@ export default async function Page(
             <TableRow key={document.id}>
               <TableCell>
                 <div className="flex items-center gap-4">
-                  <DocumentTextIcon className="w-6 h-6 text-zinc-500" />
+                  <DocumentTextIcon className="size-6 text-zinc-500" />
                   <div>
                     <TextLink
                       href={`/kennisbank/${document.id}`}

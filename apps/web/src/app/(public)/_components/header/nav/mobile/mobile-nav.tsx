@@ -4,7 +4,7 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import type React from "react";
 
 import { useMobileMenuState } from "~/app/_components/providers";
 
@@ -15,13 +15,13 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
     <Dialog open={open} onClose={setOpen} className="relative z-40 lg:hidden">
       <DialogBackdrop
         transition
-        className="fixed inset-0 bg-black bg-opacity-25 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+        className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
       />
 
       <div className="fixed inset-0 z-40 flex justify-end">
         <DialogPanel
           transition
-          className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-[closed]:translate-x-full"
+          className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-closed:translate-x-full"
         >
           <div className="relative flex items-center justify-center bg-branding-light p-4">
             <Link href="/">
@@ -41,7 +41,7 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
             >
               <span className="absolute -inset-0.5" />
               <span className="sr-only">Sluit menu</span>
-              <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+              <XMarkIcon className="size-6" aria-hidden="true" />
             </button>
           </div>
           <div className="overflow-y-auto">{children}</div>
@@ -55,8 +55,8 @@ export function MobileNavButton() {
   const [_, setOpen] = useMobileMenuState();
 
   return (
-    <button onClick={() => setOpen(true)}>
-      <Bars3Icon className="h-7 w-7" />
+    <button type="button" onClick={() => setOpen(true)}>
+      <Bars3Icon className="size-7" />
     </button>
   );
 }

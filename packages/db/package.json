@@ -4,12 +4,9 @@
   "private": true,
   "description": "",
   "type": "module",
-  "main": "./out/main.js",
-  "module": "./out/main.js",
-  "types": "./out/main.d.ts",
   "exports": {
     ".": {
-      "types": "./out/main.d.ts",
+      "types": "./src/main.ts",
       "default": "./out/main.js"
     }
   },
@@ -17,6 +14,7 @@
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
+    "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test './out/**/*.test.js'",
     "generate:custom": "drizzle-kit generate --custom",
@@ -38,17 +36,18 @@
   },
   "keywords": [],
   "dependencies": {
-    "@types/node": "^20.14.10",
+    "@types/node": "catalog:",
     "@types/yargs": "^17.0.32",
-    "drizzle-orm": "^0.31.4",
-    "postgres": "^3.4.4",
+    "drizzle-orm": "catalog:",
     "tslib": "^2.6.3",
     "type-fest": "^4.21.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
-    "drizzle-kit": "^0.22.8",
-    "typescript": "5.4.5"
+    "@tsconfig/node22": "catalog:",
+    "drizzle-kit": "catalog:",
+    "typescript": "catalog:",
+    "@types/pg": "catalog:",
+    "pg": "catalog:"
   }
 }

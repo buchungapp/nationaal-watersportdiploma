@@ -36,8 +36,8 @@ export default function AboutSection({
         {label}
         <Double />
       </div>
-      <h3 className="mt-1.5 text-2xl font-bold text-gray-900">{title}</h3>
-      <p className="mt-2.5 text-gray-700">{description}</p>
+      <h3 className="mt-1.5 text-2xl font-bold text-slate-900">{title}</h3>
+      <p className="mt-2.5 text-slate-700">{description}</p>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useActionState, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { z, ZodError } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -44,6 +44,7 @@ import {
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
 import type { ActorType } from "~/lib/nwd";
+import { invariant } from "~/utils/invariant";
 import { createPersonBulk } from "../_actions/create";
 
 const ROLES: {
@@ -136,7 +137,8 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
       // Splits each non-empty line by tabs into an array of values.
       .map((line) => line.split("\t"));
 
-    const headers = data[0]!;
+    const headers = data[0];
+    invariant(headers, "Data must contain at least one row.");
 
     // Remove the header row
     data.shift();
@@ -270,6 +272,7 @@ function SubmitForm({
         roles,
         prevState.persons!,
       );
+
       setIsOpen(false);
 
       if (result.message === "Success") {
@@ -294,7 +297,7 @@ function SubmitForm({
       const notSelectedIndices = Object.keys(mappingConfig)
         .filter((key) => mappingConfig[key] === SELECT_LABEL)
         // @ts-expect-error Fix later
-        .map((key) => parseInt(key.split("-").pop()));
+        .map((key) => Number.parseInt(key.split("-").pop()));
 
       const filteredData = csvData?.map((item) =>
         item.filter((_, index) => !notSelectedIndices.includes(index)),
@@ -465,13 +468,13 @@ function SubmitForm({
               <TableBody>
                 {data?.labels?.map((item, index) => {
                   return (
-                    <TableRow key={index}>
+                    <TableRow key={item.label}>
                       <TableCell>{item.label}</TableCell>
                       <TableCell className="space-x-2">
                         {item.value
                           .filter((val) => !!val)
-                          .map((value, index) => (
-                            <Code key={index}>{String(value)}</Code>
+                          .map((value) => (
+                            <Code key={value}>{String(value)}</Code>
                           ))}
                       </TableCell>
                       <TableCell>

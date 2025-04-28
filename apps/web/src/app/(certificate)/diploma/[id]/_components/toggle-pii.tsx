@@ -2,8 +2,8 @@
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
 import { useParams, usePathname } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useActionState, useCallback, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -84,7 +84,7 @@ function ShowButton() {
   const closeAndReset = useCallback(() => {
     setIsOpen(false);
     key.current += 1;
-  }, [setIsOpen]);
+  }, []);
 
   return (
     <>

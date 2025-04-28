@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  type ActorType,
   addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
@@ -18,6 +19,7 @@ import {
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrivilegesForCohort as listPrivilegesForCohortInner,
   listPrograms as listProgramsInner,
+  moveAllocationById as moveAllocationByIdInner,
   releaseStudentFromCohortByAllocationId as releaseStudentFromCohortByAllocationIdInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
@@ -25,7 +27,6 @@ import {
   updateCohortDetails,
   updateStudentInstructorAssignment,
   withdrawStudentFromCurriculumInCohort,
-  type ActorType,
 } from "~/lib/nwd";
 
 export async function claimStudents(cohortId: string, studentIds: string[]) {
@@ -65,7 +66,7 @@ export async function assignInstructorToStudents({
   studentIds: string[];
   instructorPersonId: string | null;
 }) {
-  if (!!instructorPersonId) {
+  if (instructorPersonId) {
     await updateStudentInstructorAssignment({
       cohortId,
       studentAllocationIds: studentIds,
@@ -187,6 +188,21 @@ export async function addInstructorToCohortByPersonId(props: {
 }) {
   const result = addInstructorToCohortByPersonIdInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+  return result;
+}
+
+export async function moveAllocationById(input: {
+  locationId: string;
+  allocationId: string;
+  cohortId: string;
+  newCohortId: string;
+}) {
+  const result = moveAllocationByIdInner(input);
+
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
+  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
+
   return result;
 }
 

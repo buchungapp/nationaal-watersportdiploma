@@ -1,6 +1,6 @@
 import * as Headless from "@headlessui/react";
+import type React from "react";
 import type { PropsWithChildren } from "react";
-import React from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   FieldGroup,
@@ -54,13 +54,12 @@ function FieldSection({
   );
 }
 
-export default async function Page({
-  params,
-}: Readonly<{
-  params: {
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-}>) {
+  }>;
+}) {
+  const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 
   const {
@@ -163,7 +162,11 @@ export default async function Page({
             description="Het algemene logo van de vaarlocatie."
           >
             <ImageUpload />
-            <img src={logo?.url} className="w-full h-auto" />
+            <img
+              src={logo?.url}
+              alt={logo?.alt ?? undefined}
+              className="w-full h-auto"
+            />
           </FieldSection>
 
           <Divider soft className="my-10" />
@@ -173,7 +176,11 @@ export default async function Page({
             description="Een kleine vierkante versie van het logo, die wordt gebruik op plekken met minder ruimte. Kan zowel vierkant als rond weergegeven worden."
           >
             <ImageUpload />
-            <img src={logoSquare?.url} className="w-full h-auto" />
+            <img
+              src={logoSquare?.url}
+              alt={logoSquare?.alt ?? undefined}
+              className="w-full h-auto"
+            />
           </FieldSection>
 
           <Divider soft className="my-10" />
@@ -184,7 +191,11 @@ export default async function Page({
           >
             <ImageUpload />
 
-            <img src={logoCertificate?.url} className="w-full h-auto" />
+            <img
+              src={logoCertificate?.url}
+              alt={logoCertificate?.alt ?? undefined}
+              className="w-full h-auto"
+            />
           </FieldSection>
         </FieldGroup>
       </Fieldset>

@@ -63,8 +63,8 @@ export default function Trustbar() {
   return (
     <section className="flex items-center justify-center gap-2 py-2 text-white sm:px-28 lg:justify-between">
       <ul className="hidden flex-1 items-center gap-6 lg:flex">
-        {socials.map((social, i) => (
-          <li key={i}>
+        {socials.map((social) => (
+          <li key={social.name}>
             <Link
               className="group relative"
               href={social.link}
@@ -72,8 +72,8 @@ export default function Trustbar() {
               referrerPolicy="no-referrer"
             >
               {/* Background on hover */}
-              <div className="absolute inset-0 scale-150 rounded bg-white bg-opacity-0 transition-opacity group-hover:bg-opacity-100" />
-              <social.icon className="relative h-4 w-4 group-hover:text-[--brand-color]" />
+              <div className="absolute inset-0 scale-150 rounded-sm bg-white/0 transition-opacity group-hover:bg-white" />
+              <social.icon className="relative size-4 group-hover:text-(--brand-color)" />
             </Link>
           </li>
         ))}

@@ -9,20 +9,37 @@ import {
 } from "~/lib/nwd";
 
 import {
-  createSearchParamsCache,
+  createLoader,
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
+import { showProgressTracking } from "~/lib/flags";
 import StudentsTable from "./_components/students-table";
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: { location: string; cohort: string };
-  searchParams: Record<string, string | string[] | undefined>;
+const searchParamsParser = createLoader({
+  weergave: parseAsArrayOf(
+    parseAsStringLiteral([
+      "uitgegeven",
+      "klaar-voor-uitgifte",
+      "geen-voortgang",
+    ] as const),
+  ),
+  query: parseAsString,
+});
+
+export default async function Page(props: {
+  params: Promise<{ location: string; cohort: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
+
+  // Kick-off the flag evaluation
+  const showProgressTrackingFlag = showProgressTracking.run({
+    identify: params,
+  });
+
   const cohortPromise = retrieveLocationByHandle(params.location).then(
     (location) =>
       retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
@@ -40,16 +57,7 @@ export default async function Page({
     ),
   ]);
 
-  const parsedSq = createSearchParamsCache({
-    weergave: parseAsArrayOf(
-      parseAsStringLiteral([
-        "uitgegeven",
-        "klaar-voor-uitgifte",
-        "geen-voortgang",
-      ] as const),
-    ),
-    query: parseAsString,
-  }).parse(searchParams);
+  const parsedSq = searchParamsParser(searchParams);
 
   const filteredStudents =
     parsedSq.weergave && parsedSq.weergave.length > 0
@@ -96,6 +104,7 @@ export default async function Page({
   });
 
   // Add students to the index
+  // biome-ignore lint/complexity/noForEach: <explanation>
   filteredStudents.forEach((student) => {
     index.add({
       id: student.id,
@@ -137,7 +146,7 @@ export default async function Page({
 
   return (
     <StudentsTable
-      progressTrackingEnabled={params.location === "krekt-sailing"}
+      progressTrackingEnabled={await showProgressTrackingFlag}
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}

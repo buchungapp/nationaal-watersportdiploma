@@ -30,7 +30,7 @@ async function CohortProgressList({ person }: Props) {
   }
 
   return (
-    <div>
+    <div className="lg:col-span-2">
       <Subheading>Jouw NWD-voortgang</Subheading>
       <Text>
         Op dit moment zit je in de volgende actieve NWD-cursussen, waarbij de
@@ -44,15 +44,15 @@ async function CohortProgressList({ person }: Props) {
             <GridListHeader
               href={`/profiel/${person.handle}/voortgang/${allocation.id}`}
             >
-              <div className="text-sm font-medium leading-6 text-gray-900">
-                {allocation.studentCurriculum!.program.title ??
-                  `${allocation.studentCurriculum!.course.title} ${allocation.studentCurriculum!.degree.title}`}
+              <div className="font-medium text-slate-900 text-sm leading-6">
+                {allocation.studentCurriculum?.program.title ??
+                  `${allocation.studentCurriculum?.course.title} ${allocation.studentCurriculum?.degree.title}`}
               </div>
             </GridListHeader>
             <DescriptionList className="px-6">
               <DescriptionTerm>Vaartuig</DescriptionTerm>
               <DescriptionDetails>
-                {allocation.studentCurriculum!.gearType.title}
+                {allocation.studentCurriculum?.gearType.title}
               </DescriptionDetails>
 
               <DescriptionTerm>Vaarlocatie</DescriptionTerm>

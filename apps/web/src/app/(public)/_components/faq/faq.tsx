@@ -1,7 +1,7 @@
 "use client";
 
 import type { PropsWithChildren } from "react";
-import React from "react";
+import type React from "react";
 
 import {
   Disclosure,
@@ -24,7 +24,7 @@ export default function FaqDisclosure({
     <Disclosure as="div" className={className} defaultOpen={defaultOpen}>
       <dt>
         <DisclosureButton
-          className="flex p-4 hover:bg-gray-100 w-full items-start justify-start text-left"
+          className="flex p-4 hover:bg-slate-100 w-full items-start justify-start text-left"
           data-attr="faq"
         >
           <div className="mr-6 flex h-6 items-center justify-center">

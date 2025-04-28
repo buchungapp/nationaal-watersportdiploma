@@ -54,9 +54,9 @@ export default async function CertificateAdvise({ id }: { id: string }) {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
                         {isModuleCompleted ? (
-                          <CheckIcon className="w-4 h-4 mr-2.5" />
+                          <CheckIcon className="size-4 mr-2.5" />
                         ) : (
-                          <span className="w-4 h-4 rounded-full border border-zinc-500 mr-2.5" />
+                          <span className="size-4 rounded-full border border-zinc-500 mr-2.5" />
                         )}
                         <Text>{module.title}</Text>
                       </div>
@@ -87,9 +87,9 @@ export default async function CertificateAdvise({ id }: { id: string }) {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
                         {isModuleCompleted ? (
-                          <CheckIcon className="w-4 h-4 mr-2.5" />
+                          <CheckIcon className="size-4 mr-2.5" />
                         ) : (
-                          <span className="w-4 h-4 rounded-full border border-zinc-500 mr-2.5" />
+                          <span className="size-4 rounded-full border border-zinc-500 mr-2.5" />
                         )}
                         <Text>{module.title}</Text>
                       </div>

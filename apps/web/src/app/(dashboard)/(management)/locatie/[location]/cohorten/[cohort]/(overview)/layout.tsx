@@ -33,8 +33,8 @@ import {
 } from "~/lib/nwd";
 import {
   DialogButtons,
-  Dialogs,
   DialogWrapper,
+  Dialogs,
 } from "./_components/dialog-context";
 import { LayoutTabs } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
@@ -73,13 +73,14 @@ async function QuickActionButtons({
   );
 }
 
-export default async function Layout({
-  params,
-  children,
-}: {
-  params: { location: string; cohort: string };
+export default async function Layout(props: {
+  params: Promise<{ location: string; cohort: string }>;
   children: React.ReactNode;
 }) {
+  const params = await props.params;
+
+  const { children } = props;
+
   const location = await retrieveLocationByHandle(params.location);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
@@ -100,7 +101,7 @@ export default async function Layout({
           // so it only blocks rendering of components that
           // actually rely on this data.
           countries: listCountries(),
-          [unstable_serialize([`allStudents`, location.id])]:
+          [unstable_serialize(["allStudents", location.id])]:
             listPersonsForLocationByRole(location.id, "student"),
           [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
             listInstructorsByCohortId(cohort.id),

@@ -25,7 +25,7 @@ export function ImageUpload() {
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
       maxFiles: 1,
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
       onDrop,
       onDropRejected: ([reject]) => {
         if (reject?.errors.find(({ code }) => code === "file-invalid-type")) {
@@ -44,7 +44,7 @@ export function ImageUpload() {
     <div
       className={clsx(
         "w-full border border-dashed h-[160px] rounded-md flex items-center justify-center",
-        isDragActive && "bg-gray-100",
+        isDragActive && "bg-slate-100",
         isDragReject && "border-destructive",
       )}
       {...getRootProps()}

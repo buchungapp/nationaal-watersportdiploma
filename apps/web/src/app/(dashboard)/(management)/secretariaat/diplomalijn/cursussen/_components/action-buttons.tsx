@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useFormState } from "react-dom";
+import { useActionState, useState } from "react";
 import { toast } from "sonner";
 import {
   Alert,
@@ -21,7 +20,7 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const submit = async (prevState: unknown, formData: FormData) => {
     const result = await actionWithId(prevState, formData);
 
-    if (!!result.id) {
+    if (result.id) {
       setIsOpen(false);
       toast.success(`Curriculum ${result.id} aangemaakt`);
       return;
@@ -30,7 +29,7 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
     toast.error("Er is iets misgegaan");
   };
 
-  const [_state, action] = useFormState(submit, undefined);
+  const [_state, action] = useActionState(submit, undefined);
 
   return (
     <>

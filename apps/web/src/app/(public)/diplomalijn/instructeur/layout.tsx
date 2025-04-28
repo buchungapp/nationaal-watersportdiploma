@@ -1,6 +1,8 @@
+"use cache";
 import { constants } from "@nawadi/lib";
 
 import type { Metadata } from "next";
+import { unstable_cacheLife } from "next/cache";
 import MdxPageHeader from "~/app/(public)/_components/mdx-page-header";
 import { Prose } from "~/app/(public)/_components/prose";
 import { getAllDiplomalijnInstructeurPages } from "~/lib/mdx-pages";
@@ -19,12 +21,14 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  unstable_cacheLife("days");
+
   const pages = await getAllDiplomalijnInstructeurPages();
 
   return (
     <main>
       <MdxPageHeader pages={pages} />
-      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr,3fr] lg:px-16">
+      <div className="mt-12 grid grid-cols-1 items-start gap-12 px-4 sm:grid-cols-[1fr_3fr] lg:px-16">
         <div className="flex justify-end h-full">
           <SideNav
             pages={{

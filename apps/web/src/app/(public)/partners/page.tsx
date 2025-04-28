@@ -48,7 +48,7 @@ export default function Page() {
             alt=""
             className="max-w-60 h-auto mb-4"
           />
-          <h2 className="!mt-4">Watersportverbond</h2>
+          <h2 className="mt-4!">Watersportverbond</h2>
           <p>
             Het Koninklijk Nederlands Watersportverbond (Watersportverbond)
             waarborgt als autoriteit en licentiehouder binnen de
@@ -65,7 +65,11 @@ export default function Page() {
           </p>
           <p>
             Lees meer op:{" "}
-            <a href="https://www.watersportverbond.nl" target="_blank">
+            <a
+              href="https://www.watersportverbond.nl"
+              target="_blank"
+              rel="noreferrer"
+            >
               www.watersportverbond.nl
             </a>
             .

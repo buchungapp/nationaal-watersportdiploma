@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useActionState, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { ZodError, z } from "zod";
@@ -32,6 +32,7 @@ import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
+import { invariant } from "~/utils/invariant";
 import { addStudentsToCohort } from "../_actions/create";
 import { listCountries } from "../_actions/nwd";
 
@@ -94,7 +95,8 @@ function CreateDialog({ locationId, isOpen, setIsOpen, cohortId }: Props) {
       // Splits each non-empty line by tabs into an array of values.
       .map((line) => line.split("\t"));
 
-    const headers = data[0]!;
+    const headers = data[0];
+    invariant(headers, "Data must contain at least one row.");
 
     // Remove the header row
     data.shift();
@@ -211,6 +213,7 @@ function SubmitForm({
       const result = await addStudentsToCohort(
         locationId,
         cohortId,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         prevState.persons!,
       );
       setIsOpen(false);
@@ -234,7 +237,8 @@ function SubmitForm({
       );
       const notSelectedIndices = Object.entries(indexToColumnSelection)
         .filter(([_, value]) => value === SELECT_LABEL)
-        .map(([key]) => parseInt(key.split("-").pop()!));
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        .map(([key]) => Number.parseInt(key.split("-").pop()!));
 
       const filteredData = csvData.map((item) =>
         item.filter((_, index) => !notSelectedIndices.includes(index)),
@@ -266,7 +270,7 @@ function SubmitForm({
 
         row.forEach((value, index) => {
           const column = selectedFields[index];
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
           const columnIndex = nonTagColumns.indexOf(column as any);
 
           if (columnIndex !== -1) {
@@ -276,7 +280,6 @@ function SubmitForm({
           }
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment
         return [...sortedRow, ...tags];
       });
 
@@ -288,10 +291,8 @@ function SubmitForm({
       const maxLength = calculateMaxLength(sortedData);
       const tagColumnsCount = Math.max(0, maxLength - nonTagColumns.length);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const COLUMNS: string[] = [
         ...nonTagColumns,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ...Array(tagColumnsCount).fill("Tag"),
       ];
 
@@ -410,6 +411,7 @@ function SubmitForm({
                         ?.name ?? person.birthCountry}
                     </TableCell>
                     {person.tags.map((tag, index) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                       <TableCell key={index}>{tag}</TableCell>
                     ))}
                   </TableRow>
@@ -436,12 +438,14 @@ function SubmitForm({
               <TableBody>
                 {data?.labels?.map((item, index) => {
                   return (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                     <TableRow key={index}>
                       <TableCell>{item.label}</TableCell>
                       <TableCell className="space-x-2">
                         {item.value
                           .filter((val) => !!val)
                           .map((value, index) => (
+                            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                             <Code key={index}>{String(value)}</Code>
                           ))}
                       </TableCell>

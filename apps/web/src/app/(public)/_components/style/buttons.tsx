@@ -23,7 +23,7 @@ export function BoxedButton({
     >
       {children}
       <ArrowLongRightIcon
-        className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1"
+        className="size-5 shrink-0 transition-transform group-hover:translate-x-1"
         strokeWidth={2.5}
       />
     </Link>
@@ -46,14 +46,14 @@ export function TekstButton({
     >
       {backwards ? (
         <ArrowLeftIcon
-          className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1"
+          className="size-4 shrink-0 transition-transform group-hover:-translate-x-1"
           strokeWidth={2.5}
         />
       ) : null}
       {children}
       {!backwards ? (
         <ArrowRightIcon
-          className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1"
+          className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
           strokeWidth={2.5}
         />
       ) : null}
@@ -70,7 +70,7 @@ export function InlineButton({
     <Link
       {...props}
       className={clsx(
-        "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-gray-100 hover:px-2",
+        "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-slate-100 hover:px-2",
         className,
       )}
     >
@@ -94,7 +94,7 @@ export function BoxedBackButton({
     >
       {children}
       <ArrowLongRightIcon
-        className="h-5 w-5 transition-transform group-hover:translate-x-1"
+        className="size-5 transition-transform group-hover:translate-x-1"
         strokeWidth={2.5}
       />
     </BackButton>

@@ -1,32 +1,38 @@
 import FlexSearch from "flexsearch";
 
 import {
-  createSearchParamsCache,
+  createLoader,
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import dayjs from "~/lib/dayjs";
 import {
   listCohortsForLocation,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { filterCohorts } from "~/utils/filter-cohorts";
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
-export default async function Page({
-  params,
-  searchParams,
-}: {
-  params: {
+const searchParamsParser = createLoader({
+  weergave: parseAsArrayOf(
+    parseAsStringLiteral(["verleden", "aankomend", "open"] as const),
+  ).withDefault(["open", "aankomend"]),
+  query: parseAsString,
+});
+
+export default async function Page(props: {
+  params: Promise<{
     location: string;
-  };
-  searchParams: Record<string, string | string[] | undefined>;
+  }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 
   const [cohorts, rolesInCurrentLocation] = await Promise.all([
@@ -35,12 +41,7 @@ export default async function Page({
   ]);
   const isLocationAdmin = rolesInCurrentLocation.includes("location_admin");
 
-  const parsedSq = createSearchParamsCache({
-    weergave: parseAsArrayOf(
-      parseAsStringLiteral(["verleden", "aankomend", "open"] as const),
-    ).withDefault(["open", "aankomend"]),
-    query: parseAsString,
-  }).parse(searchParams);
+  const parsedSq = searchParamsParser(searchParams);
 
   const filteredCohorts =
     parsedSq.weergave && parsedSq.weergave.length > 0
@@ -61,12 +62,12 @@ export default async function Page({
   });
 
   // Add cohorts to the index
-  filteredCohorts.forEach((cohort) => {
+  for (const cohort of filteredCohorts) {
     index.add({
       id: cohort.id,
       label: cohort.label,
     });
-  });
+  }
 
   const searchQuery = parsedSq.query;
 
@@ -107,23 +108,4 @@ export default async function Page({
       </div>
     </>
   );
-}
-
-function filterCohorts(
-  cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>,
-  weergave: ("verleden" | "aankomend" | "open")[],
-) {
-  const now = dayjs();
-
-  return cohorts.filter((cohort) => {
-    const startTime = dayjs(cohort.accessStartTime);
-    const endTime = dayjs(cohort.accessEndTime);
-    return (
-      (weergave.includes("verleden") && now.isAfter(endTime)) ||
-      (weergave.includes("aankomend") && now.isBefore(startTime)) ||
-      (weergave.includes("open") &&
-        now.isAfter(startTime) &&
-        now.isBefore(endTime))
-    );
-  });
 }

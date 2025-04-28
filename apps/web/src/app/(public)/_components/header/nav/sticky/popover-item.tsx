@@ -18,12 +18,12 @@ export default function PopoverNavItem({
     <Popover className="group relative">
       <PopoverButton className="flex items-center gap-x-1 text-sm font-medium uppercase leading-6">
         {label}
-        <ChevronDownIcon className="h-5 w-5 flex-none" aria-hidden="true" />
+        <ChevronDownIcon className="size-5 flex-none" aria-hidden="true" />
         <ActiveHover active={active} />
       </PopoverButton>
       <PopoverPanel
         transition
-        className="absolute -translate-x-[9.5rem] -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-gray-900/5 transition data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+        className="absolute -translate-x-[9.5rem] -left-8 top-full z-10 mt-3 w-screen max-w-md overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-slate-900/5 transition data-closed:opacity-0 data-enter:duration-200 data-leave:duration-150 data-enter:ease-out data-leave:ease-in"
       >
         {children}
       </PopoverPanel>

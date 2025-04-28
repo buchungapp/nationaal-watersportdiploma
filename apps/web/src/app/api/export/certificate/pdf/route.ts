@@ -5,8 +5,6 @@ import { z } from "zod";
 import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
 
-export const runtime = "nodejs";
-
 export async function GET(request: NextRequest) {
   const query = new URL(request.url).searchParams;
 
@@ -16,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   const filename = `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}.pdf`;
 
-  const certificateNumbers = query.getAll("certificate[]");
+  const certificateNumbers = query.getAll("certificate");
 
   const validatedNumbers = z
     .array(z.string().length(10))

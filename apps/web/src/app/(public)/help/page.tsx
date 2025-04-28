@@ -1,5 +1,7 @@
+"use cache";
 import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
+import { unstable_cacheLife } from "next/cache";
 import Link from "next/link";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import CategorieCard from "./_components/categorie-card";
@@ -36,6 +38,8 @@ export async function generateMetadata(
 }
 
 export default async function Page() {
+  unstable_cacheLife("days");
+
   const [articles, categories] = await Promise.all([
     getHelpArticles(),
     getHelpCategories(),
@@ -43,7 +47,7 @@ export default async function Page() {
 
   return (
     <>
-      <div className="grid break-inside-avoid gap-2 max-w-2xl mx-auto rounded-2xl bg-gray-100 px-6 pt-8 pb-10 w-full ring-1 ring-zinc-900/10">
+      <div className="grid break-inside-avoid gap-2 max-w-2xl mx-auto rounded-2xl bg-slate-100 px-6 pt-8 pb-10 w-full ring-1 ring-zinc-900/10">
         <h2 className="text-lg font-semibold px-4">Populaire artikelen</h2>
         <ul className="space-y-3.5">
           {articles
@@ -58,14 +62,14 @@ export default async function Page() {
                     <p className="text-lg/6 text-branding-dark font-semibold">
                       {article.metadata.title}
                     </p>
-                    <p className="text-gray-800 mt-1 font-normal">
+                    <p className="text-slate-800 mt-1 font-normal">
                       {article.metadata.summary}
                     </p>
                   </div>
 
                   <div className="h-6 flex items-center justify-center">
                     <ArrowLongRightIcon
-                      className="h-5 w-5 shrink-0 text-branding-dark transition-transform group-hover:translate-x-1"
+                      className="size-5 shrink-0 text-branding-dark transition-transform group-hover:translate-x-1"
                       strokeWidth={2.5}
                     />
                   </div>
