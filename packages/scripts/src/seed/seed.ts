@@ -142,8 +142,7 @@ withSupabaseClient(
   () =>
     withDatabase(
       {
-        pgUri,
-        onnotice: () => {},
+        connectionString: pgUri,
       },
       async () => await seed(),
     ),

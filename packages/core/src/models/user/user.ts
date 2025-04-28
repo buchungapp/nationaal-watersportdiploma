@@ -1,7 +1,6 @@
-import { schema as s, uncontrolledSchema } from "@nawadi/db";
+import { DatabaseError, schema as s, uncontrolledSchema } from "@nawadi/db";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
 import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
-import postgres from "postgres";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { createAuthUser } from "../../services/auth/handlers.js";
@@ -65,7 +64,7 @@ export const getOrCreateFromEmail = wrapCommand(
       };
 
       const handleUniqueViolation = async (error: unknown) => {
-        if (error instanceof postgres.PostgresError && error.code === "23505") {
+        if (error instanceof DatabaseError && error.code === "23505") {
           const existing = await getExistingUser();
           if (existing) return { id: existing.authUserId };
         }
@@ -107,7 +106,7 @@ export const getOrCreateFromEmail = wrapCommand(
           }
         }
 
-        if (error instanceof postgres.PostgresError) {
+        if (error instanceof DatabaseError) {
           return handleUniqueViolation(error);
         }
 

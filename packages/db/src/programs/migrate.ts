@@ -1,8 +1,5 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import type * as yargs from "yargs";
-import { migrateDatabase } from "../database.js";
-import * as schema from "../schema/index.js";
+import { createDatabase, migrateDatabase } from "../database.js";
 
 export function configureMigrateProgram(argv: yargs.Argv) {
   return argv.command(
@@ -27,19 +24,15 @@ async function main(configuration: MainConfiguration) {
 
   console.info("Migration start");
 
-  const pgSql = postgres(pgUri, {
+  const db = createDatabase({
+    connectionString: pgUri,
     max: 1,
   });
 
   try {
-    const db = drizzle(pgSql, {
-      schema,
-      logger: process.env.DRIZZLE_LOG === "true",
-    });
-    // migrate the database
     await migrateDatabase(db);
   } finally {
-    await pgSql.end();
+    await db.$client.end();
   }
 
   console.info("Migration end");

@@ -58,7 +58,7 @@ async function main(configuration: MainConfiguration) {
           serviceRoleKey: supabaseServiceRoleKey,
         },
         () =>
-          core.withDatabase({ pgUri }, async () => {
+          core.withDatabase({ connectionString: pgUri }, async () => {
             const server = application.createApplicationServer();
             await using listener = await api.lib.listen(server, { port });
 

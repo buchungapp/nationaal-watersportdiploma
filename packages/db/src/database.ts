@@ -1,20 +1,36 @@
 import path from "node:path";
-import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
-import type { Sql } from "postgres";
+import { type NodePgDatabase, drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import pg from "pg";
+import type { PoolConfig } from "pg";
 import { projectRoot } from "./root.js";
 import * as schema from "./schema/index.js";
+import type { FullSchema } from "./types.js";
+import * as uncontrolledSchema from "./uncontrolled_schema/index.js";
 
-export type Database = PostgresJsDatabase<typeof schema>;
-export function createDatabase(pgSql: Sql) {
-  const db = drizzle(pgSql, {
-    schema,
+export type Database = NodePgDatabase<FullSchema>;
+export type CreateDatabaseOptions = string | PoolConfig;
+export type DatabaseError = pg.DatabaseError;
+export const DatabaseError = pg.DatabaseError;
+
+export function createDatabase(options: CreateDatabaseOptions) {
+  const pool =
+    typeof options === "string"
+      ? new pg.Pool({ connectionString: options })
+      : new pg.Pool(options);
+
+  const db = drizzle(pool, {
+    schema: {
+      ...schema,
+      ...uncontrolledSchema,
+    },
     logger: process.env.DRIZZLE_LOG === "true",
   });
+
   return db;
 }
 
-export async function migrateDatabase(db: PostgresJsDatabase<typeof schema>) {
+export async function migrateDatabase(db: NodePgDatabase<FullSchema>) {
   await migrate(db, {
     migrationsFolder: path.join(projectRoot, "migrations"),
   });

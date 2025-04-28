@@ -14,7 +14,6 @@ import {
   Platform,
   Student,
   User,
-  withDatabase,
   withRedisClient,
   withSupabaseClient,
   withTransaction,
@@ -53,8 +52,7 @@ const redisConfig: RedisConfiguration = {
 };
 
 const dbConfig: DatabaseConfiguration = {
-  pgUri: process.env.PGURI,
-  serverless: true,
+  connectionString: process.env.PGURI,
 };
 
 async function getPrimaryPerson<T extends boolean = true>(
@@ -112,7 +110,7 @@ async function isActiveActorTypeInLocation({
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
     return await withSupabaseClient(supabaseConfig, async () => {
-      return await withDatabase(dbConfig, cb);
+      return await cb();
     });
   } catch (error) {
     console.error(error);

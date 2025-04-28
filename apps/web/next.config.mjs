@@ -34,14 +34,20 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "6mb",
     },
-    turbo: {
-      resolveAlias: {
-        canvas: "./empty-module.ts",
-      },
-    },
+
     useCache: true,
   },
-  serverComponentsExternalPackages: ["require-in-the-middle"],
+  turbopack: {
+    resolveAlias: {
+      canvas: "./empty-module.ts",
+    },
+  },
+  serverExternalPackages: [
+    "require-in-the-middle",
+    "@opentelemetry/auto-instrumentations-node",
+    "@opentelemetry/instrumentation",
+    "@opentelemetry/sdk-node",
+  ],
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
     "/": ["./src/app/(public)/**/*.mdx"],

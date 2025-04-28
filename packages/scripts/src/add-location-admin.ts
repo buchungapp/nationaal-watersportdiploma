@@ -127,7 +127,7 @@ withSupabaseClient(
   () =>
     withDatabase(
       {
-        pgUri,
+        connectionString: pgUri,
       },
       async () => await main(),
     )

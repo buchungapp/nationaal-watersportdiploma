@@ -12,7 +12,7 @@ export async function truncate() {
     `;
 
   const tables = await query.execute(selectAllTables);
-  for (const table of tables) {
+  for (const table of tables.rows) {
     const truncate = sql.raw(`TRUNCATE TABLE "${table.table_name}" CASCADE;`);
     await query.execute(truncate);
   }

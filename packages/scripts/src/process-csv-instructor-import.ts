@@ -177,7 +177,7 @@ withSupabaseClient(
   () =>
     withDatabase(
       {
-        pgUri,
+        connectionString: pgUri,
       },
       async () => {
         // Get the file path from the command-line arguments

@@ -1,4 +1,4 @@
-import postgres from "postgres";
+import { DatabaseError } from "@nawadi/db";
 import zod from "zod";
 
 export enum CoreErrorType {
@@ -67,7 +67,7 @@ export class CoreError extends Error {
       return error; // Return the original CoreError to preserve its stack and cause
     }
 
-    if (error instanceof postgres.PostgresError) {
+    if (error instanceof DatabaseError) {
       return CoreError.fromPostgresError(error);
     }
 
@@ -86,7 +86,7 @@ export class CoreError extends Error {
     return new CoreError(CoreErrorType.Unexpected, { cause: error });
   }
 
-  public static fromPostgresError(error: postgres.PostgresError) {
+  public static fromPostgresError(error: DatabaseError) {
     // https://www.postgresql.org/docs/current/errcodes-appendix.html
     switch (error.code) {
       case "23000": // integrity_constraint_violation

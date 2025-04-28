@@ -1,20 +1,17 @@
+import assert from "node:assert";
 import { AsyncLocalStorage } from "node:async_hooks";
 import cp from "node:child_process";
 import * as db from "@nawadi/db";
-import postgres from "postgres";
+import { trace } from "@opentelemetry/api";
 
-/**
- * Interface representing the configuration required for setting up the database connection.
- * @property {string} pgUri - The PostgreSQL connection URI.
- */
-export interface DatabaseConfiguration {
-  pgUri: string;
-  serverless?: boolean;
-  onnotice?: (notice: postgres.Notice) => void;
-}
+export type DatabaseConfiguration = db.CreateDatabaseOptions;
+
+type Database = ReturnType<typeof db.createDatabase>;
 
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
-const storage = new AsyncLocalStorage<db.Database>();
+const storage = new AsyncLocalStorage<Database>();
+
+let defaultDatabase: Database | undefined = undefined;
 
 /**
  * Executes a given job with a database connection.
@@ -28,21 +25,15 @@ const storage = new AsyncLocalStorage<db.Database>();
  * @returns {Promise<T>} A promise that resolves with the result of the job function.
  */
 export async function withDatabase<T>(
-  configuration: DatabaseConfiguration,
+  options: DatabaseConfiguration,
   job: () => Promise<T>,
 ): Promise<T> {
-  const { pgUri, serverless = false, onnotice } = configuration;
-
-  const pgSql = postgres(pgUri, {
-    prepare: !serverless,
-    onnotice,
-  });
+  const database = db.createDatabase(options);
   try {
-    const database = db.createDatabase(pgSql);
     const result = await storage.run(database, job);
     return result;
   } finally {
-    await pgSql.end();
+    await database.$client.end();
   }
 }
 
@@ -55,11 +46,38 @@ export async function withDatabase<T>(
  * @throws {TypeError} If called outside of a `withDatabase` context.
  */
 export function useDatabase(): db.Database {
-  const database = storage.getStore();
-  if (database == null) {
-    throw new TypeError("Database not in context");
-  }
-  return database;
+  const tracer = trace.getTracer("useDatabase");
+
+  return tracer.startActiveSpan("useDatabase", (span) => {
+    try {
+      {
+        // use database from context
+        const database = storage.getStore();
+        if (database != null) {
+          return database;
+        }
+      }
+
+      {
+        // use default database, if it exists
+        const database = defaultDatabase;
+        if (database != null) {
+          return database;
+        }
+      }
+
+      // lazily set default database and use that
+      defaultDatabase = createDatabase();
+      process.on("beforeExit", async (code) => {
+        assert(defaultDatabase != null);
+        await defaultDatabase.$client.end();
+      });
+
+      return defaultDatabase;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
@@ -69,23 +87,29 @@ export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
 
   try {
     // use a single connection pool for the migration
-    const pgSql = postgres(pgUri.toString(), {
+    const database = db.createDatabase({
+      connectionString: pgUri,
       max: 1,
-      onnotice: () => {},
     });
     try {
-      const database = db.createDatabase(pgSql);
-      // migrate (set up) the database
       await db.migrateDatabase(database);
     } finally {
-      await pgSql.end();
+      await database.$client.end();
     }
 
-    const result = await withDatabase({ pgUri }, job);
+    const result = await withDatabase(pgUri, job);
     return result;
   } finally {
     // reset database
     const options = { shell: true, stdio: "inherit" } as const;
     cp.execFileSync("pnpm", ["--filter", "supabase", "reset"], options);
   }
+}
+
+function createDatabase() {
+  const database = db.createDatabase({
+    connectionString: process.env.PGURI,
+    max: 15,
+  });
+  return database;
 }
