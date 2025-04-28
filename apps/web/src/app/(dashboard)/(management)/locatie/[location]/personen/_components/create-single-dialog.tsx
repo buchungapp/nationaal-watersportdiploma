@@ -5,6 +5,11 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
+  Checkbox,
+  CheckboxField,
+  CheckboxGroup,
+} from "~/app/(dashboard)/_components/checkbox";
+import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
@@ -17,14 +22,44 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
+  Description,
+  ErrorMessage,
   Field,
   FieldGroup,
   Fieldset,
   Label,
+  Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
+import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
+import type { ActorType } from "~/lib/nwd";
 import { createPerson } from "../_actions/create";
+
+const ROLES: {
+  type: ActorType;
+  label: string;
+  description: string;
+  defaultChecked?: boolean;
+}[] = [
+  {
+    type: "student",
+    label: "Cursist",
+    description: "Kan toegevoegd worden aan cohorten.",
+    defaultChecked: true,
+  },
+  {
+    type: "instructor",
+    label: "Instructeur",
+    description:
+      "Geeft lessen, kan toegevoegd worden aan cohorten en kan de diplomalijn inzien.",
+  },
+  {
+    type: "location_admin",
+    label: "Locatie beheerder",
+    description: "Heeft alle rechten, kan de locatie en cohorten beheren.",
+  },
+] as const;
 
 interface Props {
   locationId: string;
@@ -169,6 +204,32 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                   </Field>
                 </div>
               </FieldGroup>
+            </Fieldset>
+
+            <Fieldset className="mt-6">
+              <Legend>Rollen</Legend>
+              <Text>
+                Welke rol(len) vervult deze persoon in jullie locatie?
+              </Text>
+              {!!state?.errors.roles && (
+                <ErrorMessage>
+                  Selecteer minimaal één rol voor de persoon.
+                </ErrorMessage>
+              )}
+              <CheckboxGroup>
+                {ROLES.map((role) => (
+                  <CheckboxField key={role.type}>
+                    <Checkbox
+                      name={`role-${role.type}`}
+                      defaultChecked={
+                        "defaultChecked" in role && role.defaultChecked
+                      }
+                    />
+                    <Label>{role.label}</Label>
+                    <Description>{role.description}</Description>
+                  </CheckboxField>
+                ))}
+              </CheckboxGroup>
             </Fieldset>
           </DialogBody>
           <DialogActions>
