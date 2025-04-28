@@ -1,3 +1,4 @@
+import assert from "node:assert";
 import { AsyncLocalStorage } from "node:async_hooks";
 import cp from "node:child_process";
 import * as db from "@nawadi/db";
@@ -5,8 +6,12 @@ import { trace } from "@opentelemetry/api";
 
 export type DatabaseConfiguration = db.CreateDatabaseOptions;
 
+type Database = ReturnType<typeof db.createDatabase>;
+
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
-const storage = new AsyncLocalStorage<ReturnType<typeof db.createDatabase>>();
+const storage = new AsyncLocalStorage<Database>();
+
+let defaultDatabase: Database | undefined = undefined;
 
 /**
  * Executes a given job with a database connection.
@@ -33,48 +38,6 @@ export async function withDatabase<T>(
 }
 
 /**
- * Sets up a global database connection for the current process if one doesn't already exist.
- * Automatically cleans up the connection when the process exits.
- *
- * @param {DatabaseConfiguration} configuration - The database configuration.
- */
-export function initializeProcessScopedDatabase(
-  options: DatabaseConfiguration,
-): () => Promise<void> {
-  // Helper function to create and setup database connection
-  const setupDatabase = () => {
-    const database = db.createDatabase(options);
-
-    // @ts-expect-error find a way to type global accross packages
-    globalThis.__serverlessPool = database;
-
-    storage.enterWith(database);
-    return database;
-  };
-
-  // Helper function to setup cleanup handlers
-  const setupCleanupHandlers = (
-    database: ReturnType<typeof db.createDatabase>,
-  ) => {
-    return async () => {
-      await database.$client.end();
-      // @ts-expect-error find a way to type global accross packages
-      globalThis.__serverlessPool = null;
-    };
-  };
-
-  // @ts-expect-error find a way to type global accross packages
-  const existingDb = globalThis.__serverlessPool;
-
-  if (existingDb) {
-    return setupCleanupHandlers(existingDb);
-  }
-
-  const database = setupDatabase();
-  return setupCleanupHandlers(database);
-}
-
-/**
  * Retrieves the current database connection from the AsyncLocalStorage.
  * This function must be called within the context of a function wrapped by `withDatabase`,
  * otherwise, it throws an error indicating that the database is not in context.
@@ -87,14 +50,30 @@ export function useDatabase(): db.Database {
 
   return tracer.startActiveSpan("useDatabase", (span) => {
     try {
-      // @ts-expect-error find a way to type global accross packages
-      const database = storage.getStore() ?? globalThis.__serverlessPool;
-      if (database == null) {
-        span.setAttribute("database.error", "not_in_context");
-        throw new TypeError("Database not in context");
+      {
+        // use database from context
+        const database = storage.getStore();
+        if (database != null) {
+          return database;
+        }
       }
-      span.setAttribute("database.exists", true);
-      return database;
+
+      {
+        // use default database, if it exists
+        const database = defaultDatabase;
+        if (database != null) {
+          return database;
+        }
+      }
+
+      // lazily set default database and use that
+      defaultDatabase = createDatabase();
+      process.on("beforeExit", async (code) => {
+        assert(defaultDatabase != null);
+        await defaultDatabase.$client.end();
+      });
+
+      return defaultDatabase;
     } finally {
       span.end();
     }
@@ -125,4 +104,12 @@ export async function withTestDatabase<T>(job: () => Promise<T>): Promise<T> {
     const options = { shell: true, stdio: "inherit" } as const;
     cp.execFileSync("pnpm", ["--filter", "supabase", "reset"], options);
   }
+}
+
+function createDatabase() {
+  const database = db.createDatabase({
+    connectionString: process.env.PGURI,
+    max: 15,
+  });
+  return database;
 }
