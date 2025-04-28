@@ -29,8 +29,6 @@
   },
   "keywords": [],
   "dependencies": {
-    "@appsignal/nodejs": "^3.4.8",
-    "@skiffa/appsignal": "^0.2.5",
     "@types/node": "catalog:",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "catalog:",

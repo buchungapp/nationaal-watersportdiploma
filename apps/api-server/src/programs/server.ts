@@ -42,7 +42,6 @@ interface MainConfiguration {
 }
 
 async function main(configuration: MainConfiguration) {
-  // TODO support appsignal
   const logConfiguration = core.consoleLogConfiguration();
 
   await core.withLog(logConfiguration, async () => {
