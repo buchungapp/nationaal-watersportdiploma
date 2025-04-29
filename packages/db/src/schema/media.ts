@@ -43,23 +43,21 @@ export const media = pgTable(
     tags: text("tags").array().notNull().default(sql`ARRAY[]::text[]`),
     ...timestamps,
   },
-  (table) => {
-    return {
-      objectReference: foreignKey({
-        columns: [table.object_id],
-        foreignColumns: [_objectTable.id],
-        name: "media_object_id_fk",
-      }),
-      actorReference: foreignKey({
-        columns: [table.actorId],
-        foreignColumns: [actor.id],
-        name: "media_actor_id_fk",
-      }),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: "media_location_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.object_id],
+      foreignColumns: [_objectTable.id],
+      name: "media_object_id_fk",
+    }),
+    foreignKey({
+      columns: [table.actorId],
+      foreignColumns: [actor.id],
+      name: "media_actor_id_fk",
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "media_location_id_fk",
+    }),
+  ],
 );

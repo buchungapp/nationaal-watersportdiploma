@@ -39,18 +39,16 @@ export const cohort = pgTable(
     _metadata: jsonb("_metadata"),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandleForLocation: uniqueIndex()
-        .on(table.handle, table.locationId)
-        .where(sql`deleted_at IS NULL`),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: "cohort_location_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex()
+      .on(table.handle, table.locationId)
+      .where(sql`deleted_at IS NULL`),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "cohort_location_id_fk",
+    }),
+  ],
 );
 
 export const cohortAllocation = pgTable(
@@ -71,34 +69,28 @@ export const cohortAllocation = pgTable(
     }),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqCohortActorCurriculum: uniqueIndex().on(
-        table.cohortId,
-        table.actorId,
-        table.studentCurriculumId,
-      ),
-      idxCohortTags: index().on(table.cohortId, table.tags),
-      cohortReference: foreignKey({
-        columns: [table.cohortId],
-        foreignColumns: [cohort.id],
-        name: "cohort_allocation_cohort_id_fk",
-      }),
-      actorReference: foreignKey({
-        columns: [table.actorId],
-        foreignColumns: [actor.id],
-        name: "cohort_allocation_actor_id_fk",
-      }),
-      studentCurriculumReference: foreignKey({
-        columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.id],
-        name: "cohort_allocation_student_curriculum_id_fk",
-      }),
-      instructorReference: foreignKey({
-        columns: [table.instructorId],
-        foreignColumns: [actor.id],
-        name: "cohort_allocation_instructor_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex().on(table.cohortId, table.actorId, table.studentCurriculumId),
+    index().on(table.cohortId, table.tags),
+    foreignKey({
+      columns: [table.cohortId],
+      foreignColumns: [cohort.id],
+      name: "cohort_allocation_cohort_id_fk",
+    }),
+    foreignKey({
+      columns: [table.actorId],
+      foreignColumns: [actor.id],
+      name: "cohort_allocation_actor_id_fk",
+    }),
+    foreignKey({
+      columns: [table.studentCurriculumId],
+      foreignColumns: [studentCurriculum.id],
+      name: "cohort_allocation_student_curriculum_id_fk",
+    }),
+    foreignKey({
+      columns: [table.instructorId],
+      foreignColumns: [actor.id],
+      name: "cohort_allocation_instructor_id_fk",
+    }),
+  ],
 );

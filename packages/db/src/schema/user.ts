@@ -26,15 +26,13 @@ export const user = pgTable(
     displayName: text("display_name"),
     _metadata: jsonb("_metadata"),
   },
-  (table) => {
-    return {
-      authUserReference: foreignKey({
-        columns: [table.authUserId],
-        foreignColumns: [_usersTable.id],
-        name: "user_auth_user_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.authUserId],
+      foreignColumns: [_usersTable.id],
+      name: "user_auth_user_id_fk",
+    }),
+  ],
 );
 
 export const person = pgTable(
@@ -58,19 +56,17 @@ export const person = pgTable(
     ...timestamps,
     _metadata: jsonb("_metadata"),
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex("person_unq_handle").on(table.handle),
-      userReference: foreignKey({
-        columns: [table.userId],
-        foreignColumns: [user.authUserId],
-        name: "person_user_id_fk",
-      }),
-      unqPrimaryPerson: uniqueIndex("unq_primary_person")
-        .on(table.userId, table.isPrimary)
-        .where(sql`${table.isPrimary} = true`),
-    };
-  },
+  (table) => [
+    uniqueIndex("person_unq_handle").on(table.handle),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.authUserId],
+      name: "person_user_id_fk",
+    }),
+    uniqueIndex("unq_primary_person")
+      .on(table.userId, table.isPrimary)
+      .where(sql`${table.isPrimary} = true`),
+  ],
 );
 
 export const actorType = pgEnum("actor_type", [
@@ -94,25 +90,23 @@ export const actor = pgTable(
     ...timestamps,
     _metadata: jsonb("_metadata"),
   },
-  (table) => {
-    return {
-      personReference: foreignKey({
-        columns: [table.personId],
-        foreignColumns: [person.id],
-        name: "actor_person_id_fk",
-      }),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: "actor_location_link_location_id_fk",
-      }),
-      unqActorTypePerson: uniqueIndex("unq_actor_type_person_location").on(
-        table.type,
-        table.personId,
-        table.locationId,
-      ),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.personId],
+      foreignColumns: [person.id],
+      name: "actor_person_id_fk",
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "actor_location_link_location_id_fk",
+    }),
+    uniqueIndex("unq_actor_type_person_location").on(
+      table.type,
+      table.personId,
+      table.locationId,
+    ),
+  ],
 );
 
 export const personLocationLinkStatus = pgEnum("person_location_link_status", [
@@ -158,22 +152,20 @@ export const personLocationLink = pgTable(
       mode: "string",
     }),
   },
-  (table) => {
-    return {
-      pk: primaryKey({
-        columns: [table.personId, table.locationId],
-        name: "person_location_link_pk",
-      }),
-      personReference: foreignKey({
-        columns: [table.personId],
-        foreignColumns: [person.id],
-        name: "person_location_link_person_id_fk",
-      }),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: "person_location_link_location_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    primaryKey({
+      columns: [table.personId, table.locationId],
+      name: "person_location_link_pk",
+    }),
+    foreignKey({
+      columns: [table.personId],
+      foreignColumns: [person.id],
+      name: "person_location_link_person_id_fk",
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "person_location_link_location_id_fk",
+    }),
+  ],
 );

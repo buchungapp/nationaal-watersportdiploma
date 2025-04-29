@@ -50,16 +50,10 @@ export const country = pgTable(
     alpha_2: char("alpha_2", { length: 2 }).default("").notNull(),
     alpha_3: char("alpha_3", { length: 3 }).default("").notNull(),
   },
-  (table) => {
-    return {
-      alpha_2_is_unique: uniqueIndex("country_alpha_2_is_unique").on(
-        table.alpha_2,
-      ),
-      alpha_3_is_unique: uniqueIndex("country_alpha_3_is_unique").on(
-        table.alpha_3,
-      ),
-    };
-  },
+  (table) => [
+    uniqueIndex("country_alpha_2_is_unique").on(table.alpha_2),
+    uniqueIndex("country_alpha_3_is_unique").on(table.alpha_3),
+  ],
 );
 
 export const feedbackType = pgEnum("feedback_type", [
@@ -92,13 +86,11 @@ export const feedback = pgTable(
       withTimezone: true,
     }),
   },
-  (table) => {
-    return {
-      insertedByReference: foreignKey({
-        columns: [table.insertedBy],
-        foreignColumns: [user.authUserId],
-        name: "feedback_inserted_by_fk",
-      }),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.insertedBy],
+      foreignColumns: [user.authUserId],
+      name: "feedback_inserted_by_fk",
+    }),
+  ],
 );

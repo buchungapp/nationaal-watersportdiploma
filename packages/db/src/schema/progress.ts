@@ -20,28 +20,26 @@ export const studentCohortProgress = pgTable(
     createdAt,
     createdBy: uuid("created_by").notNull(),
   },
-  (table) => {
-    return {
-      studentCurriculumLinkReference: foreignKey({
-        columns: [table.cohortAllocationId],
-        foreignColumns: [cohortAllocation.id],
-        name: "student_cohort_progress_cohort_allocation_id_fk",
-      }),
-      competencyReference: foreignKey({
-        columns: [table.competencyId],
-        foreignColumns: [curriculumCompetency.id],
-        name: "curriculum_competency_competency_id_fk",
-      }),
-      createdByReference: foreignKey({
-        columns: [table.createdBy],
-        foreignColumns: [person.id],
-        name: "student_cohort_progress_created_by_fk",
-      }),
-      cohortAllocationIdIdx: index("cohort_allocation_id_idx").on(
-        table.cohortAllocationId,
-        table.createdAt.desc(),
-        table.competencyId,
-      ),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.cohortAllocationId],
+      foreignColumns: [cohortAllocation.id],
+      name: "student_cohort_progress_cohort_allocation_id_fk",
+    }),
+    foreignKey({
+      columns: [table.competencyId],
+      foreignColumns: [curriculumCompetency.id],
+      name: "curriculum_competency_competency_id_fk",
+    }),
+    foreignKey({
+      columns: [table.createdBy],
+      foreignColumns: [person.id],
+      name: "student_cohort_progress_created_by_fk",
+    }),
+    index("cohort_allocation_id_idx").on(
+      table.cohortAllocationId,
+      table.createdAt.desc(),
+      table.competencyId,
+    ),
+  ],
 );

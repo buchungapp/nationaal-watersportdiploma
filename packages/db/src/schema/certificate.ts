@@ -40,36 +40,36 @@ export const studentCurriculum = pgTable(
       .notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqIdentityCurriculumGear: uniqueIndex(
-        "student_curriculum_unq_identity_gear_curriculum",
-      ).on(table.personId, table.curriculumId, table.gearTypeId),
-      curriculumGearTypeReference: foreignKey({
-        columns: [table.curriculumId, table.gearTypeId],
-        foreignColumns: [
-          curriculumGearLink.curriculumId,
-          curriculumGearLink.gearTypeId,
-        ],
-        name: "student_curriculum_link_curriculum_id_gear_type_id_fk",
-      }),
-      curriculumReference: foreignKey({
-        columns: [table.curriculumId],
-        foreignColumns: [curriculum.id],
-        name: "student_curriculum_link_curriculum_id_fk",
-      }),
-      gearTypeReference: foreignKey({
-        columns: [table.gearTypeId],
-        foreignColumns: [gearType.id],
-        name: "student_curriculum_link_gear_type_id_fk",
-      }),
-      personReference: foreignKey({
-        columns: [table.personId],
-        foreignColumns: [person.id],
-        name: "student_curriculum_link_person_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex("student_curriculum_unq_identity_gear_curriculum").on(
+      table.personId,
+      table.curriculumId,
+      table.gearTypeId,
+    ),
+    foreignKey({
+      columns: [table.curriculumId, table.gearTypeId],
+      foreignColumns: [
+        curriculumGearLink.curriculumId,
+        curriculumGearLink.gearTypeId,
+      ],
+      name: "student_curriculum_link_curriculum_id_gear_type_id_fk",
+    }),
+    foreignKey({
+      columns: [table.curriculumId],
+      foreignColumns: [curriculum.id],
+      name: "student_curriculum_link_curriculum_id_fk",
+    }),
+    foreignKey({
+      columns: [table.gearTypeId],
+      foreignColumns: [gearType.id],
+      name: "student_curriculum_link_gear_type_id_fk",
+    }),
+    foreignKey({
+      columns: [table.personId],
+      foreignColumns: [person.id],
+      name: "student_curriculum_link_person_id_fk",
+    }),
+  ],
 );
 
 export const certificate = pgTable(
@@ -93,26 +93,24 @@ export const certificate = pgTable(
     }),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex("certificate_unq_handle").on(table.handle),
-      studentCurriculumReference: foreignKey({
-        columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.id],
-        name: "certificate_student_curriculum_link_id_fk",
-      }),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: "certificate_location_id_fk",
-      }),
-      cohortAllocationReference: foreignKey({
-        columns: [table.cohortAllocationId],
-        foreignColumns: [cohortAllocation.id],
-        name: "certificate_cohort_allocation_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex("certificate_unq_handle").on(table.handle),
+    foreignKey({
+      columns: [table.studentCurriculumId],
+      foreignColumns: [studentCurriculum.id],
+      name: "certificate_student_curriculum_link_id_fk",
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "certificate_location_id_fk",
+    }),
+    foreignKey({
+      columns: [table.cohortAllocationId],
+      foreignColumns: [cohortAllocation.id],
+      name: "certificate_cohort_allocation_id_fk",
+    }),
+  ],
 );
 
 export const studentCompletedCompetency = pgTable(
@@ -123,29 +121,27 @@ export const studentCompletedCompetency = pgTable(
     certificateId: uuid("certificate_id").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      pk: primaryKey({
-        columns: [table.studentCurriculumId, table.competencyId],
-        name: "student_completed_competency_pk",
-      }),
-      studentCurriculumLinkReference: foreignKey({
-        columns: [table.studentCurriculumId],
-        foreignColumns: [studentCurriculum.id],
-        name: "student_completed_competency_student_curriculum_link_id_fk",
-      }),
-      competencyReference: foreignKey({
-        columns: [table.competencyId],
-        foreignColumns: [curriculumCompetency.id],
-        name: "curriculum_competency_competency_id_fk",
-      }),
-      certificateReference: foreignKey({
-        columns: [table.certificateId],
-        foreignColumns: [certificate.id],
-        name: "student_completed_competency_certificate_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    primaryKey({
+      columns: [table.studentCurriculumId, table.competencyId],
+      name: "student_completed_competency_pk",
+    }),
+    foreignKey({
+      columns: [table.studentCurriculumId],
+      foreignColumns: [studentCurriculum.id],
+      name: "student_completed_competency_student_curriculum_link_id_fk",
+    }),
+    foreignKey({
+      columns: [table.competencyId],
+      foreignColumns: [curriculumCompetency.id],
+      name: "curriculum_competency_competency_id_fk",
+    }),
+    foreignKey({
+      columns: [table.certificateId],
+      foreignColumns: [certificate.id],
+      name: "student_completed_competency_certificate_id_fk",
+    }),
+  ],
 );
 
 export const externalCertificate = pgTable(
@@ -174,18 +170,16 @@ export const externalCertificate = pgTable(
     _metadata: jsonb("_metadata"),
     ...timestamps,
   },
-  (table) => {
-    return {
-      personReference: foreignKey({
-        columns: [table.personId],
-        foreignColumns: [person.id],
-        name: "external_certificate_person_id_fk",
-      }),
-      locationReference: foreignKey({
-        columns: [table.locationId],
-        foreignColumns: [location.id],
-        name: "external_certificate_location_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.personId],
+      foreignColumns: [person.id],
+      name: "external_certificate_person_id_fk",
+    }),
+    foreignKey({
+      columns: [table.locationId],
+      foreignColumns: [location.id],
+      name: "external_certificate_location_id_fk",
+    }),
+  ],
 );

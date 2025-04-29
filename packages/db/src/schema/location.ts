@@ -44,11 +44,5 @@ export const location = pgTable(
     _metadata: jsonb("_metadata"),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unique_handle_for_location: uniqueIndex("unique_handle_for_location").on(
-        table.handle,
-      ),
-    };
-  },
+  (table) => [uniqueIndex("unique_handle_for_location").on(table.handle)],
 );
