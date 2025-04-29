@@ -12,9 +12,9 @@ import { ACCEPTED_IMAGE_TYPES } from "./files";
 const addMediaToExternalCertificateSchema = zfd.formData({
   media: zfd.file(
     z
-      .custom<File>()
+      .custom<File | undefined>()
       .transform((file) =>
-        file.size <= 0 || file.name === "undefined" ? null : file,
+        !file || file.size <= 0 || file.name === "undefined" ? null : file,
       )
       .refine((file) => file !== null, {
         message: "A file must be uploaded",

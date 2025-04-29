@@ -12,9 +12,9 @@ import { MAX_FILE_SIZE } from "./files";
 const updateExternalCertificateSchema = zfd.formData({
   media: zfd.file(
     z
-      .custom<File>()
+      .custom<File | undefined>()
       .transform((file) =>
-        file.size <= 0 || file.name === "undefined" ? undefined : file,
+        !file || file.size <= 0 || file.name === "undefined" ? undefined : file,
       )
       .refine((file) => !file || file.size <= MAX_FILE_SIZE, {
         message: `Het bestand mag maximaal ${Math.floor(MAX_FILE_SIZE / 1000000)}MB groot zijn.`,
