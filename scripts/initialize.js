@@ -12,7 +12,7 @@ execFileSync(
   "pnpm",
   [
     "--package",
-    "@skiffa/generator@0.13.34",
+    "@skiffa/generator@0.13.36",
     "dlx",
     "skiffa-generator",
     "package",
