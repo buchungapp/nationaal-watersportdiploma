@@ -2,10 +2,16 @@
 
 import clsx from "clsx";
 import { OTPInput } from "input-otp";
-import { type PropsWithChildren, useActionState, useRef } from "react";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
+import { type PropsWithChildren, useRef } from "react";
 import { useFormStatus } from "react-dom";
+import { loginAction } from "~/actions/auth/login-action";
+import { verifyAction } from "~/actions/auth/verify-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
-import { login, verify } from "~/app/_actions/auth";
 import Spinner from "~/app/_components/spinner";
 
 export function SubmitButton({ children }: PropsWithChildren) {
@@ -17,18 +23,38 @@ export function SubmitButton({ children }: PropsWithChildren) {
   );
 }
 
+function loginErrorMessage(
+  error: InferUseActionHookReturn<typeof loginAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Ongeldig e-mailadres";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 export function EmailForm({
   children,
   ...formProps
 }: PropsWithChildren<Exclude<React.ComponentProps<"form">, "action">>) {
-  const [state, formAction] = useActionState(login, undefined);
+  const { execute, result } = useAction(loginAction);
+
+  const errorMessage = loginErrorMessage(result);
 
   return (
-    <form action={formAction} {...formProps}>
+    <form action={execute} {...formProps}>
       {children}
 
-      {state?.error ? (
-        <div className="text-red-500 text-xs font-mono">{state.error}</div>
+      {errorMessage ? (
+        <div className="font-mono text-red-500 text-xs">{errorMessage}</div>
       ) : null}
     </form>
   );
@@ -36,8 +62,8 @@ export function EmailForm({
 
 function FakeCaret() {
   return (
-    <div className="absolute pointer-events-none inset-0 flex items-center justify-center animate-caret-blink">
-      <div className="w-px h-6 bg-black" />
+    <div className="absolute inset-0 flex justify-center items-center animate-caret-blink pointer-events-none">
+      <div className="bg-black w-px h-6" />
     </div>
   );
 }
@@ -47,19 +73,37 @@ function OTPInputWithPending({ children }: PropsWithChildren) {
   return pending ? <Spinner className="text-black" /> : children;
 }
 
+function verifyErrorMessage(
+  error: InferUseActionHookReturn<typeof verifyAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Ongeldige OTP";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return "Ongeldige e-mailadres";
+  }
+
+  return null;
+}
+
 export function OtpForm({
   email,
   ...formProps
 }: { email: string } & Exclude<React.ComponentProps<"form">, "action">) {
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction] = useActionState(
-    verify.bind(null, email),
-    undefined,
-  );
+
+  const { execute, result } = useAction(verifyAction.bind(null, email));
+
+  const errorMessage = verifyErrorMessage(result);
 
   return (
-    <form ref={formRef} action={formAction} {...formProps}>
+    <form ref={formRef} action={execute} {...formProps}>
       <button type="submit" className="hidden" ref={submitButtonRef} />
       <OTPInputWithPending>
         <OTPInput
@@ -132,8 +176,8 @@ export function OtpForm({
         />
       </OTPInputWithPending>
 
-      {state?.error ? (
-        <div className="text-red-500 text-xs font-mono">{state.error}</div>
+      {errorMessage ? (
+        <div className="font-mono text-red-500 text-xs">{errorMessage}</div>
       ) : null}
     </form>
   );

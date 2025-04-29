@@ -340,6 +340,9 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.23.8
+      zod-form-data:
+        specifier: ^2.0.7
+        version: 2.0.7(zod@3.23.8)
     devDependencies:
       '@nawadi/core':
         specifier: workspace:*
@@ -2816,6 +2819,9 @@ packages:
     resolution: {integrity: sha512-fbMkAF7fufku0N2dE5TBXcNlg0pt0cJue4xBRE2Qc5Vqikxr4VCgKj/ht6SMdFcOacVA9rqF70APJ8RN/4vMJw==}
     cpu: [x64]
     os: [win32]
+
+  '@rvf/set-get@7.0.1':
+    resolution: {integrity: sha512-GkTSn9K1GrTYoTUqlUs36k6nJnzjQaFBTTEIqUYmzBcsGsoJM8xG7EAx2WLHWAA4QzFjcwWUSHQ3vM3Fbw50Tg==}
 
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
@@ -7705,6 +7711,11 @@ packages:
   yoga-layout@2.0.1:
     resolution: {integrity: sha512-tT/oChyDXelLo2A+UVnlW9GU7CsvFMaEnd9kVFsaiCQonFAXd3xrHhkLYu+suwwosrAEQ746xBU+HvYtm1Zs2Q==}
 
+  zod-form-data@2.0.7:
+    resolution: {integrity: sha512-O27uzKMx7qc7z51KXER326Fp966jqHGvZX3i18CbvElF/QqVsQQN6Q7BnzepkzeBzTJnU3golibVSagf4dp7RQ==}
+    peerDependencies:
+      zod: '>= 3.11.0'
+
   zod-to-json-schema@3.24.1:
     resolution: {integrity: sha512-3h08nf3Vw3Wl3PK+q3ow/lIil81IT2Oa7YpQyUUDsEWbXveMesdfK1xBd2RhCkynwZndAxixji/7SYJJowr62w==}
     peerDependencies:
@@ -10445,6 +10456,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.24.0':
     optional: true
+
+  '@rvf/set-get@7.0.1': {}
 
   '@sec-ant/readable-stream@0.4.1': {}
 
@@ -16465,6 +16478,11 @@ snapshots:
   yoctocolors-cjs@2.1.2: {}
 
   yoga-layout@2.0.1: {}
+
+  zod-form-data@2.0.7(zod@3.23.8):
+    dependencies:
+      '@rvf/set-get': 7.0.1
+      zod: 3.23.8
 
   zod-to-json-schema@3.24.1(zod@3.24.2):
     dependencies:
