@@ -103,6 +103,9 @@ importers:
       '@nawadi/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@nawadi/lib':
+        specifier: workspace:*
+        version: link:../../packages/lib
       '@tsconfig/node22':
         specifier: 'catalog:'
         version: 22.0.0

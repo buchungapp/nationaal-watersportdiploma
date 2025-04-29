@@ -1,0 +1,15 @@
+export const OAUTH_CONFIG = {
+  ACCESS_TOKEN_LIFETIME: 2 * 60 * 60, // 2 hours
+  REFRESH_TOKEN_LIFETIME: 120 * 24 * 60 * 60, // 120 days
+  CODE_LIFETIME: 2 * 60, // 2 minutes
+
+  CLIENT_ID_LENGTH: 24,
+  CLIENT_SECRET_LENGTH: 30,
+  ACCESS_TOKEN_LENGTH: 40,
+  REFRESH_TOKEN_LENGTH: 40,
+  CODE_LENGTH: 40,
+
+  CLIENT_ID_PREFIX: "nwd_app_",
+  CLIENT_SECRET_PREFIX: "nwd_app_secret_",
+  ACCESS_TOKEN_PREFIX: "nwd_access_token_",
+};

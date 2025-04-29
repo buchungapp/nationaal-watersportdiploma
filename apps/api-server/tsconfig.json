@@ -4,7 +4,9 @@
     "rootDir": "./src",
     "outDir": "./out",
     "noUncheckedIndexedAccess": true,
-    "composite": true
+    "composite": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }
