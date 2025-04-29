@@ -49,7 +49,10 @@ export function LogbookTableActionsButton({
         <RemoveLogbookRows />
       </TableSelectionButton>
 
-      <EditLogbook rows={rows} personId={personId} />
+      {rows.length === 1 ? (
+        // biome-ignore lint/style/noNonNullAssertion: This is guaranteed by the check above
+        <EditLogbook logbook={rows[0]!} personId={personId} />
+      ) : null}
       <RemoveLogbook
         logbookId={rows.map((row) => row.id)}
         personId={personId}

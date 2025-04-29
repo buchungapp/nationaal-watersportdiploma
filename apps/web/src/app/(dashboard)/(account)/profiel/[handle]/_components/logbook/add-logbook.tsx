@@ -1,9 +1,10 @@
 "use client";
 import { PlusIcon } from "@heroicons/react/16/solid";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
-import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createLogbookAction } from "~/actions/logbook/create-logbook-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -13,7 +14,6 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
-import { createLogbookAction } from "../../_actions/logbook";
 import { LogbookFields } from "./logbook-fields";
 
 export function AddLogbook({
@@ -29,18 +29,15 @@ export function AddLogbook({
     setIsOpen(false);
   };
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await createLogbookAction({ personId }, prevState, formData);
-
-    if (result.message === "Success") {
-      close();
-      toast.success("Logboekregel toegevoegd.");
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    createLogbookAction.bind(null, personId),
+    {
+      onSuccess: () => {
+        close();
+        toast.success("Logboekregel toegevoegd.");
+      },
+    },
+  );
 
   return (
     <>
@@ -52,9 +49,30 @@ export function AddLogbook({
       <Dialog size="2xl" open={isOpen} onClose={close}>
         <DialogTitle>Voeg een nieuw regel toe</DialogTitle>
         <Text>Vul de details in van je vaaractiviteit.</Text>
-        <form action={action}>
+        <form action={execute}>
           <DialogBody className="@container/logbook-fields">
-            <LogbookFields errors={state?.errors} />
+            <LogbookFields
+              invalid={{
+                startedAt: !!result?.validationErrors?.startedAt,
+                endedAt: !!result?.validationErrors?.endedAt,
+                departurePort: !!result?.validationErrors?.departurePort,
+                arrivalPort: !!result?.validationErrors?.arrivalPort,
+                location: !!result?.validationErrors?.location,
+                windDirection: !!result?.validationErrors?.windDirection,
+                windPower: !!result?.validationErrors?.windPower,
+                boatType: !!result?.validationErrors?.boatType,
+                boatLength: !!result?.validationErrors?.boatLength,
+                sailedNauticalMiles:
+                  !!result?.validationErrors?.sailedNauticalMiles,
+                sailedHoursInDark:
+                  !!result?.validationErrors?.sailedHoursInDark,
+                primaryRole: !!result?.validationErrors?.primaryRole,
+                crewNames: !!result?.validationErrors?.crewNames,
+                conditions: !!result?.validationErrors?.conditions,
+                additionalComments:
+                  !!result?.validationErrors?.additionalComments,
+              }}
+            />
           </DialogBody>
           <DialogActions>
             <Button plain onClick={close}>

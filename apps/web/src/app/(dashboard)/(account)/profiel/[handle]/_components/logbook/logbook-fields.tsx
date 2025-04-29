@@ -12,10 +12,26 @@ import {
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 
 export function LogbookFields({
-  errors,
+  invalid,
   defaultValues,
 }: {
-  errors?: Record<string, string>;
+  invalid?: {
+    startedAt?: boolean;
+    endedAt?: boolean;
+    departurePort?: boolean;
+    arrivalPort?: boolean;
+    location?: boolean;
+    windDirection?: boolean;
+    windPower?: boolean;
+    boatType?: boolean;
+    boatLength?: boolean;
+    sailedNauticalMiles?: boolean;
+    sailedHoursInDark?: boolean;
+    primaryRole?: boolean;
+    crewNames?: boolean;
+    conditions?: boolean;
+    additionalComments?: boolean;
+  };
   defaultValues?: Record<string, string | number | null | undefined>;
 }) {
   const hasEndDate =
@@ -37,7 +53,7 @@ export function LogbookFields({
           <SmartDatetimePicker
             name="startedAt"
             required
-            invalid={!!errors?.startedAt}
+            invalid={invalid?.startedAt}
             defaultValue={
               defaultValues?.startedAt
                 ? new Date(defaultValues.startedAt)
@@ -48,7 +64,7 @@ export function LogbookFields({
           <SmartDatePicker
             name="startedAt"
             required
-            invalid={!!errors?.startedAt}
+            invalid={invalid?.startedAt}
             defaultValue={
               defaultValues?.startedAt
                 ? new Date(defaultValues.startedAt)
@@ -63,7 +79,7 @@ export function LogbookFields({
           {useDateTime ? (
             <SmartDatetimePicker
               name="endedAt"
-              invalid={!!errors?.endedAt}
+              invalid={invalid?.endedAt}
               defaultValue={
                 defaultValues?.endedAt
                   ? new Date(defaultValues.endedAt)
@@ -73,7 +89,7 @@ export function LogbookFields({
           ) : (
             <SmartDatePicker
               name="endedAt"
-              invalid={!!errors?.endedAt}
+              invalid={invalid?.endedAt}
               defaultValue={
                 defaultValues?.endedAt
                   ? new Date(defaultValues.endedAt)
@@ -107,7 +123,7 @@ export function LogbookFields({
         <Input
           name="departurePort"
           placeholder="bv. Den Helder (NL)"
-          invalid={!!errors?.departurePort}
+          invalid={invalid?.departurePort}
           defaultValue={defaultValues?.departurePort ?? undefined}
         />
       </Field>
@@ -117,7 +133,7 @@ export function LogbookFields({
         <Input
           name="arrivalPort"
           placeholder="bv. Den Helder (NL)"
-          invalid={!!errors?.arrivalPort}
+          invalid={invalid?.arrivalPort}
           defaultValue={defaultValues?.arrivalPort ?? undefined}
         />
       </Field>
@@ -127,7 +143,7 @@ export function LogbookFields({
         <Input
           name="location"
           placeholder="bv. zeilschool, verhuurder"
-          invalid={!!errors?.location}
+          invalid={invalid?.location}
           defaultValue={defaultValues?.location ?? undefined}
         />
       </Field>
@@ -137,7 +153,7 @@ export function LogbookFields({
         <Input
           name="windDirection"
           placeholder="bv. NW"
-          invalid={!!errors?.windDirection}
+          invalid={invalid?.windDirection}
           defaultValue={defaultValues?.windDirection ?? undefined}
         />
       </Field>
@@ -149,7 +165,7 @@ export function LogbookFields({
           name="windPower"
           placeholder="bv. 4"
           step=".01"
-          invalid={!!errors?.windPower}
+          invalid={invalid?.windPower}
           defaultValue={defaultValues?.windPower ?? undefined}
         />
       </Field>
@@ -159,7 +175,7 @@ export function LogbookFields({
         <Input
           name="boatType"
           placeholder="bv. Dehler 36"
-          invalid={!!errors?.boatType}
+          invalid={invalid?.boatType}
           defaultValue={defaultValues?.boatType ?? undefined}
         />
       </Field>
@@ -170,7 +186,7 @@ export function LogbookFields({
           type="number"
           name="boatLength"
           step=".01"
-          invalid={!!errors?.boatLength}
+          invalid={invalid?.boatLength}
           defaultValue={defaultValues?.boatLength ?? undefined}
         />
       </Field>
@@ -181,7 +197,7 @@ export function LogbookFields({
           type="number"
           name="sailedNauticalMiles"
           step=".01"
-          invalid={!!errors?.sailedNauticalMiles}
+          invalid={invalid?.sailedNauticalMiles}
           defaultValue={defaultValues?.sailedNauticalMiles ?? undefined}
         />
       </Field>
@@ -192,7 +208,7 @@ export function LogbookFields({
           type="number"
           name="sailedHoursInDark"
           step=".01"
-          invalid={!!errors?.sailedHoursInDark}
+          invalid={invalid?.sailedHoursInDark}
           defaultValue={defaultValues?.sailedHoursInDark ?? undefined}
         />
       </Field>
@@ -217,7 +233,7 @@ export function LogbookFields({
         <Textarea
           name="crewNames"
           placeholder="bv. Jan Jansen, Piet Pietersen"
-          invalid={!!errors?.crewNames}
+          invalid={invalid?.crewNames}
           defaultValue={defaultValues?.crewNames ?? undefined}
         />
       </Field>
@@ -227,7 +243,7 @@ export function LogbookFields({
         <Textarea
           name="conditions"
           placeholder="bv. rustig weer, lichte golfslag"
-          invalid={!!errors?.conditions}
+          invalid={invalid?.conditions}
           defaultValue={defaultValues?.conditions ?? undefined}
         />
       </Field>
@@ -237,7 +253,7 @@ export function LogbookFields({
         <Textarea
           name="additionalComments"
           placeholder="bv. wedstrijd, storingen, vastgelopen, examen"
-          invalid={!!errors?.additionalComments}
+          invalid={invalid?.additionalComments}
           defaultValue={defaultValues?.additionalComments ?? undefined}
         />
       </Field>
