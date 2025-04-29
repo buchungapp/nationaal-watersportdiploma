@@ -1,14 +1,26 @@
 "use server";
 
+import { z } from "zod";
 import { submitProductFeedback } from "~/lib/nwd";
+import { actionClientWithMeta } from "~/lib/safe-action";
 
-export async function productFeedbackAction(input: {
-  type: "bug" | "product-feedback" | "question";
-  query?: Record<string, string | string[]>;
-  path?: string;
-  headers?: Record<string, string>;
-  priority?: "low" | "normal" | "high";
-  message: string;
-}) {
-  return await submitProductFeedback(input);
-}
+const prioritySchema = z.enum(["low", "normal", "high"]);
+const typeSchema = z.enum(["bug", "product-feedback", "question"]);
+
+const sendFeedbackSchema = z.object({
+  type: typeSchema,
+  query: z
+    .record(z.string(), z.union([z.string(), z.string().array()]))
+    .optional(),
+  path: z.string().optional(),
+  headers: z.record(z.string(), z.string()).optional(),
+  priority: prioritySchema,
+  message: z.string(),
+});
+
+export const productFeedbackAction = actionClientWithMeta
+  .schema(sendFeedbackSchema)
+  .metadata({
+    name: "send-feedback",
+  })
+  .action(async ({ parsedInput: data }) => await submitProductFeedback(data));
