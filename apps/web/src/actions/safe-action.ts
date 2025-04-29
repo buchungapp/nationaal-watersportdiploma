@@ -1,7 +1,7 @@
 import { createSafeActionClient } from "next-safe-action";
 import { z } from "zod";
 
-const DEFAULT_SERVER_ERROR_MESSAGE =
+export const DEFAULT_SERVER_ERROR_MESSAGE =
   "Er is iets misgegaan. Probeer het later opnieuw.";
 
 export const actionClient = createSafeActionClient({

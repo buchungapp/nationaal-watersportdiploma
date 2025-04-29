@@ -8,7 +8,10 @@ import {
   useState,
 } from "react";
 
-import { useAction } from "next-safe-action/hooks";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -29,11 +32,9 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import Spinner from "~/app/_components/spinner";
-import {
-  productFeedbackAction,
-  productFeedbackErrorMessage,
-} from "../../../../actions/send-feedback-action";
+import { productFeedbackAction } from "../../../../actions/send-feedback-action";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
 function urlSearchParamsToObject(
@@ -83,6 +84,24 @@ function useFeedbackDialog() {
   }
 
   return context;
+}
+
+export function productFeedbackErrorMessage(
+  error: InferUseActionHookReturn<typeof productFeedbackAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
 }
 
 function Feedback() {

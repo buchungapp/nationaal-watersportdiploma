@@ -41,10 +41,8 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import {
-  productFeedbackAction,
-  productFeedbackErrorMessage,
-} from "~/actions/send-feedback-action";
+import { productFeedbackAction } from "~/actions/send-feedback-action";
+import { productFeedbackErrorMessage } from "~/app/(dashboard)/(account)/_components/feedback";
 import Spinner from "~/app/_components/spinner";
 
 const feedbackLabels = {
