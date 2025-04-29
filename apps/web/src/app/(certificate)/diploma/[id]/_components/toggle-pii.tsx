@@ -1,9 +1,11 @@
 "use client";
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
+import { useAction } from "next-safe-action/hooks";
 import { useParams, usePathname } from "next/navigation";
-import { useActionState, useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { showPiiAction } from "~/actions/show-pii-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -19,8 +21,6 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { showPiiHandler } from "../_actions";
-
 function Submit() {
   const { pending } = useFormStatus();
 
@@ -36,16 +36,16 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
 
   const certificateId = params.id as string;
 
-  const formActionWithId = showPiiHandler.bind(null, certificateId);
-
-  const [result, action] = useActionState(formActionWithId, undefined);
+  const { execute, result } = useAction(
+    showPiiAction.bind(null, certificateId),
+  );
 
   const formRef = useRef<HTMLFormElement>(null);
   return (
-    <form ref={formRef} action={action}>
+    <form ref={formRef} action={execute}>
       <DialogBody>
         <FieldGroup>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
+          <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
             <Field>
               <Label>Datum van uitgifte</Label>
               <Input name="issuedDate" type="date" required />
@@ -58,7 +58,7 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
         </FieldGroup>
       </DialogBody>
 
-      {result?.success === false ? (
+      {result?.serverError ? (
         <div className="mt-2">
           <ErrorMessage>
             De ingevoerde gegevens komen niet overeen met het diploma.
