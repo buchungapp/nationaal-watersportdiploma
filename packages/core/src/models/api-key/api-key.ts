@@ -1,11 +1,11 @@
 import { schema as s } from "@nawadi/db";
+import { invariant } from "@nawadi/lib";
 import { and, eq, isNull, lte, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { hashToken } from "../../utils/crypto.js";
 import {
-  possibleSingleRow,
   singleRow,
   withZod,
   wrapCommand,
@@ -52,8 +52,9 @@ export const byToken = wrapQuery(
   withZod(
     z.string(),
     z.object({
-      id: z.string(),
-      userId: z.string(),
+      id: z.string().uuid(),
+      userId: z.string().uuid(),
+      locationId: z.string().uuid().nullable(),
     }),
     async (token) => {
       const query = useQuery();
@@ -73,18 +74,16 @@ export const byToken = wrapQuery(
             ),
           ),
         )
-        .then(possibleSingleRow);
+        .then(singleRow);
 
-      if (row != null && row.userId === null) {
-        throw new Error("Unassociated tokens are not supported at this time.");
-      }
+      const userId = row.userId;
+      invariant(userId, "Unassociated tokens are not supported at this time.");
 
       await query
         .insert(s.tokenUsage)
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        .values({ tokenId: row!.id, usedAt: new Date().toISOString() });
+        .values({ tokenId: row.id, usedAt: new Date().toISOString() });
 
-      return row as { id: string; userId: string };
+      return { userId, id: row.id, locationId: row.locationId };
     },
   ),
 );

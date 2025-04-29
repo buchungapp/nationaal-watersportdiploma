@@ -12,4 +12,4 @@ export const OAUTH_CONFIG = {
   CLIENT_ID_PREFIX: "nwd_app_",
   CLIENT_SECRET_PREFIX: "nwd_app_secret_",
   ACCESS_TOKEN_PREFIX: "nwd_access_token_",
-};
+} as const;

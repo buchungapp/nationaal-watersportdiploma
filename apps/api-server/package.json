@@ -26,19 +26,21 @@
   },
   "keywords": [],
   "dependencies": {
+    "@sindresorhus/slugify": "^2.2.1",
     "@types/node": "catalog:",
     "@types/yargs": "^17.0.32",
     "drizzle-orm": "catalog:",
     "tslib": "^2.6.3",
     "type-fest": "^4.21.0",
+    "yargs": "^17.7.2",
     "zod": "catalog:",
-    "yargs": "^17.7.2"
+    "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
     "@nawadi/api": "workspace:*",
     "@nawadi/core": "workspace:*",
-    "@nawadi/lib": "workspace:*",
     "@nawadi/db": "workspace:*",
+    "@nawadi/lib": "workspace:*",
     "@tsconfig/node22": "catalog:",
     "typescript": "catalog:"
   }

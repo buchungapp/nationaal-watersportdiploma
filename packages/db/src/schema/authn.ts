@@ -9,6 +9,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { timestamps } from "../utils/sql.js";
+import { location } from "./location.js";
 import { user } from "./user.js";
 
 export const token = pgTable(
@@ -25,6 +26,7 @@ export const token = pgTable(
       withTimezone: true,
       mode: "string",
     }),
+    locationId: uuid("location_id"),
     userId: uuid("user_id"),
     ...timestamps,
   },
@@ -35,6 +37,11 @@ export const token = pgTable(
         columns: [table.userId],
         foreignColumns: [user.authUserId],
         name: "token_user_id_fk",
+      }),
+      locationReference: foreignKey({
+        columns: [table.locationId],
+        foreignColumns: [location.id],
+        name: "token_location_id_fk",
       }),
     };
   },

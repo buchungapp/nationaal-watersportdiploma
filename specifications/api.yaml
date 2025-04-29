@@ -70,9 +70,41 @@ paths:
               schema:
                 $ref: './models/discipline.yaml#/$defs/DisciplineModel'
 
+  /cohort:
+    post:
+      operationId: createCohort
+      tags:
+        - cohort
+      summary: Creates a new cohort
+      security:
+        - token: []
+      parameters:
+        - $ref: '#/components/parameters/LocationId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './models/cohort.yaml#/$defs/CreateCohortRequest'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: './models/cohort.yaml#/$defs/CohortModel'
+                
+
 components:
   securitySchemes:
     token:
       type: http
       description: Default authentication mechanism
       scheme: bearer
+  parameters:
+    LocationId:
+      in: query
+      name: location-id
+      required: false
+      schema:
+        $ref: './fields.yaml#/$defs/Id'
+      description: The current locationId

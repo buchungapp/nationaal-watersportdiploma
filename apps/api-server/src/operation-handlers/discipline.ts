@@ -33,22 +33,16 @@ export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
     };
   }
 
-  if (api.validators.isId(disciplineKey)) {
-    // @elmerbulthuis why is type of disciplineKey never here?
-    const discipline = await core.Course.Discipline.fromId(disciplineKey);
-    if (discipline == null) {
-      throw new NwdApiError({
-        code: "not_found",
-        message: `Discipline with handle ${disciplineKey} not found`,
-      });
-    }
-
-    return {
-      id: discipline.id,
-      handle: discipline.handle,
-    };
+  const discipline = await core.Course.Discipline.fromId(disciplineKey);
+  if (discipline == null) {
+    throw new NwdApiError({
+      code: "not_found",
+      message: `Discipline with handle ${disciplineKey} not found`,
+    });
   }
 
-  // @elmerbulthuis is this the best way to handle this?
-  throw "impossible";
+  return {
+    id: discipline.id,
+    handle: discipline.handle,
+  };
 };

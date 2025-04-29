@@ -28,15 +28,12 @@ export const token: api.server.TokenAuthenticationHandler<
         });
       });
 
-      const user = await core.User.fromId(token.userId).catch(() => {
-        throw new NwdApiError({
-          code: "unauthorized",
-          message: "Unauthorized: Invalid API key.",
-        });
-      });
-
       return {
-        user: user.authUserId,
+        authMechanism: apiKey.startsWith("nwd_access_token_")
+          ? "oauth_token"
+          : "api_key",
+        userId: token.userId,
+        restrictedToLocationId: token.locationId,
       };
     }
 
@@ -45,19 +42,14 @@ export const token: api.server.TokenAuthenticationHandler<
     if (error) {
       throw new NwdApiError({
         code: "unauthorized",
-        message: "Unauthorized: Invalid API key.",
+        message: "Unauthorized: Invalid JWT token.",
       });
     }
 
-    const user = await core.User.fromId(data.user.id).catch(() => {
-      throw new NwdApiError({
-        code: "unauthorized",
-        message: "Unauthorized: Invalid API key.",
-      });
-    });
-
     return {
-      user: user.authUserId,
+      authMechanism: "jwt",
+      userId: data.user.id,
+      restrictedToLocationId: null,
     };
   } catch (error) {
     if (error instanceof NwdApiError) {

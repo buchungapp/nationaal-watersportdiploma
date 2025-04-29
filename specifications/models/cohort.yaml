@@ -1,0 +1,29 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+$defs:
+  CohortModel:
+    type: object
+    required:
+      - id
+      - handle
+    properties:
+      id:
+        $ref: '../fields.yaml#/$defs/Id'
+      handle:
+        $ref: '../fields.yaml#/$defs/Handle'
+
+  CreateCohortRequest:
+    type: object
+    required:
+      - accessStartTime
+      - accessEndTime
+      - title
+    properties:
+      handle:
+        $ref: '../fields.yaml#/$defs/Handle'
+      title:
+        $ref: '../fields.yaml#/$defs/Text'
+      accessStartTime:
+        $ref: '../fields.yaml#/$defs/DateTime'
+      accessEndTime:
+        $ref: '../fields.yaml#/$defs/DateTime'
