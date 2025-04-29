@@ -33,7 +33,7 @@ import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import Spinner from "~/app/_components/spinner";
-import { productFeedbackAction } from "../../_actions/feedback";
+import { productFeedbackAction } from "../../../../actions/send-feedback-action";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
 function urlSearchParamsToObject(

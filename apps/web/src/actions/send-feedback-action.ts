@@ -1,8 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { actionClientWithMeta } from "~/actions/safe-action";
 import { submitProductFeedback } from "~/lib/nwd";
-import { actionClientWithMeta } from "~/lib/safe-action";
 
 const prioritySchema = z.enum(["low", "normal", "high"]);
 const typeSchema = z.enum(["bug", "product-feedback", "question"]);
