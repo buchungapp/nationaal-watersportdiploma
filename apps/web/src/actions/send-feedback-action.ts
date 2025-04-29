@@ -1,5 +1,6 @@
 "use server";
 
+import type { InferUseActionHookReturn } from "next-safe-action/hooks";
 import { z } from "zod";
 import { actionClientWithMeta } from "~/actions/safe-action";
 import { submitProductFeedback } from "~/lib/nwd";
@@ -24,3 +25,21 @@ export const productFeedbackAction = actionClientWithMeta
     name: "send-feedback",
   })
   .action(async ({ parsedInput: data }) => await submitProductFeedback(data));
+
+export function productFeedbackErrorMessage(
+  error: InferUseActionHookReturn<typeof productFeedbackAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return "Er is iets misgegaan. Probeer het later opnieuw.";
+  }
+
+  return null;
+}

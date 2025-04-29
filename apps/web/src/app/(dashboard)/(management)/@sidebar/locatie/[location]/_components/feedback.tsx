@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { Suspense, useActionState, useState } from "react";
+import { Suspense, useState } from "react";
 import {
   SidebarItem,
   SidebarLabel,
@@ -38,10 +38,13 @@ import {
   ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSm,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
+import { useAction } from "next-safe-action/hooks";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { z } from "zod";
-import { productFeedbackAction } from "~/actions/send-feedback-action";
+import {
+  productFeedbackAction,
+  productFeedbackErrorMessage,
+} from "~/actions/send-feedback-action";
 import Spinner from "~/app/_components/spinner";
 
 const feedbackLabels = {
@@ -90,49 +93,34 @@ function FeedbackTab({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const submitFeedback = async (_prevState: unknown, formData: FormData) => {
-    try {
-      const schema = z.object({
-        comment: z.string(),
-        urgent: z.boolean().optional(),
-      });
-
-      const { comment, urgent } = schema.parse({
-        comment: formData.get("comment") as string,
-        urgent: formData.get("urgent") === "on",
-      });
-
-      await productFeedbackAction({
-        type: type === "feedback" ? "product-feedback" : type,
-        priority: urgent ? "high" : "normal",
-        message: comment,
-        path: pathname,
-        query: urlSearchParamsToObject(searchParams),
-        headers: {
-          "user-agent": navigator.userAgent,
-        },
-      });
-
+  const { execute, result } = useAction(productFeedbackAction, {
+    onSuccess: () => {
       close();
       toast.success("We hebben je melding ontvangen! 🎉");
-    } catch (error) {
-      if (error instanceof Error) {
-        return {
-          error: error.message,
-        };
-      }
-      return { error: "Er is iets misgegaan. Probeer het later opnieuw." };
-    }
-  };
+    },
+  });
 
-  const [state, formAction] = useActionState(submitFeedback, undefined);
+  const errorMessage = productFeedbackErrorMessage(result);
 
   const label = feedbackLabels[type].label;
   const placeholder = feedbackLabels[type].placeholder;
 
   return (
     <TabPanel>
-      <form action={formAction}>
+      <form
+        action={(formData) =>
+          execute({
+            type: type === "feedback" ? "product-feedback" : type,
+            message: formData.get("comment") as string,
+            priority: formData.get("urgent") === "on" ? "high" : "normal",
+            path: pathname,
+            query: urlSearchParamsToObject(searchParams),
+            headers: {
+              "user-agent": navigator.userAgent,
+            },
+          })
+        }
+      >
         <DialogBody>
           <Fieldset>
             <Field>
@@ -152,7 +140,7 @@ function FeedbackTab({
             )}
           </Fieldset>
 
-          {!!state?.error && <ErrorMessage>{state.error}</ErrorMessage>}
+          {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
         </DialogBody>
         <DialogActions>
           <Button plain onClick={close}>

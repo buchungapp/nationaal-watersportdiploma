@@ -8,10 +8,7 @@ import {
   useState,
 } from "react";
 
-import {
-  type InferUseActionHookReturn,
-  useAction,
-} from "next-safe-action/hooks";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -33,7 +30,10 @@ import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import Spinner from "~/app/_components/spinner";
-import { productFeedbackAction } from "../../../../actions/send-feedback-action";
+import {
+  productFeedbackAction,
+  productFeedbackErrorMessage,
+} from "../../../../actions/send-feedback-action";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
 function urlSearchParamsToObject(
@@ -85,24 +85,6 @@ function useFeedbackDialog() {
   return context;
 }
 
-function getErrorMessage(
-  error: InferUseActionHookReturn<typeof productFeedbackAction>["result"],
-) {
-  if (error.serverError) {
-    return error.serverError;
-  }
-
-  if (error.validationErrors) {
-    return "Een van de velden is niet correct ingevuld.";
-  }
-
-  if (error.bindArgsValidationErrors) {
-    return "Er is iets misgegaan. Probeer het later opnieuw.";
-  }
-
-  return null;
-}
-
 function Feedback() {
   const { isOpen, setIsOpen } = useFeedbackDialog();
   const searchParams = useSearchParams();
@@ -115,7 +97,7 @@ function Feedback() {
     },
   });
 
-  const errorMessage = getErrorMessage(result);
+  const errorMessage = productFeedbackErrorMessage(result);
 
   const label = "Hoe maken we de applicatie beter?";
   const placeholder = "Het zou super zijn als...";
