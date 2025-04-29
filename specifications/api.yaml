@@ -47,8 +47,6 @@ paths:
                 type: array
                 items:
                   $ref: './models/discipline.yaml#/$defs/DisciplineModel'
-        '401':
-          description: Unauthorized
 
   /discipline/{discipline-key}:
     parameters:
@@ -71,10 +69,6 @@ paths:
             application/json:
               schema:
                 $ref: './models/discipline.yaml#/$defs/DisciplineModel'
-        '401':
-          description: Unauthorized
-        '404':
-          description: Not Found
 
 components:
   securitySchemes:
