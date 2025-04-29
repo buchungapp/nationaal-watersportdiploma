@@ -21,16 +21,43 @@ export const token: api.server.TokenAuthenticationHandler<
     const isRestrictedToken = apiKey?.startsWith("nwd_");
 
     if (isRestrictedToken) {
+      const token = await core.ApiKey.byToken(apiKey).catch(() => {
+        throw new NwdApiError({
+          code: "unauthorized",
+          message: "Unauthorized: Invalid API key.",
+        });
+      });
+
+      const user = await core.User.fromId(token.userId).catch(() => {
+        throw new NwdApiError({
+          code: "unauthorized",
+          message: "Unauthorized: Invalid API key.",
+        });
+      });
+
+      return {
+        user: user.authUserId,
+      };
+    }
+
+    const { data, error } = await core.useSupabaseClient().auth.getUser(apiKey);
+
+    if (error) {
       throw new NwdApiError({
-        code: "internal_server_error",
-        message: "We don't support restricted tokens yet (oauth).",
+        code: "unauthorized",
+        message: "Unauthorized: Invalid API key.",
       });
     }
 
-    const token = await core.ApiKey.byToken(apiKey);
+    const user = await core.User.fromId(data.user.id).catch(() => {
+      throw new NwdApiError({
+        code: "unauthorized",
+        message: "Unauthorized: Invalid API key.",
+      });
+    });
 
     return {
-      user: token.userId,
+      user: user.authUserId,
     };
   } catch (error) {
     if (error instanceof NwdApiError) {

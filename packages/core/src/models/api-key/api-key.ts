@@ -79,6 +79,11 @@ export const byToken = wrapQuery(
         throw new Error("Unassociated tokens are not supported at this time.");
       }
 
+      await query
+        .insert(s.tokenUsage)
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        .values({ tokenId: row!.id, usedAt: new Date().toISOString() });
+
       return row as { id: string; userId: string };
     },
   ),
