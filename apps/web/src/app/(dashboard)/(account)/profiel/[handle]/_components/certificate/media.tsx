@@ -18,13 +18,13 @@ import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
 export default function Media({
   setValidMedia,
   small,
-  errors,
+  invalid,
   stepIndex,
   allowRemove,
 }: {
   setValidMedia?: (valid: boolean) => void;
   small?: boolean;
-  errors?: Record<string, string>;
+  invalid?: boolean;
   allowRemove?: boolean;
   stepIndex: number;
 }) {
@@ -42,7 +42,7 @@ export default function Media({
             name="media"
             setValidMedia={setValidMedia}
             setFilled={setFilled}
-            invalid={!!errors?.media}
+            invalid={invalid}
             small={small}
           />
         </Field>

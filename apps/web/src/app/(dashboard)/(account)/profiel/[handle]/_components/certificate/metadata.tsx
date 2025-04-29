@@ -10,11 +10,18 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 
 export function Metadata({
   stepIndex,
-  errors,
+  invalid,
   defaultValues,
 }: {
   stepIndex: number;
-  errors?: Record<string, string>;
+  invalid?: {
+    title?: boolean;
+    issuingAuthority?: boolean;
+    identifier?: boolean;
+    issuingLocation?: boolean;
+    awardedAt?: boolean;
+    additionalComments?: boolean;
+  };
   defaultValues?: Record<string, string | null | undefined>;
 }) {
   return (
@@ -23,8 +30,8 @@ export function Metadata({
         {stepIndex}. Vul de details over dit diploma in
       </Legend>
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-4 sm:gap-4">
-        <Field className="sm:col-span-4 relative">
+      <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-4">
+        <Field className="relative sm:col-span-4">
           <Label>
             Titel <span className="text-branding-orange">*</span>
           </Label>
@@ -33,7 +40,7 @@ export function Metadata({
             required
             placeholder="bv. Vaarbewijs I"
             defaultValue={defaultValues?.title ?? undefined}
-            invalid={!!errors?.title}
+            invalid={invalid?.title}
           />
         </Field>
 
@@ -43,17 +50,17 @@ export function Metadata({
             name="issuingAuthority"
             placeholder="bv. CBR"
             defaultValue={defaultValues?.issuingAuthority ?? undefined}
-            invalid={!!errors?.issuingAuthority}
+            invalid={invalid?.issuingAuthority}
           />
         </Field>
 
-        <Field className="sm:col-span-2 relative">
+        <Field className="relative sm:col-span-2">
           <Label>Identificatie / Diplomanummer</Label>
           <Input
             name="identifier"
             placeholder="bv. N3E345F"
             defaultValue={defaultValues?.identifier ?? undefined}
-            invalid={!!errors?.identifier}
+            invalid={invalid?.identifier}
           />
         </Field>
 
@@ -63,11 +70,11 @@ export function Metadata({
             name="issuingLocation"
             placeholder="bv. CBR Utrecht"
             defaultValue={defaultValues?.issuingLocation ?? undefined}
-            invalid={!!errors?.issuingLocation}
+            invalid={invalid?.issuingLocation}
           />
         </Field>
 
-        <Field className="sm:col-span-2 relative">
+        <Field className="relative sm:col-span-2">
           <Label>Behaald op</Label>
           <SmartDatePicker
             name="awardedAt"
@@ -76,7 +83,7 @@ export function Metadata({
                 ? new Date(defaultValues.awardedAt)
                 : undefined
             }
-            invalid={!!errors?.awardedAt}
+            invalid={invalid?.awardedAt}
           />
         </Field>
 
@@ -85,7 +92,7 @@ export function Metadata({
           <Textarea
             name="additionalComments"
             defaultValue={defaultValues?.additionalComments ?? undefined}
-            invalid={!!errors?.additionalComments}
+            invalid={invalid?.additionalComments}
           />
         </Field>
       </div>

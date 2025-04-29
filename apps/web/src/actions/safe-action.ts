@@ -1,5 +1,6 @@
 import { createSafeActionClient } from "next-safe-action";
 import { z } from "zod";
+import { zfd } from "zod-form-data";
 
 export const DEFAULT_SERVER_ERROR_MESSAGE =
   "Er is iets misgegaan. Probeer het later opnieuw.";
@@ -28,3 +29,5 @@ export const actionClientWithMeta = createSafeActionClient({
     });
   },
 });
+
+export const voidActionSchema = zfd.formData({});
