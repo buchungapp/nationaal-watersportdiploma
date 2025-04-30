@@ -30,4 +30,6 @@ export const actionClientWithMeta = createSafeActionClient({
   },
 });
 
-export const voidActionSchema = zfd.formData({});
+export const voidActionSchema = z
+  .void()
+  .or(zfd.formData({}).default(new FormData()));

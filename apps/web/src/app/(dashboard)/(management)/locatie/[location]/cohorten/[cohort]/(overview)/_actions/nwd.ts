@@ -7,7 +7,6 @@ import {
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
   completeAllCoreCompetencies as completeAllCoreCompetenciesInner,
-  deleteCohort as deleteCohortInner,
   enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
   getUserOrThrow,
   isInstructorInCohort as isInstructorInCohortInner,
@@ -269,15 +268,6 @@ export async function setTags(props: {
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
-
-  return;
-}
-
-export async function deleteCohort(props: { cohortId: string }) {
-  await deleteCohortInner(props.cohortId);
-
-  revalidatePath("/locatie/[location]/cohorten/", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
 
   return;
 }

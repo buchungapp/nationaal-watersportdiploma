@@ -5,9 +5,10 @@ import {
   useAction,
 } from "next-safe-action/hooks";
 import { useParams, useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { removeCohortAction } from "~/actions/cohort/remove-cohort-action";
 import { updateCohortAction } from "~/actions/cohort/update-cohort-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
@@ -42,7 +43,6 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import { deleteCohort } from "../_actions/nwd";
 
 interface Props {
   cohort: {
@@ -192,6 +192,20 @@ function SubmitButton() {
   );
 }
 
+function removeCohortErrorMessage(
+  error: InferUseActionHookReturn<typeof removeCohortAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.bindArgsValidationErrors || error.validationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 function RemoveCohortDialog({
   isOpen,
   cohort,
@@ -200,10 +214,20 @@ function RemoveCohortDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const params = useParams();
+
+  const { execute, result, isPending } = useAction(
+    removeCohortAction.bind(null, cohort.id),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        router.push(`/locatie/${params.location as string}/cohorten`);
+      },
+    },
+  );
+
+  const errorMessage = removeCohortErrorMessage(result);
 
   return (
     <Alert open={isOpen} onClose={setIsOpen} size="md">
@@ -213,32 +237,14 @@ function RemoveCohortDialog({
         voortgang, en kan niet ongedaan worden gemaakt.{" "}
         <Strong>Reeds uitgegeven diploma's blijven bestaan.</Strong>
       </AlertDescription>
-      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
+      {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
 
       <AlertActions>
         <Button plain onClick={() => setIsOpen(false)}>
           Annuleren
         </Button>
-        <Button
-          color="red"
-          disabled={pending}
-          onClick={() => {
-            startTransition(async () => {
-              await deleteCohort({ cohortId: cohort.id })
-                .then(() => {
-                  setIsOpen(false);
-                  router.push(`/locatie/${params.location as string}/cohorten`);
-                })
-                .catch((error) => {
-                  if (error instanceof Error) {
-                    return setError(error.message);
-                  }
-                  setError("Er is een fout opgetreden.");
-                });
-            });
-          }}
-        >
-          {pending ? <Spinner className="text-white" /> : null} Verwijderen
+        <Button color="red" disabled={isPending} onClick={() => execute()}>
+          {isPending ? <Spinner className="text-white" /> : null} Verwijderen
         </Button>
       </AlertActions>
     </Alert>
