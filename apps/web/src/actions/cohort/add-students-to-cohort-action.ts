@@ -90,6 +90,10 @@ async function parsePersonsFromCsvData(
     throw new Error("Geen data gevonden.");
   }
 
+  if (!indexToColumnSelection) {
+    throw new Error("Geen kolommen gevonden.");
+  }
+
   const selectedFields = Object.values(indexToColumnSelection).filter(
     (item) => item !== SELECT_LABEL,
   );
