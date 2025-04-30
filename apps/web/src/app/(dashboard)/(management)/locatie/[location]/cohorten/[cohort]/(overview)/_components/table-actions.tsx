@@ -1,16 +1,16 @@
-import {
-  type FormEventHandler,
-  useActionState,
-  useCallback,
-  useState,
-} from "react";
+import { type FormEventHandler, useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
 
+import { useAction } from "next-safe-action/hooks";
 import { ReactTags, type Tag } from "react-tag-autocomplete";
-import { z } from "zod";
+import { assignInstructorToStudentInCohortAction } from "~/actions/cohort/assign-instructor-to-student-in-cohort-action";
+import { claimStudentsInCohortAction } from "~/actions/cohort/claim-students-in-cohort-action";
+import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/enroll-students-in-curriculum-in-cohort-action";
+import { releaseStudentsInCohortAction } from "~/actions/cohort/release-students-in-cohort-action";
+import { updateStudentTagsInCohortAction } from "~/actions/cohort/update-student-tags-in-cohort-action";
 import {
   Combobox,
   ComboboxLabel,
@@ -36,9 +36,6 @@ import {
 import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import Spinner from "~/app/_components/spinner";
 import {
-  assignInstructorToStudents,
-  claimStudents,
-  enrollStudentsInCurriculumForCohort,
   isInstructorInCohort,
   listCurriculaByProgram,
   listDistinctTagsForCohort,
@@ -46,8 +43,6 @@ import {
   listInstructorsInCohort,
   listPrivilegesForCohort,
   listPrograms,
-  releaseStudent,
-  setTags,
 } from "../_actions/nwd";
 import type { Student } from "./students-table";
 
@@ -78,13 +73,13 @@ function Claim({ rows, cohortId }: Props) {
       onClick={async () => {
         try {
           if (doAllSelectedRowsBelongToThisInstructor) {
-            await releaseStudent(
+            await releaseStudentsInCohortAction(
               cohortId,
               rows.map((row) => row.id),
             );
             toast.success("Cursisten vrijgegeven");
           } else {
-            await claimStudents(
+            await claimStudentsInCohortAction(
               cohortId,
               rows.map((row) => row.id),
             );
@@ -138,45 +133,28 @@ function StartProgramDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (_prevState: unknown, formData: FormData) => {
-    const programId = formData.get("program");
-    const gearTypeId = formData.get("gearTypeId");
-    const curriculumId = formData.get("curriculumId");
-
-    try {
-      const validated = z
-        .object({
-          program: z.string().uuid(),
-          gearTypeId: z.string().uuid(),
-          curriculumId: z.string().uuid(),
-        })
-        .parse({
-          program: programId,
-          gearTypeId: gearTypeId,
-          curriculumId: curriculumId,
-        });
-
-      await enrollStudentsInCurriculumForCohort({
-        cohortId,
-        curriculumId: validated.curriculumId,
-        gearTypeId: validated.gearTypeId,
-        students: rows.map((row) => ({
-          allocationId: row.id,
-          personId: row.person.id,
-        })),
-      });
-
-      toast.success("Programma's gestart");
-      setIsOpen(false);
-    } catch (error) {
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
   const [programQuery, setProgramQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    enrollStudentsInCurriculumInCohortAction.bind(
+      null,
+      cohortId,
+      rows.map((row) => ({
+        allocationId: row.id,
+        personId: row.person.id,
+      })),
+    ),
+    {
+      onSuccess: () => {
+        toast.success("Programma's gestart");
+        setIsOpen(false);
+      },
+      onError: () => {
+        toast.error("Er is iets misgegaan");
+      },
+    },
+  );
 
   const { data: programs } = useSWR("allPrograms", listPrograms);
   const { data: activeCurriculumForProgram } = useSWR(
@@ -211,7 +189,7 @@ function StartProgramDialog({
     <>
       <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
         <DialogTitle>Start programma</DialogTitle>
-        <form action={formAction}>
+        <form action={execute}>
           <DialogBody>
             {/* Hidden input for curriculumId */}
             <input
@@ -391,30 +369,24 @@ function AssignInstructorDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (_prevState: unknown, formData: FormData) => {
-    try {
-      const instructorPersonId = z
-        .string()
-        .uuid()
-        .nullable()
-        .parse(formData.get("instructorPersonId"));
-
-      await assignInstructorToStudents({
-        cohortId,
-        instructorPersonId,
-        studentIds: rows.map((row) => row.id),
-      });
-
-      toast.success("Instructeur gewijzigd");
-      setIsOpen(false);
-    } catch (error) {
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
   const [instructorQuery, setInstructorQuery] = useState("");
 
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    assignInstructorToStudentInCohortAction.bind(
+      null,
+      cohortId,
+      rows.map((row) => row.id),
+    ),
+    {
+      onSuccess: () => {
+        toast.success("Instructeur gewijzigd");
+        setIsOpen(false);
+      },
+      onError: () => {
+        toast.error("Er is iets misgegaan");
+      },
+    },
+  );
 
   const { data: instructors } = useSWR(
     ["allInstructorsInCohort", cohortId],
@@ -430,7 +402,7 @@ function AssignInstructorDialog({
         <DialogDescription>
           Laat leeg om de instructeur te verwijderen.
         </DialogDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <DialogBody>
             <Field>
               {/* TODO: this combobox is temporary used should be from catalyst */}
@@ -565,33 +537,50 @@ function AddTagDialog({
     });
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  const submit: FormEventHandler<HTMLFormElement> = useCallback((event) => {
-    event.preventDefault();
+  const toastId = useRef<string | number>(null);
+  const { execute } = useAction(
+    updateStudentTagsInCohortAction.bind(null, cohortId),
+    {
+      onExecute: () => {
+        toastId.current = toast.loading("Tags toevoegen");
+      },
+      onSuccess: () => {
+        if (toastId.current) {
+          toast.dismiss(toastId.current);
+        }
 
-    async function updateTags() {
-      for (const row of rows) {
-        const distinctTags = new Set<string>([
-          ...row.tags,
-          ...tagsToAdd.map(({ value }) => value as string),
-        ]);
+        toast.success("Tags toegevoegd");
+        setIsOpen(false);
+      },
+      onError: () => {
+        if (toastId.current) {
+          toast.dismiss(toastId.current);
+        }
 
-        await setTags({
-          cohortId,
-          allocationId: row.id,
-          tags: Array.from(distinctTags),
-        });
-      }
-    }
+        toast.error("Er is iets misgegaan");
+      },
+    },
+  );
 
-    toast.promise(updateTags(), {
-      loading: "Tags toevoegen",
-      success: "Tags toegevoegd",
-      error: "Er is iets misgegaan",
-    });
+  const submit: FormEventHandler<HTMLFormElement> = useCallback(
+    (event) => {
+      event.preventDefault();
+      execute(
+        rows.map((row) => {
+          const distinctTags = new Set<string>([
+            ...row.tags,
+            ...tagsToAdd.map(({ value }) => value as string),
+          ]);
 
-    setIsOpen(false);
-  }, []);
+          return {
+            allocationId: row.id,
+            tags: Array.from(distinctTags),
+          };
+        }),
+      );
+    },
+    [execute, rows, tagsToAdd],
+  );
 
   const { data: allCohortTags } = useSWR(
     ["distinctTagsForCohort", cohortId],

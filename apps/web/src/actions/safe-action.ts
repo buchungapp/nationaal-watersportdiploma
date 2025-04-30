@@ -30,6 +30,7 @@ export const actionClientWithMeta = createSafeActionClient({
   },
 });
 
+// Allows action to be called with or without form data, useful for actions that are triggered by a form submission without any form data
 export const voidActionSchema = z
   .void()
   .or(zfd.formData({}).default(new FormData()));

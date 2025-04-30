@@ -7,7 +7,6 @@ import {
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
   addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
   completeAllCoreCompetencies as completeAllCoreCompetenciesInner,
-  enrollStudentsInCurriculumForCohort as enrollStudentsInCurriculumForCohortInner,
   getUserOrThrow,
   isInstructorInCohort as isInstructorInCohortInner,
   listCountries as listCountriesInner,
@@ -22,87 +21,8 @@ import {
   releaseStudentFromCohortByAllocationId as releaseStudentFromCohortByAllocationIdInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
-  setAllocationTags as setAllocationTagsInner,
-  updateStudentInstructorAssignment,
   withdrawStudentFromCurriculumInCohort,
 } from "~/lib/nwd";
-
-export async function claimStudents(cohortId: string, studentIds: string[]) {
-  await updateStudentInstructorAssignment({
-    cohortId,
-    studentAllocationIds: studentIds,
-    action: "claim",
-  });
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
-}
-
-export async function releaseStudent(cohortId: string, studentIds: string[]) {
-  await updateStudentInstructorAssignment({
-    cohortId,
-    studentAllocationIds: studentIds,
-    action: "release",
-  });
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
-}
-
-export async function assignInstructorToStudents({
-  cohortId,
-  instructorPersonId,
-  studentIds,
-}: {
-  cohortId: string;
-  studentIds: string[];
-  instructorPersonId: string | null;
-}) {
-  if (instructorPersonId) {
-    await updateStudentInstructorAssignment({
-      cohortId,
-      studentAllocationIds: studentIds,
-      action: "claim",
-      instructorPersonId: instructorPersonId ?? undefined,
-    });
-  } else {
-    await updateStudentInstructorAssignment({
-      cohortId,
-      studentAllocationIds: studentIds,
-      action: "release",
-    });
-  }
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
-}
-
-export async function enrollStudentsInCurriculumForCohort(props: {
-  cohortId: string;
-  curriculumId: string;
-  gearTypeId: string;
-  students: {
-    allocationId: string;
-    personId: string;
-  }[];
-}) {
-  await enrollStudentsInCurriculumForCohortInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
-}
 
 export async function withdrawStudentFromCurriculum(props: {
   allocationId: string;
@@ -116,10 +36,12 @@ export async function withdrawStudentFromCurriculum(props: {
   );
 }
 
+// TODO: Should this also be a safe action?
 export async function isInstructorInCohort(cohortId: string) {
   return isInstructorInCohortInner(cohortId);
 }
 
+// TODO: Should this also be a safe action?
 export async function listCurriculaByProgram(
   programId: string,
   onlyActive?: boolean,
@@ -129,26 +51,31 @@ export async function listCurriculaByProgram(
   return listCurriculaByProgramInner(programId, onlyActive);
 }
 
+// TODO: Should this also be a safe action?
 export async function listGearTypesByCurriculum(curriculumId: string) {
   await getUserOrThrow();
 
   return listGearTypesByCurriculumInner(curriculumId);
 }
 
+// TODO: Should this also be a safe action?
 export async function listPrograms() {
   await getUserOrThrow();
 
   return listProgramsInner();
 }
 
+// TODO: Should this also be a safe action?
 export async function listPrivilegesForCohort(cohortId: string) {
   return listPrivilegesForCohortInner(cohortId);
 }
 
+// TODO: Should this also be a safe action?
 export async function listInstructorsInCohort(cohortId: string) {
   return listInstructorsByCohortId(cohortId);
 }
 
+// TODO: Should this also be a safe action?
 export async function listDistinctTagsForCohort(cohortId: string) {
   return listDistinctTagsForCohortInner(cohortId);
 }
@@ -251,23 +178,6 @@ export async function removeCohortRole(props: {
   await removeCohortRoleInner(props);
 
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
-
-  return;
-}
-
-export async function setTags(props: {
-  cohortId: string;
-  allocationId: string | string[];
-  tags: string[];
-}) {
-  await setAllocationTagsInner(props);
-
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
 
   return;
 }

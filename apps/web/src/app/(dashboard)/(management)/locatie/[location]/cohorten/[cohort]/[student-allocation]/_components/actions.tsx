@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormState as useActionState, useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { claimStudentsInCohortAction } from "~/actions/cohort/claim-students-in-cohort-action";
+import { releaseStudentsInCohortAction } from "~/actions/cohort/release-students-in-cohort-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -28,9 +30,7 @@ import Spinner from "~/app/_components/spinner";
 import type { listCohortsForLocation } from "~/lib/nwd";
 import {
   addStudentToCohortByPersonId,
-  claimStudents,
   moveAllocationById,
-  releaseStudent,
   releaseStudentFromCohortByAllocationId,
   withdrawStudentFromCurriculum,
 } from "../../(overview)/_actions/nwd";
@@ -47,7 +47,7 @@ export function ClaimInstructorAllocation({
       outline
       className="shrink-0"
       onClick={async () => {
-        await claimStudents(cohortId, [studentAllocationId])
+        await claimStudentsInCohortAction(cohortId, [studentAllocationId])
           .then(() => toast.success("Cursist toegekent"))
           .catch(() => toast.error("Er is iets misgegaan"));
       }}
@@ -69,7 +69,7 @@ export function ReleaseInstructorAllocation({
       plain
       className="shrink-0"
       onClick={async () => {
-        await releaseStudent(cohortId, [studentAllocationId])
+        await releaseStudentsInCohortAction(cohortId, [studentAllocationId])
           .then(() => toast.success("Cursist vrijgegeven"))
           .catch(() => toast.error("Er is iets misgegaan"));
       }}
