@@ -24,7 +24,6 @@ import {
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
   setAllocationTags as setAllocationTagsInner,
-  updateCohortDetails,
   updateStudentInstructorAssignment,
   withdrawStudentFromCurriculumInCohort,
 } from "~/lib/nwd";
@@ -270,20 +269,6 @@ export async function setTags(props: {
     "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
     "page",
   );
-
-  return;
-}
-
-export async function updateCohort(props: {
-  cohortId: string;
-  label?: string;
-  accessStartTimestamp?: string;
-  accessEndTimestamp?: string;
-}) {
-  await updateCohortDetails(props);
-
-  revalidatePath("/locatie/[location]/cohorten/", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
 
   return;
 }

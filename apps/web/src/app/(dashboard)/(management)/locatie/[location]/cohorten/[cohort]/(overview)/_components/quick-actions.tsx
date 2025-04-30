@@ -1,9 +1,15 @@
 "use client";
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
 import { useParams, useRouter } from "next/navigation";
-import { useActionState, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { updateCohortAction } from "~/actions/cohort/update-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
   AlertActions,
@@ -36,7 +42,7 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import { deleteCohort, updateCohort } from "../_actions/nwd";
+import { deleteCohort } from "../_actions/nwd";
 
 interface Props {
   cohort: {
@@ -51,7 +57,7 @@ export function CohortActions(props: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState<string | null>(null);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex justify-center items-center">
       <Dropdown>
         <DropdownButton outline className="-my-1.5">
           <EllipsisHorizontalIcon />
@@ -81,6 +87,24 @@ export function CohortActions(props: Props) {
   );
 }
 
+function updateCohortErrorMessage(
+  error: InferUseActionHookReturn<typeof updateCohortAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 function EditCohortDialog({
   isOpen,
   cohort,
@@ -89,42 +113,27 @@ function EditCohortDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await updateCohort({
-      cohortId: cohort.id,
-      accessStartTimestamp: dayjs(
-        formData.get("accessStartTime") as string,
-      ).toISOString(),
-      accessEndTimestamp: dayjs(
-        formData.get("accessEndTime") as string,
-      ).toISOString(),
-      label: formData.get("label") as string,
-    })
-      .then(() => {
+  const { execute, result } = useAction(
+    updateCohortAction.bind(null, cohort.id),
+    {
+      onSuccess: () => {
         toast.success("Cohort bijgewerkt");
         setIsOpen(false);
-      })
-      .catch((error) => {
-        if (error instanceof Error) {
-          return error.message;
-        }
-        return "Er is een fout opgetreden.";
-      });
+      },
+    },
+  );
 
-    return result ? { error: result } : undefined;
-  };
-
-  const [state, formAction] = useActionState(submit, undefined);
+  const errorMessage = updateCohortErrorMessage(result);
 
   return (
     <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
       <DialogTitle>Cohort bewerken</DialogTitle>
       <DialogDescription>Pas de gegevens van dit cohort aan.</DialogDescription>
-      <form action={formAction}>
+      <form action={execute}>
         <DialogBody>
           <Fieldset>
             <FieldGroup>
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                 <Field className="col-span-2">
                   <Label>Naam</Label>
                   <Input
@@ -159,7 +168,7 @@ function EditCohortDialog({
               </div>
             </FieldGroup>
 
-            {!!state?.error && <ErrorMessage>{state.error}</ErrorMessage>}
+            {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
           </Fieldset>
         </DialogBody>
         <DialogActions>
