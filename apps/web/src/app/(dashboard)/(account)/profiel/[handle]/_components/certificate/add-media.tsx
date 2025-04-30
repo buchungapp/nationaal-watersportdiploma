@@ -3,7 +3,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { addMediaToExternalCertificateAction } from "~/actions/certficates/add-media-to-external-certificate-action";
+import { addMediaToExternalCertificateAction } from "~/actions/certficate/add-media-to-external-certificate-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
