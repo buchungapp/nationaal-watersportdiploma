@@ -3,33 +3,31 @@ import * as core from "@nawadi/core";
 import slugify from "@sindresorhus/slugify";
 import type * as application from "../application/index.js";
 import { NwdApiError } from "../lib/error.js";
+import { resolveLocationIdOrThrow } from "../lib/location.js";
 
 export const createCohort: api.server.CreateCohortOperationHandler<
   application.Authentication
 > = async ({ locationId: pathLocationId }, input, { token }) => {
   const { handle, accessStartTime, accessEndTime, title } = input;
 
-  // Determine the final location ID based on token restrictions and path parameter
-  const finalLocationId = token.restrictedToLocationId
-    ? pathLocationId && pathLocationId !== token.restrictedToLocationId
-      ? (() => {
-          throw new NwdApiError({
-            code: "forbidden",
-            message: "Forbidden: You are not allowed to access this location.",
-          });
-        })()
-      : token.restrictedToLocationId
-    : pathLocationId;
+  const finalLocationId = resolveLocationIdOrThrow(pathLocationId, token);
+  const hasPermission = await core.User.Rbac.checkPermissionForPersonInLocation(
+    {
+      personId: token.primaryPersonId,
+      locationId: finalLocationId,
+      permission: "cohort.manage",
+    },
+  );
 
-  if (!finalLocationId) {
+  if (!hasPermission) {
     throw new NwdApiError({
-      code: "bad_request",
-      message:
-        "Bad Request: Location ID is required in either the path or the token.",
+      code: "forbidden",
+      message: "You do not have permission to manage cohorts",
     });
   }
 
   const slug = handle ?? slugify(title);
+
   const cohort = await core.Cohort.create({
     handle: slug,
     accessStartTime,

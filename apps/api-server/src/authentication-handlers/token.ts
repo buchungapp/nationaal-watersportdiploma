@@ -6,8 +6,6 @@ import { NwdApiError } from "../lib/error.js";
 export const token: api.server.TokenAuthenticationHandler<
   application.Authentication
 > = async (authorizationHeader) => {
-  let apiKey: string | undefined = undefined;
-
   try {
     if (!authorizationHeader.includes("Bearer ")) {
       throw new NwdApiError({
@@ -16,9 +14,9 @@ export const token: api.server.TokenAuthenticationHandler<
           "Misconfigured authorization header. Did you forget to add 'Bearer '?",
       });
     }
-    apiKey = authorizationHeader.replace("Bearer ", "");
 
-    const isRestrictedToken = apiKey?.startsWith("nwd_");
+    const apiKey = authorizationHeader.replace("Bearer ", "");
+    const isRestrictedToken = apiKey.startsWith("nwd_");
 
     if (isRestrictedToken) {
       const token = await core.ApiKey.byToken(apiKey).catch(() => {
@@ -28,28 +26,38 @@ export const token: api.server.TokenAuthenticationHandler<
         });
       });
 
+      const primaryPerson = await core.User.Person.getPrimaryByUserId({
+        userId: token.userId,
+      });
+
       return {
         authMechanism: apiKey.startsWith("nwd_access_token_")
           ? "oauth_token"
           : "api_key",
         userId: token.userId,
         restrictedToLocationId: token.locationId,
+        primaryPersonId: primaryPerson,
       };
     }
 
-    const { data, error } = await core.useSupabaseClient().auth.getUser(apiKey);
+    const authResult = await core.useSupabaseClient().auth.getUser(apiKey);
 
-    if (error) {
+    if (authResult.error) {
       throw new NwdApiError({
         code: "unauthorized",
         message: "Unauthorized: Invalid JWT token.",
       });
     }
 
+    const primaryPerson = await core.User.Person.getPrimaryByUserId({
+      userId: authResult.data.user.id,
+    });
+
     return {
       authMechanism: "jwt",
-      userId: data.user.id,
+      userId: authResult.data.user.id,
       restrictedToLocationId: null,
+      primaryPersonId: primaryPerson,
     };
   } catch (error) {
     if (error instanceof NwdApiError) {

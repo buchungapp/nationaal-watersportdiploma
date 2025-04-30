@@ -1,4 +1,5 @@
 import { schema as s } from "@nawadi/db";
+import { invariant } from "@nawadi/lib";
 import dayjs from "dayjs";
 import {
   type SQL,
@@ -15,6 +16,8 @@ import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
+  CoreError,
+  CoreErrorType,
   possibleSingleRow,
   singleOrArray,
   singleRow,
@@ -385,6 +388,39 @@ export const setPrimary = wrapCommand(
       return result;
     },
   ),
+);
+
+export const getPrimaryByUserId = wrapQuery(
+  "user.person.getPrimaryByUserId",
+  withZod(z.object({ userId: uuidSchema }), uuidSchema, async (input) => {
+    const query = useQuery();
+
+    const persons = await query
+      .select({ id: s.person.id, isPrimary: s.person.isPrimary })
+      .from(s.person)
+      .where(and(eq(s.person.userId, input.userId)));
+
+    const primaryPerson = persons.find((person) => person.isPrimary);
+
+    if (primaryPerson) {
+      return primaryPerson.id;
+    }
+
+    if (persons.length < 1) {
+      throw new CoreError(
+        CoreErrorType.Unexpected,
+        new Error("No persons found for user"),
+      );
+    }
+
+    const [person] = persons;
+
+    invariant(person, "Impossible");
+
+    await setPrimary({ personId: person.id });
+
+    return person.id;
+  }),
 );
 
 export const replaceMetadata = wrapCommand(
