@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
   foreignKey,
+  index,
   jsonb,
   pgTable,
   primaryKey,
@@ -45,6 +46,7 @@ export const studentCurriculum = pgTable(
       unqIdentityCurriculumGear: uniqueIndex(
         "student_curriculum_unq_identity_gear_curriculum",
       ).on(table.personId, table.curriculumId, table.gearTypeId),
+      idxPerson: index("student_curriculum_idx_person").on(table.personId),
       curriculumGearTypeReference: foreignKey({
         columns: [table.curriculumId, table.gearTypeId],
         foreignColumns: [
@@ -96,6 +98,20 @@ export const certificate = pgTable(
   (table) => {
     return {
       unqHandle: uniqueIndex("certificate_unq_handle").on(table.handle),
+      idxLocation: index("certificate_idx_location").on(table.locationId),
+      idxIssuedAt: index("certificate_idx_issued_at").on(table.issuedAt),
+      idxVisibleFrom: index("certificate_idx_visible_from").on(
+        table.visibleFrom,
+      ),
+      idxDeletedAt: index("certificate_idx_deleted_at").on(table.deletedAt),
+      idxLocationIssuedAt: index("certificate_idx_location_issued_at").on(
+        table.locationId,
+        table.issuedAt,
+      ),
+      idxHandleSearch: index("certificate_idx_handle_search").using(
+        "gin",
+        sql`to_tsvector('simple', ${table.handle})`,
+      ),
       studentCurriculumReference: foreignKey({
         columns: [table.studentCurriculumId],
         foreignColumns: [studentCurriculum.id],

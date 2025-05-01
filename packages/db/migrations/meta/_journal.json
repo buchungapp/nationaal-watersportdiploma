@@ -176,6 +176,13 @@
       "when": 1742397703717,
       "tag": "0024_secret_thing",
       "breakpoints": false
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1746103591543,
+      "tag": "0025_exotic_sunspot",
+      "breakpoints": false
     }
   ]
 }
