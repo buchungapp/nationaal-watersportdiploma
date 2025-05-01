@@ -12,7 +12,7 @@ const assignInstructorToStudentInCohortSchema = zfd.formData({
 
 const assignInstructorToStudentInCohortArgsSchema: [
   cohortId: z.ZodString,
-  studentIds: z.ZodArray<z.ZodString>,
+  allocationIds: z.ZodArray<z.ZodString>,
 ] = [z.string().uuid(), z.array(z.string().uuid())];
 
 export const assignInstructorToStudentInCohortAction = actionClientWithMeta
@@ -24,19 +24,19 @@ export const assignInstructorToStudentInCohortAction = actionClientWithMeta
   .action(
     async ({
       parsedInput: { instructorPersonId },
-      bindArgsParsedInputs: [cohortId, studentIds],
+      bindArgsParsedInputs: [cohortId, studentAllocationIds],
     }) => {
       if (instructorPersonId) {
         await updateStudentInstructorAssignment({
           cohortId,
-          studentAllocationIds: studentIds,
+          studentAllocationIds,
           action: "claim",
           instructorPersonId,
         });
       } else {
         await updateStudentInstructorAssignment({
           cohortId,
-          studentAllocationIds: studentIds,
+          studentAllocationIds,
           action: "release",
         });
       }

@@ -36,12 +36,10 @@ export async function withdrawStudentFromCurriculum(props: {
   );
 }
 
-// TODO: Should this also be a safe action?
 export async function isInstructorInCohort(cohortId: string) {
   return isInstructorInCohortInner(cohortId);
 }
 
-// TODO: Should this also be a safe action?
 export async function listCurriculaByProgram(
   programId: string,
   onlyActive?: boolean,
@@ -51,31 +49,26 @@ export async function listCurriculaByProgram(
   return listCurriculaByProgramInner(programId, onlyActive);
 }
 
-// TODO: Should this also be a safe action?
 export async function listGearTypesByCurriculum(curriculumId: string) {
   await getUserOrThrow();
 
   return listGearTypesByCurriculumInner(curriculumId);
 }
 
-// TODO: Should this also be a safe action?
 export async function listPrograms() {
   await getUserOrThrow();
 
   return listProgramsInner();
 }
 
-// TODO: Should this also be a safe action?
 export async function listPrivilegesForCohort(cohortId: string) {
   return listPrivilegesForCohortInner(cohortId);
 }
 
-// TODO: Should this also be a safe action?
 export async function listInstructorsInCohort(cohortId: string) {
   return listInstructorsByCohortId(cohortId);
 }
 
-// TODO: Should this also be a safe action?
 export async function listDistinctTagsForCohort(cohortId: string) {
   return listDistinctTagsForCohortInner(cohortId);
 }
