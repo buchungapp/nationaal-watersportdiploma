@@ -3,7 +3,7 @@
 import { useActionState, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { z, ZodError } from "zod";
+import { ZodError, z } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
 import dayjs from "~/lib/dayjs";
 
@@ -224,6 +224,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
           <SubmitForm
             data={data}
             countries={countries}
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
             roles={roles!}
             locationId={locationId}
             setIsOpen={setIsOpen}
@@ -266,10 +267,11 @@ function SubmitForm({
       | undefined,
     formData: FormData,
   ) => {
-    if (!!prevState?.success) {
+    if (prevState?.success) {
       const result = await createPersonBulk(
         locationId,
         roles,
+        // biome-ignore lint/style/noNonNullAssertion: <explanation>
         prevState.persons!,
       );
 
