@@ -4,6 +4,7 @@ import {
   char,
   date,
   foreignKey,
+  index,
   jsonb,
   pgEnum,
   pgTable,
@@ -61,6 +62,16 @@ export const person = pgTable(
   (table) => {
     return {
       unqHandle: uniqueIndex("person_unq_handle").on(table.handle),
+      idxNameSearch: index("person_idx_name_search").using(
+        "gin",
+        sql`to_tsvector('simple', 
+          COALESCE(${table.firstName}, '') || ' ' || 
+          COALESCE(${table.lastNamePrefix}, '') || ' ' || 
+          COALESCE(${table.lastName}, '')
+        )`,
+      ),
+      idxFirstName: index("person_idx_first_name").on(table.firstName),
+      idxLastName: index("person_idx_last_name").on(table.lastName),
       userReference: foreignKey({
         columns: [table.userId],
         foreignColumns: [user.authUserId],

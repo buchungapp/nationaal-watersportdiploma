@@ -24,6 +24,7 @@ import {
 } from "../../contexts/index.js";
 import {
   findItem,
+  formatSearchTerms,
   singleOrArray,
   singleRow,
   uuidSchema,
@@ -154,6 +155,7 @@ export const list = wrapQuery(
             personId: singleOrArray(uuidSchema).optional(),
             issuedAfter: z.string().datetime().optional(),
             issuedBefore: z.string().datetime().optional(),
+            q: z.string().optional(),
           })
           .default({}),
         sort: z
@@ -165,11 +167,13 @@ export const list = wrapQuery(
             ]),
           )
           .default(["createdAt"]),
+        limit: z.number().int().positive().optional(),
+        offset: z.number().int().nonnegative().default(0),
         // TODO: alter this default value to be true
         respectVisibility: z.boolean().default(false),
       })
       .default({}),
-    async ({ filter, sort, respectVisibility }) => {
+    async ({ filter, sort, respectVisibility, limit, offset }) => {
       const query = useQuery();
 
       const studentPerson = alias(s.person, "student_person");
@@ -230,6 +234,16 @@ export const list = wrapQuery(
             isNull(s.certificate.deletedAt),
             respectVisibility
               ? lte(s.certificate.visibleFrom, sql`NOW()`)
+              : undefined,
+            filter.q
+              ? sql`(
+                setweight(to_tsvector('simple', COALESCE(${s.certificate.handle}, '')), 'A') ||
+                setweight(to_tsvector('simple', 
+                  COALESCE(${studentPerson.firstName}, '') || ' ' || 
+                  COALESCE(${studentPerson.lastNamePrefix}, '') || ' ' || 
+                  COALESCE(${studentPerson.lastName}, '')
+                ), 'A')
+              ) @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})`
               : undefined,
           ),
         )
@@ -316,7 +330,7 @@ export const list = wrapQuery(
         },
       });
 
-      return certificates.map((certificate) => {
+      const enrichedCertificates = certificates.map((certificate) => {
         const location = findItem({
           items: locations,
           predicate: (l) => l.id === certificate.locationId,
@@ -369,6 +383,13 @@ export const list = wrapQuery(
           completedCompetencies: relevantCompletedCompetencies,
         };
       });
+
+      return {
+        items: enrichedCertificates,
+        count: enrichedCertificates.length,
+        limit: limit ?? null,
+        offset,
+      };
     },
   ),
 );

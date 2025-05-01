@@ -9,7 +9,8 @@
     "reset": "supabase db reset",
     "link": "supabase link --project-ref $SUPABASE_PROJECT_REF",
     "lint": "supabase db lint",
-    "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push"
+    "deploy": "supabase link --project-ref $SUPABASE_PROJECT_REF && supabase db push",
+    "dump": "supabase db dump -s auth,public,storage -x auth.audit -f ./supabase/prod-seed.sql --data-only"
   },
   "devDependencies": {
     "supabase": "^2.9.6"
