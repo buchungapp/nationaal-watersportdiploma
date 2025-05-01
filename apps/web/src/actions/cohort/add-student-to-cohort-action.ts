@@ -65,7 +65,7 @@ export const addStudentToCohortAction = actionClientWithMeta
         }
       }
 
-      await addStudentToCohortByPersonId({
+      const result = await addStudentToCohortByPersonId({
         cohortId,
         locationId,
         personId,
@@ -75,5 +75,11 @@ export const addStudentToCohortAction = actionClientWithMeta
 
       revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
       revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
+
+      return {
+        allocation: {
+          id: result.id,
+        },
+      };
     },
   );

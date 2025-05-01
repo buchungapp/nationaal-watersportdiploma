@@ -1809,7 +1809,19 @@ export async function releaseStudentFromCohortByAllocationId({
       throw new Error("Unauthorized");
     }
 
-    // TODO: add check if it really is a student, not an instructor
+    // Force check if it really is a student, not an instructor
+    const allocation = await Cohort.Allocation.retrieveStudentWithCurriculum({
+      allocationId,
+    });
+
+    if (!allocation) {
+      throw new Error("Allocation not found");
+    }
+
+    if (allocation.cohort.id !== cohortId) {
+      throw new Error("Allocation does not belong to cohort");
+    }
+
     const result = await Cohort.Allocation.remove({
       id: allocationId,
     });
@@ -1949,6 +1961,19 @@ export async function removeAllocationById({
       )
     ) {
       throw new Error("Unauthorized");
+    }
+
+    const cohortIdForAllocation =
+      await Cohort.Allocation.retreiveCohortIdForAllocation({
+        allocationId,
+      });
+
+    if (!cohortIdForAllocation) {
+      throw new Error("Allocation not found");
+    }
+
+    if (cohortIdForAllocation !== cohortId) {
+      throw new Error("Allocation does not belong to cohort");
     }
 
     await Cohort.Allocation.remove({ id: allocationId });

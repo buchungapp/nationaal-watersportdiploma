@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { updateStudentInstructorAssignment } from "~/lib/nwd";
-import { actionClientWithMeta } from "../safe-action";
+import { actionClientWithMeta } from "../../safe-action";
 
 const assignInstructorToStudentInCohortSchema = zfd.formData({
   instructorPersonId: zfd.text(z.string().uuid().optional()),

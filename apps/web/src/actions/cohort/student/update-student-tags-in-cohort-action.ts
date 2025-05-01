@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { setAllocationTags } from "~/lib/nwd";
-import { actionClientWithMeta } from "../safe-action";
+import { actionClientWithMeta } from "../../safe-action";
 
 const tagSchema = z.object({
   allocationId: z.string(),

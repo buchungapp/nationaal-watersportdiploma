@@ -4,7 +4,7 @@ import { useOptimisticAction } from "next-safe-action/hooks";
 import { useCallback, useRef } from "react";
 import { ReactTags, type Tag } from "react-tag-autocomplete";
 import { toast } from "sonner";
-import { updateStudentTagsInCohortAction } from "~/actions/cohort/update-student-tags-in-cohort-action";
+import { updateStudentTagsInCohortAction } from "~/actions/cohort/student/update-student-tags-in-cohort-action";
 
 export function ManageAllocationTags({
   tags,

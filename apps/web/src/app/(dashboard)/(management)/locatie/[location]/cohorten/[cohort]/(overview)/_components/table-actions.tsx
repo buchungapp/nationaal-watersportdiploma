@@ -6,11 +6,11 @@ import { Button } from "~/app/(dashboard)/_components/button";
 
 import { useAction } from "next-safe-action/hooks";
 import { ReactTags, type Tag } from "react-tag-autocomplete";
-import { assignInstructorToStudentInCohortAction } from "~/actions/cohort/assign-instructor-to-student-in-cohort-action";
-import { claimStudentsInCohortAction } from "~/actions/cohort/claim-students-in-cohort-action";
-import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/enroll-students-in-curriculum-in-cohort-action";
-import { releaseStudentsInCohortAction } from "~/actions/cohort/release-students-in-cohort-action";
-import { updateStudentTagsInCohortAction } from "~/actions/cohort/update-student-tags-in-cohort-action";
+import { assignInstructorToStudentInCohortAction } from "~/actions/cohort/student/assign-instructor-to-student-in-cohort-action";
+import { claimStudentsInCohortAction } from "~/actions/cohort/student/claim-students-in-cohort-action";
+import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
+import { releaseStudentsInCohortAction } from "~/actions/cohort/student/release-students-in-cohort-action";
+import { updateStudentTagsInCohortAction } from "~/actions/cohort/student/update-student-tags-in-cohort-action";
 import {
   Combobox,
   ComboboxLabel,

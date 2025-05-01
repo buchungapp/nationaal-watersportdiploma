@@ -1,12 +1,18 @@
 "use client";
 
 import { XMarkIcon } from "@heroicons/react/16/solid";
+import { useAction } from "next-safe-action/hooks";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useFormState as useActionState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { claimStudentsInCohortAction } from "~/actions/cohort/claim-students-in-cohort-action";
-import { releaseStudentsInCohortAction } from "~/actions/cohort/release-students-in-cohort-action";
+import { addStudentToCohortAction } from "~/actions/cohort/add-student-to-cohort-action";
+import { moveStudentToCohortAction } from "~/actions/cohort/move-student-to-cohort-action";
+import { removeStudentFromCohortAction } from "~/actions/cohort/remove-student-from-cohort-action";
+import { claimStudentsInCohortAction } from "~/actions/cohort/student/claim-students-in-cohort-action";
+import { releaseStudentsInCohortAction } from "~/actions/cohort/student/release-students-in-cohort-action";
+import { withdrawStudentFromCurriculumInCohortAction } from "~/actions/cohort/student/withdraw-student-from-curriculum-in-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -28,12 +34,6 @@ import {
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import Spinner from "~/app/_components/spinner";
 import type { listCohortsForLocation } from "~/lib/nwd";
-import {
-  addStudentToCohortByPersonId,
-  moveAllocationById,
-  releaseStudentFromCohortByAllocationId,
-  withdrawStudentFromCurriculum,
-} from "../../(overview)/_actions/nwd";
 
 export function ClaimInstructorAllocation({
   cohortId,
@@ -68,11 +68,11 @@ export function ReleaseInstructorAllocation({
     <Button
       plain
       className="shrink-0"
-      onClick={async () => {
-        await releaseStudentsInCohortAction(cohortId, [studentAllocationId])
+      onClick={() =>
+        releaseStudentsInCohortAction(cohortId, [studentAllocationId])
           .then(() => toast.success("Cursist vrijgegeven"))
-          .catch(() => toast.error("Er is iets misgegaan"));
-      }}
+          .catch(() => toast.error("Er is iets misgegaan"))
+      }
     >
       <XMarkIcon />
     </Button>
@@ -123,40 +123,30 @@ export function MoveStudentAllocationDialog({
           return cohort.label.toLowerCase().includes(cohortQuery.toLowerCase());
         });
 
-  const moveStudentAllocation = async (
-    _prevState: unknown,
-    formData: FormData,
-  ) => {
-    try {
-      const newCohortId = formData.get("cohort") as string;
+  const { execute } = useAction(
+    moveStudentToCohortAction.bind(
+      null,
+      locationId,
+      cohortId,
+      studentAllocationId,
+    ),
+    {
+      onSuccess: ({ data }) => {
+        if (!data) {
+          toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+          return;
+        }
 
-      const newCohort = cohorts.find((x) => x.id === newCohortId);
-      if (!newCohort) {
-        toast.error("Cohort niet gevonden");
-        return;
-      }
-
-      const { id: newAllocationId } = await moveAllocationById({
-        locationId,
-        allocationId: studentAllocationId,
-        cohortId,
-        newCohortId,
-      });
-
-      // We deleted the allocation, so the page does not exist anymore
-      // We need to redirect to the new allocation overview
-      router.replace(
-        `/locatie/${params.location as string}/cohorten/${newCohort.handle}/${newAllocationId}`,
-      );
-      toast.success("Cursist verplaatst");
-    } catch (error) {
-      console.log(error);
-
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
-  const [_, formAction] = useActionState(moveStudentAllocation, undefined);
+        router.replace(
+          `/locatie/${params.location as string}/cohorten/${data.cohort.handle}/${data.allocation.id}`,
+        );
+        toast.success("Cursist verplaatst");
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   return (
     <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
@@ -165,12 +155,12 @@ export function MoveStudentAllocationDialog({
         Verplaats de cursist naar een ander cohort. Het programma en de
         voortgang worden meegenomen.
       </DialogDescription>
-      <form action={formAction}>
+      <form action={execute}>
         <DialogBody>
           <Field>
             <Label>Cohort</Label>
             <Combobox
-              name="cohort"
+              name="cohortId"
               value={selectedCohortId}
               onChange={(value) => setSelectedCohortId(value)}
               setQuery={setCohortQuery}
@@ -235,23 +225,26 @@ export function StartExtraProgramForStudentAllocation({
 
   return (
     <DropdownItem
-      onClick={async () => {
-        try {
-          const { id: allocationId } = await addStudentToCohortByPersonId({
-            personId,
-            cohortId,
-            locationId,
-          });
+      onClick={() =>
+        addStudentToCohortAction(locationId, cohortId, {
+          person: { id: personId },
+        })
+          .then((result) => {
+            if (!result?.data) {
+              toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+              return;
+            }
 
-          // We create a new allocation, so we redirect to the new allocation
-          router.push(
-            `/locatie/${params.location as string}/cohorten/${params.cohort as string}/${allocationId}`,
-          );
-          toast.success("Cursist gedupliceerd");
-        } catch (error) {
-          toast.error("Er is iets misgegaan");
-        }
-      }}
+            // We create a new allocation, so we redirect to the new allocation
+            router.push(
+              `/locatie/${params.location as string}/cohorten/${params.cohort as string}/${result.data.allocation.id}`,
+            );
+            toast.success("Cursist gedupliceerd");
+          })
+          .catch(() => {
+            toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+          })
+      }
     >
       <DropdownLabel>Start extra programma</DropdownLabel>
     </DropdownItem>
@@ -272,24 +265,18 @@ export function ReleaseStudentAllocation({
 
   return (
     <DropdownItem
-      onClick={async () => {
-        try {
-          await releaseStudentFromCohortByAllocationId({
-            allocationId: studentAllocationId,
-            cohortId,
-            locationId,
-          });
-
-          // We deleted the allocation, so the page does not exist anymore
-          // We need to redirect to the cohort overview
-          router.push(
-            `/locatie/${params.location as string}/cohorten/${params.cohort as string}`,
-          );
-          toast.success("Cursist verwijderd");
-        } catch (error) {
-          toast.error("Er is iets misgegaan");
-        }
-      }}
+      onClick={() =>
+        removeStudentFromCohortAction(locationId, cohortId, studentAllocationId)
+          .then(() => {
+            router.push(
+              `/locatie/${params.location as string}/cohorten/${params.cohort as string}`,
+            );
+            toast.success("Cursist verwijderd");
+          })
+          .catch(() => {
+            toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+          })
+      }
     >
       <DropdownLabel>Verwijder uit cohort</DropdownLabel>
     </DropdownItem>
@@ -308,15 +295,13 @@ export function WithdrawStudentCurriculum({
   return (
     <DropdownItem
       disabled={disabled}
-      onClick={async () => {
-        try {
-          await withdrawStudentFromCurriculum({
-            allocationId: studentAllocationId,
-          });
-        } catch (error) {
-          toast.error("Er is iets misgegaan");
-        }
-      }}
+      onClick={() =>
+        withdrawStudentFromCurriculumInCohortAction(studentAllocationId).catch(
+          () => {
+            toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+          },
+        )
+      }
     >
       <DropdownLabel>Verwijder programma</DropdownLabel>
       <DropdownDescription>

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { enrollStudentsInCurriculumForCohort } from "~/lib/nwd";
-import { actionClientWithMeta } from "../safe-action";
+import { actionClientWithMeta } from "../../safe-action";
 
 const enrollStudentsInCurriculumInCohortSchema = zfd.formData({
   gearTypeId: zfd.text(z.string().uuid()),

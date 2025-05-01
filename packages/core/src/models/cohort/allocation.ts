@@ -1270,3 +1270,28 @@ export const personsBelongTogetherInActiveCohort = wrapQuery(
     },
   ),
 );
+
+export const retreiveCohortIdForAllocation = wrapQuery(
+  "cohort.allocation.retreiveCohortIdForAllocation",
+  withZod(
+    z.object({
+      allocationId: uuidSchema,
+    }),
+    z.string().uuid().nullable(),
+    async (input) => {
+      const query = useQuery();
+
+      const result = await query
+        .select({ id: s.cohort.id })
+        .from(s.cohort)
+        .innerJoin(
+          s.cohortAllocation,
+          eq(s.cohortAllocation.cohortId, s.cohort.id),
+        )
+        .where(eq(s.cohortAllocation.id, input.allocationId))
+        .then(possibleSingleRow);
+
+      return result?.id ?? null;
+    },
+  ),
+);

@@ -18,7 +18,7 @@ import {
 } from "~/app/(dashboard)/_components/listbox";
 
 import { useAction } from "next-safe-action/hooks";
-import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/enroll-students-in-curriculum-in-cohort-action";
+import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import {

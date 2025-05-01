@@ -5,7 +5,6 @@ import {
   type ActorType,
   addCohortRole as addCohortRoleInner,
   addInstructorToCohortByPersonId as addInstructorToCohortByPersonIdInner,
-  addStudentToCohortByPersonId as addStudentToCohortByPersonIdInner,
   completeAllCoreCompetencies as completeAllCoreCompetenciesInner,
   getUserOrThrow,
   isInstructorInCohort as isInstructorInCohortInner,
@@ -17,24 +16,9 @@ import {
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrivilegesForCohort as listPrivilegesForCohortInner,
   listPrograms as listProgramsInner,
-  moveAllocationById as moveAllocationByIdInner,
-  releaseStudentFromCohortByAllocationId as releaseStudentFromCohortByAllocationIdInner,
   removeAllocationById,
   removeCohortRole as removeCohortRoleInner,
-  withdrawStudentFromCurriculumInCohort,
 } from "~/lib/nwd";
-
-export async function withdrawStudentFromCurriculum(props: {
-  allocationId: string;
-}) {
-  await withdrawStudentFromCurriculumInCohort(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
-}
 
 export async function isInstructorInCohort(cohortId: string) {
   return isInstructorInCohortInner(cohortId);
@@ -73,32 +57,6 @@ export async function listDistinctTagsForCohort(cohortId: string) {
   return listDistinctTagsForCohortInner(cohortId);
 }
 
-export async function addStudentToCohortByPersonId(props: {
-  cohortId: string;
-  locationId: string;
-  personId: string;
-  tags?: string[];
-}) {
-  const result = await addStudentToCohortByPersonIdInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
-  return result;
-}
-
-export async function releaseStudentFromCohortByAllocationId(props: {
-  locationId: string;
-  cohortId: string;
-  allocationId: string;
-}) {
-  const result = await releaseStudentFromCohortByAllocationIdInner(props);
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "layout");
-  revalidatePath(
-    "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
-    "page",
-  );
-
-  return result;
-}
-
 export async function addInstructorToCohortByPersonId(props: {
   cohortId: string;
   locationId: string;
@@ -106,21 +64,6 @@ export async function addInstructorToCohortByPersonId(props: {
 }) {
   const result = addInstructorToCohortByPersonIdInner(props);
   revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
-  return result;
-}
-
-export async function moveAllocationById(input: {
-  locationId: string;
-  allocationId: string;
-  cohortId: string;
-  newCohortId: string;
-}) {
-  const result = moveAllocationByIdInner(input);
-
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/instructeurs", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-
   return result;
 }
 
