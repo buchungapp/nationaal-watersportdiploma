@@ -3,8 +3,10 @@ import crypto from "node:crypto";
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import {
+  type SQL,
   and,
   asc,
+  countDistinct,
   desc,
   eq,
   getTableColumns,
@@ -28,6 +30,7 @@ import {
   singleOrArray,
   singleRow,
   uuidSchema,
+  withLimitOffset,
   withZod,
   wrapCommand,
   wrapQuery,
@@ -180,7 +183,76 @@ export const list = wrapQuery(
       const instructorActor = alias(s.actor, "instructor_actor");
       const instructorPerson = alias(s.person, "instructor_person");
 
-      const certificates = await query
+      const whereClausules: (SQL | undefined)[] = [
+        filter.id
+          ? Array.isArray(filter.id)
+            ? inArray(s.certificate.id, filter.id)
+            : eq(s.certificate.id, filter.id)
+          : undefined,
+        filter.number
+          ? Array.isArray(filter.number)
+            ? inArray(s.certificate.handle, filter.number)
+            : eq(s.certificate.handle, filter.number)
+          : undefined,
+        filter.locationId
+          ? Array.isArray(filter.locationId)
+            ? inArray(s.certificate.locationId, filter.locationId)
+            : eq(s.certificate.locationId, filter.locationId)
+          : undefined,
+        filter.issuedAfter
+          ? gte(s.certificate.issuedAt, filter.issuedAfter)
+          : undefined,
+        filter.issuedBefore
+          ? lt(s.certificate.issuedAt, filter.issuedBefore)
+          : undefined,
+        filter.personId
+          ? Array.isArray(filter.personId)
+            ? inArray(s.studentCurriculum.personId, filter.personId)
+            : eq(s.studentCurriculum.personId, filter.personId)
+          : undefined,
+        isNull(s.certificate.deletedAt),
+        respectVisibility
+          ? lte(s.certificate.visibleFrom, sql`NOW()`)
+          : undefined,
+        filter.q
+          ? sql`(
+                setweight(to_tsvector('simple', COALESCE(${s.certificate.handle}, '')), 'A') ||
+                setweight(to_tsvector('simple', 
+                  COALESCE(${studentPerson.firstName}, '') || ' ' || 
+                  COALESCE(${studentPerson.lastNamePrefix}, '') || ' ' || 
+                  COALESCE(${studentPerson.lastName}, '')
+                ), 'A')
+              ) @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})`
+          : undefined,
+      ];
+
+      const countQuery = query
+        .select({ count: countDistinct(s.certificate.id) })
+        .from(s.certificate)
+        .innerJoin(
+          s.studentCurriculum,
+          eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
+        )
+        .innerJoin(
+          studentPerson,
+          eq(studentPerson.id, s.studentCurriculum.personId),
+        )
+        .leftJoin(
+          s.cohortAllocation,
+          eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+        )
+        .leftJoin(
+          instructorActor,
+          eq(instructorActor.id, s.cohortAllocation.instructorId),
+        )
+        .leftJoin(
+          instructorPerson,
+          eq(instructorPerson.id, instructorActor.personId),
+        )
+        .where(and(...whereClausules))
+        .then(singleRow);
+
+      const certificatesQuery = query
         .select(getTableColumns(s.certificate))
         .from(s.certificate)
         .innerJoin(
@@ -203,50 +275,7 @@ export const list = wrapQuery(
           instructorPerson,
           eq(instructorPerson.id, instructorActor.personId),
         )
-        .where(
-          and(
-            filter.id
-              ? Array.isArray(filter.id)
-                ? inArray(s.certificate.id, filter.id)
-                : eq(s.certificate.id, filter.id)
-              : undefined,
-            filter.number
-              ? Array.isArray(filter.number)
-                ? inArray(s.certificate.handle, filter.number)
-                : eq(s.certificate.handle, filter.number)
-              : undefined,
-            filter.locationId
-              ? Array.isArray(filter.locationId)
-                ? inArray(s.certificate.locationId, filter.locationId)
-                : eq(s.certificate.locationId, filter.locationId)
-              : undefined,
-            filter.issuedAfter
-              ? gte(s.certificate.issuedAt, filter.issuedAfter)
-              : undefined,
-            filter.issuedBefore
-              ? lt(s.certificate.issuedAt, filter.issuedBefore)
-              : undefined,
-            filter.personId
-              ? Array.isArray(filter.personId)
-                ? inArray(s.studentCurriculum.personId, filter.personId)
-                : eq(s.studentCurriculum.personId, filter.personId)
-              : undefined,
-            isNull(s.certificate.deletedAt),
-            respectVisibility
-              ? lte(s.certificate.visibleFrom, sql`NOW()`)
-              : undefined,
-            filter.q
-              ? sql`(
-                setweight(to_tsvector('simple', COALESCE(${s.certificate.handle}, '')), 'A') ||
-                setweight(to_tsvector('simple', 
-                  COALESCE(${studentPerson.firstName}, '') || ' ' || 
-                  COALESCE(${studentPerson.lastNamePrefix}, '') || ' ' || 
-                  COALESCE(${studentPerson.lastName}, '')
-                ), 'A')
-              ) @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})`
-              : undefined,
-          ),
-        )
+        .where(and(...whereClausules))
         .orderBy(
           ...sort.map((sort) => {
             switch (sort) {
@@ -258,10 +287,21 @@ export const list = wrapQuery(
                 return desc(s.certificate.createdAt);
             }
           }),
-        );
+        )
+        .$dynamic();
+
+      const [{ count }, certificates] = await Promise.all([
+        countQuery,
+        withLimitOffset(certificatesQuery, limit, offset),
+      ]);
 
       if (certificates.length === 0) {
-        return [];
+        return {
+          items: [],
+          count,
+          limit: limit ?? null,
+          offset,
+        };
       }
 
       const uniqueStudentCurriculumIds = Array.from(
@@ -386,7 +426,7 @@ export const list = wrapQuery(
 
       return {
         items: enrichedCertificates,
-        count: enrichedCertificates.length,
+        count,
         limit: limit ?? null,
         offset,
       };

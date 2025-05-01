@@ -1,56 +1,36 @@
-import Fuse from "fuse.js";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listCertificates, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listCertificatesWithPagination,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
+import { loadSearchParams } from "./search-params";
 export default async function Page(props: {
   params: Promise<{
     location: string;
   }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+
   const location = await retrieveLocationByHandle(params.location);
-  const certificates = await listCertificates(location.id);
 
-  // Search
-  const certificatesFuse = new Fuse(certificates, {
-    includeMatches: true,
-    keys: [
-      "handle",
-      "student.firstName",
-      "student.lastNamePrefix",
-      "student.lastName",
-      "student.email",
-    ],
-    minMatchCharLength: 2,
-    ignoreLocation: true,
-    threshold: 0.3, // Lower threshold for more specific matches
+  const {
+    limit: paginationLimit,
+    page: currentPage,
+    query: q,
+  } = loadSearchParams(searchParams ?? {});
+
+  const certificates = await listCertificatesWithPagination(location.id, {
+    q,
+    limit: paginationLimit,
+    offset: (currentPage - 1) * paginationLimit,
   });
-
-  const searchQuery = searchParams?.query
-    ? Array.isArray(searchParams.query)
-      ? searchParams.query.join(" ")
-      : searchParams.query
-    : null;
-
-  const searchedCertificates =
-    searchQuery && searchQuery.length >= 2
-      ? certificatesFuse
-          .search(decodeURIComponent(searchQuery))
-          .map((result) => result.item)
-      : certificates;
-
-  // Pagination
-  const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
-  const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
-
-  const paginatedCertificates = searchedCertificates.slice(
-    (currentPage - 1) * paginationLimit,
-    currentPage * paginationLimit,
-  );
 
   return (
     <>
@@ -65,8 +45,8 @@ export default async function Page(props: {
       </div>
 
       <Table
-        certificates={paginatedCertificates}
-        totalItems={searchedCertificates.length}
+        certificates={certificates.items}
+        totalItems={certificates.count}
       />
     </>
   );
