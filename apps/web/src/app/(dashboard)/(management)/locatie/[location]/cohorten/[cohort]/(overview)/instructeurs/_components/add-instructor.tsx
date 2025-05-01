@@ -3,6 +3,8 @@
 import { clsx } from "clsx";
 import { useState } from "react";
 import { toast } from "sonner";
+import { addInstructorToCohortAction } from "~/actions/cohort/add-instructor-to-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Combobox,
   ComboboxLabel,
@@ -11,7 +13,6 @@ import {
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import dayjs from "~/lib/dayjs";
 import type { listPersonsForLocationByRole } from "~/lib/nwd";
-import { addInstructorToCohortByPersonId } from "../../_actions/nwd";
 
 export function AddInstructor({
   cohortId,
@@ -36,17 +37,13 @@ export function AddInstructor({
         onChange={async (personId) => {
           if (!personId) return;
 
-          await addInstructorToCohortByPersonId({
-            cohortId,
-            locationId,
-            personId,
-          })
+          await addInstructorToCohortAction(locationId, cohortId, personId)
             .then(() => {
               toast.success("Instructeur toegevoegd");
               setForceRerenderId((prev) => prev + 1);
             })
             .catch(() => {
-              toast.error("Er is een fout opgetreden");
+              toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
             });
         }}
         displayValue={(value: string) => {
@@ -91,7 +88,7 @@ export function AddInstructor({
                     <span className={clsx("truncate")}>{fullName}</span>
                     <span
                       className={clsx(
-                        "ml-2 truncate text-slate-500 group-data-active/option:text-white",
+                        "ml-2 text-slate-500 group-data-active/option:text-white truncate",
                       )}
                     >
                       {person.dateOfBirth

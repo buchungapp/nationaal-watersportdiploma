@@ -7,8 +7,12 @@ import {
   DisclosurePanel as HeadlessDisclosurePanel,
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { z } from "zod";
+import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
+import { CONFIRMATION_WORD } from "~/actions/cohort/student/confirm-word";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
   AlertActions,
@@ -45,7 +49,6 @@ import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import { completeAllCoreCompetencies } from "../../_actions/nwd";
 import { kickOffGeneratePDF } from "../_actions/download";
 import {
   issueCertificates,
@@ -335,8 +338,6 @@ export function RemoveCertificateDialog({
   );
 }
 
-const CONFIRMATION_WORD = "begrepen";
-
 function CompleteCoreModulesDialog({
   rows,
   isOpen,
@@ -346,23 +347,22 @@ function CompleteCoreModulesDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (_prevState: unknown, formData: FormData) => {
-    try {
-      z.literal(CONFIRMATION_WORD).parse(formData.get("confirm"));
-
-      await completeAllCoreCompetencies({
-        cohortAllocationId: rows.map((row) => row.id),
-      });
-
-      toast.success("Kernmodules afgerond");
-      setIsOpen(false);
-      resetSelection();
-    } catch (error) {
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    completeAllCoreCompetenciesForStudentInCohortAction.bind(
+      null,
+      rows.map((row) => row.id),
+    ),
+    {
+      onSuccess: () => {
+        toast.success("Kernmodules afgerond");
+        setIsOpen(false);
+        resetSelection();
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   return (
     <>
@@ -388,7 +388,7 @@ function CompleteCoreModulesDialog({
           woord <Strong>{CONFIRMATION_WORD}</Strong> om de kernmodules af te
           ronden.
         </AlertDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <AlertBody>
             <Input
               name="confirm"
