@@ -308,59 +308,67 @@ export const list = wrapQuery(
         },
       });
 
-      return await Promise.all(
-        certificates.map(async (certificate) => {
-          const location = findItem({
-            items: locations,
-            predicate: (l) => l.id === certificate.locationId,
-            enforce: true,
-          });
+      const students = await User.Person.list({
+        filter: {
+          personId: Array.from(
+            new Set(studentCurricula.map((sc) => sc.personId)),
+          ),
+        },
+      });
 
-          const studentCurriculum = findItem({
-            items: studentCurricula,
-            predicate: (sc) => sc.id === certificate.studentCurriculumId,
-            enforce: true,
-          });
+      return certificates.map((certificate) => {
+        const location = findItem({
+          items: locations,
+          predicate: (l) => l.id === certificate.locationId,
+          enforce: true,
+        });
 
-          const student = await User.Person.byIdOrHandle({
-            id: studentCurriculum.personId,
-          });
+        const studentCurriculum = findItem({
+          items: studentCurricula,
+          predicate: (sc) => sc.id === certificate.studentCurriculumId,
+          enforce: true,
+        });
 
-          const relevantCompletedCompetencies = completedCompetencies.filter(
-            (cc) =>
-              cc.student_completed_competency.studentCurriculumId ===
-              studentCurriculum.id,
-          );
+        const student = findItem({
+          items: students,
+          predicate: (s) => s.id === studentCurriculum.personId,
+          enforce: true,
+        });
 
-          const gearType = findItem({
-            items: gearTypes,
-            predicate: (gt) => gt.id === studentCurriculum.gearTypeId,
-            enforce: true,
-          });
+        const relevantCompletedCompetencies = completedCompetencies.filter(
+          (cc) =>
+            cc.student_completed_competency.studentCurriculumId ===
+            studentCurriculum.id,
+        );
 
-          const curriculum = findItem({
-            items: curricula,
-            predicate: (c) => c.id === studentCurriculum.curriculumId,
-            enforce: true,
-          });
+        const gearType = findItem({
+          items: gearTypes,
+          predicate: (gt) => gt.id === studentCurriculum.gearTypeId,
+          enforce: true,
+        });
 
-          const program = findItem({
-            items: programs,
-            predicate: (p) => p.id === curriculum.programId,
-            enforce: true,
-          });
+        const curriculum = findItem({
+          items: curricula,
+          predicate: (c) => c.id === studentCurriculum.curriculumId,
+          enforce: true,
+        });
 
-          return {
-            ...certificate,
-            location,
-            student,
-            gearType,
-            curriculum,
-            program,
-            completedCompetencies: relevantCompletedCompetencies,
-          };
-        }),
-      );
+        const program = findItem({
+          items: programs,
+          predicate: (p) => p.id === curriculum.programId,
+          enforce: true,
+        });
+
+        return {
+          ...certificate,
+          location,
+          student,
+          gearType,
+          curriculum,
+          program,
+          completedCompetencies: relevantCompletedCompetencies,
+        };
+      });
     },
   ),
 );

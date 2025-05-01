@@ -211,7 +211,8 @@ export const list = wrapQuery(
       .object({
         filter: z
           .object({
-            userId: z.string().uuid().optional(),
+            userId: singleOrArray(uuidSchema).optional(),
+            personId: singleOrArray(uuidSchema).optional(),
             locationId: singleOrArray(uuidSchema).optional(),
           })
           .default({}),
@@ -241,7 +242,19 @@ export const list = wrapQuery(
       const conditions: SQL[] = [];
 
       if (input.filter.userId != null) {
-        conditions.push(eq(s.person.userId, input.filter.userId));
+        if (Array.isArray(input.filter.userId)) {
+          conditions.push(inArray(s.person.userId, input.filter.userId));
+        } else {
+          conditions.push(eq(s.person.userId, input.filter.userId));
+        }
+      }
+
+      if (input.filter.personId != null) {
+        if (Array.isArray(input.filter.personId)) {
+          conditions.push(inArray(s.person.id, input.filter.personId));
+        } else {
+          conditions.push(eq(s.person.id, input.filter.personId));
+        }
       }
 
       if (input.filter.locationId) {
