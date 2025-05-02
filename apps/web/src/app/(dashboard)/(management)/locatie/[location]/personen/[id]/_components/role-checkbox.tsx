@@ -3,11 +3,9 @@
 import { useParams, useRouter } from "next/navigation";
 import { useOptimistic } from "react";
 import { toast } from "sonner";
+import { addActorToLocationAction } from "~/actions/person/add-actor-to-location-action";
+import { removeActorFromLocationAction } from "~/actions/person/remove-actor-from-location-action";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
-import {
-  addActorToLocation,
-  removeActorFromLocation,
-} from "../../_actions/roles";
 
 type Role = "student" | "instructor" | "location_admin";
 
@@ -36,17 +34,9 @@ export function RoleToggleCheckbox({
     setOptimisticChecked(checked);
 
     if (checked) {
-      await addActorToLocation({
-        locationId,
-        personId,
-        type,
-      });
+      await addActorToLocationAction(locationId, { personId, type });
     } else {
-      await removeActorFromLocation({
-        locationId,
-        personId,
-        type,
-      });
+      await removeActorFromLocationAction(locationId, { personId, type });
     }
 
     toast.success("Rol bijgewerkt");
