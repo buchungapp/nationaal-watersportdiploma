@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { updateExternalCertificate } from "~/lib/nwd";
+import { extractFileExtension } from "../files";
+import { ACCEPTED_IMAGE_TYPES } from "../files";
+import { MAX_FILE_SIZE } from "../files";
 import { actionClientWithMeta } from "../safe-action";
-import { extractFileExtension } from "./files";
-import { ACCEPTED_IMAGE_TYPES } from "./files";
-import { MAX_FILE_SIZE } from "./files";
 
 const updateExternalCertificateSchema = zfd.formData({
   media: zfd.file(
