@@ -1,12 +1,20 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { z, ZodError } from "zod";
 import { Button } from "~/app/(dashboard)/_components/button";
 import dayjs from "~/lib/dayjs";
 
+import type { InferUseStateActionHookReturn } from "next-safe-action/hooks";
+import { useStateAction } from "next-safe-action/stateful-hooks";
+import { createPersonsAction } from "~/actions/person/create-persons-action";
+import {
+  COLUMN_MAPPING,
+  type CSVData,
+  SELECT_LABEL,
+} from "~/actions/person/person-bulk-csv-mappings";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Checkbox,
   CheckboxField,
@@ -45,7 +53,6 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
 import type { ActorType } from "~/lib/nwd";
 import { invariant } from "~/utils/invariant";
-import { createPersonBulk } from "../_actions/create";
 
 const ROLES: {
   type: ActorType;
@@ -73,23 +80,6 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
-
-interface CSVData {
-  labels: { label: string; value: (string | null | undefined)[] }[] | null;
-  rows: string[][] | null;
-}
-
-const COLUMN_MAPPING = [
-  "E-mailadres",
-  "Voornaam",
-  "Tussenvoegsels",
-  "Achternaam",
-  "Geboortedatum",
-  "Geboorteplaats",
-  "Geboorteland",
-];
-
-const SELECT_LABEL = "Niet importeren";
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
@@ -174,7 +164,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     template
                   </TextLink>{" "}
                   of je eigen databron. <br /> Let op het volgende:
-                  <ul className="list-inside list-disc">
+                  <ul className="list-disc list-inside">
                     <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
                     <li>
                       Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
@@ -224,6 +214,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
           <SubmitForm
             data={data}
             countries={countries}
+            // biome-ignore lint/style/noNonNullAssertion: roles is set when upload is completed
             roles={roles!}
             locationId={locationId}
             setIsOpen={setIsOpen}
@@ -232,6 +223,24 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
       </Dialog>
     </>
   );
+}
+
+function createPersonsErrorMessage(
+  error: InferUseStateActionHookReturn<typeof createPersonsAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
 }
 
 function SubmitForm({
@@ -247,173 +256,33 @@ function SubmitForm({
   countries: { code: string; name: string }[];
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (
-    csvData: string[][] | null | undefined,
-    prevState:
-      | {
-          success: boolean;
-          persons?: {
-            email: string;
-            firstName: string;
-            lastNamePrefix: string | null;
-            lastName: string;
-            dateOfBirth: Date;
-            birthCity: string;
-            birthCountry: string;
-          }[];
-          message?: string;
-        }
-      | undefined,
-    formData: FormData,
-  ) => {
-    if (!!prevState?.success) {
-      const result = await createPersonBulk(
-        locationId,
-        roles,
-        prevState.persons!,
-      );
+  const { execute, result } = useStateAction(
+    createPersonsAction.bind(null, locationId, data, countries),
+    {
+      onSuccess: ({ data }) => {
+        if (data?.state !== "submitted") return;
 
-      setIsOpen(false);
-
-      if (result.message === "Success") {
+        setIsOpen(false);
         toast.success("Personen zijn toegevoegd.");
-        return;
-      }
+      },
+      onError: () => {
+        if (result.data?.state !== "parsed") return;
 
-      console.log("result", result.errors);
-
-      toast.error("Er is een fout opgetreden.");
-      return;
-    }
-
-    try {
-      const mappingConfig = Object.fromEntries(formData);
-
-      const selectedFields = Object.keys(mappingConfig)
-        .map((key) => mappingConfig[key])
-        .filter((item) => item !== SELECT_LABEL);
-
-      // Exclude data if "Select one" is selected
-      const notSelectedIndices = Object.keys(mappingConfig)
-        .filter((key) => mappingConfig[key] === SELECT_LABEL)
-        // @ts-expect-error Fix later
-        .map((key) => Number.parseInt(key.split("-").pop()));
-
-      const filteredData = csvData?.map((item) =>
-        item.filter((_, index) => !notSelectedIndices.includes(index)),
-      );
-
-      // Validate if columns are correctly pasted
-      const count = filteredData?.[0]?.length ?? 0;
-      const expectedCount = COLUMN_MAPPING.length;
-
-      const mappingFields = COLUMN_MAPPING;
-      const missingFields = mappingFields.filter(
-        (item) => !selectedFields.includes(item),
-      );
-
-      if (missingFields.length > 0) {
-        throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
-      }
-
-      if (count < expectedCount) {
-        throw new Error("Je hebt minder kolommen geplakt dan verwacht.");
-      }
-
-      if (count > expectedCount) {
-        throw new Error("Je hebt te veel kolommen geselecteerd.");
-      }
-
-      // Sort data so that we can parse it correctly.
-      const indices = selectedFields.map((columnName) =>
-        COLUMN_MAPPING.findIndex((key) => key === columnName),
-      );
-
-      const sortedData = filteredData?.map((row) =>
-        indices.map((index) => row[index]),
-      );
-
-      const personRowSchema = z.tuple([
-        z.string().trim().toLowerCase().email(),
-        z.string().trim(),
-        z
-          .string()
-          .trim()
-          .transform((tussenvoegsel) =>
-            tussenvoegsel === "" ? null : tussenvoegsel,
-          ),
-        z.string(),
-        z.string().pipe(z.coerce.date()),
-        z.string(),
-        z
-          .preprocess(
-            (value) => (value === "" ? "nl" : value),
-            z.enum(countries.map((c) => c.code) as [string, ...string[]], {
-              message: "Ongeldige landcode",
-            }),
-          )
-          .default("nl"),
-      ]);
-
-      const rows = personRowSchema.array().parse(sortedData);
-
-      return {
-        success: true,
-        persons: rows.map(
-          ([
-            email,
-            firstName,
-            lastNamePrefix,
-            lastName,
-            dateOfBirth,
-            birthCity,
-            birthCountry,
-          ]) => ({
-            email,
-            firstName,
-            lastNamePrefix,
-            lastName,
-            dateOfBirth,
-            birthCity,
-            birthCountry,
-          }),
-        ),
-      };
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return {
-          success: false,
-          message: JSON.stringify(error.flatten().fieldErrors),
-        };
-      }
-
-      if (error instanceof Error) {
-        return {
-          success: false,
-          message: error.message,
-        };
-      }
-
-      return {
-        success: false,
-        message: "Er is een onverwachte fout opgetreden.",
-      };
-    }
-  };
-
-  const [state, formAction] = useActionState(
-    submit.bind(null, data?.rows),
-    undefined,
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
   );
 
+  const errorMessage = createPersonsErrorMessage(result);
+
   return (
-    <form action={formAction}>
-      {state?.success === true ? (
+    <form action={execute}>
+      {result.data?.state === "parsed" ? (
         <>
           <DialogDescription>
-            Er zijn <Strong>{state?.persons?.length}</Strong> personen gevonden.
-            Controleer de geïmporteerde data en klik op "Verder" om door te
-            gaan.
+            Er zijn <Strong>{result.data?.persons?.length}</Strong> personen
+            gevonden. Controleer de geïmporteerde data en klik op "Verder" om
+            door te gaan.
           </DialogDescription>
           <DialogBody>
             <Table>
@@ -427,9 +296,9 @@ function SubmitForm({
               </TableHead>
 
               <TableBody>
-                {state?.persons?.map((person, index) => (
+                {result.data?.persons?.map((person, index) => (
                   <TableRow key={JSON.stringify(person)}>
-                    <TableCell className="text-right tabular-nums">{`${index + 1}.`}</TableCell>
+                    <TableCell className="tabular-nums text-right">{`${index + 1}.`}</TableCell>
                     <TableCell className="font-medium">
                       {person.email}
                     </TableCell>
@@ -448,6 +317,11 @@ function SubmitForm({
                 ))}
               </TableBody>
             </Table>
+            <div className="pt-4">
+              {errorMessage ? (
+                <ErrorMessage>{errorMessage}</ErrorMessage>
+              ) : null}
+            </div>
           </DialogBody>
         </>
       ) : (
@@ -503,7 +377,9 @@ function SubmitForm({
               </TableBody>
             </Table>
             <div className="pt-4">
-              {!!state?.message && <ErrorMessage>{state.message}</ErrorMessage>}
+              {errorMessage ? (
+                <ErrorMessage>{errorMessage}</ErrorMessage>
+              ) : null}
             </div>
           </DialogBody>
         </>

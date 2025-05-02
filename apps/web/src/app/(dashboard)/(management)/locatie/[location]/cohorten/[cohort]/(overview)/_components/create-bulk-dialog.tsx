@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { addStudentsToCohortAction } from "~/actions/cohort/add-students-to-cohort-action";
 import {
-  COLUMN_MAPPING,
+  COLUMN_MAPPING_WITH_TAG,
   type CSVData,
   SELECT_LABEL,
-} from "~/actions/cohort/csv-mappings";
+} from "~/actions/person/person-bulk-csv-mappings";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -210,7 +210,7 @@ function SubmitForm({
       onError: () => {
         if (result.data?.state !== "parsed") return;
 
-        toast.error("Er is een fout opgetreden.");
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
       },
     },
   );
@@ -303,7 +303,7 @@ function SubmitForm({
                         <Select
                           name={`include-column-${index}`}
                           defaultValue={
-                            COLUMN_MAPPING.find((col) =>
+                            COLUMN_MAPPING_WITH_TAG.find((col) =>
                               item?.label
                                 .toLowerCase()
                                 .startsWith(col.toLowerCase()),
@@ -312,7 +312,7 @@ function SubmitForm({
                           className="min-w-48"
                         >
                           <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
-                          {COLUMN_MAPPING.map((column) => (
+                          {COLUMN_MAPPING_WITH_TAG.map((column) => (
                             <option key={column} value={column}>
                               {column}
                             </option>

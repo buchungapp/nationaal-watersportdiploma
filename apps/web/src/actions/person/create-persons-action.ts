@@ -1,33 +1,30 @@
 "use server";
-
 import { revalidatePath } from "next/cache";
 import pLimit from "p-limit";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { addStudentToCohortByPersonId, setAllocationTags } from "~/lib/nwd";
 import { createStudentForLocation } from "~/lib/nwd";
+import { actionClientWithMeta, voidActionSchema } from "../safe-action";
 import {
-  COLUMN_MAPPING_WITH_TAG,
+  COLUMN_MAPPING,
   type CSVData,
   SELECT_LABEL,
   countriesSchema,
   csvColumnLiteral,
   csvDataSchema,
-} from "../person/person-bulk-csv-mappings";
-import { actionClientWithMeta, voidActionSchema } from "../safe-action";
+} from "./person-bulk-csv-mappings";
 
-const addStudentsToCohortSchema = zfd
+const createPersonsSchema = zfd
   .formData(z.record(csvColumnLiteral, zfd.text()))
   .or(voidActionSchema);
 
-const addStudentsToCohortArgsSchema: [
+const createPersonsArgsSchema: [
   locationId: z.ZodString,
-  cohortId: z.ZodString,
   csvData: typeof csvDataSchema,
   countries: typeof countriesSchema,
-] = [z.string(), z.string(), csvDataSchema, countriesSchema];
+] = [z.string(), csvDataSchema, countriesSchema];
 
-type addStudentsToCohortStateActionType = {
+type createPersonsStateActionType = {
   state: "parsed" | "submitted";
   columns?: string[];
   persons?: {
@@ -38,21 +35,20 @@ type addStudentsToCohortStateActionType = {
     dateOfBirth: Date;
     birthCity: string;
     birthCountry: string;
-    tags: string[];
   }[];
 };
 
-export const addStudentsToCohortAction = actionClientWithMeta
+export const createPersonsAction = actionClientWithMeta
   .metadata({
-    name: "add-students-to-cohort",
+    name: "create-persons",
   })
-  .schema(addStudentsToCohortSchema)
-  .bindArgsSchemas(addStudentsToCohortArgsSchema)
-  .stateAction<addStudentsToCohortStateActionType>(
+  .schema(createPersonsSchema)
+  .bindArgsSchemas(createPersonsArgsSchema)
+  .stateAction<createPersonsStateActionType>(
     async (
       {
         parsedInput: data,
-        bindArgsParsedInputs: [locationId, cohortId, csvData, countries],
+        bindArgsParsedInputs: [locationId, csvData, countries],
       },
       { prevResult },
     ) => {
@@ -64,7 +60,7 @@ export const addStudentsToCohortAction = actionClientWithMeta
 
       if (prevResult.data?.state === "parsed") {
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        return uploadPersons(locationId, cohortId, prevResult.data.persons!);
+        return uploadPersons(locationId, prevResult.data.persons!);
       }
 
       return parsePersonsFromCsvData(csvData, data, countries);
@@ -73,9 +69,9 @@ export const addStudentsToCohortAction = actionClientWithMeta
 
 async function parsePersonsFromCsvData(
   csvData: CSVData,
-  indexToColumnSelection: z.infer<typeof addStudentsToCohortSchema>,
+  indexToColumnSelection: z.infer<typeof createPersonsSchema>,
   countries: z.infer<typeof countriesSchema>,
-): Promise<addStudentsToCohortStateActionType> {
+): Promise<createPersonsStateActionType> {
   if (!csvData || !csvData.rows) {
     throw new Error("Geen data gevonden.");
   }
@@ -98,10 +94,8 @@ async function parsePersonsFromCsvData(
 
   const count = filteredData[0]?.length ?? 0;
 
-  const requiredColumns = COLUMN_MAPPING_WITH_TAG.filter(
-    (col) => col !== "Tag",
-  );
-  const minimalExpectedCount = requiredColumns.length;
+  const requiredColumns = COLUMN_MAPPING;
+  const expectedCount = requiredColumns.length;
   const missingFields = requiredColumns.filter(
     (item) => !selectedFields.includes(item),
   );
@@ -110,45 +104,22 @@ async function parsePersonsFromCsvData(
     throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
   }
 
-  if (count < minimalExpectedCount) {
+  if (count < expectedCount) {
     throw new Error("Je hebt minder kolommen geplakt dan verwacht.");
   }
 
-  const nonTagColumns = COLUMN_MAPPING_WITH_TAG.filter((col) => col !== "Tag");
+  if (count > expectedCount) {
+    throw new Error("Je hebt te veel kolommen geselecteerd.");
+  }
 
-  // Sort the data for each tuple in filteredData so that it appears
-  // in the order that we have in COLUMNS.
-  const sortedData = filteredData.map((row) => {
-    const sortedRow = Array(nonTagColumns.length).fill(null);
-    const tags: string[] = [];
+  // Sort data so that we can parse it correctly.
+  const indices = selectedFields.map((columnName) =>
+    COLUMN_MAPPING.findIndex((key) => key === columnName),
+  );
 
-    row.forEach((value, index) => {
-      const column = selectedFields[index];
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      const columnIndex = nonTagColumns.indexOf(column as any);
-
-      if (columnIndex !== -1) {
-        sortedRow[columnIndex] = value;
-      } else if (value && value.length > 0) {
-        tags.push(value);
-      }
-    });
-
-    return [...sortedRow, ...tags];
-  });
-
-  const calculateMaxLength = (data: string[][] | undefined): number => {
-    if (!data || data.length === 0) return 0;
-    return Math.max(...data.map((row) => row.length));
-  };
-
-  const maxLength = calculateMaxLength(sortedData);
-  const tagColumnsCount = Math.max(0, maxLength - nonTagColumns.length);
-
-  const COLUMNS: string[] = [
-    ...nonTagColumns,
-    ...Array(tagColumnsCount).fill("Tag"),
-  ];
+  const sortedData = filteredData?.map((row) =>
+    indices.map((index) => row[index]),
+  );
 
   const personRowSchema = z
     .tuple([
@@ -188,7 +159,6 @@ async function parsePersonsFromCsvData(
 
   return {
     state: "parsed",
-    columns: COLUMNS,
     persons: rows.map(
       ([
         email,
@@ -198,7 +168,6 @@ async function parsePersonsFromCsvData(
         dateOfBirth,
         birthCity,
         birthCountry,
-        ...tags
       ]) => ({
         email,
         firstName,
@@ -207,7 +176,6 @@ async function parsePersonsFromCsvData(
         dateOfBirth,
         birthCity,
         birthCountry,
-        tags: tags.filter(Boolean) as string[],
       }),
     ),
   };
@@ -215,38 +183,18 @@ async function parsePersonsFromCsvData(
 
 async function uploadPersons(
   locationId: string,
-  cohortId: string,
-  persons: NonNullable<addStudentsToCohortStateActionType["persons"]>,
-): Promise<addStudentsToCohortStateActionType> {
+  persons: NonNullable<createPersonsStateActionType["persons"]>,
+): Promise<createPersonsStateActionType> {
   // Create a limit function that allows only 5 concurrent operations
   const limit = pLimit(5);
 
   const result = await Promise.allSettled(
     persons.map((row) =>
-      limit(async () => {
-        const person = await createStudentForLocation(locationId, row);
-
-        const allocation = await addStudentToCohortByPersonId({
-          cohortId,
-          locationId,
-          personId: person.id,
-        });
-
-        if (row.tags && row.tags.length > 0) {
-          await setAllocationTags({
-            allocationId: allocation.id,
-            cohortId,
-            tags: row.tags,
-          });
-        }
-
-        return allocation;
-      }),
+      limit(async () => await createStudentForLocation(locationId, row)),
     ),
   );
 
-  revalidatePath("/locatie/[location]/cohorten/[cohort]", "page");
-  revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
+  revalidatePath("/locatie/[location]/personen", "page");
 
   const rowsWithError = result.filter(
     (result): result is PromiseRejectedResult => result.status === "rejected",
