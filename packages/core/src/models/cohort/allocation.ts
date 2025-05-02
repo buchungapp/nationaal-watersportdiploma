@@ -700,7 +700,10 @@ export const listStudentsWithCurricula = wrapQuery(
         .leftJoin(s.gearType, eq(s.gearType.id, s.studentCurriculum.gearTypeId))
         .leftJoin(
           s.certificate,
-          eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+          and(
+            eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+            isNull(s.certificate.deletedAt),
+          ),
         )
         .where(
           and(
