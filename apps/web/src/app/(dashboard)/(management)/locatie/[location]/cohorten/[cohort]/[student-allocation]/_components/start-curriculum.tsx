@@ -25,7 +25,7 @@ import {
   listCurriculaByProgram,
   listGearTypesByCurriculum,
   listPrograms,
-} from "../../(overview)/_actions/nwd";
+} from "../../(overview)/_actions/fetch";
 
 export function StartStudentCurriculum({
   cohortId,

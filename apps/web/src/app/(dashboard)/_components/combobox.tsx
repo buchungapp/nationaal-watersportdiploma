@@ -82,6 +82,7 @@ export function Combobox<T>({
           // Disabled state
           "data-disabled:opacity-50 data-disabled:before:bg-zinc-950/5 data-disabled:before:shadow-none",
         ])}
+        {...(invalid && { "data-invalid": true })}
       >
         <HeadlessComboboxInput
           autoFocus={autoFocus}
@@ -123,9 +124,9 @@ export function Combobox<T>({
             "absolute inset-y-0 right-0 flex items-center rounded-r-md px-3 focus:outline-hidden"
           }
         >
-          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+          <span className="right-0 absolute inset-y-0 flex items-center pr-2 pointer-events-none">
             <svg
-              className="size-5 stroke-zinc-500 group-data-disabled:stroke-zinc-600 sm:size-4 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText]"
+              className="stroke-zinc-500 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText] group-data-disabled:stroke-zinc-600 size-5 sm:size-4"
               viewBox="0 0 16 16"
               aria-hidden="true"
               fill="none"
@@ -221,7 +222,7 @@ export function ComboboxOption<T>({
       )}
     >
       <svg
-        className="relative hidden size-5 self-center stroke-current group-data-selected/option:inline sm:size-4"
+        className="hidden group-data-selected/option:inline relative self-center stroke-current size-5 sm:size-4"
         viewBox="0 0 16 16"
         fill="none"
         aria-hidden="true"
