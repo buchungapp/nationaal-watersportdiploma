@@ -6,7 +6,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 import { useAction } from "next-safe-action/hooks";
-import { updatePersonDetailsAction } from "~/actions/update-person-details-action";
+import { updatePersonDetailsAction } from "~/actions/person/update-person-details-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -56,7 +56,7 @@ export function EditDetails({
   const [isOpen, setIsOpen] = useState(false);
 
   const { execute, result } = useAction(
-    updatePersonDetailsAction.bind(null, person.id),
+    updatePersonDetailsAction.bind(null, person.id, undefined),
     {
       onSuccess: () => {
         setIsOpen(false);
