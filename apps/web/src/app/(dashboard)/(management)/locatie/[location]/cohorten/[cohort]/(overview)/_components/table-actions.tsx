@@ -43,7 +43,7 @@ import {
   listInstructorsInCohort,
   listPrivilegesForCohort,
   listPrograms,
-} from "../_actions/nwd";
+} from "../_actions/fetch";
 import type { Student } from "./students-table";
 
 interface Props {

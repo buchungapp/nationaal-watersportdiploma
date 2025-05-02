@@ -41,7 +41,7 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
-import { listCountries } from "../_actions/nwd";
+import { listCountries } from "../_actions/fetch";
 
 interface Props {
   locationId: string;

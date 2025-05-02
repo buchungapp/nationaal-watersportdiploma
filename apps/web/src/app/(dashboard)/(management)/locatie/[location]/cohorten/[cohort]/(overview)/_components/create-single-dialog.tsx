@@ -35,7 +35,7 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import { listCountries, listPersonsForLocationByRole } from "../_actions/nwd";
+import { listCountries, listPersonsForLocationByRole } from "../_actions/fetch";
 
 interface Props {
   locationId: string;
