@@ -24,7 +24,10 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
-import { unstable_cacheLife as cacheLife } from "next/cache";
+import {
+  unstable_cacheLife as cacheLife,
+  unstable_cacheTag as cacheTag,
+} from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
@@ -752,6 +755,7 @@ export const listGearTypesByCurriculum = async (curriculumId: string) => {
 export const retrieveLocationByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("locations");
 
   return makeRequest(async () => {
     return await Location.fromHandle(handle);

@@ -1,10 +1,12 @@
 "use client";
 
-import { type PropsWithChildren, useActionState } from "react";
+import type { PropsWithChildren } from "react";
 import { toast } from "sonner";
-import { updateSettings } from "../_actions/update";
 
+import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
+import { updateLocationSettingsAction } from "~/actions/location/update-location-settings-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import Spinner from "~/app/_components/spinner";
 
@@ -23,20 +25,20 @@ export default function SettingsForm({
   className,
   locationId,
 }: PropsWithChildren<{ className?: string; locationId: string }>) {
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await updateSettings(locationId, prevState, formData);
-    if (result.message === "Success") {
-      toast.success("Instellingen zijn geüpdatet.");
-    } else {
-      toast.error("Er is iets misgegaan");
-    }
-    return result;
-  };
-
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    updateLocationSettingsAction.bind(null, locationId),
+    {
+      onSuccess: () => {
+        toast.success("Instellingen zijn geüpdatet.");
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   return (
-    <form className={className} action={formAction}>
+    <form className={className} action={execute}>
       {children}
 
       <div className="flex justify-end gap-4">
