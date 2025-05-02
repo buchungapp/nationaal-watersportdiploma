@@ -1,11 +1,12 @@
 "use client";
 
 import { ArrowPathRoundedSquareIcon } from "@heroicons/react/16/solid";
-import React from "react";
+import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
+import { makeProgressVisibleForStudentInCohortAction } from "~/actions/cohort/student/make-progress-visible-for-student-in-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import Spinner from "~/app/_components/spinner";
-import { makeProgressVisible } from "../_actions/progress";
 
 export function UpdateProgressVisibility({
   allocationId,
@@ -14,22 +15,30 @@ export function UpdateProgressVisibility({
   allocationId: string;
   cohortId: string;
 }) {
-  const [pending, startTransition] = React.useTransition();
+  const { execute, isPending } = useAction(
+    makeProgressVisibleForStudentInCohortAction.bind(
+      null,
+      cohortId,
+      allocationId,
+    ),
+    {
+      onSuccess: () => {
+        toast.success("Voortgang zichtbaar gemaakt");
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   return (
     <Button
       plain
       className="shrink-0"
-      disabled={pending}
-      onClick={() => {
-        startTransition(async () => {
-          await makeProgressVisible({ allocationId, cohortId })
-            .then(() => toast.success("Voortgang zichtbaar gemaakt"))
-            .catch(() => toast.error("Er is iets misgegaan"));
-        });
-      }}
+      disabled={isPending}
+      onClick={() => execute()}
     >
-      {pending ? <Spinner /> : <ArrowPathRoundedSquareIcon />}
+      {isPending ? <Spinner /> : <ArrowPathRoundedSquareIcon />}
     </Button>
   );
 }
