@@ -5,7 +5,7 @@ import { z } from "zod";
 import { deleteCohort } from "~/lib/nwd";
 import { actionClientWithMeta, voidActionSchema } from "../safe-action";
 
-const removeCohortArgsSchema: [cohortId: z.ZodString] = [z.string()];
+const removeCohortArgsSchema: [cohortId: z.ZodString] = [z.string().uuid()];
 
 export const removeCohortAction = actionClientWithMeta
   .metadata({

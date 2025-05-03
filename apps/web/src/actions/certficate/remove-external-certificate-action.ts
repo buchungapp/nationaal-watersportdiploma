@@ -8,7 +8,7 @@ import { actionClientWithMeta, voidActionSchema } from "../safe-action";
 const removeExternalCertificateArgsSchema: [
   personId: z.ZodString,
   externalCertificateId: z.ZodString,
-] = [z.string(), z.string()];
+] = [z.string().uuid(), z.string().uuid()];
 
 export const removeExternalCertificateAction = actionClientWithMeta
   .metadata({

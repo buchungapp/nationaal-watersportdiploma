@@ -9,7 +9,7 @@ const addRoleToInstructorInCohortArgsSchema: [
   cohortId: z.ZodString,
   allocationId: z.ZodString,
   roleHandle: z.ZodLiteral<"cohort_admin">,
-] = [z.string(), z.string(), z.literal("cohort_admin")];
+] = [z.string().uuid(), z.string().uuid(), z.literal("cohort_admin")];
 
 export const addRoleToInstructorInCohortAction = actionClientWithMeta
   .metadata({

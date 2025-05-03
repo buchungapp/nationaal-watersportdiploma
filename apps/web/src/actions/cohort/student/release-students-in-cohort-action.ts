@@ -8,7 +8,7 @@ import { actionClientWithMeta, voidActionSchema } from "../../safe-action";
 const releaseStudentsInCohortArgsSchema: [
   cohortId: z.ZodString,
   allocationIds: z.ZodArray<z.ZodString>,
-] = [z.string(), z.array(z.string())];
+] = [z.string().uuid(), z.array(z.string().uuid())];
 
 export const releaseStudentsInCohortAction = actionClientWithMeta
   .metadata({

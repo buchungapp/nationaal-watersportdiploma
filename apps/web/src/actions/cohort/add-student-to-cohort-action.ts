@@ -40,7 +40,7 @@ const addStudentToCohortSchema = zfd.formData(
 const addStudentToCohortArgsSchema: [
   locationId: z.ZodString,
   cohortId: z.ZodString,
-] = [z.string(), z.string()];
+] = [z.string().uuid(), z.string().uuid()];
 
 export const addStudentToCohortAction = actionClientWithMeta
   .metadata({

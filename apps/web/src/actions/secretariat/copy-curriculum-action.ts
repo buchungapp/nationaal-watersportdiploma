@@ -10,7 +10,9 @@ const copyCurriculumSchema = zfd.formData({
   revision: zfd.text(),
 });
 
-const copyCurriculumArgsSchema: [curriculumId: z.ZodString] = [z.string()];
+const copyCurriculumArgsSchema: [curriculumId: z.ZodString] = [
+  z.string().uuid(),
+];
 
 export const copyCurriculumAction = actionClientWithMeta
   .metadata({

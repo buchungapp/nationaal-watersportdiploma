@@ -8,7 +8,10 @@ import { actionClientWithMeta, voidActionSchema } from "../safe-action";
 const removeLogbookArgsSchema: [
   personId: z.ZodString,
   logbookId: z.ZodUnion<[z.ZodString, z.ZodArray<z.ZodString>]>,
-] = [z.string(), z.union([z.string(), z.string().array()])];
+] = [
+  z.string().uuid(),
+  z.union([z.string().uuid(), z.string().uuid().array()]),
+];
 
 export const removeLogbookAction = actionClientWithMeta
   .metadata({

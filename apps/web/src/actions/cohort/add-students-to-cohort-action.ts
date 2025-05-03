@@ -25,7 +25,7 @@ const addStudentsToCohortArgsSchema: [
   cohortId: z.ZodString,
   csvData: typeof csvDataSchema,
   countries: typeof countriesSchema,
-] = [z.string(), z.string(), csvDataSchema, countriesSchema];
+] = [z.string().uuid(), z.string().uuid(), csvDataSchema, countriesSchema];
 
 type addStudentsToCohortStateActionType = {
   state: "parsed" | "submitted";

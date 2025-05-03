@@ -27,7 +27,7 @@ const updateCohortSchema = zfd.formData({
   ),
 });
 
-const updateCohortArgsSchema: [cohortId: z.ZodString] = [z.string()];
+const updateCohortArgsSchema: [cohortId: z.ZodString] = [z.string().uuid()];
 
 export const updateCohortAction = actionClientWithMeta
   .metadata({

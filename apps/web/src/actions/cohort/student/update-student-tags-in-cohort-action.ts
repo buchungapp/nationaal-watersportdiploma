@@ -6,14 +6,14 @@ import { setAllocationTags } from "~/lib/nwd";
 import { actionClientWithMeta } from "../../safe-action";
 
 const tagSchema = z.object({
-  allocationId: z.string(),
+  allocationId: z.string().uuid(),
   tags: z.string().array(),
 });
 
 const updateStudentTagsInCohortSchema = tagSchema.or(tagSchema.array());
 
 const updateStudentTagsInCohortArgsSchema: [cohortId: z.ZodString] = [
-  z.string(),
+  z.string().uuid(),
 ];
 
 export const updateStudentTagsInCohortAction = actionClientWithMeta

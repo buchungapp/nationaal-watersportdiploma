@@ -22,7 +22,7 @@ const createPersonsArgsSchema: [
   locationId: z.ZodString,
   csvData: typeof csvDataSchema,
   countries: typeof countriesSchema,
-] = [z.string(), csvDataSchema, countriesSchema];
+] = [z.string().uuid(), csvDataSchema, countriesSchema];
 
 type createPersonsStateActionType = {
   state: "parsed" | "submitted";

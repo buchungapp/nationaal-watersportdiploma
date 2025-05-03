@@ -7,11 +7,13 @@ import { upsertActorForLocation } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 const addActorToLocationSchema = zfd.formData({
-  personId: zfd.text(),
+  personId: zfd.text(z.string().uuid()),
   type: zfd.text(z.enum(["student", "instructor", "location_admin"])),
 });
 
-const addActorToLocationArgsSchema: [locationId: z.ZodString] = [z.string()];
+const addActorToLocationArgsSchema: [locationId: z.ZodString] = [
+  z.string().uuid(),
+];
 
 export const addActorToLocationAction = actionClientWithMeta
   .metadata({

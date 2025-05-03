@@ -34,7 +34,7 @@ const createLogbookSchema = zfd.formData({
   additionalComments: zfd.text(z.string().nullable().default(null)),
 });
 
-const createLogbookArgsSchema: [personId: z.ZodString] = [z.string()];
+const createLogbookArgsSchema: [personId: z.ZodString] = [z.string().uuid()];
 
 export const createLogbookAction = actionClientWithMeta
   .metadata({

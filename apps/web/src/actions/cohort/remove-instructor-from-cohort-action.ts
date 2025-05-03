@@ -9,7 +9,7 @@ const removeInstructorFromCohortArgsSchema: [
   locationId: z.ZodString,
   cohortId: z.ZodString,
   allocationId: z.ZodString,
-] = [z.string(), z.string(), z.string()];
+] = [z.string().uuid(), z.string().uuid(), z.string().uuid()];
 
 export const removeInstructorFromCohortAction = actionClientWithMeta
   .metadata({

@@ -13,7 +13,7 @@ const showPiiSchema = zfd.formData({
   issuedDate: zfd.text(certificateParamsSchema.shape.issuedDate),
 });
 
-const showPiiArgsSchema: [certificateId: z.ZodString] = [z.string()];
+const showPiiArgsSchema: [certificateId: z.ZodString] = [z.string().uuid()];
 
 export const showPiiAction = actionClientWithMeta
   .metadata({

@@ -39,7 +39,7 @@ const createExternalCertificateSchema = zfd.formData({
 });
 
 const createExternalCertificateArgsSchema: [personId: z.ZodString] = [
-  z.string(),
+  z.string().uuid(),
 ];
 
 export const createExternalCertificateAction = actionClientWithMeta

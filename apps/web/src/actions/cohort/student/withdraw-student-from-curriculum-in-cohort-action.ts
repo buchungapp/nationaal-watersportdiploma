@@ -7,7 +7,7 @@ import { actionClientWithMeta } from "../../safe-action";
 
 const withdrawStudentFromCurriculumInCohortArgsSchema: [
   allocationId: z.ZodString,
-] = [z.string()];
+] = [z.string().uuid()];
 
 export const withdrawStudentFromCurriculumInCohortAction = actionClientWithMeta
   .metadata({

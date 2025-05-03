@@ -9,7 +9,7 @@ const addInstructorToCohortArgsSchema: [
   locationId: z.ZodString,
   cohortId: z.ZodString,
   personId: z.ZodString,
-] = [z.string(), z.string(), z.string()];
+] = [z.string().uuid(), z.string().uuid(), z.string().uuid()];
 
 export const addInstructorToCohortAction = actionClientWithMeta
   .metadata({

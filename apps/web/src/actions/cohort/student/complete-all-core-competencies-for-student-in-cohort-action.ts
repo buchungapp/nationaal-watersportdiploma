@@ -13,7 +13,7 @@ const completeAllCoreCompetenciesForStudentInCohortSchema = zfd.formData({
 
 const completeAllCoreCompetenciesForStudentInCohortArgsSchema: [
   studentAllocationId: z.ZodArray<z.ZodString>,
-] = [z.string().array()];
+] = [z.array(z.string().uuid())];
 
 export const completeAllCoreCompetenciesForStudentInCohortAction =
   actionClientWithMeta

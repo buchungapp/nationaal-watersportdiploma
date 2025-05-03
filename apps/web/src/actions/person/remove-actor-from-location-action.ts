@@ -7,12 +7,12 @@ import { dropActorForLocation } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 const removeActorFromLocationSchema = zfd.formData({
-  personId: zfd.text(),
+  personId: zfd.text(z.string().uuid()),
   type: zfd.text(z.enum(["student", "instructor", "location_admin"])),
 });
 
 const removeActorFromLocationArgsSchema: [locationId: z.ZodString] = [
-  z.string(),
+  z.string().uuid(),
 ];
 
 export const removeActorFromLocationAction = actionClientWithMeta

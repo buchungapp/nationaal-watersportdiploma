@@ -39,7 +39,7 @@ const updateLogbookSchema = zfd.formData({
 });
 
 const updateLogbookArgsSchema: [personId: z.ZodString, logbookId: z.ZodString] =
-  [z.string(), z.string()];
+  [z.string().uuid(), z.string().uuid()];
 
 export const updateLogbookAction = actionClientWithMeta
   .metadata({

@@ -22,7 +22,7 @@ const updatePersonDetailsSchema = zfd.formData({
 const updatePersonDetailsArgsSchema: [
   personId: z.ZodString,
   locationId: z.ZodOptional<z.ZodString>,
-] = [z.string(), z.string().uuid().optional()];
+] = [z.string().uuid(), z.string().uuid().optional()];
 
 export const updatePersonDetailsAction = actionClientWithMeta
   .metadata({

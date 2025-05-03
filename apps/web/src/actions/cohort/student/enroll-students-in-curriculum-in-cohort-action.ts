@@ -13,15 +13,15 @@ const enrollStudentsInCurriculumInCohortSchema = zfd.formData({
 
 const studentAllocationSchema = z
   .object({
-    allocationId: z.string(),
-    personId: z.string(),
+    allocationId: z.string().uuid(),
+    personId: z.string().uuid(),
   })
   .array();
 
 const enrollStudentsInCurriculumInCohortArgsSchema: [
   cohortId: z.ZodString,
   students: typeof studentAllocationSchema,
-] = [z.string(), studentAllocationSchema];
+] = [z.string().uuid(), studentAllocationSchema];
 
 export const enrollStudentsInCurriculumInCohortAction = actionClientWithMeta
   .metadata({

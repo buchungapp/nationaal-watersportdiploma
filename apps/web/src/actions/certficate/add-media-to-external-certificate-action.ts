@@ -38,7 +38,7 @@ const addMediaToExternalCertificateSchema = zfd.formData({
 const addMediaToExternalCertificateArgsSchema: [
   personId: z.ZodString,
   externalCertificateId: z.ZodString,
-] = [z.string(), z.string()];
+] = [z.string().uuid(), z.string().uuid()];
 
 export const addMediaToExternalCertificateAction = actionClientWithMeta
   .metadata({
