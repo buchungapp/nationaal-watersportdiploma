@@ -6,7 +6,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { issueCertificateAction } from "~/actions/certficate/issue-certificate-action";
+import { issueCertificateAction } from "~/actions/certificate/issue-certificate-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {

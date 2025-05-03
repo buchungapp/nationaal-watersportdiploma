@@ -2,7 +2,7 @@
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { removeExternalCertificateAction } from "~/actions/certficate/remove-external-certificate-action";
+import { removeExternalCertificateAction } from "~/actions/certificate/remove-external-certificate-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,

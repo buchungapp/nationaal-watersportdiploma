@@ -5,7 +5,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { createExternalCertificateAction } from "~/actions/certficate/create-external-certificate-action";
+import { createExternalCertificateAction } from "~/actions/certificate/create-external-certificate-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,

@@ -12,7 +12,7 @@ import {
   useAction,
 } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { downloadCertificatesAction } from "~/actions/certficate/download-certificates-action";
+import { downloadCertificatesAction } from "~/actions/certificate/download-certificates-action";
 import { issueCertificatesInCohortAction } from "~/actions/cohort/certificate/issue-certificates-in-cohort-action";
 import { withdrawCertificatesInCohortAction } from "~/actions/cohort/certificate/withdraw-certificates-in-cohort-action";
 import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";

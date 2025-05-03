@@ -18,7 +18,7 @@ import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
 import "~/app/(dashboard)/_components/pdf-viewer";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { updateExternalCertificateAction } from "~/actions/certficate/update-external-certificate-action";
+import { updateExternalCertificateAction } from "~/actions/certificate/update-external-certificate-action";
 import {
   PDFViewer,
   PDFViewerText,

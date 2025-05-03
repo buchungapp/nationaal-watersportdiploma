@@ -5,7 +5,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { showPersonallyIdentifiableInformationAction } from "~/actions/certficate/show-personally-identifiable-information-action";
+import { showPersonallyIdentifiableInformationAction } from "~/actions/certificate/show-personally-identifiable-information-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
