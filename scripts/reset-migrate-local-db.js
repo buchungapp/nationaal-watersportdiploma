@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const cp = require("node:child_process");
+import { execFileSync } from "node:child_process";
 
 const options = { shell: true, stdio: "inherit" };
 
-cp.execFileSync("pnpm", ["--filter", "supabase", "reset"], options);
-cp.execFileSync(
+execFileSync("pnpm", ["--filter", "supabase", "reset"], options);
+execFileSync(
   "pnpm",
   [
     "--filter",

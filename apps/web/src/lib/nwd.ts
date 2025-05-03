@@ -202,9 +202,33 @@ export const listCertificates = cache(async (locationId: string) => {
       filter: { locationId },
     });
 
-    return certificates;
+    return certificates.items;
   });
 });
+
+export const listCertificatesWithPagination = cache(
+  async (
+    locationId: string,
+    { q, limit, offset }: { q: string; limit: number; offset: number },
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      });
+
+      return await Certificate.list({
+        filter: { locationId, q },
+        limit,
+        offset,
+      });
+    });
+  },
+);
 
 async function validatePersonAccessCheck({
   locationId,
@@ -289,7 +313,7 @@ export const listCertificatesForPerson = cache(
         respectVisibility: true,
       });
 
-      return certificates;
+      return certificates.items;
     });
   },
 );
@@ -506,7 +530,7 @@ export const listCertificatesByNumber = cache(
               : ["instructor", "student", "createdAt"],
       });
 
-      return certificates;
+      return certificates.items;
     });
   },
 );

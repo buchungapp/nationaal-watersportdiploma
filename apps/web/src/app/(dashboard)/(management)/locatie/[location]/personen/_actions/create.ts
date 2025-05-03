@@ -29,9 +29,9 @@ export async function createPerson(
       dateOfBirth: z.string().pipe(z.coerce.date()),
       birthCity: z.string(),
       birthCountry: z.string().length(2).toLowerCase(),
-      ["role-student"]: z.string().optional(),
-      ["role-instructor"]: z.string().optional(),
-      ["role-location_admin"]: z.string().optional(),
+      "role-student": z.string().optional(),
+      "role-instructor": z.string().optional(),
+      "role-location_admin": z.string().optional(),
     })
     .refine(
       (data) =>
