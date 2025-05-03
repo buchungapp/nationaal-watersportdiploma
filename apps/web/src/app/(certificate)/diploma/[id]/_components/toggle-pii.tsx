@@ -5,7 +5,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { showPiiAction } from "~/actions/show-pii-action";
+import { showPersonallyIdentifiableInformationAction } from "~/actions/certficate/show-personally-identifiable-information-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -37,7 +37,7 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
   const certificateId = params.id as string;
 
   const { execute, result } = useAction(
-    showPiiAction.bind(null, certificateId),
+    showPersonallyIdentifiableInformationAction.bind(null, certificateId),
   );
 
   const formRef = useRef<HTMLFormElement>(null);
