@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { createExternalCertificate } from "~/lib/nwd";
-import { requiredFileSchema } from "../files";
+import { optionalFileSchema } from "../files";
 import { actionClientWithMeta } from "../safe-action";
 
 const createExternalCertificateSchema = zfd.formData({
-  media: requiredFileSchema,
+  media: optionalFileSchema,
   awardedAt: zfd.text(z.string().date().nullable().default(null)),
   identifier: zfd.text(z.string().nullable().default(null)),
   issuingAuthority: zfd.text(z.string().nullable().default(null)),
