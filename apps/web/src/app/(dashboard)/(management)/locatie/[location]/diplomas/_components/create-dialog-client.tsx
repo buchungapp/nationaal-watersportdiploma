@@ -189,7 +189,9 @@ function CreateDialogClient({
                         // Disabled state
                         "data-disabled:opacity-50 data-disabled:before:bg-zinc-950/5 data-disabled:before:shadow-none",
                       ])}
-                      data-invalid={!!result.validationErrors?.person}
+                      {...(!!result.validationErrors?.person && {
+                        "data-invalid": true,
+                      })}
                     >
                       <Headless.ComboboxInput
                         autoFocus={true}
