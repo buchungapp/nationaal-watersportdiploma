@@ -9,6 +9,7 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input, InputGroup } from "~/app/(dashboard)/_components/input";
+import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import {
@@ -22,7 +23,7 @@ import {
   YouTube,
 } from "~/app/_components/socials";
 import { retrieveLocationByHandle } from "~/lib/nwd";
-import { ImageUpload } from "./_components/image-upload";
+import LogosForm from "./_components/logos-form";
 import SettingsForm from "./_components/settings-form";
 import SocialsForm from "./_components/socials-form";
 
@@ -37,7 +38,7 @@ function FieldSection({
   return (
     <Headless.Field
       as="section"
-      className="grid gap-x-8 gap-y-6 sm:grid-cols-2"
+      className="gap-x-8 gap-y-6 grid sm:grid-cols-2"
     >
       <div className="space-y-1">
         <Headless.Label>
@@ -88,7 +89,7 @@ export default async function Page(props: {
         </TextLink>
         .
       </Text>
-      <Divider className="mb-10 mt-6" />
+      <Divider className="mt-6 mb-10" />
 
       <SettingsForm locationId={location.id}>
         <FieldSection
@@ -145,60 +146,77 @@ export default async function Page(props: {
 
       <Divider className="my-12" />
 
-      <Fieldset>
-        <Legend>
-          <Subheading className="select-none">Logo's</Subheading>
-        </Legend>
-        <Text>
-          We gebruiken verschillende variaties. Zorg dat ze allemaal up-to-date
-          zijn.
-        </Text>
+      <LogosForm locationId={location.id}>
+        <Fieldset>
+          <Legend>
+            <Subheading className="select-none">Logo's</Subheading>
+          </Legend>
+          <Text>
+            We gebruiken verschillende variaties. Zorg dat ze allemaal
+            up-to-date zijn.
+          </Text>
 
-        <FieldGroup>
-          <Divider soft className="my-10" />
+          <FieldGroup>
+            <Divider soft className="my-10" />
 
-          <FieldSection
-            label="Standaard"
-            description="Het algemene logo van de vaarlocatie."
-          >
-            <ImageUpload />
-            <img
-              src={logo?.url}
-              alt={logo?.alt ?? undefined}
-              className="w-full h-auto"
-            />
-          </FieldSection>
+            <FieldSection
+              label="Standaard"
+              description="Het algemene logo van de vaarlocatie."
+            >
+              <MediaDropzone
+                name="logo"
+                defaultPreview={
+                  logo
+                    ? {
+                        preview: logo.url,
+                        type: "image",
+                      }
+                    : undefined
+                }
+              />
+            </FieldSection>
 
-          <Divider soft className="my-10" />
+            <Divider soft className="my-10" />
 
-          <FieldSection
-            label="Icoon"
-            description="Een kleine vierkante versie van het logo, die wordt gebruik op plekken met minder ruimte. Kan zowel vierkant als rond weergegeven worden."
-          >
-            <ImageUpload />
-            <img
-              src={logoSquare?.url}
-              alt={logoSquare?.alt ?? undefined}
-              className="w-full h-auto"
-            />
-          </FieldSection>
+            <FieldSection
+              label="Icoon"
+              description="Een kleine vierkante versie van het logo, die wordt gebruik op plekken met minder ruimte. Kan zowel vierkant als rond weergegeven worden."
+            >
+              <MediaDropzone
+                name="logoSquare"
+                defaultPreview={
+                  logoSquare
+                    ? {
+                        preview: logoSquare.url,
+                        type: "image",
+                      }
+                    : undefined
+                }
+              />
+            </FieldSection>
 
-          <Divider soft className="my-10" />
+            <Divider soft className="my-10" />
 
-          <FieldSection
-            label="Diploma"
-            description="Het logo zoals hij geprint wordt op diploma's."
-          >
-            <ImageUpload />
-
-            <img
-              src={logoCertificate?.url}
-              alt={logoCertificate?.alt ?? undefined}
-              className="w-full h-auto"
-            />
-          </FieldSection>
-        </FieldGroup>
-      </Fieldset>
+            <FieldSection
+              label="Diploma"
+              description="Het logo zoals hij geprint wordt op diploma's."
+            >
+              <MediaDropzone
+                name="logoCertificate"
+                defaultPreview={
+                  logoCertificate
+                    ? {
+                        preview: logoCertificate.url,
+                        type: "image",
+                      }
+                    : undefined
+                }
+              />
+            </FieldSection>
+          </FieldGroup>
+        </Fieldset>
+        <Divider soft className="my-10" />
+      </LogosForm>
 
       <Divider className="my-12" />
 

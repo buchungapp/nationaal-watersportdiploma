@@ -60,6 +60,9 @@ export const updateDetails = wrapCommand(
         websiteUrl: true,
         email: true,
         shortDescription: true,
+        logoMediaId: true,
+        squareLogoMediaId: true,
+        certificateMediaId: true,
       })
       .extend({
         googlePlaceId: z.string().nullish(),
@@ -106,6 +109,9 @@ export const updateDetails = wrapCommand(
               socialMedia: input.socialMedia,
             }),
           })})::jsonb)#>> '{}')::jsonb`,
+          logoMediaId: input.logoMediaId,
+          squareLogoMediaId: input.squareLogoMediaId,
+          certificateMediaId: input.certificateMediaId,
         })
         .where(eq(s.location.id, input.id));
     },
