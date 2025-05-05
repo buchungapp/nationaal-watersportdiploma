@@ -10,8 +10,12 @@ import { type PropsWithChildren, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { loginAction } from "~/actions/auth/login-action";
 import { verifyAction } from "~/actions/auth/verify-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
+import { Field } from "~/app/(dashboard)/_components/fieldset";
+import { Label } from "~/app/(dashboard)/_components/fieldset";
+import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
 
 export function SubmitButton({ children }: PropsWithChildren) {
@@ -42,16 +46,34 @@ function loginErrorMessage(
 }
 
 export function EmailForm({
-  children,
   ...formProps
-}: PropsWithChildren<Exclude<React.ComponentProps<"form">, "action">>) {
-  const { execute, result } = useAction(loginAction);
+}: Exclude<React.ComponentProps<"form">, "action">) {
+  const { execute, result, input } = useAction(loginAction);
+
+  const { getInputValue } = useFormInput(input);
 
   const errorMessage = loginErrorMessage(result);
 
   return (
     <form action={execute} {...formProps}>
-      {children}
+      <Field>
+        <Label>E-mailadres</Label>
+        <Input
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          defaultValue={getInputValue("email")}
+        />
+      </Field>
+
+      <div>
+        <SubmitButton>Doorgaan</SubmitButton>
+
+        <p className="mt-2.5 text-slate-400 text-sm text-center">
+          We sturen een pincode naar je e-mailadres
+        </p>
+      </div>
 
       {errorMessage ? (
         <div className="font-mono text-red-500 text-xs">{errorMessage}</div>

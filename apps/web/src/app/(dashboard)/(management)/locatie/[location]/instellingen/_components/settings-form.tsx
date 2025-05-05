@@ -1,14 +1,18 @@
 "use client";
-
-import type { PropsWithChildren } from "react";
 import { toast } from "sonner";
 
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { updateLocationSettingsAction } from "~/actions/location/update-location-settings-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
+import { Divider } from "~/app/(dashboard)/_components/divider";
+import { Input } from "~/app/(dashboard)/_components/input";
+import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
+import type { retrieveLocationByHandle } from "~/lib/nwd";
+import { FieldSection } from "./field-selection";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -21,11 +25,25 @@ function SubmitButton() {
 }
 
 export default function SettingsForm({
-  children,
   className,
   locationId,
-}: PropsWithChildren<{ className?: string; locationId: string }>) {
-  const { execute } = useAction(
+  name,
+  shortDescription,
+  email,
+  websiteUrl,
+}: {
+  className?: string;
+  locationId: string;
+  name: Awaited<ReturnType<typeof retrieveLocationByHandle>>["name"];
+  shortDescription: Awaited<
+    ReturnType<typeof retrieveLocationByHandle>
+  >["shortDescription"];
+  email: Awaited<ReturnType<typeof retrieveLocationByHandle>>["email"];
+  websiteUrl: Awaited<
+    ReturnType<typeof retrieveLocationByHandle>
+  >["websiteUrl"];
+}) {
+  const { execute, input } = useAction(
     updateLocationSettingsAction.bind(null, locationId),
     {
       onSuccess: () => {
@@ -37,9 +55,65 @@ export default function SettingsForm({
     },
   );
 
+  const { getInputValue } = useFormInput(input, {
+    name,
+    shortDescription,
+    email,
+    websiteUrl,
+  });
+
   return (
     <form className={className} action={execute}>
-      {children}
+      <FieldSection
+        label="Naam"
+        description="De naam zoals deze getoond wordt op de website."
+      >
+        <Input name="name" defaultValue={getInputValue("name")} required />
+      </FieldSection>
+
+      <Divider soft className="my-10" />
+
+      <FieldSection
+        label="Bio"
+        description="Een korte omschrijving zoals deze getoond wordt op de website. Maximaal 260 karakters."
+      >
+        <Textarea
+          name="shortDescription"
+          defaultValue={getInputValue("shortDescription")}
+          rows={3}
+          maxLength={260}
+        />
+      </FieldSection>
+
+      <Divider soft className="my-10" />
+
+      <FieldSection
+        label="E-mail"
+        description="Hoe kunnen deelnemers contact met jullie opnemen?"
+      >
+        <Input
+          name="email"
+          defaultValue={getInputValue("email")}
+          type="email"
+          required
+        />
+      </FieldSection>
+
+      <Divider soft className="my-10" />
+
+      <FieldSection
+        label="Website"
+        description="Waar kunnen deelnemers meer informatie vinden?"
+      >
+        <Input
+          name="websiteUrl"
+          defaultValue={getInputValue("websiteUrl")}
+          required
+          type="url"
+        />
+      </FieldSection>
+
+      <Divider soft className="my-10" />
 
       <div className="flex justify-end gap-4">
         <Button plain type="reset">
