@@ -183,6 +183,13 @@
       "when": 1746103591543,
       "tag": "0025_exotic_sunspot",
       "breakpoints": false
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1746433862492,
+      "tag": "0026_jazzy_nightmare",
+      "breakpoints": false
     }
   ]
 }
