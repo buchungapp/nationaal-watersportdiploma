@@ -1274,27 +1274,58 @@ export const personsBelongTogetherInActiveCohort = wrapQuery(
   ),
 );
 
-export const retreiveCohortIdForAllocation = wrapQuery(
-  "cohort.allocation.retreiveCohortIdForAllocation",
+export const retrieveAllocationById = wrapQuery(
+  "cohort.allocation.retrieveAllocationById",
   withZod(
     z.object({
       allocationId: uuidSchema,
     }),
-    z.string().uuid().nullable(),
+    z.object({
+      id: uuidSchema,
+      cohort: z.object({
+        id: uuidSchema,
+        label: z.string(),
+      }),
+      actor: z.object({
+        id: uuidSchema,
+        type: z.enum(["student", "instructor", "location_admin"]),
+      }),
+    }),
     async (input) => {
       const query = useQuery();
 
       const result = await query
-        .select({ id: s.cohort.id })
-        .from(s.cohort)
+        .select({
+          id: s.cohortAllocation.id,
+          cohort: {
+            id: s.cohort.id,
+            label: s.cohort.label,
+          },
+          actor: {
+            id: s.actor.id,
+            type: s.actor.type,
+          },
+        })
+        .from(s.cohortAllocation)
         .innerJoin(
-          s.cohortAllocation,
-          eq(s.cohortAllocation.cohortId, s.cohort.id),
-        )
-        .where(eq(s.cohortAllocation.id, input.allocationId))
-        .then(possibleSingleRow);
+          s.actor,
 
-      return result?.id ?? null;
+          eq(s.actor.id, s.cohortAllocation.actorId),
+        )
+        .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
+        .where(eq(s.cohortAllocation.id, input.allocationId))
+        .then(singleRow);
+
+      return {
+        ...result,
+        actor: {
+          ...result.actor,
+          type: result.actor.type as
+            | "student"
+            | "instructor"
+            | "location_admin",
+        },
+      };
     },
   ),
 );

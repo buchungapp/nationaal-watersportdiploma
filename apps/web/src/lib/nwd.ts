@@ -1838,7 +1838,7 @@ export async function releaseStudentFromCohortByAllocationId({
     }
 
     // Force check if it really is a student, not an instructor
-    const allocation = await Cohort.Allocation.retrieveStudentWithCurriculum({
+    const allocation = await Cohort.Allocation.retrieveAllocationById({
       allocationId,
     });
 
@@ -1848,6 +1848,10 @@ export async function releaseStudentFromCohortByAllocationId({
 
     if (allocation.cohort.id !== cohortId) {
       throw new Error("Allocation does not belong to cohort");
+    }
+
+    if (allocation.actor.type !== "student") {
+      throw new Error("Allocation is not a student");
     }
 
     const result = await Cohort.Allocation.remove({
@@ -1992,7 +1996,7 @@ export async function removeAllocationById({
     }
 
     const cohortIdForAllocation =
-      await Cohort.Allocation.retreiveCohortIdForAllocation({
+      await Cohort.Allocation.retrieveAllocationById({
         allocationId,
       });
 
@@ -2000,7 +2004,7 @@ export async function removeAllocationById({
       throw new Error("Allocation not found");
     }
 
-    if (cohortIdForAllocation !== cohortId) {
+    if (cohortIdForAllocation.cohort.id !== cohortId) {
       throw new Error("Allocation does not belong to cohort");
     }
 
