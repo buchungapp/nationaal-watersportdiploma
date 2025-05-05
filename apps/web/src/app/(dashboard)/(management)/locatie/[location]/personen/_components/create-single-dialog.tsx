@@ -4,6 +4,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { createPersonAction } from "~/actions/person/create-person-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -66,7 +67,7 @@ interface Props {
   locationId: string;
   countries: { code: string; name: string }[];
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }
 
 export default function Wrapper(props: Props) {
@@ -77,25 +78,44 @@ export default function Wrapper(props: Props) {
       key={String(forceRerenderId.current)}
       {...props}
       isOpen={props.isOpen}
-      setIsOpen={(next) => {
-        props.setIsOpen(next);
+      close={() => {
+        props.close();
         forceRerenderId.current += 1;
       }}
     />
   );
 }
 
-function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
-  const { execute, result } = useAction(
+function CreateDialog({ locationId, isOpen, close, countries }: Props) {
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     createPersonAction.bind(null, locationId),
     {
       onSuccess: () => {
-        setIsOpen(false);
+        closeDialog();
         toast.success("Persoon is toegevoegd.");
       },
     },
   );
-  const [selectedCountry, setSelectedCountry] = useState<string | null>("nl");
+  const { getInputValue } = useFormInput(input, {
+    birthCountry: "nl",
+    ...ROLES.reduce(
+      (acc, role) => {
+        acc[`role-${role.type}`] =
+          "defaultChecked" in role && role.defaultChecked ? "on" : "off";
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+  });
+
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(
+    getInputValue("birthCountry") ?? null,
+  );
 
   const [countryQuery, setCountryQuery] = useState("");
 
@@ -110,7 +130,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={setIsOpen}>
+      <Dialog open={isOpen} onClose={closeDialog}>
         <DialogTitle>Persoon toevoegen</DialogTitle>
         <DialogDescription>
           Vul de gegevens in om een persoon toe te voegen.
@@ -127,6 +147,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                       invalid={!!result.validationErrors?.firstName}
                       required
                       minLength={1}
+                      defaultValue={getInputValue("firstName")}
                     />
                   </Field>
                   <Field>
@@ -134,6 +155,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <Input
                       name="lastNamePrefix"
                       invalid={!!result.validationErrors?.lastNamePrefix}
+                      defaultValue={getInputValue("lastNamePrefix")}
                     />
                   </Field>
                   <Field>
@@ -143,6 +165,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                       invalid={!!result.validationErrors?.lastName}
                       required
                       minLength={1}
+                      defaultValue={getInputValue("lastName")}
                     />
                   </Field>
                 </div>
@@ -155,6 +178,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                       type="email"
                       invalid={!!result.validationErrors?.email}
                       required
+                      defaultValue={getInputValue("email")}
                     />
                   </Field>
                   <Field className="sm:col-span-2">
@@ -164,6 +188,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                       type="date"
                       invalid={!!result.validationErrors?.dateOfBirth}
                       required
+                      defaultValue={getInputValue("dateOfBirth")}
                     />
                   </Field>
                 </div>
@@ -174,6 +199,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <Input
                       name="birthCity"
                       invalid={!!result.validationErrors?.birthCity}
+                      defaultValue={getInputValue("birthCity")}
                     />
                   </Field>
                   <Field>
@@ -191,7 +217,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                         );
                         return country?.name ?? "";
                       }}
-                      defaultValue="nl"
+                      defaultValue={getInputValue("birthCountry")}
                     >
                       {filteredCountries.map((country) => (
                         <ComboboxOption key={country.code} value={country.code}>
@@ -220,7 +246,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <Checkbox
                       name={`role-${role.type}`}
                       defaultChecked={
-                        "defaultChecked" in role && role.defaultChecked
+                        getInputValue(`role-${role.type}`) === "on"
                       }
                     />
                     <Label>{role.label}</Label>
@@ -231,7 +257,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <SubmitButton />

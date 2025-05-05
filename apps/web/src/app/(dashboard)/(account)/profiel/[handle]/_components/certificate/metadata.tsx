@@ -14,15 +14,28 @@ export function Metadata({
   defaultValues,
 }: {
   stepIndex: number;
-  invalid?: {
-    title?: boolean;
-    issuingAuthority?: boolean;
-    identifier?: boolean;
-    issuingLocation?: boolean;
-    awardedAt?: boolean;
-    additionalComments?: boolean;
-  };
-  defaultValues?: Record<string, string | null | undefined>;
+  invalid?: Partial<
+    Record<
+      | "title"
+      | "issuingAuthority"
+      | "identifier"
+      | "issuingLocation"
+      | "awardedAt"
+      | "additionalComments",
+      boolean
+    >
+  >;
+  defaultValues?: Partial<
+    Record<
+      | "title"
+      | "issuingAuthority"
+      | "identifier"
+      | "issuingLocation"
+      | "awardedAt"
+      | "additionalComments",
+      string | number | null
+    >
+  >;
 }) {
   return (
     <Fieldset>

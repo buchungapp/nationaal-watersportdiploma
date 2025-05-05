@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { createCohortAction } from "~/actions/cohort/create-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -27,6 +28,7 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { SmartDatetimePicker } from "~/app/(dashboard)/_components/natural-language-input";
 import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import type { listPrograms } from "~/lib/nwd";
 
 interface Props {
@@ -74,15 +76,22 @@ function CreateDialogClient({
   isOpen,
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
-  const { execute, result } = useAction(
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     createCohortAction.bind(null, locationId),
     {
       onSuccess: () => {
         toast.success("Cohort toegevoegd");
-        setIsOpen(false);
+        closeDialog();
       },
     },
   );
+
+  const { getInputValue } = useFormInput(input);
 
   const errorMessage = createCohortErrorMessage(result);
 
@@ -97,7 +106,7 @@ function CreateDialogClient({
         <PlusIcon />
         Cohort toevoegen
       </Button>
-      <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
+      <Dialog open={isOpen} onClose={closeDialog} size="2xl">
         <DialogTitle>Cohort toevoegen</DialogTitle>
         <DialogDescription>
           Vul de gegevens in om een nieuw cohort te starten.
@@ -114,6 +123,7 @@ function CreateDialogClient({
                       invalid={!!result?.validationErrors?.label}
                       required
                       minLength={1}
+                      defaultValue={getInputValue("label")}
                     />
                   </Field>
                   <Field className="relative max-sm:col-span-2">
@@ -122,6 +132,11 @@ function CreateDialogClient({
                       name="accessStartTime"
                       invalid={!!result?.validationErrors?.accessStartTime}
                       required
+                      defaultValue={
+                        getInputValue("accessStartTime")
+                          ? dayjs(getInputValue("accessStartTime")).toDate()
+                          : undefined
+                      }
                     />
                   </Field>
                   <Field className="relative max-sm:col-span-2">
@@ -130,6 +145,11 @@ function CreateDialogClient({
                       name="accessEndTime"
                       invalid={!!result?.validationErrors?.accessEndTime}
                       required
+                      defaultValue={
+                        getInputValue("accessEndTime")
+                          ? dayjs(getInputValue("accessEndTime")).toDate()
+                          : undefined
+                      }
                     />
                   </Field>
                 </div>
@@ -141,7 +161,7 @@ function CreateDialogClient({
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <SubmitButton />

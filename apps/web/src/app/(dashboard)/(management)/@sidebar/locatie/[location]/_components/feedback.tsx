@@ -41,10 +41,10 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { productFeedbackAction } from "~/actions/send-feedback-action";
 import { productFeedbackErrorMessage } from "~/app/(dashboard)/(account)/_components/feedback";
 import Spinner from "~/app/_components/spinner";
-
 const feedbackLabels = {
   bug: {
     label: "Wat heb je gevonden?",
@@ -91,12 +91,14 @@ function FeedbackTab({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const { execute, result } = useAction(productFeedbackAction, {
+  const { execute, result, input } = useAction(productFeedbackAction, {
     onSuccess: () => {
       close();
       toast.success("We hebben je melding ontvangen! 🎉");
     },
   });
+
+  const { getInputValue } = useFormInput(input);
 
   const errorMessage = productFeedbackErrorMessage(result);
 
@@ -123,7 +125,12 @@ function FeedbackTab({
           <Fieldset>
             <Field>
               <Label>{label}</Label>
-              <Textarea name="comment" required placeholder={placeholder} />
+              <Textarea
+                name="comment"
+                required
+                placeholder={placeholder}
+                defaultValue={getInputValue("message")}
+              />
             </Field>
             {type === "bug" && (
               <CheckboxGroup>

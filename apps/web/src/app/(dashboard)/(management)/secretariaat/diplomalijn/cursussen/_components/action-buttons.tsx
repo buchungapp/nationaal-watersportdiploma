@@ -3,6 +3,7 @@
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { copyCurriculumAction } from "~/actions/secretariat/copy-curriculum-action";
 import {
@@ -18,22 +19,32 @@ import { Input } from "~/app/(dashboard)/_components/input";
 export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { execute } = useAction(copyCurriculumAction.bind(null, curriculumId), {
-    onSuccess: ({ data }) => {
-      setIsOpen(false);
-      toast.success(`Curriculum ${data?.id} aangemaakt`);
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, input, reset } = useAction(
+    copyCurriculumAction.bind(null, curriculumId),
+    {
+      onSuccess: ({ data }) => {
+        closeDialog();
+        toast.success(`Curriculum ${data?.id} aangemaakt`);
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
     },
-    onError: () => {
-      toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
-    },
-  });
+  );
+
+  const { getInputValue } = useFormInput(input);
 
   return (
     <>
       <Button type="button" onClick={() => setIsOpen(true)}>
         Kopie maken
       </Button>
-      <Alert open={isOpen} onClose={setIsOpen}>
+      <Alert open={isOpen} onClose={closeDialog}>
         <form action={execute}>
           <AlertTitle>Curriculum kopiëren</AlertTitle>
           <AlertDescription>
@@ -42,10 +53,14 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
             programma, maar staat dan nog in concept.
           </AlertDescription>
           <AlertBody>
-            <Input name="revision" required />
+            <Input
+              name="revision"
+              required
+              defaultValue={getInputValue("revision")}
+            />
           </AlertBody>
           <AlertActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <Button type="submit">Kopieren</Button>

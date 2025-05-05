@@ -6,12 +6,12 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import dayjs from "dayjs";
 import { useState } from "react";
 import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
+import dayjs from "~/lib/dayjs";
 
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import { TableSelection } from "~/app/(dashboard)/_components/table-action";

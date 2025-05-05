@@ -11,6 +11,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { addStudentToCohortAction } from "~/actions/cohort/add-student-to-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -79,11 +80,16 @@ function addStudentToCohortErrorMessage(
 }
 
 function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
-  const { execute, result } = useAction(
+  const close = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     addStudentToCohortAction.bind(null, locationId, cohortId),
     {
       onSuccess: () => {
-        setIsOpen(false);
+        close();
         toast.success("Cursist is toegevoegd.");
       },
       onError: (error) => {
@@ -91,6 +97,9 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
       },
     },
   );
+
+  const { getInputValue } = useFormInput(input);
+
   const [selectedCountry, setSelectedCountry] = useState<string | null>("nl");
 
   const [personQuery, setPersonQuery] = useState("");
@@ -103,7 +112,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
 
   const [selectedStudent, setSelectedStudent] = useState<
     NonNullable<typeof allStudents>[number] | null
-  >(null);
+  >(allStudents?.find((x) => x.id === getInputValue("person")?.id) ?? null);
 
   if (!countries || !allStudents)
     throw new Error("Data must be available through fallback");
@@ -133,7 +142,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={setIsOpen}>
+      <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Cursist toevoegen</DialogTitle>
 
         <form action={execute}>
@@ -146,6 +155,9 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
               onChange={setSelectedStudent}
               virtual={{ options: filteredStudents }}
               multiple={false}
+              defaultValue={allStudents.find(
+                (x) => x.id === getInputValue("person")?.id,
+              )}
             >
               <div
                 className={clsx([
@@ -332,6 +344,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                       }
                       required
                       minLength={1}
+                      defaultValue={getInputValue("firstName")}
                     />
                   </Field>
                   <Field>
@@ -343,6 +356,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                         "lastNamePrefix" in result.validationErrors &&
                         !!result.validationErrors.lastNamePrefix
                       }
+                      defaultValue={getInputValue("lastNamePrefix")}
                     />
                   </Field>
                   <Field>
@@ -356,6 +370,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                       }
                       required
                       minLength={1}
+                      defaultValue={getInputValue("lastName")}
                     />
                   </Field>
                 </div>
@@ -372,6 +387,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                         !!result.validationErrors.email
                       }
                       required
+                      defaultValue={getInputValue("email")}
                     />
                   </Field>
                   <Field className="sm:col-span-2">
@@ -385,6 +401,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                         !!result.validationErrors.dateOfBirth
                       }
                       required
+                      defaultValue={getInputValue("dateOfBirth")}
                     />
                   </Field>
                 </div>
@@ -400,6 +417,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                         !!result.validationErrors.birthCity
                       }
                       required
+                      defaultValue={getInputValue("birthCity")}
                     />
                   </Field>
                   <Field>
@@ -421,7 +439,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                         );
                         return country?.name ?? "";
                       }}
-                      defaultValue="nl"
+                      defaultValue={getInputValue("birthCountry")}
                     >
                       {filteredCountries.map((country) => (
                         <ComboboxOption key={country.code} value={country.code}>
@@ -435,7 +453,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={close}>
               Sluiten
             </Button>
             <SubmitButton />

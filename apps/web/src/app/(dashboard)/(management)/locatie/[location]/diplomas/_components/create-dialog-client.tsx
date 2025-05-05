@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { issueCertificateAction } from "~/actions/certificate/issue-certificate-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -82,21 +83,33 @@ function CreateDialogClient({
   isOpen,
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
-  const { execute, result } = useAction(
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     issueCertificateAction.bind(null, locationId),
     {
       onSuccess: () => {
         toast.success("Diploma toegevoegd");
-        setIsOpen(false);
+        closeDialog();
       },
-      onError: ({ error }) => {
+      onError: () => {
         toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
       },
     },
   );
 
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
-  const [selectedGearType, setSelectedGearType] = useState<string | null>(null);
+  const { getInputValue } = useFormInput(input);
+
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(
+    programs?.find((program) => program.id === getInputValue("curriculumId"))
+      ?.id ?? null,
+  );
+  const [selectedGearType, setSelectedGearType] = useState<string | null>(
+    getInputValue("gearTypeId") ?? null,
+  );
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     Awaited<ReturnType<typeof listCurriculaByProgram>>[number] | null
   >(null);
@@ -152,7 +165,7 @@ function CreateDialogClient({
         <PlusIcon />
         Diploma toevoegen
       </Button>
-      <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
+      <Dialog open={isOpen} onClose={closeDialog} size="2xl">
         <DialogTitle>Diploma toevoegen</DialogTitle>
         <DialogDescription>
           Vul de gegevens in om een diploma toe te voegen.
@@ -370,6 +383,13 @@ function CreateDialogClient({
                         setSelectedCurriculum(null);
                       }}
                       invalid={!!result.validationErrors?.curriculumId}
+                      value={selectedProgram}
+                      defaultValue={
+                        programs?.find(
+                          (program) =>
+                            program.id === getInputValue("curriculumId"),
+                        )?.id ?? null
+                      }
                     >
                       {programs
                         .filter((x) => {
@@ -398,7 +418,8 @@ function CreateDialogClient({
                     <Listbox
                       name="gearTypeId"
                       disabled={!selectedProgram}
-                      value={selectedGearType}
+                      value={selectedGearType ?? getInputValue("gearTypeId")}
+                      defaultValue={getInputValue("gearTypeId")}
                       onChange={(value) => setSelectedGearType(value)}
                       invalid={!!result.validationErrors?.gearTypeId}
                     >
@@ -418,7 +439,9 @@ function CreateDialogClient({
                       <input
                         type="hidden"
                         name="curriculumId"
-                        value={selectedCurriculum.id}
+                        value={
+                          selectedCurriculum.id ?? getInputValue("curriculumId")
+                        }
                       />
                       <CheckboxGroup>
                         <Legend>Kernmodules</Legend>
@@ -465,7 +488,7 @@ function CreateDialogClient({
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <SubmitButton />

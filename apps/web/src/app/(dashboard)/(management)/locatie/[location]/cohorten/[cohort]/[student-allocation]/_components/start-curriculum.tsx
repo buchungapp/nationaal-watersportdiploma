@@ -19,6 +19,7 @@ import {
 
 import { useAction } from "next-safe-action/hooks";
 import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import {
@@ -37,9 +38,8 @@ export function StartStudentCurriculum({
   personId: string;
 }) {
   const [programQuery, setProgramQuery] = useState("");
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
-  const { execute } = useAction(
+  const { execute, input } = useAction(
     enrollStudentsInCurriculumInCohortAction.bind(null, cohortId, [
       { allocationId, personId },
     ]),
@@ -52,8 +52,13 @@ export function StartStudentCurriculum({
       },
     },
   );
-
   const { data: programs } = useSWR("allPrograms", listPrograms);
+  const { getInputValue } = useFormInput(input);
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(
+    programs?.find((program) => program.id === getInputValue("curriculumId"))
+      ?.id ?? null,
+  );
+
   const { data: activeCurriculumForProgram } = useSWR(
     ["activeCurriculumForProgram", selectedProgram],
     async () => {
@@ -98,7 +103,10 @@ export function StartStudentCurriculum({
         <input
           type="hidden"
           name="curriculumId"
-          value={activeCurriculumForProgram?.curriculum?.id ?? ""}
+          value={
+            activeCurriculumForProgram?.curriculum?.id ??
+            getInputValue("curriculumId")
+          }
         />
 
         <Field className="flex-1">
@@ -126,6 +134,12 @@ export function StartStudentCurriculum({
 
               setSelectedProgram(value);
             }}
+            value={selectedProgram}
+            defaultValue={
+              programs?.find(
+                (program) => program.id === getInputValue("curriculumId"),
+              )?.id ?? null
+            }
             // invalid={!!state?.errors.curriculumId}
           >
             {programs
@@ -157,6 +171,7 @@ export function StartStudentCurriculum({
             disabled={
               !(selectedProgram && !!activeCurriculumForProgram?.curriculum)
             }
+            defaultValue={getInputValue("gearTypeId")}
             // invalid={!!state?.errors.gearTypeId}
           >
             {activeCurriculumForProgram?.gearTypes.map((gearType) => (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { addMediaToExternalCertificateAction } from "~/actions/certificate/add-media-to-external-certificate-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -25,14 +26,7 @@ export function AddMedia({
   const [isOpen, setIsOpen] = useState(false);
   const [validMedia, setValidMedia] = useState(false);
 
-  const close = () => {
-    setIsOpen(false);
-    setTimeout(() => {
-      setValidMedia(false);
-    }, 100);
-  };
-
-  const { execute, result } = useAction(
+  const { execute, result, input, reset } = useAction(
     addMediaToExternalCertificateAction.bind(
       null,
       personId,
@@ -45,6 +39,16 @@ export function AddMedia({
       },
     },
   );
+
+  const close = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      setValidMedia(false);
+      reset();
+    }, 100);
+  };
+
+  const { getInputValue } = useFormInput(input);
 
   return (
     <>
@@ -70,6 +74,7 @@ export function AddMedia({
                   stepIndex={1}
                   setValidMedia={setValidMedia}
                   invalid={!!result?.validationErrors?.media}
+                  key={getInputValue("media")?.lastModified} // File input do not allow defaultValue so reset field by changing key
                 />
               </FieldGroup>
             </Fieldset>

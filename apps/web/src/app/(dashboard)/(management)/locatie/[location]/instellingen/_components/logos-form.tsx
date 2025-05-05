@@ -25,7 +25,7 @@ export default function LogosForm({
   className,
   locationId,
 }: PropsWithChildren<{ className?: string; locationId: string }>) {
-  const { execute, result } = useAction(
+  const { execute } = useAction(
     updateLocationLogosAction.bind(null, locationId),
     {
       onSuccess: () => {

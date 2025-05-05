@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { createExternalCertificateAction } from "~/actions/certificate/create-external-certificate-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -38,16 +39,7 @@ export function AddCertificate({
     useState<CertificateTemplate["id"] | null>(null);
   const [validMedia, setValidMedia] = useState(false);
 
-  const close = () => {
-    setIsOpen(false);
-    setTimeout(() => {
-      setValidMedia(false);
-      setSelectedCertificateTemplate(null);
-      setCurrentStep("media");
-    }, 100);
-  };
-
-  const { execute, result } = useAction(
+  const { execute, result, input, reset } = useAction(
     createExternalCertificateAction.bind(null, personId),
     {
       onSuccess: () => {
@@ -60,6 +52,18 @@ export function AddCertificate({
   const template = certificateTemplates.find(
     (template) => template.id === selectedCertificateTemplate,
   );
+
+  const { getInputValue } = useFormInput(input, template);
+
+  const close = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      reset();
+      setValidMedia(false);
+      setSelectedCertificateTemplate(null);
+      setCurrentStep("media");
+    }, 100);
+  };
 
   return (
     <>
@@ -82,6 +86,7 @@ export function AddCertificate({
                 setValidMedia={setValidMedia}
                 invalid={!!result?.validationErrors?.media}
                 small={!validMedia && currentStep !== "media"}
+                key={getInputValue("media")?.lastModified} // File input do not allow defaultValue so reset field by changing key
               />
               <div className={currentStep === "media" ? "hidden" : ""}>
                 <CertificateTemplatePicker
@@ -110,8 +115,12 @@ export function AddCertificate({
                       !!result?.validationErrors?.additionalComments,
                   }}
                   defaultValues={{
-                    title: template?.title,
-                    issuingAuthority: template?.issuingAuthority,
+                    title: getInputValue("title"),
+                    issuingAuthority: getInputValue("issuingAuthority"),
+                    identifier: getInputValue("identifier"),
+                    issuingLocation: getInputValue("issuingLocation"),
+                    awardedAt: getInputValue("awardedAt"),
+                    additionalComments: getInputValue("additionalComments"),
                   }}
                 />
               </div>

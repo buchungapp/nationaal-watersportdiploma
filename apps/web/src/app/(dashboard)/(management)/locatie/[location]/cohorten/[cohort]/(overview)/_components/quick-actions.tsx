@@ -10,6 +10,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { removeCohortAction } from "~/actions/cohort/remove-cohort-action";
 import { updateCohortAction } from "~/actions/cohort/update-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
@@ -75,13 +76,13 @@ export function CohortActions(props: Props) {
       <EditCohortDialog
         {...props}
         isOpen={isDialogOpen === "edit"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "edit" : null)}
+        close={() => setIsDialogOpen(null)}
       />
 
       <RemoveCohortDialog
         {...props}
         isOpen={isDialogOpen === "remove"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "remove" : null)}
+        close={() => setIsDialogOpen(null)}
       />
     </div>
   );
@@ -108,25 +109,32 @@ function updateCohortErrorMessage(
 function EditCohortDialog({
   isOpen,
   cohort,
-  setIsOpen,
+  close,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
-  const { execute, result } = useAction(
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     updateCohortAction.bind(null, cohort.id),
     {
       onSuccess: () => {
         toast.success("Cohort bijgewerkt");
-        setIsOpen(false);
+        closeDialog();
       },
     },
   );
 
+  const { getInputValue } = useFormInput(input, cohort);
+
   const errorMessage = updateCohortErrorMessage(result);
 
   return (
-    <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
+    <Dialog open={isOpen} onClose={closeDialog} size="2xl">
       <DialogTitle>Cohort bewerken</DialogTitle>
       <DialogDescription>Pas de gegevens van dit cohort aan.</DialogDescription>
       <form action={execute}>
@@ -140,7 +148,7 @@ function EditCohortDialog({
                     name="label"
                     required
                     minLength={1}
-                    defaultValue={cohort.label}
+                    defaultValue={getInputValue("label")}
                   />
                 </Field>
                 <Field>
@@ -149,7 +157,11 @@ function EditCohortDialog({
                     name="accessStartTime"
                     type="datetime-local"
                     defaultValue={
-                      dayjs(cohort.accessStartTime).toISOString().split(".")[0]
+                      getInputValue("accessStartTime")
+                        ? dayjs(getInputValue("accessStartTime"))
+                            .toISOString()
+                            .split(".")[0]
+                        : undefined
                     }
                     required
                   />
@@ -160,7 +172,11 @@ function EditCohortDialog({
                     name="accessEndTime"
                     type="datetime-local"
                     defaultValue={
-                      dayjs(cohort.accessEndTime).toISOString().split(".")[0]
+                      getInputValue("accessEndTime")
+                        ? dayjs(getInputValue("accessEndTime"))
+                            .toISOString()
+                            .split(".")[0]
+                        : undefined
                     }
                     required
                   />
@@ -172,7 +188,7 @@ function EditCohortDialog({
           </Fieldset>
         </DialogBody>
         <DialogActions>
-          <Button plain onClick={() => setIsOpen(false)}>
+          <Button plain onClick={closeDialog}>
             Sluiten
           </Button>
           <SubmitButton />
@@ -209,10 +225,10 @@ function removeCohortErrorMessage(
 function RemoveCohortDialog({
   isOpen,
   cohort,
-  setIsOpen,
+  close,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const router = useRouter();
   const params = useParams();
@@ -221,7 +237,7 @@ function RemoveCohortDialog({
     removeCohortAction.bind(null, cohort.id),
     {
       onSuccess: () => {
-        setIsOpen(false);
+        close();
         router.push(`/locatie/${params.location as string}/cohorten`);
       },
     },
@@ -230,7 +246,7 @@ function RemoveCohortDialog({
   const errorMessage = removeCohortErrorMessage(result);
 
   return (
-    <Alert open={isOpen} onClose={setIsOpen} size="md">
+    <Alert open={isOpen} onClose={close} size="md">
       <AlertTitle>Cohort verwijderen</AlertTitle>
       <AlertDescription>
         Weet je zeker dat je dit cohort wilt verwijderen? Dit verwijdert alle
@@ -240,7 +256,7 @@ function RemoveCohortDialog({
       {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
 
       <AlertActions>
-        <Button plain onClick={() => setIsOpen(false)}>
+        <Button plain onClick={close}>
           Annuleren
         </Button>
         <Button color="red" disabled={isPending} onClick={() => execute()}>
