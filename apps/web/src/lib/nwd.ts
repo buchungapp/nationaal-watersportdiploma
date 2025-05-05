@@ -58,6 +58,67 @@ const dbConfig: DatabaseConfiguration = {
   connectionString: process.env.PGURI,
 };
 
+type MediaType = File | Buffer;
+
+async function constructMediaBuffer(media: MediaType) {
+  return Buffer.from(
+    new Uint8Array(media instanceof File ? await media.arrayBuffer() : media),
+  );
+}
+
+type MediaRemoveType = () => ReturnType<typeof Platform.Media.remove>;
+type MediaCreateOrReplaceResult<Media, OldId> = Media extends undefined
+  ? { id?: never; remove?: never }
+  : Media extends null
+    ? OldId extends null
+      ? { id: null; remove?: never }
+      : { id: null; remove: MediaRemoveType }
+    : OldId extends null
+      ? { id: string; remove?: never }
+      : { id: string; remove: MediaRemoveType };
+
+/**
+ * Creates a new media or replaces an existing one, if media is undefined, the existing media will not be removed / no action is performed.
+ * @param media - The media to create or replace.
+ * @param oldMediaId - The ID of the existing media to replace.
+ * @returns The ID of the created or replaced media and a function to remove the old media.
+ */
+async function createOrReplaceMedia<
+  Media extends MediaType | null | undefined,
+  OldId extends string | null = null,
+>(
+  media: Media,
+  oldMediaId?: OldId,
+  creationOptions: Omit<Parameters<typeof Platform.Media.create>[0], "file"> = {
+    isPublic: false,
+  },
+): Promise<MediaCreateOrReplaceResult<Media, OldId>> {
+  if (typeof media === "undefined") {
+    return { id: undefined, remove: undefined } as MediaCreateOrReplaceResult<
+      Media,
+      OldId
+    >;
+  }
+
+  let id: string | null = null;
+  let remove: MediaRemoveType | undefined;
+
+  if (oldMediaId) {
+    remove = () => Platform.Media.remove(oldMediaId);
+  }
+
+  if (media) {
+    const buffer = await constructMediaBuffer(media);
+    const { id: newId } = await Platform.Media.create({
+      file: buffer,
+      ...creationOptions,
+    });
+    id = newId;
+  }
+
+  return { id, remove } as MediaCreateOrReplaceResult<Media, OldId>;
+}
+
 async function getPrimaryPerson<T extends boolean = true>(
   user: Awaited<ReturnType<typeof getUserOrThrow>>,
   force = true as T,
@@ -355,7 +416,7 @@ export const createExternalCertificate = async ({
   fields,
 }: {
   personId: string;
-  media: File | Buffer | null;
+  media: MediaType | null;
   fields: {
     title: string;
     awardedAt: string | null;
@@ -375,20 +436,7 @@ export const createExternalCertificate = async ({
       throw new Error("Unauthorized");
     }
 
-    let mediaId = null;
-    if (media) {
-      const buffer = Buffer.from(
-        new Uint8Array(
-          media instanceof File ? await media.arrayBuffer() : media,
-        ),
-      );
-
-      const { id } = await Platform.Media.create({
-        file: buffer,
-        isPublic: false,
-      });
-      mediaId = id;
-    }
+    const { id: mediaId } = await createOrReplaceMedia(media);
 
     return await Certificate.External.create({
       personId,
@@ -406,7 +454,7 @@ export const updateExternalCertificate = async ({
 }: {
   id: string;
   personId: string;
-  media?: File | Buffer | null;
+  media?: MediaType | null;
   fields?: {
     title?: string;
     awardedAt?: string | null;
@@ -436,30 +484,10 @@ export const updateExternalCertificate = async ({
       throw new Error("Unauthorized");
     }
 
-    let mediaId = undefined;
-    let removeMediaId = undefined;
-    if (typeof media !== "undefined") {
-      if (oldCertificate.mediaId !== null) {
-        removeMediaId = oldCertificate.mediaId;
-      }
-
-      if (media) {
-        const buffer = Buffer.from(
-          new Uint8Array(
-            media instanceof File ? await media.arrayBuffer() : media,
-          ),
-        );
-
-        const { id: newMediaId } = await Platform.Media.create({
-          file: buffer,
-          isPublic: false,
-        });
-
-        mediaId = newMediaId;
-      } else {
-        mediaId = null;
-      }
-    }
+    const { id: mediaId, remove: removeMedia } = await createOrReplaceMedia(
+      media,
+      oldCertificate.mediaId,
+    );
 
     const certificate = await Certificate.External.update({
       id,
@@ -467,9 +495,7 @@ export const updateExternalCertificate = async ({
       ...fields,
     });
 
-    if (removeMediaId) {
-      await Platform.Media.remove(removeMediaId);
-    }
+    await removeMedia?.();
 
     return certificate;
   });
@@ -1483,6 +1509,60 @@ export type SocialPlatform =
   | "whatsapp"
   | "x"
   | "youtube";
+
+export const updateLocationLogos = async (
+  id: string,
+  {
+    logo,
+    logoSquare,
+    logoCertificate,
+  }: {
+    logo?: MediaType | null;
+    logoSquare?: MediaType | null;
+    logoCertificate?: MediaType | null;
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: id,
+      personId: primaryPerson.id,
+    });
+
+    const location = await Location.fromId(id);
+    const createOptions = { isPublic: true };
+
+    const [
+      { id: logoMediaId, remove: removeLogoMedia },
+      { id: logoSquareMediaId, remove: removeLogoSquareMedia },
+      { id: logoCertificateMediaId, remove: removeLogoCertificateMedia },
+    ] = await Promise.all([
+      createOrReplaceMedia(logo, location.logo?.id, createOptions),
+      createOrReplaceMedia(logoSquare, location.logoSquare?.id, createOptions),
+      createOrReplaceMedia(
+        logoCertificate,
+        location.logoCertificate?.id,
+        createOptions,
+      ),
+    ]);
+
+    await Location.updateDetails({
+      id,
+      logoMediaId,
+      squareLogoMediaId: logoSquareMediaId,
+      certificateMediaId: logoCertificateMediaId,
+    });
+
+    await Promise.all([
+      removeLogoMedia?.(),
+      removeLogoSquareMedia?.(),
+      removeLogoCertificateMedia?.(),
+    ]);
+  });
+};
 
 export const updateLocationDetails = async (
   id: string,
@@ -2974,7 +3054,7 @@ export const createCashback = async ({
   media,
   fields,
 }: {
-  media: File | Buffer;
+  media: MediaType;
   fields: {
     applicantFullName: string;
     applicantEmail: string;
@@ -2987,14 +3067,7 @@ export const createCashback = async ({
   };
 }) => {
   return makeRequest(async () => {
-    const buffer = Buffer.from(
-      new Uint8Array(media instanceof File ? await media.arrayBuffer() : media),
-    );
-
-    const { id: mediaId } = await Platform.Media.create({
-      file: buffer,
-      isPublic: false,
-    });
+    const { id: mediaId } = await createOrReplaceMedia(media);
 
     return await Marketing.Cashback.create({
       ...fields,

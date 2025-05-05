@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
+import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "~/actions/files";
 import { PDFViewer } from "./pdf-viewer";
 
 export function MediaDropzone({
@@ -12,6 +13,7 @@ export function MediaDropzone({
   small,
   invalid,
   setFilled,
+  defaultPreview,
 }: {
   required?: boolean;
   name: string;
@@ -19,11 +21,19 @@ export function MediaDropzone({
   setFilled?: (filled: boolean) => void;
   small?: boolean;
   invalid?: boolean;
+  defaultPreview?: {
+    preview: string;
+    type: "image" | "pdf";
+  };
 }) {
   const hiddenInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [type, setType] = useState<"image" | "pdf" | null>(null);
+  const [preview, setPreview] = useState<string | null>(
+    defaultPreview?.preview ?? null,
+  );
+  const [type, setType] = useState<"image" | "pdf" | null>(
+    defaultPreview?.type ?? null,
+  );
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
     useDropzone({
@@ -41,12 +51,8 @@ export function MediaDropzone({
           return toast.error("Bestand is te groot", { duration: 2500 });
         }
       },
-      maxSize: 5_000_000, // 5MB
-      accept: {
-        "image/png": [".png"],
-        "image/jpeg": [".jpg", ".jpeg"],
-        "application/pdf": [".pdf"],
-      },
+      maxSize: MAX_FILE_SIZE, // 5MB
+      accept: ACCEPTED_IMAGE_TYPES,
 
       onDropAccepted: (acceptedFiles) => {
         setFilled?.(true);
@@ -106,11 +112,7 @@ export function MediaDropzone({
 
           {preview ? (
             type === "image" ? (
-              <img
-                src={preview}
-                alt="certificaat voorbeeld"
-                className="rounded max-h-45"
-              />
+              <img src={preview} alt="voorbeeld" className="rounded max-h-45" />
             ) : (
               <div className="w-full h-45">
                 <PDFViewer file={preview} multiplePages={true} />
@@ -119,7 +121,7 @@ export function MediaDropzone({
           ) : (
             <>
               Sleep hier je afbeelding heen, of klik om te uploaden.
-              <span>Max 5MB.</span>
+              <span>Max {MAX_FILE_SIZE / 1000 / 1000}MB.</span>
             </>
           )}
         </div>
