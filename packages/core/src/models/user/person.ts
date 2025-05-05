@@ -13,7 +13,7 @@ import {
 import { aggregate } from "drizzle-toolbelt";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   possibleSingleRow,
   singleOrArray,
@@ -548,6 +548,115 @@ export const updateDetails = wrapCommand(
         .where(eq(s.person.id, input.personId))
         .returning({ id: s.person.id })
         .then(singleRow);
+    },
+  ),
+);
+
+export const mergePersons = wrapCommand(
+  "user.person.mergePersons",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      targetPersonId: uuidSchema,
+    }),
+    async (input) => {
+      return await withTransaction(async (tx) => {
+        // First validate that both persons exist and belong to the same user
+        const [personOne, personTwo] = await tx
+          .select({
+            id: s.person.id,
+            userId: s.person.userId,
+          })
+          .from(s.person)
+          .where(
+            and(
+              inArray(s.person.id, [input.personId, input.targetPersonId]),
+              isNull(s.person.deletedAt),
+            ),
+          );
+
+        if (!personOne || !personTwo) {
+          throw new Error("One or both persons not found");
+        }
+
+        if (personOne.userId !== personTwo.userId) {
+          throw new Error("Persons do not belong to the same user");
+        }
+
+        await Promise.all([
+          // Transfer actors
+          (async () => {
+            const actors = await tx
+              .select()
+              .from(s.actor)
+              .where(eq(s.actor.personId, input.personId));
+
+            if (actors.length > 0) {
+              await tx
+                .delete(s.actor)
+                .where(eq(s.actor.personId, input.personId));
+
+              await tx
+                .insert(s.actor)
+                .values(
+                  actors.map((actor) => ({
+                    ...actor,
+                    personId: input.targetPersonId,
+                  })),
+                )
+                .onConflictDoNothing();
+            }
+          })(),
+
+          // Transfer student curricula
+          await tx
+            .update(s.studentCurriculum)
+            .set({
+              personId: input.targetPersonId,
+            })
+            .where(eq(s.studentCurriculum.personId, input.personId)),
+
+          // Transfer location links
+          (async () => {
+            const links = await tx
+              .select()
+              .from(s.personLocationLink)
+              .where(eq(s.personLocationLink.personId, input.personId));
+
+            if (links.length > 0) {
+              await tx
+                .delete(s.personLocationLink)
+                .where(eq(s.personLocationLink.personId, input.personId));
+
+              await tx
+                .insert(s.personLocationLink)
+                .values(
+                  links.map((link) => ({
+                    ...link,
+                    personId: input.targetPersonId,
+                  })),
+                )
+                .onConflictDoNothing();
+            }
+          })(),
+
+          tx
+            .update(s.externalCertificate)
+            .set({
+              personId: input.targetPersonId,
+            })
+            .where(eq(s.externalCertificate.personId, input.personId)),
+
+          tx
+            .update(s.logbook)
+            .set({
+              personId: input.targetPersonId,
+            })
+            .where(eq(s.logbook.personId, input.personId)),
+        ]);
+
+        await tx.delete(s.person).where(eq(s.person.id, input.personId));
+      });
     },
   ),
 );

@@ -6,6 +6,10 @@ import posthog from "./posthog";
 export const showAllocationTimeline: Flag<boolean> = flag({
   key: "allocation-timeline",
   async decide() {
+    if (process.env.NODE_ENV === "development") {
+      return true;
+    }
+
     const key = this.key;
     const user = await getUserOrThrow();
     const flag = await posthog.getFeatureFlag(key, user.authUserId);
