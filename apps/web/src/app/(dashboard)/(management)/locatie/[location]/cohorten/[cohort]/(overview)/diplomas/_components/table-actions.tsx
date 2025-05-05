@@ -1,4 +1,4 @@
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
@@ -17,6 +17,7 @@ import { issueCertificatesInCohortAction } from "~/actions/cohort/certificate/is
 import { withdrawCertificatesInCohortAction } from "~/actions/cohort/certificate/withdraw-certificates-in-cohort-action";
 import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
 import { CONFIRMATION_WORD } from "~/actions/cohort/student/confirm-word";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
@@ -158,27 +159,25 @@ export function ActionButtons(props: Props) {
       <IssueCertificateDialog
         {...props}
         isOpen={isDialogOpen === "issue"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "issue" : null)}
+        close={() => setIsDialogOpen(null)}
       />
 
       <RemoveCertificateDialog
         {...props}
         isOpen={isDialogOpen === "remove"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "remove" : null)}
+        close={() => setIsDialogOpen(null)}
       />
 
       <CompleteCoreModulesDialog
         {...props}
         isOpen={isDialogOpen === "complete-core-modules"}
-        setIsOpen={(value) =>
-          setIsDialogOpen(value ? "complete-core-modules" : null)
-        }
+        close={() => setIsDialogOpen(null)}
       />
 
       <DownloadCertificatesDialog
         {...props}
         isOpen={isDialogOpen === "download"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "download" : null)}
+        close={() => setIsDialogOpen(null)}
       />
     </>
   );
@@ -209,15 +208,20 @@ export function IssueCertificateDialog({
   cohortId,
   defaultVisibleFrom,
   isOpen,
-  setIsOpen,
+  close,
   resetSelection,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const [delayVisibility, setDelayVisibility] = useState(!!defaultVisibleFrom);
 
-  const { execute, result, isPending } = useAction(
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, result, isPending, input, reset } = useAction(
     issueCertificatesInCohortAction.bind(
       null,
       cohortId,
@@ -225,16 +229,20 @@ export function IssueCertificateDialog({
     ),
     {
       onSuccess: () => {
-        setIsOpen(false);
+        closeDialog();
         resetSelection();
       },
     },
   );
 
+  const { getInputValue } = useFormInput(input, {
+    visibleFrom: defaultVisibleFrom ?? dayjs().toISOString(),
+  });
+
   const errorMessage = issueCertificatesInCohortErrorMessage(result);
 
   return (
-    <Alert open={isOpen} onClose={setIsOpen} size="lg">
+    <Alert open={isOpen} onClose={closeDialog} size="lg">
       <form action={execute}>
         <AlertTitle>Diploma's uitgeven</AlertTitle>
 
@@ -259,11 +267,7 @@ export function IssueCertificateDialog({
                 <SmartDatetimePicker
                   name="visibleFrom"
                   required={true}
-                  defaultValue={
-                    defaultVisibleFrom
-                      ? dayjs(defaultVisibleFrom).toDate()
-                      : dayjs().toDate()
-                  }
+                  defaultValue={dayjs(getInputValue("visibleFrom")).toDate()}
                 />
               </div>
             </>
@@ -272,7 +276,7 @@ export function IssueCertificateDialog({
           {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
         </AlertBody>
         <AlertActions>
-          <Button plain onClick={() => setIsOpen(false)}>
+          <Button plain onClick={closeDialog}>
             Annuleren
           </Button>
           <Button type="submit" disabled={isPending}>
@@ -285,24 +289,58 @@ export function IssueCertificateDialog({
   );
 }
 
+function withdrawCertificatesInCohortErrorMessage(
+  error: InferUseActionHookReturn<
+    typeof withdrawCertificatesInCohortAction
+  >["result"],
+) {
+  if (error.serverError) {
+    return "Er is een fout opgetreden, mogelijk is het diploma meer dan 72 uur geleden uitgegeven. Neem in dat geval contact op met het Secretariaat.";
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 export function RemoveCertificateDialog({
   rows,
   isOpen,
   cohortId,
-  setIsOpen,
+  close,
   resetSelection,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
-  const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const { execute, isPending, result } = useAction(
+    withdrawCertificatesInCohortAction.bind(
+      null,
+      cohortId,
+      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
+      rows.map((row) => row.certificate?.id!),
+    ),
+    {
+      onSuccess: () => {
+        close();
+        resetSelection();
+      },
+    },
+  );
+
+  const errorMessage = withdrawCertificatesInCohortErrorMessage(result);
 
   return (
-    <Alert open={isOpen} onClose={setIsOpen} size="md">
+    <Alert open={isOpen} onClose={close} size="md">
       <AlertTitle>Diploma's verwijderen</AlertTitle>
       <AlertDescription>
-        Tot 24 uur na het uitgeven van een diploma kan deze nog verwijderd
+        Tot 72 uur na het uitgeven van een diploma kan deze nog verwijderd
         worden.{" "}
         <strong>
           Het verwijderen maakt het reeds uitgegeven diploma onbruikbaar!
@@ -310,33 +348,14 @@ export function RemoveCertificateDialog({
         <br />
         Weet je zeker dat je de diploma's wilt verwijderen?
       </AlertDescription>
-      {error ? <ErrorMessage>{error}</ErrorMessage> : null}
+      {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
 
       <AlertActions>
-        <Button plain onClick={() => setIsOpen(false)}>
+        <Button plain onClick={close}>
           Annuleren
         </Button>
-        <Button
-          color="red"
-          disabled={pending}
-          onClick={() =>
-            withdrawCertificatesInCohortAction(
-              cohortId,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
-              rows.map((row) => row.certificate!.id),
-            )
-              .then(() => {
-                setIsOpen(false);
-                resetSelection();
-              })
-              .catch(() => {
-                setError(
-                  "Er is een fout opgetreden, mogelijk is het diploma meer dan 72 uur geleden uitgegeven. Neem in dat geval contact op met het Secretariaat.",
-                );
-              })
-          }
-        >
-          {pending ? <Spinner className="text-white" /> : null} Verwijderen
+        <Button color="red" disabled={isPending} onClick={() => execute()}>
+          {isPending ? <Spinner className="text-white" /> : null} Verwijderen
         </Button>
       </AlertActions>
     </Alert>
@@ -346,11 +365,11 @@ export function RemoveCertificateDialog({
 function CompleteCoreModulesDialog({
   rows,
   isOpen,
-  setIsOpen,
+  close,
   resetSelection,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const { execute } = useAction(
     completeAllCoreCompetenciesForStudentInCohortAction.bind(
@@ -360,7 +379,7 @@ function CompleteCoreModulesDialog({
     {
       onSuccess: () => {
         toast.success("Kernmodules afgerond");
-        setIsOpen(false);
+        close();
         resetSelection();
       },
       onError: () => {
@@ -371,7 +390,7 @@ function CompleteCoreModulesDialog({
 
   return (
     <>
-      <Alert open={isOpen} onClose={setIsOpen} size="lg">
+      <Alert open={isOpen} onClose={close} size="lg">
         <AlertTitle>Alle kernmodules afronden</AlertTitle>
         <AlertDescription>
           With great power comes great responsibility. Houd rekening met het
@@ -403,7 +422,7 @@ function CompleteCoreModulesDialog({
             />
           </AlertBody>
           <AlertActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={close}>
               Annuleren
             </Button>
             <CoreModulesSubmitButton />
@@ -427,21 +446,26 @@ function CoreModulesSubmitButton() {
 function DownloadCertificatesDialog({
   rows,
   isOpen,
-  setIsOpen,
+  close,
   resetSelection,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
-  const { execute } = useAction(
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, input, reset } = useAction(
     downloadCertificatesAction.bind(
       null,
-      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate
-      rows.map((row) => row.certificate!.handle),
+      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
+      rows.map((row) => row.certificate?.handle!),
     ),
     {
       onSuccess: () => {
-        setIsOpen(false);
+        closeDialog();
         resetSelection();
       },
       onError: () => {
@@ -450,9 +474,14 @@ function DownloadCertificatesDialog({
     },
   );
 
+  const { getInputValue } = useFormInput(input, {
+    filename: `${dayjs().toISOString()}-export-diplomas`,
+    sort: "student",
+  });
+
   return (
     <>
-      <Alert open={isOpen} onClose={setIsOpen} size="lg">
+      <Alert open={isOpen} onClose={closeDialog} size="lg">
         <AlertTitle>Diploma's downloaden</AlertTitle>
         <AlertDescription>
           Download een PDF-bestand met de diploma's van de geselecteerde
@@ -474,7 +503,7 @@ function DownloadCertificatesDialog({
                     name="filename"
                     type="text"
                     required
-                    defaultValue={`${dayjs().toISOString()}-export-diplomas`}
+                    defaultValue={getInputValue("filename")}
                   />
                 </Field>
 
@@ -483,7 +512,7 @@ function DownloadCertificatesDialog({
                   <Text>
                     Hoe moeten de diploma's in de PDF gesorteerd zijn?
                   </Text>
-                  <RadioGroup name="sort" defaultValue="student">
+                  <RadioGroup name="sort" defaultValue={getInputValue("sort")}>
                     <RadioField>
                       <Radio value="student" />
                       <Label>Naam cursist</Label>
@@ -503,7 +532,7 @@ function DownloadCertificatesDialog({
             </HeadlessDisclosure>
           </AlertBody>
           <AlertActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Annuleren
             </Button>
             <DownloadSubmitButton />

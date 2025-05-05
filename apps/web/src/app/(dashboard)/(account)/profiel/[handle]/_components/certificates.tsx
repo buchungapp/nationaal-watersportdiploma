@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import Image from "next/image";
 import { cache } from "react";
 import { TemplateHeader } from "~/app/(certificate)/diploma/[id]/_components/template-header";
@@ -24,6 +23,7 @@ import {
 } from "~/app/(dashboard)/_components/pdf-viewer";
 import { Code } from "~/app/(dashboard)/_components/text";
 import { DialogProvider } from "~/app/(dashboard)/_hooks/use-dialog";
+import dayjs from "~/lib/dayjs";
 import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,

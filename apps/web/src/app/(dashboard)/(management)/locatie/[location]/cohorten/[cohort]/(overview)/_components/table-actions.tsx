@@ -11,6 +11,7 @@ import { claimStudentsInCohortAction } from "~/actions/cohort/student/claim-stud
 import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
 import { releaseStudentsInCohortAction } from "~/actions/cohort/student/release-students-in-cohort-action";
 import { updateStudentTagsInCohortAction } from "~/actions/cohort/student/update-student-tags-in-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import {
   Combobox,
   ComboboxLabel,
@@ -128,15 +129,19 @@ function StartProgramDialog({
   rows,
   cohortId,
   isOpen,
-  setIsOpen,
+  close,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const [programQuery, setProgramQuery] = useState("");
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
-  const { execute } = useAction(
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, input, reset } = useAction(
     enrollStudentsInCurriculumInCohortAction.bind(
       null,
       cohortId,
@@ -148,15 +153,22 @@ function StartProgramDialog({
     {
       onSuccess: () => {
         toast.success("Programma's gestart");
-        setIsOpen(false);
+        closeDialog();
       },
       onError: () => {
         toast.error("Er is iets misgegaan");
       },
     },
   );
-
   const { data: programs } = useSWR("allPrograms", listPrograms);
+
+  const { getInputValue } = useFormInput(input);
+
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(
+    programs?.find((program) => program.id === getInputValue("curriculumId"))
+      ?.id ?? null,
+  );
+
   const { data: activeCurriculumForProgram } = useSWR(
     ["activeCurriculumForProgram", selectedProgram],
     async () => {
@@ -187,7 +199,7 @@ function StartProgramDialog({
 
   return (
     <>
-      <Dialog open={isOpen} onClose={setIsOpen} size="2xl">
+      <Dialog open={isOpen} onClose={closeDialog} size="2xl">
         <DialogTitle>Start programma</DialogTitle>
         <form action={execute}>
           <DialogBody>
@@ -195,7 +207,10 @@ function StartProgramDialog({
             <input
               type="hidden"
               name="curriculumId"
-              value={activeCurriculumForProgram?.curriculum?.id ?? ""}
+              value={
+                activeCurriculumForProgram?.curriculum?.id ??
+                getInputValue("curriculumId")
+              }
             />
             <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
               <Field>
@@ -225,6 +240,12 @@ function StartProgramDialog({
 
                     setSelectedProgram(value);
                   }}
+                  value={selectedProgram}
+                  defaultValue={
+                    programs?.find(
+                      (program) => program.id === getInputValue("curriculumId"),
+                    )?.id ?? null
+                  }
                   // invalid={!!state?.errors.curriculumId}
                 >
                   {programs
@@ -259,6 +280,7 @@ function StartProgramDialog({
                       !!activeCurriculumForProgram?.curriculum
                     )
                   }
+                  defaultValue={getInputValue("gearTypeId")}
                   // invalid={!!state?.errors.gearTypeId}
                 >
                   {activeCurriculumForProgram?.gearTypes.map((gearType) => (
@@ -271,7 +293,7 @@ function StartProgramDialog({
             </div>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Annuleren
             </Button>
             <ProgramSubmitButton />
@@ -313,19 +335,17 @@ export function ActionButtons(props: Props) {
       <StartProgramDialog
         {...props}
         isOpen={isDialogOpen === "start-program"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "start-program" : null)}
+        close={() => setIsDialogOpen(null)}
       />
       <AssignInstructorDialog
         {...props}
         isOpen={isDialogOpen === "assign-instructor"}
-        setIsOpen={(value) =>
-          setIsDialogOpen(value ? "assign-instructor" : null)
-        }
+        close={() => setIsDialogOpen(null)}
       />
       <AddTagDialog
         {...props}
         isOpen={isDialogOpen === "add-tag"}
-        setIsOpen={(value) => setIsDialogOpen(value ? "add-tag" : null)}
+        close={() => setIsDialogOpen(null)}
       />
     </>
   );
@@ -364,14 +384,19 @@ function AssignInstructorDialog({
   rows,
   cohortId,
   isOpen,
-  setIsOpen,
+  close,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const [instructorQuery, setInstructorQuery] = useState("");
 
-  const { execute } = useAction(
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, input, reset } = useAction(
     assignInstructorToStudentInCohortAction.bind(
       null,
       cohortId,
@@ -380,13 +405,15 @@ function AssignInstructorDialog({
     {
       onSuccess: () => {
         toast.success("Instructeur gewijzigd");
-        setIsOpen(false);
+        closeDialog();
       },
       onError: () => {
         toast.error("Er is iets misgegaan");
       },
     },
   );
+
+  const { getInputValue } = useFormInput(input);
 
   const { data: instructors } = useSWR(
     ["allInstructorsInCohort", cohortId],
@@ -397,7 +424,7 @@ function AssignInstructorDialog({
 
   return (
     <>
-      <Dialog open={isOpen} onClose={setIsOpen} size="md">
+      <Dialog open={isOpen} onClose={closeDialog} size="md">
         <DialogTitle>Instructeur toewijzen</DialogTitle>
         <DialogDescription>
           Laat leeg om de instructeur te verwijderen.
@@ -426,6 +453,7 @@ function AssignInstructorDialog({
                     .filter(Boolean)
                     .join(" ");
                 }}
+                defaultValue={getInputValue("instructorPersonId")}
               >
                 {instructors
                   .filter(
@@ -466,7 +494,7 @@ function AssignInstructorDialog({
             </Field>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Annuleren
             </Button>
             <StudentSubmitButton />
@@ -520,10 +548,10 @@ function AddTagDialog({
   rows,
   cohortId,
   isOpen,
-  setIsOpen,
+  close,
 }: Props & {
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const [tagsToAdd, setTagsToAdd] = useState<Tag[]>([]);
 
@@ -537,8 +565,13 @@ function AddTagDialog({
     });
   };
 
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
   const toastId = useRef<string | number>(null);
-  const { execute } = useAction(
+  const { execute, reset } = useAction(
     updateStudentTagsInCohortAction.bind(null, cohortId),
     {
       onExecute: () => {
@@ -550,7 +583,7 @@ function AddTagDialog({
         }
 
         toast.success("Tags toegevoegd");
-        setIsOpen(false);
+        closeDialog();
       },
       onError: () => {
         if (toastId.current) {
@@ -592,7 +625,7 @@ function AddTagDialog({
 
   return (
     <>
-      <Dialog open={isOpen} onClose={setIsOpen} size="md">
+      <Dialog open={isOpen} onClose={closeDialog} size="md">
         <DialogTitle>Tags toevoegen</DialogTitle>
         <DialogDescription>
           Welke tag(s) wil je toevoegen aan de geselecteerde cursisten? Om een
@@ -621,7 +654,7 @@ function AddTagDialog({
             />
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Annuleren
             </Button>
             <TagSubmitButton />

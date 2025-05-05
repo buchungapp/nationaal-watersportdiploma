@@ -8,6 +8,7 @@ import dayjs from "~/lib/dayjs";
 
 import type { InferUseStateActionHookReturn } from "next-safe-action/hooks";
 import { useStateAction } from "next-safe-action/stateful-hooks";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { createPersonsAction } from "~/actions/person/create-persons-action";
 import {
   COLUMN_MAPPING,
@@ -217,7 +218,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
             // biome-ignore lint/style/noNonNullAssertion: roles is set when upload is completed
             roles={roles!}
             locationId={locationId}
-            setIsOpen={setIsOpen}
+            close={() => setIsOpen(false)}
           />
         )}
       </Dialog>
@@ -248,21 +249,21 @@ function SubmitForm({
   roles,
   locationId,
   countries,
-  setIsOpen,
+  close,
 }: {
   data: CSVData;
   roles: [ActorType, ...ActorType[]];
   locationId: string;
   countries: { code: string; name: string }[];
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
-  const { execute, result } = useStateAction(
-    createPersonsAction.bind(null, locationId, data, countries),
+  const { execute, result, input } = useStateAction(
+    createPersonsAction.bind(null, locationId, roles, data, countries),
     {
       onSuccess: ({ data }) => {
         if (data?.state !== "submitted") return;
 
-        setIsOpen(false);
+        close();
         toast.success("Personen zijn toegevoegd.");
       },
       onError: () => {
@@ -272,6 +273,19 @@ function SubmitForm({
       },
     },
   );
+
+  const { getInputValue } = useFormInput(input ?? undefined, {
+    ...data?.labels?.reduce(
+      (acc, item, index) => {
+        acc[`include-column-${index}`] =
+          COLUMN_MAPPING.find((col) =>
+            item?.label.toLowerCase().startsWith(col.toLowerCase()),
+          ) ?? SELECT_LABEL;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+  });
 
   const errorMessage = createPersonsErrorMessage(result);
 
@@ -354,13 +368,9 @@ function SubmitForm({
                       <TableCell>
                         <Select
                           name={`include-column-${index}`}
-                          defaultValue={
-                            COLUMN_MAPPING.find((col) =>
-                              item?.label
-                                .toLowerCase()
-                                .startsWith(col.toLowerCase()),
-                            ) ?? SELECT_LABEL
-                          }
+                          defaultValue={getInputValue(
+                            `include-column-${index}`,
+                          )}
                           className="min-w-48"
                         >
                           <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
@@ -385,7 +395,7 @@ function SubmitForm({
         </>
       )}
       <DialogActions>
-        <Button plain onClick={() => setIsOpen(false)}>
+        <Button plain onClick={close}>
           Sluiten
         </Button>
         <SubmitButton />

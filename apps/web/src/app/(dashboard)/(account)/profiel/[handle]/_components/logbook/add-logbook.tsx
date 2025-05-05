@@ -4,6 +4,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { createLogbookAction } from "~/actions/logbook/create-logbook-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -27,9 +28,10 @@ export function AddLogbook({
 
   const close = () => {
     setIsOpen(false);
+    reset();
   };
 
-  const { execute, result } = useAction(
+  const { execute, result, input, reset } = useAction(
     createLogbookAction.bind(null, personId),
     {
       onSuccess: () => {
@@ -38,6 +40,8 @@ export function AddLogbook({
       },
     },
   );
+
+  const { getInputValue } = useFormInput(input);
 
   return (
     <>
@@ -71,6 +75,23 @@ export function AddLogbook({
                 conditions: !!result?.validationErrors?.conditions,
                 additionalComments:
                   !!result?.validationErrors?.additionalComments,
+              }}
+              defaultValues={{
+                startedAt: getInputValue("startedAt"),
+                endedAt: getInputValue("endedAt"),
+                departurePort: getInputValue("departurePort"),
+                arrivalPort: getInputValue("arrivalPort"),
+                location: getInputValue("location"),
+                windDirection: getInputValue("windDirection"),
+                windPower: getInputValue("windPower"),
+                boatType: getInputValue("boatType"),
+                boatLength: getInputValue("boatLength"),
+                sailedNauticalMiles: getInputValue("sailedNauticalMiles"),
+                sailedHoursInDark: getInputValue("sailedHoursInDark"),
+                primaryRole: getInputValue("primaryRole"),
+                crewNames: getInputValue("crewNames"),
+                conditions: getInputValue("conditions"),
+                additionalComments: getInputValue("additionalComments"),
               }}
             />
           </DialogBody>

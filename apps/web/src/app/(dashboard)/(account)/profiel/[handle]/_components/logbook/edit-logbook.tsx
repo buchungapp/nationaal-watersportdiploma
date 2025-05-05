@@ -2,6 +2,7 @@
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { updateLogbookAction } from "~/actions/logbook/update-logbook-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -25,7 +26,12 @@ export function EditLogbook({
 }) {
   const { isOpen, close } = useDialog("edit-logbook");
 
-  const { execute, result } = useAction(
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     updateLogbookAction.bind(null, personId, logbook.id),
     {
       onSuccess: () => {
@@ -35,8 +41,10 @@ export function EditLogbook({
     },
   );
 
+  const { getInputValue } = useFormInput(input, logbook);
+
   return (
-    <Dialog size="2xl" open={isOpen} onClose={close}>
+    <Dialog size="2xl" open={isOpen} onClose={closeDialog}>
       <DialogTitle>Bewerk je logboekregel</DialogTitle>
       <Text>Vul de details in van je vaaractiviteit.</Text>
       <form action={execute}>
@@ -62,12 +70,26 @@ export function EditLogbook({
                 !!result?.validationErrors?.additionalComments,
             }}
             defaultValues={{
-              ...logbook,
+              startedAt: getInputValue("startedAt"),
+              endedAt: getInputValue("endedAt"),
+              departurePort: getInputValue("departurePort"),
+              arrivalPort: getInputValue("arrivalPort"),
+              location: getInputValue("location"),
+              windDirection: getInputValue("windDirection"),
+              windPower: getInputValue("windPower"),
+              boatType: getInputValue("boatType"),
+              boatLength: getInputValue("boatLength"),
+              sailedNauticalMiles: getInputValue("sailedNauticalMiles"),
+              sailedHoursInDark: getInputValue("sailedHoursInDark"),
+              primaryRole: getInputValue("primaryRole"),
+              crewNames: getInputValue("crewNames"),
+              conditions: getInputValue("conditions"),
+              additionalComments: getInputValue("additionalComments"),
             }}
           />
         </DialogBody>
         <DialogActions>
-          <Button plain onClick={close}>
+          <Button plain onClick={closeDialog}>
             Sluiten
           </Button>
           <SubmitButton invalid={false} />

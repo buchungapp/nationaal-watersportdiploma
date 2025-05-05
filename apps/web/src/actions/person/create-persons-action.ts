@@ -3,7 +3,8 @@ import { revalidatePath } from "next/cache";
 import pLimit from "p-limit";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { createStudentForLocation } from "~/lib/nwd";
+import { type ActorType, createPersonForLocation } from "~/lib/nwd";
+import { dateInput } from "../dates";
 import { actionClientWithMeta, voidActionSchema } from "../safe-action";
 import {
   COLUMN_MAPPING,
@@ -20,9 +21,15 @@ const createPersonsSchema = zfd
 
 const createPersonsArgsSchema: [
   locationId: z.ZodString,
+  roles: z.ZodArray<z.ZodEnum<[ActorType, ...ActorType[]]>, "atleastone">,
   csvData: typeof csvDataSchema,
   countries: typeof countriesSchema,
-] = [z.string().uuid(), csvDataSchema, countriesSchema];
+] = [
+  z.string().uuid(),
+  z.array(z.enum(["student", "instructor", "location_admin"])).nonempty(),
+  csvDataSchema,
+  countriesSchema,
+];
 
 type createPersonsStateActionType = {
   state: "parsed" | "submitted";
@@ -48,7 +55,7 @@ export const createPersonsAction = actionClientWithMeta
     async (
       {
         parsedInput: data,
-        bindArgsParsedInputs: [locationId, csvData, countries],
+        bindArgsParsedInputs: [locationId, roles, csvData, countries],
       },
       { prevResult },
     ) => {
@@ -60,7 +67,7 @@ export const createPersonsAction = actionClientWithMeta
 
       if (prevResult.data?.state === "parsed") {
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        return uploadPersons(locationId, prevResult.data.persons!);
+        return uploadPersons(locationId, roles, prevResult.data.persons!);
       }
 
       return parsePersonsFromCsvData(csvData, data, countries);
@@ -130,7 +137,7 @@ async function parsePersonsFromCsvData(
         .trim()
         .transform((v) => v || null),
       z.string(),
-      z.string().pipe(z.coerce.date()),
+      dateInput,
       z.string(),
       z
         .preprocess(
@@ -183,6 +190,7 @@ async function parsePersonsFromCsvData(
 
 async function uploadPersons(
   locationId: string,
+  roles: [ActorType, ...ActorType[]],
   persons: NonNullable<createPersonsStateActionType["persons"]>,
 ): Promise<createPersonsStateActionType> {
   // Create a limit function that allows only 5 concurrent operations
@@ -190,7 +198,7 @@ async function uploadPersons(
 
   const result = await Promise.allSettled(
     persons.map((row) =>
-      limit(async () => await createStudentForLocation(locationId, row)),
+      limit(async () => await createPersonForLocation(locationId, roles, row)),
     ),
   );
 

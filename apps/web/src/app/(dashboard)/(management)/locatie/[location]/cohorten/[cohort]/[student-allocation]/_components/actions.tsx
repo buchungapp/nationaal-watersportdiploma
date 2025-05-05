@@ -12,6 +12,7 @@ import { removeStudentFromCohortAction } from "~/actions/cohort/remove-student-f
 import { claimStudentsInCohortAction } from "~/actions/cohort/student/claim-students-in-cohort-action";
 import { releaseStudentsInCohortAction } from "~/actions/cohort/student/release-students-in-cohort-action";
 import { withdrawStudentFromCurriculumInCohortAction } from "~/actions/cohort/student/withdraw-student-from-curriculum-in-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -99,7 +100,7 @@ export function MoveStudentAllocationDialog({
   cohorts,
 
   isOpen,
-  setIsOpen,
+  close,
 }: {
   cohortId: string;
   studentAllocationId: string;
@@ -108,12 +109,16 @@ export function MoveStudentAllocationDialog({
   cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>;
 
   isOpen: boolean;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
+  const closeDialog = () => {
+    close();
+    reset();
+  };
+
   const router = useRouter();
   const params = useParams();
 
-  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(null);
   const [cohortQuery, setCohortQuery] = useState("");
 
   const filteredCohorts =
@@ -123,7 +128,7 @@ export function MoveStudentAllocationDialog({
           return cohort.label.toLowerCase().includes(cohortQuery.toLowerCase());
         });
 
-  const { execute } = useAction(
+  const { execute, input, reset } = useAction(
     moveStudentToCohortAction.bind(
       null,
       locationId,
@@ -148,8 +153,14 @@ export function MoveStudentAllocationDialog({
     },
   );
 
+  const { getInputValue } = useFormInput(input);
+
+  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(
+    getInputValue("cohortId") ?? null,
+  );
+
   return (
-    <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+    <Dialog open={isOpen} onClose={closeDialog}>
       <DialogTitle>Verplaatsen naar cohort</DialogTitle>
       <DialogDescription>
         Verplaats de cursist naar een ander cohort. Het programma en de
@@ -162,6 +173,7 @@ export function MoveStudentAllocationDialog({
             <Combobox
               name="cohortId"
               value={selectedCohortId}
+              defaultValue={getInputValue("cohortId")}
               onChange={(value) => setSelectedCohortId(value)}
               setQuery={setCohortQuery}
               displayValue={(value) =>
@@ -182,7 +194,7 @@ export function MoveStudentAllocationDialog({
           </Field>
         </DialogBody>
         <DialogActions>
-          <Button plain onClick={() => setIsOpen(false)}>
+          <Button plain onClick={closeDialog}>
             Annuleren
           </Button>
           <MoveStudentAllocationSubmitButton

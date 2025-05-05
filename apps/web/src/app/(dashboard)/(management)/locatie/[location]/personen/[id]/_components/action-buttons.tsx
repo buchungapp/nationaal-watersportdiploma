@@ -4,6 +4,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { updatePersonDetailsAction } from "~/actions/person/update-person-details-action";
 import { updatePersonEmailAction } from "~/actions/person/update-person-email-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
@@ -46,12 +47,17 @@ export function ChangeEmail({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { execute, result } = useAction(
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     updatePersonEmailAction.bind(null, locationId, personId),
     {
       onSuccess: () => {
         toast.success("E-mailadres bijgewerkt.");
-        setIsOpen(false);
+        closeDialog();
       },
       onError: () => {
         toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
@@ -59,12 +65,14 @@ export function ChangeEmail({
     },
   );
 
+  const { getInputValue } = useFormInput(input);
+
   return (
     <>
       <Button type="button" onClick={() => setIsOpen(true)}>
         E-mail wijzigen
       </Button>
-      <Alert open={isOpen} onClose={setIsOpen} size="md">
+      <Alert open={isOpen} onClose={closeDialog} size="md">
         <form action={execute}>
           <AlertTitle>Nieuw e-mailadres</AlertTitle>
           <AlertDescription>
@@ -77,10 +85,11 @@ export function ChangeEmail({
               type="email"
               aria-label="E-mail"
               invalid={!!result.validationErrors?.email}
+              defaultValue={getInputValue("email")}
             />
           </AlertBody>
           <AlertActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Annuleren
             </Button>
             <Button type="submit">Bevestigen</Button>
@@ -113,18 +122,28 @@ export function EditDetails({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { execute, result } = useAction(
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, result, input, reset } = useAction(
     updatePersonDetailsAction.bind(null, person.id, locationId),
     {
       onSuccess: () => {
         toast.success("Gegevens bijgewerkt.");
-        setIsOpen(false);
+        closeDialog();
       },
     },
   );
 
+  const { getInputValue } = useFormInput(input, {
+    ...person,
+    birthCountry: person.birthCountry?.code ?? null,
+  });
+
   const [selectedCountry, setSelectedCountry] = useState<string | null>(
-    person.birthCountry?.code ?? null,
+    getInputValue("birthCountry") ?? null,
   );
 
   const [countryQuery, setCountryQuery] = useState("");
@@ -143,7 +162,7 @@ export function EditDetails({
       <Button type="button" onClick={() => setIsOpen(true)} outline>
         Personalia wijzigen
       </Button>
-      <Dialog open={isOpen} onClose={setIsOpen}>
+      <Dialog open={isOpen} onClose={closeDialog}>
         <DialogTitle>Personalia wijzigen</DialogTitle>
         <DialogDescription>
           <Strong>Let op:</Strong> deze wijzigingen zijn zichtbaar voor zowel de
@@ -160,7 +179,7 @@ export function EditDetails({
                     <Input
                       name="firstName"
                       invalid={!!result.validationErrors?.firstName}
-                      defaultValue={person.firstName}
+                      defaultValue={getInputValue("firstName")}
                       required
                       minLength={1}
                     />
@@ -170,7 +189,7 @@ export function EditDetails({
                     <Input
                       name="lastNamePrefix"
                       invalid={!!result.validationErrors?.lastNamePrefix}
-                      defaultValue={person.lastNamePrefix ?? undefined}
+                      defaultValue={getInputValue("lastNamePrefix")}
                     />
                   </Field>
                   <Field>
@@ -178,7 +197,7 @@ export function EditDetails({
                     <Input
                       name="lastName"
                       invalid={!!result.validationErrors?.lastName}
-                      defaultValue={person.lastName ?? undefined}
+                      defaultValue={getInputValue("lastName")}
                       required
                       minLength={1}
                     />
@@ -192,7 +211,7 @@ export function EditDetails({
                       name="dateOfBirth"
                       type="date"
                       invalid={!!result.validationErrors?.dateOfBirth}
-                      defaultValue={person.dateOfBirth ?? undefined}
+                      defaultValue={getInputValue("dateOfBirth")}
                       required
                     />
                   </Field>
@@ -204,7 +223,7 @@ export function EditDetails({
                     <Input
                       name="birthCity"
                       invalid={!!result.validationErrors?.birthCity}
-                      defaultValue={person.birthCity ?? undefined}
+                      defaultValue={getInputValue("birthCity")}
                     />
                   </Field>
                   <Field>
@@ -222,7 +241,7 @@ export function EditDetails({
                         );
                         return country?.name ?? "";
                       }}
-                      defaultValue="nl"
+                      defaultValue={getInputValue("birthCountry")}
                     >
                       {filteredCountries.map((country) => (
                         <ComboboxOption key={country.code} value={country.code}>
@@ -236,7 +255,7 @@ export function EditDetails({
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <SubmitButton />

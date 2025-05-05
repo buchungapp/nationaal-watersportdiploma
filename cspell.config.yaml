@@ -71,6 +71,7 @@ words:
   - Wytse
   - ylqt
   - Zabcdefghijkmnpqrstvwxyz
+  - atleastone
 ignoreWords:
   - TERMS
   - transform

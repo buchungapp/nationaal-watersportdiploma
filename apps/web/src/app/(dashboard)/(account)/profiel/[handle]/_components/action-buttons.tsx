@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 import { useAction } from "next-safe-action/hooks";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { updatePersonDetailsAction } from "~/actions/person/update-person-details-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -55,15 +56,25 @@ export function EditDetails({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { execute, result } = useAction(
+  const { execute, result, input, reset } = useAction(
     updatePersonDetailsAction.bind(null, person.id, undefined),
     {
       onSuccess: () => {
-        setIsOpen(false);
+        closeDialog();
         toast.success("Gegevens bijgewerkt.");
       },
     },
   );
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { getInputValue } = useFormInput(input, {
+    ...person,
+    birthCountry: person.birthCountry?.code ?? null,
+  });
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(
     person.birthCountry?.code ?? null,
@@ -93,7 +104,7 @@ export function EditDetails({
         </DropdownMenu>
       </Dropdown>
 
-      <Dialog open={isOpen} onClose={setIsOpen}>
+      <Dialog open={isOpen} onClose={closeDialog}>
         <DialogTitle>Personalia wijzigen</DialogTitle>
         <form action={execute}>
           <DialogBody>
@@ -105,7 +116,7 @@ export function EditDetails({
                     <Input
                       name="firstName"
                       invalid={!!result?.validationErrors?.firstName}
-                      defaultValue={person.firstName}
+                      defaultValue={getInputValue("firstName")}
                       required
                       minLength={1}
                     />
@@ -115,7 +126,7 @@ export function EditDetails({
                     <Input
                       name="lastNamePrefix"
                       invalid={!!result?.validationErrors?.lastNamePrefix}
-                      defaultValue={person.lastNamePrefix ?? undefined}
+                      defaultValue={getInputValue("lastNamePrefix")}
                     />
                   </Field>
                   <Field>
@@ -123,7 +134,7 @@ export function EditDetails({
                     <Input
                       name="lastName"
                       invalid={!!result?.validationErrors?.lastName}
-                      defaultValue={person.lastName ?? undefined}
+                      defaultValue={getInputValue("lastName")}
                       required
                       minLength={1}
                     />
@@ -137,7 +148,7 @@ export function EditDetails({
                       name="dateOfBirth"
                       type="date"
                       invalid={!!result?.validationErrors?.dateOfBirth}
-                      defaultValue={person.dateOfBirth ?? undefined}
+                      defaultValue={getInputValue("dateOfBirth")}
                       required
                     />
                   </Field>
@@ -149,7 +160,7 @@ export function EditDetails({
                     <Input
                       name="birthCity"
                       invalid={!!result?.validationErrors?.birthCity}
-                      defaultValue={person.birthCity ?? undefined}
+                      defaultValue={getInputValue("birthCity")}
                     />
                   </Field>
                   <Field>
@@ -167,7 +178,7 @@ export function EditDetails({
                         );
                         return country?.name ?? "";
                       }}
-                      defaultValue="nl"
+                      defaultValue={getInputValue("birthCountry")}
                     >
                       {filteredCountries.map((country) => (
                         <ComboboxOption key={country.code} value={country.code}>
@@ -181,7 +192,7 @@ export function EditDetails({
             </Fieldset>
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <SubmitButton />

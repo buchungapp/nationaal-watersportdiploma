@@ -76,8 +76,8 @@ export function Dialogs(props: {
       <CreateSingleDialog
         {...props}
         isOpen={isOpen === "single"}
-        setIsOpen={(next) => {
-          setIsOpen(next ? "single" : null);
+        close={() => {
+          setIsOpen(null);
         }}
       />
     </>

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { addStudentToCohortByPersonId, setAllocationTags } from "~/lib/nwd";
 import { createStudentForLocation } from "~/lib/nwd";
+import { dateInput } from "../dates";
 import {
   COLUMN_MAPPING_WITH_TAG,
   type CSVData,
@@ -159,7 +160,7 @@ async function parsePersonsFromCsvData(
         .trim()
         .transform((v) => v || null),
       z.string(),
-      z.string().pipe(z.coerce.date()),
+      dateInput,
       z.string(),
       z
         .preprocess(

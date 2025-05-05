@@ -1,15 +1,15 @@
 "use server";
 
-import dayjs from "dayjs";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { actionClientWithMeta } from "~/actions/safe-action";
+import dayjs from "~/lib/dayjs";
 import { storeCertificateHandles } from "~/lib/nwd";
 
 const downloadCertificatesSchema = zfd.formData({
-  filename: z.string().catch(`${dayjs().toISOString()}-export-diplomas`),
-  sort: z.enum(["student", "instructor"]).catch("student"),
+  filename: z.string().default(`${dayjs().toISOString()}-export-diplomas`),
+  sort: z.enum(["student", "instructor"]).default("student"),
 });
 
 const downloadCertificatesArgsSchema: [

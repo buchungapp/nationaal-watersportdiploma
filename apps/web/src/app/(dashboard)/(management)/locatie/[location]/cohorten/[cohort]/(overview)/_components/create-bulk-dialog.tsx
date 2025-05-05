@@ -7,6 +7,7 @@ import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { addStudentsToCohortAction } from "~/actions/cohort/add-students-to-cohort-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import {
   COLUMN_MAPPING_WITH_TAG,
   type CSVData,
@@ -155,7 +156,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, cohortId }: Props) {
             data={data}
             cohortId={cohortId}
             locationId={locationId}
-            setIsOpen={setIsOpen}
+            close={() => setIsOpen(false)}
           />
         )}
       </Dialog>
@@ -187,24 +188,24 @@ function SubmitForm({
   data,
   locationId,
   cohortId,
-  setIsOpen,
+  close,
 }: {
   data: CSVData;
   locationId: string;
   cohortId: string;
-  setIsOpen: (value: boolean) => void;
+  close: () => void;
 }) {
   const { data: countries } = useSWR("countries", listCountries);
 
   if (!countries) throw new Error("Data must be available through fallback");
 
-  const { execute, result } = useStateAction(
+  const { execute, result, input } = useStateAction(
     addStudentsToCohortAction.bind(null, locationId, cohortId, data, countries),
     {
       onSuccess: ({ data }) => {
         if (data?.state !== "submitted") return;
 
-        setIsOpen(false);
+        close();
         toast.success("Personen zijn toegevoegd.");
       },
       onError: () => {
@@ -214,6 +215,19 @@ function SubmitForm({
       },
     },
   );
+
+  const { getInputValue } = useFormInput(input ?? undefined, {
+    ...data?.labels?.reduce(
+      (acc, item, index) => {
+        acc[`include-column-${index}`] =
+          COLUMN_MAPPING_WITH_TAG.find((col) =>
+            item?.label.toLowerCase().startsWith(col.toLowerCase()),
+          ) ?? SELECT_LABEL;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+  });
 
   const errorMessage = addStudentsToCohortBulkErrorMessage(result);
 
@@ -302,13 +316,9 @@ function SubmitForm({
                       <TableCell>
                         <Select
                           name={`include-column-${index}`}
-                          defaultValue={
-                            COLUMN_MAPPING_WITH_TAG.find((col) =>
-                              item?.label
-                                .toLowerCase()
-                                .startsWith(col.toLowerCase()),
-                            ) ?? SELECT_LABEL
-                          }
+                          defaultValue={getInputValue(
+                            `include-column-${index}`,
+                          )}
                           className="min-w-48"
                         >
                           <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
@@ -333,7 +343,7 @@ function SubmitForm({
         </>
       )}
       <DialogActions>
-        <Button plain onClick={() => setIsOpen(false)}>
+        <Button plain onClick={close}>
           Sluiten
         </Button>
         <SubmitButton />

@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { createCashbackAction } from "~/actions/cashback/create-cashback-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -60,15 +61,15 @@ export function CashbackFormClient({
     }
   }, [isSuccess, showConfetti]);
 
-  const { execute, result, input } = useAction(createCashbackAction, {
+  const { execute, result, input, reset } = useAction(createCashbackAction, {
     onSuccess: () => {
       toast.success("Cashback aangevraagd.");
       setIsSuccess(true);
+      reset();
     },
   });
 
-  // We know this is a FormData object, as it is only executed by the form
-  const formInput = input as FormData | undefined;
+  const { getInputValue } = useFormInput(input);
 
   if (isSuccess) {
     return (
@@ -103,9 +104,7 @@ export function CashbackFormClient({
                 placeholder="Volledige naam"
                 required
                 invalid={!!result.validationErrors?.applicantFullName}
-                defaultValue={
-                  formInput?.get("applicantFullName") as string | undefined
-                }
+                defaultValue={getInputValue("applicantFullName")}
               />
               {result.validationErrors?.applicantFullName ? (
                 <ErrorMessage>
@@ -124,9 +123,7 @@ export function CashbackFormClient({
                 placeholder="naam@voorbeeld.nl"
                 required
                 invalid={!!result.validationErrors?.applicantEmail}
-                defaultValue={
-                  formInput?.get("applicantEmail") as string | undefined
-                }
+                defaultValue={getInputValue("applicantEmail")}
               />
               {result.validationErrors?.applicantEmail ? (
                 <ErrorMessage>
@@ -149,9 +146,7 @@ export function CashbackFormClient({
                 placeholder="Volledige naam"
                 required
                 invalid={!!result.validationErrors?.studentFullName}
-                defaultValue={
-                  formInput?.get("studentFullName") as string | undefined
-                }
+                defaultValue={getInputValue("studentFullName")}
               />
               {result.validationErrors?.studentFullName ? (
                 <ErrorMessage>
@@ -169,9 +164,7 @@ export function CashbackFormClient({
                 placeholder="Naam vaarlocatie"
                 required
                 invalid={!!result.validationErrors?.verificationLocation}
-                defaultValue={
-                  formInput?.get("verificationLocation") as string | undefined
-                }
+                defaultValue={getInputValue("verificationLocation")}
               />
               {result.validationErrors?.verificationLocation ? (
                 <ErrorMessage>
@@ -189,7 +182,7 @@ export function CashbackFormClient({
                 name="verificationMedia"
                 required
                 invalid={!!result.validationErrors?.verificationMedia}
-                key={formInput?.get("verificationMedia") as string | undefined} // File input do not allow defaultValue so reset field by changing key
+                key={getInputValue("verificationMedia")?.lastModified} // File input do not allow defaultValue so reset field by changing key
               />
               {result.validationErrors?.verificationMedia ? (
                 <ErrorMessage>
@@ -210,9 +203,7 @@ export function CashbackFormClient({
                 name="bookingLocationId"
                 className="w-full"
                 invalid={!!result.validationErrors?.bookingLocationId}
-                defaultValue={
-                  formInput?.get("bookingLocationId") as string | undefined
-                }
+                defaultValue={getInputValue("bookingLocationId")}
               >
                 {locations.map((location) => (
                   <ListboxOption key={location.id} value={location.id}>
@@ -236,9 +227,7 @@ export function CashbackFormClient({
                 placeholder="Boekingsnummer"
                 required
                 invalid={!!result.validationErrors?.bookingNumber}
-                defaultValue={
-                  formInput?.get("bookingNumber") as string | undefined
-                }
+                defaultValue={getInputValue("bookingNumber")}
               />
               {result.validationErrors?.bookingNumber ? (
                 <ErrorMessage>
@@ -262,9 +251,7 @@ export function CashbackFormClient({
                 required
                 pattern="^(?:IT|SM)\d{2}[A-Z]\d{3}(?:\d{4}){4}\d{3}|CY\d{2}[A-Z]\d{3}(?:\d{4}){5}|NL\d{2}[A-Z]{4}(?:\d{4}){2}\d{2}|LV\d{2}[A-Z]{4}(?:\d{4}){3}\d|(?:BG|BH|GB|IE)\d{2}[A-Z]{4}(?:\d{4}){3}\d{2}|GI\d{2}[A-Z]{4}(?:\d{4}){3}\d{3}|RO\d{2}[A-Z]{4}(?:\d{4}){4}|KW\d{2}[A-Z]{4}(?:\d{4}){5}\d{2}|MT\d{2}[A-Z]{4}(?:\d{4}){5}\d{3}|NO\d{2}(?:\d{4}){4}|(?:DK|FI|GL|FO)\d{2}(?:\d{4}){3}\d{2}|MK\d{2}(?:\d{4}){3}\d{3}|(?:AT|EE|KZ|LU|XK)\d{2}(?:\d{4}){4}|(?:BA|HR|LI|CH|CR)\d{2}(?:\d{4}){4}\d|(?:GE|DE|LT|ME|RS)\d{2}(?:\d{4}){4}\d{2}|IL\d{2}(?:\d{4}){4}\d{3}|(?:AD|CZ|ES|MD|SA)\d{2}(?:\d{4}){5}|PT\d{2}(?:\d{4}){5}\d|(?:BE|IS)\d{2}(?:\d{4}){5}\d{2}|(?:FR|MR|MC)\d{2}(?:\d{4}){5}\d{3}|(?:AL|DO|LB|PL)\d{2}(?:\d{4}){6}|(?:AZ|HU)\d{2}(?:\d{4}){6}\d|(?:GR|MU)\d{2}(?:\d{4}){6}\d{2}$"
                 invalid={!!result.validationErrors?.applicantIban}
-                defaultValue={
-                  formInput?.get("applicantIban") as string | undefined
-                }
+                defaultValue={getInputValue("applicantIban")}
               />
               {result.validationErrors?.applicantIban ? (
                 <ErrorMessage>
@@ -289,8 +276,8 @@ export function CashbackFormClient({
                 </Label>
                 <Checkbox
                   name="terms"
-                  defaultChecked={formInput?.get("terms") === "on"}
-                  key={formInput?.get("terms") as string} // Checkbox do not allow defaultValue so reset field by changing key
+                  defaultChecked={getInputValue("terms") === "on"}
+                  key={`terms-${getInputValue("terms")}`} // Checkbox does not automatically update when the value changes
                   invalid={!!result.validationErrors?.terms}
                 />
                 <Description>
@@ -308,8 +295,8 @@ export function CashbackFormClient({
                 </Label>
                 <Checkbox
                   name="newsletter"
-                  defaultChecked={formInput?.get("newsletter") === "on"}
-                  key={formInput?.get("newsletter") as string} // Checkbox do not allow defaultValue so reset field by changing key
+                  defaultChecked={getInputValue("newsletter") === "on"}
+                  key={`newsletter-${getInputValue("newsletter")}`} // Checkbox does not automatically update when the value changes
                 />
                 {result.validationErrors?.newsletter ? (
                   <ErrorMessage>

@@ -6,6 +6,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { showPersonallyIdentifiableInformationAction } from "~/actions/certificate/show-personally-identifiable-information-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -36,9 +37,11 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
 
   const certificateId = params.id as string;
 
-  const { execute, result } = useAction(
+  const { execute, result, input } = useAction(
     showPersonallyIdentifiableInformationAction.bind(null, certificateId),
   );
+
+  const { getInputValue } = useFormInput(input);
 
   const formRef = useRef<HTMLFormElement>(null);
   return (
@@ -48,11 +51,22 @@ function Form({ closeAndReset }: { closeAndReset: () => void }) {
           <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
             <Field>
               <Label>Datum van uitgifte</Label>
-              <Input name="issuedDate" type="date" required />
+              <Input
+                name="issuedDate"
+                type="date"
+                required
+                defaultValue={getInputValue("issuedDate")}
+              />
             </Field>
             <Field>
               <Label>Diplomanummer</Label>
-              <Input name="handle" minLength={10} type="text" required />
+              <Input
+                name="handle"
+                minLength={10}
+                type="text"
+                required
+                defaultValue={getInputValue("handle")}
+              />
             </Field>
           </div>
         </FieldGroup>

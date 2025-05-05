@@ -19,6 +19,7 @@ import "~/app/(dashboard)/_components/pdf-viewer";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 import { updateExternalCertificateAction } from "~/actions/certificate/update-external-certificate-action";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import {
   PDFViewer,
   PDFViewerText,
@@ -62,10 +63,11 @@ export function EditCertificate({
     setIsOpen(null);
     setTimeout(() => {
       setValidMedia(false);
+      reset();
     }, 100);
   };
 
-  const { execute, result } = useAction(
+  const { execute, result, input, reset } = useAction(
     updateExternalCertificateAction.bind(null, personId, certificate.id),
     {
       onSuccess: () => {
@@ -75,7 +77,12 @@ export function EditCertificate({
     },
   );
 
-  const { metadata, media, location, ...defaultValues } = certificate;
+  const { metadata, media, ...defaultValues } = certificate;
+
+  const { getInputValue } = useFormInput(input, {
+    issuingLocation: defaultValues.location,
+    ...defaultValues,
+  });
 
   return (
     <Dialog onClose={close} open={isOpen === certificate.id}>
@@ -111,6 +118,7 @@ export function EditCertificate({
                 setValidMedia={setValidMedia}
                 invalid={!!result?.validationErrors?.media}
                 small={validMedia}
+                key={getInputValue("media")?.lastModified} // File input do not allow defaultValue so reset field by changing key
               />
             )}
 
@@ -125,7 +133,14 @@ export function EditCertificate({
                 additionalComments:
                   !!result?.validationErrors?.additionalComments,
               }}
-              defaultValues={{ issuingLocation: location, ...defaultValues }}
+              defaultValues={{
+                issuingLocation: getInputValue("issuingLocation"),
+                title: getInputValue("title"),
+                identifier: getInputValue("identifier"),
+                awardedAt: getInputValue("awardedAt"),
+                issuingAuthority: getInputValue("issuingAuthority"),
+                additionalComments: getInputValue("additionalComments"),
+              }}
             />
           </FieldGroup>
         </DialogBody>

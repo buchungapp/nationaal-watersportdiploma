@@ -15,24 +15,46 @@ export function LogbookFields({
   invalid,
   defaultValues,
 }: {
-  invalid?: {
-    startedAt?: boolean;
-    endedAt?: boolean;
-    departurePort?: boolean;
-    arrivalPort?: boolean;
-    location?: boolean;
-    windDirection?: boolean;
-    windPower?: boolean;
-    boatType?: boolean;
-    boatLength?: boolean;
-    sailedNauticalMiles?: boolean;
-    sailedHoursInDark?: boolean;
-    primaryRole?: boolean;
-    crewNames?: boolean;
-    conditions?: boolean;
-    additionalComments?: boolean;
-  };
-  defaultValues?: Record<string, string | number | null | undefined>;
+  invalid?: Partial<
+    Record<
+      | "startedAt"
+      | "endedAt"
+      | "departurePort"
+      | "arrivalPort"
+      | "location"
+      | "windDirection"
+      | "windPower"
+      | "boatType"
+      | "boatLength"
+      | "sailedNauticalMiles"
+      | "sailedHoursInDark"
+      | "primaryRole"
+      | "crewNames"
+      | "conditions"
+      | "additionalComments",
+      boolean
+    >
+  >;
+  defaultValues?: Partial<
+    Record<
+      | "startedAt"
+      | "endedAt"
+      | "departurePort"
+      | "arrivalPort"
+      | "location"
+      | "windDirection"
+      | "windPower"
+      | "boatType"
+      | "boatLength"
+      | "sailedNauticalMiles"
+      | "sailedHoursInDark"
+      | "primaryRole"
+      | "crewNames"
+      | "conditions"
+      | "additionalComments",
+      string | number | null
+    >
+  >;
 }) {
   const hasEndDate =
     defaultValues?.endedAt !== null && defaultValues?.endedAt !== undefined;

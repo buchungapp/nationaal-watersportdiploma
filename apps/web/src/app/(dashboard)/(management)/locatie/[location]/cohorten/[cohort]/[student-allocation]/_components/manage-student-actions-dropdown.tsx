@@ -70,7 +70,7 @@ export default function ManageStudentActionsDropdown({
           locationId={locationId}
           cohorts={cohorts}
           isOpen={openDialog === "move-student"}
-          setIsOpen={(value) => setOpenDialog(value ? "move-student" : null)}
+          close={() => setOpenDialog(null)}
         />
       ) : null}
     </>

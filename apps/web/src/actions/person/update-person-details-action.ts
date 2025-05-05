@@ -3,18 +3,20 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { updatePersonDetails } from "~/lib/nwd";
+import { dateInput } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
 
 const updatePersonDetailsSchema = zfd.formData({
   firstName: zfd.text(z.string().trim()),
   lastNamePrefix: zfd.text(
-    z.preprocess(
-      (tussenvoegsel) => (tussenvoegsel === undefined ? null : tussenvoegsel),
-      z.string().trim().nullable(),
-    ),
+    z
+      .string()
+      .trim()
+      .nullish()
+      .transform((tussenvoegsel) => tussenvoegsel ?? null),
   ),
   lastName: zfd.text(z.string()),
-  dateOfBirth: zfd.text(z.string().pipe(z.coerce.date())),
+  dateOfBirth: zfd.text(dateInput),
   birthCity: zfd.text(z.string()),
   birthCountry: zfd.text(z.string().length(2).toLowerCase()),
 });

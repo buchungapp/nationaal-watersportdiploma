@@ -1,29 +1,18 @@
 "use server";
-
-import dayjs from "dayjs";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { updateCohortDetails } from "~/lib/nwd";
+import { dateInputToIsoString } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
 
 const updateCohortSchema = zfd.formData({
   label: zfd.text(z.string().optional()),
   accessStartTime: zfd.text(
-    z
-      .preprocess(
-        (value) => (value ? dayjs(value as string).toISOString() : null),
-        z.string().datetime(),
-      )
-      .optional(),
+    dateInputToIsoString(z.string().datetime().optional()),
   ),
   accessEndTime: zfd.text(
-    z
-      .preprocess(
-        (value) => (value ? dayjs(value as string).toISOString() : null),
-        z.string().datetime(),
-      )
-      .optional(),
+    dateInputToIsoString(z.string().datetime().optional()),
   ),
 });
 

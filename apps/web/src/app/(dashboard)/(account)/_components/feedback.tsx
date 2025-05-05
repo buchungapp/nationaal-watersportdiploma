@@ -32,6 +32,7 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
+import { useFormInput } from "~/actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import Spinner from "~/app/_components/spinner";
 import { productFeedbackAction } from "../../../../actions/send-feedback-action";
@@ -109,12 +110,19 @@ function Feedback() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const { execute, result } = useAction(productFeedbackAction, {
+  const { execute, result, input, reset } = useAction(productFeedbackAction, {
     onSuccess: () => {
-      setIsOpen(false);
+      closeDialog();
       toast.success("We hebben je feedback ontvangen! 🎉");
     },
   });
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { getInputValue } = useFormInput(input);
 
   const errorMessage = productFeedbackErrorMessage(result);
 
@@ -123,7 +131,7 @@ function Feedback() {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={setIsOpen}>
+      <Dialog open={isOpen} onClose={closeDialog}>
         <DialogTitle>Neem contact op</DialogTitle>
 
         <form
@@ -144,14 +152,19 @@ function Feedback() {
             <Fieldset>
               <Field>
                 <Label>{label}</Label>
-                <Textarea name="comment" required placeholder={placeholder} />
+                <Textarea
+                  name="comment"
+                  required
+                  placeholder={placeholder}
+                  defaultValue={getInputValue("message")}
+                />
               </Field>
             </Fieldset>
 
             {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
           </DialogBody>
           <DialogActions>
-            <Button plain onClick={() => setIsOpen(false)}>
+            <Button plain onClick={closeDialog}>
               Sluiten
             </Button>
             <SubmitButton />

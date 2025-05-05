@@ -1,10 +1,10 @@
 "use server";
 
-import dayjs from "dayjs";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { certificateParamsSchema } from "~/app/(certificate)/diploma/_utils/parse-certificate-params";
+import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
