@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { type ActorType, createPersonForLocation } from "~/lib/nwd";
+import { dateInput } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
 
 const createPersonSchema = zfd
@@ -18,7 +19,7 @@ const createPersonSchema = zfd
         .transform((tussenvoegsel) => tussenvoegsel ?? null),
     ),
     lastName: zfd.text(z.string()),
-    dateOfBirth: zfd.text(z.string().pipe(z.coerce.date())),
+    dateOfBirth: zfd.text(dateInput),
     birthCity: zfd.text(z.string()),
     birthCountry: zfd.text(z.string().length(2).toLowerCase()),
     "role-student": zfd.checkbox(),

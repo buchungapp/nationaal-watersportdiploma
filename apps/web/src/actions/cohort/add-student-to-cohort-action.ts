@@ -7,6 +7,7 @@ import {
   addStudentToCohortByPersonId,
   createStudentForLocation,
 } from "~/lib/nwd";
+import { dateInput } from "../dates";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
   actionClientWithMeta,
@@ -25,7 +26,7 @@ const addStudentToCohortSchema = zfd.formData(
           .transform((tussenvoegsel) => tussenvoegsel ?? null),
       ),
       lastName: zfd.text(z.string()),
-      dateOfBirth: zfd.text(z.string().pipe(z.coerce.date())),
+      dateOfBirth: zfd.text(dateInput),
       birthCity: zfd.text(z.string()),
       birthCountry: zfd.text(z.string().length(2).toLowerCase()),
     }),

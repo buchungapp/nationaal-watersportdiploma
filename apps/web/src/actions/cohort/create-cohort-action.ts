@@ -5,21 +5,12 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { actionClientWithMeta } from "~/actions/safe-action";
 import { createCohort } from "~/lib/nwd";
+import { dateInputToIsoString } from "../dates";
 
 const createCohortSchema = zfd.formData({
   label: zfd.text(),
-  accessStartTime: zfd.text(
-    z.preprocess(
-      (value) => (value ? new Date(String(value)).toISOString() : null),
-      z.string().datetime(),
-    ),
-  ),
-  accessEndTime: zfd.text(
-    z.preprocess(
-      (value) => (value ? new Date(String(value)).toISOString() : null),
-      z.string().datetime(),
-    ),
-  ),
+  accessStartTime: zfd.text(dateInputToIsoString()),
+  accessEndTime: zfd.text(dateInputToIsoString()),
 });
 
 const bindArgsSchemas: [locationId: z.ZodString] = [z.string().uuid()];

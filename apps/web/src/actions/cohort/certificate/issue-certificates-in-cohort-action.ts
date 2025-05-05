@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { dateInputToIsoString } from "~/actions/dates";
 import { actionClientWithMeta } from "~/actions/safe-action";
 import {
   issueCertificatesInCohort,
@@ -9,12 +10,7 @@ import {
 } from "~/lib/nwd";
 
 const issueCertificatesInCohortSchema = zfd.formData({
-  visibleFrom: zfd.text(
-    z.preprocess(
-      (value) => (value ? new Date(String(value)).toISOString() : null),
-      z.string().datetime().nullable(),
-    ),
-  ),
+  visibleFrom: zfd.text(dateInputToIsoString(z.string().datetime().optional())),
 });
 
 const issueCertificatesInCohortArgsSchema: [

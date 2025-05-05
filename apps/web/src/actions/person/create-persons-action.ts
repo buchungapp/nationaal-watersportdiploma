@@ -4,6 +4,7 @@ import pLimit from "p-limit";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { createStudentForLocation } from "~/lib/nwd";
+import { dateInput } from "../dates";
 import { actionClientWithMeta, voidActionSchema } from "../safe-action";
 import {
   COLUMN_MAPPING,
@@ -130,7 +131,7 @@ async function parsePersonsFromCsvData(
         .trim()
         .transform((v) => v || null),
       z.string(),
-      z.string().pipe(z.coerce.date()),
+      dateInput,
       z.string(),
       z
         .preprocess(

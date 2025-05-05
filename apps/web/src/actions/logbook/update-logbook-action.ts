@@ -4,24 +4,13 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { updateLogbook } from "~/lib/nwd";
+import { dateInputToIsoString } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
 
 const updateLogbookSchema = zfd.formData({
-  startedAt: zfd.text(
-    z
-      .preprocess(
-        (value) => (value ? new Date(String(value)).toISOString() : null),
-        z.string().datetime(),
-      )
-      .optional(),
-  ),
+  startedAt: zfd.text(dateInputToIsoString(z.string().datetime().optional())),
   endedAt: zfd.text(
-    z
-      .preprocess(
-        (value) => (value ? new Date(String(value)).toISOString() : null),
-        z.string().datetime().nullable(),
-      )
-      .optional(),
+    dateInputToIsoString(z.string().datetime().nullable().optional()),
   ),
   departurePort: zfd.text(z.string().nullable().optional()),
   arrivalPort: zfd.text(z.string().nullable().optional()),
