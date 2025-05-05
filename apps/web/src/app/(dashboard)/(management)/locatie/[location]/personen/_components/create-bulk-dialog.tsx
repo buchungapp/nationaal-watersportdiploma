@@ -258,7 +258,7 @@ function SubmitForm({
   close: () => void;
 }) {
   const { execute, result, input } = useStateAction(
-    createPersonsAction.bind(null, locationId, data, countries),
+    createPersonsAction.bind(null, locationId, roles, data, countries),
     {
       onSuccess: ({ data }) => {
         if (data?.state !== "submitted") return;
