@@ -1,7 +1,10 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
 import { toast } from "sonner";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
+import { copyCurriculumAction } from "~/actions/secretariat/copy-curriculum-action";
 import {
   Alert,
   AlertActions,
@@ -11,25 +14,19 @@ import {
 } from "~/app/(dashboard)/_components/alert";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { copyCurriculumAction } from "../_actions/mutations";
 
 export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const actionWithId = copyCurriculumAction.bind(null, { curriculumId });
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await actionWithId(prevState, formData);
-
-    if (result.id) {
+  const { execute } = useAction(copyCurriculumAction.bind(null, curriculumId), {
+    onSuccess: ({ data }) => {
       setIsOpen(false);
-      toast.success(`Curriculum ${result.id} aangemaakt`);
-      return;
-    }
-
-    toast.error("Er is iets misgegaan");
-  };
-
-  const [_state, action] = useActionState(submit, undefined);
+      toast.success(`Curriculum ${data?.id} aangemaakt`);
+    },
+    onError: () => {
+      toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+    },
+  });
 
   return (
     <>
@@ -37,7 +34,7 @@ export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
         Kopie maken
       </Button>
       <Alert open={isOpen} onClose={setIsOpen}>
-        <form action={action}>
+        <form action={execute}>
           <AlertTitle>Curriculum kopiëren</AlertTitle>
           <AlertDescription>
             Deze actie kopieert alle onderdelen van het geselecteerde curriculum

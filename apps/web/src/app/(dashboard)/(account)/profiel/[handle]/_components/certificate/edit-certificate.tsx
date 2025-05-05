@@ -1,9 +1,8 @@
 "use client";
 import Image from "next/image";
 import { parseAsString, useQueryState } from "nuqs";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -17,12 +16,14 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
 import "~/app/(dashboard)/_components/pdf-viewer";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+import { updateExternalCertificateAction } from "~/actions/certificate/update-external-certificate-action";
 import {
   PDFViewer,
   PDFViewerText,
 } from "~/app/(dashboard)/_components/pdf-viewer";
 import Spinner from "~/app/_components/spinner";
-import { updateExternalCertificateAction } from "../../_actions/certificate";
 import type { ExternalCertificate } from "../certificates";
 import { MediaViewerButton } from "../media-viewer";
 import Media from "./media";
@@ -64,29 +65,22 @@ export function EditCertificate({
     }, 100);
   };
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await updateExternalCertificateAction(
-      { personId, externalCertificateId: certificate.id },
-      prevState,
-      formData,
-    );
-
-    if (result.message === "Success") {
-      close();
-      toast.success("Diploma bijgewerkt.");
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    updateExternalCertificateAction.bind(null, personId, certificate.id),
+    {
+      onSuccess: () => {
+        close();
+        toast.success("Diploma bijgewerkt.");
+      },
+    },
+  );
 
   const { metadata, media, location, ...defaultValues } = certificate;
 
   return (
     <Dialog onClose={close} open={isOpen === certificate.id}>
       <DialogTitle>Bewerk je certificaat</DialogTitle>
-      <form action={action}>
+      <form action={execute}>
         <DialogBody>
           <FieldGroup>
             {media ? (
@@ -115,14 +109,22 @@ export function EditCertificate({
               <Media
                 stepIndex={1}
                 setValidMedia={setValidMedia}
-                errors={state?.errors}
+                invalid={!!result?.validationErrors?.media}
                 small={validMedia}
               />
             )}
 
             <Metadata
               stepIndex={media ? 1 : 2}
-              errors={state?.errors}
+              invalid={{
+                issuingLocation: !!result?.validationErrors?.issuingLocation,
+                title: !!result?.validationErrors?.title,
+                identifier: !!result?.validationErrors?.identifier,
+                awardedAt: !!result?.validationErrors?.awardedAt,
+                issuingAuthority: !!result?.validationErrors?.issuingAuthority,
+                additionalComments:
+                  !!result?.validationErrors?.additionalComments,
+              }}
               defaultValues={{ issuingLocation: location, ...defaultValues }}
             />
           </FieldGroup>

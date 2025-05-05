@@ -24,7 +24,10 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
-import { unstable_cacheLife as cacheLife } from "next/cache";
+import {
+  unstable_cacheLife as cacheLife,
+  unstable_cacheTag as cacheTag,
+} from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
@@ -776,6 +779,7 @@ export const listGearTypesByCurriculum = async (curriculumId: string) => {
 export const retrieveLocationByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("locations");
 
   return makeRequest(async () => {
     return await Location.fromHandle(handle);
@@ -1833,7 +1837,23 @@ export async function releaseStudentFromCohortByAllocationId({
       throw new Error("Unauthorized");
     }
 
-    // TODO: add check if it really is a student, not an instructor
+    // Force check if it really is a student, not an instructor
+    const allocation = await Cohort.Allocation.retrieveAllocationById({
+      allocationId,
+    });
+
+    if (!allocation) {
+      throw new Error("Allocation not found");
+    }
+
+    if (allocation.cohort.id !== cohortId) {
+      throw new Error("Allocation does not belong to cohort");
+    }
+
+    if (allocation.actor.type !== "student") {
+      throw new Error("Allocation is not a student");
+    }
+
     const result = await Cohort.Allocation.remove({
       id: allocationId,
     });
@@ -1973,6 +1993,19 @@ export async function removeAllocationById({
       )
     ) {
       throw new Error("Unauthorized");
+    }
+
+    const cohortIdForAllocation =
+      await Cohort.Allocation.retrieveAllocationById({
+        allocationId,
+      });
+
+    if (!cohortIdForAllocation) {
+      throw new Error("Allocation not found");
+    }
+
+    if (cohortIdForAllocation.cohort.id !== cohortId) {
+      throw new Error("Allocation does not belong to cohort");
     }
 
     await Cohort.Allocation.remove({ id: allocationId });

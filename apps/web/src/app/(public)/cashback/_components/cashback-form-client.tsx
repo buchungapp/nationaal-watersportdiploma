@@ -1,16 +1,12 @@
 "use client";
 
 import JSConfetti from "js-confetti";
+import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
-import {
-  useActionState,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createCashbackAction } from "~/actions/cashback/create-cashback-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -29,7 +25,6 @@ import { Listbox, ListboxOption } from "~/app/(dashboard)/_components/listbox";
 import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
 import Spinner from "~/app/_components/spinner";
 import type { listAllLocations } from "~/lib/nwd";
-import { createCashbackAction } from "../_actions/cashback";
 
 export function CashbackFormClient({
   locations,
@@ -65,24 +60,21 @@ export function CashbackFormClient({
     }
   }, [isSuccess, showConfetti]);
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await createCashbackAction(prevState, formData);
-
-    if (result.message === "Success") {
+  const { execute, result, input } = useAction(createCashbackAction, {
+    onSuccess: () => {
       toast.success("Cashback aangevraagd.");
       setIsSuccess(true);
-    }
+    },
+  });
 
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
+  // We know this is a FormData object, as it is only executed by the form
+  const formInput = input as FormData | undefined;
 
   if (isSuccess) {
     return (
-      <div className="bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl text-center min-h-[600px] flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-bold text-slate-900 mb-4">Gelukt!</h2>
-        <p className="text-slate-600 mb-8 max-w-prose mx-auto">
+      <div className="flex flex-col justify-center items-center bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl min-h-[600px] text-center">
+        <h2 className="mb-4 font-bold text-slate-900 text-2xl">Gelukt!</h2>
+        <p className="mx-auto mb-8 max-w-prose text-slate-600">
           We hebben je cashback aanvraag ontvangen. <br /> Als we vragen hebben
           nemen we contact met je op.
         </p>
@@ -95,7 +87,7 @@ export function CashbackFormClient({
 
   return (
     <form
-      action={action}
+      action={execute}
       className="@container/cashback-fields bg-white p-4 lg:p-8 rounded-xl w-full max-w-3xl"
     >
       <div className="gap-8 grid grid-cols-1">
@@ -110,11 +102,15 @@ export function CashbackFormClient({
                 name="applicantFullName"
                 placeholder="Volledige naam"
                 required
-                invalid={!!state?.errors?.applicantFullName}
-                defaultValue={state?.fields?.applicantFullName as string}
+                invalid={!!result.validationErrors?.applicantFullName}
+                defaultValue={
+                  formInput?.get("applicantFullName") as string | undefined
+                }
               />
-              {state?.errors?.applicantFullName ? (
-                <ErrorMessage>{state.errors.applicantFullName}</ErrorMessage>
+              {result.validationErrors?.applicantFullName ? (
+                <ErrorMessage>
+                  {result.validationErrors.applicantFullName._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
 
@@ -127,11 +123,15 @@ export function CashbackFormClient({
                 type="email"
                 placeholder="naam@voorbeeld.nl"
                 required
-                invalid={!!state?.errors?.applicantEmail}
-                defaultValue={state?.fields?.applicantEmail as string}
+                invalid={!!result.validationErrors?.applicantEmail}
+                defaultValue={
+                  formInput?.get("applicantEmail") as string | undefined
+                }
               />
-              {state?.errors?.applicantEmail ? (
-                <ErrorMessage>{state.errors.applicantEmail}</ErrorMessage>
+              {result.validationErrors?.applicantEmail ? (
+                <ErrorMessage>
+                  {result.validationErrors.applicantEmail._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
           </div>
@@ -148,11 +148,15 @@ export function CashbackFormClient({
                 name="studentFullName"
                 placeholder="Volledige naam"
                 required
-                invalid={!!state?.errors?.studentFullName}
-                defaultValue={state?.fields?.studentFullName as string}
+                invalid={!!result.validationErrors?.studentFullName}
+                defaultValue={
+                  formInput?.get("studentFullName") as string | undefined
+                }
               />
-              {state?.errors?.studentFullName ? (
-                <ErrorMessage>{state.errors.studentFullName}</ErrorMessage>
+              {result.validationErrors?.studentFullName ? (
+                <ErrorMessage>
+                  {result.validationErrors.studentFullName._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
             <Field className="@2xl/cashback-fields:col-span-2">
@@ -164,11 +168,15 @@ export function CashbackFormClient({
                 name="verificationLocation"
                 placeholder="Naam vaarlocatie"
                 required
-                invalid={!!state?.errors?.verificationLocation}
-                defaultValue={state?.fields?.verificationLocation as string}
+                invalid={!!result.validationErrors?.verificationLocation}
+                defaultValue={
+                  formInput?.get("verificationLocation") as string | undefined
+                }
               />
-              {state?.errors?.verificationLocation ? (
-                <ErrorMessage>{state.errors.verificationLocation}</ErrorMessage>
+              {result.validationErrors?.verificationLocation ? (
+                <ErrorMessage>
+                  {result.validationErrors.verificationLocation._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
 
@@ -180,11 +188,13 @@ export function CashbackFormClient({
               <MediaDropzone
                 name="verificationMedia"
                 required
-                invalid={!!state?.errors?.verificationMedia}
-                key={state?.fields?.verificationMedia as string} // File input do not allow defaultValue so reset field by changing key
+                invalid={!!result.validationErrors?.verificationMedia}
+                key={formInput?.get("verificationMedia") as string | undefined} // File input do not allow defaultValue so reset field by changing key
               />
-              {state?.errors?.verificationMedia ? (
-                <ErrorMessage>{state.errors.verificationMedia}</ErrorMessage>
+              {result.validationErrors?.verificationMedia ? (
+                <ErrorMessage>
+                  {result.validationErrors.verificationMedia._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
           </div>
@@ -199,8 +209,10 @@ export function CashbackFormClient({
               <Listbox
                 name="bookingLocationId"
                 className="w-full"
-                invalid={!!state?.errors?.bookingLocationId}
-                defaultValue={state?.fields?.bookingLocationId as string}
+                invalid={!!result.validationErrors?.bookingLocationId}
+                defaultValue={
+                  formInput?.get("bookingLocationId") as string | undefined
+                }
               >
                 {locations.map((location) => (
                   <ListboxOption key={location.id} value={location.id}>
@@ -208,8 +220,10 @@ export function CashbackFormClient({
                   </ListboxOption>
                 ))}
               </Listbox>
-              {state?.errors?.bookingLocationId ? (
-                <ErrorMessage>{state.errors.bookingLocationId}</ErrorMessage>
+              {result.validationErrors?.bookingLocationId ? (
+                <ErrorMessage>
+                  {result.validationErrors.bookingLocationId._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
 
@@ -221,11 +235,15 @@ export function CashbackFormClient({
                 name="bookingNumber"
                 placeholder="Boekingsnummer"
                 required
-                invalid={!!state?.errors?.bookingNumber}
-                defaultValue={state?.fields?.bookingNumber as string}
+                invalid={!!result.validationErrors?.bookingNumber}
+                defaultValue={
+                  formInput?.get("bookingNumber") as string | undefined
+                }
               />
-              {state?.errors?.bookingNumber ? (
-                <ErrorMessage>{state.errors.bookingNumber}</ErrorMessage>
+              {result.validationErrors?.bookingNumber ? (
+                <ErrorMessage>
+                  {result.validationErrors.bookingNumber._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
           </div>
@@ -243,15 +261,19 @@ export function CashbackFormClient({
                 placeholder="NL12 ABCD 1234 5678 90"
                 required
                 pattern="^(?:IT|SM)\d{2}[A-Z]\d{3}(?:\d{4}){4}\d{3}|CY\d{2}[A-Z]\d{3}(?:\d{4}){5}|NL\d{2}[A-Z]{4}(?:\d{4}){2}\d{2}|LV\d{2}[A-Z]{4}(?:\d{4}){3}\d|(?:BG|BH|GB|IE)\d{2}[A-Z]{4}(?:\d{4}){3}\d{2}|GI\d{2}[A-Z]{4}(?:\d{4}){3}\d{3}|RO\d{2}[A-Z]{4}(?:\d{4}){4}|KW\d{2}[A-Z]{4}(?:\d{4}){5}\d{2}|MT\d{2}[A-Z]{4}(?:\d{4}){5}\d{3}|NO\d{2}(?:\d{4}){4}|(?:DK|FI|GL|FO)\d{2}(?:\d{4}){3}\d{2}|MK\d{2}(?:\d{4}){3}\d{3}|(?:AT|EE|KZ|LU|XK)\d{2}(?:\d{4}){4}|(?:BA|HR|LI|CH|CR)\d{2}(?:\d{4}){4}\d|(?:GE|DE|LT|ME|RS)\d{2}(?:\d{4}){4}\d{2}|IL\d{2}(?:\d{4}){4}\d{3}|(?:AD|CZ|ES|MD|SA)\d{2}(?:\d{4}){5}|PT\d{2}(?:\d{4}){5}\d|(?:BE|IS)\d{2}(?:\d{4}){5}\d{2}|(?:FR|MR|MC)\d{2}(?:\d{4}){5}\d{3}|(?:AL|DO|LB|PL)\d{2}(?:\d{4}){6}|(?:AZ|HU)\d{2}(?:\d{4}){6}\d|(?:GR|MU)\d{2}(?:\d{4}){6}\d{2}$"
-                invalid={!!state?.errors?.applicantIban}
-                defaultValue={state?.fields?.applicantIban as string}
+                invalid={!!result.validationErrors?.applicantIban}
+                defaultValue={
+                  formInput?.get("applicantIban") as string | undefined
+                }
               />
-              {state?.errors?.applicantIban ? (
-                <ErrorMessage>{state.errors.applicantIban}</ErrorMessage>
+              {result.validationErrors?.applicantIban ? (
+                <ErrorMessage>
+                  {result.validationErrors.applicantIban._errors?.[0]}
+                </ErrorMessage>
               ) : null}
             </Field>
 
-            <div className="@xl/cashback-fields:col-span-4 flex flex-col gap-y-2">
+            <div className="flex flex-col gap-y-2 @xl/cashback-fields:col-span-4">
               <CheckboxField>
                 <Label>
                   Ik ga akkoord met de{" "}
@@ -267,15 +289,15 @@ export function CashbackFormClient({
                 </Label>
                 <Checkbox
                   name="terms"
-                  defaultChecked={
-                    state?.fields?.terms ? state?.fields?.terms === "on" : false
-                  }
-                  key={state?.fields?.terms as string} // Checkbox do not allow defaultValue so reset field by changing key
-                  invalid={!!state?.errors?.terms}
+                  defaultChecked={formInput?.get("terms") === "on"}
+                  key={formInput?.get("terms") as string} // Checkbox do not allow defaultValue so reset field by changing key
+                  invalid={!!result.validationErrors?.terms}
                 />
                 <Description>
-                  {state?.errors?.terms ? (
-                    <ErrorMessage>{state.errors.terms}</ErrorMessage>
+                  {result.validationErrors?.terms ? (
+                    <ErrorMessage>
+                      {result.validationErrors.terms._errors?.[0]}
+                    </ErrorMessage>
                   ) : null}
                 </Description>
               </CheckboxField>
@@ -286,15 +308,13 @@ export function CashbackFormClient({
                 </Label>
                 <Checkbox
                   name="newsletter"
-                  defaultChecked={
-                    state?.fields?.newsletter
-                      ? state?.fields?.newsletter === "on"
-                      : false
-                  }
-                  key={state?.fields?.newsletter as string} // Checkbox do not allow defaultValue so reset field by changing key
+                  defaultChecked={formInput?.get("newsletter") === "on"}
+                  key={formInput?.get("newsletter") as string} // Checkbox do not allow defaultValue so reset field by changing key
                 />
-                {state?.errors?.newsletter ? (
-                  <ErrorMessage>{state.errors.newsletter}</ErrorMessage>
+                {result.validationErrors?.newsletter ? (
+                  <ErrorMessage>
+                    {result.validationErrors.newsletter._errors?.[0]}
+                  </ErrorMessage>
                 ) : null}
               </CheckboxField>
             </div>

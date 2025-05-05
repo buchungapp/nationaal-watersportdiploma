@@ -43,7 +43,6 @@
     "@vis.gl/react-google-maps": "^1.1.3",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
-    "pg": "catalog:",
     "fast-glob": "^3.3.2",
     "fathom-client": "^3.7.2",
     "flexsearch": "^0.7.43",
@@ -59,10 +58,11 @@
     "motion": "^12.0.8",
     "next": "catalog:",
     "next-mdx-remote": "5.0.0",
-    "next-safe-action": "7.0.0-next.47",
+    "next-safe-action": "7.10.8",
     "nuqs": "catalog:",
     "p-limit": "^6.1.0",
     "pdfkit": "^0.16.0",
+    "pg": "catalog:",
     "posthog-js": "^1.161.4",
     "posthog-node": "^4.2.0",
     "pretty-bytes": "^6.1.1",
@@ -83,7 +83,8 @@
     "swr": "2.2.6-beta.4",
     "tailwind-merge": "^3.0.1",
     "use-debounce": "^10.0.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "zod-form-data": "^2.0.7"
   },
   "devDependencies": {
     "@nawadi/core": "workspace:*",

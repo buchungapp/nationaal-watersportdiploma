@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { Suspense, useActionState, useState } from "react";
+import { Suspense, useState } from "react";
 import {
   SidebarItem,
   SidebarLabel,
@@ -38,10 +38,11 @@ import {
   ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSm,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/16/solid";
+import { useAction } from "next-safe-action/hooks";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { z } from "zod";
-import { productFeedbackAction } from "~/app/(dashboard)/_actions/feedback";
+import { productFeedbackAction } from "~/actions/send-feedback-action";
+import { productFeedbackErrorMessage } from "~/app/(dashboard)/(account)/_components/feedback";
 import Spinner from "~/app/_components/spinner";
 
 const feedbackLabels = {
@@ -90,49 +91,34 @@ function FeedbackTab({
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const submitFeedback = async (_prevState: unknown, formData: FormData) => {
-    try {
-      const schema = z.object({
-        comment: z.string(),
-        urgent: z.boolean().optional(),
-      });
-
-      const { comment, urgent } = schema.parse({
-        comment: formData.get("comment") as string,
-        urgent: formData.get("urgent") === "on",
-      });
-
-      await productFeedbackAction({
-        type: type === "feedback" ? "product-feedback" : type,
-        priority: urgent ? "high" : "normal",
-        message: comment,
-        path: pathname,
-        query: urlSearchParamsToObject(searchParams),
-        headers: {
-          "user-agent": navigator.userAgent,
-        },
-      });
-
+  const { execute, result } = useAction(productFeedbackAction, {
+    onSuccess: () => {
       close();
       toast.success("We hebben je melding ontvangen! 🎉");
-    } catch (error) {
-      if (error instanceof Error) {
-        return {
-          error: error.message,
-        };
-      }
-      return { error: "Er is iets misgegaan. Probeer het later opnieuw." };
-    }
-  };
+    },
+  });
 
-  const [state, formAction] = useActionState(submitFeedback, undefined);
+  const errorMessage = productFeedbackErrorMessage(result);
 
   const label = feedbackLabels[type].label;
   const placeholder = feedbackLabels[type].placeholder;
 
   return (
     <TabPanel>
-      <form action={formAction}>
+      <form
+        action={(formData) =>
+          execute({
+            type: type === "feedback" ? "product-feedback" : type,
+            message: formData.get("comment") as string,
+            priority: formData.get("urgent") === "on" ? "high" : "normal",
+            path: pathname,
+            query: urlSearchParamsToObject(searchParams),
+            headers: {
+              "user-agent": navigator.userAgent,
+            },
+          })
+        }
+      >
         <DialogBody>
           <Fieldset>
             <Field>
@@ -152,7 +138,7 @@ function FeedbackTab({
             )}
           </Fieldset>
 
-          {!!state?.error && <ErrorMessage>{state.error}</ErrorMessage>}
+          {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
         </DialogBody>
         <DialogActions>
           <Button plain onClick={close}>
@@ -179,16 +165,16 @@ function Feedback() {
         <DialogTitle>Neem contact op</DialogTitle>
 
         <TabGroup className="mt-4">
-          <TabList className="bg-slate-100 border border-slate-300 rounded-lg w-full grid grid-cols-3 p-[2px]">
-            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+          <TabList className="grid grid-cols-3 bg-slate-100 p-[2px] border border-slate-300 rounded-lg w-full">
+            <Tab className="flex justify-center items-center gap-x-2 data-selected:bg-white opacity-50 data-selected:opacity-100 data-selected:shadow-sm p-2 rounded-md text-slate-900 text-xs">
               <BugAntIcon className="size-4 text-slate-400" />
               Bug
             </Tab>
-            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+            <Tab className="flex justify-center items-center gap-x-2 data-selected:bg-white opacity-50 data-selected:opacity-100 data-selected:shadow-sm p-2 rounded-md text-slate-900 text-xs">
               <ChatBubbleOvalLeftIconSm className="size-4 text-slate-400" />
               Feedback
             </Tab>
-            <Tab className="p-2 data-selected:bg-white flex items-center text-slate-900 gap-x-2 data-selected:opacity-100 opacity-50 justify-center rounded-md text-xs data-selected:shadow-sm">
+            <Tab className="flex justify-center items-center gap-x-2 data-selected:bg-white opacity-50 data-selected:opacity-100 data-selected:shadow-sm p-2 rounded-md text-slate-900 text-xs">
               <QuestionMarkCircleIcon className="size-4 text-slate-400" />
               Vraag
             </Tab>

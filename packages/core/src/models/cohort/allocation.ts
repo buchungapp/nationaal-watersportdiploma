@@ -700,7 +700,10 @@ export const listStudentsWithCurricula = wrapQuery(
         .leftJoin(s.gearType, eq(s.gearType.id, s.studentCurriculum.gearTypeId))
         .leftJoin(
           s.certificate,
-          eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+          and(
+            eq(s.certificate.cohortAllocationId, s.cohortAllocation.id),
+            isNull(s.certificate.deletedAt),
+          ),
         )
         .where(
           and(
@@ -1267,6 +1270,62 @@ export const personsBelongTogetherInActiveCohort = wrapQuery(
         );
 
       return result.length > 0;
+    },
+  ),
+);
+
+export const retrieveAllocationById = wrapQuery(
+  "cohort.allocation.retrieveAllocationById",
+  withZod(
+    z.object({
+      allocationId: uuidSchema,
+    }),
+    z.object({
+      id: uuidSchema,
+      cohort: z.object({
+        id: uuidSchema,
+        label: z.string(),
+      }),
+      actor: z.object({
+        id: uuidSchema,
+        type: z.enum(["student", "instructor", "location_admin"]),
+      }),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      const result = await query
+        .select({
+          id: s.cohortAllocation.id,
+          cohort: {
+            id: s.cohort.id,
+            label: s.cohort.label,
+          },
+          actor: {
+            id: s.actor.id,
+            type: s.actor.type,
+          },
+        })
+        .from(s.cohortAllocation)
+        .innerJoin(
+          s.actor,
+
+          eq(s.actor.id, s.cohortAllocation.actorId),
+        )
+        .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
+        .where(eq(s.cohortAllocation.id, input.allocationId))
+        .then(singleRow);
+
+      return {
+        ...result,
+        actor: {
+          ...result.actor,
+          type: result.actor.type as
+            | "student"
+            | "instructor"
+            | "location_admin",
+        },
+      };
     },
   ),
 );

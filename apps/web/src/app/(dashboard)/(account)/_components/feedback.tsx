@@ -4,19 +4,21 @@ import {
   type PropsWithChildren,
   Suspense,
   createContext,
-  useActionState,
   useContext,
   useState,
 } from "react";
 
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogActions,
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-
-import { toast } from "sonner";
 import {
   ErrorMessage,
   Field,
@@ -30,9 +32,9 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { z } from "zod";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import Spinner from "~/app/_components/spinner";
-import { productFeedbackAction } from "../../_actions/feedback";
+import { productFeedbackAction } from "../../../../actions/send-feedback-action";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
 function urlSearchParamsToObject(
@@ -84,46 +86,37 @@ function useFeedbackDialog() {
   return context;
 }
 
+export function productFeedbackErrorMessage(
+  error: InferUseActionHookReturn<typeof productFeedbackAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 function Feedback() {
   const { isOpen, setIsOpen } = useFeedbackDialog();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  const submitFeedback = async (_prevState: unknown, formData: FormData) => {
-    try {
-      const schema = z.object({
-        comment: z.string(),
-        urgent: z.boolean().optional(),
-      });
-
-      const { comment } = schema.parse({
-        comment: formData.get("comment") as string,
-      });
-
-      await productFeedbackAction({
-        type: "product-feedback",
-        priority: "normal",
-        message: comment,
-        path: pathname,
-        query: urlSearchParamsToObject(searchParams),
-        headers: {
-          "user-agent": navigator.userAgent,
-        },
-      });
-
+  const { execute, result } = useAction(productFeedbackAction, {
+    onSuccess: () => {
       setIsOpen(false);
       toast.success("We hebben je feedback ontvangen! 🎉");
-    } catch (error) {
-      if (error instanceof Error) {
-        return {
-          error: error.message,
-        };
-      }
-      return { error: "Er is iets misgegaan. Probeer het later opnieuw." };
-    }
-  };
+    },
+  });
 
-  const [state, formAction] = useActionState(submitFeedback, undefined);
+  const errorMessage = productFeedbackErrorMessage(result);
 
   const label = "Hoe maken we de applicatie beter?";
   const placeholder = "Het zou super zijn als...";
@@ -133,7 +126,20 @@ function Feedback() {
       <Dialog open={isOpen} onClose={setIsOpen}>
         <DialogTitle>Neem contact op</DialogTitle>
 
-        <form action={formAction}>
+        <form
+          action={(formData) =>
+            execute({
+              type: "product-feedback",
+              priority: "normal",
+              message: formData.get("comment") as string,
+              path: pathname,
+              query: urlSearchParamsToObject(searchParams),
+              headers: {
+                "user-agent": navigator.userAgent,
+              },
+            })
+          }
+        >
           <DialogBody>
             <Fieldset>
               <Field>
@@ -142,7 +148,7 @@ function Feedback() {
               </Field>
             </Fieldset>
 
-            {!!state?.error && <ErrorMessage>{state.error}</ErrorMessage>}
+            {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
           </DialogBody>
           <DialogActions>
             <Button plain onClick={() => setIsOpen(false)}>

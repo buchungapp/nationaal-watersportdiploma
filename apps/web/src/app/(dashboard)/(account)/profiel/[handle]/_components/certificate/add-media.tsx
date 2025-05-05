@@ -1,7 +1,9 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { addMediaToExternalCertificateAction } from "~/actions/certificate/add-media-to-external-certificate-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -11,7 +13,6 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
 import Spinner from "~/app/_components/spinner";
-import { addMediaToExternalCertificateAction } from "../../_actions/certificate";
 import Media from "./media";
 
 export function AddMedia({
@@ -31,22 +32,19 @@ export function AddMedia({
     }, 100);
   };
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await addMediaToExternalCertificateAction(
-      { personId, externalCertificateId },
-      prevState,
-      formData,
-    );
-
-    if (result.message === "Success") {
-      close();
-      toast.success("Media toegevoegd.");
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    addMediaToExternalCertificateAction.bind(
+      null,
+      personId,
+      externalCertificateId,
+    ),
+    {
+      onSuccess: () => {
+        close();
+        toast.success("Media toegevoegd.");
+      },
+    },
+  );
 
   return (
     <>
@@ -57,21 +55,21 @@ export function AddMedia({
           "w-full h-full border border-dashed rounded-md flex flex-col items-center justify-center hover:bg-slate-100"
         }
       >
-        <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787] p-2 py-6">
+        <div className="flex flex-col justify-center items-center p-2 py-6 text-[#878787] text-xs text-center">
           Klik om een afbeelding te uploaden.
         </div>
       </button>
 
       <Dialog open={isOpen} onClose={close}>
         <DialogTitle>Voeg een afbeelding aan je certificaat toe</DialogTitle>
-        <form action={action}>
+        <form action={execute}>
           <DialogBody>
             <Fieldset>
               <FieldGroup>
                 <Media
                   stepIndex={1}
                   setValidMedia={setValidMedia}
-                  errors={state?.errors}
+                  invalid={!!result?.validationErrors?.media}
                 />
               </FieldGroup>
             </Fieldset>

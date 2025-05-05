@@ -1,10 +1,12 @@
 "use client";
 
 import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
+import { useAction } from "next-safe-action/hooks";
+import { updatePersonDetailsAction } from "~/actions/person/update-person-details-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -32,7 +34,6 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
-import { updatePerson } from "../_actions/person";
 
 export function EditDetails({
   person,
@@ -54,22 +55,15 @@ export function EditDetails({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await updatePerson(
-      { personId: person.id },
-      prevState,
-      formData,
-    );
-
-    if (result.message === "Success") {
-      setIsOpen(false);
-      toast.success("Gegevens bijgewerkt.");
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    updatePersonDetailsAction.bind(null, person.id, undefined),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        toast.success("Gegevens bijgewerkt.");
+      },
+    },
+  );
 
   const [selectedCountry, setSelectedCountry] = useState<string | null>(
     person.birthCountry?.code ?? null,
@@ -101,16 +95,16 @@ export function EditDetails({
 
       <Dialog open={isOpen} onClose={setIsOpen}>
         <DialogTitle>Personalia wijzigen</DialogTitle>
-        <form action={action}>
+        <form action={execute}>
           <DialogBody>
             <Fieldset>
               <FieldGroup>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
                   <Field>
                     <Label>Voornaam</Label>
                     <Input
                       name="firstName"
-                      invalid={!!state?.errors.firstName}
+                      invalid={!!result?.validationErrors?.firstName}
                       defaultValue={person.firstName}
                       required
                       minLength={1}
@@ -120,7 +114,7 @@ export function EditDetails({
                     <Label>Tussenvoegsel</Label>
                     <Input
                       name="lastNamePrefix"
-                      invalid={!!state?.errors.lastNamePrefix}
+                      invalid={!!result?.validationErrors?.lastNamePrefix}
                       defaultValue={person.lastNamePrefix ?? undefined}
                     />
                   </Field>
@@ -128,7 +122,7 @@ export function EditDetails({
                     <Label>Achternaam</Label>
                     <Input
                       name="lastName"
-                      invalid={!!state?.errors.lastName}
+                      invalid={!!result?.validationErrors?.lastName}
                       defaultValue={person.lastName ?? undefined}
                       required
                       minLength={1}
@@ -136,25 +130,25 @@ export function EditDetails({
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-5 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-5">
                   <Field className="sm:col-span-3">
                     <Label>Geboortedatum</Label>
                     <Input
                       name="dateOfBirth"
                       type="date"
-                      invalid={!!state?.errors.dateOfBirth}
+                      invalid={!!result?.validationErrors?.dateOfBirth}
                       defaultValue={person.dateOfBirth ?? undefined}
                       required
                     />
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <Field>
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
-                      invalid={!!state?.errors.birthCity}
+                      invalid={!!result?.validationErrors?.birthCity}
                       defaultValue={person.birthCity ?? undefined}
                     />
                   </Field>
@@ -162,7 +156,7 @@ export function EditDetails({
                     <Label>Geboorteland</Label>
                     <Combobox
                       name="birthCountry"
-                      invalid={!!state?.errors.birthCountry}
+                      invalid={!!result?.validationErrors?.birthCountry}
                       value={selectedCountry}
                       setQuery={setCountryQuery}
                       onChange={(value) => setSelectedCountry(value)}

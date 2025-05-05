@@ -1,10 +1,18 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import type { InferUseStateActionHookReturn } from "next-safe-action/hooks";
+import { useStateAction } from "next-safe-action/stateful-hooks";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
-import { ZodError, z } from "zod";
+import { addStudentsToCohortAction } from "~/actions/cohort/add-students-to-cohort-action";
+import {
+  COLUMN_MAPPING_WITH_TAG,
+  type CSVData,
+  SELECT_LABEL,
+} from "~/actions/person/person-bulk-csv-mappings";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -33,8 +41,7 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
-import { addStudentsToCohort } from "../_actions/create";
-import { listCountries } from "../_actions/nwd";
+import { listCountries } from "../_actions/fetch";
 
 interface Props {
   locationId: string;
@@ -42,24 +49,6 @@ interface Props {
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
-
-interface CSVData {
-  labels: { label: string; value: (string | null | undefined)[] }[] | null;
-  rows: string[][] | null;
-}
-
-const COLUMN_MAPPING = [
-  "E-mailadres",
-  "Voornaam",
-  "Tussenvoegsels",
-  "Achternaam",
-  "Geboortedatum",
-  "Geboorteplaats",
-  "Geboorteland",
-  "Tag",
-] as const;
-
-const SELECT_LABEL = "Niet importeren";
 
 export default function Wrapper(props: Props) {
   const forceRerenderId = useRef(0);
@@ -128,7 +117,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, cohortId }: Props) {
                 template
               </TextLink>{" "}
               of je eigen databron. <br /> Let op het volgende:
-              <ul className="list-inside list-disc">
+              <ul className="list-disc list-inside">
                 <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
                 <li>
                   Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
@@ -174,6 +163,26 @@ function CreateDialog({ locationId, isOpen, setIsOpen, cohortId }: Props) {
   );
 }
 
+function addStudentsToCohortBulkErrorMessage(
+  error: InferUseStateActionHookReturn<
+    typeof addStudentsToCohortAction
+  >["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 function SubmitForm({
   data,
   locationId,
@@ -189,195 +198,31 @@ function SubmitForm({
 
   if (!countries) throw new Error("Data must be available through fallback");
 
-  const submit = async (
-    csvData: string[][] | null | undefined,
-    prevState:
-      | {
-          success: boolean;
-          persons?: {
-            email: string;
-            firstName: string;
-            lastNamePrefix: string | null;
-            lastName: string;
-            dateOfBirth: Date;
-            birthCity: string;
-            birthCountry: string;
-            tags: string[];
-          }[];
-          message?: string;
-        }
-      | undefined,
-    formData: FormData,
-  ) => {
-    if (prevState?.success) {
-      const result = await addStudentsToCohort(
-        locationId,
-        cohortId,
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        prevState.persons!,
-      );
-      setIsOpen(false);
+  const { execute, result } = useStateAction(
+    addStudentsToCohortAction.bind(null, locationId, cohortId, data, countries),
+    {
+      onSuccess: ({ data }) => {
+        if (data?.state !== "submitted") return;
 
-      if (result.message === "Success") {
+        setIsOpen(false);
         toast.success("Personen zijn toegevoegd.");
-      } else {
-        toast.error("Er is een fout opgetreden.");
-      }
-      return;
-    }
+      },
+      onError: () => {
+        if (result.data?.state !== "parsed") return;
 
-    try {
-      if (!csvData) {
-        throw new Error("Geen data gevonden.");
-      }
-
-      const indexToColumnSelection = Object.fromEntries(formData);
-      const selectedFields = Object.values(indexToColumnSelection).filter(
-        (item) => item !== SELECT_LABEL,
-      );
-      const notSelectedIndices = Object.entries(indexToColumnSelection)
-        .filter(([_, value]) => value === SELECT_LABEL)
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        .map(([key]) => Number.parseInt(key.split("-").pop()!));
-
-      const filteredData = csvData.map((item) =>
-        item.filter((_, index) => !notSelectedIndices.includes(index)),
-      );
-
-      const count = filteredData[0]?.length ?? 0;
-
-      const requiredColumns = COLUMN_MAPPING.filter((col) => col !== "Tag");
-      const minimalExpectedCount = requiredColumns.length;
-      const missingFields = requiredColumns.filter(
-        (item) => !selectedFields.includes(item),
-      );
-
-      if (missingFields.length > 0) {
-        throw new Error(`Missende velden in data: ${missingFields.join(", ")}`);
-      }
-
-      if (count < minimalExpectedCount) {
-        throw new Error("Je hebt minder kolommen geplakt dan verwacht.");
-      }
-
-      const nonTagColumns = COLUMN_MAPPING.filter((col) => col !== "Tag");
-
-      // Sort the data for each tuple in filteredData so that it appears
-      // in the order that we have in COLUMNS.
-      const sortedData = filteredData.map((row) => {
-        const sortedRow = Array(nonTagColumns.length).fill(null);
-        const tags: string[] = [];
-
-        row.forEach((value, index) => {
-          const column = selectedFields[index];
-          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-          const columnIndex = nonTagColumns.indexOf(column as any);
-
-          if (columnIndex !== -1) {
-            sortedRow[columnIndex] = value;
-          } else if (value && value.length > 0) {
-            tags.push(value);
-          }
-        });
-
-        return [...sortedRow, ...tags];
-      });
-
-      const calculateMaxLength = (data: string[][] | undefined): number => {
-        if (!data || data.length === 0) return 0;
-        return Math.max(...data.map((row) => row.length));
-      };
-
-      const maxLength = calculateMaxLength(sortedData);
-      const tagColumnsCount = Math.max(0, maxLength - nonTagColumns.length);
-
-      const COLUMNS: string[] = [
-        ...nonTagColumns,
-        ...Array(tagColumnsCount).fill("Tag"),
-      ];
-
-      const personRowSchema = z
-        .tuple([
-          z.string().trim().toLowerCase().email(),
-          z.string().trim(),
-          z
-            .string()
-            .trim()
-            .transform((v) => v || null),
-          z.string(),
-          z.string().pipe(z.coerce.date()),
-          z.string(),
-          z
-            .preprocess(
-              (value) => (value === "" ? "nl" : value),
-              z.enum(countries.map((c) => c.code) as [string, ...string[]], {
-                message: "Ongeldige landcode",
-              }),
-            )
-            .default("nl"),
-        ])
-        .rest(z.string().nullish());
-
-      const rows = personRowSchema.array().parse(sortedData);
-
-      return {
-        success: true,
-        columns: COLUMNS,
-        persons: rows.map(
-          ([
-            email,
-            firstName,
-            lastNamePrefix,
-            lastName,
-            dateOfBirth,
-            birthCity,
-            birthCountry,
-            ...tags
-          ]) => ({
-            email,
-            firstName,
-            lastNamePrefix,
-            lastName,
-            dateOfBirth,
-            birthCity,
-            birthCountry,
-            tags: tags.filter(Boolean) as string[],
-          }),
-        ),
-      };
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return {
-          success: false,
-          message: JSON.stringify(error.flatten().fieldErrors),
-        };
-      }
-
-      if (error instanceof Error) {
-        return {
-          success: false,
-          message: error.message,
-        };
-      }
-
-      return {
-        success: false,
-        message: "Er is een onverwachte fout opgetreden.",
-      };
-    }
-  };
-
-  const [state, formAction] = useActionState(
-    submit.bind(null, data?.rows),
-    undefined,
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
   );
 
+  const errorMessage = addStudentsToCohortBulkErrorMessage(result);
+
   return (
-    <form action={formAction}>
-      {state?.success === true ? (
+    <form action={execute}>
+      {result.data?.state === "parsed" ? (
         <>
           <DialogDescription>
-            Er zijn <Strong>{state?.persons?.length}</Strong> cursisten
+            Er zijn <Strong>{result.data?.persons?.length}</Strong> cursisten
             gevonden. Controleer de geïmporteerde data en klik op "Verder" om
             door te gaan.
           </DialogDescription>
@@ -386,16 +231,16 @@ function SubmitForm({
               <TableHead>
                 <TableRow>
                   <TableHeader />
-                  {state.columns?.map((item) => (
+                  {result.data?.columns?.map((item) => (
                     <TableHeader key={item}>{item}</TableHeader>
                   ))}
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {state.persons?.map((person, index) => (
+                {result.data?.persons?.map((person, index) => (
                   <TableRow key={JSON.stringify(person)}>
-                    <TableCell className="text-right tabular-nums">{`${index + 1}.`}</TableCell>
+                    <TableCell className="tabular-nums text-right">{`${index + 1}.`}</TableCell>
                     <TableCell className="font-medium">
                       {person.email}
                     </TableCell>
@@ -418,6 +263,11 @@ function SubmitForm({
                 ))}
               </TableBody>
             </Table>
+            <div className="pt-4">
+              {errorMessage ? (
+                <ErrorMessage>{errorMessage}</ErrorMessage>
+              ) : null}
+            </div>
           </DialogBody>
         </>
       ) : (
@@ -453,7 +303,7 @@ function SubmitForm({
                         <Select
                           name={`include-column-${index}`}
                           defaultValue={
-                            COLUMN_MAPPING.find((col) =>
+                            COLUMN_MAPPING_WITH_TAG.find((col) =>
                               item?.label
                                 .toLowerCase()
                                 .startsWith(col.toLowerCase()),
@@ -462,7 +312,7 @@ function SubmitForm({
                           className="min-w-48"
                         >
                           <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
-                          {COLUMN_MAPPING.map((column) => (
+                          {COLUMN_MAPPING_WITH_TAG.map((column) => (
                             <option key={column} value={column}>
                               {column}
                             </option>
@@ -475,7 +325,9 @@ function SubmitForm({
               </TableBody>
             </Table>
             <div className="pt-4">
-              {!!state?.message && <ErrorMessage>{state.message}</ErrorMessage>}
+              {errorMessage ? (
+                <ErrorMessage>{errorMessage}</ErrorMessage>
+              ) : null}
             </div>
           </DialogBody>
         </>

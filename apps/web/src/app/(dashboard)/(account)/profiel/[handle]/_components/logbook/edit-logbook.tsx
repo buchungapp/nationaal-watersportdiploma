@@ -1,7 +1,8 @@
 "use client";
-import { useActionState } from "react";
+import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { updateLogbookAction } from "~/actions/logbook/update-logbook-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -12,54 +13,54 @@ import {
 import { Text } from "~/app/(dashboard)/_components/text";
 import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import Spinner from "~/app/_components/spinner";
-import { updateLogbookAction } from "../../_actions/logbook";
 import { LogbookFields } from "./logbook-fields";
 import type { LogbookType } from "./logbook-table";
 
 export function EditLogbook({
   personId,
-  rows,
+  logbook,
 }: {
   personId: string;
-  rows: LogbookType[];
+  logbook: LogbookType;
 }) {
   const { isOpen, close } = useDialog("edit-logbook");
 
-  const logbook = rows[0];
-
-  const submit = async (prevState: unknown, formData: FormData) => {
-    if (!logbook) {
-      return;
-    }
-
-    const result = await updateLogbookAction(
-      { personId, logbookId: logbook.id },
-      prevState,
-      formData,
-    );
-
-    if (result.message === "Success") {
-      close();
-      toast.success("Logboekregel bijgewerkt.");
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
-
-  if (rows.length !== 1 || !logbook) {
-    return null;
-  }
+  const { execute, result } = useAction(
+    updateLogbookAction.bind(null, personId, logbook.id),
+    {
+      onSuccess: () => {
+        close();
+        toast.success("Logboekregel bijgewerkt.");
+      },
+    },
+  );
 
   return (
     <Dialog size="2xl" open={isOpen} onClose={close}>
       <DialogTitle>Bewerk je logboekregel</DialogTitle>
       <Text>Vul de details in van je vaaractiviteit.</Text>
-      <form action={action}>
+      <form action={execute}>
         <DialogBody className="@container/logbook-fields">
           <LogbookFields
-            errors={state?.errors}
+            invalid={{
+              startedAt: !!result?.validationErrors?.startedAt,
+              endedAt: !!result?.validationErrors?.endedAt,
+              departurePort: !!result?.validationErrors?.departurePort,
+              arrivalPort: !!result?.validationErrors?.arrivalPort,
+              location: !!result?.validationErrors?.location,
+              windDirection: !!result?.validationErrors?.windDirection,
+              windPower: !!result?.validationErrors?.windPower,
+              boatType: !!result?.validationErrors?.boatType,
+              boatLength: !!result?.validationErrors?.boatLength,
+              sailedNauticalMiles:
+                !!result?.validationErrors?.sailedNauticalMiles,
+              sailedHoursInDark: !!result?.validationErrors?.sailedHoursInDark,
+              primaryRole: !!result?.validationErrors?.primaryRole,
+              crewNames: !!result?.validationErrors?.crewNames,
+              conditions: !!result?.validationErrors?.conditions,
+              additionalComments:
+                !!result?.validationErrors?.additionalComments,
+            }}
             defaultValues={{
               ...logbook,
             }}

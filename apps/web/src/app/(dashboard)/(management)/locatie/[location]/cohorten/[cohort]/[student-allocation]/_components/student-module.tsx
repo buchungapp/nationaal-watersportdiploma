@@ -12,6 +12,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
+import { useAction } from "next-safe-action/hooks";
 import {
   type PropsWithChildren,
   createContext,
@@ -19,9 +20,11 @@ import {
   useOptimistic,
   useRef,
   useState,
-  useTransition,
 } from "react";
 import { toast } from "sonner";
+import { updateCompetencyProgressForStudentInCohortAction } from "~/actions/cohort/student/update-competency-progress-for-student-in-cohort-action";
+import { updateCompetencyProgressesForStudentInCohortAction } from "~/actions/cohort/student/update-competency-progresses-for-student-in-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -49,10 +52,6 @@ import { Strong } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import { Weight } from "~/app/_components/weight";
 import type { retrieveCurriculumById } from "~/lib/nwd";
-import {
-  updateBulkCompetencyProgress,
-  updateSingleCompetencyProgress,
-} from "../_actions/progress";
 
 const CourseCardContext = createContext<
   | {
@@ -151,7 +150,17 @@ export function CompleteAllCoreModules({
   competencyIds: string[];
   disabled?: boolean;
 }) {
-  const [isBusy, startTransition] = useTransition();
+  const { execute, isPending } = useAction(
+    updateCompetencyProgressesForStudentInCohortAction.bind(
+      null,
+      cohortAllocationId,
+    ),
+    {
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   if (competencyIds.length < 1) {
     return null;
@@ -160,23 +169,17 @@ export function CompleteAllCoreModules({
   return (
     <Button
       outline
-      disabled={disabled || isBusy}
-      onClick={() => {
-        startTransition(
-          async () =>
-            await updateBulkCompetencyProgress({
-              cohortAllocationId,
-              progressData: competencyIds.map((competencyId) => ({
-                competencyId,
-                progress: 100,
-              })),
-            }).catch(() => {
-              toast.error("Er is iets misgegaan.");
-            }),
-        );
-      }}
+      disabled={disabled || isPending}
+      onClick={() =>
+        execute(
+          competencyIds.map((competencyId) => ({
+            competencyId,
+            progress: 100,
+          })),
+        )
+      }
     >
-      {isBusy ? <Spinner /> : <CheckIcon />}
+      {isPending ? <Spinner /> : <CheckIcon />}
       Voltooi alle kernmodules
     </Button>
   );
@@ -330,7 +333,7 @@ export function Module({
         <>
           {/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
           <CheckboxGroup role="group">
-            <div className="flex items-center justify-between">
+            <div className="flex justify-between items-center">
               <div className="flex items-center gap-x-2">
                 <DisclosureButton as={Button} plain>
                   {panelOpen ? <MinusIcon /> : <PlusIcon />}
@@ -352,14 +355,14 @@ export function Module({
                         })),
                       );
 
-                      await updateBulkCompetencyProgress({
+                      await updateCompetencyProgressesForStudentInCohortAction(
                         cohortAllocationId,
-                        progressData: module.competencies.map((competency) => ({
+                        module.competencies.map((competency) => ({
                           competencyId: competency.id,
                           progress: checked ? 100 : 0,
                         })),
-                      }).catch(() => {
-                        toast.error("Er is iets misgegaan.");
+                      ).catch(() => {
+                        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
                       });
 
                       return;
@@ -373,7 +376,7 @@ export function Module({
                   </div>
                 </CheckboxField>
               </div>
-              <div className="flex items-center justify-end gap-x-2">
+              <div className="flex justify-end items-center gap-x-2">
                 <ModuleRequiredBadge
                   type={module.isRequired ? "required" : "not-required"}
                 />
@@ -423,12 +426,14 @@ export function Module({
                           },
                         ]);
 
-                        await updateSingleCompetencyProgress({
+                        await updateCompetencyProgressForStudentInCohortAction(
                           cohortAllocationId,
-                          competencyId: competency.id,
-                          progress: newProgress,
-                        }).catch(() => {
-                          toast.error("Er is iets misgegaan.");
+                          {
+                            competencyId: competency.id,
+                            progress: newProgress,
+                          },
+                        ).catch(() => {
+                          toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
                         });
 
                         return;

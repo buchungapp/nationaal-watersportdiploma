@@ -9,6 +9,9 @@ import {
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { addRoleToInstructorInCohortAction } from "~/actions/cohort/instructor/add-role-to-instructor-in-cohort-action";
+import { removeRoleFromInstructorInCohortAction } from "~/actions/cohort/instructor/remove-role-from-instructor-in-cohort-action";
+import { removeInstructorFromCohortAction } from "~/actions/cohort/remove-instructor-from-cohort-action";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Dropdown,
@@ -31,11 +34,6 @@ import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import type { listInstructorsByCohortId } from "~/lib/nwd";
-import {
-  addCohortRole,
-  removeAllocation,
-  removeCohortRole,
-} from "../../_actions/nwd";
 
 export type Instructor = Awaited<
   ReturnType<typeof listInstructorsByCohortId>
@@ -105,31 +103,31 @@ export default function InstructorsTable({
         id: "actions",
         cell: ({ row }) => {
           const deleteInstructor = async () => {
-            await removeAllocation({
+            await removeInstructorFromCohortAction(
               locationId,
-              allocationId: row.original.id,
               cohortId,
-            });
+              row.original.id,
+            );
 
             toast(`${row.original.person.firstName} verwijderd`);
           };
 
           const makeAdmin = async () => {
-            await addCohortRole({
-              roleHandle: "cohort_admin",
-              allocationId: row.original.id,
+            await addRoleToInstructorInCohortAction(
               cohortId,
-            });
+              row.original.id,
+              "cohort_admin",
+            );
 
             toast(`${row.original.person.firstName} is nu beheerder`);
           };
 
           const removeAdmin = async () => {
-            await removeCohortRole({
-              roleHandle: "cohort_admin",
-              allocationId: row.original.id,
+            await removeRoleFromInstructorInCohortAction(
               cohortId,
-            });
+              row.original.id,
+              "cohort_admin",
+            );
 
             toast(`${row.original.person.firstName} is geen beheerder meer`);
           };

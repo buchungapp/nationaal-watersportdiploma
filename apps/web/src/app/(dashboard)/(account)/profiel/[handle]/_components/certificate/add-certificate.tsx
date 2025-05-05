@@ -1,9 +1,11 @@
 "use client";
 import { PlusIcon } from "@heroicons/react/16/solid";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import { useActionState, useState } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createExternalCertificateAction } from "~/actions/certificate/create-external-certificate-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -15,7 +17,6 @@ import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
 import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
-import { createExternalCertificateAction } from "../../_actions/certificate";
 import { CertificateTemplatePicker } from "./certificate-template-picker";
 import {
   type CertificateTemplate,
@@ -46,22 +47,15 @@ export function AddCertificate({
     }, 100);
   };
 
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await createExternalCertificateAction(
-      { personId },
-      prevState,
-      formData,
-    );
-
-    if (result.message === "Success") {
-      close();
-      toast.success("Certificaat toegevoegd.");
-    }
-
-    return result;
-  };
-
-  const [state, action] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    createExternalCertificateAction.bind(null, personId),
+    {
+      onSuccess: () => {
+        close();
+        toast.success("Certificaat toegevoegd.");
+      },
+    },
+  );
 
   const template = certificateTemplates.find(
     (template) => template.id === selectedCertificateTemplate,
@@ -80,13 +74,13 @@ export function AddCertificate({
           Upload een kopie van je diploma en vul de details in. Alleen de titel
           is verplicht.
         </Text>
-        <form action={action}>
+        <form action={execute}>
           <DialogBody>
             <FieldGroup>
               <Media
                 stepIndex={1}
                 setValidMedia={setValidMedia}
-                errors={state?.errors}
+                invalid={!!result?.validationErrors?.media}
                 small={!validMedia && currentStep !== "media"}
               />
               <div className={currentStep === "media" ? "hidden" : ""}>
@@ -104,7 +98,17 @@ export function AddCertificate({
               >
                 <Metadata
                   stepIndex={3}
-                  errors={state?.errors}
+                  invalid={{
+                    title: !!result?.validationErrors?.title,
+                    issuingAuthority:
+                      !!result?.validationErrors?.issuingAuthority,
+                    identifier: !!result?.validationErrors?.identifier,
+                    issuingLocation:
+                      !!result?.validationErrors?.issuingLocation,
+                    awardedAt: !!result?.validationErrors?.awardedAt,
+                    additionalComments:
+                      !!result?.validationErrors?.additionalComments,
+                  }}
                   defaultValues={{
                     title: template?.title,
                     issuingAuthority: template?.issuingAuthority,

@@ -2,9 +2,12 @@
 import * as Headless from "@headlessui/react";
 import { PlusIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { issueCertificateAction } from "~/actions/certificate/issue-certificate-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -44,7 +47,6 @@ import type {
   listPersonsForLocationByRole,
   listPrograms,
 } from "~/lib/nwd";
-import { createCertificate } from "../_actions/create";
 import {
   getCurriculaByProgram,
   getGearTypesByCurriculum,
@@ -80,23 +82,18 @@ function CreateDialogClient({
   isOpen,
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await createCertificate(
-      locationId,
-      selectedCurriculum?.id ?? "",
-      prevState,
-      formData,
-    );
-
-    if (result.message === "Success") {
-      toast.success("Diploma toegevoegd");
-      setIsOpen(false);
-    }
-
-    return result;
-  };
-
-  const [state, formAction] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    issueCertificateAction.bind(null, locationId),
+    {
+      onSuccess: () => {
+        toast.success("Diploma toegevoegd");
+        setIsOpen(false);
+      },
+      onError: ({ error }) => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
   const [selectedGearType, setSelectedGearType] = useState<string | null>(null);
@@ -160,7 +157,7 @@ function CreateDialogClient({
         <DialogDescription>
           Vul de gegevens in om een diploma toe te voegen.
         </DialogDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <DialogBody>
             <Fieldset>
               <FieldGroup>
@@ -192,6 +189,9 @@ function CreateDialogClient({
                         // Disabled state
                         "data-disabled:opacity-50 data-disabled:before:bg-zinc-950/5 data-disabled:before:shadow-none",
                       ])}
+                      {...(!!result.validationErrors?.person && {
+                        "data-invalid": true,
+                      })}
                     >
                       <Headless.ComboboxInput
                         autoFocus={true}
@@ -212,7 +212,6 @@ function CreateDialogClient({
                           return fullName;
                         }}
                         onChange={(e) => setPersonQuery(e.target.value)}
-                        data-invalid={!!state?.errors.personId}
                         className={clsx([
                           // Basic layout
                           "relative block w-full appearance-none rounded-lg py-[calc(--spacing(2.5)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
@@ -244,9 +243,9 @@ function CreateDialogClient({
                           "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
                         }
                       >
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <span className="right-0 absolute inset-y-0 flex items-center pr-2 pointer-events-none">
                           <svg
-                            className="size-5 stroke-zinc-500 group-data-disabled:stroke-zinc-600 sm:size-4 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText]"
+                            className="stroke-zinc-500 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText] group-data-disabled:stroke-zinc-600 size-5 sm:size-4"
                             viewBox="0 0 16 16"
                             aria-hidden="true"
                             fill="none"
@@ -320,7 +319,7 @@ function CreateDialogClient({
                                   </span>
                                   <span
                                     className={clsx(
-                                      "ml-2 truncate text-slate-500 group-data-active/option:text-white",
+                                      "ml-2 text-slate-500 group-data-active/option:text-white truncate",
                                     )}
                                   >
                                     {person.dateOfBirth
@@ -339,7 +338,7 @@ function CreateDialogClient({
                   </Headless.Combobox>
                 </Field>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
+                <div className="gap-x-4 grid grid-cols-1 lg:grid-cols-2">
                   <Field>
                     <Label>Programma</Label>
                     {/* TODO: this combobox is temporary used should be from catalyst */}
@@ -370,7 +369,7 @@ function CreateDialogClient({
                         setGearTypes([]);
                         setSelectedCurriculum(null);
                       }}
-                      invalid={!!state?.errors.curriculumId}
+                      invalid={!!result.validationErrors?.curriculumId}
                     >
                       {programs
                         .filter((x) => {
@@ -401,7 +400,7 @@ function CreateDialogClient({
                       disabled={!selectedProgram}
                       value={selectedGearType}
                       onChange={(value) => setSelectedGearType(value)}
-                      invalid={!!state?.errors.gearTypeId}
+                      invalid={!!result.validationErrors?.gearTypeId}
                     >
                       {gearTypes.map((gearType) => (
                         <ListboxOption key={gearType.id} value={gearType.id}>
@@ -415,7 +414,12 @@ function CreateDialogClient({
                 <Fieldset>
                   <Legend>Modules</Legend>
                   {selectedCurriculum ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 mt-2 gap-x-4">
+                    <div className="gap-x-4 grid grid-cols-1 lg:grid-cols-2 mt-2">
+                      <input
+                        type="hidden"
+                        name="curriculumId"
+                        value={selectedCurriculum.id}
+                      />
                       <CheckboxGroup>
                         <Legend>Kernmodules</Legend>
                         {selectedCurriculum.modules
@@ -424,7 +428,7 @@ function CreateDialogClient({
                           .map((module) => (
                             <CheckboxField key={module.id}>
                               <Checkbox
-                                name="competencies[]"
+                                name="competencies"
                                 value={module.competencies
                                   .map((c) => c.id)
                                   .join(",")}
@@ -442,7 +446,7 @@ function CreateDialogClient({
                           .map((module) => (
                             <CheckboxField key={module.id}>
                               <Checkbox
-                                name="competencies[]"
+                                name="competencies"
                                 value={module.competencies
                                   .map((c) => c.id)
                                   .join(",")}

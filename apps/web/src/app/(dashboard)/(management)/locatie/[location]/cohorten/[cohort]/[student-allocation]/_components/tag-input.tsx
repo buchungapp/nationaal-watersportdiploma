@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useOptimistic } from "react";
+import { useOptimisticAction } from "next-safe-action/hooks";
+import { useCallback, useRef } from "react";
 import { ReactTags, type Tag } from "react-tag-autocomplete";
 import { toast } from "sonner";
-import { setTags } from "../../(overview)/_actions/nwd";
+import { updateStudentTagsInCohortAction } from "~/actions/cohort/student/update-student-tags-in-cohort-action";
 
 export function ManageAllocationTags({
   tags,
@@ -16,58 +17,69 @@ export function ManageAllocationTags({
   cohortId: string;
   allCohortTags?: string[];
 }) {
-  // states
+  const toastId = useRef<string | number>(null);
+  const { execute, optimisticState } = useOptimisticAction(
+    updateStudentTagsInCohortAction.bind(null, cohortId),
+    {
+      currentState: tags,
+      updateFn: (_current, newTags) => {
+        if (Array.isArray(newTags)) {
+          return newTags.flatMap((tag) => tag.tags);
+        }
 
-  const [optimisticTags, setOptimisticTags] = useOptimistic(
-    tags,
-    (_current, newTags: string[]) => newTags,
+        return newTags.tags;
+      },
+      onExecute: () => {
+        toastId.current = toast.loading("Tags wijzigen");
+      },
+      onSuccess: () => {
+        if (toastId.current) {
+          toast.dismiss(toastId.current);
+        }
+
+        toast.success("Tags gewijzigd");
+      },
+      onError: () => {
+        if (toastId.current) {
+          toast.dismiss(toastId.current);
+        }
+
+        toast.error("Er is iets misgegaan");
+      },
+    },
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onAdd = useCallback(
     async (tag: Tag) => {
-      const newTags = [...optimisticTags, tag.label];
-      setOptimisticTags(newTags);
-
-      await setTags({
+      const newTags = [...optimisticState, tag.label];
+      execute({
         allocationId,
-        cohortId,
         tags: newTags,
-      }).catch(() => {
-        toast.error(
-          `Er is iets misgegaan bij het toevoegen van de tag: ${tag.label}`,
-        );
       });
     },
-    [optimisticTags],
+    [execute, allocationId, optimisticState],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const onDelete = useCallback(
     async (index: number) => {
-      const newTags = [...optimisticTags];
+      const newTags = [...optimisticState];
       newTags.splice(index, 1);
 
-      setOptimisticTags(newTags);
-
-      await setTags({
+      execute({
         allocationId,
-        cohortId,
         tags: newTags,
-      }).catch(() => {
-        toast.error("Er is iets misgegaan bij het verwijderen van de tag");
       });
     },
-    [optimisticTags],
+    [execute, allocationId, optimisticState],
   );
 
   return (
     <ReactTags
       labelText={undefined}
-      selected={optimisticTags.map((tag) => ({ label: tag, value: tag }))}
+      selected={optimisticState.map((tag) => ({ label: tag, value: tag }))}
       suggestions={
         allCohortTags
-          .filter((tag) => !optimisticTags.includes(tag))
+          .filter((tag) => !optimisticState.includes(tag))
           .map((tag) => ({ label: tag, value: tag })) as Tag[]
       }
       onAdd={onAdd}

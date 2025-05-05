@@ -2,10 +2,16 @@
 
 import * as Headless from "@headlessui/react";
 import { clsx } from "clsx";
-import { useActionState, useMemo, useRef, useState } from "react";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
+import { useMemo, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { addStudentToCohortAction } from "~/actions/cohort/add-student-to-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -29,12 +35,7 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import { createPerson } from "../_actions/create";
-import {
-  addStudentToCohortByPersonId,
-  listCountries,
-  listPersonsForLocationByRole,
-} from "../_actions/nwd";
+import { listCountries, listPersonsForLocationByRole } from "../_actions/fetch";
 
 interface Props {
   locationId: string;
@@ -59,46 +60,37 @@ export default function Wrapper(props: Props) {
   );
 }
 
+function addStudentToCohortErrorMessage(
+  error: InferUseActionHookReturn<typeof addStudentToCohortAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
-  const submit = async (
-    prevState: unknown,
-    formData: FormData,
-  ): Promise<{
-    message: string;
-    errors: Record<string, string>;
-  }> => {
-    let existingPersonId = formData.get("person[id]") as string | null;
-
-    if (!existingPersonId) {
-      const result = await createPerson(locationId, prevState, formData);
-
-      if (
-        result.message !== "Success" ||
-        typeof result.data?.id === "undefined"
-      ) {
-        toast.error("Er is iets misgegaan.");
-        return result;
-      }
-
-      existingPersonId = result.data.id;
-    }
-
-    await addStudentToCohortByPersonId({
-      cohortId,
-      locationId,
-      personId: existingPersonId,
-    }).catch(() => {
-      toast.error("Er is iets misgegaan.");
-      return { message: "Error", errors: {} };
-    });
-
-    setIsOpen(false);
-    toast.success("Cursist is toegevoegd.");
-
-    return { message: "Success", errors: {} };
-  };
-
-  const [state, formAction] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    addStudentToCohortAction.bind(null, locationId, cohortId),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        toast.success("Cursist is toegevoegd.");
+      },
+      onError: (error) => {
+        toast.error(addStudentToCohortErrorMessage(error.error));
+      },
+    },
+  );
   const [selectedCountry, setSelectedCountry] = useState<string | null>("nl");
 
   const [personQuery, setPersonQuery] = useState("");
@@ -144,7 +136,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
       <Dialog open={isOpen} onClose={setIsOpen}>
         <DialogTitle>Cursist toevoegen</DialogTitle>
 
-        <form action={formAction}>
+        <form action={execute}>
           <Field className="max-w-md">
             <Label>Vind een bestaande</Label>
             <Headless.Combobox
@@ -195,7 +187,11 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                     return fullName;
                   }}
                   onChange={(e) => setPersonQuery(e.target.value)}
-                  data-invalid={!!state?.errors.personId}
+                  data-invalid={
+                    result?.validationErrors &&
+                    "person[id]" in result.validationErrors &&
+                    !!result.validationErrors["person[id]"]
+                  }
                   className={clsx([
                     // Basic layout
                     "relative block w-full appearance-none rounded-lg py-[calc(--spacing(2.5)-1px)] sm:py-[calc(--spacing(1.5)-1px)]",
@@ -227,9 +223,9 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                     "absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-hidden"
                   }
                 >
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                  <span className="right-0 absolute inset-y-0 flex items-center pr-2 pointer-events-none">
                     <svg
-                      className="size-5 stroke-zinc-500 group-data-disabled:stroke-zinc-600 sm:size-4 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText]"
+                      className="stroke-zinc-500 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText] group-data-disabled:stroke-zinc-600 size-5 sm:size-4"
                       viewBox="0 0 16 16"
                       aria-hidden="true"
                       fill="none"
@@ -301,7 +297,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                             <span className={clsx("truncate")}>{fullName}</span>
                             <span
                               className={clsx(
-                                "ml-2 truncate text-slate-500 group-data-active/option:text-white",
+                                "ml-2 text-slate-500 group-data-active/option:text-white truncate",
                               )}
                             >
                               {person.dateOfBirth
@@ -324,12 +320,16 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
           <DialogBody>
             <Fieldset disabled={!!selectedStudent}>
               <FieldGroup>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
                   <Field>
                     <Label>Voornaam</Label>
                     <Input
                       name="firstName"
-                      invalid={!!state?.errors.firstName}
+                      invalid={
+                        result?.validationErrors &&
+                        "firstName" in result.validationErrors &&
+                        !!result.validationErrors.firstName
+                      }
                       required
                       minLength={1}
                     />
@@ -338,27 +338,39 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                     <Label>Tussenvoegsel</Label>
                     <Input
                       name="lastNamePrefix"
-                      invalid={!!state?.errors.lastNamePrefix}
+                      invalid={
+                        result?.validationErrors &&
+                        "lastNamePrefix" in result.validationErrors &&
+                        !!result.validationErrors.lastNamePrefix
+                      }
                     />
                   </Field>
                   <Field>
                     <Label>Achternaam</Label>
                     <Input
                       name="lastName"
-                      invalid={!!state?.errors.lastName}
+                      invalid={
+                        result?.validationErrors &&
+                        "lastName" in result.validationErrors &&
+                        !!result.validationErrors.lastName
+                      }
                       required
                       minLength={1}
                     />
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-5 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-5">
                   <Field className="sm:col-span-3">
                     <Label>E-mail</Label>
                     <Input
                       name="email"
                       type="email"
-                      invalid={!!state?.errors.email}
+                      invalid={
+                        result?.validationErrors &&
+                        "email" in result.validationErrors &&
+                        !!result.validationErrors.email
+                      }
                       required
                     />
                   </Field>
@@ -367,25 +379,38 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                     <Input
                       name="dateOfBirth"
                       type="date"
-                      invalid={!!state?.errors.dateOfBirth}
+                      invalid={
+                        result?.validationErrors &&
+                        "dateOfBirth" in result.validationErrors &&
+                        !!result.validationErrors.dateOfBirth
+                      }
                       required
                     />
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <Field>
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
-                      invalid={!!state?.errors.birthCity}
+                      invalid={
+                        result?.validationErrors &&
+                        "birthCity" in result.validationErrors &&
+                        !!result.validationErrors.birthCity
+                      }
+                      required
                     />
                   </Field>
                   <Field>
                     <Label>Geboorteland</Label>
                     <Combobox
                       name="birthCountry"
-                      invalid={!!state?.errors.birthCountry}
+                      invalid={
+                        result?.validationErrors &&
+                        "birthCountry" in result.validationErrors &&
+                        !!result.validationErrors.birthCountry
+                      }
                       value={selectedCountry}
                       setQuery={setCountryQuery}
                       onChange={(value) => setSelectedCountry(value)}

@@ -1,8 +1,14 @@
 "use client";
 import { PlusIcon } from "@heroicons/react/16/solid";
-import { useActionState, useRef, useState } from "react";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createCohortAction } from "~/actions/cohort/create-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -22,7 +28,6 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import { SmartDatetimePicker } from "~/app/(dashboard)/_components/natural-language-input";
 import Spinner from "~/app/_components/spinner";
 import type { listPrograms } from "~/lib/nwd";
-import { createCohortAction } from "../_actions/create";
 
 interface Props {
   locationId: string;
@@ -46,23 +51,40 @@ export default function Wrapper(props: Props) {
   );
 }
 
+function createCohortErrorMessage(
+  error: InferUseActionHookReturn<typeof createCohortAction>["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 function CreateDialogClient({
   locationId,
   isOpen,
   setIsOpen,
 }: Props & { isOpen: boolean; setIsOpen: (value: boolean) => void }) {
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await createCohortAction(locationId, prevState, formData);
+  const { execute, result } = useAction(
+    createCohortAction.bind(null, locationId),
+    {
+      onSuccess: () => {
+        toast.success("Cohort toegevoegd");
+        setIsOpen(false);
+      },
+    },
+  );
 
-    if (result.message === "Success") {
-      toast.success("Cohort toegevoegd");
-      setIsOpen(false);
-    }
-
-    return result;
-  };
-
-  const [state, formAction] = useActionState(submit, undefined);
+  const errorMessage = createCohortErrorMessage(result);
 
   return (
     <>
@@ -80,7 +102,7 @@ function CreateDialogClient({
         <DialogDescription>
           Vul de gegevens in om een nieuw cohort te starten.
         </DialogDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <DialogBody>
             <Fieldset>
               <FieldGroup>
@@ -89,7 +111,7 @@ function CreateDialogClient({
                     <Label>Naam</Label>
                     <Input
                       name="label"
-                      invalid={!!state?.errors.label}
+                      invalid={!!result?.validationErrors?.label}
                       required
                       minLength={1}
                     />
@@ -98,7 +120,7 @@ function CreateDialogClient({
                     <Label>Opent op</Label>
                     <SmartDatetimePicker
                       name="accessStartTime"
-                      invalid={!!state?.errors.accessStartTime}
+                      invalid={!!result?.validationErrors?.accessStartTime}
                       required
                     />
                   </Field>
@@ -106,16 +128,16 @@ function CreateDialogClient({
                     <Label>Sluit op</Label>
                     <SmartDatetimePicker
                       name="accessEndTime"
-                      invalid={!!state?.errors.accessEndTime}
+                      invalid={!!result?.validationErrors?.accessEndTime}
                       required
                     />
                   </Field>
                 </div>
               </FieldGroup>
 
-              {!!state?.errors && (
-                <ErrorMessage>{JSON.stringify(state.errors)}</ErrorMessage>
-              )}
+              {errorMessage ? (
+                <ErrorMessage>{errorMessage}</ErrorMessage>
+              ) : null}
             </Fieldset>
           </DialogBody>
           <DialogActions>

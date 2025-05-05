@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createPersonAction } from "~/actions/person/create-person-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -34,7 +36,6 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import type { ActorType } from "~/lib/nwd";
-import { createPerson } from "../_actions/create";
 
 const ROLES: {
   type: ActorType;
@@ -85,18 +86,15 @@ export default function Wrapper(props: Props) {
 }
 
 function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
-  const submit = async (prevState: unknown, formData: FormData) => {
-    const result = await createPerson(locationId, prevState, formData);
-
-    if (result.message === "Success") {
-      setIsOpen(false);
-      toast.success("Persoon is toegevoegd.");
-    }
-
-    return result;
-  };
-
-  const [state, formAction] = useActionState(submit, undefined);
+  const { execute, result } = useAction(
+    createPersonAction.bind(null, locationId),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        toast.success("Persoon is toegevoegd.");
+      },
+    },
+  );
   const [selectedCountry, setSelectedCountry] = useState<string | null>("nl");
 
   const [countryQuery, setCountryQuery] = useState("");
@@ -117,16 +115,16 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
         <DialogDescription>
           Vul de gegevens in om een persoon toe te voegen.
         </DialogDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <DialogBody>
             <Fieldset>
               <FieldGroup>
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
                   <Field>
                     <Label>Voornaam</Label>
                     <Input
                       name="firstName"
-                      invalid={!!state?.errors.firstName}
+                      invalid={!!result.validationErrors?.firstName}
                       required
                       minLength={1}
                     />
@@ -135,27 +133,27 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <Label>Tussenvoegsel</Label>
                     <Input
                       name="lastNamePrefix"
-                      invalid={!!state?.errors.lastNamePrefix}
+                      invalid={!!result.validationErrors?.lastNamePrefix}
                     />
                   </Field>
                   <Field>
                     <Label>Achternaam</Label>
                     <Input
                       name="lastName"
-                      invalid={!!state?.errors.lastName}
+                      invalid={!!result.validationErrors?.lastName}
                       required
                       minLength={1}
                     />
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-5 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-5">
                   <Field className="sm:col-span-3">
                     <Label>E-mail</Label>
                     <Input
                       name="email"
                       type="email"
-                      invalid={!!state?.errors.email}
+                      invalid={!!result.validationErrors?.email}
                       required
                     />
                   </Field>
@@ -164,25 +162,25 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
                     <Input
                       name="dateOfBirth"
                       type="date"
-                      invalid={!!state?.errors.dateOfBirth}
+                      invalid={!!result.validationErrors?.dateOfBirth}
                       required
                     />
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-4">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <Field>
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
-                      invalid={!!state?.errors.birthCity}
+                      invalid={!!result.validationErrors?.birthCity}
                     />
                   </Field>
                   <Field>
                     <Label>Geboorteland</Label>
                     <Combobox
                       name="birthCountry"
-                      invalid={!!state?.errors.birthCountry}
+                      invalid={!!result.validationErrors?.birthCountry}
                       value={selectedCountry}
                       setQuery={setCountryQuery}
                       onChange={(value) => setSelectedCountry(value)}
@@ -211,7 +209,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
               <Text>
                 Welke rol(len) vervult deze persoon in jullie locatie?
               </Text>
-              {!!state?.errors.roles && (
+              {!!result.validationErrors?.roles && (
                 <ErrorMessage>
                   Selecteer minimaal één rol voor de persoon.
                 </ErrorMessage>

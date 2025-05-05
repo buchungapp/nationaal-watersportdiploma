@@ -1,12 +1,10 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { Button } from "~/app/(dashboard)/_components/button";
-
-import { z } from "zod";
 import {
   Combobox,
   ComboboxLabel,
@@ -19,14 +17,15 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 
+import { useAction } from "next-safe-action/hooks";
+import { enrollStudentsInCurriculumInCohortAction } from "~/actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
 import { Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import {
-  enrollStudentsInCurriculumForCohort,
   listCurriculaByProgram,
   listGearTypesByCurriculum,
   listPrograms,
-} from "../../(overview)/_actions/nwd";
+} from "../../(overview)/_actions/fetch";
 
 export function StartStudentCurriculum({
   cohortId,
@@ -37,46 +36,22 @@ export function StartStudentCurriculum({
   allocationId: string;
   personId: string;
 }) {
-  const submit = async (_prevState: unknown, formData: FormData) => {
-    const programId = formData.get("program");
-    const gearTypeId = formData.get("gearTypeId");
-    const curriculumId = formData.get("curriculumId");
-
-    try {
-      const validated = z
-        .object({
-          program: z.string().uuid(),
-          gearTypeId: z.string().uuid(),
-          curriculumId: z.string().uuid(),
-        })
-        .parse({
-          program: programId,
-          gearTypeId: gearTypeId,
-          curriculumId: curriculumId,
-        });
-
-      await enrollStudentsInCurriculumForCohort({
-        cohortId,
-        curriculumId: validated.curriculumId,
-        gearTypeId: validated.gearTypeId,
-        students: [
-          {
-            allocationId,
-            personId,
-          },
-        ],
-      });
-
-      toast.success("Programma gestart");
-    } catch (error) {
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
   const [programQuery, setProgramQuery] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    enrollStudentsInCurriculumInCohortAction.bind(null, cohortId, [
+      { allocationId, personId },
+    ]),
+    {
+      onSuccess: () => {
+        toast.success("Programma gestart");
+      },
+      onError: () => {
+        toast.error("Er is iets misgegaan");
+      },
+    },
+  );
 
   const { data: programs } = useSWR("allPrograms", listPrograms);
   const { data: activeCurriculumForProgram } = useSWR(
@@ -116,8 +91,8 @@ export function StartStudentCurriculum({
       </Text>
 
       <form
-        action={formAction}
-        className="mt-2.5 flex flex-col gap-y-3.5 lg:flex-row lg:gap-x-4 lg:items-end"
+        action={execute}
+        className="flex lg:flex-row flex-col lg:items-end gap-y-3.5 lg:gap-x-4 mt-2.5"
       >
         {/* Hidden input for curriculumId */}
         <input

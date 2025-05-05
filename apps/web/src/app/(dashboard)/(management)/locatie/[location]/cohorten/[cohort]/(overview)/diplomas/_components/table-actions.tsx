@@ -1,4 +1,4 @@
-import { useActionState, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
@@ -7,8 +7,17 @@ import {
   DisclosurePanel as HeadlessDisclosurePanel,
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
+import {
+  type InferUseActionHookReturn,
+  useAction,
+} from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { z } from "zod";
+import { downloadCertificatesAction } from "~/actions/certificate/download-certificates-action";
+import { issueCertificatesInCohortAction } from "~/actions/cohort/certificate/issue-certificates-in-cohort-action";
+import { withdrawCertificatesInCohortAction } from "~/actions/cohort/certificate/withdraw-certificates-in-cohort-action";
+import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
+import { CONFIRMATION_WORD } from "~/actions/cohort/student/confirm-word";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
   AlertActions,
@@ -45,12 +54,6 @@ import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import { completeAllCoreCompetencies } from "../../_actions/nwd";
-import { kickOffGeneratePDF } from "../_actions/download";
-import {
-  issueCertificates,
-  withDrawCertificates,
-} from "../_actions/quick-actions";
 import type { Student } from "./students-table";
 
 interface Props {
@@ -181,6 +184,26 @@ export function ActionButtons(props: Props) {
   );
 }
 
+function issueCertificatesInCohortErrorMessage(
+  error: InferUseActionHookReturn<
+    typeof issueCertificatesInCohortAction
+  >["result"],
+) {
+  if (error.serverError) {
+    return error.serverError;
+  }
+
+  if (error.validationErrors) {
+    return "Een van de velden is niet correct ingevuld.";
+  }
+
+  if (error.bindArgsValidationErrors) {
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  }
+
+  return null;
+}
+
 export function IssueCertificateDialog({
   rows,
   cohortId,
@@ -193,39 +216,26 @@ export function IssueCertificateDialog({
   setIsOpen: (value: boolean) => void;
 }) {
   const [delayVisibility, setDelayVisibility] = useState(!!defaultVisibleFrom);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+
+  const { execute, result, isPending } = useAction(
+    issueCertificatesInCohortAction.bind(
+      null,
+      cohortId,
+      rows.map((row) => row.id),
+    ),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        resetSelection();
+      },
+    },
+  );
+
+  const errorMessage = issueCertificatesInCohortErrorMessage(result);
 
   return (
     <Alert open={isOpen} onClose={setIsOpen} size="lg">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-
-          const formData = new FormData(e.target as HTMLFormElement);
-          const visibleFrom = formData.get("visibleFrom") as string | null;
-
-          startTransition(async () => {
-            await issueCertificates({
-              cohortAllocationIds: rows.map((row) => row.id),
-              visibleFrom: delayVisibility
-                ? dayjs(visibleFrom).toISOString()
-                : null,
-              cohortId,
-            })
-              .then(() => {
-                setIsOpen(false);
-                resetSelection();
-              })
-              .catch((error) => {
-                if (error instanceof Error) {
-                  return setError(error.message);
-                }
-                setError("Er is een fout opgetreden.");
-              });
-          });
-        }}
-      >
+      <form action={execute}>
         <AlertTitle>Diploma's uitgeven</AlertTitle>
 
         <AlertBody>
@@ -259,14 +269,14 @@ export function IssueCertificateDialog({
             </>
           ) : null}
 
-          {error ? <ErrorMessage>{error}</ErrorMessage> : null}
+          {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
         </AlertBody>
         <AlertActions>
           <Button plain onClick={() => setIsOpen(false)}>
             Annuleren
           </Button>
-          <Button type="submit" disabled={pending}>
-            {pending ? <Spinner className="text-white" /> : null}
+          <Button type="submit" disabled={isPending}>
+            {isPending ? <Spinner className="text-white" /> : null}
             Uitgeven
           </Button>
         </AlertActions>
@@ -309,24 +319,22 @@ export function RemoveCertificateDialog({
         <Button
           color="red"
           disabled={pending}
-          onClick={() => {
-            startTransition(async () => {
-              await withDrawCertificates({
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
-                certificateIds: rows.map((row) => row.certificate!.id),
-                cohortId,
+          onClick={() =>
+            withdrawCertificatesInCohortAction(
+              cohortId,
+              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              rows.map((row) => row.certificate!.id),
+            )
+              .then(() => {
+                setIsOpen(false);
+                resetSelection();
               })
-                .then(() => {
-                  setIsOpen(false);
-                  resetSelection();
-                })
-                .catch(() => {
-                  setError(
-                    "Er is een fout opgetreden, mogelijk is het diploma meer dan 72 uur geleden uitgegeven. Neem in dat geval contact op met het Secretariaat.",
-                  );
-                });
-            });
-          }}
+              .catch(() => {
+                setError(
+                  "Er is een fout opgetreden, mogelijk is het diploma meer dan 72 uur geleden uitgegeven. Neem in dat geval contact op met het Secretariaat.",
+                );
+              })
+          }
         >
           {pending ? <Spinner className="text-white" /> : null} Verwijderen
         </Button>
@@ -334,8 +342,6 @@ export function RemoveCertificateDialog({
     </Alert>
   );
 }
-
-const CONFIRMATION_WORD = "begrepen";
 
 function CompleteCoreModulesDialog({
   rows,
@@ -346,23 +352,22 @@ function CompleteCoreModulesDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (_prevState: unknown, formData: FormData) => {
-    try {
-      z.literal(CONFIRMATION_WORD).parse(formData.get("confirm"));
-
-      await completeAllCoreCompetencies({
-        cohortAllocationId: rows.map((row) => row.id),
-      });
-
-      toast.success("Kernmodules afgerond");
-      setIsOpen(false);
-      resetSelection();
-    } catch (error) {
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    completeAllCoreCompetenciesForStudentInCohortAction.bind(
+      null,
+      rows.map((row) => row.id),
+    ),
+    {
+      onSuccess: () => {
+        toast.success("Kernmodules afgerond");
+        setIsOpen(false);
+        resetSelection();
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   return (
     <>
@@ -388,7 +393,7 @@ function CompleteCoreModulesDialog({
           woord <Strong>{CONFIRMATION_WORD}</Strong> om de kernmodules af te
           ronden.
         </AlertDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <AlertBody>
             <Input
               name="confirm"
@@ -428,34 +433,22 @@ function DownloadCertificatesDialog({
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }) {
-  const submit = async (_prevState: unknown, formData: FormData) => {
-    const advancedOptionsSchema = z.object({
-      filename: z.string().catch(`${dayjs().toISOString()}-export-diplomas`),
-      sort: z.enum(["student", "instructor"]).catch("student"),
-    });
-
-    const advancedOptions = advancedOptionsSchema.parse({
-      filename: formData.get("filename"),
-      sort: formData.get("sort"),
-    });
-
-    try {
-      await kickOffGeneratePDF({
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        handles: rows.map((row) => row.certificate!.handle),
-        fileName: advancedOptions.filename,
-        sort: advancedOptions.sort,
-      });
-
-      toast.success("Bestand gedownload");
-      setIsOpen(false);
-      resetSelection();
-    } catch (error) {
-      toast.error("Er is iets misgegaan");
-    }
-  };
-
-  const [_state, formAction] = useActionState(submit, undefined);
+  const { execute } = useAction(
+    downloadCertificatesAction.bind(
+      null,
+      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate
+      rows.map((row) => row.certificate!.handle),
+    ),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        resetSelection();
+      },
+      onError: () => {
+        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+      },
+    },
+  );
 
   return (
     <>
@@ -465,7 +458,7 @@ function DownloadCertificatesDialog({
           Download een PDF-bestand met de diploma's van de geselecteerde
           cursisten.
         </AlertDescription>
-        <form action={formAction}>
+        <form action={execute}>
           <AlertBody>
             <HeadlessDisclosure>
               <HeadlessDisclosureButton className="flex">
