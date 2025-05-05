@@ -25,11 +25,7 @@ export const competency = pgTable(
     weight: smallint("weight").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-    };
-  },
+  (table) => [uniqueIndex().on(table.handle)],
 );
 
 export const module = pgTable(
@@ -44,12 +40,7 @@ export const module = pgTable(
     weight: smallint("weight").notNull(),
     ...timestamps,
   },
-
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-    };
-  },
+  (table) => [uniqueIndex().on(table.handle)],
 );
 
 export const discipline = pgTable(
@@ -64,11 +55,7 @@ export const discipline = pgTable(
     weight: smallint("weight").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-    };
-  },
+  (table) => [uniqueIndex().on(table.handle)],
 );
 
 export const degree = pgTable(
@@ -83,12 +70,7 @@ export const degree = pgTable(
     rang: smallint("rang").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-      unqRang: uniqueIndex().on(table.rang),
-    };
-  },
+  (table) => [uniqueIndex().on(table.handle), uniqueIndex().on(table.rang)],
 );
 
 // type Degree = degree.$inferSelect
@@ -107,16 +89,14 @@ export const category = pgTable(
     weight: smallint("weight").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-      parentCategoryReference: foreignKey({
-        columns: [table.parentCategoryId],
-        foreignColumns: [table.id],
-        name: "category_parent_category_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex().on(table.handle),
+    foreignKey({
+      columns: [table.parentCategoryId],
+      foreignColumns: [table.id],
+      name: "category_parent_category_id_fk",
+    }),
+  ],
 );
 
 export const course = pgTable(
@@ -132,16 +112,14 @@ export const course = pgTable(
     disciplineId: uuid("discipline_id").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-      disciplineReference: foreignKey({
-        columns: [table.disciplineId],
-        foreignColumns: [discipline.id],
-        name: "course_discipline_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex().on(table.handle),
+    foreignKey({
+      columns: [table.disciplineId],
+      foreignColumns: [discipline.id],
+      name: "course_discipline_id_fk",
+    }),
+  ],
 );
 
 export const courseCategory = pgTable(
@@ -155,21 +133,19 @@ export const courseCategory = pgTable(
     categoryId: uuid("category_id").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      courseReference: foreignKey({
-        columns: [table.courseId],
-        foreignColumns: [course.id],
-        name: "course_category_course_id_fk",
-      }),
-      categoryReference: foreignKey({
-        columns: [table.categoryId],
-        foreignColumns: [category.id],
-        name: "course_category_category_id_fk",
-      }),
-      unqCourseCategory: uniqueIndex().on(table.categoryId, table.courseId),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.courseId],
+      foreignColumns: [course.id],
+      name: "course_category_course_id_fk",
+    }),
+    foreignKey({
+      columns: [table.categoryId],
+      foreignColumns: [category.id],
+      name: "course_category_category_id_fk",
+    }),
+    uniqueIndex().on(table.categoryId, table.courseId),
+  ],
 );
 
 export const program = pgTable(
@@ -185,21 +161,19 @@ export const program = pgTable(
     degreeId: uuid("degree_id").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-      courseReference: foreignKey({
-        columns: [table.courseId],
-        foreignColumns: [course.id],
-        name: "program_course_id_fk",
-      }),
-      degreeReference: foreignKey({
-        columns: [table.degreeId],
-        foreignColumns: [degree.id],
-        name: "program_degree_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex().on(table.handle),
+    foreignKey({
+      columns: [table.courseId],
+      foreignColumns: [course.id],
+      name: "program_course_id_fk",
+    }),
+    foreignKey({
+      columns: [table.degreeId],
+      foreignColumns: [degree.id],
+      name: "program_degree_id_fk",
+    }),
+  ],
 );
 
 export const gearType = pgTable(
@@ -213,9 +187,5 @@ export const gearType = pgTable(
     title: text("title"),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqHandle: uniqueIndex().on(table.handle),
-    };
-  },
+  (table) => [uniqueIndex().on(table.handle)],
 );

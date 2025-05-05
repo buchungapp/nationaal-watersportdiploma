@@ -27,16 +27,14 @@ export const curriculum = pgTable(
     }),
     ...timestamps,
   },
-  (table) => {
-    return {
-      programReference: foreignKey({
-        columns: [table.programId],
-        foreignColumns: [program.id],
-        name: "curriculum_program_id_fk",
-      }),
-      unqProgramRevision: uniqueIndex().on(table.programId, table.revision),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.programId],
+      foreignColumns: [program.id],
+      name: "curriculum_program_id_fk",
+    }),
+    uniqueIndex().on(table.programId, table.revision),
+  ],
 );
 
 export const curriculumModule = pgTable(
@@ -46,22 +44,20 @@ export const curriculumModule = pgTable(
     moduleId: uuid("module_id").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.curriculumId, table.moduleId] }),
-      curriculumReference: foreignKey({
-        columns: [table.curriculumId],
-        foreignColumns: [curriculum.id],
-        name: "curriculum_module_curriculum_id_fk",
-      }),
-      moduleReference: foreignKey({
-        columns: [table.moduleId],
-        foreignColumns: [module.id],
-        name: "curriculum_module_module_id_fk",
-      }),
-      unqCurriculumModule: uniqueIndex().on(table.curriculumId, table.moduleId),
-    };
-  },
+  (table) => [
+    primaryKey({ columns: [table.curriculumId, table.moduleId] }),
+    foreignKey({
+      columns: [table.curriculumId],
+      foreignColumns: [curriculum.id],
+      name: "curriculum_module_curriculum_id_fk",
+    }),
+    foreignKey({
+      columns: [table.moduleId],
+      foreignColumns: [module.id],
+      name: "curriculum_module_module_id_fk",
+    }),
+    uniqueIndex().on(table.curriculumId, table.moduleId),
+  ],
 );
 
 export const curriculumCompetency = pgTable(
@@ -78,28 +74,26 @@ export const curriculumCompetency = pgTable(
     requirement: text("requirement"),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unq: uniqueIndex("curriculum_competency_unq_set").on(
-        table.curriculumId,
-        table.moduleId,
-        table.competencyId,
-      ),
-      curriculumModuleReference: foreignKey({
-        columns: [table.curriculumId, table.moduleId],
-        foreignColumns: [
-          curriculumModule.curriculumId,
-          curriculumModule.moduleId,
-        ],
-        name: "curriculum_competency_curriculum_module_id_fk",
-      }),
-      competencyReference: foreignKey({
-        columns: [table.competencyId],
-        foreignColumns: [competency.id],
-        name: "curriculum_competency_competency_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex("curriculum_competency_unq_set").on(
+      table.curriculumId,
+      table.moduleId,
+      table.competencyId,
+    ),
+    foreignKey({
+      columns: [table.curriculumId, table.moduleId],
+      foreignColumns: [
+        curriculumModule.curriculumId,
+        curriculumModule.moduleId,
+      ],
+      name: "curriculum_competency_curriculum_module_id_fk",
+    }),
+    foreignKey({
+      columns: [table.competencyId],
+      foreignColumns: [competency.id],
+      name: "curriculum_competency_competency_id_fk",
+    }),
+  ],
 );
 
 export const curriculumGearLink = pgTable(
@@ -109,19 +103,17 @@ export const curriculumGearLink = pgTable(
     gearTypeId: uuid("gear_type_id").notNull(),
     ...timestamps,
   },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.curriculumId, table.gearTypeId] }),
-      curriculumReference: foreignKey({
-        columns: [table.curriculumId],
-        foreignColumns: [curriculum.id],
-        name: "curriculum_gear_link_curriculum_id_fk",
-      }),
-      gearTypeReference: foreignKey({
-        columns: [table.gearTypeId],
-        foreignColumns: [gearType.id],
-        name: "curriculum_gear_link_gear_type_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    primaryKey({ columns: [table.curriculumId, table.gearTypeId] }),
+    foreignKey({
+      columns: [table.curriculumId],
+      foreignColumns: [curriculum.id],
+      name: "curriculum_gear_link_curriculum_id_fk",
+    }),
+    foreignKey({
+      columns: [table.gearTypeId],
+      foreignColumns: [gearType.id],
+      name: "curriculum_gear_link_gear_type_id_fk",
+    }),
+  ],
 );

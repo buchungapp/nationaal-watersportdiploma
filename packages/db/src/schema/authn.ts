@@ -28,16 +28,14 @@ export const token = pgTable(
     userId: uuid("user_id"),
     ...timestamps,
   },
-  (table) => {
-    return {
-      unqKey: uniqueIndex().on(table.hashedKey),
-      userReference: foreignKey({
-        columns: [table.userId],
-        foreignColumns: [user.authUserId],
-        name: "token_user_id_fk",
-      }),
-    };
-  },
+  (table) => [
+    uniqueIndex().on(table.hashedKey),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.authUserId],
+      name: "token_user_id_fk",
+    }),
+  ],
 );
 
 export const tokenUsage = pgTable(
@@ -55,15 +53,13 @@ export const tokenUsage = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => {
-    return {
-      tokenReference: foreignKey({
-        columns: [table.tokenId],
-        foreignColumns: [token.id],
-        name: "token_usage_token_id_fk",
-      }),
-      // Index on token_id and used_at for fast lookups
-      idxUsage: index().on(table.tokenId, table.usedAt.desc()),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.tokenId],
+      foreignColumns: [token.id],
+      name: "token_usage_token_id_fk",
+    }),
+    // Index on token_id and used_at for fast lookups
+    index().on(table.tokenId, table.usedAt.desc()),
+  ],
 );

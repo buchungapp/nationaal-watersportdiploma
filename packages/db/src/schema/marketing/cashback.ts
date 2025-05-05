@@ -35,16 +35,14 @@ export const cashback = marketingSchema.table(
 
     ...timestamps,
   },
-  (table) => {
-    return {
-      verificationMediaFk: foreignKey({
-        columns: [table.verificationMediaId],
-        foreignColumns: [media.id],
-      }),
-      bookingLocationFk: foreignKey({
-        columns: [table.bookingLocationId],
-        foreignColumns: [location.id],
-      }),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.verificationMediaId],
+      foreignColumns: [media.id],
+    }),
+    foreignKey({
+      columns: [table.bookingLocationId],
+      foreignColumns: [location.id],
+    }),
+  ],
 );
