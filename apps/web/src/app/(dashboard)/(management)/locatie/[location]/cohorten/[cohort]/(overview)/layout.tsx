@@ -121,9 +121,9 @@ export default async function Layout(props: {
         <div className="max-lg:hidden">
           <Link
             href={`/locatie/${params.location}/cohorten`}
-            className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
+            className="inline-flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-sm/6"
           >
-            <ChevronLeftIcon className="size-4 fill-zinc-400 dark:fill-zinc-500" />
+            <ChevronLeftIcon className="fill-zinc-400 dark:fill-zinc-500 size-4" />
             Cohorten
           </Link>
         </div>
@@ -132,10 +132,10 @@ export default async function Layout(props: {
             <Heading>{`Cohort ${cohort.label}`}</Heading>
           </div>
 
-          <div className="isolate mt-1 flex flex-wrap justify-between gap-x-6">
+          <div className="isolate flex flex-wrap justify-between gap-x-6 mt-1">
             <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
-              <span className="flex items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
-                <UsersIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
+              <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
+                <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
                 <span>
                   <Suspense fallback={null}>
                     <StudentCount cohortId={cohort.id} />
@@ -143,15 +143,15 @@ export default async function Layout(props: {
                 </span>
               </span>
 
-              <span className="flex items-center gap-3 text-base/6 text-zinc-950 sm:text-sm/6 dark:text-white">
-                <CalendarIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
+              <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
+                <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
                 <div className="flex items-center gap-2">
                   <span>
                     {dayjs(cohort.accessStartTime)
                       .tz()
                       .format("ddd DD-MM-YYYY HH:mm uur")}
                   </span>
-                  <ArrowRightIcon className="size-4 shrink-0 fill-zinc-400 dark:fill-zinc-500" />
+                  <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
                   <span>
                     {dayjs(cohort.accessEndTime)
                       .tz()
@@ -185,7 +185,7 @@ export default async function Layout(props: {
 
         <LayoutTabs personRoles={roles} personPrivileges={privileges} />
 
-        <div className="mt-4">{children}</div>
+        <div className="mt-4 max-sm:mb-30">{children}</div>
 
         <Dialogs locationId={location.id} cohortId={cohort.id} />
       </DialogWrapper>
