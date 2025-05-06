@@ -34,10 +34,10 @@ export default async function Page(props: {
 
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-sm:w-full sm:flex-1">
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div className="sm:flex-1 max-sm:w-full">
           <Heading>Diploma's</Heading>
-          <div className="mt-4 flex max-w-xl gap-4">
+          <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek diploma's..." />
           </div>
         </div>

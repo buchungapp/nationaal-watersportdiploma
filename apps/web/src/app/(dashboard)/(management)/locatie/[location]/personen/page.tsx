@@ -1,7 +1,6 @@
-import Fuse from "fuse.js";
 import {
   listCountries,
-  listPersonsForLocation,
+  listPersonsForLocationWithPagination,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 
@@ -10,7 +9,7 @@ import {
   createLoader,
   parseAsArrayOf,
   parseAsInteger,
-  parseAsString,
+  parseAsStringLiteral,
 } from "nuqs/server";
 
 import {
@@ -19,6 +18,7 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Heading } from "~/app/(dashboard)/_components/heading";
+import { parseAsSearchQuery } from "~/app/(dashboard)/_lib/search-parser";
 import Search from "../../../_components/search";
 import {
   DialogButtons,
@@ -32,8 +32,10 @@ import Table from "./_components/table";
 export const maxDuration = 240;
 
 const searchParamsParser = createLoader({
-  filter: parseAsArrayOf(parseAsString),
-  query: parseAsString,
+  filter: parseAsArrayOf(
+    parseAsStringLiteral(["student", "instructor", "location_admin"] as const),
+  ),
+  query: parseAsSearchQuery.withDefault(""),
   page: parseAsInteger.withDefault(1),
   limit: parseAsInteger.withDefault(25),
 });
@@ -51,54 +53,17 @@ export default async function Page(props: {
     listCountries(),
   ]);
 
-  const persons = await listPersonsForLocation(location.id);
-
-  const parsedSq = searchParamsParser(searchParams);
-
-  // Filter
-  const filterParams = parsedSq.filter
-    ? Array.isArray(parsedSq.filter)
-      ? parsedSq.filter
-      : [parsedSq.filter]
-    : [];
-
-  const filteredPersons =
-    filterParams.length > 0
-      ? persons.filter((person) =>
-          person.actors.some((actor) => filterParams.includes(actor.type)),
-        )
-      : persons;
-
-  // Search
-  const personsFuse = new Fuse(filteredPersons, {
-    includeMatches: true,
-    keys: ["firstName", "lastNamePrefix", "lastName", "email", "handle"],
-    minMatchCharLength: 2,
-    ignoreLocation: true,
-    threshold: 0.3, // Lower threshold for more specific matches
+  const {
+    filter,
+    query,
+    page: currentPage,
+    limit: paginationLimit,
+  } = searchParamsParser(searchParams);
+  const persons = await listPersonsForLocationWithPagination(location.id, {
+    limit: paginationLimit,
+    offset: (currentPage - 1) * paginationLimit,
+    filter: { actorType: filter, q: query },
   });
-
-  const searchQuery = parsedSq.query
-    ? Array.isArray(parsedSq.query)
-      ? parsedSq.query.join(" ")
-      : parsedSq.query
-    : null;
-
-  const searchedPersons =
-    searchQuery && searchQuery.length >= 2
-      ? personsFuse
-          .search(decodeURIComponent(searchQuery))
-          .map((result) => result.item)
-      : filteredPersons;
-
-  // Pagination
-  const paginationLimit = parsedSq.limit;
-  const currentPage = parsedSq.page;
-
-  const paginatedPersons = searchedPersons.slice(
-    (currentPage - 1) * paginationLimit,
-    currentPage * paginationLimit,
-  );
 
   return (
     <DialogWrapper>
@@ -121,7 +86,7 @@ export default async function Page(props: {
         </Dropdown>
       </div>
 
-      <Table persons={paginatedPersons} totalItems={searchedPersons.length} />
+      <Table persons={persons.items} totalItems={persons.count} />
 
       <Dialogs locationId={location.id} countries={countries} />
     </DialogWrapper>

@@ -20,9 +20,11 @@ import {
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import type { listPersonsForLocation } from "~/lib/nwd";
+import type { listPersonsForLocationWithPagination } from "~/lib/nwd";
 import PersonRoleBadge from "../../_components/person-role-badge";
-type Person = Awaited<ReturnType<typeof listPersonsForLocation>>[number];
+type Person = Awaited<
+  ReturnType<typeof listPersonsForLocationWithPagination>
+>["items"][number];
 
 const columnHelper = createColumnHelper<Person>();
 
@@ -75,7 +77,9 @@ export default function PersonsTable({
   persons,
   totalItems,
 }: {
-  persons: Awaited<ReturnType<typeof listPersonsForLocation>>;
+  persons: Awaited<
+    ReturnType<typeof listPersonsForLocationWithPagination>
+  >["items"];
   totalItems: number;
 }) {
   const params = useParams();

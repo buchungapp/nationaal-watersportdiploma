@@ -34,7 +34,7 @@ async function main() {
           filter: { locationId: answers.location },
         });
 
-        return persons.map((person) => ({
+        return persons.items.map((person) => ({
           name: `${[person.firstName, person.lastNamePrefix, person.lastName].filter(Boolean).join(" ")}`,
           value: person.id,
         }));

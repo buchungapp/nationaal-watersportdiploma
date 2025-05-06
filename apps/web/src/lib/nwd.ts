@@ -132,8 +132,9 @@ async function getPrimaryPerson<T extends boolean = true>(
   }
 
   const primaryPerson =
+    user.persons.find((person) => person.isPrimary) ??
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    user.persons.find((person) => person.isPrimary) ?? user.persons[0]!;
+    user.persons[0]!;
 
   if (!primaryPerson.isPrimary && !force) {
     return null as T extends true
@@ -225,7 +226,7 @@ export const getUserOrThrow = cache(async () => {
 
     return {
       ...userData,
-      persons,
+      persons: persons.items,
     };
   });
 });
@@ -829,9 +830,56 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 
     const persons = await User.Person.list({ filter: { locationId } });
 
-    return persons;
+    return persons.items;
   });
 });
+
+export const listPersonsForLocationWithPagination = cache(
+  async (
+    locationId: string,
+    {
+      limit,
+      offset,
+      filter,
+    }: {
+      limit: number;
+      offset: number;
+      filter?: { actorType?: ActorType | ActorType[] | null; q?: string };
+    },
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      const isLocationAdmin = await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      }).catch(() => false);
+
+      if (!isLocationAdmin) {
+        return {
+          items: [],
+          count: 0,
+          limit,
+          offset,
+        };
+      }
+
+      const persons = await User.Person.list({
+        filter: {
+          locationId,
+          q: filter?.q ?? undefined,
+          actorType: filter?.actorType ?? undefined,
+        },
+        limit,
+        offset,
+      });
+
+      return persons;
+    });
+  },
+);
 
 export const getPersonById = cache(
   async (personId: string, locationId: string) => {
@@ -872,7 +920,7 @@ export const listPersonsForUser = cache(async () => {
       filter: { userId: user.authUserId },
     });
 
-    return persons;
+    return persons.items;
   });
 });
 

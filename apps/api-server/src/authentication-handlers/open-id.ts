@@ -21,6 +21,6 @@ export const openId: api.server.OpenIdAuthenticationHandler<
 
   return {
     user: authUser.id,
-    persons: personItems.map((item) => item.id),
+    persons: personItems.items.map((item) => item.id),
   };
 };
