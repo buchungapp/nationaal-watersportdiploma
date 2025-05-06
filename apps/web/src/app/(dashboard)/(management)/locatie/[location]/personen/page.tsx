@@ -53,12 +53,16 @@ export default async function Page(props: {
     listCountries(),
   ]);
 
-  const { filter, query, page, limit } = searchParamsParser(searchParams);
+  const {
+    filter,
+    query,
+    page: currentPage,
+    limit: paginationLimit,
+  } = searchParamsParser(searchParams);
   const persons = await listPersonsForLocationWithPagination(location.id, {
-    q: query,
-    limit,
-    offset: (page - 1) * limit,
-    filter: { actorType: filter },
+    limit: paginationLimit,
+    offset: (currentPage - 1) * paginationLimit,
+    filter: { actorType: filter, q: query },
   });
 
   return (

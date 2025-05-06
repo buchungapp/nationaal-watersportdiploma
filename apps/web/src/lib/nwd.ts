@@ -838,15 +838,13 @@ export const listPersonsForLocationWithPagination = cache(
   async (
     locationId: string,
     {
-      q,
       limit,
       offset,
       filter,
     }: {
-      q: string;
       limit: number;
       offset: number;
-      filter?: { actorType?: ActorType | ActorType[] | null };
+      filter?: { actorType?: ActorType | ActorType[] | null; q?: string };
     },
   ) => {
     return makeRequest(async () => {
@@ -871,7 +869,7 @@ export const listPersonsForLocationWithPagination = cache(
       const persons = await User.Person.list({
         filter: {
           locationId,
-          q,
+          q: filter?.q ?? undefined,
           actorType: filter?.actorType ?? undefined,
         },
         limit,
