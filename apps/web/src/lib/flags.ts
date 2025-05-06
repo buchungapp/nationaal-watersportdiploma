@@ -1,5 +1,4 @@
-import type { Flag } from "@vercel/flags/next";
-import { flag } from "@vercel/flags/next";
+import { type Flag, flag } from "flags/next";
 import { getUserOrThrow } from "./nwd";
 import posthog from "./posthog";
 
