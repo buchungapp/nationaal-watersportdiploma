@@ -1,7 +1,4 @@
-"use cache";
-
 import clsx from "clsx";
-import { unstable_cacheLife } from "next/cache";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Breadcrumb from "~/app/(public)/_components/breadcrumb";
@@ -20,8 +17,6 @@ export default async function Page(props: {
     course: string;
   }>;
 }) {
-  unstable_cacheLife("days");
-
   const params = await props.params;
   const [discipline, course] = await Promise.all([
     retrieveDisciplineByHandle(params.discipline),
@@ -63,7 +58,7 @@ export default async function Page(props: {
           },
         ]}
       />
-      <h1 className="mt-4 text-xl font-semibold text-slate-900">
+      <h1 className="mt-4 font-semibold text-slate-900 text-xl">
         {course.title}
       </h1>
 
@@ -83,21 +78,21 @@ export default async function Page(props: {
         <div className="flow-root">
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
-              <table className="mt-6 min-w-full w-auto table-fixed border-collapse">
+              <table className="mt-6 w-auto min-w-full border-collapse table-fixed">
                 <thead>
                   <tr>
-                    <th className="whitespace-nowrap text-right w-8" />
-                    <th className="grow w-auto whitespace-nowrap">Module</th>
+                    <th className="w-8 text-right whitespace-nowrap" />
+                    <th className="w-auto whitespace-nowrap grow">Module</th>
                     {programs.map((program) => (
                       <th
                         key={program.id}
-                        className="w-12 min-w-10 border-l border-slate-200"
+                        className="border-slate-200 border-l w-12 min-w-10"
                       >
                         <div
                           style={{
                             writingMode: "vertical-rl",
                           }}
-                          className="rotate-180 relative whitespace-nowrap text-center font-semibold text-slate-800 leading-none left-[calc(50%-0.5em)]"
+                          className="left-[calc(50%-0.5em)] relative font-semibold text-slate-800 text-center leading-none whitespace-nowrap rotate-180"
                         >
                           {program.degree.title}
                         </div>
@@ -112,7 +107,7 @@ export default async function Page(props: {
                         <td>
                           <Weight weight={module.weight} />
                         </td>
-                        <td className="text-slate-900 border-t border-slate-20 whitespace-nowrap">
+                        <td className="border-slate-20 border-t text-slate-900 whitespace-nowrap">
                           {module.title}
                         </td>
                         {programs.map((program) => {
@@ -134,7 +129,7 @@ export default async function Page(props: {
                             <td
                               key={program.id}
                               className={clsx(
-                                "text-center border-l border-t border-slate-200",
+                                "border-slate-200 border-t border-l text-center",
                                 programModule
                                   ? programModule.isRequired
                                     ? "bg-pink-100"
@@ -155,15 +150,15 @@ export default async function Page(props: {
                   })}
                 </tbody>
               </table>
-              <div className="text-right flex justify-end mt-4 gap-x-4">
-                <div className="text-sm text-slate-700 mt-2">
-                  <span className="bg-pink-100 inline-block size-6 text-sm leading-6 text-center rounded-sm mr-2">
+              <div className="flex justify-end gap-x-4 mt-4 text-right">
+                <div className="mt-2 text-slate-700 text-sm">
+                  <span className="inline-block bg-pink-100 mr-2 rounded-sm size-6 text-sm text-center leading-6">
                     ✔
                   </span>
                   Kern
                 </div>
-                <div className="text-sm text-slate-700 mt-2">
-                  <span className="bg-blue-100 inline-block size-6 text-sm leading-6 text-center rounded-sm mr-2">
+                <div className="mt-2 text-slate-700 text-sm">
+                  <span className="inline-block bg-blue-100 mr-2 rounded-sm size-6 text-sm text-center leading-6">
                     ❍
                   </span>
                   Keuze
@@ -175,7 +170,7 @@ export default async function Page(props: {
       </div>
 
       <div className="mt-12 pb-4">
-        <div className="border-t border-slate-300 pt-2">
+        <div className="pt-2 border-slate-300 border-t">
           <h2 className="text-slate-700">Programmaoverzicht</h2>
           <p className="text-sm">
             Een overzicht van de verschillende niveaus (programma's) voor deze
@@ -185,7 +180,7 @@ export default async function Page(props: {
           </p>
         </div>
 
-        <ul className="list-none pl-0 space-y-6 divide-y divide-zinc-950/5">
+        <ul className="space-y-6 pl-0 divide-y divide-zinc-950/5 list-none">
           {programs.map((program) => {
             return (
               <Program
