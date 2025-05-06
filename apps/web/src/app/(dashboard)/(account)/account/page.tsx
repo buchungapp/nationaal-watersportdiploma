@@ -27,9 +27,9 @@ async function Persons() {
     <div className="my-6">
       <Subheading>Personen die jij beheert</Subheading>
       <Divider className="mt-2 mb-4" />
-      {persons.items.length > 0 ? (
+      {persons.length > 0 ? (
         <GridList>
-          {persons.items.map((person) => (
+          {persons.map((person) => (
             <GridListItem key={person.id}>
               <GridListHeader href={`/profiel/${person.handle}`}>
                 <Avatar

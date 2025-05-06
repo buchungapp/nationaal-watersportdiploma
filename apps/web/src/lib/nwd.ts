@@ -922,7 +922,7 @@ export const listPersonsForUser = cache(async () => {
       filter: { userId: user.authUserId },
     });
 
-    return persons;
+    return persons.items;
   });
 });
 
