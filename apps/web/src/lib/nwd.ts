@@ -830,7 +830,7 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
 
     const persons = await User.Person.list({ filter: { locationId } });
 
-    return persons;
+    return persons.items;
   });
 });
 
