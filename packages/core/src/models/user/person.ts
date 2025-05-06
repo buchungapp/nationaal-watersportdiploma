@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import {
   type SQL,
   and,
+  countDistinct,
   eq,
   exists,
   getTableColumns,
@@ -15,11 +16,13 @@ import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
+  formatSearchTerms,
   possibleSingleRow,
   singleOrArray,
   singleRow,
   successfulCreateResponse,
   uuidSchema,
+  withLimitOffset,
   withZod,
   wrapCommand,
   wrapQuery,
@@ -214,81 +217,125 @@ export const list = wrapQuery(
             userId: singleOrArray(uuidSchema).optional(),
             personId: singleOrArray(uuidSchema).optional(),
             locationId: singleOrArray(uuidSchema).optional(),
+            actorType: singleOrArray(
+              z.enum(["student", "instructor", "location_admin"]),
+            ).optional(),
+            q: z.string().optional(),
           })
           .default({}),
+        limit: z.number().int().positive().optional(),
+        offset: z.number().int().nonnegative().default(0),
       })
       .default({}),
-    personSchema
-      .extend({
-        actors: z
-          .object({
-            id: uuidSchema,
-            createdAt: z.string(),
-            type: z.enum([
-              "student",
-              "instructor",
-              "location_admin",
-              "application",
-              "system",
-            ]),
-            locationId: uuidSchema,
-          })
-          .array(),
-      })
-      .array(),
-    async (input) => {
+    z.object({
+      items: personSchema
+        .extend({
+          actors: z
+            .object({
+              id: uuidSchema,
+              createdAt: z.string(),
+              type: z.enum([
+                "student",
+                "instructor",
+                "location_admin",
+                "application",
+                "system",
+              ]),
+              locationId: uuidSchema,
+            })
+            .array(),
+        })
+        .array(),
+      count: z.number().int().nonnegative(),
+      limit: z.number().int().positive().nullable(),
+      offset: z.number().int().nonnegative(),
+    }),
+    async ({ filter, limit, offset }) => {
       const query = useQuery();
 
-      const conditions: SQL[] = [];
+      const whereClausules: (SQL | undefined)[] = [
+        filter.userId
+          ? Array.isArray(filter.userId)
+            ? inArray(s.person.userId, filter.userId)
+            : eq(s.person.userId, filter.userId)
+          : undefined,
+        filter.personId
+          ? Array.isArray(filter.personId)
+            ? inArray(s.person.id, filter.personId)
+            : eq(s.person.id, filter.personId)
+          : undefined,
+        filter.actorType
+          ? Array.isArray(filter.actorType)
+            ? inArray(s.actor.type, filter.actorType)
+            : eq(s.actor.type, filter.actorType)
+          : undefined,
+        filter.q
+          ? sql`
+              (
+                setweight(to_tsvector('simple', 
+                  COALESCE(split_part(${s.user.email}, '@', 1), '') || ' ' ||
+                  COALESCE(split_part(${s.user.email}, '@', 2), '')
+                ), 'A') ||
+                setweight(to_tsvector('simple', COALESCE(${s.person.handle}, '')), 'B') ||
+                setweight(to_tsvector('simple', 
+                  COALESCE(${s.person.firstName}, '') || ' ' || 
+                  COALESCE(${s.person.lastNamePrefix}, '') || ' ' || 
+                  COALESCE(${s.person.lastName}, '')
+                ), 'A')
+              ) @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})
+            `
+          : undefined,
+      ];
 
-      if (input.filter.userId != null) {
-        if (Array.isArray(input.filter.userId)) {
-          conditions.push(inArray(s.person.userId, input.filter.userId));
-        } else {
-          conditions.push(eq(s.person.userId, input.filter.userId));
-        }
-      }
-
-      if (input.filter.personId != null) {
-        if (Array.isArray(input.filter.personId)) {
-          conditions.push(inArray(s.person.id, input.filter.personId));
-        } else {
-          conditions.push(eq(s.person.id, input.filter.personId));
-        }
-      }
-
-      if (input.filter.locationId) {
-        if (Array.isArray(input.filter.locationId)) {
+      if (filter.locationId) {
+        if (Array.isArray(filter.locationId)) {
           const existsQuery = query
             .select({ personId: s.personLocationLink.personId })
             .from(s.personLocationLink)
             .where(
               and(
-                inArray(
-                  s.personLocationLink.locationId,
-                  input.filter.locationId,
-                ),
+                inArray(s.personLocationLink.locationId, filter.locationId),
                 eq(s.personLocationLink.status, "linked"),
                 eq(s.personLocationLink.personId, s.person.id),
               ),
             );
-          conditions.push(exists(existsQuery));
+          whereClausules.push(exists(existsQuery));
         } else {
           const existsQuery = query
             .select({ personId: s.personLocationLink.personId })
             .from(s.personLocationLink)
             .where(
               and(
-                eq(s.personLocationLink.locationId, input.filter.locationId),
+                eq(s.personLocationLink.locationId, filter.locationId),
                 eq(s.personLocationLink.status, "linked"),
                 eq(s.personLocationLink.personId, s.person.id),
               ),
             );
-          conditions.push(exists(existsQuery));
+          whereClausules.push(exists(existsQuery));
         }
       }
 
-      const rows = await query
+      const personCountQuery = query
+        .select({ count: countDistinct(s.person.id) })
+        .from(s.person)
+        .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+        .innerJoin(
+          s.actor,
+          and(
+            eq(s.actor.personId, s.person.id),
+            isNull(s.actor.deletedAt),
+            isNull(s.person.deletedAt),
+            filter.locationId
+              ? Array.isArray(filter.locationId)
+                ? inArray(s.actor.locationId, filter.locationId)
+                : eq(s.actor.locationId, filter.locationId)
+              : undefined,
+          ),
+        )
+        .where(and(...whereClausules))
+        .then(singleRow);
+
+      const personQuery = query
         .select({
           ...getTableColumns(s.person),
           birthCountry: {
@@ -307,23 +354,44 @@ export const list = wrapQuery(
             eq(s.actor.personId, s.person.id),
             isNull(s.actor.deletedAt),
             isNull(s.person.deletedAt),
-            input.filter.locationId
-              ? Array.isArray(input.filter.locationId)
-                ? inArray(s.actor.locationId, input.filter.locationId)
-                : eq(s.actor.locationId, input.filter.locationId)
+            filter.locationId
+              ? Array.isArray(filter.locationId)
+                ? inArray(s.actor.locationId, filter.locationId)
+                : eq(s.actor.locationId, filter.locationId)
               : undefined,
           ),
         )
-        .where(and(...conditions))
-        .then(aggregate({ pkey: "id", fields: { actors: "actor.id" } }));
+        .where(and(...whereClausules))
+        .$dynamic();
 
-      return rows.map((row) => ({
-        ...row,
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        handle: row.handle!,
-        createdAt: dayjs(row.createdAt).toISOString(),
-        updatedAt: dayjs(row.updatedAt).toISOString(),
-      }));
+      const [{ count }, persons] = await Promise.all([
+        personCountQuery,
+        withLimitOffset(personQuery, limit, offset).then(
+          aggregate({ pkey: "id", fields: { actors: "actor.id" } }),
+        ),
+      ]);
+
+      if (persons.length === 0) {
+        return {
+          items: [],
+          count,
+          limit: limit ?? null,
+          offset,
+        };
+      }
+
+      return {
+        items: persons.map((person) => ({
+          ...person,
+          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          handle: person.handle!,
+          createdAt: dayjs(person.createdAt).toISOString(),
+          updatedAt: dayjs(person.updatedAt).toISOString(),
+        })),
+        count,
+        limit: limit ?? null,
+        offset,
+      };
     },
   ),
 );

@@ -28,6 +28,13 @@ export const user = pgTable(
     _metadata: jsonb("_metadata"),
   },
   (table) => [
+    index("user_idx_email_search").using(
+      "gin",
+      sql`to_tsvector('simple', 
+        COALESCE(split_part(${table.email}::text, '@', 1), '') || ' ' ||
+        COALESCE(split_part(${table.email}::text, '@', 2), '')
+      )`,
+    ),
     foreignKey({
       columns: [table.authUserId],
       foreignColumns: [_usersTable.id],
@@ -59,6 +66,10 @@ export const person = pgTable(
   },
   (table) => [
     uniqueIndex("person_unq_handle").on(table.handle),
+    index("person_idx_handle_search").using(
+      "gin",
+      sql`to_tsvector('simple', COALESCE(${table.handle}, ''))`,
+    ),
     index("person_idx_name_search").using(
       "gin",
       sql`to_tsvector('simple', 
@@ -67,8 +78,8 @@ export const person = pgTable(
         COALESCE(${table.lastName}, '')
       )`,
     ),
-    index("person_idx_first_name").on(table.firstName),
-    index("person_idx_last_name").on(table.lastName),
+    index("person_idx_user_id").on(table.userId),
+    index("person_idx_is_primary").on(table.isPrimary),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [user.authUserId],

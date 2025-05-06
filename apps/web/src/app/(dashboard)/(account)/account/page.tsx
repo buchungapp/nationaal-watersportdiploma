@@ -27,17 +27,17 @@ async function Persons() {
     <div className="my-6">
       <Subheading>Personen die jij beheert</Subheading>
       <Divider className="mt-2 mb-4" />
-      {persons.length > 0 ? (
+      {persons.items.length > 0 ? (
         <GridList>
-          {persons.map((person) => (
+          {persons.items.map((person) => (
             <GridListItem key={person.id}>
               <GridListHeader href={`/profiel/${person.handle}`}>
                 <Avatar
                   square
                   initials={person.firstName.slice(0, 2)}
-                  className="size-8 bg-zinc-900 text-white"
+                  className="bg-zinc-900 size-8 text-white"
                 />
-                <div className="text-sm font-medium leading-6 text-slate-900">
+                <div className="font-medium text-slate-900 text-sm leading-6">
                   {[person.firstName, person.lastNamePrefix, person.lastName]
                     .filter(Boolean)
                     .join(" ")}
@@ -92,9 +92,9 @@ async function InstructionLocations() {
               <Avatar
                 square
                 initials={location.name?.slice(0, 2)}
-                className="size-8 bg-zinc-900 text-white"
+                className="bg-zinc-900 size-8 text-white"
               />
-              <div className="text-sm font-medium leading-6 text-slate-900">
+              <div className="font-medium text-slate-900 text-sm leading-6">
                 {location.name}
               </div>
             </GridListHeader>
@@ -109,7 +109,7 @@ export default async function Page() {
   const user = await getUserOrThrow();
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="mx-auto p-4 max-w-3xl">
       <Heading>Welkom{user.displayName ? ` ${user.displayName}` : ""}!</Heading>
 
       <Text>

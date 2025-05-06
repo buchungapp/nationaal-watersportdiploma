@@ -368,7 +368,7 @@ export const list = wrapQuery(
             new Set(studentCurricula.map((sc) => sc.personId)),
           ),
         },
-      });
+      }).then((res) => res.items);
 
       const enrichedCertificates = certificates.map((certificate) => {
         const location = findItem({

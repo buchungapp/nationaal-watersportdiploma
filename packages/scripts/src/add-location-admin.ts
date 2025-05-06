@@ -53,7 +53,7 @@ async function main() {
     filter: {
       userId: user.id,
     },
-  });
+  }).then((res) => res.items);
 
   // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
   let personId;
