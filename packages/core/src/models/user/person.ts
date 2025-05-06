@@ -273,10 +273,14 @@ export const list = wrapQuery(
           ? sql`
               (
                 setweight(to_tsvector('simple', 
-                  COALESCE(${s.user.email}, '') || ' ' ||
-                  COALESCE(split_part(${s.user.email}, '@', 1), '') || ' ' ||
-                  COALESCE(split_part(${s.user.email}, '@', 2), '')
+                  COALESCE(${s.user.email}, '')
                 ), 'A') ||
+                setweight(to_tsvector('simple', 
+                  COALESCE(split_part(${s.user.email}, '@', 1), '')
+                ), 'B') ||
+                setweight(to_tsvector('simple', 
+                  COALESCE(split_part(${s.user.email}, '@', 2), '')
+                ), 'C') ||
                 setweight(to_tsvector('simple', COALESCE(${s.person.handle}, '')), 'B') ||
                 setweight(to_tsvector('simple', 
                   COALESCE(${s.person.firstName}, '') || ' ' || 

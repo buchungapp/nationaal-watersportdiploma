@@ -1,5 +1,5 @@
 {
-  "id": "db75f86c-a688-4977-b6c6-6381fd465223",
+  "id": "5b555fae-1aac-4fcc-8a74-3d500cf4dd6f",
   "prevId": "1b3119df-2ba9-437b-8339-64a5be74687e",
   "version": "7",
   "dialect": "postgresql",
@@ -4070,11 +4070,41 @@
         }
       },
       "indexes": {
-        "user_idx_email_search": {
-          "name": "user_idx_email_search",
+        "user_idx_email_full_search": {
+          "name": "user_idx_email_full_search",
           "columns": [
             {
-              "expression": "to_tsvector('simple', \n        COALESCE(split_part(\"email\"::text, '@', 1), '') || ' ' ||\n        COALESCE(split_part(\"email\"::text, '@', 2), '')\n      )",
+              "expression": "to_tsvector('simple', COALESCE(\"email\", ''))",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "user_idx_email_username_search": {
+          "name": "user_idx_email_username_search",
+          "columns": [
+            {
+              "expression": "to_tsvector('simple', COALESCE(split_part(\"email\"::text, '@', 1), ''))",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        },
+        "user_idx_email_domain_search": {
+          "name": "user_idx_email_domain_search",
+          "columns": [
+            {
+              "expression": "to_tsvector('simple', COALESCE(split_part(\"email\"::text, '@', 2), ''))",
               "asc": true,
               "isExpression": true,
               "nulls": "last"

@@ -28,12 +28,17 @@ export const user = pgTable(
     _metadata: jsonb("_metadata"),
   },
   (table) => [
-    index("user_idx_email_search").using(
+    index("user_idx_email_full_search").using(
       "gin",
-      sql`to_tsvector('simple', 
-        COALESCE(split_part(${table.email}::text, '@', 1), '') || ' ' ||
-        COALESCE(split_part(${table.email}::text, '@', 2), '')
-      )`,
+      sql`to_tsvector('simple', COALESCE(${table.email}, ''))`,
+    ),
+    index("user_idx_email_username_search").using(
+      "gin",
+      sql`to_tsvector('simple', COALESCE(split_part(${table.email}::text, '@', 1), ''))`,
+    ),
+    index("user_idx_email_domain_search").using(
+      "gin",
+      sql`to_tsvector('simple', COALESCE(split_part(${table.email}::text, '@', 2), ''))`,
     ),
     foreignKey({
       columns: [table.authUserId],
