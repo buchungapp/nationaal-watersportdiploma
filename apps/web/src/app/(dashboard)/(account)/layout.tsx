@@ -2,17 +2,13 @@ import {
   ArrowRightStartOnRectangleIcon,
   LifebuoyIcon,
   ShieldCheckIcon,
-  UserIcon,
 } from "@heroicons/react/16/solid";
-import { connection } from "next/server";
+import { Suspense } from "react";
 import Logo from "~/app/_components/brand/logo";
-import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
-import { Avatar } from "../_components/avatar";
 import {
   Dropdown,
   DropdownButton,
-  DropdownDescription,
   DropdownDivider,
   DropdownItem,
   DropdownLabel,
@@ -28,6 +24,11 @@ import {
 } from "../_components/navbar";
 import { Sidebar, SidebarHeader } from "../_components/sidebar";
 import { StackedLayout } from "../_components/stacked-layout";
+import {
+  UserAvatar,
+  UserAvatarFallback,
+} from "./@selector/_components/user-avatar";
+import { UserItem, UserItemFallback } from "./@selector/_components/user-item";
 import FeedbackDialog, {
   FeedbackButton,
   FeedbackProvider,
@@ -35,22 +36,19 @@ import FeedbackDialog, {
 
 // const navItems = [{ label: "Homepage", url: "/" }];
 
-export default async function Layout({
+export default function Layout({
   children,
   selector,
 }: Readonly<{
   children: React.ReactNode;
   selector: React.ReactNode;
 }>) {
-  await connection();
-  const user = await getUserOrThrow();
-
   return (
     <StackedLayout
       navbar={
         <Navbar>
           <Link href="/" target="_blank">
-            <Logo className="text-white size-8" />
+            <Logo className="size-8 text-white" />
           </Link>
           <NavbarDivider className="max-lg:hidden" />
           <div className="max-lg:hidden">{selector}</div>
@@ -66,17 +64,14 @@ export default async function Layout({
             <FeedbackProvider>
               <Dropdown>
                 <DropdownButton as={NavbarItem}>
-                  <Avatar
-                    initials={(user.displayName ?? user.email).slice(0, 2)}
-                    square
-                  />
+                  <Suspense fallback={<UserAvatarFallback />}>
+                    <UserAvatar />
+                  </Suspense>
                 </DropdownButton>
                 <DropdownMenu className="min-w-64" anchor="bottom end">
-                  <DropdownItem href="/account">
-                    <UserIcon />
-                    <DropdownLabel>Mijn account</DropdownLabel>
-                    <DropdownDescription>{user.email}</DropdownDescription>
-                  </DropdownItem>
+                  <Suspense fallback={<UserItemFallback />}>
+                    <UserItem />
+                  </Suspense>
                   <DropdownDivider />
                   <DropdownItem href="/help">
                     <LifebuoyIcon />
