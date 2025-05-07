@@ -23,7 +23,7 @@ import {
   listCountries,
   listDistinctTagsForCohort,
   listInstructorsByCohortId,
-  listPersonsForLocationByRole,
+  listPersonsForLocationWithPagination,
   listPrivilegesForCohort,
   listPrograms,
   listRolesForLocation,
@@ -101,8 +101,16 @@ export default async function Layout(props: {
           // so it only blocks rendering of components that
           // actually rely on this data.
           countries: listCountries(),
-          [unstable_serialize(["allStudents", location.id])]:
-            listPersonsForLocationByRole(location.id, "student"),
+          [unstable_serialize([
+            "allStudents",
+            location.id,
+            "?actorType=student",
+          ])]: listPersonsForLocationWithPagination(location.id, {
+            filter: {
+              actorType: "student",
+            },
+            limit: 25,
+          }),
           [unstable_serialize(["allInstructorsInCohort", cohort.id])]:
             listInstructorsByCohortId(cohort.id),
           [unstable_serialize(["isInstructorInCohort", cohort.id])]:

@@ -1,18 +1,29 @@
 import { notFound } from "next/navigation";
+import { createLoader, parseAsString } from "nuqs/server";
 import {
   listInstructorsByCohortId,
-  listPersonsForLocationByRole,
+  listPersonsForLocationWithPagination,
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import { AddInstructor } from "./_components/add-instructor";
 import StudentsTable from "./_components/instructors-table";
 
+const searchParamsParser = createLoader({
+  query: parseAsString.withDefault(""),
+});
+
 export default async function Page(props: {
   params: Promise<{ location: string; cohort: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
   const location = await retrieveLocationByHandle(params.location);
+
+  const { query } = searchParamsParser(searchParams);
 
   const cohortPromise = retrieveCohortByHandle(params.cohort, location.id).then(
     (cohort) => {
@@ -23,16 +34,22 @@ export default async function Page(props: {
     },
   );
 
-  const [cohort, instructors, allInstructors] = await Promise.all([
+  const [cohort, instructors, searchedInstructors] = await Promise.all([
     cohortPromise,
     cohortPromise.then((cohort) => listInstructorsByCohortId(cohort.id)),
-    listPersonsForLocationByRole(location.id, "instructor"),
+    listPersonsForLocationWithPagination(location.id, {
+      filter: {
+        actorType: "instructor",
+        q: query,
+      },
+      limit: 25,
+    }),
   ]);
 
   return (
     <div className="max-w-4xl">
       <AddInstructor
-        allInstructors={allInstructors.filter(
+        searchedInstructors={searchedInstructors.items.filter(
           (instructor) =>
             !instructors.some((i) => i.person.id === instructor.id),
         )}

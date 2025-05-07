@@ -842,10 +842,10 @@ export const listPersonsForLocationWithPagination = cache(
       offset,
       filter,
     }: {
-      limit: number;
-      offset: number;
+      limit?: number;
+      offset?: number;
       filter?: { actorType?: ActorType | ActorType[] | null; q?: string };
-    },
+    } = {},
   ) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
@@ -863,7 +863,7 @@ export const listPersonsForLocationWithPagination = cache(
           count: 0,
           limit,
           offset,
-        };
+        } as Awaited<ReturnType<typeof User.Person.list>>;
       }
 
       const persons = await User.Person.list({

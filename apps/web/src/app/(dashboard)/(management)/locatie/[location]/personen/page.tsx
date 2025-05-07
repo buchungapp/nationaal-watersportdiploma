@@ -9,6 +9,7 @@ import {
   createLoader,
   parseAsArrayOf,
   parseAsInteger,
+  parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
 
@@ -18,7 +19,6 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { parseAsSearchQuery } from "~/app/(dashboard)/_lib/search-parser";
 import Search from "../../../_components/search";
 import {
   DialogButtons,
@@ -35,7 +35,7 @@ const searchParamsParser = createLoader({
   filter: parseAsArrayOf(
     parseAsStringLiteral(["student", "instructor", "location_admin"] as const),
   ),
-  query: parseAsSearchQuery.withDefault(""),
+  query: parseAsString.withDefault(""),
   page: parseAsInteger.withDefault(1),
   limit: parseAsInteger.withDefault(25),
 });

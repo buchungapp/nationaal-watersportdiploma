@@ -6,7 +6,7 @@ import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
 
 export default function Search({ placeholder = "Zoeken..." }) {
-  const [isNavPending, startTransition] = useTransition();
+  const [isSearchPending, startTransition] = useTransition();
 
   const [{ query }, setQuery] = useQueryStates(
     {
@@ -25,18 +25,18 @@ export default function Search({ placeholder = "Zoeken..." }) {
   return (
     <div className="relative w-full">
       <Input
-        value={decodeURIComponent(query)}
+        value={query}
         onChange={(e) => {
           void setQuery({
-            query: encodeURIComponent(e.target.value),
+            query: e.target.value,
             page: null,
             limit: null,
           });
         }}
         placeholder={placeholder}
       />
-      {isNavPending && (
-        <div className="absolute inset-y-0 right-2 flex items-center">
+      {isSearchPending && (
+        <div className="right-2 absolute inset-y-0 flex items-center">
           <Spinner />
         </div>
       )}

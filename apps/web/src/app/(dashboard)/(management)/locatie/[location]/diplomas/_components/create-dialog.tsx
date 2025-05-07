@@ -1,4 +1,5 @@
-import { listPersonsForLocationByRole, listPrograms } from "~/lib/nwd";
+import { SWRConfig, unstable_serialize } from "swr";
+import { listPersonsForLocationWithPagination, listPrograms } from "~/lib/nwd";
 import CreateDialogClient from "./create-dialog-client";
 
 export default async function CreateDialog({
@@ -6,16 +7,26 @@ export default async function CreateDialog({
 }: {
   locationId: string;
 }) {
-  const [students, programs] = await Promise.all([
-    listPersonsForLocationByRole(locationId, "student"),
-    listPrograms(),
-  ]);
+  const [programs] = await Promise.all([listPrograms()]);
 
   return (
-    <CreateDialogClient
-      locationId={locationId}
-      persons={students}
-      programs={programs}
-    />
+    <SWRConfig
+      value={{
+        fallback: {
+          [unstable_serialize([
+            "allStudents",
+            locationId,
+            "?actorType=student",
+          ])]: listPersonsForLocationWithPagination(locationId, {
+            filter: {
+              actorType: "student",
+            },
+            limit: 25,
+          }),
+        },
+      }}
+    >
+      <CreateDialogClient locationId={locationId} programs={programs} />
+    </SWRConfig>
   );
 }
