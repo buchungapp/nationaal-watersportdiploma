@@ -3,7 +3,6 @@ import {
   LifebuoyIcon,
   ShieldCheckIcon,
 } from "@heroicons/react/16/solid";
-import { Suspense } from "react";
 import Logo from "~/app/_components/brand/logo";
 import { LogOutDropdownItem } from "../_components/auth";
 import {
@@ -24,11 +23,8 @@ import {
 } from "../_components/navbar";
 import { Sidebar, SidebarHeader } from "../_components/sidebar";
 import { StackedLayout } from "../_components/stacked-layout";
-import {
-  UserAvatar,
-  UserAvatarFallback,
-} from "./@selector/_components/user-avatar";
-import { UserItem, UserItemFallback } from "./@selector/_components/user-item";
+import { UserAvatar } from "../_components/user-avatar";
+import { UserItem } from "./@selector/_components/user-item";
 import FeedbackDialog, {
   FeedbackButton,
   FeedbackProvider,
@@ -64,14 +60,10 @@ export default function Layout({
             <FeedbackProvider>
               <Dropdown>
                 <DropdownButton as={NavbarItem}>
-                  <Suspense fallback={<UserAvatarFallback />}>
-                    <UserAvatar />
-                  </Suspense>
+                  <UserAvatar />
                 </DropdownButton>
                 <DropdownMenu className="min-w-64" anchor="bottom end">
-                  <Suspense fallback={<UserItemFallback />}>
-                    <UserItem />
-                  </Suspense>
+                  <UserItem />
                   <DropdownDivider />
                   <DropdownItem href="/help">
                     <LifebuoyIcon />

@@ -1,4 +1,5 @@
 import { UserIcon } from "@heroicons/react/16/solid";
+import { Suspense } from "react";
 import {
   DropdownDescription,
   DropdownItem,
@@ -6,7 +7,17 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { getUserOrThrow } from "~/lib/nwd";
 
-export async function UserItem() {
+function UserItemFallback() {
+  return (
+    <DropdownItem href="/account">
+      <UserIcon />
+      <DropdownLabel>Mijn account</DropdownLabel>
+      <DropdownDescription>laden...</DropdownDescription>
+    </DropdownItem>
+  );
+}
+
+async function UserItemContent() {
   const user = await getUserOrThrow();
 
   return (
@@ -18,12 +29,10 @@ export async function UserItem() {
   );
 }
 
-export async function UserItemFallback() {
+export function UserItem() {
   return (
-    <DropdownItem>
-      <UserIcon />
-      <DropdownLabel>Mijn account</DropdownLabel>
-      <DropdownDescription>laden...</DropdownDescription>
-    </DropdownItem>
+    <Suspense fallback={<UserItemFallback />}>
+      <UserItemContent />
+    </Suspense>
   );
 }
