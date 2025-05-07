@@ -4,8 +4,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { createPersonAction } from "~/actions/person/create-person-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -35,6 +33,8 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { createPersonAction } from "~/app/_actions/person/create-person-action";
 import Spinner from "~/app/_components/spinner";
 import type { ActorType } from "~/lib/nwd";
 

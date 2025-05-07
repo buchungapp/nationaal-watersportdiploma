@@ -22,9 +22,6 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
-import { updateCompetencyProgressForStudentInCohortAction } from "~/actions/cohort/student/update-competency-progress-for-student-in-cohort-action";
-import { updateCompetencyProgressesForStudentInCohortAction } from "~/actions/cohort/student/update-competency-progresses-for-student-in-cohort-action";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -49,6 +46,9 @@ import {
   SwitchGroup,
 } from "~/app/(dashboard)/_components/switch";
 import { Strong } from "~/app/(dashboard)/_components/text";
+import { updateCompetencyProgressForStudentInCohortAction } from "~/app/_actions/cohort/student/update-competency-progress-for-student-in-cohort-action";
+import { updateCompetencyProgressesForStudentInCohortAction } from "~/app/_actions/cohort/student/update-competency-progresses-for-student-in-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import { Weight } from "~/app/_components/weight";
 import type { retrieveCurriculumById } from "~/lib/nwd";

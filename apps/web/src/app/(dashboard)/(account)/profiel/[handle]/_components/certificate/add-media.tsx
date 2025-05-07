@@ -3,8 +3,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { addMediaToExternalCertificateAction } from "~/actions/certificate/add-media-to-external-certificate-action";
-import { useFormInput } from "~/actions/hooks/useFormInput";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -13,6 +11,8 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
+import { addMediaToExternalCertificateAction } from "~/app/_actions/certificate/add-media-to-external-certificate-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
 import Media from "./media";
 

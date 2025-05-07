@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { actionClientWithMeta } from "~/actions/safe-action";
+import { actionClientWithMeta } from "~/app/_actions/safe-action";
 import { withdrawCertificatesInCohort } from "~/lib/nwd";
 
 const withdrawCertificatesInCohortArgsSchema: [

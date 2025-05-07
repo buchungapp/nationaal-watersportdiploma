@@ -3,7 +3,7 @@
 import { useAction } from "next-safe-action/hooks";
 import type { PropsWithChildren } from "react";
 import { toast } from "sonner";
-import { logoutAction } from "~/actions/auth/logout-action";
+import { logoutAction } from "~/app/_actions/auth/logout-action";
 import { DropdownItem } from "./dropdown";
 
 export function LogOutDropdownItem({ children }: PropsWithChildren) {

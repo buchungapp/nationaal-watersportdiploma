@@ -2,8 +2,6 @@
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { updateLogbookAction } from "~/actions/logbook/update-logbook-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -13,6 +11,8 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { updateLogbookAction } from "~/app/_actions/logbook/update-logbook-action";
 import Spinner from "~/app/_components/spinner";
 import { LogbookFields } from "./logbook-fields";
 import type { LogbookType } from "./logbook-table";

@@ -5,7 +5,8 @@ import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { type ActorType, createPersonForLocation } from "~/lib/nwd";
 import { dateInput } from "../dates";
-import { actionClientWithMeta, voidActionSchema } from "../safe-action";
+import { actionClientWithMeta } from "../safe-action";
+import { voidActionSchema } from "../utils";
 import {
   COLUMN_MAPPING,
   type CSVData,

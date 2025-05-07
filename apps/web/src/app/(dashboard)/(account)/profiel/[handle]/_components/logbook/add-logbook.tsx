@@ -4,8 +4,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { createLogbookAction } from "~/actions/logbook/create-logbook-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -14,6 +12,8 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { createLogbookAction } from "~/app/_actions/logbook/create-logbook-action";
 import Spinner from "~/app/_components/spinner";
 import { LogbookFields } from "./logbook-fields";
 

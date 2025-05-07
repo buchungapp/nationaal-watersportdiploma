@@ -15,7 +15,8 @@ import {
   csvColumnLiteral,
   csvDataSchema,
 } from "../person/person-bulk-csv-mappings";
-import { actionClientWithMeta, voidActionSchema } from "../safe-action";
+import { actionClientWithMeta } from "../safe-action";
+import { voidActionSchema } from "../utils";
 
 const addStudentsToCohortSchema = zfd
   .formData(z.record(csvColumnLiteral, zfd.text()))

@@ -3,9 +3,9 @@
 import { useParams, useRouter } from "next/navigation";
 import { useOptimistic } from "react";
 import { toast } from "sonner";
-import { addActorToLocationAction } from "~/actions/person/add-actor-to-location-action";
-import { removeActorFromLocationAction } from "~/actions/person/remove-actor-from-location-action";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import { addActorToLocationAction } from "~/app/_actions/person/add-actor-to-location-action";
+import { removeActorFromLocationAction } from "~/app/_actions/person/remove-actor-from-location-action";
 
 type Role = "student" | "instructor" | "location_admin";
 

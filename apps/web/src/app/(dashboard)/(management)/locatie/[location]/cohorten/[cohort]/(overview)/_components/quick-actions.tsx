@@ -8,10 +8,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { removeCohortAction } from "~/actions/cohort/remove-cohort-action";
-import { updateCohortAction } from "~/actions/cohort/update-cohort-action";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
   AlertActions,
@@ -42,6 +38,10 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong } from "~/app/(dashboard)/_components/text";
+import { removeCohortAction } from "~/app/_actions/cohort/remove-cohort-action";
+import { updateCohortAction } from "~/app/_actions/cohort/update-cohort-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 

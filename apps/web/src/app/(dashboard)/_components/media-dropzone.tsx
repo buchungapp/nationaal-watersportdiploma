@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "~/actions/files";
+import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "~/app/_actions/files";
 import { PDFViewer } from "./pdf-viewer";
 
 export function MediaDropzone({

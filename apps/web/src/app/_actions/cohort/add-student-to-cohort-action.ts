@@ -8,10 +8,8 @@ import {
   createStudentForLocation,
 } from "~/lib/nwd";
 import { dateInput } from "../dates";
-import {
-  DEFAULT_SERVER_ERROR_MESSAGE,
-  actionClientWithMeta,
-} from "../safe-action";
+import { actionClientWithMeta } from "../safe-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "../utils";
 
 const addStudentToCohortSchema = zfd.formData(
   z.union([

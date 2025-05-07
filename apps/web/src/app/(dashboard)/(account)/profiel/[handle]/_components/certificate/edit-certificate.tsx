@@ -18,12 +18,12 @@ import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
 import "~/app/(dashboard)/_components/pdf-viewer";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { updateExternalCertificateAction } from "~/actions/certificate/update-external-certificate-action";
-import { useFormInput } from "~/actions/hooks/useFormInput";
 import {
   PDFViewer,
   PDFViewerText,
 } from "~/app/(dashboard)/_components/pdf-viewer";
+import { updateExternalCertificateAction } from "~/app/_actions/certificate/update-external-certificate-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
 import type { ExternalCertificate } from "../certificates";
 import { MediaViewerButton } from "../media-viewer";

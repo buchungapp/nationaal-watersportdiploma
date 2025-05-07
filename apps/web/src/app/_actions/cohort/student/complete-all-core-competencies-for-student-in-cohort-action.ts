@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { actionClientWithMeta } from "~/actions/safe-action";
+import { actionClientWithMeta } from "~/app/_actions/safe-action";
 import { completeAllCoreCompetencies } from "~/lib/nwd";
 import { confirmWordSchema } from "./confirm-word";
 

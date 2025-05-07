@@ -1,4 +1,4 @@
-import type { FormDataLikeInput } from "../safe-action";
+import type { FormDataLikeInput } from "../utils";
 
 type NullableFields<T> = { [K in keyof T]: T[K] | null };
 export type NonNullableFields<T> = {

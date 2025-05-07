@@ -2,8 +2,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { dateInputToIsoString } from "~/actions/dates";
-import { actionClientWithMeta } from "~/actions/safe-action";
+import { dateInputToIsoString } from "~/app/_actions/dates";
+import { actionClientWithMeta } from "~/app/_actions/safe-action";
 import {
   issueCertificatesInCohort,
   updateDefaultCertificateVisibleFromDate,

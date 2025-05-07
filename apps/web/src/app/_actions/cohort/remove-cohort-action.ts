@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { deleteCohort } from "~/lib/nwd";
-import { actionClientWithMeta, voidActionSchema } from "../safe-action";
+import { actionClientWithMeta } from "../safe-action";
+import { voidActionSchema } from "../utils";
 
 const removeCohortArgsSchema: [cohortId: z.ZodString] = [z.string().uuid()];
 

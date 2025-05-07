@@ -2,37 +2,33 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { zfd } from "zod-form-data";
-import { actionClientWithMeta } from "~/actions/safe-action";
+import { actionClientWithMeta } from "~/app/_actions/safe-action";
 import { updateCompetencyProgress } from "~/lib/nwd";
 
-const updateCompetencyProgressForStudentInCohortSchema = zfd.formData({
-  competencyId: zfd.text(z.string().uuid()),
-  progress: zfd.numeric(z.number().int().min(0).max(100)),
-});
+const updateCompetencyProgressesForStudentInCohortSchema = z
+  .object({
+    competencyId: z.string().uuid(),
+    progress: z.number().int().min(0).max(100),
+  })
+  .array();
 
 const bindArgsSchemas: [allocationId: z.ZodString] = [z.string().uuid()];
 
-export const updateCompetencyProgressForStudentInCohortAction =
+export const updateCompetencyProgressesForStudentInCohortAction =
   actionClientWithMeta
     .metadata({
-      name: "update-competency-progress-for-student-in-cohort",
+      name: "update-competency-progresses-for-student-in-cohort",
     })
-    .schema(updateCompetencyProgressForStudentInCohortSchema)
+    .schema(updateCompetencyProgressesForStudentInCohortSchema)
     .bindArgsSchemas(bindArgsSchemas)
     .action(
       async ({
-        parsedInput: { competencyId, progress },
+        parsedInput: competencyProgresses,
         bindArgsParsedInputs: [allocationId],
       }) => {
         await updateCompetencyProgress({
           cohortAllocationId: allocationId,
-          competencyProgress: [
-            {
-              competencyId,
-              progress,
-            },
-          ],
+          competencyProgress: competencyProgresses,
         });
 
         revalidatePath(

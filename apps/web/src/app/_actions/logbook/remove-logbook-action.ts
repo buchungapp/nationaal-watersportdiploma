@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { removeLogbook } from "~/lib/nwd";
-import { actionClientWithMeta, voidActionSchema } from "../safe-action";
+import { actionClientWithMeta } from "../safe-action";
+import { voidActionSchema } from "../utils";
 
 const removeLogbookArgsSchema: [
   personId: z.ZodString,

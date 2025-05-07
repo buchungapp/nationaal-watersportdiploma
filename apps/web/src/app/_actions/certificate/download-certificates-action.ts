@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { actionClientWithMeta } from "~/actions/safe-action";
+import { actionClientWithMeta } from "~/app/_actions/safe-action";
 import dayjs from "~/lib/dayjs";
 import { storeCertificateHandles } from "~/lib/nwd";
 

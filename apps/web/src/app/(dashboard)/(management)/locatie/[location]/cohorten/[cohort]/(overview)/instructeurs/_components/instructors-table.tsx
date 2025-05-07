@@ -9,9 +9,6 @@ import {
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
-import { addRoleToInstructorInCohortAction } from "~/actions/cohort/instructor/add-role-to-instructor-in-cohort-action";
-import { removeRoleFromInstructorInCohortAction } from "~/actions/cohort/instructor/remove-role-from-instructor-in-cohort-action";
-import { removeInstructorFromCohortAction } from "~/actions/cohort/remove-instructor-from-cohort-action";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Dropdown,
@@ -32,6 +29,9 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { TextLink } from "~/app/(dashboard)/_components/text";
+import { addRoleToInstructorInCohortAction } from "~/app/_actions/cohort/instructor/add-role-to-instructor-in-cohort-action";
+import { removeRoleFromInstructorInCohortAction } from "~/app/_actions/cohort/instructor/remove-role-from-instructor-in-cohort-action";
+import { removeInstructorFromCohortAction } from "~/app/_actions/cohort/remove-instructor-from-cohort-action";
 import dayjs from "~/lib/dayjs";
 import type { listInstructorsByCohortId } from "~/lib/nwd";
 

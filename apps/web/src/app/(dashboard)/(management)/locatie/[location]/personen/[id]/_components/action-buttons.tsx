@@ -4,10 +4,6 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { updatePersonDetailsAction } from "~/actions/person/update-person-details-action";
-import { updatePersonEmailAction } from "~/actions/person/update-person-email-action";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
   AlertActions,
@@ -36,6 +32,10 @@ import {
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Strong } from "~/app/(dashboard)/_components/text";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { updatePersonDetailsAction } from "~/app/_actions/person/update-person-details-action";
+import { updatePersonEmailAction } from "~/app/_actions/person/update-person-email-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 
 export function ChangeEmail({

@@ -12,13 +12,6 @@ import {
   useAction,
 } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { downloadCertificatesAction } from "~/actions/certificate/download-certificates-action";
-import { issueCertificatesInCohortAction } from "~/actions/cohort/certificate/issue-certificates-in-cohort-action";
-import { withdrawCertificatesInCohortAction } from "~/actions/cohort/certificate/withdraw-certificates-in-cohort-action";
-import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
-import { CONFIRMATION_WORD } from "~/actions/cohort/student/confirm-word";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
 import {
   Alert,
   AlertActions,
@@ -53,6 +46,13 @@ import {
 } from "~/app/(dashboard)/_components/radio";
 import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
+import { downloadCertificatesAction } from "~/app/_actions/certificate/download-certificates-action";
+import { issueCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/issue-certificates-in-cohort-action";
+import { withdrawCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/withdraw-certificates-in-cohort-action";
+import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/app/_actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
+import { CONFIRMATION_WORD } from "~/app/_actions/cohort/student/confirm-word";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import type { Student } from "./students-table";

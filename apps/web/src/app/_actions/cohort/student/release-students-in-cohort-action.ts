@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { updateStudentInstructorAssignment } from "~/lib/nwd";
-import { actionClientWithMeta, voidActionSchema } from "../../safe-action";
+import { actionClientWithMeta } from "../../safe-action";
+import { voidActionSchema } from "../../utils";
 
 const releaseStudentsInCohortArgsSchema: [
   cohortId: z.ZodString,

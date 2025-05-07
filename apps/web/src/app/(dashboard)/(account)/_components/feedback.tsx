@@ -32,10 +32,10 @@ import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { LightBulbIcon } from "@heroicons/react/16/solid";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { useFormInput } from "~/actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/actions/safe-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
-import { productFeedbackAction } from "../../../../actions/send-feedback-action";
+import { productFeedbackAction } from "../../../_actions/send-feedback-action";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
 function urlSearchParamsToObject(
