@@ -6,7 +6,7 @@ import {
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
-import { loadSearchParams } from "./search-params";
+import { loadSearchParams } from "./_search-params";
 export default async function Page(props: {
   params: Promise<{
     location: string;
