@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
-import { serializePersonListSearchParams } from "~/app/api/persons/list/[location]/search-params";
+import { serializePersonListSearchParams } from "~/app/api/persons/list/[location]/_search-params";
 import type {
   ActorType,
   listPersonsForLocationWithPagination,

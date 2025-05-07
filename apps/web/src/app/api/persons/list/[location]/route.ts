@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { listPersonsForLocationWithPagination } from "~/lib/nwd";
-import { parsePersonListSearchParams } from "./search-params";
+import { parsePersonListSearchParams } from "./_search-params";
 
 export async function GET(
   request: NextRequest,
