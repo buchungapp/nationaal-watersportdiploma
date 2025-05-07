@@ -4,12 +4,9 @@ import {
   UserIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
-import { connection } from "next/server";
 import type React from "react";
 import { Github } from "~/app/_components/socials";
-import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
-import { Avatar } from "../_components/avatar";
 import {
   Dropdown,
   DropdownButton,
@@ -25,17 +22,15 @@ import {
   NavbarSpacer,
 } from "../_components/navbar";
 import { SidebarLayout } from "../_components/sidebar-layout";
+import { UserAvatar } from "../_components/user-avatar";
 
-export default async function Layout({
+export default function Layout({
   children,
   sidebar,
 }: Readonly<{
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
-  await connection();
-  const user = await getUserOrThrow();
-
   return (
     <SidebarLayout
       navbar={
@@ -44,10 +39,7 @@ export default async function Layout({
           <NavbarSection>
             <Dropdown>
               <DropdownButton as={NavbarItem}>
-                <Avatar
-                  initials={(user.displayName ?? user.email).slice(0, 2)}
-                  square
-                />
+                <UserAvatar />
               </DropdownButton>
               <DropdownMenu className="min-w-64" anchor="bottom end">
                 <DropdownItem href="/account">

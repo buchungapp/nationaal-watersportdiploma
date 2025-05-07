@@ -28,7 +28,7 @@ import {
   listCertificatesForPerson,
   listExternalCertificatesForPerson,
 } from "~/lib/nwd";
-import { pageParamsCache } from "../_searchParams";
+import { parseCertificateSearchParams } from "../_searchParams";
 import { AddMedia } from "./certificate/add-media";
 import {
   EditCertificate,
@@ -71,14 +71,17 @@ const getAllCertificates = cache(async (personId: string) => {
 export async function Certificates({
   personId,
   noResults = null,
+  searchParams,
 }: {
   personId: string;
   noResults?: React.ReactNode;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { allCertificates, externalCertificates } =
-    await getAllCertificates(personId);
-
-  const parsedSq = pageParamsCache.all();
+  const [{ allCertificates, externalCertificates }, parsedSq] =
+    await Promise.all([
+      getAllCertificates(personId),
+      parseCertificateSearchParams(searchParams),
+    ]);
 
   const editCertificate = externalCertificates.find(
     (certificate) => certificate.id === parsedSq["edit-certificate"],

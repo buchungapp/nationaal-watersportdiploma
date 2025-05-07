@@ -72,3 +72,24 @@ export function DefaultTableCell<T>({
     </TableCell>
   );
 }
+
+export function PlaceholderTableRows({
+  rows,
+}: {
+  rows: number;
+}) {
+  return [...Array(rows)].map((_, index) => (
+    <tr
+      // biome-ignore lint/suspicious/noArrayIndexKey: no other option
+      key={`logbook-table-placeholder-${index}`}
+      className="relative h-11.25"
+    >
+      <span
+        className="inline-block top-0 left-0 absolute bg-slate-200 mt-2 rounded w-full h-9.25 animate-pulse"
+        style={{
+          animationDelay: `${index * 0.3}s`,
+        }}
+      />
+    </tr>
+  ));
+}

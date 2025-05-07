@@ -8,7 +8,7 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { listActiveCohortsForPerson } from "~/lib/nwd";
+import { getPersonByHandle, listActiveCohortsForPerson } from "~/lib/nwd";
 import {
   GridList,
   GridListHeader,
@@ -16,13 +16,12 @@ import {
 } from "../../../../_components/grid-list";
 
 interface Props {
-  person: {
-    id: string;
-    handle: string;
-  };
+  params: Promise<{ handle: string }>;
 }
 
-async function CohortProgressList({ person }: Props) {
+async function CohortProgressContent({ params }: Props) {
+  const { handle } = await params;
+  const person = await getPersonByHandle(handle);
   const allocations = await listActiveCohortsForPerson(person.id);
 
   if (allocations.length === 0) {
@@ -77,7 +76,7 @@ async function CohortProgressList({ person }: Props) {
 export function PersonCohortProgress(props: Props) {
   return (
     <Suspense fallback={null}>
-      <CohortProgressList {...props} />
+      <CohortProgressContent {...props} />
     </Suspense>
   );
 }

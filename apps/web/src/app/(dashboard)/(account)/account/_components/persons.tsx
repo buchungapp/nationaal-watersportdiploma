@@ -80,12 +80,12 @@ function PersonsListFallback() {
         <DescriptionList className="px-6">
           <DescriptionTerm>NWD-id</DescriptionTerm>
           <DescriptionDetails>
-            <div className="bg-gray-200 rounded w-24 h-5 animate-pulse [animation-delay:150ms]" />
+            <div className="bg-gray-200 rounded w-24 h-5 animate-pulse [animation-delay:300ms]" />
           </DescriptionDetails>
 
           <DescriptionTerm>Geboortedatum</DescriptionTerm>
           <DescriptionDetails>
-            <div className="bg-gray-200 rounded w-20 h-5 animate-pulse [animation-delay:300ms]" />
+            <div className="bg-gray-200 rounded w-20 h-5 animate-pulse [animation-delay:600ms]" />
           </DescriptionDetails>
         </DescriptionList>
       </GridListItem>

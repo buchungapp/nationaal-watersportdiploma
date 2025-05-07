@@ -19,6 +19,7 @@ import {
   DefaultTableCell,
   DefaultTableRows,
   NoTableRows,
+  PlaceholderTableRows,
 } from "~/app/(dashboard)/_components/table-content";
 import {
   TablePagination,
@@ -144,10 +145,12 @@ export function LogbookTable({
   logbooks,
   personId,
   totalItems,
+  placeholderRows,
 }: {
   logbooks: LogbookType[];
   personId: string;
   totalItems: number;
+  placeholderRows?: number;
 }) {
   const columnOrderingOptions = useColumnOrdering(
     getOrderableColumnIds({
@@ -197,17 +200,25 @@ export function LogbookTable({
       >
         <SortableTableHead table={table} />
         <TableBody>
-          <NoTableRows table={table}>Geen logboek regels gevonden.</NoTableRows>
-          <DefaultTableRows table={table}>
-            {(cell, index, row) => (
-              <DefaultTableCell
-                key={cell.id}
-                cell={cell}
-                index={index}
-                row={row}
-              />
-            )}
-          </DefaultTableRows>
+          {placeholderRows && placeholderRows > 0 ? (
+            <PlaceholderTableRows rows={placeholderRows} />
+          ) : (
+            <>
+              <NoTableRows table={table}>
+                Geen logboek regels gevonden.
+              </NoTableRows>
+              <DefaultTableRows table={table}>
+                {(cell, index, row) => (
+                  <DefaultTableCell
+                    key={cell.id}
+                    cell={cell}
+                    index={index}
+                    row={row}
+                  />
+                )}
+              </DefaultTableRows>
+            </>
+          )}
         </TableBody>
       </Table>
 
