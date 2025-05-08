@@ -1,107 +1,97 @@
-"use client";
+import FlexSearch from "flexsearch";
 import {
-  createColumnHelper,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useParams } from "next/navigation";
-import { Table, TableBody } from "~/app/(dashboard)/_components/table";
-import {
-  DefaultTableCell,
-  DefaultTableRows,
-  NoTableRows,
-} from "~/app/(dashboard)/_components/table-content";
-import {
-  TableFooter,
-  TablePagination,
-  TableRowSelection,
-} from "~/app/(dashboard)/_components/table-footer";
-import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
-import dayjs from "~/lib/dayjs";
-import type { listCohortsForLocation } from "~/lib/nwd";
+  createLoader,
+  parseAsArrayOf,
+  parseAsString,
+  parseAsStringLiteral,
+} from "nuqs/server";
+import { Suspense } from "react";
+import { listCohortsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
+import { filterCohorts } from "~/utils/filter-cohorts";
+import TableClient from "./table-client";
 
-type Cohort = Awaited<ReturnType<typeof listCohortsForLocation>>[number];
+type TableProps = {
+  params: Promise<{ location: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-const columnHelper = createColumnHelper<Cohort>();
+const searchParamsParser = createLoader({
+  weergave: parseAsArrayOf(
+    parseAsStringLiteral(["verleden", "aankomend", "open"] as const),
+  ).withDefault(["open", "aankomend"]),
+  query: parseAsString,
+});
 
-const columns = [
-  columnHelper.accessor("label", {
-    header: "Naam",
-    cell: ({ getValue }) => (
-      <span className="font-medium text-zinc-950">{getValue()}</span>
-    ),
-  }),
-  columnHelper.accessor("accessStartTime", {
-    header: "Opent op",
-    cell: ({ getValue }) => {
-      const dateTime = getValue();
+async function TableContent(props: TableProps) {
+  const locationPromise = props.params.then((params) =>
+    retrieveLocationByHandle(params.location),
+  );
+  const cohortsPromise = locationPromise.then((location) =>
+    listCohortsForLocation(location.id),
+  );
+  const parsedSqPromise = searchParamsParser(props.searchParams);
 
-      return (
-        <time dateTime={dateTime}>{dayjs(dateTime).format("DD-MM-YYYY")}</time>
-      );
+  const [cohorts, parsedSq] = await Promise.all([
+    cohortsPromise,
+    parsedSqPromise,
+  ]);
+
+  const filteredCohorts =
+    parsedSq.weergave && parsedSq.weergave.length > 0
+      ? filterCohorts(cohorts, parsedSq.weergave)
+      : cohorts;
+
+  const index = new FlexSearch.Document({
+    tokenize: "forward",
+    context: {
+      resolution: 9,
+      depth: 2,
+      bidirectional: true,
     },
-  }),
-  columnHelper.accessor("accessEndTime", {
-    header: "Sluit op",
-    cell: ({ getValue }) => {
-      const dateTime = getValue();
-
-      return (
-        <time dateTime={dateTime}>{dayjs(dateTime).format("DD-MM-YYYY")}</time>
-      );
+    document: {
+      id: "id",
+      index: [{ field: "label", tokenize: "full" }],
     },
-  }),
-];
-
-export default function CohortsTable({
-  cohorts,
-  totalItems,
-}: {
-  cohorts: Awaited<ReturnType<typeof listCohortsForLocation>>;
-  totalItems: number;
-}) {
-  const table = useReactTable({
-    data: cohorts,
-    columns,
-    getRowId: (row) => row.id,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
-  const params = useParams();
+  // Add cohorts to the index
+  for (const cohort of filteredCohorts) {
+    index.add({
+      id: cohort.id,
+      label: cohort.label,
+    });
+  }
+
+  const searchQuery = parsedSq.query;
+
+  let searchedCohorts = filteredCohorts;
+
+  if (searchQuery && searchQuery.length >= 2) {
+    const searchResult = index.search(decodeURIComponent(searchQuery));
+
+    if (searchResult.length > 0) {
+      searchedCohorts = filteredCohorts.filter((cohort) =>
+        searchResult.flatMap(({ result }) => result).includes(cohort.id),
+      );
+    } else {
+      searchedCohorts = [];
+    }
+  }
 
   return (
-    <>
-      <Table
-        className="mt-4 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
-        dense
-      >
-        <DefaultTableHead table={table} />
-        <TableBody>
-          <NoTableRows table={table}>Geen cohorten gevonden.</NoTableRows>
-          <DefaultTableRows
-            table={table}
-            href={(row) =>
-              `/locatie/${params.location as string}/cohorten/${row.original.handle}`
-            }
-          >
-            {(cell, index, row) => (
-              <DefaultTableCell
-                key={cell.id}
-                cell={cell}
-                index={index}
-                row={row}
-              />
-            )}
-          </DefaultTableRows>
-        </TableBody>
-      </Table>
+    <TableClient
+      cohorts={searchedCohorts}
+      totalItems={searchedCohorts.length}
+    />
+  );
+}
 
-      <TableFooter>
-        <TableRowSelection table={table} totalItems={totalItems} />
-        <TablePagination totalItems={totalItems} />
-      </TableFooter>
-    </>
+export function Table(props: TableProps) {
+  return (
+    <Suspense
+      fallback={<TableClient cohorts={[]} totalItems={0} placeholderRows={2} />}
+    >
+      <TableContent params={props.params} searchParams={props.searchParams} />
+    </Suspense>
   );
 }
