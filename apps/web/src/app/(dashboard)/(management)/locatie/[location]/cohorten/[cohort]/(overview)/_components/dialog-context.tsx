@@ -1,86 +1,28 @@
-"use client";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { retrieveCohortByHandle, retrieveLocationByHandle } from "~/lib/nwd";
+import { DialogsClient } from "./dialog-context-client";
 
-import { usePostHog } from "posthog-js/react";
-import type { Dispatch, PropsWithChildren, SetStateAction } from "react";
-import { createContext, useContext, useState } from "react";
-import {
-  DropdownItem,
-  DropdownLabel,
-} from "~/app/(dashboard)/_components/dropdown";
-import CreateBulkDialog from "./create-bulk-dialog";
-import CreateSingleDialog from "./create-single-dialog";
+type DialogsProps = {
+  params: Promise<{ location: string; cohort: string }>;
+};
 
-type DialogStates = "single" | "bulk" | null;
+async function DialogsContent(props: DialogsProps) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
-const DialogContext = createContext<{
-  isOpen: DialogStates;
-  setIsOpen: Dispatch<SetStateAction<DialogStates>>;
-} | null>(null);
-
-export function DialogWrapper({ children }: PropsWithChildren) {
-  const [isOpen, setIsOpen] = useState<DialogStates>(null);
-  const posthog = usePostHog();
-  return (
-    <DialogContext.Provider
-      value={{
-        isOpen,
-        setIsOpen: (newValue) => {
-          posthog.capture("Add Person To Cohort Dialog Opened", {
-            type: newValue,
-          });
-          setIsOpen(newValue);
-        },
-      }}
-    >
-      {children}
-    </DialogContext.Provider>
-  );
-}
-
-export function useDialog() {
-  const context = useContext(DialogContext);
-
-  if (!context) {
-    throw new Error("useDialog must be used within a DialogWrapper");
+  if (!cohort) {
+    notFound();
   }
 
-  return context;
+  return <DialogsClient locationId={location.id} cohortId={cohort.id} />;
 }
 
-export function DialogButtons() {
-  const { setIsOpen } = useDialog();
-
+export function Dialogs(props: DialogsProps) {
   return (
-    <>
-      <DropdownItem onClick={() => setIsOpen("single")}>
-        <DropdownLabel>Enkel</DropdownLabel>
-      </DropdownItem>
-      <DropdownItem onClick={() => setIsOpen("bulk")}>
-        <DropdownLabel>Meerdere (bulk)</DropdownLabel>
-      </DropdownItem>
-    </>
-  );
-}
-
-export function Dialogs(props: { locationId: string; cohortId: string }) {
-  const { isOpen, setIsOpen } = useDialog();
-
-  return (
-    <>
-      <CreateBulkDialog
-        {...props}
-        isOpen={isOpen === "bulk"}
-        setIsOpen={(next) => {
-          setIsOpen(next ? "bulk" : null);
-        }}
-      />
-      <CreateSingleDialog
-        {...props}
-        isOpen={isOpen === "single"}
-        setIsOpen={(next) => {
-          setIsOpen(next ? "single" : null);
-        }}
-      />
-    </>
+    <Suspense fallback={null}>
+      <DialogsContent {...props} />
+    </Suspense>
   );
 }

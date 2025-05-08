@@ -1,7 +1,6 @@
 import {
   ArrowRightIcon,
   CalendarIcon,
-  ChevronLeftIcon,
   PlusIcon,
   UsersIcon,
 } from "@heroicons/react/16/solid";
@@ -15,8 +14,6 @@ import {
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
-import { Heading } from "~/app/(dashboard)/_components/heading";
-import { Link } from "~/app/(dashboard)/_components/link";
 import dayjs from "~/lib/dayjs";
 import {
   isInstructorInCohort,
@@ -31,30 +28,42 @@ import {
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { BackToCohortsLink } from "./_components/back-to-cohorts-link";
+import { Dialogs } from "./_components/dialog-context";
 import {
   DialogButtons,
   DialogWrapper,
-  Dialogs,
-} from "./_components/dialog-context";
+} from "./_components/dialog-context-client";
+import { Heading } from "./_components/heading";
 import { LayoutTabs } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
 
 // We need this for the bulk actions
 export const maxDuration = 240;
 
-async function StudentCount({ cohortId }: { cohortId: string }) {
-  const count = (await listStudentsWithCurriculaByCohortId(cohortId)).length;
+async function StudentCount(props: {
+  params: Promise<{ location: string; cohort: string }>;
+}) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
+
+  if (!cohort) {
+    notFound();
+  }
+
+  const count = (await listStudentsWithCurriculaByCohortId(cohort.id)).length;
 
   return count;
 }
 
-async function QuickActionButtons({
-  locationId,
-}: {
-  cohortId: string;
-  locationId: string;
+async function QuickActionButtons(props: {
+  params: Promise<{ location: string }>;
 }) {
-  const [roles] = await Promise.all([listRolesForLocation(locationId)]);
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+
+  const [roles] = await Promise.all([listRolesForLocation(location.id)]);
 
   if (!roles.includes("location_admin")) {
     return null;
@@ -73,12 +82,35 @@ async function QuickActionButtons({
   );
 }
 
-export default async function Layout(props: {
+async function CohortDates(props: {
+  params: Promise<{ location: string; cohort: string }>;
+}) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
+
+  if (!cohort) {
+    notFound();
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span>
+        {dayjs(cohort.accessStartTime).tz().format("ddd DD-MM-YYYY HH:mm uur")}
+      </span>
+      <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+      <span>
+        {dayjs(cohort.accessEndTime).tz().format("ddd DD-MM-YYYY HH:mm uur")}
+      </span>
+    </div>
+  );
+}
+
+async function LayoutContent(props: {
   params: Promise<{ location: string; cohort: string }>;
   children: React.ReactNode;
 }) {
   const params = await props.params;
-
   const { children } = props;
 
   const location = await retrieveLocationByHandle(params.location);
@@ -88,18 +120,10 @@ export default async function Layout(props: {
     notFound();
   }
 
-  const [roles, privileges] = await Promise.all([
-    listRolesForLocation(location.id),
-    listPrivilegesForCohort(cohort.id),
-  ]);
-
   return (
     <SWRConfig
       value={{
         fallback: {
-          // Note that there is no `await` here,
-          // so it only blocks rendering of components that
-          // actually rely on this data.
           countries: listCountries(),
           [unstable_serialize([
             "allStudents",
@@ -127,17 +151,11 @@ export default async function Layout(props: {
     >
       <DialogWrapper>
         <div className="max-lg:hidden">
-          <Link
-            href={`/locatie/${params.location}/cohorten`}
-            className="inline-flex items-center gap-2 text-zinc-500 dark:text-zinc-400 text-sm/6"
-          >
-            <ChevronLeftIcon className="fill-zinc-400 dark:fill-zinc-500 size-4" />
-            Cohorten
-          </Link>
+          <BackToCohortsLink params={props.params} />
         </div>
         <div className="mt-4">
           <div className="flex items-center gap-4">
-            <Heading>{`Cohort ${cohort.label}`}</Heading>
+            <Heading params={props.params} />
           </div>
 
           <div className="isolate flex flex-wrap justify-between gap-x-6 mt-1">
@@ -145,58 +163,110 @@ export default async function Layout(props: {
               <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
                 <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
                 <span>
-                  <Suspense fallback={null}>
-                    <StudentCount cohortId={cohort.id} />
+                  <Suspense fallback={0}>
+                    <StudentCount params={props.params} />
                   </Suspense>
                 </span>
               </span>
 
               <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
                 <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                <div className="flex items-center gap-2">
-                  <span>
-                    {dayjs(cohort.accessStartTime)
-                      .tz()
-                      .format("ddd DD-MM-YYYY HH:mm uur")}
-                  </span>
-                  <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                  <span>
-                    {dayjs(cohort.accessEndTime)
-                      .tz()
-                      .format("ddd DD-MM-YYYY HH:mm uur")}
-                  </span>
-                </div>
+                <Suspense
+                  fallback={
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block bg-gray-200 rounded w-20 h-4 animate-pulse" />
+                      <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+                      <span className="inline-block bg-gray-200 rounded w-20 h-4 animate-pulse" />
+                    </div>
+                  }
+                >
+                  <CohortDates params={props.params} />
+                </Suspense>
               </span>
             </div>
             <div className="flex gap-4">
               <Suspense fallback={null}>
-                <QuickActionButtons
-                  locationId={location.id}
-                  cohortId={cohort.id}
-                />
+                <QuickActionButtons params={props.params} />
               </Suspense>
-              {roles.includes("location_admin") ? (
-                <CohortActions
-                  cohort={{
-                    id: cohort.id,
-                    label: cohort.label,
-                    accessStartTime: cohort.accessStartTime,
-                    accessEndTime: cohort.accessEndTime,
-                  }}
-                />
-              ) : null}
+              <CohortActions params={props.params} />
             </div>
           </div>
         </div>
 
         <Divider className="my-4" />
 
-        <LayoutTabs personRoles={roles} personPrivileges={privileges} />
+        <LayoutTabs params={props.params} />
 
         <div className="mt-4 max-sm:mb-30">{children}</div>
 
-        <Dialogs locationId={location.id} cohortId={cohort.id} />
+        <Dialogs params={props.params} />
       </DialogWrapper>
     </SWRConfig>
+  );
+}
+
+export default function Layout(props: {
+  params: Promise<{ location: string; cohort: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <>
+          <div className="max-lg:hidden">
+            <BackToCohortsLink params={props.params} />
+          </div>
+          <div className="mt-4">
+            <div className="flex items-center gap-4">
+              <Heading params={props.params} />
+            </div>
+
+            <div className="isolate flex flex-wrap justify-between gap-x-6 mt-1">
+              <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
+                <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
+                  <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+                  <span>
+                    <Suspense fallback={0}>
+                      <StudentCount params={props.params} />
+                    </Suspense>
+                  </span>
+                </span>
+
+                <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
+                  <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center gap-2">
+                        <span className="inline-block bg-gray-200 rounded w-41.75 h-4 animate-pulse" />
+                        <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+                        <span className="inline-block bg-gray-200 rounded w-41.75 h-4 animate-pulse" />
+                      </div>
+                    }
+                  >
+                    <CohortDates params={props.params} />
+                  </Suspense>
+                </span>
+              </div>
+              <div className="flex gap-4">
+                <Suspense fallback={null}>
+                  <QuickActionButtons params={props.params} />
+                </Suspense>
+                <CohortActions params={props.params} />
+              </div>
+            </div>
+          </div>
+
+          <Divider className="my-4" />
+
+          <LayoutTabs params={props.params} />
+
+          <div className="mt-4 max-sm:mb-30">
+            <div className="bg-gray-200 rounded w-full h-96 animate-pulse" />
+          </div>
+        </>
+      }
+    >
+      <LayoutContent {...props} />
+    </Suspense>
   );
 }
