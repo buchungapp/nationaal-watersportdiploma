@@ -52,7 +52,7 @@ function LocationsListFallback() {
             initials={"..."}
             className="bg-zinc-900 size-8 text-white"
           />
-          <div className="bg-zinc-300 rounded w-32 h-6 animate-pulse" />
+          <div className="bg-gray-200 rounded w-32 h-6 animate-pulse" />
         </GridListHeader>
       </GridListItem>
     </GridList>

@@ -42,12 +42,12 @@ function SummaryListFallback() {
     <DescriptionList>
       <DescriptionTerm>Vaarlocatie</DescriptionTerm>
       <DescriptionDetails>
-        <span className="inline-block bg-zinc-200 rounded-md w-full h-4.25 align-middle animate-pulse" />
+        <span className="inline-block bg-gray-200 rounded-md w-full h-4.25 align-middle animate-pulse" />
       </DescriptionDetails>
 
       <DescriptionTerm>Bijgewerkt tot</DescriptionTerm>
       <DescriptionDetails>
-        <span className="inline-block bg-zinc-200 rounded-md w-full h-4.25 align-middle animate-pulse [animation-delay:0.3s]" />
+        <span className="inline-block bg-gray-200 rounded-md w-full h-4.25 align-middle animate-pulse [animation-delay:0.3s]" />
       </DescriptionDetails>
     </DescriptionList>
   );
