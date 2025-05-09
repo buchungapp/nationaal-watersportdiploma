@@ -660,24 +660,79 @@ export const mergePersons = wrapCommand(
           // Transfer actors
           (async () => {
             const actors = await tx
-              .select()
+              .select({
+                id: s.actor.id,
+                type: s.actor.type,
+                locationId: s.actor.locationId,
+              })
               .from(s.actor)
               .where(eq(s.actor.personId, input.personId));
 
             if (actors.length > 0) {
               await tx
-                .delete(s.actor)
-                .where(eq(s.actor.personId, input.personId));
-
-              await tx
                 .insert(s.actor)
                 .values(
                   actors.map((actor) => ({
                     ...actor,
+                    id: undefined,
                     personId: input.targetPersonId,
                   })),
                 )
                 .onConflictDoNothing();
+
+              const [targetPersonActors, cohortAllocationsToUpdate] =
+                await Promise.all([
+                  tx
+                    .select({
+                      id: s.actor.id,
+                      type: s.actor.type,
+                      locationId: s.actor.locationId,
+                    })
+                    .from(s.actor)
+                    .where(eq(s.actor.personId, input.targetPersonId)),
+                  tx
+                    .select({
+                      id: s.cohortAllocation.id,
+                      actorId: s.cohortAllocation.actorId,
+                    })
+                    .from(s.cohortAllocation)
+                    .where(
+                      inArray(
+                        s.cohortAllocation.actorId,
+                        actors.map((actor) => actor.id),
+                      ),
+                    ),
+                ]);
+
+              for (const cohortAllocation of cohortAllocationsToUpdate) {
+                const currentActor = actors.find(
+                  (actor) => actor.id === cohortAllocation.actorId,
+                );
+
+                if (!currentActor) {
+                  throw new Error("Actor not found");
+                }
+
+                const targetActor = targetPersonActors.filter(
+                  (actor) =>
+                    actor.locationId === currentActor.locationId &&
+                    actor.type === currentActor.type,
+                );
+
+                if (targetActor.length !== 1) {
+                  throw new Error("Target actor not found");
+                }
+
+                await tx
+                  .update(s.cohortAllocation)
+                  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  .set({ actorId: targetActor[0]!.id })
+                  .where(eq(s.cohortAllocation.id, cohortAllocation.id));
+              }
+
+              await tx
+                .delete(s.actor)
+                .where(eq(s.actor.personId, input.personId));
             }
           })(),
 
