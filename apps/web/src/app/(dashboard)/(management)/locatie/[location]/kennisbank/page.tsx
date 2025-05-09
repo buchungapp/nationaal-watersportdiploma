@@ -2,7 +2,7 @@ import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { FilesTable } from "./_components/files-table";
 
-export default async function Page(_props: {
+export default function Page(_props: {
   params: Promise<{
     location: string;
   }>;

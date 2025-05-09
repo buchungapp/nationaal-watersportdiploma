@@ -7,7 +7,7 @@ import { ManageStudentActions } from "./_components/manage-student-actions";
 import { ManageStudentCurriculumActions } from "./_components/manage-student-curriculum-actions";
 import Timeline from "./_components/timeline";
 
-export default async function Page(props: {
+export default function Page(props: {
   params: Promise<{
     location: string;
     cohort: string;
