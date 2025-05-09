@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { type PropsWithChildren, Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
@@ -7,6 +7,23 @@ import { getPersonByHandle, listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
 import { AddLogbook } from "./add-logbook";
 import { LogbookTable } from "./logbook-table";
+
+function LogbookSkeleton({
+  children,
+  button,
+}: PropsWithChildren<{ button?: React.ReactNode | undefined }>) {
+  return (
+    <div className="lg:col-span-3">
+      <div className="flex justify-between items-center mb-2 w-full">
+        <Subheading>Jouw Logboek</Subheading>
+        {button}
+      </div>
+      <Text>Hieronder vind je een overzicht van alle vaaractiviteiten.</Text>
+      <Divider className="mt-2 mb-4" />
+      {children}
+    </div>
+  );
+}
 
 async function LogbookContent({
   params,
@@ -33,11 +50,25 @@ async function LogbookContent({
   );
 
   return (
-    <LogbookTable
-      logbooks={logbooks}
-      totalItems={data.length}
-      personId={person.id}
-    />
+    <LogbookSkeleton
+      button={
+        <Suspense fallback={<AddLogbookButtonFallback />}>
+          <AddLogbookButton params={params} />
+        </Suspense>
+      }
+    >
+      <LogbookTable
+        logbooks={logbooks}
+        totalItems={data.length}
+        personId={person.id}
+      />
+    </LogbookSkeleton>
+  );
+}
+
+function AddLogbookButtonFallback() {
+  return (
+    <div className="bg-slate-200 -my-1.5 rounded-lg w-35.5 h-9 animate-pulse" />
   );
 }
 
@@ -57,19 +88,13 @@ export function Logbook(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <div className="lg:col-span-3">
-      <div className="flex justify-between items-center mb-2 w-full">
-        <Subheading>Jouw Logboek</Subheading>
-        <Suspense
-          fallback={
-            <div className="bg-slate-200 -my-1.5 rounded-lg w-35.5 h-9 animate-pulse" />
-          }
-        >
+    <LogbookSkeleton
+      button={
+        <Suspense fallback={<AddLogbookButtonFallback />}>
           <AddLogbookButton params={props.params} />
         </Suspense>
-      </div>
-      <Text>Hieronder vind je een overzicht van alle vaaractiviteiten.</Text>
-      <Divider className="mt-2 mb-4" />
+      }
+    >
       <Suspense
         fallback={
           <LogbookTable
@@ -82,6 +107,6 @@ export function Logbook(props: {
       >
         <LogbookContent {...props} />
       </Suspense>
-    </div>
+    </LogbookSkeleton>
   );
 }
