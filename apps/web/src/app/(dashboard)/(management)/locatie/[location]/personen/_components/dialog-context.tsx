@@ -1,85 +1,46 @@
-"use client";
-
-import { usePostHog } from "posthog-js/react";
-import type { Dispatch, PropsWithChildren, SetStateAction } from "react";
-import { createContext, useContext, useState } from "react";
+import { PlusIcon } from "@heroicons/react/16/solid";
+import { Suspense } from "react";
 import {
-  DropdownItem,
-  DropdownLabel,
+  Dropdown,
+  DropdownButton,
+  DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
-import CreateBulkDialog from "./create-bulk-dialog";
-import CreateSingleDialog from "./create-single-dialog";
+import { listCountries } from "~/lib/nwd";
+import { retrieveLocationByHandle } from "~/lib/nwd";
+import { DialogButtons, DialogsClient } from "./dialog-context-client";
 
-const DialogContext = createContext<{
-  isOpen: "single" | "bulk" | null;
-  setIsOpen: Dispatch<SetStateAction<"single" | "bulk" | null>>;
-} | null>(null);
+type DialogsProps = { params: Promise<{ location: string }> };
 
-export function DialogWrapper({ children }: PropsWithChildren) {
-  const [isOpen, setIsOpen] = useState<"single" | "bulk" | null>(null);
-  const posthog = usePostHog();
-  return (
-    <DialogContext.Provider
-      value={{
-        isOpen,
-        setIsOpen: (newValue) => {
-          posthog.capture("Create Person Dialog Opened", { type: newValue });
-          setIsOpen(newValue);
-        },
-      }}
-    >
-      {children}
-    </DialogContext.Provider>
-  );
-}
-
-export function useDialog() {
-  const context = useContext(DialogContext);
-
-  if (!context) {
-    throw new Error("useDialog must be used within a DialogWrapper");
-  }
-
-  return context;
-}
-
-export function DialogButtons() {
-  const { setIsOpen } = useDialog();
+async function DialogsContent(props: DialogsProps) {
+  const [location, countries] = await Promise.all([
+    props.params.then(({ location }) => retrieveLocationByHandle(location)),
+    listCountries(),
+  ]);
 
   return (
     <>
-      <DropdownItem onClick={() => setIsOpen("single")}>
-        <DropdownLabel>Enkel</DropdownLabel>
-      </DropdownItem>
-      <DropdownItem onClick={() => setIsOpen("bulk")}>
-        <DropdownLabel>Meerdere (bulk)</DropdownLabel>
-      </DropdownItem>
+      <Dropdown>
+        <DropdownButton color="branding-orange">
+          <PlusIcon />
+          Persoon aanmaken
+        </DropdownButton>
+        <DropdownMenu>
+          <DialogButtons />
+        </DropdownMenu>
+      </Dropdown>
+      <DialogsClient locationId={location.id} countries={countries} />
     </>
   );
 }
 
-export function Dialogs(props: {
-  countries: { code: string; name: string }[];
-  locationId: string;
-}) {
-  const { isOpen, setIsOpen } = useDialog();
+export function DialogsFallback() {
+  return <div className="bg-gray-200 rounded-lg w-43.25 h-9 animate-pulse" />;
+}
 
+export function Dialogs(props: DialogsProps) {
   return (
-    <>
-      <CreateBulkDialog
-        {...props}
-        isOpen={isOpen === "bulk"}
-        setIsOpen={(next) => {
-          setIsOpen(next ? "bulk" : null);
-        }}
-      />
-      <CreateSingleDialog
-        {...props}
-        isOpen={isOpen === "single"}
-        close={() => {
-          setIsOpen(null);
-        }}
-      />
-    </>
+    <Suspense fallback={<DialogsFallback />}>
+      <DialogsContent {...props} />
+    </Suspense>
   );
 }

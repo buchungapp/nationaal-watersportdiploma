@@ -262,6 +262,42 @@ function ProgressInput({
   );
 }
 
+export function ModuleFallback({ index = 1 }: { index?: number }) {
+  return (
+    /* biome-ignore lint/a11y/useSemanticElements: <explanation> */
+    <CheckboxGroup role="group">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-x-2">
+          <Button plain>
+            <PlusIcon />
+          </Button>
+
+          <CheckboxField disabled={true}>
+            <Checkbox />
+            <div className="flex gap-x-2">
+              <Weight weight={1} />
+              <Label>
+                <Strong>
+                  <span
+                    className="inline-block bg-gray-300 rounded w-24 h-4.25 align-middle animate-pulse"
+                    style={{ animationDelay: `${index * 0.3}s` }}
+                  />
+                </Strong>
+              </Label>
+            </div>
+          </CheckboxField>
+        </div>
+        <div className="flex justify-end items-center gap-x-2">
+          <span
+            className="inline-flex bg-gray-200 rounded-md w-9.5 h-6 animate-pulse"
+            style={{ animationDelay: `${index * 0.3 + 0.1}s` }}
+          />
+        </div>
+      </div>
+    </CheckboxGroup>
+  );
+}
+
 export function Module({
   disabled,
   module,

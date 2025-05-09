@@ -3,7 +3,8 @@ import {
   ExclamationTriangleIcon,
 } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
-import React from "react";
+import React, { Suspense } from "react";
+import { SWRConfig } from "swr";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -15,7 +16,10 @@ import dayjs from "~/lib/dayjs";
 import {
   listCompetencyProgressInCohortForStudent,
   listCompletedCompetenciesByStudentCurriculumId,
+  listPrograms,
+  retrieveCohortByHandle,
   retrieveCurriculumById,
+  retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
 import { StartStudentCurriculum } from "./start-curriculum";
@@ -24,31 +28,54 @@ import {
   CourseCardProvider,
   CourseCardViewSettings,
   Module,
+  ModuleFallback,
 } from "./student-module";
 
-export async function CourseCard({
-  cohortAllocationId,
-  cohortId,
-}: {
-  cohortAllocationId: string;
-  cohortId: string;
-}) {
+type CourseCardProps = {
+  params: Promise<{
+    location: string;
+    cohort: string;
+    "student-allocation": string;
+  }>;
+};
+
+async function CourseCardContent(props: CourseCardProps) {
+  const params = await props.params;
+
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
+
+  if (!cohort) {
+    notFound();
+  }
+
   const allocation = await retrieveStudentAllocationWithCurriculum(
-    cohortId,
-    cohortAllocationId,
+    cohort.id,
+    params["student-allocation"],
   );
 
   if (!allocation) {
-    return notFound();
+    notFound();
   }
 
   if (!allocation.studentCurriculum) {
     return (
-      <StartStudentCurriculum
-        allocationId={cohortAllocationId}
-        cohortId={cohortId}
-        personId={allocation.person.id}
-      />
+      <SWRConfig
+        value={{
+          fallback: {
+            // Note that there is no `await` here,
+            // so it only blocks rendering of components that
+            // actually rely on this data.
+            allPrograms: listPrograms(),
+          },
+        }}
+      >
+        <StartStudentCurriculum
+          allocationId={allocation.id}
+          cohortId={cohort.id}
+          personId={allocation.person.id}
+        />
+      </SWRConfig>
     );
   }
 
@@ -62,7 +89,7 @@ export async function CourseCard({
       listCompletedCompetenciesByStudentCurriculumId(
         allocation.studentCurriculum.id,
       ),
-      listCompetencyProgressInCohortForStudent(cohortAllocationId),
+      listCompetencyProgressInCohortForStudent(allocation.id),
     ]);
 
   if (!curriculum) {
@@ -92,7 +119,7 @@ export async function CourseCard({
             <TextLink
               href={`/diplomalijn/consument/disciplines/${allocation.studentCurriculum.discipline.handle}/${allocation.studentCurriculum.course.handle}`}
               target="_blank"
-              className="flex gap-1 items-center"
+              className="flex items-center gap-1"
             >
               {allocation.studentCurriculum.program.title ??
                 `${allocation.studentCurriculum.course.title} ${allocation.studentCurriculum.degree.title}`}
@@ -119,10 +146,10 @@ export async function CourseCard({
           </Text>
         ) : null}
 
-        <div className="flex flex-wrap items-center justify-between mt-2 gap-x-2 gap-y-2">
+        <div className="flex flex-wrap justify-between items-center gap-x-2 gap-y-2 mt-2">
           <CompleteAllCoreModules
             disabled={hasIssuedCertificate}
-            cohortAllocationId={cohortAllocationId}
+            cohortAllocationId={allocation.id}
             competencyIds={curriculum.modules
               .filter((m) => m.isRequired)
               .flatMap((module) => module.competencies.map((c) => c.id))
@@ -143,7 +170,7 @@ export async function CourseCard({
 
         {hasFinishedCompetencesOnPreviousCertificate &&
         !hasIssuedCertificate ? (
-          <div className="rounded-md bg-blue-50 p-4 mt-6">
+          <div className="bg-blue-50 mt-6 p-4 rounded-md">
             <div className="flex">
               <div className="shrink-0">
                 <ExclamationTriangleIcon
@@ -152,7 +179,7 @@ export async function CourseCard({
                 />
               </div>
               <div className="ml-3">
-                <p className="text-sm text-blue-700">
+                <p className="text-blue-700 text-sm">
                   De cursist heeft al competenties afgerond voor dit programma
                   via een eerder uitgegeven diploma, deze zijn niet opnieuw af
                   te ronden en grijs weergegeven.
@@ -171,7 +198,7 @@ export async function CourseCard({
                   module={module}
                   completedCompetencies={completedCompetencyIds}
                   competenciesProgress={competencyProgressMap}
-                  cohortAllocationId={cohortAllocationId}
+                  cohortAllocationId={allocation.id}
                 />
 
                 {index < curriculum.modules.length - 1 ? (
@@ -183,5 +210,46 @@ export async function CourseCard({
         </div>
       </div>
     </CourseCardProvider>
+  );
+}
+
+export function CourseCardFallback() {
+  return (
+    <div>
+      <DescriptionList>
+        <DescriptionTerm>Programma</DescriptionTerm>
+        <DescriptionDetails>
+          <span className="inline-block bg-gray-200 rounded w-48 h-4 align-middle animate-pulse" />
+        </DescriptionDetails>
+
+        <DescriptionTerm>Vaartuig</DescriptionTerm>
+        <DescriptionDetails>
+          <span className="inline-block bg-gray-200 rounded w-48 h-4 align-middle animate-pulse" />
+        </DescriptionDetails>
+      </DescriptionList>
+
+      <div className="flex flex-wrap justify-between items-center gap-x-2 gap-y-2 mt-2">
+        <span className="inline-block bg-gray-200 rounded w-52 h-9 align-middle animate-pulse" />
+        <span className="inline-block bg-gray-200 rounded w-28 h-9 align-middle animate-pulse" />
+      </div>
+
+      <div className="mt-6">
+        {[1, 2, 3].map((i, index) => (
+          <React.Fragment key={`module-fallback-${i}`}>
+            <ModuleFallback index={index} />
+
+            {index < 2 ? <Divider soft className="my-2.5" /> : null}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function CourseCard(props: CourseCardProps) {
+  return (
+    <Suspense fallback={<CourseCardFallback />}>
+      <CourseCardContent {...props} />
+    </Suspense>
   );
 }

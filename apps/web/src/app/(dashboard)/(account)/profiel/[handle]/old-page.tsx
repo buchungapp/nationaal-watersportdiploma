@@ -14,8 +14,8 @@ import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { getPersonByHandle, getUserOrThrow, listCountries } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
-import { EditDetails } from "./_components/action-buttons";
 import { PersonCohortProgress } from "./_components/cohort-progress";
+import { EditDetails } from "./_components/person/action-buttons";
 
 async function ActionButton({ handle }: { handle: string }) {
   const [person, countries] = await Promise.all([
@@ -48,7 +48,7 @@ export default async function PageWithoutNewWaterSportCertificates(props: {
   await posthog.shutdown();
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="mx-auto p-4 max-w-3xl">
       <Heading>Welkom {person.firstName}!</Heading>
 
       <Text>
@@ -58,7 +58,7 @@ export default async function PageWithoutNewWaterSportCertificates(props: {
 
       <div className="space-y-12 xl:space-y-16">
         <div>
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             <Subheading>Personalia</Subheading>
             <Suspense fallback={null}>
               <ActionButton handle={params.handle} />
@@ -93,12 +93,7 @@ export default async function PageWithoutNewWaterSportCertificates(props: {
             </DescriptionDetails>
           </DescriptionList>
         </div>
-        <PersonCohortProgress
-          person={{
-            id: person.id,
-            handle: person.handle,
-          }}
-        />
+        <PersonCohortProgress params={props.params} />
         <div>
           <Subheading>Jouw NWD-diploma's</Subheading>
           <Text>

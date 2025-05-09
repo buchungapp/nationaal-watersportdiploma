@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { type PropsWithChildren, Suspense } from "react";
 import { getUserOrThrow } from "~/lib/nwd";
 import {
@@ -9,6 +10,7 @@ import {
 import { PersonItem } from "./_components/person-item";
 
 async function PersonsDropdownMenu() {
+  await connection();
   const { persons } = await getUserOrThrow();
 
   if (persons.length === 0) {

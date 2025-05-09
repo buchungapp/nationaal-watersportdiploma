@@ -12,12 +12,16 @@ import {
 import clsx from "clsx";
 import { notFound } from "next/navigation";
 import type { PropsWithChildren } from "react";
-import React from "react";
+import React, { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
+import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Code, Strong } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
+import { showAllocationTimeline } from "~/lib/flags";
 import {
   listAllocationHistory,
+  retrieveCohortByHandle,
+  retrieveLocationByHandle,
   retrieveStudentAllocationWithCurriculum,
 } from "~/lib/nwd";
 
@@ -229,20 +233,38 @@ function batchedProgressToTimelineEvent(
   }));
 }
 
-export default async function Timeline({
-  cohortId,
-  allocationId,
-}: {
-  cohortId: string;
-  allocationId: string;
-}) {
+type TimelineProps = {
+  params: Promise<{
+    location: string;
+    cohort: string;
+    "student-allocation": string;
+  }>;
+};
+
+async function TimelineContent(props: TimelineProps) {
+  // Kick-off the flag evaluation
+  const showTimelineFlag = showAllocationTimeline();
+
+  const params = await props.params;
+
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
+
+  if (!cohort) {
+    notFound();
+  }
+
   const allocation = await retrieveStudentAllocationWithCurriculum(
-    cohortId,
-    allocationId,
+    cohort.id,
+    params["student-allocation"],
   );
 
   if (!allocation) {
     notFound();
+  }
+
+  if (!(await showTimelineFlag)) {
+    return null;
   }
 
   const progress = await listAllocationHistory(
@@ -273,29 +295,55 @@ export default async function Timeline({
   timeline.push(...batchedProgressToTimelineEvent(batchedProgress));
 
   return (
-    <ul className="-mb-8 mt-4">
-      {timeline
-        .sort((a, b) => (dayjs(a.date).isAfter(dayjs(b.date)) ? -1 : 1))
-        .map((event, eventIdx) => (
-          <li key={event.type + event.date}>
-            <div className="relative pb-8">
-              {eventIdx !== timeline.length - 1 ? (
-                <span
-                  aria-hidden="true"
-                  className="absolute left-4 top-4 -ml-px h-full w-px bg-zinc-950/10 dark:bg-white/10"
-                />
-              ) : null}
-              {event.type === "added-to-cohort" ? (
-                <TimelineEventAddedToCohort event={event} />
-              ) : event.type === "competencies-progress" ? (
-                <TimelineEventCompetenciesProgress event={event} />
-              ) : event.type === "certificate-achieved" ? (
-                <TimelineEventCertificateAchieved event={event} />
-              ) : null}
-            </div>
-          </li>
-        ))}
-    </ul>
+    <div className="lg:col-start-3 lg:row-start-1">
+      <div className="flex justify-between items-center">
+        <Subheading>Tijdlijn</Subheading>
+      </div>
+      <Divider className="mt-4" />
+      <ul className="mt-4 -mb-8">
+        {timeline
+          .sort((a, b) => (dayjs(a.date).isAfter(dayjs(b.date)) ? -1 : 1))
+          .map((event, eventIdx) => (
+            <li key={event.type + event.date}>
+              <div className="relative pb-8">
+                {eventIdx !== timeline.length - 1 ? (
+                  <span
+                    aria-hidden="true"
+                    className="top-4 left-4 absolute bg-zinc-950/10 dark:bg-white/10 -ml-px w-px h-full"
+                  />
+                ) : null}
+                {event.type === "added-to-cohort" ? (
+                  <TimelineEventAddedToCohort event={event} />
+                ) : event.type === "competencies-progress" ? (
+                  <TimelineEventCompetenciesProgress event={event} />
+                ) : event.type === "certificate-achieved" ? (
+                  <TimelineEventCertificateAchieved event={event} />
+                ) : null}
+              </div>
+            </li>
+          ))}
+      </ul>
+    </div>
+  );
+}
+
+export function TimelineFallback() {
+  return (
+    <div className="lg:col-start-3 lg:row-start-1">
+      <div className="flex justify-between items-center">
+        <Subheading>Tijdlijn</Subheading>
+      </div>
+      <Divider className="mt-4" />
+      <div className="bg-slate-200 mt-4 rounded-lg w-full h-18 animate-pulse" />
+    </div>
+  );
+}
+
+export default async function Timeline(props: TimelineProps) {
+  return (
+    <Suspense fallback={<TimelineFallback />}>
+      <TimelineContent params={props.params} />
+    </Suspense>
   );
 }
 
@@ -311,14 +359,14 @@ function TimelineEvent({
     <div className="relative flex space-x-3.5">
       <span
         className={clsx(
-          "text-zinc-400 flex size-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+          "flex justify-center items-center bg-white border border-zinc-950/10 rounded-full ring-8 ring-white size-6 text-zinc-400",
         )}
       >
         <Icon aria-hidden="true" className="size-4" />
       </span>
-      <div className="flex min-w-0 flex-1 justify-between space-x-4">
-        <div className="text-zinc-500 text-sm overflow-hidden">{children}</div>
-        <div className="text-right text-sm text-slate-500">
+      <div className="flex flex-1 justify-between space-x-4 min-w-0">
+        <div className="overflow-hidden text-zinc-500 text-sm">{children}</div>
+        <div className="text-slate-500 text-sm text-right">
           <time
             dateTime={date}
             title={dayjs(date).tz().format("dddd D MMMM YYYY [om] HH:mm")}
@@ -352,13 +400,13 @@ function TimelineEventCompetenciesProgress({
     <div className="relative flex space-x-3.5">
       <span
         className={clsx(
-          "text-zinc-400 flex size-6 items-center justify-center rounded-full ring-8 bg-white border border-zinc-950/10 ring-white",
+          "flex justify-center items-center bg-white border border-zinc-950/10 rounded-full ring-8 ring-white size-6 text-zinc-400",
         )}
       >
         <ChartBarIcon aria-hidden="true" className="size-4" />
       </span>
-      <div className="flex min-w-0 flex-1 justify-between space-x-4">
-        <div className="text-zinc-500 text-sm overflow-hidden">
+      <div className="flex flex-1 justify-between space-x-4 min-w-0">
+        <div className="overflow-hidden text-zinc-500 text-sm">
           <Disclosure>
             <DisclosureButton className="group flex gap-1 text-left">
               <div>
@@ -372,7 +420,7 @@ function TimelineEventCompetenciesProgress({
                   }
                 />
               </div>
-              <div className="text-right text-sm text-slate-500">
+              <div className="text-slate-500 text-sm text-right">
                 <time
                   dateTime={event.date}
                   title={dayjs(event.date)
@@ -392,7 +440,7 @@ function TimelineEventCompetenciesProgress({
                       <React.Fragment key={module.module.id}>
                         <li className="">
                           <Disclosure>
-                            <DisclosureButton className="group w-full gap-x-2 flex items-center justify-between">
+                            <DisclosureButton className="group flex justify-between items-center gap-x-2 w-full">
                               <Strong>{module.module.title ?? ""}</Strong>
 
                               <ChevronDownIcon
@@ -411,10 +459,10 @@ function TimelineEventCompetenciesProgress({
                                   .map((competency) => (
                                     <li
                                       key={competency.competency.id}
-                                      className="flex justify-between max-w-full relative gap-1"
+                                      className="relative flex justify-between gap-1 max-w-full"
                                     >
                                       {competency.progress <= 0 ? (
-                                        <div className="absolute top-1/2 -translate-y-1/2 w-full border-t border-zinc-950" />
+                                        <div className="top-1/2 absolute border-zinc-950 border-t w-full -translate-y-1/2" />
                                       ) : null}
                                       <span className="hyphens-auto">
                                         {competency.competency.title ?? ""}
@@ -450,7 +498,7 @@ function TimelineEventCertificateAchieved({
 }) {
   return (
     <TimelineEvent icon={AcademicCapIcon} date={event.date}>
-      <span className="text-zinc-950 font-semibold">Diploma uitgegeven 🎉</span>
+      <span className="font-semibold text-zinc-950">Diploma uitgegeven 🎉</span>
       <br />
       <Code>{event.certificateHandle}</Code>
     </TimelineEvent>
