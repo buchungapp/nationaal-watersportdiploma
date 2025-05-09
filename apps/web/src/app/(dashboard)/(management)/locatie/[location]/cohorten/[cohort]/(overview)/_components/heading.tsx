@@ -1,17 +1,24 @@
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Heading as HeadingComponent } from "~/app/(dashboard)/_components/heading";
-
+import { retrieveCohortByHandle, retrieveLocationByHandle } from "~/lib/nwd";
 type HeadingProps = {
   params: Promise<{ location: string; cohort: string }>;
 };
 
 async function HeadingContent(props: HeadingProps) {
   const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
-  return <HeadingComponent>{`Cohort ${params.cohort}`}</HeadingComponent>;
+  if (!cohort) {
+    notFound();
+  }
+
+  return <HeadingComponent>{`Cohort ${cohort.label}`}</HeadingComponent>;
 }
 
-function HeadingFallback() {
+export function HeadingFallback() {
   return (
     <HeadingComponent>
       Cohort{" "}

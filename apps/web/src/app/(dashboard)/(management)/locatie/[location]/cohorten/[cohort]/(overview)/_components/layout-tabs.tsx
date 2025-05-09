@@ -28,12 +28,13 @@ async function LayoutTabsContent(props: Props) {
   return <LayoutTabsClient personRoles={roles} personPrivileges={privileges} />;
 }
 
-function LayoutTabsFallback() {
+export function LayoutTabsFallback() {
   return (
     <nav
       className="flex space-x-6 overflow-auto text-sm scrollbar-none"
       aria-label="Tabs"
     >
+      {/* TODO: href="#" is not a nice solution, but it works for now */}
       {[
         {
           name: "Cursisten",

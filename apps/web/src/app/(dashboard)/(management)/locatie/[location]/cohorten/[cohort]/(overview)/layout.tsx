@@ -28,14 +28,17 @@ import {
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
-import { BackToCohortsLink } from "./_components/back-to-cohorts-link";
+import {
+  BackToCohortsLink,
+  BackToCohortsLinkFallback,
+} from "./_components/back-to-cohorts-link";
 import { Dialogs } from "./_components/dialog-context";
 import {
   DialogButtons,
   DialogWrapper,
 } from "./_components/dialog-context-client";
-import { Heading } from "./_components/heading";
-import { LayoutTabs } from "./_components/layout-tabs";
+import { Heading, HeadingFallback } from "./_components/heading";
+import { LayoutTabs, LayoutTabsFallback } from "./_components/layout-tabs";
 import { CohortActions } from "./_components/quick-actions";
 
 // We need this for the bulk actions
@@ -55,6 +58,12 @@ async function StudentCount(props: {
   const count = (await listStudentsWithCurriculaByCohortId(cohort.id)).length;
 
   return count;
+}
+
+function StudentCountFallback() {
+  return (
+    <span className="inline-block bg-gray-200 rounded w-4 h-4 align-middle animate-pulse" />
+  );
 }
 
 async function QuickActionButtons(props: {
@@ -102,6 +111,16 @@ async function CohortDates(props: {
       <span>
         {dayjs(cohort.accessEndTime).tz().format("ddd DD-MM-YYYY HH:mm uur")}
       </span>
+    </div>
+  );
+}
+
+function CohortDatesFallback() {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="inline-block bg-gray-200 rounded w-41.75 h-4 animate-pulse" />
+      <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+      <span className="inline-block bg-gray-200 rounded w-41.75 h-4 animate-pulse" />
     </div>
   );
 }
@@ -162,8 +181,8 @@ async function LayoutContent(props: {
             <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
               <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
                 <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                <span>
-                  <Suspense fallback={0}>
+                <span className="min-w-4">
+                  <Suspense fallback={<StudentCountFallback />}>
                     <StudentCount params={props.params} />
                   </Suspense>
                 </span>
@@ -171,15 +190,7 @@ async function LayoutContent(props: {
 
               <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
                 <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                <Suspense
-                  fallback={
-                    <div className="flex items-center gap-2">
-                      <span className="inline-block bg-gray-200 rounded w-20 h-4 animate-pulse" />
-                      <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                      <span className="inline-block bg-gray-200 rounded w-20 h-4 animate-pulse" />
-                    </div>
-                  }
-                >
+                <Suspense fallback={<CohortDatesFallback />}>
                   <CohortDates params={props.params} />
                 </Suspense>
               </span>
@@ -214,51 +225,33 @@ export default function Layout(props: {
       fallback={
         <>
           <div className="max-lg:hidden">
-            <BackToCohortsLink params={props.params} />
+            <BackToCohortsLinkFallback />
           </div>
           <div className="mt-4">
             <div className="flex items-center gap-4">
-              <Heading params={props.params} />
+              <HeadingFallback />
             </div>
 
             <div className="isolate flex flex-wrap justify-between gap-x-6 mt-1">
               <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
                 <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
                   <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                  <span>
-                    <Suspense fallback={0}>
-                      <StudentCount params={props.params} />
-                    </Suspense>
+                  <span className="min-w-4">
+                    <StudentCountFallback />
                   </span>
                 </span>
 
                 <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
                   <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                  <Suspense
-                    fallback={
-                      <div className="flex items-center gap-2">
-                        <span className="inline-block bg-gray-200 rounded w-41.75 h-4 animate-pulse" />
-                        <ArrowRightIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                        <span className="inline-block bg-gray-200 rounded w-41.75 h-4 animate-pulse" />
-                      </div>
-                    }
-                  >
-                    <CohortDates params={props.params} />
-                  </Suspense>
+                  <CohortDatesFallback />
                 </span>
-              </div>
-              <div className="flex gap-4">
-                <Suspense fallback={null}>
-                  <QuickActionButtons params={props.params} />
-                </Suspense>
-                <CohortActions params={props.params} />
               </div>
             </div>
           </div>
 
           <Divider className="my-4" />
 
-          <LayoutTabs params={props.params} />
+          <LayoutTabsFallback />
 
           <div className="mt-4 max-sm:mb-30">
             <div className="bg-gray-200 rounded w-full h-96 animate-pulse" />
