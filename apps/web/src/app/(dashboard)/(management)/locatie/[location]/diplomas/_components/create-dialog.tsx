@@ -1,13 +1,21 @@
+import { Suspense } from "react";
 import { SWRConfig, unstable_serialize } from "swr";
-import { listPersonsForLocationWithPagination, listPrograms } from "~/lib/nwd";
+import {
+  listPersonsForLocationWithPagination,
+  listPrograms,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import CreateDialogClient from "./create-dialog-client";
 
-export default async function CreateDialog({
-  locationId,
-}: {
-  locationId: string;
-}) {
-  const [programs] = await Promise.all([listPrograms()]);
+type CreateDialogProps = {
+  params: Promise<{ location: string }>;
+};
+
+async function CreateDialogContent({ params }: CreateDialogProps) {
+  const [programs, location] = await Promise.all([
+    listPrograms(),
+    params.then(({ location }) => retrieveLocationByHandle(location)),
+  ]);
 
   return (
     <SWRConfig
@@ -15,9 +23,9 @@ export default async function CreateDialog({
         fallback: {
           [unstable_serialize([
             "allStudents",
-            locationId,
+            location.id,
             "?actorType=student",
-          ])]: listPersonsForLocationWithPagination(locationId, {
+          ])]: listPersonsForLocationWithPagination(location.id, {
             filter: {
               actorType: "student",
             },
@@ -26,7 +34,21 @@ export default async function CreateDialog({
         },
       }}
     >
-      <CreateDialogClient locationId={locationId} programs={programs} />
+      <CreateDialogClient locationId={location.id} programs={programs} />
     </SWRConfig>
+  );
+}
+
+function CreateDialogFallback() {
+  return (
+    <div className="bg-gray-200 -my-1.5 rounded-lg w-43.75 h-9 animate-pulse" />
+  );
+}
+
+export default function CreateDialog(props: CreateDialogProps) {
+  return (
+    <Suspense fallback={<CreateDialogFallback />}>
+      <CreateDialogContent {...props} />
+    </Suspense>
   );
 }

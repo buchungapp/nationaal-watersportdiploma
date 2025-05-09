@@ -18,6 +18,7 @@ import {
   DefaultTableCell,
   DefaultTableRows,
   NoTableRows,
+  PlaceholderTableRows,
 } from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
@@ -117,9 +118,11 @@ const columns = [
 export default function CertificateTable({
   certificates,
   totalItems,
+  placeholderRows,
 }: {
   certificates: Certificate[];
   totalItems: number;
+  placeholderRows?: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -149,23 +152,29 @@ export default function CertificateTable({
       >
         <DefaultTableHead table={table} />
         <TableBody>
-          <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-          <DefaultTableRows
-            table={table}
-            href={(row) =>
-              `/diploma/${row.original.id}?nummer=${row.original.handle}&datum=${dayjs(row.original.issuedAt).format("YYYYMMDD")}`
-            }
-            target="_blank"
-          >
-            {(cell, index, row) => (
-              <DefaultTableCell
-                key={cell.id}
-                cell={cell}
-                index={index}
-                row={row}
-              />
-            )}
-          </DefaultTableRows>
+          {placeholderRows && placeholderRows > 0 ? (
+            <PlaceholderTableRows rows={placeholderRows} />
+          ) : (
+            <>
+              <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+              <DefaultTableRows
+                table={table}
+                href={(row) =>
+                  `/diploma/${row.original.id}?nummer=${row.original.handle}&datum=${dayjs(row.original.issuedAt).format("YYYYMMDD")}`
+                }
+                target="_blank"
+              >
+                {(cell, index, row) => (
+                  <DefaultTableCell
+                    key={cell.id}
+                    cell={cell}
+                    index={index}
+                    row={row}
+                  />
+                )}
+              </DefaultTableRows>
+            </>
+          )}
         </TableBody>
       </Table>
       <TableFooter>
