@@ -11,6 +11,7 @@ import {
   DefaultTableCell,
   DefaultTableRows,
   NoTableRows,
+  PlaceholderTableRows,
 } from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
@@ -76,11 +77,13 @@ const columns = [
 export default function PersonsTable({
   persons,
   totalItems,
+  placeholderRows,
 }: {
   persons: Awaited<
     ReturnType<typeof listPersonsForLocationWithPagination>
   >["items"];
   totalItems: number;
+  placeholderRows?: number;
 }) {
   const params = useParams();
 
@@ -100,22 +103,31 @@ export default function PersonsTable({
       >
         <DefaultTableHead table={table} />
         <TableBody>
-          <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-          <DefaultTableRows
-            table={table}
-            href={(row) =>
-              `/locatie/${params.location as string}/personen/${row.original.id}`
-            }
-          >
-            {(cell, index, row) => (
-              <DefaultTableCell
-                key={cell.id}
-                cell={cell}
-                index={index}
-                row={row}
-              />
-            )}
-          </DefaultTableRows>
+          {placeholderRows && placeholderRows > 0 ? (
+            <PlaceholderTableRows
+              rows={placeholderRows}
+              colSpan={columns.length}
+            />
+          ) : (
+            <>
+              <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+              <DefaultTableRows
+                table={table}
+                href={(row) =>
+                  `/locatie/${params.location as string}/personen/${row.original.id}`
+                }
+              >
+                {(cell, index, row) => (
+                  <DefaultTableCell
+                    key={cell.id}
+                    cell={cell}
+                    index={index}
+                    row={row}
+                  />
+                )}
+              </DefaultTableRows>
+            </>
+          )}
         </TableBody>
       </Table>
 

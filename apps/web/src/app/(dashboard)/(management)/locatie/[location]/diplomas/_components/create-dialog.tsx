@@ -40,9 +40,7 @@ async function CreateDialogContent({ params }: CreateDialogProps) {
 }
 
 function CreateDialogFallback() {
-  return (
-    <div className="bg-gray-200 -my-1.5 rounded-lg w-43.75 h-9 animate-pulse" />
-  );
+  return <div className="bg-gray-200 rounded-lg w-43.75 h-9 animate-pulse" />;
 }
 
 export default function CreateDialog(props: CreateDialogProps) {

@@ -1,30 +1,19 @@
 import {
-  listCountries,
-  listPersonsForLocationWithPagination,
-  retrieveLocationByHandle,
-} from "~/lib/nwd";
-
-import { PlusIcon } from "@heroicons/react/16/solid";
-import {
   createLoader,
   parseAsArrayOf,
   parseAsInteger,
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
-
-import {
-  Dropdown,
-  DropdownButton,
-  DropdownMenu,
-} from "~/app/(dashboard)/_components/dropdown";
+import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import Search from "../../../_components/search";
 import {
-  DialogButtons,
-  DialogWrapper,
-  Dialogs,
-} from "./_components/dialog-context";
+  listPersonsForLocationWithPagination,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
+import Search from "../../../_components/search";
+import { Dialogs } from "./_components/dialog-context";
+import { DialogWrapper } from "./_components/dialog-context-client";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
 
@@ -40,31 +29,39 @@ const searchParamsParser = createLoader({
   limit: parseAsInteger.withDefault(25),
 });
 
-export default async function Page(props: {
-  params: Promise<{
-    location: string;
-  }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+async function PersonsTable(props: {
+  params: Promise<{ location: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
-  const params = await props.params;
-  const [location, countries] = await Promise.all([
-    retrieveLocationByHandle(params.location),
-    listCountries(),
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
   ]);
+
+  const location = await retrieveLocationByHandle(params.location);
 
   const {
     filter,
     query,
     page: currentPage,
     limit: paginationLimit,
-  } = searchParamsParser(searchParams);
+  } = searchParamsParser(searchParams ?? {});
+
   const persons = await listPersonsForLocationWithPagination(location.id, {
     limit: paginationLimit,
     offset: (currentPage - 1) * paginationLimit,
     filter: { actorType: filter, q: query },
   });
 
+  return <Table persons={persons.items} totalItems={persons.count} />;
+}
+
+export default function Page(props: {
+  params: Promise<{
+    location: string;
+  }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   return (
     <DialogWrapper>
       <div className="flex flex-wrap justify-between items-end gap-4">
@@ -75,20 +72,15 @@ export default async function Page(props: {
             <FilterSelect />
           </div>
         </div>
-        <Dropdown>
-          <DropdownButton color="branding-orange">
-            <PlusIcon />
-            Persoon aanmaken
-          </DropdownButton>
-          <DropdownMenu>
-            <DialogButtons />
-          </DropdownMenu>
-        </Dropdown>
+
+        <Dialogs params={props.params} />
       </div>
 
-      <Table persons={persons.items} totalItems={persons.count} />
-
-      <Dialogs locationId={location.id} countries={countries} />
+      <Suspense
+        fallback={<Table persons={[]} totalItems={0} placeholderRows={10} />}
+      >
+        <PersonsTable params={props.params} searchParams={props.searchParams} />
+      </Suspense>
     </DialogWrapper>
   );
 }

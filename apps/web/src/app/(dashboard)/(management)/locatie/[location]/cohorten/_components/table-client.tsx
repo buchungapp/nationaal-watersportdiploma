@@ -82,7 +82,10 @@ export default function CohortsTable({
         <DefaultTableHead table={table} />
         <TableBody>
           {placeholderRows && placeholderRows > 0 ? (
-            <PlaceholderTableRows rows={placeholderRows} />
+            <PlaceholderTableRows
+              rows={placeholderRows}
+              colSpan={columns.length}
+            />
           ) : (
             <>
               <DefaultTableRows

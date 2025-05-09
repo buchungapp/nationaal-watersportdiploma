@@ -37,7 +37,7 @@ async function CertificatesTable(props: {
   );
 }
 
-export default async function Page(props: {
+export default function Page(props: {
   params: Promise<{
     location: string;
   }>;
