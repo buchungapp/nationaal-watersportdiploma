@@ -1,77 +1,58 @@
-"use client";
-
-import {
-  AcademicCapIcon,
-  CalendarDaysIcon,
-  ChartBarIcon,
-  FolderIcon,
-  UserGroupIcon,
-} from "@heroicons/react/20/solid";
-import { useParams, useSelectedLayoutSegments } from "next/navigation";
+import { Suspense } from "react";
 import {
   SidebarItem,
   SidebarLabel,
   SidebarSection,
 } from "~/app/(dashboard)/_components/sidebar";
-import type { ActorType } from "~/lib/nwd";
+import { listRolesForLocation, retrieveLocationByHandle } from "~/lib/nwd";
+import { LocationSidebarMenuClient } from "./sidebar-menu-client";
 
-export function LocationSidebarMenu({
-  personRoles,
-}: {
-  personRoles: ActorType[];
+async function LocationSidebarMenuContent(props: {
+  params: Promise<{
+    location: string;
+  }>;
 }) {
-  const segments = useSelectedLayoutSegments();
-  const params = useParams();
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const rolesForPerson = await listRolesForLocation(location.id);
 
-  const hasRole = (role: ActorType[]) =>
-    personRoles.some((r) => role.includes(r));
+  return <LocationSidebarMenuClient personRoles={rolesForPerson} />;
+}
 
+function LocationSidebarMenuFallback() {
   return (
     <SidebarSection>
-      {[
-        {
-          name: "Cohorten",
-          href: `/locatie/${params.location}/cohorten`,
-          Icon: CalendarDaysIcon,
-          active: hasRole(["instructor", "location_admin"]),
-          current: segments[0] === "cohorten",
-        },
-        {
-          name: "Personen",
-          href: `/locatie/${params.location}/personen`,
-          Icon: UserGroupIcon,
-          active: hasRole(["location_admin"]),
-          current: segments[0] === "personen",
-        },
-        {
-          name: "Diploma's",
-          href: `/locatie/${params.location}/diplomas`,
-          Icon: AcademicCapIcon,
-          active: hasRole(["location_admin"]),
-          current: segments[0] === "diplomas",
-        },
-        {
-          name: "Kennisbank",
-          href: `/locatie/${params.location}/kennisbank`,
-          Icon: FolderIcon,
-          active: hasRole(["instructor", "location_admin"]),
-          current: segments[0] === "kennisbank",
-        },
-        {
-          name: "Inzichten",
-          href: `/locatie/${params.location}/inzichten`,
-          Icon: ChartBarIcon,
-          active: hasRole(["location_admin"]),
-          current: segments[0] === "inzichten",
-        },
-      ]
-        .filter((item) => !!item.active)
-        .map((item) => (
-          <SidebarItem key={item.name} href={item.href} current={item.current}>
-            <item.Icon />
-            <SidebarLabel> {item.name}</SidebarLabel>
-          </SidebarItem>
-        ))}
+      {[1, 2].map((i) => (
+        <SidebarItem key={`sidebar-menu-fallback-${i}`} href="#" disabled>
+          <div
+            data-slot="icon"
+            className="bg-gray-300 rounded animate-pulse"
+            style={{
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+          <SidebarLabel className="w-full">
+            <span
+              className="inline-block bg-gray-300 rounded w-full h-4.5 align-middle animate-pulse"
+              style={{
+                animationDelay: `${i * 0.3 + 0.1}s`,
+              }}
+            />
+          </SidebarLabel>
+        </SidebarItem>
+      ))}
     </SidebarSection>
+  );
+}
+
+export function LocationSidebarMenu(props: {
+  params: Promise<{
+    location: string;
+  }>;
+}) {
+  return (
+    <Suspense fallback={<LocationSidebarMenuFallback />}>
+      <LocationSidebarMenuContent params={props.params} />
+    </Suspense>
   );
 }

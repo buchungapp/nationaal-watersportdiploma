@@ -72,3 +72,35 @@ export function DefaultTableCell<T>({
     </TableCell>
   );
 }
+
+export function PlaceholderTableRows<T>({
+  table,
+  colSpan,
+  rows,
+  children,
+}: PropsWithChildren<
+  (
+    | { table: Table<T>; colSpan?: never }
+    | { table?: never; colSpan: number }
+  ) & { rows?: number }
+>) {
+  if (rows && rows > 0) {
+    return [...Array(rows)].map((_, index) => (
+      <tr
+        // biome-ignore lint/suspicious/noArrayIndexKey: no other option
+        key={`logbook-table-placeholder-${index}`}
+      >
+        <td colSpan={colSpan ?? table.getAllColumns().length}>
+          <span
+            className="block bg-gray-200 mt-2 rounded w-full h-9.25 animate-pulse"
+            style={{
+              animationDelay: `${index * 0.3}s`,
+            }}
+          />
+        </td>
+      </tr>
+    ));
+  }
+
+  return children;
+}

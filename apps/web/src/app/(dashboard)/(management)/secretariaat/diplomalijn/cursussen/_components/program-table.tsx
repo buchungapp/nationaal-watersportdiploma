@@ -14,9 +14,12 @@ import {
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
-import { DefaultTableCell } from "~/app/(dashboard)/_components/table-content";
-import { NoTableRows } from "~/app/(dashboard)/_components/table-content";
-import { DefaultTableRows } from "~/app/(dashboard)/_components/table-content";
+import {
+  DefaultTableCell,
+  DefaultTableRows,
+  NoTableRows,
+  PlaceholderTableRows,
+} from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
   TablePagination,
@@ -32,9 +35,11 @@ const columnHelper = createColumnHelper<Program>();
 export default function ProgramTable({
   programs,
   totalItems,
+  placeholderRows,
 }: {
   programs: Program[];
   totalItems: number;
+  placeholderRows?: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -83,22 +88,24 @@ export default function ProgramTable({
         ) : null}
         <DefaultTableHead table={table} />
         <TableBody>
-          <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-          <DefaultTableRows
-            table={table}
-            href={(row) =>
-              `/secretariaat/diplomalijn/cursussen/programmas/${row.original.handle}`
-            }
-          >
-            {(cell, index, row) => (
-              <DefaultTableCell
-                key={cell.id}
-                cell={cell}
-                index={index}
-                row={row}
-              />
-            )}
-          </DefaultTableRows>
+          <PlaceholderTableRows table={table} rows={placeholderRows}>
+            <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/secretariaat/diplomalijn/cursussen/programmas/${row.original.handle}`
+              }
+            >
+              {(cell, index, row) => (
+                <DefaultTableCell
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  row={row}
+                />
+              )}
+            </DefaultTableRows>
+          </PlaceholderTableRows>
         </TableBody>
       </Table>
       <TableFooter>

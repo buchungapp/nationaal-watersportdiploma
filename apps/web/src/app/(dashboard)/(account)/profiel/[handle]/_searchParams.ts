@@ -1,20 +1,11 @@
-import {
-  createSearchParamsCache,
-  parseAsInteger,
-  parseAsString,
-} from "nuqs/server";
+import { createLoader, parseAsInteger, parseAsString } from "nuqs/server";
 
-export const logbookParams = {
-  "logbook-page": parseAsInteger.withDefault(1),
-  "logbook-limit": parseAsInteger.withDefault(25),
-};
-
-export const certificateParams = {
+export const parseCertificateSearchParams = createLoader({
   "edit-certificate": parseAsString,
   "media-viewer": parseAsString,
-};
+});
 
-export const pageParamsCache = createSearchParamsCache({
-  ...logbookParams,
-  ...certificateParams,
+export const parseLogbookSearchParams = createLoader({
+  "logbook-page": parseAsInteger.withDefault(1),
+  "logbook-limit": parseAsInteger.withDefault(25),
 });

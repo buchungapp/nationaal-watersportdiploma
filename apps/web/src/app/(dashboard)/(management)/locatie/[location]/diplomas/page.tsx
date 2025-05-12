@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
   listCertificatesWithPagination,
@@ -7,10 +8,9 @@ import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
 import { loadSearchParams } from "./_search-params";
-export default async function Page(props: {
-  params: Promise<{
-    location: string;
-  }>;
+
+async function CertificatesTable(props: {
+  params: Promise<{ location: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [params, searchParams] = await Promise.all([
@@ -33,6 +33,17 @@ export default async function Page(props: {
   });
 
   return (
+    <Table certificates={certificates.items} totalItems={certificates.count} />
+  );
+}
+
+export default function Page(props: {
+  params: Promise<{
+    location: string;
+  }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  return (
     <>
       <div className="flex flex-wrap justify-between items-end gap-4">
         <div className="sm:flex-1 max-sm:w-full">
@@ -41,13 +52,19 @@ export default async function Page(props: {
             <Search placeholder="Doorzoek diploma's..." />
           </div>
         </div>
-        <CreateDialog locationId={location.id} />
+        <CreateDialog params={props.params} />
       </div>
 
-      <Table
-        certificates={certificates.items}
-        totalItems={certificates.count}
-      />
+      <Suspense
+        fallback={
+          <Table placeholderRows={10} certificates={[]} totalItems={0} />
+        }
+      >
+        <CertificatesTable
+          params={props.params}
+          searchParams={props.searchParams}
+        />
+      </Suspense>
     </>
   );
 }

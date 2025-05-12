@@ -1,5 +1,6 @@
 import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { listLocationsForPerson, listRolesForLocation } from "~/lib/nwd";
 import { Avatar } from "../../../../../_components/avatar";
 import {
@@ -12,15 +13,18 @@ import {
 } from "../../../../../_components/dropdown";
 import { SidebarItem, SidebarLabel } from "../../../../../_components/sidebar";
 
-export async function LocationSelector({
-  currentLocationSlug,
-}: {
-  currentLocationSlug: string;
+async function LocationSelectorContent(props: {
+  params: Promise<{
+    location: string;
+  }>;
 }) {
-  const locations = await listLocationsForPerson();
+  const [params, locations] = await Promise.all([
+    props.params,
+    listLocationsForPerson(),
+  ]);
 
   const currentLocation = locations.find(
-    (location) => location.handle === currentLocationSlug,
+    (location) => location.handle === params.location,
   );
 
   if (!currentLocation) {
@@ -54,7 +58,7 @@ export async function LocationSelector({
       <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
         {isLocationAdmin ? (
           <>
-            <DropdownItem href={`/locatie/${currentLocationSlug}/instellingen`}>
+            <DropdownItem href={`/locatie/${params.location}/instellingen`}>
               <Cog8ToothIcon />
               <DropdownLabel>Instellingen</DropdownLabel>
             </DropdownItem>
@@ -73,12 +77,43 @@ export async function LocationSelector({
               <Avatar
                 slot="icon"
                 initials={(location.name ?? location.handle).slice(0, 2)}
-                className="bg-purple-500 text-white "
+                className="bg-purple-500 text-white"
               />
               <DropdownLabel>{location.name}</DropdownLabel>
             </DropdownItem>
           ))}
       </DropdownMenu>
     </Dropdown>
+  );
+}
+
+function LocationSelectorFallback() {
+  return (
+    <Dropdown>
+      <DropdownButton
+        as={SidebarItem}
+        className="lg:mb-2.5"
+        title={undefined}
+        disabled={true}
+      >
+        <Avatar className="size-6 shrink-0" initials={"..."} />
+        <SidebarLabel className="w-full">
+          <span className="inline-block bg-gray-300 rounded w-full h-4.5 align-middle animate-pulse" />
+        </SidebarLabel>
+        <ChevronDownIcon />
+      </DropdownButton>
+    </Dropdown>
+  );
+}
+
+export function LocationSelector(props: {
+  params: Promise<{
+    location: string;
+  }>;
+}) {
+  return (
+    <Suspense fallback={<LocationSelectorFallback />}>
+      <LocationSelectorContent params={props.params} />
+    </Suspense>
   );
 }

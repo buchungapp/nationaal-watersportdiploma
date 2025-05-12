@@ -1,14 +1,14 @@
 import FlexSearch from "flexsearch";
+import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listCompetencies } from "~/lib/nwd";
 import Search from "../../../_components/search";
-import ProgramCompetencyClient from "./_components/program-table";
+import CompetencyTableClient from "./_components/competency-table";
 
-async function CompetencyTable({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+async function CompetencyTable(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   const competencies = await listCompetencies();
   const searchQuery = searchParams?.query?.toString() ?? null;
 
@@ -43,34 +43,43 @@ async function CompetencyTable({
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
-  const paginatedPrograms = filteredCompetencies.slice(
+  const paginatedCompetencies = filteredCompetencies.slice(
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit,
   );
 
   return (
-    <ProgramCompetencyClient
-      competencies={paginatedPrograms}
+    <CompetencyTableClient
+      competencies={paginatedCompetencies}
       totalItems={filteredCompetencies.length}
     />
   );
 }
 
-export default async function Page(props: {
+export default function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-sm:w-full sm:flex-1">
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div className="sm:flex-1 max-sm:w-full">
           <Heading>Competenties</Heading>
-          <div className="mt-4 flex max-w-xl gap-4">
+          <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek competenties..." />
           </div>
         </div>
       </div>
-      <CompetencyTable searchParams={searchParams} />
+      <Suspense
+        fallback={
+          <CompetencyTableClient
+            competencies={[]}
+            totalItems={0}
+            placeholderRows={4}
+          />
+        }
+      >
+        <CompetencyTable searchParams={props.searchParams} />
+      </Suspense>
     </>
   );
 }

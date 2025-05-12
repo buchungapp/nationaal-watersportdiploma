@@ -18,7 +18,7 @@ async function LatestNewsList() {
           href={`/actueel/${article.slug}`}
           target="_blank"
           title={article.title}
-          className="*:truncate *:inline-block"
+          className="*:inline-block *:truncate"
         >
           {article.title}
         </SidebarItem>
@@ -27,9 +27,27 @@ async function LatestNewsList() {
   );
 }
 
+function LatestNewsFallback() {
+  return (
+    <SidebarSection className="max-lg:hidden">
+      <SidebarHeading>Laatste nieuws</SidebarHeading>
+      {[1, 2, 3].map((i) => (
+        <SidebarItem key={`news-fallback-${i}`} href="#" disabled>
+          <span
+            className="inline-block bg-gray-300 rounded w-full h-4.5 animate-pulse"
+            style={{
+              animationDelay: `${i * 0.3}s`,
+            }}
+          />
+        </SidebarItem>
+      ))}
+    </SidebarSection>
+  );
+}
+
 export default function LatestNews() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<LatestNewsFallback />}>
       <LatestNewsList />
     </Suspense>
   );

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import React from "react";
+import React, { Suspense } from "react";
+import { ModuleFallback } from "~/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/[student-allocation]/_components/student-module";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -15,13 +16,15 @@ import {
 } from "~/lib/nwd";
 import { Module } from "./student-module";
 
-export async function CourseCard({
-  cohortAllocationId,
-}: {
-  cohortAllocationId: string;
+async function CourseCardContent(props: {
+  params: Promise<{
+    "allocation-id": string;
+  }>;
 }) {
-  const allocation =
-    await retrieveStudentAllocationWithCurriculumForPerson(cohortAllocationId);
+  const params = await props.params;
+  const allocation = await retrieveStudentAllocationWithCurriculumForPerson(
+    params["allocation-id"],
+  );
 
   if (!allocation) {
     return notFound();
@@ -45,7 +48,7 @@ export async function CourseCard({
       listCompletedCompetenciesByStudentCurriculumId(
         allocation.studentCurriculum.id,
       ),
-      listCompetencyProgressInCohortForStudent(cohortAllocationId, true),
+      listCompetencyProgressInCohortForStudent(params["allocation-id"], true),
     ]);
 
   if (!curriculum) {
@@ -99,5 +102,45 @@ export async function CourseCard({
         })}
       </div>
     </div>
+  );
+}
+
+function CourseCardFallback() {
+  return (
+    <div>
+      <DescriptionList>
+        <DescriptionTerm>Programma</DescriptionTerm>
+        <DescriptionDetails>
+          <span className="inline-block bg-gray-200 rounded w-48 h-4.25 align-middle animate-pulse" />
+        </DescriptionDetails>
+
+        <DescriptionTerm>Vaartuig</DescriptionTerm>
+        <DescriptionDetails>
+          <span className="inline-block bg-gray-200 rounded w-32 h-4.25 align-middle animate-pulse [animation-delay:0.3s]" />
+        </DescriptionDetails>
+      </DescriptionList>
+
+      <div className="mt-6">
+        {[1, 2, 3].map((i, index) => (
+          <React.Fragment key={`module-fallback-${i}`}>
+            <ModuleFallback index={index} />
+
+            {index < 2 ? <Divider soft className="my-2.5" /> : null}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function CourseCard(props: {
+  params: Promise<{
+    "allocation-id": string;
+  }>;
+}) {
+  return (
+    <Suspense fallback={<CourseCardFallback />}>
+      <CourseCardContent params={props.params} />
+    </Suspense>
   );
 }

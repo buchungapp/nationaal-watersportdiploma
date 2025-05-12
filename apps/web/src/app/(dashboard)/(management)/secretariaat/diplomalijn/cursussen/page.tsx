@@ -1,14 +1,14 @@
 import FlexSearch from "flexsearch";
+import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listCourses, listParentCategories } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CourseTableClient from "./_components/course-table";
 
-async function ProgramTable({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+async function ProgramTable(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   const [courses, parentCategories] = await Promise.all([
     listCourses(),
     listParentCategories(),
@@ -60,21 +60,31 @@ async function ProgramTable({
   );
 }
 
-export default async function Page(props: {
+export default function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-sm:w-full sm:flex-1">
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div className="sm:flex-1 max-sm:w-full">
           <Heading>Cursussen</Heading>
-          <div className="mt-4 flex max-w-xl gap-4">
+          <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek cursussen..." />
           </div>
         </div>
       </div>
-      <ProgramTable searchParams={searchParams} />
+      <Suspense
+        fallback={
+          <CourseTableClient
+            courses={[]}
+            parentCategories={[]}
+            totalItems={0}
+            placeholderRows={4}
+          />
+        }
+      >
+        <ProgramTable searchParams={props.searchParams} />
+      </Suspense>
     </>
   );
 }
