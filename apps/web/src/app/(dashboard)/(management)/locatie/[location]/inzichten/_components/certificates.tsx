@@ -30,10 +30,12 @@ async function CertificatesContent(props: CertificatesProps) {
   const certificatesPerWeek = Object.values(
     certificates.reduce(
       (acc, certificate) => {
-        const week = dayjs(certificate.issuedAt).week();
+        const date = dayjs(certificate.issuedAt);
+        const isoKey = date.startOf("week").toISOString();
+        const week = date.week();
 
-        if (!acc[week]) {
-          acc[week] = {
+        if (!acc[isoKey]) {
+          acc[isoKey] = {
             week: `Week ${week}`,
             weekStart: dayjs(certificate.issuedAt)
               .startOf("week")
@@ -52,12 +54,14 @@ async function CertificatesContent(props: CertificatesProps) {
           };
         }
 
-        acc[week]?.certificates.push(certificate);
+        acc[isoKey]?.certificates.push(certificate);
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        acc[week]!.count += 1;
+        acc[isoKey]!.count += 1;
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
-        (acc[week]![certificate.program.course.discipline.title!] as number) +=
-          1;
+        (acc[isoKey]![
+          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          certificate.program.course.discipline.title!
+        ] as number) += 1;
 
         return acc;
       },
@@ -75,6 +79,8 @@ async function CertificatesContent(props: CertificatesProps) {
     ),
   );
 
+  console.log(certificatesPerWeek);
+
   return (
     <>
       <div className="gap-8 grid lg:grid-cols-3 mt-4">
@@ -82,7 +88,9 @@ async function CertificatesContent(props: CertificatesProps) {
           {
             id: "year",
             title: "Dit jaar",
-            count: certificates.length,
+            count: certificates.filter((certificate) =>
+              dayjs(certificate.issuedAt).isAfter(dayjs().startOf("year")),
+            ).length,
           },
           {
             id: "lastMonth",
