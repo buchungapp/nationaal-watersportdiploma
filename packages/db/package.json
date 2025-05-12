@@ -8,6 +8,10 @@
     ".": {
       "types": "./src/main.ts",
       "default": "./out/main.js"
+    },
+    "./drizzle": {
+      "types": "./src/lib/drizzle.ts",
+      "default": "./out/lib/drizzle.js"
     }
   },
   "scripts": {
