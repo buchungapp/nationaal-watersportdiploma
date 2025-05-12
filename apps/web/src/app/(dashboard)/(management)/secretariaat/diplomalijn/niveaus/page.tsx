@@ -1,14 +1,14 @@
 import FlexSearch from "flexsearch";
+import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listDegrees } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import DegreeTableCLient from "./_components/degree-table";
 
-async function DegreesTable({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+async function DegreesTable(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   const degrees = await listDegrees();
   const searchQuery = searchParams?.query?.toString() ?? null;
 
@@ -30,10 +30,10 @@ async function DegreesTable({
   }
 
   // Search programs using FlexSearch
-  let filteredGearTypes = degrees;
+  let filteredDegrees = degrees;
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
-    filteredGearTypes = results.map(
+    filteredDegrees = results.map(
       // biome-ignore lint/style/noNonNullAssertion: <explanation>
       (result) => degrees.find((degree) => degree.id === result)!,
     );
@@ -43,34 +43,39 @@ async function DegreesTable({
   const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
-  const paginatedGearTypes = filteredGearTypes.slice(
+  const paginatedDegrees = filteredDegrees.slice(
     (currentPage - 1) * paginationLimit,
     currentPage * paginationLimit,
   );
 
   return (
     <DegreeTableCLient
-      degrees={paginatedGearTypes}
-      totalItems={filteredGearTypes.length}
+      degrees={paginatedDegrees}
+      totalItems={filteredDegrees.length}
     />
   );
 }
 
-export default async function Page(props: {
+export default function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-sm:w-full sm:flex-1">
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div className="sm:flex-1 max-sm:w-full">
           <Heading>Niveaus</Heading>
-          <div className="mt-4 flex max-w-xl gap-4">
+          <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek niveaus..." />
           </div>
         </div>
       </div>
-      <DegreesTable searchParams={searchParams} />
+      <Suspense
+        fallback={
+          <DegreeTableCLient degrees={[]} totalItems={0} placeholderRows={4} />
+        }
+      >
+        <DegreesTable searchParams={props.searchParams} />
+      </Suspense>
     </>
   );
 }

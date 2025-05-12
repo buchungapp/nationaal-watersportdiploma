@@ -1,14 +1,14 @@
 import FlexSearch from "flexsearch";
+import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listGearTypes } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import GearTypeTableCLient from "./_components/gear-type-table";
 
-async function GearTypeTable({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
+async function GearTypeTable(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const searchParams = await props.searchParams;
   const gearTypes = await listGearTypes();
   const searchQuery = searchParams?.query?.toString() ?? null;
 
@@ -56,21 +56,30 @@ async function GearTypeTable({
   );
 }
 
-export default async function Page(props: {
+export default function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const searchParams = await props.searchParams;
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="max-sm:w-full sm:flex-1">
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div className="sm:flex-1 max-sm:w-full">
           <Heading>Materialen</Heading>
-          <div className="mt-4 flex max-w-xl gap-4">
+          <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek materialen..." />
           </div>
         </div>
       </div>
-      <GearTypeTable searchParams={searchParams} />
+      <Suspense
+        fallback={
+          <GearTypeTableCLient
+            gearTypes={[]}
+            totalItems={0}
+            placeholderRows={4}
+          />
+        }
+      >
+        <GearTypeTable searchParams={props.searchParams} />
+      </Suspense>
     </>
   );
 }

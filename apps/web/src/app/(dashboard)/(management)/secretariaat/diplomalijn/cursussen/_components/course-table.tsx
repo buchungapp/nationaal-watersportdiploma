@@ -19,6 +19,7 @@ import {
   DefaultTableCell,
   DefaultTableRows,
   NoTableRows,
+  PlaceholderTableRows,
 } from "~/app/(dashboard)/_components/table-content";
 import {
   TableFooter,
@@ -29,6 +30,7 @@ import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import type { listCourses, listParentCategories } from "~/lib/nwd";
 
 type Course = Awaited<ReturnType<typeof listCourses>>[number];
+type ParentCategory = Awaited<ReturnType<typeof listParentCategories>>[number];
 
 const columnHelper = createColumnHelper<Course>();
 
@@ -36,10 +38,12 @@ export default function CourseTable({
   courses,
   parentCategories,
   totalItems,
+  placeholderRows,
 }: {
   courses: Course[];
-  parentCategories: Awaited<ReturnType<typeof listParentCategories>>;
+  parentCategories: ParentCategory[];
   totalItems: number;
+  placeholderRows?: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -105,22 +109,24 @@ export default function CourseTable({
         ) : null}
         <DefaultTableHead table={table} />
         <TableBody>
-          <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-          <DefaultTableRows
-            table={table}
-            href={(row) =>
-              `/secretariaat/diplomalijn/cursussen/${row.original.handle}`
-            }
-          >
-            {(cell, index, row) => (
-              <DefaultTableCell
-                key={cell.id}
-                cell={cell}
-                index={index}
-                row={row}
-              />
-            )}
-          </DefaultTableRows>
+          <PlaceholderTableRows table={table} rows={placeholderRows}>
+            <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/secretariaat/diplomalijn/cursussen/${row.original.handle}`
+              }
+            >
+              {(cell, index, row) => (
+                <DefaultTableCell
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  row={row}
+                />
+              )}
+            </DefaultTableRows>
+          </PlaceholderTableRows>
         </TableBody>
       </Table>
       <TableFooter>

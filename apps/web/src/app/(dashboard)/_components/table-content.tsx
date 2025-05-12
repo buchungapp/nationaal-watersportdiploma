@@ -92,7 +92,7 @@ export function PlaceholderTableRows<T>({
       >
         <td colSpan={colSpan ?? table.getAllColumns().length}>
           <span
-            className="block bg-slate-200 mt-2 rounded w-full h-9.25 animate-pulse"
+            className="block bg-gray-200 mt-2 rounded w-full h-9.25 animate-pulse"
             style={{
               animationDelay: `${index * 0.3}s`,
             }}
