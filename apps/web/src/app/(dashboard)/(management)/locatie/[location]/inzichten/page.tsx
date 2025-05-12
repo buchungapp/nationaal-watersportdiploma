@@ -15,8 +15,8 @@ export default function Page(props: {
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const defaultFrom = dayjs().startOf("year").toDate();
-  const defaultTo = dayjs().endOf("year").toDate();
+  const defaultFrom = dayjs().startOf("year").format("YYYY-MM-DD");
+  const defaultTo = dayjs().endOf("year").format("YYYY-MM-DD");
 
   return (
     <>
@@ -32,44 +32,51 @@ export default function Page(props: {
         <Subheading>Diploma's</Subheading>
         <div className="flex items-center gap-2 -mt-2.5">
           <FixedDateSelector
+            defaultValueFrom={defaultFrom}
+            defaultValueTo={defaultTo}
             dateOptions={[
               {
-                label: "Deze week",
+                label: "Huidige week",
                 value: {
-                  from: dayjs().startOf("week").toDate(),
-                  to: dayjs().endOf("week").toDate(),
+                  from: dayjs().startOf("week").format("YYYY-MM-DD"),
+                  to: dayjs().endOf("week").format("YYYY-MM-DD"),
                 },
               },
               {
-                label: "Vorige week",
+                label: "Afgelopen week",
                 value: {
-                  from: dayjs().startOf("week").subtract(1, "week").toDate(),
-                  to: dayjs().endOf("week").subtract(1, "week").toDate(),
+                  from: dayjs()
+                    .startOf("week")
+                    .subtract(1, "week")
+                    .format("YYYY-MM-DD"),
+                  to: dayjs()
+                    .endOf("week")
+                    .subtract(1, "week")
+                    .format("YYYY-MM-DD"),
                 },
               },
               {
-                label: "Deze maand",
-                value: {
-                  from: dayjs().startOf("month").toDate(),
-                  to: dayjs().endOf("month").toDate(),
-                },
-              },
-              {
-                label: "Dit jaar",
+                label: "Huidig seizoen",
                 value: { from: defaultFrom, to: defaultTo },
               },
               {
-                label: "Vorig jaar",
+                label: "Afgelopen seizoen",
                 value: {
-                  from: dayjs().startOf("year").subtract(1, "year").toDate(),
-                  to: dayjs().endOf("year").subtract(1, "year").toDate(),
+                  from: dayjs()
+                    .startOf("year")
+                    .subtract(1, "year")
+                    .format("YYYY-MM-DD"),
+                  to: dayjs()
+                    .endOf("year")
+                    .subtract(1, "year")
+                    .format("YYYY-MM-DD"),
                 },
               },
               {
-                label: "Alle tijd",
+                label: "Alle tijden",
                 value: {
-                  from: dayjs("1900-01-01").toDate(),
-                  to: dayjs("2100-01-01").toDate(),
+                  from: "1900-01-01",
+                  to: "2100-01-01",
                 },
               },
             ]}

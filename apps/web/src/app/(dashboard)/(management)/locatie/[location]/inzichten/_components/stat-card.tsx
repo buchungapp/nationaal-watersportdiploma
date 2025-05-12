@@ -1,11 +1,11 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 
 export function StatCard({
   title,
   children,
 }: PropsWithChildren<{
-  title: string;
+  title: ReactNode;
 }>) {
   return (
     <div>

@@ -1,6 +1,5 @@
 "use client";
-import { dateTime } from "@nawadi/lib";
-import { parseAsIsoDate, useQueryState, useQueryStates } from "nuqs";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { useTransition } from "react";
 import {
   Dropdown,
@@ -17,24 +16,26 @@ export function DateSelector({
   defaultValue,
 }: {
   name: string;
-  defaultValue?: Date;
+  defaultValue: string;
 }) {
   const [isLoading, startTransition] = useTransition();
   const [date, setDate] = useQueryState(
     name,
-    parseAsIsoDate
-      .withDefault(defaultValue ?? new Date())
+    parseAsString
+      .withDefault(defaultValue)
       .withOptions({ startTransition, shallow: false, throttleMs: 300 }),
   );
+
+  console.log(date);
 
   return (
     <div className="relative">
       <Input
         type="date"
         name={name}
-        value={dateTime.getDateLocal(date)}
+        value={date}
         onChange={(e) => {
-          setDate(new Date(e.target.value));
+          setDate(e.target.value);
         }}
       />
       {isLoading && (
@@ -51,21 +52,21 @@ export function FixedDateSelector({
   defaultValueTo,
   dateOptions,
 }: {
-  defaultValueFrom?: Date;
-  defaultValueTo?: Date;
+  defaultValueFrom: string;
+  defaultValueTo: string;
   dateOptions: {
     label: string;
     value: {
-      from: Date;
-      to: Date;
+      from: string;
+      to: string;
     };
   }[];
 }) {
   const [isLoading, startTransition] = useTransition();
   const [date, setDate] = useQueryStates(
     {
-      from: parseAsIsoDate.withDefault(defaultValueFrom ?? new Date()),
-      to: parseAsIsoDate.withDefault(defaultValueTo ?? new Date()),
+      from: parseAsString.withDefault(defaultValueFrom),
+      to: parseAsString.withDefault(defaultValueTo),
     },
     {
       startTransition,
@@ -80,8 +81,7 @@ export function FixedDateSelector({
         {isLoading ? <Spinner /> : null}
         {dateOptions.find(
           (option) =>
-            option.value.from.toISOString() === date.from.toISOString() &&
-            option.value.to.toISOString() === date.to.toISOString(),
+            option.value.from === date.from && option.value.to === date.to,
         )?.label ?? "Kies een periode"}
       </DropdownButton>
       <DropdownMenu anchor="bottom end">

@@ -5,8 +5,8 @@ import { and, asc, eq, gte, lte } from "@nawadi/db/drizzle";
 
 export async function listCertificatesBetween(
   locationId: string,
-  from: Date,
-  to: Date,
+  from?: Date,
+  to?: Date,
 ) {
   const query = useQuery();
 
@@ -33,8 +33,8 @@ export async function listCertificatesBetween(
     .where(
       and(
         eq(s.certificate.locationId, locationId),
-        gte(s.certificate.issuedAt, from.toISOString()),
-        lte(s.certificate.issuedAt, to.toISOString()),
+        from ? gte(s.certificate.issuedAt, from.toISOString()) : undefined,
+        to ? lte(s.certificate.issuedAt, to.toISOString()) : undefined,
       ),
     )
     .orderBy(asc(s.certificate.issuedAt));

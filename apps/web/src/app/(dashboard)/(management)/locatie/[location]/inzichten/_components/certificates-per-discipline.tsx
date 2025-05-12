@@ -149,28 +149,51 @@ async function CertificatesPerDisciplineContent(
 
 export function CertificatesPerDisciplineFallback() {
   return (
-    <div className="gap-8 grid lg:grid-cols-3 mt-4">
-      {[
-        {
-          id: "year",
-          title: "Dit jaar",
-        },
-        {
-          id: "lastMonth",
-          title: "Afgelopen maand",
-        },
-        {
-          id: "thisMonth",
-          title: "Deze maand",
-        },
-      ].map((stat) => {
-        return (
-          <StatCard key={stat.id} title={stat.title}>
-            <span className="inline-block bg-gray-200 rounded w-15.5 h-6 animate-pulse" />
-          </StatCard>
-        );
-      })}
-    </div>
+    <>
+      <div className="gap-8 grid lg:grid-cols-3 mt-4">
+        {[
+          {
+            id: "total",
+            title: "Totaal",
+          },
+          {
+            id: "discipline-1",
+          },
+          {
+            id: "discipline-2",
+          },
+          {
+            id: "discipline-3",
+          },
+          {
+            id: "discipline-4",
+          },
+          {
+            id: "discipline-5",
+          },
+          {
+            id: "discipline-6",
+          },
+          {
+            id: "discipline-7",
+          },
+        ].map((stat) => {
+          return (
+            <StatCard
+              key={stat.id}
+              title={
+                stat.title ?? (
+                  <span className="inline-block bg-gray-200 rounded w-18 h-4.25 animate-pulse" />
+                )
+              }
+            >
+              <span className="inline-block bg-gray-200 rounded w-15.5 h-6 animate-pulse" />
+            </StatCard>
+          );
+        })}
+      </div>
+      <div className="bg-gray-200 mt-12 rounded w-full h-80 animate-pulse" />
+    </>
   );
 }
 
