@@ -81,30 +81,23 @@ export default function CohortsTable({
       >
         <DefaultTableHead table={table} />
         <TableBody>
-          {placeholderRows && placeholderRows > 0 ? (
-            <PlaceholderTableRows
-              rows={placeholderRows}
-              colSpan={columns.length}
-            />
-          ) : (
-            <>
-              <DefaultTableRows
-                table={table}
-                href={(row) =>
-                  `/locatie/${params.location as string}/cohorten/${row.original.handle}`
-                }
-              >
-                {(cell, index, row) => (
-                  <DefaultTableCell
-                    key={cell.id}
-                    cell={cell}
-                    index={index}
-                    row={row}
-                  />
-                )}
-              </DefaultTableRows>
-            </>
-          )}
+          <PlaceholderTableRows table={table} rows={placeholderRows}>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/locatie/${params.location as string}/cohorten/${row.original.handle}`
+              }
+            >
+              {(cell, index, row) => (
+                <DefaultTableCell
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  row={row}
+                />
+              )}
+            </DefaultTableRows>
+          </PlaceholderTableRows>
         </TableBody>
       </Table>
 

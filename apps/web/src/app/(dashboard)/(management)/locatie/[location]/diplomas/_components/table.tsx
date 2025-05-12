@@ -152,32 +152,25 @@ export default function CertificateTable({
       >
         <DefaultTableHead table={table} />
         <TableBody>
-          {placeholderRows && placeholderRows > 0 ? (
-            <PlaceholderTableRows
-              rows={placeholderRows}
-              colSpan={columns.length}
-            />
-          ) : (
-            <>
-              <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-              <DefaultTableRows
-                table={table}
-                href={(row) =>
-                  `/diploma/${row.original.id}?nummer=${row.original.handle}&datum=${dayjs(row.original.issuedAt).format("YYYYMMDD")}`
-                }
-                target="_blank"
-              >
-                {(cell, index, row) => (
-                  <DefaultTableCell
-                    key={cell.id}
-                    cell={cell}
-                    index={index}
-                    row={row}
-                  />
-                )}
-              </DefaultTableRows>
-            </>
-          )}
+          <PlaceholderTableRows table={table} rows={placeholderRows}>
+            <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/diploma/${row.original.id}?nummer=${row.original.handle}&datum=${dayjs(row.original.issuedAt).format("YYYYMMDD")}`
+              }
+              target="_blank"
+            >
+              {(cell, index, row) => (
+                <DefaultTableCell
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  row={row}
+                />
+              )}
+            </DefaultTableRows>
+          </PlaceholderTableRows>
         </TableBody>
       </Table>
       <TableFooter>

@@ -103,31 +103,24 @@ export default function PersonsTable({
       >
         <DefaultTableHead table={table} />
         <TableBody>
-          {placeholderRows && placeholderRows > 0 ? (
-            <PlaceholderTableRows
-              rows={placeholderRows}
-              colSpan={columns.length}
-            />
-          ) : (
-            <>
-              <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-              <DefaultTableRows
-                table={table}
-                href={(row) =>
-                  `/locatie/${params.location as string}/personen/${row.original.id}`
-                }
-              >
-                {(cell, index, row) => (
-                  <DefaultTableCell
-                    key={cell.id}
-                    cell={cell}
-                    index={index}
-                    row={row}
-                  />
-                )}
-              </DefaultTableRows>
-            </>
-          )}
+          <PlaceholderTableRows table={table} rows={placeholderRows}>
+            <NoTableRows table={table}>Geen items gevonden</NoTableRows>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/locatie/${params.location as string}/personen/${row.original.id}`
+              }
+            >
+              {(cell, index, row) => (
+                <DefaultTableCell
+                  key={cell.id}
+                  cell={cell}
+                  index={index}
+                  row={row}
+                />
+              )}
+            </DefaultTableRows>
+          </PlaceholderTableRows>
         </TableBody>
       </Table>
 
