@@ -7,7 +7,7 @@ import { Persons } from "./_components/persons";
 
 dayjs.extend(weekOfYear);
 
-export default async function Page(props: {
+export default function Page(props: {
   params: Promise<{
     location: string;
   }>;

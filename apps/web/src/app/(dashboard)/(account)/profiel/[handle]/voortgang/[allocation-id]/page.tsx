@@ -4,7 +4,7 @@ import { CourseCard } from "./_components/course-card";
 import { ProfileLink } from "./_components/profile-link";
 import { SummaryList } from "./_components/summary-list";
 
-export default async function Page({
+export default function Page({
   params,
 }: {
   params: Promise<{ handle: string; "allocation-id": string }>;
