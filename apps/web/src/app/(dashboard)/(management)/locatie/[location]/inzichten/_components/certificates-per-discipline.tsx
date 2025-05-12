@@ -2,11 +2,8 @@ import { createLoader, parseAsIsoDate } from "nuqs/server";
 import { Suspense } from "react";
 import { BarChart } from "~/app/(dashboard)/_components/charts/bar-chart";
 import dayjs from "~/lib/dayjs";
-import {
-  listCertificates,
-  listDisciplines,
-  retrieveLocationByHandle,
-} from "~/lib/nwd";
+import { listDisciplines, retrieveLocationByHandle } from "~/lib/nwd";
+import { listCertificatesBetween } from "./queries";
 import { StatCard } from "./stat-card";
 
 const parseCertificatesPerDisciplineSearchParams = createLoader({
@@ -28,27 +25,18 @@ async function CertificatesPerDisciplineContent(
   const searchParams = await parseCertificatesPerDisciplineSearchParams(
     props.searchParams,
   );
+  const fromDate = searchParams.from ?? dayjs().startOf("year").toDate();
+  const toDate = searchParams.to ?? dayjs().endOf("year").toDate();
+
   const location = await retrieveLocationByHandle(params.location);
 
   const [certificates, disciplines] = await Promise.all([
-    listCertificates(location.id).then((certificates) => {
-      return certificates
-        .filter((certificate) => !!certificate.issuedAt)
-        .sort((a, b) => dayjs(a.issuedAt).diff(dayjs(b.issuedAt)));
-    }),
+    listCertificatesBetween(location.id, fromDate, toDate),
     listDisciplines(),
   ]);
 
-  const filteredCertificates = certificates.filter((certificate) => {
-    return dayjs(certificate.issuedAt).isBetween(
-      searchParams.from ?? dayjs().startOf("year").toDate(),
-      searchParams.to ?? dayjs().endOf("year").toDate(),
-      "day",
-    );
-  });
-
   const certificatesPerWeek = Object.values(
-    filteredCertificates.reduce(
+    certificates.reduce(
       (acc, certificate) => {
         const date = dayjs(certificate.issuedAt);
         const isoKey = date.startOf("week").toISOString();
@@ -80,7 +68,7 @@ async function CertificatesPerDisciplineContent(
         // biome-ignore lint/style/noNonNullAssertion: <explanation>
         (acc[isoKey]![
           // biome-ignore lint/style/noNonNullAssertion: <explanation>
-          certificate.program.course.discipline.title!
+          certificate.discipline.title!
         ] as number) += 1;
 
         return acc;
@@ -99,16 +87,20 @@ async function CertificatesPerDisciplineContent(
     ),
   );
 
-  const certificatesPerDiscipline = disciplines.map((discipline) => {
-    return {
+  const certificatesPerDiscipline = [
+    {
+      id: "total",
+      title: "Totaal",
+      count: certificates.length,
+    },
+    ...disciplines.map((discipline) => ({
       id: discipline.handle,
       title: discipline.title,
-      count: filteredCertificates.filter(
-        (certificate) =>
-          certificate.program.course.discipline.title === discipline.title,
+      count: certificates.filter(
+        (certificate) => certificate.discipline.title === discipline.title,
       ).length,
-    };
-  });
+    })),
+  ];
 
   return (
     <>
