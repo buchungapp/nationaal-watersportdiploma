@@ -1,8 +1,8 @@
 import { createLoader, parseAsIsoDate } from "nuqs/server";
 import { Suspense } from "react";
-import { BarChart } from "~/app/(dashboard)/_components/charts/bar-chart";
 import dayjs from "~/lib/dayjs";
 import { listDisciplines, retrieveLocationByHandle } from "~/lib/nwd";
+import { CertificatesBarChart } from "./certificates-bar-chart";
 import { listCertificatesBetween } from "./queries";
 import { StatCard } from "./stat-card";
 
@@ -123,9 +123,8 @@ async function CertificatesPerDisciplineContent(
       </div>
 
       {certificatesPerWeek.length > 0 ? (
-        <BarChart
-          data={certificatesPerWeek}
-          index="week"
+        <CertificatesBarChart
+          data={certificatesPerWeek as Record<string, number>[]}
           categories={
             disciplines
               .filter((discipline) => {
@@ -136,11 +135,6 @@ async function CertificatesPerDisciplineContent(
               })
               .map((discipline) => discipline.title) as string[]
           }
-          colors={["blue", "violet", "fuchsia", "cyan"]}
-          yAxisWidth={60}
-          showLegend={false}
-          type="stacked"
-          className="mt-12 h-72"
         />
       ) : null}
     </>
