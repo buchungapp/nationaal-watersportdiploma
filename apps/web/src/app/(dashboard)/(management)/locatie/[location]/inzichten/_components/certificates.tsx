@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { BarChart } from "~/app/(dashboard)/_components/charts/bar-chart";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import dayjs from "~/lib/dayjs";
 import {
@@ -116,25 +117,27 @@ async function CertificatesContent(props: CertificatesProps) {
         })}
       </div>
 
-      {/* <BarChart
-        data={certificatesPerWeek}
-        index="week"
-        categories={
-          disciplines
-            .filter((discipline) => {
-              return certificatesPerWeek.some(
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
-                (week) => (week[discipline.title!]! as number) > 0,
-              );
-            })
-            .map((discipline) => discipline.title) as string[]
-        }
-        colors={["blue", "violet", "fuchsia", "cyan"]}
-        yAxisWidth={60}
-        showLegend={false}
-        stack={true}
-        className="mt-12 h-72"
-      /> */}
+      {certificatesPerWeek.length > 0 ? (
+        <BarChart
+          data={certificatesPerWeek}
+          index="week"
+          categories={
+            disciplines
+              .filter((discipline) => {
+                return certificatesPerWeek.some(
+                  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  (week) => (week[discipline.title!]! as number) > 0,
+                );
+              })
+              .map((discipline) => discipline.title) as string[]
+          }
+          colors={["blue", "violet", "fuchsia", "cyan"]}
+          yAxisWidth={60}
+          showLegend={false}
+          type="stacked"
+          className="mt-12 h-72"
+        />
+      ) : null}
     </>
   );
 }
