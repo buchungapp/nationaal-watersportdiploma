@@ -26,8 +26,6 @@ export function DateSelector({
       .withOptions({ startTransition, shallow: false, throttleMs: 300 }),
   );
 
-  console.log(date);
-
   return (
     <div className="relative">
       <Input
