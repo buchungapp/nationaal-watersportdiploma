@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
 import { retrieveCertificateHandles } from "~/lib/nwd";
+import { presentPDF } from "../../_utils/present-pdf";
 
 export async function GET(
   request: NextRequest,
@@ -27,23 +28,4 @@ export async function GET(
     await generatePDF(handles, { sort: settings.sort }),
     type,
   );
-}
-
-function presentPDF(
-  filename: string,
-  data: ReadableStream,
-  type: "download" | "preview",
-) {
-  const types = {
-    download: "attachment",
-    preview: "inline",
-  };
-
-  return new Response(data, {
-    status: 201,
-    headers: {
-      "Content-Disposition": `${types[type]}; filename="${filename}"`,
-      "Content-Type": "application/pdf",
-    },
-  });
 }
