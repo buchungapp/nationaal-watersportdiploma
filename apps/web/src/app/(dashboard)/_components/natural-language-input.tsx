@@ -12,11 +12,13 @@ export function SmartDatetimePicker({
   required,
   invalid,
   defaultValue,
+  onChange,
 }: {
   name: string;
   required?: boolean;
   invalid?: boolean;
   defaultValue?: Date;
+  onChange?: (date: Date) => void;
 }) {
   const dateRef = React.useRef<HTMLInputElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -72,6 +74,8 @@ export function SmartDatetimePicker({
           if (inputRef.current) {
             inputRef.current.value = dateTimeUtils.formatDateTime(expiryDate);
           }
+
+          onChange?.(expiryDate);
         }}
         // we intentionally make the datetime-local input field with a width of 1px
         // to hide the input field, but allow for browser form validation
@@ -86,11 +90,13 @@ export function SmartDatePicker({
   required,
   invalid,
   defaultValue,
+  onChange,
 }: {
   name: string;
   required?: boolean;
   invalid?: boolean;
   defaultValue?: Date;
+  onChange?: (date: Date) => void;
 }) {
   const dateRef = React.useRef<HTMLInputElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -151,6 +157,8 @@ export function SmartDatePicker({
           if (inputRef.current) {
             inputRef.current.value = dateTimeUtils.formatDate(expiryDate);
           }
+
+          onChange?.(expiryDate);
         }}
         // we intentionally make the datetime-local input field with a width of 1px
         // to hide the input field, but allow for browser form validation
@@ -165,11 +173,13 @@ export function SmartTimePicker({
   required,
   invalid,
   defaultValue,
+  onChange,
 }: {
   name: string;
   required?: boolean;
   invalid?: boolean;
   defaultValue?: Date;
+  onChange?: (date: Date) => void;
 }) {
   const dateRef = React.useRef<HTMLInputElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -232,6 +242,8 @@ export function SmartTimePicker({
           if (inputRef.current) {
             inputRef.current.value = dateTimeUtils.formatTime(expiryDate);
           }
+
+          onChange?.(expiryDate);
         }}
         // we intentionally make the datetime-local input field with a width of 1px
         // to hide the input field, but allow for browser form validation

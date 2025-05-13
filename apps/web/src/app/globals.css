@@ -8,9 +8,6 @@
 
 @config '../../tailwind.config.ts';
 
-/* Path to Tremor module: @TODO: fix this when tremor is updated to tailwind v4 */
-/* @source "../../node_modules/@tremor/react/"; */
-
 @plugin "@tailwindcss/typography";
 @plugin "@headlessui/tailwindcss";
 

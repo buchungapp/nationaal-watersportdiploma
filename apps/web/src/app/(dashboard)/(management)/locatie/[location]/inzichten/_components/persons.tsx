@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { listPersonsForLocation, retrieveLocationByHandle } from "~/lib/nwd";
+import { StatCard } from "./stat-card";
 
 type PersonsProps = {
   params: Promise<{
@@ -40,15 +40,9 @@ async function PersonsContent(props: PersonsProps) {
         },
       ].map((stat) => {
         return (
-          <div key={stat.id}>
-            <Divider />
-            <div className="mt-6 font-medium sm:text-sm/6 text-lg/6">
-              {stat.title}
-            </div>
-            <div className="mt-3 font-semibold tabular-nums sm:text-2xl/8 text-3xl/8">
-              {stat.count}
-            </div>
-          </div>
+          <StatCard key={stat.id} title={stat.title}>
+            {stat.count}
+          </StatCard>
         );
       })}
     </div>
@@ -73,15 +67,9 @@ export function PersonsFallback() {
         },
       ].map((stat) => {
         return (
-          <div key={stat.id}>
-            <Divider />
-            <div className="mt-6 font-medium sm:text-sm/6 text-lg/6">
-              {stat.title}
-            </div>
-            <div className="mt-3 font-semibold tabular-nums sm:text-2xl/8 text-3xl/8">
-              <span className="inline-block bg-gray-200 rounded w-15.5 h-6 animate-pulse" />
-            </div>
-          </div>
+          <StatCard key={stat.id} title={stat.title}>
+            <span className="inline-block bg-gray-200 rounded w-15.5 h-6 animate-pulse" />{" "}
+          </StatCard>
         );
       })}
     </div>
