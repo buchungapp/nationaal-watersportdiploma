@@ -33,6 +33,6 @@ export const downloadCertificatesAction = actionClientWithMeta
         sort,
       });
 
-      redirect(`/api/export/certificate/pdf/${uuid}`);
+      redirect(`/api/export/certificate/pdf/bulk/${uuid}`);
     },
   );

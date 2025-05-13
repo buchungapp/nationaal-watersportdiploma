@@ -1,8 +1,10 @@
+import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Button } from "~/app/(dashboard)/_components/button";
 import Logo from "~/app/_components/brand/logo";
 import {
   Facebook,
@@ -102,9 +104,9 @@ export default async function Page(props: Props) {
       dayjs(certificate.issuedAt).format("YYYYMMDD");
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="text-center py-8 lg:py-12 max-w-prose mx-auto">
-        <h2 className="text-2xl font-bold text-slate-950">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+      <div className="mx-auto py-8 lg:py-12 max-w-prose text-center">
+        <h2 className="font-bold text-slate-950 text-2xl">
           {`Gefeliciteerd, ${certificate.student.firstName}! Een nieuw diploma!`}
         </h2>
 
@@ -114,7 +116,7 @@ export default async function Page(props: Props) {
           diploma met je familie en vrienden!
         </Text>
 
-        <Text className="italic my-6">
+        <Text className="my-6 italic">
           <strong>Psst..</strong> Deel een foto van jou en je diploma op
           Instagram, tag ons op{" "}
           <TextLink href={constants.INSTAGRAM_URL} target="_blank">
@@ -123,20 +125,32 @@ export default async function Page(props: Props) {
           en krijg een persoonlijke NWD felicitatie met stickers thuisgestuurd!
         </Text>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-x-4 gap-y-3.5">
+        <div className="flex md:flex-row flex-col justify-center items-center gap-x-4 gap-y-3.5">
           <Suspense>
             <Confetti />
           </Suspense>
           <ShareCertificate id={params.id} />
+          {!shouldMask ? (
+            <Button
+              type="button"
+              color="blue"
+              href={`/api/export/certificate/pdf/${params.id}?preview=true&handle=${result.handle}&issuedDate=${result.issuedDate.format("YYYYMMDD")}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ArrowDownTrayIcon />
+              Download je diploma!
+            </Button>
+          ) : null}
         </div>
       </div>
 
-      <div className="rounded-xs -mx-2.5 sm:mx-0 overflow-hidden bg-white shadow-md border border-slate-200">
+      <div className="bg-white shadow-md -mx-2.5 sm:mx-0 border border-slate-200 rounded-xs overflow-hidden">
         <CertificateTemplate id={params.id} maskPii={shouldMask} />
       </div>
 
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-semibold text-slate-950">En nu?</h2>
+      <div className="py-8 text-center">
+        <h2 className="font-semibold text-slate-950 text-2xl">En nu?</h2>
 
         <Suspense>
           <CertificateAdvise id={params.id} />
@@ -146,10 +160,10 @@ export default async function Page(props: Props) {
       <div className="mt-10 pb-8 lg:pb-12 xl:pb-16">
         <div className="flex justify-center items-center gap-x-6 sm:gap-x-8 mx-auto">
           <Link href="/">
-            <Logo className="size-20 sm:size-24 md:size-28 lg:size-32 mx-auto text-white" />
+            <Logo className="mx-auto size-20 sm:size-24 md:size-28 lg:size-32 text-white" />
           </Link>
 
-          <ul className="flex items-center gap-6 justify-start">
+          <ul className="flex justify-start items-center gap-6">
             {socials.map((social) => (
               <li key={social.name}>
                 <Link

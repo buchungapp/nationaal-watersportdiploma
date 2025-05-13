@@ -186,7 +186,10 @@ export default function CertificateTable({
         selectedRows={selectedRows}
         clearRowSelection={() => setRowSelection({})}
       >
-        <ActionButtons rows={actionRows} />
+        <ActionButtons
+          rows={actionRows}
+          resetSelection={() => setRowSelection({})}
+        />
       </TableSelection>
     </div>
   );

@@ -92,13 +92,6 @@ export function ActionButtons(props: Props) {
     return completedModules > 0;
   });
 
-  const params = new URLSearchParams();
-
-  for (const row of props.rows) {
-    if (!row.certificate) continue;
-    params.append("certificate[]", row.certificate.handle);
-  }
-
   return (
     <>
       <TableSelectionButton>
