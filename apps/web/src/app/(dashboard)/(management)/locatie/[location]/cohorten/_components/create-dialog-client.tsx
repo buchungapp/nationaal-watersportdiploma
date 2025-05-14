@@ -29,11 +29,9 @@ import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
-import type { listPrograms } from "~/lib/nwd";
 
 interface Props {
   locationId: string;
-  programs: Awaited<ReturnType<typeof listPrograms>>;
 }
 
 export default function Wrapper(props: Props) {

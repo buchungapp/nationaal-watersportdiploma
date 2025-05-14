@@ -43,7 +43,7 @@ import {
   listGearTypesByCurriculumForLocation,
   listInstructorsInCohort,
   listPrivilegesForCohort,
-  listPrograms,
+  listProgramsForLocation,
 } from "../_actions/fetch";
 import type { Student } from "./students-table";
 
@@ -162,7 +162,9 @@ function StartProgramDialog({
       },
     },
   );
-  const { data: programs } = useSWR("allPrograms", listPrograms);
+  const { data: programs } = useSWR(["allPrograms", locationId], () =>
+    listProgramsForLocation(locationId),
+  );
 
   const { getInputValue } = useFormInput(input);
 

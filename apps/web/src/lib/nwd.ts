@@ -742,6 +742,20 @@ export const listPrograms = async () => {
   });
 };
 
+export const listProgramsForLocation = async (locationId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag(`${locationId}-resource-link`);
+
+  return makeRequest(async () => {
+    const programs = await Course.Program.list({
+      filter: { locationId },
+    });
+
+    return programs;
+  });
+};
+
 export const listProgramsForCourse = async (courseId: string) => {
   "use cache";
   cacheLife("days");

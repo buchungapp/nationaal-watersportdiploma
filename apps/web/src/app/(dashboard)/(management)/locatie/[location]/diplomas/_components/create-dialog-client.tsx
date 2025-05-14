@@ -46,7 +46,7 @@ import dayjs from "~/lib/dayjs";
 import type {
   listCurriculaByProgram,
   listGearTypesByCurriculumForLocation,
-  listPrograms,
+  listProgramsForLocation,
 } from "~/lib/nwd";
 import {
   getCurriculaByProgram,
@@ -55,7 +55,7 @@ import {
 
 interface Props {
   locationId: string;
-  programs: Awaited<ReturnType<typeof listPrograms>>;
+  programs: Awaited<ReturnType<typeof listProgramsForLocation>>;
 }
 
 export default function Wrapper(props: Props) {

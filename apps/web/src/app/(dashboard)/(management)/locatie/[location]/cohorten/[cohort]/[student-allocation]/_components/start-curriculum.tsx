@@ -25,7 +25,7 @@ import Spinner from "~/app/_components/spinner";
 import {
   listCurriculaByProgram,
   listGearTypesByCurriculumForLocation,
-  listPrograms,
+  listProgramsForLocation,
 } from "../../(overview)/_actions/fetch";
 
 export function StartStudentCurriculum({
@@ -54,7 +54,10 @@ export function StartStudentCurriculum({
       },
     },
   );
-  const { data: programs } = useSWR("allPrograms", listPrograms);
+  const { data: programs } = useSWR(
+    ["allPrograms", locationId],
+    listProgramsForLocation.bind(null, locationId),
+  );
   const { getInputValue } = useFormInput(input);
   const [selectedProgram, setSelectedProgram] = useState<string | null>(
     programs?.find((program) => program.id === getInputValue("curriculumId"))
