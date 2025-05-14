@@ -79,6 +79,7 @@ export default function ResourcesForm({
       <FieldSection
         label="Vaartuigen"
         description="De vaartuigen die deze locatie aanbiedt."
+        className="flex flex-wrap gap-2 h-fit"
       >
         {allGearTypes.map((gearType) => (
           <BadgeCheckbox
@@ -94,6 +95,7 @@ export default function ResourcesForm({
       <FieldSection
         label="Disciplines"
         description="De disciplines die deze locatie aanbiedt."
+        className="flex flex-wrap gap-2 h-fit"
       >
         {allDisciplines.map((discipline) => (
           <BadgeCheckbox
