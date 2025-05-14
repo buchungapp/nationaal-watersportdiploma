@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { type SQLWrapper, and, asc, eq, exists, inArray } from "drizzle-orm";
+import { type SQL, and, asc, eq, exists, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
@@ -49,6 +49,7 @@ export const list = wrapQuery(
             id: singleOrArray(uuidSchema).optional(),
             handle: singleOrArray(handleSchema).optional(),
             curriculumId: singleOrArray(uuidSchema).optional(),
+            locationId: singleOrArray(uuidSchema).optional(),
           })
           .default({}),
       })
@@ -56,52 +57,67 @@ export const list = wrapQuery(
     selectSchema.array(),
     async ({ filter }) => {
       const query = useQuery();
-      const filters: SQLWrapper[] = [];
-
-      const gearTypeQuery = query.select().from(s.gearType);
-
-      if (filter.curriculumId) {
-        filters.push(
-          exists(
-            query
-              .select()
-              .from(s.curriculumGearLink)
-              .where(
-                and(
-                  eq(s.curriculumGearLink.gearTypeId, s.gearType.id),
-                  Array.isArray(filter.curriculumId)
-                    ? inArray(
-                        s.curriculumGearLink.curriculumId,
-                        filter.curriculumId,
-                      )
-                    : eq(
-                        s.curriculumGearLink.curriculumId,
-                        filter.curriculumId,
-                      ),
-                ),
-              ),
-          ),
-        );
-      }
-
-      if (filter.id) {
-        filters.push(
-          Array.isArray(filter.id)
+      const whereClauses: (SQL | undefined)[] = [
+        filter.id
+          ? Array.isArray(filter.id)
             ? inArray(s.gearType.id, filter.id)
-            : eq(s.gearType.id, filter.id),
-        );
-      }
-
-      if (filter.handle) {
-        filters.push(
-          Array.isArray(filter.handle)
+            : eq(s.gearType.id, filter.id)
+          : undefined,
+        filter.handle
+          ? Array.isArray(filter.handle)
             ? inArray(s.gearType.handle, filter.handle)
-            : eq(s.gearType.handle, filter.handle),
-        );
-      }
+            : eq(s.gearType.handle, filter.handle)
+          : undefined,
+        filter.curriculumId
+          ? exists(
+              query
+                .select()
+                .from(s.curriculumGearLink)
+                .where(
+                  and(
+                    isNull(s.curriculumGearLink.deletedAt),
+                    eq(s.curriculumGearLink.gearTypeId, s.gearType.id),
+                    Array.isArray(filter.curriculumId)
+                      ? inArray(
+                          s.curriculumGearLink.curriculumId,
+                          filter.curriculumId,
+                        )
+                      : eq(
+                          s.curriculumGearLink.curriculumId,
+                          filter.curriculumId,
+                        ),
+                  ),
+                ),
+            )
+          : undefined,
+        filter.locationId
+          ? exists(
+              query
+                .select()
+                .from(s.locationResourceLink)
+                .where(
+                  and(
+                    isNull(s.locationResourceLink.deletedAt),
+                    eq(s.locationResourceLink.gearTypeId, s.gearType.id),
+                    Array.isArray(filter.locationId)
+                      ? inArray(
+                          s.locationResourceLink.locationId,
+                          filter.locationId,
+                        )
+                      : eq(
+                          s.locationResourceLink.locationId,
+                          filter.locationId,
+                        ),
+                  ),
+                ),
+            )
+          : undefined,
+      ];
 
-      const rows = await gearTypeQuery
-        .where(and(...filters))
+      const rows = await query
+        .select()
+        .from(s.gearType)
+        .where(and(...whereClauses))
         .orderBy(asc(s.gearType.title));
 
       return rows;
