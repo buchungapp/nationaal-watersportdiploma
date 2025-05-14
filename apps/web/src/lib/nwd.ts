@@ -591,6 +591,20 @@ export const listDisciplines = async () => {
   });
 };
 
+export const listDisciplinesForLocation = async (locationId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag(`${locationId}-resource-link`);
+
+  return makeRequest(async () => {
+    const disciplines = await Course.Discipline.list({
+      filter: { locationId },
+    });
+
+    return disciplines;
+  });
+};
+
 export const listDegrees = async () => {
   "use cache";
   cacheLife("days");
@@ -630,6 +644,22 @@ export const listGearTypes = async () => {
 
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list();
+
+    return gearTypes;
+  });
+};
+
+export const listGearTypesForLocation = async (locationId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag(`${locationId}-resource-link`);
+
+  return makeRequest(async () => {
+    const gearTypes = await Curriculum.GearType.list({
+      filter: {
+        locationId: locationId,
+      },
+    });
 
     return gearTypes;
   });
@@ -803,6 +833,26 @@ export const listGearTypesByCurriculum = async (curriculumId: string) => {
   });
 };
 
+export const listGearTypesByCurriculumForLocation = async (
+  curriculumId: string,
+  locationId: string,
+) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag(`${locationId}-resource-link`);
+
+  return makeRequest(async () => {
+    const gearTypes = await Curriculum.GearType.list({
+      filter: {
+        curriculumId: curriculumId,
+        locationId: locationId,
+      },
+    });
+
+    return gearTypes;
+  });
+};
+
 export const retrieveLocationByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
@@ -810,6 +860,16 @@ export const retrieveLocationByHandle = async (handle: string) => {
 
   return makeRequest(async () => {
     return await Location.fromHandle(handle);
+  });
+};
+
+export const listResourcesForLocation = async (locationId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag(`${locationId}-resource-link`);
+
+  return makeRequest(async () => {
+    return await Location.listResources(locationId);
   });
 };
 
@@ -1647,6 +1707,34 @@ export const updateLocationDetails = async (
     });
 
     return;
+  });
+};
+
+export const updateLocationResources = async (
+  id: string,
+  {
+    gearTypes,
+    disciplines,
+  }: {
+    gearTypes: string[];
+    disciplines: string[];
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: id,
+      personId: primaryPerson.id,
+    });
+
+    await Location.updateResources({
+      id,
+      gearTypes,
+      disciplines,
+    });
   });
 };
 
