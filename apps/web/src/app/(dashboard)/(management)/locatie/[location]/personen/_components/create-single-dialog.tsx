@@ -1,7 +1,7 @@
 "use client";
 
 import { useAction } from "next-safe-action/hooks";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -14,6 +14,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -113,21 +114,6 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
     ),
   });
 
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(
-    getInputValue("birthCountry") ?? null,
-  );
-
-  const [countryQuery, setCountryQuery] = useState("");
-
-  const filteredCountries =
-    countryQuery === ""
-      ? countries
-      : countries.filter((country) => {
-          return country.name
-            .toLowerCase()
-            .includes(countryQuery.toLowerCase());
-        });
-
   return (
     <>
       <Dialog open={isOpen} onClose={closeDialog}>
@@ -207,23 +193,27 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     <Combobox
                       name="birthCountry"
                       invalid={!!result.validationErrors?.birthCountry}
-                      value={selectedCountry}
-                      setQuery={setCountryQuery}
-                      onChange={(value) => setSelectedCountry(value)}
-                      displayValue={(value: string | null) => {
-                        if (!value) return "";
-                        const country = countries.find(
+                      options={countries.map((country) => country.code)}
+                      displayValue={(value) =>
+                        ensuredFind(
+                          countries,
                           (country) => country.code === value,
-                        );
-                        return country?.name ?? "";
-                      }}
+                        ).name
+                      }
                       defaultValue={getInputValue("birthCountry")}
                     >
-                      {filteredCountries.map((country) => (
-                        <ComboboxOption key={country.code} value={country.code}>
-                          <ComboboxLabel>{country.name}</ComboboxLabel>
+                      {(countryCode) => (
+                        <ComboboxOption key={countryCode} value={countryCode}>
+                          <ComboboxLabel>
+                            {
+                              ensuredFind(
+                                countries,
+                                (country) => country.code === countryCode,
+                              ).name
+                            }
+                          </ComboboxLabel>
                         </ComboboxOption>
-                      ))}
+                      )}
                     </Combobox>
                   </Field>
                 </div>
