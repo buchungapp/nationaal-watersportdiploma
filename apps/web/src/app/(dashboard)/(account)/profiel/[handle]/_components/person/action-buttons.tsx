@@ -11,6 +11,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -75,21 +76,6 @@ export function EditDetails({
     ...person,
     birthCountry: person.birthCountry?.code ?? null,
   });
-
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(
-    person.birthCountry?.code ?? null,
-  );
-
-  const [countryQuery, setCountryQuery] = useState("");
-
-  const filteredCountries =
-    countryQuery === ""
-      ? countries
-      : countries.filter((country) => {
-          return country.name
-            .toLowerCase()
-            .includes(countryQuery.toLowerCase());
-        });
 
   return (
     <>
@@ -167,24 +153,32 @@ export function EditDetails({
                     <Label>Geboorteland</Label>
                     <Combobox
                       name="birthCountry"
-                      invalid={!!result?.validationErrors?.birthCountry}
-                      value={selectedCountry}
-                      setQuery={setCountryQuery}
-                      onChange={(value) => setSelectedCountry(value)}
-                      displayValue={(value: string | null) => {
-                        if (!value) return "";
-                        const country = countries.find(
+                      invalid={
+                        result?.validationErrors &&
+                        "birthCountry" in result.validationErrors &&
+                        !!result.validationErrors.birthCountry
+                      }
+                      options={countries.map((country) => country.code)}
+                      displayValue={(value) =>
+                        ensuredFind(
+                          countries,
                           (country) => country.code === value,
-                        );
-                        return country?.name ?? "";
-                      }}
+                        ).name
+                      }
                       defaultValue={getInputValue("birthCountry")}
                     >
-                      {filteredCountries.map((country) => (
-                        <ComboboxOption key={country.code} value={country.code}>
-                          <ComboboxLabel>{country.name}</ComboboxLabel>
+                      {(countryCode) => (
+                        <ComboboxOption key={countryCode} value={countryCode}>
+                          <ComboboxLabel>
+                            {
+                              ensuredFind(
+                                countries,
+                                (country) => country.code === countryCode,
+                              ).name
+                            }
+                          </ComboboxLabel>
                         </ComboboxOption>
-                      ))}
+                      )}
                     </Combobox>
                   </Field>
                 </div>

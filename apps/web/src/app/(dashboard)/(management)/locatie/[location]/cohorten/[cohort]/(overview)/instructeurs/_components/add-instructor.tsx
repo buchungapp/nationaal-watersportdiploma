@@ -8,6 +8,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { addInstructorToCohortAction } from "~/app/_actions/cohort/add-instructor-to-cohort-action";
@@ -48,6 +49,7 @@ export function AddInstructor({
           key={forceRerenderId}
           autoFocus={true}
           name="personId"
+          options={searchedInstructors.map((person) => person.id)}
           setQuery={(value) => {
             const valueWithNull = value === "" ? null : value;
             if (valueWithNull === query) return;
@@ -66,11 +68,10 @@ export function AddInstructor({
               });
           }}
           displayValue={(value: string) => {
-            const person = searchedInstructors.find(
+            const person = ensuredFind(
+              searchedInstructors,
               (person) => person.id === value,
             );
-
-            if (!person) return "";
 
             const fullName = [
               person.firstName,
@@ -82,8 +83,14 @@ export function AddInstructor({
 
             return fullName;
           }}
+          filter={null}
         >
-          {searchedInstructors.map((person) => {
+          {(personId) => {
+            const person = ensuredFind(
+              searchedInstructors,
+              (person) => personId === person.id,
+            );
+
             const fullName = [
               person.firstName,
               person.lastNamePrefix,
@@ -110,7 +117,7 @@ export function AddInstructor({
                 </ComboboxLabel>
               </ComboboxOption>
             );
-          })}
+          }}
         </Combobox>
         {isSearchPending && (
           <div className="right-8 absolute inset-y-0 flex items-center">

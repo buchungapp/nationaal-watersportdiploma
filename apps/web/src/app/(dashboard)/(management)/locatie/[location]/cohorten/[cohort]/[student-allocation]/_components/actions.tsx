@@ -11,6 +11,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -119,15 +120,6 @@ export function MoveStudentAllocationDialog({
   const router = useRouter();
   const params = useParams();
 
-  const [cohortQuery, setCohortQuery] = useState("");
-
-  const filteredCohorts =
-    cohortQuery === ""
-      ? cohorts
-      : cohorts.filter((cohort) => {
-          return cohort.label.toLowerCase().includes(cohortQuery.toLowerCase());
-        });
-
   const { execute, input, reset } = useAction(
     moveStudentToCohortAction.bind(
       null,
@@ -172,24 +164,31 @@ export function MoveStudentAllocationDialog({
             <Label>Cohort</Label>
             <Combobox
               name="cohortId"
+              options={cohorts.map((cohort) => cohort.id)}
               value={selectedCohortId}
               defaultValue={getInputValue("cohortId")}
-              onChange={(value) => setSelectedCohortId(value)}
-              setQuery={setCohortQuery}
+              onChange={setSelectedCohortId}
               displayValue={(value) =>
-                cohorts.find((x) => x.id === value)?.label ?? ""
+                ensuredFind(cohorts, (cohort) => cohort.id === value).label
               }
               placeholder="Selecteer een cohort"
             >
-              {filteredCohorts.map((cohort) => (
+              {(renderCohortId) => (
                 <ComboboxOption
-                  key={cohort.id}
-                  value={cohort.id}
-                  disabled={cohort.id === cohortId}
+                  key={renderCohortId}
+                  value={renderCohortId}
+                  disabled={renderCohortId === cohortId}
                 >
-                  <ComboboxLabel>{cohort.label}</ComboboxLabel>
+                  <ComboboxLabel>
+                    {
+                      ensuredFind(
+                        cohorts,
+                        (cohort) => cohort.id === renderCohortId,
+                      ).label
+                    }
+                  </ComboboxLabel>
                 </ComboboxOption>
-              ))}
+              )}
             </Combobox>
           </Field>
         </DialogBody>

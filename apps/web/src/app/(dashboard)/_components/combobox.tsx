@@ -20,7 +20,12 @@ type WithoutOptions<T> = {
   filter?: never;
 };
 
-export function ensureFind<T>(
+/**
+ * Finds an item in an array using a find function.
+ * Throws an error if the item is not found.
+ * Use when you are sure the item is in the array, but the type system doesn't know it.
+ */
+export function ensuredFind<T>(
   array: T[],
   find: (value: T, index: number, obj: T[]) => unknown,
 ) {
