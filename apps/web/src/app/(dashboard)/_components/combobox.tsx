@@ -8,7 +8,9 @@ type WithOptions<T> = {
   options: NonNullable<T>[];
   displayValue: (value: NonNullable<T>) => string | undefined;
   children: (option: NonNullable<T>) => React.ReactElement;
-  filter?: ((option: NonNullable<T>, query: string) => boolean) | null;
+  filter?:
+    | ((option: NonNullable<T>, query: string) => boolean | null | undefined)
+    | null;
 };
 
 type WithoutOptions<T> = {
@@ -17,6 +19,16 @@ type WithoutOptions<T> = {
   options?: never;
   filter?: never;
 };
+
+export function ensureFind<T>(
+  array: T[],
+  find: (value: T, index: number, obj: T[]) => unknown,
+) {
+  const result = array.find(find);
+  if (result === null || result === undefined)
+    throw new Error("Value not found");
+  return result;
+}
 
 export function Combobox<T>({
   options,
@@ -47,7 +59,9 @@ export function Combobox<T>({
       ? options
       : options.filter((option) => {
           if (filter) {
-            return filter(option, query);
+            const result = filter(option, query);
+            if (result === null || result === undefined) return false;
+            return result;
           }
 
           return displayValue(option)
