@@ -97,10 +97,12 @@ export const BadgeCheckbox = React.forwardRef(function BadgeCheckbox(
     checkedColor = "green",
     className,
     children,
+    hidden,
     ...props
   }: BadgeProps & {
     checkedColor?: keyof typeof colors;
     children: React.ReactNode;
+    hidden?: boolean;
   } & Headless.CheckboxProps,
   ref: React.ForwardedRef<HTMLButtonElement>,
 ) {
@@ -110,7 +112,8 @@ export const BadgeCheckbox = React.forwardRef(function BadgeCheckbox(
       ref={ref}
       className={clsx(
         className,
-        "group relative cursor-default inline-flex rounded-md focus:outline-hidden data-focus:outline data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
+        "group relative cursor-default rounded-md focus:outline-hidden data-focus:outline data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
+        hidden ? "hidden" : "inline-flex",
       )}
     >
       {({ checked }) => (
