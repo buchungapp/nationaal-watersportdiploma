@@ -834,8 +834,8 @@ export const listGearTypesByCurriculum = async (curriculumId: string) => {
 };
 
 export const listGearTypesByCurriculumForLocation = async (
-  curriculumId: string,
   locationId: string,
+  curriculumId: string,
 ) => {
   "use cache";
   cacheLife("days");

@@ -40,7 +40,7 @@ import {
   isInstructorInCohort,
   listCurriculaByProgram,
   listDistinctTagsForCohort,
-  listGearTypesByCurriculum,
+  listGearTypesByCurriculumForLocation,
   listInstructorsInCohort,
   listPrivilegesForCohort,
   listPrograms,
@@ -56,6 +56,7 @@ interface Props {
     tags: Student["tags"];
   }[];
   cohortId: string;
+  locationId: string;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }
 
@@ -128,6 +129,7 @@ function StartProgram({
 function StartProgramDialog({
   rows,
   cohortId,
+  locationId,
   isOpen,
   close,
 }: Props & {
@@ -190,7 +192,10 @@ function StartProgramDialog({
 
       return {
         curriculum,
-        gearTypes: await listGearTypesByCurriculum(curriculum.id),
+        gearTypes: await listGearTypesByCurriculumForLocation(
+          locationId,
+          curriculum.id,
+        ),
       };
     },
   );

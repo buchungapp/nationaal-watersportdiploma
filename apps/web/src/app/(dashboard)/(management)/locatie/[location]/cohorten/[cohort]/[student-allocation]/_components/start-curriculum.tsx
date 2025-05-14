@@ -24,7 +24,7 @@ import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
 import {
   listCurriculaByProgram,
-  listGearTypesByCurriculum,
+  listGearTypesByCurriculumForLocation,
   listPrograms,
 } from "../../(overview)/_actions/fetch";
 
@@ -32,10 +32,12 @@ export function StartStudentCurriculum({
   cohortId,
   allocationId,
   personId,
+  locationId,
 }: {
   cohortId: string;
   allocationId: string;
   personId: string;
+  locationId: string;
 }) {
   const [programQuery, setProgramQuery] = useState("");
 
@@ -80,7 +82,10 @@ export function StartStudentCurriculum({
 
       return {
         curriculum,
-        gearTypes: await listGearTypesByCurriculum(curriculum.id),
+        gearTypes: await listGearTypesByCurriculumForLocation(
+          locationId,
+          curriculum.id,
+        ),
       };
     },
   );

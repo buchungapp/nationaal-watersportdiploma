@@ -175,6 +175,7 @@ const columns = [
 
 export default function StudentsTable({
   cohortId,
+  locationId,
   students,
   totalItems,
   noOptionsLabel = "Geen items gevonden",
@@ -182,6 +183,7 @@ export default function StudentsTable({
   view,
 }: {
   cohortId: string;
+  locationId: string;
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
@@ -329,6 +331,7 @@ export default function StudentsTable({
         <ActionButtons
           rows={actionRows}
           cohortId={cohortId}
+          locationId={locationId}
           locationRoles={locationRoles}
         />
       </TableSelection>

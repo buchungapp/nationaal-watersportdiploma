@@ -45,12 +45,12 @@ import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import type {
   listCurriculaByProgram,
-  listGearTypesByCurriculum,
+  listGearTypesByCurriculumForLocation,
   listPrograms,
 } from "~/lib/nwd";
 import {
   getCurriculaByProgram,
-  getGearTypesByCurriculum,
+  getGearTypesByCurriculumForLocation,
 } from "../_actions/fetch";
 
 interface Props {
@@ -124,7 +124,7 @@ function CreateDialogClient({
     });
 
   const [gearTypes, setGearTypes] = useState<
-    Awaited<ReturnType<typeof listGearTypesByCurriculum>>
+    Awaited<ReturnType<typeof listGearTypesByCurriculumForLocation>>
   >([]);
 
   useEffect(() => {
@@ -142,12 +142,15 @@ function CreateDialogClient({
       }
 
       setSelectedCurriculum(curriculum);
-      const gearTypes = await getGearTypesByCurriculum(curriculum.id);
+      const gearTypes = await getGearTypesByCurriculumForLocation(
+        locationId,
+        curriculum.id,
+      );
       setGearTypes(gearTypes);
     }
 
     void fetchCurricula();
-  }, [selectedProgram]);
+  }, [selectedProgram, locationId]);
 
   return (
     <>

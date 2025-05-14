@@ -74,6 +74,7 @@ async function CourseCardContent(props: CourseCardProps) {
           allocationId={allocation.id}
           cohortId={cohort.id}
           personId={allocation.person.id}
+          locationId={location.id}
         />
       </SWRConfig>
     );

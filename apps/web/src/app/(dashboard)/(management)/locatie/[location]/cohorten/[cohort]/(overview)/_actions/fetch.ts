@@ -6,7 +6,7 @@ import {
   listCountries as listCountriesInner,
   listCurriculaByProgram as listCurriculaByProgramInner,
   listDistinctTagsForCohort as listDistinctTagsForCohortInner,
-  listGearTypesByCurriculum as listGearTypesByCurriculumInner,
+  listGearTypesByCurriculumForLocation as listGearTypesByCurriculumForLocationInner,
   listInstructorsByCohortId,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrivilegesForCohort as listPrivilegesForCohortInner,
@@ -26,10 +26,13 @@ export async function listCurriculaByProgram(
   return listCurriculaByProgramInner(programId, onlyActive);
 }
 
-export async function listGearTypesByCurriculum(curriculumId: string) {
+export async function listGearTypesByCurriculumForLocation(
+  locationId: string,
+  curriculumId: string,
+) {
   await getUserOrThrow();
 
-  return listGearTypesByCurriculumInner(curriculumId);
+  return listGearTypesByCurriculumForLocationInner(locationId, curriculumId);
 }
 
 export async function listPrograms() {
