@@ -182,12 +182,7 @@ export function Combobox<T>({
         )}
       >
         {typeof children === "function"
-          ? ({ option }: { option: T }) =>
-              option !== null && typeof option !== "undefined" ? (
-                children(option)
-              ) : (
-                <></>
-              )
+          ? ({ option }: { option: NonNullable<T> }) => children(option)
           : children}
       </Headless.ComboboxOptions>
     </Headless.Combobox>
