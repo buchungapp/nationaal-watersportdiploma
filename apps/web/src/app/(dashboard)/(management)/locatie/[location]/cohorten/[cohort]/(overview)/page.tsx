@@ -127,6 +127,7 @@ export default async function Page(props: {
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}
+      locationId={location.id}
       // TODO: this can be optimized
       locationRoles={await listRolesForLocation(location.id)}
       noOptionsLabel={

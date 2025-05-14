@@ -6,11 +6,11 @@ import {
   listCountries as listCountriesInner,
   listCurriculaByProgram as listCurriculaByProgramInner,
   listDistinctTagsForCohort as listDistinctTagsForCohortInner,
-  listGearTypesByCurriculum as listGearTypesByCurriculumInner,
+  listGearTypesByCurriculumForLocation as listGearTypesByCurriculumForLocationInner,
   listInstructorsByCohortId,
   listPersonsForLocationByRole as listPersonsForLocationByRoleInner,
   listPrivilegesForCohort as listPrivilegesForCohortInner,
-  listPrograms as listProgramsInner,
+  listProgramsForLocation as listProgramsForLocationInner,
 } from "~/lib/nwd";
 
 export async function isInstructorInCohort(cohortId: string) {
@@ -26,16 +26,19 @@ export async function listCurriculaByProgram(
   return listCurriculaByProgramInner(programId, onlyActive);
 }
 
-export async function listGearTypesByCurriculum(curriculumId: string) {
+export async function listGearTypesByCurriculumForLocation(
+  locationId: string,
+  curriculumId: string,
+) {
   await getUserOrThrow();
 
-  return listGearTypesByCurriculumInner(curriculumId);
+  return listGearTypesByCurriculumForLocationInner(locationId, curriculumId);
 }
 
-export async function listPrograms() {
+export async function listProgramsForLocation(locationId: string) {
   await getUserOrThrow();
 
-  return listProgramsInner();
+  return listProgramsForLocationInner(locationId);
 }
 
 export async function listPrivilegesForCohort(cohortId: string) {

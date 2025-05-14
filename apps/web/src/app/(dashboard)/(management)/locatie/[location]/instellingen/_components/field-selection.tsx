@@ -7,9 +7,11 @@ export function FieldSection({
   label,
   description,
   children,
+  className,
 }: PropsWithChildren<{
   label: React.ReactNode;
   description?: React.ReactNode;
+  className?: string;
 }>) {
   return (
     <Headless.Field
@@ -26,7 +28,7 @@ export function FieldSection({
           </Headless.Description>
         ) : null}
       </div>
-      <div>{children}</div>
+      <div className={className}>{children}</div>
     </Headless.Field>
   );
 }

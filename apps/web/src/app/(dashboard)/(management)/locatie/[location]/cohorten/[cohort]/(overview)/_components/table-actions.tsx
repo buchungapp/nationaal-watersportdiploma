@@ -40,10 +40,10 @@ import {
   isInstructorInCohort,
   listCurriculaByProgram,
   listDistinctTagsForCohort,
-  listGearTypesByCurriculum,
+  listGearTypesByCurriculumForLocation,
   listInstructorsInCohort,
   listPrivilegesForCohort,
-  listPrograms,
+  listProgramsForLocation,
 } from "../_actions/fetch";
 import type { Student } from "./students-table";
 
@@ -56,6 +56,7 @@ interface Props {
     tags: Student["tags"];
   }[];
   cohortId: string;
+  locationId: string;
   locationRoles: ("student" | "instructor" | "location_admin")[];
 }
 
@@ -128,6 +129,7 @@ function StartProgram({
 function StartProgramDialog({
   rows,
   cohortId,
+  locationId,
   isOpen,
   close,
 }: Props & {
@@ -160,7 +162,9 @@ function StartProgramDialog({
       },
     },
   );
-  const { data: programs } = useSWR("allPrograms", listPrograms);
+  const { data: programs } = useSWR(["allPrograms", locationId], () =>
+    listProgramsForLocation(locationId),
+  );
 
   const { getInputValue } = useFormInput(input);
 
@@ -190,7 +194,10 @@ function StartProgramDialog({
 
       return {
         curriculum,
-        gearTypes: await listGearTypesByCurriculum(curriculum.id),
+        gearTypes: await listGearTypesByCurriculumForLocation(
+          locationId,
+          curriculum.id,
+        ),
       };
     },
   );

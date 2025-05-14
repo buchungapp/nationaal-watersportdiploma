@@ -1,8 +1,14 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listDisciplines,
+  listGearTypes,
+  listResourcesForLocation,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import LogosForm from "./_components/logos-form";
+import ResourcesForm from "./_components/resources-form";
 import SettingsForm from "./_components/settings-form";
 import SocialsForm from "./_components/socials-form";
 
@@ -12,7 +18,15 @@ export default async function Page(props: {
   }>;
 }) {
   const params = await props.params;
-  const location = await retrieveLocationByHandle(params.location);
+  const locationPromise = retrieveLocationByHandle(params.location);
+  const [location, resources, allGearTypes, allDisciplines] = await Promise.all(
+    [
+      locationPromise,
+      locationPromise.then((location) => listResourcesForLocation(location.id)),
+      listGearTypes(),
+      listDisciplines(),
+    ],
+  );
 
   const {
     name,
@@ -25,6 +39,8 @@ export default async function Page(props: {
     googlePlaceId,
     socialMedia,
   } = location;
+
+  const { gearTypes, disciplines } = resources;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -61,6 +77,16 @@ export default async function Page(props: {
         locationId={location.id}
         googlePlaceId={googlePlaceId}
         socialMedia={socialMedia}
+      />
+
+      <Divider className="my-12" />
+
+      <ResourcesForm
+        locationId={location.id}
+        gearTypes={gearTypes}
+        disciplines={disciplines}
+        allGearTypes={allGearTypes}
+        allDisciplines={allDisciplines}
       />
     </div>
   );

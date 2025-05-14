@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { SWRConfig, unstable_serialize } from "swr";
 import {
   listPersonsForLocationWithPagination,
-  listPrograms,
+  listProgramsForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import CreateDialogClient from "./create-dialog-client";
@@ -11,11 +11,10 @@ type CreateDialogProps = {
   params: Promise<{ location: string }>;
 };
 
-async function CreateDialogContent({ params }: CreateDialogProps) {
-  const [programs, location] = await Promise.all([
-    listPrograms(),
-    params.then(({ location }) => retrieveLocationByHandle(location)),
-  ]);
+async function CreateDialogContent(props: CreateDialogProps) {
+  const params = await props.params;
+  const location = await retrieveLocationByHandle(params.location);
+  const programs = await listProgramsForLocation(location.id);
 
   return (
     <SWRConfig
