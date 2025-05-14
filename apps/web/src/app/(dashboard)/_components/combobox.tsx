@@ -4,6 +4,20 @@ import * as Headless from "@headlessui/react";
 import clsx from "clsx";
 import { useState } from "react";
 
+type WithOptions<T> = {
+  options: NonNullable<T>[];
+  displayValue: (value: NonNullable<T>) => string | undefined;
+  children: (option: NonNullable<T>) => React.ReactElement;
+  filter?: ((option: NonNullable<T>, query: string) => boolean) | null;
+};
+
+type WithoutOptions<T> = {
+  displayValue: (value: NonNullable<T>) => string | undefined;
+  children: React.ReactNode;
+  options?: never;
+  filter?: never;
+};
+
 export function Combobox<T>({
   options,
   displayValue,
@@ -14,36 +28,49 @@ export function Combobox<T>({
   autoFocus,
   "aria-label": ariaLabel,
   children,
+  setQuery: setExternalQuery,
   ...props
 }: {
-  options: T[];
-  displayValue: (value: T | null) => string | undefined;
-  filter?: (value: T, query: string) => boolean;
+  setQuery?: (query: string) => void;
   className?: string;
   placeholder?: string;
   autoFocus?: boolean;
   "aria-label"?: string;
-  children: (value: NonNullable<T>) => React.ReactElement;
-} & Omit<Headless.ComboboxProps<T, false>, "as" | "multiple" | "children"> & {
+} & (WithOptions<T> | WithoutOptions<T>) &
+  Omit<Headless.ComboboxProps<T, false>, "as" | "multiple" | "children"> & {
     anchor?: "top" | "bottom";
   }) {
   const [query, setQuery] = useState("");
 
-  const filteredOptions =
-    query === ""
+  const filteredOptions = options
+    ? filter === null || query === ""
       ? options
-      : options.filter((option) =>
-          filter
-            ? filter(option, query)
-            : displayValue(option)?.toLowerCase().includes(query.toLowerCase()),
-        );
+      : options.filter((option) => {
+          if (filter) {
+            return filter(option, query);
+          }
+
+          return displayValue(option)
+            ?.toLowerCase()
+            .includes(query.toLowerCase());
+        })
+    : null;
 
   return (
-    <Headless.Combobox
+    <Headless.Combobox<T, false>
       {...props}
       multiple={false}
-      virtual={{ options: filteredOptions }}
-      onClose={() => setQuery("")}
+      {...(filteredOptions
+        ? {
+            virtual: {
+              options: filteredOptions,
+            },
+          }
+        : {})}
+      onClose={() => {
+        setQuery("");
+        setExternalQuery?.("");
+      }}
     >
       <span
         data-slot="control"
@@ -63,12 +90,18 @@ export function Combobox<T>({
           "has-data-invalid:before:shadow-red-500/10",
         ])}
       >
-        <Headless.ComboboxInput
+        <Headless.ComboboxInput<T>
           autoFocus={autoFocus}
           data-slot="control"
           aria-label={ariaLabel}
-          displayValue={(option: T) => displayValue(option) ?? ""}
-          onChange={(event) => setQuery(event.target.value)}
+          displayValue={(option) => {
+            if (option === null || typeof option === "undefined") return "";
+            return displayValue(option) ?? "";
+          }}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            setExternalQuery?.(event.target.value);
+          }}
           placeholder={placeholder}
           className={clsx([
             className,
@@ -134,7 +167,14 @@ export function Combobox<T>({
           "transition-opacity duration-100 ease-in data-closed:data-leave:opacity-0 data-transition:pointer-events-none",
         )}
       >
-        {({ option }) => children(option)}
+        {typeof children === "function"
+          ? ({ option }: { option: T }) =>
+              option !== null && typeof option !== "undefined" ? (
+                children(option)
+              ) : (
+                <></>
+              )
+          : children}
       </Headless.ComboboxOptions>
     </Headless.Combobox>
   );
