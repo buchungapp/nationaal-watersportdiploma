@@ -38,6 +38,36 @@ export function generatePersonID() {
   return nanoid();
 }
 
+function createPartialMatch(data: {
+  personId: string;
+  hasLocationLink: boolean;
+  userEmail: string;
+  personFirstName: string;
+  personLastName: string | null;
+  personLastNamePrefix: string | null;
+  personDateOfBirth: string | null;
+}) {
+  return {
+    id: data.personId,
+    person: data.hasLocationLink
+      ? {
+          email: data.userEmail,
+          firstName: data.personFirstName,
+          lastName: data.personLastName,
+          lastNamePrefix: data.personLastNamePrefix,
+          dateOfBirth: data.personDateOfBirth,
+        }
+      : maskObject({
+          email: data.userEmail,
+          firstName: data.personFirstName,
+          lastName: data.personLastName,
+          lastNamePrefix: data.personLastNamePrefix,
+          dateOfBirth: null,
+        }),
+    status: "partial-match" as const,
+  };
+}
+
 /**
  * Tries to find a person by email, first name, last name prefix, last name, date of birth, birth city and birth country.
  * If not found, null is returned.
@@ -94,7 +124,7 @@ export const find = wrapQuery(
         : [input.person];
 
       const linkedQuery = input.filter.locationId
-        ? exists(
+        ? (exists(
             query
               .select()
               .from(s.personLocationLink)
@@ -113,8 +143,8 @@ export const find = wrapQuery(
                       ),
                 ),
               ),
-          )
-        : sql`false`;
+          ) as SQL<boolean>)
+        : sql<boolean>`false`;
 
       const results = await Promise.all(
         persons.map(async (item) => {
@@ -144,21 +174,21 @@ export const find = wrapQuery(
             );
           }
 
-          const findUserQuery = query
-            .select({
-              userId: s.user.authUserId,
-              personId: s.person.id,
-              hasLocationLink: linkedQuery,
+          // const findUserQuery = query
+          //   .select({
+          //     userId: s.user.authUserId,
+          //     personId: s.person.id,
+          //     hasLocationLink: linkedQuery,
 
-              userEmail: s.user.email,
-              personFirstName: s.person.firstName,
-              personLastName: s.person.lastName,
-              personLastNamePrefix: s.person.lastNamePrefix,
-              personDateOfBirth: s.person.dateOfBirth,
-            })
-            .from(s.user)
-            .innerJoin(s.person, eq(s.user.authUserId, s.person.userId))
-            .where(and(eq(s.user.email, item.email), ...conditions));
+          //     userEmail: s.user.email,
+          //     personFirstName: s.person.firstName,
+          //     personLastName: s.person.lastName,
+          //     personLastNamePrefix: s.person.lastNamePrefix,
+          //     personDateOfBirth: s.person.dateOfBirth,
+          //   })
+          //   .from(s.user)
+          //   .innerJoin(s.person, eq(s.user.authUserId, s.person.userId))
+          //   .where(and(eq(s.user.email, item.email), ...conditions));
 
           const findPersonQuery = query
             .select({
@@ -176,61 +206,40 @@ export const find = wrapQuery(
             .innerJoin(s.user, eq(s.person.userId, s.user.authUserId))
             .where(and(...conditions));
 
-          const viaEmailAndPerson = await findUserQuery.then(possibleSingleRow);
+          // Hebben we viaEmail and person nodig of kunnen we gwn kijken of de viaPerson user email gelijk is aan de email die geven is?
+          // const viaEmailAndPerson = await findUserQuery.then(possibleSingleRow);
           const viaPerson = await findPersonQuery.then(possibleSingleRow);
 
           // Assumtion: person data is never twice in the database
           // This means that if we find a person via email and a user via person, they are the same user
 
-          if (viaEmailAndPerson?.userId && viaPerson?.userId) {
+          console.log(
+            item.firstName,
+            item.email,
+            // viaEmailAndPerson,
+            item.email === viaPerson?.userEmail,
+            viaPerson,
+          );
+
+          // if (viaEmailAndPerson && viaPerson) {
+          if (viaPerson && viaPerson.userEmail === item.email) {
+            // Person found, on a user with the same email
+            // Do you need to check if person id and user id is the same?
             return {
-              id: viaEmailAndPerson.personId,
+              // id: viaEmailAndPerson.personId,
+              id: viaPerson.personId,
               status: "match" as const,
             };
           }
 
-          if (viaEmailAndPerson) {
-            return {
-              id: viaEmailAndPerson.personId,
-              person: viaEmailAndPerson.hasLocationLink
-                ? {
-                    email: viaEmailAndPerson.userEmail,
-                    firstName: viaEmailAndPerson.personFirstName,
-                    lastName: viaEmailAndPerson.personLastName,
-                    lastNamePrefix: viaEmailAndPerson.personLastNamePrefix,
-                    dateOfBirth: viaEmailAndPerson.personDateOfBirth,
-                  }
-                : maskObject({
-                    email: viaEmailAndPerson.userEmail,
-                    firstName: viaEmailAndPerson.personFirstName,
-                    lastName: viaEmailAndPerson.personLastName,
-                    lastNamePrefix: viaEmailAndPerson.personLastNamePrefix,
-                    dateOfBirth: null,
-                  }),
-              status: "partial-match" as const,
-            };
-          }
+          // if (viaEmailAndPerson) {
+          //   // Should not happen, then the person should then also be found via person
+          //   return createPartialMatch(viaEmailAndPerson);
+          // }
 
           if (viaPerson) {
-            return {
-              id: viaPerson.personId,
-              person: viaPerson.hasLocationLink
-                ? {
-                    email: viaPerson.userEmail,
-                    firstName: viaPerson.personFirstName,
-                    lastName: viaPerson.personLastName,
-                    lastNamePrefix: viaPerson.personLastNamePrefix,
-                    dateOfBirth: viaPerson.personDateOfBirth,
-                  }
-                : maskObject({
-                    email: viaPerson.userEmail,
-                    firstName: viaPerson.personFirstName,
-                    lastName: viaPerson.personLastName,
-                    lastNamePrefix: viaPerson.personLastNamePrefix,
-                    dateOfBirth: null,
-                  }),
-              status: "partial-match" as const,
-            };
+            // Person found, but on another user
+            return createPartialMatch(viaPerson);
           }
 
           return {
