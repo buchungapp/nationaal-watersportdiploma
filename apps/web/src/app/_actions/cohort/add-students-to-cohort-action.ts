@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import pLimit from "p-limit";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { addStudentToCohortByPersonId, setAllocationTags } from "~/lib/nwd";
+import {
+  addStudentToCohortByPersonId,
+  findPersonsForLocation,
+  setAllocationTags,
+} from "~/lib/nwd";
 import { createStudentForLocation } from "~/lib/nwd";
 import { dateInput } from "../dates";
 import {
@@ -41,6 +45,7 @@ type addStudentsToCohortStateActionType = {
     birthCity: string;
     birthCountry: string;
     tags: string[];
+    status: "no-match" | "match" | "partial-match";
   }[];
 };
 
@@ -69,11 +74,12 @@ export const addStudentsToCohortAction = actionClientWithMeta
         return uploadPersons(locationId, cohortId, prevResult.data.persons!);
       }
 
-      return parsePersonsFromCsvData(csvData, data, countries);
+      return parsePersonsFromCsvData(locationId, csvData, data, countries);
     },
   );
 
 async function parsePersonsFromCsvData(
+  locationId: string,
   csvData: CSVData,
   indexToColumnSelection: z.infer<typeof addStudentsToCohortSchema>,
   countries: z.infer<typeof countriesSchema>,
@@ -188,30 +194,38 @@ async function parsePersonsFromCsvData(
     );
   }
 
+  const personObjects = rows.map(
+    ([
+      email,
+      firstName,
+      lastNamePrefix,
+      lastName,
+      dateOfBirth,
+      birthCity,
+      birthCountry,
+      ...tags
+    ]) => ({
+      email,
+      firstName,
+      lastNamePrefix,
+      lastName,
+      dateOfBirth,
+      birthCity,
+      birthCountry,
+      tags: tags.filter(Boolean) as string[],
+    }),
+  );
+
+  // For each row, check if person exists in the database
+  const persons = await findPersonsForLocation(locationId, personObjects);
+
   return {
     state: "parsed",
     columns: COLUMNS,
-    persons: rows.map(
-      ([
-        email,
-        firstName,
-        lastNamePrefix,
-        lastName,
-        dateOfBirth,
-        birthCity,
-        birthCountry,
-        ...tags
-      ]) => ({
-        email,
-        firstName,
-        lastNamePrefix,
-        lastName,
-        dateOfBirth,
-        birthCity,
-        birthCountry,
-        tags: tags.filter(Boolean) as string[],
-      }),
-    ),
+    persons: personObjects.map((person, index) => ({
+      ...person,
+      status: persons[index]?.status ?? "no-match",
+    })),
   };
 }
 

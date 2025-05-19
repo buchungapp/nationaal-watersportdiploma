@@ -881,6 +881,43 @@ export const listPersonsForLocationWithPagination = cache(
   },
 );
 
+export const findPersonsForLocation = cache(
+  async (
+    locationId: string,
+    persons: {
+      email: string;
+      firstName: string;
+      lastNamePrefix: string | null;
+      lastName: string;
+      dateOfBirth: Date;
+    }[],
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      });
+
+      const foundPersons = await User.Person.find({
+        filter: { locationId },
+        person: persons.map((person) => ({
+          email: person.email,
+          firstName: person.firstName,
+          lastNamePrefix: person.lastNamePrefix,
+          lastName: person.lastName,
+          dateOfBirth: person.dateOfBirth.toISOString(),
+        })),
+      });
+
+      return foundPersons;
+    });
+  },
+);
+
 export const getPersonById = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {

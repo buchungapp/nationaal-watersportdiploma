@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -245,6 +246,7 @@ function SubmitForm({
               <TableHead>
                 <TableRow>
                   <TableHeader />
+                  <TableHeader>Status</TableHeader>
                   {result.data?.columns?.map((item) => (
                     <TableHeader key={item}>{item}</TableHeader>
                   ))}
@@ -255,6 +257,15 @@ function SubmitForm({
                 {result.data?.persons?.map((person, index) => (
                   <TableRow key={JSON.stringify(person)}>
                     <TableCell className="tabular-nums text-right">{`${index + 1}.`}</TableCell>
+                    <TableCell>
+                      {person.status === "match" ? (
+                        <Badge color="green">Gevonden</Badge>
+                      ) : person.status === "partial-match" ? (
+                        <Badge color="yellow">Gevonden ander e-mail</Badge>
+                      ) : person.status === "no-match" ? (
+                        <Badge color="blue">Nieuw account</Badge>
+                      ) : null}
+                    </TableCell>
                     <TableCell className="font-medium">
                       {person.email}
                     </TableCell>
