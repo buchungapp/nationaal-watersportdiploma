@@ -27,9 +27,9 @@ import {
   wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
-import { insertSchema, personSchema } from "./person.schema.js";
+import { insertSchema, personSchema, selectSchema } from "./person.schema.js";
 import { getOrCreateFromEmail } from "./user.js";
-import { selectSchema } from "./user.schema.js";
+import { selectSchema as userSelectSchema } from "./user.schema.js";
 
 export function generatePersonID() {
   const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
@@ -37,6 +37,183 @@ export function generatePersonID() {
 
   return nanoid();
 }
+
+/**
+ * Tries to find a person by email, first name, last name prefix, last name, date of birth, birth city and birth country.
+ * If not found, null is returned.
+ * Order of ouput is same as input.
+ */
+export const find = wrapQuery(
+  "user.person.find",
+  withZod(
+    z.object({
+      person: singleOrArray(
+        selectSchema
+          .pick({
+            firstName: true,
+            lastName: true,
+            lastNamePrefix: true,
+            dateOfBirth: true,
+          })
+          .extend({
+            email: userSelectSchema.shape.email,
+          }),
+      ),
+      filter: z.object({
+        locationId: singleOrArray(uuidSchema).optional(),
+      }),
+    }),
+    z
+      .discriminatedUnion("status", [
+        z.object({
+          id: uuidSchema,
+          status: z.enum(["match", "partial-match"]),
+        }),
+        z.object({
+          id: uuidSchema.optional(),
+          status: z.literal("no-match"),
+        }),
+      ])
+      .array(),
+    async (input) => {
+      const query = useQuery();
+
+      const persons = Array.isArray(input.person)
+        ? input.person
+        : [input.person];
+
+      const results = await Promise.all(
+        persons.map(async (item) => {
+          const conditions: SQL[] = [];
+
+          if (item.firstName) {
+            conditions.push(
+              eq(
+                sql`LOWER(${s.person.firstName})`,
+                item.firstName.toLowerCase(),
+              ),
+            );
+          }
+
+          if (item.lastName) {
+            conditions.push(
+              eq(sql`LOWER(${s.person.lastName})`, item.lastName.toLowerCase()),
+            );
+          }
+
+          if (item.dateOfBirth) {
+            conditions.push(
+              eq(
+                s.person.dateOfBirth,
+                dayjs(item.dateOfBirth).format("YYYY-MM-DD"),
+              ),
+            );
+          }
+
+          const findUserQuery = query
+            .select({
+              userId: s.user.authUserId,
+              personId: s.person.id,
+              hasLocationLink: input.filter.locationId
+                ? exists(
+                    query
+                      .select()
+                      .from(s.personLocationLink)
+                      .where(
+                        and(
+                          eq(s.personLocationLink.personId, s.person.id),
+                          eq(s.personLocationLink.status, "linked"),
+                          Array.isArray(input.filter.locationId)
+                            ? inArray(
+                                s.personLocationLink.locationId,
+                                input.filter.locationId,
+                              )
+                            : eq(
+                                s.personLocationLink.locationId,
+                                input.filter.locationId,
+                              ),
+                        ),
+                      ),
+                  )
+                : sql`false`,
+            })
+            .from(s.user)
+            .innerJoin(s.person, eq(s.user.authUserId, s.person.userId))
+            .where(eq(s.user.email, item.email))
+            .$dynamic();
+
+          const findPersonQuery = query
+            .select({
+              userId: s.user.authUserId,
+              personId: s.person.id,
+              hasLocationLink: input.filter.locationId
+                ? exists(
+                    query
+                      .select()
+                      .from(s.personLocationLink)
+                      .where(
+                        and(
+                          eq(s.personLocationLink.personId, s.person.id),
+                          eq(s.personLocationLink.status, "linked"),
+                          Array.isArray(input.filter.locationId)
+                            ? inArray(
+                                s.personLocationLink.locationId,
+                                input.filter.locationId,
+                              )
+                            : eq(
+                                s.personLocationLink.locationId,
+                                input.filter.locationId,
+                              ),
+                        ),
+                      ),
+                  )
+                : sql`false`,
+            })
+            .from(s.person)
+            .innerJoin(s.user, eq(s.person.userId, s.user.authUserId))
+            .where(and(...conditions))
+            .$dynamic();
+
+          const result = await findPersonQuery.unionAll(findUserQuery);
+
+          console.log(item.firstName, item.email, result);
+          return {
+            status: "no-match" as const,
+          };
+          // if (!result) {
+          //   return {
+          //     status: "no-match" as const,
+          //   };
+          // }
+
+          // if (
+          //   result?.userId &&
+          //   result?.personId &&
+          //   result.userPersonId === result.personId
+          // ) {
+          //   return {
+          //     id: result.personId,
+          //     status: "match" as const,
+          //   };
+          // }
+
+          // if (result?.userId || result?.personId) {
+          //   return {
+          //     id: result?.personId ?? result?.userId,
+          //     status: "partial-match" as const,
+          //   };
+          // }
+
+          // return {
+          //   status: "no-match" as const,
+          // };
+        }),
+      );
+
+      return results;
+    },
+  ),
+);
 
 export const getOrCreate = wrapCommand(
   "user.person.getOrCreate",
@@ -51,7 +228,7 @@ export const getOrCreate = wrapCommand(
         birthCountry: true,
       })
       .extend({
-        userId: selectSchema.shape.authUserId.optional(),
+        userId: userSelectSchema.shape.authUserId.optional(),
       }),
     successfulCreateResponse,
     async (input) => {
