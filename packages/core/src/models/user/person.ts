@@ -27,10 +27,10 @@ import {
   wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
+import { maskObject } from "../../utils/privacy.js";
 import { insertSchema, personSchema, selectSchema } from "./person.schema.js";
 import { getOrCreateFromEmail } from "./user.js";
 import { selectSchema as userSelectSchema } from "./user.schema.js";
-
 export function generatePersonID() {
   const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
   const nanoid = customAlphabet(dictionary, 10);
@@ -67,7 +67,18 @@ export const find = wrapQuery(
       .discriminatedUnion("status", [
         z.object({
           id: uuidSchema,
-          status: z.enum(["match", "partial-match"]),
+          status: z.literal("match"),
+        }),
+        z.object({
+          id: uuidSchema,
+          person: personSchema.pick({
+            email: true,
+            firstName: true,
+            lastName: true,
+            lastNamePrefix: true,
+            dateOfBirth: true,
+          }),
+          status: z.literal("partial-match"),
         }),
         z.object({
           id: uuidSchema.optional(),
@@ -81,6 +92,29 @@ export const find = wrapQuery(
       const persons = Array.isArray(input.person)
         ? input.person
         : [input.person];
+
+      const linkedQuery = input.filter.locationId
+        ? exists(
+            query
+              .select()
+              .from(s.personLocationLink)
+              .where(
+                and(
+                  eq(s.personLocationLink.personId, s.person.id),
+                  eq(s.personLocationLink.status, "linked"),
+                  Array.isArray(input.filter.locationId)
+                    ? inArray(
+                        s.personLocationLink.locationId,
+                        input.filter.locationId,
+                      )
+                    : eq(
+                        s.personLocationLink.locationId,
+                        input.filter.locationId,
+                      ),
+                ),
+              ),
+          )
+        : sql`false`;
 
       const results = await Promise.all(
         persons.map(async (item) => {
@@ -114,99 +148,94 @@ export const find = wrapQuery(
             .select({
               userId: s.user.authUserId,
               personId: s.person.id,
-              hasLocationLink: input.filter.locationId
-                ? exists(
-                    query
-                      .select()
-                      .from(s.personLocationLink)
-                      .where(
-                        and(
-                          eq(s.personLocationLink.personId, s.person.id),
-                          eq(s.personLocationLink.status, "linked"),
-                          Array.isArray(input.filter.locationId)
-                            ? inArray(
-                                s.personLocationLink.locationId,
-                                input.filter.locationId,
-                              )
-                            : eq(
-                                s.personLocationLink.locationId,
-                                input.filter.locationId,
-                              ),
-                        ),
-                      ),
-                  )
-                : sql`false`,
+              hasLocationLink: linkedQuery,
+
+              userEmail: s.user.email,
+              personFirstName: s.person.firstName,
+              personLastName: s.person.lastName,
+              personLastNamePrefix: s.person.lastNamePrefix,
+              personDateOfBirth: s.person.dateOfBirth,
             })
             .from(s.user)
             .innerJoin(s.person, eq(s.user.authUserId, s.person.userId))
-            .where(eq(s.user.email, item.email))
-            .$dynamic();
+            .where(and(eq(s.user.email, item.email), ...conditions));
 
           const findPersonQuery = query
             .select({
               userId: s.user.authUserId,
               personId: s.person.id,
-              hasLocationLink: input.filter.locationId
-                ? exists(
-                    query
-                      .select()
-                      .from(s.personLocationLink)
-                      .where(
-                        and(
-                          eq(s.personLocationLink.personId, s.person.id),
-                          eq(s.personLocationLink.status, "linked"),
-                          Array.isArray(input.filter.locationId)
-                            ? inArray(
-                                s.personLocationLink.locationId,
-                                input.filter.locationId,
-                              )
-                            : eq(
-                                s.personLocationLink.locationId,
-                                input.filter.locationId,
-                              ),
-                        ),
-                      ),
-                  )
-                : sql`false`,
+              hasLocationLink: linkedQuery,
+
+              userEmail: s.user.email,
+              personFirstName: s.person.firstName,
+              personLastName: s.person.lastName,
+              personLastNamePrefix: s.person.lastNamePrefix,
+              personDateOfBirth: s.person.dateOfBirth,
             })
             .from(s.person)
             .innerJoin(s.user, eq(s.person.userId, s.user.authUserId))
-            .where(and(...conditions))
-            .$dynamic();
+            .where(and(...conditions));
 
-          const result = await findPersonQuery.unionAll(findUserQuery);
+          const viaEmailAndPerson = await findUserQuery.then(possibleSingleRow);
+          const viaPerson = await findPersonQuery.then(possibleSingleRow);
 
-          console.log(item.firstName, item.email, result);
+          // Assumtion: person data is never twice in the database
+          // This means that if we find a person via email and a user via person, they are the same user
+
+          if (viaEmailAndPerson?.userId && viaPerson?.userId) {
+            return {
+              id: viaEmailAndPerson.personId,
+              status: "match" as const,
+            };
+          }
+
+          if (viaEmailAndPerson) {
+            return {
+              id: viaEmailAndPerson.personId,
+              person: viaEmailAndPerson.hasLocationLink
+                ? {
+                    email: viaEmailAndPerson.userEmail,
+                    firstName: viaEmailAndPerson.personFirstName,
+                    lastName: viaEmailAndPerson.personLastName,
+                    lastNamePrefix: viaEmailAndPerson.personLastNamePrefix,
+                    dateOfBirth: viaEmailAndPerson.personDateOfBirth,
+                  }
+                : maskObject({
+                    email: viaEmailAndPerson.userEmail,
+                    firstName: viaEmailAndPerson.personFirstName,
+                    lastName: viaEmailAndPerson.personLastName,
+                    lastNamePrefix: viaEmailAndPerson.personLastNamePrefix,
+                    dateOfBirth: null,
+                  }),
+              status: "partial-match" as const,
+            };
+          }
+
+          if (viaPerson) {
+            return {
+              id: viaPerson.personId,
+              person: viaPerson.hasLocationLink
+                ? {
+                    email: viaPerson.userEmail,
+                    firstName: viaPerson.personFirstName,
+                    lastName: viaPerson.personLastName,
+                    lastNamePrefix: viaPerson.personLastNamePrefix,
+                    dateOfBirth: viaPerson.personDateOfBirth,
+                  }
+                : maskObject({
+                    email: viaPerson.userEmail,
+                    firstName: viaPerson.personFirstName,
+                    lastName: viaPerson.personLastName,
+                    lastNamePrefix: viaPerson.personLastNamePrefix,
+                    dateOfBirth: null,
+                  }),
+              status: "partial-match" as const,
+            };
+          }
+
           return {
             status: "no-match" as const,
           };
-          // if (!result) {
-          //   return {
-          //     status: "no-match" as const,
-          //   };
-          // }
-
-          // if (
-          //   result?.userId &&
-          //   result?.personId &&
-          //   result.userPersonId === result.personId
-          // ) {
-          //   return {
-          //     id: result.personId,
-          //     status: "match" as const,
-          //   };
-          // }
-
-          // if (result?.userId || result?.personId) {
-          //   return {
-          //     id: result?.personId ?? result?.userId,
-          //     status: "partial-match" as const,
-          //   };
-          // }
-
-          // return {
-          //   status: "no-match" as const,
-          // };
         }),
       );
 
