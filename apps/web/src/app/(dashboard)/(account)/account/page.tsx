@@ -6,7 +6,7 @@ import { Welcome } from "./_components/welcome";
 
 export default function Page() {
   return (
-    <div className="space-y-9 mx-auto p-4 max-w-3xl">
+    <div className="space-y-9 mx-auto max-w-3xl">
       <StackedLayoutCard>
         <Welcome />
         <Text>

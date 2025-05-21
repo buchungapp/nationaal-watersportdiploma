@@ -33,7 +33,7 @@ export default async function Page(props: {
 
   return (
     <div className="items-start gap-3 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <StackedLayoutCard className="lg:col-span-3">
+      <StackedLayoutCard className="lg:col-span-3 mb-6 lg:mb-0">
         <Welcome params={props.params} />
         <Text>
           Op deze pagina vind je jouw persoonlijke gegevens, NWD-diploma's en
