@@ -146,7 +146,7 @@ function Certificate({
   const isNWD = "program" in certificate;
 
   return (
-    <GridListItem key={certificate.id}>
+    <GridListItem key={certificate.id} className="bg-white">
       <div className="flex flex-col h-full">
         <div className="grow">
           {isNWD ? (

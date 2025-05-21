@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   GridList,
   gridContainer,
@@ -48,18 +47,19 @@ export default function NWDCertificatesSection(props: {
   params: Promise<{ handle: string }>;
 }) {
   return (
-    <StackedLayoutCard className={`${gridContainer} lg:col-span-2`}>
-      <Subheading>Jouw NWD-diploma's</Subheading>
-      <Text>
-        Hieronder vind je een overzicht van de NWD-diploma's die je hebt
-        behaald. Klik ze aan en leer meer over je diploma en vier het succes nog
-        een keer! Mis je een diploma? Neem dan contact op met de{" "}
-        <TextLink href="/vaarlocaties" target="_blank">
-          vaarlocatie
-        </TextLink>{" "}
-        waar je de cursus hebt gevolgd.
-      </Text>
-      <Divider className="mt-2 mb-4" />
+    <div className={`${gridContainer} lg:col-span-2 mb-6`}>
+      <StackedLayoutCard className="mb-3">
+        <Subheading>Jouw NWD-diploma's</Subheading>
+        <Text>
+          Hieronder vind je een overzicht van de NWD-diploma's die je hebt
+          behaald. Klik ze aan en leer meer over je diploma en vier het succes
+          nog een keer! Mis je een diploma? Neem dan contact op met de{" "}
+          <TextLink href="/vaarlocaties" target="_blank">
+            vaarlocatie
+          </TextLink>{" "}
+          waar je de cursus hebt gevolgd.
+        </Text>
+      </StackedLayoutCard>
       <Suspense
         fallback={
           <GridList>
@@ -70,6 +70,6 @@ export default function NWDCertificatesSection(props: {
       >
         <NWDCertificatesContent {...props} />
       </Suspense>
-    </StackedLayoutCard>
+    </div>
   );
 }

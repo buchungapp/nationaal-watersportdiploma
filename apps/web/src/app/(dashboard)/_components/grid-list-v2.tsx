@@ -1,4 +1,5 @@
 import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
+import clsx from "clsx";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import type React from "react";
@@ -8,15 +9,23 @@ export const gridContainer = "@container/grid-list";
 
 export function GridList({ children }: PropsWithChildren) {
   return (
-    <ul className="gap-x-4 gap-y-4 xl:gap-x-6 grid grid-cols-1 @xl/grid-list:grid-cols-2 @4xl/grid-list:grid-cols-3">
+    <ul className="gap-x-4 gap-y-4 xl:gap-x-6 grid grid-cols-1 @4xl/grid-list:grid-cols-3 @xl/grid-list:grid-cols-2">
       {children}
     </ul>
   );
 }
 
-export function GridListItem({ children }: PropsWithChildren) {
+export function GridListItem({
+  children,
+  className,
+}: PropsWithChildren<{ className?: string }>) {
   return (
-    <li className="py-3 border border-slate-200 rounded-xl overflow-hidden">
+    <li
+      className={clsx(
+        "py-3 border border-slate-200 rounded-xl overflow-hidden",
+        className,
+      )}
+    >
       {children}
     </li>
   );
