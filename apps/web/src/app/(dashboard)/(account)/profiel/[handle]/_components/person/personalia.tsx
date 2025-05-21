@@ -62,7 +62,7 @@ export async function Personalia({
   params,
 }: { params: Promise<{ handle: string }> }) {
   return (
-    <StackedLayoutCard className="lg:col-start-3 lg:row-start-2">
+    <StackedLayoutCard className="lg:col-start-3 lg:row-start-2 mb-6">
       <div className="flex justify-between items-center">
         <Subheading>Personalia</Subheading>
         <Suspense

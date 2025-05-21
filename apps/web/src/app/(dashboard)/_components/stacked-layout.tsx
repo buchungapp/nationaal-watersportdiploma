@@ -100,7 +100,7 @@ export function StackedLayoutCard({
     <div
       className={clsx(
         "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
-        "p-3 lg:p-5 ",
+        "lg:p-5",
         className,
       )}
     >
