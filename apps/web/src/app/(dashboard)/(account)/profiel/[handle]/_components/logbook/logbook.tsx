@@ -43,19 +43,11 @@ async function LogbookContent({
   );
 
   return (
-    <LogbookSkeleton
-      button={
-        <Suspense fallback={<AddLogbookButtonFallback />}>
-          <AddLogbookButton params={params} />
-        </Suspense>
-      }
-    >
-      <LogbookTable
-        logbooks={logbooks}
-        totalItems={data.length}
-        personId={person.id}
-      />
-    </LogbookSkeleton>
+    <LogbookTable
+      logbooks={logbooks}
+      totalItems={data.length}
+      personId={person.id}
+    />
   );
 }
 
