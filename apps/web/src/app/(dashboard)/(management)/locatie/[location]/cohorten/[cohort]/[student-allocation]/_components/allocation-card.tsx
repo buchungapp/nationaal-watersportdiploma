@@ -9,7 +9,6 @@ import {
 } from "~/app/(dashboard)/_components/description-list";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { showProgressTracking } from "~/lib/flags";
 import {
   isInstructorInCohort,
   listDistinctTagsForCohort,
@@ -147,11 +146,6 @@ async function TagsField({
 async function AllocationCardContent(props: AllocationCardProps) {
   const params = await props.params;
 
-  // Kick-off the flag evaluation
-  const showProgressTrackingFlag = showProgressTracking.run({
-    identify: params,
-  });
-
   const location = await retrieveLocationByHandle(params.location);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
@@ -230,28 +224,24 @@ async function AllocationCardContent(props: AllocationCardProps) {
         </Suspense>
       </DescriptionDetails>
 
-      {(await showProgressTrackingFlag) ? (
-        <>
-          <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
-          <DescriptionDetails className="flex justify-between items-center gap-x-2">
-            {allocation.progressVisibleForStudentUpUntil ? (
-              dayjs(allocation.progressVisibleForStudentUpUntil)
-                .tz()
-                .format("DD-MM-YYYY HH:mm")
-            ) : (
-              <>
-                <span className="text-zinc-500">Niet zichtbaar</span>
-              </>
-            )}
-            <div className="-my-2">
-              <UpdateProgressVisibility
-                allocationId={allocation.id}
-                cohortId={cohort.id}
-              />
-            </div>
-          </DescriptionDetails>
-        </>
-      ) : null}
+      <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
+      <DescriptionDetails className="flex justify-between items-center gap-x-2">
+        {allocation.progressVisibleForStudentUpUntil ? (
+          dayjs(allocation.progressVisibleForStudentUpUntil)
+            .tz()
+            .format("DD-MM-YYYY HH:mm")
+        ) : (
+          <>
+            <span className="text-zinc-500">Niet zichtbaar</span>
+          </>
+        )}
+        <div className="-my-2">
+          <UpdateProgressVisibility
+            allocationId={allocation.id}
+            cohortId={cohort.id}
+          />
+        </div>
+      </DescriptionDetails>
 
       <DescriptionTerm>Tags</DescriptionTerm>
       <DescriptionDetails>
@@ -303,10 +293,10 @@ export function AllocationCardFallback() {
         <span className="inline-block bg-gray-200 rounded w-40 h-4 align-middle animate-pulse" />
       </DescriptionDetails>
 
-      {/* <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
+      <DescriptionTerm>Voortgang zichtbaar tot</DescriptionTerm>
       <DescriptionDetails>
         <span className="bg-gray-200 rounded w-36 h-4 animate-pulse" />
-      </DescriptionDetails> */}
+      </DescriptionDetails>
 
       <DescriptionTerm>Tags</DescriptionTerm>
       <DescriptionDetails>
