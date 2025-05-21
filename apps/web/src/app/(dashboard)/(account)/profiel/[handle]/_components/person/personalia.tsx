@@ -6,6 +6,7 @@ import {
 } from "~/app/(dashboard)/_components/description-list";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import dayjs from "~/lib/dayjs";
 import { getPersonByHandle, listCountries } from "~/lib/nwd";
 import { EditDetails } from "./action-buttons";
@@ -61,7 +62,7 @@ export async function Personalia({
   params,
 }: { params: Promise<{ handle: string }> }) {
   return (
-    <div className="lg:col-start-3 lg:row-start-2">
+    <StackedLayoutCard className="lg:col-start-3 lg:row-start-2">
       <div className="flex justify-between items-center">
         <Subheading>Personalia</Subheading>
         <Suspense
@@ -110,6 +111,6 @@ export async function Personalia({
       >
         <PersonaliaContent params={params} />
       </Suspense>
-    </div>
+    </StackedLayoutCard>
   );
 }

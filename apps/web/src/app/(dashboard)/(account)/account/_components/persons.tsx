@@ -12,6 +12,7 @@ import {
   GridListItem,
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Code, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listPersonsForUser } from "~/lib/nwd";
@@ -35,7 +36,7 @@ async function PersonsList() {
                 .join(" ")}
             </div>
           </GridListHeader>
-          <DescriptionList className="px-6">
+          <DescriptionList className="bg-white px-6">
             <DescriptionTerm>NWD-id</DescriptionTerm>
             <DescriptionDetails>
               <Code>{person.handle}</Code>
@@ -77,7 +78,7 @@ function PersonsListFallback() {
           />
           <div className="bg-gray-200 rounded w-32 h-6 animate-pulse" />
         </GridListHeader>
-        <DescriptionList className="px-6">
+        <DescriptionList className="bg-white px-6">
           <DescriptionTerm>NWD-id</DescriptionTerm>
           <DescriptionDetails>
             <div className="bg-gray-200 rounded w-24 h-5 animate-pulse [animation-delay:300ms]" />
@@ -95,12 +96,12 @@ function PersonsListFallback() {
 
 export function Persons() {
   return (
-    <div className="my-6">
+    <StackedLayoutCard>
       <Subheading>Personen die jij beheert</Subheading>
       <Divider className="mt-2 mb-4" />
       <Suspense fallback={<PersonsListFallback />}>
         <PersonsList />
       </Suspense>
-    </div>
+    </StackedLayoutCard>
   );
 }

@@ -1,6 +1,7 @@
 import { type PropsWithChildren, Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { getPersonByHandle, listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
@@ -12,7 +13,7 @@ function LogbookSkeleton({
   button,
 }: PropsWithChildren<{ button?: React.ReactNode | undefined }>) {
   return (
-    <div className="lg:col-span-3">
+    <StackedLayoutCard className="lg:col-span-3">
       <div className="flex justify-between items-center mb-2 w-full">
         <Subheading>Jouw Logboek</Subheading>
         {button}
@@ -20,7 +21,7 @@ function LogbookSkeleton({
       <Text>Hieronder vind je een overzicht van alle vaaractiviteiten.</Text>
       <Divider className="mt-2 mb-4" />
       {children}
-    </div>
+    </StackedLayoutCard>
   );
 }
 

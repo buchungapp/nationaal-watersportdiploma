@@ -5,6 +5,7 @@ import {
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { getPersonByHandle } from "~/lib/nwd";
 import { NWDCertificates } from "./certificates";
@@ -47,7 +48,7 @@ export default function NWDCertificatesSection(props: {
   params: Promise<{ handle: string }>;
 }) {
   return (
-    <div className={`${gridContainer} lg:col-span-2`}>
+    <StackedLayoutCard className={`${gridContainer} lg:col-span-2`}>
       <Subheading>Jouw NWD-diploma's</Subheading>
       <Text>
         Hieronder vind je een overzicht van de NWD-diploma's die je hebt
@@ -69,6 +70,6 @@ export default function NWDCertificatesSection(props: {
       >
         <NWDCertificatesContent {...props} />
       </Suspense>
-    </div>
+    </StackedLayoutCard>
   );
 }
