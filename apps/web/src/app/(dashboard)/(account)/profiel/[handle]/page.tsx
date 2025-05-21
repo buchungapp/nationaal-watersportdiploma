@@ -6,7 +6,7 @@ import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout"
 import { getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Logbook } from "./_components/logbook/logbook";
-import NWDCertificatesSection from "./_components/nwd-certificates-section";
+import NWDProgressSection from "./_components/nwd-progress";
 import { Personalia } from "./_components/person/personalia";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import { Welcome } from "./_components/welcome";
@@ -45,7 +45,8 @@ export default async function Page(props: {
 
       <PersonCohortProgress params={props.params} />
 
-      <NWDCertificatesSection params={props.params} />
+      <NWDProgressSection params={props.params} />
+      {/* <NWDCertificatesSection params={props.params} /> */}
       <WatersportCertificatesSection
         params={props.params}
         searchParams={props.searchParams}
