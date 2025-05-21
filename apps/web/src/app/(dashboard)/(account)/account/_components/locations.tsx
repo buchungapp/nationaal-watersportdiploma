@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   GridList,
   GridListHeader,
   GridListItem,
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { listLocationsWherePrimaryPersonHasManagementRole } from "~/lib/nwd";
 
@@ -62,8 +62,9 @@ function LocationsListFallback() {
 export function Locations() {
   return (
     <div>
-      <Subheading>Vaarlocaties waar jij lesgeeft</Subheading>
-      <Divider className="mt-2 mb-4" />
+      <StackedLayoutCard className="mb-3">
+        <Subheading>Vaarlocaties waar jij lesgeeft</Subheading>
+      </StackedLayoutCard>
       <Suspense fallback={<LocationsListFallback />}>
         <LocationsList />
       </Suspense>

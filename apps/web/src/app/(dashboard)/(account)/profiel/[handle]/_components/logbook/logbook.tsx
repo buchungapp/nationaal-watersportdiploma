@@ -1,5 +1,4 @@
 import { type PropsWithChildren, Suspense } from "react";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
@@ -19,7 +18,6 @@ function LogbookSkeleton({
         {button}
       </div>
       <Text>Hieronder vind je een overzicht van alle vaaractiviteiten.</Text>
-      <Divider className="mt-2 mb-4" />
       {children}
     </StackedLayoutCard>
   );

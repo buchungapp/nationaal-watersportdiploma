@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   GridList,
   gridContainer,
@@ -49,22 +48,23 @@ export default function WatersportCertificatesSection(
   props: WatersportCertificatesProps,
 ) {
   return (
-    <StackedLayoutCard className={`${gridContainer} lg:col-span-3`}>
-      <div className="flex justify-between items-center mb-2 w-full">
-        <Subheading>Jouw Watersportcertificaten</Subheading>
-        <Suspense
-          fallback={
-            <div className="bg-slate-200 -my-1.5 rounded-lg w-40.5 h-9 animate-pulse" />
-          }
-        >
-          <AddCertificateButton params={props.params} />
-        </Suspense>
-      </div>
-      <Text>
-        Hieronder vind je een overzicht van alle Watersportcertificaten die je
-        hebt behaald.
-      </Text>
-      <Divider className="mt-2 mb-4" />
+    <div className={`${gridContainer} lg:col-span-3 mb-6`}>
+      <StackedLayoutCard className="mb-3">
+        <div className="flex justify-between items-center mb-2 w-full">
+          <Subheading>Jouw Watersportcertificaten</Subheading>
+          <Suspense
+            fallback={
+              <div className="bg-slate-200 -my-1.5 rounded-lg w-40.5 h-9 animate-pulse" />
+            }
+          >
+            <AddCertificateButton params={props.params} />
+          </Suspense>
+        </div>
+        <Text>
+          Hieronder vind je een overzicht van alle Watersportcertificaten die je
+          hebt behaald.
+        </Text>
+      </StackedLayoutCard>
       <Suspense
         fallback={
           <GridList>
@@ -76,6 +76,6 @@ export default function WatersportCertificatesSection(
       >
         <WatersportCertificatesContent {...props} />
       </Suspense>
-    </StackedLayoutCard>
+    </div>
   );
 }
