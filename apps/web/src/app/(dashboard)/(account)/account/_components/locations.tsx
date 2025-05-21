@@ -7,7 +7,6 @@ import {
   GridListItem,
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { listLocationsWherePrimaryPersonHasManagementRole } from "~/lib/nwd";
 
@@ -62,12 +61,12 @@ function LocationsListFallback() {
 
 export function Locations() {
   return (
-    <StackedLayoutCard>
+    <div>
       <Subheading>Vaarlocaties waar jij lesgeeft</Subheading>
       <Divider className="mt-2 mb-4" />
       <Suspense fallback={<LocationsListFallback />}>
         <LocationsList />
       </Suspense>
-    </StackedLayoutCard>
+    </div>
   );
 }

@@ -12,7 +12,6 @@ import {
   GridListItem,
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Code, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listPersonsForUser } from "~/lib/nwd";
@@ -96,12 +95,12 @@ function PersonsListFallback() {
 
 export function Persons() {
   return (
-    <StackedLayoutCard>
+    <div>
       <Subheading>Personen die jij beheert</Subheading>
       <Divider className="mt-2 mb-4" />
       <Suspense fallback={<PersonsListFallback />}>
         <PersonsList />
       </Suspense>
-    </StackedLayoutCard>
+    </div>
   );
 }
