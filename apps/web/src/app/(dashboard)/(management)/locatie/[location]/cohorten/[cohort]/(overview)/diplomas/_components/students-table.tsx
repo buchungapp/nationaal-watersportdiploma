@@ -52,6 +52,233 @@ import {
 } from "~/app/(dashboard)/_components/table-content";
 
 const columnHelper = createColumnHelper<Student>();
+const columns = [
+  columnHelper.display({
+    id: "select",
+    cell: ({ row }) => (
+      <CheckboxField className="relative">
+        <span
+          className="top-1/2 left-1/2 absolute size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2"
+          aria-hidden="true"
+        />
+        <Checkbox
+          {...{
+            checked: row.getIsSelected(),
+            disabled: !row.getCanSelect(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+        />
+      </CheckboxField>
+    ),
+    header: ({ table }) => (
+      <CheckboxField>
+        <Checkbox
+          {...{
+            disabled: false,
+            checked:
+              table.getIsSomePageRowsSelected() ||
+              table.getIsAllPageRowsSelected(),
+            indeterminate: !table.getIsAllPageRowsSelected(),
+            onChange: (checked) => table.toggleAllPageRowsSelected(checked),
+          }}
+        />
+      </CheckboxField>
+    ),
+    enableSorting: false,
+  }),
+  columnHelper.accessor("certificate.handle", {
+    id: "diploma",
+    header: "Diploma",
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value ? <Code>{getValue()}</Code> : null;
+    },
+    enableSorting: false,
+  }),
+  columnHelper.accessor(
+    (data) =>
+      [data.person.firstName, data.person.lastNamePrefix, data.person.lastName]
+        .filter(Boolean)
+        .join(" "),
+    {
+      id: "cursist",
+      header: "Naam",
+      cell: ({ getValue }) => (
+        <span className="font-medium text-zinc-950">{getValue()}</span>
+      ),
+    },
+  ),
+  columnHelper.accessor(
+    (row) =>
+      row.person.dateOfBirth
+        ? dayjs().diff(dayjs(row.person.dateOfBirth), "year")
+        : null,
+    {
+      id: "leeftijd",
+      header: "Leeftijd",
+      cell: ({ getValue }) => {
+        const age = getValue();
+        return age ? `${age} jr.` : null;
+      },
+      sortingFn: "alphanumeric",
+    },
+  ),
+  columnHelper.accessor(
+    (row) => {
+      if (!row.studentCurriculum) return undefined;
+
+      const coreModulesCompleted = row.studentCurriculum.moduleStatus.filter(
+        ({ module: { type }, completedCompetencies, totalCompetencies }) =>
+          type === "required" && completedCompetencies === totalCompetencies,
+      ).length;
+
+      return coreModulesCompleted;
+    },
+    {
+      id: "kernmodules",
+      header: "Kernmodules",
+      sortUndefined: "last",
+      cell: ({ row }) => {
+        if (!row.original.studentCurriculum) {
+          return null;
+        }
+
+        const coreModules = row.original.studentCurriculum.moduleStatus.filter(
+          (status) => status.module.type === "required",
+        );
+
+        return (
+          <div className="flex items-center gap-x-1.5">
+            <span className="font-medium text-zinc-950">
+              {
+                coreModules.filter(
+                  (status) =>
+                    status.completedCompetencies === status.totalCompetencies,
+                ).length
+              }
+            </span>
+            <span className="text-zinc-500">/</span>
+            <span className="text-zinc-950">{coreModules.length}</span>
+          </div>
+        );
+      },
+    },
+  ),
+  columnHelper.accessor(
+    (row) => {
+      if (!row.studentCurriculum) return undefined;
+
+      const electiveModulesCompleted =
+        row.studentCurriculum.moduleStatus.filter(
+          ({ module: { type }, completedCompetencies, totalCompetencies }) =>
+            type === "optional" && completedCompetencies === totalCompetencies,
+        ).length;
+
+      return electiveModulesCompleted;
+    },
+    {
+      id: "keuzemodules",
+      header: "Keuzemodules",
+      sortUndefined: "last",
+      cell: ({ row }) => {
+        if (!row.original.studentCurriculum) {
+          return null;
+        }
+
+        const electiveModules =
+          row.original.studentCurriculum.moduleStatus.filter(
+            (status) => status.module.type === "optional",
+          );
+
+        return (
+          <div className="flex items-center gap-x-1.5">
+            <span className="font-medium text-zinc-950">
+              {
+                electiveModules.filter(
+                  (status) =>
+                    status.completedCompetencies === status.totalCompetencies,
+                ).length
+              }
+            </span>
+            <span className="text-zinc-500">/</span>
+            <span className="text-zinc-950">{electiveModules.length}</span>
+          </div>
+        );
+      },
+    },
+  ),
+  columnHelper.accessor(
+    (data) =>
+      data.studentCurriculum?.program.title ??
+      data.studentCurriculum?.course.title,
+    {
+      id: "cursus",
+      header: "Cursus",
+    },
+  ),
+  columnHelper.accessor("studentCurriculum.degree.title", {
+    id: "niveau",
+    header: "Niveau",
+  }),
+  columnHelper.accessor("studentCurriculum.gearType.title", {
+    id: "vaartuig",
+    header: "Vaartuig",
+  }),
+  columnHelper.accessor(
+    (data) =>
+      data.instructor
+        ? [
+            data.instructor.firstName,
+            data.instructor.lastNamePrefix,
+            data.instructor.lastName,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : null,
+    {
+      id: "instructeur",
+      header: "Instructeur",
+      cell: ({ getValue }) => (
+        <span className="font-medium text-zinc-950">{getValue()}</span>
+      ),
+    },
+  ),
+  columnHelper.accessor("tags", {
+    id: "tags",
+    header: "Tags",
+    cell: ({ getValue }) => {
+      return (
+        <div className="flex items-center gap-x-2">
+          {getValue().map((tag) => (
+            <Badge key={tag}>{tag}</Badge>
+          ))}
+        </div>
+      );
+    },
+    enableSorting: false,
+  }),
+  columnHelper.accessor("certificate.issuedAt", {
+    id: "uitgegevenOp",
+    header: "Diploma uitgegeven op",
+    cell: ({ getValue }) => {
+      const issuedAt = getValue();
+      return issuedAt ? dayjs(issuedAt).tz().format("DD-MM-YYYY HH:mm") : null;
+    },
+  }),
+  columnHelper.accessor("progressVisibleForStudentUpUntil", {
+    id: "voortgang",
+    header: "Voortgang zichtbaar tot",
+    cell: ({ getValue }) => {
+      const date = getValue();
+      return date ? (
+        dayjs(date).tz().format("DD-MM-YYYY HH:mm")
+      ) : (
+        <span className="text-slate-500">Niet zichtbaar</span>
+      );
+    },
+  }),
+];
 
 export default function StudentsTable({
   cohortId,
@@ -59,270 +286,13 @@ export default function StudentsTable({
   totalItems,
   noOptionsLabel = "Geen items gevonden",
   defaultCertificateVisibleFromDate,
-  progressTrackingEnabled,
 }: {
   cohortId: string;
   students: Awaited<ReturnType<typeof listCertificateOverviewByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
   defaultCertificateVisibleFromDate?: string;
-  progressTrackingEnabled: boolean;
 }) {
-  const columns = React.useMemo(
-    () => [
-      columnHelper.display({
-        id: "select",
-        cell: ({ row }) => (
-          <CheckboxField className="relative">
-            <span
-              className="top-1/2 left-1/2 absolute size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2"
-              aria-hidden="true"
-            />
-            <Checkbox
-              {...{
-                checked: row.getIsSelected(),
-                disabled: !row.getCanSelect(),
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler(),
-              }}
-            />
-          </CheckboxField>
-        ),
-        header: ({ table }) => (
-          <CheckboxField>
-            <Checkbox
-              {...{
-                disabled: false,
-                checked:
-                  table.getIsSomePageRowsSelected() ||
-                  table.getIsAllPageRowsSelected(),
-                indeterminate: !table.getIsAllPageRowsSelected(),
-                onChange: (checked) => table.toggleAllPageRowsSelected(checked),
-              }}
-            />
-          </CheckboxField>
-        ),
-        enableSorting: false,
-      }),
-      columnHelper.accessor("certificate.handle", {
-        id: "diploma",
-        header: "Diploma",
-        cell: ({ getValue }) => {
-          const value = getValue();
-          return value ? <Code>{getValue()}</Code> : null;
-        },
-        enableSorting: false,
-      }),
-      columnHelper.accessor(
-        (data) =>
-          [
-            data.person.firstName,
-            data.person.lastNamePrefix,
-            data.person.lastName,
-          ]
-            .filter(Boolean)
-            .join(" "),
-        {
-          id: "cursist",
-          header: "Naam",
-          cell: ({ getValue }) => (
-            <span className="font-medium text-zinc-950">{getValue()}</span>
-          ),
-        },
-      ),
-      columnHelper.accessor(
-        (row) =>
-          row.person.dateOfBirth
-            ? dayjs().diff(dayjs(row.person.dateOfBirth), "year")
-            : null,
-        {
-          id: "leeftijd",
-          header: "Leeftijd",
-          cell: ({ getValue }) => {
-            const age = getValue();
-            return age ? `${age} jr.` : null;
-          },
-          sortingFn: "alphanumeric",
-        },
-      ),
-      columnHelper.accessor(
-        (row) => {
-          if (!row.studentCurriculum) return undefined;
-
-          const coreModulesCompleted =
-            row.studentCurriculum.moduleStatus.filter(
-              ({
-                module: { type },
-                completedCompetencies,
-                totalCompetencies,
-              }) =>
-                type === "required" &&
-                completedCompetencies === totalCompetencies,
-            ).length;
-
-          return coreModulesCompleted;
-        },
-        {
-          id: "kernmodules",
-          header: "Kernmodules",
-          sortUndefined: "last",
-          cell: ({ row }) => {
-            if (!row.original.studentCurriculum) {
-              return null;
-            }
-
-            const coreModules =
-              row.original.studentCurriculum.moduleStatus.filter(
-                (status) => status.module.type === "required",
-              );
-
-            return (
-              <div className="flex items-center gap-x-1.5">
-                <span className="font-medium text-zinc-950">
-                  {
-                    coreModules.filter(
-                      (status) =>
-                        status.completedCompetencies ===
-                        status.totalCompetencies,
-                    ).length
-                  }
-                </span>
-                <span className="text-zinc-500">/</span>
-                <span className="text-zinc-950">{coreModules.length}</span>
-              </div>
-            );
-          },
-        },
-      ),
-      columnHelper.accessor(
-        (row) => {
-          if (!row.studentCurriculum) return undefined;
-
-          const electiveModulesCompleted =
-            row.studentCurriculum.moduleStatus.filter(
-              ({
-                module: { type },
-                completedCompetencies,
-                totalCompetencies,
-              }) =>
-                type === "optional" &&
-                completedCompetencies === totalCompetencies,
-            ).length;
-
-          return electiveModulesCompleted;
-        },
-        {
-          id: "keuzemodules",
-          header: "Keuzemodules",
-          sortUndefined: "last",
-          cell: ({ row }) => {
-            if (!row.original.studentCurriculum) {
-              return null;
-            }
-
-            const electiveModules =
-              row.original.studentCurriculum.moduleStatus.filter(
-                (status) => status.module.type === "optional",
-              );
-
-            return (
-              <div className="flex items-center gap-x-1.5">
-                <span className="font-medium text-zinc-950">
-                  {
-                    electiveModules.filter(
-                      (status) =>
-                        status.completedCompetencies ===
-                        status.totalCompetencies,
-                    ).length
-                  }
-                </span>
-                <span className="text-zinc-500">/</span>
-                <span className="text-zinc-950">{electiveModules.length}</span>
-              </div>
-            );
-          },
-        },
-      ),
-      columnHelper.accessor(
-        (data) =>
-          data.studentCurriculum?.program.title ??
-          data.studentCurriculum?.course.title,
-        {
-          id: "cursus",
-          header: "Cursus",
-        },
-      ),
-      columnHelper.accessor("studentCurriculum.degree.title", {
-        id: "niveau",
-        header: "Niveau",
-      }),
-      columnHelper.accessor("studentCurriculum.gearType.title", {
-        id: "vaartuig",
-        header: "Vaartuig",
-      }),
-      columnHelper.accessor(
-        (data) =>
-          data.instructor
-            ? [
-                data.instructor.firstName,
-                data.instructor.lastNamePrefix,
-                data.instructor.lastName,
-              ]
-                .filter(Boolean)
-                .join(" ")
-            : null,
-        {
-          id: "instructeur",
-          header: "Instructeur",
-          cell: ({ getValue }) => (
-            <span className="font-medium text-zinc-950">{getValue()}</span>
-          ),
-        },
-      ),
-      columnHelper.accessor("tags", {
-        id: "tags",
-        header: "Tags",
-        cell: ({ getValue }) => {
-          return (
-            <div className="flex items-center gap-x-2">
-              {getValue().map((tag) => (
-                <Badge key={tag}>{tag}</Badge>
-              ))}
-            </div>
-          );
-        },
-        enableSorting: false,
-      }),
-      columnHelper.accessor("certificate.issuedAt", {
-        id: "uitgegevenOp",
-        header: "Diploma uitgegeven op",
-        cell: ({ getValue }) => {
-          const issuedAt = getValue();
-          return issuedAt
-            ? dayjs(issuedAt).tz().format("DD-MM-YYYY HH:mm")
-            : null;
-        },
-      }),
-      ...(progressTrackingEnabled
-        ? [
-            columnHelper.accessor("progressVisibleForStudentUpUntil", {
-              id: "voortgang",
-              header: "Voortgang zichtbaar tot",
-              cell: ({ getValue }) => {
-                const date = getValue();
-                return date ? (
-                  dayjs(date).tz().format("DD-MM-YYYY HH:mm")
-                ) : (
-                  <span className="text-slate-500">Niet zichtbaar</span>
-                );
-              },
-            }),
-          ]
-        : []),
-    ],
-    [progressTrackingEnabled],
-  );
-
   const columnOrderingOptions = useColumnOrdering(
     getOrderableColumnIds({
       columns,
