@@ -1,6 +1,7 @@
 "use client";
 
 import * as Headless from "@headlessui/react";
+import clsx from "clsx";
 import type React from "react";
 import { useState } from "react";
 import { NavbarItem } from "./navbar";
@@ -30,13 +31,13 @@ function MobileSidebar({
     <Headless.Dialog open={open} onClose={close} className="lg:hidden">
       <Headless.DialogBackdrop
         transition
-        className="fixed inset-0 bg-black/30 transition data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
+        className="fixed inset-0 bg-black/30 data-closed:opacity-0 transition data-enter:duration-300 data-leave:duration-200 data-leave:ease-in data-enter:ease-out"
       />
       <Headless.DialogPanel
         transition
-        className="fixed inset-y-0 w-full max-w-80 p-2 transition duration-300 ease-in-out data-closed:-translate-x-full"
+        className="fixed inset-y-0 p-2 w-full max-w-80 transition data-closed:-translate-x-full duration-300 ease-in-out"
       >
-        <div className="flex h-full flex-col rounded-lg bg-white shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+        <div className="flex flex-col bg-white dark:bg-zinc-900 shadow-xs rounded-lg ring-1 ring-zinc-950/5 dark:ring-white/10 h-full">
           <div className="-mb-3 px-4 pt-3">
             <Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
               <CloseMenuIcon />
@@ -60,7 +61,7 @@ export function StackedLayout({
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <div className="relative isolate flex min-h-svh w-full flex-col bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
+    <div className="isolate relative flex flex-col bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950 w-full min-h-svh">
       {/* Sidebar on mobile */}
       <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
         {sidebar}
@@ -68,7 +69,7 @@ export function StackedLayout({
 
       {/* Navbar */}
       <header className="flex items-center px-4">
-        <div className="py-2.5 lg:hidden">
+        <div className="lg:hidden py-2.5">
           <NavbarItem
             onClick={() => setShowSidebar(true)}
             aria-label="Open navigation"
@@ -76,15 +77,34 @@ export function StackedLayout({
             <OpenMenuIcon />
           </NavbarItem>
         </div>
-        <div className="min-w-0 flex-1">{navbar}</div>
+        <div className="flex-1 min-w-0">{navbar}</div>
       </header>
 
       {/* Content */}
-      <main className="flex flex-1 flex-col pb-2 lg:px-2">
-        <div className="grow p-6 lg:rounded-lg lg:bg-white lg:p-10 lg:shadow-xs lg:ring-1 lg:ring-zinc-950/5 dark:lg:bg-zinc-900 dark:lg:ring-white/10">
+      <main className="flex flex-col flex-1 lg:px-2 pb-2">
+        {/* <div className="lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs p-6 lg:p-10 lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10 grow"> */}
+        <div className="p-6 lg:p-10 grow">
           <div className="mx-auto max-w-6xl">{children}</div>
         </div>
+        {/* </div> */}
       </main>
+    </div>
+  );
+}
+
+export function StackedLayoutCard({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div
+      className={clsx(
+        "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
+        "p-3 lg:p-5 ",
+        className,
+      )}
+    >
+      {children}
     </div>
   );
 }
