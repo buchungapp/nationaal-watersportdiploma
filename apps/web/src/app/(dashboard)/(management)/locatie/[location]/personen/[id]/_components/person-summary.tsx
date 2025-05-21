@@ -5,6 +5,7 @@ import {
   DescriptionList,
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list";
+import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
   getPersonById,
@@ -45,6 +46,11 @@ async function PersonSummaryContent(props: PersonSummaryProps) {
 
   return (
     <DescriptionList>
+      <DescriptionTerm>NWD-id</DescriptionTerm>
+      <DescriptionDetails>
+        <Code>{person.handle}</Code>
+      </DescriptionDetails>
+
       <DescriptionTerm>Voornaam</DescriptionTerm>
       <DescriptionDetails>{person.firstName}</DescriptionDetails>
 
