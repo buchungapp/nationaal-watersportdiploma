@@ -6,6 +6,7 @@ import {
 } from "~/app/(dashboard)/_components/description-list";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { getPersonByHandle, listActiveCohortsForPerson } from "~/lib/nwd";
@@ -29,7 +30,7 @@ async function CohortProgressContent({ params }: Props) {
   }
 
   return (
-    <div className="lg:col-span-2">
+    <StackedLayoutCard className="lg:col-span-2">
       <Subheading>Jouw NWD-voortgang</Subheading>
       <Text>
         Op dit moment zit je in de volgende actieve NWD-cursussen, waarbij de
@@ -69,7 +70,7 @@ async function CohortProgressContent({ params }: Props) {
           </GridListItem>
         ))}
       </GridList>
-    </div>
+    </StackedLayoutCard>
   );
 }
 

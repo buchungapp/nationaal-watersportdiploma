@@ -5,6 +5,7 @@ import {
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { getPersonByHandle } from "~/lib/nwd";
 import { AddCertificate } from "./certificate/add-certificate";
@@ -48,7 +49,7 @@ export default function WatersportCertificatesSection(
   props: WatersportCertificatesProps,
 ) {
   return (
-    <div className={`${gridContainer} lg:col-span-3`}>
+    <StackedLayoutCard className={`${gridContainer} lg:col-span-3`}>
       <div className="flex justify-between items-center mb-2 w-full">
         <Subheading>Jouw Watersportcertificaten</Subheading>
         <Suspense
@@ -75,6 +76,6 @@ export default function WatersportCertificatesSection(
       >
         <WatersportCertificatesContent {...props} />
       </Suspense>
-    </div>
+    </StackedLayoutCard>
   );
 }
