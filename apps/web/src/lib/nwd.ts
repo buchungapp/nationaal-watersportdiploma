@@ -1902,6 +1902,18 @@ export const retrieveStudentAllocationWithCurriculumForPerson = cache(
   },
 );
 
+export const listProgramProgressesByPersonId = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
+      return await Student.Curriculum.listProgramProgresses({
+        personId,
+      });
+    });
+  },
+);
+
 export const listCompletedCompetenciesByStudentCurriculumId = cache(
   async (studentCurriculumId: string) => {
     return makeRequest(async () => {
