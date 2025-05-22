@@ -1,4 +1,8 @@
-import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
+import * as Headless from "@headlessui/react";
+import {
+  ChevronDownIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
@@ -39,6 +43,14 @@ export function GridListItemHeader({ children }: PropsWithChildren) {
   );
 }
 
+export function GridListItemFooter({ children }: PropsWithChildren) {
+  return (
+    <div className="flex justify-between items-center gap-x-4 bg-branding-light/10 -mb-3 px-6 pt-3 pb-3 border-t border-t-slate-200">
+      {children}
+    </div>
+  );
+}
+
 const gridListItemTitleClassNames =
   "text-sm font-medium leading-6 text-slate-900";
 export function GridListItemTitle({
@@ -70,5 +82,33 @@ export function GirdListItemOptions({ children }: PropsWithChildren) {
       </DropdownButton>
       <DropdownMenu anchor="bottom end">{children}</DropdownMenu>
     </Dropdown>
+  );
+}
+
+export function GridListItemDisclosure({
+  title,
+  children,
+  defaultOpen = false,
+  className,
+  panelClassName,
+}: PropsWithChildren<{
+  title: React.ReactNode;
+  defaultOpen?: boolean;
+  className?: string;
+  panelClassName?: string;
+}>) {
+  return (
+    <div className={clsx("border-t border-t-slate-200", className)}>
+      <Headless.Disclosure defaultOpen={defaultOpen}>
+        <Headless.DisclosureButton className="group/disclosure relative flex justify-between items-center data-active:bg-slate-100 data-hover:bg-slate-50 data-disabled:opacity-50 px-6 py-2 focus:outline-none w-full text-left">
+          <span className="absolute inset-0 mx-2 rounded-lg group-data-focus/disclosure:outline-2 group-data-focus/disclosure:outline-branding-light group-data-focus/disclosure:outline-offset-2" />
+          <span className="font-semibold text-slate-900 text-sm">{title}</span>
+          <ChevronDownIcon className="w-4 h-4 text-slate-900 ui-open:rotate-180 transition-transform" />
+        </Headless.DisclosureButton>
+        <Headless.DisclosurePanel className={panelClassName}>
+          {children}
+        </Headless.DisclosurePanel>
+      </Headless.Disclosure>
+    </div>
   );
 }
