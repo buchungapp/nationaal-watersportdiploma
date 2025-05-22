@@ -25,7 +25,7 @@ import {
   TabPanels,
 } from "~/app/(dashboard)/_components/tabs";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { getPersonByHandle } from "~/lib/nwd";
+import { getPersonByHandle, listProgramProgressesByPersonId } from "~/lib/nwd";
 import { NWDCertificates } from "./certificates";
 
 async function NWDCertificatesContent({
@@ -69,7 +69,9 @@ async function NWDProgramsContent({
 }) {
   const { handle } = await params;
   const person = await getPersonByHandle(handle);
-  // const programs = await getPersonPrograms(person.id);
+  const programs = await listProgramProgressesByPersonId(person.id);
+
+  console.log(programs);
 
   return (
     <GridList>
