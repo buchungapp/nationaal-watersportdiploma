@@ -2605,7 +2605,7 @@ export const listKnowledgeCenterDocuments = cache(async () => {
       throw new Error("Unauthorized");
     }
 
-    return await Platform.Media.listFiles();
+    return await Platform.Media.listKnowledgeCenterDocuments();
   });
 });
 
