@@ -8,11 +8,22 @@ import { generateAdvise } from "~/app/(certificate)/diploma/_utils/generate-advi
 import dayjs from "~/lib/dayjs";
 import { listCertificatesByNumber } from "~/lib/nwd";
 
+function getPath(filename: string) {
+  return path.join(process.cwd(), filename);
+}
+
 const fontPaths = {
   regular: "./src/assets/fonts/Inter-Regular.ttf",
   medium: "./src/assets/fonts/Inter-Medium.ttf",
   bold: "./src/assets/fonts/Inter-Bold.ttf",
   black: "./src/assets/fonts/Inter-Black.ttf",
+};
+
+const backgroundPaths = {
+  bahiaOutside: "./src/assets/certificates/bahia_01.png",
+  bahiaInside: "./src/assets/certificates/bahia_02.png",
+  templateOutside: "./src/assets/certificates/diploma-template_01.png",
+  templateInside: "./src/assets/certificates/diploma-template_02.png",
 };
 
 // Caching setup
@@ -43,9 +54,11 @@ export async function generatePDF(
   {
     debug = false,
     sort = "student",
+    style = "print",
   }: {
     debug?: boolean;
     sort?: "student" | "instructor";
+    style?: "print" | "digital";
   } = {},
 ): Promise<ReadableStream> {
   const data = await listCertificatesByNumber(certificateNumbers, sort);
@@ -68,10 +81,29 @@ export async function generatePDF(
   });
 
   for (const [key, value] of Object.entries(fontPaths)) {
-    doc.registerFont(key, path.join(process.cwd(), value));
+    doc.registerFont(key, getPath(value));
   }
 
   for await (const certificate of data) {
+    if (style === "digital") {
+      // Background
+      // Boat
+      doc.image(getPath(backgroundPaths.bahiaOutside), 0, 0, {
+        fit: [doc.page.width, doc.page.height],
+        align: "center",
+        valign: "center",
+      });
+
+      // Template
+      doc.image(getPath(backgroundPaths.templateOutside), 0, 0, {
+        cover: [doc.page.width, doc.page.height],
+        align: "center",
+        valign: "center",
+      });
+
+      doc.addPage();
+    }
+
     const degree = certificate.program.degree.title;
 
     const uniqueCompletedModules = Array.from(
@@ -104,6 +136,23 @@ export async function generatePDF(
         ? fetchLogoWithCache(certificate.location.logoCertificate.url)
         : null,
     ]);
+
+    // Background
+    if (style === "print") {
+      // Boat
+      doc.image(getPath(backgroundPaths.bahiaInside), 0, 0, {
+        fit: [doc.page.width, doc.page.height],
+        align: "center",
+        valign: "center",
+      });
+
+      // Template
+      doc.image(getPath(backgroundPaths.templateInside), 0, 0, {
+        cover: [doc.page.width, doc.page.height],
+        align: "center",
+        valign: "center",
+      });
+    }
 
     // Gear type
     doc.font("bold", 20).text(certificate.gearType.title ?? "", 476.22, 36.85, {

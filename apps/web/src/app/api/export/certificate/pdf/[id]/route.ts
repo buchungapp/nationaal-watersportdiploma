@@ -1,49 +1,57 @@
 import { constants } from "@nawadi/lib";
 import slugify from "@sindresorhus/slugify";
+import { notFound } from "next/navigation";
 import type { NextRequest } from "next/server";
+import { safeParseCertificateParams } from "~/app/(certificate)/diploma/_utils/parse-certificate-params";
 import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
-import { retrieveCertificateHandles } from "~/lib/nwd";
+import { findCertificate, retrieveCertificateById } from "~/lib/nwd";
+import { presentPDF } from "../_utils/present-pdf";
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const { searchParams } = new URL(request.url);
+  const searchParams = new URL(request.url).searchParams;
+
+  const result = safeParseCertificateParams({
+    handle: searchParams.get("handle"),
+    issuedDate: searchParams.get("issuedDate"),
+  });
+
+  if (!result) {
+    notFound();
+  }
+
+  const [certificateFromParams, certificateFromId] = await Promise.all([
+    findCertificate({
+      handle: result.handle,
+      issuedAt: result.issuedDate.toISOString(),
+    }).catch(() => notFound()),
+    context.params.then((params) =>
+      retrieveCertificateById(params.id).catch(() => notFound()),
+    ),
+  ]);
+
+  if (certificateFromParams.id !== certificateFromId.id) {
+    notFound();
+  }
 
   const type = searchParams.has("preview")
     ? ("preview" as const)
     : ("download" as const);
 
-  const { handles, settings } = await retrieveCertificateHandles(
-    (await context.params).id,
-  );
+  const filename = `${
+    searchParams.has("filename")
+      ? searchParams.get("filename")
+      : `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
+  }.pdf`;
 
   return presentPDF(
-    `${
-      settings.fileName ??
-      `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
-    }.pdf`,
-    await generatePDF(handles, { sort: settings.sort }),
+    filename,
+    await generatePDF([certificateFromParams.handle], {
+      style: "digital",
+    }),
     type,
   );
-}
-
-function presentPDF(
-  filename: string,
-  data: ReadableStream,
-  type: "download" | "preview",
-) {
-  const types = {
-    download: "attachment",
-    preview: "inline",
-  };
-
-  return new Response(data, {
-    status: 201,
-    headers: {
-      "Content-Disposition": `${types[type]}; filename="${filename}"`,
-      "Content-Type": "application/pdf",
-    },
-  });
 }
