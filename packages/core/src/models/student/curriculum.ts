@@ -173,6 +173,10 @@ export const listProgramProgresses = wrapQuery(
               s.curriculum.revision,
               "curriculumRevision",
             ),
+            curriculumStartedAt: aliasedColumn(
+              s.curriculum.startedAt,
+              "curriculumStartedAt",
+            ),
             competencies: jsonAggBuildObject(
               {
                 id: s.competency.id,
@@ -180,10 +184,13 @@ export const listProgramProgresses = wrapQuery(
                 title: s.competency.title,
                 weight: s.competency.weight,
                 type: s.competency.type,
+                requirement: s.curriculumCompetency.requirement,
                 completed: sql<null | {
-                  createdAt: Date;
+                  createdAt: string;
+                  certificateId: string;
                 }>`CASE WHEN ${s.studentCompletedCompetency.createdAt} IS NOT NULL THEN ${jsonBuildObject(
                   {
+                    certificateId: s.studentCompletedCompetency.certificateId,
                     createdAt: s.studentCompletedCompetency.createdAt,
                   },
                 )} ELSE NULL END`,
@@ -250,6 +257,7 @@ export const listProgramProgresses = wrapQuery(
               curriculum: jsonBuildObject({
                 id: withModuleCompetencies.curriculumId,
                 revision: withModuleCompetencies.curriculumRevision,
+                startedAt: withModuleCompetencies.curriculumStartedAt,
               }),
               module: jsonBuildObject({
                 id: withModuleCompetencies.moduleId,
@@ -260,11 +268,18 @@ export const listProgramProgresses = wrapQuery(
               competencies: withModuleCompetencies.competencies,
             },
             {
-              // @ts-expect-error - The module weight doesn't have the column type because of the aliased column
-              orderBy: {
-                colName: withModuleCompetencies.moduleWeight,
-                direction: "ASC",
-              },
+              orderBy: [
+                {
+                  // @ts-expect-error - The curriculum started at doesn't have the column type because of the aliased column
+                  colName: withModuleCompetencies.curriculumStartedAt,
+                  direction: "ASC",
+                },
+                {
+                  // @ts-expect-error - The module weight doesn't have the column type because of the aliased column
+                  colName: withModuleCompetencies.moduleWeight,
+                  direction: "ASC",
+                },
+              ],
             },
           ).as("modules"),
         })
@@ -292,7 +307,6 @@ export const listProgramProgresses = wrapQuery(
         .groupBy(s.gearType.id, s.program.id, s.degree.id);
 
       const rows = await curriculumRows;
-      // console.log(rows[0]!.modules[0]!.module.weight);
 
       return rows;
     },

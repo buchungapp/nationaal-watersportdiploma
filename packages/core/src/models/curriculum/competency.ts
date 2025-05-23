@@ -1,9 +1,13 @@
 import { schema as s } from "@nawadi/db";
+import { type SQL, and } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { singleRow } from "../../utils/data-helpers.js";
 import {
+  applyArrayOrEqual,
+  singleOrArray,
   successfulCreateResponse,
+  uuidSchema,
   withZod,
   wrapCommand,
   wrapQuery,
@@ -44,9 +48,44 @@ export const create = wrapCommand(
 
 export const list = wrapQuery(
   "curriculum.competency.list",
-  withZod(z.void(), selectSchema.array(), async () => {
-    const query = useQuery();
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            curriculumId: singleOrArray(uuidSchema).optional(),
+            moduleId: singleOrArray(uuidSchema).optional(),
+            competencyId: singleOrArray(uuidSchema).optional(),
+          })
+          .default({}),
+      })
+      .default({}),
+    selectSchema.array(),
+    async ({ filter }) => {
+      const query = useQuery();
 
-    return await query.select().from(s.curriculumCompetency);
-  }),
+      const whereClausules: (SQL | undefined)[] = [
+        filter.curriculumId
+          ? applyArrayOrEqual(
+              s.curriculumCompetency.curriculumId,
+              filter.curriculumId,
+            )
+          : undefined,
+        filter.moduleId
+          ? applyArrayOrEqual(s.curriculumCompetency.moduleId, filter.moduleId)
+          : undefined,
+        filter.competencyId
+          ? applyArrayOrEqual(
+              s.curriculumCompetency.competencyId,
+              filter.competencyId,
+            )
+          : undefined,
+      ];
+
+      return await query
+        .select()
+        .from(s.curriculumCompetency)
+        .where(and(...whereClausules));
+    },
+  ),
 );
