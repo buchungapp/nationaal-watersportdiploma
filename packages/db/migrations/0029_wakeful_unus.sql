@@ -1,0 +1,1 @@
+CREATE INDEX "media_idx_name_search" ON "media" USING gin (to_tsvector('simple', COALESCE("name", '')));

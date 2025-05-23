@@ -2691,25 +2691,31 @@ export async function updateEmailForPerson({
   });
 }
 
-export const listKnowledgeCenterDocuments = cache(async () => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
+export const listKnowledgeCenterDocuments = cache(
+  async (filter?: {
+    q?: string;
+  }) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
 
-    const activeActorTypes = await User.Actor.listActiveTypesForUser({
-      userId: user.authUserId,
+      const activeActorTypes = await User.Actor.listActiveTypesForUser({
+        userId: user.authUserId,
+      });
+
+      if (
+        !activeActorTypes.some((type) =>
+          ["instructor", "location_admin"].includes(type),
+        )
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      return await Platform.Media.listKnowledgeCenterDocuments({
+        filter,
+      });
     });
-
-    if (
-      !activeActorTypes.some((type) =>
-        ["instructor", "location_admin"].includes(type),
-      )
-    ) {
-      throw new Error("Unauthorized");
-    }
-
-    return await Platform.Media.listKnowledgeCenterDocuments();
-  });
-});
+  },
+);
 
 export const downloadKnowledgeCenterDocument = cache(
   async (documentId: string, forceDownload = true) => {
