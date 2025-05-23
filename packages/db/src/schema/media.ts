@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   foreignKey,
+  index,
   jsonb,
   pgEnum,
   pgTable,
@@ -44,6 +45,10 @@ export const media = pgTable(
     ...timestamps,
   },
   (table) => [
+    index("media_idx_name_search").using(
+      "gin",
+      sql`to_tsvector('simple', COALESCE(${table.name}, ''))`,
+    ),
     foreignKey({
       columns: [table.object_id],
       foreignColumns: [_objectTable.id],
