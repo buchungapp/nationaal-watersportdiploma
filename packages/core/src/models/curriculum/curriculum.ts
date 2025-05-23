@@ -9,6 +9,7 @@ import {
   exists,
   inArray,
   isNotNull,
+  isNull,
   lte,
   sql,
 } from "drizzle-orm";
@@ -35,7 +36,6 @@ export const create = wrapCommand(
     insertSchema.pick({
       programId: true,
       revision: true,
-      startedAt: true,
     }),
     successfulCreateResponse,
     async (input) => {
@@ -46,7 +46,6 @@ export const create = wrapCommand(
         .values({
           programId: input.programId,
           revision: input.revision,
-          startedAt: input.startedAt,
         })
         .returning({ id: s.curriculum.id });
 
@@ -503,6 +502,34 @@ export const copy = wrapCommand(
 
         return { id: newCurriculum };
       });
+    },
+  ),
+);
+
+export const start = wrapCommand(
+  "curriculum.curriculum.start",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+      startedAt: z.string().datetime({ offset: true }).optional(),
+    }),
+    successfulCreateResponse,
+    async ({ curriculumId, startedAt }) => {
+      const query = useQuery();
+      const curriculum = await query
+        .update(s.curriculum)
+        .set({ startedAt: startedAt ?? sql`NOW()` })
+        .where(
+          // @TODO: Check if curriculum contains at least one valid module
+          and(
+            eq(s.curriculum.id, curriculumId),
+            isNull(s.curriculum.startedAt),
+          ),
+        )
+        .returning({ id: s.curriculum.id })
+        .then(singleRow);
+
+      return { id: curriculum.id };
     },
   ),
 );

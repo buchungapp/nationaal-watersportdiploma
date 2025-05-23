@@ -26,7 +26,7 @@ export function defaultTimestamps<T>(
       ) {
         sanitizedObj[key] = value === null ? null : DEFAULT_TEST_TIMESTAMP;
       } else {
-        sanitizedObj[key] = defaultTimestamps(value);
+        sanitizedObj[key] = defaultTimestamps(value, additionalFields);
       }
     }
 
