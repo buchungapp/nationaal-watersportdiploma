@@ -1,7 +1,15 @@
 import assert from "node:assert";
 import crypto from "node:crypto";
 import { schema as s, uncontrolledSchema } from "@nawadi/db";
-import { and, asc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";
 import { imageSize } from "image-size";
 import { z } from "zod";
@@ -245,8 +253,8 @@ export const listImages = wrapQuery(
   }),
 );
 
-export const listFiles = wrapQuery(
-  "platform.media.listFiles",
+export const listKnowledgeCenterDocuments = wrapQuery(
+  "platform.media.listKnowledgeCenterDocuments",
   withZod(z.void(), async () => {
     const query = useQuery();
 
@@ -260,6 +268,7 @@ export const listFiles = wrapQuery(
       .from(s.media)
       .where(
         and(
+          isNotNull(s.media.name),
           isNull(s.media.deletedAt),
           isNull(s.media.locationId),
           eq(s.media.type, "file"),
