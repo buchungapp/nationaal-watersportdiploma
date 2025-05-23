@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import { schema as s, uncontrolledSchema } from "@nawadi/db";
 import {
   and,
+  arrayContains,
   asc,
   eq,
   getTableColumns,
@@ -268,7 +269,10 @@ export const listKnowledgeCenterDocuments = wrapQuery(
       .from(s.media)
       .where(
         and(
+          // Knowledge center documents have a name
           isNotNull(s.media.name),
+          arrayContains(s.media.tags, ["knowledge-base"]),
+
           isNull(s.media.deletedAt),
           isNull(s.media.locationId),
           eq(s.media.type, "file"),
