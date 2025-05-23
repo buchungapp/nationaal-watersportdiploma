@@ -1,5 +1,32 @@
 import { Badge } from "./badge";
 
+export const DEGREE_COLORS = {
+  "niveau-1": "red",
+  "niveau-2": "yellow",
+  "niveau-3": "green",
+  "niveau-4": "blue",
+  "niveau-a": "purple",
+  "niveau-b": "orange",
+  "niveau-c": "green",
+} as const;
+
+export function DegreeBadge({
+  handle,
+  title,
+}:
+  | {
+      handle: keyof typeof DEGREE_COLORS;
+      title: string;
+    }
+  | {
+      handle: null;
+      title: null;
+    }) {
+  if (!handle) return null;
+
+  return <Badge color={DEGREE_COLORS[handle]}>{title}</Badge>;
+}
+
 export function CompetencyTypeBadge({
   type,
 }: {
