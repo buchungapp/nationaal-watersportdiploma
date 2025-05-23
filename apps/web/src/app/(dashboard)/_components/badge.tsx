@@ -90,3 +90,69 @@ export const BadgeButton = React.forwardRef(function BadgeButton(
     </Headless.Button>
   );
 });
+
+export const BadgeCheckbox = React.forwardRef(function BadgeCheckbox(
+  {
+    color = "zinc",
+    checkedColor = "green",
+    className,
+    children,
+    hidden,
+    ...props
+  }: BadgeProps & {
+    checkedColor?: keyof typeof colors;
+    children: React.ReactNode;
+    hidden?: boolean;
+  } & Headless.CheckboxProps,
+  ref: React.ForwardedRef<HTMLButtonElement>,
+) {
+  return (
+    <Headless.Checkbox
+      {...props}
+      ref={ref}
+      className={clsx(
+        className,
+        "group relative cursor-default rounded-md focus:outline-hidden data-focus:outline data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
+        hidden ? "hidden" : "inline-flex",
+      )}
+    >
+      {({ checked }) => (
+        <TouchTarget>
+          <Badge color={checked ? checkedColor : color}>
+            <svg
+              className="stroke-current size-3.5"
+              viewBox="0 0 14 14"
+              fill="none"
+            >
+              {/* Checkmark icon */}
+              <path
+                className="opacity-0 group-data-checked:opacity-100"
+                d="M3 8L6 11L11 3.5"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* Indeterminate icon */}
+              <path
+                className="opacity-0 group-data-indeterminate:opacity-100"
+                d="M3 7H11"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              {/* X icon for unchecked state */}
+              <path
+                className="opacity-100 group-data-checked:opacity-0 group-data-indeterminate:opacity-0"
+                d="M3 3L11 11M3 11L11 3"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {children}
+          </Badge>
+        </TouchTarget>
+      )}
+    </Headless.Checkbox>
+  );
+});

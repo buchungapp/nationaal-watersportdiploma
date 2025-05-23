@@ -4,7 +4,7 @@ import {
 } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import React, { Suspense } from "react";
-import { SWRConfig } from "swr";
+import { SWRConfig, unstable_serialize } from "swr";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -16,7 +16,7 @@ import dayjs from "~/lib/dayjs";
 import {
   listCompetencyProgressInCohortForStudent,
   listCompletedCompetenciesByStudentCurriculumId,
-  listPrograms,
+  listProgramsForLocation,
   retrieveCohortByHandle,
   retrieveCurriculumById,
   retrieveLocationByHandle,
@@ -66,7 +66,8 @@ async function CourseCardContent(props: CourseCardProps) {
             // Note that there is no `await` here,
             // so it only blocks rendering of components that
             // actually rely on this data.
-            allPrograms: listPrograms(),
+            [unstable_serialize(["allPrograms", location.id])]:
+              listProgramsForLocation(location.id),
           },
         }}
       >
@@ -74,6 +75,7 @@ async function CourseCardContent(props: CourseCardProps) {
           allocationId={allocation.id}
           cohortId={cohort.id}
           personId={allocation.person.id}
+          locationId={location.id}
         />
       </SWRConfig>
     );

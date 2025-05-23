@@ -1,11 +1,17 @@
 "use server";
 
-import { listCurriculaByProgram, listGearTypesByCurriculum } from "~/lib/nwd";
+import {
+  listCurriculaByProgram,
+  listGearTypesByCurriculumForLocation,
+} from "~/lib/nwd";
 
 export async function getCurriculaByProgram(programId: string) {
   return await listCurriculaByProgram(programId, true);
 }
 
-export async function getGearTypesByCurriculum(curriculumId: string) {
-  return await listGearTypesByCurriculum(curriculumId);
+export async function getGearTypesByCurriculumForLocation(
+  locationId: string,
+  curriculumId: string,
+) {
+  return await listGearTypesByCurriculumForLocation(locationId, curriculumId);
 }
