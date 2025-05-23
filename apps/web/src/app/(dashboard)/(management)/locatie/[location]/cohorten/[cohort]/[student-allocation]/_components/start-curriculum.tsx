@@ -9,6 +9,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import {
@@ -37,9 +38,7 @@ export function StartStudentCurriculum({
   allocationId: string;
   personId: string;
 }) {
-  const [programQuery, setProgramQuery] = useState("");
-
-  const { execute, input } = useAction(
+  const { execute, input, result } = useAction(
     enrollStudentsInCurriculumInCohortAction.bind(null, cohortId, [
       { allocationId, personId },
     ]),
@@ -111,57 +110,44 @@ export function StartStudentCurriculum({
 
         <Field className="flex-1">
           <Label>Programma</Label>
-          {/* TODO: this combobox is temporary used should be from catalyst */}
           <Combobox
             name="program"
-            setQuery={setProgramQuery}
-            displayValue={(value: string) => {
-              const program = programs.find((program) => program.id === value);
-
-              if (!program) {
-                return "";
-              }
+            options={programs.map((program) => program.id)}
+            displayValue={(programId) => {
+              const program = ensuredFind(
+                programs,
+                (program) => program.id === programId,
+              );
 
               return (
-                program?.title ??
-                `${program?.course.title} ${program?.degree.title}`
+                program.title ??
+                `${program.course.title} ${program.degree.title}`
               );
             }}
-            onChange={(value: unknown) => {
-              if (!(typeof value === "string" || value === null)) {
-                throw new Error("Invalid value for program");
-              }
-
-              setSelectedProgram(value);
-            }}
+            onChange={setSelectedProgram}
             value={selectedProgram}
             defaultValue={
               programs?.find(
                 (program) => program.id === getInputValue("curriculumId"),
               )?.id ?? null
             }
-            // invalid={!!state?.errors.curriculumId}
+            invalid={!!result?.validationErrors?.curriculumId}
           >
-            {programs
-              .filter((x) => {
-                const programTitle =
-                  x.title ?? `${x.course.title} ${x.degree.title}`;
+            {(programId) => {
+              const program = ensuredFind(
+                programs,
+                (program) => program.id === programId,
+              );
 
-                return (
-                  programQuery.length < 1 ||
-                  programTitle
-                    ?.toLowerCase()
-                    .includes(programQuery.toLowerCase())
-                );
-              })
-              .map((program) => (
-                <ComboboxOption key={program.id} value={program.id}>
+              return (
+                <ComboboxOption key={programId} value={programId}>
                   <ComboboxLabel>
                     {program.title ??
                       `${program.course.title} ${program.degree.title}`}
                   </ComboboxLabel>
                 </ComboboxOption>
-              ))}
+              );
+            }}
           </Combobox>
         </Field>
         <Field className="flex-1">
@@ -172,7 +158,7 @@ export function StartStudentCurriculum({
               !(selectedProgram && !!activeCurriculumForProgram?.curriculum)
             }
             defaultValue={getInputValue("gearTypeId")}
-            // invalid={!!state?.errors.gearTypeId}
+            invalid={!!result?.validationErrors?.gearTypeId}
           >
             {activeCurriculumForProgram?.gearTypes.map((gearType) => (
               <ListboxOption key={gearType.id} value={gearType.id}>

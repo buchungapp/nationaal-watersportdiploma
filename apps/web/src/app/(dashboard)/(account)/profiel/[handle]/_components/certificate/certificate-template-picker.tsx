@@ -3,6 +3,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
@@ -81,15 +82,15 @@ export function CertificateTemplatePicker({
         <Combobox
           value={selectedCertificateTemplate}
           setQuery={setTemplateQuery}
-          onChange={(value) => setSelectedCertificateTemplate(value)}
+          onChange={setSelectedCertificateTemplate}
           displayValue={(value) => {
             if (value === "other") return "Overig";
 
-            const template = certificateTemplates.find(
+            const template = ensuredFind(
+              certificateTemplates,
               (template) => template.id === value,
             );
 
-            if (!template) return "";
             return templateLabel(template);
           }}
         >
@@ -104,7 +105,7 @@ export function CertificateTemplatePicker({
           ) : null}
           {categories.map((category) => (
             <Fragment key={category}>
-              <p className="ml-2 font-semibold text-xs text-zinc-500 mb-1 uppercase">
+              <p className="mb-1 ml-2 font-semibold text-zinc-500 text-xs uppercase">
                 {category}
               </p>
               {filteredTemplates
@@ -114,7 +115,7 @@ export function CertificateTemplatePicker({
                     <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
                   </ComboboxOption>
                 ))}
-              <Divider className="mt-1 mb-2 last:hidden" />
+              <Divider className="last:hidden mt-1 mb-2" />
             </Fragment>
           ))}
           {hasQuery ? <OtherTemplateOption /> : null}
