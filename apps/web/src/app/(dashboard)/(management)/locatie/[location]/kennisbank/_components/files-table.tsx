@@ -26,7 +26,7 @@ type FilesTableProps = {
 function FilesTableInner({ children }: PropsWithChildren) {
   return (
     <>
-      <Search className="mt-4" />
+      <Search className="mt-4 max-w-lg" />
       <Table
         className="mt-4 [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]"
         dense
