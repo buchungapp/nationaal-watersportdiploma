@@ -100,7 +100,7 @@ export function ProgressCardTypeBadge() {
   return (
     <span
       className={clsx(
-        "max-sm:self-end row-start-1",
+        "max-sm:col-span-2 row-start-1",
         "inline-flex items-center gap-x-2 px-3 py-1 rounded-full w-fit font-semibold sm:text-xs/5 text-sm/5 uppercase",
         "bg-zinc-600/10 text-zinc-700 group-data-hover:bg-zinc-600/20 dark:bg-white/5 dark:text-zinc-400 dark:group-data-hover:bg-white/10",
       )}
@@ -131,7 +131,7 @@ export function ProgressCardTitleColored({ children }: PropsWithChildren) {
   return (
     <span
       className={clsx(
-        "max-sm:-mt-2",
+        "max-sm:-mt-1",
         type === "cursus" && "text-branding-dark",
         type === "opleiding" && "text-branding-light",
         type === "diploma" && "text-branding-orange",
@@ -147,7 +147,7 @@ export function ProgressCardDegree({ children }: PropsWithChildren) {
   return (
     <span
       className={clsx(
-        "flex justify-center items-center sm:row-span-2 rounded-full size-15 font-black text-3xl",
+        "flex justify-center items-center sm:row-span-2 max-sm:row-start-3 rounded-full size-15 font-black text-3xl",
         type === "cursus" && "bg-branding-dark/20 text-branding-dark",
         type === "opleiding" && "bg-branding-light/20 text-branding-light",
         type === "diploma" && "bg-branding-orange/20 text-branding-orange",
