@@ -162,7 +162,11 @@ async function CohortProgressContent({ params }: CohortProgressProps) {
 }
 
 function CohortProgressFallback() {
-  return "TODO";
+  return (
+    <ul className="space-y-2">
+      <li className="bg-gray-200 rounded w-full h-68.5 animate-pulse" />
+    </ul>
+  );
 }
 
 export function CohortProgress(props: CohortProgressProps) {

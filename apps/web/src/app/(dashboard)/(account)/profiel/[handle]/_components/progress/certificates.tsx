@@ -153,6 +153,7 @@ async function CertificatesContent({ params }: CertificatesProps) {
                   color="white"
                   target="_blank"
                   href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+                  className="-my-0.5"
                 >
                   <ArrowTopRightOnSquareIcon />
                   Bekijk details
@@ -167,7 +168,11 @@ async function CertificatesContent({ params }: CertificatesProps) {
 }
 
 function CertificatesFallback() {
-  return "TODO";
+  return (
+    <ul className="space-y-2">
+      <li className="bg-gray-200 rounded w-full h-68.5 animate-pulse" />
+    </ul>
+  );
 }
 
 export function Certificates(props: CertificatesProps) {

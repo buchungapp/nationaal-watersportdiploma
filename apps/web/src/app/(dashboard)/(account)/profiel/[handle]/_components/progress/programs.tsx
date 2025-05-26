@@ -230,7 +230,11 @@ async function ProgramsContent({ params }: ProgramsProps) {
 }
 
 function ProgramsFallback() {
-  return "TODO";
+  return (
+    <ul className="space-y-2">
+      <li className="bg-gray-200 rounded w-full h-81.75 animate-pulse" />
+    </ul>
+  );
 }
 
 export function Programs(props: ProgramsProps) {
