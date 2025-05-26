@@ -12,7 +12,7 @@ export function TabList({ children, ...props }: Headless.TabListProps) {
     <Headless.TabList
       {...props}
       className={clsx(
-        "flex gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg w-full",
+        "flex sm:flex-row flex-col gap-1 bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg w-full",
         props.className,
       )}
     >
@@ -27,7 +27,7 @@ export function Tab({ children, ...props }: Headless.TabProps) {
       {...props}
       className={clsx(
         props.className,
-        "flex-1 px-3 py-2 rounded-md font-medium text-sm transition-colors",
+        "flex-1 px-3 py-2 rounded-md font-medium text-sm transition-colors group/tab text-left sm:text-center",
         "focus:outline-hidden data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
         "data-selected:bg-white data-selected:text-zinc-900 data-selected:shadow-sm data-selected:dark:bg-zinc-700 data-selected:dark:text-white",
         "text-zinc-600 hover:bg-white/50 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-700/50 dark:hover:text-white",

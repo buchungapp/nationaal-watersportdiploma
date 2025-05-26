@@ -15,3 +15,24 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
+
+@keyframes wave {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-wave-slow {
+  animation: wave 100s linear infinite;
+}
+
+.animate-wave-medium {
+  animation: wave 80s linear infinite;
+}
+
+.animate-wave-fast {
+  animation: wave 60s linear infinite;
+}

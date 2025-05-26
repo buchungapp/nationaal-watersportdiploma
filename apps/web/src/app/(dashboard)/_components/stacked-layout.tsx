@@ -1,6 +1,7 @@
 "use client";
 
 import * as Headless from "@headlessui/react";
+import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import type React from "react";
 import { useState } from "react";
@@ -84,7 +85,7 @@ export function StackedLayout({
       <main className="flex flex-col flex-1 lg:px-2 pb-2">
         {/* <div className="lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs p-6 lg:p-10 lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10 grow"> */}
         <div className="p-6 lg:p-10 grow">
-          <div className="mx-auto max-w-6xl">{children}</div>
+          <div className="mx-auto max-w-7xl">{children}</div>
         </div>
         {/* </div> */}
       </main>
@@ -95,16 +96,55 @@ export function StackedLayout({
 export function StackedLayoutCard({
   children,
   className,
-}: React.PropsWithChildren<{ className?: string }>) {
+  transparent,
+}: React.PropsWithChildren<{ className?: string; transparent?: boolean }>) {
   return (
     <div
       className={clsx(
-        "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
-        "lg:p-5",
+        transparent ? "lg:px-5 lg:py-2" : "lg:p-5",
+        !transparent &&
+          "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
         className,
       )}
     >
       {children}
     </div>
+  );
+}
+
+export function StackedLayoutCardDisclosure({
+  children,
+  className,
+  transparent,
+  header,
+  ...props
+}: React.PropsWithChildren<{
+  className?: string;
+  transparent?: boolean;
+  header: React.ReactNode;
+}> &
+  Headless.DisclosureProps) {
+  return (
+    <div
+      className={clsx(
+        transparent ? "lg:px-5 lg:py-2" : "lg:p-5",
+        !transparent &&
+          "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
+        className,
+      )}
+    >
+      <Headless.Disclosure {...props}>
+        <Headless.DisclosureButton className="group/stacked-layout-card-disclosure text-left">
+          {header}
+        </Headless.DisclosureButton>
+        <Headless.DisclosurePanel>{children}</Headless.DisclosurePanel>
+      </Headless.Disclosure>
+    </div>
+  );
+}
+
+export function StackedLayoutCardDisclosureChevron() {
+  return (
+    <ChevronDownIcon className="size-4 group-data-open/stacked-layout-card-disclosure:rotate-180 transition" />
   );
 }

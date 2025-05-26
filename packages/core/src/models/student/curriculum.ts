@@ -1,5 +1,16 @@
 import { schema as s } from "@nawadi/db";
-import { and, eq, exists, isNotNull, isNull, min, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  exists,
+  isNotNull,
+  isNull,
+  lte,
+  min,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
@@ -187,11 +198,19 @@ export const listProgramProgresses = wrapQuery(
                 requirement: s.curriculumCompetency.requirement,
                 completed: sql<null | {
                   createdAt: string;
-                  certificateId: string;
-                }>`CASE WHEN ${s.studentCompletedCompetency.createdAt} IS NOT NULL THEN ${jsonBuildObject(
+                  certificate: {
+                    id: string;
+                    handle: string;
+                    issuedAt: string;
+                  };
+                }>`CASE WHEN ${s.certificate.id} IS NOT NULL THEN ${jsonBuildObject(
                   {
-                    certificateId: s.studentCompletedCompetency.certificateId,
                     createdAt: s.studentCompletedCompetency.createdAt,
+                    certificate: jsonBuildObject({
+                      id: s.certificate.id,
+                      handle: s.certificate.handle,
+                      issuedAt: s.certificate.issuedAt,
+                    }),
                   },
                 )} ELSE NULL END`,
               },
@@ -228,6 +247,17 @@ export const listProgramProgresses = wrapQuery(
             eq(
               s.studentCompletedCompetency.competencyId,
               s.curriculumCompetency.id,
+            ),
+          )
+          .leftJoin(
+            s.certificate,
+            and(
+              eq(s.certificate.id, s.studentCompletedCompetency.certificateId),
+              or(
+                isNull(s.certificate.visibleFrom),
+                lte(s.certificate.visibleFrom, sql`NOW()`),
+              ),
+              isNotNull(s.certificate.issuedAt),
             ),
           )
           .groupBy(s.module.id, s.curriculum.id),
@@ -304,7 +334,8 @@ export const listProgramProgresses = wrapQuery(
             isNull(s.studentCurriculum.deletedAt),
           ),
         )
-        .groupBy(s.gearType.id, s.program.id, s.degree.id);
+        .groupBy(s.gearType.id, s.program.id, s.degree.id)
+        .orderBy(desc(min(s.studentCurriculum.startedAt)));
 
       const rows = await curriculumRows;
 

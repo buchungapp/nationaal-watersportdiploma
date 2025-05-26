@@ -1914,6 +1914,19 @@ export const listProgramProgressesByPersonId = cache(
   },
 );
 
+export const listCompetencyProgressesByPersonId = cache(
+  async (personId: string, respectProgressVisibility?: boolean) => {
+    return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
+      return await Cohort.StudentProgress.listByPersonId({
+        personId,
+        respectProgressVisibility,
+      });
+    });
+  },
+);
+
 export const listCompletedCompetenciesByStudentCurriculumId = cache(
   async (studentCurriculumId: string) => {
     return makeRequest(async () => {

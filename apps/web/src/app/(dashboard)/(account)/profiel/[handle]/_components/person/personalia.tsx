@@ -3,7 +3,7 @@ import {
   DescriptionDetails,
   DescriptionList,
   DescriptionTerm,
-} from "~/app/(dashboard)/_components/description-list";
+} from "~/app/(dashboard)/_components/description-list-v2";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
@@ -31,6 +31,9 @@ async function PersonaliaContent({
 
   return (
     <DescriptionList>
+      <DescriptionTerm>NWD-ID</DescriptionTerm>
+      <DescriptionDetails>{person.handle}</DescriptionDetails>
+
       <DescriptionTerm>Voornaam</DescriptionTerm>
       <DescriptionDetails>{person.firstName}</DescriptionDetails>
 
@@ -62,55 +65,62 @@ export async function Personalia({
   params,
 }: { params: Promise<{ handle: string }> }) {
   return (
-    <StackedLayoutCard className="lg:col-start-3 lg:row-start-2 mb-6">
-      <div className="flex justify-between items-center">
-        <Subheading>Personalia</Subheading>
-        <Suspense
-          fallback={
-            <div className="bg-slate-200 -my-1.5 rounded-lg size-9 animate-pulse" />
-          }
-        >
-          <ActionButton params={params} />
-        </Suspense>
-      </div>
-      <Divider className="mt-4" />
+    <StackedLayoutCard>
+      <Subheading className="mb-3">Personalia</Subheading>
       <Suspense
         fallback={
           <DescriptionList>
+            <DescriptionTerm>NWD-ID</DescriptionTerm>
+            <DescriptionDetails>
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+            </DescriptionDetails>
+
             <DescriptionTerm>Voornaam</DescriptionTerm>
             <DescriptionDetails>
-              <span className="inline-block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
 
             <DescriptionTerm>Tussenvoegsel</DescriptionTerm>
             <DescriptionDetails>
-              <span className="inline-block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
 
             <DescriptionTerm>Achternaam</DescriptionTerm>
             <DescriptionDetails>
-              <span className="inline-block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
 
             <DescriptionTerm>Geboortedatum</DescriptionTerm>
             <DescriptionDetails>
-              <span className="inline-block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
 
             <DescriptionTerm>Geboorteplaats</DescriptionTerm>
             <DescriptionDetails>
-              <span className="inline-block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
 
             <DescriptionTerm>Geboorteland</DescriptionTerm>
             <DescriptionDetails>
-              <span className="inline-block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
           </DescriptionList>
         }
       >
         <PersonaliaContent params={params} />
       </Suspense>
+
+      <Divider className="my-4" />
+
+      <div className="flex justify-end">
+        <Suspense
+          fallback={
+            <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+          }
+        >
+          <ActionButton params={params} />
+        </Suspense>
+      </div>
     </StackedLayoutCard>
   );
 }

@@ -5,7 +5,7 @@ import { withTestTransaction } from "../../contexts/index.js";
 import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.js";
 import * as Course from "../course/index.js";
 import * as Curriculum from "../curriculum/index.js";
-import { Location, Student } from "../index.js";
+import { Certificate, Location, Student } from "../index.js";
 import * as User from "../user/index.js";
 import * as StudentCurriculum from "./curriculum.js";
 
@@ -404,6 +404,8 @@ describe("student curriculum list program progresses", () => {
         certificateId,
       });
 
+      const certificate = await Certificate.byId(certificateId);
+
       const list = await StudentCurriculum.listProgramProgresses({
         personId,
       });
@@ -411,101 +413,108 @@ describe("student curriculum list program progresses", () => {
       const [item] = list;
       assert.ok(item);
 
-      assert.deepStrictEqual(defaultTimestamps(item, ["startedAt"]), {
-        startedAt: DEFAULT_TEST_TIMESTAMP,
-        gearType: {
-          id: gearTypeId,
-          handle: "gt1",
-          title: "gear-type-1",
-        },
-        program: {
-          id: programId,
-          handle: "pr1",
-          title: "program-1",
-        },
-        degree: {
-          id: degreeId,
-          handle: "dg1",
-          title: "degree-1",
-        },
-        modules: [
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[0].id,
-              handle: "mo1",
-              title: "module-1",
-              weight: 100,
-            },
-            competencies: [
-              {
-                id: modules[0].competencies[0],
-                type: "knowledge",
-                title: "competency-1",
-                handle: "cp1",
+      assert.deepStrictEqual(
+        defaultTimestamps(item, ["startedAt", "issuedAt"]),
+        {
+          startedAt: DEFAULT_TEST_TIMESTAMP,
+          gearType: {
+            id: gearTypeId,
+            handle: "gt1",
+            title: "gear-type-1",
+          },
+          program: {
+            id: programId,
+            handle: "pr1",
+            title: "program-1",
+          },
+          degree: {
+            id: degreeId,
+            handle: "dg1",
+            title: "degree-1",
+          },
+          modules: [
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[0].id,
+                handle: "mo1",
+                title: "module-1",
                 weight: 100,
-                requirement: "This is the 1 requirement",
-                completed: {
-                  createdAt: DEFAULT_TEST_TIMESTAMP,
-                  certificateId: certificateId,
+              },
+              competencies: [
+                {
+                  id: modules[0].competencies[0],
+                  type: "knowledge",
+                  title: "competency-1",
+                  handle: "cp1",
+                  weight: 100,
+                  requirement: "This is the 1 requirement",
+                  completed: {
+                    createdAt: DEFAULT_TEST_TIMESTAMP,
+                    certificate: {
+                      id: certificate.id,
+                      handle: certificate.handle,
+                      issuedAt: DEFAULT_TEST_TIMESTAMP,
+                    },
+                  },
                 },
+              ],
+            },
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[1].id,
-              handle: "mo2",
-              title: "module-2",
-              weight: 101,
-            },
-            competencies: [
-              {
-                id: modules[1].competencies[0],
-                type: "skill",
-                title: "competency-2",
-                handle: "cp2",
+              module: {
+                id: modules[1].id,
+                handle: "mo2",
+                title: "module-2",
                 weight: 101,
-                requirement: "This is the 2 requirement",
-                completed: null,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
+              competencies: [
+                {
+                  id: modules[1].competencies[0],
+                  type: "skill",
+                  title: "competency-2",
+                  handle: "cp2",
+                  weight: 101,
+                  requirement: "This is the 2 requirement",
+                  completed: null,
+                },
+              ],
             },
-            module: {
-              id: modules[2].id,
-              handle: "mo3",
-              title: "module-3",
-              weight: 102,
-            },
-            competencies: [
-              {
-                id: modules[2].competencies[0],
-                type: "knowledge",
-                title: "competency-3",
-                handle: "cp3",
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[2].id,
+                handle: "mo3",
+                title: "module-3",
                 weight: 102,
-                requirement: "This is the 3 requirement",
-                completed: null,
               },
-            ],
-          },
-        ],
-      } satisfies typeof item);
+              competencies: [
+                {
+                  id: modules[2].competencies[0],
+                  type: "knowledge",
+                  title: "competency-3",
+                  handle: "cp3",
+                  weight: 102,
+                  requirement: "This is the 3 requirement",
+                  completed: null,
+                },
+              ],
+            },
+          ],
+        } satisfies typeof item,
+      );
     }));
 
   it("should list a single program progress with two competencies and modules completed, with separate certificates", () =>
@@ -543,6 +552,8 @@ describe("student curriculum list program progresses", () => {
         certificateId: certificateId1,
       });
 
+      const certificate1 = await Certificate.byId(certificateId1);
+
       const { id: certificateId2 } = await Student.Certificate.startCertificate(
         {
           studentCurriculumId,
@@ -560,6 +571,8 @@ describe("student curriculum list program progresses", () => {
         certificateId: certificateId2,
       });
 
+      const certificate2 = await Certificate.byId(certificateId2);
+
       const list = await StudentCurriculum.listProgramProgresses({
         personId,
       });
@@ -567,104 +580,115 @@ describe("student curriculum list program progresses", () => {
       const [item] = list;
       assert.ok(item);
 
-      assert.deepStrictEqual(defaultTimestamps(item, ["startedAt"]), {
-        startedAt: DEFAULT_TEST_TIMESTAMP,
-        gearType: {
-          id: gearTypeId,
-          handle: "gt1",
-          title: "gear-type-1",
-        },
-        program: {
-          id: programId,
-          handle: "pr1",
-          title: "program-1",
-        },
-        degree: {
-          id: degreeId,
-          handle: "dg1",
-          title: "degree-1",
-        },
-        modules: [
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[0].id,
-              handle: "mo1",
-              title: "module-1",
-              weight: 100,
-            },
-            competencies: [
-              {
-                id: modules[0].competencies[0],
-                type: "knowledge",
-                title: "competency-1",
-                handle: "cp1",
+      assert.deepStrictEqual(
+        defaultTimestamps(item, ["startedAt", "issuedAt"]),
+        {
+          startedAt: DEFAULT_TEST_TIMESTAMP,
+          gearType: {
+            id: gearTypeId,
+            handle: "gt1",
+            title: "gear-type-1",
+          },
+          program: {
+            id: programId,
+            handle: "pr1",
+            title: "program-1",
+          },
+          degree: {
+            id: degreeId,
+            handle: "dg1",
+            title: "degree-1",
+          },
+          modules: [
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[0].id,
+                handle: "mo1",
+                title: "module-1",
                 weight: 100,
-                requirement: "This is the 1 requirement",
-                completed: {
-                  createdAt: DEFAULT_TEST_TIMESTAMP,
-                  certificateId: certificateId1,
-                },
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
+              competencies: [
+                {
+                  id: modules[0].competencies[0],
+                  type: "knowledge",
+                  title: "competency-1",
+                  handle: "cp1",
+                  weight: 100,
+                  requirement: "This is the 1 requirement",
+                  completed: {
+                    createdAt: DEFAULT_TEST_TIMESTAMP,
+                    certificate: {
+                      id: certificate1.id,
+                      handle: certificate1.handle,
+                      issuedAt: DEFAULT_TEST_TIMESTAMP,
+                    },
+                  },
+                },
+              ],
             },
-            module: {
-              id: modules[1].id,
-              handle: "mo2",
-              title: "module-2",
-              weight: 101,
-            },
-            competencies: [
-              {
-                id: modules[1].competencies[0],
-                type: "skill",
-                title: "competency-2",
-                handle: "cp2",
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[1].id,
+                handle: "mo2",
+                title: "module-2",
                 weight: 101,
-                requirement: "This is the 2 requirement",
-                completed: {
-                  createdAt: DEFAULT_TEST_TIMESTAMP,
-                  certificateId: certificateId2,
+              },
+              competencies: [
+                {
+                  id: modules[1].competencies[0],
+                  type: "skill",
+                  title: "competency-2",
+                  handle: "cp2",
+                  weight: 101,
+                  requirement: "This is the 2 requirement",
+                  completed: {
+                    createdAt: DEFAULT_TEST_TIMESTAMP,
+                    certificate: {
+                      id: certificate2.id,
+                      handle: certificate2.handle,
+                      issuedAt: DEFAULT_TEST_TIMESTAMP,
+                    },
+                  },
                 },
+              ],
+            },
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[2].id,
-              handle: "mo3",
-              title: "module-3",
-              weight: 102,
-            },
-            competencies: [
-              {
-                id: modules[2].competencies[0],
-                type: "knowledge",
-                title: "competency-3",
-                handle: "cp3",
+              module: {
+                id: modules[2].id,
+                handle: "mo3",
+                title: "module-3",
                 weight: 102,
-                requirement: "This is the 3 requirement",
-                completed: null,
               },
-            ],
-          },
-        ],
-      } satisfies typeof item);
+              competencies: [
+                {
+                  id: modules[2].competencies[0],
+                  type: "knowledge",
+                  title: "competency-3",
+                  handle: "cp3",
+                  weight: 102,
+                  requirement: "This is the 3 requirement",
+                  completed: null,
+                },
+              ],
+            },
+          ],
+        } satisfies typeof item,
+      );
     }));
 
   it("should list a single program progress with two competencies and modules completed, with separate: certificates and curricula", () =>
@@ -702,6 +726,8 @@ describe("student curriculum list program progresses", () => {
         certificateId: certificateId1,
       });
 
+      const certificate1 = await Certificate.byId(certificateId1);
+
       const {
         curriculumId: curriculumId2,
         curriculumCompetencyIds: curriculumCompetencyIds2,
@@ -730,6 +756,8 @@ describe("student curriculum list program progresses", () => {
         certificateId: certificateId2,
       });
 
+      const certificate2 = await Certificate.byId(certificateId2);
+
       const list = await StudentCurriculum.listProgramProgresses({
         personId,
       });
@@ -737,175 +765,186 @@ describe("student curriculum list program progresses", () => {
       const [item] = list;
       assert.ok(item);
 
-      assert.deepStrictEqual(defaultTimestamps(item, ["startedAt"]), {
-        startedAt: DEFAULT_TEST_TIMESTAMP,
-        gearType: {
-          id: gearTypeId,
-          handle: "gt1",
-          title: "gear-type-1",
-        },
-        program: {
-          id: programId,
-          handle: "pr1",
-          title: "program-1",
-        },
-        degree: {
-          id: degreeId,
-          handle: "dg1",
-          title: "degree-1",
-        },
-        modules: [
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[0].id,
-              handle: "mo1",
-              title: "module-1",
-              weight: 100,
-            },
-            competencies: [
-              {
-                id: modules[0].competencies[0],
-                type: "knowledge",
-                title: "competency-1",
-                handle: "cp1",
+      assert.deepStrictEqual(
+        defaultTimestamps(item, ["startedAt", "issuedAt"]),
+        {
+          startedAt: DEFAULT_TEST_TIMESTAMP,
+          gearType: {
+            id: gearTypeId,
+            handle: "gt1",
+            title: "gear-type-1",
+          },
+          program: {
+            id: programId,
+            handle: "pr1",
+            title: "program-1",
+          },
+          degree: {
+            id: degreeId,
+            handle: "dg1",
+            title: "degree-1",
+          },
+          modules: [
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[0].id,
+                handle: "mo1",
+                title: "module-1",
                 weight: 100,
-                requirement: "This is the 1 requirement",
-                completed: {
-                  createdAt: DEFAULT_TEST_TIMESTAMP,
-                  certificateId: certificateId1,
+              },
+              competencies: [
+                {
+                  id: modules[0].competencies[0],
+                  type: "knowledge",
+                  title: "competency-1",
+                  handle: "cp1",
+                  weight: 100,
+                  requirement: "This is the 1 requirement",
+                  completed: {
+                    createdAt: DEFAULT_TEST_TIMESTAMP,
+                    certificate: {
+                      id: certificate1.id,
+                      handle: certificate1.handle,
+                      issuedAt: DEFAULT_TEST_TIMESTAMP,
+                    },
+                  },
                 },
+              ],
+            },
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[1].id,
-              handle: "mo2",
-              title: "module-2",
-              weight: 101,
-            },
-            competencies: [
-              {
-                id: modules[1].competencies[0],
-                type: "skill",
-                title: "competency-2",
-                handle: "cp2",
+              module: {
+                id: modules[1].id,
+                handle: "mo2",
+                title: "module-2",
                 weight: 101,
-                requirement: "This is the 2 requirement",
-                completed: null,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId,
-              revision: "A",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
+              competencies: [
+                {
+                  id: modules[1].competencies[0],
+                  type: "skill",
+                  title: "competency-2",
+                  handle: "cp2",
+                  weight: 101,
+                  requirement: "This is the 2 requirement",
+                  completed: null,
+                },
+              ],
             },
-            module: {
-              id: modules[2].id,
-              handle: "mo3",
-              title: "module-3",
-              weight: 102,
-            },
-            competencies: [
-              {
-                id: modules[2].competencies[0],
-                type: "knowledge",
-                title: "competency-3",
-                handle: "cp3",
+            {
+              curriculum: {
+                id: curriculumId,
+                revision: "A",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[2].id,
+                handle: "mo3",
+                title: "module-3",
                 weight: 102,
-                requirement: "This is the 3 requirement",
-                completed: null,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId2,
-              revision: "B",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
+              competencies: [
+                {
+                  id: modules[2].competencies[0],
+                  type: "knowledge",
+                  title: "competency-3",
+                  handle: "cp3",
+                  weight: 102,
+                  requirement: "This is the 3 requirement",
+                  completed: null,
+                },
+              ],
             },
-            module: {
-              id: modules[0].id,
-              handle: "mo1",
-              title: "module-1",
-              weight: 100,
-            },
-            competencies: [
-              {
-                id: modules[0].competencies[0],
-                type: "knowledge",
-                title: "competency-1",
-                handle: "cp1",
+            {
+              curriculum: {
+                id: curriculumId2,
+                revision: "B",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[0].id,
+                handle: "mo1",
+                title: "module-1",
                 weight: 100,
-                requirement: "This is the 1 requirement",
-                completed: null,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId2,
-              revision: "B",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
-            },
-            module: {
-              id: modules[1].id,
-              handle: "mo2",
-              title: "module-2",
-              weight: 101,
-            },
-            competencies: [
-              {
-                id: modules[1].competencies[0],
-                type: "skill",
-                title: "competency-2",
-                handle: "cp2",
-                weight: 101,
-                requirement: "This is the 2 requirement",
-                completed: {
-                  createdAt: DEFAULT_TEST_TIMESTAMP,
-                  certificateId: certificateId2,
+              competencies: [
+                {
+                  id: modules[0].competencies[0],
+                  type: "knowledge",
+                  title: "competency-1",
+                  handle: "cp1",
+                  weight: 100,
+                  requirement: "This is the 1 requirement",
+                  completed: null,
                 },
+              ],
+            },
+            {
+              curriculum: {
+                id: curriculumId2,
+                revision: "B",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
               },
-            ],
-          },
-          {
-            curriculum: {
-              id: curriculumId2,
-              revision: "B",
-              startedAt: DEFAULT_TEST_TIMESTAMP,
+              module: {
+                id: modules[1].id,
+                handle: "mo2",
+                title: "module-2",
+                weight: 101,
+              },
+              competencies: [
+                {
+                  id: modules[1].competencies[0],
+                  type: "skill",
+                  title: "competency-2",
+                  handle: "cp2",
+                  weight: 101,
+                  requirement: "This is the 2 requirement",
+                  completed: {
+                    createdAt: DEFAULT_TEST_TIMESTAMP,
+                    certificate: {
+                      id: certificate2.id,
+                      handle: certificate2.handle,
+                      issuedAt: DEFAULT_TEST_TIMESTAMP,
+                    },
+                  },
+                },
+              ],
             },
-            module: {
-              id: modules[2].id,
-              handle: "mo3",
-              title: "module-3",
-              weight: 102,
-            },
-            competencies: [
-              {
-                id: modules[2].competencies[0],
-                type: "knowledge",
-                title: "competency-3",
-                handle: "cp3",
+            {
+              curriculum: {
+                id: curriculumId2,
+                revision: "B",
+                startedAt: DEFAULT_TEST_TIMESTAMP,
+              },
+              module: {
+                id: modules[2].id,
+                handle: "mo3",
+                title: "module-3",
                 weight: 102,
-                requirement: "This is the 3 requirement",
-                completed: null,
               },
-            ],
-          },
-        ],
-      } satisfies typeof item);
+              competencies: [
+                {
+                  id: modules[2].competencies[0],
+                  type: "knowledge",
+                  title: "competency-3",
+                  handle: "cp3",
+                  weight: 102,
+                  requirement: "This is the 3 requirement",
+                  completed: null,
+                },
+              ],
+            },
+          ],
+        } satisfies typeof item,
+      );
     }));
 });

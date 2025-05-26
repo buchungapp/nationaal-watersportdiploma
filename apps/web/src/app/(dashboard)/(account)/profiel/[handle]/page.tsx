@@ -1,13 +1,13 @@
 import { Text } from "~/app/(dashboard)/_components/text";
-import { PersonCohortProgress } from "./_components/cohort-progress";
 
 import { after } from "next/server";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Logbook } from "./_components/logbook/logbook";
-import NWDProgressSection from "./_components/nwd-progress";
+import { News } from "./_components/news";
 import { Personalia } from "./_components/person/personalia";
+import ProgressSection from "./_components/progress/progress";
+import { Socials } from "./_components/socials";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import { Welcome } from "./_components/welcome";
 
@@ -32,27 +32,31 @@ export default async function Page(props: {
   });
 
   return (
-    <div className="items-start gap-3 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <StackedLayoutCard className="lg:col-span-3 mb-6 lg:mb-0">
+    <div className="gap-2 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
+      <div className="mb-6">
         <Welcome params={props.params} />
         <Text>
-          Op deze pagina vind je jouw persoonlijke gegevens, NWD-diploma's en
-          overige certificaten. Ook kan je hier je personalia wijzigen.
+          Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
+          binnen het Nationaal Watersportdiploma (NWD) en je andere
+          watersportactiviteiten. Beheer je meerdere personen met dit
+          e-mailadres? Selecteer dan een andere persoon via de menubalk.
         </Text>
-      </StackedLayoutCard>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:row-start-2 h-fit">
+        <ProgressSection params={props.params} />
 
-      <Personalia params={props.params} />
+        <WatersportCertificatesSection
+          params={props.params}
+          searchParams={props.searchParams}
+        />
 
-      <PersonCohortProgress params={props.params} />
-
-      <NWDProgressSection params={props.params} />
-      {/* <NWDCertificatesSection params={props.params} /> */}
-      <WatersportCertificatesSection
-        params={props.params}
-        searchParams={props.searchParams}
-      />
-
-      <Logbook params={props.params} searchParams={props.searchParams} />
+        <Logbook params={props.params} searchParams={props.searchParams} />
+      </div>
+      <div className="gap-2 grid grid-cols-1 lg:row-start-2 h-fit">
+        <Personalia params={props.params} />
+        <News />
+        <Socials />
+      </div>
     </div>
   );
 }
