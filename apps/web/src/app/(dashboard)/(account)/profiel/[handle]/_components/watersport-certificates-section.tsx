@@ -52,7 +52,6 @@ export default function WatersportCertificatesSection(
 ) {
   return (
     <StackedLayoutCardDisclosure
-      defaultOpen
       className={gridContainer}
       header={
         <>
