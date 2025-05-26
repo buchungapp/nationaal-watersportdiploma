@@ -36,8 +36,13 @@ export const listByPersonId = wrapQuery(
     z.object({
       personId: uuidSchema,
       respectProgressVisibility: z.boolean().default(false),
+      respectCohortVisibility: z.boolean().default(false),
     }),
-    async ({ personId, respectProgressVisibility }) => {
+    async ({
+      personId,
+      respectProgressVisibility,
+      respectCohortVisibility,
+    }) => {
       const query = useQuery();
 
       const latestProgresses = query.$with("latest_progresses").as(
@@ -273,9 +278,15 @@ export const listByPersonId = wrapQuery(
         )
         .where(
           and(
-            gte(s.cohort.accessEndTime, sql`NOW()`),
-            lte(s.cohort.accessStartTime, sql`NOW()`),
-            lte(s.cohortAllocation.progressVisibleUpUntil, sql`NOW()`),
+            respectCohortVisibility
+              ? and(
+                  gte(s.cohort.accessEndTime, sql`NOW()`),
+                  lte(s.cohort.accessStartTime, sql`NOW()`),
+                )
+              : undefined,
+            respectProgressVisibility
+              ? lte(s.cohortAllocation.progressVisibleUpUntil, sql`NOW()`)
+              : undefined,
             eq(s.actor.personId, personId),
           ),
         )

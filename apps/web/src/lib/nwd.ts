@@ -1922,6 +1922,7 @@ export const listCompetencyProgressesByPersonId = cache(
       return await Cohort.StudentProgress.listByPersonId({
         personId,
         respectProgressVisibility,
+        respectCohortVisibility: true,
       });
     });
   },
