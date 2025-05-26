@@ -1,6 +1,9 @@
 import { type PropsWithChildren, Suspense } from "react";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
+import {
+  StackedLayoutCardDisclosure,
+  StackedLayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { getPersonByHandle, listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
@@ -12,14 +15,23 @@ function LogbookSkeleton({
   button,
 }: PropsWithChildren<{ button?: React.ReactNode | undefined }>) {
   return (
-    <StackedLayoutCard className="lg:col-span-3">
-      <div className="flex justify-between items-center mb-2 w-full">
-        <Subheading>Jouw Logboek</Subheading>
-        {button}
-      </div>
-      <Text>Hieronder vind je een overzicht van alle vaaractiviteiten.</Text>
+    <StackedLayoutCardDisclosure
+      header={
+        <>
+          <div className="flex justify-between items-center gap-2">
+            <Subheading>Jouw Logboek</Subheading>
+            <StackedLayoutCardDisclosureChevron />
+          </div>
+          <Text>
+            Hieronder vind je een overzicht van alle vaaractiviteiten.
+          </Text>
+        </>
+      }
+    >
+      <div className="my-2">{button}</div>
+
       {children}
-    </StackedLayoutCard>
+    </StackedLayoutCardDisclosure>
   );
 }
 
@@ -51,9 +63,7 @@ async function LogbookContent({
 }
 
 function AddLogbookButtonFallback() {
-  return (
-    <div className="bg-slate-200 -my-1.5 rounded-lg w-35.5 h-9 animate-pulse" />
-  );
+  return <div className="bg-slate-200 rounded-lg w-35.5 h-9 animate-pulse" />;
 }
 
 async function AddLogbookButton({
@@ -64,7 +74,7 @@ async function AddLogbookButton({
   const { handle } = await params;
   const person = await getPersonByHandle(handle);
 
-  return <AddLogbook className="-my-1.5" personId={person.id} />;
+  return <AddLogbook personId={person.id} />;
 }
 
 export function Logbook(props: {

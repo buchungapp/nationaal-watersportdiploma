@@ -32,8 +32,8 @@ export default async function Page(props: {
   });
 
   return (
-    <div className="gap-2 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <div className="mb-6">
+    <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
+      <div className="sm:mb-6">
         <Welcome params={props.params} />
         <Text>
           Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
@@ -42,8 +42,10 @@ export default async function Page(props: {
           e-mailadres? Selecteer dan een andere persoon via de menubalk.
         </Text>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 lg:row-start-2 h-fit">
+      <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 row-start-3 lg:row-start-2 h-fit">
         <ProgressSection params={props.params} />
+
+        <News className="sm:hidden" />
 
         <WatersportCertificatesSection
           params={props.params}
@@ -51,11 +53,13 @@ export default async function Page(props: {
         />
 
         <Logbook params={props.params} searchParams={props.searchParams} />
+
+        <Socials className="sm:hidden" />
       </div>
-      <div className="gap-2 grid grid-cols-1 lg:row-start-2 h-fit">
+      <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 row-start-2 h-fit">
         <Personalia params={props.params} />
-        <News />
-        <Socials />
+        <News className="max-sm:hidden" />
+        <Socials className="max-sm:hidden" />
       </div>
     </div>
   );

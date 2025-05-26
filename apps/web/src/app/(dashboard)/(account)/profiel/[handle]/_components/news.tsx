@@ -57,9 +57,9 @@ async function NewsContent() {
   );
 }
 
-export async function News() {
+export async function News({ className }: { className?: string }) {
   return (
-    <StackedLayoutCard>
+    <StackedLayoutCard className={className}>
       <Subheading className="mb-3">Blijf op de hoogte</Subheading>
       <Suspense
         fallback={

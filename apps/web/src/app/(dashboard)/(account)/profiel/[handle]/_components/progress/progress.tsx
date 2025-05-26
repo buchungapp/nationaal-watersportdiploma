@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
-import { gridContainer } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
   StackedLayoutCardDisclosure,
@@ -77,62 +76,59 @@ export default function ProgressSection(props: {
   params: Promise<{ handle: string }>;
 }) {
   return (
-    <div className={`${gridContainer} lg:col-span-2 mb-6`}>
-      <StackedLayoutCardDisclosure
-        defaultOpen
-        className="mb-3"
-        header={
-          <>
-            <div className="flex justify-between items-center gap-2">
-              <Subheading>Jouw NWD-programma's en NWD-diploma's</Subheading>
-              <StackedLayoutCardDisclosureChevron />
-            </div>
-            <Text>
-              Bekijk je diploma's, hoe je ervoor staat met je opleidingen, en
-              hoe het gaat met je huidige cursus. Mis je een diploma? Neem dan
-              contact op met de{" "}
-              <TextLink href="/vaarlocaties" target="_blank">
-                vaarlocatie
-              </TextLink>{" "}
-              waar je de cursus hebt gevolgd.
-            </Text>
-          </>
+    <StackedLayoutCardDisclosure
+      defaultOpen
+      header={
+        <>
+          <div className="flex justify-between items-center gap-2">
+            <Subheading>Nationaal Watersportdiploma</Subheading>
+            <StackedLayoutCardDisclosureChevron />
+          </div>
+          <Text>
+            Bekijk je diploma's, hoe je ervoor staat met je opleidingen, en hoe
+            het gaat met je huidige cursus. Mis je een diploma? Neem dan contact
+            op met de{" "}
+            <TextLink href="/vaarlocaties" target="_blank">
+              vaarlocatie
+            </TextLink>{" "}
+            waar je de cursus hebt gevolgd.
+          </Text>
+        </>
+      }
+    >
+      <Suspense
+        fallback={
+          <TabGroup>
+            <TabList className="mt-2">
+              <Tab className="flex justify-between sm:justify-center items-center gap-2">
+                Behaalde diploma's
+                <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
+              </Tab>
+              <Tab className="flex justify-between sm:justify-center items-center gap-2">
+                Opleidingen
+                <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
+              </Tab>
+              <Tab className="flex justify-between sm:justify-center items-center gap-2">
+                Lopende cursussen
+                <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
+              </Tab>
+            </TabList>
+            <TabPanels className="mt-4">
+              <TabPanel>
+                <CertificatesFallback />
+              </TabPanel>
+              <TabPanel>
+                <ProgramsFallback />
+              </TabPanel>
+              <TabPanel>
+                <CohortProgressFallback />
+              </TabPanel>
+            </TabPanels>
+          </TabGroup>
         }
       >
-        <Suspense
-          fallback={
-            <TabGroup>
-              <TabList className="mt-2">
-                <Tab className="flex justify-between sm:justify-center items-center gap-2">
-                  Behaalde diploma's
-                  <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
-                </Tab>
-                <Tab className="flex justify-between sm:justify-center items-center gap-2">
-                  Opleidingen
-                  <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
-                </Tab>
-                <Tab className="flex justify-between sm:justify-center items-center gap-2">
-                  Lopende cursussen
-                  <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
-                </Tab>
-              </TabList>
-              <TabPanels className="mt-4">
-                <TabPanel>
-                  <CertificatesFallback />
-                </TabPanel>
-                <TabPanel>
-                  <ProgramsFallback />
-                </TabPanel>
-                <TabPanel>
-                  <CohortProgressFallback />
-                </TabPanel>
-              </TabPanels>
-            </TabGroup>
-          }
-        >
-          <ProgressTabs params={props.params} />
-        </Suspense>
-      </StackedLayoutCardDisclosure>
-    </div>
+        <ProgressTabs params={props.params} />
+      </Suspense>
+    </StackedLayoutCardDisclosure>
   );
 }

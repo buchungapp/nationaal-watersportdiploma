@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { PDFViewer } from "~/app/(dashboard)/_components/pdf-viewer";
-import type { ExternalCertificate } from "./certificates";
+import type { ExternalCertificate } from "./external-certificate/certificates-list";
 
 type Media = NonNullable<ExternalCertificate["media"]>;
 

@@ -356,7 +356,7 @@ function Wave({
   return (
     <div
       className={clsx(
-        "absolute inset-0 opacity-40 overflow-hidden -translate-y-full pointer-events-none",
+        "absolute inset-0 opacity-10 overflow-hidden -translate-y-full pointer-events-none",
         className,
         waveColor,
       )}

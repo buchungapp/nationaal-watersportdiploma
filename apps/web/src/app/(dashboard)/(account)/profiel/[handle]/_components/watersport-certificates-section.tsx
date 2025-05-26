@@ -4,11 +4,14 @@ import {
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
+import {
+  StackedLayoutCardDisclosure,
+  StackedLayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { getPersonByHandle } from "~/lib/nwd";
-import { AddCertificate } from "./certificate/add-certificate";
-import { Certificates } from "./certificates";
+import { AddCertificate } from "./external-certificate/add-certificate";
+import { ExternalCertificatesList } from "./external-certificate/certificates-list";
 
 interface WatersportCertificatesProps {
   params: Promise<{ handle: string }>;
@@ -23,7 +26,7 @@ async function WatersportCertificatesContent({
   const person = await getPersonByHandle(handle);
 
   return (
-    <Certificates
+    <ExternalCertificatesList
       searchParams={searchParams}
       personId={person.id}
       noResults={
@@ -41,30 +44,39 @@ async function AddCertificateButton({
   const { handle } = await params;
   const person = await getPersonByHandle(handle);
 
-  return <AddCertificate className="-my-1.5" personId={person.id} />;
+  return <AddCertificate className="" personId={person.id} />;
 }
 
 export default function WatersportCertificatesSection(
   props: WatersportCertificatesProps,
 ) {
   return (
-    <div className={`${gridContainer} lg:col-span-3 mb-6`}>
-      <StackedLayoutCard className="mb-3">
-        <div className="flex justify-between items-center mb-2 w-full">
-          <Subheading>Jouw Watersportcertificaten</Subheading>
-          <Suspense
-            fallback={
-              <div className="bg-slate-200 -my-1.5 rounded-lg w-40.5 h-9 animate-pulse" />
-            }
-          >
-            <AddCertificateButton params={props.params} />
-          </Suspense>
-        </div>
-        <Text>
-          Hieronder vind je een overzicht van alle Watersportcertificaten die je
-          hebt behaald.
-        </Text>
-      </StackedLayoutCard>
+    <StackedLayoutCardDisclosure
+      defaultOpen
+      className={gridContainer}
+      header={
+        <>
+          <div className="flex justify-between items-center gap-2">
+            <Subheading>Overige watersportcertificaten</Subheading>
+            <StackedLayoutCardDisclosureChevron />
+          </div>
+          <Text>
+            Je kan deze sectie gebruiken om jouw watersport gerelateerde zaken -
+            zoals je vaarbewijs, navigatie diploma’s of buitenlandse bewijzen -
+            bij elkaar te verzamelen!
+          </Text>
+        </>
+      }
+    >
+      <div className="my-2">
+        <Suspense
+          fallback={
+            <div className="bg-slate-200 rounded-lg w-40.5 h-9 animate-pulse" />
+          }
+        >
+          <AddCertificateButton params={props.params} />
+        </Suspense>
+      </div>
       <Suspense
         fallback={
           <GridList>
@@ -76,6 +88,6 @@ export default function WatersportCertificatesSection(
       >
         <WatersportCertificatesContent {...props} />
       </Suspense>
-    </div>
+    </StackedLayoutCardDisclosure>
   );
 }

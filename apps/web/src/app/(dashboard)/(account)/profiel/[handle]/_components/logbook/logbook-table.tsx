@@ -195,7 +195,7 @@ export function LogbookTable({
   return (
     <>
       <Table
-        className="mt-4 [--gutter:--spacing(6)] lg:[--gutter:--spacing(10)]"
+        className="mt-4 [--gutter:--spacing(4)] lg:[--gutter:--spacing(5)]"
         dense
       >
         <SortableTableHead table={table} />

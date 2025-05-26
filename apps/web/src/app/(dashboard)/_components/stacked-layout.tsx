@@ -134,7 +134,8 @@ export function StackedLayoutCardDisclosure({
       )}
     >
       <Headless.Disclosure {...props}>
-        <Headless.DisclosureButton className="group/stacked-layout-card-disclosure text-left">
+        <Headless.DisclosureButton className="group/stacked-layout-card-disclosure relative focus:outline-none w-full text-left">
+          <span className="absolute inset-0 rounded-lg group-data-focus/stacked-layout-card-disclosure:outline-2 group-data-focus/stacked-layout-card-disclosure:outline-branding-light group-data-focus/stacked-layout-card-disclosure:outline-offset-2" />
           {header}
         </Headless.DisclosureButton>
         <Headless.DisclosurePanel>{children}</Headless.DisclosurePanel>

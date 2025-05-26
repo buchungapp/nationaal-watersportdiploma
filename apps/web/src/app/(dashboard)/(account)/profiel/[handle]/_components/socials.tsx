@@ -1,11 +1,15 @@
+import clsx from "clsx";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Instagram, LinkedIn, TikTok } from "~/app/_components/socials";
 
-export function Socials() {
+export function Socials({ className }: { className?: string }) {
   return (
-    <StackedLayoutCard transparent className="@container/socials">
+    <StackedLayoutCard
+      transparent
+      className={clsx("@container/socials", className)}
+    >
       <Text>Volg het NWD ook op sociale media</Text>
       <div className="flex @sm/socials:flex-row flex-col gap-2 mt-2">
         <Button color="branding-orange">
