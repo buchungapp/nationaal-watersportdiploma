@@ -25,6 +25,15 @@ type ProgramsProps = {
   params: Promise<{ handle: string }>;
 };
 
+export function fetchPrograms(personId: string) {
+  // Currently also includes a program with no progress when the student has started a program in a cohort
+  // I think this is fine
+  // @TODO: remove this comment when reviewing
+  return listProgramProgressesByPersonId(personId).then(
+    deduplicateCurriculumCompetencies,
+  );
+}
+
 function deduplicateCurriculumCompetencies(
   programs: Awaited<ReturnType<typeof listProgramProgressesByPersonId>>,
 ) {
@@ -102,17 +111,11 @@ function deduplicateCurriculumCompetencies(
   });
 }
 
-async function ProgramsContent({ params }: ProgramsProps) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
-
-  // Currently also includes a program with no progress when the student has started a program in a cohort
-  // I think this is fine
-  // @TODO: remove this comment when reviewing
-  const programs = await listProgramProgressesByPersonId(person.id).then(
-    deduplicateCurriculumCompetencies,
-  );
-
+export async function Programs({
+  programs,
+}: {
+  programs: Awaited<ReturnType<typeof fetchPrograms>>;
+}) {
   return (
     <ul className="space-y-2">
       {programs.map((program, index) => {
@@ -230,7 +233,14 @@ async function ProgramsContent({ params }: ProgramsProps) {
   );
 }
 
-function ProgramsFallback() {
+export async function ProgramsContent(props: ProgramsProps) {
+  const { handle } = await props.params;
+  const person = await getPersonByHandle(handle);
+  const programs = await fetchPrograms(person.id);
+  return <Programs programs={programs} />;
+}
+
+export function ProgramsFallback() {
   return (
     <ul className="space-y-2">
       <li className="bg-gray-200 rounded w-full h-81.75 animate-pulse" />
@@ -238,7 +248,7 @@ function ProgramsFallback() {
   );
 }
 
-export function Programs(props: ProgramsProps) {
+export function ProgramsWithSuspense(props: ProgramsProps) {
   return (
     <Suspense fallback={<ProgramsFallback />}>
       <ProgramsContent {...props} />

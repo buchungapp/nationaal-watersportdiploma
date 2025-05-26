@@ -25,6 +25,12 @@ type CohortProgressProps = {
   params: Promise<{ handle: string }>;
 };
 
+export function fetchCohortProgress(personId: string) {
+  return listCompetencyProgressesByPersonId(personId, true).then(
+    allocationModules,
+  );
+}
+
 function allocationModules(
   allocations: Awaited<ReturnType<typeof listCompetencyProgressesByPersonId>>,
 ) {
@@ -64,14 +70,9 @@ function allocationModules(
   });
 }
 
-async function CohortProgressContent({ params }: CohortProgressProps) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
-  const allocations = await listCompetencyProgressesByPersonId(
-    person.id,
-    true,
-  ).then(allocationModules);
-
+export async function CohortProgress({
+  allocations,
+}: { allocations: Awaited<ReturnType<typeof fetchCohortProgress>> }) {
   return (
     <ul className="space-y-2">
       {allocations.map((allocation, index) => {
@@ -161,7 +162,14 @@ async function CohortProgressContent({ params }: CohortProgressProps) {
   );
 }
 
-function CohortProgressFallback() {
+export async function CohortProgressContent(props: CohortProgressProps) {
+  const { handle } = await props.params;
+  const person = await getPersonByHandle(handle);
+  const allocations = await fetchCohortProgress(person.id);
+  return <CohortProgress allocations={allocations} />;
+}
+
+export function CohortProgressFallback() {
   return (
     <ul className="space-y-2">
       <li className="bg-gray-200 rounded w-full h-68.5 animate-pulse" />
@@ -169,7 +177,7 @@ function CohortProgressFallback() {
   );
 }
 
-export function CohortProgress(props: CohortProgressProps) {
+export function CohortProgressWithSuspense(props: CohortProgressProps) {
   return (
     <Suspense fallback={<CohortProgressFallback />}>
       <CohortProgressContent {...props} />

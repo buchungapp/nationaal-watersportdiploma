@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { gridContainer } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
@@ -13,9 +14,64 @@ import {
   TabPanels,
 } from "~/app/(dashboard)/_components/tabs";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { Certificates } from "./certificates";
-import { CohortProgress } from "./cohort-progress";
-import { Programs } from "./programs";
+import { getPersonByHandle } from "~/lib/nwd";
+import {
+  Certificates,
+  CertificatesFallback,
+  fetchCertificates,
+} from "./certificates";
+import {
+  CohortProgress,
+  CohortProgressFallback,
+  fetchCohortProgress,
+} from "./cohort-progress";
+import { Programs, ProgramsFallback, fetchPrograms } from "./programs";
+
+async function ProgressTabs(props: {
+  params: Promise<{ handle: string }>;
+}) {
+  const { handle } = await props.params;
+  const person = await getPersonByHandle(handle);
+  const certificates = await fetchCertificates(person.id);
+  const programs = await fetchPrograms(person.id);
+  const allocations = await fetchCohortProgress(person.id);
+
+  return (
+    <TabGroup>
+      <TabList className="mt-2">
+        <Tab className="flex justify-between sm:justify-center items-center gap-2">
+          Behaalde diploma's
+          <Badge color="branding-orange" className="-my-1">
+            {certificates.length}
+          </Badge>
+        </Tab>
+        <Tab className="flex justify-between sm:justify-center items-center gap-2">
+          Opleidingen
+          <Badge color="branding-light" className="-my-1">
+            {programs.length}
+          </Badge>
+        </Tab>
+        <Tab className="flex justify-between sm:justify-center items-center gap-2">
+          Lopende cursussen
+          <Badge color="branding-dark" className="-my-1">
+            {allocations.length}
+          </Badge>
+        </Tab>
+      </TabList>
+      <TabPanels className="mt-4">
+        <TabPanel>
+          <Certificates certificates={certificates} />
+        </TabPanel>
+        <TabPanel>
+          <Programs programs={programs} />
+        </TabPanel>
+        <TabPanel>
+          <CohortProgress allocations={allocations} />
+        </TabPanel>
+      </TabPanels>
+    </TabGroup>
+  );
+}
 
 export default function ProgressSection(props: {
   params: Promise<{ handle: string }>;
@@ -43,33 +99,39 @@ export default function ProgressSection(props: {
           </>
         }
       >
-        <TabGroup>
-          <TabList className="mt-2">
-            <Tab className="flex justify-between sm:justify-center items-center gap-2">
-              Behaalde diploma's
-              <Badge color="zinc">1</Badge>
-            </Tab>
-            <Tab className="flex justify-between sm:justify-center items-center gap-2">
-              Opleidingen
-              <Badge color="zinc">1</Badge>
-            </Tab>
-            <Tab className="flex justify-between sm:justify-center items-center gap-2">
-              Lopende cursussen
-              <Badge color="zinc">0</Badge>
-            </Tab>
-          </TabList>
-          <TabPanels className="mt-4">
-            <TabPanel>
-              <Certificates {...props} />
-            </TabPanel>
-            <TabPanel>
-              <Programs {...props} />
-            </TabPanel>
-            <TabPanel>
-              <CohortProgress {...props} />
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+        <Suspense
+          fallback={
+            <TabGroup>
+              <TabList className="mt-2">
+                <Tab className="flex justify-between sm:justify-center items-center gap-2">
+                  Behaalde diploma's
+                  <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
+                </Tab>
+                <Tab className="flex justify-between sm:justify-center items-center gap-2">
+                  Opleidingen
+                  <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
+                </Tab>
+                <Tab className="flex justify-between sm:justify-center items-center gap-2">
+                  Lopende cursussen
+                  <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
+                </Tab>
+              </TabList>
+              <TabPanels className="mt-4">
+                <TabPanel>
+                  <CertificatesFallback />
+                </TabPanel>
+                <TabPanel>
+                  <ProgramsFallback />
+                </TabPanel>
+                <TabPanel>
+                  <CohortProgressFallback />
+                </TabPanel>
+              </TabPanels>
+            </TabGroup>
+          }
+        >
+          <ProgressTabs params={props.params} />
+        </Suspense>
       </StackedLayoutCardDisclosure>
     </div>
   );

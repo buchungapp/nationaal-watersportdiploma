@@ -24,6 +24,10 @@ type CertificatesProps = {
   params: Promise<{ handle: string }>;
 };
 
+export function fetchCertificates(personId: string) {
+  return listCertificatesForPerson(personId).then(certificatesModules);
+}
+
 function certificatesModules(
   certificates: Awaited<ReturnType<typeof listCertificatesForPerson>>,
 ) {
@@ -70,13 +74,9 @@ function certificatesModules(
   });
 }
 
-async function CertificatesContent({ params }: CertificatesProps) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
-  const certificates = await listCertificatesForPerson(person.id).then(
-    certificatesModules,
-  );
-
+export async function Certificates({
+  certificates,
+}: { certificates: Awaited<ReturnType<typeof fetchCertificates>> }) {
   return (
     <ul className="space-y-2">
       {certificates.map((certificate, index) => {
@@ -167,7 +167,15 @@ async function CertificatesContent({ params }: CertificatesProps) {
   );
 }
 
-function CertificatesFallback() {
+export async function CertificatesContent(props: CertificatesProps) {
+  const { handle } = await props.params;
+  const person = await getPersonByHandle(handle);
+  const certificates = await fetchCertificates(person.id);
+
+  return <Certificates certificates={certificates} />;
+}
+
+export function CertificatesFallback() {
   return (
     <ul className="space-y-2">
       <li className="bg-gray-200 rounded w-full h-68.5 animate-pulse" />
@@ -175,7 +183,7 @@ function CertificatesFallback() {
   );
 }
 
-export function Certificates(props: CertificatesProps) {
+export function CertificatesWithSuspense(props: CertificatesProps) {
   return (
     <Suspense fallback={<CertificatesFallback />}>
       <CertificatesContent {...props} />
