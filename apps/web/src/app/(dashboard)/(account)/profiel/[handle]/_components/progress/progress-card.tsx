@@ -206,7 +206,7 @@ export function ProgressCardDisclosure({
         <div className="flex items-center gap-2 font-medium">{header}</div>
         <ChevronDownIcon className="size-4 text-zinc-500 group-data-open/progress-card-disclosure:rotate-180 transition-transform" />
       </Headless.DisclosureButton>
-      <Headless.DisclosurePanel className="px-4">
+      <Headless.DisclosurePanel className="px-4 nth-last-[2]:pb-12">
         {children}
       </Headless.DisclosurePanel>
     </Headless.Disclosure>
@@ -324,7 +324,7 @@ export function ProgressCardFooter({
   waveSpacing,
 }: PropsWithChildren<{ waveOffset?: number; waveSpacing?: number }>) {
   return (
-    <footer className="group/progress-card-footer peer/progress-card-footer relative flex justify-between bg-neutral-100 px-4 py-2 border-zinc-200 border-t last:rounded-b-md overflow-hidden">
+    <footer className="group/progress-card-footer peer/progress-card-footer relative flex justify-between bg-neutral-100 px-4 py-2 border-zinc-200 border-t last:rounded-b-md">
       <Wave offset={waveOffset} spacing={waveSpacing} />
       <div className="z-10 flex items-center gap-2">
         <Logo className="size-8 text-zinc-500" />
@@ -356,7 +356,7 @@ function Wave({
   return (
     <div
       className={clsx(
-        "absolute inset-0 opacity-40 overflow-hidden",
+        "absolute inset-0 opacity-40 overflow-hidden -translate-y-full pointer-events-none",
         className,
         waveColor,
       )}
