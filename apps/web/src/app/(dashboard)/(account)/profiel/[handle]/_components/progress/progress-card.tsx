@@ -75,7 +75,7 @@ export function ProgressCard({
 
 export function ProgressCardHeader({ children }: PropsWithChildren) {
   return (
-    <header className="items-center gap-2 grid grid-cols-[1fr_fit-content(--spacing(15))] grid-rows-2 mb-4 px-4">
+    <header className="items-center gap-2 grid grid-cols-[1fr_fit-content(--spacing(15))] grid-rows-[fit-content(--spacing(15))_1fr] mb-4 px-4">
       {children}
     </header>
   );
@@ -100,7 +100,7 @@ export function ProgressCardTypeBadge() {
   return (
     <span
       className={clsx(
-        "row-start-1",
+        "max-sm:self-end row-start-1",
         "inline-flex items-center gap-x-2 px-3 py-1 rounded-full w-fit font-semibold sm:text-xs/5 text-sm/5 uppercase",
         "bg-zinc-600/10 text-zinc-700 group-data-hover:bg-zinc-600/20 dark:bg-white/5 dark:text-zinc-400 dark:group-data-hover:bg-white/10",
       )}
@@ -120,7 +120,7 @@ export function ProgressCardTypeBadge() {
 
 export function ProgressCardTitle({ children }: PropsWithChildren) {
   return (
-    <h3 className="flex gap-3 row-start-2 font-semibold text-zinc-950 text-xl">
+    <h3 className="flex max-sm:flex-col gap-x-3 max-sm:col-span-2 row-start-2 font-semibold text-zinc-950 text-xl">
       {children}
     </h3>
   );
@@ -146,7 +146,7 @@ export function ProgressCardDegree({ children }: PropsWithChildren) {
   return (
     <span
       className={clsx(
-        "flex justify-center items-center row-span-2 rounded-full size-15 font-black text-3xl",
+        "flex justify-center items-center sm:row-span-2 rounded-full size-15 font-black text-3xl",
         type === "cursus" && "bg-branding-dark/20 text-branding-dark",
         type === "opleiding" && "bg-branding-light/20 text-branding-light",
         type === "diploma" && "bg-branding-orange/20 text-branding-orange",
@@ -158,7 +158,7 @@ export function ProgressCardDegree({ children }: PropsWithChildren) {
 }
 
 export function ProgressCardDescriptionList({ children }: PropsWithChildren) {
-  return <dl className="flex mb-4 px-4">{children}</dl>;
+  return <dl className="flex max-sm:flex-col mb-4 px-4">{children}</dl>;
 }
 
 export function ProgressCardDescriptionListItem({
@@ -166,7 +166,7 @@ export function ProgressCardDescriptionListItem({
   label,
 }: PropsWithChildren<{ label: string }>) {
   return (
-    <div className="flex flex-col flex-1 gap-2 px-2 py-1 border border-zinc-200 not-first:border-l-0 border-dashed">
+    <div className="flex flex-col flex-1 gap-2 px-2 py-1 border border-zinc-200 max-sm:not-first:border-t-0 sm:not-first:border-l-0 border-dashed">
       <dt className="text-zinc-500 lg:text-sm text-base">{label}</dt>
       <dd className="font-medium text-zinc-950 lg:text-sm text-base">
         {children}
@@ -215,7 +215,9 @@ export function ProgressCardStatusList({
 }: PropsWithChildren<{
   className?: string;
 }>) {
-  return <ul className={clsx("text-sm", className)}>{children}</ul>;
+  return (
+    <ul className={clsx("lg:text-sm text-base", className)}>{children}</ul>
+  );
 }
 
 export function ProgressCardStatusSubList({
@@ -224,7 +226,7 @@ export function ProgressCardStatusSubList({
 }: PropsWithChildren<{
   className?: string;
 }>) {
-  return <ul className={clsx("pl-13", className)}>{children}</ul>;
+  return <ul className={clsx("sm:pl-13", className)}>{children}</ul>;
 }
 
 export function ProgressCardStatusIcon({
@@ -261,8 +263,17 @@ export function ProgressCardStatus({
   icon?: React.ReactNode;
 }) {
   const status = (
-    <div className={clsx("flex justify-between items-center py-2")}>
-      <div className="flex items-start gap-2">
+    <div
+      className={clsx(
+        "flex max-sm:flex-col sm:justify-between sm:items-center py-2",
+      )}
+    >
+      <div
+        className={clsx(
+          "flex gap-2",
+          subtitle ? "items-start" : "items-center",
+        )}
+      >
         {children ? (
           <Button plain className="-m-2">
             <MinusIcon className="hidden group-data-open/progress-card-status-disclosure:block size-4 text-zinc-500" />
@@ -277,6 +288,7 @@ export function ProgressCardStatus({
       </div>
       <Badge
         color={progress >= 100 ? "green" : progress > 0 ? "yellow" : "zinc"}
+        className={clsx(!children && "max-sm:ml-6", "w-fit")}
       >
         {progress >= 100
           ? `Behaald ${updatedAt ? `op ${dayjs(updatedAt).format("DD-MM-YYYY")}` : ""}`
