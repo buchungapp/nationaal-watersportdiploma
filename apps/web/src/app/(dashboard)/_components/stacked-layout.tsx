@@ -62,7 +62,7 @@ export function StackedLayout({
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <div className="isolate relative flex flex-col bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950 w-full min-h-svh">
+    <div className="isolate relative flex flex-col bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950 w-full min-h-svh">
       {/* Sidebar on mobile */}
       <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
         {sidebar}
@@ -84,7 +84,7 @@ export function StackedLayout({
       {/* Content */}
       <main className="flex flex-col flex-1 lg:px-2 pb-2">
         {/* <div className="lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs p-6 lg:p-10 lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10 grow"> */}
-        <div className="p-6 lg:p-10 grow">
+        <div className="p-2 lg:p-10 grow">
           <div className="mx-auto max-w-7xl">{children}</div>
         </div>
         {/* </div> */}
@@ -101,9 +101,9 @@ export function StackedLayoutCard({
   return (
     <div
       className={clsx(
-        transparent ? "lg:px-5 lg:py-2" : "lg:p-5",
+        transparent ? "sm:px-5 sm:py-2 px-3 py-1" : "sm:p-5 p-3",
         !transparent &&
-          "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
+          "bg-white dark:bg-zinc-900 shadow-xs rounded-lg ring-1 ring-zinc-950/5 dark:ring-white/10",
         className,
       )}
     >
@@ -127,9 +127,9 @@ export function StackedLayoutCardDisclosure({
   return (
     <div
       className={clsx(
-        transparent ? "lg:px-5 lg:py-2" : "lg:p-5",
+        transparent ? "sm:px-5 sm:py-2 px-3 py-1" : "sm:p-5 p-3",
         !transparent &&
-          "lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10",
+          "bg-white dark:bg-zinc-900 shadow-xs rounded-lg ring-1 ring-zinc-950/5 dark:ring-white/10",
         className,
       )}
     >

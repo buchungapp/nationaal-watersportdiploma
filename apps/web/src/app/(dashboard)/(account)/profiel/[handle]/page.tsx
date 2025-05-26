@@ -33,8 +33,8 @@ export default async function Page(props: {
   });
 
   return (
-    <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <div className="sm:mb-6">
+    <div className="gap-2 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
+      <div className="sm:mb-6 max-sm:px-2">
         <Welcome params={props.params} />
         <Text>
           Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
@@ -43,7 +43,7 @@ export default async function Page(props: {
           e-mailadres? Selecteer dan een andere persoon via de menubalk.
         </Text>
       </div>
-      <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 row-start-3 lg:row-start-2 h-fit">
+      <div className="gap-2 grid grid-cols-1 row-start-3 lg:row-start-2 h-fit">
         <ProgressSection params={props.params} />
 
         <News className="sm:hidden" />
@@ -57,7 +57,7 @@ export default async function Page(props: {
 
         <Socials className="sm:hidden" />
       </div>
-      <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 row-start-2 h-fit">
+      <div className="gap-2 grid grid-cols-1 row-start-2 h-fit">
         <Locations />
         <Personalia params={props.params} />
         <News className="max-sm:hidden" />

@@ -10,7 +10,9 @@ export function Socials({ className }: { className?: string }) {
       transparent
       className={clsx("@container/socials", className)}
     >
-      <Text>Volg het NWD ook op sociale media</Text>
+      <Text className="@max-sm/socials:text-center">
+        Volg het NWD ook op sociale media
+      </Text>
       <div className="flex @sm/socials:flex-row flex-col gap-2 mt-2">
         <Button color="branding-orange">
           <Instagram />
