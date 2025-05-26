@@ -1,7 +1,7 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { Suspense } from "react";
 import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
-import { Strong, TextLink } from "~/app/(dashboard)/_components/text";
+import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { getPersonByHandle, listProgramProgressesByPersonId } from "~/lib/nwd";
 import {
@@ -116,6 +116,14 @@ export async function Programs({
 }: {
   programs: Awaited<ReturnType<typeof fetchPrograms>>;
 }) {
+  if (programs.length === 0) {
+    return (
+      <Text className="-mt-2 mb-2">
+        We hebben geen opleiding voor je gevonden.
+      </Text>
+    );
+  }
+
   return (
     <ul className="space-y-2">
       {programs.map((program, index) => {

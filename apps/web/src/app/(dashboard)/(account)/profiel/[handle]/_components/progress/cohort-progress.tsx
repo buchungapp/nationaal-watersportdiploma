@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
   getPersonByHandle,
@@ -73,6 +74,14 @@ function allocationModules(
 export async function CohortProgress({
   allocations,
 }: { allocations: Awaited<ReturnType<typeof fetchCohortProgress>> }) {
+  if (allocations.length === 0) {
+    return (
+      <Text className="-mt-2 mb-2">
+        We hebben geen lopende cursus voor je gevonden.
+      </Text>
+    );
+  }
+
   return (
     <ul className="space-y-2">
       {allocations.map((allocation, index) => {

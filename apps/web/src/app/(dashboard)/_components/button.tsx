@@ -233,7 +233,7 @@ export const Button = React.forwardRef(function Button(
 const textButtonStyles = {
   base: [
     // Base
-    "relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg text-base/6",
+    "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
 
     // Sizing
     "px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
@@ -251,28 +251,40 @@ const textButtonStyles = {
   ],
   plain: [
     // Base
-    "border-transparent text-zinc-500 data-active:bg-zinc-50 data-hover:bg-zinc-50",
+    "border-transparent text-(--btn-text) data-active:bg-zinc-50 data-hover:bg-zinc-50",
 
     // Dark mode
-    "dark:text-zinc-400 dark:data-active:bg-zinc-50 dark:data-hover:bg-zinc-50",
+    "dark:text-(--btn-text-dark) dark:data-active:bg-zinc-50 dark:data-hover:bg-zinc-50",
 
     // Icon
-    "[--btn-icon:var(--color-zinc-500)] data-active:[--btn-icon:var(--color-zinc-500)] data-hover:[--btn-icon:var(--color-zinc-500)] dark:[--btn-icon:var(--color-zinc-400)] dark:data-active:[--btn-icon:var(--color-zinc-400)] dark:data-hover:[--btn-icon:var(--color-zinc-400)]",
+    "[--btn-icon:var(--btn-text)] data-active:[--btn-icon:var(--btn-text)] data-hover:[--btn-icon:var(--btn-text)] dark:[--btn-icon:var(--btn-text-dark)] dark:data-active:[--btn-icon:var(--btn-text-dark)] dark:data-hover:[--btn-icon:var(--btn-text-dark)]",
   ],
+  colors: {
+    zinc: [
+      "[--btn-text:var(--color-zinc-500)] [--btn-text-dark:var(--color-zinc-400)]",
+    ],
+    "dark/zinc": [
+      "[--btn-text:var(--color-zinc-950)] [--btn-text-dark:var(--color-zinc-400)]",
+    ],
+  },
 };
 
 type TextButtonProps = {
   children: React.ReactNode;
+  color?: keyof typeof textButtonStyles.colors;
+  center?: boolean;
 } & (Headless.ButtonProps | React.ComponentPropsWithoutRef<typeof Link>);
 
 export const TextButton = React.forwardRef(function TextButton(
-  { color, className, children, ...props }: TextButtonProps,
+  { color, center = true, className, children, ...props }: TextButtonProps,
   ref: React.ForwardedRef<HTMLElement>,
 ) {
   const classes = clsx(
     className,
     textButtonStyles.base,
     textButtonStyles.plain,
+    textButtonStyles.colors[color ?? "zinc"],
+    center && "justify-center",
   );
 
   return "href" in props ? (

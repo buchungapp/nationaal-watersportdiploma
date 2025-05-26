@@ -1447,6 +1447,39 @@ export const withdrawCertificatesInCohort = async ({
   });
 };
 
+export const listCohortForPerson = cache(
+  async ({
+    personId,
+    respectCohortVisibility,
+  }: {
+    personId?: string;
+    respectCohortVisibility?: ("open" | "upcoming" | "completed")[];
+  } = {}) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      if (personId && personId !== primaryPerson.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const cohorts = await User.Person.listCohorts({
+        personId: personId ?? primaryPerson.id,
+        respectCohortVisibility:
+          respectCohortVisibility && respectCohortVisibility.length > 0
+            ? (respectCohortVisibility as [
+                "open" | "upcoming" | "completed",
+                ...("open" | "upcoming" | "completed")[],
+              ])
+            : undefined,
+        roles: ["instructor", "location_admin"],
+      });
+
+      return cohorts;
+    });
+  },
+);
+
 export const listCohortsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();

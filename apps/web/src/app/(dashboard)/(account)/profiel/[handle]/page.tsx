@@ -3,6 +3,7 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { after } from "next/server";
 import { getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
+import { Locations } from "./_components/locations";
 import { Logbook } from "./_components/logbook/logbook";
 import { News } from "./_components/news";
 import { Personalia } from "./_components/person/personalia";
@@ -57,6 +58,7 @@ export default async function Page(props: {
         <Socials className="sm:hidden" />
       </div>
       <div className="gap-2 max-sm:gap-y-12 grid grid-cols-1 row-start-2 h-fit">
+        <Locations />
         <Personalia params={props.params} />
         <News className="max-sm:hidden" />
         <Socials className="max-sm:hidden" />

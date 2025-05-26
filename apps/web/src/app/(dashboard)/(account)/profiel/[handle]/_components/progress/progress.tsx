@@ -59,6 +59,13 @@ async function ProgressTabs(props: {
       </TabList>
       <TabPanels className="mt-4">
         <TabPanel>
+          <Text className="-mt-2 mb-2">
+            Mis je een diploma? Neem dan contact op met de{" "}
+            <TextLink href="/vaarlocaties" target="_blank">
+              vaarlocatie
+            </TextLink>{" "}
+            waar je de cursus hebt gevolgd.
+          </Text>
           <Certificates certificates={certificates} />
         </TabPanel>
         <TabPanel>
@@ -86,12 +93,7 @@ export default function ProgressSection(props: {
           </div>
           <Text>
             Bekijk je diploma's, hoe je ervoor staat met je opleidingen, en hoe
-            het gaat met je huidige cursus. Mis je een diploma? Neem dan contact
-            op met de{" "}
-            <TextLink href="/vaarlocaties" target="_blank">
-              vaarlocatie
-            </TextLink>{" "}
-            waar je de cursus hebt gevolgd.
+            het gaat met je huidige cursus.
           </Text>
         </>
       }
@@ -115,6 +117,13 @@ export default function ProgressSection(props: {
             </TabList>
             <TabPanels className="mt-4">
               <TabPanel>
+                <Text className="-mt-2 mb-2">
+                  Mis je een diploma? Neem dan contact op met de{" "}
+                  <TextLink href="/vaarlocaties" target="_blank">
+                    vaarlocatie
+                  </TextLink>{" "}
+                  waar je de cursus hebt gevolgd.
+                </Text>
                 <CertificatesFallback />
               </TabPanel>
               <TabPanel>

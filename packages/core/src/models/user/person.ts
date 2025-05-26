@@ -7,8 +7,11 @@ import {
   eq,
   exists,
   getTableColumns,
+  gte,
   inArray,
   isNull,
+  lte,
+  or,
   sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
@@ -17,6 +20,7 @@ import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   formatSearchTerms,
+  jsonAggBuildObject,
   possibleSingleRow,
   singleOrArray,
   singleRow,
@@ -444,6 +448,115 @@ export const listLocationsByRole = wrapQuery(
 
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       return result as any;
+    },
+  ),
+);
+
+export const listCohorts = wrapQuery(
+  "user.person.listCohorts",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      respectCohortVisibility: z
+        .enum(["open", "upcoming", "completed"])
+        .array()
+        .nonempty()
+        .default(["open", "upcoming", "completed"]),
+      roles: z
+        .array(z.enum(["student", "instructor", "location_admin"]))
+        .default(["instructor", "student", "location_admin"]),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      const rows = await query
+        .select({
+          location: {
+            id: s.location.id,
+            name: s.location.name,
+            handle: s.location.handle,
+          },
+          cohorts: jsonAggBuildObject(
+            {
+              id: s.cohort.id,
+              handle: s.cohort.handle,
+              label: s.cohort.label,
+
+              accessStartTime: s.cohort.accessStartTime,
+              accessEndTime: s.cohort.accessEndTime,
+            },
+            {
+              orderBy: [
+                {
+                  colName: s.cohort.accessStartTime,
+                  direction: "ASC",
+                },
+                {
+                  colName: s.cohort.accessEndTime,
+                  direction: "ASC",
+                },
+              ],
+              notNullColumn: "id",
+            },
+          ),
+        })
+        .from(s.personLocationLink)
+        .innerJoin(
+          s.location,
+          eq(s.personLocationLink.locationId, s.location.id),
+        )
+        .innerJoin(
+          s.actor,
+          and(
+            eq(s.actor.personId, s.personLocationLink.personId),
+            eq(s.actor.locationId, s.personLocationLink.locationId),
+            isNull(s.actor.deletedAt),
+            inArray(s.actor.type, input.roles),
+          ),
+        )
+        .leftJoin(
+          s.cohortAllocation,
+          and(
+            eq(s.cohortAllocation.actorId, s.actor.id),
+            isNull(s.cohortAllocation.deletedAt),
+          ),
+        )
+        .leftJoin(
+          s.cohort,
+          and(
+            or(
+              eq(s.cohort.id, s.cohortAllocation.cohortId),
+              and(
+                eq(s.actor.type, "location_admin"),
+                eq(s.cohort.locationId, s.actor.locationId),
+              ),
+            ),
+            isNull(s.cohort.deletedAt),
+            or(
+              input.respectCohortVisibility.includes("open")
+                ? and(
+                    lte(s.cohort.accessStartTime, sql`NOW()`),
+                    gte(s.cohort.accessEndTime, sql`NOW()`),
+                  )
+                : undefined,
+              input.respectCohortVisibility.includes("upcoming")
+                ? and(gte(s.cohort.accessStartTime, sql`NOW()`))
+                : undefined,
+              input.respectCohortVisibility.includes("completed")
+                ? and(lte(s.cohort.accessEndTime, sql`NOW()`))
+                : undefined,
+            ),
+          ),
+        )
+        .where(
+          and(
+            eq(s.personLocationLink.personId, input.personId),
+            eq(s.personLocationLink.status, "linked"),
+          ),
+        )
+        .groupBy(s.location.id);
+
+      return rows;
     },
   ),
 );
