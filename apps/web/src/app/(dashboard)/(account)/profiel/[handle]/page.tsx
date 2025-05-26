@@ -1,6 +1,7 @@
 import { Text } from "~/app/(dashboard)/_components/text";
 
 import { after } from "next/server";
+import Balancer from "react-wrap-balancer";
 import { getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Locations } from "./_components/locations";
@@ -34,13 +35,15 @@ export default async function Page(props: {
 
   return (
     <div className="gap-2 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <div className="sm:mb-6 max-sm:px-2">
+      <div className="sm:mb-6 max-sm:px-3">
         <Welcome params={props.params} />
         <Text>
-          Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
-          binnen het Nationaal Watersportdiploma (NWD) en je andere
-          watersportactiviteiten. Beheer je meerdere personen met dit
-          e-mailadres? Selecteer dan een andere persoon via de menubalk.
+          <Balancer>
+            Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
+            binnen het Nationaal Watersportdiploma (NWD) en je andere
+            watersportactiviteiten. Beheer je meerdere personen met dit
+            e-mailadres? Selecteer dan een andere persoon via de menubalk.
+          </Balancer>
         </Text>
       </div>
       <div className="gap-2 grid grid-cols-1 row-start-3 lg:row-start-2 h-fit">

@@ -66,7 +66,7 @@ export function ProgressCard({
 }>) {
   return (
     <ProgressCardProvider type={type}>
-      <article className="relative pt-4 border border-zinc-200 rounded-md">
+      <article className="relative pt-2 sm:pt-4 border border-zinc-200 rounded-md">
         {children}
       </article>
     </ProgressCardProvider>
@@ -75,7 +75,7 @@ export function ProgressCard({
 
 export function ProgressCardHeader({ children }: PropsWithChildren) {
   return (
-    <header className="items-center gap-2 grid grid-cols-[1fr_fit-content(--spacing(15))] grid-rows-[fit-content(--spacing(15))_1fr] mb-4 px-4">
+    <header className="items-center gap-2 grid grid-cols-[1fr_fit-content(--spacing(15))] grid-rows-[fit-content(--spacing(15))_1fr] mb-4 px-2 sm:px-4">
       {children}
     </header>
   );
@@ -131,6 +131,7 @@ export function ProgressCardTitleColored({ children }: PropsWithChildren) {
   return (
     <span
       className={clsx(
+        "max-sm:-mt-2",
         type === "cursus" && "text-branding-dark",
         type === "opleiding" && "text-branding-light",
         type === "diploma" && "text-branding-orange",
@@ -158,7 +159,7 @@ export function ProgressCardDegree({ children }: PropsWithChildren) {
 }
 
 export function ProgressCardDescriptionList({ children }: PropsWithChildren) {
-  return <dl className="flex max-sm:flex-col mb-4 px-4">{children}</dl>;
+  return <dl className="flex max-sm:flex-col mb-4 px-2 sm:px-4">{children}</dl>;
 }
 
 export function ProgressCardDescriptionListItem({
@@ -200,13 +201,13 @@ export function ProgressCardDisclosure({
     <Headless.Disclosure>
       <Headless.DisclosureButton
         disabled={disabled}
-        className="group/progress-card-disclosure relative flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 px-4 py-4 border-zinc-200 border-t last:rounded-b-md focus:outline-none w-full text-zinc-950 lg:text-sm text-base"
+        className="group/progress-card-disclosure relative flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 px-2 sm:px-4 py-4 border-zinc-200 border-t last:rounded-b-md focus:outline-none w-full text-zinc-950 lg:text-sm text-base"
       >
         <span className="absolute inset-0 mx-2 rounded-lg group-data-focus/progress-card-disclosure:outline-2 group-data-focus/progress-card-disclosure:outline-branding-light group-data-focus/progress-card-disclosure:outline-offset-2" />
         <div className="flex items-center gap-2 font-medium">{header}</div>
         <ChevronDownIcon className="size-4 text-zinc-500 group-data-open/progress-card-disclosure:rotate-180 transition-transform" />
       </Headless.DisclosureButton>
-      <Headless.DisclosurePanel className="px-4 nth-last-[2]:pb-12">
+      <Headless.DisclosurePanel className="px-2 sm:px-4 nth-last-[2]:pb-12">
         {children}
       </Headless.DisclosurePanel>
     </Headless.Disclosure>
@@ -324,7 +325,7 @@ export function ProgressCardFooter({
   waveSpacing,
 }: PropsWithChildren<{ waveOffset?: number; waveSpacing?: number }>) {
   return (
-    <footer className="group/progress-card-footer peer/progress-card-footer relative flex justify-between bg-neutral-100 px-4 py-2 border-zinc-200 border-t last:rounded-b-md">
+    <footer className="group/progress-card-footer peer/progress-card-footer relative flex justify-between bg-neutral-100 px-2 sm:px-4 py-2 border-zinc-200 border-t last:rounded-b-md">
       <Wave offset={waveOffset} spacing={waveSpacing} />
       <div className="z-10 flex items-center gap-2">
         <Logo className="size-8 text-zinc-500" />
