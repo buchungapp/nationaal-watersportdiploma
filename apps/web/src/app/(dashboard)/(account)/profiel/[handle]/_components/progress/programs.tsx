@@ -185,6 +185,7 @@ async function ProgramsContent({ params }: ProgramsProps) {
                 </ProgressCardStatusList>
               </ProgressCardDisclosure>
               <ProgressCardDisclosure
+                disabled={program.certificates.length === 0}
                 header={
                   <>
                     Behaalde diploma's{" "}

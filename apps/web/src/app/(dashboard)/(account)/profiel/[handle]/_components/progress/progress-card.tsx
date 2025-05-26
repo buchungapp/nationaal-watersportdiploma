@@ -194,10 +194,14 @@ export function ProgressCardBadge({ children }: PropsWithChildren) {
 export function ProgressCardDisclosure({
   children,
   header,
-}: PropsWithChildren<{ header: React.ReactNode }>) {
+  disabled,
+}: PropsWithChildren<{ header: React.ReactNode; disabled?: boolean }>) {
   return (
     <Headless.Disclosure>
-      <Headless.DisclosureButton className="group/progress-card-disclosure relative flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 px-4 py-4 border-zinc-200 border-t last:rounded-b-md focus:outline-none w-full text-zinc-950 lg:text-sm text-base">
+      <Headless.DisclosureButton
+        disabled={disabled}
+        className="group/progress-card-disclosure relative flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 px-4 py-4 border-zinc-200 border-t last:rounded-b-md focus:outline-none w-full text-zinc-950 lg:text-sm text-base"
+      >
         <span className="absolute inset-0 mx-2 rounded-lg group-data-focus/progress-card-disclosure:outline-2 group-data-focus/progress-card-disclosure:outline-branding-light group-data-focus/progress-card-disclosure:outline-offset-2" />
         <div className="flex items-center gap-2 font-medium">{header}</div>
         <ChevronDownIcon className="size-4 text-zinc-500 group-data-open/progress-card-disclosure:rotate-180 transition-transform" />
