@@ -10,6 +10,7 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
+  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -134,14 +135,12 @@ function StartProgramDialog({
   isOpen: boolean;
   close: () => void;
 }) {
-  const [programQuery, setProgramQuery] = useState("");
-
   const closeDialog = () => {
     close();
     reset();
   };
 
-  const { execute, input, reset } = useAction(
+  const { execute, input, reset, result } = useAction(
     enrollStudentsInCurriculumInCohortAction.bind(
       null,
       cohortId,
@@ -215,59 +214,44 @@ function StartProgramDialog({
             <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
               <Field>
                 <Label>Programma</Label>
-                {/* TODO: this combobox is temporary used should be from catalyst */}
                 <Combobox
                   name="program"
-                  setQuery={setProgramQuery}
-                  displayValue={(value: string) => {
-                    const program = programs.find(
-                      (program) => program.id === value,
+                  options={programs.map((program) => program.id)}
+                  displayValue={(programId) => {
+                    const program = ensuredFind(
+                      programs,
+                      (program) => program.id === programId,
                     );
-
-                    if (!program) {
-                      return "";
-                    }
 
                     return (
-                      program?.title ??
-                      `${program?.course.title} ${program?.degree.title}`
+                      program.title ??
+                      `${program.course.title} ${program.degree.title}`
                     );
                   }}
-                  onChange={(value: unknown) => {
-                    if (!(typeof value === "string" || value === null)) {
-                      throw new Error("Invalid value for program");
-                    }
-
-                    setSelectedProgram(value);
-                  }}
+                  onChange={setSelectedProgram}
                   value={selectedProgram}
                   defaultValue={
                     programs?.find(
                       (program) => program.id === getInputValue("curriculumId"),
                     )?.id ?? null
                   }
-                  // invalid={!!state?.errors.curriculumId}
+                  invalid={!!result?.validationErrors?.curriculumId}
                 >
-                  {programs
-                    .filter((x) => {
-                      const programTitle =
-                        x.title ?? `${x.course.title} ${x.degree.title}`;
+                  {(programId) => {
+                    const program = ensuredFind(
+                      programs,
+                      (program) => program.id === programId,
+                    );
 
-                      return (
-                        programQuery.length < 1 ||
-                        programTitle
-                          ?.toLowerCase()
-                          .includes(programQuery.toLowerCase())
-                      );
-                    })
-                    .map((program) => (
-                      <ComboboxOption key={program.id} value={program.id}>
+                    return (
+                      <ComboboxOption key={programId} value={programId}>
                         <ComboboxLabel>
                           {program.title ??
                             `${program.course.title} ${program.degree.title}`}
                         </ComboboxLabel>
                       </ComboboxOption>
-                    ))}
+                    );
+                  }}
                 </Combobox>
               </Field>
               <Field>
@@ -281,7 +265,7 @@ function StartProgramDialog({
                     )
                   }
                   defaultValue={getInputValue("gearTypeId")}
-                  // invalid={!!state?.errors.gearTypeId}
+                  invalid={!!result?.validationErrors?.gearTypeId}
                 >
                   {activeCurriculumForProgram?.gearTypes.map((gearType) => (
                     <ListboxOption key={gearType.id} value={gearType.id}>
@@ -389,8 +373,6 @@ function AssignInstructorDialog({
   isOpen: boolean;
   close: () => void;
 }) {
-  const [instructorQuery, setInstructorQuery] = useState("");
-
   const closeDialog = () => {
     close();
     reset();
@@ -432,18 +414,14 @@ function AssignInstructorDialog({
         <form action={execute}>
           <DialogBody>
             <Field>
-              {/* TODO: this combobox is temporary used should be from catalyst */}
               <Combobox
                 name="instructorPersonId"
-                setQuery={setInstructorQuery}
-                displayValue={(value: string) => {
-                  const instructor = instructors.find(
-                    (instructor) => instructor.person.id === value,
+                options={instructors.map((instructor) => instructor.person.id)}
+                displayValue={(personId) => {
+                  const instructor = ensuredFind(
+                    instructors,
+                    (instructor) => instructor.person.id === personId,
                   );
-
-                  if (!instructor) {
-                    return "";
-                  }
 
                   return [
                     instructor.person.firstName,
@@ -455,30 +433,14 @@ function AssignInstructorDialog({
                 }}
                 defaultValue={getInputValue("instructorPersonId")}
               >
-                {instructors
-                  .filter(
-                    ({ person: { firstName, lastNamePrefix, lastName } }) => {
-                      const instructorName = [
-                        firstName,
-                        lastNamePrefix,
-                        lastName,
-                      ]
-                        .filter(Boolean)
-                        .join(" ");
+                {(personId) => {
+                  const instructor = ensuredFind(
+                    instructors,
+                    (instructor) => instructor.person.id === personId,
+                  );
 
-                      return (
-                        instructorQuery.length < 1 ||
-                        instructorName
-                          ?.toLowerCase()
-                          .includes(instructorQuery.toLowerCase())
-                      );
-                    },
-                  )
-                  .map((instructor) => (
-                    <ComboboxOption
-                      key={instructor.id}
-                      value={instructor.person.id}
-                    >
+                  return (
+                    <ComboboxOption key={personId} value={personId}>
                       <ComboboxLabel>
                         {[
                           instructor.person.firstName,
@@ -489,7 +451,8 @@ function AssignInstructorDialog({
                           .join(" ")}
                       </ComboboxLabel>
                     </ComboboxOption>
-                  ))}
+                  );
+                }}
               </Combobox>
             </Field>
           </DialogBody>
