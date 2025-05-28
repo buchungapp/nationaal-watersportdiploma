@@ -20,3 +20,4 @@ coverage/
 .snaplet/structure.d.ts
 
 .vercel
+prod-seed.sql
