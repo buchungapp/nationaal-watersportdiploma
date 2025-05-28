@@ -2,7 +2,6 @@ import { type PropsWithChildren, Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { showNewLogBook } from "~/lib/flags";
 import { getPersonByHandle, listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
 import { AddLogbook } from "./add-logbook";
@@ -32,12 +31,6 @@ async function LogbookContent({
   params: Promise<{ handle: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const showLogBook = await showNewLogBook();
-
-  if (!showLogBook) {
-    return null;
-  }
-
   const { handle } = await params;
   const person = await getPersonByHandle(handle);
   const data = await listLogbooksForPerson({ personId: person.id });
@@ -50,19 +43,11 @@ async function LogbookContent({
   );
 
   return (
-    <LogbookSkeleton
-      button={
-        <Suspense fallback={<AddLogbookButtonFallback />}>
-          <AddLogbookButton params={params} />
-        </Suspense>
-      }
-    >
-      <LogbookTable
-        logbooks={logbooks}
-        totalItems={data.length}
-        personId={person.id}
-      />
-    </LogbookSkeleton>
+    <LogbookTable
+      logbooks={logbooks}
+      totalItems={data.length}
+      personId={person.id}
+    />
   );
 }
 

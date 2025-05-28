@@ -2,7 +2,6 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { PersonCohortProgress } from "./_components/cohort-progress";
 
 import { after } from "next/server";
-import { showNewWaterSportCertificates } from "~/lib/flags";
 import { getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Logbook } from "./_components/logbook/logbook";
@@ -10,7 +9,6 @@ import NWDCertificatesSection from "./_components/nwd-certificates-section";
 import { Personalia } from "./_components/person/personalia";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import { Welcome } from "./_components/welcome";
-import PageWithoutNewWaterSportCertificates from "./old-page";
 
 export default async function Page(props: {
   params: Promise<{
@@ -18,10 +16,6 @@ export default async function Page(props: {
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  if (!(await showNewWaterSportCertificates())) {
-    return await PageWithoutNewWaterSportCertificates(props);
-  }
-
   after(async () => {
     const user = await getUserOrThrow();
 

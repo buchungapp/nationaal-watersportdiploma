@@ -17,7 +17,6 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Code, Strong } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { showAllocationTimeline } from "~/lib/flags";
 import {
   listAllocationHistory,
   retrieveCohortByHandle,
@@ -242,9 +241,6 @@ type TimelineProps = {
 };
 
 async function TimelineContent(props: TimelineProps) {
-  // Kick-off the flag evaluation
-  const showTimelineFlag = showAllocationTimeline();
-
   const params = await props.params;
 
   const location = await retrieveLocationByHandle(params.location);
@@ -261,10 +257,6 @@ async function TimelineContent(props: TimelineProps) {
 
   if (!allocation) {
     notFound();
-  }
-
-  if (!(await showTimelineFlag)) {
-    return null;
   }
 
   const progress = await listAllocationHistory(
