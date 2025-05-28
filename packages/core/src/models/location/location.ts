@@ -1,6 +1,14 @@
 import { schema as s } from "@nawadi/db";
-import { asc, eq } from "drizzle-orm";
-import { sql } from "drizzle-orm/sql";
+import {
+  and,
+  asc,
+  eq,
+  isNotNull,
+  isNull,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { findItem, singleRow } from "../../utils/data-helpers.js";
@@ -11,6 +19,8 @@ import {
   uuidSchema,
   withZod,
 } from "../../utils/zod.js";
+import { selectSchema as disciplineSelectSchema } from "../course/discipline.schema.js";
+import { selectSchema as gearTypeSelectSchema } from "../curriculum/gear-type.schema.js";
 import { Platform } from "../index.js";
 import {
   type LocationMetadata,
@@ -237,4 +247,142 @@ export const fromHandle = wrapQuery(
       ...mapMetaForLocation(location._metadata),
     };
   }),
+);
+
+export const listResources = wrapQuery(
+  "location.listResources",
+  withZod(
+    uuidSchema,
+    z.object({
+      gearTypes: z
+        .object({
+          id: z.string(),
+          locationId: z.string(),
+          gearType: gearTypeSelectSchema,
+        })
+        .array(),
+      disciplines: z
+        .object({
+          id: z.string(),
+          locationId: z.string(),
+          discipline: disciplineSelectSchema,
+        })
+        .array(),
+    }),
+    async (locationId) => {
+      const query = useQuery();
+
+      const rows = await query
+        .select()
+        .from(s.locationResourceLink)
+        .leftJoin(
+          s.gearType,
+          eq(s.locationResourceLink.gearTypeId, s.gearType.id),
+        )
+        .leftJoin(
+          s.discipline,
+          eq(s.locationResourceLink.disciplineId, s.discipline.id),
+        )
+        .where(
+          and(
+            eq(s.locationResourceLink.locationId, locationId),
+            isNull(s.locationResourceLink.deletedAt),
+          ),
+        );
+
+      const gearTypes = rows
+        .filter((row) => row.gear_type)
+        .map((row) => ({
+          id: row.location_resource_link.id,
+          locationId: row.location_resource_link.locationId,
+          // biome-ignore lint/style/noNonNullAssertion: Filtering ensures this is not null
+          gearType: row.gear_type!,
+        }));
+
+      const disciplines = rows
+        .filter((row) => row.discipline)
+        .map((row) => ({
+          id: row.location_resource_link.id,
+          locationId: row.location_resource_link.locationId,
+          // biome-ignore lint/style/noNonNullAssertion: Filtering ensures this is not null
+          discipline: row.discipline!,
+        }));
+
+      return {
+        gearTypes,
+        disciplines,
+      };
+    },
+  ),
+);
+
+export const updateResources = wrapCommand(
+  "location.updateResources",
+  withZod(
+    z.object({
+      id: uuidSchema,
+      gearTypes: z.array(uuidSchema),
+      disciplines: z.array(uuidSchema),
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+
+      await query
+        .delete(s.locationResourceLink)
+        .where(
+          and(
+            eq(s.locationResourceLink.locationId, input.id),
+            or(
+              and(
+                isNotNull(s.locationResourceLink.gearTypeId),
+                notInArray(s.locationResourceLink.gearTypeId, input.gearTypes),
+              ),
+              and(
+                isNotNull(s.locationResourceLink.disciplineId),
+                notInArray(
+                  s.locationResourceLink.disciplineId,
+                  input.disciplines,
+                ),
+              ),
+            ),
+          ),
+        );
+
+      const gearTypes = input.gearTypes.map((gearTypeId) => ({
+        locationId: input.id,
+        gearTypeId,
+        disciplineId: null,
+      }));
+
+      const disciplines = input.disciplines.map((disciplineId) => ({
+        locationId: input.id,
+        gearTypeId: null,
+        disciplineId,
+      }));
+
+      await Promise.all([
+        gearTypes.length > 0 &&
+          query
+            .insert(s.locationResourceLink)
+            .values(gearTypes)
+            .onConflictDoNothing({
+              target: [
+                s.locationResourceLink.locationId,
+                s.locationResourceLink.gearTypeId,
+              ],
+            }),
+        disciplines.length > 0 &&
+          query
+            .insert(s.locationResourceLink)
+            .values(disciplines)
+            .onConflictDoNothing({
+              target: [
+                s.locationResourceLink.locationId,
+                s.locationResourceLink.disciplineId,
+              ],
+            }),
+      ]);
+    },
+  ),
 );

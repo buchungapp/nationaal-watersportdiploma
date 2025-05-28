@@ -25,18 +25,20 @@ import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
 import {
   listCurriculaByProgram,
-  listGearTypesByCurriculum,
-  listPrograms,
+  listGearTypesByCurriculumForLocation,
+  listProgramsForLocation,
 } from "../../(overview)/_actions/fetch";
 
 export function StartStudentCurriculum({
   cohortId,
   allocationId,
   personId,
+  locationId,
 }: {
   cohortId: string;
   allocationId: string;
   personId: string;
+  locationId: string;
 }) {
   const { execute, input, result } = useAction(
     enrollStudentsInCurriculumInCohortAction.bind(null, cohortId, [
@@ -51,7 +53,10 @@ export function StartStudentCurriculum({
       },
     },
   );
-  const { data: programs } = useSWR("allPrograms", listPrograms);
+  const { data: programs } = useSWR(
+    ["allPrograms", locationId],
+    listProgramsForLocation.bind(null, locationId),
+  );
   const { getInputValue } = useFormInput(input);
   const [selectedProgram, setSelectedProgram] = useState<string | null>(
     programs?.find((program) => program.id === getInputValue("curriculumId"))
@@ -79,7 +84,10 @@ export function StartStudentCurriculum({
 
       return {
         curriculum,
-        gearTypes: await listGearTypesByCurriculum(curriculum.id),
+        gearTypes: await listGearTypesByCurriculumForLocation(
+          locationId,
+          curriculum.id,
+        ),
       };
     },
   );

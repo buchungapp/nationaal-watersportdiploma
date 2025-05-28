@@ -5,8 +5,10 @@ import {
   and,
   asc,
   eq,
+  exists,
   getTableColumns,
   inArray,
+  isNull,
 } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
@@ -59,6 +61,7 @@ export const list = wrapQuery(
           .object({
             id: singleOrArray(uuidSchema).optional(),
             courseId: singleOrArray(uuidSchema).optional(),
+            locationId: singleOrArray(uuidSchema).optional(),
           })
           .default({}),
       })
@@ -83,6 +86,31 @@ export const list = wrapQuery(
         } else {
           whereClausules.push(eq(s.program.courseId, filter.courseId));
         }
+      }
+
+      if (filter.locationId) {
+        whereClausules.push(
+          exists(
+            query
+              .select()
+              .from(s.locationResourceLink)
+              .where(
+                and(
+                  isNull(s.locationResourceLink.deletedAt),
+                  eq(
+                    s.locationResourceLink.disciplineId,
+                    s.course.disciplineId,
+                  ),
+                  Array.isArray(filter.locationId)
+                    ? inArray(
+                        s.locationResourceLink.locationId,
+                        filter.locationId,
+                      )
+                    : eq(s.locationResourceLink.locationId, filter.locationId),
+                ),
+              ),
+          ),
+        );
       }
 
       // Prepare a database query to fetch programs and their categories using joins.

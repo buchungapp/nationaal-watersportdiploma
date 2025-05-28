@@ -1,10 +1,20 @@
 import { schema as s } from "@nawadi/db";
-import { asc, desc, eq } from "drizzle-orm";
+import {
+  type SQL,
+  and,
+  asc,
+  desc,
+  eq,
+  exists,
+  inArray,
+  isNull,
+} from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   handleSchema,
   possibleSingleRow,
+  singleOrArray,
   singleRow,
   successfulCreateResponse,
   uuidSchema,
@@ -48,16 +58,54 @@ export const create = wrapCommand(
 
 export const list = wrapQuery(
   "course.discipline.list",
-  withZod(z.void(), selectSchema.array(), async () => {
-    const query = useQuery();
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            locationId: singleOrArray(uuidSchema).optional(),
+          })
+          .default({}),
+      })
+      .default({}),
+    selectSchema.array(),
+    async ({ filter }) => {
+      const query = useQuery();
 
-    const rows = await query
-      .select()
-      .from(s.discipline)
-      .orderBy(asc(s.discipline.weight));
+      const whereClauses: (SQL | undefined)[] = [
+        filter.locationId
+          ? exists(
+              query
+                .select()
+                .from(s.locationResourceLink)
+                .where(
+                  and(
+                    isNull(s.locationResourceLink.deletedAt),
+                    eq(s.locationResourceLink.disciplineId, s.discipline.id),
+                    Array.isArray(filter.locationId)
+                      ? inArray(
+                          s.locationResourceLink.locationId,
+                          filter.locationId,
+                        )
+                      : eq(
+                          s.locationResourceLink.locationId,
+                          filter.locationId,
+                        ),
+                  ),
+                ),
+            )
+          : undefined,
+      ];
 
-    return rows;
-  }),
+      const rows = await query
+        .select()
+        .from(s.discipline)
+        .where(and(...whereClauses))
+        .orderBy(asc(s.discipline.weight));
+
+      return rows;
+    },
+  ),
 );
 
 export const fromHandle = wrapQuery(

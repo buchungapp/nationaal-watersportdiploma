@@ -1,11 +1,7 @@
 import { PlusIcon } from "@heroicons/react/16/solid";
 import { Suspense } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
-import {
-  listPrograms,
-  listRolesForLocation,
-  retrieveLocationByHandle,
-} from "~/lib/nwd";
+import { listRolesForLocation, retrieveLocationByHandle } from "~/lib/nwd";
 import CreateDialogClient from "./create-dialog-client";
 
 type CreateDialogProps = {
@@ -18,16 +14,13 @@ async function CreateDialogContent(props: CreateDialogProps) {
   const params = await props.params;
   const location = await retrieveLocationByHandle(params.location);
 
-  const [programs, personLocationRoles] = await Promise.all([
-    listPrograms(),
-    listRolesForLocation(location.id),
-  ]);
+  const personLocationRoles = await listRolesForLocation(location.id);
 
   if (!personLocationRoles.includes("location_admin")) {
     return null;
   }
 
-  return <CreateDialogClient locationId={location.id} programs={programs} />;
+  return <CreateDialogClient locationId={location.id} />;
 }
 
 function CreateDialogFallback() {

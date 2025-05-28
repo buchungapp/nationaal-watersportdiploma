@@ -22,7 +22,7 @@ import {
   listInstructorsByCohortId,
   listPersonsForLocationWithPagination,
   listPrivilegesForCohort,
-  listPrograms,
+  listProgramsForLocation,
   listRolesForLocation,
   listStudentsWithCurriculaByCohortId,
   retrieveCohortByHandle,
@@ -164,7 +164,8 @@ async function LayoutContent(props: {
             listRolesForLocation(location.id),
           [unstable_serialize(["distinctTagsForCohort", cohort.id])]:
             listDistinctTagsForCohort(cohort.id),
-          allPrograms: listPrograms(),
+          [unstable_serialize(["allPrograms", location.id])]:
+            listProgramsForLocation(location.id),
         },
       }}
     >
