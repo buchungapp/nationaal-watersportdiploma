@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { NextRequest } from "next/server";
 import { safeParseCertificateParams } from "~/app/(certificate)/diploma/_utils/parse-certificate-params";
 import dayjs from "~/lib/dayjs";
+import { createDigitalSignatureConfig } from "~/lib/digital-signature-utils";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
 import { findCertificate, retrieveCertificateById } from "~/lib/nwd";
 import { presentPDF } from "../_utils/present-pdf";
@@ -47,11 +48,29 @@ export async function GET(
       : `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
   }.pdf`;
 
+  let digitalSignature = undefined;
+  if (
+    searchParams.has("signed") &&
+    process.env.DIGITAL_SIGNATURE_CERT_PATH &&
+    process.env.DIGITAL_SIGNATURE_CERT_PASSPHRASE
+  ) {
+    try {
+      digitalSignature = await createDigitalSignatureConfig({
+        certificatePath: process.env.DIGITAL_SIGNATURE_CERT_PATH,
+        passphrase: process.env.DIGITAL_SIGNATURE_CERT_PASSPHRASE,
+      });
+    } catch (error) {
+      console.warn("Failed to create digital signature config:", error);
+      // Continue without digital signature
+    }
+  }
+
   return presentPDF(
     filename,
     await generatePDF([certificateFromParams.handle], {
       style: searchParams.has("print") ? "print" : "digital",
       debug: searchParams.has("debug"),
+      digitalSignature,
     }),
     type,
   );

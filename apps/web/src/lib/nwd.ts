@@ -1,8 +1,4 @@
-import type {
-  DatabaseConfiguration,
-  RedisConfiguration,
-  SupabaseConfiguration,
-} from "@nawadi/core";
+import type { RedisConfiguration, SupabaseConfiguration } from "@nawadi/core";
 import {
   Certificate,
   Cohort,
@@ -46,16 +42,12 @@ invariant(
 invariant(process.env.REDIS_URL, "Missing REDIS_URL");
 invariant(process.env.PGURI, "Missing PGURI");
 
-const supabaseConfig: SupabaseConfiguration = {
+export const supabaseConfig: SupabaseConfiguration = {
   url: process.env.NEXT_PUBLIC_SUPABASE_URL,
   serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
 };
 const redisConfig: RedisConfiguration = {
   url: process.env.REDIS_URL,
-};
-
-const dbConfig: DatabaseConfiguration = {
-  connectionString: process.env.PGURI,
 };
 
 type MediaType = File | Buffer;

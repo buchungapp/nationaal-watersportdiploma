@@ -1,6 +1,9 @@
 import assert from "node:assert";
 import path from "node:path";
 import { constants } from "@nawadi/lib";
+import { pdfkitAddPlaceholder } from "@signpdf/placeholder-pdfkit";
+import { P12Signer } from "@signpdf/signer-p12";
+import signpdf from "@signpdf/signpdf";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
 import SVGtoPDF from "svg-to-pdfkit";
@@ -75,10 +78,19 @@ export async function generatePDF(
     debug = false,
     sort = "student",
     style = "print",
+    digitalSignature,
   }: {
     debug?: boolean;
     sort?: "student" | "instructor";
     style?: "print" | "digital";
+    digitalSignature?: {
+      certificate: ArrayBuffer;
+      passphrase: string;
+      reason: string;
+      location: string;
+      contactInfo: string;
+      name: string;
+    };
   } = {},
 ): Promise<ReadableStream> {
   const data = await listCertificatesByNumber(certificateNumbers, sort);
@@ -397,83 +409,66 @@ export async function generatePDF(
     }
   }
 
-  const stream = new ReadableStream({
-    start(controller) {
-      let streamState: "active" | "closing" | "closed" = "active";
-      const pendingChunks: Uint8Array[] = [];
-      let isProcessing = false;
+  // Handle digital signature if provided
+  if (digitalSignature) {
+    // Add signature placeholder before ending the document
+    const signatureOptions = {
+      reason: digitalSignature.reason,
+      contactInfo: digitalSignature.contactInfo,
+      name: digitalSignature.name,
+      location: digitalSignature.location,
+    };
 
-      const processQueue = () => {
-        if (isProcessing || streamState === "closed") return;
-        isProcessing = true;
+    pdfkitAddPlaceholder({
+      pdf: doc,
+      pdfBuffer: Buffer.alloc(0), // Will be properly set when PDF is generated
+      ...signatureOptions,
+    });
+  }
 
-        try {
-          while (pendingChunks.length > 0 && streamState === "active") {
-            const chunk = pendingChunks.shift();
-            if (chunk) {
-              controller.enqueue(chunk);
-            }
-          }
+  // Generate the PDF buffer first
+  return new Promise<ReadableStream>((resolve, reject) => {
+    const chunks: Buffer[] = [];
 
-          if (streamState === "closing" && pendingChunks.length === 0) {
-            streamState = "closed";
+    doc.on("data", (chunk) => {
+      chunks.push(chunk);
+    });
+
+    doc.on("end", async () => {
+      try {
+        let pdfBuffer = Buffer.concat(chunks);
+
+        // Sign the PDF if digital signature is provided
+        if (digitalSignature) {
+          const signer = new P12Signer(
+            Buffer.from(digitalSignature.certificate),
+            {
+              passphrase: digitalSignature.passphrase,
+            },
+          );
+
+          pdfBuffer = Buffer.from(await signpdf.sign(pdfBuffer, signer));
+        }
+
+        // Create a ReadableStream from the final buffer
+        const stream = new ReadableStream({
+          start(controller) {
+            controller.enqueue(pdfBuffer);
             controller.close();
-            cleanup();
-          }
-        } catch (error) {
-          streamState = "closed";
-          cleanup();
-          console.error("Error processing queue:", error);
-        } finally {
-          isProcessing = false;
-        }
-      };
+          },
+        });
 
-      const cleanup = () => {
-        doc.removeAllListeners("data");
-        doc.removeAllListeners("end");
-        doc.removeAllListeners("error");
-        pendingChunks.length = 0; // Clear any remaining chunks
-      };
+        resolve(stream);
+      } catch (error) {
+        reject(error);
+      }
+    });
 
-      doc.on("data", (chunk) => {
-        if (streamState === "closed") return;
+    doc.on("error", (error) => {
+      reject(error);
+    });
 
-        pendingChunks.push(chunk);
-        processQueue();
-      });
-
-      doc.on("end", () => {
-        if (streamState === "closed") return;
-
-        streamState = "closing";
-        processQueue();
-      });
-
-      doc.on("error", (error) => {
-        if (streamState === "closed") return;
-
-        streamState = "closed";
-        cleanup();
-        console.error("PDF generation error:", error);
-        try {
-          controller.error(error);
-        } catch (controllerError) {
-          console.error("Controller error:", controllerError);
-        }
-      });
-    },
-
-    cancel() {
-      // Handle case where stream is cancelled before completion
-      doc.removeAllListeners("data");
-      doc.removeAllListeners("end");
-      doc.removeAllListeners("error");
-    },
+    // End the document to trigger the generation
+    doc.end();
   });
-
-  // Now that the stream is set up, start the PDF generation
-  doc.end();
-
-  return stream;
 }
