@@ -50,7 +50,8 @@ export async function GET(
   return presentPDF(
     filename,
     await generatePDF([certificateFromParams.handle], {
-      style: "digital",
+      style: searchParams.has("print") ? "print" : "digital",
+      debug: searchParams.has("debug"),
     }),
     type,
   );

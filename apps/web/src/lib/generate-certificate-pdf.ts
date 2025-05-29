@@ -22,12 +22,24 @@ const fontPaths = {
 const backgroundPaths = {
   bahiaOutside: "./src/assets/certificates/bahia_01.png",
   bahiaInside: "./src/assets/certificates/bahia_02.png",
-  templateOutside: "./src/assets/certificates/diploma-template_01.png",
+  templateOutsideBack: "./src/assets/certificates/diploma-template_01-back.png",
+  templateOutsideFront:
+    "./src/assets/certificates/diploma-template_01-front.png",
   templateInside: "./src/assets/certificates/diploma-template_02.png",
 };
 
 // Caching setup
 const cache = new Map<string, Promise<ArrayBuffer>>();
+
+// Simple 1x1 transparent PNG as placeholder (89 bytes)
+const PLACEHOLDER_LOGO = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49,
+  0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06,
+  0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44,
+  0x41, 0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0d,
+  0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42,
+  0x60, 0x82,
+]).buffer;
 
 async function fetchLogoWithCache(
   url: string,
@@ -39,7 +51,15 @@ async function fetchLogoWithCache(
     cache.set(
       cacheKey,
       fetch(url, options).then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch logo");
+        if (!res.ok) {
+          if (process.env.NODE_ENV === "development") {
+            console.warn(
+              `Failed to fetch logo from ${url}, using placeholder in development mode`,
+            );
+            return PLACEHOLDER_LOGO;
+          }
+          throw new Error("Failed to fetch logo");
+        }
         return res.arrayBuffer();
       }),
     );
@@ -86,16 +106,19 @@ export async function generatePDF(
 
   for await (const certificate of data) {
     if (style === "digital") {
-      // Background
-      // Boat
+      doc.image(getPath(backgroundPaths.templateOutsideBack), 0, 0, {
+        cover: [doc.page.width, doc.page.height],
+        align: "center",
+        valign: "center",
+      });
+
       doc.image(getPath(backgroundPaths.bahiaOutside), 0, 0, {
         fit: [doc.page.width, doc.page.height],
         align: "center",
         valign: "center",
       });
 
-      // Template
-      doc.image(getPath(backgroundPaths.templateOutside), 0, 0, {
+      doc.image(getPath(backgroundPaths.templateOutsideFront), 0, 0, {
         cover: [doc.page.width, doc.page.height],
         align: "center",
         valign: "center",
@@ -138,7 +161,7 @@ export async function generatePDF(
     ]);
 
     // Background
-    if (style === "print") {
+    if (style === "digital") {
       // Boat
       doc.image(getPath(backgroundPaths.bahiaInside), 0, 0, {
         fit: [doc.page.width, doc.page.height],
@@ -155,24 +178,26 @@ export async function generatePDF(
     }
 
     // Gear type
-    doc.font("bold", 20).text(certificate.gearType.title ?? "", 476.22, 36.85, {
-      ellipsis: true,
-      lineBreak: false,
-      width: 272.126 - 5.669,
-      height: 17.921,
-      align: "right",
-      baseline: "hanging",
-    });
+    doc
+      .font("bold", 20)
+      .text(certificate.gearType.title ?? "", 479.055, 39.685, {
+        ellipsis: true,
+        lineBreak: false,
+        width: 272.126 - 5.669,
+        height: 17.921,
+        align: "right",
+        baseline: "hanging",
+      });
 
-    debug && doc.rect(476.22, 36.85, 272.126 - 5.669, 17.921).stroke();
+    debug && doc.rect(479.055, 39.685, 272.126 - 5.669, 17.921).stroke();
 
     // Program title
     doc
       .font("regular", 11)
       .text(
         certificate.program.title ?? certificate.program.course.title ?? "",
-        476.22,
-        56.378,
+        479.055,
+        59.213,
         {
           ellipsis: true,
           lineBreak: false,
@@ -183,12 +208,12 @@ export async function generatePDF(
         },
       );
 
-    debug && doc.rect(476.22, 56.378, 272.126 - 5.669, 14.488).stroke();
+    debug && doc.rect(479.055, 59.213, 272.126 - 5.669, 14.488).stroke();
 
     // Degree
     doc.font("black", 42).fillColor([255, 128, 0]);
 
-    doc.text(degree ?? "", 748.346, 36.85, {
+    doc.text(degree ?? "", 751.181, 39.685, {
       lineBreak: false,
       width: 34.016,
       height: 34.016,
@@ -196,16 +221,18 @@ export async function generatePDF(
       baseline: "hanging",
     });
 
-    debug && doc.rect(748.346, 36.85, 34.016, 34.016).stroke();
+    debug && doc.rect(751.181, 39.685, 34.016, 34.016).stroke();
 
     // Name
     doc.fillColor("black");
 
-    doc.font("bold", 12).text(studentFullName, 476.22, 145.586, {
+    doc.font("bold", 12).text(studentFullName, 479.055, 144.421 + 4, {
       width: 306.142,
       align: "left",
       baseline: "hanging",
     });
+
+    debug && doc.rect(479.055, 144.421 + 4, 306.142, 12).stroke();
 
     // Date of birth
     doc
@@ -214,8 +241,8 @@ export async function generatePDF(
         certificate.student.dateOfBirth
           ? dayjs(certificate.student.dateOfBirth).format("DD-MM-YYYY")
           : "",
-        476.22,
-        201.561,
+        479.055,
+        204.395 + 4,
         {
           width: 148.819,
           align: "left",
@@ -223,20 +250,24 @@ export async function generatePDF(
         },
       );
 
+    debug && doc.rect(479.055, 204.395 + 4, 148.819, 12).stroke();
+
     // Place of birth
-    doc.text(certificate.student.birthCity ?? "", 633.543, 201.561, {
+    doc.text(certificate.student.birthCity ?? "", 636.378, 204.395 + 4, {
       width: 148.819,
       align: "left",
       baseline: "hanging",
     });
+
+    debug && doc.rect(636.378, 204.395 + 4, 148.819, 12).stroke();
 
     // Issued at
     doc.text(
       certificate.issuedAt
         ? dayjs(certificate.issuedAt).format("DD-MM-YYYY")
         : "",
-      476.22,
-      261.536,
+      479.055,
+      264.37 + 4,
       {
         width: 148.819,
         align: "left",
@@ -244,40 +275,57 @@ export async function generatePDF(
       },
     );
 
+    debug && doc.rect(479.055, 264.37 + 4, 148.819, 12).stroke();
+
     // Number
-    doc.text(certificate.handle, 633.543, 261.536, {
+    doc.text(certificate.handle, 636.378, 264.37 + 4, {
       width: 148.819,
       align: "left",
       baseline: "hanging",
     });
 
+    debug && doc.rect(636.378, 264.37 + 4, 148.819, 12).stroke();
+
     // Location
     if (locationCertificateLogo) {
-      doc.image(locationCertificateLogo, 481.89, 331.18, {
-        fit: [137.48, 87.874],
+      doc.image(locationCertificateLogo, 487.559, 334.014, {
+        fit: [131.811, 82.205],
         align: "center",
         valign: "center",
       });
     } else {
       // Fallback location name
+      const textOptions = {
+        width: 131.811,
+        align: "center",
+      } as const;
+
+      const textHeight = doc.heightOfString(
+        certificate.location.name ?? "",
+        textOptions,
+      );
+      const yPosition = 334.014 + (82.205 - textHeight) / 2;
+
       doc
         .font("bold", 12)
-        .text(certificate.location.name ?? "", 476.22, 331.18, {
-          width: 148.819,
-          align: "left",
-          baseline: "hanging",
+        .text(certificate.location.name ?? "", 487.559, yPosition, {
+          width: 131.811,
+          align: "center",
+          baseline: "top",
         });
     }
 
+    debug && doc.rect(487.559, 334.014, 131.811, 82.205).stroke();
+
     // QR-code
-    SVGtoPDF(doc, qrCodeSVG, 291.969, 501.732, {
+    SVGtoPDF(doc, qrCodeSVG, 291.969, 501.927, {
       width: 62.362,
       height: 62.362,
       assumePt: true,
       preserveAspectRatio: "xMidYMid meet",
     });
 
-    debug && doc.rect(291.969, 501.732, 62.362, 62.362).stroke();
+    debug && doc.rect(291.969, 501.927, 62.362, 62.362).stroke();
 
     // Advice
     const options = {
@@ -349,12 +397,83 @@ export async function generatePDF(
     }
   }
 
-  doc.end();
-
-  return new ReadableStream({
+  const stream = new ReadableStream({
     start(controller) {
-      doc.on("data", (chunk) => controller.enqueue(chunk));
-      doc.on("end", () => controller.close());
+      let streamState: "active" | "closing" | "closed" = "active";
+      const pendingChunks: Uint8Array[] = [];
+      let isProcessing = false;
+
+      const processQueue = () => {
+        if (isProcessing || streamState === "closed") return;
+        isProcessing = true;
+
+        try {
+          while (pendingChunks.length > 0 && streamState === "active") {
+            const chunk = pendingChunks.shift();
+            if (chunk) {
+              controller.enqueue(chunk);
+            }
+          }
+
+          if (streamState === "closing" && pendingChunks.length === 0) {
+            streamState = "closed";
+            controller.close();
+            cleanup();
+          }
+        } catch (error) {
+          streamState = "closed";
+          cleanup();
+          console.error("Error processing queue:", error);
+        } finally {
+          isProcessing = false;
+        }
+      };
+
+      const cleanup = () => {
+        doc.removeAllListeners("data");
+        doc.removeAllListeners("end");
+        doc.removeAllListeners("error");
+        pendingChunks.length = 0; // Clear any remaining chunks
+      };
+
+      doc.on("data", (chunk) => {
+        if (streamState === "closed") return;
+
+        pendingChunks.push(chunk);
+        processQueue();
+      });
+
+      doc.on("end", () => {
+        if (streamState === "closed") return;
+
+        streamState = "closing";
+        processQueue();
+      });
+
+      doc.on("error", (error) => {
+        if (streamState === "closed") return;
+
+        streamState = "closed";
+        cleanup();
+        console.error("PDF generation error:", error);
+        try {
+          controller.error(error);
+        } catch (controllerError) {
+          console.error("Controller error:", controllerError);
+        }
+      });
+    },
+
+    cancel() {
+      // Handle case where stream is cancelled before completion
+      doc.removeAllListeners("data");
+      doc.removeAllListeners("end");
+      doc.removeAllListeners("error");
     },
   });
+
+  // Now that the stream is set up, start the PDF generation
+  doc.end();
+
+  return stream;
 }
