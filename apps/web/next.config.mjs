@@ -49,7 +49,10 @@ const nextConfig = {
     "@opentelemetry/sdk-node",
   ],
   outputFileTracingIncludes: {
-    "/api/export/certificate/pdf": ["./src/assets/fonts/**/*"],
+    "/api/export/certificate/pdf/**/*": [
+      "./src/assets/fonts/**/*",
+      "./src/assets/certificates/**/*",
+    ],
     "/": ["./src/app/(public)/**/*.mdx"],
   },
   images: {
