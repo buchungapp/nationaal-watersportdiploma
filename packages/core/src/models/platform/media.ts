@@ -2,6 +2,7 @@ import assert from "node:assert";
 import crypto from "node:crypto";
 import { schema as s, uncontrolledSchema } from "@nawadi/db";
 import {
+  type SQL,
   and,
   arrayContains,
   asc,
@@ -16,6 +17,7 @@ import { imageSize } from "image-size";
 import { z } from "zod";
 import { useQuery, useSupabaseClient } from "../../contexts/index.js";
 import {
+  formatSearchTerms,
   singleRow,
   successfulCreateResponse,
   uuidSchema,
@@ -256,33 +258,54 @@ export const listImages = wrapQuery(
 
 export const listKnowledgeCenterDocuments = wrapQuery(
   "platform.media.listKnowledgeCenterDocuments",
-  withZod(z.void(), async () => {
-    const query = useQuery();
-
-    const { object_id, actorId, locationId, status, type, ...selectFields } =
-      getTableColumns(s.media);
-
-    const rows = await query
-      .select({
-        ...selectFields,
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            q: z.string().optional(),
+          })
+          .default({}),
       })
-      .from(s.media)
-      .where(
-        and(
-          // Knowledge center documents have a name
-          isNotNull(s.media.name),
-          arrayContains(s.media.tags, ["knowledge-base"]),
+      .default({}),
+    async ({ filter }) => {
+      const query = useQuery();
 
-          isNull(s.media.deletedAt),
-          isNull(s.media.locationId),
-          eq(s.media.type, "file"),
-          eq(s.media.status, "ready"),
-        ),
-      )
-      .orderBy(asc(s.media.name));
+      const whereClauses: (SQL | undefined)[] = [
+        filter.q
+          ? sql`setweight(to_tsvector('simple', 
+                COALESCE(${s.media.name}, '')
+              ), 'A')
+            @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})
+          `
+          : undefined,
+      ];
 
-    return rows;
-  }),
+      const { object_id, actorId, locationId, status, type, ...selectFields } =
+        getTableColumns(s.media);
+
+      const rows = await query
+        .select({
+          ...selectFields,
+        })
+        .from(s.media)
+        .where(
+          and(
+            ...whereClauses,
+            // Knowledge center documents have a name
+            isNotNull(s.media.name),
+            arrayContains(s.media.tags, ["knowledge-base"]),
+            isNull(s.media.deletedAt),
+            isNull(s.media.locationId),
+            eq(s.media.type, "file"),
+            eq(s.media.status, "ready"),
+          ),
+        )
+        .orderBy(asc(s.media.name));
+
+      return rows;
+    },
+  ),
 );
 
 export const createSignedUrl = wrapCommand(

@@ -1,7 +1,9 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/16/solid";
 import { DocumentTextIcon } from "@heroicons/react/20/solid";
+import { createLoader, parseAsString } from "nuqs/server";
 import prettyBytes from "pretty-bytes";
 import { type PropsWithChildren, Suspense } from "react";
+import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -17,26 +19,41 @@ import { TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
 
+type FilesTableProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
 function FilesTableInner({ children }: PropsWithChildren) {
   return (
-    <Table
-      className="mt-8 [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]"
-      dense
-    >
-      <TableHead>
-        <TableRow>
-          <TableHeader>Naam</TableHeader>
-          <TableHeader>Laatste update</TableHeader>
-          <TableHeader />
-        </TableRow>
-      </TableHead>
-      <TableBody>{children}</TableBody>
-    </Table>
+    <>
+      <Search className="mt-4 max-w-lg" />
+      <Table
+        className="mt-4 [--gutter:--spacing(6)] sm:[--gutter:--spacing(8)]"
+        dense
+      >
+        <TableHead>
+          <TableRow>
+            <TableHeader>Naam</TableHeader>
+            <TableHeader>Laatste update</TableHeader>
+            <TableHeader />
+          </TableRow>
+        </TableHead>
+        <TableBody>{children}</TableBody>
+      </Table>
+    </>
   );
 }
 
-async function FilesTableContent() {
-  const documents = await listKnowledgeCenterDocuments();
+const searchParamsParser = createLoader({
+  query: parseAsString.withDefault(""),
+});
+
+async function FilesTableContent({ searchParams }: FilesTableProps) {
+  const { query } = await searchParamsParser(searchParams);
+
+  const documents = await listKnowledgeCenterDocuments({
+    q: query,
+  });
 
   return (
     <FilesTableInner>
@@ -90,10 +107,10 @@ export function FilesTableFallback() {
   );
 }
 
-export function FilesTable() {
+export function FilesTable(props: FilesTableProps) {
   return (
     <Suspense fallback={<FilesTableFallback />}>
-      <FilesTableContent />
+      <FilesTableContent searchParams={props.searchParams} />
     </Suspense>
   );
 }
