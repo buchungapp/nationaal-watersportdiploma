@@ -134,7 +134,7 @@ export default async function Page(props: Props) {
             <Button
               type="button"
               color="blue"
-              href={`/api/export/certificate/pdf/${params.id}?preview=true&handle=${result.handle}&issuedDate=${result.issuedDate.format("YYYYMMDD")}`}
+              href={`/api/export/certificate/pdf/${params.id}?preview=true&signed=true&handle=${result.handle}&issuedDate=${result.issuedDate.format("YYYYMMDD")}&filename=nationaal-watersportdiploma_nwd-${result.handle}-${result.issuedDate.format("YYYYMMDD")}`}
               target="_blank"
               rel="noreferrer"
             >
