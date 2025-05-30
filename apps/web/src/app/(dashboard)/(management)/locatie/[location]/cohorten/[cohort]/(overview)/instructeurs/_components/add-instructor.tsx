@@ -47,7 +47,7 @@ export function AddInstructor({
         <Combobox
           key={forceRerenderId}
           autoFocus={true}
-          name="personId"
+          name="person"
           options={searchedInstructors}
           setQuery={(value) => {
             setQuery(value);
@@ -88,7 +88,7 @@ export function AddInstructor({
               .join(" ");
 
             return (
-              <ComboboxOption key={person.id} value={person.id}>
+              <ComboboxOption key={person.id} value={person}>
                 <ComboboxLabel>
                   <div className="flex">
                     <span className={clsx("truncate")}>{fullName}</span>

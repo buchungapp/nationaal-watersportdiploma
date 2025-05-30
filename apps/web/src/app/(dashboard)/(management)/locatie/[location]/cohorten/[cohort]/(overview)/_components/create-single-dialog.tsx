@@ -146,6 +146,7 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                   !!result.validationErrors["person[id]"]
                 }
                 setQuery={setPersonQuery}
+                filter={() => true}
               >
                 {(person) => (
                   <ComboboxOption
