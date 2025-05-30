@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
 import {
-  GridList,
   GridListItem,
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
@@ -14,6 +13,7 @@ import {
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { listActiveCohortsForPerson, listLocationsForPerson } from "~/lib/nwd";
+import { ScrollableGridList } from "./scrollable-grid-list";
 
 async function ActiveCohortsForLocation({
   location,
@@ -34,7 +34,7 @@ async function ActiveCohortsForLocation({
   }
 
   return (
-    <div className="mt-2">
+    <div className="mt-2 pl-8.5">
       <Text className="text-zinc-600 font-medium">Lopende cohorten</Text>
       <ul className="flex flex-col flex-1">
         {activeCohorts.map((cohort) => (
@@ -87,16 +87,16 @@ async function LocationsContent({
         </>
       }
     >
-      <GridList className="mt-2">
+      <ScrollableGridList className="mt-2 max-h-[300px] overflow-y-auto">
         {locations.map((location) => (
           <GridListItem key={location.id} className="bg-white px-2">
             <Link
               href={`/locatie/${location.handle}/cohorten`}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2.5"
             >
               <Avatar
                 square
-                className="mr-2.5 size-6 sm:size-5 sm:mr-2"
+                className="size-6"
                 initials={location.name?.slice(0, 2)}
                 src={location.logoSquare?.transformUrl}
               />
@@ -112,7 +112,7 @@ async function LocationsContent({
             </Suspense>
           </GridListItem>
         ))}
-      </GridList>
+      </ScrollableGridList>
     </StackedLayoutCardDisclosure>
   );
 }
