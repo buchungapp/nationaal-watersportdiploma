@@ -53,6 +53,7 @@ const nextConfig = {
       "./src/assets/fonts/**/*",
       "./src/assets/certificates/**/*",
     ],
+    "/api/og": ["./src/assets/fonts/**/*"],
     "/": ["./src/app/(public)/**/*.mdx"],
   },
   images: {
