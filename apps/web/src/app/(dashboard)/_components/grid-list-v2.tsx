@@ -11,8 +11,13 @@ import { Dropdown, DropdownButton, DropdownMenu } from "./dropdown";
 
 export const gridContainer = "@container/grid-list";
 
-export function GridList({ children }: PropsWithChildren) {
-  return <ul className="gap-2 grid grid-cols-1">{children}</ul>;
+export function GridList({
+  children,
+  className,
+}: PropsWithChildren<{ className?: string }>) {
+  return (
+    <ul className={clsx("gap-2 grid grid-cols-1", className)}>{children}</ul>
+  );
 }
 
 export function GridListItem({

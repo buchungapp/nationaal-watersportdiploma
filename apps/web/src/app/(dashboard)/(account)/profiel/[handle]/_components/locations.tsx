@@ -87,7 +87,7 @@ async function LocationsContent({
         </>
       }
     >
-      <GridList>
+      <GridList className="mt-2">
         {locations.map((location) => (
           <GridListItem key={location.id} className="bg-white px-2">
             <Link
