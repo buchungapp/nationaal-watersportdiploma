@@ -18,11 +18,9 @@ const updatePersonDetailsSchema = zfd.formData({
   lastName: zfd.text(z.string()),
   dateOfBirth: zfd.text(dateInput),
   birthCity: zfd.text(z.string()),
-  birthCountry: zfd.json(
-    z.object({
-      code: zfd.text(z.string().length(2).toLowerCase()),
-    }),
-  ),
+  birthCountry: z.object({
+    code: zfd.text(z.string().length(2).toLowerCase()),
+  }),
 });
 
 const updatePersonDetailsArgsSchema: [

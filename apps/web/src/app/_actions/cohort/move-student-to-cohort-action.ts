@@ -7,7 +7,9 @@ import { filterCohorts } from "~/utils/filter-cohorts";
 import { actionClientWithMeta } from "../safe-action";
 
 const moveStudentToCohortSchema = zfd.formData({
-  cohortId: zfd.text(z.string().uuid()),
+  cohort: z.object({
+    id: zfd.text(z.string().uuid()),
+  }),
 });
 
 const moveStudentToCohortArgsSchema: [
@@ -25,7 +27,9 @@ export const moveStudentToCohortAction = actionClientWithMeta
   .action(
     async ({
       bindArgsParsedInputs: [locationId, cohortId, allocationId],
-      parsedInput: { cohortId: newCohortId },
+      parsedInput: {
+        cohort: { id: newCohortId },
+      },
     }) => {
       const cohorts = await listCohortsForLocation(locationId).then((cohorts) =>
         filterCohorts(cohorts, ["open", "aankomend"]),

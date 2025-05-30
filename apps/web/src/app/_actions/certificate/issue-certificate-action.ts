@@ -8,8 +8,8 @@ import { actionClientWithMeta } from "../safe-action";
 
 const issueCertificateSchema = zfd.formData({
   person: z.object({ id: zfd.text(z.string().uuid()) }),
-  gearTypeId: zfd.text(z.string().uuid()),
-  curriculumId: zfd.text(z.string().uuid()),
+  gearType: z.object({ id: zfd.text(z.string().uuid()) }),
+  curriculum: z.object({ id: zfd.text(z.string().uuid()) }),
   competencies: zfd
     .repeatableOfType(
       zfd.text(
@@ -36,8 +36,8 @@ export const issueCertificateAction = actionClientWithMeta
     async ({
       parsedInput: {
         person: { id: personId },
-        gearTypeId,
-        curriculumId,
+        gearType: { id: gearTypeId },
+        curriculum: { id: curriculumId },
         competencies,
       },
       bindArgsParsedInputs: [locationId],

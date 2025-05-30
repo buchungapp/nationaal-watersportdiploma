@@ -73,9 +73,11 @@ export function EditDetails({
 
   const { getInputValue } = useFormInput(input, {
     ...person,
-    birthCountry: {
-      code: person.birthCountry?.code ?? "",
-    },
+    birthCountry: person.birthCountry
+      ? {
+          code: person.birthCountry.code,
+        }
+      : null,
   });
 
   return (
