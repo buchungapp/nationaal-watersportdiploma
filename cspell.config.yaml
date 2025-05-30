@@ -2,6 +2,7 @@ version: "0.2"
 words:
   - ABCDEFGHJKLMNPQRSTVWXY
   - afrondingsdag
+  - atleastone
   - Axwo
   - BCDFGHJKLMNPQRT
   - brondbestand
@@ -62,6 +63,7 @@ words:
   - Tera
   - TKFT
   - trivago
+  - uncategorized
   - upstash
   - veiligheids
   - Wavie
@@ -71,7 +73,6 @@ words:
   - Wytse
   - ylqt
   - Zabcdefghijkmnpqrstvwxyz
-  - atleastone
 ignoreWords:
   - TERMS
   - transform
