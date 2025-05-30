@@ -12,11 +12,7 @@ import { Dropdown, DropdownButton, DropdownMenu } from "./dropdown";
 export const gridContainer = "@container/grid-list";
 
 export function GridList({ children }: PropsWithChildren) {
-  return (
-    <ul className="gap-x-4 gap-y-4 xl:gap-x-6 grid grid-cols-1 @4xl/grid-list:grid-cols-3 @xl/grid-list:grid-cols-2">
-      {children}
-    </ul>
-  );
+  return <ul className="gap-2 grid grid-cols-1">{children}</ul>;
 }
 
 export function GridListItem({
@@ -37,7 +33,7 @@ export function GridListItem({
 
 export function GridListItemHeader({ children }: PropsWithChildren) {
   return (
-    <div className="flex justify-between items-center gap-x-4 px-6 pt-3 pb-3">
+    <div className="flex justify-between items-center gap-x-4 px-4 py-1.5">
       {children}
     </div>
   );
@@ -45,7 +41,7 @@ export function GridListItemHeader({ children }: PropsWithChildren) {
 
 export function GridListItemFooter({ children }: PropsWithChildren) {
   return (
-    <div className="flex justify-between items-center gap-x-4 bg-branding-light/10 -mb-3 px-6 pt-3 pb-3 border-t border-t-slate-200">
+    <div className="flex justify-between items-center gap-x-4 bg-branding-light/10 -mb-3 px-4 pt-3 pb-3 border-t border-t-slate-200">
       {children}
     </div>
   );

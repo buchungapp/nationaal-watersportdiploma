@@ -1,6 +1,5 @@
 import { StackedLayoutCard } from "../../_components/stacked-layout";
 import { Text, TextLink } from "../../_components/text";
-import { Locations } from "./_components/locations";
 import { Persons } from "./_components/persons";
 import { Welcome } from "./_components/welcome";
 
@@ -20,7 +19,6 @@ export default function Page() {
         </Text>
       </StackedLayoutCard>
       <Persons />
-      <Locations />
     </div>
   );
 }

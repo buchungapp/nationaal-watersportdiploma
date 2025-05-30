@@ -34,8 +34,8 @@ export default async function Page(props: {
   });
 
   return (
-    <div className="gap-2 grid grid-cols-1 lg:grid-cols-[2fr_1fr] mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <div className="sm:mb-6 max-sm:px-3">
+    <div>
+      <div className="sm:mb-6 max-sm:px-3 order-1 lg:order-none lg:col-start-1 lg:row-start-1">
         <Welcome params={props.params} />
         <Text>
           <Balancer>
@@ -46,25 +46,30 @@ export default async function Page(props: {
           </Balancer>
         </Text>
       </div>
-      <div className="gap-2 grid grid-cols-1 row-start-3 lg:row-start-2 h-fit">
-        <ProgressSection params={props.params} />
 
-        <News className="sm:hidden" />
+      <div className="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <div className="lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
+          <Personalia params={props.params} />
+        </div>
 
-        <WatersportCertificatesSection
-          params={props.params}
-          searchParams={props.searchParams}
-        />
+        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 flex flex-col gap-2">
+          <Locations />
 
-        <Logbook params={props.params} searchParams={props.searchParams} />
+          <ProgressSection params={props.params} />
 
-        <Socials className="sm:hidden" />
-      </div>
-      <div className="gap-2 grid grid-cols-1 row-start-2 h-fit">
-        <Locations />
-        <Personalia params={props.params} />
-        <News className="max-sm:hidden" />
-        <Socials className="max-sm:hidden" />
+          <WatersportCertificatesSection
+            params={props.params}
+            searchParams={props.searchParams}
+          />
+
+          <Logbook params={props.params} searchParams={props.searchParams} />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <News />
+
+          <Socials />
+        </div>
       </div>
     </div>
   );
