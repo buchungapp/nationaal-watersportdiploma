@@ -26,7 +26,9 @@ const addStudentToCohortSchema = zfd.formData(
       lastName: zfd.text(z.string()),
       dateOfBirth: zfd.text(dateInput),
       birthCity: zfd.text(z.string()),
-      birthCountry: zfd.text(z.string().length(2).toLowerCase()),
+      birthCountry: z.object({
+        code: zfd.text(z.string().length(2).toLowerCase()),
+      }),
     }),
     z.object({
       person: z.object({
@@ -57,7 +59,10 @@ export const addStudentToCohortAction = actionClientWithMeta
         personId = data.person.id;
       } else {
         try {
-          const result = await createStudentForLocation(locationId, data);
+          const result = await createStudentForLocation(locationId, {
+            ...data,
+            birthCountry: data.birthCountry.code,
+          });
           personId = result.id;
         } catch (error) {
           throw new Error(DEFAULT_SERVER_ERROR_MESSAGE);

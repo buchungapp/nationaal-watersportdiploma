@@ -16,6 +16,7 @@ import { useAction } from "next-safe-action/hooks";
 import {
   type PropsWithChildren,
   createContext,
+  startTransition,
   useContext,
   useOptimistic,
   useRef,
@@ -366,62 +367,61 @@ export function Module({
   return (
     <Disclosure>
       {({ open: panelOpen }) => (
-        <>
-          {/* biome-ignore lint/a11y/useSemanticElements: <explanation> */}
-          <CheckboxGroup role="group">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-x-2">
-                <DisclosureButton as={Button} plain>
-                  {panelOpen ? <MinusIcon /> : <PlusIcon />}
-                </DisclosureButton>
+        // biome-ignore lint/a11y/useSemanticElements: <explanation>
+        <CheckboxGroup role="group">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-x-2">
+              <DisclosureButton as={Button} plain>
+                {panelOpen ? <MinusIcon /> : <PlusIcon />}
+              </DisclosureButton>
 
-                <CheckboxField
-                  disabled={disabled || areAllCompetenciesCompleted}
-                >
-                  <Checkbox
-                    checked={
-                      areAllCompetenciesCompleted || areSomeCompetenciesSelected
-                    }
-                    indeterminate={!areAllCompetenciesSelected}
-                    onChange={async (checked) => {
+              <CheckboxField disabled={disabled || areAllCompetenciesCompleted}>
+                <Checkbox
+                  checked={
+                    areAllCompetenciesCompleted || areSomeCompetenciesSelected
+                  }
+                  indeterminate={!areAllCompetenciesSelected}
+                  onChange={async (checked) => {
+                    startTransition(() => {
                       setOptimisticProgress(
                         module.competencies.map((competency) => ({
                           id: competency.id,
                           progress: checked ? 100 : 0,
                         })),
                       );
+                    });
 
-                      await updateCompetencyProgressesForStudentInCohortAction(
-                        cohortAllocationId,
-                        module.competencies.map((competency) => ({
-                          competencyId: competency.id,
-                          progress: checked ? 100 : 0,
-                        })),
-                      ).catch(() => {
-                        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
-                      });
+                    await updateCompetencyProgressesForStudentInCohortAction(
+                      cohortAllocationId,
+                      module.competencies.map((competency) => ({
+                        competencyId: competency.id,
+                        progress: checked ? 100 : 0,
+                      })),
+                    ).catch(() => {
+                      toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+                    });
 
-                      return;
-                    }}
-                  />
-                  <div className="flex gap-x-2">
-                    <Weight weight={module.weight} />
-                    <Label>
-                      <Strong>{module.title}</Strong>
-                    </Label>
-                  </div>
-                </CheckboxField>
-              </div>
-              <div className="flex justify-end items-center gap-x-2">
-                <ModuleRequiredBadge
-                  type={module.isRequired ? "required" : "not-required"}
+                    return;
+                  }}
                 />
-                {/* <CompetencyTypeBadge type={module.type} /> */}
-              </div>
+                <div className="flex gap-x-2">
+                  <Weight weight={module.weight} />
+                  <Label>
+                    <Strong>{module.title}</Strong>
+                  </Label>
+                </div>
+              </CheckboxField>
             </div>
+            <div className="flex justify-end items-center gap-x-2">
+              <ModuleRequiredBadge
+                type={module.isRequired ? "required" : "not-required"}
+              />
+              {/* <CompetencyTypeBadge type={module.type} /> */}
+            </div>
+          </div>
 
-            <DisclosurePanel className="mt-2 pl-[52px] sm:pl-11">
-              {/* <div className="flex">
+          <DisclosurePanel className="mt-2 pl-[52px] sm:pl-11">
+            {/* <div className="flex">
                 <SwitchField>
                   <Label>Toon eisen</Label>
                   <Switch
@@ -431,66 +431,67 @@ export function Module({
                 </SwitchField>
               </div> */}
 
-              <dl className="space-y-1 mt-4">
-                {module.competencies.map((competency) => {
-                  const isCompletedInPreviousCertification =
-                    completedCompetencies.includes(competency.id);
+            <dl className="space-y-1 mt-4">
+              {module.competencies.map((competency) => {
+                const isCompletedInPreviousCertification =
+                  completedCompetencies.includes(competency.id);
 
-                  const competencyProgress =
-                    optimisticProgress.find((cp) => cp.id === competency.id)
-                      ?.progress ?? 0;
+                const competencyProgress =
+                  optimisticProgress.find((cp) => cp.id === competency.id)
+                    ?.progress ?? 0;
 
-                  return (
-                    <ProgressInput
-                      key={competency.id}
-                      disabled={disabled || isCompletedInPreviousCertification}
-                      value={
-                        isCompletedInPreviousCertification
-                          ? 100
-                          : competencyProgress
-                      }
-                      indeterminate={
-                        !isCompletedInPreviousCertification &&
-                        competencyProgress > 0 &&
-                        competencyProgress < 100
-                      }
-                      setCompleted={async (newProgress) => {
+                return (
+                  <ProgressInput
+                    key={competency.id}
+                    disabled={disabled || isCompletedInPreviousCertification}
+                    value={
+                      isCompletedInPreviousCertification
+                        ? 100
+                        : competencyProgress
+                    }
+                    indeterminate={
+                      !isCompletedInPreviousCertification &&
+                      competencyProgress > 0 &&
+                      competencyProgress < 100
+                    }
+                    setCompleted={async (newProgress) => {
+                      startTransition(() => {
                         setOptimisticProgress([
                           {
                             id: competency.id,
                             progress: newProgress,
                           },
                         ]);
+                      });
 
-                        await updateCompetencyProgressForStudentInCohortAction(
-                          cohortAllocationId,
-                          {
-                            competencyId: competency.id,
-                            progress: newProgress,
-                          },
-                        ).catch(() => {
-                          toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
-                        });
+                      await updateCompetencyProgressForStudentInCohortAction(
+                        cohortAllocationId,
+                        {
+                          competencyId: competency.id,
+                          progress: newProgress,
+                        },
+                      ).catch(() => {
+                        toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
+                      });
 
-                        return;
-                      }}
-                    >
-                      <div className="flex gap-x-2">
-                        <Weight weight={competency.weight} />
-                        <Label>{competency.title}</Label>
-                      </div>
-                      {showRequirements ? (
-                        <Description className="text-justify">
-                          {competency.requirement}
-                        </Description>
-                      ) : null}
-                    </ProgressInput>
-                  );
-                })}
-              </dl>
-            </DisclosurePanel>
-          </CheckboxGroup>
-        </>
+                      return;
+                    }}
+                  >
+                    <div className="flex gap-x-2">
+                      <Weight weight={competency.weight} />
+                      <Label>{competency.title}</Label>
+                    </div>
+                    {showRequirements ? (
+                      <Description className="text-justify">
+                        {competency.requirement}
+                      </Description>
+                    ) : null}
+                  </ProgressInput>
+                );
+              })}
+            </dl>
+          </DisclosurePanel>
+        </CheckboxGroup>
       )}
     </Disclosure>
   );

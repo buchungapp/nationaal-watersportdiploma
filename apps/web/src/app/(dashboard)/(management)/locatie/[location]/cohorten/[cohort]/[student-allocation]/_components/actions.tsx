@@ -11,7 +11,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -147,8 +146,10 @@ export function MoveStudentAllocationDialog({
 
   const { getInputValue } = useFormInput(input);
 
-  const [selectedCohortId, setSelectedCohortId] = useState<string | null>(
-    getInputValue("cohortId") ?? null,
+  const [selectedCohort, setSelectedCohort] = useState<
+    NonNullable<typeof cohorts>[number] | null
+  >(
+    cohorts.find((cohort) => cohort.id === getInputValue("cohort")?.id) ?? null,
   );
 
   return (
@@ -164,29 +165,22 @@ export function MoveStudentAllocationDialog({
             <Label>Cohort</Label>
             <Combobox
               name="cohortId"
-              options={cohorts.map((cohort) => cohort.id)}
-              value={selectedCohortId}
-              defaultValue={getInputValue("cohortId")}
-              onChange={setSelectedCohortId}
-              displayValue={(value) =>
-                ensuredFind(cohorts, (cohort) => cohort.id === value).label
-              }
+              options={cohorts}
+              value={selectedCohort}
+              defaultValue={cohorts.find(
+                (cohort) => cohort.id === getInputValue("cohort")?.id,
+              )}
+              onChange={setSelectedCohort}
+              displayValue={(cohort) => cohort?.label}
               placeholder="Selecteer een cohort"
             >
-              {(renderCohortId) => (
+              {(cohort) => (
                 <ComboboxOption
-                  key={renderCohortId}
-                  value={renderCohortId}
-                  disabled={renderCohortId === cohortId}
+                  key={cohort.id}
+                  value={cohort}
+                  disabled={cohort.id === cohortId}
                 >
-                  <ComboboxLabel>
-                    {
-                      ensuredFind(
-                        cohorts,
-                        (cohort) => cohort.id === renderCohortId,
-                      ).label
-                    }
-                  </ComboboxLabel>
+                  <ComboboxLabel>{cohort.label}</ComboboxLabel>
                 </ComboboxOption>
               )}
             </Combobox>
@@ -198,7 +192,7 @@ export function MoveStudentAllocationDialog({
           </Button>
           <MoveStudentAllocationSubmitButton
             disabled={
-              selectedCohortId === cohortId || selectedCohortId === null
+              selectedCohort?.id === cohortId || selectedCohort === null
             }
           />
         </DialogActions>

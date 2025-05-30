@@ -19,10 +19,7 @@ import { createExternalCertificateAction } from "~/app/_actions/certificate/crea
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
 import { CertificateTemplatePicker } from "./certificate-template-picker";
-import {
-  type CertificateTemplate,
-  certificateTemplates,
-} from "./certificate-templates";
+import type { CertificateTemplate } from "./certificate-templates";
 import Media from "./media";
 import { Metadata } from "./metadata";
 
@@ -36,7 +33,7 @@ export function AddCertificate({
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<"media" | "metadata">("media");
   const [selectedCertificateTemplate, setSelectedCertificateTemplate] =
-    useState<CertificateTemplate["id"] | null>(null);
+    useState<CertificateTemplate | null>(null);
   const [validMedia, setValidMedia] = useState(false);
 
   const { execute, result, input, reset } = useAction(
@@ -49,11 +46,10 @@ export function AddCertificate({
     },
   );
 
-  const template = certificateTemplates.find(
-    (template) => template.id === selectedCertificateTemplate,
+  const { getInputValue } = useFormInput(
+    input,
+    selectedCertificateTemplate ?? undefined,
   );
-
-  const { getInputValue } = useFormInput(input, template);
 
   const close = () => {
     setIsOpen(false);

@@ -21,7 +21,11 @@ const createPersonSchema = zfd
     lastName: zfd.text(z.string()),
     dateOfBirth: zfd.text(dateInput),
     birthCity: zfd.text(z.string()),
-    birthCountry: zfd.text(z.string().length(2).toLowerCase()),
+    birthCountry: zfd.json(
+      z.object({
+        code: zfd.text(z.string().length(2).toLowerCase()),
+      }),
+    ),
     "role-student": zfd.checkbox(),
     "role-instructor": zfd.checkbox(),
     "role-location_admin": zfd.checkbox(),
@@ -65,7 +69,10 @@ export const createPersonAction = actionClientWithMeta
       parsedInput: { roles, ...parsed },
       bindArgsParsedInputs: [locationId],
     }) => {
-      await createPersonForLocation(locationId, roles, parsed);
+      await createPersonForLocation(locationId, roles, {
+        ...parsed,
+        birthCountry: parsed.birthCountry.code,
+      });
 
       revalidatePath("/locatie/[location]/personen", "page");
     },

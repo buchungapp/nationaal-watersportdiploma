@@ -7,8 +7,12 @@ import { enrollStudentsInCurriculumForCohort } from "~/lib/nwd";
 import { actionClientWithMeta } from "../../safe-action";
 
 const enrollStudentsInCurriculumInCohortSchema = zfd.formData({
-  gearTypeId: zfd.text(z.string().uuid()),
-  curriculumId: zfd.text(z.string().uuid()),
+  gearType: z.object({
+    id: zfd.text(z.string().uuid()),
+  }),
+  curriculum: z.object({
+    id: zfd.text(z.string().uuid()),
+  }),
 });
 
 const studentAllocationSchema = z
@@ -31,7 +35,10 @@ export const enrollStudentsInCurriculumInCohortAction = actionClientWithMeta
   .bindArgsSchemas(enrollStudentsInCurriculumInCohortArgsSchema)
   .action(
     async ({
-      parsedInput: { gearTypeId, curriculumId },
+      parsedInput: {
+        gearType: { id: gearTypeId },
+        curriculum: { id: curriculumId },
+      },
       bindArgsParsedInputs: [cohortId, students],
     }) => {
       await enrollStudentsInCurriculumForCohort({

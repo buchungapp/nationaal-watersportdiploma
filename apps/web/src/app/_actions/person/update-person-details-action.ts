@@ -18,7 +18,9 @@ const updatePersonDetailsSchema = zfd.formData({
   lastName: zfd.text(z.string()),
   dateOfBirth: zfd.text(dateInput),
   birthCity: zfd.text(z.string()),
-  birthCountry: zfd.text(z.string().length(2).toLowerCase()),
+  birthCountry: z.object({
+    code: zfd.text(z.string().length(2).toLowerCase()),
+  }),
 });
 
 const updatePersonDetailsArgsSchema: [
@@ -41,6 +43,7 @@ export const updatePersonDetailsAction = actionClientWithMeta
         locationId,
         personId,
         ...data,
+        birthCountry: data.birthCountry.code,
       });
 
       revalidatePath("/profiel/[handle]", "page");

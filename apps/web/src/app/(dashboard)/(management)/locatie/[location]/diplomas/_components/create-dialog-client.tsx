@@ -15,7 +15,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -101,12 +100,15 @@ function CreateDialogClient({
 
   const { getInputValue } = useFormInput(input);
 
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(
-    programs?.find((program) => program.id === getInputValue("curriculumId"))
-      ?.id ?? null,
+  const [selectedProgram, setSelectedProgram] = useState<
+    NonNullable<typeof programs>[number] | null
+  >(
+    programs?.find(
+      (program) => program.id === getInputValue("curriculum")?.id,
+    ) ?? null,
   );
   const [selectedGearType, setSelectedGearType] = useState<string | null>(
-    getInputValue("gearTypeId") ?? null,
+    getInputValue("gearType")?.id ?? null,
   );
   const [selectedCurriculum, setSelectedCurriculum] = useState<
     Awaited<ReturnType<typeof listCurriculaByProgram>>[number] | null
@@ -126,13 +128,14 @@ function CreateDialogClient({
     Awaited<ReturnType<typeof listGearTypesByCurriculumForLocation>>
   >([]);
 
+  // @TODO why are we using an effect for this?
   useEffect(() => {
     async function fetchCurricula() {
       if (!selectedProgram) {
         return;
       }
 
-      const [curriculum] = await getCurriculaByProgram(selectedProgram);
+      const [curriculum] = await getCurriculaByProgram(selectedProgram.id);
 
       if (!curriculum) {
         setSelectedCurriculum(null);
@@ -179,6 +182,7 @@ function CreateDialogClient({
                       options={searchedStudents.items}
                       autoFocus={true}
                       displayValue={(person) => {
+                        if (!person) return "";
                         const fullName = [
                           person.firstName,
                           person.lastNamePrefix,
@@ -190,7 +194,6 @@ function CreateDialogClient({
                         return fullName;
                       }}
                       setQuery={setPersonQuery}
-                      filter={null}
                     >
                       {(person) => (
                         <ComboboxOption
@@ -238,13 +241,9 @@ function CreateDialogClient({
                     <Label>Programma</Label>
                     <Combobox
                       name="program"
-                      options={programs.map((program) => program.id)}
-                      displayValue={(programId) => {
-                        const program = ensuredFind(
-                          programs,
-                          (program) => program.id === programId,
-                        );
-
+                      options={programs}
+                      displayValue={(program) => {
+                        if (!program) return "";
                         return (
                           program.title ??
                           `${program.course.title} ${program.degree.title}`
@@ -255,19 +254,14 @@ function CreateDialogClient({
                       defaultValue={
                         programs?.find(
                           (program) =>
-                            program.id === getInputValue("curriculumId"),
-                        )?.id ?? null
+                            program.id === getInputValue("curriculum")?.id,
+                        ) ?? null
                       }
-                      invalid={!!result?.validationErrors?.curriculumId}
+                      invalid={!!result?.validationErrors?.curriculum}
                     >
-                      {(programId) => {
-                        const program = ensuredFind(
-                          programs,
-                          (program) => program.id === programId,
-                        );
-
+                      {(program) => {
                         return (
-                          <ComboboxOption key={programId} value={programId}>
+                          <ComboboxOption key={program.id} value={program}>
                             <ComboboxLabel>
                               {program.title ??
                                 `${program.course.title} ${program.degree.title}`}
@@ -280,12 +274,12 @@ function CreateDialogClient({
                   <Field>
                     <Label>Vaartuig</Label>
                     <Listbox
-                      name="gearTypeId"
+                      name="gearType[id]"
                       disabled={!selectedProgram}
-                      value={selectedGearType ?? getInputValue("gearTypeId")}
-                      defaultValue={getInputValue("gearTypeId")}
+                      value={selectedGearType ?? getInputValue("gearType")?.id}
+                      defaultValue={getInputValue("gearType")?.id}
                       onChange={setSelectedGearType}
-                      invalid={!!result.validationErrors?.gearTypeId}
+                      invalid={!!result.validationErrors?.gearType}
                     >
                       {gearTypes.map((gearType) => (
                         <ListboxOption key={gearType.id} value={gearType.id}>
@@ -302,9 +296,11 @@ function CreateDialogClient({
                     <div className="gap-4 grid grid-cols-1 lg:grid-cols-2 mt-2">
                       <input
                         type="hidden"
-                        name="curriculumId"
+                        name="curriculum[id]"
                         value={
-                          selectedCurriculum.id ?? getInputValue("curriculumId")
+                          selectedCurriculum.id ??
+                          getInputValue("curriculum")?.id ??
+                          ""
                         }
                       />
                       <CheckboxGroup>

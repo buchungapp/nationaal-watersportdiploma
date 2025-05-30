@@ -13,7 +13,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -135,9 +134,11 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                 value={selectedStudent}
                 onChange={setSelectedStudent}
                 displayValue={(person) =>
-                  [person.firstName, person.lastNamePrefix, person.lastName]
-                    .filter(Boolean)
-                    .join(" ")
+                  !person
+                    ? ""
+                    : [person.firstName, person.lastNamePrefix, person.lastName]
+                        .filter(Boolean)
+                        .join(" ")
                 }
                 invalid={
                   result?.validationErrors &&
@@ -145,7 +146,6 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                   !!result.validationErrors["person[id]"]
                 }
                 setQuery={setPersonQuery}
-                filter={null}
               >
                 {(person) => (
                   <ComboboxOption
@@ -289,25 +289,16 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
                         "birthCountry" in result.validationErrors &&
                         !!result.validationErrors.birthCountry
                       }
-                      options={countries.map((country) => country.code)}
-                      displayValue={(value) =>
-                        ensuredFind(
-                          countries,
-                          (country) => country.code === value,
-                        ).name
-                      }
-                      defaultValue={getInputValue("birthCountry")}
+                      options={countries}
+                      displayValue={(country) => country?.name}
+                      defaultValue={countries.find(
+                        (country) =>
+                          country.code === getInputValue("birthCountry")?.code,
+                      )}
                     >
-                      {(countryCode) => (
-                        <ComboboxOption key={countryCode} value={countryCode}>
-                          <ComboboxLabel>
-                            {
-                              ensuredFind(
-                                countries,
-                                (country) => country.code === countryCode,
-                              ).name
-                            }
-                          </ComboboxLabel>
+                      {(country) => (
+                        <ComboboxOption key={country.code} value={country}>
+                          <ComboboxLabel>{country.name}</ComboboxLabel>
                         </ComboboxOption>
                       )}
                     </Combobox>
