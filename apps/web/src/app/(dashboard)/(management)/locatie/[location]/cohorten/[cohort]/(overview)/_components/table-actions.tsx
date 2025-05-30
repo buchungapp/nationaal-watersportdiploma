@@ -169,8 +169,9 @@ function StartProgramDialog({
   const [selectedProgram, setSelectedProgram] = useState<
     NonNullable<typeof programs>[number] | null
   >(
-    programs?.find((program) => program.id === getInputValue("curriculumId")) ??
-      null,
+    programs?.find(
+      (program) => program.id === getInputValue("curriculum")?.id,
+    ) ?? null,
   );
 
   const { data: activeCurriculumForProgram } = useSWR(
@@ -216,10 +217,11 @@ function StartProgramDialog({
             {/* Hidden input for curriculumId */}
             <input
               type="hidden"
-              name="curriculumId"
+              name="curriculum[id]"
               value={
                 activeCurriculumForProgram?.curriculum?.id ??
-                getInputValue("curriculumId")
+                getInputValue("curriculum")?.id ??
+                ""
               }
             />
             <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
@@ -238,9 +240,9 @@ function StartProgramDialog({
                   onChange={setSelectedProgram}
                   value={selectedProgram}
                   defaultValue={programs?.find(
-                    (program) => program.id === getInputValue("curriculumId"),
+                    (program) => program.id === getInputValue("curriculum")?.id,
                   )}
-                  invalid={!!result?.validationErrors?.curriculumId}
+                  invalid={!!result?.validationErrors?.curriculum}
                 >
                   {(program) => {
                     return (
@@ -264,8 +266,8 @@ function StartProgramDialog({
                       !!activeCurriculumForProgram?.curriculum
                     )
                   }
-                  defaultValue={getInputValue("gearTypeId")}
-                  invalid={!!result?.validationErrors?.gearTypeId}
+                  defaultValue={getInputValue("gearType")?.id}
+                  invalid={!!result?.validationErrors?.gearType}
                 >
                   {activeCurriculumForProgram?.gearTypes.map((gearType) => (
                     <ListboxOption key={gearType.id} value={gearType.id}>
