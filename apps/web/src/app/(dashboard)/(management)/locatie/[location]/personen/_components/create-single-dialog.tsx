@@ -14,7 +14,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -100,10 +99,21 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
         closeDialog();
         toast.success("Persoon is toegevoegd.");
       },
+      onError: ({ error, input }) => {
+        if (input instanceof FormData) {
+          console.log(Object.fromEntries(input.entries()));
+        } else {
+          console.log("input is not a FormData", input);
+        }
+        console.error("Error: ", error);
+        toast.error("Er is iets misgegaan bij het toevoegen van de persoon.");
+      },
     },
   );
   const { getInputValue } = useFormInput(input, {
-    birthCountry: "nl",
+    birthCountry: {
+      code: "nl",
+    },
     ...ROLES.reduce(
       (acc, role) => {
         acc[`role-${role.type}`] =
@@ -193,25 +203,15 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     <Combobox
                       name="birthCountry"
                       invalid={!!result.validationErrors?.birthCountry}
-                      options={countries.map((country) => country.code)}
-                      displayValue={(value) =>
-                        ensuredFind(
-                          countries,
-                          (country) => country.code === value,
-                        ).name
-                      }
-                      defaultValue={getInputValue("birthCountry")}
+                      options={countries}
+                      displayValue={(value) => value?.name}
+                      defaultValue={countries.find(
+                        (c) => c.code === getInputValue("birthCountry")?.code,
+                      )}
                     >
-                      {(countryCode) => (
-                        <ComboboxOption key={countryCode} value={countryCode}>
-                          <ComboboxLabel>
-                            {
-                              ensuredFind(
-                                countries,
-                                (country) => country.code === countryCode,
-                              ).name
-                            }
-                          </ComboboxLabel>
+                      {(country) => (
+                        <ComboboxOption key={country.code} value={country}>
+                          <ComboboxLabel>{country.name}</ComboboxLabel>
                         </ComboboxOption>
                       )}
                     </Combobox>

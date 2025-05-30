@@ -8,7 +8,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { addInstructorToCohortAction } from "~/app/_actions/cohort/add-instructor-to-cohort-action";
@@ -49,16 +48,14 @@ export function AddInstructor({
           key={forceRerenderId}
           autoFocus={true}
           name="personId"
-          options={searchedInstructors.map((person) => person.id)}
+          options={searchedInstructors}
           setQuery={(value) => {
-            const valueWithNull = value === "" ? null : value;
-            if (valueWithNull === query) return;
-            setQuery(valueWithNull);
+            setQuery(value);
           }}
-          onChange={async (personId) => {
-            if (!personId) return;
+          onChange={async (person) => {
+            if (!person) return;
 
-            await addInstructorToCohortAction(locationId, cohortId, personId)
+            await addInstructorToCohortAction(locationId, cohortId, person.id)
               .then(() => {
                 toast.success("Instructeur toegevoegd");
                 setForceRerenderId((prev) => prev + 1);
@@ -67,11 +64,8 @@ export function AddInstructor({
                 toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
               });
           }}
-          displayValue={(value: string) => {
-            const person = ensuredFind(
-              searchedInstructors,
-              (person) => person.id === value,
-            );
+          displayValue={(person) => {
+            if (!person) return "";
 
             const fullName = [
               person.firstName,
@@ -83,14 +77,8 @@ export function AddInstructor({
 
             return fullName;
           }}
-          filter={null}
         >
-          {(personId) => {
-            const person = ensuredFind(
-              searchedInstructors,
-              (person) => personId === person.id,
-            );
-
+          {(person) => {
             const fullName = [
               person.firstName,
               person.lastNamePrefix,
