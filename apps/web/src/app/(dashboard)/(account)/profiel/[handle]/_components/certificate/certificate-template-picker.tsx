@@ -3,7 +3,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
@@ -53,9 +52,9 @@ export function CertificateTemplatePicker({
   setSelectedCertificateTemplate,
   stepIndex,
 }: {
-  selectedCertificateTemplate: CertificateTemplate["id"] | null;
+  selectedCertificateTemplate: CertificateTemplate | null;
   setSelectedCertificateTemplate: (
-    template: CertificateTemplate["id"] | null,
+    template: CertificateTemplate | null,
   ) => void;
   stepIndex: number;
 }) {
@@ -80,45 +79,53 @@ export function CertificateTemplatePicker({
 
       <Field>
         <Combobox
+          options={Array.from(
+            { length: 1 + templatesWithoutCategory.length + categories.length },
+            // biome-ignore lint/suspicious/noExplicitAny: This is a hack to render all children
+            (_, i) => i as any,
+          )}
           value={selectedCertificateTemplate}
           setQuery={setTemplateQuery}
           onChange={setSelectedCertificateTemplate}
-          displayValue={(value) => {
-            if (value === "other") return "Overig";
-
-            const template = ensuredFind(
-              certificateTemplates,
-              (template) => template.id === value,
-            );
+          displayValue={(template) => {
+            if (!template) return "";
 
             return templateLabel(template);
           }}
         >
-          {!hasQuery ? <OtherTemplateOption /> : null}
-          {templatesWithoutCategory.map((template) => (
-            <ComboboxOption key={template.id} value={template.id}>
-              <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
-            </ComboboxOption>
-          ))}
-          {!hasQuery || templatesWithoutCategory.length > 0 ? (
-            <Divider className="mt-1 mb-2" />
-          ) : null}
-          {categories.map((category) => (
-            <Fragment key={category}>
-              <p className="mb-1 ml-2 font-semibold text-zinc-500 text-xs uppercase">
-                {category}
-              </p>
-              {filteredTemplates
-                .filter((x) => x.category === category)
-                .map((template) => (
-                  <ComboboxOption key={template.id} value={template.id}>
+          {() => {
+            return (
+              <>
+                {!hasQuery ? <OtherTemplateOption /> : null}
+                {templatesWithoutCategory.map((template) => (
+                  <ComboboxOption key={template.id} value={template}>
                     <ComboboxLabel>{templateLabel(template)}</ComboboxLabel>
                   </ComboboxOption>
                 ))}
-              <Divider className="last:hidden mt-1 mb-2" />
-            </Fragment>
-          ))}
-          {hasQuery ? <OtherTemplateOption /> : null}
+                {!hasQuery || templatesWithoutCategory.length > 0 ? (
+                  <Divider className="mt-1 mb-2" />
+                ) : null}
+                {categories.map((category) => (
+                  <Fragment key={category}>
+                    <p className="mb-1 ml-2 font-semibold text-zinc-500 text-xs uppercase">
+                      {category}
+                    </p>
+                    {filteredTemplates
+                      .filter((x) => x.category === category)
+                      .map((template) => (
+                        <ComboboxOption key={template.id} value={template}>
+                          <ComboboxLabel>
+                            {templateLabel(template)}
+                          </ComboboxLabel>
+                        </ComboboxOption>
+                      ))}
+                    <Divider className="last:hidden mt-1 mb-2" />
+                  </Fragment>
+                ))}
+                {hasQuery ? <OtherTemplateOption /> : null}
+              </>
+            );
+          }}
         </Combobox>
       </Field>
     </Fieldset>
