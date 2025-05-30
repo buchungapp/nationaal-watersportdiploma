@@ -530,19 +530,40 @@ export const listCertificatesByNumber = cache(
     sort: "createdAt" | "student" | "instructor" = "createdAt",
   ) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const user = await getUserOrThrow().catch(() => null);
 
-      // TODO: this authorization check should be more specific
-      const availableLocations = await User.Person.listLocationsByRole({
-        personId: person.id,
-        roles: ["location_admin", "instructor"],
-      });
+      if (!user && numbers.length > 1) {
+        // @TODO this is a temporary fix to allow for consumers to download their certificate without being logged in
+        // we should find a better way to handle this
+        redirect("/login");
+      }
+
+      const listAvailableLocationsForLoggedInUser = async (
+        loggedInUser: typeof user,
+      ) => {
+        if (!loggedInUser) {
+          return [];
+        }
+
+        const person = await getPrimaryPerson(loggedInUser);
+
+        // TODO: this authorization check should be more specific
+        const availableLocations = await User.Person.listLocationsByRole({
+          personId: person.id,
+          roles: ["location_admin", "instructor"],
+        });
+
+        return availableLocations.map((location) => location.locationId);
+      };
+
+      const locationFilter = user
+        ? await listAvailableLocationsForLoggedInUser(user)
+        : [];
 
       const certificates = await Certificate.list({
         filter: {
           number: numbers,
-          locationId: availableLocations.map((l) => l.locationId),
+          ...(locationFilter.length > 0 && { locationId: locationFilter }),
         },
         sort:
           sort === "createdAt"
