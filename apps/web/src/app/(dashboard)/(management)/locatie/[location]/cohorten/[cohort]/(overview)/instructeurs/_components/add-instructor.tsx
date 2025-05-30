@@ -52,6 +52,7 @@ export function AddInstructor({
           setQuery={(value) => {
             setQuery(value);
           }}
+          filter={() => true}
           onChange={async (person) => {
             if (!person) return;
 
