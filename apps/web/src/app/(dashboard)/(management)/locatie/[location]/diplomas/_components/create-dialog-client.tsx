@@ -194,6 +194,7 @@ function CreateDialogClient({
                         return fullName;
                       }}
                       setQuery={setPersonQuery}
+                      filter={() => true}
                     >
                       {(person) => (
                         <ComboboxOption
