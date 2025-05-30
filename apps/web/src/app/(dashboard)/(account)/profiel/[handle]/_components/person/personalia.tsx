@@ -1,3 +1,4 @@
+import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import {
   DescriptionDetails,
@@ -8,15 +9,14 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import dayjs from "~/lib/dayjs";
-import { getPersonByHandle, listCountries } from "~/lib/nwd";
+import { listCountries } from "~/lib/nwd";
 import { EditDetails } from "./action-buttons";
 
 async function ActionButton({
-  params,
-}: { params: Promise<{ handle: string }> }) {
-  const { handle } = await params;
+  personPromise,
+}: { personPromise: Promise<User.Person.$schema.Person> }) {
   const [person, countries] = await Promise.all([
-    getPersonByHandle(handle),
+    personPromise,
     listCountries(),
   ]);
 
@@ -24,10 +24,9 @@ async function ActionButton({
 }
 
 async function PersonaliaContent({
-  params,
-}: { params: Promise<{ handle: string }> }) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
+  personPromise,
+}: { personPromise: Promise<User.Person.$schema.Person> }) {
+  const person = await personPromise;
 
   return (
     <DescriptionList>
@@ -62,8 +61,8 @@ async function PersonaliaContent({
 }
 
 export async function Personalia({
-  params,
-}: { params: Promise<{ handle: string }> }) {
+  personPromise,
+}: { personPromise: Promise<User.Person.$schema.Person> }) {
   return (
     <StackedLayoutCard>
       <Subheading className="mb-3">Personalia</Subheading>
@@ -107,7 +106,7 @@ export async function Personalia({
           </DescriptionList>
         }
       >
-        <PersonaliaContent params={params} />
+        <PersonaliaContent personPromise={personPromise} />
       </Suspense>
 
       <Divider className="my-4" />
@@ -118,7 +117,7 @@ export async function Personalia({
             <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
           }
         >
-          <ActionButton params={params} />
+          <ActionButton personPromise={personPromise} />
         </Suspense>
       </div>
     </StackedLayoutCard>

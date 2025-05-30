@@ -1,8 +1,9 @@
 import { Text } from "~/app/(dashboard)/_components/text";
 
+import { redirect } from "next/navigation";
 import { after } from "next/server";
 import Balancer from "react-wrap-balancer";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getPersonByHandle, getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Locations } from "./_components/locations";
 import { Logbook } from "./_components/logbook/logbook";
@@ -19,6 +20,21 @@ export default async function Page(props: {
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const personPromise = async () => {
+    const { handle } = await props.params;
+
+    const person = await getPersonByHandle(handle);
+
+    if (!person) {
+      redirect("/login");
+    }
+
+    return person;
+  };
+
+  // Kick off the promise
+  personPromise();
+
   after(async () => {
     const user = await getUserOrThrow();
 
@@ -49,12 +65,12 @@ export default async function Page(props: {
 
       <div className="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         <div className="lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
-          <Personalia params={props.params} />
+          <Locations personPromise={personPromise()} />
+
+          <Personalia personPromise={personPromise()} />
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 flex flex-col gap-2">
-          <Locations />
-
           <ProgressSection params={props.params} />
 
           <WatersportCertificatesSection

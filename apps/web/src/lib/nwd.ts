@@ -1016,24 +1016,27 @@ export const listPersonsForLocationByRole = cache(
   },
 );
 
-export const listLocationsForPerson = cache(async (personId?: string) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+export const listLocationsForPerson = cache(
+  async (personId?: string, roles?: ActorType[]) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
 
-    if (personId && person.id !== personId) {
-      throw new Error("Unauthorized");
-    }
+      if (personId && person.id !== personId) {
+        throw new Error("Unauthorized");
+      }
 
-    const locations = await User.Person.listLocationsByRole({
-      personId: person.id,
+      const locations = await User.Person.listLocationsByRole({
+        personId: person.id,
+        roles,
+      });
+
+      return await Location.list().then((locs) =>
+        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+      );
     });
-
-    return await Location.list().then((locs) =>
-      locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
-    );
-  });
-});
+  },
+);
 
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {
@@ -1447,13 +1450,11 @@ export const withdrawCertificatesInCohort = async ({
   });
 };
 
-export const listCohortForPerson = cache(
+export const listActiveCohortsForPerson = cache(
   async ({
     personId,
-    respectCohortVisibility,
   }: {
     personId?: string;
-    respectCohortVisibility?: ("open" | "upcoming" | "completed")[];
   } = {}) => {
     return makeRequest(async () => {
       const authUser = await getUserOrThrow();
@@ -1463,17 +1464,13 @@ export const listCohortForPerson = cache(
         throw new Error("Unauthorized");
       }
 
-      const cohorts = await User.Person.listCohorts({
-        personId: personId ?? primaryPerson.id,
-        respectCohortVisibility:
-          respectCohortVisibility && respectCohortVisibility.length > 0
-            ? (respectCohortVisibility as [
-                "open" | "upcoming" | "completed",
-                ...("open" | "upcoming" | "completed")[],
-              ])
-            : undefined,
-        roles: ["instructor", "location_admin"],
-      });
+      console.log("personId: ", personId ?? primaryPerson.id);
+
+      const cohorts =
+        await Cohort.Allocation.listPersonActiveCohortsGroupedByLocation({
+          personId: personId ?? primaryPerson.id,
+          allocationType: ["instructor", "location_admin"],
+        });
 
       return cohorts;
     });
@@ -1648,6 +1645,27 @@ export const getIsActiveInstructor = cache(async () => {
   });
 });
 
+export const getIsActiveInstructorByPersonId = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      if (!user.persons.some((p) => p.id === personId)) {
+        return false;
+      }
+
+      return await User.Actor.listActiveTypesForUser({
+        userId: user.authUserId,
+        filter: {
+          personId,
+        },
+      }).then((types) =>
+        types.some((type) => ["instructor", "location_admin"].includes(type)),
+      );
+    });
+  },
+);
+
 export type SocialPlatform =
   | "facebook"
   | "instagram"
@@ -1812,22 +1830,6 @@ export const listStudentsWithCurriculaByCohortId = cache(
     });
   },
 );
-
-export const listActiveCohortsForPerson = cache(async (personId: string) => {
-  return makeRequest(async () => {
-    const [authUser] = await Promise.all([getUserOrThrow()]);
-
-    if (!authUser.persons.some((p) => p.id === personId)) {
-      throw new Error("Unauthorized");
-    }
-
-    return await Cohort.Allocation.listStudentsWithCurricula({
-      personId,
-      respectCohortVisibility: true,
-      respectProgressVisibility: true,
-    });
-  });
-});
 
 export const listCertificateOverviewByCohortId = cache(
   async (cohortId: string) => {
