@@ -7,7 +7,13 @@ import { updateStudentInstructorAssignment } from "~/lib/nwd";
 import { actionClientWithMeta } from "../../safe-action";
 
 const assignInstructorToStudentInCohortSchema = zfd.formData({
-  instructorPersonId: zfd.text(z.string().uuid().optional()),
+  instructor: z
+    .object({
+      person: z.object({
+        id: zfd.text(z.string().uuid()),
+      }),
+    })
+    .optional(),
 });
 
 const assignInstructorToStudentInCohortArgsSchema: [
@@ -23,15 +29,15 @@ export const assignInstructorToStudentInCohortAction = actionClientWithMeta
   .bindArgsSchemas(assignInstructorToStudentInCohortArgsSchema)
   .action(
     async ({
-      parsedInput: { instructorPersonId },
+      parsedInput: { instructor },
       bindArgsParsedInputs: [cohortId, studentAllocationIds],
     }) => {
-      if (instructorPersonId) {
+      if (instructor) {
         await updateStudentInstructorAssignment({
           cohortId,
           studentAllocationIds,
           action: "claim",
-          instructorPersonId,
+          instructorPersonId: instructor.person.id,
         });
       } else {
         await updateStudentInstructorAssignment({

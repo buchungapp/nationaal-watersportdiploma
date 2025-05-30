@@ -10,7 +10,6 @@ import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
-  ensuredFind,
 } from "~/app/(dashboard)/_components/combobox";
 import {
   Dialog,
@@ -167,9 +166,11 @@ function StartProgramDialog({
 
   const { getInputValue } = useFormInput(input);
 
-  const [selectedProgram, setSelectedProgram] = useState<string | null>(
-    programs?.find((program) => program.id === getInputValue("curriculumId"))
-      ?.id ?? null,
+  const [selectedProgram, setSelectedProgram] = useState<
+    NonNullable<typeof programs>[number] | null
+  >(
+    programs?.find((program) => program.id === getInputValue("curriculumId")) ??
+      null,
   );
 
   const { data: activeCurriculumForProgram } = useSWR(
@@ -182,7 +183,10 @@ function StartProgramDialog({
         };
       }
 
-      const [curriculum] = await listCurriculaByProgram(selectedProgram, true);
+      const [curriculum] = await listCurriculaByProgram(
+        selectedProgram.id,
+        true,
+      );
 
       if (!curriculum) {
         return {
@@ -223,13 +227,9 @@ function StartProgramDialog({
                 <Label>Programma</Label>
                 <Combobox
                   name="program"
-                  options={programs.map((program) => program.id)}
-                  displayValue={(programId) => {
-                    const program = ensuredFind(
-                      programs,
-                      (program) => program.id === programId,
-                    );
-
+                  options={programs}
+                  displayValue={(program) => {
+                    if (!program) return "";
                     return (
                       program.title ??
                       `${program.course.title} ${program.degree.title}`
@@ -237,21 +237,14 @@ function StartProgramDialog({
                   }}
                   onChange={setSelectedProgram}
                   value={selectedProgram}
-                  defaultValue={
-                    programs?.find(
-                      (program) => program.id === getInputValue("curriculumId"),
-                    )?.id ?? null
-                  }
+                  defaultValue={programs?.find(
+                    (program) => program.id === getInputValue("curriculumId"),
+                  )}
                   invalid={!!result?.validationErrors?.curriculumId}
                 >
-                  {(programId) => {
-                    const program = ensuredFind(
-                      programs,
-                      (program) => program.id === programId,
-                    );
-
+                  {(program) => {
                     return (
-                      <ComboboxOption key={programId} value={programId}>
+                      <ComboboxOption key={program.id} value={program}>
                         <ComboboxLabel>
                           {program.title ??
                             `${program.course.title} ${program.degree.title}`}
@@ -422,14 +415,10 @@ function AssignInstructorDialog({
           <DialogBody>
             <Field>
               <Combobox
-                name="instructorPersonId"
-                options={instructors.map((instructor) => instructor.person.id)}
-                displayValue={(personId) => {
-                  const instructor = ensuredFind(
-                    instructors,
-                    (instructor) => instructor.person.id === personId,
-                  );
-
+                name="instructor"
+                options={instructors}
+                displayValue={(instructor) => {
+                  if (!instructor) return "";
                   return [
                     instructor.person.firstName,
                     instructor.person.lastNamePrefix,
@@ -438,16 +427,15 @@ function AssignInstructorDialog({
                     .filter(Boolean)
                     .join(" ");
                 }}
-                defaultValue={getInputValue("instructorPersonId")}
+                defaultValue={instructors.find(
+                  (instructor) =>
+                    instructor.person.id ===
+                    getInputValue("instructor")?.person.id,
+                )}
               >
-                {(personId) => {
-                  const instructor = ensuredFind(
-                    instructors,
-                    (instructor) => instructor.person.id === personId,
-                  );
-
+                {(instructor) => {
                   return (
-                    <ComboboxOption key={personId} value={personId}>
+                    <ComboboxOption key={instructor.id} value={instructor}>
                       <ComboboxLabel>
                         {[
                           instructor.person.firstName,
