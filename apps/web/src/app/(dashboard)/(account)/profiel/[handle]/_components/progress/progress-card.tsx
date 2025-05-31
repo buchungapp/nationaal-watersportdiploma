@@ -15,16 +15,14 @@ import Image from "next/image";
 import type React from "react";
 import { type PropsWithChildren, createContext, useContext } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
-import { Button } from "~/app/(dashboard)/_components/button";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { BoatIcon } from "~/app/(dashboard)/_components/icons/boat-icon";
 import { CircleIcon } from "~/app/(dashboard)/_components/icons/circle-icon";
 import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
 import { Logo } from "~/app/_assets/logo";
-import watersportverbondGray from "~/app/_assets/watersportverbond-gray.png";
+import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
 import dayjs from "~/lib/dayjs";
 
-type CardType = "cursus" | "opleiding" | "diploma";
+type CardType = "course" | "program" | "certificate";
 
 interface ProgressCardContextType {
   type: CardType;
@@ -64,19 +62,94 @@ export function ProgressCard({
 }: PropsWithChildren<{
   type: CardType;
 }>) {
+  const colors: Record<CardType, string> = {
+    program: "border-sky-200",
+    certificate: "border-orange-200",
+    course: "border-blue-200",
+  };
+
   return (
     <ProgressCardProvider type={type}>
-      <article className="relative pt-2 sm:pt-4 border border-zinc-200 rounded-md">
+      <article
+        className={clsx(
+          "relative border rounded-md overflow-hidden pb-2",
+          colors[type],
+        )}
+      >
         {children}
       </article>
     </ProgressCardProvider>
   );
 }
 
-export function ProgressCardHeader({ children }: PropsWithChildren) {
+export function ProgressCardHeader({
+  degree,
+  program,
+  gearType,
+  itemIndex = 0,
+}: {
+  degree: React.ReactNode;
+  program: React.ReactNode;
+  gearType: React.ReactNode;
+  itemIndex: number;
+}) {
+  const { type } = useProgressCard();
+
+  const colors: Record<
+    CardType,
+    {
+      background: string;
+      text: string;
+    }
+  > = {
+    program: {
+      background: "bg-branding-light",
+      text: "text-branding-light",
+    },
+    certificate: {
+      background: "bg-orange-50",
+      text: "text-branding-orange",
+    },
+    course: {
+      background: "bg-branding-dark/20",
+      text: "text-branding-dark",
+    },
+  };
+
+  const color = colors[type];
+
   return (
-    <header className="items-center gap-2 grid grid-cols-[1fr_fit-content(--spacing(15))] grid-rows-[fit-content(--spacing(15))_1fr] mb-4 px-2 sm:px-4">
-      {children}
+    <header
+      className={clsx(
+        "flex justify-between relative",
+        "p-2 sm:p-4 pb-8 sm:pb-10",
+        color.background,
+      )}
+    >
+      <div className="flex items-center gap-x-4 w-full">
+        <ProgressCardDegree>{degree}</ProgressCardDegree>
+        <div className="space-y-2">
+          <ProgressCardTypeBadge />
+          <ProgressCardTitle>
+            {program}
+            <ColoredText>{gearType}</ColoredText>
+          </ProgressCardTitle>
+        </div>
+      </div>
+      <div className="flex items-center gap-x-4 shrink-0">
+        <div
+          className={clsx("shrink-0 h-8", color.text)}
+          style={{
+            aspectRatio: `${watersportverbondGray.width} / ${watersportverbondGray.height}`,
+            backgroundColor: "currentColor",
+            mask: `url(${watersportverbondGray.src}) no-repeat center/contain`,
+            WebkitMask: `url(${watersportverbondGray.src}) no-repeat center/contain`,
+          }}
+          aria-label="Watersportverbond"
+        />
+        <Logo className={clsx("size-14 shrink-0", color.text)} />
+      </div>
+      <Wave offset={itemIndex * -30} spacing={3 * itemIndex} />
     </header>
   );
 }
@@ -84,35 +157,39 @@ export function ProgressCardHeader({ children }: PropsWithChildren) {
 export function ProgressCardTypeBadge() {
   const { type } = useProgressCard();
 
-  const Icon =
-    type === "opleiding"
-      ? AcademicCapIcon
-      : type === "diploma"
-        ? MedailIcon
-        : BoatIcon;
-  const text =
-    type === "opleiding"
-      ? "Opleiding"
-      : type === "diploma"
-        ? "Diploma"
-        : "Cursus";
+  const typeDetails: Record<
+    CardType,
+    { Icon: React.ElementType; text: string; className: string }
+  > = {
+    program: {
+      Icon: AcademicCapIcon,
+      text: "Opleiding",
+      className: "text-branding-light",
+    },
+    certificate: {
+      Icon: MedailIcon,
+      text: "Diploma",
+      className: "text-branding-orange",
+    },
+    course: {
+      Icon: BoatIcon,
+      text: "Cursus",
+      className: "text-branding-dark",
+    },
+  };
+
+  const { Icon, text, className } = typeDetails[type];
 
   return (
     <span
       className={clsx(
         "max-sm:col-span-2 row-start-1",
-        "inline-flex items-center gap-x-2 px-3 py-1 rounded-full w-fit font-semibold sm:text-xs/5 text-sm/5 uppercase",
-        "bg-zinc-600/10 text-zinc-700 group-data-hover:bg-zinc-600/20 dark:bg-white/5 dark:text-zinc-400 dark:group-data-hover:bg-white/10",
+        "inline-flex items-center gap-x-2 px-3 py-1 rounded-full w-fit font-semibold tracking-wide sm:text-xs/5 text-sm/5 uppercase",
+        "bg-white",
+        className,
       )}
     >
-      <Icon
-        className={clsx(
-          "size-5",
-          type === "opleiding" && "text-branding-light",
-          type === "diploma" && "text-branding-orange",
-          type === "cursus" && "text-branding-dark",
-        )}
-      />
+      <Icon className="size-5" />
       {text}
     </span>
   );
@@ -126,15 +203,14 @@ export function ProgressCardTitle({ children }: PropsWithChildren) {
   );
 }
 
-export function ProgressCardTitleColored({ children }: PropsWithChildren) {
+export function ColoredText({ children }: PropsWithChildren) {
   const { type } = useProgressCard();
   return (
     <span
       className={clsx(
-        "max-sm:-mt-1",
-        type === "cursus" && "text-branding-dark",
-        type === "opleiding" && "text-branding-light",
-        type === "diploma" && "text-branding-orange",
+        type === "course" && "text-branding-dark",
+        type === "program" && "text-branding-light",
+        type === "certificate" && "text-branding-orange",
       )}
     >
       {children}
@@ -144,30 +220,46 @@ export function ProgressCardTitleColored({ children }: PropsWithChildren) {
 
 export function ProgressCardDegree({ children }: PropsWithChildren) {
   const { type } = useProgressCard();
+
+  const colors: Record<CardType, string> = {
+    program: "bg-branding-light/20 text-branding-light",
+    certificate: "bg-branding-orange/20 text-branding-orange",
+    course: "bg-branding-dark/20 text-branding-dark",
+  };
+
+  const color = colors[type];
+
   return (
     <span
       className={clsx(
-        "flex justify-center items-center sm:row-span-2 max-sm:row-start-3 rounded-full size-15 font-black text-3xl",
-        type === "cursus" && "bg-branding-dark/20 text-branding-dark",
-        type === "opleiding" && "bg-branding-light/20 text-branding-light",
-        type === "diploma" && "bg-branding-orange/20 text-branding-orange",
+        "flex flex-col justify-center items-center sm:row-span-2 max-sm:row-start-3 rounded-full size-16 sm:size-18",
+        color,
       )}
     >
-      {children}
+      <span className="text-[11px] font-semibold tracking-wider uppercase leading-none">
+        Niveau
+      </span>
+      <span className="text-xl sm:text-2xl lg:text-3xl font-black leading-none mt-0.5">
+        {children}
+      </span>
     </span>
   );
 }
 
 export function ProgressCardDescriptionList({ children }: PropsWithChildren) {
-  return <dl className="flex max-sm:flex-col mb-4 px-2 sm:px-4">{children}</dl>;
+  return <dl className="grid grid-cols-6 gap-x-4 gap-y-2">{children}</dl>;
 }
 
 export function ProgressCardDescriptionListItem({
   children,
   label,
-}: PropsWithChildren<{ label: string }>) {
+  className,
+}: PropsWithChildren<{
+  label: string;
+  className?: string;
+}>) {
   return (
-    <div className="flex flex-col flex-1 gap-2 px-2 py-1 border border-zinc-200 max-sm:not-first:border-t-0 sm:not-first:border-l-0 border-dashed">
+    <div className={clsx("flex flex-col gap-y-1 py-1", className)}>
       <dt className="text-zinc-500 lg:text-sm text-base">{label}</dt>
       <dd className="font-medium text-zinc-950 lg:text-sm text-base">
         {children}
@@ -178,18 +270,30 @@ export function ProgressCardDescriptionListItem({
 
 export function ProgressCardBadge({ children }: PropsWithChildren) {
   const { type } = useProgressCard();
-  return (
-    <span
-      className={clsx(
-        "px-2.5 py-0.5 rounded-full font-normal text-zinc-700 text-xs",
-        type === "opleiding" && "bg-branding-light/10",
-        type === "diploma" && "bg-branding-orange/10",
-        type === "cursus" && "bg-branding-dark/10",
-      )}
-    >
-      {children}
-    </span>
-  );
+
+  const colors: Record<CardType, Parameters<typeof Badge>[0]["color"]> = {
+    program: "branding-light",
+    certificate: "branding-orange",
+    course: "branding-dark",
+  };
+
+  const color = colors[type];
+
+  return <Badge color={color}>{children}</Badge>;
+}
+
+export function ProgressCardDisclosures({ children }: PropsWithChildren) {
+  const { type } = useProgressCard();
+
+  const colors: Record<CardType, string> = {
+    program: "divide-sky-200",
+    certificate: "divide-orange-200",
+    course: "divide-blue-200",
+  };
+
+  const color = colors[type];
+
+  return <div className={clsx("divide-y px-2 sm:px-4", color)}>{children}</div>;
 }
 
 export function ProgressCardDisclosure({
@@ -198,30 +302,36 @@ export function ProgressCardDisclosure({
   disabled,
 }: PropsWithChildren<{ header: React.ReactNode; disabled?: boolean }>) {
   return (
-    <Headless.Disclosure>
+    <Headless.Disclosure as="div">
       <Headless.DisclosureButton
         disabled={disabled}
-        className="group/progress-card-disclosure relative flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 px-2 sm:px-4 py-4 border-zinc-200 border-t last:rounded-b-md focus:outline-none w-full text-zinc-950 lg:text-sm text-base"
+        className={clsx(
+          "group/progress-card-disclosure flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 py-2 sm:py-2.5 focus:outline-none w-full text-zinc-950 lg:text-sm text-base",
+        )}
       >
-        <span className="absolute inset-0 mx-2 rounded-lg group-data-focus/progress-card-disclosure:outline-2 group-data-focus/progress-card-disclosure:outline-branding-light group-data-focus/progress-card-disclosure:outline-offset-2" />
         <div className="flex items-center gap-2 font-medium">{header}</div>
         <ChevronDownIcon className="size-4 text-zinc-500 group-data-open/progress-card-disclosure:rotate-180 transition-transform" />
       </Headless.DisclosureButton>
-      <Headless.DisclosurePanel className="px-2 sm:px-4 nth-last-[2]:pb-12">
+      <Headless.DisclosurePanel className="pb-4">
         {children}
       </Headless.DisclosurePanel>
     </Headless.Disclosure>
   );
 }
 
-export function ProgressCardStatusList({
-  children,
-  className,
-}: PropsWithChildren<{
-  className?: string;
-}>) {
+export function ProgressCardStatusList({ children }: PropsWithChildren) {
+  const { type } = useProgressCard();
+
+  const colors: Record<CardType, string> = {
+    program: "divide-sky-100",
+    certificate: "divide-orange-100",
+    course: "divide-blue-100",
+  };
+
   return (
-    <ul className={clsx("lg:text-sm text-base", className)}>{children}</ul>
+    <ul className={clsx("lg:text-sm text-base divide-y", colors[type])}>
+      {children}
+    </ul>
   );
 }
 
@@ -231,7 +341,7 @@ export function ProgressCardStatusSubList({
 }: PropsWithChildren<{
   className?: string;
 }>) {
-  return <ul className={clsx("sm:pl-13", className)}>{children}</ul>;
+  return <ul className={clsx("sm:pl-6", className)}>{children}</ul>;
 }
 
 export function ProgressCardStatusIcon({
@@ -239,13 +349,15 @@ export function ProgressCardStatusIcon({
 }: {
   progress: number;
 }) {
-  return progress >= 100 ? (
-    <CheckCircleIcon className="size-5 text-green-500" />
-  ) : progress > 0 ? (
-    <MinusCircleIcon className="size-5 text-yellow-500" />
-  ) : (
-    <CircleIcon className="size-5 text-zinc-500" />
-  );
+  if (progress >= 100) {
+    return <CheckCircleIcon className="size-5 text-green-500 flex-shrink-0" />;
+  }
+
+  if (progress > 0) {
+    return <MinusCircleIcon className="size-5 text-yellow-500 flex-shrink-0" />;
+  }
+
+  return <CircleIcon className="size-5 text-zinc-500 flex-shrink-0" />;
 }
 
 export function ProgressCardStatus({
@@ -255,6 +367,7 @@ export function ProgressCardStatus({
   subtitle,
   updatedAt,
   icon,
+  showProgressBadge = true,
 }: (
   | PropsWithChildren
   | {
@@ -266,6 +379,7 @@ export function ProgressCardStatus({
   subtitle?: React.ReactNode;
   updatedAt?: string;
   icon?: React.ReactNode;
+  showProgressBadge?: boolean;
 }) {
   const status = (
     <div
@@ -280,10 +394,10 @@ export function ProgressCardStatus({
         )}
       >
         {children ? (
-          <Button plain className="-m-2">
+          <div>
             <MinusIcon className="hidden group-data-open/progress-card-status-disclosure:block size-4 text-zinc-500" />
             <PlusIcon className="group-data-open/progress-card-status-disclosure:hidden block size-4 text-zinc-500" />
-          </Button>
+          </div>
         ) : null}
         {icon ?? <ProgressCardStatusIcon progress={progress} />}
         <div className="flex flex-col">
@@ -291,23 +405,26 @@ export function ProgressCardStatus({
           {subtitle && <span className="text-zinc-500">{subtitle}</span>}
         </div>
       </div>
-      <Badge
-        color={progress >= 100 ? "green" : progress > 0 ? "yellow" : "zinc"}
-        className={clsx(!children && "max-sm:ml-6", "w-fit")}
-      >
-        {progress >= 100
-          ? `Behaald ${updatedAt ? `op ${dayjs(updatedAt).format("DD-MM-YYYY")}` : ""}`
-          : updatedAt
-            ? `Laatst bijgewerkt op ${dayjs(updatedAt).format("DD-MM-YYYY")}`
-            : "Nog niet behaald"}
-      </Badge>
+      {showProgressBadge && (
+        <Badge
+          color={progress >= 100 ? "green" : progress > 0 ? "yellow" : "zinc"}
+          className={clsx(
+            !children && "max-sm:ml-6",
+            "w-fit whitespace-nowrap",
+          )}
+        >
+          {progress >= 100
+            ? `Behaald${updatedAt ? ` ${dayjs(updatedAt).format("DD-MM-YYYY")}` : ""}`
+            : updatedAt
+              ? `Laatst bijgewerkt ${dayjs(updatedAt).format("DD-MM-YYYY")}`
+              : "Niet behaald"}
+        </Badge>
+      )}
     </div>
   );
 
   return children ? (
     <Headless.Disclosure as="li">
-      <Divider />
-
       <Headless.DisclosureButton className="group/progress-card-status-disclosure relative data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 focus:outline-none w-full">
         <span className="absolute inset-0 rounded-lg group-data-focus/progress-card-status-disclosure:outline-2 group-data-focus/progress-card-status-disclosure:outline-branding-light group-data-focus/progress-card-status-disclosure:outline-offset-2" />
         {status}
@@ -326,7 +443,6 @@ export function ProgressCardFooter({
 }: PropsWithChildren<{ waveOffset?: number; waveSpacing?: number }>) {
   return (
     <footer className="group/progress-card-footer peer/progress-card-footer relative flex justify-between bg-neutral-100 px-2 sm:px-4 py-2 border-zinc-200 border-t last:rounded-b-md">
-      <Wave offset={waveOffset} spacing={waveSpacing} />
       <div className="z-10 flex items-center gap-2">
         <Logo className="size-8 text-zinc-500" />
         <Image
@@ -341,55 +457,90 @@ export function ProgressCardFooter({
 }
 
 function Wave({
-  className,
   offset = 0,
   spacing = 0,
-}: { className?: string; offset?: number; spacing?: number }) {
+}: { offset?: number; spacing?: number }) {
   const { type } = useProgressCard();
 
-  const waveColor =
-    type === "opleiding"
-      ? "text-branding-light"
-      : type === "diploma"
-        ? "text-branding-orange"
-        : "text-branding-dark";
+  const waveColors: Record<CardType, string> = {
+    program: "text-branding-light",
+    certificate: "text-branding-orange",
+    course: "text-branding-dark",
+  };
+
+  const waveColor = waveColors[type];
 
   return (
     <div
       className={clsx(
-        "absolute inset-0 opacity-10 overflow-hidden -translate-y-full pointer-events-none",
-        className,
+        "absolute bottom-0 left-0 right-0 h-8 pointer-events-none z-0",
         waveColor,
       )}
     >
-      <div className="absolute inset-0 flex">
+      <div className="absolute opacity-40 inset-0 flex">
         <Wave1
-          className="absolute opacity-20 animate-wave-fast"
-          style={{ animationDelay: `${offset + spacing}s` }}
+          className="absolute bottom-0"
+          style={{
+            animationName: "wave",
+            animationDelay: `${offset + spacing}s`,
+            animationDuration: "60s",
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
         />
         <Wave1
-          className="absolute opacity-20 translate-x-full animate-wave-fast"
-          style={{ animationDelay: `${offset + spacing}s` }}
+          className="absolute bottom-0 translate-x-full"
+          style={{
+            animationName: "wave",
+            animationDelay: `${offset + spacing}s`,
+            animationDuration: "60s",
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
         />
       </div>
-      <div className="absolute inset-0 flex">
+      <div className="absolute opacity-20 inset-0 flex">
         <Wave2
-          className="absolute opacity-25 animate-wave-medium"
-          style={{ animationDelay: `${offset + spacing * 2}s` }}
+          className="absolute bottom-0"
+          style={{
+            animationName: "wave",
+            animationDelay: `${offset + spacing * 2}s`,
+            animationDuration: "40s",
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
         />
         <Wave2
-          className="absolute opacity-25 translate-x-full animate-wave-medium"
-          style={{ animationDelay: `${offset + spacing * 2}s` }}
+          className="absolute bottom-0 translate-x-full"
+          style={{
+            animationName: "wave",
+            animationDelay: `${offset + spacing * 2}s`,
+            animationDuration: "40s",
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
         />
       </div>
-      <div className="absolute inset-0 flex">
+      <div className="absolute text-white inset-0 flex">
         <Wave3
-          className="absolute opacity-30 animate-wave-slow"
-          style={{ animationDelay: `${offset + spacing * 3}s` }}
+          className="absolute bottom-0"
+          style={{
+            animationName: "wave",
+            animationDelay: `${offset + spacing * 3}s`,
+            animationDuration: "100s",
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
         />
         <Wave3
-          className="absolute opacity-30 translate-x-full animate-wave-slow"
-          style={{ animationDelay: `${offset + spacing * 3}s` }}
+          className="absolute bottom-0 translate-x-full"
+          style={{
+            animationName: "wave",
+            animationDelay: `${offset + spacing * 3}s`,
+            animationDuration: "100s",
+            animationTimingFunction: "linear",
+            animationIterationCount: "infinite",
+          }}
         />
       </div>
     </div>
@@ -400,8 +551,8 @@ function Wave1(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg
       width="910"
-      height="55"
-      viewBox="0 0 910 55"
+      height="28"
+      viewBox="0 0 910 28"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
@@ -417,8 +568,8 @@ function Wave2(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg
       width="1066"
-      height="60"
-      viewBox="0 0 1066 60"
+      height="30"
+      viewBox="0 0 1066 30"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
@@ -434,8 +585,8 @@ function Wave3(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg
       width="869"
-      height="50"
-      viewBox="0 0 869 50"
+      height="25"
+      viewBox="0 0 869 25"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >

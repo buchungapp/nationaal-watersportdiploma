@@ -6,6 +6,7 @@ import {
   listCompetencyProgressesByPersonId,
 } from "~/lib/nwd";
 import {
+  ColoredText,
   ProgressCard,
   ProgressCardBadge,
   ProgressCardDegree,
@@ -18,7 +19,6 @@ import {
   ProgressCardStatusList,
   ProgressCardStatusSubList,
   ProgressCardTitle,
-  ProgressCardTitleColored,
   ProgressCardTypeBadge,
 } from "./progress-card";
 
@@ -92,9 +92,7 @@ export async function CohortProgress({
                 <ProgressCardTypeBadge />
                 <ProgressCardTitle>
                   {allocation.program.title}
-                  <ProgressCardTitleColored>
-                    {allocation.gearType.title}
-                  </ProgressCardTitleColored>
+                  <ColoredText>{allocation.gearType.title}</ColoredText>
                 </ProgressCardTitle>
                 <ProgressCardDegree>
                   {allocation.degree.title}

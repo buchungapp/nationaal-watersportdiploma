@@ -24,15 +24,3 @@
     transform: translateX(-100%);
   }
 }
-
-.animate-wave-slow {
-  animation: wave 100s linear infinite;
-}
-
-.animate-wave-medium {
-  animation: wave 80s linear infinite;
-}
-
-.animate-wave-fast {
-  animation: wave 60s linear infinite;
-}

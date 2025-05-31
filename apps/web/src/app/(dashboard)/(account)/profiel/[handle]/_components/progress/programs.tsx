@@ -5,6 +5,7 @@ import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { getPersonByHandle, listProgramProgressesByPersonId } from "~/lib/nwd";
 import {
+  ColoredText,
   ProgressCard,
   ProgressCardBadge,
   ProgressCardDegree,
@@ -17,7 +18,6 @@ import {
   ProgressCardStatusList,
   ProgressCardStatusSubList,
   ProgressCardTitle,
-  ProgressCardTitleColored,
   ProgressCardTypeBadge,
 } from "./progress-card";
 
@@ -138,9 +138,7 @@ export async function Programs({
                 <ProgressCardTypeBadge />
                 <ProgressCardTitle>
                   {program.program.title}
-                  <ProgressCardTitleColored>
-                    {program.gearType.title}
-                  </ProgressCardTitleColored>
+                  <ColoredText>{program.gearType.title}</ColoredText>
                 </ProgressCardTitle>
                 <ProgressCardDegree>{program.degree.title}</ProgressCardDegree>
               </ProgressCardHeader>

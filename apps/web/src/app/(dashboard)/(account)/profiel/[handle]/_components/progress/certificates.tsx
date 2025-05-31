@@ -1,24 +1,23 @@
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/16/solid";
 import type { User } from "@nawadi/core";
 import { Suspense } from "react";
-import { Button } from "~/app/(dashboard)/_components/button";
+import { TextButton } from "~/app/(dashboard)/_components/button";
 import dayjs from "~/lib/dayjs";
 import { listCertificatesForPerson } from "~/lib/nwd";
 import {
   ProgressCard,
   ProgressCardBadge,
-  ProgressCardDegree,
   ProgressCardDescriptionList,
   ProgressCardDescriptionListItem,
   ProgressCardDisclosure,
-  ProgressCardFooter,
+  ProgressCardDisclosures,
   ProgressCardHeader,
   ProgressCardStatus,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
-  ProgressCardTitle,
-  ProgressCardTitleColored,
-  ProgressCardTypeBadge,
 } from "./progress-card";
 
 type CertificatesProps = {
@@ -83,83 +82,98 @@ async function Certificates({
       {certificates.map((certificate, index) => {
         return (
           <li key={certificate.id}>
-            <ProgressCard type="diploma">
-              <ProgressCardHeader>
-                <ProgressCardTypeBadge />
-                <ProgressCardTitle>
-                  {certificate.program.title}
-                  <ProgressCardTitleColored>
-                    {certificate.gearType.title}
-                  </ProgressCardTitleColored>
-                </ProgressCardTitle>
-                <ProgressCardDegree>
-                  {certificate.program.degree.title}
-                </ProgressCardDegree>
-              </ProgressCardHeader>
-
-              <ProgressCardDescriptionList>
-                <ProgressCardDescriptionListItem label="Diplomanummer">
-                  {certificate.handle}
-                </ProgressCardDescriptionListItem>
-                <ProgressCardDescriptionListItem label="Datum van afgifte">
-                  {dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
-                </ProgressCardDescriptionListItem>
-                <ProgressCardDescriptionListItem label="Vaarlocatie van afgifte">
-                  {certificate.location.name}
-                </ProgressCardDescriptionListItem>
-              </ProgressCardDescriptionList>
-
-              <ProgressCardDisclosure
-                header={
-                  <>
-                    Behaalde modules{" "}
-                    <ProgressCardBadge>
-                      {certificate.completedModules.length}
-                    </ProgressCardBadge>
-                  </>
+            <ProgressCard type="certificate">
+              <ProgressCardHeader
+                degree={certificate.program.degree.title}
+                program={
+                  certificate.program.title ?? certificate.program.course.title
                 }
-              >
-                <ProgressCardStatusList>
-                  {certificate.completedModules.map((m, index) => (
-                    <ProgressCardStatus
-                      key={m.module.id}
-                      title={m.module.title}
-                      progress={m.completedAt ? 100 : 0}
-                      updatedAt={m.completedAt}
+                gearType={certificate.gearType.title}
+                itemIndex={index}
+              />
+
+              <ProgressCardDisclosures>
+                <ProgressCardDisclosure header="Details">
+                  <ProgressCardDescriptionList>
+                    <ProgressCardDescriptionListItem
+                      label="Diplomanummer"
+                      className="col-span-full sm:col-span-2"
                     >
-                      <ProgressCardStatusSubList>
-                        {m.module.competencies.map((c) => (
-                          <ProgressCardStatus
-                            key={c.id}
-                            title={c.title}
-                            subtitle={c.requirement}
-                            progress={100}
-                            updatedAt={m.completedAt}
-                          />
-                        ))}
-                      </ProgressCardStatusSubList>
-                    </ProgressCardStatus>
-                  ))}
-                </ProgressCardStatusList>
-              </ProgressCardDisclosure>
-              <ProgressCardFooter
-                waveOffset={index * -30}
-                waveSpacing={3 * index}
-              >
-                {/* <Button plain>
-                  <ArrowDownTrayIcon />
-                  Download PDF
-                </Button> */}
-                <Button
-                  color="white"
-                  target="_blank"
-                  href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
-                  className="-my-0.5"
+                      {certificate.handle}
+                    </ProgressCardDescriptionListItem>
+                    <ProgressCardDescriptionListItem
+                      label="Datum van afgifte"
+                      className="col-span-full sm:col-span-2"
+                    >
+                      {dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
+                    </ProgressCardDescriptionListItem>
+                    <ProgressCardDescriptionListItem
+                      label="Vaarlocatie van afgifte"
+                      className="col-span-full sm:col-span-2"
+                    >
+                      {certificate.location.name}
+                    </ProgressCardDescriptionListItem>
+                    <div className="col-span-full flex justify-end gap-x-4 sm:gap-x-6 mt-2">
+                      <TextButton
+                        href={`/api/export/certificate/pdf/${certificate.id}?preview=true&signed=true&handle=${certificate.handle}&issuedDate=${dayjs(
+                          certificate.issuedAt,
+                        ).format(
+                          "YYYYMMDD",
+                        )}&filename=nationaal-watersportdiploma_nwd-${certificate.handle}-${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+                        target="_blank"
+                      >
+                        <ArrowDownTrayIcon />
+                        Download PDF
+                      </TextButton>
+                      <TextButton
+                        href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+                        target="_blank"
+                      >
+                        <ArrowTopRightOnSquareIcon />
+                        Bekijk online
+                      </TextButton>
+                    </div>
+                  </ProgressCardDescriptionList>
+                </ProgressCardDisclosure>
+
+                <ProgressCardDisclosure
+                  header={
+                    <>
+                      Behaalde modules{" "}
+                      <ProgressCardBadge>
+                        {certificate.completedModules.length}
+                      </ProgressCardBadge>
+                    </>
+                  }
                 >
-                  <ArrowTopRightOnSquareIcon />
-                  Bekijk details
-                </Button>
-              </ProgressCardFooter>
+                  <ProgressCardStatusList>
+                    {certificate.completedModules.map(
+                      ({ module, completedAt }) => (
+                        <ProgressCardStatus
+                          key={module.id}
+                          title={module.title}
+                          progress={100}
+                          updatedAt={completedAt}
+                          showProgressBadge={false}
+                        >
+                          <ProgressCardStatusSubList>
+                            {module.competencies.map((c) => (
+                              <ProgressCardStatus
+                                key={c.id}
+                                title={c.title}
+                                subtitle={c.requirement}
+                                progress={100}
+                                updatedAt={completedAt}
+                                showProgressBadge={false}
+                              />
+                            ))}
+                          </ProgressCardStatusSubList>
+                        </ProgressCardStatus>
+                      ),
+                    )}
+                  </ProgressCardStatusList>
+                </ProgressCardDisclosure>
+              </ProgressCardDisclosures>
             </ProgressCard>
           </li>
         );
