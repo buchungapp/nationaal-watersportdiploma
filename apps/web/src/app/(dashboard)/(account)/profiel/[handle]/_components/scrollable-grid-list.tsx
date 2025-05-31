@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { GridList } from "~/app/(dashboard)/_components/grid-list-v2";
 
@@ -13,36 +13,51 @@ export function ScrollableGridList({
   children,
   className,
 }: ScrollableGridListProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [hasOverflow, setHasOverflow] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const checkOverflow = () => {
-      const container = scrollContainerRef.current;
-      if (container) {
-        const hasVerticalOverflow =
-          container.scrollHeight > container.clientHeight;
-        setHasOverflow(hasVerticalOverflow);
-      }
-    };
+  // Subscribe function - sets up listeners for overflow changes
+  const subscribe = useCallback((callback: () => void) => {
+    const container = containerRef.current;
+    if (!container) return () => {};
 
-    checkOverflow();
+    const resizeObserver = new ResizeObserver(callback);
+    resizeObserver.observe(container);
 
-    // Use ResizeObserver for better performance than window resize listener
-    const resizeObserver = new ResizeObserver(checkOverflow);
-    if (scrollContainerRef.current) {
-      resizeObserver.observe(scrollContainerRef.current);
-    }
+    // Also listen for content changes that might affect overflow
+    const mutationObserver = new MutationObserver(callback);
+    mutationObserver.observe(container, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"],
+    });
 
     return () => {
       resizeObserver.disconnect();
+      mutationObserver.disconnect();
     };
   }, []);
 
+  // Snapshot function - returns current overflow state
+  const getSnapshot = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return false;
+    return container.scrollHeight > container.clientHeight;
+  }, []);
+
+  // Server snapshot - assume no overflow on server
+  const getServerSnapshot = () => false;
+
+  const hasOverflow = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
+
   return (
     <div className="relative">
-      <div ref={scrollContainerRef} className={className}>
-        <GridList>{children}</GridList>
+      <div ref={containerRef} className={className}>
+        <GridList className={hasOverflow ? "pb-8" : ""}>{children}</GridList>
       </div>
       {/* Fade overlay that only shows when there's overflow */}
       {hasOverflow && (
