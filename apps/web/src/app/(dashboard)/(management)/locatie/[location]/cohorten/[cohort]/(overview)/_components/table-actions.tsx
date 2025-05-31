@@ -259,7 +259,7 @@ function StartProgramDialog({
               <Field>
                 <Label>Vaartuig</Label>
                 <Listbox
-                  name="gearTypeId"
+                  name="gearType[id]"
                   disabled={
                     !(
                       selectedProgram &&
