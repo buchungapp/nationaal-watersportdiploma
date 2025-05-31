@@ -1,29 +1,23 @@
+import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
+import { listCompetencyProgressesByPersonId } from "~/lib/nwd";
 import {
-  getPersonByHandle,
-  listCompetencyProgressesByPersonId,
-} from "~/lib/nwd";
-import {
-  ColoredText,
   ProgressCard,
   ProgressCardBadge,
-  ProgressCardDegree,
   ProgressCardDescriptionList,
   ProgressCardDescriptionListItem,
   ProgressCardDisclosure,
-  ProgressCardFooter,
+  ProgressCardDisclosures,
   ProgressCardHeader,
   ProgressCardStatus,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
-  ProgressCardTitle,
-  ProgressCardTypeBadge,
 } from "./progress-card";
 
 type CohortProgressProps = {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
 };
 
 export async function fetchCohortProgress(personId: string) {
@@ -71,7 +65,7 @@ function allocationModules(
   });
 }
 
-export async function CohortProgress({
+async function CohortProgress({
   allocations,
 }: { allocations: Awaited<ReturnType<typeof fetchCohortProgress>> }) {
   if (allocations.length === 0) {
@@ -87,80 +81,82 @@ export async function CohortProgress({
       {allocations.map((allocation, index) => {
         return (
           <li key={allocation.cohortAllocationId}>
-            <ProgressCard type="cursus">
-              <ProgressCardHeader>
-                <ProgressCardTypeBadge />
-                <ProgressCardTitle>
-                  {allocation.program.title}
-                  <ColoredText>{allocation.gearType.title}</ColoredText>
-                </ProgressCardTitle>
-                <ProgressCardDegree>
-                  {allocation.degree.title}
-                </ProgressCardDegree>
-              </ProgressCardHeader>
-
-              <ProgressCardDescriptionList>
-                <ProgressCardDescriptionListItem label="Vaarlocatie van afgifte">
-                  {allocation.location.name}
-                </ProgressCardDescriptionListItem>
-                <ProgressCardDescriptionListItem label="Voortgang bijgewerkt tot">
-                  {dayjs(allocation.progressVisibleUpUntil).format(
-                    "DD-MM-YYYY",
-                  )}
-                </ProgressCardDescriptionListItem>
-              </ProgressCardDescriptionList>
-
-              <ProgressCardDisclosure
-                header={
-                  <>
-                    Voortgang{" "}
-                    <ProgressCardBadge>
-                      {
-                        allocation.modules.filter(
-                          ({ progress }) => progress >= 100,
-                        ).length
-                      }
-                    </ProgressCardBadge>
-                  </>
-                }
-              >
-                <ProgressCardStatusList>
-                  {allocation.modules.map(
-                    ({ module, progress, updatedAt, competencies }) => (
-                      <ProgressCardStatus
-                        key={module.id}
-                        progress={progress}
-                        title={module.title}
-                        updatedAt={updatedAt}
-                      >
-                        <ProgressCardStatusSubList>
-                          {competencies.map((competency) => {
-                            const progress = competency.completed
-                              ? 100
-                              : (competency.progress?.progress ?? 0);
-                            return (
-                              <ProgressCardStatus
-                                key={competency.id}
-                                progress={progress}
-                                title={competency.title}
-                                subtitle={competency.requirement}
-                                updatedAt={
-                                  competency.progress?.updatedAt ??
-                                  competency.completed?.createdAt
-                                }
-                              />
-                            );
-                          })}
-                        </ProgressCardStatusSubList>
-                      </ProgressCardStatus>
-                    ),
-                  )}
-                </ProgressCardStatusList>
-              </ProgressCardDisclosure>
-              <ProgressCardFooter
-                waveOffset={index * -30}
-                waveSpacing={3 * index}
+            <ProgressCard type="course">
+              <ProgressCardHeader
+                degree={allocation.degree.title}
+                program={allocation.program.title}
+                gearType={allocation.gearType.title}
+                itemIndex={index}
               />
+
+              <ProgressCardDisclosures>
+                <ProgressCardDisclosure header="Details">
+                  <ProgressCardDescriptionList>
+                    <ProgressCardDescriptionListItem
+                      label="Vaarlocatie van afgifte"
+                      className="col-span-full sm:col-span-3"
+                    >
+                      {allocation.location.name}
+                    </ProgressCardDescriptionListItem>
+                    <ProgressCardDescriptionListItem
+                      label="Voortgang bijgewerkt tot"
+                      className="col-span-full sm:col-span-3"
+                    >
+                      {dayjs(allocation.progressVisibleUpUntil).format(
+                        "DD-MM-YYYY",
+                      )}
+                    </ProgressCardDescriptionListItem>
+                  </ProgressCardDescriptionList>
+                </ProgressCardDisclosure>
+
+                <ProgressCardDisclosure
+                  header={
+                    <>
+                      Voortgang{" "}
+                      <ProgressCardBadge>
+                        {
+                          allocation.modules.filter(
+                            ({ progress }) => progress >= 100,
+                          ).length
+                        }
+                      </ProgressCardBadge>
+                    </>
+                  }
+                >
+                  <ProgressCardStatusList>
+                    {allocation.modules.map(
+                      ({ module, progress, updatedAt, competencies }) => (
+                        <ProgressCardStatus
+                          key={module.id}
+                          progress={progress}
+                          title={module.title}
+                          updatedAt={updatedAt}
+                        >
+                          <ProgressCardStatusSubList>
+                            {competencies.map((competency) => {
+                              const progress = competency.completed
+                                ? 100
+                                : (competency.progress?.progress ?? 0);
+                              return (
+                                <ProgressCardStatus
+                                  key={competency.id}
+                                  progress={progress}
+                                  title={competency.title}
+                                  subtitle={competency.requirement}
+                                  updatedAt={
+                                    competency.progress?.updatedAt ??
+                                    competency.completed?.createdAt
+                                  }
+                                />
+                              );
+                            })}
+                          </ProgressCardStatusSubList>
+                        </ProgressCardStatus>
+                      ),
+                    )}
+                  </ProgressCardStatusList>
+                </ProgressCardDisclosure>
+              </ProgressCardDisclosures>
             </ProgressCard>
           </li>
         );
@@ -169,14 +165,13 @@ export async function CohortProgress({
   );
 }
 
-export async function CohortProgressContent(props: CohortProgressProps) {
-  const { handle } = await props.params;
-  const person = await getPersonByHandle(handle);
+async function CohortProgressContent(props: CohortProgressProps) {
+  const person = await props.personPromise;
   const allocations = await fetchCohortProgress(person.id);
   return <CohortProgress allocations={allocations} />;
 }
 
-export function CohortProgressFallback() {
+function CohortProgressFallback() {
   return (
     <ul className="space-y-2">
       <li className="bg-gray-200 rounded w-full h-68.5 animate-pulse" />

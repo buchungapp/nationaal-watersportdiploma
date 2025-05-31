@@ -16,7 +16,10 @@ import {
 } from "~/app/(dashboard)/_components/tabs";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { CertificatesWithSuspense, fetchCertificates } from "./certificates";
-import { fetchCohortProgress } from "./cohort-progress";
+import {
+  CohortProgressWithSuspense,
+  fetchCohortProgress,
+} from "./cohort-progress";
 import { ProgramsWithSuspense, fetchPrograms } from "./programs";
 
 type BadgeColor = "branding-orange" | "branding-light" | "branding-dark";
@@ -128,20 +131,13 @@ export default function ProgressSection({
         </TabList>
         <TabPanels className="mt-4">
           <TabPanel>
-            {/* <Text className="-mt-2 mb-2">
-              Mis je een diploma? Neem dan contact op met de{" "}
-              <TextLink href="/vaarlocaties" target="_blank">
-                vaarlocatie
-              </TextLink>{" "}
-              waar je de cursus hebt gevolgd.
-            </Text> */}
             <CertificatesWithSuspense personPromise={personPromise} />
           </TabPanel>
           <TabPanel>
             <ProgramsWithSuspense personPromise={personPromise} />
           </TabPanel>
           <TabPanel>
-            {/* <CohortProgress allocations={allocations} /> */}
+            <CohortProgressWithSuspense personPromise={personPromise} />
           </TabPanel>
         </TabPanels>
       </TabGroup>

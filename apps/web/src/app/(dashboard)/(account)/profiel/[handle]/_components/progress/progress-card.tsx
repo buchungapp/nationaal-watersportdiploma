@@ -11,7 +11,6 @@ import {
   MinusCircleIcon,
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Image from "next/image";
 import type React from "react";
 import { type PropsWithChildren, createContext, useContext } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
@@ -441,26 +440,6 @@ export function ProgressCardStatus({
     </Headless.Disclosure>
   ) : (
     status
-  );
-}
-
-export function ProgressCardFooter({
-  children,
-  waveOffset,
-  waveSpacing,
-}: PropsWithChildren<{ waveOffset?: number; waveSpacing?: number }>) {
-  return (
-    <footer className="group/progress-card-footer peer/progress-card-footer relative flex justify-between bg-neutral-100 px-2 sm:px-4 py-2 border-zinc-200 border-t last:rounded-b-md">
-      <div className="z-10 flex items-center gap-2">
-        <Logo className="size-8 text-zinc-500" />
-        <Image
-          src={watersportverbondGray}
-          className="w-auto h-8"
-          alt="Watersportverbond"
-        />
-      </div>
-      <div className="flex gap-2">{children}</div>
-    </footer>
   );
 }
 
