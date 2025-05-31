@@ -1,28 +1,25 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
-import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { getPersonByHandle, listProgramProgressesByPersonId } from "~/lib/nwd";
+import { listProgramProgressesByPersonId } from "~/lib/nwd";
 import {
-  ColoredText,
   ProgressCard,
   ProgressCardBadge,
-  ProgressCardDegree,
   ProgressCardDescriptionList,
   ProgressCardDescriptionListItem,
   ProgressCardDisclosure,
-  ProgressCardFooter,
+  ProgressCardDisclosures,
   ProgressCardHeader,
   ProgressCardStatus,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
-  ProgressCardTitle,
-  ProgressCardTypeBadge,
 } from "./progress-card";
 
 type ProgramsProps = {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
 };
 
 export async function fetchPrograms(personId: string) {
@@ -111,19 +108,11 @@ function deduplicateCurriculumCompetencies(
   });
 }
 
-export async function Programs({
+async function Programs({
   programs,
 }: {
   programs: Awaited<ReturnType<typeof fetchPrograms>>;
 }) {
-  if (programs.length === 0) {
-    return (
-      <Text className="-mt-2 mb-2">
-        We hebben geen opleiding voor je gevonden.
-      </Text>
-    );
-  }
-
   return (
     <ul className="space-y-2">
       {programs.map((program, index) => {
@@ -133,104 +122,108 @@ export async function Programs({
 
         return (
           <li key={`${program.program.id}-${program.gearType.id}`}>
-            <ProgressCard type="opleiding">
-              <ProgressCardHeader>
-                <ProgressCardTypeBadge />
-                <ProgressCardTitle>
-                  {program.program.title}
-                  <ColoredText>{program.gearType.title}</ColoredText>
-                </ProgressCardTitle>
-                <ProgressCardDegree>{program.degree.title}</ProgressCardDegree>
-              </ProgressCardHeader>
-
-              <ProgressCardDescriptionList>
-                <ProgressCardDescriptionListItem label="Eerst behaalde diploma">
-                  {firstCompletedCertificate
-                    ? dayjs(firstCompletedCertificate.issuedAt).format(
-                        "DD-MM-YYYY",
-                      )
-                    : "-"}
-                </ProgressCardDescriptionListItem>
-                <ProgressCardDescriptionListItem label="Meest recente diploma">
-                  {mostRecentCompletedCertificate
-                    ? dayjs(mostRecentCompletedCertificate.issuedAt).format(
-                        "DD-MM-YYYY",
-                      )
-                    : "-"}
-                </ProgressCardDescriptionListItem>
-              </ProgressCardDescriptionList>
-
-              <ProgressCardDisclosure
-                header={
-                  <>
-                    Opleidingsprogramma{" "}
-                    <ProgressCardBadge>
-                      {program.modules.filter((m) => m.completedAt).length}
-                    </ProgressCardBadge>
-                  </>
-                }
-              >
-                <ProgressCardStatusList>
-                  {program.modules.map((m, index) => (
-                    <ProgressCardStatus
-                      key={m.module.id}
-                      title={m.module.title}
-                      progress={m.completedAt ? 100 : 0}
-                      updatedAt={m.completedAt}
-                    >
-                      <ProgressCardStatusSubList>
-                        {m.competencies.map((c) => (
-                          <ProgressCardStatus
-                            key={c.id}
-                            title={c.title}
-                            subtitle={c.requirement}
-                            progress={c.completed ? 100 : 0}
-                            updatedAt={c.completed?.createdAt}
-                          />
-                        ))}
-                      </ProgressCardStatusSubList>
-                    </ProgressCardStatus>
-                  ))}
-                </ProgressCardStatusList>
-              </ProgressCardDisclosure>
-              <ProgressCardDisclosure
-                disabled={program.certificates.length === 0}
-                header={
-                  <>
-                    Behaalde diploma's{" "}
-                    <ProgressCardBadge>
-                      {program.certificates.length}
-                    </ProgressCardBadge>
-                  </>
-                }
-              >
-                <ProgressCardStatusList>
-                  {program.certificates.map((certificate, index) => (
-                    <ProgressCardStatus
-                      key={certificate.id}
-                      title={
-                        <TextLink
-                          target="_blank"
-                          href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
-                          className="flex items-center gap-1"
-                        >
-                          <Strong>{certificate.handle}</Strong>
-                          <ArrowTopRightOnSquareIcon className="size-4" />
-                        </TextLink>
-                      }
-                      progress={100}
-                      updatedAt={certificate.issuedAt}
-                      icon={
-                        <MedailIcon className="size-5 text-branding-orange" />
-                      }
-                    />
-                  ))}
-                </ProgressCardStatusList>
-              </ProgressCardDisclosure>
-              <ProgressCardFooter
-                waveOffset={index * -30}
-                waveSpacing={3 * index}
+            <ProgressCard type="program">
+              <ProgressCardHeader
+                degree={program.degree.title}
+                program={program.program.title}
+                gearType={program.gearType.title}
+                itemIndex={index}
               />
+
+              <ProgressCardDisclosures>
+                <ProgressCardDisclosure header="Details">
+                  <ProgressCardDescriptionList>
+                    <ProgressCardDescriptionListItem
+                      label="Eerst behaalde diploma"
+                      className="col-span-full sm:col-span-3"
+                    >
+                      {firstCompletedCertificate
+                        ? dayjs(firstCompletedCertificate.issuedAt).format(
+                            "DD-MM-YYYY",
+                          )
+                        : "-"}
+                    </ProgressCardDescriptionListItem>
+                    <ProgressCardDescriptionListItem
+                      label="Meest recente diploma"
+                      className="col-span-full sm:col-span-3"
+                    >
+                      {mostRecentCompletedCertificate
+                        ? dayjs(mostRecentCompletedCertificate.issuedAt).format(
+                            "DD-MM-YYYY",
+                          )
+                        : "-"}
+                    </ProgressCardDescriptionListItem>
+                  </ProgressCardDescriptionList>
+                </ProgressCardDisclosure>
+
+                <ProgressCardDisclosure
+                  header={
+                    <>
+                      Opleidingsprogramma{" "}
+                      <ProgressCardBadge>
+                        {program.modules.filter((m) => m.completedAt).length}
+                      </ProgressCardBadge>
+                    </>
+                  }
+                >
+                  <ProgressCardStatusList>
+                    {program.modules.map((m) => (
+                      <ProgressCardStatus
+                        key={m.module.id}
+                        title={m.module.title}
+                        progress={m.completedAt ? 100 : 0}
+                        updatedAt={m.completedAt}
+                      >
+                        <ProgressCardStatusSubList>
+                          {m.competencies.map((c) => (
+                            <ProgressCardStatus
+                              key={c.id}
+                              title={c.title}
+                              subtitle={c.requirement}
+                              progress={c.completed ? 100 : 0}
+                              updatedAt={c.completed?.createdAt}
+                            />
+                          ))}
+                        </ProgressCardStatusSubList>
+                      </ProgressCardStatus>
+                    ))}
+                  </ProgressCardStatusList>
+                </ProgressCardDisclosure>
+                <ProgressCardDisclosure
+                  disabled={program.certificates.length === 0}
+                  header={
+                    <>
+                      Behaalde diploma's{" "}
+                      <ProgressCardBadge>
+                        {program.certificates.length}
+                      </ProgressCardBadge>
+                    </>
+                  }
+                >
+                  <ProgressCardStatusList>
+                    {program.certificates.map((certificate) => (
+                      <ProgressCardStatus
+                        key={certificate.id}
+                        title={
+                          <TextLink
+                            target="_blank"
+                            href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+                            className="flex items-center gap-1"
+                          >
+                            <Strong>{certificate.handle}</Strong>
+                            <ArrowTopRightOnSquareIcon className="size-4" />
+                          </TextLink>
+                        }
+                        progress={100}
+                        updatedAt={certificate.issuedAt}
+                        icon={
+                          <MedailIcon className="size-5 text-branding-orange" />
+                        }
+                      />
+                    ))}
+                  </ProgressCardStatusList>
+                </ProgressCardDisclosure>
+              </ProgressCardDisclosures>
             </ProgressCard>
           </li>
         );
@@ -239,14 +232,18 @@ export async function Programs({
   );
 }
 
-export async function ProgramsContent(props: ProgramsProps) {
-  const { handle } = await props.params;
-  const person = await getPersonByHandle(handle);
+async function ProgramsContent(props: ProgramsProps) {
+  const person = await props.personPromise;
   const programs = await fetchPrograms(person.id);
+
+  if (programs.length < 1) {
+    return "Geen opleidingen gevonden";
+  }
+
   return <Programs programs={programs} />;
 }
 
-export function ProgramsFallback() {
+function ProgramsFallback() {
   return (
     <ul className="space-y-2">
       <li className="bg-gray-200 rounded w-full h-81.75 animate-pulse" />

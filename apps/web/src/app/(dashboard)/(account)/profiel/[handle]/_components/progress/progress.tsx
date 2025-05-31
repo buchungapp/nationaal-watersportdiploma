@@ -17,7 +17,7 @@ import {
 import { Text } from "~/app/(dashboard)/_components/text";
 import { CertificatesWithSuspense, fetchCertificates } from "./certificates";
 import { fetchCohortProgress } from "./cohort-progress";
-import { fetchPrograms } from "./programs";
+import { ProgramsWithSuspense, fetchPrograms } from "./programs";
 
 type BadgeColor = "branding-orange" | "branding-light" | "branding-dark";
 
@@ -137,7 +137,9 @@ export default function ProgressSection({
             </Text> */}
             <CertificatesWithSuspense personPromise={personPromise} />
           </TabPanel>
-          <TabPanel>{/* <Programs programs={programs} /> */}</TabPanel>
+          <TabPanel>
+            <ProgramsWithSuspense personPromise={personPromise} />
+          </TabPanel>
           <TabPanel>
             {/* <CohortProgress allocations={allocations} /> */}
           </TabPanel>

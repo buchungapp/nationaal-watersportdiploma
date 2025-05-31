@@ -6,7 +6,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/16/solid";
 import {
-  AcademicCapIcon,
+  ArrowTrendingUpIcon,
   CheckCircleIcon,
   MinusCircleIcon,
 } from "@heroicons/react/24/outline";
@@ -17,7 +17,6 @@ import { type PropsWithChildren, createContext, useContext } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { BoatIcon } from "~/app/(dashboard)/_components/icons/boat-icon";
 import { CircleIcon } from "~/app/(dashboard)/_components/icons/circle-icon";
-import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
 import { Logo } from "~/app/_assets/logo";
 import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
 import dayjs from "~/lib/dayjs";
@@ -95,50 +94,65 @@ export function ProgressCardHeader({
 }) {
   const { type } = useProgressCard();
 
-  const colors: Record<
+  const details: Record<
     CardType,
     {
       background: string;
       text: string;
+      typeLabel: string;
     }
   > = {
     program: {
-      background: "bg-branding-light",
+      background: "bg-sky-50",
       text: "text-branding-light",
+      typeLabel: "Opleiding",
     },
     certificate: {
       background: "bg-orange-50",
       text: "text-branding-orange",
+      typeLabel: "Diploma",
     },
     course: {
-      background: "bg-branding-dark/20",
+      background: "bg-blue-50",
       text: "text-branding-dark",
+      typeLabel: "Cursus",
     },
   };
 
-  const color = colors[type];
+  const detail = details[type];
 
   return (
     <header
       className={clsx(
         "flex justify-between relative",
         "p-2 sm:p-4 pb-8 sm:pb-10",
-        color.background,
+        detail.background,
       )}
     >
-      <div className="flex items-center gap-x-4 w-full">
-        <ProgressCardDegree>{degree}</ProgressCardDegree>
-        <div className="space-y-2">
-          <ProgressCardTypeBadge />
-          <ProgressCardTitle>
-            {program}
-            <ColoredText>{gearType}</ColoredText>
-          </ProgressCardTitle>
+      <div className="flex flex-col gap-y-2 w-full">
+        <span
+          className={clsx(
+            "font-medium tracking-wide sm:text-xs/5 text-sm/5 uppercase text-gray-950/50",
+          )}
+        >
+          {detail.typeLabel}
+        </span>
+        <ProgressCardTitle>
+          <ColoredText> {program}</ColoredText>
+        </ProgressCardTitle>
+        <div className="flex gap-x-2 items-center">
+          <ProgressCardDescriptiveBadge Icon={ArrowTrendingUpIcon}>
+            {`Niveau ${degree}`}
+          </ProgressCardDescriptiveBadge>
+
+          <ProgressCardDescriptiveBadge Icon={BoatIcon}>
+            {gearType}
+          </ProgressCardDescriptiveBadge>
         </div>
       </div>
       <div className="flex items-center gap-x-4 shrink-0">
         <div
-          className={clsx("shrink-0 h-8", color.text)}
+          className={clsx("shrink-0 h-8", detail.text)}
           style={{
             aspectRatio: `${watersportverbondGray.width} / ${watersportverbondGray.height}`,
             backgroundColor: "currentColor",
@@ -147,38 +161,32 @@ export function ProgressCardHeader({
           }}
           aria-label="Watersportverbond"
         />
-        <Logo className={clsx("size-14 shrink-0", color.text)} />
+        <Logo className={clsx("size-14 shrink-0", detail.text)} />
       </div>
       <Wave offset={itemIndex * -30} spacing={3 * itemIndex} />
     </header>
   );
 }
 
-export function ProgressCardTypeBadge() {
+function ProgressCardDescriptiveBadge({
+  Icon,
+  children,
+}: PropsWithChildren<{ Icon: React.ElementType }>) {
   const { type } = useProgressCard();
 
-  const typeDetails: Record<
-    CardType,
-    { Icon: React.ElementType; text: string; className: string }
-  > = {
+  const typeDetails: Record<CardType, { className: string }> = {
     program: {
-      Icon: AcademicCapIcon,
-      text: "Opleiding",
       className: "text-branding-light",
     },
     certificate: {
-      Icon: MedailIcon,
-      text: "Diploma",
       className: "text-branding-orange",
     },
     course: {
-      Icon: BoatIcon,
-      text: "Cursus",
       className: "text-branding-dark",
     },
   };
 
-  const { Icon, text, className } = typeDetails[type];
+  const { className } = typeDetails[type];
 
   return (
     <span
@@ -190,7 +198,7 @@ export function ProgressCardTypeBadge() {
       )}
     >
       <Icon className="size-5" />
-      {text}
+      {children}
     </span>
   );
 }

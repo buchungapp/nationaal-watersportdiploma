@@ -186,6 +186,10 @@ async function CertificatesContent(props: CertificatesProps) {
   const person = await props.personPromise;
   const certificates = await fetchCertificates(person.id);
 
+  if (certificates.length < 1) {
+    return "Geen diploma's gevonden";
+  }
+
   return <Certificates certificates={certificates} />;
 }
 
