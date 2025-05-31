@@ -99,22 +99,26 @@ export function ProgressCardHeader({
       background: string;
       text: string;
       typeLabel: string;
+      typeLabelColor: string;
     }
   > = {
     program: {
       background: "bg-sky-50",
       text: "text-branding-light",
       typeLabel: "Opleiding",
+      typeLabelColor: "text-sky-900",
     },
     certificate: {
       background: "bg-orange-50",
       text: "text-branding-orange",
       typeLabel: "Diploma",
+      typeLabelColor: "text-orange-900",
     },
     course: {
       background: "bg-blue-50",
       text: "text-branding-dark",
       typeLabel: "Cursus",
+      typeLabelColor: "text-blue-900",
     },
   };
 
@@ -131,7 +135,8 @@ export function ProgressCardHeader({
       <div className="flex flex-col gap-y-2 w-full">
         <span
           className={clsx(
-            "font-medium tracking-wide sm:text-xs/5 text-sm/5 uppercase text-gray-950/50",
+            "font-medium tracking-wide sm:text-xs/5 text-sm/5 uppercase -mb-1",
+            detail.typeLabelColor,
           )}
         >
           {detail.typeLabel}

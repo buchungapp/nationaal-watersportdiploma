@@ -2,7 +2,10 @@ import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { listCompetencyProgressesByPersonId } from "~/lib/nwd";
+import {
+  listCompetencyProgressesByPersonId,
+  listCurriculaByIds,
+} from "~/lib/nwd";
 import {
   ProgressCard,
   ProgressCardBadge,
@@ -21,46 +24,34 @@ type CohortProgressProps = {
 };
 
 export async function fetchCohortProgress(personId: string) {
-  return listCompetencyProgressesByPersonId(personId, true).then(
-    allocationModules,
-  );
-}
+  const allocations = await listCompetencyProgressesByPersonId(personId, true);
 
-function allocationModules(
-  allocations: Awaited<ReturnType<typeof listCompetencyProgressesByPersonId>>,
-) {
+  const uniqueCurricula = new Set(
+    allocations.map((allocation) => allocation.curriculumId),
+  );
+
+  if (uniqueCurricula.size < 1) {
+    throw new Error("No curricula found");
+  }
+
+  const allCurriculaData = await listCurriculaByIds(
+    Array.from(uniqueCurricula),
+  );
+
+  const curriculumDataMap = new Map(
+    allCurriculaData.map((curriculum) => [curriculum.id, curriculum]),
+  );
+
   return allocations.map((allocation) => {
+    const curriculum = curriculumDataMap.get(allocation.curriculumId);
+
+    if (!curriculum) {
+      throw new Error("Curriculum not found");
+    }
+
     return {
       ...allocation,
-      modules: allocation.modules.map((module) => {
-        const progress =
-          module.competencies.length > 0
-            ? module.competencies
-                .map((competency) =>
-                  competency.completed
-                    ? 100
-                    : (competency.progress?.progress ?? 0),
-                )
-                .reduce((a, b) => a + b, 0) / module.competencies.length
-            : 0;
-
-        const updateDates = module.competencies.flatMap((competency) => [
-          ...(competency.progress?.updatedAt
-            ? [dayjs(competency.progress?.updatedAt)]
-            : []),
-          ...(competency.completed?.createdAt
-            ? [dayjs(competency.completed.createdAt)]
-            : []),
-        ]);
-
-        const updatedAt = dayjs.max(updateDates)?.toISOString();
-
-        return {
-          ...module,
-          progress,
-          updatedAt,
-        };
-      }),
+      curriculum,
     };
   });
 }
@@ -68,24 +59,25 @@ function allocationModules(
 async function CohortProgress({
   allocations,
 }: { allocations: Awaited<ReturnType<typeof fetchCohortProgress>> }) {
-  if (allocations.length === 0) {
-    return (
-      <Text className="-mt-2 mb-2">
-        We hebben geen lopende cursus voor je gevonden.
-      </Text>
-    );
-  }
-
   return (
     <ul className="space-y-2">
       {allocations.map((allocation, index) => {
+        const completedModules = allocation.curriculum.modules.filter(
+          (module) =>
+            module.competencies.every((competency) =>
+              allocation.progress.some(
+                (progress) => progress.competencyId === competency.id,
+              ),
+            ),
+        );
+
         return (
-          <li key={allocation.cohortAllocationId}>
+          <li key={allocation.allocationId}>
             <ProgressCard type="course">
               <ProgressCardHeader
-                degree={allocation.degree.title}
-                program={allocation.program.title}
-                gearType={allocation.gearType.title}
+                degree={allocation.degree.name}
+                program={allocation.program.name ?? allocation.course.name}
+                gearType={allocation.gearType.name}
                 itemIndex={index}
               />
 
@@ -114,45 +106,54 @@ async function CohortProgress({
                     <>
                       Voortgang{" "}
                       <ProgressCardBadge>
-                        {
-                          allocation.modules.filter(
-                            ({ progress }) => progress >= 100,
-                          ).length
-                        }
+                        {completedModules.length}
                       </ProgressCardBadge>
                     </>
                   }
                 >
                   <ProgressCardStatusList>
-                    {allocation.modules.map(
-                      ({ module, progress, updatedAt, competencies }) => (
-                        <ProgressCardStatus
-                          key={module.id}
-                          progress={progress}
-                          title={module.title}
-                          updatedAt={updatedAt}
-                        >
-                          <ProgressCardStatusSubList>
-                            {competencies.map((competency) => {
-                              const progress = competency.completed
-                                ? 100
-                                : (competency.progress?.progress ?? 0);
-                              return (
-                                <ProgressCardStatus
-                                  key={competency.id}
-                                  progress={progress}
-                                  title={competency.title}
-                                  subtitle={competency.requirement}
-                                  updatedAt={
-                                    competency.progress?.updatedAt ??
-                                    competency.completed?.createdAt
-                                  }
-                                />
-                              );
-                            })}
-                          </ProgressCardStatusSubList>
-                        </ProgressCardStatus>
-                      ),
+                    {allocation.curriculum.modules.map(
+                      ({ id: moduleId, title, updatedAt, competencies }) => {
+                        const totalProgressSumOfAllModuleCompetencies =
+                          competencies.reduce((acc, competency) => {
+                            const progress = allocation.progress.find(
+                              (progress) =>
+                                progress.competencyId === competency.id,
+                            );
+                            return acc + (progress?.progress ?? 0);
+                          }, 0);
+
+                        const progress =
+                          totalProgressSumOfAllModuleCompetencies /
+                          competencies.length;
+
+                        return (
+                          <ProgressCardStatus
+                            key={moduleId}
+                            progress={progress}
+                            title={title}
+                            updatedAt={updatedAt}
+                          >
+                            <ProgressCardStatusSubList>
+                              {competencies.map((competency) => {
+                                const progress = allocation.progress.find(
+                                  (progress) =>
+                                    progress.competencyId === competency.id,
+                                );
+                                return (
+                                  <ProgressCardStatus
+                                    key={competency.id}
+                                    progress={progress?.progress ?? 0}
+                                    title={competency.title}
+                                    subtitle={competency.requirement}
+                                    updatedAt={progress?.createdAt}
+                                  />
+                                );
+                              })}
+                            </ProgressCardStatusSubList>
+                          </ProgressCardStatus>
+                        );
+                      },
                     )}
                   </ProgressCardStatusList>
                 </ProgressCardDisclosure>
@@ -168,6 +169,15 @@ async function CohortProgress({
 async function CohortProgressContent(props: CohortProgressProps) {
   const person = await props.personPromise;
   const allocations = await fetchCohortProgress(person.id);
+
+  if (allocations.length < 1) {
+    return (
+      <Text className="-mt-2 mb-2">
+        We hebben geen lopende cursus voor je gevonden.
+      </Text>
+    );
+  }
+
   return <CohortProgress allocations={allocations} />;
 }
 

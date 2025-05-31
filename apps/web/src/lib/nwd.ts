@@ -772,6 +772,19 @@ export const listCurriculaByDiscipline = async (disciplineId: string) => {
   });
 };
 
+export const listCurriculaByIds = async (curriculumIds: string[]) => {
+  "use cache";
+  cacheLife("days");
+
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list({
+      filter: { id: curriculumIds },
+    });
+
+    return curricula;
+  });
+};
+
 export const listCurriculaByProgram = async (
   programId: string,
   onlyCurrentActive = true,

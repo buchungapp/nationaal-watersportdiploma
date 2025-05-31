@@ -4,25 +4,20 @@ import {
   asc,
   desc,
   eq,
-  exists,
   getTableColumns,
   gte,
   inArray,
   isNotNull,
   isNull,
   lte,
-  max,
   notExists,
-  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
-  aliasedColumn,
   enforceArray,
-  jsonAggBuildObject,
-  jsonBuildObject,
+  handleSchema,
   singleOrArray,
   uuidSchema,
   withZod,
@@ -31,13 +26,54 @@ import {
 } from "../../utils/index.js";
 
 export const listByPersonId = wrapQuery(
-  "cohort.student-progress.listByPersonId",
+  "cohort.studentProgress.listByPersonId",
   withZod(
     z.object({
       personId: uuidSchema,
       respectProgressVisibility: z.boolean().default(false),
       respectCohortVisibility: z.boolean().default(false),
     }),
+    z
+      .object({
+        cohortId: uuidSchema,
+        allocationId: uuidSchema,
+        studentCurriculumId: uuidSchema,
+        curriculumId: uuidSchema,
+        location: z.object({
+          id: uuidSchema,
+          handle: handleSchema,
+          name: z.string().nullable(),
+        }),
+        progressVisibleUpUntil: z.string(),
+        program: z.object({
+          id: uuidSchema,
+          handle: handleSchema,
+          name: z.string().nullable(),
+        }),
+        degree: z.object({
+          id: uuidSchema,
+          handle: handleSchema,
+          name: z.string().nullable(),
+        }),
+        course: z.object({
+          id: uuidSchema,
+          handle: handleSchema,
+          name: z.string().nullable(),
+        }),
+        gearType: z.object({
+          id: uuidSchema,
+          handle: handleSchema,
+          name: z.string().nullable(),
+        }),
+        progress: z
+          .object({
+            competencyId: uuidSchema,
+            progress: z.number().int().min(0).max(100),
+            createdAt: z.string(),
+          })
+          .array(),
+      })
+      .array(),
     async ({
       personId,
       respectProgressVisibility,
@@ -45,225 +81,91 @@ export const listByPersonId = wrapQuery(
     }) => {
       const query = useQuery();
 
-      const latestProgresses = query.$with("latest_progresses").as(
+      const withAllocationProgress = query.$with("allocation_progress").as(
         query
-          .select({
-            competencyId: s.studentCohortProgress.competencyId,
-            cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
-            updatedAt: max(s.studentCohortProgress.createdAt).as("updatedAt"),
-          })
+          .selectDistinctOn(
+            [
+              s.studentCohortProgress.competencyId,
+              s.studentCohortProgress.cohortAllocationId,
+            ],
+            {
+              cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
+              competencyId: s.studentCohortProgress.competencyId,
+              progress: s.studentCohortProgress.progress,
+              createdAt: s.studentCohortProgress.createdAt,
+            },
+          )
           .from(s.studentCohortProgress)
           .innerJoin(
             s.cohortAllocation,
             eq(
-              s.cohortAllocation.id,
               s.studentCohortProgress.cohortAllocationId,
+              s.cohortAllocation.id,
             ),
           )
+          .innerJoin(s.actor, eq(s.cohortAllocation.actorId, s.actor.id))
           .where(
-            respectProgressVisibility
-              ? lte(
-                  s.studentCohortProgress.createdAt,
-                  s.cohortAllocation.progressVisibleUpUntil,
-                )
-              : undefined,
+            and(
+              eq(s.actor.personId, personId),
+              eq(s.actor.type, "student"),
+              respectProgressVisibility
+                ? lte(
+                    s.studentCohortProgress.createdAt,
+                    s.cohortAllocation.progressVisibleUpUntil,
+                  )
+                : undefined,
+            ),
           )
-          .groupBy(
+          .orderBy(
             s.studentCohortProgress.competencyId,
             s.studentCohortProgress.cohortAllocationId,
+            desc(s.studentCohortProgress.createdAt),
           ),
-      );
-
-      const latestProgress = query.$with("latest_progress").as(
-        query
-          .with(latestProgresses)
-          .select({
-            competencyId: latestProgresses.competencyId,
-            cohortAllocationId: latestProgresses.cohortAllocationId,
-            updatedAt: latestProgresses.updatedAt,
-            progress: s.studentCohortProgress.progress,
-          })
-          .from(s.studentCohortProgress)
-          .innerJoin(
-            latestProgresses,
-            and(
-              eq(
-                s.studentCohortProgress.competencyId,
-                latestProgresses.competencyId,
-              ),
-              eq(
-                s.studentCohortProgress.cohortAllocationId,
-                latestProgresses.cohortAllocationId,
-              ),
-              eq(s.studentCohortProgress.createdAt, latestProgresses.updatedAt),
-            ),
-          ),
-      );
-
-      const withModulesProgress = query.$with("modules_progress").as(
-        query
-          .with(latestProgress)
-          .select({
-            cohortAllocationId: s.cohortAllocation.id,
-            moduleId: aliasedColumn(s.module.id, "moduleId"),
-            moduleHandle: aliasedColumn(s.module.handle, "moduleHandle"),
-            moduleTitle: aliasedColumn(s.module.title, "moduleTitle"),
-            moduleWeight: aliasedColumn(s.module.weight, "moduleWeight"),
-            competencies: jsonAggBuildObject(
-              {
-                id: s.competency.id,
-                handle: s.competency.handle,
-                title: s.competency.title,
-                weight: s.competency.weight,
-                type: s.competency.type,
-                requirement: s.curriculumCompetency.requirement,
-                progress: sql<null | {
-                  progress: number;
-                  updatedAt: string;
-                }>`CASE WHEN ${latestProgress.updatedAt} IS NOT NULL THEN ${jsonBuildObject(
-                  {
-                    progress: latestProgress.progress,
-                    updatedAt: latestProgress.updatedAt,
-                  },
-                )} ELSE NULL END`,
-                completed: sql<null | {
-                  createdAt: string;
-                  certificate: {
-                    id: string;
-                    handle: string;
-                    issuedAt: string;
-                  };
-                }>`CASE WHEN ${s.certificate.id} IS NOT NULL THEN ${jsonBuildObject(
-                  {
-                    createdAt: s.studentCompletedCompetency.createdAt,
-                    certificate: jsonBuildObject({
-                      id: s.certificate.id,
-                      handle: s.certificate.handle,
-                      issuedAt: s.certificate.issuedAt,
-                    }),
-                  },
-                )} ELSE NULL END`,
-              },
-              {
-                orderBy: {
-                  colName: s.competency.weight,
-                  direction: "ASC",
-                },
-              },
-            ).as("competencies"),
-          })
-          .from(s.curriculum)
-          .innerJoin(
-            s.curriculumModule,
-            eq(s.curriculumModule.curriculumId, s.curriculum.id),
-          )
-          .innerJoin(s.module, eq(s.module.id, s.curriculumModule.moduleId))
-          .innerJoin(
-            s.curriculumCompetency,
-            and(
-              eq(s.curriculumCompetency.moduleId, s.module.id),
-              eq(
-                s.curriculumCompetency.curriculumId,
-                s.curriculumModule.curriculumId,
-              ),
-            ),
-          )
-          .innerJoin(
-            s.studentCurriculum,
-            eq(s.studentCurriculum.curriculumId, s.curriculum.id),
-          )
-          .innerJoin(
-            s.cohortAllocation,
-            eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
-          )
-          .innerJoin(
-            s.competency,
-            eq(s.curriculumCompetency.competencyId, s.competency.id),
-          )
-          .leftJoin(
-            s.studentCompletedCompetency,
-            eq(
-              s.studentCompletedCompetency.competencyId,
-              s.curriculumCompetency.id,
-            ),
-          )
-          .leftJoin(
-            s.certificate,
-            and(
-              eq(s.certificate.id, s.studentCompletedCompetency.certificateId),
-              or(
-                isNull(s.certificate.visibleFrom),
-                lte(s.certificate.visibleFrom, sql`NOW()`),
-              ),
-              isNotNull(s.certificate.issuedAt),
-            ),
-          )
-          .leftJoin(
-            latestProgress,
-            and(
-              eq(latestProgress.cohortAllocationId, s.cohortAllocation.id),
-              eq(latestProgress.competencyId, s.curriculumCompetency.id),
-            ),
-          )
-          .groupBy(s.module.id, s.cohortAllocation.id),
       );
 
       const rows = await query
-        .with(withModulesProgress)
+        .with(withAllocationProgress)
         .select({
-          cohortAllocationId: s.cohortAllocation.id,
+          cohortId: s.cohort.id,
+          allocationId: s.cohortAllocation.id,
+          studentCurriculumId: s.cohortAllocation.studentCurriculumId,
+          curriculumId: s.studentCurriculum.curriculumId,
+          competencyId: withAllocationProgress.competencyId,
+          progress: withAllocationProgress.progress,
           progressVisibleUpUntil: s.cohortAllocation.progressVisibleUpUntil,
-          location: {
-            id: s.location.id,
-            name: s.location.name,
-          },
           gearType: {
             id: s.gearType.id,
             handle: s.gearType.handle,
-            title: s.gearType.title,
+            name: s.gearType.title,
           },
           program: {
             id: s.program.id,
             handle: s.program.handle,
-            title: s.program.title,
+            name: s.program.title,
           },
           degree: {
             id: s.degree.id,
             handle: s.degree.handle,
-            title: s.degree.title,
+            name: s.degree.title,
           },
-          modules: jsonAggBuildObject(
-            {
-              module: jsonBuildObject({
-                id: withModulesProgress.moduleId,
-                handle: withModulesProgress.moduleHandle,
-                title: withModulesProgress.moduleTitle,
-                weight: withModulesProgress.moduleWeight,
-              }),
-              competencies: withModulesProgress.competencies,
-            },
-            {
-              orderBy: [
-                {
-                  // @ts-expect-error - The module weight doesn't have the column type because of the aliased column
-                  colName: withModulesProgress.moduleWeight,
-                  direction: "ASC",
-                },
-              ],
-            },
-          ).as("modules"),
+          course: {
+            id: s.course.id,
+            handle: s.course.handle,
+            name: s.course.title,
+          },
+          location: {
+            id: s.location.id,
+            handle: s.location.handle,
+            name: s.location.name,
+          },
+          createdAt: withAllocationProgress.createdAt,
         })
         .from(s.cohortAllocation)
         .innerJoin(s.actor, eq(s.cohortAllocation.actorId, s.actor.id))
+        .innerJoin(s.cohort, eq(s.cohortAllocation.cohortId, s.cohort.id))
         .innerJoin(
           s.studentCurriculum,
           eq(s.cohortAllocation.studentCurriculumId, s.studentCurriculum.id),
-        )
-        .innerJoin(s.cohort, eq(s.cohort.id, s.cohortAllocation.cohortId))
-        .innerJoin(s.location, eq(s.cohort.locationId, s.location.id))
-        .innerJoin(
-          s.gearType,
-          eq(s.studentCurriculum.gearTypeId, s.gearType.id),
         )
         .innerJoin(
           s.curriculum,
@@ -271,40 +173,140 @@ export const listByPersonId = wrapQuery(
         )
         .innerJoin(s.program, eq(s.curriculum.programId, s.program.id))
         .innerJoin(s.degree, eq(s.program.degreeId, s.degree.id))
-
+        .innerJoin(s.course, eq(s.program.courseId, s.course.id))
+        .innerJoin(
+          s.gearType,
+          eq(s.studentCurriculum.gearTypeId, s.gearType.id),
+        )
+        .innerJoin(s.location, eq(s.cohort.locationId, s.location.id))
         .leftJoin(
-          withModulesProgress,
-          eq(s.cohortAllocation.id, withModulesProgress.cohortAllocationId),
+          withAllocationProgress,
+          eq(withAllocationProgress.cohortAllocationId, s.cohortAllocation.id),
         )
         .where(
           and(
+            eq(s.actor.personId, personId),
+            eq(s.actor.type, "student"),
+            isNotNull(s.cohortAllocation.studentCurriculumId),
+            isNull(s.actor.deletedAt),
+            isNull(s.cohortAllocation.deletedAt),
+            isNull(s.cohort.deletedAt),
+            isNull(s.studentCurriculum.deletedAt),
+            isNull(s.location.deletedAt),
             respectCohortVisibility
               ? and(
                   gte(s.cohort.accessEndTime, sql`NOW()`),
                   lte(s.cohort.accessStartTime, sql`NOW()`),
                 )
               : undefined,
-            respectProgressVisibility
-              ? lte(s.cohortAllocation.progressVisibleUpUntil, sql`NOW()`)
-              : undefined,
-            eq(s.actor.personId, personId),
           ),
         )
-        .groupBy(
-          s.cohortAllocation.id,
-          s.location.id,
-          s.gearType.id,
-          s.program.id,
-          s.degree.id,
-        );
+        .orderBy(s.cohortAllocation.id, withAllocationProgress.competencyId);
 
-      return rows;
+      // Group progress by allocation
+      const groupedResults = new Map<
+        string,
+        {
+          cohortId: string;
+          allocationId: string;
+          studentCurriculumId: string;
+          curriculumId: string;
+          location: {
+            id: string;
+            handle: string;
+            name: string | null;
+          };
+          program: {
+            id: string;
+            handle: string;
+            name: string | null;
+          };
+          degree: {
+            id: string;
+            handle: string;
+            name: string | null;
+          };
+          course: {
+            id: string;
+            handle: string;
+            name: string | null;
+          };
+          gearType: {
+            id: string;
+            handle: string;
+            name: string | null;
+          };
+          progressVisibleUpUntil: string;
+          progress: Array<{
+            competencyId: string;
+            progress: number;
+            createdAt: string;
+          }>;
+        }
+      >();
+
+      for (const row of rows) {
+        const key = row.allocationId;
+
+        if (!groupedResults.has(key)) {
+          if (!row.studentCurriculumId) continue;
+
+          groupedResults.set(key, {
+            cohortId: row.cohortId,
+            allocationId: row.allocationId,
+            studentCurriculumId: row.studentCurriculumId,
+            curriculumId: row.curriculumId,
+            gearType: {
+              id: row.gearType.id,
+              handle: row.gearType.handle,
+              name: row.gearType.name,
+            },
+            program: {
+              id: row.program.id,
+              handle: row.program.handle,
+              name: row.program.name,
+            },
+            degree: {
+              id: row.degree.id,
+              handle: row.degree.handle,
+              name: row.degree.name,
+            },
+            course: {
+              id: row.course.id,
+              handle: row.course.handle,
+              name: row.course.name,
+            },
+            // biome-ignore lint/style/noNonNullAssertion: Part of the where clause
+            progressVisibleUpUntil: row.progressVisibleUpUntil!,
+            location: {
+              id: row.location.id,
+              handle: row.location.handle,
+              name: row.location.name,
+            },
+            progress: [],
+          });
+        }
+
+        // Only add progress if it exists (left join might return null)
+        if (row.competencyId && row.progress !== null && row.createdAt) {
+          const allocation = groupedResults.get(key);
+          if (allocation) {
+            allocation.progress.push({
+              competencyId: row.competencyId,
+              progress: Number.parseInt(row.progress, 10),
+              createdAt: row.createdAt,
+            });
+          }
+        }
+      }
+
+      return Array.from(groupedResults.values());
     },
   ),
 );
 
 export const byAllocationId = wrapQuery(
-  "cohort.student-progress.byAllocationId",
+  "cohort.studentProgress.byAllocationId",
   withZod(
     z.object({
       id: uuidSchema,
@@ -313,62 +315,33 @@ export const byAllocationId = wrapQuery(
     async ({ id: cohortAllocationId, respectProgressVisibility }) => {
       const query = useQuery();
 
-      const subquery = query
-        .select({
-          cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
+      const rows = await query
+        .selectDistinctOn([s.studentCohortProgress.competencyId], {
           competencyId: s.studentCohortProgress.competencyId,
-          maxCreatedAt: max(s.studentCohortProgress.createdAt).as(
-            "max_created_at",
-          ),
+          progress: s.studentCohortProgress.progress,
+          createdAt: s.studentCohortProgress.createdAt,
         })
         .from(s.studentCohortProgress)
         .where(
           and(
             eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId),
             respectProgressVisibility
-              ? exists(
+              ? lte(
+                  s.studentCohortProgress.createdAt,
                   query
                     .select({
-                      id: sql`1`,
+                      progressVisibleUpUntil:
+                        s.cohortAllocation.progressVisibleUpUntil,
                     })
                     .from(s.cohortAllocation)
-                    .where(
-                      and(
-                        eq(s.cohortAllocation.id, cohortAllocationId),
-                        lte(
-                          s.studentCohortProgress.createdAt,
-                          s.cohortAllocation.progressVisibleUpUntil,
-                        ),
-                      ),
-                    ),
+                    .where(eq(s.cohortAllocation.id, cohortAllocationId)),
                 )
               : undefined,
           ),
         )
-        .groupBy(
-          s.studentCohortProgress.cohortAllocationId,
+        .orderBy(
           s.studentCohortProgress.competencyId,
-        )
-        .as("latest");
-
-      const rows = await query
-        .select(getTableColumns(s.studentCohortProgress))
-        .from(s.studentCohortProgress)
-        .innerJoin(
-          subquery,
-          and(
-            eq(
-              s.studentCohortProgress.cohortAllocationId,
-              subquery.cohortAllocationId,
-            ),
-            eq(s.studentCohortProgress.competencyId, subquery.competencyId),
-            eq(s.studentCohortProgress.createdAt, subquery.maxCreatedAt),
-          ),
-        )
-        .where(
-          and(
-            eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId),
-          ),
+          desc(s.studentCohortProgress.createdAt),
         );
 
       return rows.map((row) => ({
