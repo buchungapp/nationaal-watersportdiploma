@@ -64,8 +64,7 @@ export function AddCertificate({
   return (
     <>
       <Button outline onClick={() => setIsOpen(true)} className={className}>
-        <PlusIcon className="size-8" />
-        <span className="hidden sm:inline">Voeg diploma toe</span>
+        <PlusIcon className="size-8" /> Voeg diploma toe
       </Button>
 
       <Dialog open={isOpen} onClose={close}>

@@ -392,7 +392,8 @@ export const list = wrapQuery(
         const relevantCompletedCompetencies = completedCompetencies.filter(
           (cc) =>
             cc.student_completed_competency.studentCurriculumId ===
-            studentCurriculum.id,
+              studentCurriculum.id &&
+            cc.student_completed_competency.certificateId === certificate.id,
         );
 
         const gearType = findItem({

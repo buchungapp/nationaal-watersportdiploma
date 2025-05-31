@@ -95,6 +95,10 @@ test("curriculum list filters", () =>
     const { id } = await Curriculum.create({
       programId: programId,
       revision: "A",
+    });
+
+    await Curriculum.start({
+      curriculumId: id,
       startedAt,
     });
 

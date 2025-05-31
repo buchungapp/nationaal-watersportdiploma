@@ -25,8 +25,8 @@ import {
 import { updateExternalCertificateAction } from "~/app/_actions/certificate/update-external-certificate-action";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
-import type { ExternalCertificate } from "../certificates";
 import { MediaViewerButton } from "../media-viewer";
+import type { ExternalCertificate } from "./certificates-list";
 import Media from "./media";
 import { Metadata } from "./metadata";
 

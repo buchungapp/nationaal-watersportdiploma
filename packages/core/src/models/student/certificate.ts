@@ -78,6 +78,8 @@ export const completeCompetency = wrapCommand(
         ? input.competencyId
         : [input.competencyId];
 
+      // @TODO: should check if competency is linked to curriculum of student curriculum
+      // Currently a competency for a studenet curriculum can be completed without the curriculum being the same
       await query.insert(s.studentCompletedCompetency).values(
         competencies.map((competencyId) => ({
           studentCurriculumId: input.studentCurriculumId,

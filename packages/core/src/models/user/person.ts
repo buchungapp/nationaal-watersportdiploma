@@ -31,6 +31,8 @@ import { insertSchema, personSchema } from "./person.schema.js";
 import { getOrCreateFromEmail } from "./user.js";
 import { selectSchema } from "./user.schema.js";
 
+export * as $schema from "./person.schema.js";
+
 export function generatePersonID() {
   const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
   const nanoid = customAlphabet(dictionary, 10);

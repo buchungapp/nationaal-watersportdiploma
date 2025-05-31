@@ -33,3 +33,5 @@ export const personSchema = z.object({
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
+
+export type Person = z.infer<typeof personSchema>;

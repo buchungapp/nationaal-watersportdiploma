@@ -16,20 +16,30 @@ import { insertSchema, selectSchema } from "./competency.schema.js";
 export const create = wrapCommand(
   "course.competency.create",
   withZod(
-    insertSchema.pick({
-      title: true,
-      handle: true,
-      type: true,
-    }),
+    insertSchema
+      .pick({
+        title: true,
+        handle: true,
+        type: true,
+      })
+      .extend({
+        weight: insertSchema.shape.weight.optional(),
+      }),
     successfulCreateResponse,
     async (item) =>
       withTransaction(async (tx) => {
-        const currentHeighestWeight = await tx
-          .select({ weight: s.competency.weight })
-          .from(s.competency)
-          .orderBy(desc(s.competency.weight))
-          .limit(1)
-          .then((rows) => rows[0]?.weight ?? 0);
+        let weight = item.weight;
+
+        if (!weight) {
+          const currentHeighestWeight = await tx
+            .select({ weight: s.competency.weight })
+            .from(s.competency)
+            .orderBy(desc(s.competency.weight))
+            .limit(1)
+            .then((rows) => rows[0]?.weight ?? 0);
+
+          weight = currentHeighestWeight + 1;
+        }
 
         const rows = await tx
           .insert(s.competency)
@@ -37,7 +47,7 @@ export const create = wrapCommand(
             title: item.title,
             handle: item.handle,
             type: item.type,
-            weight: currentHeighestWeight + 1,
+            weight,
           })
           .returning({ id: s.competency.id });
 

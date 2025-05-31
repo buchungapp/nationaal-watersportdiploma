@@ -1,21 +1,37 @@
 import { Text } from "~/app/(dashboard)/_components/text";
-import { PersonCohortProgress } from "./_components/cohort-progress";
 
+import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { getUserOrThrow } from "~/lib/nwd";
+import Balancer from "react-wrap-balancer";
+import { getPersonByHandle, getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
+import { Locations } from "./_components/locations";
 import { Logbook } from "./_components/logbook/logbook";
-import NWDCertificatesSection from "./_components/nwd-certificates-section";
+import { News } from "./_components/news";
 import { Personalia } from "./_components/person/personalia";
+import ProgressSection from "./_components/progress/progress";
+import { Socials } from "./_components/socials";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import { Welcome } from "./_components/welcome";
 
-export default async function Page(props: {
+export default function Page(props: {
   params: Promise<{
     handle: string;
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const personPromise = (async () => {
+    const { handle } = await props.params;
+
+    const person = await getPersonByHandle(handle);
+
+    if (!person) {
+      redirect("/login");
+    }
+
+    return person;
+  })();
+
   after(async () => {
     const user = await getUserOrThrow();
 
@@ -31,26 +47,43 @@ export default async function Page(props: {
   });
 
   return (
-    <div className="items-start gap-x-8 gap-y-16 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 lg:max-w-none max-w-3xl">
-      <div className="lg:col-span-3 mt-4">
+    <div>
+      <div className="sm:mb-6 max-sm:px-3 order-1 lg:order-none lg:col-start-1 lg:row-start-1">
         <Welcome params={props.params} />
         <Text>
-          Op deze pagina vind je jouw persoonlijke gegevens, NWD-diploma's en
-          overige certificaten. Ook kan je hier je personalia wijzigen.
+          <Balancer>
+            Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
+            binnen het Nationaal Watersportdiploma (NWD) en je andere
+            watersportactiviteiten. Beheer je meerdere personen met dit
+            e-mailadres? Selecteer dan een andere persoon via de menubalk.
+          </Balancer>
         </Text>
       </div>
 
-      <Personalia params={props.params} />
+      <div className="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <div className="lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
+          <Locations personPromise={personPromise} />
 
-      <PersonCohortProgress params={props.params} />
+          <Personalia personPromise={personPromise} />
+        </div>
 
-      <NWDCertificatesSection params={props.params} />
-      <WatersportCertificatesSection
-        params={props.params}
-        searchParams={props.searchParams}
-      />
+        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 flex flex-col gap-2">
+          <ProgressSection personPromise={personPromise} />
 
-      <Logbook params={props.params} searchParams={props.searchParams} />
+          <WatersportCertificatesSection
+            params={props.params}
+            searchParams={props.searchParams}
+          />
+
+          <Logbook params={props.params} searchParams={props.searchParams} />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <News />
+
+          <Socials />
+        </div>
+      </div>
     </div>
   );
 }

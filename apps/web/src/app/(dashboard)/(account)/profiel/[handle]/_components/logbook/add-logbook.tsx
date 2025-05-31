@@ -46,8 +46,7 @@ export function AddLogbook({
   return (
     <>
       <Button outline onClick={() => setIsOpen(true)} className={className}>
-        <PlusIcon className="size-8" />
-        <span className="hidden sm:inline">Voeg regel toe</span>
+        <PlusIcon className="size-8" /> Voeg regel toe
       </Button>
 
       <Dialog size="2xl" open={isOpen} onClose={close}>

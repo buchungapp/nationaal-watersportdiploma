@@ -32,6 +32,12 @@ export const colors = {
   pink: "bg-pink-400/15 text-pink-700 group-data-hover:bg-pink-400/25 dark:bg-pink-400/10 dark:text-pink-400 dark:group-data-hover:bg-pink-400/20",
   rose: "bg-rose-400/15 text-rose-700 group-data-hover:bg-rose-400/25 dark:bg-rose-400/10 dark:text-rose-400 dark:group-data-hover:bg-rose-400/20",
   zinc: "bg-zinc-600/10 text-zinc-700 group-data-hover:bg-zinc-600/20 dark:bg-white/5 dark:text-zinc-400 dark:group-data-hover:bg-white/10",
+  "branding-light":
+    "bg-branding-light/15 text-branding-light group-data-hover:bg-branding-light/25 dark:bg-branding-light/10 dark:text-branding-light dark:group-data-hover:bg-branding-light/20",
+  "branding-dark":
+    "bg-branding-dark/15 text-branding-dark group-data-hover:bg-branding-dark/25 dark:bg-branding-dark/10 dark:text-branding-dark dark:group-data-hover:bg-branding-dark/20",
+  "branding-orange":
+    "bg-branding-orange/15 text-branding-orange group-data-hover:bg-branding-orange/25 dark:bg-branding-orange/10 dark:text-branding-orange dark:group-data-hover:bg-branding-orange/20",
 };
 
 interface BadgeProps {

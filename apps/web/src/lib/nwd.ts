@@ -793,6 +793,19 @@ export const listCurriculaByDiscipline = async (disciplineId: string) => {
   });
 };
 
+export const listCurriculaByIds = async (curriculumIds: string[]) => {
+  "use cache";
+  cacheLife("days");
+
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list({
+      filter: { id: curriculumIds },
+    });
+
+    return curricula;
+  });
+};
+
 export const listCurriculaByProgram = async (
   programId: string,
   onlyCurrentActive = true,
@@ -1037,24 +1050,27 @@ export const listPersonsForLocationByRole = cache(
   },
 );
 
-export const listLocationsForPerson = cache(async (personId?: string) => {
-  return makeRequest(async () => {
-    const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+export const listLocationsForPerson = cache(
+  async (personId?: string, roles?: ActorType[]) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
 
-    if (personId && person.id !== personId) {
-      throw new Error("Unauthorized");
-    }
+      if (personId && person.id !== personId) {
+        throw new Error("Unauthorized");
+      }
 
-    const locations = await User.Person.listLocationsByRole({
-      personId: person.id,
+      const locations = await User.Person.listLocationsByRole({
+        personId: person.id,
+        roles,
+      });
+
+      return await Location.list().then((locs) =>
+        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
+      );
     });
-
-    return await Location.list().then((locs) =>
-      locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
-    );
-  });
-});
+  },
+);
 
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {
@@ -1468,6 +1484,33 @@ export const withdrawCertificatesInCohort = async ({
   });
 };
 
+export const listActiveCohortsForPerson = cache(
+  async ({
+    personId,
+  }: {
+    personId?: string;
+  } = {}) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+      const primaryPerson = await getPrimaryPerson(authUser);
+
+      if (personId && personId !== primaryPerson.id) {
+        throw new Error("Unauthorized");
+      }
+
+      console.log("personId: ", personId ?? primaryPerson.id);
+
+      const cohorts =
+        await Cohort.Allocation.listPersonActiveCohortsGroupedByLocation({
+          personId: personId ?? primaryPerson.id,
+          allocationType: ["instructor", "location_admin"],
+        });
+
+      return cohorts;
+    });
+  },
+);
+
 export const listCohortsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
@@ -1636,6 +1679,27 @@ export const getIsActiveInstructor = cache(async () => {
   });
 });
 
+export const getIsActiveInstructorByPersonId = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      if (!user.persons.some((p) => p.id === personId)) {
+        return false;
+      }
+
+      return await User.Actor.listActiveTypesForUser({
+        userId: user.authUserId,
+        filter: {
+          personId,
+        },
+      }).then((types) =>
+        types.some((type) => ["instructor", "location_admin"].includes(type)),
+      );
+    });
+  },
+);
+
 export type SocialPlatform =
   | "facebook"
   | "instagram"
@@ -1801,22 +1865,6 @@ export const listStudentsWithCurriculaByCohortId = cache(
   },
 );
 
-export const listActiveCohortsForPerson = cache(async (personId: string) => {
-  return makeRequest(async () => {
-    const [authUser] = await Promise.all([getUserOrThrow()]);
-
-    if (!authUser.persons.some((p) => p.id === personId)) {
-      throw new Error("Unauthorized");
-    }
-
-    return await Cohort.Allocation.listStudentsWithCurricula({
-      personId,
-      respectCohortVisibility: true,
-      respectProgressVisibility: true,
-    });
-  });
-});
-
 export const listCertificateOverviewByCohortId = cache(
   async (cohortId: string) => {
     return makeRequest(async () => {
@@ -1919,6 +1967,32 @@ export const retrieveStudentAllocationWithCurriculumForPerson = cache(
       }
 
       return result;
+    });
+  },
+);
+
+export const listProgramProgressesByPersonId = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
+      return await Student.Curriculum.listProgramProgresses({
+        personId,
+      });
+    });
+  },
+);
+
+export const listCompetencyProgressesByPersonId = cache(
+  async (personId: string, respectProgressVisibility?: boolean) => {
+    return makeRequest(async () => {
+      // TODO: This needs authorization checks
+
+      return await Cohort.StudentProgress.listByPersonId({
+        personId,
+        respectProgressVisibility,
+        respectCohortVisibility: true,
+      });
     });
   },
 );
