@@ -59,12 +59,12 @@ async function LocationsContent({
 
   const activeCohortsPromise = listActiveCohortsForPerson({
     personId: person.id,
-  });
+  }).catch(() => []);
 
   const locations = await listLocationsForPerson(person.id, [
     "instructor",
     "location_admin",
-  ]);
+  ]).catch(() => []);
 
   if (locations.length < 1) {
     return null;

@@ -1,8 +1,9 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import dayjs from "~/lib/dayjs";
-import { getPersonByHandle, listCertificatesForPerson } from "~/lib/nwd";
+import { listCertificatesForPerson } from "~/lib/nwd";
 import {
   ProgressCard,
   ProgressCardBadge,
@@ -21,10 +22,10 @@ import {
 } from "./progress-card";
 
 type CertificatesProps = {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
 };
 
-export function fetchCertificates(personId: string) {
+export async function fetchCertificates(personId: string) {
   return listCertificatesForPerson(personId).then(certificatesModules);
 }
 
@@ -74,7 +75,7 @@ function certificatesModules(
   });
 }
 
-export async function Certificates({
+async function Certificates({
   certificates,
 }: { certificates: Awaited<ReturnType<typeof fetchCertificates>> }) {
   return (
@@ -167,15 +168,14 @@ export async function Certificates({
   );
 }
 
-export async function CertificatesContent(props: CertificatesProps) {
-  const { handle } = await props.params;
-  const person = await getPersonByHandle(handle);
+async function CertificatesContent(props: CertificatesProps) {
+  const person = await props.personPromise;
   const certificates = await fetchCertificates(person.id);
 
   return <Certificates certificates={certificates} />;
 }
 
-export function CertificatesFallback() {
+function CertificatesFallback() {
   return (
     <ul className="space-y-2">
       <li className="bg-gray-200 rounded w-full h-68.5 animate-pulse" />

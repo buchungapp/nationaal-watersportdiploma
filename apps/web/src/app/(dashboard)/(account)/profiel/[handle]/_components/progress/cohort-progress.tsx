@@ -26,7 +26,7 @@ type CohortProgressProps = {
   params: Promise<{ handle: string }>;
 };
 
-export function fetchCohortProgress(personId: string) {
+export async function fetchCohortProgress(personId: string) {
   return listCompetencyProgressesByPersonId(personId, true).then(
     allocationModules,
   );

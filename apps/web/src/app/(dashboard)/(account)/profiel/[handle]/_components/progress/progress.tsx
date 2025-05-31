@@ -15,7 +15,7 @@ import {
   TabPanels,
 } from "~/app/(dashboard)/_components/tabs";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { fetchCertificates } from "./certificates";
+import { CertificatesWithSuspense, fetchCertificates } from "./certificates";
 import { fetchCohortProgress } from "./cohort-progress";
 import { fetchPrograms } from "./programs";
 
@@ -134,8 +134,8 @@ export default function ProgressSection({
                 vaarlocatie
               </TextLink>{" "}
               waar je de cursus hebt gevolgd.
-            </Text>
-            <Certificates certificates={certificates} /> */}
+            </Text> */}
+            <CertificatesWithSuspense personPromise={personPromise} />
           </TabPanel>
           <TabPanel>{/* <Programs programs={programs} /> */}</TabPanel>
           <TabPanel>

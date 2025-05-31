@@ -25,7 +25,7 @@ type ProgramsProps = {
   params: Promise<{ handle: string }>;
 };
 
-export function fetchPrograms(personId: string) {
+export async function fetchPrograms(personId: string) {
   // Currently also includes a program with no progress when the student has started a program in a cohort
   // I think this is fine
   // @TODO: remove this comment when reviewing
