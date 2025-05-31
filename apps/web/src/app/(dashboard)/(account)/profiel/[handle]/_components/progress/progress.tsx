@@ -1,3 +1,5 @@
+import type { User } from "@nawadi/core";
+import { clsx } from "clsx";
 import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
@@ -12,76 +14,74 @@ import {
   TabPanel,
   TabPanels,
 } from "~/app/(dashboard)/_components/tabs";
-import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { getPersonByHandle } from "~/lib/nwd";
-import {
-  Certificates,
-  CertificatesFallback,
-  fetchCertificates,
-} from "./certificates";
-import {
-  CohortProgress,
-  CohortProgressFallback,
-  fetchCohortProgress,
-} from "./cohort-progress";
-import { Programs, ProgramsFallback, fetchPrograms } from "./programs";
+import { Text } from "~/app/(dashboard)/_components/text";
+import { fetchCertificates } from "./certificates";
+import { fetchCohortProgress } from "./cohort-progress";
+import { fetchPrograms } from "./programs";
 
-async function ProgressTabs(props: {
-  params: Promise<{ handle: string }>;
+type BadgeColor = "branding-orange" | "branding-light" | "branding-dark";
+
+const colorClassMap: Record<BadgeColor, string> = {
+  "branding-orange":
+    "group-data-selected/tab:bg-branding-orange/15 group-data-selected/tab:text-branding-orange",
+  "branding-light":
+    "group-data-selected/tab:bg-branding-light/15 group-data-selected/tab:text-branding-light",
+  "branding-dark":
+    "group-data-selected/tab:bg-branding-dark/15 group-data-selected/tab:text-branding-dark",
+};
+
+async function BadgeContent({
+  promise,
+  color,
+}: {
+  promise: Promise<React.ReactNode>;
+  color: BadgeColor;
 }) {
-  const { handle } = await props.params;
-  const person = await getPersonByHandle(handle);
-  const certificates = await fetchCertificates(person.id);
-  const programs = await fetchPrograms(person.id);
-  const allocations = await fetchCohortProgress(person.id);
-
+  const content = await promise;
   return (
-    <TabGroup>
-      <TabList className="mt-2">
-        <Tab className="flex justify-between sm:justify-center items-center gap-2">
-          Behaalde diploma's
-          <Badge color="branding-orange" className="-my-1">
-            {certificates.length}
-          </Badge>
-        </Tab>
-        <Tab className="flex justify-between sm:justify-center items-center gap-2">
-          Opleidingen
-          <Badge color="branding-light" className="-my-1">
-            {programs.length}
-          </Badge>
-        </Tab>
-        <Tab className="flex justify-between sm:justify-center items-center gap-2">
-          Lopende cursussen
-          <Badge color="branding-dark" className="-my-1">
-            {allocations.length}
-          </Badge>
-        </Tab>
-      </TabList>
-      <TabPanels className="mt-4">
-        <TabPanel>
-          <Text className="-mt-2 mb-2">
-            Mis je een diploma? Neem dan contact op met de{" "}
-            <TextLink href="/vaarlocaties" target="_blank">
-              vaarlocatie
-            </TextLink>{" "}
-            waar je de cursus hebt gevolgd.
-          </Text>
-          <Certificates certificates={certificates} />
-        </TabPanel>
-        <TabPanel>
-          <Programs programs={programs} />
-        </TabPanel>
-        <TabPanel>
-          <CohortProgress allocations={allocations} />
-        </TabPanel>
-      </TabPanels>
-    </TabGroup>
+    <span
+      className={clsx(
+        "-my-1",
+        "inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline",
+        colorClassMap[color],
+      )}
+    >
+      {content}
+    </span>
   );
 }
 
-export default function ProgressSection(props: {
-  params: Promise<{ handle: string }>;
+function SuspendedBadge({
+  promise,
+  color,
+}: {
+  promise: Promise<React.ReactNode>;
+  color: BadgeColor;
 }) {
+  return (
+    <Suspense
+      fallback={<Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />}
+    >
+      <BadgeContent promise={promise} color={color} />
+    </Suspense>
+  );
+}
+
+export default function ProgressSection({
+  personPromise,
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
+  const certificatesPromise = personPromise.then((person) =>
+    fetchCertificates(person.id),
+  );
+  const programsPromise = personPromise.then((person) =>
+    fetchPrograms(person.id),
+  );
+  const allocationsPromise = personPromise.then((person) =>
+    fetchCohortProgress(person.id),
+  );
+
   return (
     <StackedLayoutCardDisclosure
       defaultOpen
@@ -98,46 +98,51 @@ export default function ProgressSection(props: {
         </>
       }
     >
-      <Suspense
-        fallback={
-          <TabGroup>
-            <TabList className="mt-2">
-              <Tab className="flex justify-between sm:justify-center items-center gap-2">
-                Behaalde diploma's
-                <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
-              </Tab>
-              <Tab className="flex justify-between sm:justify-center items-center gap-2">
-                Opleidingen
-                <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
-              </Tab>
-              <Tab className="flex justify-between sm:justify-center items-center gap-2">
-                Lopende cursussen
-                <Badge className="-my-1 w-5 h-6 align-middle animate-pulse" />
-              </Tab>
-            </TabList>
-            <TabPanels className="mt-4">
-              <TabPanel>
-                <Text className="-mt-2 mb-2">
-                  Mis je een diploma? Neem dan contact op met de{" "}
-                  <TextLink href="/vaarlocaties" target="_blank">
-                    vaarlocatie
-                  </TextLink>{" "}
-                  waar je de cursus hebt gevolgd.
-                </Text>
-                <CertificatesFallback />
-              </TabPanel>
-              <TabPanel>
-                <ProgramsFallback />
-              </TabPanel>
-              <TabPanel>
-                <CohortProgressFallback />
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
-        }
-      >
-        <ProgressTabs params={props.params} />
-      </Suspense>
+      <TabGroup>
+        <TabList className="mt-2">
+          <Tab className="flex justify-between sm:justify-center items-center gap-2">
+            Behaalde diploma's
+            <SuspendedBadge
+              promise={certificatesPromise.then(
+                (certificates) => certificates.length,
+              )}
+              color="branding-orange"
+            />
+          </Tab>
+          <Tab className="flex justify-between sm:justify-center items-center gap-2">
+            Opleidingen
+            <SuspendedBadge
+              promise={programsPromise.then((programs) => programs.length)}
+              color="branding-light"
+            />
+          </Tab>
+          <Tab className="flex justify-between sm:justify-center items-center gap-2">
+            Lopende cursussen
+            <SuspendedBadge
+              promise={allocationsPromise.then(
+                (allocations) => allocations.length,
+              )}
+              color="branding-dark"
+            />
+          </Tab>
+        </TabList>
+        <TabPanels className="mt-4">
+          <TabPanel>
+            {/* <Text className="-mt-2 mb-2">
+              Mis je een diploma? Neem dan contact op met de{" "}
+              <TextLink href="/vaarlocaties" target="_blank">
+                vaarlocatie
+              </TextLink>{" "}
+              waar je de cursus hebt gevolgd.
+            </Text>
+            <Certificates certificates={certificates} /> */}
+          </TabPanel>
+          <TabPanel>{/* <Programs programs={programs} /> */}</TabPanel>
+          <TabPanel>
+            {/* <CohortProgress allocations={allocations} /> */}
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
     </StackedLayoutCardDisclosure>
   );
 }

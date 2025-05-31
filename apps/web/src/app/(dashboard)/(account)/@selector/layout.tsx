@@ -1,7 +1,8 @@
 import {
   ArrowRightStartOnRectangleIcon,
+  LifebuoyIcon,
   ShieldCheckIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/16/solid";
 import { connection } from "next/server";
 import { type PropsWithChildren, Suspense } from "react";
 import { getUserOrThrow } from "~/lib/nwd";
@@ -53,6 +54,10 @@ async function PersonsDropdownMenu() {
       })}
       <DropdownDivider />
       <FeedbackButton />
+      <DropdownItem href="/help">
+        <LifebuoyIcon />
+        <DropdownLabel>Helpcentrum</DropdownLabel>
+      </DropdownItem>
       <DropdownItem href="/privacy">
         <ShieldCheckIcon />
         <DropdownLabel>Privacybeleid</DropdownLabel>

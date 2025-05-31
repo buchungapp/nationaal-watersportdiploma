@@ -14,13 +14,13 @@ import { Socials } from "./_components/socials";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import { Welcome } from "./_components/welcome";
 
-export default async function Page(props: {
+export default function Page(props: {
   params: Promise<{
     handle: string;
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const personPromise = async () => {
+  const personPromise = (async () => {
     const { handle } = await props.params;
 
     const person = await getPersonByHandle(handle);
@@ -30,10 +30,7 @@ export default async function Page(props: {
     }
 
     return person;
-  };
-
-  // Kick off the promise
-  personPromise();
+  })();
 
   after(async () => {
     const user = await getUserOrThrow();
@@ -65,13 +62,13 @@ export default async function Page(props: {
 
       <div className="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         <div className="lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
-          <Locations personPromise={personPromise()} />
+          <Locations personPromise={personPromise} />
 
-          <Personalia personPromise={personPromise()} />
+          <Personalia personPromise={personPromise} />
         </div>
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 flex flex-col gap-2">
-          <ProgressSection params={props.params} />
+          <ProgressSection personPromise={personPromise} />
 
           <WatersportCertificatesSection
             params={props.params}

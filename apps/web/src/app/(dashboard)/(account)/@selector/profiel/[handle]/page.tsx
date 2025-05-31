@@ -13,9 +13,12 @@ export default async function PersonSelector(props: {
   const person = await getPersonByHandle(params.handle);
 
   return (
-    <DropdownButton as={NavbarItem} className="[&>*]:bg-white">
+    <DropdownButton
+      as={NavbarItem}
+      className="[&>*]:bg-white [&>*]:border [&>*]:border-slate-200"
+    >
       <UsersIcon />
-      <NavbarLabel>
+      <NavbarLabel className="max-w-[120px] truncate">
         {[person.firstName, person.lastNamePrefix, person.lastName]
           .filter(Boolean)
           .join(" ")}
