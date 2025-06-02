@@ -303,7 +303,7 @@ export function ProgressCardEmptyState({
       Icon: AcademicCapIcon,
       label: "opleiding",
       heading:
-        "Je hebt nog geen opleiding gestart... Maar dat kan snel veranderen!",
+        "Je bent nog geen opleiding gestart... Maar dat kan snel veranderen!",
       buttonColor: "branding-light",
       iconClassName: "text-sky-600",
       headingClassName: "text-sky-950",

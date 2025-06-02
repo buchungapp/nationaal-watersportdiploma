@@ -2,6 +2,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   LifebuoyIcon,
   ShieldCheckIcon,
+  UserIcon,
 } from "@heroicons/react/16/solid";
 import { connection } from "next/server";
 import { type PropsWithChildren, Suspense } from "react";
@@ -31,6 +32,10 @@ async function PersonsDropdownMenu() {
           <DropdownLabel>Geen personen beschikbaar.</DropdownLabel>
         </DropdownItem>
         <DropdownDivider />
+        <DropdownItem href="/account">
+          <UserIcon />
+          <DropdownLabel>Mijn account</DropdownLabel>
+        </DropdownItem>
         <LogOutDropdownItem>
           <ArrowRightStartOnRectangleIcon />
           <DropdownLabel>Uitloggen</DropdownLabel>
@@ -63,6 +68,10 @@ async function PersonsDropdownMenu() {
         <DropdownLabel>Privacybeleid</DropdownLabel>
       </DropdownItem>
       <DropdownDivider />
+      <DropdownItem href="/account">
+        <UserIcon />
+        <DropdownLabel>Mijn account</DropdownLabel>
+      </DropdownItem>
       <LogOutDropdownItem>
         <ArrowRightStartOnRectangleIcon />
         <DropdownLabel>Uitloggen</DropdownLabel>

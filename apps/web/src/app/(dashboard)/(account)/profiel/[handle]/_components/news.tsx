@@ -19,6 +19,7 @@ async function NewsContent() {
         <li key={article.id}>
           <Link
             href={`/actueel/${article.slug}`}
+            target="_blank"
             className={clsx(
               "gap-x-3 grid grid-cols-3 data-active:bg-zinc-50 data-hover:bg-zinc-50 rounded-lg",
 

@@ -44,9 +44,16 @@ async function PersonaliaContent({
 
       <DescriptionTerm>Geboortedatum</DescriptionTerm>
       <DescriptionDetails>
-        {person.dateOfBirth
-          ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
-          : "-"}
+        {person.dateOfBirth ? (
+          <>
+            {dayjs(person.dateOfBirth).format("DD-MM-YYYY")}{" "}
+            <span className="font-normal text-zinc-500">
+              ({dayjs().diff(dayjs(person.dateOfBirth), "years")} jaar)
+            </span>
+          </>
+        ) : (
+          "-"
+        )}
       </DescriptionDetails>
 
       <DescriptionTerm>Geboorteplaats</DescriptionTerm>
