@@ -13,6 +13,7 @@ import {
   ProgressCardDescriptionListItem,
   ProgressCardDisclosure,
   ProgressCardDisclosures,
+  ProgressCardEmptyState,
   ProgressCardHeader,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
@@ -209,11 +210,7 @@ async function CohortProgressContent(props: CohortProgressProps) {
   ]);
 
   if (allocations.length < 1) {
-    return (
-      <Text className="-mt-2 mb-2">
-        We hebben geen lopende cursus voor je gevonden.
-      </Text>
-    );
+    return <ProgressCardEmptyState type="course" />;
   }
 
   return (

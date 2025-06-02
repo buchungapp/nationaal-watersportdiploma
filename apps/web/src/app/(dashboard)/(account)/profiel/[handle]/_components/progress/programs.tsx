@@ -13,6 +13,7 @@ import {
   ProgressCardDescriptionListItem,
   ProgressCardDisclosure,
   ProgressCardDisclosures,
+  ProgressCardEmptyState,
   ProgressCardHeader,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
@@ -234,7 +235,7 @@ async function ProgramsContent(props: ProgramsProps) {
   );
 
   if (onlyCurriculaWithProgress.length < 1) {
-    return "Geen opleidingen gevonden";
+    return <ProgressCardEmptyState type="program" />;
   }
 
   return (

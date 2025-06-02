@@ -17,6 +17,7 @@ import {
   ProgressCardDescriptionListItem,
   ProgressCardDisclosure,
   ProgressCardDisclosures,
+  ProgressCardEmptyState,
   ProgressCardHeader,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
@@ -222,7 +223,7 @@ async function CertificatesContent(props: CertificatesProps) {
   const certificates = await fetchCertificates(person.id);
 
   if (certificates.length < 1) {
-    return "Geen diploma's gevonden";
+    return <ProgressCardEmptyState type="certificate" />;
   }
 
   return <Certificates certificates={certificates} />;

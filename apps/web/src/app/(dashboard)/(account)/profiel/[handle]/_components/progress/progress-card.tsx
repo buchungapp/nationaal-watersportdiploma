@@ -2,21 +2,27 @@
 import * as Headless from "@headlessui/react";
 import {
   ChevronDownIcon,
+  MapPinIcon,
   MinusIcon,
   PlusIcon,
 } from "@heroicons/react/16/solid";
 import {
+  AcademicCapIcon,
   ArrowTrendingUpIcon,
   CheckCircleIcon,
   MinusCircleIcon,
 } from "@heroicons/react/24/outline";
 import type { Student } from "@nawadi/core";
 import clsx from "clsx";
+import Link from "next/link";
 import type React from "react";
 import { type PropsWithChildren, createContext, useContext } from "react";
+import Balancer from "react-wrap-balancer";
 import { Badge } from "~/app/(dashboard)/_components/badge";
+import { Button } from "~/app/(dashboard)/_components/button";
 import { BoatIcon } from "~/app/(dashboard)/_components/icons/boat-icon";
 import { CircleIcon } from "~/app/(dashboard)/_components/icons/circle-icon";
+import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
 import { Logo } from "~/app/_assets/logo";
 import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
 import { moduleTypeLabel } from "~/utils/labels";
@@ -61,18 +67,31 @@ export function ProgressCard({
 }: PropsWithChildren<{
   type: CardType;
 }>) {
-  const colors: Record<CardType, string> = {
-    program: "border-sky-200",
-    certificate: "border-orange-200",
-    course: "border-blue-200",
+  const styles: Record<
+    CardType,
+    {
+      borderColor: string;
+    }
+  > = {
+    program: {
+      borderColor: "border-sky-200",
+    },
+    certificate: {
+      borderColor: "border-orange-200",
+    },
+    course: {
+      borderColor: "border-blue-200",
+    },
   };
+
+  const style = styles[type];
 
   return (
     <ProgressCardProvider type={type}>
       <article
         className={clsx(
           "relative border rounded-md overflow-hidden pb-2",
-          colors[type],
+          style.borderColor,
         )}
       >
         {children}
@@ -256,6 +275,123 @@ export function ProgressCardDegree({ children }: PropsWithChildren) {
         {children}
       </span>
     </span>
+  );
+}
+
+export function ProgressCardEmptyState({
+  type,
+}: PropsWithChildren<{
+  type: CardType;
+}>) {
+  const styles: Record<
+    CardType,
+    {
+      cardClassName: string;
+      iconBackgroundClassName: string;
+      Icon: React.ElementType;
+      label: string;
+      heading: string;
+      buttonColor: Parameters<typeof Button>[0]["color"];
+      iconClassName: string;
+      headingClassName: string;
+      textClassName: string;
+    }
+  > = {
+    program: {
+      cardClassName: "bg-sky-50/50",
+      iconBackgroundClassName: "bg-sky-100",
+      Icon: AcademicCapIcon,
+      label: "opleiding",
+      heading:
+        "Je hebt nog geen opleiding gestart... Maar dat kan snel veranderen!",
+      buttonColor: "branding-light",
+      iconClassName: "text-sky-600",
+      headingClassName: "text-sky-950",
+      textClassName: "text-sky-950/60",
+    },
+    certificate: {
+      cardClassName: "bg-orange-50/50",
+      iconBackgroundClassName: "bg-orange-100",
+      Icon: MedailIcon,
+      label: "diploma",
+      heading:
+        "Je hebt nog geen diploma behaald... Maar dat kan snel veranderen!",
+      buttonColor: "branding-orange",
+      iconClassName: "text-orange-600",
+      headingClassName: "text-orange-950",
+      textClassName: "text-orange-950/60",
+    },
+    course: {
+      cardClassName: "bg-blue-50/50",
+      iconBackgroundClassName: "bg-blue-100",
+      Icon: BoatIcon,
+      label: "cursus",
+      heading: "Je volgt geen actieve cursus... Maar dat kan snel veranderen!",
+      buttonColor: "branding-dark",
+      iconClassName: "text-blue-600",
+      headingClassName: "text-blue-950",
+      textClassName: "text-blue-950/60",
+    },
+  };
+
+  const style = styles[type];
+
+  return (
+    <ProgressCardProvider type={type}>
+      <article
+        className={clsx(
+          "relative border-dashed border-2 rounded-md overflow-hidden pb-2",
+          style.cardClassName,
+        )}
+      >
+        <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+          <div
+            className={clsx(
+              "size-16 rounded-full flex items-center justify-center",
+              style.iconBackgroundClassName,
+            )}
+          >
+            <style.Icon className={clsx("size-8", style.iconClassName)} />
+          </div>
+
+          <div className="space-y-2 mt-2.5">
+            <div>
+              <Balancer>
+                <h3
+                  className={clsx(
+                    "text-2xl/7 font-semibold sm:text-xl/7",
+                    style.headingClassName,
+                  )}
+                >
+                  {style.heading}
+                </h3>
+              </Balancer>
+            </div>
+          </div>
+
+          <Button
+            href="/vaarlocaties"
+            color={style.buttonColor}
+            className="my-6"
+            target="_blank"
+          >
+            <MapPinIcon className="w-4 h-4" />
+            Vind een NWD-erkende locatie
+          </Button>
+
+          <p className={clsx("text-base/6 sm:text-sm/6", style.textClassName)}>
+            Denk je dat er een {style.label} ontbreekt?{" "}
+            <Link
+              href="/help/categorie/app-consumenten"
+              className="hover:underline hover:underline-offset-1"
+            >
+              <ColoredText>Bezoek onze hulppagina.</ColoredText>
+            </Link>
+          </p>
+        </div>
+        <Wave />
+      </article>
+    </ProgressCardProvider>
   );
 }
 

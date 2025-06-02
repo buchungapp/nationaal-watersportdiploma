@@ -39,7 +39,7 @@ export function DescriptionDetails({
       {...props}
       className={clsx(
         className,
-        "pb-2 text-zinc-950 sm:pb-0 dark:text-white break-words",
+        "pb-2 text-zinc-950 font-medium sm:pb-0 dark:text-white break-words",
       )}
     />
   );
