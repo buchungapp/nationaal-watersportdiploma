@@ -384,6 +384,7 @@ export function ProgressCardEmptyState({
             <Link
               href="/help/categorie/app-consumenten"
               className="hover:underline hover:underline-offset-1"
+              target="_blank"
             >
               <ColoredText>Bezoek onze hulppagina.</ColoredText>
             </Link>
