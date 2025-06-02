@@ -5,6 +5,8 @@ import dayjs from "~/lib/dayjs";
 import { listStudentCohortProgressByPersonId } from "~/lib/nwd";
 import { invariant } from "~/utils/invariant";
 import {
+  Competency,
+  ModuleDisclosure,
   ProgressCard,
   ProgressCardBadge,
   ProgressCardDescriptionList,
@@ -12,7 +14,6 @@ import {
   ProgressCardDisclosure,
   ProgressCardDisclosures,
   ProgressCardHeader,
-  ProgressCardStatus,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
 } from "./progress-card";
@@ -51,6 +52,14 @@ async function CohortProgress({
               );
               return progress && progress.progress >= 100;
             }),
+        );
+
+        const kernModules = studentCurriculum.curriculum.modules.filter(
+          (module) => module.isRequired,
+        );
+
+        const keuzemodules = studentCurriculum.curriculum.modules.filter(
+          (module) => !module.isRequired,
         );
 
         return (
@@ -96,11 +105,53 @@ async function CohortProgress({
                     </>
                   }
                 >
+                  <Text>Kernmodules</Text>
                   <ProgressCardStatusList>
-                    {studentCurriculum.curriculum.modules.map(
-                      ({ id: moduleId, title, competencies }) => {
+                    {kernModules.map((module) => {
+                      const totalProgressSumOfAllModuleCompetencies =
+                        module.competencies.reduce((acc, competency) => {
+                          const progress = allocation.progress.find(
+                            (progress) =>
+                              progress.competencyId === competency.id,
+                          );
+                          return acc + (progress?.progress ?? 0);
+                        }, 0);
+
+                      const progress =
+                        totalProgressSumOfAllModuleCompetencies /
+                        module.competencies.length;
+
+                      return (
+                        <ModuleDisclosure
+                          key={module.id}
+                          module={module}
+                          progress={progress}
+                        >
+                          <ProgressCardStatusSubList>
+                            {module.competencies.map((competency) => {
+                              const progress = allocation.progress.find(
+                                (progress) =>
+                                  progress.competencyId === competency.id,
+                              );
+                              return (
+                                <Competency
+                                  key={competency.id}
+                                  progress={progress?.progress ?? 0}
+                                  competency={competency}
+                                />
+                              );
+                            })}
+                          </ProgressCardStatusSubList>
+                        </ModuleDisclosure>
+                      );
+                    })}
+                  </ProgressCardStatusList>
+                  <Text className="mt-2">Keuzemodules</Text>
+                  {keuzemodules.length > 0 ? (
+                    <ProgressCardStatusList>
+                      {keuzemodules.map((module) => {
                         const totalProgressSumOfAllModuleCompetencies =
-                          competencies.reduce((acc, competency) => {
+                          module.competencies.reduce((acc, competency) => {
                             const progress = allocation.progress.find(
                               (progress) =>
                                 progress.competencyId === competency.id,
@@ -110,36 +161,36 @@ async function CohortProgress({
 
                         const progress =
                           totalProgressSumOfAllModuleCompetencies /
-                          competencies.length;
+                          module.competencies.length;
 
                         return (
-                          <ProgressCardStatus
-                            key={moduleId}
+                          <ModuleDisclosure
+                            key={module.id}
                             progress={progress}
-                            title={title}
+                            module={module}
                           >
                             <ProgressCardStatusSubList>
-                              {competencies.map((competency) => {
+                              {module.competencies.map((competency) => {
                                 const progress = allocation.progress.find(
                                   (progress) =>
                                     progress.competencyId === competency.id,
                                 );
                                 return (
-                                  <ProgressCardStatus
+                                  <Competency
                                     key={competency.id}
                                     progress={progress?.progress ?? 0}
-                                    title={competency.title}
-                                    subtitle={competency.requirement}
-                                    updatedAt={progress?.createdAt}
+                                    competency={competency}
                                   />
                                 );
                               })}
                             </ProgressCardStatusSubList>
-                          </ProgressCardStatus>
+                          </ModuleDisclosure>
                         );
-                      },
-                    )}
-                  </ProgressCardStatusList>
+                      })}
+                    </ProgressCardStatusList>
+                  ) : (
+                    <Text className="italic">Geen keuzemodules</Text>
+                  )}
                 </ProgressCardDisclosure>
               </ProgressCardDisclosures>
             </ProgressCard>

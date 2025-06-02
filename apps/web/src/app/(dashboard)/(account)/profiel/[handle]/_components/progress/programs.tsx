@@ -115,17 +115,11 @@ async function Programs({
                         (m) => m.moduleId === module.id,
                       );
 
-                      const relevantCertificate =
-                        curriculumProgress?.certificates.find(
-                          (c) => c.id === completedModule?.certificateId,
-                        );
-
                       return (
                         <ModuleDisclosure
                           key={module.id}
                           module={module}
                           progress={completedModule ? 100 : 0}
-                          moduleCompletedOn={relevantCertificate?.issuedAt}
                         >
                           <ProgressCardStatusSubList>
                             {module.competencies.map((c) => {
@@ -143,39 +137,38 @@ async function Programs({
                     })}
                   </ProgressCardStatusList>
                   <Text className="mt-2">Keuzemodules</Text>
-                  <ProgressCardStatusList>
-                    {keuzemodules.map((module) => {
-                      const completedModule = curriculumProgress?.modules.find(
-                        (m) => m.moduleId === module.id,
-                      );
+                  {keuzemodules.length > 0 ? (
+                    <ProgressCardStatusList>
+                      {keuzemodules.map((module) => {
+                        const completedModule =
+                          curriculumProgress?.modules.find(
+                            (m) => m.moduleId === module.id,
+                          );
 
-                      const relevantCertificate =
-                        curriculumProgress?.certificates.find(
-                          (c) => c.id === completedModule?.certificateId,
+                        return (
+                          <ModuleDisclosure
+                            key={module.id}
+                            module={module}
+                            progress={completedModule ? 100 : 0}
+                          >
+                            <ProgressCardStatusSubList>
+                              {module.competencies.map((c) => {
+                                return (
+                                  <Competency
+                                    key={c.id}
+                                    competency={c}
+                                    progress={completedModule ? 100 : 0}
+                                  />
+                                );
+                              })}
+                            </ProgressCardStatusSubList>
+                          </ModuleDisclosure>
                         );
-
-                      return (
-                        <ModuleDisclosure
-                          key={module.id}
-                          module={module}
-                          progress={completedModule ? 100 : 0}
-                          moduleCompletedOn={relevantCertificate?.issuedAt}
-                        >
-                          <ProgressCardStatusSubList>
-                            {module.competencies.map((c) => {
-                              return (
-                                <Competency
-                                  key={c.id}
-                                  competency={c}
-                                  progress={completedModule ? 100 : 0}
-                                />
-                              );
-                            })}
-                          </ProgressCardStatusSubList>
-                        </ModuleDisclosure>
-                      );
-                    })}
-                  </ProgressCardStatusList>
+                      })}
+                    </ProgressCardStatusList>
+                  ) : (
+                    <Text className="italic">Geen keuzemodules</Text>
+                  )}
                 </ProgressCardDisclosure>
                 <ProgressCardDisclosure
                   disabled={curriculumProgress?.certificates.length === 0}
