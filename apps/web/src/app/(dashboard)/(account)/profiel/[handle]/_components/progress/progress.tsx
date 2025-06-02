@@ -15,12 +15,13 @@ import {
   TabPanels,
 } from "~/app/(dashboard)/_components/tabs";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { listCurriculaByPersonId } from "~/lib/nwd";
 import { CertificatesWithSuspense, fetchCertificates } from "./certificates";
 import {
   CohortProgressWithSuspense,
   fetchCohortProgress,
 } from "./cohort-progress";
-import { ProgramsWithSuspense, fetchPrograms } from "./programs";
+import { ProgramsWithSuspense, fetchCurriculaProgress } from "./programs";
 
 type BadgeColor = "branding-orange" | "branding-light" | "branding-dark";
 
@@ -75,11 +76,14 @@ export default function ProgressSection({
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
 }) {
+  const curriculaPromise = personPromise.then((person) =>
+    listCurriculaByPersonId(person.id, false),
+  );
   const certificatesPromise = personPromise.then((person) =>
     fetchCertificates(person.id),
   );
   const programsPromise = personPromise.then((person) =>
-    fetchPrograms(person.id),
+    fetchCurriculaProgress(person.id),
   );
   const allocationsPromise = personPromise.then((person) =>
     fetchCohortProgress(person.id),
@@ -115,7 +119,12 @@ export default function ProgressSection({
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Opleidingen
             <SuspendedBadge
-              promise={programsPromise.then((programs) => programs.length)}
+              promise={programsPromise.then((programs) => {
+                const programsWithProgress = programs.filter(
+                  (program) => program.certificates.length > 0,
+                );
+                return programsWithProgress.length;
+              })}
               color="branding-light"
             />
           </Tab>
@@ -134,10 +143,16 @@ export default function ProgressSection({
             <CertificatesWithSuspense personPromise={personPromise} />
           </TabPanel>
           <TabPanel>
-            <ProgramsWithSuspense personPromise={personPromise} />
+            <ProgramsWithSuspense
+              personPromise={personPromise}
+              curriculaPromise={curriculaPromise}
+            />
           </TabPanel>
           <TabPanel>
-            <CohortProgressWithSuspense personPromise={personPromise} />
+            <CohortProgressWithSuspense
+              personPromise={personPromise}
+              curriculaPromise={curriculaPromise}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>

@@ -1,11 +1,9 @@
-import type { User } from "@nawadi/core";
+import type { Student, User } from "@nawadi/core";
 import { Suspense } from "react";
 import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import {
-  listCompetencyProgressesByPersonId,
-  listCurriculaByIds,
-} from "~/lib/nwd";
+import { listStudentCohortProgressByPersonId } from "~/lib/nwd";
+import { invariant } from "~/utils/invariant";
 import {
   ProgressCard,
   ProgressCardBadge,
@@ -21,63 +19,50 @@ import {
 
 type CohortProgressProps = {
   personPromise: Promise<User.Person.$schema.Person>;
+  curriculaPromise: Promise<Student.Curriculum.$schema.StudentCurriculum[]>;
 };
 
 export async function fetchCohortProgress(personId: string) {
-  const allocations = await listCompetencyProgressesByPersonId(personId, true);
-
-  const uniqueCurricula = new Set(
-    allocations.map((allocation) => allocation.curriculumId),
-  );
-
-  if (uniqueCurricula.size < 1) {
-    throw new Error("No curricula found");
-  }
-
-  const allCurriculaData = await listCurriculaByIds(
-    Array.from(uniqueCurricula),
-  );
-
-  const curriculumDataMap = new Map(
-    allCurriculaData.map((curriculum) => [curriculum.id, curriculum]),
-  );
-
-  return allocations.map((allocation) => {
-    const curriculum = curriculumDataMap.get(allocation.curriculumId);
-
-    if (!curriculum) {
-      throw new Error("Curriculum not found");
-    }
-
-    return {
-      ...allocation,
-      curriculum,
-    };
-  });
+  return listStudentCohortProgressByPersonId(personId, true, true);
 }
 
 async function CohortProgress({
-  allocations,
-}: { allocations: Awaited<ReturnType<typeof fetchCohortProgress>> }) {
+  allocationProgress,
+  studentCurricula,
+}: {
+  allocationProgress: Awaited<ReturnType<typeof fetchCohortProgress>>;
+  studentCurricula: Student.Curriculum.$schema.StudentCurriculum[];
+}) {
   return (
     <ul className="space-y-2">
-      {allocations.map((allocation, index) => {
-        const completedModules = allocation.curriculum.modules.filter(
+      {allocationProgress.map((allocation, index) => {
+        const studentCurriculum = studentCurricula.find(
+          (studentCurriculum) =>
+            studentCurriculum.id === allocation.studentCurriculumId,
+        );
+
+        invariant(studentCurriculum, "Curriculum not found");
+
+        const completedModules = studentCurriculum.curriculum.modules.filter(
           (module) =>
-            module.competencies.every((competency) =>
-              allocation.progress.some(
-                (progress) => progress.competencyId === competency.id,
-              ),
-            ),
+            module.competencies.every((competency) => {
+              const progress = allocation.progress.find(
+                (p) => p.competencyId === competency.id,
+              );
+              return progress && progress.progress >= 100;
+            }),
         );
 
         return (
-          <li key={allocation.allocationId}>
+          <li key={allocation.allocation.id}>
             <ProgressCard type="course">
               <ProgressCardHeader
-                degree={allocation.degree.name}
-                program={allocation.program.name ?? allocation.course.name}
-                gearType={allocation.gearType.name}
+                degree={studentCurriculum.curriculum.program.degree.title}
+                program={
+                  studentCurriculum.curriculum.program.title ??
+                  studentCurriculum.curriculum.program.course.title
+                }
+                gearType={studentCurriculum.gearType.title}
                 itemIndex={index}
               />
 
@@ -85,10 +70,10 @@ async function CohortProgress({
                 <ProgressCardDisclosure header="Details">
                   <ProgressCardDescriptionList>
                     <ProgressCardDescriptionListItem
-                      label="Vaarlocatie van afgifte"
+                      label="Vaarlocatie"
                       className="col-span-full sm:col-span-3"
                     >
-                      {allocation.location.name}
+                      {allocation.allocation.cohort.location.name}
                     </ProgressCardDescriptionListItem>
                     <ProgressCardDescriptionListItem
                       label="Voortgang bijgewerkt tot"
@@ -112,8 +97,8 @@ async function CohortProgress({
                   }
                 >
                   <ProgressCardStatusList>
-                    {allocation.curriculum.modules.map(
-                      ({ id: moduleId, title, updatedAt, competencies }) => {
+                    {studentCurriculum.curriculum.modules.map(
+                      ({ id: moduleId, title, competencies }) => {
                         const totalProgressSumOfAllModuleCompetencies =
                           competencies.reduce((acc, competency) => {
                             const progress = allocation.progress.find(
@@ -132,7 +117,6 @@ async function CohortProgress({
                             key={moduleId}
                             progress={progress}
                             title={title}
-                            updatedAt={updatedAt}
                           >
                             <ProgressCardStatusSubList>
                               {competencies.map((competency) => {
@@ -168,7 +152,10 @@ async function CohortProgress({
 
 async function CohortProgressContent(props: CohortProgressProps) {
   const person = await props.personPromise;
-  const allocations = await fetchCohortProgress(person.id);
+  const [allocations, curricula] = await Promise.all([
+    fetchCohortProgress(person.id),
+    props.curriculaPromise,
+  ]);
 
   if (allocations.length < 1) {
     return (
@@ -178,7 +165,12 @@ async function CohortProgressContent(props: CohortProgressProps) {
     );
   }
 
-  return <CohortProgress allocations={allocations} />;
+  return (
+    <CohortProgress
+      allocationProgress={allocations}
+      studentCurricula={curricula}
+    />
+  );
 }
 
 function CohortProgressFallback() {

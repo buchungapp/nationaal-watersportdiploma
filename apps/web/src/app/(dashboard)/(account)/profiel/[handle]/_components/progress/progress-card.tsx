@@ -10,6 +10,7 @@ import {
   CheckCircleIcon,
   MinusCircleIcon,
 } from "@heroicons/react/24/outline";
+import type { Student } from "@nawadi/core";
 import clsx from "clsx";
 import type React from "react";
 import { type PropsWithChildren, createContext, useContext } from "react";
@@ -19,6 +20,7 @@ import { CircleIcon } from "~/app/(dashboard)/_components/icons/circle-icon";
 import { Logo } from "~/app/_assets/logo";
 import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
 import dayjs from "~/lib/dayjs";
+import { moduleTypeLabel } from "~/utils/labels";
 
 type CardType = "course" | "program" | "certificate";
 
@@ -380,19 +382,14 @@ export function ProgressCardStatus({
   updatedAt,
   icon,
   showProgressBadge = true,
-}: (
-  | PropsWithChildren
-  | {
-      children?: never;
-    }
-) & {
+}: PropsWithChildren<{
   progress: number;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   updatedAt?: string;
   icon?: React.ReactNode;
   showProgressBadge?: boolean;
-}) {
+}>) {
   const status = (
     <div
       className={clsx(
@@ -448,6 +445,81 @@ export function ProgressCardStatus({
   );
 }
 
+export function ModuleDisclosure({
+  children,
+  module,
+  progress,
+  moduleCompletedOn,
+}: PropsWithChildren<{
+  module: Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number];
+  progress: number;
+  moduleCompletedOn?: string | null;
+}>) {
+  return (
+    <Headless.Disclosure as="li">
+      <Headless.DisclosureButton className="group/progress-card-status-disclosure relative data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] -mx-2 sm:-mx-4 px-2 sm:px-4">
+        <span className="absolute inset-0 rounded-lg group-data-focus/progress-card-status-disclosure:outline-2 group-data-focus/progress-card-status-disclosure:outline-branding-light group-data-focus/progress-card-status-disclosure:outline-offset-2" />
+        <div
+          className={clsx(
+            "flex max-sm:flex-col sm:justify-between sm:items-center py-2",
+          )}
+        >
+          <div className="flex gap-x-2 items-center w-full">
+            <div>
+              <MinusIcon className="hidden group-data-open/progress-card-status-disclosure:block size-4 text-zinc-500" />
+              <PlusIcon className="group-data-open/progress-card-status-disclosure:hidden block size-4 text-zinc-500" />
+            </div>
+            <ProgressCardStatusIcon progress={progress} />
+            <div className="flex flex-1 justify-between gap-x-2">
+              <span className="font-semibold">{module.title}</span>
+              <div className="flex gap-x-2 items-center">
+                {moduleCompletedOn && (
+                  <>
+                    <span className="text-zinc-500 tabular-nums">
+                      {dayjs(moduleCompletedOn).format("DD-MM-YYYY")}
+                    </span>
+                    <span className="text-zinc-500">|</span>
+                  </>
+                )}
+                <span className="text-zinc-500">
+                  {moduleTypeLabel(module.type)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Headless.DisclosureButton>
+      <Headless.DisclosurePanel>{children}</Headless.DisclosurePanel>
+    </Headless.Disclosure>
+  );
+}
+
+export function Competency({
+  competency,
+  progress,
+}: {
+  competency: Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]["competencies"][number];
+  progress: number;
+}) {
+  return (
+    <div
+      className={clsx(
+        "flex max-sm:flex-col sm:justify-between sm:items-center py-2",
+      )}
+    >
+      <div className="flex flex-col">
+        <div className="flex gap-x-2 items-start">
+          <ProgressCardStatusIcon progress={progress} />
+          <span className="font-semibold leading-5">{competency.title}</span>
+        </div>
+        {competency.requirement && (
+          <p className="text-zinc-500 pl-7 mt-0.5">{competency.requirement}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Wave({
   offset = 0,
   spacing = 0,
@@ -473,7 +545,7 @@ function Wave({
         <Wave1
           className="absolute bottom-0"
           style={{
-            animationName: "wave",
+            animationName: "wave-reversed",
             animationDelay: `${offset + spacing}s`,
             animationDuration: "60s",
             animationTimingFunction: "linear",
@@ -481,9 +553,9 @@ function Wave({
           }}
         />
         <Wave1
-          className="absolute bottom-0 translate-x-full"
+          className="absolute bottom-0 -translate-x-full"
           style={{
-            animationName: "wave",
+            animationName: "wave-reversed",
             animationDelay: `${offset + spacing}s`,
             animationDuration: "60s",
             animationTimingFunction: "linear",

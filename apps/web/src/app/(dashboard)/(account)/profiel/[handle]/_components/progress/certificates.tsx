@@ -2,12 +2,15 @@ import {
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/16/solid";
-import type { User } from "@nawadi/core";
+import type { Student, User } from "@nawadi/core";
 import { Suspense } from "react";
 import { TextButton } from "~/app/(dashboard)/_components/button";
+import { Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listCertificatesForPerson } from "~/lib/nwd";
 import {
+  Competency,
+  ModuleDisclosure,
   ProgressCard,
   ProgressCardBadge,
   ProgressCardDescriptionList,
@@ -15,7 +18,6 @@ import {
   ProgressCardDisclosure,
   ProgressCardDisclosures,
   ProgressCardHeader,
-  ProgressCardStatus,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
 } from "./progress-card";
@@ -80,6 +82,13 @@ async function Certificates({
   return (
     <ul className="space-y-2">
       {certificates.map((certificate, index) => {
+        const kernModules = certificate.completedModules.filter(
+          (m) => m.module.isRequired,
+        );
+        const keuzemodules = certificate.completedModules.filter(
+          (m) => !m.module.isRequired,
+        );
+
         return (
           <li key={certificate.id}>
             <ProgressCard type="certificate">
@@ -146,32 +155,54 @@ async function Certificates({
                     </>
                   }
                 >
+                  <Text>Kernmodules</Text>
                   <ProgressCardStatusList>
-                    {certificate.completedModules.map(
-                      ({ module, completedAt }) => (
-                        <ProgressCardStatus
+                    {kernModules.map(({ module }) => (
+                      <ModuleDisclosure
+                        key={module.id}
+                        module={
+                          module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
+                        }
+                        progress={100}
+                      >
+                        <ProgressCardStatusSubList>
+                          {module.competencies.map((c) => (
+                            <Competency
+                              key={c.id}
+                              competency={c}
+                              progress={100}
+                            />
+                          ))}
+                        </ProgressCardStatusSubList>
+                      </ModuleDisclosure>
+                    ))}
+                  </ProgressCardStatusList>
+                  <Text className="mt-2">Keuzemodules</Text>
+                  {keuzemodules.length > 0 ? (
+                    <ProgressCardStatusList>
+                      {keuzemodules.map(({ module }) => (
+                        <ModuleDisclosure
                           key={module.id}
-                          title={module.title}
+                          module={
+                            module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
+                          }
                           progress={100}
-                          updatedAt={completedAt}
-                          showProgressBadge={false}
                         >
                           <ProgressCardStatusSubList>
                             {module.competencies.map((c) => (
-                              <ProgressCardStatus
+                              <Competency
                                 key={c.id}
-                                title={c.title}
-                                subtitle={c.requirement}
+                                competency={c}
                                 progress={100}
-                                updatedAt={completedAt}
-                                showProgressBadge={false}
                               />
                             ))}
                           </ProgressCardStatusSubList>
-                        </ProgressCardStatus>
-                      ),
-                    )}
-                  </ProgressCardStatusList>
+                        </ModuleDisclosure>
+                      ))}
+                    </ProgressCardStatusList>
+                  ) : (
+                    <Text className="italic">Geen keuzemodules</Text>
+                  )}
                 </ProgressCardDisclosure>
               </ProgressCardDisclosures>
             </ProgressCard>

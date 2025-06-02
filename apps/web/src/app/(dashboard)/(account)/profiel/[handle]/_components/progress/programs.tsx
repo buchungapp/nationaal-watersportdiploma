@@ -1,11 +1,12 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import type { User } from "@nawadi/core";
+import type { Student, User } from "@nawadi/core";
 import { Suspense } from "react";
-import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
-import { Strong, TextLink } from "~/app/(dashboard)/_components/text";
+import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import { listProgramProgressesByPersonId } from "~/lib/nwd";
+import { listCurriculaProgressByPersonId } from "~/lib/nwd";
 import {
+  Competency,
+  ModuleDisclosure,
   ProgressCard,
   ProgressCardBadge,
   ProgressCardDescriptionList,
@@ -13,120 +14,55 @@ import {
   ProgressCardDisclosure,
   ProgressCardDisclosures,
   ProgressCardHeader,
-  ProgressCardStatus,
   ProgressCardStatusList,
   ProgressCardStatusSubList,
 } from "./progress-card";
 
 type ProgramsProps = {
   personPromise: Promise<User.Person.$schema.Person>;
+  curriculaPromise: Promise<Student.Curriculum.$schema.StudentCurriculum[]>;
 };
 
-export async function fetchPrograms(personId: string) {
-  // Currently also includes a program with no progress when the student has started a program in a cohort
-  // I think this is fine
-  // @TODO: remove this comment when reviewing
-  return listProgramProgressesByPersonId(personId).then(
-    deduplicateCurriculumCompetencies,
-  );
-}
-
-function deduplicateCurriculumCompetencies(
-  programs: Awaited<ReturnType<typeof listProgramProgressesByPersonId>>,
-) {
-  return programs.map((program) => {
-    // biome-ignore lint/style/noNonNullAssertion: There is always at least one module
-    const currentCurriculum = program.modules.sort((a, b) =>
-      dayjs(a.curriculum.startedAt).isAfter(dayjs(b.curriculum.startedAt))
-        ? 1
-        : -1,
-    )[0]!.curriculum;
-
-    const sortedCertificates = program.modules
-      .flatMap((module) => module.competencies)
-      .sort((a, b) =>
-        dayjs(a.completed?.createdAt).isAfter(dayjs(b.completed?.createdAt))
-          ? 1
-          : -1,
-      )
-      .map((competency) => competency.completed?.certificate)
-      .filter((certificate) => certificate !== undefined)
-      .filter(
-        (certificate, index, self) =>
-          self.findIndex((t) => t.id === certificate.id) === index,
-      );
-
-    return {
-      ...program,
-      certificates: sortedCertificates,
-      modules: program.modules
-        .reduce(
-          (acc, module) => {
-            const currentModuleIndex = acc.findIndex(
-              (m) => m.module.id === module.module.id,
-            );
-
-            if (module.curriculum.id !== currentCurriculum.id) {
-              if (currentModuleIndex !== -1) {
-                acc.splice(currentModuleIndex, 1);
-              }
-
-              if (
-                module.competencies.some((competency) => competency.completed)
-              ) {
-                acc.push(module);
-              }
-            } else if (currentModuleIndex === -1) {
-              acc.push(module);
-            }
-
-            return acc;
-          },
-          [] as typeof program.modules,
-        )
-        .map((module) => {
-          const lastCompletedCompetency = dayjs
-            .max(
-              module.competencies
-                .filter(
-                  (
-                    x,
-                  ): x is (typeof module.competencies)[number] & {
-                    completed: NonNullable<typeof x.completed>;
-                  } => !!x.completed,
-                )
-                .map(({ completed }) => dayjs(completed.createdAt)),
-            )
-            ?.toISOString();
-
-          return {
-            ...module,
-            completedAt: lastCompletedCompetency,
-          };
-        }),
-    };
-  });
+export async function fetchCurriculaProgress(personId: string) {
+  return listCurriculaProgressByPersonId(personId, true, true);
 }
 
 async function Programs({
-  programs,
+  curriculaProgress,
+  curricula,
 }: {
-  programs: Awaited<ReturnType<typeof fetchPrograms>>;
+  curriculaProgress: Awaited<ReturnType<typeof fetchCurriculaProgress>>;
+  curricula: Student.Curriculum.$schema.StudentCurriculum[];
 }) {
   return (
     <ul className="space-y-2">
-      {programs.map((program, index) => {
-        const firstCompletedCertificate = program.certificates[0];
+      {curricula.map((studentCurriculum, index) => {
+        const curriculumProgress = curriculaProgress.find(
+          (c) => c.studentCurriculumId === studentCurriculum.id,
+        );
+
+        const firstCompletedCertificate =
+          curriculumProgress?.certificates.at(0);
         const mostRecentCompletedCertificate =
-          program.certificates[program.certificates.length - 1];
+          curriculumProgress?.certificates.at(-1);
+
+        const kernModules = studentCurriculum.curriculum.modules.filter(
+          (m) => m.isRequired,
+        );
+        const keuzemodules = studentCurriculum.curriculum.modules.filter(
+          (m) => !m.isRequired,
+        );
 
         return (
-          <li key={`${program.program.id}-${program.gearType.id}`}>
+          <li key={studentCurriculum.id}>
             <ProgressCard type="program">
               <ProgressCardHeader
-                degree={program.degree.title}
-                program={program.program.title}
-                gearType={program.gearType.title}
+                degree={studentCurriculum.curriculum.program.degree.title}
+                program={
+                  studentCurriculum.curriculum.program.title ??
+                  studentCurriculum.curriculum.program.course.title
+                }
+                gearType={studentCurriculum.gearType.title}
                 itemIndex={index}
               />
 
@@ -134,8 +70,14 @@ async function Programs({
                 <ProgressCardDisclosure header="Details">
                   <ProgressCardDescriptionList>
                     <ProgressCardDescriptionListItem
+                      label="Curriculum"
+                      className="col-span-full sm:col-span-2"
+                    >
+                      {studentCurriculum.curriculum.revision}
+                    </ProgressCardDescriptionListItem>
+                    <ProgressCardDescriptionListItem
                       label="Eerst behaalde diploma"
-                      className="col-span-full sm:col-span-3"
+                      className="col-span-full sm:col-span-2"
                     >
                       {firstCompletedCertificate
                         ? dayjs(firstCompletedCertificate.issuedAt).format(
@@ -145,7 +87,7 @@ async function Programs({
                     </ProgressCardDescriptionListItem>
                     <ProgressCardDescriptionListItem
                       label="Meest recente diploma"
-                      className="col-span-full sm:col-span-3"
+                      className="col-span-full sm:col-span-2"
                     >
                       {mostRecentCompletedCertificate
                         ? dayjs(mostRecentCompletedCertificate.issuedAt).format(
@@ -161,65 +103,118 @@ async function Programs({
                     <>
                       Opleidingsprogramma{" "}
                       <ProgressCardBadge>
-                        {program.modules.filter((m) => m.completedAt).length}
+                        {curriculumProgress?.modules.length ?? 0}
                       </ProgressCardBadge>
                     </>
                   }
                 >
+                  <Text>Kernmodules</Text>
                   <ProgressCardStatusList>
-                    {program.modules.map((m) => (
-                      <ProgressCardStatus
-                        key={m.module.id}
-                        title={m.module.title}
-                        progress={m.completedAt ? 100 : 0}
-                        updatedAt={m.completedAt}
-                      >
-                        <ProgressCardStatusSubList>
-                          {m.competencies.map((c) => (
-                            <ProgressCardStatus
-                              key={c.id}
-                              title={c.title}
-                              subtitle={c.requirement}
-                              progress={c.completed ? 100 : 0}
-                              updatedAt={c.completed?.createdAt}
-                            />
-                          ))}
-                        </ProgressCardStatusSubList>
-                      </ProgressCardStatus>
-                    ))}
+                    {kernModules.map((module) => {
+                      const completedModule = curriculumProgress?.modules.find(
+                        (m) => m.moduleId === module.id,
+                      );
+
+                      const relevantCertificate =
+                        curriculumProgress?.certificates.find(
+                          (c) => c.id === completedModule?.certificateId,
+                        );
+
+                      return (
+                        <ModuleDisclosure
+                          key={module.id}
+                          module={module}
+                          progress={completedModule ? 100 : 0}
+                          moduleCompletedOn={relevantCertificate?.issuedAt}
+                        >
+                          <ProgressCardStatusSubList>
+                            {module.competencies.map((c) => {
+                              return (
+                                <Competency
+                                  key={c.id}
+                                  competency={c}
+                                  progress={completedModule ? 100 : 0}
+                                />
+                              );
+                            })}
+                          </ProgressCardStatusSubList>
+                        </ModuleDisclosure>
+                      );
+                    })}
+                  </ProgressCardStatusList>
+                  <Text className="mt-2">Keuzemodules</Text>
+                  <ProgressCardStatusList>
+                    {keuzemodules.map((module) => {
+                      const completedModule = curriculumProgress?.modules.find(
+                        (m) => m.moduleId === module.id,
+                      );
+
+                      const relevantCertificate =
+                        curriculumProgress?.certificates.find(
+                          (c) => c.id === completedModule?.certificateId,
+                        );
+
+                      return (
+                        <ModuleDisclosure
+                          key={module.id}
+                          module={module}
+                          progress={completedModule ? 100 : 0}
+                          moduleCompletedOn={relevantCertificate?.issuedAt}
+                        >
+                          <ProgressCardStatusSubList>
+                            {module.competencies.map((c) => {
+                              return (
+                                <Competency
+                                  key={c.id}
+                                  competency={c}
+                                  progress={completedModule ? 100 : 0}
+                                />
+                              );
+                            })}
+                          </ProgressCardStatusSubList>
+                        </ModuleDisclosure>
+                      );
+                    })}
                   </ProgressCardStatusList>
                 </ProgressCardDisclosure>
                 <ProgressCardDisclosure
-                  disabled={program.certificates.length === 0}
+                  disabled={curriculumProgress?.certificates.length === 0}
                   header={
                     <>
                       Behaalde diploma's{" "}
                       <ProgressCardBadge>
-                        {program.certificates.length}
+                        {curriculumProgress?.certificates.length ?? 0}
                       </ProgressCardBadge>
                     </>
                   }
                 >
                   <ProgressCardStatusList>
-                    {program.certificates.map((certificate) => (
-                      <ProgressCardStatus
-                        key={certificate.id}
-                        title={
-                          <TextLink
-                            target="_blank"
-                            href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
-                            className="flex items-center gap-1"
-                          >
-                            <Strong>{certificate.handle}</Strong>
-                            <ArrowTopRightOnSquareIcon className="size-4" />
-                          </TextLink>
-                        }
-                        progress={100}
-                        updatedAt={certificate.issuedAt}
-                        icon={
-                          <MedailIcon className="size-5 text-branding-orange" />
-                        }
-                      />
+                    {curriculumProgress?.certificates.map((certificate) => (
+                      <li key={certificate.id}>
+                        <TextLink
+                          target="_blank"
+                          href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
+                          className="group relative data-active:bg-zinc-100 data-hover:bg-zinc-50 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] -mx-2 sm:-mx-4 px-2 sm:px-4 block no-underline"
+                        >
+                          <span className="absolute inset-0 rounded-lg group-focus:outline-2 group-focus:outline-branding-light group-focus:outline-offset-2" />
+                          <div className="flex items-center justify-between py-3">
+                            <div className="flex items-center gap-x-2 min-w-0 flex-1">
+                              <Strong className="text-zinc-950">
+                                {`#${certificate.handle}`}
+                              </Strong>
+                              <span className="text-zinc-500 text-sm">
+                                {dayjs(certificate.issuedAt).format(
+                                  "DD-MM-YYYY",
+                                )}
+                              </span>
+                              <span className="text-zinc-500 text-sm">
+                                {certificate.location.name}
+                              </span>
+                            </div>
+                            <ArrowTopRightOnSquareIcon className="size-4 text-zinc-400 group-hover:text-zinc-600 flex-shrink-0" />
+                          </div>
+                        </TextLink>
+                      </li>
                     ))}
                   </ProgressCardStatusList>
                 </ProgressCardDisclosure>
@@ -234,13 +229,27 @@ async function Programs({
 
 async function ProgramsContent(props: ProgramsProps) {
   const person = await props.personPromise;
-  const programs = await fetchPrograms(person.id);
+  const [curriculaProgress, curricula] = await Promise.all([
+    fetchCurriculaProgress(person.id),
+    props.curriculaPromise,
+  ]);
 
-  if (programs.length < 1) {
+  const onlyCurriculaWithProgress = curricula.filter((c) =>
+    curriculaProgress.some(
+      (p) => p.studentCurriculumId === c.id && p.modules.length > 0,
+    ),
+  );
+
+  if (onlyCurriculaWithProgress.length < 1) {
     return "Geen opleidingen gevonden";
   }
 
-  return <Programs programs={programs} />;
+  return (
+    <Programs
+      curriculaProgress={curriculaProgress}
+      curricula={onlyCurriculaWithProgress}
+    />
+  );
 }
 
 function ProgramsFallback() {

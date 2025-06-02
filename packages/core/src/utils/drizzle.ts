@@ -71,10 +71,7 @@ export function formatSearchTerms(
   return formattedWords.join(` ${operator === "and" ? "&" : "|"} `);
 }
 
-export function jsonBuildObject<T extends SelectedFields>(
-  shape: T,
-  options?: { distinct?: boolean },
-) {
+export function jsonBuildObject<T extends SelectedFields>(shape: T) {
   const chunks: SQL[] = [];
 
   for (const [key, value] of Object.entries(shape)) {
@@ -91,10 +88,7 @@ export function jsonBuildObject<T extends SelectedFields>(
       chunks.push(sql`${value}`);
     }
   }
-
-  return sql<
-    SelectResultFields<T>
-  >`${options?.distinct ? sql.raw("distinct ") : sql.raw("")}coalesce(jsonb_build_object(${sql.join(chunks)}), '{}')`;
+  return sql<SelectResultFields<T>>`json_build_object(${sql.join(chunks)})`;
 }
 
 export function jsonAggBuildObject<T extends SelectedFields>(
@@ -103,13 +97,12 @@ export function jsonAggBuildObject<T extends SelectedFields>(
     orderBy?:
       | { colName: AnyColumn; direction: "ASC" | "DESC" }
       | Array<{ colName: AnyColumn; direction: "ASC" | "DESC" }>;
-    distinct?: boolean;
     notNullColumn?: keyof T;
   },
 ) {
   return sql<
     SelectResultFields<T>[]
-  >`coalesce(jsonb_agg(${jsonBuildObject(shape, { distinct: options?.distinct })}${
+  >`coalesce(jsonb_agg(${jsonBuildObject(shape)}${
     options?.orderBy
       ? sql`order by ${
           Array.isArray(options.orderBy)

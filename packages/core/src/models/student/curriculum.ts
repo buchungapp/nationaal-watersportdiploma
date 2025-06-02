@@ -1,20 +1,19 @@
 import { schema as s } from "@nawadi/db";
 import {
   and,
-  desc,
+  countDistinct,
   eq,
   exists,
   isNotNull,
   isNull,
   lte,
-  min,
-  or,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
   aliasedColumn,
+  dateTimeSchema,
   jsonAggBuildObject,
   jsonBuildObject,
   possibleSingleRow,
@@ -24,7 +23,9 @@ import {
   wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
-import { insertSchema } from "./curriculum.schema.js";
+import { insertSchema, outputSchema } from "./curriculum.schema.js";
+
+export * as $schema from "./curriculum.schema.js";
 
 export const start = wrapCommand(
   "student.curriculum.start",
@@ -163,56 +164,45 @@ export const listCompletedCompetenciesById = wrapQuery(
   ),
 );
 
-export const listProgramProgresses = wrapQuery(
-  "student.curriculum.listProgramProgresses",
+export const listByPersonId = wrapQuery(
+  "student.curriculum.listByPersonId",
   withZod(
     z.object({
       personId: uuidSchema,
+      filters: z
+        .object({
+          atLeastOneModuleCompleted: z.boolean().default(false),
+        })
+        .default({}),
     }),
+    outputSchema.array(),
     async (input) => {
       const query = useQuery();
 
       const withModuleCompetencies = query.$with("module_competencies").as(
         query
           .select({
-            moduleId: aliasedColumn(s.module.id, "moduleId"),
-            moduleHandle: aliasedColumn(s.module.handle, "moduleHandle"),
-            moduleTitle: aliasedColumn(s.module.title, "moduleTitle"),
-            moduleWeight: aliasedColumn(s.module.weight, "moduleWeight"),
-            curriculumId: aliasedColumn(s.curriculum.id, "curriculumId"),
-            curriculumRevision: aliasedColumn(
-              s.curriculum.revision,
-              "curriculumRevision",
+            curriculumId: aliasedColumn(
+              s.curriculum.id,
+              "module_competencies_curriculum_id",
             ),
-            curriculumStartedAt: aliasedColumn(
-              s.curriculum.startedAt,
-              "curriculumStartedAt",
+            moduleId: aliasedColumn(
+              s.module.id,
+              "module_competencies_module_id",
             ),
+            moduleHandle: s.module.handle,
+            moduleTitle: s.module.title,
+            moduleWeight: s.module.weight,
             competencies: jsonAggBuildObject(
               {
-                id: s.competency.id,
+                id: s.curriculumCompetency.id,
+                competencyId: s.competency.id,
                 handle: s.competency.handle,
                 title: s.competency.title,
                 weight: s.competency.weight,
                 type: s.competency.type,
+                isRequired: s.curriculumCompetency.isRequired,
                 requirement: s.curriculumCompetency.requirement,
-                completed: sql<null | {
-                  createdAt: string;
-                  certificate: {
-                    id: string;
-                    handle: string;
-                    issuedAt: string;
-                  };
-                }>`CASE WHEN ${s.certificate.id} IS NOT NULL THEN ${jsonBuildObject(
-                  {
-                    createdAt: s.studentCompletedCompetency.createdAt,
-                    certificate: jsonBuildObject({
-                      id: s.certificate.id,
-                      handle: s.certificate.handle,
-                      issuedAt: s.certificate.issuedAt,
-                    }),
-                  },
-                )} ELSE NULL END`,
               },
               {
                 orderBy: {
@@ -242,76 +232,68 @@ export const listProgramProgresses = wrapQuery(
             s.competency,
             eq(s.curriculumCompetency.competencyId, s.competency.id),
           )
-          .leftJoin(
-            s.studentCompletedCompetency,
-            eq(
-              s.studentCompletedCompetency.competencyId,
-              s.curriculumCompetency.id,
-            ),
-          )
-          .leftJoin(
-            s.certificate,
-            and(
-              eq(s.certificate.id, s.studentCompletedCompetency.certificateId),
-              or(
-                isNull(s.certificate.visibleFrom),
-                lte(s.certificate.visibleFrom, sql`NOW()`),
-              ),
-              isNotNull(s.certificate.issuedAt),
-            ),
-          )
           .groupBy(s.module.id, s.curriculum.id),
       );
 
-      const curriculumRows = query
+      const rows = await query
         .with(withModuleCompetencies)
         .select({
-          startedAt: min(s.studentCurriculum.startedAt),
+          id: s.studentCurriculum.id,
+          personId: s.studentCurriculum.personId,
+          startedAt: s.studentCurriculum.startedAt,
+          curriculum: {
+            id: s.curriculum.id,
+            revision: s.curriculum.revision,
+            startedAt: s.curriculum.startedAt,
+            program: jsonBuildObject({
+              id: s.program.id,
+              handle: s.program.handle,
+              title: s.program.title,
+              course: jsonBuildObject({
+                id: s.course.id,
+                handle: s.course.handle,
+                title: s.course.title,
+              }),
+              degree: jsonBuildObject({
+                id: s.degree.id,
+                handle: s.degree.handle,
+                title: s.degree.title,
+                rang: s.degree.rang,
+              }),
+            }),
+            modules: jsonAggBuildObject(
+              {
+                id: withModuleCompetencies.moduleId,
+                handle: withModuleCompetencies.moduleHandle,
+                title: withModuleCompetencies.moduleTitle,
+                weight: withModuleCompetencies.moduleWeight,
+                competencies: withModuleCompetencies.competencies,
+                isRequired: sql<boolean>`COALESCE(
+                  (
+                    SELECT bool_and(competency.value->>'isRequired' = 'true')
+                    FROM jsonb_array_elements(${withModuleCompetencies.competencies}) AS competency
+                  ),
+                  false
+                )`,
+                type: sql<"knowledge" | "skill">`(
+                  SELECT (competency.value->>'type')::text
+                  FROM jsonb_array_elements(${withModuleCompetencies.competencies}) AS competency
+                  LIMIT 1
+                )`,
+              },
+              {
+                orderBy: {
+                  colName: withModuleCompetencies.moduleWeight,
+                  direction: "ASC",
+                },
+              },
+            ).as("modules"),
+          },
           gearType: {
             id: s.gearType.id,
             handle: s.gearType.handle,
             title: s.gearType.title,
           },
-          program: {
-            id: s.program.id,
-            handle: s.program.handle,
-            title: s.program.title,
-          },
-          degree: {
-            id: s.degree.id,
-            handle: s.degree.handle,
-            title: s.degree.title,
-          },
-          modules: jsonAggBuildObject(
-            {
-              curriculum: jsonBuildObject({
-                id: withModuleCompetencies.curriculumId,
-                revision: withModuleCompetencies.curriculumRevision,
-                startedAt: withModuleCompetencies.curriculumStartedAt,
-              }),
-              module: jsonBuildObject({
-                id: withModuleCompetencies.moduleId,
-                handle: withModuleCompetencies.moduleHandle,
-                title: withModuleCompetencies.moduleTitle,
-                weight: withModuleCompetencies.moduleWeight,
-              }),
-              competencies: withModuleCompetencies.competencies,
-            },
-            {
-              orderBy: [
-                {
-                  // @ts-expect-error - The curriculum started at doesn't have the column type because of the aliased column
-                  colName: withModuleCompetencies.curriculumStartedAt,
-                  direction: "ASC",
-                },
-                {
-                  // @ts-expect-error - The module weight doesn't have the column type because of the aliased column
-                  colName: withModuleCompetencies.moduleWeight,
-                  direction: "ASC",
-                },
-              ],
-            },
-          ).as("modules"),
         })
         .from(s.studentCurriculum)
         .innerJoin(
@@ -320,6 +302,7 @@ export const listProgramProgresses = wrapQuery(
         )
         .innerJoin(s.program, eq(s.curriculum.programId, s.program.id))
         .innerJoin(s.degree, eq(s.program.degreeId, s.degree.id))
+        .innerJoin(s.course, eq(s.program.courseId, s.course.id))
         .innerJoin(
           s.gearType,
           eq(s.studentCurriculum.gearTypeId, s.gearType.id),
@@ -332,14 +315,219 @@ export const listProgramProgresses = wrapQuery(
           and(
             eq(s.studentCurriculum.personId, input.personId),
             isNull(s.studentCurriculum.deletedAt),
+            input.filters.atLeastOneModuleCompleted
+              ? exists(
+                  // This only checks for completed competencies, not a whole module
+                  // but business logic enforces that a competency can only be completed
+                  // if the whole module is completed
+                  query
+                    .select({ id: sql`1` })
+                    .from(s.studentCompletedCompetency)
+                    .where(
+                      eq(
+                        s.studentCompletedCompetency.studentCurriculumId,
+                        s.studentCurriculum.id,
+                      ),
+                    ),
+                )
+              : undefined,
           ),
         )
-        .groupBy(s.gearType.id, s.program.id, s.degree.id)
-        .orderBy(desc(min(s.studentCurriculum.startedAt)));
-
-      const rows = await curriculumRows;
+        .groupBy(
+          s.studentCurriculum.id,
+          s.curriculum.id,
+          s.program.id,
+          s.course.id,
+          s.degree.id,
+          s.gearType.id,
+        );
 
       return rows;
+    },
+  ),
+);
+
+export const listProgressByPersonId = wrapQuery(
+  "student.curriculum.listProgressByPersonId",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      filters: z
+        .object({
+          respectCertificateVisibility: z.boolean().default(false),
+          includeCurriculaWithoutProgress: z.boolean().default(false),
+        })
+        .default({}),
+    }),
+    z
+      .object({
+        studentCurriculumId: uuidSchema,
+        modules: z
+          .object({
+            moduleId: uuidSchema,
+            certificateId: uuidSchema,
+          })
+          .array(),
+        certificates: z
+          .object({
+            id: uuidSchema,
+            handle: z.string(),
+            issuedAt: dateTimeSchema,
+            location: z.object({
+              id: uuidSchema,
+              handle: z.string(),
+              name: z.string().nullable(),
+            }),
+          })
+          .array(),
+      })
+      .array(),
+    async (input) => {
+      const query = useQuery();
+
+      const withModules = query.$with("modules").as(
+        query
+          .selectDistinct({
+            studentCurriculumId: aliasedColumn(
+              s.studentCurriculum.id,
+              "modules_student_curriculum_id",
+            ),
+            moduleId: aliasedColumn(
+              s.curriculumCompetency.moduleId,
+              "modules_module_id",
+            ),
+            certificateId: aliasedColumn(
+              s.certificate.id,
+              "modules_certificate_id",
+            ),
+          })
+          .from(s.studentCurriculum)
+          .innerJoin(
+            s.studentCompletedCompetency,
+            eq(
+              s.studentCompletedCompetency.studentCurriculumId,
+              s.studentCurriculum.id,
+            ),
+          )
+          .innerJoin(
+            s.curriculumCompetency,
+            eq(
+              s.studentCompletedCompetency.competencyId,
+              s.curriculumCompetency.id,
+            ),
+          )
+          .innerJoin(
+            s.certificate,
+            and(
+              eq(s.certificate.id, s.studentCompletedCompetency.certificateId),
+              isNotNull(s.certificate.issuedAt),
+            ),
+          )
+          .where(
+            and(
+              eq(s.studentCurriculum.personId, input.personId),
+              isNull(s.studentCurriculum.deletedAt),
+              isNull(s.studentCompletedCompetency.deletedAt),
+              isNull(s.certificate.deletedAt),
+              input.filters.respectCertificateVisibility
+                ? lte(s.certificate.visibleFrom, sql`now()`)
+                : undefined,
+            ),
+          ),
+      );
+
+      const withModulesAgg = query.$with("modules_agg").as(
+        query
+          .select({
+            studentCurriculumId: withModules.studentCurriculumId,
+            modules: jsonAggBuildObject({
+              moduleId: withModules.moduleId,
+              certificateId: withModules.certificateId,
+            }).as("modules"),
+          })
+          .from(withModules)
+          .groupBy(withModules.studentCurriculumId),
+      );
+
+      const withCertificates = query.$with("certificates").as(
+        query
+          .select({
+            studentCurriculumId: s.studentCurriculum.id,
+            certificateCount: countDistinct(s.certificate.id),
+            certificates: jsonAggBuildObject(
+              {
+                id: s.certificate.id,
+                handle: s.certificate.handle,
+                issuedAt: sql<string>`${s.certificate.issuedAt}`,
+                location: jsonBuildObject({
+                  id: s.location.id,
+                  handle: s.location.handle,
+                  name: s.location.name,
+                }),
+              },
+              {
+                orderBy: {
+                  colName: s.certificate.issuedAt,
+                  direction: "ASC",
+                },
+              },
+            ).as("certificates"),
+          })
+          .from(s.studentCurriculum)
+          .innerJoin(
+            s.certificate,
+            and(
+              eq(s.certificate.studentCurriculumId, s.studentCurriculum.id),
+              isNotNull(s.certificate.issuedAt),
+              input.filters.respectCertificateVisibility
+                ? lte(s.certificate.visibleFrom, sql`now()`)
+                : undefined,
+              isNull(s.certificate.deletedAt),
+            ),
+          )
+          .innerJoin(s.location, eq(s.location.id, s.certificate.locationId))
+          .where(
+            and(
+              eq(s.studentCurriculum.personId, input.personId),
+              isNull(s.studentCurriculum.deletedAt),
+            ),
+          )
+          .groupBy(s.studentCurriculum.id)
+          .having(({ certificateCount }) =>
+            input.filters.includeCurriculaWithoutProgress
+              ? sql`TRUE`
+              : sql`${certificateCount} > 0`,
+          ),
+      );
+
+      const rows = await query
+        .with(withModules, withModulesAgg, withCertificates)
+        .select({
+          studentCurriculumId: s.studentCurriculum.id,
+          modules: withModulesAgg.modules,
+          certificates: withCertificates.certificates,
+        })
+        .from(s.studentCurriculum)
+        .leftJoin(
+          withModulesAgg,
+          eq(withModulesAgg.studentCurriculumId, s.studentCurriculum.id),
+        )
+        .leftJoin(
+          withCertificates,
+          eq(withCertificates.studentCurriculumId, s.studentCurriculum.id),
+        )
+        .where(
+          and(
+            eq(s.studentCurriculum.personId, input.personId),
+            isNull(s.studentCurriculum.deletedAt),
+          ),
+        );
+
+      return rows.map((row) => ({
+        studentCurriculumId: row.studentCurriculumId,
+        modules: row.modules || [],
+        certificates: row.certificates || [],
+      }));
     },
   ),
 );

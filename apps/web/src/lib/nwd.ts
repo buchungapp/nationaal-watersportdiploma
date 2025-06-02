@@ -1950,27 +1950,51 @@ export const retrieveStudentAllocationWithCurriculumForPerson = cache(
   },
 );
 
-export const listProgramProgressesByPersonId = cache(
-  async (personId: string) => {
+export const listCurriculaByPersonId = cache(
+  async (personId: string, atLeastOneModuleCompleted?: boolean) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
-
-      return await Student.Curriculum.listProgramProgresses({
+      return await Student.Curriculum.listByPersonId({
         personId,
+        filters: {
+          atLeastOneModuleCompleted,
+        },
       });
     });
   },
 );
 
-export const listCompetencyProgressesByPersonId = cache(
-  async (personId: string, respectProgressVisibility?: boolean) => {
+export const listCurriculaProgressByPersonId = cache(
+  async (
+    personId: string,
+    respectCertificateVisibility?: boolean,
+    includeCurriculaWithoutProgress?: boolean,
+  ) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
+      return await Student.Curriculum.listProgressByPersonId({
+        personId,
+        filters: {
+          respectCertificateVisibility,
+          includeCurriculaWithoutProgress,
+        },
+      });
+    });
+  },
+);
 
+export const listStudentCohortProgressByPersonId = cache(
+  async (
+    personId: string,
+    respectProgressVisibility?: boolean,
+    respectCohortVisibility?: boolean,
+  ) => {
+    return makeRequest(async () => {
+      // TODO: This needs authorization checks
       return await Cohort.StudentProgress.listByPersonId({
         personId,
         respectProgressVisibility,
-        respectCohortVisibility: true,
+        respectCohortVisibility,
       });
     });
   },
@@ -1980,7 +2004,6 @@ export const listCompletedCompetenciesByStudentCurriculumId = cache(
   async (studentCurriculumId: string) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
-
       return await Student.Curriculum.listCompletedCompetenciesById({
         id: studentCurriculumId,
       });
@@ -1992,7 +2015,6 @@ export const listCompetencyProgressInCohortForStudent = cache(
   async (allocationId: string, respectVisibility?: boolean) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
-
       return await Cohort.StudentProgress.byAllocationId({
         id: allocationId,
         respectProgressVisibility: respectVisibility,
