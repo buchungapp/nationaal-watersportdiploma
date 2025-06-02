@@ -298,7 +298,7 @@ export function ProgressCardEmptyState({
     }
   > = {
     program: {
-      cardClassName: "bg-sky-50/50",
+      cardClassName: "bg-sky-50/50 border-sky-200",
       iconBackgroundClassName: "bg-sky-100",
       Icon: AcademicCapIcon,
       label: "opleiding",
@@ -310,7 +310,7 @@ export function ProgressCardEmptyState({
       textClassName: "text-sky-950/60",
     },
     certificate: {
-      cardClassName: "bg-orange-50/50",
+      cardClassName: "bg-orange-50/50 border-orange-200",
       iconBackgroundClassName: "bg-orange-100",
       Icon: MedailIcon,
       label: "diploma",
@@ -322,7 +322,7 @@ export function ProgressCardEmptyState({
       textClassName: "text-orange-950/60",
     },
     course: {
-      cardClassName: "bg-blue-50/50",
+      cardClassName: "bg-blue-50/50 border-blue-200",
       iconBackgroundClassName: "bg-blue-100",
       Icon: BoatIcon,
       label: "cursus",
