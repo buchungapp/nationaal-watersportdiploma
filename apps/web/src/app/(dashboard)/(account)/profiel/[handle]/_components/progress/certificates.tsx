@@ -156,27 +156,31 @@ async function Certificates({
                   }
                 >
                   <Text>Kernmodules</Text>
-                  <ProgressCardStatusList>
-                    {kernModules.map(({ module }) => (
-                      <ModuleDisclosure
-                        key={module.id}
-                        module={
-                          module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
-                        }
-                        progress={100}
-                      >
-                        <ProgressCardStatusSubList>
-                          {module.competencies.map((c) => (
-                            <Competency
-                              key={c.id}
-                              competency={c}
-                              progress={100}
-                            />
-                          ))}
-                        </ProgressCardStatusSubList>
-                      </ModuleDisclosure>
-                    ))}
-                  </ProgressCardStatusList>
+                  {kernModules.length > 0 ? (
+                    <ProgressCardStatusList>
+                      {kernModules.map(({ module }) => (
+                        <ModuleDisclosure
+                          key={module.id}
+                          module={
+                            module as Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number]
+                          }
+                          progress={100}
+                        >
+                          <ProgressCardStatusSubList>
+                            {module.competencies.map((c) => (
+                              <Competency
+                                key={c.id}
+                                competency={c}
+                                progress={100}
+                              />
+                            ))}
+                          </ProgressCardStatusSubList>
+                        </ModuleDisclosure>
+                      ))}
+                    </ProgressCardStatusList>
+                  ) : (
+                    <Text className="italic">Geen kernmodules</Text>
+                  )}
                   <Text className="mt-2">Keuzemodules</Text>
                   {keuzemodules.length > 0 ? (
                     <ProgressCardStatusList>
