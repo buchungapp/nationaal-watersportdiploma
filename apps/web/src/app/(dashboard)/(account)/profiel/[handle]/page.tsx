@@ -51,7 +51,7 @@ export default function Page(props: {
         <Welcome params={props.params} />
         <Text className="max-w-prose">
           In je digitale watersportcentrum.{" "}
-          <TextLink href="/help/artikel/personenbeheer">
+          <TextLink href="/help/artikel/personenbeheer" target="_blank">
             Leer meer over personenbeheer
           </TextLink>
         </Text>
