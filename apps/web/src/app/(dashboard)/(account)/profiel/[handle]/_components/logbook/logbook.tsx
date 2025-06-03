@@ -1,3 +1,4 @@
+import type { User } from "@nawadi/core";
 import { type PropsWithChildren, Suspense } from "react";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
@@ -5,7 +6,7 @@ import {
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { getPersonByHandle, listLogbooksForPerson } from "~/lib/nwd";
+import { listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
 import { AddLogbook } from "./add-logbook";
 import { LogbookTable } from "./logbook-table";
@@ -16,14 +17,16 @@ function LogbookSkeleton({
 }: PropsWithChildren<{ button?: React.ReactNode | undefined }>) {
   return (
     <StackedLayoutCardDisclosure
+      defaultOpen
       header={
         <>
           <div className="flex justify-between items-center gap-2">
-            <Subheading>Jouw Logboek</Subheading>
+            <Subheading>Vaarlogboek</Subheading>
             <StackedLayoutCardDisclosureChevron />
           </div>
           <Text>
-            Hieronder vind je een overzicht van alle vaaractiviteiten.
+            In jouw vaarlogboek kan je er voor kiezen om je vaaractiviteiten bij
+            te houden.
           </Text>
         </>
       }
@@ -36,14 +39,13 @@ function LogbookSkeleton({
 }
 
 async function LogbookContent({
-  params,
+  personPromise,
   searchParams,
 }: {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
+  const person = await personPromise;
   const data = await listLogbooksForPerson({ personId: person.id });
 
   const parsedSq = await parseLogbookSearchParams(searchParams);
@@ -67,25 +69,24 @@ function AddLogbookButtonFallback() {
 }
 
 async function AddLogbookButton({
-  params,
+  personPromise,
 }: {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
 }) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
+  const person = await personPromise;
 
   return <AddLogbook personId={person.id} />;
 }
 
 export function Logbook(props: {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
     <LogbookSkeleton
       button={
         <Suspense fallback={<AddLogbookButtonFallback />}>
-          <AddLogbookButton params={props.params} />
+          <AddLogbookButton {...props} />
         </Suspense>
       }
     >
