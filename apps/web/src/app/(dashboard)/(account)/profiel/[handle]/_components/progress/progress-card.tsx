@@ -604,7 +604,9 @@ export function Competency({
           <span className="font-semibold leading-5">{competency.title}</span>
         </div>
         {competency.requirement && (
-          <p className="text-zinc-500 pl-7 mt-0.5">{competency.requirement}</p>
+          <p className="text-zinc-500 pl-7 mt-0.5 text-justify">
+            {competency.requirement}
+          </p>
         )}
       </div>
     </div>
