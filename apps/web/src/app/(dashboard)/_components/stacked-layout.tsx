@@ -64,20 +64,24 @@ export function StackedLayout({
   return (
     <div className="isolate relative flex flex-col bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950 w-full min-h-svh">
       {/* Sidebar on mobile */}
-      <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
-        {sidebar}
-      </MobileSidebar>
+      {!!sidebar && (
+        <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
+          {sidebar}
+        </MobileSidebar>
+      )}
 
       {/* Navbar */}
       <header className="flex items-center px-4">
-        <div className="lg:hidden py-2.5">
-          <NavbarItem
-            onClick={() => setShowSidebar(true)}
-            aria-label="Open navigation"
-          >
-            <OpenMenuIcon />
-          </NavbarItem>
-        </div>
+        {!!sidebar && (
+          <div className="lg:hidden py-2.5">
+            <NavbarItem
+              onClick={() => setShowSidebar(true)}
+              aria-label="Open navigation"
+            >
+              <OpenMenuIcon />
+            </NavbarItem>
+          </div>
+        )}
         <div className="flex-1 min-w-0">{navbar}</div>
       </header>
 

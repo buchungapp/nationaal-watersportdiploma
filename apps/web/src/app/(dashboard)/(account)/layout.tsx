@@ -7,12 +7,6 @@ import {
   NavbarSection,
   NavbarSpacer,
 } from "../_components/navbar";
-import {
-  Sidebar,
-  SidebarBody,
-  SidebarItem,
-  SidebarSection,
-} from "../_components/sidebar";
 import { StackedLayout } from "../_components/stacked-layout";
 
 export default function Layout({
@@ -40,18 +34,7 @@ export default function Layout({
           </NavbarSection>
         </Navbar>
       }
-      sidebar={
-        <Sidebar>
-          <SidebarBody>
-            <SidebarSection>
-              <SidebarItem href="/help">
-                Helpcentrum
-                <LifebuoyIcon />
-              </SidebarItem>
-            </SidebarSection>
-          </SidebarBody>
-        </Sidebar>
-      }
+      sidebar={null}
     >
       {children}
     </StackedLayout>
