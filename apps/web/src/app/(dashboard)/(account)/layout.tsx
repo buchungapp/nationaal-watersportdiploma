@@ -26,7 +26,10 @@ export default function Layout({
 
           <NavbarSpacer />
           <NavbarSection>
-            <NavbarItem href="/help" className="max-lg:hidden">
+            <NavbarItem
+              href="/help/categorie/app-consumenten"
+              className="max-lg:hidden"
+            >
               <LifebuoyIcon />
               Helpcentrum
             </NavbarItem>
