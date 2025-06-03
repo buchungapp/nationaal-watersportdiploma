@@ -36,7 +36,7 @@ async function CohortProgress({
   studentCurricula: Student.Curriculum.$schema.StudentCurriculum[];
 }) {
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-4">
       {allocationProgress.map((allocation, index) => {
         const studentCurriculum = studentCurricula.find(
           (studentCurriculum) =>

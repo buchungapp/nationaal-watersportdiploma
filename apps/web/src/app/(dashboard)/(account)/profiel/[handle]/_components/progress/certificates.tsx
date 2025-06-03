@@ -81,7 +81,7 @@ async function Certificates({
   certificates,
 }: { certificates: Awaited<ReturnType<typeof fetchCertificates>> }) {
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-4">
       {certificates.map((certificate, index) => {
         const kernModules = certificate.completedModules.filter(
           (m) => m.module.isRequired,

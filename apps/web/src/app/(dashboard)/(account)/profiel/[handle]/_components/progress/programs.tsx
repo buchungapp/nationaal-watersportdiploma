@@ -1,7 +1,9 @@
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
 import type { Student, User } from "@nawadi/core";
+import clsx from "clsx";
 import { Suspense } from "react";
-import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { Link } from "~/app/(dashboard)/_components/link";
+import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listCurriculaProgressByPersonId } from "~/lib/nwd";
 import {
@@ -36,7 +38,7 @@ async function Programs({
   curricula: Student.Curriculum.$schema.StudentCurriculum[];
 }) {
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-4">
       {curricula.map((studentCurriculum, index) => {
         const curriculumProgress = curriculaProgress.find(
           (c) => c.studentCurriculumId === studentCurriculum.id,
@@ -196,30 +198,39 @@ async function Programs({
                 >
                   <ProgressCardStatusList>
                     {curriculumProgress?.certificates.map((certificate) => (
-                      <li key={certificate.id}>
-                        <TextLink
+                      <li key={certificate.id} className="w-full">
+                        <Link
                           target="_blank"
                           href={`/diploma/${certificate.id}?nummer=${certificate.handle}&datum=${dayjs(certificate.issuedAt).format("YYYYMMDD")}`}
-                          className="group relative data-active:bg-zinc-100 data-hover:bg-zinc-50 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] -mx-2 sm:-mx-4 px-2 sm:px-4 block no-underline"
+                          className={clsx(
+                            // Base
+                            "relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg text-base/6 font-semibold",
+
+                            // Sizing
+                            "py-[calc(--spacing(2.5)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+
+                            // Focus
+                            "focus:outline-hidden data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
+                            "w-full data-active:bg-zinc-950/5 data-hover:bg-zinc-950/5",
+                          )}
                         >
-                          <span className="absolute inset-0 rounded-lg group-focus:outline-2 group-focus:outline-branding-light group-focus:outline-offset-2" />
-                          <div className="flex items-center justify-between py-3">
-                            <div className="flex items-center gap-x-2 min-w-0 flex-1">
-                              <Strong className="text-zinc-950">
+                          <div className="flex w-full justify-between gap-x-2 items-center">
+                            <div className="w-full flex items-center gap-x-2.5">
+                              <Strong className="text-blue-800 tabular-nums">
                                 {`#${certificate.handle}`}
                               </Strong>
-                              <span className="text-zinc-500 text-sm">
+                              <span className="text-zinc-500 font-normal text-sm tabular-nums">
                                 {dayjs(certificate.issuedAt).format(
                                   "DD-MM-YYYY",
                                 )}
                               </span>
-                              <span className="text-zinc-500 text-sm">
+                              <span className="text-zinc-500 font-normal text-sm">
                                 {certificate.location.name}
                               </span>
                             </div>
                             <ArrowTopRightOnSquareIcon className="size-4 text-zinc-400 group-hover:text-zinc-600 flex-shrink-0" />
                           </div>
-                        </TextLink>
+                        </Link>
                       </li>
                     ))}
                   </ProgressCardStatusList>

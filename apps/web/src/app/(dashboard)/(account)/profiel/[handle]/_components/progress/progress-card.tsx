@@ -148,7 +148,7 @@ export function ProgressCardHeader({
   return (
     <header
       className={clsx(
-        "flex justify-between relative",
+        "flex justify-between relative items-center sm:items-start",
         "p-2 sm:p-4 pb-8 sm:pb-10",
         detail.background,
       )}
@@ -165,7 +165,7 @@ export function ProgressCardHeader({
         <ProgressCardTitle>
           <ColoredText> {program}</ColoredText>
         </ProgressCardTitle>
-        <div className="flex gap-x-2 items-center">
+        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
           <ProgressCardDescriptiveBadge Icon={ArrowTrendingUpIcon}>
             {`Niveau ${degree}`}
           </ProgressCardDescriptiveBadge>
@@ -175,7 +175,7 @@ export function ProgressCardHeader({
           </ProgressCardDescriptiveBadge>
         </div>
       </div>
-      <div className="flex items-center gap-x-4 shrink-0">
+      <div className="flex flex-col sm:flex-row items-end gap-y-2 sm:items-center gap-x-4 shrink-0">
         <div
           className={clsx("shrink-0 h-8", detail.text)}
           style={{
@@ -492,7 +492,7 @@ export function ProgressCardStatusSubList({
 }: PropsWithChildren<{
   className?: string;
 }>) {
-  return <ul className={clsx("sm:pl-6", className)}>{children}</ul>;
+  return <ul className={clsx("pl-6", className)}>{children}</ul>;
 }
 
 export function ProgressCardStatusIcon({

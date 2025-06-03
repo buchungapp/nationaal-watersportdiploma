@@ -1,8 +1,7 @@
-import { Text } from "~/app/(dashboard)/_components/text";
+import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import Balancer from "react-wrap-balancer";
 import { getPersonByHandle, getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Locations } from "./_components/locations";
@@ -48,26 +47,22 @@ export default function Page(props: {
 
   return (
     <div>
-      <div className="sm:mb-6 max-sm:px-3 order-1 lg:order-none lg:col-start-1 lg:row-start-1">
+      <div className="mx-auto max-w-2xl lg:max-w-none lg:mx-0">
         <Welcome params={props.params} />
-        <Text>
-          <Balancer>
-            Welkom bij jouw digitale watersportcentrum. Volg hier je voortgang
-            binnen het Nationaal Watersportdiploma (NWD) en je andere
-            watersportactiviteiten. Beheer je meerdere personen met dit
-            e-mailadres? Selecteer dan een andere persoon via de menubalk.
-          </Balancer>
+        <Text className="max-w-prose">
+          In je digitale watersportcentrum.{" "}
+          <TextLink href="/over-nwd">Leer meer over personenbeheer</TextLink>
         </Text>
       </div>
 
-      <div className="mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-        <div className="lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
+      <div className="mt-2 mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        <div className="order-2 lg:order-none lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
           <Locations personPromise={personPromise} />
 
           <Personalia personPromise={personPromise} />
         </div>
 
-        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 flex flex-col gap-2">
+        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-3 lg:order-none flex flex-col gap-2">
           <ProgressSection personPromise={personPromise} />
 
           <WatersportCertificatesSection
@@ -78,7 +73,7 @@ export default function Page(props: {
           <Logbook params={props.params} searchParams={props.searchParams} />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2">
           <News />
 
           <Socials />
