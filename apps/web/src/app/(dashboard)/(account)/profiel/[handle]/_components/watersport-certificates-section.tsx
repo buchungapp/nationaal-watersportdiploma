@@ -1,4 +1,6 @@
+import type { User } from "@nawadi/core";
 import { Suspense } from "react";
+import Balancer from "react-wrap-balancer";
 import {
   GridList,
   gridContainer,
@@ -8,41 +10,65 @@ import {
   StackedLayoutCardDisclosure,
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
-import { Text } from "~/app/(dashboard)/_components/text";
-import { getPersonByHandle } from "~/lib/nwd";
+import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { AnimatedWave } from "~/app/_components/animated-wave";
 import { AddCertificate } from "./external-certificate/add-certificate";
 import { ExternalCertificatesList } from "./external-certificate/certificates-list";
 
 interface WatersportCertificatesProps {
-  params: Promise<{ handle: string }>;
+  personPromise: Promise<User.Person.$schema.Person>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 async function WatersportCertificatesContent({
-  params,
+  personPromise,
   searchParams,
 }: WatersportCertificatesProps) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
+  const person = await personPromise;
 
   return (
     <ExternalCertificatesList
       searchParams={searchParams}
       personId={person.id}
       noResults={
-        <Text className="italic">
-          We hebben geen watersport certificaten voor jou kunnen vinden.
-        </Text>
+        <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
+          <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+            <div className="space-y-2">
+              <div>
+                <Balancer>
+                  <h3 className="text-2xl/7 font-semibold sm:text-xl/7 text-zinc-900">
+                    Je hebt nog geen aanvullende watersportcertificaten
+                    opgeslagen.
+                  </h3>
+                </Balancer>
+              </div>
+            </div>
+
+            <div className="my-6">
+              <AddCertificateButton personPromise={personPromise} />
+            </div>
+
+            <Text>
+              Wil je meer weten over deze functionaliteit?{" "}
+              <TextLink
+                href="/help/artikel/aanvullende-vaardigheden-opslaan-in-jouw-nwd"
+                target="_blank"
+              >
+                Bezoek onze hulppagina.
+              </TextLink>
+            </Text>
+          </div>
+          <AnimatedWave textColorClassName="text-zinc-600" />
+        </div>
       }
     />
   );
 }
 
 async function AddCertificateButton({
-  params,
-}: { params: Promise<{ handle: string }> }) {
-  const { handle } = await params;
-  const person = await getPersonByHandle(handle);
+  personPromise,
+}: { personPromise: Promise<User.Person.$schema.Person> }) {
+  const person = await personPromise;
 
   return <AddCertificate className="" personId={person.id} />;
 }
@@ -53,10 +79,11 @@ export default function WatersportCertificatesSection(
   return (
     <StackedLayoutCardDisclosure
       className={gridContainer}
+      defaultOpen
       header={
         <>
           <div className="flex justify-between items-center gap-2">
-            <Subheading>Overige watersportcertificaten</Subheading>
+            <Subheading>Aanvullende vaardigheden</Subheading>
             <StackedLayoutCardDisclosureChevron />
           </div>
           <Text>
@@ -73,7 +100,7 @@ export default function WatersportCertificatesSection(
             <div className="bg-slate-200 rounded-lg w-40.5 h-9 animate-pulse" />
           }
         >
-          <AddCertificateButton params={props.params} />
+          <AddCertificateButton {...props} />
         </Suspense>
       </div>
       <Suspense

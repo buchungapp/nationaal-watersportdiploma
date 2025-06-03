@@ -1498,8 +1498,6 @@ export const listActiveCohortsForPerson = cache(
         throw new Error("Unauthorized");
       }
 
-      console.log("personId: ", personId ?? primaryPerson.id);
-
       const cohorts =
         await Cohort.Allocation.listPersonActiveCohortsGroupedByLocation({
           personId: personId ?? primaryPerson.id,

@@ -1,7 +1,5 @@
-import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-
-import { redirect } from "next/navigation";
 import { after } from "next/server";
+import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { getPersonByHandle, getUserOrThrow } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import { Locations } from "./_components/locations";
@@ -23,10 +21,6 @@ export default function Page(props: {
     const { handle } = await props.params;
 
     const person = await getPersonByHandle(handle);
-
-    if (!person) {
-      redirect("/login");
-    }
 
     return person;
   })();
@@ -68,11 +62,14 @@ export default function Page(props: {
           <ProgressSection personPromise={personPromise} />
 
           <WatersportCertificatesSection
-            params={props.params}
+            personPromise={personPromise}
             searchParams={props.searchParams}
           />
 
-          <Logbook params={props.params} searchParams={props.searchParams} />
+          <Logbook
+            personPromise={personPromise}
+            searchParams={props.searchParams}
+          />
         </div>
 
         <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2">
