@@ -9,17 +9,20 @@ import {
   exists,
   getTableColumns,
   gte,
+  inArray,
   isNotNull,
   isNull,
   lte,
+  notExists,
+  or,
   sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core/alias";
-import { inArray, notExists } from "drizzle-orm/sql/expressions";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   applyArrayOrEqual,
+  jsonAggBuildObject,
   possibleSingleRow,
   singleOrArray,
   singleRow,
@@ -1326,6 +1329,97 @@ export const retrieveAllocationById = wrapQuery(
             | "location_admin",
         },
       };
+    },
+  ),
+);
+
+export const listPersonActiveCohortsGroupedByLocation = wrapQuery(
+  "cohort.allocation.listPersonActiveCohortsGroupedByLocation",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      allocationType: z
+        .array(z.enum(["student", "instructor", "location_admin"]))
+        .default(["student", "instructor", "location_admin"]),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      const rows = await query
+        .select({
+          locationId: s.location.id,
+          cohorts: jsonAggBuildObject(
+            {
+              id: s.cohort.id,
+              handle: s.cohort.handle,
+              label: s.cohort.label,
+            },
+            {
+              orderBy: [
+                {
+                  colName: s.cohort.accessStartTime,
+                  direction: "ASC",
+                },
+                {
+                  colName: s.cohort.accessEndTime,
+                  direction: "ASC",
+                },
+              ],
+            },
+          ),
+        })
+        .from(s.cohort)
+        .innerJoin(s.location, eq(s.cohort.locationId, s.location.id))
+        .where(
+          and(
+            or(
+              // Location admin has access to all cohorts in their location
+              exists(
+                query
+                  .select({ id: sql`1` })
+                  .from(s.actor)
+                  .innerJoin(s.person, eq(s.person.id, s.actor.personId))
+                  .where(
+                    and(
+                      eq(s.actor.personId, input.personId),
+                      eq(s.actor.type, "location_admin"),
+                      isNull(s.actor.deletedAt),
+                      isNull(s.person.deletedAt),
+                      inArray(s.actor.type, input.allocationType),
+                    ),
+                  ),
+              ),
+              // Student/instructor has access through cohort allocation
+              exists(
+                query
+                  .select({ id: sql`1` })
+                  .from(s.cohortAllocation)
+                  .innerJoin(
+                    s.actor,
+                    eq(s.actor.id, s.cohortAllocation.actorId),
+                  )
+                  .innerJoin(s.person, eq(s.person.id, s.actor.personId))
+                  .where(
+                    and(
+                      eq(s.cohortAllocation.cohortId, s.cohort.id),
+                      eq(s.actor.personId, input.personId),
+                      inArray(s.actor.type, input.allocationType),
+                      isNull(s.cohortAllocation.deletedAt),
+                      isNull(s.actor.deletedAt),
+                      isNull(s.person.deletedAt),
+                    ),
+                  ),
+              ),
+            ),
+            lte(s.cohort.accessStartTime, sql`NOW()`),
+            gte(s.cohort.accessEndTime, sql`NOW()`),
+            isNull(s.cohort.deletedAt),
+            isNull(s.location.deletedAt),
+          ),
+        )
+        .groupBy(s.location.id);
+
+      return rows;
     },
   ),
 );

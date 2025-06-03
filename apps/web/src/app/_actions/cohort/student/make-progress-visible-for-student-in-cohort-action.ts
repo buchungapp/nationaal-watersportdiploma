@@ -23,5 +23,5 @@ export const makeProgressVisibleForStudentInCohortAction = actionClientWithMeta
       "page",
     );
     revalidatePath("/locatie/[location]/cohorten/[cohort]/diplomas", "page");
-    revalidatePath("/profiel/[handle]/voortgang/[allocation-id]", "page");
+    revalidatePath("/profiel/[handle]", "page");
   });

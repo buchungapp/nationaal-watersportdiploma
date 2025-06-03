@@ -9,6 +9,7 @@ import {
   exists,
   inArray,
   isNotNull,
+  isNull,
   lte,
   sql,
 } from "drizzle-orm";
@@ -18,6 +19,7 @@ import { findItem, singleRow } from "../../utils/data-helpers.js";
 import dayjs from "../../utils/dayjs.js";
 import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
+  dateTimeSchema,
   singleOrArray,
   successfulCreateResponse,
   uuidSchema,
@@ -35,7 +37,6 @@ export const create = wrapCommand(
     insertSchema.pick({
       programId: true,
       revision: true,
-      startedAt: true,
     }),
     successfulCreateResponse,
     async (input) => {
@@ -46,7 +47,6 @@ export const create = wrapCommand(
         .values({
           programId: input.programId,
           revision: input.revision,
-          startedAt: input.startedAt,
         })
         .returning({ id: s.curriculum.id });
 
@@ -285,7 +285,7 @@ export const list = wrapQuery(
 );
 
 export const getById = wrapQuery(
-  "curriculum.curriculum.getById",
+  "curriculum.getById",
   withZod(
     z.object({
       id: uuidSchema,
@@ -408,7 +408,7 @@ export const getById = wrapQuery(
 );
 
 export const countStartedStudents = wrapQuery(
-  "curriculum.curriculum.countStartedStudents",
+  "curriculum.countStartedStudents",
   withZod(
     z.object({
       curriculumId: uuidSchema,
@@ -429,7 +429,7 @@ export const countStartedStudents = wrapQuery(
 );
 
 export const copy = wrapCommand(
-  "curriculum.curriculum.copy",
+  "curriculum.copy",
   withZod(
     z.object({
       curriculumId: uuidSchema,
@@ -507,8 +507,36 @@ export const copy = wrapCommand(
   ),
 );
 
+export const start = wrapCommand(
+  "curriculum.start",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+      startedAt: dateTimeSchema.optional(),
+    }),
+    successfulCreateResponse,
+    async ({ curriculumId, startedAt }) => {
+      const query = useQuery();
+      const curriculum = await query
+        .update(s.curriculum)
+        .set({ startedAt: startedAt ?? sql`NOW()` })
+        .where(
+          // @TODO: Check if curriculum contains at least one valid module
+          and(
+            eq(s.curriculum.id, curriculumId),
+            isNull(s.curriculum.startedAt),
+          ),
+        )
+        .returning({ id: s.curriculum.id })
+        .then(singleRow);
+
+      return { id: curriculum.id };
+    },
+  ),
+);
+
 export const linkModule = wrapCommand(
-  "curriculum.curriculum.linkModule",
+  "curriculum.linkModule",
   withZod(
     z.object({
       curriculumId: uuidSchema,

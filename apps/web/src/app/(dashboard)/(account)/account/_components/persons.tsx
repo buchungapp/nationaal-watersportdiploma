@@ -5,13 +5,13 @@ import {
   DescriptionList,
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
   GridList,
   GridListHeader,
   GridListItem,
 } from "~/app/(dashboard)/_components/grid-list";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Code, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listPersonsForUser } from "~/lib/nwd";
@@ -22,7 +22,7 @@ async function PersonsList() {
   return persons.length > 0 ? (
     <GridList>
       {persons.map((person) => (
-        <GridListItem key={person.id}>
+        <GridListItem key={person.id} className="bg-white">
           <GridListHeader href={`/profiel/${person.handle}`}>
             <Avatar
               square
@@ -68,7 +68,7 @@ async function PersonsList() {
 function PersonsListFallback() {
   return (
     <GridList>
-      <GridListItem>
+      <GridListItem className="bg-white">
         <GridListHeader href="#">
           <Avatar
             square
@@ -95,9 +95,10 @@ function PersonsListFallback() {
 
 export function Persons() {
   return (
-    <div className="my-6">
-      <Subheading>Personen die jij beheert</Subheading>
-      <Divider className="mt-2 mb-4" />
+    <div>
+      <StackedLayoutCard className="mb-3">
+        <Subheading>Personen die jij beheert</Subheading>
+      </StackedLayoutCard>
       <Suspense fallback={<PersonsListFallback />}>
         <PersonsList />
       </Suspense>

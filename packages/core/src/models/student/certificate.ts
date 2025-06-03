@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
@@ -77,6 +77,37 @@ export const completeCompetency = wrapCommand(
       const competencies = Array.isArray(input.competencyId)
         ? input.competencyId
         : [input.competencyId];
+
+      // Check if all competencies belong to the student's curriculum
+      const validCompetencies = await query
+        .select({ competencyId: s.curriculumCompetency.id })
+        .from(s.curriculumCompetency)
+        .innerJoin(
+          s.studentCurriculum,
+          eq(
+            s.curriculumCompetency.curriculumId,
+            s.studentCurriculum.curriculumId,
+          ),
+        )
+        .where(
+          and(
+            eq(s.studentCurriculum.id, input.studentCurriculumId),
+            inArray(s.curriculumCompetency.id, competencies),
+          ),
+        );
+
+      const validCompetencyIds = validCompetencies.map((c) => c.competencyId);
+
+      // Check if all provided competencies are valid
+      const invalidCompetencies = competencies.filter(
+        (id) => !validCompetencyIds.includes(id),
+      );
+
+      if (invalidCompetencies.length > 0) {
+        throw new Error(
+          `Competencies [${invalidCompetencies.join(", ")}] do not belong to the student's curriculum`,
+        );
+      }
 
       await query.insert(s.studentCompletedCompetency).values(
         competencies.map((competencyId) => ({

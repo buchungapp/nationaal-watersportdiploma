@@ -15,7 +15,14 @@ import { insertSchema, selectSchema } from "./actor.schema.js";
 export const listActiveTypesForUser = wrapQuery(
   "user.actor.listActiveTypesForUser",
   withZod(
-    z.object({ userId: uuidSchema }),
+    z.object({
+      userId: uuidSchema,
+      filter: z
+        .object({
+          personId: uuidSchema,
+        })
+        .optional(),
+    }),
     selectSchema.shape.type.array(),
     async (input) => {
       const query = useQuery();
@@ -25,16 +32,16 @@ export const listActiveTypesForUser = wrapQuery(
         .from(s.actor)
         .innerJoin(s.person, eq(s.actor.personId, s.person.id))
         .innerJoin(s.location, eq(s.actor.locationId, s.location.id))
-        .innerJoin(
-          s.personLocationLink,
-          and(
-            eq(s.personLocationLink.personId, s.person.id),
-            eq(s.personLocationLink.locationId, s.location.id),
-            eq(s.personLocationLink.status, "linked"),
-          ),
-        )
         .where(
-          and(isNull(s.actor.deletedAt), eq(s.person.userId, input.userId)),
+          and(
+            isNull(s.actor.deletedAt),
+            isNull(s.location.deletedAt),
+            isNull(s.person.deletedAt),
+            eq(s.person.userId, input.userId),
+            input.filter?.personId
+              ? eq(s.actor.personId, input.filter.personId)
+              : undefined,
+          ),
         );
 
       return rows.map(({ type }) => type);

@@ -16,7 +16,7 @@ import {
 import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import { removeExternalCertificateAction } from "~/app/_actions/certificate/remove-external-certificate-action";
 import Spinner from "~/app/_components/spinner";
-import type { ExternalCertificate } from "../certificates";
+import type { ExternalCertificate } from "./certificates-list";
 
 export function RemoveCertificateButton() {
   const { open } = useDialog("remove-certificate");

@@ -1,22 +1,26 @@
 import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
 import {
   and,
   asc,
   desc,
   eq,
-  exists,
   getTableColumns,
+  gte,
   inArray,
+  isNotNull,
   isNull,
   lte,
-  max,
   notExists,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
+  dateTimeSchema,
   enforceArray,
+  handleSchema,
+  jsonAggBuildObject,
   singleOrArray,
   uuidSchema,
   withZod,
@@ -24,8 +28,164 @@ import {
   wrapQuery,
 } from "../../utils/index.js";
 
+export const listByPersonId = wrapQuery(
+  "cohort.studentProgress.listByPersonId",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      respectProgressVisibility: z.boolean().default(false),
+      respectCohortVisibility: z.boolean().default(false),
+    }),
+    z
+      .object({
+        allocation: z.object({
+          id: uuidSchema,
+          cohort: z.object({
+            id: uuidSchema,
+            location: z.object({
+              id: uuidSchema,
+              handle: handleSchema,
+              name: z.string().nullable(),
+            }),
+          }),
+        }),
+        studentCurriculumId: uuidSchema,
+        progress: z
+          .object({
+            competencyId: uuidSchema,
+            moduleId: uuidSchema,
+            progress: z.number().int().min(0).max(100),
+            createdAt: dateTimeSchema,
+          })
+          .array(),
+        progressVisibleUpUntil: dateTimeSchema.nullable(),
+      })
+      .array(),
+    async ({
+      personId,
+      respectProgressVisibility,
+      respectCohortVisibility,
+    }) => {
+      const query = useQuery();
+
+      const latestProgress = query.$with("latest_progress").as(
+        query
+          .selectDistinctOn(
+            [
+              s.studentCohortProgress.cohortAllocationId,
+              s.studentCohortProgress.competencyId,
+            ],
+            {
+              cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
+              competencyId: s.studentCohortProgress.competencyId,
+              moduleId: s.curriculumCompetency.moduleId,
+              progress: s.studentCohortProgress.progress,
+              createdAt: s.studentCohortProgress.createdAt,
+            },
+          )
+          .from(s.studentCohortProgress)
+          .innerJoin(
+            s.curriculumCompetency,
+            eq(s.studentCohortProgress.competencyId, s.curriculumCompetency.id),
+          )
+          .innerJoin(
+            s.cohortAllocation,
+            eq(
+              s.studentCohortProgress.cohortAllocationId,
+              s.cohortAllocation.id,
+            ),
+          )
+          .where(
+            respectProgressVisibility
+              ? lte(
+                  s.studentCohortProgress.createdAt,
+                  s.cohortAllocation.progressVisibleUpUntil,
+                )
+              : undefined,
+          )
+          .orderBy(
+            s.studentCohortProgress.cohortAllocationId,
+            s.studentCohortProgress.competencyId,
+            desc(s.studentCohortProgress.createdAt),
+          ),
+      );
+
+      const rows = await query
+        .with(latestProgress)
+        .select({
+          allocationId: s.cohortAllocation.id,
+          cohortId: s.cohort.id,
+          locationId: s.location.id,
+          locationHandle: s.location.handle,
+          locationName: s.location.name,
+          studentCurriculumId: s.cohortAllocation.studentCurriculumId,
+          progress: jsonAggBuildObject({
+            competencyId: latestProgress.competencyId,
+            moduleId: latestProgress.moduleId,
+            progress: sql<number>`${latestProgress.progress}::integer`,
+            createdAt: latestProgress.createdAt,
+          }).as("progress"),
+          progressVisibleUpUntil: s.cohortAllocation.progressVisibleUpUntil,
+        })
+        .from(s.cohortAllocation)
+        .innerJoin(s.actor, eq(s.cohortAllocation.actorId, s.actor.id))
+        .innerJoin(s.cohort, eq(s.cohortAllocation.cohortId, s.cohort.id))
+        .innerJoin(s.location, eq(s.cohort.locationId, s.location.id))
+        .leftJoin(
+          latestProgress,
+          eq(latestProgress.cohortAllocationId, s.cohortAllocation.id),
+        )
+        .where(
+          and(
+            eq(s.actor.personId, personId),
+            eq(s.actor.type, "student"),
+            isNotNull(s.cohortAllocation.studentCurriculumId),
+            isNull(s.actor.deletedAt),
+            isNull(s.cohortAllocation.deletedAt),
+            isNull(s.cohort.deletedAt),
+            isNull(s.location.deletedAt),
+            respectCohortVisibility
+              ? and(
+                  gte(s.cohort.accessEndTime, sql`NOW()`),
+                  lte(s.cohort.accessStartTime, sql`NOW()`),
+                )
+              : undefined,
+            respectProgressVisibility
+              ? lte(s.cohortAllocation.progressVisibleUpUntil, sql`NOW()`)
+              : undefined,
+          ),
+        )
+        .groupBy(s.cohortAllocation.id, s.cohort.id, s.location.id);
+
+      return rows.map((row) => ({
+        allocation: {
+          id: row.allocationId,
+          cohort: {
+            id: row.cohortId,
+            location: {
+              id: row.locationId,
+              handle: row.locationHandle,
+              name: row.locationName,
+            },
+          },
+        },
+        studentCurriculumId: row.studentCurriculumId as string,
+        progress: row.progress.map((p) => ({
+          competencyId: p.competencyId,
+          moduleId: p.moduleId,
+          progress: p.progress,
+          createdAt: dayjs(p.createdAt).toISOString(),
+        })),
+        progressVisibleUpUntil: row.progressVisibleUpUntil
+          ? dayjs(row.progressVisibleUpUntil).toISOString()
+          : null,
+      }));
+    },
+  ),
+);
+
 export const byAllocationId = wrapQuery(
-  "cohort.student-progress.byAllocationId",
+  "cohort.studentProgress.byAllocationId",
   withZod(
     z.object({
       id: uuidSchema,
@@ -34,62 +194,33 @@ export const byAllocationId = wrapQuery(
     async ({ id: cohortAllocationId, respectProgressVisibility }) => {
       const query = useQuery();
 
-      const subquery = query
-        .select({
-          cohortAllocationId: s.studentCohortProgress.cohortAllocationId,
+      const rows = await query
+        .selectDistinctOn([s.studentCohortProgress.competencyId], {
           competencyId: s.studentCohortProgress.competencyId,
-          maxCreatedAt: max(s.studentCohortProgress.createdAt).as(
-            "max_created_at",
-          ),
+          progress: s.studentCohortProgress.progress,
+          createdAt: s.studentCohortProgress.createdAt,
         })
         .from(s.studentCohortProgress)
         .where(
           and(
             eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId),
             respectProgressVisibility
-              ? exists(
+              ? lte(
+                  s.studentCohortProgress.createdAt,
                   query
                     .select({
-                      id: sql`1`,
+                      progressVisibleUpUntil:
+                        s.cohortAllocation.progressVisibleUpUntil,
                     })
                     .from(s.cohortAllocation)
-                    .where(
-                      and(
-                        eq(s.cohortAllocation.id, cohortAllocationId),
-                        lte(
-                          s.studentCohortProgress.createdAt,
-                          s.cohortAllocation.progressVisibleUpUntil,
-                        ),
-                      ),
-                    ),
+                    .where(eq(s.cohortAllocation.id, cohortAllocationId)),
                 )
               : undefined,
           ),
         )
-        .groupBy(
-          s.studentCohortProgress.cohortAllocationId,
+        .orderBy(
           s.studentCohortProgress.competencyId,
-        )
-        .as("latest");
-
-      const rows = await query
-        .select(getTableColumns(s.studentCohortProgress))
-        .from(s.studentCohortProgress)
-        .innerJoin(
-          subquery,
-          and(
-            eq(
-              s.studentCohortProgress.cohortAllocationId,
-              subquery.cohortAllocationId,
-            ),
-            eq(s.studentCohortProgress.competencyId, subquery.competencyId),
-            eq(s.studentCohortProgress.createdAt, subquery.maxCreatedAt),
-          ),
-        )
-        .where(
-          and(
-            eq(s.studentCohortProgress.cohortAllocationId, cohortAllocationId),
-          ),
+          desc(s.studentCohortProgress.createdAt),
         );
 
       return rows.map((row) => ({

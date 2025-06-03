@@ -1,12 +1,11 @@
 "use client";
-
-import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
+import { ArrowRightIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
-import { Button } from "~/app/(dashboard)/_components/button";
+import { Button, TextButton } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
   ComboboxLabel,
@@ -18,13 +17,6 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import {
-  Dropdown,
-  DropdownButton,
-  DropdownItem,
-  DropdownLabel,
-  DropdownMenu,
-} from "~/app/(dashboard)/_components/dropdown";
 import {
   Field,
   FieldGroup,
@@ -82,16 +74,9 @@ export function EditDetails({
 
   return (
     <>
-      <Dropdown>
-        <DropdownButton outline className="-my-1.5">
-          <EllipsisHorizontalIcon />
-        </DropdownButton>
-        <DropdownMenu anchor="bottom end">
-          <DropdownItem onClick={() => setIsOpen(true)}>
-            <DropdownLabel> Wijzig gegevens</DropdownLabel>
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
+      <TextButton onClick={() => setIsOpen(true)}>
+        Bewerk gegevens <ArrowRightIcon />
+      </TextButton>
 
       <Dialog open={isOpen} onClose={closeDialog}>
         <DialogTitle>Personalia wijzigen</DialogTitle>

@@ -99,11 +99,6 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/profiel",
-        destination: "/account",
-        permanent: true,
-      },
-      {
         source: "/aansluiten",
         destination:
           "/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd",

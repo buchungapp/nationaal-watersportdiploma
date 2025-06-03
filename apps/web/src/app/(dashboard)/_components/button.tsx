@@ -230,12 +230,84 @@ export const Button = React.forwardRef(function Button(
   );
 });
 
+const textButtonStyles = {
+  base: [
+    // Base
+    "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
+
+    // Sizing
+    "px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+
+    "-mx-[calc(--spacing(3.5)-1px)] -my-[calc(--spacing(2.5)-1px)] sm:-mx-[calc(--spacing(3)-1px)] sm:-my-[calc(--spacing(1.5)-1px)]",
+
+    // Focus
+    "focus:outline-hidden data-focus:outline data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
+
+    // Disabled
+    "data-disabled:opacity-50",
+
+    // Icon
+    "*:data-[slot=icon]:-mx-0.5 *:data-[slot=icon]:my-0.5 *:data-[slot=icon]:size-5 *:data-[slot=icon]:shrink-0 *:data-[slot=icon]:text-(--btn-icon) sm:*:data-[slot=icon]:my-1 sm:*:data-[slot=icon]:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-hover:[--btn-icon:ButtonText]",
+  ],
+  plain: [
+    // Base
+    "border-transparent text-(--btn-text) data-active:bg-zinc-50 data-hover:bg-zinc-50",
+
+    // Dark mode
+    "dark:text-(--btn-text-dark) dark:data-active:bg-zinc-50 dark:data-hover:bg-zinc-50",
+
+    // Icon
+    "[--btn-icon:var(--btn-text)] data-active:[--btn-icon:var(--btn-text)] data-hover:[--btn-icon:var(--btn-text)] dark:[--btn-icon:var(--btn-text-dark)] dark:data-active:[--btn-icon:var(--btn-text-dark)] dark:data-hover:[--btn-icon:var(--btn-text-dark)]",
+  ],
+  colors: {
+    zinc: [
+      "[--btn-text:var(--color-zinc-500)] [--btn-text-dark:var(--color-zinc-400)]",
+    ],
+    "dark/zinc": [
+      "[--btn-text:var(--color-zinc-950)] [--btn-text-dark:var(--color-zinc-400)]",
+    ],
+  },
+};
+
+type TextButtonProps = {
+  children: React.ReactNode;
+  color?: keyof typeof textButtonStyles.colors;
+  center?: boolean;
+} & (Headless.ButtonProps | React.ComponentPropsWithoutRef<typeof Link>);
+
+export const TextButton = React.forwardRef(function TextButton(
+  { color, center = true, className, children, ...props }: TextButtonProps,
+  ref: React.ForwardedRef<HTMLElement>,
+) {
+  const classes = clsx(
+    className,
+    textButtonStyles.base,
+    textButtonStyles.plain,
+    textButtonStyles.colors[color ?? "zinc"],
+    center && "justify-center",
+  );
+
+  return "href" in props ? (
+    <Link
+      {...props}
+      className={classes}
+      ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+    >
+      <TouchTarget>{children}</TouchTarget>
+    </Link>
+  ) : (
+    <Headless.Button {...props} className={clsx(classes, "cursor-default")}>
+      <TouchTarget>{children}</TouchTarget>
+    </Headless.Button>
+  );
+});
+
 /* Expand the hit area to at least 44×44px on touch devices */
 export function TouchTarget({ children }: { children: React.ReactNode }) {
   return (
     <>
       <span
-        className="absolute left-1/2 top-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 [@media(pointer:fine)]:hidden"
+        className="[@media(pointer:fine)]:hidden top-1/2 left-1/2 absolute size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2"
         aria-hidden="true"
       />
       {children}

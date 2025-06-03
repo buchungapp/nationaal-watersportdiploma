@@ -1,7 +1,7 @@
 import { constants } from "@nawadi/lib";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
-import watersportverbondWhite from "~/app/(public)/_assets/watersportverbond-white.png";
+import watersportverbondWhite from "~/app/_assets/watersportverbond-white.png";
 
 import { unstable_cacheLife as cacheLife } from "next/cache";
 import Image from "next/image";
@@ -20,7 +20,7 @@ function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
     <li>
       <Link
         href={href}
-        className="-mx-2.5 -my-1.5 w-fit rounded-lg px-2.5 py-1.5 transition-colors hover:bg-white/10"
+        className="hover:bg-white/10 -mx-2.5 -my-1.5 px-2.5 py-1.5 rounded-lg w-fit transition-colors"
       >
         {children}
       </Link>
@@ -65,42 +65,42 @@ export default async function Footer() {
   ];
 
   return (
-    <footer className="mt-32 grid gap-14 rounded-t-[3rem] bg-branding-dark px-4 pb-12 pt-20 lg:px-16">
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-2">
+    <footer className="gap-14 grid bg-branding-dark mt-32 px-4 lg:px-16 pt-20 pb-12 rounded-t-[3rem]">
+      <div className="items-start gap-12 grid grid-cols-1 lg:grid-cols-2">
         <div>
-          <div className="grid gap-6 justify-start">
-            <NWDPreviousCWO className="h-16 w-fit text-white" />
-            <p className="text-sm text-slate-200">{constants.APP_SLOGAN}</p>
+          <div className="justify-start gap-6 grid">
+            <NWDPreviousCWO className="w-fit h-16 text-white" />
+            <p className="text-slate-200 text-sm">{constants.APP_SLOGAN}</p>
           </div>
 
           <div className="mt-12">
-            <p className="text-sm uppercase font-semibold text-white/55">
+            <p className="font-semibold text-white/55 text-sm uppercase">
               Gelicentieerd door
             </p>
             <Link href="/partners">
               <Image
                 src={watersportverbondWhite}
-                className="h-14 w-auto mt-3.5"
+                className="mt-3.5 w-auto h-14"
                 alt="Watersportverbond"
               />
             </Link>
           </div>
         </div>
-        <div className="grid grid-cols-1 items-start gap-12 text-sm lg:grid-cols-3 lg:gap-0">
-          <div className="grid gap-6">
-            <h3 className="font-semibold uppercase text-white">
+        <div className="items-start gap-12 lg:gap-0 grid grid-cols-1 lg:grid-cols-3 text-sm">
+          <div className="gap-6 grid">
+            <h3 className="font-semibold text-white uppercase">
               Diplomeringslijn
             </h3>
-            <ul className="grid gap-6 text-slate-200">
+            <ul className="gap-6 grid text-slate-200">
               <FooterLink href="/diplomalijn/consument">Consumenten</FooterLink>
               <FooterLink href="/diplomalijn/instructeur">
                 Instructeurs
               </FooterLink>
             </ul>
           </div>
-          <div className="grid gap-6">
-            <h3 className="font-semibold uppercase text-white">Locaties</h3>
-            <ul className="grid gap-6 text-slate-200">
+          <div className="gap-6 grid">
+            <h3 className="font-semibold text-white uppercase">Locaties</h3>
+            <ul className="gap-6 grid text-slate-200">
               <FooterLink href="/vaarlocaties">
                 Aangesloten vaarlocaties
               </FooterLink>
@@ -109,9 +109,9 @@ export default async function Footer() {
               </FooterLink>
             </ul>
           </div>
-          <div className="grid gap-6">
-            <h3 className="font-semibold uppercase text-white">Over NWD</h3>
-            <ul className="grid gap-6 text-slate-200">
+          <div className="gap-6 grid">
+            <h3 className="font-semibold text-white uppercase">Over NWD</h3>
+            <ul className="gap-6 grid text-slate-200">
               <FooterLink href="/vereniging/manifest">Manifest</FooterLink>
               <FooterLink href="/help">Helpcentrum</FooterLink>
               <FooterLink href="/vereniging/bestuur">Bestuur</FooterLink>
@@ -128,8 +128,8 @@ export default async function Footer() {
       </div>
       <Line className="w-full text-branding-light/20" />
 
-      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-        <div className="grid gap-2 text-sm">
+      <div className="flex lg:flex-row flex-col justify-between lg:items-center gap-4">
+        <div className="gap-2 grid text-sm">
           <p className="font-semibold text-white">
             Schrijf je in voor de NWD-nieuwsbrief
           </p>
@@ -146,13 +146,13 @@ export default async function Footer() {
             type="email"
             name="email"
             required
-            className="min-w-[200px] rounded-sm border border-[#004099] bg-[#003580] px-3 py-1.5 text-white placeholder:text-slate-400"
+            className="bg-[#003580] px-3 py-1.5 border border-[#004099] rounded-sm min-w-[200px] text-white placeholder:text-slate-400"
             placeholder="Je e-mailadres"
           />
           <input type="hidden" name="userGroup" value="Website footer" />
           <button
             type="submit"
-            className="group flex w-fit items-center gap-1 rounded-lg bg-branding-light px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white hover:text-branding-dark"
+            className="group flex items-center gap-1 bg-branding-light hover:bg-white px-4 py-2 rounded-lg w-fit font-semibold text-white hover:text-branding-dark text-sm transition-colors"
           >
             Aanmelden
           </button>
@@ -161,11 +161,11 @@ export default async function Footer() {
 
       <LineWave progress="60%" />
 
-      <div className="flex flex-col gap-4 text-slate-200 lg:flex-row">
-        <p className="flex-1 text-center text-sm lg:text-start">
+      <div className="flex lg:flex-row flex-col gap-4 text-slate-200">
+        <p className="flex-1 text-sm text-center lg:text-start">
           {`© ${await getYear()} ${constants.APP_NAME}`}
         </p>
-        <ul className="flex flex-1 items-center justify-center gap-6 lg:justify-end">
+        <ul className="flex flex-1 justify-center lg:justify-end items-center gap-6">
           {socials.map((social) => (
             <li key={social.name}>
               <Link
