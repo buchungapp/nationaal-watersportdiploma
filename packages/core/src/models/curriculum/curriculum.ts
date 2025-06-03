@@ -19,6 +19,7 @@ import { findItem, singleRow } from "../../utils/data-helpers.js";
 import dayjs from "../../utils/dayjs.js";
 import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
+  dateTimeSchema,
   singleOrArray,
   successfulCreateResponse,
   uuidSchema,
@@ -284,7 +285,7 @@ export const list = wrapQuery(
 );
 
 export const getById = wrapQuery(
-  "curriculum.curriculum.getById",
+  "curriculum.getById",
   withZod(
     z.object({
       id: uuidSchema,
@@ -407,7 +408,7 @@ export const getById = wrapQuery(
 );
 
 export const countStartedStudents = wrapQuery(
-  "curriculum.curriculum.countStartedStudents",
+  "curriculum.countStartedStudents",
   withZod(
     z.object({
       curriculumId: uuidSchema,
@@ -428,7 +429,7 @@ export const countStartedStudents = wrapQuery(
 );
 
 export const copy = wrapCommand(
-  "curriculum.curriculum.copy",
+  "curriculum.copy",
   withZod(
     z.object({
       curriculumId: uuidSchema,
@@ -507,11 +508,11 @@ export const copy = wrapCommand(
 );
 
 export const start = wrapCommand(
-  "curriculum.curriculum.start",
+  "curriculum.start",
   withZod(
     z.object({
       curriculumId: uuidSchema,
-      startedAt: z.string().datetime({ offset: true }).optional(),
+      startedAt: dateTimeSchema.optional(),
     }),
     successfulCreateResponse,
     async ({ curriculumId, startedAt }) => {
@@ -535,7 +536,7 @@ export const start = wrapCommand(
 );
 
 export const linkModule = wrapCommand(
-  "curriculum.curriculum.linkModule",
+  "curriculum.linkModule",
   withZod(
     z.object({
       curriculumId: uuidSchema,
