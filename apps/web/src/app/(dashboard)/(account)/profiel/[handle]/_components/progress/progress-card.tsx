@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { Student } from "@nawadi/core";
 import clsx from "clsx";
+import dayjs from "dayjs";
 import Link from "next/link";
 import type React from "react";
 import { type PropsWithChildren, createContext, useContext } from "react";
@@ -514,9 +515,20 @@ export function ModuleDisclosure({
   children,
   module,
   progress,
+  certificate,
 }: PropsWithChildren<{
   module: Student.Curriculum.$schema.StudentCurriculum["curriculum"]["modules"][number];
   progress: number;
+  certificate?: {
+    id: string;
+    handle: string;
+    issuedAt: string;
+    location: {
+      id: string;
+      handle: string;
+      name: string | null;
+    };
+  };
 }>) {
   return (
     <Headless.Disclosure as="li">
@@ -542,7 +554,33 @@ export function ModuleDisclosure({
           </div>
         </div>
       </Headless.DisclosureButton>
-      <Headless.DisclosurePanel>{children}</Headless.DisclosurePanel>
+      <Headless.DisclosurePanel>
+        {certificate ? (
+          <div className="pl-13 mb-2">
+            <ProgressCardDescriptionList>
+              <ProgressCardDescriptionListItem
+                label="Diplomanummer"
+                className="col-span-full sm:col-span-2"
+              >
+                {certificate.handle}
+              </ProgressCardDescriptionListItem>
+              <ProgressCardDescriptionListItem
+                label="Datum van afgifte"
+                className="col-span-full sm:col-span-2"
+              >
+                {dayjs(certificate.issuedAt).format("DD-MM-YYYY")}
+              </ProgressCardDescriptionListItem>
+              <ProgressCardDescriptionListItem
+                label="Vaarlocatie van afgifte"
+                className="col-span-full sm:col-span-2"
+              >
+                {certificate.location.name ?? "Onbekend"}
+              </ProgressCardDescriptionListItem>
+            </ProgressCardDescriptionList>
+          </div>
+        ) : undefined}
+        {children}
+      </Headless.DisclosurePanel>
     </Headless.Disclosure>
   );
 }

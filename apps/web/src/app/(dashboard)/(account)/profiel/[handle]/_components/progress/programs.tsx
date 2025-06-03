@@ -116,11 +116,17 @@ async function Programs({
                         (m) => m.moduleId === module.id,
                       );
 
+                      const relevantCertificate =
+                        curriculumProgress?.certificates.find(
+                          (c) => c.id === completedModule?.certificateId,
+                        );
+
                       return (
                         <ModuleDisclosure
                           key={module.id}
                           module={module}
                           progress={completedModule ? 100 : 0}
+                          certificate={relevantCertificate}
                         >
                           <ProgressCardStatusSubList>
                             {module.competencies.map((c) => {
@@ -146,11 +152,17 @@ async function Programs({
                             (m) => m.moduleId === module.id,
                           );
 
+                        const relevantCertificate =
+                          curriculumProgress?.certificates.find(
+                            (c) => c.id === completedModule?.certificateId,
+                          );
+
                         return (
                           <ModuleDisclosure
                             key={module.id}
                             module={module}
                             progress={completedModule ? 100 : 0}
+                            certificate={relevantCertificate}
                           >
                             <ProgressCardStatusSubList>
                               {module.competencies.map((c) => {
