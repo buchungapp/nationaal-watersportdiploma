@@ -383,7 +383,7 @@ export function ProgressCardEmptyState({
           <p className={clsx("text-base/6 sm:text-sm/6", style.textClassName)}>
             Denk je dat er een {style.label} ontbreekt?{" "}
             <Link
-              href="/help/categorie/app-consumenten"
+              href="/help/artikel/nwd-diplomas-opleidingen-en-cursussen-in-jouw-profiel"
               className="hover:underline hover:underline-offset-1"
               target="_blank"
             >

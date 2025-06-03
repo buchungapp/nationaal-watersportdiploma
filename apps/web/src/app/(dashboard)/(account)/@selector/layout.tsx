@@ -59,7 +59,10 @@ async function PersonsDropdownMenu() {
       })}
       <DropdownDivider />
       <FeedbackButton />
-      <DropdownItem href="/help">
+      <DropdownItem
+        href="/help/categorie/app-consumenten"
+        className="lg:hidden"
+      >
         <LifebuoyIcon />
         <DropdownLabel>Helpcentrum</DropdownLabel>
       </DropdownItem>
