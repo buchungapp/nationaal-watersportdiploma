@@ -370,16 +370,14 @@ export function ProgressCardEmptyState({
 
           <div className="space-y-2 mt-2.5">
             <div>
-              <Balancer>
-                <h3
-                  className={clsx(
-                    "text-2xl/7 font-semibold sm:text-xl/7",
-                    style.headingClassName,
-                  )}
-                >
-                  {style.heading}
-                </h3>
-              </Balancer>
+              <h3
+                className={clsx(
+                  "text-2xl/7 font-semibold sm:text-xl/7",
+                  style.headingClassName,
+                )}
+              >
+                <Balancer>{style.heading}</Balancer>
+              </h3>
             </div>
           </div>
 
