@@ -67,7 +67,7 @@ async function PersonsList() {
             <div className="px-2 sm:px-4">
               <GridListItemDisclosure
                 header="Persoonlijke informatie"
-                defaultOpen={false}
+                defaultOpen={true}
               >
                 <PersonaliaContent personPromise={Promise.resolve(person)} />
               </GridListItemDisclosure>
