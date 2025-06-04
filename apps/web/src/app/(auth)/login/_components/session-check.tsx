@@ -8,7 +8,7 @@ async function SessionCheckLogic() {
   const { data } = await supabase.auth.getUser();
 
   if (data.user) {
-    redirect("/profiel");
+    redirect("/profiel?_cacheBust=1");
   }
 
   return null;

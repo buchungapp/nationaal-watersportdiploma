@@ -32,5 +32,5 @@ export const verifyAction = actionClientWithMeta
     }
 
     revalidatePath("/", "layout");
-    redirect("/profiel");
+    redirect("/profiel?_cacheBust=1");
   });

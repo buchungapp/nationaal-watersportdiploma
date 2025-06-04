@@ -20,7 +20,7 @@ export default function Layout({
     <StackedLayout
       navbar={
         <Navbar>
-          <Link href="/profiel">
+          <Link href="/profiel?_cacheBust=1">
             <Logo className="size-8 text-white" />
           </Link>
 
