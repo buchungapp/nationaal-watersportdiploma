@@ -8,6 +8,7 @@ import {
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
+import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listCountries } from "~/lib/nwd";
 import { EditDetails } from "./action-buttons";
@@ -23,7 +24,7 @@ async function ActionButton({
   return <EditDetails person={person} countries={countries} />;
 }
 
-async function PersonaliaContent({
+export async function PersonaliaContent({
   personPromise,
 }: { personPromise: Promise<User.Person.$schema.Person> }) {
   const person = await personPromise;
@@ -31,7 +32,9 @@ async function PersonaliaContent({
   return (
     <DescriptionList>
       <DescriptionTerm>NWD-ID</DescriptionTerm>
-      <DescriptionDetails>{person.handle}</DescriptionDetails>
+      <DescriptionDetails>
+        <Code>{person.handle}</Code>
+      </DescriptionDetails>
 
       <DescriptionTerm>Voornaam</DescriptionTerm>
       <DescriptionDetails>{person.firstName}</DescriptionDetails>

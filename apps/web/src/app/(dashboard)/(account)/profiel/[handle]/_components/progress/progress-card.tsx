@@ -126,21 +126,21 @@ export function ProgressCardHeader({
     }
   > = {
     program: {
-      background: "bg-sky-50",
+      background: "bg-sky-50/50",
       text: "text-branding-light",
       typeLabel: "Opleiding",
       typeLabelColor: "text-sky-900",
       waveColor: "text-branding-light",
     },
     certificate: {
-      background: "bg-orange-50",
+      background: "bg-orange-50/50",
       text: "text-branding-orange",
       typeLabel: "Diploma",
       typeLabelColor: "text-orange-900",
       waveColor: "text-branding-orange",
     },
     course: {
-      background: "bg-blue-50",
+      background: "bg-blue-50/50",
       text: "text-branding-dark",
       typeLabel: "Cursus",
       typeLabelColor: "text-blue-900",

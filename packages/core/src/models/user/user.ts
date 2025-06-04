@@ -31,7 +31,7 @@ import { selectSchema } from "./user.schema.js";
  * optimized or simplified without reintroducing the original issues.
  */
 export const getOrCreateFromEmail = wrapCommand(
-  "user.user.getOrCreateFromEmail",
+  "user.getOrCreateFromEmail",
   withZod(
     z.object({
       email: z.string().trim().toLowerCase().email(),
@@ -117,7 +117,7 @@ export const getOrCreateFromEmail = wrapCommand(
 );
 
 export const fromId = wrapQuery(
-  "user.user.fromId",
+  "user.fromId",
   withZod(uuidSchema, selectSchema, async (id) => {
     const query = useQuery();
 
@@ -157,7 +157,7 @@ export const fromId = wrapQuery(
 );
 
 export const canUserAccessLocation = wrapCommand(
-  "user.user.canUserAccessLocation",
+  "user.canUserAccessLocation",
   withZod(
     z.object({
       userId: uuidSchema,
@@ -184,6 +184,22 @@ export const canUserAccessLocation = wrapCommand(
         );
 
       return rows.length > 0;
+    },
+  ),
+);
+
+export const updateDisplayName = wrapCommand(
+  "user.updateDisplayName",
+  withZod(
+    z.object({ userId: uuidSchema, displayName: z.string() }),
+    z.void(),
+    async ({ userId, displayName }) => {
+      const query = useQuery();
+
+      await query
+        .update(s.user)
+        .set({ displayName })
+        .where(eq(s.user.authUserId, userId));
     },
   ),
 );
