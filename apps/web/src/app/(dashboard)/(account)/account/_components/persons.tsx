@@ -1,6 +1,7 @@
 import { clsx } from "clsx";
 import Link from "next/link";
 import { Suspense } from "react";
+import Balancer from "react-wrap-balancer";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
 import {
   DescriptionDetails,
@@ -13,7 +14,7 @@ import {
   GridListItemDisclosure,
   GridListItemHeader,
 } from "~/app/(dashboard)/_components/grid-list-v2";
-import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { AnimatedWave } from "~/app/_components/animated-wave";
@@ -25,7 +26,7 @@ import { PersonActions } from "./persons-client";
 async function PersonsList() {
   const persons = await listPersonsForUser();
 
-  return persons.length > 0 ? (
+  return persons.length > 10 ? (
     <GridList>
       {persons
         .sort((a) => (a.isPrimary ? -1 : 1))
@@ -75,16 +76,32 @@ async function PersonsList() {
         ))}
     </GridList>
   ) : (
-    <>
-      <Text className="italic">
-        Er zijn nog geen personen aan jouw account gekoppeld. Neem contact op
-        met de{" "}
-        <TextLink href="/vaarlocaties" target="_blank">
-          vaarlocatie
-        </TextLink>{" "}
-        waar de cursus is gevolgd.
-      </Text>
-    </>
+    <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
+      <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+        <div className="space-y-2">
+          <div>
+            <Heading>
+              <Balancer>
+                Er zijn nog geen profielen aan jouw account gekoppeld.
+              </Balancer>
+            </Heading>
+          </div>
+        </div>
+
+        <div className="my-6">
+          <AddPersonButton countriesPromise={listCountries()} />
+        </div>
+
+        <Text>
+          Voeg een profiel toe om alle functies van het Nationaal
+          Watersportdiploma platform te kunnen gebruiken. <br />
+          <TextLink href="/help/artikel/personenbeheer" target="_blank">
+            Lees hier meer over personenbeheer.
+          </TextLink>
+        </Text>
+      </div>
+      <AnimatedWave textColorClassName="text-zinc-600" />
+    </div>
   );
 }
 
