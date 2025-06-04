@@ -127,12 +127,6 @@ export function Persons() {
             <Text>
               De volgende personen zijn aan jouw account gekoppeld. Klik op een
               naam om de profielpagina te bekijken.
-              {/* Staan hier niet de
-              personen die verwacht? Lees dan ons{" "}
-              <TextLink href="/help/artikel/personenbeheer" target="_blank">
-                helpartikel
-              </TextLink>{" "}
-              voor meer informatie. */}
             </Text>
           </div>
           <Button outline className="whitespace-nowrap">
@@ -144,6 +138,20 @@ export function Persons() {
           <Suspense fallback={<PersonsListFallback />}>
             <PersonsList />
           </Suspense>
+        </div>
+
+        <div className="bg-yellow-50 p-4 rounded-md mt-4">
+          <p className="text-sm text-yellow-700">
+            Zie je niet alle personen die je verwacht, of juist teveel?{" "}
+            <Link
+              href="/help/artikel/personenbeheer"
+              target="_blank"
+              className="font-medium text-yellow-700 underline hover:text-yellow-600"
+            >
+              Lees hier waarom en hoe je dit kunt oplossen
+            </Link>
+            .
+          </p>
         </div>
       </StackedLayoutCard>
     </div>
