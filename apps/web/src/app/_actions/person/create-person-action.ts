@@ -61,7 +61,7 @@ const createPersonSchema = zfd
 const createPersonArgsSchema: [locationId: z.ZodString] = [z.string().uuid()];
 
 export const createPersonForLocationAction = actionClientWithMeta
-  .metadata({ name: "create-person" })
+  .metadata({ name: "create-person-for-location" })
   .schema(createPersonSchema)
   .bindArgsSchemas(createPersonArgsSchema)
   .action(

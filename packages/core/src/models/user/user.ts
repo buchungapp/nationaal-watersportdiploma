@@ -1,8 +1,8 @@
 import { DatabaseError, schema as s, uncontrolledSchema } from "@nawadi/db";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
-import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.js";
 import { createAuthUser } from "../../services/auth/handlers.js";
 import {
   possibleSingleRow,
@@ -200,6 +200,49 @@ export const updateDisplayName = wrapCommand(
         .update(s.user)
         .set({ displayName })
         .where(eq(s.user.authUserId, userId));
+    },
+  ),
+);
+
+export const setPrimaryPerson = wrapCommand(
+  "user.setPrimaryPerson",
+  withZod(
+    z.object({
+      userId: uuidSchema,
+      personId: uuidSchema,
+    }),
+    z.void(),
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // 1. Set all other persons as not primary
+        await tx
+          .update(s.person)
+          .set({
+            isPrimary: false,
+            updatedAt: sql`NOW()`,
+          })
+          .where(
+            and(eq(s.person.userId, input.userId), isNull(s.person.deletedAt)),
+          );
+
+        // 2. Set the person as primary (also validates person exists and belongs to user)
+        await tx
+          .update(s.person)
+          .set({
+            isPrimary: true,
+            updatedAt: sql`NOW()`,
+          })
+          .where(
+            and(
+              eq(s.person.id, input.personId),
+              eq(s.person.userId, input.userId),
+              isNull(s.person.deletedAt),
+            ),
+          )
+          .returning({ id: s.person.id })
+          // Check if the update affected any rows (validates person exists and belongs to user)
+          .then(singleRow);
+      });
     },
   ),
 );
