@@ -218,7 +218,15 @@ export const getUserOrThrow = cache(async () => {
 
     return {
       ...userData,
-      persons: persons.items,
+      persons: (() => {
+        const primaryPerson = persons.items.find((person) => person.isPrimary);
+        const nonPrimaryPersons = persons.items.filter(
+          (person) => !person.isPrimary,
+        );
+        return primaryPerson
+          ? [primaryPerson, ...nonPrimaryPersons]
+          : nonPrimaryPersons;
+      })(),
     };
   });
 });
