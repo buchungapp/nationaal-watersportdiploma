@@ -3353,3 +3353,14 @@ export const listAllCashbacks = cache(async () => {
     return await Marketing.Cashback.listAll();
   });
 });
+
+export const updateCurrentUserDisplayName = async (displayName: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    return await User.updateDisplayName({
+      userId: user.authUserId,
+      displayName,
+    });
+  });
+};

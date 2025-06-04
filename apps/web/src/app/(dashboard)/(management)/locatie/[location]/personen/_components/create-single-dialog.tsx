@@ -34,7 +34,7 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createPersonAction } from "~/app/_actions/person/create-person-action";
+import { createPersonForLocationAction } from "~/app/_actions/person/create-person-action";
 import Spinner from "~/app/_components/spinner";
 import type { ActorType } from "~/lib/nwd";
 
@@ -93,7 +93,7 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
   };
 
   const { execute, result, input, reset } = useAction(
-    createPersonAction.bind(null, locationId),
+    createPersonForLocationAction.bind(null, locationId),
     {
       onSuccess: () => {
         closeDialog();
