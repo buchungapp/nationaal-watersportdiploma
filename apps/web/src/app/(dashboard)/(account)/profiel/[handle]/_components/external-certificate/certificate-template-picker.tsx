@@ -155,7 +155,10 @@ export function CertificateTemplatePicker({
             } else if (item.type === "template") {
               setSelectedCertificateTemplate(item.template);
             } else if (item.type === "other") {
-              setSelectedCertificateTemplate(null);
+              setSelectedCertificateTemplate({
+                id: "other",
+                issuingAuthority: "",
+              });
             }
             // Ignore category headers and dividers
           }}
