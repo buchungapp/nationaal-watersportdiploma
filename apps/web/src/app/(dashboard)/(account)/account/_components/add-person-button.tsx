@@ -1,15 +1,11 @@
 "use client";
 
+import { PlusIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
-import { useRef } from "react";
+import { Suspense, use, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
-import {
-  Checkbox,
-  CheckboxField,
-  CheckboxGroup,
-} from "~/app/(dashboard)/_components/checkbox";
 import {
   Combobox,
   ComboboxLabel,
@@ -23,81 +19,107 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import {
-  Description,
-  ErrorMessage,
   Field,
   FieldGroup,
   Fieldset,
   Label,
-  Legend,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { Text } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createPersonForLocationAction } from "~/app/_actions/person/create-person-action";
+import { createPersonForUserAction } from "~/app/_actions/person/create-person-action";
 import Spinner from "~/app/_components/spinner";
-import type { ActorType } from "~/lib/nwd";
-
-const ROLES: {
-  type: ActorType;
-  label: string;
-  description: string;
-  defaultChecked?: boolean;
-}[] = [
-  {
-    type: "student",
-    label: "Cursist",
-    description: "Kan toegevoegd worden aan cohorten.",
-    defaultChecked: true,
-  },
-  {
-    type: "instructor",
-    label: "Instructeur",
-    description:
-      "Geeft lessen, kan toegevoegd worden aan cohorten en kan de diplomalijn inzien.",
-  },
-  {
-    type: "location_admin",
-    label: "Locatie beheerder",
-    description: "Heeft alle rechten, kan de locatie en cohorten beheren.",
-  },
-] as const;
 
 interface Props {
-  locationId: string;
+  countriesPromise: Promise<{ code: string; name: string }[]>;
+}
+
+export function AddPersonButton({ countriesPromise }: Props) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        outline
+        className="whitespace-nowrap"
+        onClick={() => setIsDialogOpen(true)}
+      >
+        <PlusIcon />
+        Profiel toevoegen
+      </Button>
+
+      {isDialogOpen && (
+        <Suspense fallback={null}>
+          <CreatePersonDialogWrapper
+            countriesPromise={countriesPromise}
+            isOpen={isDialogOpen}
+            close={() => setIsDialogOpen(false)}
+          />
+        </Suspense>
+      )}
+    </>
+  );
+}
+
+function CreatePersonDialogWrapper({
+  countriesPromise,
+  isOpen,
+  close,
+}: {
+  countriesPromise: Promise<{ code: string; name: string }[]>;
+  isOpen: boolean;
+  close: () => void;
+}) {
+  const countries = use(countriesPromise);
+
+  return (
+    <CreatePersonDialog countries={countries} isOpen={isOpen} close={close} />
+  );
+}
+
+function CreatePersonDialog({
+  countries,
+  isOpen,
+  close,
+}: {
   countries: { code: string; name: string }[];
   isOpen: boolean;
   close: () => void;
-}
-
-export default function Wrapper(props: Props) {
+}) {
   const forceRerenderId = useRef(0);
 
   return (
-    <CreateDialog
+    <CreatePersonDialogInternal
       key={String(forceRerenderId.current)}
-      {...props}
-      isOpen={props.isOpen}
+      countries={countries}
+      isOpen={isOpen}
       close={() => {
-        props.close();
+        close();
         forceRerenderId.current += 1;
       }}
     />
   );
 }
 
-function CreateDialog({ locationId, isOpen, close, countries }: Props) {
+function CreatePersonDialogInternal({
+  countries,
+  isOpen,
+  close,
+}: {
+  countries: { code: string; name: string }[];
+  isOpen: boolean;
+  close: () => void;
+}) {
   const closeDialog = () => {
     close();
     reset();
   };
 
   const { execute, result, input, reset } = useAction(
-    createPersonForLocationAction.bind(null, locationId),
+    createPersonForUserAction,
     {
       onSuccess: () => {
         closeDialog();
-        toast.success("Persoon is toegevoegd.");
+        toast.success("Profiel is toegevoegd.");
       },
       onError: ({ error, input }) => {
         if (input instanceof FormData) {
@@ -106,30 +128,24 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
           console.log("input is not a FormData", input);
         }
         console.error("Error: ", error);
-        toast.error("Er is iets misgegaan bij het toevoegen van de persoon.");
+        toast.error("Er is iets misgegaan bij het toevoegen van het profiel.");
       },
     },
   );
+
   const { getInputValue } = useFormInput(input, {
     birthCountry: {
       code: "nl",
     },
-    ...ROLES.reduce(
-      (acc, role) => {
-        acc[`role-${role.type}`] =
-          "defaultChecked" in role && role.defaultChecked ? "on" : "off";
-        return acc;
-      },
-      {} as Record<string, string>,
-    ),
   });
 
   return (
     <>
       <Dialog open={isOpen} onClose={closeDialog}>
-        <DialogTitle>Persoon toevoegen</DialogTitle>
+        <DialogTitle>Profiel toevoegen</DialogTitle>
         <DialogDescription>
-          Vul de gegevens in om een persoon toe te voegen.
+          Vul de gegevens in om een nieuw profiel toe te voegen aan jouw
+          account.
         </DialogDescription>
         <form action={execute}>
           <DialogBody>
@@ -166,18 +182,8 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                   </Field>
                 </div>
 
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-5">
-                  <Field className="sm:col-span-3">
-                    <Label>E-mail</Label>
-                    <Input
-                      name="email"
-                      type="email"
-                      invalid={!!result.validationErrors?.email}
-                      required
-                      defaultValue={getInputValue("email")}
-                    />
-                  </Field>
-                  <Field className="sm:col-span-2">
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
+                  <Field>
                     <Label>Geboortedatum</Label>
                     <Input
                       name="dateOfBirth"
@@ -187,17 +193,18 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                       defaultValue={getInputValue("dateOfBirth")}
                     />
                   </Field>
-                </div>
-
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <Field>
                     <Label>Geboorteplaats</Label>
                     <Input
                       name="birthCity"
                       invalid={!!result.validationErrors?.birthCity}
+                      required
                       defaultValue={getInputValue("birthCity")}
                     />
                   </Field>
+                </div>
+
+                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                   <Field>
                     <Label>Geboorteland</Label>
                     <Combobox
@@ -218,32 +225,6 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                   </Field>
                 </div>
               </FieldGroup>
-            </Fieldset>
-
-            <Fieldset className="mt-6">
-              <Legend>Rollen</Legend>
-              <Text>
-                Welke rol(len) vervult deze persoon in jullie locatie?
-              </Text>
-              {!!result.validationErrors?.roles && (
-                <ErrorMessage>
-                  Selecteer minimaal één rol voor de persoon.
-                </ErrorMessage>
-              )}
-              <CheckboxGroup>
-                {ROLES.map((role) => (
-                  <CheckboxField key={role.type}>
-                    <Checkbox
-                      name={`role-${role.type}`}
-                      defaultChecked={
-                        getInputValue(`role-${role.type}`) === "on"
-                      }
-                    />
-                    <Label>{role.label}</Label>
-                    <Description>{role.description}</Description>
-                  </CheckboxField>
-                ))}
-              </CheckboxGroup>
             </Fieldset>
           </DialogBody>
           <DialogActions>

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const primaryPerson = user.persons.find((person) => person.isPrimary);
 
   if (!primaryPerson) {
-    redirect("/profiel/toevoegen");
+    redirect("/account");
   }
 
   redirect(`/profiel/${primaryPerson.handle}`);

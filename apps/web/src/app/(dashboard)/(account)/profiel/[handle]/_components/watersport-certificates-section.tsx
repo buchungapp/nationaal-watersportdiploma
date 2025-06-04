@@ -5,7 +5,7 @@ import {
   GridList,
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
-import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import {
   StackedLayoutCardDisclosure,
   StackedLayoutCardDisclosureChevron,
@@ -35,12 +35,12 @@ async function WatersportCertificatesContent({
           <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
             <div className="space-y-2">
               <div>
-                <Balancer>
-                  <h3 className="text-2xl/7 font-semibold sm:text-xl/7 text-zinc-900">
+                <Heading>
+                  <Balancer>
                     Je hebt nog geen aanvullende watersportcertificaten
                     opgeslagen.
-                  </h3>
-                </Balancer>
+                  </Balancer>
+                </Heading>
               </div>
             </div>
 

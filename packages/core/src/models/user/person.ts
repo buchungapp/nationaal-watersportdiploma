@@ -125,6 +125,49 @@ export const getOrCreate = wrapCommand(
   ),
 );
 
+export const create = wrapCommand(
+  "user.person.create",
+  withZod(
+    insertSchema
+      .pick({
+        firstName: true,
+        lastName: true,
+        lastNamePrefix: true,
+        dateOfBirth: true,
+        birthCity: true,
+        birthCountry: true,
+      })
+      .extend({
+        userId: selectSchema.shape.authUserId.optional(),
+      }),
+    successfulCreateResponse,
+    async (input) => {
+      const query = useQuery();
+
+      const newPerson = await query
+        .insert(s.person)
+        .values({
+          userId: input.userId,
+          handle: generatePersonID(),
+          firstName: input.firstName,
+          lastName: input.lastName,
+          lastNamePrefix: input.lastNamePrefix,
+          dateOfBirth: input.dateOfBirth
+            ? dayjs(input.dateOfBirth).format("YYYY-MM-DD")
+            : undefined,
+          birthCity: input.birthCity,
+          birthCountry: input.birthCountry,
+        })
+        .returning({ id: s.person.id })
+        .then(singleRow);
+
+      return {
+        id: newPerson.id,
+      };
+    },
+  ),
+);
+
 export const createLocationLink = wrapCommand(
   "user.person.createLocationLink",
   withZod(
@@ -326,7 +369,7 @@ export const list = wrapQuery(
         .select({ count: countDistinct(s.person.id) })
         .from(s.person)
         .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-        .innerJoin(
+        .leftJoin(
           s.actor,
           and(
             eq(s.actor.personId, s.person.id),
@@ -355,7 +398,7 @@ export const list = wrapQuery(
         .from(s.person)
         .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
         .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-        .innerJoin(
+        .leftJoin(
           s.actor,
           and(
             eq(s.actor.personId, s.person.id),

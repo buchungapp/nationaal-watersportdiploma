@@ -218,7 +218,15 @@ export const getUserOrThrow = cache(async () => {
 
     return {
       ...userData,
-      persons: persons.items,
+      persons: (() => {
+        const primaryPerson = persons.items.find((person) => person.isPrimary);
+        const nonPrimaryPersons = persons.items.filter(
+          (person) => !person.isPrimary,
+        );
+        return primaryPerson
+          ? [primaryPerson, ...nonPrimaryPersons]
+          : nonPrimaryPersons;
+      })(),
     };
   });
 });
@@ -3353,3 +3361,14 @@ export const listAllCashbacks = cache(async () => {
     return await Marketing.Cashback.listAll();
   });
 });
+
+export const updateCurrentUserDisplayName = async (displayName: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    return await User.updateDisplayName({
+      userId: user.authUserId,
+      displayName,
+    });
+  });
+};

@@ -87,29 +87,27 @@ export function GirdListItemOptions({ children }: PropsWithChildren) {
 }
 
 export function GridListItemDisclosure({
-  title,
+  header,
   children,
   defaultOpen = false,
-  className,
-  panelClassName,
 }: PropsWithChildren<{
-  title: React.ReactNode;
-  defaultOpen?: boolean;
-  className?: string;
-  panelClassName?: string;
+  header: React.ReactNode;
+  disabled?: boolean;
+  defaultOpen: boolean;
 }>) {
   return (
-    <div className={clsx("border-t border-t-slate-200", className)}>
-      <Headless.Disclosure defaultOpen={defaultOpen}>
-        <Headless.DisclosureButton className="group/disclosure relative flex justify-between items-center data-active:bg-slate-100 data-hover:bg-slate-50 data-disabled:opacity-50 px-6 py-2 focus:outline-none w-full text-left">
-          <span className="absolute inset-0 mx-2 rounded-lg group-data-focus/disclosure:outline-2 group-data-focus/disclosure:outline-branding-light group-data-focus/disclosure:outline-offset-2" />
-          <span className="font-semibold text-slate-900 text-sm">{title}</span>
-          <ChevronDownIcon className="w-4 h-4 text-slate-900 ui-open:rotate-180 transition-transform" />
-        </Headless.DisclosureButton>
-        <Headless.DisclosurePanel className={panelClassName}>
-          {children}
-        </Headless.DisclosurePanel>
-      </Headless.Disclosure>
-    </div>
+    <Headless.Disclosure as="div" defaultOpen={defaultOpen}>
+      <Headless.DisclosureButton
+        className={clsx(
+          "group/progress-card-disclosure flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 py-2 sm:py-2.5 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] text-zinc-950 lg:text-sm text-base -mx-2 sm:-mx-4 px-2 sm:px-4",
+        )}
+      >
+        <div className="flex items-center gap-2 font-medium">{header}</div>
+        <ChevronDownIcon className="size-4 text-zinc-500 group-data-open/progress-card-disclosure:rotate-180 transition-transform" />
+      </Headless.DisclosureButton>
+      <Headless.DisclosurePanel className="pb-4">
+        {children}
+      </Headless.DisclosurePanel>
+    </Headless.Disclosure>
   );
 }

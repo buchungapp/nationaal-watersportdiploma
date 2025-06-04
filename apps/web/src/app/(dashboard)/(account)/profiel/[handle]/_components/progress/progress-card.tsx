@@ -126,21 +126,21 @@ export function ProgressCardHeader({
     }
   > = {
     program: {
-      background: "bg-sky-50",
+      background: "bg-sky-50/50",
       text: "text-branding-light",
       typeLabel: "Opleiding",
       typeLabelColor: "text-sky-900",
       waveColor: "text-branding-light",
     },
     certificate: {
-      background: "bg-orange-50",
+      background: "bg-orange-50/50",
       text: "text-branding-orange",
       typeLabel: "Diploma",
       typeLabelColor: "text-orange-900",
       waveColor: "text-branding-orange",
     },
     course: {
-      background: "bg-blue-50",
+      background: "bg-blue-50/50",
       text: "text-branding-dark",
       typeLabel: "Cursus",
       typeLabelColor: "text-blue-900",
@@ -370,16 +370,14 @@ export function ProgressCardEmptyState({
 
           <div className="space-y-2 mt-2.5">
             <div>
-              <Balancer>
-                <h3
-                  className={clsx(
-                    "text-2xl/7 font-semibold sm:text-xl/7",
-                    style.headingClassName,
-                  )}
-                >
-                  {style.heading}
-                </h3>
-              </Balancer>
+              <h3
+                className={clsx(
+                  "text-2xl/7 font-semibold sm:text-xl/7",
+                  style.headingClassName,
+                )}
+              >
+                <Balancer>{style.heading}</Balancer>
+              </h3>
             </div>
           </div>
 
