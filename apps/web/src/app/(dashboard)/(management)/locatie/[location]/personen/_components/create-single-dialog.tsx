@@ -58,7 +58,7 @@ const ROLES: {
   },
   {
     type: "location_admin",
-    label: "Locatie beheerder",
+    label: "Locatiebeheerder",
     description: "Heeft alle rechten, kan de locatie en cohorten beheren.",
   },
 ] as const;
