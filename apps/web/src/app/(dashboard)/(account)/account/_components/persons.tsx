@@ -26,7 +26,7 @@ import { PersonActions } from "./persons-client";
 async function PersonsList() {
   const persons = await listPersonsForUser();
 
-  return persons.length > 10 ? (
+  return persons.length > 0 ? (
     <GridList>
       {persons
         .sort((a) => (a.isPrimary ? -1 : 1))

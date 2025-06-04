@@ -25,6 +25,7 @@ async function AccountContent() {
                 id="displayName"
                 name="displayName"
                 type="text"
+                minLength={3}
                 defaultValue={user.displayName ?? undefined}
                 autoComplete="given-name"
               />

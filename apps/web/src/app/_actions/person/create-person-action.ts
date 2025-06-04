@@ -117,7 +117,7 @@ export const createPersonForUserAction = actionClientWithMeta
       dateOfBirth: parsedInput.dateOfBirth.toISOString(),
     });
 
-    revalidatePath("/account", "layout");
+    revalidatePath("/account");
 
     return {
       personId: person.id,
