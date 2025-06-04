@@ -1,9 +1,7 @@
-import { PlusIcon } from "@heroicons/react/16/solid";
 import { clsx } from "clsx";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
-import { Button } from "~/app/(dashboard)/_components/button";
 import {
   DescriptionDetails,
   DescriptionList,
@@ -19,8 +17,9 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { AnimatedWave } from "~/app/_components/animated-wave";
-import { listPersonsForUser } from "~/lib/nwd";
+import { listCountries, listPersonsForUser } from "~/lib/nwd";
 import { PersonaliaContent } from "../../profiel/[handle]/_components/person/personalia";
+import { AddPersonButton } from "./add-person-button";
 import { PersonActions } from "./persons-client";
 
 async function PersonsList() {
@@ -118,6 +117,9 @@ function PersonsListFallback() {
 }
 
 export function Persons() {
+  // Start the promise early but don't await it
+  const countriesPromise = listCountries();
+
   return (
     <div>
       <StackedLayoutCard className="mb-3">
@@ -129,10 +131,7 @@ export function Persons() {
               naam om de profielpagina te bekijken.
             </Text>
           </div>
-          <Button outline className="whitespace-nowrap">
-            <PlusIcon />
-            Profiel toevoegen
-          </Button>
+          <AddPersonButton countriesPromise={countriesPromise} />
         </div>
         <div className="mt-4">
           <Suspense fallback={<PersonsListFallback />}>

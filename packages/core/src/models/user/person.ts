@@ -369,7 +369,7 @@ export const list = wrapQuery(
         .select({ count: countDistinct(s.person.id) })
         .from(s.person)
         .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-        .innerJoin(
+        .leftJoin(
           s.actor,
           and(
             eq(s.actor.personId, s.person.id),
@@ -398,7 +398,7 @@ export const list = wrapQuery(
         .from(s.person)
         .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
         .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
-        .innerJoin(
+        .leftJoin(
           s.actor,
           and(
             eq(s.actor.personId, s.person.id),
