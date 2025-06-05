@@ -1,0 +1,67 @@
+import Link from "next/link";
+import Image from "../../../_components/mdx-image";
+import LaunchFaq from "../_components/launch-faq";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.png";
+import Preview from "./_assets/nwd-new-profile-preview.png";
+
+export const article = {
+  date: "2025-06-05T07:00:00Z",
+  category: "consument",
+  title: "Nu beschikbaar: verzamel al je watersportprestaties op één plek via www.nwd.nl!",
+  description:
+    "Vanaf vandaag kan elke watersporter een gratis profiel aanmaken en al zijn certificaten, diploma's en vaarervaring centraal beheren. Van NWD-diploma's tot vaarbewijzen of een digitaal vaarlogboek.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical: "/actueel/e4qwkkmc-nu-beschikbaar-verzamel-al-je-watersportprestaties-op-een-plek-via-nwd-nl",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/e4qwkkmc-nu-beschikbaar-verzamel-al-je-watersportprestaties-op-een-plek-via-nwd-nl",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het Nationaal Watersportdiploma zet een volgende stap richting de toekomst van watersport. Vanaf vandaag kunnen alle watersporters - niet alleen NWD-diplomahouders - een gratis account aanmaken op <Link href="/">nationaalwatersportdiploma.nl</Link> en hun complete watersportidentiteit digitaal beheren.
+
+## Voor NWD-diplomahouders: meer inzicht dan ooit
+
+Heb je al NWD-diploma's behaald? Dan krijg je nu niet alleen een overzicht van je behaalde diploma's, maar ook een helder beeld van je voortgang binnen complete opleidingen. Door de modulaire opbouw van de <Link href="/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd">NWD-diplomalijn</Link> kun je over de tijd aanvullende modules behalen - dit wordt nu overzichtelijk getoond binnen één opleidingskaart.
+
+<Image src={Preview} className="rounded-none" />
+
+## Voor alle watersporters: jouw digitale watersportpaspoort
+
+Ook als je (nog) geen NWD-diploma's hebt, biedt het platform waardevolle functionaliteiten:
+
+**Certificatenbeheer:** Sla al je watersportcertificaten digitaal op - van je klein vaarbewijs tot navigatiediploma's of buitenlandse bewijzen zoals RYA of VWDS. Upload een foto of PDF en vul de belangrijkste gegevens in. Zo heb je alles altijd bij de hand, bijvoorbeeld bij bootverhuurders.
+
+**Digitaal vaarlogboek:** Houd je vaaractiviteiten bij in een speciaal ontwikkeld logboek. Perfect voor jachtzeilers die hun ervaring moeten aantonen, maar ook gewoon leuk om je watersportavonturen te documenteren.
+
+## De toekomst van watersport
+
+Met deze ontwikkeling werkt het Nationaal Watersportdiploma toe naar het bieden van hét digitale platform voor watersporters. Een centrale plek waar je watersportcarrière volledig in beeld komt - van je eerste diploma tot je meest recente vaarervaring.
+
+**Klaar om te beginnen?** Maak vandaag nog je gratis profiel aan op <Link href="/login">nationaalwatersportdiploma.nl</Link> en ontdek alle mogelijkheden.
+
+---
+
+*Bekijk in onderstaande video hoe je de nieuwe functionaliteiten gebruikt:*
+
+<div className="relative aspect-video w-full overflow-hidden rounded-xl mt-6">
+  <iframe
+    src="https://www.youtube-nocookie.com/embed/bVJfeGKa0aQ"
+    title="Nieuwe NWD-accountfuncties: complete rondleiding door je digitale watersportprofiel (2025)"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowFullScreen
+    className="absolute inset-0 w-full h-full"
+  />
+</div>
