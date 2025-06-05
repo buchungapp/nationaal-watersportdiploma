@@ -11,7 +11,8 @@ export default function Page() {
           Welkom bij het {constants.APP_NAME}
         </h2>
         <p className="mt-2 text-slate-500 text-sm leading-6">
-          Log in met je e-mailadres om verder te gaan.
+          Voer je e-mailadres in om verder te gaan. Als je nog geen account
+          hebt, maken we er een voor je.
         </p>
       </div>
 
