@@ -19,7 +19,7 @@ const cspHeader = `
     object-src 'none';
     base-uri 'self';
     form-action 'self';
-    frame-src https://vercel.live;
+    frame-src https://vercel.live https://www.youtube-nocookie.com;
     frame-ancestors 'none';
     upgrade-insecure-requests;
     report-to csp-endpoint;

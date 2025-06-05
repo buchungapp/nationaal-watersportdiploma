@@ -15,17 +15,23 @@ import {
 } from "../../../_components/socials";
 
 async function AccountButton() {
-  const isLoggedIn = await getUserOrThrow()
-    .then((res) => !!res)
-    .catch(() => false);
+  const user = await getUserOrThrow().catch(() => null);
+
+  const primaryPerson = user?.persons.find((person) => person.isPrimary);
 
   return (
     <DataInteractive>
       <Link
-        href={isLoggedIn ? "/account" : "/login"}
+        href={
+          user
+            ? primaryPerson
+              ? `/profiel/${primaryPerson.handle}`
+              : "/account"
+            : "/login"
+        }
         className="flex items-center text-sm font-semibold uppercase gap-x-1.5"
       >
-        {isLoggedIn ? "Account" : "Login"} <ArrowRightIcon className="size-4" />
+        {user ? "Account" : "Login"} <ArrowRightIcon className="size-4" />
       </Link>
     </DataInteractive>
   );
