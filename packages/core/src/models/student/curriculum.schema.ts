@@ -4,6 +4,7 @@ import { z } from "zod";
 import { selectSchema as competencySelectSchema } from "../course/competency.schema.js";
 import { outputSchema as courseSelectSchema } from "../course/course.schema.js";
 import { selectSchema as degreeSelectSchema } from "../course/degree.schema.js";
+import { selectSchema as disciplineSelectSchema } from "../course/discipline.schema.js";
 import { selectSchema as moduleSelectSchema } from "../course/module.schema.js";
 import { outputSchema as programSelectSchema } from "../course/program.schema.js";
 import { outputSchema as curriculumSelectSchema } from "../curriculum/curriculum.schema.js";
@@ -35,11 +36,20 @@ export const outputSchema = selectSchema
         program: programSelectSchema
           .pick({ id: true, handle: true, title: true })
           .extend({
-            course: courseSelectSchema.pick({
-              id: true,
-              handle: true,
-              title: true,
-            }),
+            course: courseSelectSchema
+              .pick({
+                id: true,
+                handle: true,
+                title: true,
+              })
+              .extend({
+                discipline: disciplineSelectSchema.pick({
+                  id: true,
+                  handle: true,
+                  title: true,
+                  weight: true,
+                }),
+              }),
             degree: degreeSelectSchema.pick({
               id: true,
               handle: true,

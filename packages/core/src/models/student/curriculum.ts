@@ -259,6 +259,12 @@ export const listByPersonId = wrapQuery(
                 id: s.course.id,
                 handle: s.course.handle,
                 title: s.course.title,
+                discipline: jsonBuildObject({
+                  id: s.discipline.id,
+                  handle: s.discipline.handle,
+                  title: s.discipline.title,
+                  weight: s.discipline.weight,
+                }),
               }),
               degree: jsonBuildObject({
                 id: s.degree.id,
@@ -309,6 +315,7 @@ export const listByPersonId = wrapQuery(
         .innerJoin(s.program, eq(s.curriculum.programId, s.program.id))
         .innerJoin(s.degree, eq(s.program.degreeId, s.degree.id))
         .innerJoin(s.course, eq(s.program.courseId, s.course.id))
+        .innerJoin(s.discipline, eq(s.course.disciplineId, s.discipline.id))
         .innerJoin(
           s.gearType,
           eq(s.studentCurriculum.gearTypeId, s.gearType.id),
@@ -344,6 +351,7 @@ export const listByPersonId = wrapQuery(
           s.curriculum.id,
           s.program.id,
           s.course.id,
+          s.discipline.id,
           s.degree.id,
           s.gearType.id,
         );

@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { Suspense, use, useMemo } from "react";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
@@ -41,6 +41,7 @@ import {
 import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
+import type { StudentsProgressData } from "../page";
 import { SetView } from "./filters";
 import { ActionButtons } from "./table-actions";
 
@@ -50,7 +51,24 @@ export type Student = Awaited<
 
 const columnHelper = createColumnHelper<Student>();
 
-const columns = [
+const ProgramProgress = ({
+  studentProgress: studentProgressPromise,
+  personId,
+}: { studentProgress: Promise<StudentsProgressData>; personId: string }) => {
+  const data = use(studentProgressPromise);
+
+  const studentProgress = data.find(
+    (student) => student.personId === personId,
+  )?.curricula;
+
+  return <div>{JSON.stringify(studentProgress, null, 2)}</div>;
+};
+
+const columns = ({
+  studentsProgressPromise,
+}: {
+  studentsProgressPromise: Promise<StudentsProgressData>;
+}) => [
   columnHelper.display({
     id: "select",
     cell: ({ row }) => (
@@ -171,6 +189,21 @@ const columns = [
     },
     enableSorting: false,
   }),
+  columnHelper.display({
+    id: "program-progress",
+    cell: ({ row }) => (
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProgramProgress
+          studentProgress={studentsProgressPromise}
+          personId={row.original.person.id}
+        />
+      </Suspense>
+    ),
+    header: "Voortgang",
+    enableSorting: false,
+    // @ts-expect-error - isDefaultVisible is not typed
+    isDefaultVisible: true,
+  }),
 ];
 
 export default function StudentsTable({
@@ -181,6 +214,7 @@ export default function StudentsTable({
   noOptionsLabel = "Geen items gevonden",
   locationRoles,
   view,
+  studentsProgressPromise,
 }: {
   cohortId: string;
   locationId: string;
@@ -189,16 +223,21 @@ export default function StudentsTable({
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
   view: "allen" | "geclaimd" | null;
+  studentsProgressPromise: Promise<StudentsProgressData>;
 }) {
+  const generatedColumns = useMemo(() => {
+    return columns({ studentsProgressPromise });
+  }, [studentsProgressPromise]);
+
   const columnOrderingOptions = useColumnOrdering(
     getOrderableColumnIds({
-      columns,
+      columns: generatedColumns,
       excludeColumns: ["select"],
     }),
   );
 
   const sortingOptions = useSorting({
-    sortableColumnIds: getSortableColumnIds(columns),
+    sortableColumnIds: getSortableColumnIds(generatedColumns),
     defaultSorting: [{ id: "cursist", desc: false }],
   });
 
@@ -253,7 +292,7 @@ export default function StudentsTable({
     ...columnOrderingOptions,
     ...sortingOptions,
     data: students,
-    columns,
+    columns: generatedColumns,
     state: {
       rowSelection: transformSelectionState(rowSelection),
       ...columnOrderingOptions.state,
