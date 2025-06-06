@@ -1978,7 +1978,7 @@ export const retrieveStudentAllocationWithCurriculumForPerson = cache(
 );
 
 export const listCurriculaByPersonId = cache(
-  async (personId: string, atLeastOneModuleCompleted?: boolean) => {
+  async (personId: string | string[], atLeastOneModuleCompleted?: boolean) => {
     return makeRequest(async () => {
       // TODO: This needs authorization checks
       return await Student.Curriculum.listByPersonId({
@@ -1993,7 +1993,7 @@ export const listCurriculaByPersonId = cache(
 
 export const listCurriculaProgressByPersonId = cache(
   async (
-    personId: string,
+    personId: string | string[],
     respectCertificateVisibility?: boolean,
     includeCurriculaWithoutProgress?: boolean,
   ) => {

@@ -4,6 +4,7 @@ import {
   countDistinct,
   eq,
   exists,
+  inArray,
   isNotNull,
   isNull,
   lte,
@@ -17,6 +18,7 @@ import {
   jsonAggBuildObject,
   jsonBuildObject,
   possibleSingleRow,
+  singleOrArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -168,7 +170,7 @@ export const listByPersonId = wrapQuery(
   "student.curriculum.listByPersonId",
   withZod(
     z.object({
-      personId: uuidSchema,
+      personId: singleOrArray(uuidSchema),
       filters: z
         .object({
           atLeastOneModuleCompleted: z.boolean().default(false),
@@ -178,6 +180,10 @@ export const listByPersonId = wrapQuery(
     outputSchema.array(),
     async (input) => {
       const query = useQuery();
+
+      const personIds = Array.isArray(input.personId)
+        ? input.personId
+        : [input.personId];
 
       const withModuleCompetencies = query.$with("module_competencies").as(
         query
@@ -253,6 +259,12 @@ export const listByPersonId = wrapQuery(
                 id: s.course.id,
                 handle: s.course.handle,
                 title: s.course.title,
+                discipline: jsonBuildObject({
+                  id: s.discipline.id,
+                  handle: s.discipline.handle,
+                  title: s.discipline.title,
+                  weight: s.discipline.weight,
+                }),
               }),
               degree: jsonBuildObject({
                 id: s.degree.id,
@@ -303,6 +315,7 @@ export const listByPersonId = wrapQuery(
         .innerJoin(s.program, eq(s.curriculum.programId, s.program.id))
         .innerJoin(s.degree, eq(s.program.degreeId, s.degree.id))
         .innerJoin(s.course, eq(s.program.courseId, s.course.id))
+        .innerJoin(s.discipline, eq(s.course.disciplineId, s.discipline.id))
         .innerJoin(
           s.gearType,
           eq(s.studentCurriculum.gearTypeId, s.gearType.id),
@@ -313,7 +326,7 @@ export const listByPersonId = wrapQuery(
         )
         .where(
           and(
-            eq(s.studentCurriculum.personId, input.personId),
+            inArray(s.studentCurriculum.personId, personIds),
             isNull(s.studentCurriculum.deletedAt),
             input.filters.atLeastOneModuleCompleted
               ? exists(
@@ -338,6 +351,7 @@ export const listByPersonId = wrapQuery(
           s.curriculum.id,
           s.program.id,
           s.course.id,
+          s.discipline.id,
           s.degree.id,
           s.gearType.id,
         );
@@ -351,7 +365,7 @@ export const listProgressByPersonId = wrapQuery(
   "student.curriculum.listProgressByPersonId",
   withZod(
     z.object({
-      personId: uuidSchema,
+      personId: singleOrArray(uuidSchema),
       filters: z
         .object({
           respectCertificateVisibility: z.boolean().default(false),
@@ -361,6 +375,7 @@ export const listProgressByPersonId = wrapQuery(
     }),
     z
       .object({
+        personId: uuidSchema,
         studentCurriculumId: uuidSchema,
         modules: z
           .object({
@@ -385,9 +400,17 @@ export const listProgressByPersonId = wrapQuery(
     async (input) => {
       const query = useQuery();
 
+      const personIds = Array.isArray(input.personId)
+        ? input.personId
+        : [input.personId];
+
       const withModules = query.$with("modules").as(
         query
           .selectDistinct({
+            personId: aliasedColumn(
+              s.studentCurriculum.personId,
+              "modules_person_id",
+            ),
             studentCurriculumId: aliasedColumn(
               s.studentCurriculum.id,
               "modules_student_curriculum_id",
@@ -425,7 +448,7 @@ export const listProgressByPersonId = wrapQuery(
           )
           .where(
             and(
-              eq(s.studentCurriculum.personId, input.personId),
+              inArray(s.studentCurriculum.personId, personIds),
               isNull(s.studentCurriculum.deletedAt),
               isNull(s.studentCompletedCompetency.deletedAt),
               isNull(s.certificate.deletedAt),
@@ -439,6 +462,7 @@ export const listProgressByPersonId = wrapQuery(
       const withModulesAgg = query.$with("modules_agg").as(
         query
           .select({
+            personId: withModules.personId,
             studentCurriculumId: withModules.studentCurriculumId,
             modules: jsonAggBuildObject({
               moduleId: withModules.moduleId,
@@ -446,12 +470,13 @@ export const listProgressByPersonId = wrapQuery(
             }).as("modules"),
           })
           .from(withModules)
-          .groupBy(withModules.studentCurriculumId),
+          .groupBy(withModules.personId, withModules.studentCurriculumId),
       );
 
       const withCertificates = query.$with("certificates").as(
         query
           .select({
+            personId: s.studentCurriculum.personId,
             studentCurriculumId: s.studentCurriculum.id,
             certificateCount: countDistinct(s.certificate.id),
             certificates: jsonAggBuildObject(
@@ -488,11 +513,11 @@ export const listProgressByPersonId = wrapQuery(
           .innerJoin(s.location, eq(s.location.id, s.certificate.locationId))
           .where(
             and(
-              eq(s.studentCurriculum.personId, input.personId),
+              inArray(s.studentCurriculum.personId, personIds),
               isNull(s.studentCurriculum.deletedAt),
             ),
           )
-          .groupBy(s.studentCurriculum.id)
+          .groupBy(s.studentCurriculum.personId, s.studentCurriculum.id)
           .having(({ certificateCount }) =>
             input.filters.includeCurriculaWithoutProgress
               ? sql`TRUE`
@@ -503,6 +528,7 @@ export const listProgressByPersonId = wrapQuery(
       const rows = await query
         .with(withModules, withModulesAgg, withCertificates)
         .select({
+          personId: s.studentCurriculum.personId,
           studentCurriculumId: s.studentCurriculum.id,
           modules: withModulesAgg.modules,
           certificates: withCertificates.certificates,
@@ -518,12 +544,13 @@ export const listProgressByPersonId = wrapQuery(
         )
         .where(
           and(
-            eq(s.studentCurriculum.personId, input.personId),
+            inArray(s.studentCurriculum.personId, personIds),
             isNull(s.studentCurriculum.deletedAt),
           ),
         );
 
       return rows.map((row) => ({
+        personId: row.personId,
         studentCurriculumId: row.studentCurriculumId,
         modules: row.modules || [],
         certificates: row.certificates || [],

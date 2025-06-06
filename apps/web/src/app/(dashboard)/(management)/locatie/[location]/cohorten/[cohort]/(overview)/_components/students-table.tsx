@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { Suspense, use, useMemo } from "react";
 import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
@@ -41,6 +41,7 @@ import {
 import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
+import type { StudentsProgressData } from "../page";
 import { SetView } from "./filters";
 import { ActionButtons } from "./table-actions";
 
@@ -50,7 +51,73 @@ export type Student = Awaited<
 
 const columnHelper = createColumnHelper<Student>();
 
-const columns = [
+const ProgramProgress = ({
+  studentProgress: studentProgressPromise,
+  personId,
+}: { studentProgress: Promise<StudentsProgressData>; personId: string }) => {
+  const data = use(studentProgressPromise);
+
+  const studentProgress = data.find(
+    (student) => student.personId === personId,
+  )?.curricula;
+
+  if (!studentProgress || studentProgress.length === 0) {
+    return <div className="text-zinc-500 text-sm">Geen diploma's</div>;
+  }
+
+  // Group curricula by discipline and find highest ranked degree per discipline
+  const highestDegreesByCourse = studentProgress.reduce(
+    (acc, curriculum) => {
+      const key = `${curriculum.curriculum.curriculum.program.course.id}`;
+      const currentRank = curriculum.curriculum.curriculum.program.degree.rang;
+
+      if (
+        !acc[key] ||
+        currentRank < acc[key].curriculum.curriculum.program.degree.rang
+      ) {
+        acc[key] = curriculum;
+      }
+
+      return acc;
+    },
+    {} as Record<string, (typeof studentProgress)[0]>,
+  );
+
+  return (
+    <div className="flex flex-col gap-1">
+      {Object.values(highestDegreesByCourse)
+        .sort((a, b) => {
+          return (
+            a.curriculum.curriculum.program.course.discipline.weight -
+            b.curriculum.curriculum.program.course.discipline.weight
+          );
+        })
+        .map((curriculum) => (
+          <div
+            key={curriculum.curriculum.curriculum.program.course.id}
+            className="flex items-center gap-1.5"
+          >
+            <span className="text-sm">
+              {curriculum.curriculum.curriculum.program.course.title}
+            </span>
+            <span className="text-sm font-medium">
+              {curriculum.curriculum.curriculum.program.degree.title}
+            </span>
+            <span className="text-xs text-zinc-500">
+              ({curriculum.progress?.modules.length ?? 0}/
+              {curriculum.curriculum.curriculum.modules.length})
+            </span>
+          </div>
+        ))}
+    </div>
+  );
+};
+
+const columns = ({
+  studentsProgressPromise,
+}: {
+  studentsProgressPromise: Promise<StudentsProgressData>;
+}) => [
   columnHelper.display({
     id: "select",
     cell: ({ row }) => (
@@ -171,6 +238,21 @@ const columns = [
     },
     enableSorting: false,
   }),
+  columnHelper.display({
+    id: "program-progress",
+    cell: ({ row }) => (
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProgramProgress
+          studentProgress={studentsProgressPromise}
+          personId={row.original.person.id}
+        />
+      </Suspense>
+    ),
+    header: "Hoogste niveau per cursus",
+    enableSorting: false,
+    // @ts-expect-error - isDefaultVisible is not typed
+    isDefaultVisible: false,
+  }),
 ];
 
 export default function StudentsTable({
@@ -181,6 +263,7 @@ export default function StudentsTable({
   noOptionsLabel = "Geen items gevonden",
   locationRoles,
   view,
+  studentsProgressPromise,
 }: {
   cohortId: string;
   locationId: string;
@@ -189,16 +272,21 @@ export default function StudentsTable({
   noOptionsLabel?: React.ReactNode;
   locationRoles: ("student" | "instructor" | "location_admin")[];
   view: "allen" | "geclaimd" | null;
+  studentsProgressPromise: Promise<StudentsProgressData>;
 }) {
+  const generatedColumns = useMemo(() => {
+    return columns({ studentsProgressPromise });
+  }, [studentsProgressPromise]);
+
   const columnOrderingOptions = useColumnOrdering(
     getOrderableColumnIds({
-      columns,
+      columns: generatedColumns,
       excludeColumns: ["select"],
     }),
   );
 
   const sortingOptions = useSorting({
-    sortableColumnIds: getSortableColumnIds(columns),
+    sortableColumnIds: getSortableColumnIds(generatedColumns),
     defaultSorting: [{ id: "cursist", desc: false }],
   });
 
@@ -253,7 +341,7 @@ export default function StudentsTable({
     ...columnOrderingOptions,
     ...sortingOptions,
     data: students,
-    columns,
+    columns: generatedColumns,
     state: {
       rowSelection: transformSelectionState(rowSelection),
       ...columnOrderingOptions.state,
