@@ -170,7 +170,7 @@ export const listByPersonId = wrapQuery(
   "student.curriculum.listByPersonId",
   withZod(
     z.object({
-      personId: uuidSchema,
+      personId: singleOrArray(uuidSchema),
       filters: z
         .object({
           atLeastOneModuleCompleted: z.boolean().default(false),
@@ -180,6 +180,10 @@ export const listByPersonId = wrapQuery(
     outputSchema.array(),
     async (input) => {
       const query = useQuery();
+
+      const personIds = Array.isArray(input.personId)
+        ? input.personId
+        : [input.personId];
 
       const withModuleCompetencies = query.$with("module_competencies").as(
         query
@@ -315,7 +319,7 @@ export const listByPersonId = wrapQuery(
         )
         .where(
           and(
-            eq(s.studentCurriculum.personId, input.personId),
+            inArray(s.studentCurriculum.personId, personIds),
             isNull(s.studentCurriculum.deletedAt),
             input.filters.atLeastOneModuleCompleted
               ? exists(
