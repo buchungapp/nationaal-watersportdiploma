@@ -61,7 +61,56 @@ const ProgramProgress = ({
     (student) => student.personId === personId,
   )?.curricula;
 
-  return <div>{JSON.stringify(studentProgress, null, 2)}</div>;
+  if (!studentProgress || studentProgress.length === 0) {
+    return <div className="text-zinc-500 text-sm">Geen diploma's</div>;
+  }
+
+  // Group curricula by discipline and find highest ranked degree per discipline
+  const highestDegreesByCourse = studentProgress.reduce(
+    (acc, curriculum) => {
+      const key = `${curriculum.curriculum.curriculum.program.course.id}`;
+      const currentRank = curriculum.curriculum.curriculum.program.degree.rang;
+
+      if (
+        !acc[key] ||
+        currentRank < acc[key].curriculum.curriculum.program.degree.rang
+      ) {
+        acc[key] = curriculum;
+      }
+
+      return acc;
+    },
+    {} as Record<string, (typeof studentProgress)[0]>,
+  );
+
+  return (
+    <div className="flex flex-col gap-1">
+      {Object.values(highestDegreesByCourse)
+        .sort((a, b) => {
+          return (
+            a.curriculum.curriculum.program.course.discipline.weight -
+            b.curriculum.curriculum.program.course.discipline.weight
+          );
+        })
+        .map((curriculum) => (
+          <div
+            key={curriculum.curriculum.curriculum.program.course.id}
+            className="flex items-center gap-1.5"
+          >
+            <span className="text-sm">
+              {curriculum.curriculum.curriculum.program.course.title}
+            </span>
+            <span className="text-sm font-medium">
+              {curriculum.curriculum.curriculum.program.degree.title}
+            </span>
+            <span className="text-xs text-zinc-500">
+              ({curriculum.progress?.modules.length ?? 0}/
+              {curriculum.curriculum.curriculum.modules.length})
+            </span>
+          </div>
+        ))}
+    </div>
+  );
 };
 
 const columns = ({
@@ -199,10 +248,10 @@ const columns = ({
         />
       </Suspense>
     ),
-    header: "Voortgang",
+    header: "Hoogste niveau per cursus",
     enableSorting: false,
     // @ts-expect-error - isDefaultVisible is not typed
-    isDefaultVisible: true,
+    isDefaultVisible: false,
   }),
 ];
 
