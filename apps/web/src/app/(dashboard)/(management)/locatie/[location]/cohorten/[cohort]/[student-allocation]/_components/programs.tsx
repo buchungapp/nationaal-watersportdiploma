@@ -1,8 +1,11 @@
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import {
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   listCurriculaByPersonId,
@@ -57,7 +60,7 @@ async function ProgramsContent(props: ProgramsProps) {
   }
 
   return (
-    <ul className="flex flex-col gap-1 mt-4">
+    <ul className="flex flex-col gap-1 mt-2">
       {curriculaWithProgress
         .sort((a, b) => {
           // TODO: sort on category instead of course
@@ -110,20 +113,25 @@ async function ProgramsContent(props: ProgramsProps) {
 
 function ProgramsFallback() {
   return (
-    <div className="bg-slate-200 mt-4 rounded-lg w-full h-18 animate-pulse" />
+    <div className="bg-slate-200 mt-2 rounded-lg w-full h-18 animate-pulse" />
   );
 }
 
 export function Programs(props: ProgramsProps) {
   return (
-    <div className="lg:col-start-3 lg:row-start-2">
-      <div className="flex justify-between items-center">
-        <Subheading>Opleidingen</Subheading>
-      </div>
-      <Divider className="mt-4" />
+    <LayoutCardDisclosure
+      defaultOpen
+      className="lg:col-start-3 lg:row-start-2"
+      header={
+        <div className="flex justify-between items-center">
+          <Subheading>Opleidingen</Subheading>
+          <LayoutCardDisclosureChevron />
+        </div>
+      }
+    >
       <Suspense fallback={<ProgramsFallback />}>
         <ProgramsContent params={props.params} />
       </Suspense>
-    </div>
+    </LayoutCardDisclosure>
   );
 }

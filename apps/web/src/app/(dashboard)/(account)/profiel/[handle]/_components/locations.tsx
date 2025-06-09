@@ -8,9 +8,9 @@ import {
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
-  StackedLayoutCardDisclosure,
-  StackedLayoutCardDisclosureChevron,
-} from "~/app/(dashboard)/_components/stacked-layout";
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { listActiveCohortsForPerson, listLocationsForPerson } from "~/lib/nwd";
 import { ScrollableGridList } from "./scrollable-grid-list";
@@ -35,7 +35,7 @@ async function ActiveCohortsForLocation({
 
   return (
     <div className="mt-2 pl-8.5">
-      <Text className="text-zinc-600 font-medium">Lopende cohorten</Text>
+      <Text className="font-medium text-zinc-600">Lopende cohorten</Text>
       <ul className="flex flex-col flex-1">
         {activeCohorts.map((cohort) => (
           <li key={cohort.id}>
@@ -71,14 +71,14 @@ async function LocationsContent({
   }
 
   return (
-    <StackedLayoutCardDisclosure
+    <LayoutCardDisclosure
       defaultOpen
       className={gridContainer}
       header={
         <>
           <div className="flex justify-between items-center gap-2">
             <Subheading>Jouw leslocaties</Subheading>
-            <StackedLayoutCardDisclosureChevron />
+            <LayoutCardDisclosureChevron />
           </div>
           <Text>
             De locaties waar je als instructeur en/of beheerder aan gekoppeld
@@ -113,7 +113,7 @@ async function LocationsContent({
           </GridListItem>
         ))}
       </ScrollableGridList>
-    </StackedLayoutCardDisclosure>
+    </LayoutCardDisclosure>
   );
 }
 

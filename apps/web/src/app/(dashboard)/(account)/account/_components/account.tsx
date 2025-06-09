@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
+import { LayoutCard } from "~/app/(dashboard)/_components/layout-card";
 import Spinner from "~/app/_components/spinner";
 import { getUserOrThrow } from "~/lib/nwd";
 import { AccountForm, SubmitButton } from "./account-client";
@@ -12,11 +12,11 @@ async function AccountContent() {
   return (
     <AccountForm>
       <div className="">
-        <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <div className="gap-x-6 gap-y-8 grid grid-cols-1 sm:grid-cols-6 max-w-2xl">
           <div className="sm:col-span-2">
             <label
               htmlFor="displayName"
-              className="block text-sm/6 font-medium text-gray-900"
+              className="block font-medium text-gray-900 text-sm/6"
             >
               Hoe mogen we je noemen?
             </label>
@@ -35,7 +35,7 @@ async function AccountContent() {
           <div className="sm:col-span-4">
             <label
               htmlFor="email"
-              className="block text-sm/6 font-medium text-gray-900"
+              className="block font-medium text-gray-900 text-sm/6"
             >
               E-mailadres
             </label>
@@ -52,7 +52,7 @@ async function AccountContent() {
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 mt-4 pt-4">
+      <div className="flex justify-end items-center gap-x-6 mt-4 pt-4 border-gray-900/10 border-t">
         <SubmitButton />
       </div>
     </AccountForm>
@@ -62,14 +62,14 @@ async function AccountContent() {
 export function Account() {
   return (
     <div>
-      <StackedLayoutCard className="mb-3">
+      <LayoutCard className="mb-3">
         <Subheading>Jouw account</Subheading>
         <div className="mt-4">
           <Suspense fallback={<Spinner />}>
             <AccountContent />
           </Suspense>
         </div>
-      </StackedLayoutCard>
+      </LayoutCard>
     </div>
   );
 }

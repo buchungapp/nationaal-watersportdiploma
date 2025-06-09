@@ -4,7 +4,7 @@ import {
   DescriptionDetails,
   DescriptionList,
   DescriptionTerm,
-} from "~/app/(dashboard)/_components/description-list";
+} from "~/app/(dashboard)/_components/description-list-v2";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
@@ -88,6 +88,11 @@ async function PersonSummaryContent(props: PersonSummaryProps) {
 export function PersonSummaryFallback() {
   return (
     <DescriptionList>
+      <DescriptionTerm>NWD-id</DescriptionTerm>
+      <DescriptionDetails>
+        <span className="inline-block bg-gray-200 rounded w-32 h-4.25 animate-pulse" />
+      </DescriptionDetails>
+
       <DescriptionTerm>Voornaam</DescriptionTerm>
       <DescriptionDetails>
         <span className="inline-block bg-gray-200 rounded w-32 h-4.25 animate-pulse" />

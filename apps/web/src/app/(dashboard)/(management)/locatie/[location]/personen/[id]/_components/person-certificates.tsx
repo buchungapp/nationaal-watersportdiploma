@@ -1,8 +1,11 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Programs } from "~/app/(dashboard)/(account)/profiel/[handle]/_components/progress/programs";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import {
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import {
   getPersonById,
   listCurriculaByPersonId,
@@ -76,22 +79,36 @@ async function PersonCertificatesContent(props: PersonCertificatesProps) {
 
   return (
     <>
-      <div className="mt-8">
-        <Subheading>Opleidingen</Subheading>
-        <Divider className="mt-2 mb-4" />
-        <Programs
-          curricula={curricula}
-          curriculaProgress={curriculaProgress}
-          id={"curriculum"}
-        />
-      </div>
+      <LayoutCardDisclosure
+        header={
+          <div className="flex justify-between items-center">
+            <Subheading>Opleidingen</Subheading>
+            <LayoutCardDisclosureChevron />
+          </div>
+        }
+        className="mt-2"
+      >
+        <div className="mt-4">
+          <Programs
+            curricula={curricula}
+            curriculaProgress={curriculaProgress}
+            id={"curriculum"}
+          />
+        </div>
+      </LayoutCardDisclosure>
     </>
+  );
+}
+
+export function PersonCertificatesFallback() {
+  return (
+    <div className="block bg-gray-200 mt-2 rounded-lg w-full h-16 animate-pulse" />
   );
 }
 
 export function PersonCertificates(props: PersonCertificatesProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<PersonCertificatesFallback />}>
       <PersonCertificatesContent {...props} />
     </Suspense>
   );

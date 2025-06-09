@@ -30,13 +30,13 @@ function MobileSidebar({
     <Headless.Dialog open={open} onClose={close} className="lg:hidden">
       <Headless.DialogBackdrop
         transition
-        className="fixed inset-0 bg-black/30 transition data-closed:opacity-0 data-enter:duration-300 data-leave:duration-200 data-enter:ease-out data-leave:ease-in"
+        className="fixed inset-0 bg-black/30 data-closed:opacity-0 transition data-enter:duration-300 data-leave:duration-200 data-leave:ease-in data-enter:ease-out"
       />
       <Headless.DialogPanel
         transition
-        className="fixed inset-y-0 w-full max-w-80 p-2 transition duration-300 ease-in-out data-closed:-translate-x-full"
+        className="fixed inset-y-0 p-2 w-full max-w-80 transition data-closed:-translate-x-full duration-300 ease-in-out"
       >
-        <div className="flex h-full flex-col rounded-lg bg-white shadow-xs ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+        <div className="flex flex-col bg-white dark:bg-zinc-900 shadow-xs rounded-lg ring-1 ring-zinc-950/5 dark:ring-white/10 h-full">
           <div className="-mb-3 px-4 pt-3">
             <Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
               <CloseMenuIcon />
@@ -60,9 +60,9 @@ export function SidebarLayout({
   const [showSidebar, setShowSidebar] = useState(false);
 
   return (
-    <div className="relative isolate flex min-h-svh w-full bg-white max-lg:flex-col lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
+    <div className="isolate relative flex max-lg:flex-col bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950 w-full min-h-svh">
       {/* Sidebar on desktop */}
-      <div className="fixed inset-y-0 left-0 w-64 max-lg:hidden">{sidebar}</div>
+      <div className="max-lg:hidden left-0 fixed inset-y-0 w-64">{sidebar}</div>
 
       {/* Sidebar on mobile */}
       <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
@@ -70,7 +70,7 @@ export function SidebarLayout({
       </MobileSidebar>
 
       {/* Navbar on mobile */}
-      <header className="flex items-center px-4 lg:hidden">
+      <header className="lg:hidden flex items-center px-4">
         <div className="py-2.5">
           <NavbarItem
             onClick={() => setShowSidebar(true)}
@@ -79,14 +79,18 @@ export function SidebarLayout({
             <OpenMenuIcon />
           </NavbarItem>
         </div>
-        <div className="min-w-0 flex-1">{navbar}</div>
+        <div className="flex-1 min-w-0">{navbar}</div>
       </header>
 
       {/* Content */}
-      <main className="flex flex-1 flex-col pb-2 lg:min-w-0 lg:pl-64 lg:pr-2 lg:pt-2">
-        <div className="grow p-6 lg:rounded-lg lg:bg-white lg:p-10 lg:shadow-xs lg:ring-1 lg:ring-zinc-950/5 dark:lg:bg-zinc-900 dark:lg:ring-white/10">
+      <main className="flex flex-col flex-1 lg:pt-2 lg:pr-2 pb-2 lg:pl-64 lg:min-w-0">
+        {/* <div className="lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs p-6 lg:p-10 lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10 grow"> */}
+        {/* <div className="p-6 lg:p-10 grow">
           <div className="mx-auto max-w-6xl">{children}</div>
-        </div>
+        </div> */}
+        {/* </div> */}
+
+        {children}
       </main>
     </div>
   );

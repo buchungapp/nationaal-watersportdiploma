@@ -15,6 +15,10 @@ import type { PropsWithChildren } from "react";
 import React, { Suspense } from "react";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import {
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import { Code, Strong } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
@@ -287,11 +291,16 @@ async function TimelineContent(props: TimelineProps) {
   timeline.push(...batchedProgressToTimelineEvent(batchedProgress));
 
   return (
-    <div className="lg:col-start-3 lg:row-start-1">
-      <div className="flex justify-between items-center">
-        <Subheading>Tijdlijn</Subheading>
-      </div>
-      <Divider className="mt-4" />
+    <LayoutCardDisclosure
+      defaultOpen
+      className="lg:col-start-3 lg:row-start-1"
+      header={
+        <div className="flex justify-between items-center">
+          <Subheading>Tijdlijn</Subheading>
+          <LayoutCardDisclosureChevron />
+        </div>
+      }
+    >
       <ul className="mt-4 -mb-8">
         {timeline
           .sort((a, b) => (dayjs(a.date).isAfter(dayjs(b.date)) ? -1 : 1))
@@ -315,19 +324,24 @@ async function TimelineContent(props: TimelineProps) {
             </li>
           ))}
       </ul>
-    </div>
+    </LayoutCardDisclosure>
   );
 }
 
 export function TimelineFallback() {
   return (
-    <div className="lg:col-start-3 lg:row-start-1">
-      <div className="flex justify-between items-center">
-        <Subheading>Tijdlijn</Subheading>
-      </div>
-      <Divider className="mt-4" />
+    <LayoutCardDisclosure
+      defaultOpen
+      className="lg:col-start-3 lg:row-start-1"
+      header={
+        <div className="flex justify-between items-center">
+          <Subheading>Tijdlijn</Subheading>
+          <LayoutCardDisclosureChevron />
+        </div>
+      }
+    >
       <div className="bg-slate-200 mt-4 rounded-lg w-full h-18 animate-pulse" />
-    </div>
+    </LayoutCardDisclosure>
   );
 }
 

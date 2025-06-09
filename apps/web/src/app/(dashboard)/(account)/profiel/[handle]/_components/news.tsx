@@ -5,8 +5,8 @@ import { Suspense } from "react";
 import { TextButton } from "~/app/(dashboard)/_components/button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { LayoutCard } from "~/app/(dashboard)/_components/layout-card";
 import { Link } from "~/app/(dashboard)/_components/link";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { getAllArticles } from "~/lib/articles";
 
@@ -60,7 +60,7 @@ async function NewsContent() {
 
 export async function News({ className }: { className?: string }) {
   return (
-    <StackedLayoutCard className={className}>
+    <LayoutCard className={className}>
       <Subheading className="mb-3">Blijf op de hoogte</Subheading>
       <Suspense
         fallback={
@@ -84,6 +84,6 @@ export async function News({ className }: { className?: string }) {
           Bekijk nieuwsoverzicht <ArrowRightIcon />
         </TextButton>
       </div>
-    </StackedLayoutCard>
+    </LayoutCard>
   );
 }

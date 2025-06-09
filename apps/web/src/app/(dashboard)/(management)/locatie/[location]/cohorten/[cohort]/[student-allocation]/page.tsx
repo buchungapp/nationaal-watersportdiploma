@@ -1,5 +1,8 @@
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import {
+  LayoutCard,
+  LayoutMultiCard,
+} from "~/app/(dashboard)/_components/layout-card";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import { AllocationCard } from "./_components/allocation-card";
 import { CourseCard } from "./_components/course-card";
@@ -16,34 +19,32 @@ export default function Page(props: {
   }>;
 }) {
   return (
-    <>
+    <LayoutMultiCard>
       <div className="max-lg:hidden">
         <RouterPreviousButton>Overzicht</RouterPreviousButton>
       </div>
 
-      <div className="items-start gap-x-8 gap-y-8 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-8 lg:max-w-none max-w-2xl">
-        <div className="lg:col-start-3 lg:row-end-1">
-          <div className="flex justify-between items-center">
+      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-4 lg:max-w-none max-w-2xl">
+        <LayoutCard className="lg:col-start-3 lg:row-end-1">
+          <div className="flex justify-between items-center mb-3">
             <Subheading>Cursist</Subheading>
             <ManageStudentActions params={props.params} />
           </div>
-          <Divider className="mt-4" />
           <AllocationCard params={props.params} />
-        </div>
+        </LayoutCard>
 
         <Timeline params={props.params} />
 
         <Programs params={props.params} />
 
-        <div className="lg:col-span-2 lg:row-span-3 lg:row-end-3">
-          <div className="flex justify-between items-center">
+        <LayoutCard className="lg:col-span-2 lg:row-span-3 lg:row-end-3">
+          <div className="flex justify-between items-center mb-3">
             <Subheading>Cursuskaart</Subheading>
             <ManageStudentCurriculumActions params={props.params} />
           </div>
-          <Divider className="mt-4" />
           <CourseCard params={props.params} />
-        </div>
+        </LayoutCard>
       </div>
-    </>
+    </LayoutMultiCard>
   );
 }

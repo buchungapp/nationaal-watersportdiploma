@@ -7,7 +7,7 @@ import {
 } from "~/app/(dashboard)/_components/description-list-v2";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
+import { LayoutCard } from "~/app/(dashboard)/_components/layout-card";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import { listCountries } from "~/lib/nwd";
@@ -74,7 +74,7 @@ export async function Personalia({
   personPromise,
 }: { personPromise: Promise<User.Person.$schema.Person> }) {
   return (
-    <StackedLayoutCard>
+    <LayoutCard>
       <Subheading className="mb-3">Personalia</Subheading>
       <Suspense
         fallback={
@@ -130,6 +130,6 @@ export async function Personalia({
           <ActionButton personPromise={personPromise} />
         </Suspense>
       </div>
-    </StackedLayoutCard>
+    </LayoutCard>
   );
 }

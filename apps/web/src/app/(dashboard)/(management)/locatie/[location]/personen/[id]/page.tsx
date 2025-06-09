@@ -1,5 +1,10 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import {
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+  LayoutMultiCard,
+} from "~/app/(dashboard)/_components/layout-card";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import { EditPerson } from "./_components/edit-person";
 import { PersonCertificates } from "./_components/person-certificates";
@@ -14,28 +19,39 @@ export default function Page(props: {
   }>;
 }) {
   return (
-    <>
+    <LayoutMultiCard>
       <div className="max-lg:hidden">
         <RouterPreviousButton>Terug</RouterPreviousButton>
       </div>
 
-      <div className="flex flex-wrap justify-between gap-x-6 mt-4 lg:mt-8">
+      <div className="mt-4">
         <PersonName params={props.params} />
-        <EditPerson params={props.params} />
       </div>
 
-      <div className="items-start gap-x-8 gap-y-8 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-8 lg:max-w-none max-w-2xl">
+      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-2 lg:max-w-none max-w-2xl">
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
-          <div>
-            <Subheading>Samenvatting</Subheading>
-            <Divider className="mt-2 mb-4" />
+          <LayoutCardDisclosure
+            defaultOpen
+            header={
+              <div className="flex justify-between items-center">
+                <Subheading>Samenvatting</Subheading>
+                <LayoutCardDisclosureChevron />
+              </div>
+            }
+          >
             <PersonSummary params={props.params} />
-          </div>
+
+            <Divider className="my-4" />
+
+            <div className="flex justify-end">
+              <EditPerson params={props.params} />
+            </div>
+          </LayoutCardDisclosure>
           <PersonCertificates params={props.params} />
         </div>
 
         <Roles params={props.params} />
       </div>
-    </>
+    </LayoutMultiCard>
   );
 }
