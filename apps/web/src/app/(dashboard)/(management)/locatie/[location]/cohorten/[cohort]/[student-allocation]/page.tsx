@@ -5,6 +5,7 @@ import { AllocationCard } from "./_components/allocation-card";
 import { CourseCard } from "./_components/course-card";
 import { ManageStudentActions } from "./_components/manage-student-actions";
 import { ManageStudentCurriculumActions } from "./_components/manage-student-curriculum-actions";
+import { Programs } from "./_components/programs";
 import Timeline from "./_components/timeline";
 
 export default function Page(props: {
@@ -32,7 +33,9 @@ export default function Page(props: {
 
         <Timeline params={props.params} />
 
-        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
+        <Programs params={props.params} />
+
+        <div className="lg:col-span-2 lg:row-span-3 lg:row-end-3">
           <div className="flex justify-between items-center">
             <Subheading>Cursuskaart</Subheading>
             <ManageStudentCurriculumActions params={props.params} />

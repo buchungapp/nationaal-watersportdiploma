@@ -30,12 +30,14 @@ export async function fetchCurriculaProgress(personId: string) {
   return listCurriculaProgressByPersonId(personId, true, true);
 }
 
-async function Programs({
+export async function Programs({
   curriculaProgress,
   curricula,
+  id,
 }: {
   curriculaProgress: Awaited<ReturnType<typeof fetchCurriculaProgress>>;
   curricula: Student.Curriculum.$schema.StudentCurriculum[];
+  id?: string;
 }) {
   return (
     <ul className="space-y-4">
@@ -57,7 +59,10 @@ async function Programs({
         );
 
         return (
-          <li key={studentCurriculum.id}>
+          <li
+            key={studentCurriculum.id}
+            id={id ? `${id}-${studentCurriculum.id}` : undefined}
+          >
             <ProgressCard type="program">
               <ProgressCardHeader
                 degree={studentCurriculum.curriculum.program.degree.title}
@@ -214,21 +219,21 @@ async function Programs({
                             "w-full data-active:bg-zinc-950/5 data-hover:bg-zinc-950/5",
                           )}
                         >
-                          <div className="flex w-full justify-between gap-x-2 items-center">
-                            <div className="w-full flex items-center gap-x-2.5">
-                              <Strong className="text-blue-800 tabular-nums">
+                          <div className="flex justify-between items-center gap-x-2 w-full">
+                            <div className="flex items-center gap-x-2.5 w-full">
+                              <Strong className="tabular-nums text-blue-800">
                                 {`#${certificate.handle}`}
                               </Strong>
-                              <span className="text-zinc-500 font-normal text-sm tabular-nums">
+                              <span className="font-normal tabular-nums text-zinc-500 text-sm">
                                 {dayjs(certificate.issuedAt).format(
                                   "DD-MM-YYYY",
                                 )}
                               </span>
-                              <span className="text-zinc-500 font-normal text-sm">
+                              <span className="font-normal text-zinc-500 text-sm">
                                 {certificate.location.name}
                               </span>
                             </div>
-                            <ArrowTopRightOnSquareIcon className="size-4 text-zinc-400 group-hover:text-zinc-600 flex-shrink-0" />
+                            <ArrowTopRightOnSquareIcon className="flex-shrink-0 size-4 text-zinc-400 group-hover:text-zinc-600" />
                           </div>
                         </Link>
                       </li>

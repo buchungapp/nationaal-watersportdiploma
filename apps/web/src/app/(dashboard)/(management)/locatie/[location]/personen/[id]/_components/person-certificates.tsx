@@ -1,14 +1,12 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Programs } from "~/app/(dashboard)/(account)/profiel/[handle]/_components/progress/programs";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
-  ExternalCertificates,
-  NWDCertificates,
-} from "~/app/(dashboard)/_components/nwd/certificates";
-import { Text } from "~/app/(dashboard)/_components/text";
-import {
   getPersonById,
+  listCurriculaByPersonId,
+  listCurriculaProgressByPersonId,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -50,36 +48,42 @@ async function PersonCertificatesContent(props: PersonCertificatesProps) {
   );
 
   if (!isStudentOrInstructor) return null;
+
+  const curricula = await listCurriculaByPersonId(person.id, true).then(
+    (curricula) =>
+      curricula.sort((a, b) => {
+        const course = b.curriculum.program.course.handle.localeCompare(
+          a.curriculum.program.course.handle,
+        );
+        const disciplineWeight =
+          b.curriculum.program.course.discipline.weight -
+          a.curriculum.program.course.discipline.weight;
+        const degreeRank =
+          b.curriculum.program.degree.rang - a.curriculum.program.degree.rang;
+
+        return course !== 0
+          ? course
+          : disciplineWeight !== 0
+            ? disciplineWeight
+            : degreeRank;
+      }),
+  );
+  const curriculaProgress = await listCurriculaProgressByPersonId(
+    person.id,
+    false,
+    false,
+  );
+
   return (
     <>
       <div className="mt-8">
-        <Subheading>NWD-diploma's</Subheading>
+        <Subheading>Opleidingen</Subheading>
         <Divider className="mt-2 mb-4" />
-        <Suspense>
-          <NWDCertificates
-            personId={person.id}
-            locationId={location.id}
-            noResults={
-              <Text className="italic">Geen NWD-diploma's kunnen vinden.</Text>
-            }
-          />
-        </Suspense>
-      </div>
-
-      <div className="mt-8">
-        <Subheading>Overige certificaten</Subheading>
-        <Divider className="mt-2 mb-4" />
-        <Suspense>
-          <ExternalCertificates
-            personId={person.id}
-            locationId={location.id}
-            noResults={
-              <Text className="italic">
-                Geen overige certificaten kunnen vinden.
-              </Text>
-            }
-          />
-        </Suspense>
+        <Programs
+          curricula={curricula}
+          curriculaProgress={curriculaProgress}
+          id={"curriculum"}
+        />
       </div>
     </>
   );
