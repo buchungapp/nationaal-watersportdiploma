@@ -73,7 +73,7 @@ const ProgramProgress = ({
 
       if (
         !acc[key] ||
-        currentRank < acc[key].curriculum.curriculum.program.degree.rang
+        currentRank > acc[key].curriculum.curriculum.program.degree.rang
       ) {
         acc[key] = curriculum;
       }
@@ -100,10 +100,10 @@ const ProgramProgress = ({
             <span className="text-sm">
               {curriculum.curriculum.curriculum.program.course.title}
             </span>
-            <span className="text-sm font-medium">
+            <span className="font-medium text-sm">
               {curriculum.curriculum.curriculum.program.degree.title}
             </span>
-            <span className="text-xs text-zinc-500">
+            <span className="text-zinc-500 text-xs">
               ({curriculum.progress?.modules.length ?? 0}/
               {curriculum.curriculum.curriculum.modules.length})
             </span>
