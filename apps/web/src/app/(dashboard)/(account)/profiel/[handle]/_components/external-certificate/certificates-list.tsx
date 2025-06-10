@@ -35,10 +35,12 @@ export type ExternalCertificate = Awaited<
 export async function ExternalCertificatesList({
   personId,
   noResults = null,
+  whenResults = null,
   searchParams,
 }: {
   personId: string;
   noResults?: React.ReactNode;
+  whenResults?: React.ReactNode;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const [externalCertificates, parsedSq] = await Promise.all([
@@ -60,7 +62,7 @@ export async function ExternalCertificatesList({
 
   return (
     <>
-      {externalCertificates.length === 0 ? noResults : null}
+      {externalCertificates.length === 0 ? noResults : whenResults}
       {editCertificate ? (
         <EditCertificate personId={personId} certificate={editCertificate} />
       ) : null}
