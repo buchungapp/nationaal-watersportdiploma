@@ -30,9 +30,16 @@ async function WatersportCertificatesContent({
     <ExternalCertificatesList
       searchParams={searchParams}
       personId={person.id}
+      whenResults={
+        <div className="my-2">
+          <Suspense fallback={<AddCertificateButtonFallback />}>
+            <AddCertificateButton personPromise={personPromise} />
+          </Suspense>
+        </div>
+      }
       noResults={
-        <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
-          <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+        <div className="relative bg-zinc-50/50 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
+          <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
             <div className="space-y-2">
               <div>
                 <Heading>
@@ -65,6 +72,10 @@ async function WatersportCertificatesContent({
   );
 }
 
+function AddCertificateButtonFallback() {
+  return <div className="bg-slate-200 rounded-lg w-40.5 h-9 animate-pulse" />;
+}
+
 async function AddCertificateButton({
   personPromise,
 }: { personPromise: Promise<User.Person.$schema.Person> }) {
@@ -94,22 +105,16 @@ export default function WatersportCertificatesSection(
         </>
       }
     >
-      <div className="my-2">
-        <Suspense
-          fallback={
-            <div className="bg-slate-200 rounded-lg w-40.5 h-9 animate-pulse" />
-          }
-        >
-          <AddCertificateButton {...props} />
-        </Suspense>
-      </div>
       <Suspense
         fallback={
-          <GridList>
-            <li className="bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse" />
-            <li className="hidden sm:block bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse [animation-delay:300ms]" />
-            <li className="hidden lg:block bg-slate-200 rounded-xl w-full h-107 lg:h-78.5 animate-pulse [animation-delay:600ms]" />
-          </GridList>
+          <>
+            <div className="my-2">
+              <AddCertificateButtonFallback />
+            </div>
+            <GridList>
+              <li className="bg-slate-200 rounded-xl w-full h-107 sm:h-78.5 animate-pulse" />
+            </GridList>
+          </>
         }
       >
         <WatersportCertificatesContent {...props} />

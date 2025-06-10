@@ -1,42 +1,18 @@
 import type { User } from "@nawadi/core";
-import { type PropsWithChildren, Suspense } from "react";
+import { Suspense } from "react";
+import Balancer from "react-wrap-balancer";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
   StackedLayoutCardDisclosure,
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
-import { Text } from "~/app/(dashboard)/_components/text";
+import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { AnimatedWave } from "~/app/_components/animated-wave";
 import { listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
 import { AddLogbook } from "./add-logbook";
 import { LogbookTable } from "./logbook-table";
-
-function LogbookSkeleton({
-  children,
-  button,
-}: PropsWithChildren<{ button?: React.ReactNode | undefined }>) {
-  return (
-    <StackedLayoutCardDisclosure
-      defaultOpen
-      header={
-        <>
-          <div className="flex justify-between items-center gap-2">
-            <Subheading>Vaarlogboek</Subheading>
-            <StackedLayoutCardDisclosureChevron />
-          </div>
-          <Text>
-            In jouw vaarlogboek kan je er voor kiezen om je vaaractiviteiten bij
-            te houden.
-          </Text>
-        </>
-      }
-    >
-      <div className="my-2">{button}</div>
-
-      {children}
-    </StackedLayoutCardDisclosure>
-  );
-}
 
 async function LogbookContent({
   personPromise,
@@ -55,12 +31,52 @@ async function LogbookContent({
     parsedSq["logbook-page"] * parsedSq["logbook-limit"],
   );
 
+  if (data.length < 1) {
+    return (
+      <div className="relative bg-zinc-50/50 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
+        <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
+          <div className="space-y-2">
+            <div>
+              <Heading>
+                <Balancer>
+                  Je hebt nog geen vaaractiviteiten aangemaakt.
+                </Balancer>
+              </Heading>
+            </div>
+          </div>
+
+          <div className="my-6">
+            <AddLogbook personId={person.id} />
+          </div>
+
+          <Text>
+            Wil je meer weten over deze functionaliteit?{" "}
+            <TextLink
+              href="/help/artikel/vaarlogboek-gebruiken"
+              target="_blank"
+            >
+              Bezoek onze hulppagina.
+            </TextLink>
+          </Text>
+        </div>
+        <AnimatedWave textColorClassName="text-zinc-600" />
+      </div>
+    );
+  }
+
   return (
-    <LogbookTable
-      logbooks={logbooks}
-      totalItems={data.length}
-      personId={person.id}
-    />
+    <>
+      <div className="my-2">
+        <Suspense fallback={<AddLogbookButtonFallback />}>
+          <AddLogbookButton personPromise={personPromise} />
+        </Suspense>
+      </div>
+      <LogbookTable
+        logbooks={logbooks}
+        totalItems={data.length}
+        personId={person.id}
+      />
+    </>
   );
 }
 
@@ -83,25 +99,38 @@ export function Logbook(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <LogbookSkeleton
-      button={
-        <Suspense fallback={<AddLogbookButtonFallback />}>
-          <AddLogbookButton {...props} />
-        </Suspense>
+    <StackedLayoutCardDisclosure
+      defaultOpen
+      header={
+        <>
+          <div className="flex justify-between items-center gap-2">
+            <Subheading>Vaarlogboek</Subheading>
+            <StackedLayoutCardDisclosureChevron />
+          </div>
+          <Text>
+            In jouw vaarlogboek kan je er voor kiezen om je vaaractiviteiten bij
+            te houden.
+          </Text>
+        </>
       }
     >
       <Suspense
         fallback={
-          <LogbookTable
-            logbooks={[]}
-            totalItems={0}
-            personId={""}
-            placeholderRows={2}
-          />
+          <>
+            <div className="my-2">
+              <AddLogbookButtonFallback />
+            </div>
+            <LogbookTable
+              logbooks={[]}
+              totalItems={0}
+              personId={""}
+              placeholderRows={2}
+            />
+          </>
         }
       >
         <LogbookContent {...props} />
       </Suspense>
-    </LogbookSkeleton>
+    </StackedLayoutCardDisclosure>
   );
 }

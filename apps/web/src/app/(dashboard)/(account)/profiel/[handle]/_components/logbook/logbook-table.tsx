@@ -11,10 +11,6 @@ import {
   Checkbox,
   CheckboxField,
 } from "~/app/(dashboard)/_components/checkbox";
-import dayjs from "~/lib/dayjs";
-
-import Balancer from "react-wrap-balancer";
-import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import { TableSelection } from "~/app/(dashboard)/_components/table-action";
 import {
@@ -29,16 +25,14 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { TableFooter } from "~/app/(dashboard)/_components/table-footer";
 import { SortableTableHead } from "~/app/(dashboard)/_components/table-head";
-import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import {
   getOrderableColumnIds,
   useColumnOrdering,
 } from "~/app/(dashboard)/_hooks/use-column-ordering";
 import { useSorting } from "~/app/(dashboard)/_hooks/use-sorting";
 import { getSortableColumnIds } from "~/app/(dashboard)/_hooks/use-sorting";
-import { AnimatedWave } from "~/app/_components/animated-wave";
+import dayjs from "~/lib/dayjs";
 import type { listLogbooksForPerson } from "~/lib/nwd";
-import { AddLogbook } from "./add-logbook";
 import { LogbookTableActionsButton } from "./logbook-table-actions";
 
 export type LogbookType = Awaited<
@@ -196,39 +190,6 @@ export function LogbookTable({
 
   const selectedRows = Object.keys(rowSelection).length;
   const actionRows = logbooks.filter((logbook) => rowSelection[logbook.id]);
-
-  if (totalItems < 1) {
-    return (
-      <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
-        <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
-          <div className="space-y-2">
-            <div>
-              <Heading>
-                <Balancer>
-                  Je hebt nog geen vaaractiviteiten aangemaakt.
-                </Balancer>
-              </Heading>
-            </div>
-          </div>
-
-          <div className="my-6">
-            <AddLogbook personId={personId} />
-          </div>
-
-          <Text>
-            Wil je meer weten over deze functionaliteit?{" "}
-            <TextLink
-              href="/help/artikel/vaarlogboek-gebruiken"
-              target="_blank"
-            >
-              Bezoek onze hulppagina.
-            </TextLink>
-          </Text>
-        </div>
-        <AnimatedWave textColorClassName="text-zinc-600" />
-      </div>
-    );
-  }
 
   return (
     <>
