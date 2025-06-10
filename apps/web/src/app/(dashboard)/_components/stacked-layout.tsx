@@ -86,7 +86,7 @@ export function StackedLayout({
       {/* Content */}
       <main className="flex flex-col flex-1 lg:px-2 pb-2">
         {/* <div className="lg:bg-white dark:lg:bg-zinc-900 lg:shadow-xs p-6 lg:p-10 lg:rounded-lg lg:ring-1 lg:ring-zinc-950/5 dark:lg:ring-white/10 grow"> */}
-        <div className="p-2 lg:p-10 grow">
+        <div className="lg:p-10 grow">
           <div className="mx-auto max-w-7xl">{children}</div>
         </div>
         {/* </div> */}

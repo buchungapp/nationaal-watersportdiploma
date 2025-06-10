@@ -3,6 +3,7 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
   LayoutCardDisclosure,
   LayoutCardDisclosureChevron,
+  LayoutMobilePadding,
   LayoutMultiCard,
 } from "~/app/(dashboard)/_components/layout-card";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
@@ -20,15 +21,15 @@ export default function Page(props: {
 }) {
   return (
     <LayoutMultiCard>
-      <div className="max-lg:hidden">
+      <div className="max-lg:hidden mt-1.5">
         <RouterPreviousButton>Terug</RouterPreviousButton>
       </div>
 
-      <div className="mt-4">
+      <LayoutMobilePadding className="flex items-center gap-4 lg:-mt-1.5">
         <PersonName params={props.params} />
-      </div>
+      </LayoutMobilePadding>
 
-      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-2 lg:max-w-none max-w-2xl">
+      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-1 lg:max-w-none max-w-2xl">
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
           <LayoutCardDisclosure
             defaultOpen

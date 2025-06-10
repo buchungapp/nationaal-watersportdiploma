@@ -20,11 +20,11 @@ export default function Page(props: {
 }) {
   return (
     <LayoutMultiCard>
-      <div className="max-lg:hidden">
+      <div className="max-lg:hidden mt-1.5">
         <RouterPreviousButton>Overzicht</RouterPreviousButton>
       </div>
 
-      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-4 lg:max-w-none max-w-2xl">
+      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-7.25 lg:max-w-none max-w-2xl">
         <LayoutCard className="lg:col-start-3 lg:row-end-1">
           <div className="flex justify-between items-center mb-3">
             <Subheading>Cursist</Subheading>

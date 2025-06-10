@@ -13,7 +13,7 @@ export function LayoutSingleCard({ children }: React.PropsWithChildren) {
 
 export function LayoutMultiCard({ children }: React.PropsWithChildren) {
   return (
-    <div className="p-6 lg:p-10 grow">
+    <div className="lg:p-2 grow">
       <div className="mx-auto max-w-6xl">{children}</div>
     </div>
   );
@@ -35,6 +35,15 @@ export function LayoutCard({
     >
       {children}
     </div>
+  );
+}
+
+export function LayoutMobilePadding({
+  children,
+  className,
+}: React.PropsWithChildren<{ className?: string }>) {
+  return (
+    <div className={clsx("max-sm:px-3 max-lg:px-5", className)}>{children}</div>
   );
 }
 
