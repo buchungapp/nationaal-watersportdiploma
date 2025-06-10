@@ -33,7 +33,7 @@ async function LogbookContent({
 
   if (data.length < 1) {
     return (
-      <div className="relative bg-zinc-50/50 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
+      <div className="relative bg-zinc-50/50 mt-2 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
         <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
           <div className="space-y-2">
             <div>
