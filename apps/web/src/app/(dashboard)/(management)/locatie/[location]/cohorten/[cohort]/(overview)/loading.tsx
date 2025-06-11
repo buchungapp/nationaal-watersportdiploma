@@ -9,6 +9,7 @@ export default function Loading() {
         </div>
         <div className="flex items-center gap-1 animate-pulse shrink-0">
           <div className="bg-slate-200 rounded-lg size-9" />
+          <div className="bg-slate-200 rounded-lg size-9" />
         </div>
       </div>
       <div className="gap-2 grid mt-4 animate-pulse">

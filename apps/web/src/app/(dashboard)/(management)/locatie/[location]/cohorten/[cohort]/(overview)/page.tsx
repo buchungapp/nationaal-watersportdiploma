@@ -5,8 +5,6 @@ import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
 import { TextLink } from "~/app/(dashboard)/_components/text";
 import {
   isInstructorInCohort,
-  listCurriculaByPersonId,
-  listCurriculaProgressByPersonId,
   listPrivilegesForCohort,
   listRolesForLocation,
   listStudentsWithCurriculaByCohortId,
@@ -14,16 +12,7 @@ import {
   retrieveLocationByHandle,
 } from "~/lib/nwd";
 import StudentsTable from "./_components/students-table";
-
-export type StudentsProgressData = Array<{
-  personId: string;
-  curricula: Array<{
-    curriculum: Awaited<ReturnType<typeof listCurriculaByPersonId>>[number];
-    progress:
-      | Awaited<ReturnType<typeof listCurriculaProgressByPersonId>>[number]
-      | null;
-  }>;
-}>;
+import { studentProgress } from "./_student-progress";
 
 const searchParamsParser = (defaultValue: "allen" | "geclaimd") =>
   createLoader({
@@ -133,63 +122,17 @@ export default async function Page(props: {
     }
   }
 
-  const studentsProgressPromise = async () => {
-    const uniquePersonIds = [
-      ...new Set(searchedStudents.map((student) => student.person.id)),
-    ];
-
-    if (uniquePersonIds.length === 0) {
-      return [];
-    }
-
-    const [curricula, progress] = await Promise.all([
-      listCurriculaByPersonId(uniquePersonIds, true),
-      listCurriculaProgressByPersonId(uniquePersonIds, false, false),
-    ]);
-
-    const curriculaByPersonId = new Map<string, typeof curricula>();
-    const progressByStudentCurriculumId = new Map<
-      string,
-      (typeof progress)[number]
-    >();
-
-    for (const curriculum of curricula) {
-      const existing = curriculaByPersonId.get(curriculum.personId);
-      if (existing) {
-        existing.push(curriculum);
-      } else {
-        curriculaByPersonId.set(curriculum.personId, [curriculum]);
-      }
-    }
-
-    for (const progressItem of progress) {
-      progressByStudentCurriculumId.set(
-        progressItem.studentCurriculumId,
-        progressItem,
-      );
-    }
-
-    return uniquePersonIds.map((personId) => {
-      const personCurricula = curriculaByPersonId.get(personId) || [];
-
-      return {
-        personId,
-        curricula: personCurricula.map((curriculum) => ({
-          curriculum,
-          progress: progressByStudentCurriculumId.get(curriculum.id) || null,
-        })),
-      };
-    });
-  };
-
   return (
     <StudentsTable
       view={instructorAllocation ? parsedSq.overzicht : null}
       students={searchedStudents}
       totalItems={searchedStudents.length}
       cohortId={cohort.id}
+      cohortLabel={cohort.label}
       locationId={location.id}
-      studentsProgressPromise={studentsProgressPromise()}
+      studentsProgressPromise={studentProgress([
+        ...new Set(searchedStudents.map((student) => student.person.id)),
+      ])}
       // TODO: this can be optimized
       locationRoles={await listRolesForLocation(location.id)}
       noOptionsLabel={
