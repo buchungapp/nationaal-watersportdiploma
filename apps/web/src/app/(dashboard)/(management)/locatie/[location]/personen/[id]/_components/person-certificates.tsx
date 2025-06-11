@@ -78,31 +78,29 @@ async function PersonCertificatesContent(props: PersonCertificatesProps) {
   );
 
   return (
-    <>
-      <LayoutCardDisclosure
-        header={
-          <div className="flex justify-between items-center">
-            <Subheading>Opleidingen</Subheading>
-            <LayoutCardDisclosureChevron />
-          </div>
-        }
-        className="mt-2"
-      >
-        <div className="mt-4">
-          <Programs
-            curricula={curricula}
-            curriculaProgress={curriculaProgress}
-            id={"curriculum"}
-          />
+    <LayoutCardDisclosure
+      defaultOpen
+      header={
+        <div className="flex justify-between items-center">
+          <Subheading>Opleidingen</Subheading>
+          <LayoutCardDisclosureChevron />
         </div>
-      </LayoutCardDisclosure>
-    </>
+      }
+    >
+      <div className="mt-4">
+        <Programs
+          curricula={curricula}
+          curriculaProgress={curriculaProgress}
+          id={"curriculum"}
+        />
+      </div>
+    </LayoutCardDisclosure>
   );
 }
 
 export function PersonCertificatesFallback() {
   return (
-    <div className="block bg-gray-200 mt-2 rounded-lg w-full h-16 animate-pulse" />
+    <div className="block bg-gray-200 rounded-lg w-full h-96 animate-pulse" />
   );
 }
 

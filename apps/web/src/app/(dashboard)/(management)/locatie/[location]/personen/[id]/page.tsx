@@ -1,9 +1,9 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
+  LayoutCard,
   LayoutCardDisclosure,
   LayoutCardDisclosureChevron,
-  LayoutMobilePadding,
   LayoutMultiCard,
 } from "~/app/(dashboard)/_components/layout-card";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
@@ -25,18 +25,19 @@ export default function Page(props: {
         <RouterPreviousButton>Terug</RouterPreviousButton>
       </div>
 
-      <LayoutMobilePadding className="flex items-center gap-4 lg:-mt-1.5">
-        <PersonName params={props.params} />
-      </LayoutMobilePadding>
-
-      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-1 lg:max-w-none max-w-2xl">
-        <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2">
+      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-2 lg:max-w-none max-w-2xl">
+        <LayoutCard className="lg:col-start-3">
+          <PersonName params={props.params} />
+        </LayoutCard>
+        <div className="space-y-2 lg:col-span-2 lg:row-span-2 lg:row-end-2">
           <LayoutCardDisclosure
             defaultOpen
             header={
-              <div className="flex justify-between items-center">
-                <Subheading>Samenvatting</Subheading>
-                <LayoutCardDisclosureChevron />
+              <div>
+                <div className="flex justify-between items-center">
+                  <Subheading>Samenvatting</Subheading>
+                  <LayoutCardDisclosureChevron />
+                </div>
               </div>
             }
           >
