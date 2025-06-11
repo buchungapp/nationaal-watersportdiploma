@@ -1691,6 +1691,44 @@ export const retrieveCohortByHandle = cache(
   },
 );
 
+export const retrieveCohortById = cache(async (id: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const cohort = await Cohort.byIdOrHandle({ id });
+
+    if (!cohort) {
+      return null;
+    }
+
+    const [isLocationAdmin, isInstructorInCohort] = await Promise.all([
+      isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: cohort?.locationId,
+        personId: primaryPerson.id,
+      }).catch(() => false),
+      Cohort.Allocation.listByPersonId({
+        cohortId: cohort.id,
+        personId: primaryPerson.id,
+        actorType: "instructor",
+      }).then((actors) => actors.length > 0),
+    ]);
+
+    const canAccessCohort =
+      isLocationAdmin ||
+      (isInstructorInCohort &&
+        dayjs().isAfter(dayjs(cohort.accessStartTime)) &&
+        dayjs().isBefore(dayjs(cohort.accessEndTime)));
+
+    if (!canAccessCohort) {
+      return null;
+    }
+
+    return cohort;
+  });
+});
+
 export const createCohort = async ({
   locationId,
   label,
