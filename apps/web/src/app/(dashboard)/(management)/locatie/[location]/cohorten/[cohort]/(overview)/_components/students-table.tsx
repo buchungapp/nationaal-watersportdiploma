@@ -41,7 +41,8 @@ import {
 import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
-import type { StudentsProgressData } from "../page";
+import type { StudentsProgressData } from "../_student-progress";
+import { ExportStudentsListDialog } from "./download/export-students-list-dialog";
 import { SetView } from "./filters";
 import { ActionButtons } from "./table-actions";
 
@@ -100,10 +101,10 @@ const ProgramProgress = ({
             <span className="text-sm">
               {curriculum.curriculum.curriculum.program.course.title}
             </span>
-            <span className="text-sm font-medium">
+            <span className="font-medium text-sm">
               {curriculum.curriculum.curriculum.program.degree.title}
             </span>
-            <span className="text-xs text-zinc-500">
+            <span className="text-zinc-500 text-xs">
               ({curriculum.progress?.modules.length ?? 0}/
               {curriculum.curriculum.curriculum.modules.length})
             </span>
@@ -258,6 +259,7 @@ const columns = ({
 export default function StudentsTable({
   cohortId,
   locationId,
+  cohortLabel,
   students,
   totalItems,
   noOptionsLabel = "Geen items gevonden",
@@ -267,6 +269,7 @@ export default function StudentsTable({
 }: {
   cohortId: string;
   locationId: string;
+  cohortLabel: string;
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
@@ -373,6 +376,10 @@ export default function StudentsTable({
             <Search placeholder="Zoek cursisten op naam, cursus, instructeur of tag" />
           </div>
           <div className="flex items-center gap-1 sm:shrink-0">
+            <ExportStudentsListDialog
+              cohortId={cohortId}
+              cohortLabel={cohortLabel}
+            />
             {view ? (
               <SetView defaultView={view}>
                 <option value="allen">Alle cursisten</option>
