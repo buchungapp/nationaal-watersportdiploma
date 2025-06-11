@@ -1,4 +1,5 @@
 import { Heading } from "~/app/(dashboard)/_components/heading";
+import { LayoutSingleCard } from "~/app/(dashboard)/_components/layout-card";
 import Search from "../../../_components/search";
 import CreateDialog from "./_components/create-dialog";
 import { FilterSelect } from "./_components/filter";
@@ -11,7 +12,7 @@ export default function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <>
+    <LayoutSingleCard>
       <div className="flex flex-wrap justify-between items-end gap-4">
         <div className="sm:flex-1 max-sm:w-full">
           <Heading>Cohorten</Heading>
@@ -31,6 +32,6 @@ export default function Page(props: {
       <div className="mt-4">
         <Table params={props.params} searchParams={props.searchParams} />
       </div>
-    </>
+    </LayoutSingleCard>
   );
 }

@@ -6,7 +6,7 @@ import {
   DescriptionDetails,
   DescriptionList,
   DescriptionTerm,
-} from "~/app/(dashboard)/_components/description-list";
+} from "~/app/(dashboard)/_components/description-list-v2";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {

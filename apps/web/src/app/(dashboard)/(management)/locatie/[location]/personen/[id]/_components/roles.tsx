@@ -4,9 +4,9 @@ import {
   CheckboxField,
   CheckboxGroup,
 } from "~/app/(dashboard)/_components/checkbox";
-import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Description, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { LayoutCard } from "~/app/(dashboard)/_components/layout-card";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import {
   getPersonById,
@@ -75,10 +75,9 @@ async function RolesContent(props: RolesProps) {
 
   return (
     <>
-      <div className="lg:col-start-3">
+      <LayoutCard className="lg:col-start-3">
         <div>
           <Subheading>Rollen</Subheading>
-          <Divider className="mt-2 mb-4" />
           <Text>
             Geef de rollen aan die deze persoon heeft binnen de locatie.{" "}
             <Strong>
@@ -101,14 +100,20 @@ async function RolesContent(props: RolesProps) {
             ))}
           </CheckboxGroup>
         </div>
-      </div>
+      </LayoutCard>
     </>
+  );
+}
+
+export function RolesFallback() {
+  return (
+    <div className="block bg-gray-200 rounded-lg w-full h-96 animate-pulse" />
   );
 }
 
 export function Roles(props: RolesProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<RolesFallback />}>
       <RolesContent {...props} />
     </Suspense>
   );
