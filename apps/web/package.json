@@ -44,6 +44,7 @@
     "@vercel/speed-insights": "^1.0.12",
     "@vis.gl/react-google-maps": "^1.1.3",
     "clsx": "^2.1.1",
+    "csv-stringify": "^6.5.2",
     "dayjs": "^1.11.13",
     "fast-glob": "^3.3.2",
     "fathom-client": "^3.7.2",
@@ -56,6 +57,7 @@
     "import-in-the-middle": "1.12.0",
     "input-otp": "^1.2.4",
     "js-confetti": "^0.12.0",
+    "libphonenumber-js": "^1.12.9",
     "marked": "^12.0.2",
     "micromark": "^4.0.0",
     "motion": "^12.0.8",
@@ -88,6 +90,7 @@
     "swr": "2.2.6-beta.4",
     "tailwind-merge": "^3.0.1",
     "use-debounce": "^10.0.3",
+    "xlsx": "^0.18.5",
     "zod": "catalog:",
     "zod-form-data": "^2.0.7"
   },
