@@ -4,9 +4,9 @@ import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
-  StackedLayoutCardDisclosure,
-  StackedLayoutCardDisclosureChevron,
-} from "~/app/(dashboard)/_components/stacked-layout";
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import {
   Tab,
   TabGroup,
@@ -90,13 +90,13 @@ export default function ProgressSection({
   );
 
   return (
-    <StackedLayoutCardDisclosure
+    <LayoutCardDisclosure
       defaultOpen
       header={
         <>
           <div className="flex justify-between items-center gap-2">
             <Subheading>Nationaal Watersportdiploma</Subheading>
-            <StackedLayoutCardDisclosureChevron />
+            <LayoutCardDisclosureChevron />
           </div>
           <Text>
             Bekijk je diploma's, hoe je ervoor staat met je opleidingen, en hoe
@@ -156,6 +156,6 @@ export default function ProgressSection({
           </TabPanel>
         </TabPanels>
       </TabGroup>
-    </StackedLayoutCardDisclosure>
+    </LayoutCardDisclosure>
   );
 }

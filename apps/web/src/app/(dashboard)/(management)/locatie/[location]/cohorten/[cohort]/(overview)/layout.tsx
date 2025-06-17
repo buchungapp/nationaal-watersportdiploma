@@ -14,6 +14,7 @@ import {
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
+import { LayoutSingleCard } from "~/app/(dashboard)/_components/layout-card";
 import dayjs from "~/lib/dayjs";
 import {
   isInstructorInCohort,
@@ -222,45 +223,47 @@ export default function Layout(props: {
   children: React.ReactNode;
 }) {
   return (
-    <Suspense
-      fallback={
-        <>
-          <div className="max-lg:hidden">
-            <BackToCohortsLinkFallback />
-          </div>
-          <div className="mt-4">
-            <div className="flex items-center gap-4">
-              <HeadingFallback />
+    <LayoutSingleCard>
+      <Suspense
+        fallback={
+          <>
+            <div className="max-lg:hidden">
+              <BackToCohortsLinkFallback />
             </div>
+            <div className="mt-4">
+              <div className="flex items-center gap-4">
+                <HeadingFallback />
+              </div>
 
-            <div className="isolate flex flex-wrap justify-between gap-x-6 mt-1">
-              <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
-                <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
-                  <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                  <span className="min-w-4">
-                    <StudentCountFallback />
+              <div className="isolate flex flex-wrap justify-between gap-x-6 mt-1">
+                <div className="flex flex-wrap gap-x-10 gap-y-4 py-1.5">
+                  <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
+                    <UsersIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+                    <span className="min-w-4">
+                      <StudentCountFallback />
+                    </span>
                   </span>
-                </span>
 
-                <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
-                  <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
-                  <CohortDatesFallback />
-                </span>
+                  <span className="flex items-center gap-3 text-zinc-950 dark:text-white sm:text-sm/6 text-base/6">
+                    <CalendarIcon className="fill-zinc-400 dark:fill-zinc-500 size-4 shrink-0" />
+                    <CohortDatesFallback />
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <Divider className="my-4" />
+            <Divider className="my-4" />
 
-          <LayoutTabsFallback />
+            <LayoutTabsFallback />
 
-          <div className="mt-4 max-sm:mb-30">
-            <div className="bg-gray-200 rounded w-full h-96 animate-pulse" />
-          </div>
-        </>
-      }
-    >
-      <LayoutContent {...props} />
-    </Suspense>
+            <div className="mt-4 max-sm:mb-30">
+              <div className="bg-gray-200 rounded w-full h-96 animate-pulse" />
+            </div>
+          </>
+        }
+      >
+        <LayoutContent {...props} />
+      </Suspense>
+    </LayoutSingleCard>
   );
 }

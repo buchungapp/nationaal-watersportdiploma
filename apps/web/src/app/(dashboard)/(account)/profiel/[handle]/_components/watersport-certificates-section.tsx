@@ -7,9 +7,9 @@ import {
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import {
-  StackedLayoutCardDisclosure,
-  StackedLayoutCardDisclosureChevron,
-} from "~/app/(dashboard)/_components/stacked-layout";
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { AnimatedWave } from "~/app/_components/animated-wave";
 import { AddCertificate } from "./external-certificate/add-certificate";
@@ -31,8 +31,8 @@ async function WatersportCertificatesContent({
       searchParams={searchParams}
       personId={person.id}
       noResults={
-        <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
-          <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+        <div className="relative bg-zinc-50/50 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
+          <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
             <div className="space-y-2">
               <div>
                 <Heading>
@@ -77,14 +77,14 @@ export default function WatersportCertificatesSection(
   props: WatersportCertificatesProps,
 ) {
   return (
-    <StackedLayoutCardDisclosure
+    <LayoutCardDisclosure
       className={gridContainer}
       defaultOpen
       header={
         <>
           <div className="flex justify-between items-center gap-2">
             <Subheading>Aanvullende vaardigheden</Subheading>
-            <StackedLayoutCardDisclosureChevron />
+            <LayoutCardDisclosureChevron />
           </div>
           <Text>
             Je kan deze sectie gebruiken om jouw watersport gerelateerde zaken -
@@ -114,6 +114,6 @@ export default function WatersportCertificatesSection(
       >
         <WatersportCertificatesContent {...props} />
       </Suspense>
-    </StackedLayoutCardDisclosure>
+    </LayoutCardDisclosure>
   );
 }

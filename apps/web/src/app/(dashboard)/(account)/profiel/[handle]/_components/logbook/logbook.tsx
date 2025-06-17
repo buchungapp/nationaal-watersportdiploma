@@ -2,9 +2,9 @@ import type { User } from "@nawadi/core";
 import { type PropsWithChildren, Suspense } from "react";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
-  StackedLayoutCardDisclosure,
-  StackedLayoutCardDisclosureChevron,
-} from "~/app/(dashboard)/_components/stacked-layout";
+  LayoutCardDisclosure,
+  LayoutCardDisclosureChevron,
+} from "~/app/(dashboard)/_components/layout-card";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
@@ -16,13 +16,13 @@ function LogbookSkeleton({
   button,
 }: PropsWithChildren<{ button?: React.ReactNode | undefined }>) {
   return (
-    <StackedLayoutCardDisclosure
+    <LayoutCardDisclosure
       defaultOpen
       header={
         <>
           <div className="flex justify-between items-center gap-2">
             <Subheading>Vaarlogboek</Subheading>
-            <StackedLayoutCardDisclosureChevron />
+            <LayoutCardDisclosureChevron />
           </div>
           <Text>
             In jouw vaarlogboek kan je er voor kiezen om je vaaractiviteiten bij
@@ -34,7 +34,7 @@ function LogbookSkeleton({
       <div className="my-2">{button}</div>
 
       {children}
-    </StackedLayoutCardDisclosure>
+    </LayoutCardDisclosure>
   );
 }
 

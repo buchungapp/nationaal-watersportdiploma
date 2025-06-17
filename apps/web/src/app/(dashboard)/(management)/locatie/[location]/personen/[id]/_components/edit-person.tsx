@@ -64,7 +64,14 @@ async function EditPersonContent(props: EditPersonProps) {
 
 export function EditPerson(props: EditPersonProps) {
   return (
-    <Suspense fallback={null}>
+    <Suspense
+      fallback={
+        <div className="flex gap-4">
+          <span className="block bg-gray-200 rounded-md w-38 h-9 animate-pulse" />
+          <span className="block bg-gray-200 rounded-md w-34 h-9 animate-pulse" />
+        </div>
+      }
+    >
       <EditPersonContent {...props} />
     </Suspense>
   );
