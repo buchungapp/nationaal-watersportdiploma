@@ -1,5 +1,5 @@
 "use server";
-
+import { CoreError, CoreErrorType } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
@@ -26,12 +26,24 @@ export const createCohortAction = actionClientWithMeta
       parsedInput: { label, accessStartTime, accessEndTime },
       bindArgsParsedInputs: [locationId],
     }) => {
-      await createCohort({
-        locationId,
-        label,
-        accessStartTimestamp: accessStartTime,
-        accessEndTimestamp: accessEndTime,
-      });
+      try {
+        await createCohort({
+          locationId,
+          label,
+          accessStartTimestamp: accessStartTime,
+          accessEndTimestamp: accessEndTime,
+        });
+      } catch (error) {
+        console.log(error);
+
+        if (error instanceof CoreError) {
+          if (error.type === CoreErrorType.UniqueKey) {
+            throw new Error("Er is al een cohort met deze naam");
+          }
+        }
+
+        throw error;
+      }
 
       revalidatePath("/locatie/[location]/cohorten", "page");
     },
