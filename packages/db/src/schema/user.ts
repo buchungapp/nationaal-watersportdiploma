@@ -11,6 +11,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -100,8 +101,9 @@ export const actorType = pgEnum("actor_type", [
   "student",
   "instructor",
   "location_admin",
-  "application",
   "system",
+  "pvb_beoordelaar",
+  "secretariaat",
 ]);
 
 export const actor = pgTable(
@@ -113,7 +115,7 @@ export const actor = pgTable(
       .notNull(),
     type: actorType("type").notNull(),
     personId: uuid("person_id"),
-    locationId: uuid("location_id").notNull(),
+    locationId: uuid("location_id"),
     ...timestamps,
     _metadata: jsonb("_metadata"),
   },
@@ -128,11 +130,9 @@ export const actor = pgTable(
       foreignColumns: [location.id],
       name: "actor_location_link_location_id_fk",
     }),
-    uniqueIndex("unq_actor_type_person_location").on(
-      table.type,
-      table.personId,
-      table.locationId,
-    ),
+    unique("unq_actor_type_person_location")
+      .on(table.type, table.personId, table.locationId)
+      .nullsNotDistinct(),
   ],
 );
 
