@@ -196,6 +196,7 @@ ALTER TABLE "kss"."kerntaak_onderdeel" ADD CONSTRAINT "kerntaak_onderdeel_kernta
 ALTER TABLE "kss"."kwalificatieprofiel" ADD CONSTRAINT "kwalificatieprofiel_niveau_id_niveau_id_fk" FOREIGN KEY ("niveau_id") REFERENCES "kss"."niveau"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."werkproces" ADD CONSTRAINT "werkproces_kerntaak_id_kerntaak_id_fk" FOREIGN KEY ("kerntaak_id") REFERENCES "kss"."kerntaak"("id") ON DELETE no action ON UPDATE no action;
 CREATE UNIQUE INDEX "instructie_groep_cursus_course_id_index" ON "kss"."instructie_groep_cursus" USING btree ("course_id");
+CREATE UNIQUE INDEX "unique_person_course_kerntaak_onderdeel" ON "kss"."persoon_kwalificatie" USING btree ("person_id","course_id","kerntaak_onderdeel_id");
 CREATE UNIQUE INDEX "pvb_onderdeel_aanvraag_extra_course_pvb_onderdeel_id_course_id_index" ON "kss"."pvb_onderdeel_aanvraag_extra_course" USING btree ("pvb_onderdeel_id","course_id");
 ALTER TABLE "actor" ADD CONSTRAINT "unq_actor_type_person_location" UNIQUE NULLS NOT DISTINCT("type","person_id","location_id");
 ALTER TABLE "public"."actor" ALTER COLUMN "type" SET DATA TYPE text;

@@ -5,6 +5,7 @@ import {
   pgEnum,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { actor, course, person } from "../index.js";
@@ -80,6 +81,11 @@ export const persoonKwalificatie = kssSchema.table(
       columns: [table.personId],
       foreignColumns: [person.id],
     }),
+    uniqueIndex("unique_person_course_kerntaak_onderdeel").on(
+      table.personId,
+      table.courseId,
+      table.kerntaakOnderdeelId,
+    ),
     // Business rule constraints based on verkregenReden
     check(
       "verkregen_reden_pvb_behaald_constraint",

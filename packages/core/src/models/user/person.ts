@@ -283,10 +283,11 @@ export const list = wrapQuery(
                 "student",
                 "instructor",
                 "location_admin",
-                "application",
                 "system",
+                "pvb_beoordelaar",
+                "secretariaat",
               ]),
-              locationId: uuidSchema,
+              locationId: uuidSchema.nullable(),
             })
             .array(),
         })

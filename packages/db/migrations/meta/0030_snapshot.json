@@ -1,5 +1,5 @@
 {
-  "id": "a233ce8a-a8c0-483b-9117-0e23404e99d6",
+  "id": "bedfbb31-c499-4960-b827-a153cf87e837",
   "prevId": "f5232e96-b91d-4cfe-b74a-1e0a90860cdd",
   "version": "7",
   "dialect": "postgresql",
@@ -2944,7 +2944,35 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "unique_person_course_kerntaak_onderdeel": {
+          "name": "unique_person_course_kerntaak_onderdeel",
+          "columns": [
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kerntaak_onderdeel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "persoon_kwalificatie_direct_behaalde_pvb_onderdeel_id_kerntaak_onderdeel_id_toegevoegd_door_pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_fk": {
           "name": "persoon_kwalificatie_direct_behaalde_pvb_onderdeel_id_kerntaak_onderdeel_id_toegevoegd_door_pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_fk",
