@@ -31,7 +31,7 @@ export const listActiveTypesForUser = wrapQuery(
         .selectDistinct({ type: s.actor.type })
         .from(s.actor)
         .innerJoin(s.person, eq(s.actor.personId, s.person.id))
-        .innerJoin(s.location, eq(s.actor.locationId, s.location.id))
+        .leftJoin(s.location, eq(s.actor.locationId, s.location.id))
         .where(
           and(
             isNull(s.actor.deletedAt),

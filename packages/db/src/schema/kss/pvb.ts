@@ -2,6 +2,8 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
+  index,
+  jsonb,
   text,
   timestamp,
   uniqueIndex,
@@ -17,15 +19,19 @@ import {
   kerntaakOnderdeel,
 } from "./toetsdocument.js";
 
-export const pvbAanvraagStatus = kssSchema.enum("pvb_aanvraag_status", [
-  "concept", // Aanvraag is in concept fase
-  "wacht_op_leercoach", // Wachtend op goedkeuring van leercoach
-  "beoordelaar_gezocht", // Goedgekeurd, nu beoordelaar(s) zoeken
-  "beoordelaar_gevonden", // Beoordelaar(s) hebben zich gemeld
-  "ingetrokken", // Aanvraag is ingetrokken door kandidaat, locatie of leercoach
-  "wacht_op_beoordeling", // Wachtend op beoordeling
-  "afgerond", // Beoordeling is afgerond
-  "geannuleerd", // Aanvraag is geannuleerd
+export const aanvraagStatus = kssSchema.enum("aanvraag_status", [
+  "concept", // Aanvraag is in concept/draft fase
+  "wacht_op_voorwaarden", // Wacht op vervulling van alle voorwaarden (parallel: leercoach toestemming, beoordelaar toewijzing, startdatum planning)
+  "gereed_voor_beoordeling", // Alle voorwaarden vervuld, klaar voor beoordeling
+  "in_beoordeling", // Beoordeling is gaande
+  "afgerond", // Beoordeling is succesvol afgerond
+  "ingetrokken", // Aanvraag is ingetrokken door kandidaat of locatie
+  "afgebroken", // PvB is afgebroken gedurende de beoordeling
+]);
+
+export const pvbAanvraagType = kssSchema.enum("pvb_aanvraag_type", [
+  "intern",
+  "extern",
 ]);
 
 export const pvbOnderdeelUitslag = kssSchema.enum("pvb_onderdeel_uitslag", [
@@ -34,8 +40,8 @@ export const pvbOnderdeelUitslag = kssSchema.enum("pvb_onderdeel_uitslag", [
   "nog_niet_bekend", // Uitslag nog niet bekend
 ]);
 
-export const beoordelaarBeschikbaarheidStatus = kssSchema.enum(
-  "beoordelaar_beschikbaarheid_status",
+export const beoordelaarBeschikbaarheidsstatus = kssSchema.enum(
+  "beoordelaar_beschikbaarheidsstatus",
   [
     "geinteresseerd", // Beoordelaar is geïnteresseerd
     "toegewezen", // Beoordelaar is toegewezen
@@ -43,6 +49,35 @@ export const beoordelaarBeschikbaarheidStatus = kssSchema.enum(
     "afgewezen_door_secretariaat", // Secretariaat heeft beoordelaar afgewezen
     "afgewezen_door_vaarlocatie", // Vaarlocatie heeft afgewezen
     "ingetrokken", // Beoordelaar heeft interesse ingetrokken
+  ],
+);
+
+// Event types for comprehensive event tracking (both aanvraag and onderdeel level)
+export const pvbGebeurtenisType = kssSchema.enum("pvb_gebeurtenis_type", [
+  // Core workflow events
+  "aanvraag_ingediend",
+  "leercoach_toestemming_gevraagd",
+  "leercoach_toestemming_gegeven",
+  "leercoach_toestemming_geweigerd",
+  "voorwaarden_voltooid",
+  "beoordeling_gestart",
+  "beoordeling_afgerond",
+  "aanvraag_ingetrokken",
+
+  // Component events
+  "onderdeel_toegevoegd",
+  "onderdeel_beoordelaar_gewijzigd",
+  "onderdeel_uitslag_gewijzigd",
+]);
+
+// Leercoach permission status
+export const leercoachToestemmingStatus = kssSchema.enum(
+  "leercoach_toestemming_status",
+  [
+    "gevraagd", // Toestemming is gevraagd
+    "gegeven", // Toestemming is gegeven
+    "geweigerd", // Toestemming is geweigerd
+    "herroepen", // Toestemming is herroepen
   ],
 );
 
@@ -55,14 +90,9 @@ export const pvbAanvraag = kssSchema.table(
       .primaryKey()
       .notNull(),
     kandidaatId: uuid("kandidaat_id").notNull(), // De kandidaat
-    leercoachId: uuid("leercoach_id"), // De leercoach (person)
     locatieId: uuid("locatie_id").notNull(), // De vaarlocatie vanuit waar de aanvraag is gedaan
-    courseId: uuid("course_id").notNull(),
+    type: pvbAanvraagType("type").notNull(),
     opmerkingen: text("opmerkingen"),
-    aangemaaktOp: timestamp("aangemaakt_op", {
-      withTimezone: true,
-      mode: "string",
-    }).defaultNow(),
   },
   (table) => [
     foreignKey({
@@ -70,17 +100,37 @@ export const pvbAanvraag = kssSchema.table(
       foreignColumns: [actor.id, actor.locationId],
     }),
     foreignKey({
-      columns: [table.leercoachId],
-      foreignColumns: [actor.id],
-    }),
-    foreignKey({
       columns: [table.locatieId],
       foreignColumns: [location.id],
+    }),
+  ],
+);
+
+export const pvbAanvraagCourse = kssSchema.table(
+  "pvb_aanvraag_course",
+  {
+    id: uuid("id")
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    pvbAanvraagId: uuid("pvb_aanvraag_id").notNull(),
+    courseId: uuid("course_id").notNull(),
+    isMainCourse: boolean("is_main_course").notNull(),
+    opmerkingen: text("opmerkingen"),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.pvbAanvraagId],
+      foreignColumns: [pvbAanvraag.id],
     }),
     foreignKey({
       columns: [table.courseId],
       foreignColumns: [course.id],
     }),
+    // Ensure exactly one main course per PvB aanvraag
+    uniqueIndex("pvb_aanvraag_course_main_course_unique_idx")
+      .on(table.pvbAanvraagId)
+      .where(sql`${table.isMainCourse} = true`),
   ],
 );
 
@@ -96,6 +146,10 @@ export const pvbOnderdeel = kssSchema.table(
     kerntaakOnderdeelId: uuid("kerntaak_onderdeel_id").notNull(),
     kerntaakId: uuid("kerntaak_id").notNull(),
     beoordelaarId: uuid("beoordelaar_id"), // Kan per onderdeel verschillen
+    startDatumTijd: timestamp("start_datum_tijd", {
+      withTimezone: true,
+      mode: "string",
+    }),
     uitslag: pvbOnderdeelUitslag("uitslag")
       .default("nog_niet_bekend")
       .notNull(),
@@ -117,38 +171,6 @@ export const pvbOnderdeel = kssSchema.table(
     foreignKey({
       columns: [table.beoordelaarId],
       foreignColumns: [actor.id],
-    }),
-  ],
-);
-
-export const pvbOnderdeelBeoordelingsCriterium = kssSchema.table(
-  "pvb_onderdeel_beoordelingscriterium",
-  {
-    id: uuid("id")
-      .default(sql`extensions.uuid_generate_v4()`)
-      .primaryKey()
-      .notNull(),
-    pvbOnderdeelId: uuid("pvb_onderdeel_id").notNull(),
-    kerntaakId: uuid("kerntaak_id").notNull(),
-    beoordelingscriteriumId: uuid("beoordelingscriterium_id").notNull(),
-    behaald: boolean("behaald"),
-    opmerkingen: text("opmerkingen"),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.pvbOnderdeelId, table.kerntaakId],
-      foreignColumns: [pvbOnderdeel.id, pvbOnderdeel.kerntaakId],
-    }),
-    foreignKey({
-      columns: [table.beoordelingscriteriumId, table.kerntaakId],
-      foreignColumns: [
-        beoordelingscriterium.id,
-        beoordelingscriterium.kerntaakId,
-      ],
-    }),
-    foreignKey({
-      columns: [table.kerntaakId],
-      foreignColumns: [kerntaak.id],
     }),
   ],
 );
@@ -246,7 +268,7 @@ export const pvbBeoordelaarBeschikbaarheidStatus = kssSchema.table(
     pvbBeoordelaarBeschikbaarheidId: uuid(
       "pvb_beoordelaar_beschikbaarheid_id",
     ).notNull(),
-    status: beoordelaarBeschikbaarheidStatus("status").notNull(),
+    status: beoordelaarBeschikbaarheidsstatus("status").notNull(),
     aangemaaktOp: timestamp("aangemaakt_op", {
       withTimezone: true,
       mode: "string",
@@ -267,16 +289,99 @@ export const pvbBeoordelaarBeschikbaarheidStatus = kssSchema.table(
   ],
 );
 
-// Volledige audit trail van alle PvB aanvraag statusveranderingen
-export const pvbAanvraagStatusHistory = kssSchema.table(
-  "pvb_aanvraag_status_history",
+// Event logging for comprehensive event tracking (both aanvraag and onderdeel level)
+export const pvbGebeurtenis = kssSchema.table(
+  "pvb_gebeurtenis",
   {
     id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
     pvbAanvraagId: uuid("pvb_aanvraag_id").notNull(),
-    status: pvbAanvraagStatus("status").notNull(),
+    pvbOnderdeelId: uuid("pvb_onderdeel_id"), // Optional: for onderdeel-specific events
+    gebeurtenisType: pvbGebeurtenisType("gebeurtenis_type").notNull(),
+    data: jsonb("data"), // Flexible JSONB data for event-specific information
+    aangemaaktOp: timestamp("aangemaakt_op", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+    aangemaaktDoor: uuid("aangemaakt_door").notNull(), // actor.id van wie event heeft geinitieerd
+    reden: text("reden"), // Waarom deze gebeurtenis
+    opmerkingen: text("opmerkingen"),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.pvbAanvraagId],
+      foreignColumns: [pvbAanvraag.id],
+    }),
+    foreignKey({
+      columns: [table.pvbOnderdeelId],
+      foreignColumns: [pvbOnderdeel.id],
+    }),
+    foreignKey({
+      columns: [table.aangemaaktDoor],
+      foreignColumns: [actor.id],
+    }),
+  ],
+);
+
+// Explicit leercoach permission tracking for parallel process
+export const pvbLeercoachToestemming = kssSchema.table(
+  "pvb_leercoach_toestemming",
+  {
+    id: uuid("id")
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    pvbAanvraagId: uuid("pvb_aanvraag_id").notNull(),
+    leercoachId: uuid("leercoach_id").notNull(),
+    status: leercoachToestemmingStatus("status").notNull(),
+    aangemaaktOp: timestamp("aangemaakt_op", {
+      withTimezone: true,
+      mode: "string",
+    }).defaultNow(),
+    aangemaaktDoor: uuid("aangemaakt_door").notNull(), // actor.id van wie actie heeft uitgevoerd
+    reden: text("reden"), // Waarom deze status (bijv. "Geen tijd", "Kandidaat niet klaar")
+    opmerkingen: text("opmerkingen"),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.pvbAanvraagId],
+      foreignColumns: [pvbAanvraag.id],
+    }),
+    foreignKey({
+      columns: [table.leercoachId],
+      foreignColumns: [actor.id],
+    }),
+    foreignKey({
+      columns: [table.aangemaaktDoor],
+      foreignColumns: [actor.id],
+    }),
+    // Index optimized for querying most recent status per aanvraag+leercoach
+    index("pvb_leercoach_toestemming_recent_idx").on(
+      table.pvbAanvraagId,
+      table.leercoachId,
+      table.aangemaaktOp.desc(),
+    ),
+    // Additional index for status filtering
+    index("pvb_leercoach_toestemming_status_idx").on(
+      table.pvbAanvraagId,
+      table.leercoachId,
+      table.status,
+    ),
+  ],
+);
+
+// Volledige audit trail van alle PvB aanvraag statusveranderingen
+export const pvbAanvraagStatus = kssSchema.table(
+  "pvb_aanvraag_status",
+  {
+    id: uuid("id")
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    pvbAanvraagId: uuid("pvb_aanvraag_id").notNull(),
+    status: aanvraagStatus("status").notNull(),
     aangemaaktOp: timestamp("aangemaakt_op", {
       withTimezone: true,
       mode: "string",
@@ -297,30 +402,34 @@ export const pvbAanvraagStatusHistory = kssSchema.table(
   ],
 );
 
-// Extra courses binnen dezelfde instructiegroep die automatisch moeten worden afgerond
-// zodra de PvB succesvol is behaald
-export const pvbOnderdeelAanvraagExtraCourse = kssSchema.table(
-  "pvb_onderdeel_aanvraag_extra_course",
+export const pvbOnderdeelBeoordelingsCriterium = kssSchema.table(
+  "pvb_onderdeel_beoordelingscriterium",
   {
     id: uuid("id")
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
     pvbOnderdeelId: uuid("pvb_onderdeel_id").notNull(),
-    courseId: uuid("course_id").notNull(), // Extra course die automatisch wordt afgerond
+    kerntaakId: uuid("kerntaak_id").notNull(),
+    beoordelingscriteriumId: uuid("beoordelingscriterium_id").notNull(),
+    behaald: boolean("behaald"),
     opmerkingen: text("opmerkingen"),
   },
   (table) => [
     foreignKey({
-      columns: [table.pvbOnderdeelId],
-      foreignColumns: [pvbOnderdeel.id],
+      columns: [table.pvbOnderdeelId, table.kerntaakId],
+      foreignColumns: [pvbOnderdeel.id, pvbOnderdeel.kerntaakId],
     }),
     foreignKey({
-      columns: [table.courseId],
-      foreignColumns: [course.id],
+      columns: [table.beoordelingscriteriumId, table.kerntaakId],
+      foreignColumns: [
+        beoordelingscriterium.id,
+        beoordelingscriterium.kerntaakId,
+      ],
     }),
-    // Unieke combinatie: dezelfde extra course kan niet meerdere keren
-    // worden toegevoegd aan dezelfde PvB aanvraag
-    uniqueIndex().on(table.pvbOnderdeelId, table.courseId),
+    foreignKey({
+      columns: [table.kerntaakId],
+      foreignColumns: [kerntaak.id],
+    }),
   ],
 );

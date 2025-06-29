@@ -85,7 +85,12 @@ export const getActorByPersonIdAndType = wrapQuery(
     z.object({
       locationId: uuidSchema,
       personId: uuidSchema,
-      actorType: z.enum(["student", "instructor", "location_admin"]),
+      actorType: z.enum([
+        "student",
+        "instructor",
+        "location_admin",
+        "pvb_beoordelaar",
+      ]),
     }),
     async (input) => {
       const query = useQuery();
