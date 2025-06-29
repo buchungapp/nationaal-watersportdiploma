@@ -141,6 +141,7 @@ export const addOnderdeel = wrapCommand(
         currentStatusResults,
         kerntaakOnderdeelResults,
         existingOnderdelen,
+        existingKwalificatie,
       ] = await Promise.all([
         // 1. Check current status - only allow adding onderdelen in concept or waiting states
         tx
@@ -148,6 +149,7 @@ export const addOnderdeel = wrapCommand(
             status: s.pvbAanvraagStatus.status,
             aanvraagId: s.pvbAanvraagStatus.pvbAanvraagId,
             locatieId: s.pvbAanvraag.locatieId,
+            kandidaatId: s.pvbAanvraag.kandidaatId,
           })
           .from(s.pvbAanvraagStatus)
           .innerJoin(
@@ -186,6 +188,35 @@ export const addOnderdeel = wrapCommand(
               eq(s.pvbOnderdeel.kerntaakOnderdeelId, input.kerntaakOnderdeelId),
             ),
           ),
+
+        // 4. Check if person already has this qualification for any course linked to this aanvraag
+        tx
+          .select({
+            id: s.persoonKwalificatie.id,
+            courseId: s.persoonKwalificatie.courseId,
+          })
+          .from(s.persoonKwalificatie)
+          .innerJoin(
+            s.actor,
+            eq(s.persoonKwalificatie.personId, s.actor.personId),
+          )
+          .innerJoin(s.pvbAanvraag, eq(s.actor.id, s.pvbAanvraag.kandidaatId))
+          .innerJoin(
+            s.pvbAanvraagCourse,
+            and(
+              eq(s.pvbAanvraagCourse.pvbAanvraagId, s.pvbAanvraag.id),
+              eq(s.pvbAanvraagCourse.courseId, s.persoonKwalificatie.courseId),
+            ),
+          )
+          .where(
+            and(
+              eq(s.pvbAanvraag.id, input.pvbAanvraagId),
+              eq(
+                s.persoonKwalificatie.kerntaakOnderdeelId,
+                input.kerntaakOnderdeelId,
+              ),
+            ),
+          ),
       ]);
 
       // Process results from parallel queries
@@ -202,6 +233,13 @@ export const addOnderdeel = wrapCommand(
       // Validate uniqueness
       if (existingOnderdelen.length > 0) {
         throw new Error("Dit onderdeel bestaat al voor deze aanvraag");
+      }
+
+      // Check if person already has this qualification for any linked course
+      if (existingKwalificatie.length > 0) {
+        throw new Error(
+          "Deze persoon heeft al een kwalificatie voor dit kerntaak onderdeel voor een van de gekoppelde cursussen",
+        );
       }
 
       // Validate niveau consistency (depends on kerntaakOnderdeel result, so runs after parallel queries)
@@ -370,103 +408,150 @@ export const updateBeoordelaar = wrapCommand(
 export const addCourse = wrapCommand(
   "pvb.addCourse",
   withZod(addCourseSchema, addCourseOutputSchema, async (input) => {
-    const query = useQuery();
+    return withTransaction(async (tx) => {
+      // Run independent validation queries in parallel
+      const [
+        aanvragenResults,
+        courseResults,
+        existingCourses,
+        existingKwalificaties,
+      ] = await Promise.all([
+        // 1. Validate the aanvraag exists
+        tx
+          .select({
+            id: s.pvbAanvraag.id,
+            kandidaatId: s.pvbAanvraag.kandidaatId,
+          })
+          .from(s.pvbAanvraag)
+          .where(eq(s.pvbAanvraag.id, input.pvbAanvraagId)),
 
-    // Validate the aanvraag exists
-    const aanvragen = await query
-      .select({ id: s.pvbAanvraag.id })
-      .from(s.pvbAanvraag)
-      .where(eq(s.pvbAanvraag.id, input.pvbAanvraagId));
+        // 2. Validate course exists and get its instructieGroep
+        tx
+          .select({
+            courseId: s.course.id,
+            instructieGroepId: s.instructieGroepCursus.instructieGroepId,
+          })
+          .from(s.course)
+          .innerJoin(
+            s.instructieGroepCursus,
+            eq(s.course.id, s.instructieGroepCursus.courseId),
+          )
+          .where(eq(s.course.id, input.courseId)),
 
-    const _aanvraag = singleRow(aanvragen);
+        // 3. Check if course is already added to this aanvraag
+        tx
+          .select({ id: s.pvbAanvraagCourse.id })
+          .from(s.pvbAanvraagCourse)
+          .where(
+            and(
+              eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
+              eq(s.pvbAanvraagCourse.courseId, input.courseId),
+            ),
+          ),
 
-    // Validate course exists and get its instructieGroep
-    const courseResults = await query
-      .select({
-        courseId: s.course.id,
-        instructieGroepId: s.instructieGroepCursus.instructieGroepId,
-      })
-      .from(s.course)
-      .innerJoin(
-        s.instructieGroepCursus,
-        eq(s.course.id, s.instructieGroepCursus.courseId),
-      )
-      .where(eq(s.course.id, input.courseId));
+        // 4. Check if person already has qualifications for this course + any existing onderdelen
+        tx
+          .select({
+            id: s.persoonKwalificatie.id,
+            kerntaakOnderdeelId: s.persoonKwalificatie.kerntaakOnderdeelId,
+          })
+          .from(s.persoonKwalificatie)
+          .innerJoin(
+            s.actor,
+            eq(s.persoonKwalificatie.personId, s.actor.personId),
+          )
+          .innerJoin(s.pvbAanvraag, eq(s.actor.id, s.pvbAanvraag.kandidaatId))
+          .innerJoin(
+            s.pvbOnderdeel,
+            and(
+              eq(s.pvbOnderdeel.pvbAanvraagId, s.pvbAanvraag.id),
+              eq(
+                s.pvbOnderdeel.kerntaakOnderdeelId,
+                s.persoonKwalificatie.kerntaakOnderdeelId,
+              ),
+            ),
+          )
+          .where(
+            and(
+              eq(s.pvbAanvraag.id, input.pvbAanvraagId),
+              eq(s.persoonKwalificatie.courseId, input.courseId),
+            ),
+          ),
+      ]);
 
-    const course = singleRow(courseResults);
+      const _aanvraag = singleRow(aanvragenResults);
+      const course = singleRow(courseResults);
 
-    // Check if course is already added to this aanvraag
-    const existingCourses = await query
-      .select({ id: s.pvbAanvraagCourse.id })
-      .from(s.pvbAanvraagCourse)
-      .where(
-        and(
-          eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
-          eq(s.pvbAanvraagCourse.courseId, input.courseId),
-        ),
-      );
+      // Validate course is not already added
+      if (existingCourses.length > 0) {
+        throw new Error("Deze cursus is al toegevoegd aan de aanvraag");
+      }
 
-    if (existingCourses.length > 0) {
-      throw new Error("Deze cursus is al toegevoegd aan de aanvraag");
-    }
+      // Check if person already has qualifications that would conflict
+      if (existingKwalificaties.length > 0) {
+        throw new Error(
+          "Deze persoon heeft al een kwalificatie voor deze cursus in combinatie met een van de onderdelen uit deze aanvraag",
+        );
+      }
 
-    // Get current main course to validate instructieGroep consistency
-    const mainCourses = await query
-      .select({
-        courseId: s.pvbAanvraagCourse.courseId,
-        instructieGroepId: s.instructieGroepCursus.instructieGroepId,
-      })
-      .from(s.pvbAanvraagCourse)
-      .innerJoin(
-        s.instructieGroepCursus,
-        eq(s.pvbAanvraagCourse.courseId, s.instructieGroepCursus.courseId),
-      )
-      .where(
-        and(
-          eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
-          eq(s.pvbAanvraagCourse.isMainCourse, true),
-        ),
-      );
-
-    const mainCourse = possibleSingleRow(mainCourses);
-    if (
-      mainCourse &&
-      course.instructieGroepId !== mainCourse.instructieGroepId
-    ) {
-      throw new Error(
-        "Cursus moet tot dezelfde instructiegroep behoren als de hoofdcursus",
-      );
-    }
-
-    // If setting as main course, unset current main course
-    if (input.isMainCourse && mainCourse) {
-      await query
-        .update(s.pvbAanvraagCourse)
-        .set({ isMainCourse: false })
+      // Get current main course to validate instructieGroep consistency
+      const mainCourses = await tx
+        .select({
+          courseId: s.pvbAanvraagCourse.courseId,
+          instructieGroepId: s.instructieGroepCursus.instructieGroepId,
+        })
+        .from(s.pvbAanvraagCourse)
+        .innerJoin(
+          s.instructieGroepCursus,
+          eq(s.pvbAanvraagCourse.courseId, s.instructieGroepCursus.courseId),
+        )
         .where(
           and(
             eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
             eq(s.pvbAanvraagCourse.isMainCourse, true),
           ),
         );
-    }
 
-    // Create the pvbAanvraagCourse
-    const createdCourses = await query
-      .insert(s.pvbAanvraagCourse)
-      .values({
-        pvbAanvraagId: input.pvbAanvraagId,
-        courseId: input.courseId,
-        isMainCourse: input.isMainCourse,
-        opmerkingen: input.opmerkingen,
-      })
-      .returning({ id: s.pvbAanvraagCourse.id });
+      const mainCourse = possibleSingleRow(mainCourses);
+      if (
+        mainCourse &&
+        course.instructieGroepId !== mainCourse.instructieGroepId
+      ) {
+        throw new Error(
+          "Cursus moet tot dezelfde instructiegroep behoren als de hoofdcursus",
+        );
+      }
 
-    const pvbAanvraagCourse = singleRow(createdCourses);
+      // If setting as main course, unset current main course
+      if (input.isMainCourse && mainCourse) {
+        await tx
+          .update(s.pvbAanvraagCourse)
+          .set({ isMainCourse: false })
+          .where(
+            and(
+              eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
+              eq(s.pvbAanvraagCourse.isMainCourse, true),
+            ),
+          );
+      }
 
-    return {
-      id: pvbAanvraagCourse.id,
-    };
+      // Create the pvbAanvraagCourse
+      const createdCourses = await tx
+        .insert(s.pvbAanvraagCourse)
+        .values({
+          pvbAanvraagId: input.pvbAanvraagId,
+          courseId: input.courseId,
+          isMainCourse: input.isMainCourse,
+          opmerkingen: input.opmerkingen,
+        })
+        .returning({ id: s.pvbAanvraagCourse.id });
+
+      const pvbAanvraagCourse = singleRow(createdCourses);
+
+      return {
+        id: pvbAanvraagCourse.id,
+      };
+    });
   }),
 );
 
