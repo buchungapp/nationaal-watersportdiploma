@@ -27,7 +27,12 @@ export const list = wrapQuery(
       filter: z
         .object({
           type: singleOrArray(
-            z.enum(["student", "instructor", "location_admin"]),
+            z.enum([
+              "student",
+              "instructor",
+              "location_admin",
+              "pvb_beoordelaar",
+            ]),
           ).optional(),
         })
         .default({}),

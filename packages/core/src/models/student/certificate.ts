@@ -1,9 +1,9 @@
 import { schema as s } from "@nawadi/db";
 import { and, eq, inArray, isNull } from "drizzle-orm";
-import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import {
+  generateCertificateID,
   singleOrArray,
   successfulCreateResponse,
   uuidSchema,
@@ -11,13 +11,6 @@ import {
   wrapCommand,
 } from "../../utils/index.js";
 import { insertSchema } from "./certificate.schema.js";
-
-function generateCertificateID() {
-  const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
-  const nanoid = customAlphabet(dictionary, 10);
-
-  return nanoid();
-}
 
 export const startCertificate = wrapCommand(
   "student.certificate.start",

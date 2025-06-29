@@ -12,11 +12,11 @@ import {
   sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
-import { customAlphabet } from "nanoid";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   formatSearchTerms,
+  generatePersonID,
   possibleSingleRow,
   singleOrArray,
   singleRow,
@@ -32,13 +32,6 @@ import { getOrCreateFromEmail } from "./user.js";
 import { selectSchema } from "./user.schema.js";
 
 export * as $schema from "./person.schema.js";
-
-export function generatePersonID() {
-  const dictionary = "6789BCDFGHJKLMNPQRTWbcdfghjkmnpqrtwz";
-  const nanoid = customAlphabet(dictionary, 10);
-
-  return nanoid();
-}
 
 export const getOrCreate = wrapCommand(
   "user.person.getOrCreate",
@@ -263,7 +256,12 @@ export const list = wrapQuery(
             personId: singleOrArray(uuidSchema).optional(),
             locationId: singleOrArray(uuidSchema).optional(),
             actorType: singleOrArray(
-              z.enum(["student", "instructor", "location_admin"]),
+              z.enum([
+                "student",
+                "instructor",
+                "location_admin",
+                "pvb_beoordelaar",
+              ]),
             ).optional(),
             q: z.string().optional(),
           })
@@ -453,13 +451,32 @@ export const listLocationsByRole = wrapQuery(
     z.object({
       personId: uuidSchema,
       roles: z
-        .array(z.enum(["student", "instructor", "location_admin"]))
-        .default(["instructor", "student", "location_admin"]),
+        .array(
+          z.enum([
+            "student",
+            "instructor",
+            "location_admin",
+            "pvb_beoordelaar",
+          ]),
+        )
+        .default([
+          "instructor",
+          "student",
+          "location_admin",
+          "pvb_beoordelaar",
+        ]),
     }),
     z.array(
       z.object({
         locationId: uuidSchema,
-        roles: z.array(z.enum(["student", "instructor", "location_admin"])),
+        roles: z.array(
+          z.enum([
+            "student",
+            "instructor",
+            "location_admin",
+            "pvb_beoordelaar",
+          ]),
+        ),
       }),
     ),
     async (input) => {

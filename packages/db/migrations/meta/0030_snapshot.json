@@ -1,5 +1,5 @@
 {
-  "id": "ab8b0593-18fb-4871-8ad8-267ee60cbbb5",
+  "id": "4d9005fb-e9d4-427f-b37d-e34d8fb65106",
   "prevId": "f5232e96-b91d-4cfe-b74a-1e0a90860cdd",
   "version": "7",
   "dialect": "postgresql",
@@ -3092,6 +3092,12 @@
           "notNull": true,
           "default": "extensions.uuid_generate_v4()"
         },
+        "handle": {
+          "name": "handle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "kandidaat_id": {
           "name": "kandidaat_id",
           "type": "uuid",
@@ -3150,7 +3156,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "pvb_aanvraag_handle_unique": {
+          "name": "pvb_aanvraag_handle_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "handle"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

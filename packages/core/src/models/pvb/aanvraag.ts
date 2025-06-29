@@ -5,6 +5,7 @@ import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import { possibleSingleRow, singleRow } from "../../utils/data-helpers.js";
 import {
+  generatePvbAanvraagID,
   jsonBuildObject,
   withLimitOffset,
   withZod,
@@ -1027,6 +1028,7 @@ export const createAanvraag = wrapCommand(
       const pvbAanvraag = await tx
         .insert(s.pvbAanvraag)
         .values({
+          handle: generatePvbAanvraagID(),
           kandidaatId: input.kandidaatId,
           locatieId: input.locatieId,
           type: input.type,
@@ -1101,6 +1103,7 @@ export const list = wrapCommand(
       items: z.array(
         z.object({
           id: z.string().uuid(),
+          handle: z.string(),
           kandidaat: z.object({
             id: z.string().uuid(),
             firstName: z.string(),
@@ -1159,6 +1162,7 @@ export const list = wrapCommand(
       const aanvragenQuery = query
         .select({
           id: s.pvbAanvraag.id,
+          handle: s.pvbAanvraag.handle,
           kandidaatId: s.pvbAanvraag.kandidaatId,
           type: s.pvbAanvraag.type,
           opmerkingen: s.pvbAanvraag.opmerkingen,
@@ -1239,6 +1243,7 @@ export const list = wrapCommand(
 
       const items = aanvragen.map((row) => ({
         id: row.id,
+        handle: row.handle,
         kandidaat: {
           id: row.kandidaatId,
           firstName: row.kandidaatFirstName,

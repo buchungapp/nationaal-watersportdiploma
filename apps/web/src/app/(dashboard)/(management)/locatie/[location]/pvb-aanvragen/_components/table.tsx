@@ -65,9 +65,9 @@ const columns = [
     ),
     enableSorting: false,
   }),
-  columnHelper.accessor("id", {
+  columnHelper.accessor("handle", {
     header: "ID",
-    cell: ({ getValue }) => <Code>{getValue().slice(0, 8)}</Code>,
+    cell: ({ getValue }) => <Code>{getValue()}</Code>,
   }),
   columnHelper.accessor(
     (data) =>

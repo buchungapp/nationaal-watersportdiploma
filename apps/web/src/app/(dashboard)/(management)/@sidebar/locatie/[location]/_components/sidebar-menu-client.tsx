@@ -4,6 +4,7 @@ import {
   AcademicCapIcon,
   CalendarDaysIcon,
   ChartBarIcon,
+  DocumentTextIcon,
   FolderIcon,
   UserGroupIcon,
 } from "@heroicons/react/20/solid";
@@ -49,6 +50,13 @@ export function LocationSidebarMenuClient({
           Icon: AcademicCapIcon,
           active: hasRole(["location_admin"]),
           current: segments[0] === "diplomas",
+        },
+        {
+          name: "PvB aanvragen",
+          href: `/locatie/${params.location}/pvb-aanvragen`,
+          Icon: DocumentTextIcon,
+          active: hasRole(["location_admin"]),
+          current: segments[0] === "pvb-aanvragen",
         },
         {
           name: "Kennisbank",

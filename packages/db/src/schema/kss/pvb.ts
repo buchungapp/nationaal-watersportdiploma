@@ -90,6 +90,7 @@ export const pvbAanvraag = kssSchema.table(
       .default(sql`extensions.uuid_generate_v4()`)
       .primaryKey()
       .notNull(),
+    handle: text("handle").notNull().unique(),
     kandidaatId: uuid("kandidaat_id").notNull(), // De kandidaat
     locatieId: uuid("locatie_id").notNull(), // De vaarlocatie vanuit waar de aanvraag is gedaan
     type: pvbAanvraagType("type").notNull(),

@@ -30,7 +30,11 @@ import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
 
-export type ActorType = "student" | "instructor" | "location_admin";
+export type ActorType =
+  | "student"
+  | "instructor"
+  | "location_admin"
+  | "pvb_beoordelaar";
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -332,7 +336,7 @@ async function validatePersonAccessCheck({
 
   const isRequestedPersonAnActivePersonForLocationRequest =
     isActiveActorTypeInLocation({
-      actorType: ["instructor", "student", "location_admin"],
+      actorType: ["instructor", "student", "location_admin", "pvb_beoordelaar"],
       locationId,
       personId: requestedPersonId,
     });

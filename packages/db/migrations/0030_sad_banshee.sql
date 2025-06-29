@@ -40,10 +40,12 @@ CREATE TABLE "kss"."persoon_kwalificatie" (
 
 CREATE TABLE "kss"."pvb_aanvraag" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
+	"handle" text NOT NULL,
 	"kandidaat_id" uuid NOT NULL,
 	"locatie_id" uuid NOT NULL,
 	"type" "kss"."pvb_aanvraag_type" NOT NULL,
-	"opmerkingen" text
+	"opmerkingen" text,
+	CONSTRAINT "pvb_aanvraag_handle_unique" UNIQUE("handle")
 );
 
 CREATE TABLE "kss"."pvb_aanvraag_course" (

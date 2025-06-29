@@ -1,4 +1,6 @@
+import { PlusIcon } from "@heroicons/react/16/solid";
 import { Suspense } from "react";
+import { Button } from "~/app/(dashboard)/_components/button";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listPvbsWithPagination, retrieveLocationByHandle } from "~/lib/nwd";
 import Search from "../../../_components/search";
@@ -31,6 +33,22 @@ async function PvbsTable(props: {
   return <Table pvbs={pvbs.items} totalItems={pvbs.count} />;
 }
 
+async function CreateButton(props: {
+  params: Promise<{ location: string }>;
+}) {
+  const params = await props.params;
+
+  return (
+    <Button
+      href={`/locatie/${params.location}/pvb-aanvragen/nieuw`}
+      color="branding-orange"
+    >
+      <PlusIcon />
+      Nieuwe aanvraag
+    </Button>
+  );
+}
+
 export default function Page(props: {
   params: Promise<{
     location: string;
@@ -41,12 +59,12 @@ export default function Page(props: {
     <>
       <div className="flex flex-wrap justify-between items-end gap-4">
         <div className="sm:flex-1 max-sm:w-full">
-          <Heading>PvB's</Heading>
+          <Heading>PvB aanvragen</Heading>
           <div className="flex gap-4 mt-4 max-w-xl">
-            <Search placeholder="Doorzoek PvB's..." />
+            <Search placeholder="Doorzoek aanvragen..." />
           </div>
         </div>
-        {/* Future: Add CreateDialog component */}
+        <CreateButton params={props.params} />
       </div>
 
       <Suspense
