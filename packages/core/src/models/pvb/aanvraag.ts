@@ -1,9 +1,15 @@
 import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
 import { and, countDistinct, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import { possibleSingleRow, singleRow } from "../../utils/data-helpers.js";
-import { withZod, wrapCommand } from "../../utils/index.js";
+import {
+  jsonBuildObject,
+  withLimitOffset,
+  withZod,
+  wrapCommand,
+} from "../../utils/index.js";
 import {
   aanvraagSchema,
   addCourseOutputSchema,
@@ -1077,4 +1083,181 @@ export const createAanvraag = wrapCommand(
       };
     });
   }),
+);
+
+// List PvB aanvragen for a location with pagination
+export const list = wrapCommand(
+  "pvb.listAanvragen",
+  withZod(
+    z.object({
+      filter: z.object({
+        locationId: z.string().uuid(),
+        q: z.string().optional(),
+      }),
+      limit: z.number().int().positive().optional(),
+      offset: z.number().int().nonnegative().default(0),
+    }),
+    z.object({
+      items: z.array(
+        z.object({
+          id: z.string().uuid(),
+          kandidaat: z.object({
+            id: z.string().uuid(),
+            firstName: z.string(),
+            lastNamePrefix: z.string().nullable(),
+            lastName: z.string().nullable(),
+          }),
+          type: z.enum(["intern", "extern"]),
+          status: z.enum([
+            "concept",
+            "wacht_op_voorwaarden",
+            "gereed_voor_beoordeling",
+            "in_beoordeling",
+            "afgerond",
+            "ingetrokken",
+            "afgebroken",
+          ]),
+          lastStatusChange: z.string().datetime(),
+          opmerkingen: z.string().nullable(),
+          kerntaakOnderdelen: z.array(
+            z.object({
+              id: z.string().uuid(),
+              titel: z.string(),
+              type: z.enum(["portfolio", "praktijk"]),
+              rang: z.number().int().nonnegative(),
+              behaaldStatus: z.enum([
+                "behaald",
+                "niet_behaald",
+                "nog_niet_bekend",
+              ]),
+            }),
+          ),
+        }),
+      ),
+      count: z.number().int().nonnegative(),
+      limit: z.number().int().positive().nullable(),
+      offset: z.number().int().nonnegative(),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      // More performant subquery using DISTINCT ON to get latest status
+      const latestStatusSubquery = query
+        .selectDistinct({
+          pvbAanvraagId: s.pvbAanvraagStatus.pvbAanvraagId,
+          status: s.pvbAanvraagStatus.status,
+          aangemaaktOp: s.pvbAanvraagStatus.aangemaaktOp,
+        })
+        .from(s.pvbAanvraagStatus)
+        .orderBy(
+          s.pvbAanvraagStatus.pvbAanvraagId,
+          desc(s.pvbAanvraagStatus.aangemaaktOp),
+        )
+        .as("latest_status");
+
+      // Query to get basic aanvraag info with current status and aggregated onderdelen
+      const aanvragenQuery = query
+        .select({
+          id: s.pvbAanvraag.id,
+          kandidaatId: s.pvbAanvraag.kandidaatId,
+          type: s.pvbAanvraag.type,
+          opmerkingen: s.pvbAanvraag.opmerkingen,
+          kandidaatFirstName: s.person.firstName,
+          kandidaatLastNamePrefix: s.person.lastNamePrefix,
+          kandidaatLastName: s.person.lastName,
+          status: latestStatusSubquery.status,
+          lastStatusChange: latestStatusSubquery.aangemaaktOp,
+          // Array aggregation for onderdelen
+          kerntaakOnderdelen: sql<
+            Array<{
+              id: string;
+              titel: string;
+              type: "portfolio" | "praktijk";
+              rang: number;
+              behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
+            }>
+          >`
+            COALESCE(
+              json_agg(
+                ${jsonBuildObject({
+                  id: s.kerntaakOnderdeel.id,
+                  titel: s.kerntaak.titel,
+                  type: s.kerntaakOnderdeel.type,
+                  rang: s.kerntaak.rang,
+                  behaaldStatus: sql`COALESCE(${s.pvbOnderdeel.uitslag}, 'nog_niet_bekend')`,
+                })} ORDER BY ${s.kerntaak.rang}, ${s.kerntaak.titel}
+              ) FILTER (WHERE ${s.kerntaakOnderdeel.id} IS NOT NULL),
+              '[]'::json
+            )
+          `,
+        })
+        .from(s.pvbAanvraag)
+        .innerJoin(s.actor, eq(s.pvbAanvraag.kandidaatId, s.actor.id))
+        .innerJoin(s.person, eq(s.actor.personId, s.person.id))
+        .innerJoin(
+          latestStatusSubquery,
+          eq(latestStatusSubquery.pvbAanvraagId, s.pvbAanvraag.id),
+        )
+        .leftJoin(
+          s.pvbOnderdeel,
+          eq(s.pvbOnderdeel.pvbAanvraagId, s.pvbAanvraag.id),
+        )
+        .leftJoin(
+          s.kerntaakOnderdeel,
+          eq(s.kerntaakOnderdeel.id, s.pvbOnderdeel.kerntaakOnderdeelId),
+        )
+        .leftJoin(s.kerntaak, eq(s.kerntaak.id, s.kerntaakOnderdeel.kerntaakId))
+        .where(eq(s.pvbAanvraag.locatieId, input.filter.locationId))
+        .groupBy(
+          s.pvbAanvraag.id,
+          s.person.id,
+          latestStatusSubquery.status,
+          latestStatusSubquery.aangemaaktOp,
+        )
+        .orderBy(desc(latestStatusSubquery.aangemaaktOp))
+        .$dynamic();
+
+      // Get count
+      const countQuery = query
+        .select({ count: countDistinct(s.pvbAanvraag.id) })
+        .from(s.pvbAanvraag)
+        .where(eq(s.pvbAanvraag.locatieId, input.filter.locationId));
+
+      const [aanvragen, { count }] = await Promise.all([
+        withLimitOffset(aanvragenQuery, input.limit, input.offset),
+        countQuery.then(singleRow),
+      ]);
+
+      if (aanvragen.length === 0) {
+        return {
+          items: [],
+          count,
+          limit: input.limit ?? null,
+          offset: input.offset,
+        };
+      }
+
+      const items = aanvragen.map((row) => ({
+        id: row.id,
+        kandidaat: {
+          id: row.kandidaatId,
+          firstName: row.kandidaatFirstName,
+          lastNamePrefix: row.kandidaatLastNamePrefix,
+          lastName: row.kandidaatLastName,
+        },
+        type: row.type,
+        status: row.status,
+        lastStatusChange: dayjs(row.lastStatusChange).toISOString(),
+        opmerkingen: row.opmerkingen,
+        kerntaakOnderdelen: row.kerntaakOnderdelen || [],
+      }));
+
+      return {
+        items,
+        count,
+        limit: input.limit ?? null,
+        offset: input.offset,
+      };
+    },
+  ),
 );

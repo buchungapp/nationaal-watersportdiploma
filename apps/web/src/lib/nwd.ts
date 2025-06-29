@@ -8,6 +8,7 @@ import {
   Logbook,
   Marketing,
   Platform,
+  Pvb,
   Student,
   User,
   withRedisClient,
@@ -3372,3 +3373,46 @@ export const updateCurrentUserDisplayName = async (displayName: string) => {
     });
   });
 };
+
+export const listPvbs = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: person.id,
+    });
+
+    const pvbs = await Pvb.Aanvraag.list({
+      filter: { locationId },
+    });
+
+    return pvbs.items;
+  });
+});
+
+export const listPvbsWithPagination = cache(
+  async (
+    locationId: string,
+    { q, limit, offset }: { q: string; limit: number; offset: number },
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      });
+
+      return await Pvb.Aanvraag.list({
+        filter: { locationId, q },
+        limit,
+        offset,
+      });
+    });
+  },
+);

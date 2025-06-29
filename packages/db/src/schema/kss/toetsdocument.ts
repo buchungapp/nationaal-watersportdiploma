@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { foreignKey, integer, text, uuid } from "drizzle-orm/pg-core";
+import { foreignKey, integer, text, unique, uuid } from "drizzle-orm/pg-core";
 import { kssSchema } from "./schema.js";
 
 export const richting = kssSchema.enum("richting", [
@@ -89,6 +89,7 @@ export const kerntaakOnderdeel = kssSchema.table(
       columns: [table.kerntaakId],
       foreignColumns: [kerntaak.id],
     }),
+    unique().on(table.id, table.kerntaakId),
   ],
 );
 
@@ -110,6 +111,7 @@ export const werkproces = kssSchema.table(
       columns: [table.kerntaakId],
       foreignColumns: [kerntaak.id],
     }),
+    unique().on(table.id, table.kerntaakId),
   ],
 );
 
@@ -129,11 +131,12 @@ export const beoordelingscriterium = kssSchema.table(
   (table) => [
     foreignKey({
       columns: [table.werkprocesId, table.kerntaakId],
-      foreignColumns: [werkproces.id, kerntaak.id],
+      foreignColumns: [werkproces.id, werkproces.kerntaakId],
     }),
     foreignKey({
       columns: [table.kerntaakId],
       foreignColumns: [kerntaak.id],
     }),
+    unique().on(table.id, table.kerntaakId),
   ],
 );

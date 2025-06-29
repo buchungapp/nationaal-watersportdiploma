@@ -6,6 +6,7 @@ import {
   jsonb,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -172,6 +173,31 @@ export const pvbOnderdeel = kssSchema.table(
       columns: [table.beoordelaarId],
       foreignColumns: [actor.id],
     }),
+    uniqueIndex(
+      "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_beoordelaar_id_unique",
+    ).on(table.pvbAanvraagId, table.kerntaakOnderdeelId, table.beoordelaarId),
+    uniqueIndex("pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_unique").on(
+      table.pvbAanvraagId,
+      table.kerntaakOnderdeelId,
+    ),
+    uniqueIndex("pvb_onderdeel_aanvraag_id_kerntaak_id_unique").on(
+      table.pvbAanvraagId,
+      table.kerntaakId,
+    ),
+    // These are needed for the foreign key constraints
+    unique("pvb_onderdeel_id_kerntaak_onderdeel_id_unique").on(
+      table.id,
+      table.kerntaakOnderdeelId,
+    ),
+    unique("pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_unique").on(
+      table.id,
+      table.kerntaakOnderdeelId,
+      table.beoordelaarId,
+    ),
+    unique("pvb_onderdeel_id_kerntaak_id_unique").on(
+      table.id,
+      table.kerntaakId,
+    ),
   ],
 );
 
@@ -200,6 +226,7 @@ export const pvbVoorstelDatum = kssSchema.table(
       columns: [table.pvbAanvraagId],
       foreignColumns: [pvbAanvraag.id],
     }),
+    unique().on(table.id, table.pvbAanvraagId),
   ],
 );
 

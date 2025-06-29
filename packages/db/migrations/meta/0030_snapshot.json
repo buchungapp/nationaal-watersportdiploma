@@ -1,5 +1,5 @@
 {
-  "id": "bedfbb31-c499-4960-b827-a153cf87e837",
+  "id": "ab8b0593-18fb-4871-8ad8-267ee60cbbb5",
   "prevId": "f5232e96-b91d-4cfe-b74a-1e0a90860cdd",
   "version": "7",
   "dialect": "postgresql",
@@ -3098,21 +3098,16 @@
           "primaryKey": false,
           "notNull": true
         },
-        "leercoach_id": {
-          "name": "leercoach_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "locatie_id": {
           "name": "locatie_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
+        "type": {
+          "name": "type",
+          "type": "pvb_aanvraag_type",
+          "typeSchema": "kss",
           "primaryKey": false,
           "notNull": true
         },
@@ -3121,13 +3116,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "aangemaakt_op": {
-          "name": "aangemaakt_op",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -3147,19 +3135,6 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "pvb_aanvraag_leercoach_id_actor_id_fk": {
-          "name": "pvb_aanvraag_leercoach_id_actor_id_fk",
-          "tableFrom": "pvb_aanvraag",
-          "tableTo": "actor",
-          "columnsFrom": [
-            "leercoach_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "pvb_aanvraag_locatie_id_location_id_fk": {
           "name": "pvb_aanvraag_locatie_id_location_id_fk",
           "tableFrom": "pvb_aanvraag",
@@ -3172,10 +3147,86 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kss.pvb_aanvraag_course": {
+      "name": "pvb_aanvraag_course",
+      "schema": "kss",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
         },
-        "pvb_aanvraag_course_id_course_id_fk": {
-          "name": "pvb_aanvraag_course_id_course_id_fk",
-          "tableFrom": "pvb_aanvraag",
+        "pvb_aanvraag_id": {
+          "name": "pvb_aanvraag_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_main_course": {
+          "name": "is_main_course",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opmerkingen": {
+          "name": "opmerkingen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pvb_aanvraag_course_main_course_unique_idx": {
+          "name": "pvb_aanvraag_course_main_course_unique_idx",
+          "columns": [
+            {
+              "expression": "pvb_aanvraag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"kss\".\"pvb_aanvraag_course\".\"is_main_course\" = true",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pvb_aanvraag_course_pvb_aanvraag_id_pvb_aanvraag_id_fk": {
+          "name": "pvb_aanvraag_course_pvb_aanvraag_id_pvb_aanvraag_id_fk",
+          "tableFrom": "pvb_aanvraag_course",
+          "tableTo": "pvb_aanvraag",
+          "schemaTo": "kss",
+          "columnsFrom": [
+            "pvb_aanvraag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pvb_aanvraag_course_course_id_course_id_fk": {
+          "name": "pvb_aanvraag_course_course_id_course_id_fk",
+          "tableFrom": "pvb_aanvraag_course",
           "tableTo": "course",
           "columnsFrom": [
             "course_id"
@@ -3193,8 +3244,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "kss.pvb_aanvraag_status_history": {
-      "name": "pvb_aanvraag_status_history",
+    "kss.pvb_aanvraag_status": {
+      "name": "pvb_aanvraag_status",
       "schema": "kss",
       "columns": {
         "id": {
@@ -3212,7 +3263,7 @@
         },
         "status": {
           "name": "status",
-          "type": "pvb_aanvraag_status",
+          "type": "aanvraag_status",
           "typeSchema": "kss",
           "primaryKey": false,
           "notNull": true
@@ -3245,9 +3296,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "pvb_aanvraag_status_history_pvb_aanvraag_id_pvb_aanvraag_id_fk": {
-          "name": "pvb_aanvraag_status_history_pvb_aanvraag_id_pvb_aanvraag_id_fk",
-          "tableFrom": "pvb_aanvraag_status_history",
+        "pvb_aanvraag_status_pvb_aanvraag_id_pvb_aanvraag_id_fk": {
+          "name": "pvb_aanvraag_status_pvb_aanvraag_id_pvb_aanvraag_id_fk",
+          "tableFrom": "pvb_aanvraag_status",
           "tableTo": "pvb_aanvraag",
           "schemaTo": "kss",
           "columnsFrom": [
@@ -3259,9 +3310,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "pvb_aanvraag_status_history_aangemaakt_door_actor_id_fk": {
-          "name": "pvb_aanvraag_status_history_aangemaakt_door_actor_id_fk",
-          "tableFrom": "pvb_aanvraag_status_history",
+        "pvb_aanvraag_status_aangemaakt_door_actor_id_fk": {
+          "name": "pvb_aanvraag_status_aangemaakt_door_actor_id_fk",
+          "tableFrom": "pvb_aanvraag_status",
           "tableTo": "actor",
           "columnsFrom": [
             "aangemaakt_door"
@@ -3386,7 +3437,7 @@
         },
         "status": {
           "name": "status",
-          "type": "beoordelaar_beschikbaarheid_status",
+          "type": "beoordelaar_beschikbaarheidsstatus",
           "typeSchema": "kss",
           "primaryKey": false,
           "notNull": true
@@ -3514,6 +3565,278 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "kss.pvb_gebeurtenis": {
+      "name": "pvb_gebeurtenis",
+      "schema": "kss",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "pvb_aanvraag_id": {
+          "name": "pvb_aanvraag_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pvb_onderdeel_id": {
+          "name": "pvb_onderdeel_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "gebeurtenis_type": {
+          "name": "gebeurtenis_type",
+          "type": "pvb_gebeurtenis_type",
+          "typeSchema": "kss",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aangemaakt_op": {
+          "name": "aangemaakt_op",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "aangemaakt_door": {
+          "name": "aangemaakt_door",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reden": {
+          "name": "reden",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opmerkingen": {
+          "name": "opmerkingen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pvb_gebeurtenis_pvb_aanvraag_id_pvb_aanvraag_id_fk": {
+          "name": "pvb_gebeurtenis_pvb_aanvraag_id_pvb_aanvraag_id_fk",
+          "tableFrom": "pvb_gebeurtenis",
+          "tableTo": "pvb_aanvraag",
+          "schemaTo": "kss",
+          "columnsFrom": [
+            "pvb_aanvraag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pvb_gebeurtenis_pvb_onderdeel_id_pvb_onderdeel_id_fk": {
+          "name": "pvb_gebeurtenis_pvb_onderdeel_id_pvb_onderdeel_id_fk",
+          "tableFrom": "pvb_gebeurtenis",
+          "tableTo": "pvb_onderdeel",
+          "schemaTo": "kss",
+          "columnsFrom": [
+            "pvb_onderdeel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pvb_gebeurtenis_aangemaakt_door_actor_id_fk": {
+          "name": "pvb_gebeurtenis_aangemaakt_door_actor_id_fk",
+          "tableFrom": "pvb_gebeurtenis",
+          "tableTo": "actor",
+          "columnsFrom": [
+            "aangemaakt_door"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kss.pvb_leercoach_toestemming": {
+      "name": "pvb_leercoach_toestemming",
+      "schema": "kss",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "pvb_aanvraag_id": {
+          "name": "pvb_aanvraag_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "leercoach_id": {
+          "name": "leercoach_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "leercoach_toestemming_status",
+          "typeSchema": "kss",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aangemaakt_op": {
+          "name": "aangemaakt_op",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "aangemaakt_door": {
+          "name": "aangemaakt_door",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reden": {
+          "name": "reden",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opmerkingen": {
+          "name": "opmerkingen",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "pvb_leercoach_toestemming_recent_idx": {
+          "name": "pvb_leercoach_toestemming_recent_idx",
+          "columns": [
+            {
+              "expression": "pvb_aanvraag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "leercoach_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "aangemaakt_op",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pvb_leercoach_toestemming_status_idx": {
+          "name": "pvb_leercoach_toestemming_status_idx",
+          "columns": [
+            {
+              "expression": "pvb_aanvraag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "leercoach_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "pvb_leercoach_toestemming_pvb_aanvraag_id_pvb_aanvraag_id_fk": {
+          "name": "pvb_leercoach_toestemming_pvb_aanvraag_id_pvb_aanvraag_id_fk",
+          "tableFrom": "pvb_leercoach_toestemming",
+          "tableTo": "pvb_aanvraag",
+          "schemaTo": "kss",
+          "columnsFrom": [
+            "pvb_aanvraag_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pvb_leercoach_toestemming_leercoach_id_actor_id_fk": {
+          "name": "pvb_leercoach_toestemming_leercoach_id_actor_id_fk",
+          "tableFrom": "pvb_leercoach_toestemming",
+          "tableTo": "actor",
+          "columnsFrom": [
+            "leercoach_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "pvb_leercoach_toestemming_aangemaakt_door_actor_id_fk": {
+          "name": "pvb_leercoach_toestemming_aangemaakt_door_actor_id_fk",
+          "tableFrom": "pvb_leercoach_toestemming",
+          "tableTo": "actor",
+          "columnsFrom": [
+            "aangemaakt_door"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "kss.pvb_onderdeel": {
       "name": "pvb_onderdeel",
       "schema": "kss",
@@ -3549,6 +3872,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "start_datum_tijd": {
+          "name": "start_datum_tijd",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "uitslag": {
           "name": "uitslag",
           "type": "pvb_onderdeel_uitslag",
@@ -3564,7 +3893,77 @@
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_beoordelaar_id_unique": {
+          "name": "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_beoordelaar_id_unique",
+          "columns": [
+            {
+              "expression": "pvb_aanvraag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kerntaak_onderdeel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "beoordelaar_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_unique": {
+          "name": "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_unique",
+          "columns": [
+            {
+              "expression": "pvb_aanvraag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kerntaak_onderdeel_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "pvb_onderdeel_aanvraag_id_kerntaak_id_unique": {
+          "name": "pvb_onderdeel_aanvraag_id_kerntaak_id_unique",
+          "columns": [
+            {
+              "expression": "pvb_aanvraag_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "kerntaak_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "pvb_onderdeel_pvb_aanvraag_id_pvb_aanvraag_id_fk": {
           "name": "pvb_onderdeel_pvb_aanvraag_id_pvb_aanvraag_id_fk",
@@ -3625,95 +4024,33 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "kss.pvb_onderdeel_aanvraag_extra_course": {
-      "name": "pvb_onderdeel_aanvraag_extra_course",
-      "schema": "kss",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "extensions.uuid_generate_v4()"
-        },
-        "pvb_onderdeel_id": {
-          "name": "pvb_onderdeel_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "course_id": {
-          "name": "course_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "opmerkingen": {
-          "name": "opmerkingen",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "pvb_onderdeel_aanvraag_extra_course_pvb_onderdeel_id_course_id_index": {
-          "name": "pvb_onderdeel_aanvraag_extra_course_pvb_onderdeel_id_course_id_index",
+      "uniqueConstraints": {
+        "pvb_onderdeel_id_kerntaak_onderdeel_id_unique": {
+          "name": "pvb_onderdeel_id_kerntaak_onderdeel_id_unique",
+          "nullsNotDistinct": false,
           "columns": [
-            {
-              "expression": "pvb_onderdeel_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "course_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "pvb_onderdeel_aanvraag_extra_course_pvb_onderdeel_id_pvb_onderdeel_id_fk": {
-          "name": "pvb_onderdeel_aanvraag_extra_course_pvb_onderdeel_id_pvb_onderdeel_id_fk",
-          "tableFrom": "pvb_onderdeel_aanvraag_extra_course",
-          "tableTo": "pvb_onderdeel",
-          "schemaTo": "kss",
-          "columnsFrom": [
-            "pvb_onderdeel_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+            "id",
+            "kerntaak_onderdeel_id"
+          ]
         },
-        "pvb_onderdeel_aanvraag_extra_course_course_id_course_id_fk": {
-          "name": "pvb_onderdeel_aanvraag_extra_course_course_id_course_id_fk",
-          "tableFrom": "pvb_onderdeel_aanvraag_extra_course",
-          "tableTo": "course",
-          "columnsFrom": [
-            "course_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+        "pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_unique": {
+          "name": "pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "kerntaak_onderdeel_id",
+            "beoordelaar_id"
+          ]
+        },
+        "pvb_onderdeel_id_kerntaak_id_unique": {
+          "name": "pvb_onderdeel_id_kerntaak_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "kerntaak_id"
+          ]
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3875,7 +4212,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "pvb_voorstel_datum_id_pvb_aanvraag_id_unique": {
+          "name": "pvb_voorstel_datum_id_pvb_aanvraag_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "pvb_aanvraag_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -3918,8 +4264,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "beoordelingscriterium_werkproces_id_kerntaak_id_werkproces_id_id_fk": {
-          "name": "beoordelingscriterium_werkproces_id_kerntaak_id_werkproces_id_id_fk",
+        "beoordelingscriterium_werkproces_id_kerntaak_id_werkproces_id_kerntaak_id_fk": {
+          "name": "beoordelingscriterium_werkproces_id_kerntaak_id_werkproces_id_kerntaak_id_fk",
           "tableFrom": "beoordelingscriterium",
           "tableTo": "werkproces",
           "schemaTo": "kss",
@@ -3929,7 +4275,7 @@
           ],
           "columnsTo": [
             "id",
-            "id"
+            "kerntaak_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -3950,7 +4296,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "beoordelingscriterium_id_kerntaak_id_unique": {
+          "name": "beoordelingscriterium_id_kerntaak_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "kerntaak_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -4058,7 +4413,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "kerntaak_onderdeel_id_kerntaak_id_unique": {
+          "name": "kerntaak_onderdeel_id_kerntaak_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "kerntaak_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -4197,7 +4561,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "werkproces_id_kerntaak_id_unique": {
+          "name": "werkproces_id_kerntaak_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id",
+            "kerntaak_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -5546,6 +5919,14 @@
             "person_id",
             "location_id"
           ]
+        },
+        "unq_actor_location_id_unique": {
+          "name": "unq_actor_location_id_unique",
+          "nullsNotDistinct": true,
+          "columns": [
+            "id",
+            "location_id"
+          ]
         }
       },
       "policies": {},
@@ -6010,8 +6391,21 @@
         "onbekend"
       ]
     },
-    "kss.beoordelaar_beschikbaarheid_status": {
-      "name": "beoordelaar_beschikbaarheid_status",
+    "kss.aanvraag_status": {
+      "name": "aanvraag_status",
+      "schema": "kss",
+      "values": [
+        "concept",
+        "wacht_op_voorwaarden",
+        "gereed_voor_beoordeling",
+        "in_beoordeling",
+        "afgerond",
+        "ingetrokken",
+        "afgebroken"
+      ]
+    },
+    "kss.beoordelaar_beschikbaarheidsstatus": {
+      "name": "beoordelaar_beschikbaarheidsstatus",
       "schema": "kss",
       "values": [
         "geinteresseerd",
@@ -6022,18 +6416,39 @@
         "ingetrokken"
       ]
     },
-    "kss.pvb_aanvraag_status": {
-      "name": "pvb_aanvraag_status",
+    "kss.leercoach_toestemming_status": {
+      "name": "leercoach_toestemming_status",
       "schema": "kss",
       "values": [
-        "concept",
-        "wacht_op_leercoach",
-        "beoordelaar_gezocht",
-        "beoordelaar_gevonden",
-        "ingetrokken",
-        "wacht_op_beoordeling",
-        "afgerond",
-        "geannuleerd"
+        "gevraagd",
+        "gegeven",
+        "geweigerd",
+        "herroepen"
+      ]
+    },
+    "kss.pvb_aanvraag_type": {
+      "name": "pvb_aanvraag_type",
+      "schema": "kss",
+      "values": [
+        "intern",
+        "extern"
+      ]
+    },
+    "kss.pvb_gebeurtenis_type": {
+      "name": "pvb_gebeurtenis_type",
+      "schema": "kss",
+      "values": [
+        "aanvraag_ingediend",
+        "leercoach_toestemming_gevraagd",
+        "leercoach_toestemming_gegeven",
+        "leercoach_toestemming_geweigerd",
+        "voorwaarden_voltooid",
+        "beoordeling_gestart",
+        "beoordeling_afgerond",
+        "aanvraag_ingetrokken",
+        "onderdeel_toegevoegd",
+        "onderdeel_beoordelaar_gewijzigd",
+        "onderdeel_uitslag_gewijzigd"
       ]
     },
     "kss.pvb_onderdeel_uitslag": {

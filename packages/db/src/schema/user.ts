@@ -133,6 +133,9 @@ export const actor = pgTable(
     unique("unq_actor_type_person_location")
       .on(table.type, table.personId, table.locationId)
       .nullsNotDistinct(),
+    unique("unq_actor_location_id_unique")
+      .on(table.id, table.locationId)
+      .nullsNotDistinct(),
   ],
 );
 
