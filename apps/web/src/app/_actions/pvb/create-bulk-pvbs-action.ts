@@ -12,7 +12,22 @@ const actionClient = createSafeActionClient();
 const createBulkPvbsSchema = z.object({
   locationHandle: z.string(),
   courseConfig: z.object({
-    type: z.enum(["instructeur", "assistent"]),
+    niveauId: z.string().uuid(),
+    selectedOnderdelen: z
+      .array(z.string().uuid())
+      .min(1, "Selecteer minimaal één onderdeel"),
+    courses: z
+      .array(
+        z.object({
+          id: z.string().uuid(),
+          isMain: z.boolean(),
+        }),
+      )
+      .min(1, "Selecteer minimaal één cursus")
+      .refine(
+        (courses) => courses.filter((c) => c.isMain).length === 1,
+        "Exact één cursus moet als 'main' gemarkeerd zijn",
+      ),
     opmerkingen: z.string().optional(),
   }),
   kandidaten: z
@@ -36,11 +51,6 @@ export const createBulkPvbsAction = actionClient
       );
       const user = await getUserOrThrow();
 
-      // Get course IDs for the type (simplified - you might need to adjust this based on your course structure)
-      // For now, I'll use a placeholder approach - you'll need to implement proper course selection
-      const courseId = "placeholder-course-id"; // TODO: Implement proper course selection logic
-      const onderdeelId = "placeholder-onderdeel-id"; // TODO: Implement proper onderdeel selection logic
-
       const results = [];
 
       // Create PvB aanvraag for each kandidaat
@@ -53,31 +63,39 @@ export const createBulkPvbsAction = actionClient
             leercoachId: kandidaat.leercoach || null,
             opmerkingen: parsedInput.courseConfig.opmerkingen || null,
             startDatumTijd: kandidaat.startDatumTijd || null,
-            courses: [
-              {
-                courseId: courseId,
-                isMainCourse: true,
-                opmerkingen: null,
-              },
-            ] as [
+            courses: parsedInput.courseConfig.courses.map((course) => ({
+              courseId: course.id,
+              isMainCourse: course.isMain,
+              opmerkingen: null,
+            })) as [
               {
                 courseId: string;
                 isMainCourse: boolean;
                 opmerkingen: string | null;
               },
+              ...{
+                courseId: string;
+                isMainCourse: boolean;
+                opmerkingen: string | null;
+              }[],
             ],
-            onderdelen: [
-              {
+            onderdelen: parsedInput.courseConfig.selectedOnderdelen.map(
+              (onderdeelId) => ({
                 kerntaakOnderdeelId: onderdeelId,
                 beoordelaarId: kandidaat.beoordelaar || null,
                 opmerkingen: null,
-              },
-            ] as [
+              }),
+            ) as [
               {
                 kerntaakOnderdeelId: string;
                 beoordelaarId: string | null;
                 opmerkingen: string | null;
               },
+              ...{
+                kerntaakOnderdeelId: string;
+                beoordelaarId: string | null;
+                opmerkingen: string | null;
+              }[],
             ],
           };
 

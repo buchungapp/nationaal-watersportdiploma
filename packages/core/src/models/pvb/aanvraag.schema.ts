@@ -13,17 +13,12 @@ export const aanvraagInternPvbSchema = z.object({
   courses: z
     .object({
       courseId: uuidSchema,
+      instructieGroepId: uuidSchema,
       isMainCourse: z.boolean(),
       opmerkingen: z.string().nullable(),
     })
     .array()
-    .nonempty()
-    .refine(
-      (data) => data.filter((course) => course.isMainCourse).length === 1,
-      {
-        message: "Er moet precies één hoofdcursus geselecteerd zijn",
-      },
-    ),
+    .nonempty(),
   onderdelen: z
     .object({
       kerntaakOnderdeelId: uuidSchema,
@@ -43,17 +38,12 @@ export const aanvraagExternPvbSchema = z.object({
   courses: z
     .object({
       courseId: uuidSchema,
+      instructieGroepId: uuidSchema,
       isMainCourse: z.boolean(),
       opmerkingen: z.string().nullable(),
     })
     .array()
-    .nonempty()
-    .refine(
-      (data) => data.filter((course) => course.isMainCourse).length === 1,
-      {
-        message: "Er moet precies één hoofdcursus geselecteerd zijn",
-      },
-    ),
+    .nonempty(),
   onderdelen: z
     .object({
       kerntaakOnderdeelId: uuidSchema,
@@ -115,6 +105,7 @@ export const updateBeoordelaarOutputSchema = z.object({
 export const addCourseSchema = z.object({
   pvbAanvraagId: uuidSchema,
   courseId: uuidSchema,
+  instructieGroepId: uuidSchema,
   isMainCourse: z.boolean(),
   opmerkingen: z.string().nullable(),
   aangemaaktDoor: uuidSchema,
@@ -129,6 +120,7 @@ export const addCourseOutputSchema = z.object({
 export const removeCourseSchema = z.object({
   pvbAanvraagId: uuidSchema,
   courseId: uuidSchema,
+  instructieGroepId: uuidSchema,
   aangemaaktDoor: uuidSchema,
   reden: z.string().optional(),
 });
@@ -141,6 +133,7 @@ export const removeCourseOutputSchema = z.object({
 export const setMainCourseSchema = z.object({
   pvbAanvraagId: uuidSchema,
   courseId: uuidSchema,
+  instructieGroepId: uuidSchema,
   aangemaaktDoor: uuidSchema,
   reden: z.string().optional(),
 });

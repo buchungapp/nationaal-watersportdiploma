@@ -3,6 +3,9 @@ import { SWRConfig, unstable_serialize } from "swr";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
   listCountries,
+  listCourses,
+  listKssKwalificatieprofielenWithOnderdelen,
+  listKssNiveaus,
   listPersonsForLocationWithPagination,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -10,12 +13,50 @@ import CreatePvbForm from "./_components/create-pvb-form";
 
 async function CreatePvbContent(props: {
   params: Promise<{ location: string }>;
+  searchParams: Promise<{ niveau?: string }>;
 }) {
-  const params = await props.params;
+  const [params, searchParams] = await Promise.all([
+    props.params,
+    props.searchParams,
+  ]);
+
   const location = await retrieveLocationByHandle(params.location);
 
   // Fetch required data for the form
-  const countries = await listCountries();
+  const [countries, niveausResult, coursesResult] = await Promise.all([
+    listCountries(),
+    listKssNiveaus(),
+    listCourses("consument"),
+  ]);
+
+  // Transform courses to match the expected interface (filter out nulls)
+  const niveaus = niveausResult.filter(
+    (niveau): niveau is typeof niveau & { rang: number } => niveau.rang < 4,
+  );
+  const courses = coursesResult
+    .filter(
+      (course): course is typeof course & { title: string } =>
+        course.title !== null,
+    )
+    .map((course) => ({
+      id: course.id,
+      title: course.title,
+    }));
+
+  // Fetch kwalificatieprofielen if niveau is selected
+  let kwalificatieprofielen: Awaited<
+    ReturnType<typeof listKssKwalificatieprofielenWithOnderdelen>
+  > = [];
+  if (searchParams.niveau) {
+    try {
+      kwalificatieprofielen = await listKssKwalificatieprofielenWithOnderdelen(
+        searchParams.niveau,
+      );
+    } catch (error) {
+      console.error("Failed to load kwalificatieprofielen:", error);
+      // Continue without kwalificatieprofielen
+    }
+  }
 
   return (
     <SWRConfig
@@ -44,13 +85,21 @@ async function CreatePvbContent(props: {
         },
       }}
     >
-      <CreatePvbForm locationId={location.id} countries={countries} />
+      <CreatePvbForm
+        locationId={location.id}
+        countries={countries}
+        niveaus={niveaus}
+        courses={courses}
+        kwalificatieprofielen={kwalificatieprofielen}
+        selectedNiveauId={searchParams.niveau || ""}
+      />
     </SWRConfig>
   );
 }
 
 export default function Page(props: {
   params: Promise<{ location: string }>;
+  searchParams: Promise<{ niveau?: string }>;
 }) {
   return (
     <>
@@ -66,7 +115,10 @@ export default function Page(props: {
 
       <div className="mt-8">
         <Suspense fallback={<div>Laden...</div>}>
-          <CreatePvbContent params={props.params} />
+          <CreatePvbContent
+            params={props.params}
+            searchParams={props.searchParams}
+          />
         </Suspense>
       </div>
     </>

@@ -4,6 +4,7 @@ import {
   Cohort,
   Course,
   Curriculum,
+  KSS,
   Location,
   Logbook,
   Marketing,
@@ -735,12 +736,18 @@ export const retrieveDisciplineByHandle = async (handle: string) => {
   });
 };
 
-export const listCourses = async () => {
+export const listCourses = async (
+  typeOfCourses?: "consument" | "instructeur",
+) => {
   "use cache";
   cacheLife("days");
 
   return makeRequest(async () => {
-    const courses = await Course.list();
+    const courses = await Course.list({
+      filter: {
+        type: typeOfCourses,
+      },
+    });
 
     return courses;
   });
@@ -2182,7 +2189,6 @@ export async function releaseStudentFromCohortByAllocationId({
         personId: primaryPerson.id,
       }),
     ]);
-
     if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
       throw new Error("Unauthorized");
     }
@@ -2721,7 +2727,6 @@ export const listDistinctTagsForCohort = async (cohortId: string) => {
     });
   });
 };
-
 export async function upsertActorForLocation({
   locationId,
   personId,
@@ -2943,7 +2948,6 @@ export const updateDefaultCertificateVisibleFromDate = async ({
     });
   });
 };
-
 export const updateCohortDetails = async ({
   cohortId,
   label,
@@ -3416,6 +3420,22 @@ export const listPvbsWithPagination = cache(
         filter: { locationId, q },
         limit,
         offset,
+      });
+    });
+  },
+);
+
+export const listKssNiveaus = cache(async () => {
+  return makeRequest(async () => {
+    return await KSS.Kwalificatieprofiel.listNiveaus();
+  });
+});
+
+export const listKssKwalificatieprofielenWithOnderdelen = cache(
+  async (niveauId: string) => {
+    return makeRequest(async () => {
+      return await KSS.Kwalificatieprofiel.listWithOnderdelen({
+        niveauId,
       });
     });
   },

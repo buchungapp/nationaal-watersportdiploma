@@ -437,11 +437,16 @@ export const addCourse = wrapCommand(
           .select({
             courseId: s.course.id,
             instructieGroepId: s.instructieGroepCursus.instructieGroepId,
+            richting: s.instructieGroep.richting,
           })
           .from(s.course)
           .innerJoin(
             s.instructieGroepCursus,
             eq(s.course.id, s.instructieGroepCursus.courseId),
+          )
+          .innerJoin(
+            s.instructieGroep,
+            eq(s.instructieGroepCursus.instructieGroepId, s.instructieGroep.id),
           )
           .where(eq(s.course.id, input.courseId)),
 
@@ -453,6 +458,10 @@ export const addCourse = wrapCommand(
             and(
               eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
               eq(s.pvbAanvraagCourse.courseId, input.courseId),
+              eq(
+                s.pvbAanvraagCourse.instructieGroepId,
+                input.instructieGroepId,
+              ),
             ),
           ),
 
@@ -487,7 +496,7 @@ export const addCourse = wrapCommand(
       ]);
 
       const _aanvraag = singleRow(aanvragenResults);
-      const course = singleRow(courseResults);
+      const _course = singleRow(courseResults);
 
       // Validate course is not already added
       if (existingCourses.length > 0) {
@@ -516,18 +525,11 @@ export const addCourse = wrapCommand(
           and(
             eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
             eq(s.pvbAanvraagCourse.isMainCourse, true),
+            eq(s.pvbAanvraagCourse.instructieGroepId, input.instructieGroepId),
           ),
         );
 
       const mainCourse = possibleSingleRow(mainCourses);
-      if (
-        mainCourse &&
-        course.instructieGroepId !== mainCourse.instructieGroepId
-      ) {
-        throw new Error(
-          "Cursus moet tot dezelfde instructiegroep behoren als de hoofdcursus",
-        );
-      }
 
       // If setting as main course, unset current main course
       if (input.isMainCourse && mainCourse) {
@@ -538,6 +540,10 @@ export const addCourse = wrapCommand(
             and(
               eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
               eq(s.pvbAanvraagCourse.isMainCourse, true),
+              eq(
+                s.pvbAanvraagCourse.instructieGroepId,
+                input.instructieGroepId,
+              ),
             ),
           );
       }
@@ -548,6 +554,7 @@ export const addCourse = wrapCommand(
         .values({
           pvbAanvraagId: input.pvbAanvraagId,
           courseId: input.courseId,
+          instructieGroepId: input.instructieGroepId,
           isMainCourse: input.isMainCourse,
           opmerkingen: input.opmerkingen,
         })
@@ -567,7 +574,7 @@ export const removeCourse = wrapCommand(
   withZod(removeCourseSchema, removeCourseOutputSchema, async (input) => {
     return withTransaction(async (tx) => {
       // Validate the course exists in this aanvraag and get course count in one query
-      const [courseResults, allCourses] = await Promise.all([
+      const [courseResults] = await Promise.all([
         tx
           .select({
             id: s.pvbAanvraagCourse.id,
@@ -578,30 +585,15 @@ export const removeCourse = wrapCommand(
             and(
               eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
               eq(s.pvbAanvraagCourse.courseId, input.courseId),
+              eq(
+                s.pvbAanvraagCourse.instructieGroepId,
+                input.instructieGroepId,
+              ),
             ),
           ),
-
-        tx
-          .select({ id: s.pvbAanvraagCourse.id })
-          .from(s.pvbAanvraagCourse)
-          .where(eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId)),
       ]);
 
       const course = singleRow(courseResults);
-
-      // Prevent deleting the last course
-      if (allCourses.length === 1) {
-        throw new Error(
-          "Kan de laatste cursus niet verwijderen. Een PvB aanvraag moet minimaal één cursus hebben.",
-        );
-      }
-
-      // Can't remove main course if there are other courses
-      if (course.isMainCourse && allCourses.length > 1) {
-        throw new Error(
-          "Kan de hoofdcursus niet verwijderen zolang er andere cursussen zijn. Stel eerst een andere cursus in als hoofdcursus.",
-        );
-      }
 
       // Remove the course
       await tx
@@ -631,6 +623,7 @@ export const setMainCourse = wrapCommand(
         and(
           eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
           eq(s.pvbAanvraagCourse.courseId, input.courseId),
+          eq(s.pvbAanvraagCourse.instructieGroepId, input.instructieGroepId),
         ),
       );
 
@@ -648,6 +641,7 @@ export const setMainCourse = wrapCommand(
         and(
           eq(s.pvbAanvraagCourse.pvbAanvraagId, input.pvbAanvraagId),
           eq(s.pvbAanvraagCourse.isMainCourse, true),
+          eq(s.pvbAanvraagCourse.instructieGroepId, input.instructieGroepId),
         ),
       );
 
@@ -1051,6 +1045,7 @@ export const createAanvraag = wrapCommand(
         await addCourse({
           pvbAanvraagId: pvbAanvraag.id,
           courseId: course.courseId,
+          instructieGroepId: course.instructieGroepId,
           isMainCourse: course.isMainCourse,
           opmerkingen: course.opmerkingen,
           aangemaaktDoor: input.kandidaatId,

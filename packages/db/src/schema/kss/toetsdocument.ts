@@ -3,10 +3,9 @@ import { foreignKey, integer, text, unique, uuid } from "drizzle-orm/pg-core";
 import { kssSchema } from "./schema.js";
 
 export const richting = kssSchema.enum("richting", [
-  "trainer-coach",
   "instructeur",
-  "official",
-  "opleider",
+  "leercoach",
+  "pvb_beoordelaar",
 ]);
 
 export const kerntaakOnderdeelType = kssSchema.enum("kerntaakOnderdeelType", [

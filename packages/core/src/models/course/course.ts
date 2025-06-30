@@ -7,6 +7,8 @@ import {
   eq,
   getTableColumns,
   inArray,
+  like,
+  not,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";
@@ -16,6 +18,7 @@ import {
   handleSchema,
   possibleSingleRow,
   singleOrArray,
+  singleOrNonEmptyArray,
   singleRow,
   successfulCreateResponse,
   uuidSchema,
@@ -68,6 +71,9 @@ export const list = wrapQuery(
         filter: z
           .object({
             id: singleOrArray(uuidSchema).optional(),
+            type: singleOrNonEmptyArray(
+              z.enum(["consument", "instructeur"]),
+            ).optional(),
           })
           .default({}),
       })
@@ -83,6 +89,28 @@ export const list = wrapQuery(
           whereClausules.push(inArray(s.course.id, filter.id));
         } else {
           whereClausules.push(eq(s.course.id, filter.id));
+        }
+      }
+
+      if (filter.type) {
+        // If both types are selected, no additional filtering needed
+        if (Array.isArray(filter.type) && filter.type.length === 2) {
+          // Both 'consument' and 'instructeur' selected - include all courses
+        } else {
+          const types = Array.isArray(filter.type)
+            ? filter.type
+            : [filter.type];
+
+          if (types.includes("consument") && !types.includes("instructeur")) {
+            // Only 'consument' selected - exclude courses ending with '-instructeurs'
+            whereClausules.push(not(like(s.course.handle, "%-instructeurs")));
+          } else if (
+            types.includes("instructeur") &&
+            !types.includes("consument")
+          ) {
+            // Only 'instructeur' selected - include only courses ending with '-instructeurs'
+            whereClausules.push(like(s.course.handle, "%-instructeurs"));
+          }
         }
       }
 

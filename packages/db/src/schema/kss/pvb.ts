@@ -10,7 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { course } from "../index.js";
+import { course, instructieGroep } from "../index.js";
 import { location } from "../location.js";
 import { actor } from "../user.js";
 import { kssSchema } from "./schema.js";
@@ -117,6 +117,7 @@ export const pvbAanvraagCourse = kssSchema.table(
       .notNull(),
     pvbAanvraagId: uuid("pvb_aanvraag_id").notNull(),
     courseId: uuid("course_id").notNull(),
+    instructieGroepId: uuid("instructie_groep_id").notNull(),
     isMainCourse: boolean("is_main_course").notNull(),
     opmerkingen: text("opmerkingen"),
   },
@@ -129,10 +130,19 @@ export const pvbAanvraagCourse = kssSchema.table(
       columns: [table.courseId],
       foreignColumns: [course.id],
     }),
+    foreignKey({
+      columns: [table.instructieGroepId],
+      foreignColumns: [instructieGroep.id],
+    }),
     // Ensure exactly one main course per PvB aanvraag
-    uniqueIndex("pvb_aanvraag_course_main_course_unique_idx")
-      .on(table.pvbAanvraagId)
+    uniqueIndex()
+      .on(table.pvbAanvraagId, table.instructieGroepId)
       .where(sql`${table.isMainCourse} = true`),
+    uniqueIndex().on(
+      table.pvbAanvraagId,
+      table.instructieGroepId,
+      table.courseId,
+    ),
   ],
 );
 

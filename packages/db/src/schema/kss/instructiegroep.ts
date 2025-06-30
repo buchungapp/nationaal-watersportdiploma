@@ -36,6 +36,6 @@ export const instructieGroepCursus = kssSchema.table(
       columns: [table.courseId],
       foreignColumns: [course.id],
     }),
-    uniqueIndex().on(table.courseId),
+    uniqueIndex().on(table.instructieGroepId, table.courseId),
   ],
 );
