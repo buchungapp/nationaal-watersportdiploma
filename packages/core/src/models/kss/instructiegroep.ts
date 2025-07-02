@@ -33,6 +33,22 @@ export const findByCourseId = wrapQuery(
     async (input) => {
       const query = useQuery();
 
+      // Single query using a subquery to find the instructiegroep that contains
+      // the given courseId and richting, then return all courses in that instructiegroep
+      const instructiegroepSubquery = query
+        .select({ id: s.instructieGroep.id })
+        .from(s.instructieGroep)
+        .innerJoin(
+          s.instructieGroepCursus,
+          eq(s.instructieGroep.id, s.instructieGroepCursus.instructieGroepId),
+        )
+        .where(
+          and(
+            eq(s.instructieGroep.richting, input.richting),
+            eq(s.instructieGroepCursus.courseId, input.courseId),
+          ),
+        );
+
       const result = await query
         .select({
           id: s.instructieGroep.id,
@@ -56,12 +72,7 @@ export const findByCourseId = wrapQuery(
             isNull(s.course.deletedAt),
           ),
         )
-        .where(
-          and(
-            eq(s.instructieGroep.richting, input.richting),
-            eq(s.instructieGroepCursus.courseId, input.courseId),
-          ),
-        )
+        .where(eq(s.instructieGroep.id, instructiegroepSubquery))
         .groupBy(s.instructieGroep.id)
         .then(singleRow);
 

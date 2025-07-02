@@ -3,26 +3,23 @@
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { DocumentDuplicateIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useStateAction } from "next-safe-action/stateful-hooks";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Breakout from "~/app/(dashboard)/_components/breakout";
 import { Button } from "~/app/(dashboard)/_components/button";
-import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import {
+  Checkbox,
+  CheckboxField,
+  CheckboxGroup,
+} from "~/app/(dashboard)/_components/checkbox";
 import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
-import { ErrorMessage } from "~/app/(dashboard)/_components/fieldset";
-import {
-  Field,
-  FieldGroup,
-  Fieldset,
-  Label,
-  Legend,
-} from "~/app/(dashboard)/_components/fieldset";
+import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Select } from "~/app/(dashboard)/_components/select";
 import {
@@ -77,6 +74,22 @@ interface Kwalificatieprofiel {
   }>;
 }
 
+interface InstructiegroepData {
+  kwalificatieprofielId: string;
+  courseId: string;
+  instructiegroep?: {
+    id: string;
+    title: string;
+    richting: string;
+    courses: Array<{
+      id: string;
+      handle: string;
+      title: string | null;
+    }>;
+  };
+  error?: string;
+}
+
 interface Props {
   locationId: string;
   countries: Country[];
@@ -84,6 +97,7 @@ interface Props {
   courses: Course[];
   kwalificatieprofielen: Kwalificatieprofiel[];
   selectedNiveauId: string;
+  instructiegroepData: Record<string, InstructiegroepData>;
 }
 
 interface SelectedKandidaat {
@@ -94,18 +108,28 @@ interface SelectedKandidaat {
   startDatumTijd?: string;
 }
 
-interface CourseSelection {
+interface KwalificatieprofielConfig {
   id: string;
-  title: string;
-  isMain: boolean;
-}
-
-interface OnderdeelSelection {
-  id: string;
-  title: string;
-  type: string;
-  selected: boolean;
-  kwalificatieprofielTitel: string;
+  titel: string;
+  richting: string;
+  hoofdcursus?: {
+    courseId: string;
+    instructieGroepId: string;
+    title: string;
+  };
+  aanvullendeCursussen: Array<{
+    courseId: string;
+    instructieGroepId: string;
+    title: string;
+    selected: boolean;
+  }>;
+  instructiegroepError?: string;
+  onderdelen: Array<{
+    id: string;
+    title: string;
+    type: string;
+    selected: boolean;
+  }>;
 }
 
 function BeoordelaarCombobox({
@@ -142,7 +166,7 @@ function BeoordelaarCombobox({
   if (hasNoBeoordelaars) {
     return (
       <div className="relative">
-        <div className="w-full p-2 text-xs text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg">
+        <div className="w-full p-2 text-sm text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg">
           Geen beoordelaars beschikbaar. Voeg de rol 'PvB Beoordelaar' toe via
           personen-pagina.
         </div>
@@ -241,64 +265,120 @@ export default function CreatePvbForm({
   courses,
   kwalificatieprofielen,
   selectedNiveauId,
+  instructiegroepData,
 }: Props) {
   const params = useParams();
   const router = useRouter();
-  const [niveau, setNiveau] = useQueryState("niveau");
+  const searchParams = useSearchParams();
+  const [_niveau, setNiveau] = useQueryState("niveau", { shallow: false });
+
+  // Parse course selections from URL search params
+  const [courseSelections, setCourseSelections] = useState<
+    Record<string, string>
+  >(() => {
+    const selections: Record<string, string> = {};
+    for (const kp of kwalificatieprofielen) {
+      const value = searchParams.get(`kp-${kp.id}`) || "";
+      selections[`kp-${kp.id}`] = value;
+    }
+    return selections;
+  });
 
   const [selectedKandidaten, setSelectedKandidaten] = useState<
     SelectedKandidaat[]
   >([]);
-  const [courseConfig, setCourseConfig] = useState({
-    niveauId: selectedNiveauId,
-    selectedOnderdelen: [] as string[],
-    courses: [] as CourseSelection[],
-    opmerkingen: "",
-  });
+  const [kwalificatieprofielenConfig, setKwalificatieprofielenConfig] =
+    useState<KwalificatieprofielConfig[]>([]);
+  const [opmerkingen, setOpmerkingen] = useState("");
   const [personQuery, setPersonQuery] = useState("");
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-  const [onderdelenSelections, setOnderdelenSelections] = useState<
-    OnderdeelSelection[]
-  >([]);
 
-  // Initialize onderdelen selections when kwalificatieprofielen data is available
+  // Function to update URL when course selections change
+  const updateCourseSelectionInURL = (kpId: string, courseId: string) => {
+    const newSearchParams = new URLSearchParams(searchParams);
+    if (courseId) {
+      newSearchParams.set(`kp-${kpId}`, courseId);
+    } else {
+      newSearchParams.delete(`kp-${kpId}`);
+    }
+    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
+
+    setCourseSelections((prev) => ({
+      ...prev,
+      [`kp-${kpId}`]: courseId,
+    }));
+  };
+
+  // Initialize kwalificatieprofielen configurations when data is available
   useEffect(() => {
     if (kwalificatieprofielen.length > 0) {
-      const onderdelen: OnderdeelSelection[] = [];
-      for (const kp of kwalificatieprofielen) {
-        for (const kerntaak of kp.kerntaken) {
-          for (const onderdeel of kerntaak.onderdelen) {
-            onderdelen.push({
-              id: onderdeel.id,
-              title: `${kerntaak.titel} - ${onderdeel.type}`,
-              type: onderdeel.type,
-              selected: true,
-              kwalificatieprofielTitel: kp.titel,
-            });
-          }
-        }
-      }
-      setOnderdelenSelections(onderdelen);
-      setCourseConfig((prev) => ({
-        ...prev,
-        selectedOnderdelen: onderdelen.map((o) => o.id),
-      }));
-    } else {
-      setOnderdelenSelections([]);
-      setCourseConfig((prev) => ({
-        ...prev,
-        selectedOnderdelen: [],
-      }));
-    }
-  }, [kwalificatieprofielen]);
+      const configs: KwalificatieprofielConfig[] = kwalificatieprofielen.map(
+        (kp) => {
+          const courseSelection = courseSelections[`kp-${kp.id}`];
+          const instructiegroepKey = courseSelection
+            ? `${kp.id}-${courseSelection}`
+            : null;
+          const instructiegroepInfo = instructiegroepKey
+            ? instructiegroepData[instructiegroepKey]
+            : null;
 
-  // Sync courseConfig.niveauId with selectedNiveauId prop
-  useEffect(() => {
-    setCourseConfig((prev) => ({
-      ...prev,
-      niveauId: selectedNiveauId,
-    }));
-  }, [selectedNiveauId]);
+          let hoofdcursus = undefined;
+          let aanvullendeCursussen: KwalificatieprofielConfig["aanvullendeCursussen"] =
+            [];
+          let instructiegroepError = undefined;
+
+          if (courseSelection && instructiegroepInfo) {
+            const course = courses.find((c) => c.id === courseSelection);
+            if (course) {
+              if (instructiegroepInfo.instructiegroep) {
+                hoofdcursus = {
+                  courseId: courseSelection,
+                  instructieGroepId: instructiegroepInfo.instructiegroep.id,
+                  title: course.title,
+                };
+
+                aanvullendeCursussen =
+                  instructiegroepInfo.instructiegroep.courses
+                    .filter(
+                      (c: { id: string; title: string | null }) =>
+                        c.id !== courseSelection && c.title,
+                    )
+                    .map((c: { id: string; title: string | null }) => ({
+                      courseId: c.id,
+                      instructieGroepId:
+                        instructiegroepInfo.instructiegroep?.id ?? "",
+                      title: c.title as string,
+                      selected: false,
+                    }));
+              } else if (instructiegroepInfo.error) {
+                instructiegroepError = instructiegroepInfo.error;
+              }
+            }
+          }
+
+          return {
+            id: kp.id,
+            titel: kp.titel,
+            richting: kp.richting,
+            hoofdcursus,
+            aanvullendeCursussen,
+            instructiegroepError,
+            onderdelen: kp.kerntaken.flatMap((kerntaak) =>
+              kerntaak.onderdelen.map((onderdeel) => ({
+                id: onderdeel.id,
+                title: `${kerntaak.titel} - ${onderdeel.type}`,
+                type: onderdeel.type,
+                selected: true,
+              })),
+            ),
+          };
+        },
+      );
+      setKwalificatieprofielenConfig(configs);
+    } else {
+      setKwalificatieprofielenConfig([]);
+    }
+  }, [kwalificatieprofielen, courseSelections, instructiegroepData, courses]);
 
   const { data: searchedInstructors, isLoading: isInstructorsLoading } =
     usePersonsForLocation(locationId, {
@@ -383,6 +463,57 @@ export default function CreatePvbForm({
     toast.success("Instellingen gekopieerd naar alle rijen");
   };
 
+  const handleNiveauChange = (niveauId: string) => {
+    setNiveau(niveauId);
+    // Clear all course selections when niveau changes
+    const clearedSelections: Record<string, string> = {};
+    for (const kp of kwalificatieprofielen) {
+      clearedSelections[`kp-${kp.id}`] = "";
+    }
+    setCourseSelections(clearedSelections);
+
+    // Also clear from URL
+    const newSearchParams = new URLSearchParams(searchParams);
+    for (const kp of kwalificatieprofielen) {
+      newSearchParams.delete(`kp-${kp.id}`);
+    }
+    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
+  };
+
+  const handleHoofdcursusSelect = (kpId: string, courseId: string) => {
+    updateCourseSelectionInURL(kpId, courseId);
+  };
+
+  const handleAanvullendeCursusToggle = (kpId: string, courseId: string) => {
+    setKwalificatieprofielenConfig((prev) =>
+      prev.map((config) =>
+        config.id === kpId
+          ? {
+              ...config,
+              aanvullendeCursussen: config.aanvullendeCursussen.map((c) =>
+                c.courseId === courseId ? { ...c, selected: !c.selected } : c,
+              ),
+            }
+          : config,
+      ),
+    );
+  };
+
+  const handleOnderdeelToggle = (kpId: string, onderdeelId: string) => {
+    setKwalificatieprofielenConfig((prev) =>
+      prev.map((config) =>
+        config.id === kpId
+          ? {
+              ...config,
+              onderdelen: config.onderdelen.map((o) =>
+                o.id === onderdeelId ? { ...o, selected: !o.selected } : o,
+              ),
+            }
+          : config,
+      ),
+    );
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -391,9 +522,45 @@ export default function CreatePvbForm({
       return;
     }
 
+    if (kwalificatieprofielenConfig.length === 0) {
+      toast.error("Selecteer een niveau");
+      return;
+    }
+
+    if (!kwalificatieprofielenConfig.some((kp) => kp.hoofdcursus)) {
+      toast.error("Selecteer minimaal één hoofdcursus");
+      return;
+    }
+
+    // Get all selected onderdelen from all kwalificatieprofielen
+    const selectedOnderdelen = kwalificatieprofielenConfig.flatMap((kp) =>
+      kp.onderdelen.filter((o) => o.selected).map((o) => o.id),
+    );
+
+    if (selectedOnderdelen.length === 0) {
+      toast.error("Selecteer minimaal één onderdeel");
+      return;
+    }
+
     execute({
       locationHandle: params.location as string,
-      courseConfig,
+      courseConfig: {
+        niveauId: selectedNiveauId,
+        selectedOnderdelen,
+        kwalificatieprofielen: kwalificatieprofielenConfig.map((kp) => ({
+          id: kp.id,
+          titel: kp.titel,
+          richting: kp.richting,
+          hoofdcursus: kp.hoofdcursus,
+          aanvullendeCursussen: kp.aanvullendeCursussen
+            .filter((c) => c.selected)
+            .map((c) => ({
+              courseId: c.courseId,
+              instructieGroepId: c.instructieGroepId,
+            })),
+        })),
+        opmerkingen,
+      },
       kandidaten: selectedKandidaten.map((k) => ({
         id: k.id,
         leercoach: k.leercoach,
@@ -404,75 +571,38 @@ export default function CreatePvbForm({
   };
 
   const isLoading = status === "executing";
-
-  const handleNiveauChange = (niveauId: string) => {
-    setNiveau(niveauId);
-    setCourseConfig((prev) => ({
-      ...prev,
-      niveauId,
-      selectedOnderdelen: [],
-      courses: [],
-    }));
-  };
-
-  const handleOnderdeelToggle = (onderdeelId: string) => {
-    setOnderdelenSelections((prev) =>
-      prev.map((o) =>
-        o.id === onderdeelId ? { ...o, selected: !o.selected } : o,
-      ),
+  const hasValidConfiguration =
+    kwalificatieprofielenConfig.some((kp) => kp.hoofdcursus) &&
+    kwalificatieprofielenConfig.some((kp) =>
+      kp.onderdelen.some((o) => o.selected),
     );
-    setCourseConfig((prev) => ({
-      ...prev,
-      selectedOnderdelen: onderdelenSelections
-        .filter((o) => (o.id === onderdeelId ? !o.selected : o.selected))
-        .map((o) => o.id),
-    }));
-  };
-
-  const handleCourseToggle = (courseId: string, title: string) => {
-    setCourseConfig((prev) => {
-      const existingIndex = prev.courses.findIndex((c) => c.id === courseId);
-      if (existingIndex >= 0) {
-        // Remove course
-        return {
-          ...prev,
-          courses: prev.courses.filter((c) => c.id !== courseId),
-        };
-      }
-      // Add course (first course is main by default)
-      return {
-        ...prev,
-        courses: [
-          ...prev.courses,
-          { id: courseId, title, isMain: prev.courses.length === 0 },
-        ],
-      };
-    });
-  };
-
-  const handleCourseMainToggle = (courseId: string) => {
-    setCourseConfig((prev) => ({
-      ...prev,
-      courses: prev.courses.map((c) => ({
-        ...c,
-        isMain: c.id === courseId,
-      })),
-    }));
-  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Step 1: KSS Niveau Selection */}
-      <Fieldset>
-        <Legend>KSS Niveau</Legend>
-        <Text>Selecteer het KSS niveau voor de PvB aanvragen.</Text>
+      <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+              1
+            </div>
+            <h2 className="text-base font-semibold text-zinc-900">
+              KSS Niveau
+            </h2>
+          </div>
+        </div>
 
-        <FieldGroup>
-          <Field>
-            <Label>Niveau</Label>
+        <div className="p-4">
+          <Text className="text-sm text-zinc-600 mb-3">
+            Selecteer het KSS niveau voor de PvB aanvragen.
+          </Text>
+
+          <Field className="max-w-xs">
+            <Label className="text-sm font-medium text-zinc-700">Niveau</Label>
             <Select
-              value={courseConfig.niveauId}
+              value={selectedNiveauId}
               onChange={(e) => handleNiveauChange(e.target.value)}
+              className="mt-1"
             >
               <option value="">Selecteer niveau...</option>
               {niveaus.map((niveau) => (
@@ -482,186 +612,275 @@ export default function CreatePvbForm({
               ))}
             </Select>
           </Field>
-        </FieldGroup>
-      </Fieldset>
+        </div>
+      </div>
 
-      {/* Step 2: Kwalificatieprofielen en Onderdelen */}
-      {courseConfig.niveauId && (
-        <Fieldset>
-          <Legend>Kwalificatieprofielen en Onderdelen</Legend>
-          <Text>
-            Selecteer de onderdelen die getoetst moeten worden. Standaard zijn
-            alle onderdelen geselecteerd.
-          </Text>
-
-          <FieldGroup>
-            {kwalificatieprofielen.map((kp) => (
-              <div key={kp.id} className="space-y-2">
-                <Text className="font-medium text-zinc-900">{kp.titel}</Text>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pl-4">
-                  {kp.kerntaken.map((kerntaak) =>
-                    kerntaak.onderdelen.map((onderdeel) => {
-                      const selection = onderdelenSelections.find(
-                        (o) => o.id === onderdeel.id,
-                      );
-                      return (
-                        <div
-                          key={onderdeel.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            checked={selection?.selected || false}
-                            onChange={() => handleOnderdeelToggle(onderdeel.id)}
-                          />
-                          <Text className="text-sm">
-                            {kerntaak.titel} - {onderdeel.type}
-                          </Text>
-                        </div>
-                      );
-                    }),
-                  )}
-                </div>
+      {/* Step 2: Kwalificatieprofielen Configuration */}
+      {selectedNiveauId && kwalificatieprofielen.length > 0 && (
+        <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                2
               </div>
-            ))}
-          </FieldGroup>
-        </Fieldset>
-      )}
+              <h2 className="text-base font-semibold text-zinc-900">
+                Kwalificatieprofielen
+              </h2>
+            </div>
+          </div>
 
-      {/* Step 3: Cursussen */}
-      {courseConfig.niveauId && (
-        <Fieldset>
-          <Legend>Cursussen</Legend>
-          <Text>
-            Selecteer één of meerdere cursussen. Markeer exact één cursus als
-            'main' - deze cursus bepaalt wie gekwalificeerd is om de PvB te
-            beoordelen.
-          </Text>
+          <div className="p-4">
+            <Text className="text-sm text-zinc-600 mb-4">
+              Voor elk kwalificatieprofiel moet een hoofdcursus geselecteerd
+              worden. De hoofdcursus bepaalt waar de PvB plaatsvindt en welke
+              beoordelaar bevoegd is.
+            </Text>
 
-          <FieldGroup>
-            <div className="space-y-2">
-              {courses.map((course) => {
-                const isSelected = courseConfig.courses.some(
-                  (c) => c.id === course.id,
+            <div className="space-y-4">
+              {kwalificatieprofielen.map((kp) => {
+                const config = kwalificatieprofielenConfig.find(
+                  (c) => c.id === kp.id,
                 );
-                const selectedCourse = courseConfig.courses.find(
-                  (c) => c.id === course.id,
-                );
+                if (!config) return null;
 
                 return (
                   <div
-                    key={course.id}
-                    className="flex items-center space-x-4 p-3 border rounded-lg"
+                    key={kp.id}
+                    className="border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50/30 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={() =>
-                        handleCourseToggle(course.id, course.title)
-                      }
-                    />
-                    <Text className="flex-1">{course.title}</Text>
-                    {isSelected && (
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={selectedCourse?.isMain || false}
-                          onChange={() => handleCourseMainToggle(course.id)}
-                        />
-                        <Text className="text-sm text-amber-600 font-medium">
-                          Main
-                        </Text>
+                    {/* Header */}
+                    <div className="bg-zinc-100 px-3 py-2 border-b border-zinc-200">
+                      <h3 className="font-medium text-sm text-zinc-900">
+                        {kp.titel}
+                      </h3>
+                    </div>
+
+                    <div className="p-3 space-y-3">
+                      {/* Hoofdcursus Selection */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                          <div className="text-sm font-medium">Hoofdcursus</div>
+                        </div>
+                        <Select
+                          value={courseSelections[`kp-${kp.id}`] || ""}
+                          onChange={(e) =>
+                            handleHoofdcursusSelect(kp.id, e.target.value)
+                          }
+                          className="w-full"
+                        >
+                          <option value="">Selecteer hoofdcursus...</option>
+                          {courses.map((course) => (
+                            <option key={course.id} value={course.id}>
+                              {course.title}
+                            </option>
+                          ))}
+                        </Select>
+                        {config.instructiegroepError && (
+                          <div className="flex items-start gap-1.5 p-2 bg-red-50 border border-red-200 rounded text-sm">
+                            <span className="text-red-600 mt-0.5">⚠️</span>
+                            <Text className="text-red-700">
+                              {config.instructiegroepError}
+                            </Text>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      {/* Aanvullende Cursussen */}
+                      {config.hoofdcursus &&
+                        config.aanvullendeCursussen.length > 0 && (
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-1 h-3 bg-emerald-500 rounded-full" />
+                              <div className="text-sm font-medium">
+                                Aanvullende cursussen
+                                <span className="text-sm font-normal text-zinc-500 ml-1">
+                                  (optioneel)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="bg-zinc-50/50 p-2.5 rounded border border-zinc-100">
+                              <Text className="text-sm text-zinc-600 leading-relaxed">
+                                Door aanvullende cursussen aan te vinken worden
+                                de kwalificaties van deze PvB ook meteen
+                                toegepast op deze cursussen (voorheen
+                                disciplines) bij succesvol behalen. De aanvrager
+                                is er voor verantwoordelijk enkel cursussen aan
+                                te klikken waarin hij de kandidaat bekwaam acht,
+                                en waar de kandidaat ook voor aan de gestelde
+                                ingangseisen voldoet.
+                              </Text>
+                            </div>
+                            <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
+                              {config.aanvullendeCursussen.map((course) => (
+                                <CheckboxField
+                                  key={course.courseId}
+                                  className="py-1 px-2 rounded hover:bg-zinc-50"
+                                >
+                                  <Checkbox
+                                    checked={course.selected}
+                                    onChange={() =>
+                                      handleAanvullendeCursusToggle(
+                                        kp.id,
+                                        course.courseId,
+                                      )
+                                    }
+                                    className="h-4 w-4 flex-shrink-0"
+                                  />
+                                  <Label className="text-sm text-zinc-700 truncate cursor-pointer">
+                                    {course.title}
+                                  </Label>
+                                </CheckboxField>
+                              ))}
+                            </CheckboxGroup>
+                          </div>
+                        )}
+
+                      {/* Onderdelen */}
+                      {config.hoofdcursus && (
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-1 h-3 bg-purple-500 rounded-full" />
+                            <div className="text-sm font-medium">
+                              Onderdelen
+                            </div>
+                          </div>
+                          <Text className="text-sm text-zinc-600">
+                            Selecteer de onderdelen die getoetst moeten worden.
+                          </Text>
+                          <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
+                            {config.onderdelen.map((onderdeel) => (
+                              <CheckboxField
+                                key={onderdeel.id}
+                                className="py-1 px-2 rounded hover:bg-zinc-50"
+                              >
+                                <Checkbox
+                                  checked={onderdeel.selected}
+                                  onChange={() =>
+                                    handleOnderdeelToggle(kp.id, onderdeel.id)
+                                  }
+                                  className="h-4 w-4 mt-0.5"
+                                />
+                                <Label className="text-sm text-zinc-700 break-words leading-snug cursor-pointer">
+                                  {onderdeel.title}
+                                </Label>
+                              </CheckboxField>
+                            ))}
+                          </CheckboxGroup>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
-          </FieldGroup>
-        </Fieldset>
+          </div>
+        </div>
       )}
 
-      {/* Step 4: Algemene Opmerkingen */}
-      <Fieldset>
-        <Legend>Algemene opmerkingen</Legend>
-        <Text>
-          Deze opmerkingen gelden voor alle PvB aanvragen in deze bulk.
-        </Text>
+      {/* Step 3: Algemene Opmerkingen */}
+      {hasValidConfiguration && (
+        <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                3
+              </div>
+              <h2 className="text-base font-semibold text-zinc-900">
+                Algemene opmerkingen
+              </h2>
+            </div>
+          </div>
 
-        <FieldGroup>
-          <Field>
-            <Label>Opmerkingen</Label>
-            <Textarea
-              value={courseConfig.opmerkingen}
-              onChange={(e) =>
-                setCourseConfig((prev) => ({
-                  ...prev,
-                  opmerkingen: e.target.value,
-                }))
-              }
-              rows={3}
-              placeholder="Optionele opmerkingen die gelden voor alle aanvragen..."
-            />
-          </Field>
-        </FieldGroup>
-      </Fieldset>
+          <div className="p-4">
+            <Text className="text-sm text-zinc-600 mb-3">
+              Deze opmerkingen gelden voor alle PvB aanvragen in deze bulk.
+            </Text>
 
-      {/* Step 5: Kandidaten beheren */}
-      {courseConfig.niveauId &&
-        courseConfig.selectedOnderdelen.length > 0 &&
-        courseConfig.courses.length > 0 && (
-          <Fieldset>
-            <Legend>Kandidaten beheren</Legend>
-            <Text>
+            <Field>
+              <Label className="text-sm font-medium text-zinc-700">
+                Opmerkingen
+              </Label>
+              <Textarea
+                value={opmerkingen}
+                onChange={(e) => setOpmerkingen(e.target.value)}
+                rows={3}
+                placeholder="Optionele opmerkingen die gelden voor alle aanvragen..."
+                className="mt-1"
+              />
+            </Field>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Kandidaten beheren */}
+      {hasValidConfiguration && (
+        <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                4
+              </div>
+              <h2 className="text-base font-semibold text-zinc-900">
+                Kandidaten beheren
+              </h2>
+            </div>
+          </div>
+
+          <div className="p-4">
+            <Text className="text-sm text-zinc-600 mb-4">
               Voeg instructeurs toe die een PvB aanvraag moeten krijgen en
               configureer hun specifieke instellingen.
             </Text>
 
-            <FieldGroup>
-              <Field className="max-w-lg">
-                <Label>Voeg kandidaat toe</Label>
-                <div className="flex gap-2">
-                  <div className="flex-1 relative">
-                    <Combobox
-                      options={searchedInstructors.items}
-                      value={selectedPerson}
-                      onChange={handlePersonSelect}
-                      displayValue={(person) =>
-                        person ? formatPersonName(person) : ""
-                      }
-                      setQuery={setPersonQuery}
-                      filter={() => true}
-                      placeholder="Zoek instructeur op naam of email..."
-                    >
-                      {(person) => (
-                        <ComboboxOption key={person.id} value={person}>
-                          <ComboboxLabel>
-                            <div className="flex">
-                              <span className="truncate">
-                                {formatPersonName(person)}
+            <Field className="max-w-lg mb-4">
+              <Label className="text-sm font-medium text-zinc-700">
+                Voeg kandidaat toe
+              </Label>
+              <div className="flex gap-2 mt-1">
+                <div className="flex-1 relative">
+                  <Combobox
+                    options={searchedInstructors.items}
+                    value={selectedPerson}
+                    onChange={handlePersonSelect}
+                    displayValue={(person) =>
+                      person ? formatPersonName(person) : ""
+                    }
+                    setQuery={setPersonQuery}
+                    filter={() => true}
+                    placeholder="Zoek instructeur op naam of email..."
+                  >
+                    {(person) => (
+                      <ComboboxOption key={person.id} value={person}>
+                        <ComboboxLabel>
+                          <div className="flex">
+                            <span className="truncate">
+                              {formatPersonName(person)}
+                            </span>
+                            {person.email && (
+                              <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
+                                ({person.email})
                               </span>
-                              {person.email && (
-                                <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
-                                  ({person.email})
-                                </span>
-                              )}
-                            </div>
-                          </ComboboxLabel>
-                        </ComboboxOption>
-                      )}
-                    </Combobox>
-                    {isInstructorsLoading && (
-                      <div className="right-8 absolute inset-y-0 flex items-center">
-                        <Spinner />
-                      </div>
+                            )}
+                          </div>
+                        </ComboboxLabel>
+                      </ComboboxOption>
                     )}
-                  </div>
+                  </Combobox>
+                  {isInstructorsLoading && (
+                    <div className="right-8 absolute inset-y-0 flex items-center">
+                      <Spinner />
+                    </div>
+                  )}
                 </div>
-              </Field>
-            </FieldGroup>
+              </div>
+            </Field>
 
             {/* Configuration Table */}
             {selectedKandidaten.length > 0 && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <Text className="font-medium">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Text className="font-medium text-sm">
                     Kandidaten configuratie ({selectedKandidaten.length})
                   </Text>
                   <div className="flex gap-2">
@@ -679,7 +898,7 @@ export default function CreatePvbForm({
                 </div>
 
                 <Breakout className="overflow-x-auto">
-                  <Table>
+                  <Table className="text-sm">
                     <TableHead>
                       <TableRow>
                         <TableHeader className="w-48">Kandidaat</TableHeader>
@@ -820,9 +1039,9 @@ export default function CreatePvbForm({
 
             {/* Empty state */}
             {selectedKandidaten.length === 0 && (
-              <div className="mt-6 text-center py-12 bg-zinc-50 rounded-lg border-2 border-dashed border-zinc-200">
-                <PlusIcon className="h-12 w-12 text-zinc-400 mx-auto mb-4" />
-                <Text className="text-zinc-600 mb-2">
+              <div className="text-center py-8 bg-zinc-50 rounded-lg border border-dashed border-zinc-200">
+                <PlusIcon className="h-8 w-8 text-zinc-400 mx-auto mb-2" />
+                <Text className="text-zinc-600 text-sm mb-1">
                   Nog geen kandidaten toegevoegd
                 </Text>
                 <Text className="text-sm text-zinc-500">
@@ -830,29 +1049,35 @@ export default function CreatePvbForm({
                 </Text>
               </div>
             )}
-          </Fieldset>
-        )}
+          </div>
+        </div>
+      )}
 
       {/* Error Messages */}
       {result?.validationErrors && (
-        <ErrorMessage>
-          Er zijn validatiefouten opgetreden. Controleer de ingevoerde gegevens.
-        </ErrorMessage>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <Text className="text-red-700 text-sm">
+            Er zijn validatiefouten opgetreden. Controleer de ingevoerde
+            gegevens.
+          </Text>
+        </div>
       )}
 
-      {result?.serverError && <ErrorMessage>{result.serverError}</ErrorMessage>}
+      {result?.serverError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <Text className="text-red-700 text-sm">{result.serverError}</Text>
+        </div>
+      )}
 
       {/* Submit Actions */}
-      <div className="flex justify-end space-x-4">
+      <div className="flex justify-end space-x-4 pt-4 border-t border-zinc-200">
         <Button
           color="branding-dark"
           type="submit"
           disabled={
             isLoading ||
             selectedKandidaten.length === 0 ||
-            !courseConfig.niveauId ||
-            courseConfig.selectedOnderdelen.length === 0 ||
-            courseConfig.courses.length === 0
+            !hasValidConfiguration
           }
         >
           {isLoading && <Spinner className="text-white" />}

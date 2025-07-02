@@ -1,6 +1,6 @@
 {
-  "id": "8fdb5023-11fd-4ffb-ac45-394c95cf029c",
-  "prevId": "f5232e96-b91d-4cfe-b74a-1e0a90860cdd",
+  "id": "7f7e35f6-6ba3-45c2-81ae-fe062cb4240e",
+  "prevId": "8fdb5023-11fd-4ffb-ac45-394c95cf029c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1792,6 +1792,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "abbreviation": {
+          "name": "abbreviation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -2069,6 +2075,12 @@
           "type": "smallint",
           "primaryKey": false,
           "notNull": true
+        },
+        "abbreviation": {
+          "name": "abbreviation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "created_at": {
           "name": "created_at",

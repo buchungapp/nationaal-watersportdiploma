@@ -53,6 +53,7 @@ export const discipline = pgTable(
     handle: text("handle").notNull(),
     title: text("title"),
     weight: smallint("weight").notNull(),
+    abbreviation: text("abbreviation"),
     ...timestamps,
   },
   (table) => [uniqueIndex().on(table.handle)],
@@ -110,6 +111,7 @@ export const course = pgTable(
     title: text("title"),
     description: text("description"),
     disciplineId: uuid("discipline_id").notNull(),
+    abbreviation: text("abbreviation"),
     ...timestamps,
   },
   (table) => [

@@ -5,10 +5,12 @@ import {
   type SQLWrapper,
   and,
   eq,
+  exists,
   getTableColumns,
   inArray,
   like,
   not,
+  sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";
@@ -74,6 +76,7 @@ export const list = wrapQuery(
             type: singleOrNonEmptyArray(
               z.enum(["consument", "instructeur"]),
             ).optional(),
+            locationId: uuidSchema.optional(),
           })
           .default({}),
       })
@@ -112,6 +115,26 @@ export const list = wrapQuery(
             whereClausules.push(like(s.course.handle, "%-instructeurs"));
           }
         }
+      }
+
+      if (filter.locationId) {
+        whereClausules.push(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.locationResourceLink)
+              .innerJoin(
+                s.discipline,
+                eq(s.discipline.id, s.locationResourceLink.disciplineId),
+              )
+              .where(
+                and(
+                  eq(s.locationResourceLink.locationId, filter.locationId),
+                  eq(s.discipline.id, s.course.disciplineId),
+                ),
+              ),
+          ),
+        );
       }
 
       // Prepare a database query to fetch programs and their categories using joins.

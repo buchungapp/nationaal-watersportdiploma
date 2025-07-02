@@ -7,14 +7,14 @@ INSERT INTO "kss"."niveau" ("id", "rang") VALUES
 
 INSERT INTO "kss"."kwalificatieprofiel" ("id", "titel", "richting", "niveau_id") VALUES
 ('2b490053-b340-4b8d-807d-13b12146e951', 'Instructeur 4', 'instructeur', 'b5de3935-0002-43c6-a748-d6a655a55204'),
-('60839761-8c3b-460d-bb37-6b03be4970ed', 'Leercoach 5', 'opleider', 'c200e135-4125-4ee0-8e40-5607c45f2498'),
+('60839761-8c3b-460d-bb37-6b03be4970ed', 'Leercoach 5', 'leercoach', 'c200e135-4125-4ee0-8e40-5607c45f2498'),
 ('622c0044-eafc-4aed-a5d8-b079accde542', 'Instructeur 3', 'instructeur', '34f9a3d9-9fe7-466f-a7dc-d5928d5b6630'),
-('759710a2-43af-4132-8de6-d39119a9b16a', 'Beoordelaar 5', 'opleider', 'c200e135-4125-4ee0-8e40-5607c45f2498'),
+('759710a2-43af-4132-8de6-d39119a9b16a', 'Beoordelaar 5', 'pvb_beoordelaar', 'c200e135-4125-4ee0-8e40-5607c45f2498'),
 ('828d211a-0ba4-485d-8838-5ad70818b427', 'Wal/waterhulp 1', 'instructeur', '872ac617-8687-4f8c-bf96-cc29f59b7b0a'),
-('89e1ace9-0103-45ad-83f1-2ecfdc3cfaec', 'Leercoach 4', 'opleider', 'b5de3935-0002-43c6-a748-d6a655a55204'),
+('89e1ace9-0103-45ad-83f1-2ecfdc3cfaec', 'Leercoach 4', 'leercoach', 'b5de3935-0002-43c6-a748-d6a655a55204'),
 ('97d3dd44-9e97-4ee4-836e-20269613dfdc', 'Instructeur 2', 'instructeur', '04512274-469c-4a07-b6e1-b175bd1b3d82'),
 ('a4e95e19-3258-4fc9-a154-c6fb60a55166', 'Instructeur 5', 'instructeur', 'c200e135-4125-4ee0-8e40-5607c45f2498'),
-('a4ff31ab-16eb-478f-915c-82cc26e4fb37', 'Beoordelaar 4', 'opleider', 'b5de3935-0002-43c6-a748-d6a655a55204');
+('a4ff31ab-16eb-478f-915c-82cc26e4fb37', 'Beoordelaar 4', 'pvb_beoordelaar', 'b5de3935-0002-43c6-a748-d6a655a55204');
 
 INSERT INTO "kss"."kerntaak" ("id", "titel", "kwalificatieprofiel_id", "type", "rang") VALUES
 ('54532cda-57f0-4c16-a189-0798d89a82a6', 'PvB 1.1 - Assisteren bij lessen en activiteiten', '828d211a-0ba4-485d-8838-5ad70818b427', 'verplicht', 11),

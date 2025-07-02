@@ -738,6 +738,7 @@ export const retrieveDisciplineByHandle = async (handle: string) => {
 
 export const listCourses = async (
   typeOfCourses?: "consument" | "instructeur",
+  locationId?: string,
 ) => {
   "use cache";
   cacheLife("days");
@@ -746,6 +747,7 @@ export const listCourses = async (
     const courses = await Course.list({
       filter: {
         type: typeOfCourses,
+        ...(locationId && { locationId }),
       },
     });
 
@@ -3437,6 +3439,22 @@ export const listKssKwalificatieprofielenWithOnderdelen = cache(
       return await KSS.Kwalificatieprofiel.listWithOnderdelen({
         niveauId,
       });
+    });
+  },
+);
+
+export const getInstructiegroepByCourseId = cache(
+  async (
+    courseId: string,
+    richting: "instructeur" | "leercoach" | "pvb_beoordelaar",
+  ) => {
+    return makeRequest(async () => {
+      const result = await KSS.InstructieGroep.findByCourseId({
+        courseId,
+        richting,
+      });
+
+      return result;
     });
   },
 );

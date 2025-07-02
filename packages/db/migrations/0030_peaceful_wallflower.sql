@@ -9,7 +9,7 @@ CREATE TYPE "kss"."pvb_gebeurtenis_type" AS ENUM('aanvraag_ingediend', 'leercoac
 CREATE TYPE "kss"."pvb_onderdeel_uitslag" AS ENUM('behaald', 'niet_behaald', 'nog_niet_bekend');
 CREATE TYPE "kss"."kerntaakOnderdeelType" AS ENUM('portfolio', 'praktijk');
 CREATE TYPE "kss"."kerntaakType" AS ENUM('verplicht', 'facultatief');
-CREATE TYPE "kss"."richting" AS ENUM('trainer-coach', 'instructeur', 'official', 'opleider');
+CREATE TYPE "kss"."richting" AS ENUM('instructeur', 'leercoach', 'pvb_beoordelaar');
 CREATE TABLE "kss"."instructie_groep" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"title" text NOT NULL,
@@ -52,6 +52,7 @@ CREATE TABLE "kss"."pvb_aanvraag_course" (
 	"id" uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4() NOT NULL,
 	"pvb_aanvraag_id" uuid NOT NULL,
 	"course_id" uuid NOT NULL,
+	"instructie_groep_id" uuid NOT NULL,
 	"is_main_course" boolean NOT NULL,
 	"opmerkingen" text
 );
@@ -207,6 +208,7 @@ ALTER TABLE "kss"."pvb_aanvraag" ADD CONSTRAINT "pvb_aanvraag_kandidaat_id_locat
 ALTER TABLE "kss"."pvb_aanvraag" ADD CONSTRAINT "pvb_aanvraag_locatie_id_location_id_fk" FOREIGN KEY ("locatie_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_aanvraag_course" ADD CONSTRAINT "pvb_aanvraag_course_pvb_aanvraag_id_pvb_aanvraag_id_fk" FOREIGN KEY ("pvb_aanvraag_id") REFERENCES "kss"."pvb_aanvraag"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_aanvraag_course" ADD CONSTRAINT "pvb_aanvraag_course_course_id_course_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."course"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "kss"."pvb_aanvraag_course" ADD CONSTRAINT "pvb_aanvraag_course_instructie_groep_id_instructie_groep_id_fk" FOREIGN KEY ("instructie_groep_id") REFERENCES "kss"."instructie_groep"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_aanvraag_status" ADD CONSTRAINT "pvb_aanvraag_status_pvb_aanvraag_id_pvb_aanvraag_id_fk" FOREIGN KEY ("pvb_aanvraag_id") REFERENCES "kss"."pvb_aanvraag"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_aanvraag_status" ADD CONSTRAINT "pvb_aanvraag_status_aangemaakt_door_actor_id_fk" FOREIGN KEY ("aangemaakt_door") REFERENCES "public"."actor"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_beoordelaar_beschikbaarheid" ADD CONSTRAINT "pvb_beoordelaar_beschikbaarheid_pvb_aanvraag_id_pvb_aanvraag_id_fk" FOREIGN KEY ("pvb_aanvraag_id") REFERENCES "kss"."pvb_aanvraag"("id") ON DELETE no action ON UPDATE no action;
@@ -236,9 +238,10 @@ ALTER TABLE "kss"."kerntaak" ADD CONSTRAINT "kerntaak_kwalificatieprofiel_id_kwa
 ALTER TABLE "kss"."kerntaak_onderdeel" ADD CONSTRAINT "kerntaak_onderdeel_kerntaak_id_kerntaak_id_fk" FOREIGN KEY ("kerntaak_id") REFERENCES "kss"."kerntaak"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."kwalificatieprofiel" ADD CONSTRAINT "kwalificatieprofiel_niveau_id_niveau_id_fk" FOREIGN KEY ("niveau_id") REFERENCES "kss"."niveau"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."werkproces" ADD CONSTRAINT "werkproces_kerntaak_id_kerntaak_id_fk" FOREIGN KEY ("kerntaak_id") REFERENCES "kss"."kerntaak"("id") ON DELETE no action ON UPDATE no action;
-CREATE UNIQUE INDEX "instructie_groep_cursus_course_id_index" ON "kss"."instructie_groep_cursus" USING btree ("course_id");
+CREATE UNIQUE INDEX "instructie_groep_cursus_instructie_groep_id_course_id_index" ON "kss"."instructie_groep_cursus" USING btree ("instructie_groep_id","course_id");
 CREATE UNIQUE INDEX "unique_person_course_kerntaak_onderdeel" ON "kss"."persoon_kwalificatie" USING btree ("person_id","course_id","kerntaak_onderdeel_id");
-CREATE UNIQUE INDEX "pvb_aanvraag_course_main_course_unique_idx" ON "kss"."pvb_aanvraag_course" USING btree ("pvb_aanvraag_id") WHERE "kss"."pvb_aanvraag_course"."is_main_course" = true;
+CREATE UNIQUE INDEX "pvb_aanvraag_course_pvb_aanvraag_id_instructie_groep_id_index" ON "kss"."pvb_aanvraag_course" USING btree ("pvb_aanvraag_id","instructie_groep_id") WHERE "kss"."pvb_aanvraag_course"."is_main_course" = true;
+CREATE UNIQUE INDEX "pvb_aanvraag_course_pvb_aanvraag_id_instructie_groep_id_course_id_index" ON "kss"."pvb_aanvraag_course" USING btree ("pvb_aanvraag_id","instructie_groep_id","course_id");
 CREATE INDEX "pvb_leercoach_toestemming_recent_idx" ON "kss"."pvb_leercoach_toestemming" USING btree ("pvb_aanvraag_id","leercoach_id","aangemaakt_op" DESC NULLS LAST);
 CREATE INDEX "pvb_leercoach_toestemming_status_idx" ON "kss"."pvb_leercoach_toestemming" USING btree ("pvb_aanvraag_id","leercoach_id","status");
 CREATE UNIQUE INDEX "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_beoordelaar_id_unique" ON "kss"."pvb_onderdeel" USING btree ("pvb_aanvraag_id","kerntaak_onderdeel_id","beoordelaar_id");

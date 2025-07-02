@@ -16,18 +16,29 @@ const createBulkPvbsSchema = z.object({
     selectedOnderdelen: z
       .array(z.string().uuid())
       .min(1, "Selecteer minimaal één onderdeel"),
-    courses: z
+    kwalificatieprofielen: z
       .array(
         z.object({
           id: z.string().uuid(),
-          isMain: z.boolean(),
+          titel: z.string(),
+          richting: z.string(),
+          hoofdcursus: z
+            .object({
+              courseId: z.string().uuid(),
+              instructieGroepId: z.string().uuid(),
+            })
+            .optional(),
+          aanvullendeCursussen: z
+            .array(
+              z.object({
+                courseId: z.string().uuid(),
+                instructieGroepId: z.string().uuid(),
+              }),
+            )
+            .default([]),
         }),
       )
-      .min(1, "Selecteer minimaal één cursus")
-      .refine(
-        (courses) => courses.filter((c) => c.isMain).length === 1,
-        "Exact één cursus moet als 'main' gemarkeerd zijn",
-      ),
+      .min(1, "Selecteer minimaal één kwalificatieprofiel"),
     opmerkingen: z.string().optional(),
   }),
   kandidaten: z
@@ -56,6 +67,47 @@ export const createBulkPvbsAction = actionClient
       // Create PvB aanvraag for each kandidaat
       for (const kandidaat of parsedInput.kandidaten) {
         try {
+          // Collect all courses (hoofdcursussen and aanvullende cursussen)
+          const allCourses: Array<{
+            courseId: string;
+            instructieGroepId: string;
+            isMainCourse: boolean;
+            opmerkingen: string | null;
+          }> = [];
+
+          for (const kp of parsedInput.courseConfig.kwalificatieprofielen) {
+            // Add hoofdcursus if selected
+            if (kp.hoofdcursus) {
+              allCourses.push({
+                courseId: kp.hoofdcursus.courseId,
+                instructieGroepId: kp.hoofdcursus.instructieGroepId,
+                isMainCourse: true, // First hoofdcursus is main
+                opmerkingen: null,
+              });
+            }
+
+            // Add aanvullende cursussen
+            for (const aanvullendeCursus of kp.aanvullendeCursussen) {
+              allCourses.push({
+                courseId: aanvullendeCursus.courseId,
+                instructieGroepId: aanvullendeCursus.instructieGroepId,
+                isMainCourse: false,
+                opmerkingen: null,
+              });
+            }
+          }
+
+          // Ensure at least one course is marked as main
+          if (
+            allCourses.length > 0 &&
+            !allCourses.some((c) => c.isMainCourse)
+          ) {
+            const firstCourse = allCourses[0];
+            if (firstCourse) {
+              firstCourse.isMainCourse = true;
+            }
+          }
+
           const aanvraagInput = {
             type: "intern" as const,
             locatieId: location.id,
@@ -63,18 +115,16 @@ export const createBulkPvbsAction = actionClient
             leercoachId: kandidaat.leercoach || null,
             opmerkingen: parsedInput.courseConfig.opmerkingen || null,
             startDatumTijd: kandidaat.startDatumTijd || null,
-            courses: parsedInput.courseConfig.courses.map((course) => ({
-              courseId: course.id,
-              isMainCourse: course.isMain,
-              opmerkingen: null,
-            })) as [
+            courses: allCourses as [
               {
                 courseId: string;
+                instructieGroepId: string;
                 isMainCourse: boolean;
                 opmerkingen: string | null;
               },
               ...{
                 courseId: string;
+                instructieGroepId: string;
                 isMainCourse: boolean;
                 opmerkingen: string | null;
               }[],

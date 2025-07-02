@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SWRConfig, unstable_serialize } from "swr";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import {
+  getInstructiegroepByCourseId,
   listCountries,
   listCourses,
   listKssKwalificatieprofielenWithOnderdelen,
@@ -13,7 +14,10 @@ import CreatePvbForm from "./_components/create-pvb-form";
 
 async function CreatePvbContent(props: {
   params: Promise<{ location: string }>;
-  searchParams: Promise<{ niveau?: string }>;
+  searchParams: Promise<{
+    niveau?: string;
+    [key: string]: string | undefined;
+  }>;
 }) {
   const [params, searchParams] = await Promise.all([
     props.params,
@@ -26,12 +30,12 @@ async function CreatePvbContent(props: {
   const [countries, niveausResult, coursesResult] = await Promise.all([
     listCountries(),
     listKssNiveaus(),
-    listCourses("consument"),
+    listCourses("consument", location.id),
   ]);
 
   // Transform courses to match the expected interface (filter out nulls)
   const niveaus = niveausResult.filter(
-    (niveau): niveau is typeof niveau & { rang: number } => niveau.rang < 4,
+    (niveau): niveau is typeof niveau & { rang: number } => niveau.rang < 5,
   );
   const courses = coursesResult
     .filter(
@@ -56,6 +60,72 @@ async function CreatePvbContent(props: {
       console.error("Failed to load kwalificatieprofielen:", error);
       // Continue without kwalificatieprofielen
     }
+  }
+
+  // Fetch instructiegroep data for selected courses
+  const instructiegroepData: Record<
+    string,
+    {
+      kwalificatieprofielId: string;
+      courseId: string;
+      instructiegroep?: {
+        id: string;
+        title: string;
+        richting: string;
+        courses: Array<{
+          id: string;
+          handle: string;
+          title: string | null;
+        }>;
+      };
+      error?: string;
+    }
+  > = {};
+
+  if (kwalificatieprofielen.length > 0) {
+    // Extract course selections from searchParams (format: kp-{id}=courseId)
+    const courseSelections = Object.entries(searchParams)
+      .filter(([key]) => key.startsWith("kp-"))
+      .map(([key, courseId]) => ({
+        kwalificatieprofielId: key.replace("kp-", ""),
+        courseId: courseId as string,
+      }));
+
+    // Fetch instructiegroep data for each selected course
+    await Promise.all(
+      courseSelections.map(async ({ kwalificatieprofielId, courseId }) => {
+        const kp = kwalificatieprofielen.find(
+          (k) => k.id === kwalificatieprofielId,
+        );
+        if (!kp || !courseId) return;
+
+        const key = `${kwalificatieprofielId}-${courseId}`;
+
+        try {
+          const instructiegroep = await getInstructiegroepByCourseId(
+            courseId,
+            kp.richting as "instructeur" | "leercoach" | "pvb_beoordelaar",
+          );
+
+          instructiegroepData[key] = {
+            kwalificatieprofielId,
+            courseId,
+            instructiegroep,
+          };
+        } catch (error) {
+          console.error(
+            `Failed to fetch instructiegroep for course ${courseId}:`,
+            error,
+          );
+          instructiegroepData[key] = {
+            kwalificatieprofielId,
+            courseId,
+            error:
+              "Voor deze cursus kunnen momenteel geen PvB's worden aangevraagd. Neem contact op met het Secretariaat.",
+          };
+        }
+      }),
+    );
   }
 
   return (
@@ -92,6 +162,7 @@ async function CreatePvbContent(props: {
         courses={courses}
         kwalificatieprofielen={kwalificatieprofielen}
         selectedNiveauId={searchParams.niveau || ""}
+        instructiegroepData={instructiegroepData}
       />
     </SWRConfig>
   );
@@ -99,7 +170,10 @@ async function CreatePvbContent(props: {
 
 export default function Page(props: {
   params: Promise<{ location: string }>;
-  searchParams: Promise<{ niveau?: string }>;
+  searchParams: Promise<{
+    niveau?: string;
+    [key: string]: string | undefined;
+  }>;
 }) {
   return (
     <>
