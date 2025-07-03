@@ -110,14 +110,17 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
       },
     });
   const [selectedStudent, setSelectedStudent] = useState<
-    (typeof searchedStudents)["items"][number] | null
+    NonNullable<typeof searchedStudents>["items"][number] | null
   >(
-    searchedStudents.items.find((x) => x.id === getInputValue("person")?.id) ??
+    searchedStudents?.items.find((x) => x.id === getInputValue("person")?.id) ??
       null,
   );
 
   if (!countries)
     throw new Error("Country data must be available through fallback");
+
+  if (!searchedStudents)
+    throw new Error("Person list data must be available through fallback");
 
   return (
     <>

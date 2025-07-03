@@ -204,10 +204,9 @@ export const addOnderdeel = wrapCommand(
           })
           .from(s.persoonKwalificatie)
           .innerJoin(
-            s.actor,
-            eq(s.persoonKwalificatie.personId, s.actor.personId),
+            s.pvbAanvraag,
+            eq(s.persoonKwalificatie.personId, s.pvbAanvraag.kandidaatId),
           )
-          .innerJoin(s.pvbAanvraag, eq(s.actor.id, s.pvbAanvraag.kandidaatId))
           .innerJoin(
             s.pvbAanvraagCourse,
             and(
@@ -473,10 +472,9 @@ export const addCourse = wrapCommand(
           })
           .from(s.persoonKwalificatie)
           .innerJoin(
-            s.actor,
-            eq(s.persoonKwalificatie.personId, s.actor.personId),
+            s.pvbAanvraag,
+            eq(s.persoonKwalificatie.personId, s.pvbAanvraag.kandidaatId),
           )
-          .innerJoin(s.pvbAanvraag, eq(s.actor.id, s.pvbAanvraag.kandidaatId))
           .innerJoin(
             s.pvbOnderdeel,
             and(
@@ -690,7 +688,7 @@ export const requestLeercoachPermission = wrapCommand(
         .from(s.actor)
         .where(
           and(
-            eq(s.actor.id, input.leercoachId),
+            eq(s.actor.personId, input.leercoachId),
             eq(s.actor.locationId, aanvraag.locatieId),
             eq(s.actor.type, "instructor"),
           ),
@@ -1006,7 +1004,7 @@ export const createAanvraag = wrapCommand(
         .from(s.actor)
         .where(
           and(
-            eq(s.actor.id, input.kandidaatId),
+            eq(s.actor.personId, input.kandidaatId),
             eq(s.actor.locationId, input.locatieId),
             eq(s.actor.type, "instructor"),
           ),
@@ -1037,7 +1035,7 @@ export const createAanvraag = wrapCommand(
       await tx.insert(s.pvbAanvraagStatus).values({
         pvbAanvraagId: pvbAanvraag.id,
         status: "concept",
-        aangemaaktDoor: input.kandidaatId,
+        aangemaaktDoor: input.aangevraagdDoor,
         reden: "Nieuwe aanvraag aangemaakt",
       });
 
@@ -1048,7 +1046,7 @@ export const createAanvraag = wrapCommand(
           instructieGroepId: course.instructieGroepId,
           isMainCourse: course.isMainCourse,
           opmerkingen: course.opmerkingen,
-          aangemaaktDoor: input.kandidaatId,
+          aangemaaktDoor: input.aangevraagdDoor,
           reden: "Initiele aanvraag cursus",
         });
       }
@@ -1061,7 +1059,7 @@ export const createAanvraag = wrapCommand(
             "beoordelaarId" in onderdeel ? onderdeel.beoordelaarId : null,
           startDatumTijd: input.startDatumTijd,
           opmerkingen: onderdeel.opmerkingen,
-          aangemaaktDoor: input.kandidaatId,
+          aangemaaktDoor: input.aangevraagdDoor,
           reden: "Initiele aanvraag onderdeel",
         });
       }
@@ -1070,7 +1068,7 @@ export const createAanvraag = wrapCommand(
         await requestLeercoachPermission({
           pvbAanvraagId: pvbAanvraag.id,
           leercoachId: input.leercoachId,
-          aangemaaktDoor: input.kandidaatId,
+          aangemaaktDoor: input.aangevraagdDoor,
           reden: "Initiele leercoach toewijzing",
         });
       }
@@ -1191,8 +1189,7 @@ export const list = wrapCommand(
           `,
         })
         .from(s.pvbAanvraag)
-        .innerJoin(s.actor, eq(s.pvbAanvraag.kandidaatId, s.actor.id))
-        .innerJoin(s.person, eq(s.actor.personId, s.person.id))
+        .innerJoin(s.person, eq(s.pvbAanvraag.kandidaatId, s.person.id))
         .innerJoin(
           latestStatusSubquery,
           eq(latestStatusSubquery.pvbAanvraagId, s.pvbAanvraag.id),

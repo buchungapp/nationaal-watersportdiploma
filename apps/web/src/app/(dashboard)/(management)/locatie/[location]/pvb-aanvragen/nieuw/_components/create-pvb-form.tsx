@@ -3,11 +3,9 @@
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { DocumentDuplicateIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useStateAction } from "next-safe-action/stateful-hooks";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useQueryState } from "nuqs";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import Breakout from "~/app/(dashboard)/_components/breakout";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -32,6 +30,8 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
+import { useKwalificatieprofielenByNiveau } from "~/app/(dashboard)/_hooks/swr/use-kwalificatieprofielen-by-niveau";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
 import { createBulkPvbsAction } from "~/app/_actions/pvb/create-bulk-pvbs-action";
 import Spinner from "~/app/_components/spinner";
@@ -45,11 +45,6 @@ interface Person {
   actors: { type: string; id: string }[];
 }
 
-interface Country {
-  code: string;
-  name: string;
-}
-
 interface Niveau {
   id: string;
   rang: number;
@@ -60,100 +55,228 @@ interface Course {
   title: string;
 }
 
-interface Kwalificatieprofiel {
-  id: string;
-  titel: string;
-  richting: string;
-  niveau: { id: string; rang: number };
-  kerntaken: Array<{
-    id: string;
-    titel: string;
-    type: string;
-    rang: number | null;
-    onderdelen: Array<{ id: string; type: string }>;
-  }>;
-}
-
-interface InstructiegroepData {
-  kwalificatieprofielId: string;
-  courseId: string;
-  instructiegroep?: {
-    id: string;
-    title: string;
-    richting: string;
-    courses: Array<{
-      id: string;
-      handle: string;
-      title: string | null;
-    }>;
-  };
-  error?: string;
-}
-
 interface Props {
   locationId: string;
-  countries: Country[];
   niveaus: Niveau[];
   courses: Course[];
-  kwalificatieprofielen: Kwalificatieprofiel[];
   selectedNiveauId: string;
-  instructiegroepData: Record<string, InstructiegroepData>;
 }
 
-interface SelectedKandidaat {
-  id: string;
-  label: string;
-  leercoach?: string;
-  beoordelaar?: string;
-  startDatumTijd?: string;
-}
-
-interface KwalificatieprofielConfig {
-  id: string;
-  titel: string;
-  richting: string;
-  hoofdcursus?: {
-    courseId: string;
-    instructieGroepId: string;
-    title: string;
-  };
-  aanvullendeCursussen: Array<{
-    courseId: string;
-    instructieGroepId: string;
-    title: string;
-    selected: boolean;
-  }>;
-  instructiegroepError?: string;
-  onderdelen: Array<{
+// Component for a single kwalificatieprofiel configuration
+function KwalificatieprofielCard({
+  kp,
+  kpIndex,
+  courses,
+}: {
+  kp: {
     id: string;
-    title: string;
-    type: string;
-    selected: boolean;
-  }>;
+    titel: string;
+    richting: string;
+    kerntaken: Array<{
+      id: string;
+      titel: string;
+      onderdelen: Array<{ id: string; type: string }>;
+    }>;
+  };
+  kpIndex: number;
+  courses: Course[];
+}) {
+  const [selectedHoofdcursus, setSelectedHoofdcursus] = useState("");
+
+  // Fetch instructiegroep data when hoofdcursus is selected
+  const { instructiegroep, isLoading: isLoadingInstructiegroep } =
+    useInstructiegroepByCourse(
+      selectedHoofdcursus || null,
+      kp.richting as "instructeur" | "leercoach" | "pvb_beoordelaar",
+    );
+
+  // Get aanvullende cursussen from instructiegroep
+  const aanvullendeCursussen =
+    instructiegroep?.courses?.filter(
+      (c) => c.id !== selectedHoofdcursus && c.title,
+    ) || [];
+
+  return (
+    <div className="border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50/30 shadow-sm hover:shadow-md transition-shadow">
+      {/* Hidden fields for kwalificatieprofiel data */}
+      <input
+        type="hidden"
+        name={`courseConfig.kwalificatieprofielen[${kpIndex}].id`}
+        value={kp.id}
+      />
+      <input
+        type="hidden"
+        name={`courseConfig.kwalificatieprofielen[${kpIndex}].titel`}
+        value={kp.titel}
+      />
+      <input
+        type="hidden"
+        name={`courseConfig.kwalificatieprofielen[${kpIndex}].richting`}
+        value={kp.richting}
+      />
+      {/* Hidden field for instructiegroepId when hoofdcursus is selected */}
+      {instructiegroep && (
+        <input
+          type="hidden"
+          name={`courseConfig.kwalificatieprofielen[${kpIndex}].instructieGroepId`}
+          value={instructiegroep.id}
+        />
+      )}
+
+      {/* Header */}
+      <div className="bg-zinc-100 px-3 py-2 border-b border-zinc-200">
+        <h3 className="font-medium text-sm text-zinc-900">{kp.titel}</h3>
+      </div>
+
+      <div className="p-3 space-y-3">
+        {/* Hoofdcursus Selection */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1 h-3 bg-blue-500 rounded-full" />
+            <div className="text-sm font-medium">Hoofdcursus</div>
+          </div>
+          <Select
+            name={`courseConfig.kwalificatieprofielen[${kpIndex}].hoofdcursus.courseId`}
+            className="w-full"
+            value={selectedHoofdcursus}
+            onChange={(e) => setSelectedHoofdcursus(e.target.value)}
+          >
+            <option value="">Selecteer hoofdcursus...</option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        {/* Aanvullende Cursussen - only show when hoofdcursus is selected */}
+        {selectedHoofdcursus && (
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <div className="w-1 h-3 bg-emerald-500 rounded-full" />
+              <div className="text-sm font-medium">
+                Aanvullende cursussen
+                <span className="text-sm font-normal text-zinc-500 ml-1">
+                  (optioneel)
+                </span>
+              </div>
+            </div>
+
+            {isLoadingInstructiegroep ? (
+              <div className="flex items-center gap-2 p-3 bg-zinc-50/50 rounded">
+                <Spinner className="h-4 w-4 text-zinc-600" />
+                <Text className="text-sm text-zinc-600">
+                  Instructiegroep laden...
+                </Text>
+              </div>
+            ) : aanvullendeCursussen.length > 0 ? (
+              <>
+                <div className="bg-zinc-50/50 p-2.5 rounded border border-zinc-100">
+                  <Text className="text-sm text-zinc-600 leading-relaxed">
+                    Door aanvullende cursussen aan te vinken worden de
+                    kwalificaties van deze PvB ook meteen toegepast op deze
+                    cursussen (voorheen disciplines) bij succesvol behalen. De
+                    aanvrager is er voor verantwoordelijk enkel cursussen aan te
+                    klikken waarin hij de kandidaat bekwaam acht, en waar de
+                    kandidaat ook voor aan de gestelde ingangseisen voldoet.
+                  </Text>
+                </div>
+                <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
+                  {aanvullendeCursussen.map((course, courseIndex) => (
+                    <CheckboxField
+                      key={course.id}
+                      className="py-1 px-2 rounded hover:bg-zinc-50"
+                    >
+                      <Checkbox
+                        name={`courseConfig.kwalificatieprofielen[${kpIndex}].aanvullendeCursussen[${courseIndex}].courseId`}
+                        value={course.id}
+                        className="h-4 w-4 flex-shrink-0"
+                      />
+                      <Label className="text-sm text-zinc-700 truncate cursor-pointer">
+                        {course.title}
+                      </Label>
+                    </CheckboxField>
+                  ))}
+                </CheckboxGroup>
+              </>
+            ) : (
+              <div className="p-3 bg-zinc-50/50 rounded border border-zinc-100">
+                <Text className="text-sm text-zinc-500">
+                  Geen aanvullende cursussen beschikbaar voor deze
+                  instructiegroep.
+                </Text>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Onderdelen */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1 h-3 bg-purple-500 rounded-full" />
+            <div className="text-sm font-medium">Onderdelen</div>
+          </div>
+          <Text className="text-sm text-zinc-600">
+            Selecteer de onderdelen die getoetst moeten worden.
+          </Text>
+          <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
+            {kp.kerntaken.flatMap((kerntaak) =>
+              kerntaak.onderdelen.map((onderdeel) => (
+                <CheckboxField
+                  key={onderdeel.id}
+                  className="py-1 px-2 rounded hover:bg-zinc-50"
+                >
+                  <Checkbox
+                    name="courseConfig.selectedOnderdelen"
+                    value={onderdeel.id}
+                    defaultChecked
+                    className="h-4 w-4 mt-0.5"
+                  />
+                  <Label className="text-sm text-zinc-700 break-words leading-snug cursor-pointer">
+                    {kerntaak.titel} - {onderdeel.type}
+                  </Label>
+                </CheckboxField>
+              )),
+            )}
+          </CheckboxGroup>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function BeoordelaarCombobox({
+// Helper component for person selection that manages its own search state
+function PersonCombobox({
   locationId,
-  value,
-  onChange,
+  actorType,
+  placeholder,
+  name,
+  value: parentValue,
+  onSelect,
 }: {
   locationId: string;
-  value: string;
-  onChange: (personId: string) => void;
+  actorType: "student" | "instructor" | "location_admin" | "pvb_beoordelaar";
+  placeholder: string;
+  name: string;
+  value?: string;
+  onSelect?: (personId: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [value, setValue] = useState(parentValue || "");
 
-  const { data: beoordelaars, isLoading } = usePersonsForLocation(locationId, {
-    filter: {
-      query,
-      actorType: "pvb_beoordelaar",
-    },
+  // Sync with parent value changes
+  useEffect(() => {
+    setValue(parentValue || "");
+  }, [parentValue]);
+
+  const { data: persons } = usePersonsForLocation(locationId, {
+    filter: { query, actorType },
   });
 
-  const selectedBeoordelaar =
-    beoordelaars.items.find((p) => p.id === value) || null;
-  const hasNoBeoordelaars =
-    !isLoading && beoordelaars.items.length === 0 && !query;
+  // Handle undefined data during loading
+  const personsItems = persons ? persons.items : [];
+  const selectedPerson = personsItems.find((p) => p.id === value) || null;
 
   const formatPersonName = (person: Person) => {
     const parts = [person.firstName];
@@ -162,239 +285,282 @@ function BeoordelaarCombobox({
     return parts.join(" ");
   };
 
-  // Show empty state message when no beoordelaars exist
-  if (hasNoBeoordelaars) {
-    return (
-      <div className="relative">
-        <div className="w-full p-2 text-sm text-zinc-500 bg-zinc-50 border border-zinc-200 rounded-lg">
-          Geen beoordelaars beschikbaar. Voeg de rol 'PvB Beoordelaar' toe via
-          personen-pagina.
+  // Determine if we should show the empty state message
+  const showEmptyMessage = persons && personsItems.length === 0;
+
+  // Get appropriate empty message based on actor type
+  const getEmptyMessage = () => {
+    if (actorType === "pvb_beoordelaar") {
+      return (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
+          <div className="text-sm font-medium text-amber-900">
+            Er zijn geen beoordelaars gevonden op deze locatie
+          </div>
+          <div className="text-xs text-amber-700 mt-1">
+            Beoordelaars worden aangewezen door personen binnen de locatie te
+            voorzien van de 'interne beoordelaar' rol.
+          </div>
         </div>
+      );
+    }
+    if (actorType === "instructor") {
+      return (
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
+          <div className="text-sm text-zinc-600">
+            Geen instructeurs gevonden
+          </div>
+        </div>
+      );
+    }
+    if (actorType === "student") {
+      return (
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
+          <div className="text-sm text-zinc-600">Geen studenten gevonden</div>
+        </div>
+      );
+    }
+    return (
+      <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
+        <div className="text-sm text-zinc-600">Geen personen gevonden</div>
       </div>
+    );
+  };
+
+  // If there's a selected value but no items, still show the combobox
+  // Otherwise hide it when empty
+  if (showEmptyMessage && !value) {
+    return (
+      <>
+        <input type="hidden" name={name} value={value} />
+        <div className="w-full">{getEmptyMessage()}</div>
+      </>
     );
   }
 
   return (
-    <Combobox
-      options={beoordelaars.items}
-      value={selectedBeoordelaar}
-      onChange={(person) => onChange(person?.id || "")}
-      displayValue={(person) => (person ? formatPersonName(person) : "")}
-      setQuery={setQuery}
-      filter={() => true}
-      placeholder="Selecteer beoordelaar..."
-    >
-      {(person) => (
-        <ComboboxOption key={person.id} value={person}>
-          <ComboboxLabel>
-            <div className="flex">
-              <span className="truncate">{formatPersonName(person)}</span>
-              {person.email && (
-                <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
-                  ({person.email})
-                </span>
-              )}
-            </div>
-          </ComboboxLabel>
-        </ComboboxOption>
-      )}
-    </Combobox>
+    <>
+      <input type="hidden" name={name} value={value} />
+      <Combobox
+        options={personsItems}
+        value={selectedPerson}
+        onChange={(person) => {
+          const newValue = person?.id || "";
+          setValue(newValue);
+          onSelect?.(newValue);
+        }}
+        displayValue={(person) => (person ? formatPersonName(person) : "")}
+        setQuery={setQuery}
+        filter={() => true}
+        placeholder={placeholder}
+      >
+        {(person) => (
+          <ComboboxOption key={person.id} value={person}>
+            <ComboboxLabel>
+              <div className="flex">
+                <span className="truncate">{formatPersonName(person)}</span>
+                {person.email && (
+                  <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
+                    ({person.email})
+                  </span>
+                )}
+              </div>
+            </ComboboxLabel>
+          </ComboboxOption>
+        )}
+      </Combobox>
+    </>
   );
 }
 
-function LeercoachCombobox({
+// Component for a single kandidaat row
+function KandidaatRow({
+  index,
+  personId,
+  personName,
   locationId,
-  value,
-  onChange,
+  onRemove,
+  onCopyField,
+  globalLeercoach,
+  globalBeoordelaar,
 }: {
+  index: number;
+  personId: string;
+  personName: string;
   locationId: string;
-  value: string;
-  onChange: (personId: string) => void;
+  onRemove: () => void;
+  onCopyField: (field: string, value: string) => void;
+  globalLeercoach?: string;
+  globalBeoordelaar?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [leercoach, setLeercoach] = useState("");
+  const [beoordelaar, setBeoordelaar] = useState("");
 
-  const { data: instructors, isLoading } = usePersonsForLocation(locationId, {
-    filter: {
-      query,
-      actorType: "instructor",
-    },
-  });
+  // Update local state when global values change
+  useEffect(() => {
+    if (globalLeercoach !== undefined) {
+      setLeercoach(globalLeercoach);
+    }
+  }, [globalLeercoach]);
 
-  const selectedLeercoach =
-    instructors.items.find((p) => p.id === value) || null;
-
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
+  useEffect(() => {
+    if (globalBeoordelaar !== undefined) {
+      setBeoordelaar(globalBeoordelaar);
+    }
+  }, [globalBeoordelaar]);
 
   return (
-    <Combobox
-      options={instructors.items}
-      value={selectedLeercoach}
-      onChange={(person) => onChange(person?.id || "")}
-      displayValue={(person) => (person ? formatPersonName(person) : "")}
-      setQuery={setQuery}
-      filter={() => true}
-      placeholder="Selecteer leercoach..."
-    >
-      {(person) => (
-        <ComboboxOption key={person.id} value={person}>
-          <ComboboxLabel>
-            <div className="flex">
-              <span className="truncate">{formatPersonName(person)}</span>
-              {person.email && (
-                <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
-                  ({person.email})
-                </span>
-              )}
-            </div>
-          </ComboboxLabel>
-        </ComboboxOption>
-      )}
-    </Combobox>
+    <TableRow>
+      <TableCell className="font-medium">
+        {personName}
+        <input
+          type="hidden"
+          name={`kandidaten[${index}].id`}
+          value={personId}
+        />
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <div className="flex-1">
+            <PersonCombobox
+              locationId={locationId}
+              actorType="instructor"
+              placeholder="Selecteer leercoach..."
+              name={`kandidaten[${index}].leercoach`}
+              value={leercoach}
+              onSelect={(value) => {
+                setLeercoach(value);
+              }}
+            />
+          </div>
+          {leercoach && (
+            <Button
+              type="button"
+              plain
+              onClick={() => {
+                onCopyField("leercoach", leercoach);
+              }}
+              title="Kopieer naar alle rijen"
+              className="h-8 w-8 p-0 flex-shrink-0"
+            >
+              <DocumentDuplicateIcon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <div className="flex-1">
+            <PersonCombobox
+              locationId={locationId}
+              actorType="pvb_beoordelaar"
+              placeholder="Selecteer beoordelaar..."
+              name={`kandidaten[${index}].beoordelaar`}
+              value={beoordelaar}
+              onSelect={(value) => {
+                setBeoordelaar(value);
+              }}
+            />
+          </div>
+          {beoordelaar && (
+            <Button
+              type="button"
+              plain
+              onClick={() => {
+                onCopyField("beoordelaar", beoordelaar);
+              }}
+              title="Kopieer naar alle rijen"
+              className="h-8 w-8 p-0 flex-shrink-0"
+            >
+              <DocumentDuplicateIcon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <Input
+            type="datetime-local"
+            name={`kandidaten[${index}].startDatumTijd`}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            plain
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              const parent = e.currentTarget.parentElement;
+              const input = parent?.querySelector(
+                'input[type="datetime-local"]',
+              ) as HTMLInputElement;
+
+              if (input?.value) {
+                onCopyField("startDatumTijd", input.value);
+              } else {
+                toast.error("Selecteer eerst een datum/tijd om te kopiëren");
+              }
+            }}
+            title="Kopieer naar alle rijen"
+            className="h-8 w-8 p-0 flex-shrink-0"
+          >
+            <DocumentDuplicateIcon className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Button
+          type="button"
+          plain
+          onClick={onRemove}
+          className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
+          title="Verwijder kandidaat"
+        >
+          <TrashIcon className="h-4 w-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
   );
 }
 
 export default function CreatePvbForm({
   locationId,
-  countries,
   niveaus,
   courses,
-  kwalificatieprofielen,
-  selectedNiveauId,
-  instructiegroepData,
+  selectedNiveauId: initialNiveauId,
 }: Props) {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [_niveau, setNiveau] = useQueryState("niveau", { shallow: false });
 
-  // Parse course selections from URL search params
-  const [courseSelections, setCourseSelections] = useState<
-    Record<string, string>
-  >(() => {
-    const selections: Record<string, string> = {};
-    for (const kp of kwalificatieprofielen) {
-      const value = searchParams.get(`kp-${kp.id}`) || "";
-      selections[`kp-${kp.id}`] = value;
-    }
-    return selections;
+  // Minimal state - only for UI interactions
+  const [selectedNiveauId, setSelectedNiveauId] = useState(initialNiveauId);
+  const [kandidaten, setKandidaten] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+  const [kandidaatSearchQuery, setKandidaatSearchQuery] = useState("");
+
+  // Global copy states for "copy to all rows" functionality
+  const [globalLeercoach, setGlobalLeercoach] = useState<string | undefined>();
+  const [globalBeoordelaar, setGlobalBeoordelaar] = useState<
+    string | undefined
+  >();
+
+  // Fetch kwalificatieprofielen based on selected niveau
+  const { kwalificatieprofielen, isLoading: isLoadingKwalificatieprofielen } =
+    useKwalificatieprofielenByNiveau(selectedNiveauId || null);
+
+  const { data: searchedInstructors } = usePersonsForLocation(locationId, {
+    filter: {
+      query: kandidaatSearchQuery,
+      actorType: "instructor",
+    },
   });
 
-  const [selectedKandidaten, setSelectedKandidaten] = useState<
-    SelectedKandidaat[]
-  >([]);
-  const [kwalificatieprofielenConfig, setKwalificatieprofielenConfig] =
-    useState<KwalificatieprofielConfig[]>([]);
-  const [opmerkingen, setOpmerkingen] = useState("");
-  const [personQuery, setPersonQuery] = useState("");
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
-
-  // Function to update URL when course selections change
-  const updateCourseSelectionInURL = (kpId: string, courseId: string) => {
-    const newSearchParams = new URLSearchParams(searchParams);
-    if (courseId) {
-      newSearchParams.set(`kp-${kpId}`, courseId);
-    } else {
-      newSearchParams.delete(`kp-${kpId}`);
-    }
-    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
-
-    setCourseSelections((prev) => ({
-      ...prev,
-      [`kp-${kpId}`]: courseId,
-    }));
-  };
-
-  // Initialize kwalificatieprofielen configurations when data is available
-  useEffect(() => {
-    if (kwalificatieprofielen.length > 0) {
-      const configs: KwalificatieprofielConfig[] = kwalificatieprofielen.map(
-        (kp) => {
-          const courseSelection = courseSelections[`kp-${kp.id}`];
-          const instructiegroepKey = courseSelection
-            ? `${kp.id}-${courseSelection}`
-            : null;
-          const instructiegroepInfo = instructiegroepKey
-            ? instructiegroepData[instructiegroepKey]
-            : null;
-
-          let hoofdcursus = undefined;
-          let aanvullendeCursussen: KwalificatieprofielConfig["aanvullendeCursussen"] =
-            [];
-          let instructiegroepError = undefined;
-
-          if (courseSelection && instructiegroepInfo) {
-            const course = courses.find((c) => c.id === courseSelection);
-            if (course) {
-              if (instructiegroepInfo.instructiegroep) {
-                hoofdcursus = {
-                  courseId: courseSelection,
-                  instructieGroepId: instructiegroepInfo.instructiegroep.id,
-                  title: course.title,
-                };
-
-                aanvullendeCursussen =
-                  instructiegroepInfo.instructiegroep.courses
-                    .filter(
-                      (c: { id: string; title: string | null }) =>
-                        c.id !== courseSelection && c.title,
-                    )
-                    .map((c: { id: string; title: string | null }) => ({
-                      courseId: c.id,
-                      instructieGroepId:
-                        instructiegroepInfo.instructiegroep?.id ?? "",
-                      title: c.title as string,
-                      selected: false,
-                    }));
-              } else if (instructiegroepInfo.error) {
-                instructiegroepError = instructiegroepInfo.error;
-              }
-            }
-          }
-
-          return {
-            id: kp.id,
-            titel: kp.titel,
-            richting: kp.richting,
-            hoofdcursus,
-            aanvullendeCursussen,
-            instructiegroepError,
-            onderdelen: kp.kerntaken.flatMap((kerntaak) =>
-              kerntaak.onderdelen.map((onderdeel) => ({
-                id: onderdeel.id,
-                title: `${kerntaak.titel} - ${onderdeel.type}`,
-                type: onderdeel.type,
-                selected: true,
-              })),
-            ),
-          };
-        },
-      );
-      setKwalificatieprofielenConfig(configs);
-    } else {
-      setKwalificatieprofielenConfig([]);
-    }
-  }, [kwalificatieprofielen, courseSelections, instructiegroepData, courses]);
-
-  const { data: searchedInstructors, isLoading: isInstructorsLoading } =
-    usePersonsForLocation(locationId, {
-      filter: {
-        query: personQuery,
-        actorType: "instructor",
-      },
-    });
+  // Handle undefined data during loading
+  const searchedInstructorsItems = searchedInstructors?.items ?? [];
 
   const { execute, result, status } = useStateAction(createBulkPvbsAction, {
     onSuccess: ({ data }) => {
       if (data) {
         toast.success(data.message);
-        router.push(
-          `/(dashboard)/(management)/locatie/${params.location}/pvb-aanvragen`,
-        );
+        router.push(`/locatie/${params.location}/pvb-aanvragen`);
       }
     },
     onError: ({ error }) => {
@@ -409,176 +575,111 @@ export default function CreatePvbForm({
     return parts.join(" ");
   };
 
-  const handlePersonSelect = (person: Person | null) => {
-    if (person && !selectedKandidaten.some((k) => k.id === person.id)) {
-      const newKandidaat: SelectedKandidaat = {
-        id: person.id,
-        label: formatPersonName(person),
-      };
-      setSelectedKandidaten((prev) => [...prev, newKandidaat]);
+  // Add kandidaat
+  const addKandidaat = (person: Person) => {
+    if (!kandidaten.some((k) => k.id === person.id)) {
+      setKandidaten((prev) => [
+        ...prev,
+        { id: person.id, name: formatPersonName(person) },
+      ]);
     }
-    setSelectedPerson(null);
-    setPersonQuery("");
+    setKandidaatSearchQuery("");
   };
 
-  const removeKandidaat = (kandidaatId: string) => {
-    setSelectedKandidaten((prev) => prev.filter((k) => k.id !== kandidaatId));
+  // Remove kandidaat
+  const removeKandidaat = (index: number) => {
+    setKandidaten((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateKandidaatField = (
-    kandidaatId: string,
-    field: keyof SelectedKandidaat,
-    value: string,
-  ) => {
-    setSelectedKandidaten((prev) =>
-      prev.map((k) => (k.id === kandidaatId ? { ...k, [field]: value } : k)),
-    );
-  };
+  // Copy field value to all kandidaten
+  const copyToAllRows = (field: string, value: string) => {
+    if (field === "leercoach") {
+      setGlobalLeercoach(value);
+    } else if (field === "beoordelaar") {
+      setGlobalBeoordelaar(value);
+    } else if (field === "startDatumTijd") {
+      // For datetime inputs, we still need to update DOM directly
+      const form = document.querySelector("form");
+      if (!form) {
+        return;
+      }
 
-  const copyToAllRows = (field: keyof SelectedKandidaat, value: string) => {
-    setSelectedKandidaten((prev) =>
-      prev.map((k) => ({ ...k, [field]: value })),
-    );
-    toast.success(`${field} gekopieerd naar alle rijen`);
-  };
+      let successCount = 0;
+      kandidaten.forEach((_, index) => {
+        const selector = `[name="kandidaten[${index}].${field}"]`;
+        const input = form.querySelector(selector) as HTMLInputElement;
 
-  const copyFromFirstRow = () => {
-    if (selectedKandidaten.length === 0) return;
+        if (input) {
+          // For inputs, set value and trigger React's onChange
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+            window.HTMLInputElement.prototype,
+            "value",
+          )?.set;
 
-    const firstRow = selectedKandidaten[0];
-    if (!firstRow) return;
+          if (nativeInputValueSetter) {
+            nativeInputValueSetter.call(input, value);
+            // Trigger React's synthetic event
+            const event = new Event("input", { bubbles: true });
+            input.dispatchEvent(event);
+            // Also trigger change event for datetime inputs
+            const changeEvent = new Event("change", { bubbles: true });
+            input.dispatchEvent(changeEvent);
+            successCount++;
+          }
+        }
+      });
 
-    setSelectedKandidaten((prev) =>
-      prev.map((k, index) =>
-        index === 0
-          ? k
-          : {
-              ...k,
-              leercoach: firstRow?.leercoach,
-              beoordelaar: firstRow?.beoordelaar,
-              startDatumTijd: firstRow?.startDatumTijd,
-            },
-      ),
-    );
-    toast.success("Instellingen gekopieerd naar alle rijen");
-  };
-
-  const handleNiveauChange = (niveauId: string) => {
-    setNiveau(niveauId);
-    // Clear all course selections when niveau changes
-    const clearedSelections: Record<string, string> = {};
-    for (const kp of kwalificatieprofielen) {
-      clearedSelections[`kp-${kp.id}`] = "";
-    }
-    setCourseSelections(clearedSelections);
-
-    // Also clear from URL
-    const newSearchParams = new URLSearchParams(searchParams);
-    for (const kp of kwalificatieprofielen) {
-      newSearchParams.delete(`kp-${kp.id}`);
-    }
-    router.replace(`?${newSearchParams.toString()}`, { scroll: false });
-  };
-
-  const handleHoofdcursusSelect = (kpId: string, courseId: string) => {
-    updateCourseSelectionInURL(kpId, courseId);
-  };
-
-  const handleAanvullendeCursusToggle = (kpId: string, courseId: string) => {
-    setKwalificatieprofielenConfig((prev) =>
-      prev.map((config) =>
-        config.id === kpId
-          ? {
-              ...config,
-              aanvullendeCursussen: config.aanvullendeCursussen.map((c) =>
-                c.courseId === courseId ? { ...c, selected: !c.selected } : c,
-              ),
-            }
-          : config,
-      ),
-    );
-  };
-
-  const handleOnderdeelToggle = (kpId: string, onderdeelId: string) => {
-    setKwalificatieprofielenConfig((prev) =>
-      prev.map((config) =>
-        config.id === kpId
-          ? {
-              ...config,
-              onderdelen: config.onderdelen.map((o) =>
-                o.id === onderdeelId ? { ...o, selected: !o.selected } : o,
-              ),
-            }
-          : config,
-      ),
-    );
-  };
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (selectedKandidaten.length === 0) {
-      toast.error("Selecteer minimaal één kandidaat");
-      return;
+      if (successCount > 0) {
+        toast.success(
+          `Aanvangsdatum/tijd gekopieerd naar ${successCount} rij(en)`,
+        );
+      } else {
+        toast.error("Kon aanvangsdatum/tijd niet kopiëren");
+      }
     }
 
-    if (kwalificatieprofielenConfig.length === 0) {
-      toast.error("Selecteer een niveau");
-      return;
+    const fieldLabel =
+      field === "leercoach"
+        ? "Leercoach"
+        : field === "beoordelaar"
+          ? "Beoordelaar"
+          : field === "startDatumTijd"
+            ? "Aanvangsdatum/tijd"
+            : field;
+
+    if (field !== "startDatumTijd") {
+      toast.success(`${fieldLabel} gekopieerd naar alle rijen`);
     }
 
-    if (!kwalificatieprofielenConfig.some((kp) => kp.hoofdcursus)) {
-      toast.error("Selecteer minimaal één hoofdcursus");
-      return;
+    // Reset global state after a short delay to allow all rows to update
+    if (field === "leercoach" || field === "beoordelaar") {
+      setTimeout(() => {
+        if (field === "leercoach") {
+          setGlobalLeercoach(undefined);
+        } else {
+          setGlobalBeoordelaar(undefined);
+        }
+      }, 100);
     }
-
-    // Get all selected onderdelen from all kwalificatieprofielen
-    const selectedOnderdelen = kwalificatieprofielenConfig.flatMap((kp) =>
-      kp.onderdelen.filter((o) => o.selected).map((o) => o.id),
-    );
-
-    if (selectedOnderdelen.length === 0) {
-      toast.error("Selecteer minimaal één onderdeel");
-      return;
-    }
-
-    execute({
-      locationHandle: params.location as string,
-      courseConfig: {
-        niveauId: selectedNiveauId,
-        selectedOnderdelen,
-        kwalificatieprofielen: kwalificatieprofielenConfig.map((kp) => ({
-          id: kp.id,
-          titel: kp.titel,
-          richting: kp.richting,
-          hoofdcursus: kp.hoofdcursus,
-          aanvullendeCursussen: kp.aanvullendeCursussen
-            .filter((c) => c.selected)
-            .map((c) => ({
-              courseId: c.courseId,
-              instructieGroepId: c.instructieGroepId,
-            })),
-        })),
-        opmerkingen,
-      },
-      kandidaten: selectedKandidaten.map((k) => ({
-        id: k.id,
-        leercoach: k.leercoach,
-        beoordelaar: k.beoordelaar,
-        startDatumTijd: k.startDatumTijd,
-      })),
-    });
   };
 
   const isLoading = status === "executing";
-  const hasValidConfiguration =
-    kwalificatieprofielenConfig.some((kp) => kp.hoofdcursus) &&
-    kwalificatieprofielenConfig.some((kp) =>
-      kp.onderdelen.some((o) => o.selected),
-    );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        execute({ locationHandle: params.location as string, formData });
+      }}
+      className="space-y-6"
+    >
+      <input
+        type="hidden"
+        name="locationHandle"
+        value={params.location as string}
+      />
+
       {/* Step 1: KSS Niveau Selection */}
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
         <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
@@ -600,8 +701,9 @@ export default function CreatePvbForm({
           <Field className="max-w-xs">
             <Label className="text-sm font-medium text-zinc-700">Niveau</Label>
             <Select
+              name="courseConfig.niveauId"
               value={selectedNiveauId}
-              onChange={(e) => handleNiveauChange(e.target.value)}
+              onChange={(e) => setSelectedNiveauId(e.target.value)}
               className="mt-1"
             >
               <option value="">Selecteer niveau...</option>
@@ -616,7 +718,7 @@ export default function CreatePvbForm({
       </div>
 
       {/* Step 2: Kwalificatieprofielen Configuration */}
-      {selectedNiveauId && kwalificatieprofielen.length > 0 && (
+      {selectedNiveauId && (
         <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
           <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
             <div className="flex items-center gap-2">
@@ -630,156 +732,45 @@ export default function CreatePvbForm({
           </div>
 
           <div className="p-4">
-            <Text className="text-sm text-zinc-600 mb-4">
-              Voor elk kwalificatieprofiel moet een hoofdcursus geselecteerd
-              worden. De hoofdcursus bepaalt waar de PvB plaatsvindt en welke
-              beoordelaar bevoegd is.
-            </Text>
+            {isLoadingKwalificatieprofielen ? (
+              <div className="flex items-center justify-center py-8">
+                <Spinner className="text-zinc-600" />
+                <Text className="ml-2 text-sm text-zinc-600">
+                  Kwalificatieprofielen laden...
+                </Text>
+              </div>
+            ) : kwalificatieprofielen.length === 0 ? (
+              <div className="text-center py-8 bg-zinc-50 rounded-lg border border-dashed border-zinc-200">
+                <Text className="text-zinc-600 text-sm">
+                  Geen kwalificatieprofielen gevonden voor dit niveau.
+                </Text>
+              </div>
+            ) : (
+              <>
+                <Text className="text-sm text-zinc-600 mb-4">
+                  Voor elk kwalificatieprofiel moet een hoofdcursus geselecteerd
+                  worden. De hoofdcursus bepaalt waar de PvB plaatsvindt en
+                  welke beoordelaar bevoegd is.
+                </Text>
 
-            <div className="space-y-4">
-              {kwalificatieprofielen.map((kp) => {
-                const config = kwalificatieprofielenConfig.find(
-                  (c) => c.id === kp.id,
-                );
-                if (!config) return null;
-
-                return (
-                  <div
-                    key={kp.id}
-                    className="border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50/30 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    {/* Header */}
-                    <div className="bg-zinc-100 px-3 py-2 border-b border-zinc-200">
-                      <h3 className="font-medium text-sm text-zinc-900">
-                        {kp.titel}
-                      </h3>
-                    </div>
-
-                    <div className="p-3 space-y-3">
-                      {/* Hoofdcursus Selection */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-1 h-3 bg-blue-500 rounded-full" />
-                          <div className="text-sm font-medium">Hoofdcursus</div>
-                        </div>
-                        <Select
-                          value={courseSelections[`kp-${kp.id}`] || ""}
-                          onChange={(e) =>
-                            handleHoofdcursusSelect(kp.id, e.target.value)
-                          }
-                          className="w-full"
-                        >
-                          <option value="">Selecteer hoofdcursus...</option>
-                          {courses.map((course) => (
-                            <option key={course.id} value={course.id}>
-                              {course.title}
-                            </option>
-                          ))}
-                        </Select>
-                        {config.instructiegroepError && (
-                          <div className="flex items-start gap-1.5 p-2 bg-red-50 border border-red-200 rounded text-sm">
-                            <span className="text-red-600 mt-0.5">⚠️</span>
-                            <Text className="text-red-700">
-                              {config.instructiegroepError}
-                            </Text>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Aanvullende Cursussen */}
-                      {config.hoofdcursus &&
-                        config.aanvullendeCursussen.length > 0 && (
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-1 h-3 bg-emerald-500 rounded-full" />
-                              <div className="text-sm font-medium">
-                                Aanvullende cursussen
-                                <span className="text-sm font-normal text-zinc-500 ml-1">
-                                  (optioneel)
-                                </span>
-                              </div>
-                            </div>
-                            <div className="bg-zinc-50/50 p-2.5 rounded border border-zinc-100">
-                              <Text className="text-sm text-zinc-600 leading-relaxed">
-                                Door aanvullende cursussen aan te vinken worden
-                                de kwalificaties van deze PvB ook meteen
-                                toegepast op deze cursussen (voorheen
-                                disciplines) bij succesvol behalen. De aanvrager
-                                is er voor verantwoordelijk enkel cursussen aan
-                                te klikken waarin hij de kandidaat bekwaam acht,
-                                en waar de kandidaat ook voor aan de gestelde
-                                ingangseisen voldoet.
-                              </Text>
-                            </div>
-                            <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
-                              {config.aanvullendeCursussen.map((course) => (
-                                <CheckboxField
-                                  key={course.courseId}
-                                  className="py-1 px-2 rounded hover:bg-zinc-50"
-                                >
-                                  <Checkbox
-                                    checked={course.selected}
-                                    onChange={() =>
-                                      handleAanvullendeCursusToggle(
-                                        kp.id,
-                                        course.courseId,
-                                      )
-                                    }
-                                    className="h-4 w-4 flex-shrink-0"
-                                  />
-                                  <Label className="text-sm text-zinc-700 truncate cursor-pointer">
-                                    {course.title}
-                                  </Label>
-                                </CheckboxField>
-                              ))}
-                            </CheckboxGroup>
-                          </div>
-                        )}
-
-                      {/* Onderdelen */}
-                      {config.hoofdcursus && (
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-1 h-3 bg-purple-500 rounded-full" />
-                            <div className="text-sm font-medium">
-                              Onderdelen
-                            </div>
-                          </div>
-                          <Text className="text-sm text-zinc-600">
-                            Selecteer de onderdelen die getoetst moeten worden.
-                          </Text>
-                          <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
-                            {config.onderdelen.map((onderdeel) => (
-                              <CheckboxField
-                                key={onderdeel.id}
-                                className="py-1 px-2 rounded hover:bg-zinc-50"
-                              >
-                                <Checkbox
-                                  checked={onderdeel.selected}
-                                  onChange={() =>
-                                    handleOnderdeelToggle(kp.id, onderdeel.id)
-                                  }
-                                  className="h-4 w-4 mt-0.5"
-                                />
-                                <Label className="text-sm text-zinc-700 break-words leading-snug cursor-pointer">
-                                  {onderdeel.title}
-                                </Label>
-                              </CheckboxField>
-                            ))}
-                          </CheckboxGroup>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                <div className="space-y-4">
+                  {kwalificatieprofielen.map((kp, kpIndex) => (
+                    <KwalificatieprofielCard
+                      key={kp.id}
+                      kp={kp}
+                      kpIndex={kpIndex}
+                      courses={courses}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
       {/* Step 3: Algemene Opmerkingen */}
-      {hasValidConfiguration && (
+      {selectedNiveauId && kwalificatieprofielen.length > 0 && (
         <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
           <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
             <div className="flex items-center gap-2">
@@ -802,8 +793,7 @@ export default function CreatePvbForm({
                 Opmerkingen
               </Label>
               <Textarea
-                value={opmerkingen}
-                onChange={(e) => setOpmerkingen(e.target.value)}
+                name="courseConfig.opmerkingen"
                 rows={3}
                 placeholder="Optionele opmerkingen die gelden voor alle aanvragen..."
                 className="mt-1"
@@ -814,7 +804,7 @@ export default function CreatePvbForm({
       )}
 
       {/* Step 4: Kandidaten beheren */}
-      {hasValidConfiguration && (
+      {selectedNiveauId && kwalificatieprofielen.length > 0 && (
         <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
           <div className="bg-zinc-50 px-4 py-3 border-b border-zinc-200">
             <div className="flex items-center gap-2">
@@ -840,13 +830,11 @@ export default function CreatePvbForm({
               <div className="flex gap-2 mt-1">
                 <div className="flex-1 relative">
                   <Combobox
-                    options={searchedInstructors.items}
-                    value={selectedPerson}
-                    onChange={handlePersonSelect}
-                    displayValue={(person) =>
-                      person ? formatPersonName(person) : ""
-                    }
-                    setQuery={setPersonQuery}
+                    options={searchedInstructorsItems}
+                    value={null}
+                    onChange={(person) => person && addKandidaat(person)}
+                    displayValue={() => ""}
+                    setQuery={setKandidaatSearchQuery}
                     filter={() => true}
                     placeholder="Zoek instructeur op naam of email..."
                   >
@@ -867,37 +855,20 @@ export default function CreatePvbForm({
                       </ComboboxOption>
                     )}
                   </Combobox>
-                  {isInstructorsLoading && (
-                    <div className="right-8 absolute inset-y-0 flex items-center">
-                      <Spinner />
-                    </div>
-                  )}
                 </div>
               </div>
             </Field>
 
             {/* Configuration Table */}
-            {selectedKandidaten.length > 0 && (
+            {kandidaten.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Text className="font-medium text-sm">
-                    Kandidaten configuratie ({selectedKandidaten.length})
+                    Kandidaten configuratie ({kandidaten.length})
                   </Text>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      outline
-                      onClick={copyFromFirstRow}
-                      disabled={selectedKandidaten.length < 2}
-                      className="text-sm"
-                    >
-                      <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
-                      Kopieer van eerste rij
-                    </Button>
-                  </div>
                 </div>
 
-                <Breakout className="overflow-x-auto">
+                <div className="overflow-x-auto">
                   <Table className="text-sm">
                     <TableHead>
                       <TableRow>
@@ -915,130 +886,27 @@ export default function CreatePvbForm({
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {selectedKandidaten.map((kandidaat, index) => (
-                        <TableRow key={kandidaat.id}>
-                          <TableCell className="font-medium">
-                            {kandidaat.label}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <div className="flex-1">
-                                <LeercoachCombobox
-                                  locationId={locationId}
-                                  value={kandidaat.leercoach || ""}
-                                  onChange={(personId) =>
-                                    updateKandidaatField(
-                                      kandidaat.id,
-                                      "leercoach",
-                                      personId,
-                                    )
-                                  }
-                                />
-                              </div>
-                              {kandidaat.leercoach && (
-                                <Button
-                                  type="button"
-                                  plain
-                                  onClick={() =>
-                                    copyToAllRows(
-                                      "leercoach",
-                                      kandidaat.leercoach ?? "",
-                                    )
-                                  }
-                                  title="Kopieer naar alle rijen"
-                                  className="h-8 w-8 p-0 flex-shrink-0"
-                                >
-                                  <DocumentDuplicateIcon className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <div className="flex-1">
-                                <BeoordelaarCombobox
-                                  locationId={locationId}
-                                  value={kandidaat.beoordelaar || ""}
-                                  onChange={(personId) =>
-                                    updateKandidaatField(
-                                      kandidaat.id,
-                                      "beoordelaar",
-                                      personId,
-                                    )
-                                  }
-                                />
-                              </div>
-                              {kandidaat.beoordelaar && (
-                                <Button
-                                  type="button"
-                                  plain
-                                  onClick={() =>
-                                    copyToAllRows(
-                                      "beoordelaar",
-                                      kandidaat.beoordelaar ?? "",
-                                    )
-                                  }
-                                  title="Kopieer naar alle rijen"
-                                  className="h-8 w-8 p-0 flex-shrink-0"
-                                >
-                                  <DocumentDuplicateIcon className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <Input
-                                type="datetime-local"
-                                value={kandidaat.startDatumTijd || ""}
-                                onChange={(e) =>
-                                  updateKandidaatField(
-                                    kandidaat.id,
-                                    "startDatumTijd",
-                                    e.target.value,
-                                  )
-                                }
-                                className="flex-1"
-                              />
-                              {kandidaat.startDatumTijd && (
-                                <Button
-                                  type="button"
-                                  plain
-                                  onClick={() =>
-                                    copyToAllRows(
-                                      "startDatumTijd",
-                                      kandidaat.startDatumTijd ?? "",
-                                    )
-                                  }
-                                  title="Kopieer naar alle rijen"
-                                  className="h-8 w-8 p-0 flex-shrink-0"
-                                >
-                                  <DocumentDuplicateIcon className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              type="button"
-                              plain
-                              onClick={() => removeKandidaat(kandidaat.id)}
-                              className="h-8 w-8 p-0 text-red-600 hover:text-red-800"
-                              title="Verwijder kandidaat"
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
+                      {kandidaten.map((kandidaat, index) => (
+                        <KandidaatRow
+                          key={kandidaat.id}
+                          index={index}
+                          personId={kandidaat.id}
+                          personName={kandidaat.name}
+                          locationId={locationId}
+                          onRemove={() => removeKandidaat(index)}
+                          onCopyField={copyToAllRows}
+                          globalLeercoach={globalLeercoach}
+                          globalBeoordelaar={globalBeoordelaar}
+                        />
                       ))}
                     </TableBody>
                   </Table>
-                </Breakout>
+                </div>
               </div>
             )}
 
             {/* Empty state */}
-            {selectedKandidaten.length === 0 && (
+            {kandidaten.length === 0 && (
               <div className="text-center py-8 bg-zinc-50 rounded-lg border border-dashed border-zinc-200">
                 <PlusIcon className="h-8 w-8 text-zinc-400 mx-auto mb-2" />
                 <Text className="text-zinc-600 text-sm mb-1">
@@ -1074,14 +942,10 @@ export default function CreatePvbForm({
         <Button
           color="branding-dark"
           type="submit"
-          disabled={
-            isLoading ||
-            selectedKandidaten.length === 0 ||
-            !hasValidConfiguration
-          }
+          disabled={isLoading || kandidaten.length === 0}
         >
           {isLoading && <Spinner className="text-white" />}
-          PvB aanvragen aanmaken ({selectedKandidaten.length})
+          PvB aanvragen aanmaken ({kandidaten.length})
         </Button>
       </div>
     </form>

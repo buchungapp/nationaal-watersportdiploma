@@ -117,7 +117,7 @@ async function createOrReplaceMedia<
   return { id, remove } as MediaCreateOrReplaceResult<Media, OldId>;
 }
 
-async function getPrimaryPerson<T extends boolean = true>(
+export async function getPrimaryPerson<T extends boolean = true>(
   user: Awaited<ReturnType<typeof getUserOrThrow>>,
   force = true as T,
 ): Promise<

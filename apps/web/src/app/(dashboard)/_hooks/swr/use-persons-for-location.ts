@@ -41,14 +41,9 @@ export function usePersonsForLocation(
     () => jsonFetcher(`/api/persons/list/${locationId}${searchParams}`),
     {
       keepPreviousData: true,
-      revalidateOnMount: false,
+      revalidateOnMount: true,
     },
   );
-
-  if (!data)
-    throw new Error(
-      `Person list data must be available through fallback, key: ${["allPersons", locationId, searchParams].join("|")}`,
-    );
 
   return {
     data,

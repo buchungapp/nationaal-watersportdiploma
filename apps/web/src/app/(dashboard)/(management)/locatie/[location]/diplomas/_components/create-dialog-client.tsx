@@ -154,6 +154,9 @@ function CreateDialogClient({
     void fetchCurricula();
   }, [selectedProgram, locationId]);
 
+  if (!searchedStudents)
+    throw new Error("Person list data must be available through fallback");
+
   return (
     <>
       <Button

@@ -12,7 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { course, instructieGroep } from "../index.js";
 import { location } from "../location.js";
-import { actor } from "../user.js";
+import { actor, person } from "../user.js";
 import { kssSchema } from "./schema.js";
 import {
   beoordelingscriterium,
@@ -98,8 +98,8 @@ export const pvbAanvraag = kssSchema.table(
   },
   (table) => [
     foreignKey({
-      columns: [table.kandidaatId, table.locatieId],
-      foreignColumns: [actor.id, actor.locationId],
+      columns: [table.kandidaatId],
+      foreignColumns: [person.id],
     }),
     foreignKey({
       columns: [table.locatieId],
@@ -190,10 +190,6 @@ export const pvbOnderdeel = kssSchema.table(
     uniqueIndex("pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_unique").on(
       table.pvbAanvraagId,
       table.kerntaakOnderdeelId,
-    ),
-    uniqueIndex("pvb_onderdeel_aanvraag_id_kerntaak_id_unique").on(
-      table.pvbAanvraagId,
-      table.kerntaakId,
     ),
     // These are needed for the foreign key constraints
     unique("pvb_onderdeel_id_kerntaak_onderdeel_id_unique").on(
@@ -389,7 +385,7 @@ export const pvbLeercoachToestemming = kssSchema.table(
     }),
     foreignKey({
       columns: [table.leercoachId],
-      foreignColumns: [actor.id],
+      foreignColumns: [person.id],
     }),
     foreignKey({
       columns: [table.aangemaaktDoor],

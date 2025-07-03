@@ -5,6 +5,7 @@ import { dateTimeSchema, uuidSchema } from "../../utils/index.js";
 export const pvbAanvraagStatus = z.enum(schema.aanvraagStatus.enumValues);
 
 export const aanvraagInternPvbSchema = z.object({
+  aangevraagdDoor: uuidSchema,
   locatieId: uuidSchema,
   kandidaatId: uuidSchema,
   leercoachId: uuidSchema.nullable(),
@@ -30,6 +31,7 @@ export const aanvraagInternPvbSchema = z.object({
 });
 
 export const aanvraagExternPvbSchema = z.object({
+  aangevraagdDoor: uuidSchema,
   locatieId: uuidSchema,
   kandidaatId: uuidSchema,
   leercoachId: uuidSchema.nullable(),
