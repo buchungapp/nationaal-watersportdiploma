@@ -4,7 +4,7 @@ import { Button } from "~/app/(dashboard)/_components/button";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listPvbsWithPagination, retrieveLocationByHandle } from "~/lib/nwd";
 import Search from "../../../_components/search";
-import Table from "./_components/table";
+import { PvbTableWrapper } from "./_components/pvb-table-wrapper";
 import { loadSearchParams } from "./_search-params";
 
 async function PvbsTable(props: {
@@ -30,7 +30,13 @@ async function PvbsTable(props: {
     offset: (currentPage - 1) * paginationLimit,
   });
 
-  return <Table pvbs={pvbs.items} totalItems={pvbs.count} />;
+  return (
+    <PvbTableWrapper
+      pvbs={pvbs.items}
+      totalItems={pvbs.count}
+      locationId={location.id}
+    />
+  );
 }
 
 async function CreateButton(props: {
@@ -68,7 +74,14 @@ export default function Page(props: {
       </div>
 
       <Suspense
-        fallback={<Table placeholderRows={10} pvbs={[]} totalItems={0} />}
+        fallback={
+          <PvbTableWrapper
+            placeholderRows={10}
+            pvbs={[]}
+            totalItems={0}
+            locationId=""
+          />
+        }
       >
         <PvbsTable params={props.params} searchParams={props.searchParams} />
       </Suspense>

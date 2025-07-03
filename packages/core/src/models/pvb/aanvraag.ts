@@ -1115,6 +1115,28 @@ export const list = wrapCommand(
           ]),
           lastStatusChange: z.string().datetime(),
           opmerkingen: z.string().nullable(),
+          leercoach: z
+            .object({
+              id: z.string().uuid(),
+              firstName: z.string(),
+              lastNamePrefix: z.string().nullable(),
+              lastName: z.string().nullable(),
+            })
+            .nullable(),
+          hoofdcursus: z
+            .object({
+              id: z.string().uuid(),
+              title: z.string(),
+              code: z.string(),
+            })
+            .nullable(),
+          kwalificatieprofielen: z.array(
+            z.object({
+              id: z.string().uuid(),
+              titel: z.string(),
+              richting: z.string(),
+            }),
+          ),
           kerntaakOnderdelen: z.array(
             z.object({
               id: z.string().uuid(),
@@ -1126,6 +1148,14 @@ export const list = wrapCommand(
                 "niet_behaald",
                 "nog_niet_bekend",
               ]),
+              beoordelaar: z
+                .object({
+                  id: z.string().uuid(),
+                  firstName: z.string(),
+                  lastNamePrefix: z.string().nullable(),
+                  lastName: z.string().nullable(),
+                })
+                .nullable(),
             }),
           ),
         }),
@@ -1136,6 +1166,13 @@ export const list = wrapCommand(
     }),
     async (input) => {
       const query = useQuery();
+
+      // Aliases for joined tables
+      const leercoachPerson = s.person.as("leercoachPerson");
+      const hoofdCursus = s.pvbAanvraagCourse.as("hoofdCursus");
+      const hoofdCourse = s.course.as("hoofdCourse");
+      const beoordelaarActor = s.actor.as("beoordelaarActor");
+      const beoordelaarPerson = s.person.as("beoordelaarPerson");
 
       // More performant subquery using DISTINCT ON to get latest status
       const latestStatusSubquery = query
@@ -1151,6 +1188,19 @@ export const list = wrapCommand(
         )
         .as("latest_status");
 
+      // Subquery to get latest leercoach toestemming
+      const latestLeercoachSubquery = query
+        .selectDistinct({
+          pvbAanvraagId: s.pvbLeercoachToestemming.pvbAanvraagId,
+          leercoachId: s.pvbLeercoachToestemming.leercoachId,
+        })
+        .from(s.pvbLeercoachToestemming)
+        .orderBy(
+          s.pvbLeercoachToestemming.pvbAanvraagId,
+          desc(s.pvbLeercoachToestemming.aangemaaktOp),
+        )
+        .as("latest_leercoach");
+
       // Query to get basic aanvraag info with current status and aggregated onderdelen
       const aanvragenQuery = query
         .select({
@@ -1164,7 +1214,35 @@ export const list = wrapCommand(
           kandidaatLastName: s.person.lastName,
           status: latestStatusSubquery.status,
           lastStatusChange: latestStatusSubquery.aangemaaktOp,
-          // Array aggregation for onderdelen
+          // Leercoach info
+          leercoachId: latestLeercoachSubquery.leercoachId,
+          leercoachFirstName: leercoachPerson.firstName,
+          leercoachLastNamePrefix: leercoachPerson.lastNamePrefix,
+          leercoachLastName: leercoachPerson.lastName,
+          // Hoofdcursus info
+          hoofdcursusId: hoofdCursus.courseId,
+          hoofdcursusTitle: hoofdCourse.title,
+          hoofdcursusCode: hoofdCourse.code,
+          // Array aggregation for kwalificatieprofielen
+          kwalificatieprofielen: sql<
+            Array<{
+              id: string;
+              titel: string;
+              richting: string;
+            }>
+          >`
+            COALESCE(
+              json_agg(DISTINCT
+                ${jsonBuildObject({
+                  id: s.kwalificatieprofiel.id,
+                  titel: s.kwalificatieprofiel.titel,
+                  richting: s.kwalificatieprofiel.richting,
+                })}
+              ) FILTER (WHERE ${s.kwalificatieprofiel.id} IS NOT NULL),
+              '[]'::json
+            )
+          `,
+          // Array aggregation for onderdelen with beoordelaar
           kerntaakOnderdelen: sql<
             Array<{
               id: string;
@@ -1172,6 +1250,10 @@ export const list = wrapCommand(
               type: "portfolio" | "praktijk";
               rang: number;
               behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
+              beoordelaarId: string | null;
+              beoordelaarFirstName: string | null;
+              beoordelaarLastNamePrefix: string | null;
+              beoordelaarLastName: string | null;
             }>
           >`
             COALESCE(
@@ -1182,6 +1264,10 @@ export const list = wrapCommand(
                   type: s.kerntaakOnderdeel.type,
                   rang: s.kerntaak.rang,
                   behaaldStatus: sql`COALESCE(${s.pvbOnderdeel.uitslag}, 'nog_niet_bekend')`,
+                  beoordelaarId: s.pvbOnderdeel.beoordelaarId,
+                  beoordelaarFirstName: beoordelaarPerson.firstName,
+                  beoordelaarLastNamePrefix: beoordelaarPerson.lastNamePrefix,
+                  beoordelaarLastName: beoordelaarPerson.lastName,
                 })} ORDER BY ${s.kerntaak.rang}, ${s.kerntaak.titel}
               ) FILTER (WHERE ${s.kerntaakOnderdeel.id} IS NOT NULL),
               '[]'::json
@@ -1195,6 +1281,34 @@ export const list = wrapCommand(
           eq(latestStatusSubquery.pvbAanvraagId, s.pvbAanvraag.id),
         )
         .leftJoin(
+          latestLeercoachSubquery,
+          eq(latestLeercoachSubquery.pvbAanvraagId, s.pvbAanvraag.id),
+        )
+        .leftJoin(
+          leercoachPerson,
+          eq(leercoachPerson.id, latestLeercoachSubquery.leercoachId),
+        )
+        .leftJoin(
+          hoofdCursus,
+          and(
+            eq(hoofdCursus.pvbAanvraagId, s.pvbAanvraag.id),
+            eq(hoofdCursus.isMainCourse, true),
+          ),
+        )
+        .leftJoin(hoofdCourse, eq(hoofdCourse.id, hoofdCursus.courseId))
+        .leftJoin(
+          s.pvbAanvraagCourse,
+          eq(s.pvbAanvraagCourse.pvbAanvraagId, s.pvbAanvraag.id),
+        )
+        .leftJoin(
+          s.instructieGroep,
+          eq(s.instructieGroep.id, s.pvbAanvraagCourse.instructieGroepId),
+        )
+        .leftJoin(
+          s.kwalificatieprofiel,
+          eq(s.kwalificatieprofiel.id, s.instructieGroep.kwalificatieprofielId),
+        )
+        .leftJoin(
           s.pvbOnderdeel,
           eq(s.pvbOnderdeel.pvbAanvraagId, s.pvbAanvraag.id),
         )
@@ -1203,12 +1317,24 @@ export const list = wrapCommand(
           eq(s.kerntaakOnderdeel.id, s.pvbOnderdeel.kerntaakOnderdeelId),
         )
         .leftJoin(s.kerntaak, eq(s.kerntaak.id, s.kerntaakOnderdeel.kerntaakId))
+        .leftJoin(
+          beoordelaarActor,
+          eq(beoordelaarActor.id, s.pvbOnderdeel.beoordelaarId),
+        )
+        .leftJoin(
+          beoordelaarPerson,
+          eq(beoordelaarPerson.id, beoordelaarActor.personId),
+        )
         .where(eq(s.pvbAanvraag.locatieId, input.filter.locationId))
         .groupBy(
           s.pvbAanvraag.id,
           s.person.id,
           latestStatusSubquery.status,
           latestStatusSubquery.aangemaaktOp,
+          latestLeercoachSubquery.leercoachId,
+          leercoachPerson.id,
+          hoofdCursus.courseId,
+          hoofdCourse.id,
         )
         .orderBy(desc(latestStatusSubquery.aangemaaktOp))
         .$dynamic();
@@ -1246,7 +1372,39 @@ export const list = wrapCommand(
         status: row.status,
         lastStatusChange: dayjs(row.lastStatusChange).toISOString(),
         opmerkingen: row.opmerkingen,
-        kerntaakOnderdelen: row.kerntaakOnderdelen || [],
+        leercoach: row.leercoachId
+          ? {
+              id: row.leercoachId,
+              firstName: row.leercoachFirstName,
+              lastNamePrefix: row.leercoachLastNamePrefix,
+              lastName: row.leercoachLastName,
+            }
+          : null,
+        hoofdcursus: row.hoofdcursusId
+          ? {
+              id: row.hoofdcursusId,
+              title: row.hoofdcursusTitle,
+              code: row.hoofdcursusCode,
+            }
+          : null,
+        kwalificatieprofielen: row.kwalificatieprofielen || [],
+        kerntaakOnderdelen: (row.kerntaakOnderdelen || []).map(
+          (onderdeel: any) => ({
+            id: onderdeel.id,
+            titel: onderdeel.titel,
+            type: onderdeel.type,
+            rang: onderdeel.rang,
+            behaaldStatus: onderdeel.behaaldStatus,
+            beoordelaar: onderdeel.beoordelaarId
+              ? {
+                  id: onderdeel.beoordelaarId,
+                  firstName: onderdeel.beoordelaarFirstName,
+                  lastNamePrefix: onderdeel.beoordelaarLastNamePrefix,
+                  lastName: onderdeel.beoordelaarLastName,
+                }
+              : null,
+          }),
+        ),
       }));
 
       return {
@@ -1254,6 +1412,217 @@ export const list = wrapCommand(
         count,
         limit: input.limit ?? null,
         offset: input.offset,
+      };
+    },
+  ),
+);
+
+// Update start time for multiple PvB onderdelen
+export const updateStartTimeForMultiple = wrapCommand(
+  "pvb.updateStartTimeForMultiple",
+  withZod(
+    z.object({
+      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
+      startDatumTijd: z.string().datetime(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string().optional(),
+    }),
+    z.object({
+      success: z.boolean(),
+      updatedCount: z.number().int().nonnegative(),
+    }),
+    async (input) => {
+      return withTransaction(async (tx) => {
+        let updatedCount = 0;
+
+        for (const aanvraagId of input.pvbAanvraagIds) {
+          // Update all onderdelen for this aanvraag
+          const updatedOnderdelen = await tx
+            .update(s.pvbOnderdeel)
+            .set({ startDatumTijd: input.startDatumTijd })
+            .where(eq(s.pvbOnderdeel.pvbAanvraagId, aanvraagId))
+            .returning({ id: s.pvbOnderdeel.id });
+
+          if (updatedOnderdelen.length > 0) {
+            updatedCount++;
+
+            // Log event for this aanvraag
+            await logPvbEvent({
+              pvbAanvraagId: aanvraagId,
+              gebeurtenisType: "onderdeel_toegevoegd", // Using existing event type
+              data: {
+                startDatumTijd: input.startDatumTijd,
+                aantalOnderdelenBijgewerkt: updatedOnderdelen.length,
+              },
+              aangemaaktDoor: input.aangemaaktDoor,
+              reden:
+                input.reden ??
+                "Aanvangsdatum/tijd voor alle onderdelen bijgewerkt",
+            });
+          }
+        }
+
+        return {
+          success: true,
+          updatedCount,
+        };
+      });
+    },
+  ),
+);
+
+// Update leercoach for multiple PvB aanvragen
+export const updateLeercoachForMultiple = wrapCommand(
+  "pvb.updateLeercoachForMultiple",
+  withZod(
+    z.object({
+      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
+      leercoachId: z.string().uuid(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string().optional(),
+    }),
+    z.object({
+      success: z.boolean(),
+      updatedCount: z.number().int().nonnegative(),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      // Validate leercoach is an instructor
+      const leercoachActors = await query
+        .select({ locationId: s.actor.locationId })
+        .from(s.actor)
+        .where(
+          and(
+            eq(s.actor.personId, input.leercoachId),
+            eq(s.actor.type, "instructor"),
+          ),
+        );
+
+      if (leercoachActors.length === 0) {
+        throw new Error("De geselecteerde leercoach is geen instructeur");
+      }
+
+      let updatedCount = 0;
+
+      for (const aanvraagId of input.pvbAanvraagIds) {
+        try {
+          await requestLeercoachPermission({
+            pvbAanvraagId: aanvraagId,
+            leercoachId: input.leercoachId,
+            aangemaaktDoor: input.aangemaaktDoor,
+            reden: input.reden ?? "Leercoach toegewezen via bulk actie",
+          });
+          updatedCount++;
+        } catch (error) {
+          // Continue with other aanvragen if one fails
+          console.error(
+            `Failed to update leercoach for aanvraag ${aanvraagId}:`,
+            error,
+          );
+        }
+      }
+
+      return {
+        success: true,
+        updatedCount,
+      };
+    },
+  ),
+);
+
+// Cancel multiple PvB aanvragen
+export const cancelMultiple = wrapCommand(
+  "pvb.cancelMultiple",
+  withZod(
+    z.object({
+      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string().optional(),
+    }),
+    z.object({
+      success: z.boolean(),
+      cancelledCount: z.number().int().nonnegative(),
+    }),
+    async (input) => {
+      let cancelledCount = 0;
+
+      for (const aanvraagId of input.pvbAanvraagIds) {
+        try {
+          await withdrawAanvraag({
+            pvbAanvraagId: aanvraagId,
+            aangemaaktDoor: input.aangemaaktDoor,
+            reden: input.reden ?? "Aanvraag geannuleerd via bulk actie",
+          });
+          cancelledCount++;
+        } catch (error) {
+          // Continue with other aanvragen if one fails
+          console.error(`Failed to cancel aanvraag ${aanvraagId}:`, error);
+        }
+      }
+
+      return {
+        success: true,
+        cancelledCount,
+      };
+    },
+  ),
+);
+
+// Submit multiple PvB aanvragen
+export const submitMultiple = wrapCommand(
+  "pvb.submitMultiple",
+  withZod(
+    z.object({
+      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string().optional(),
+    }),
+    z.object({
+      success: z.boolean(),
+      submittedCount: z.number().int().nonnegative(),
+      results: z.array(
+        z.object({
+          aanvraagId: z.string().uuid(),
+          success: z.boolean(),
+          newStatus: z
+            .enum(["wacht_op_voorwaarden", "gereed_voor_beoordeling"])
+            .optional(),
+          error: z.string().optional(),
+        }),
+      ),
+    }),
+    async (input) => {
+      const results = [];
+      let submittedCount = 0;
+
+      for (const aanvraagId of input.pvbAanvraagIds) {
+        try {
+          const result = await submitAanvraag({
+            pvbAanvraagId: aanvraagId,
+            aangemaaktDoor: input.aangemaaktDoor,
+            reden: input.reden ?? "Aanvraag ingediend via bulk actie",
+          });
+
+          results.push({
+            aanvraagId,
+            success: true,
+            newStatus: result.newStatus,
+          });
+          submittedCount++;
+        } catch (error) {
+          results.push({
+            aanvraagId,
+            success: false,
+            error: error instanceof Error ? error.message : "Onbekende fout",
+          });
+        }
+      }
+
+      return {
+        success: true,
+        submittedCount,
+        results,
       };
     },
   ),
