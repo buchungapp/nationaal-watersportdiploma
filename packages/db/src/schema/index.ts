@@ -11,3 +11,4 @@ export * from "./progress.js";
 export * from "./user.js";
 export * from "./logbook.js";
 export * from "./marketing/index.js";
+export * from "./pvb.js";

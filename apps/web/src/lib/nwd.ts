@@ -16,14 +16,14 @@ import {
 } from "@nawadi/core";
 import slugify from "@sindresorhus/slugify";
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
-import { cache } from "react";
-import "server-only";
 import {
   unstable_cacheLife as cacheLife,
   unstable_cacheTag as cacheTag,
 } from "next/cache";
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
+import "server-only";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
@@ -62,12 +62,12 @@ type MediaRemoveType = () => ReturnType<typeof Platform.Media.remove>;
 type MediaCreateOrReplaceResult<Media, OldId> = Media extends undefined
   ? { id?: never; remove?: never }
   : Media extends null
-    ? OldId extends null
-      ? { id: null; remove?: never }
-      : { id: null; remove: MediaRemoveType }
-    : OldId extends null
-      ? { id: string; remove?: never }
-      : { id: string; remove: MediaRemoveType };
+  ? OldId extends null
+    ? { id: null; remove?: never }
+    : { id: null; remove: MediaRemoveType }
+  : OldId extends null
+  ? { id: string; remove?: never }
+  : { id: string; remove: MediaRemoveType };
 
 /**
  * Creates a new media or replaces an existing one, if media is undefined, the existing media will not be removed / no action is performed.
@@ -577,8 +577,8 @@ export const listCertificatesByNumber = cache(
           sort === "createdAt"
             ? [sort]
             : sort === "student"
-              ? ["student", "createdAt"]
-              : ["instructor", "student", "createdAt"],
+            ? ["student", "createdAt"]
+            : ["instructor", "student", "createdAt"],
       });
 
       return certificates.items;
@@ -2445,7 +2445,7 @@ export async function updateStudentInstructorAssignment({
     ]);
 
     const instructorId =
-      action === "claim" ? (instructorPersonId ?? primaryPerson.id) : null;
+      action === "claim" ? instructorPersonId ?? primaryPerson.id : null;
 
     const instructorActor = instructorId
       ? await Location.Person.getActorByPersonIdAndType({
@@ -3372,3 +3372,128 @@ export const updateCurrentUserDisplayName = async (displayName: string) => {
     });
   });
 };
+
+export const listPvbs = cache(
+  async (
+    locationId: string,
+    { q, limit, offset }: { q?: string; limit: number; offset: number } = {
+      limit: 50,
+      offset: 0,
+    },
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      });
+
+      // For now, return mock data since the PVB functionality is not fully implemented
+      // This will be replaced with actual Pvb.list() call once the core model is working
+      const mockPvbs = [
+        {
+          id: "mock-pvb-1",
+          handle: "I1-12345678",
+          type: "instructeur_1",
+          status: "concept",
+          opmerkingen: "Eerste PvB aanvraag",
+          kwalificatieprofielen: ["Instructeur 1 Zeilen"],
+          kandidaat: {
+            id: "mock-person-1",
+            firstName: "Jan",
+            lastNamePrefix: "de",
+            lastName: "Vries",
+          },
+          leercoach: {
+            id: "mock-person-2",
+            firstName: "Maria",
+            lastNamePrefix: null,
+            lastName: "Janssen",
+          },
+          beoordelaar: {
+            id: "mock-person-3",
+            firstName: "Pieter",
+            lastNamePrefix: "van",
+            lastName: "Berg",
+          },
+          hoofdcursus: {
+            id: "mock-curriculum-1",
+            program: {
+              id: "mock-program-1",
+              title: "Instructeur 1 Zeilen",
+              course: {
+                id: "mock-course-1",
+                title: "Zeilen",
+              },
+            },
+          },
+          createdAt: new Date("2024-01-15").toISOString(),
+          updatedAt: new Date("2024-01-15").toISOString(),
+        },
+        {
+          id: "mock-pvb-2",
+          handle: "I2-87654321",
+          type: "instructeur_2",
+          status: "wacht_op_voorwaarden",
+          opmerkingen: null,
+          kwalificatieprofielen: ["Instructeur 2 Zeilen", "Veiligheid"],
+          kandidaat: {
+            id: "mock-person-4",
+            firstName: "Emma",
+            lastNamePrefix: null,
+            lastName: "Peters",
+          },
+          leercoach: null,
+          beoordelaar: {
+            id: "mock-person-3",
+            firstName: "Pieter",
+            lastNamePrefix: "van",
+            lastName: "Berg",
+          },
+          hoofdcursus: {
+            id: "mock-curriculum-2",
+            program: {
+              id: "mock-program-2",
+              title: "Instructeur 2 Zeilen",
+              course: {
+                id: "mock-course-1",
+                title: "Zeilen",
+              },
+            },
+          },
+          createdAt: new Date("2024-01-20").toISOString(),
+          updatedAt: new Date("2024-01-20").toISOString(),
+        },
+      ];
+
+      // Apply simple filtering if query is provided
+      const filteredPvbs = q
+        ? mockPvbs.filter(
+            (pvb) =>
+              pvb.kandidaat.firstName.toLowerCase().includes(q.toLowerCase()) ||
+              pvb.kandidaat.lastName?.toLowerCase().includes(q.toLowerCase()) ||
+              pvb.handle.toLowerCase().includes(q.toLowerCase()) ||
+              pvb.opmerkingen?.toLowerCase().includes(q.toLowerCase()),
+          )
+        : mockPvbs;
+
+      // Apply pagination
+      const paginatedPvbs = filteredPvbs.slice(offset, offset + limit);
+
+      return {
+        items: paginatedPvbs,
+        totalCount: filteredPvbs.length,
+      };
+
+      // TODO: Replace with actual implementation once PVB model is working:
+      // return await Pvb.list({
+      //   filter: { locationId, q },
+      //   limit,
+      //   offset,
+      // });
+    });
+  },
+);
