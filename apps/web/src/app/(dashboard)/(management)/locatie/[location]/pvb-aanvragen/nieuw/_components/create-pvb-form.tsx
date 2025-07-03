@@ -67,6 +67,9 @@ function KwalificatieprofielCard({
   kp,
   kpIndex,
   courses,
+  isEnabled,
+  onToggle,
+  canDisable,
 }: {
   kp: {
     id: string;
@@ -80,6 +83,9 @@ function KwalificatieprofielCard({
   };
   kpIndex: number;
   courses: Course[];
+  isEnabled: boolean;
+  onToggle: () => void;
+  canDisable: boolean;
 }) {
   const [selectedHoofdcursus, setSelectedHoofdcursus] = useState("");
 
@@ -97,151 +103,191 @@ function KwalificatieprofielCard({
     ) || [];
 
   return (
-    <div className="border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50/30 shadow-sm hover:shadow-md transition-shadow">
-      {/* Hidden fields for kwalificatieprofiel data */}
-      <input
-        type="hidden"
-        name={`courseConfig.kwalificatieprofielen[${kpIndex}].id`}
-        value={kp.id}
-      />
-      <input
-        type="hidden"
-        name={`courseConfig.kwalificatieprofielen[${kpIndex}].titel`}
-        value={kp.titel}
-      />
-      <input
-        type="hidden"
-        name={`courseConfig.kwalificatieprofielen[${kpIndex}].richting`}
-        value={kp.richting}
-      />
-      {/* Hidden field for instructiegroepId when hoofdcursus is selected */}
-      {instructiegroep && (
-        <input
-          type="hidden"
-          name={`courseConfig.kwalificatieprofielen[${kpIndex}].instructieGroepId`}
-          value={instructiegroep.id}
-        />
+    <div
+      className={`border border-zinc-200 rounded-lg overflow-hidden shadow-sm transition-all ${
+        isEnabled
+          ? "bg-zinc-50/30 hover:shadow-md"
+          : "bg-zinc-100/50 opacity-60"
+      }`}
+    >
+      {/* Hidden fields for kwalificatieprofiel data - only render if enabled */}
+      {isEnabled && (
+        <>
+          <input
+            type="hidden"
+            name={`courseConfig.kwalificatieprofielen[${kpIndex}].id`}
+            value={kp.id}
+          />
+          <input
+            type="hidden"
+            name={`courseConfig.kwalificatieprofielen[${kpIndex}].titel`}
+            value={kp.titel}
+          />
+          <input
+            type="hidden"
+            name={`courseConfig.kwalificatieprofielen[${kpIndex}].richting`}
+            value={kp.richting}
+          />
+          {/* Hidden field for instructiegroepId when hoofdcursus is selected */}
+          {instructiegroep && (
+            <input
+              type="hidden"
+              name={`courseConfig.kwalificatieprofielen[${kpIndex}].instructieGroepId`}
+              value={instructiegroep.id}
+            />
+          )}
+        </>
       )}
 
       {/* Header */}
-      <div className="bg-zinc-100 px-3 py-2 border-b border-zinc-200">
-        <h3 className="font-medium text-sm text-zinc-900">{kp.titel}</h3>
+      <div
+        className={`px-3 py-2 border-b border-zinc-200 ${
+          isEnabled ? "bg-zinc-100" : "bg-zinc-200"
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <h3
+            className={`font-medium text-sm ${
+              isEnabled ? "text-zinc-900" : "text-zinc-600"
+            }`}
+          >
+            {kp.titel}
+          </h3>
+          <CheckboxField>
+            <Checkbox
+              checked={isEnabled}
+              onChange={onToggle}
+              disabled={!canDisable && isEnabled}
+              className="h-4 w-4"
+            />
+            <Label
+              className={`text-sm ${
+                isEnabled ? "text-zinc-700" : "text-zinc-500"
+              }`}
+            >
+              Actief
+            </Label>
+          </CheckboxField>
+        </div>
       </div>
 
-      <div className="p-3 space-y-3">
-        {/* Hoofdcursus Selection */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 h-3 bg-blue-500 rounded-full" />
-            <div className="text-sm font-medium">Hoofdcursus</div>
-          </div>
-          <Select
-            name={`courseConfig.kwalificatieprofielen[${kpIndex}].hoofdcursus.courseId`}
-            className="w-full"
-            value={selectedHoofdcursus}
-            onChange={(e) => setSelectedHoofdcursus(e.target.value)}
-          >
-            <option value="">Selecteer hoofdcursus...</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        {/* Aanvullende Cursussen - only show when hoofdcursus is selected */}
-        {selectedHoofdcursus && (
+      {isEnabled && (
+        <div className="p-3 space-y-3">
+          {/* Hoofdcursus Selection */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5">
-              <div className="w-1 h-3 bg-emerald-500 rounded-full" />
-              <div className="text-sm font-medium">
-                Aanvullende cursussen
-                <span className="text-sm font-normal text-zinc-500 ml-1">
-                  (optioneel)
-                </span>
-              </div>
+              <div className="w-1 h-3 bg-blue-500 rounded-full" />
+              <div className="text-sm font-medium">Hoofdcursus</div>
             </div>
+            <Select
+              name={`courseConfig.kwalificatieprofielen[${kpIndex}].hoofdcursus.courseId`}
+              className="w-full"
+              value={selectedHoofdcursus}
+              onChange={(e) => setSelectedHoofdcursus(e.target.value)}
+            >
+              <option value="">Selecteer hoofdcursus...</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </Select>
+          </div>
 
-            {isLoadingInstructiegroep ? (
-              <div className="flex items-center gap-2 p-3 bg-zinc-50/50 rounded">
-                <Spinner className="h-4 w-4 text-zinc-600" />
-                <Text className="text-sm text-zinc-600">
-                  Instructiegroep laden...
-                </Text>
+          {/* Aanvullende Cursussen - only show when hoofdcursus is selected */}
+          {selectedHoofdcursus && (
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1 h-3 bg-emerald-500 rounded-full" />
+                <div className="text-sm font-medium">
+                  Aanvullende cursussen
+                  <span className="text-sm font-normal text-zinc-500 ml-1">
+                    (optioneel)
+                  </span>
+                </div>
               </div>
-            ) : aanvullendeCursussen.length > 0 ? (
-              <>
-                <div className="bg-zinc-50/50 p-2.5 rounded border border-zinc-100">
-                  <Text className="text-sm text-zinc-600 leading-relaxed">
-                    Door aanvullende cursussen aan te vinken worden de
-                    kwalificaties van deze PvB ook meteen toegepast op deze
-                    cursussen (voorheen disciplines) bij succesvol behalen. De
-                    aanvrager is er voor verantwoordelijk enkel cursussen aan te
-                    klikken waarin hij de kandidaat bekwaam acht, en waar de
-                    kandidaat ook voor aan de gestelde ingangseisen voldoet.
+
+              {isLoadingInstructiegroep ? (
+                <div className="flex items-center gap-2 p-3 bg-zinc-50/50 rounded">
+                  <Spinner className="h-4 w-4 text-zinc-600" />
+                  <Text className="text-sm text-zinc-600">
+                    Instructiegroep laden...
                   </Text>
                 </div>
-                <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
-                  {aanvullendeCursussen.map((course, courseIndex) => (
-                    <CheckboxField
-                      key={course.id}
-                      className="py-1 px-2 rounded hover:bg-zinc-50"
-                    >
-                      <Checkbox
-                        name={`courseConfig.kwalificatieprofielen[${kpIndex}].aanvullendeCursussen[${courseIndex}].courseId`}
-                        value={course.id}
-                        className="h-4 w-4 flex-shrink-0"
-                      />
-                      <Label className="text-sm text-zinc-700 truncate cursor-pointer">
-                        {course.title}
-                      </Label>
-                    </CheckboxField>
-                  ))}
-                </CheckboxGroup>
-              </>
-            ) : (
-              <div className="p-3 bg-zinc-50/50 rounded border border-zinc-100">
-                <Text className="text-sm text-zinc-500">
-                  Geen aanvullende cursussen beschikbaar voor deze
-                  instructiegroep.
-                </Text>
-              </div>
-            )}
-          </div>
-        )}
+              ) : aanvullendeCursussen.length > 0 ? (
+                <>
+                  <div className="bg-zinc-50/50 p-2.5 rounded border border-zinc-100">
+                    <Text className="text-sm text-zinc-600 leading-relaxed">
+                      Door aanvullende cursussen aan te vinken worden de
+                      kwalificaties van deze PvB ook meteen toegepast op deze
+                      cursussen (voorheen disciplines) bij succesvol behalen. De
+                      aanvrager is er voor verantwoordelijk enkel cursussen aan
+                      te klikken waarin hij de kandidaat bekwaam acht, en waar
+                      de kandidaat ook voor aan de gestelde ingangseisen
+                      voldoet.
+                    </Text>
+                  </div>
+                  <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
+                    {aanvullendeCursussen.map((course, courseIndex) => (
+                      <CheckboxField
+                        key={course.id}
+                        className="py-1 px-2 rounded hover:bg-zinc-50"
+                      >
+                        <Checkbox
+                          name={`courseConfig.kwalificatieprofielen[${kpIndex}].aanvullendeCursussen[${courseIndex}].courseId`}
+                          value={course.id}
+                          className="h-4 w-4 flex-shrink-0"
+                        />
+                        <Label className="text-sm text-zinc-700 truncate cursor-pointer">
+                          {course.title}
+                        </Label>
+                      </CheckboxField>
+                    ))}
+                  </CheckboxGroup>
+                </>
+              ) : (
+                <div className="p-3 bg-zinc-50/50 rounded border border-zinc-100">
+                  <Text className="text-sm text-zinc-500">
+                    Geen aanvullende cursussen beschikbaar voor deze
+                    instructiegroep.
+                  </Text>
+                </div>
+              )}
+            </div>
+          )}
 
-        {/* Onderdelen */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 h-3 bg-purple-500 rounded-full" />
-            <div className="text-sm font-medium">Onderdelen</div>
+          {/* Onderdelen */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5">
+              <div className="w-1 h-3 bg-purple-500 rounded-full" />
+              <div className="text-sm font-medium">Onderdelen</div>
+            </div>
+            <Text className="text-sm text-zinc-600">
+              Selecteer de onderdelen die getoetst moeten worden.
+            </Text>
+            <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
+              {kp.kerntaken.flatMap((kerntaak) =>
+                kerntaak.onderdelen.map((onderdeel) => (
+                  <CheckboxField
+                    key={onderdeel.id}
+                    className="py-1 px-2 rounded hover:bg-zinc-50"
+                  >
+                    <Checkbox
+                      name="courseConfig.selectedOnderdelen"
+                      value={onderdeel.id}
+                      defaultChecked
+                      className="h-4 w-4 mt-0.5"
+                    />
+                    <Label className="text-sm text-zinc-700 break-words leading-snug cursor-pointer">
+                      {kerntaak.titel} - {onderdeel.type}
+                    </Label>
+                  </CheckboxField>
+                )),
+              )}
+            </CheckboxGroup>
           </div>
-          <Text className="text-sm text-zinc-600">
-            Selecteer de onderdelen die getoetst moeten worden.
-          </Text>
-          <CheckboxGroup className="grid grid-cols-1 md:grid-cols-2 gap-0.5">
-            {kp.kerntaken.flatMap((kerntaak) =>
-              kerntaak.onderdelen.map((onderdeel) => (
-                <CheckboxField
-                  key={onderdeel.id}
-                  className="py-1 px-2 rounded hover:bg-zinc-50"
-                >
-                  <Checkbox
-                    name="courseConfig.selectedOnderdelen"
-                    value={onderdeel.id}
-                    defaultChecked
-                    className="h-4 w-4 mt-0.5"
-                  />
-                  <Label className="text-sm text-zinc-700 break-words leading-snug cursor-pointer">
-                    {kerntaak.titel} - {onderdeel.type}
-                  </Label>
-                </CheckboxField>
-              )),
-            )}
-          </CheckboxGroup>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -536,6 +582,10 @@ export default function CreatePvbForm({
   >([]);
   const [kandidaatSearchQuery, setKandidaatSearchQuery] = useState("");
 
+  // State for tracking enabled kwalificatieprofielen
+  const [enabledKwalificatieprofielen, setEnabledKwalificatieprofielen] =
+    useState<Set<string>>(new Set());
+
   // Global copy states for "copy to all rows" functionality
   const [globalLeercoach, setGlobalLeercoach] = useState<string | undefined>();
   const [globalBeoordelaar, setGlobalBeoordelaar] = useState<
@@ -545,6 +595,28 @@ export default function CreatePvbForm({
   // Fetch kwalificatieprofielen based on selected niveau
   const { kwalificatieprofielen, isLoading: isLoadingKwalificatieprofielen } =
     useKwalificatieprofielenByNiveau(selectedNiveauId || null);
+
+  // Initialize all kwalificatieprofielen as enabled when they load
+  useEffect(() => {
+    if (kwalificatieprofielen.length > 0) {
+      setEnabledKwalificatieprofielen(
+        new Set(kwalificatieprofielen.map((kp) => kp.id)),
+      );
+    }
+  }, [kwalificatieprofielen]);
+
+  // Toggle kwalificatieprofiel enabled state
+  const toggleKwalificatieprofiel = (kpId: string) => {
+    setEnabledKwalificatieprofielen((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(kpId)) {
+        newSet.delete(kpId);
+      } else {
+        newSet.add(kpId);
+      }
+      return newSet;
+    });
+  };
 
   const { data: searchedInstructors } = usePersonsForLocation(locationId, {
     filter: {
@@ -747,21 +819,51 @@ export default function CreatePvbForm({
               </div>
             ) : (
               <>
-                <Text className="text-sm text-zinc-600 mb-4">
-                  Voor elk kwalificatieprofiel moet een hoofdcursus geselecteerd
-                  worden. De hoofdcursus bepaalt waar de PvB plaatsvindt en
-                  welke beoordelaar bevoegd is.
-                </Text>
+                <div className="flex items-center justify-between mb-4">
+                  <Text className="text-sm text-zinc-600">
+                    Voor elk kwalificatieprofiel moet een hoofdcursus
+                    geselecteerd worden. De hoofdcursus bepaalt waar de PvB
+                    plaatsvindt en welke beoordelaar bevoegd is.
+                  </Text>
+                  <div className="text-sm text-zinc-500 font-medium">
+                    {enabledKwalificatieprofielen.size} van{" "}
+                    {kwalificatieprofielen.length} actief
+                  </div>
+                </div>
+
+                {enabledKwalificatieprofielen.size === 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                    <Text className="text-red-700 text-sm font-medium">
+                      Minimaal 1 kwalificatieprofiel moet actief zijn
+                    </Text>
+                  </div>
+                )}
 
                 <div className="space-y-4">
-                  {kwalificatieprofielen.map((kp, kpIndex) => (
-                    <KwalificatieprofielCard
-                      key={kp.id}
-                      kp={kp}
-                      kpIndex={kpIndex}
-                      courses={courses}
-                    />
-                  ))}
+                  {kwalificatieprofielen.map((kp, originalIndex) => {
+                    const isEnabled = enabledKwalificatieprofielen.has(kp.id);
+                    const canDisable = enabledKwalificatieprofielen.size > 1;
+
+                    // Calculate the form index based on enabled kwalificatieprofielen only
+                    const enabledKpsBefore = kwalificatieprofielen
+                      .slice(0, originalIndex)
+                      .filter((otherKp) =>
+                        enabledKwalificatieprofielen.has(otherKp.id),
+                      );
+                    const formIndex = enabledKpsBefore.length;
+
+                    return (
+                      <KwalificatieprofielCard
+                        key={kp.id}
+                        kp={kp}
+                        kpIndex={formIndex}
+                        courses={courses}
+                        isEnabled={isEnabled}
+                        onToggle={() => toggleKwalificatieprofiel(kp.id)}
+                        canDisable={canDisable}
+                      />
+                    );
+                  })}
                 </div>
               </>
             )}
@@ -942,7 +1044,11 @@ export default function CreatePvbForm({
         <Button
           color="branding-dark"
           type="submit"
-          disabled={isLoading || kandidaten.length === 0}
+          disabled={
+            isLoading ||
+            kandidaten.length === 0 ||
+            enabledKwalificatieprofielen.size === 0
+          }
         >
           {isLoading && <Spinner className="text-white" />}
           PvB aanvragen aanmaken ({kandidaten.length})

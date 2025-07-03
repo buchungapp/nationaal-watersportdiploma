@@ -25,6 +25,7 @@ export const logPvbEvent = wrapCommand(
         "onderdeel_toegevoegd",
         "onderdeel_beoordelaar_gewijzigd",
         "onderdeel_uitslag_gewijzigd",
+        "onderdeel_startdatum_gewijzigd",
       ]),
       data: z.record(z.any()).optional(),
       aangemaaktDoor: z.string().uuid(),

@@ -69,6 +69,7 @@ export const pvbGebeurtenisType = kssSchema.enum("pvb_gebeurtenis_type", [
   "onderdeel_toegevoegd",
   "onderdeel_beoordelaar_gewijzigd",
   "onderdeel_uitslag_gewijzigd",
+  "onderdeel_startdatum_gewijzigd",
 ]);
 
 // Leercoach permission status

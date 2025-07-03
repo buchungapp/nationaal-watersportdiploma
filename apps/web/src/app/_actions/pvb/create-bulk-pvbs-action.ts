@@ -67,7 +67,10 @@ const kwalificatieprofielSchema = z.object({
       courseId: z.string().uuid(),
     }),
   ),
-  instructieGroepId: z.string().uuid().nullable(),
+  instructieGroepId: z
+    .string()
+    .transform((val) => (val === "" ? null : val))
+    .pipe(z.string().uuid().nullable()),
 });
 
 // Schema for kandidaat
@@ -134,7 +137,7 @@ export const createBulkPvbsAction = actionClient
       const opmerkingen = baseData.courseConfig.opmerkingen;
       const selectedOnderdelen = baseData.courseConfig.selectedOnderdelen || [];
 
-      // Parse kwalificatieprofielen using helper function
+      // Parse kwalificatieprofielen using helper function - only include enabled ones
       const kwalificatieprofielen = parseDynamicArray(
         formData,
         "courseConfig.kwalificatieprofielen",
@@ -144,19 +147,30 @@ export const createBulkPvbsAction = actionClient
           ) as string | null;
           if (!id) return null;
 
+          // Check if this kwalificatieprofiel is enabled by verifying required fields are present
+          // Disabled kwalificatieprofielen won't have these fields in the form data
+          const titel = formData.get(
+            `courseConfig.kwalificatieprofielen[${index}].titel`,
+          ) as string | null;
+          const richting = formData.get(
+            `courseConfig.kwalificatieprofielen[${index}].richting`,
+          ) as string | null;
+          const instructieGroepId = formData.get(
+            `courseConfig.kwalificatieprofielen[${index}].instructieGroepId`,
+          ) as string | null;
+
+          // If essential fields are missing, this kwalificatieprofiel is disabled
+          if (!titel || !richting) {
+            return null;
+          }
+
           const kp = {
             id,
-            titel: formData.get(
-              `courseConfig.kwalificatieprofielen[${index}].titel`,
-            ) as string,
-            richting: formData.get(
-              `courseConfig.kwalificatieprofielen[${index}].richting`,
-            ) as string,
+            titel,
+            richting,
             hoofdcursus: undefined as { courseId: string } | undefined,
             aanvullendeCursussen: [] as Array<{ courseId: string }>,
-            instructieGroepId: formData.get(
-              `courseConfig.kwalificatieprofielen[${index}].instructieGroepId`,
-            ) as string | null,
+            instructieGroepId,
           };
 
           // Get hoofdcursus
