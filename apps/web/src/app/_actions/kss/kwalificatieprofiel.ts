@@ -2,6 +2,7 @@
 
 import { KSS } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { actionClientWithMeta } from "../safe-action";
 
 // Create kwalificatieprofiel
@@ -146,5 +147,68 @@ export const deleteBeoordelingscriterium = actionClientWithMeta
     const result =
       await KSS.Kwalificatieprofiel.deleteBeoordelingscriterium(parsedInput);
     revalidatePath("/secretariaat/kss/beoordelingscriteria");
+    return result;
+  });
+
+// Bulk create beoordelingscriteria
+export const bulkCreateBeoordelingscriteria = actionClientWithMeta
+  .metadata({ name: "kss.beoordelingscriterium.bulkCreate" })
+  .schema(
+    z.object({
+      werkprocesId: z.string().uuid(),
+      criteria: z
+        .array(
+          z.object({
+            title: z.string().min(1, "Titel is verplicht"),
+            omschrijving: z.string().min(1, "Omschrijving is verplicht"),
+            rang: z.number().int().positive(),
+          }),
+        )
+        .min(1, "Minimaal één criterium is verplicht"),
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const results = [];
+
+    // Create each criterium using the existing single create function
+    for (const criterium of parsedInput.criteria) {
+      const result = await KSS.Kwalificatieprofiel.createBeoordelingscriterium({
+        werkprocesId: parsedInput.werkprocesId,
+        ...criterium,
+      });
+      results.push(result);
+    }
+
+    revalidatePath("/secretariaat/kss/kerntaken");
+    return { success: true, count: results.length };
+  });
+
+// Assign werkprocessen to onderdeel
+export const assignWerkprocessenToOnderdeel = actionClientWithMeta
+  .metadata({ name: "kss.werkproces.assignToOnderdeel" })
+  .schema(
+    z.object({
+      kerntaakOnderdeelId: z.string().uuid(),
+      werkprocesIds: z.array(z.string().uuid()),
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const result =
+      await KSS.Kwalificatieprofiel.assignWerkprocesToOnderdeel(parsedInput);
+    revalidatePath("/secretariaat/kss/kerntaken");
+    return result;
+  });
+
+// List werkprocessen by onderdeel
+export const listWerkprocessenByOnderdeel = actionClientWithMeta
+  .metadata({ name: "kss.werkproces.listByOnderdeel" })
+  .schema(
+    z.object({
+      kerntaakOnderdeelId: z.string().uuid(),
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const result =
+      await KSS.Kwalificatieprofiel.listWerkprocessenByOnderdeel(parsedInput);
     return result;
   });

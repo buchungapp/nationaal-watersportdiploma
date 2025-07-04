@@ -150,43 +150,6 @@ export async function AanvraagCard(props: {
         </ul>
       </div>
 
-      <Divider />
-
-      <div>
-        <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">
-          Onderdelen
-        </h4>
-        <ul className="space-y-2">
-          {aanvraag.onderdelen.map((onderdeel) => (
-            <li key={onderdeel.id} className="text-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-900 dark:text-gray-100">
-                  {onderdeel.kerntaakOnderdeelId}
-                </span>
-                {onderdeel.uitslag && (
-                  <Badge
-                    color={onderdeel.uitslag === "behaald" ? "green" : "red"}
-                  >
-                    {onderdeel.uitslag === "behaald"
-                      ? "Behaald"
-                      : "Niet behaald"}
-                  </Badge>
-                )}
-              </div>
-              {onderdeel.beoordelaar && (
-                <Text>Beoordelaar: {formatName(onderdeel.beoordelaar)}</Text>
-              )}
-              {onderdeel.startDatumTijd && (
-                <Text>
-                  Start:{" "}
-                  {dayjs(onderdeel.startDatumTijd).format("DD-MM-YYYY HH:mm")}
-                </Text>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
-
       {aanvraag.status === "wacht_op_voorwaarden" && (
         <>
           <Divider />

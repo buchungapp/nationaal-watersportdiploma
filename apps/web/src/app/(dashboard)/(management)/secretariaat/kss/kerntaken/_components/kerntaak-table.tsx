@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
+import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Popover,
   PopoverButton,
@@ -99,6 +100,18 @@ const columns = [
         </div>
       );
     },
+  }),
+  columnHelper.display({
+    id: "actions",
+    header: "Acties",
+    cell: ({ row }) => (
+      <Button
+        href={`/secretariaat/kss/kerntaken/${row.original.id}`}
+        className="!px-2 !py-1 text-xs"
+      >
+        Beheren
+      </Button>
+    ),
   }),
 ];
 

@@ -85,17 +85,6 @@ export function SecretariaatSidebarMenu() {
             current: segments.slice(0, 2).join("/") === "kss/kerntaken",
           },
           {
-            name: "Werkprocessen",
-            href: "/secretariaat/kss/werkprocessen",
-            current: segments.slice(0, 2).join("/") === "kss/werkprocessen",
-          },
-          {
-            name: "Beoordelingscriteria",
-            href: "/secretariaat/kss/beoordelingscriteria",
-            current:
-              segments.slice(0, 2).join("/") === "kss/beoordelingscriteria",
-          },
-          {
             name: "Instructiegroepen",
             href: "/secretariaat/kss/instructiegroepen",
             current: segments.slice(0, 2).join("/") === "kss/instructiegroepen",

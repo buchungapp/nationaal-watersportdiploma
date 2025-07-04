@@ -168,6 +168,7 @@ export const deleteWerkprocesOutputSchema = z.object({
 // Beoordelingscriterium schemas
 export const createBeoordelingscriteriumSchema = z.object({
   werkprocesId: uuidSchema,
+  title: z.string().min(1, "Titel is verplicht"),
   omschrijving: z.string().min(1, "Omschrijving is verplicht"),
   rang: z.number().int().nullable().optional(),
 });
@@ -178,6 +179,7 @@ export const createBeoordelingscriteriumOutputSchema = z.object({
 
 export const updateBeoordelingscriteriumSchema = z.object({
   id: uuidSchema,
+  title: z.string().min(1, "Titel is verplicht").optional(),
   omschrijving: z.string().min(1, "Omschrijving is verplicht").optional(),
   rang: z.number().int().nullable().optional(),
 });

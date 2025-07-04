@@ -1,5 +1,5 @@
 {
-  "id": "49fec42f-ecca-4d1b-8990-abaea1a4726f",
+  "id": "d62f2cb0-66cd-4a2e-bace-ee24b4f40bb2",
   "prevId": "7f7e35f6-6ba3-45c2-81ae-fe062cb4240e",
   "version": "7",
   "dialect": "postgresql",
@@ -4317,6 +4317,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "omschrijving": {
           "name": "omschrijving",
           "type": "text",
@@ -4630,6 +4636,86 @@
           "columns": [
             "id",
             "kerntaak_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "kss.werkproces_kerntaak_onderdeel": {
+      "name": "werkproces_kerntaak_onderdeel",
+      "schema": "kss",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "extensions.uuid_generate_v4()"
+        },
+        "werkproces_id": {
+          "name": "werkproces_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kerntaak_onderdeel_id": {
+          "name": "kerntaak_onderdeel_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kerntaak_id": {
+          "name": "kerntaak_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "werkproces_kerntaak_onderdeel_werkproces_id_kerntaak_id_werkproces_id_kerntaak_id_fk": {
+          "name": "werkproces_kerntaak_onderdeel_werkproces_id_kerntaak_id_werkproces_id_kerntaak_id_fk",
+          "tableFrom": "werkproces_kerntaak_onderdeel",
+          "tableTo": "werkproces",
+          "schemaTo": "kss",
+          "columnsFrom": [
+            "werkproces_id",
+            "kerntaak_id"
+          ],
+          "columnsTo": [
+            "id",
+            "kerntaak_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "werkproces_kerntaak_onderdeel_kerntaak_onderdeel_id_kerntaak_id_kerntaak_onderdeel_id_kerntaak_id_fk": {
+          "name": "werkproces_kerntaak_onderdeel_kerntaak_onderdeel_id_kerntaak_id_kerntaak_onderdeel_id_kerntaak_id_fk",
+          "tableFrom": "werkproces_kerntaak_onderdeel",
+          "tableTo": "kerntaak_onderdeel",
+          "schemaTo": "kss",
+          "columnsFrom": [
+            "kerntaak_onderdeel_id",
+            "kerntaak_id"
+          ],
+          "columnsTo": [
+            "id",
+            "kerntaak_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "werkproces_kerntaak_onderdeel_werkproces_id_kerntaak_onderdeel_id_unique": {
+          "name": "werkproces_kerntaak_onderdeel_werkproces_id_kerntaak_onderdeel_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "werkproces_id",
+            "kerntaak_onderdeel_id"
           ]
         }
       },

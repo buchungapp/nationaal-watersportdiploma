@@ -10,5 +10,10 @@ export async function ToetsdocumentenCard({
   const aanvraag = await retrievePvbAanvraagByHandle(resolvedParams.handle);
   const toetsdocumenten = await getPvbToetsdocumenten(aanvraag.id);
 
-  return <ToetsdocumentenDisplay toetsdocumenten={toetsdocumenten} />;
+  return (
+    <ToetsdocumentenDisplay
+      toetsdocumenten={toetsdocumenten}
+      aanvraag={aanvraag}
+    />
+  );
 }

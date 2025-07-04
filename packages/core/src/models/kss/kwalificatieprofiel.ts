@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { type SQLWrapper, and, eq } from "drizzle-orm";
+import { type SQLWrapper, and, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
@@ -260,6 +260,113 @@ export const byId = wrapQuery(
         .then((res) => possibleSingleRow(res) ?? null);
 
       return row;
+    },
+  ),
+);
+
+export const getKerntaakById = wrapQuery(
+  "kss.kerntaak.byId",
+  withZod(
+    z.object({
+      kerntaakId: uuidSchema,
+    }),
+    z
+      .object({
+        id: uuidSchema,
+        titel: z.string(),
+        type: z.enum(s.kerntaak.type.enumValues),
+        rang: z.number().nullable(),
+        kwalificatieprofielId: uuidSchema,
+      })
+      .nullable(),
+    async ({ kerntaakId }) => {
+      const query = useQuery();
+
+      const row = await query
+        .select({
+          id: s.kerntaak.id,
+          titel: s.kerntaak.titel,
+          type: s.kerntaak.type,
+          rang: s.kerntaak.rang,
+          kwalificatieprofielId: s.kerntaak.kwalificatieprofielId,
+        })
+        .from(s.kerntaak)
+        .where(eq(s.kerntaak.id, kerntaakId))
+        .then((res) => possibleSingleRow(res) ?? null);
+
+      return row;
+    },
+  ),
+);
+
+export const listWerkprocessen = wrapQuery(
+  "kss.werkproces.list",
+  withZod(
+    z.object({
+      kerntaakId: uuidSchema,
+    }),
+    z.array(
+      z.object({
+        id: uuidSchema,
+        titel: z.string(),
+        resultaat: z.string(),
+        rang: z.number(),
+        kerntaakId: uuidSchema,
+      }),
+    ),
+    async ({ kerntaakId }) => {
+      const query = useQuery();
+
+      const rows = await query
+        .select({
+          id: s.werkproces.id,
+          titel: s.werkproces.titel,
+          resultaat: s.werkproces.resultaat,
+          rang: s.werkproces.rang,
+          kerntaakId: s.werkproces.kerntaakId,
+        })
+        .from(s.werkproces)
+        .where(eq(s.werkproces.kerntaakId, kerntaakId))
+        .orderBy(s.werkproces.rang);
+
+      return rows;
+    },
+  ),
+);
+
+export const listBeoordelingscriteria = wrapQuery(
+  "kss.beoordelingscriterium.list",
+  withZod(
+    z.object({
+      werkprocesId: uuidSchema,
+    }),
+    z.array(
+      z.object({
+        id: uuidSchema,
+        title: z.string(),
+        omschrijving: z.string(),
+        rang: z.number(),
+        werkprocesId: uuidSchema,
+        kerntaakId: uuidSchema,
+      }),
+    ),
+    async ({ werkprocesId }) => {
+      const query = useQuery();
+
+      const rows = await query
+        .select({
+          id: s.beoordelingscriterium.id,
+          title: s.beoordelingscriterium.title,
+          omschrijving: s.beoordelingscriterium.omschrijving,
+          rang: s.beoordelingscriterium.rang,
+          werkprocesId: s.beoordelingscriterium.werkprocesId,
+          kerntaakId: s.beoordelingscriterium.kerntaakId,
+        })
+        .from(s.beoordelingscriterium)
+        .where(eq(s.beoordelingscriterium.werkprocesId, werkprocesId))
+        .orderBy(s.beoordelingscriterium.rang);
+
+      return rows;
     },
   ),
 );
@@ -686,6 +793,7 @@ export const createBeoordelingscriterium = wrapCommand(
           .values({
             werkprocesId: input.werkprocesId,
             kerntaakId: werkproces.kerntaakId,
+            title: input.title,
             omschrijving: input.omschrijving,
             rang: input.rang ?? 1, // Default to 1 if not provided, since it's required
           })
@@ -716,10 +824,12 @@ export const updateBeoordelingscriterium = wrapCommand(
 
         // Update beoordelingscriterium
         const updateData: Partial<{
+          title: string;
           omschrijving: string;
           rang: number;
         }> = {};
 
+        if (input.title !== undefined) updateData.title = input.title;
         if (input.omschrijving !== undefined)
           updateData.omschrijving = input.omschrijving;
         if (input.rang !== undefined && input.rang !== null)
@@ -750,6 +860,160 @@ export const deleteBeoordelingscriterium = wrapCommand(
 
         return { success: true };
       });
+    },
+  ),
+);
+
+// Werkproces-Onderdeel relationship handlers
+
+export const assignWerkprocesToOnderdeel = wrapCommand(
+  "kss.werkproces.assignToOnderdeel",
+  withZod(
+    z.object({
+      kerntaakOnderdeelId: uuidSchema,
+      werkprocesIds: z.array(uuidSchema),
+    }),
+    z.object({ success: z.boolean() }),
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate kerntaakOnderdeel exists and get kerntaakId
+        const onderdeelResult = await tx
+          .select({
+            id: s.kerntaakOnderdeel.id,
+            kerntaakId: s.kerntaakOnderdeel.kerntaakId,
+          })
+          .from(s.kerntaakOnderdeel)
+          .where(eq(s.kerntaakOnderdeel.id, input.kerntaakOnderdeelId));
+
+        if (onderdeelResult.length === 0) {
+          throw new Error("Opgegeven kerntaak onderdeel bestaat niet");
+        }
+
+        const onderdeel = singleRow(onderdeelResult);
+
+        // Validate all werkprocessen exist and belong to the same kerntaak
+        if (input.werkprocesIds.length > 0) {
+          const werkprocessenResult = await tx
+            .select({
+              id: s.werkproces.id,
+              kerntaakId: s.werkproces.kerntaakId,
+            })
+            .from(s.werkproces)
+            .where(
+              and(
+                inArray(s.werkproces.id, input.werkprocesIds),
+                eq(s.werkproces.kerntaakId, onderdeel.kerntaakId),
+              ),
+            );
+
+          if (werkprocessenResult.length !== input.werkprocesIds.length) {
+            throw new Error(
+              "Een of meer werkprocessen bestaan niet of behoren niet tot dezelfde kerntaak als het onderdeel",
+            );
+          }
+        }
+
+        // Remove existing assignments for this onderdeel
+        await tx
+          .delete(s.werkprocesKerntaakOnderdeel)
+          .where(
+            eq(
+              s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
+              input.kerntaakOnderdeelId,
+            ),
+          );
+
+        // Insert new assignments
+        if (input.werkprocesIds.length > 0) {
+          await tx.insert(s.werkprocesKerntaakOnderdeel).values(
+            input.werkprocesIds.map((werkprocesId) => ({
+              werkprocesId,
+              kerntaakOnderdeelId: input.kerntaakOnderdeelId,
+              kerntaakId: onderdeel.kerntaakId,
+            })),
+          );
+        }
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+export const removeWerkprocesFromOnderdeel = wrapCommand(
+  "kss.werkproces.removeFromOnderdeel",
+  withZod(
+    z.object({
+      kerntaakOnderdeelId: uuidSchema,
+      werkprocesId: uuidSchema,
+    }),
+    z.object({ success: z.boolean() }),
+    async (input) => {
+      const query = useQuery();
+
+      await query
+        .delete(s.werkprocesKerntaakOnderdeel)
+        .where(
+          and(
+            eq(
+              s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
+              input.kerntaakOnderdeelId,
+            ),
+            eq(s.werkprocesKerntaakOnderdeel.werkprocesId, input.werkprocesId),
+          ),
+        );
+
+      return { success: true };
+    },
+  ),
+);
+
+export const listWerkprocessenByOnderdeel = wrapQuery(
+  "kss.werkproces.listByOnderdeel",
+  withZod(
+    z.object({
+      kerntaakOnderdeelId: uuidSchema,
+    }),
+    z.array(
+      z.object({
+        id: uuidSchema,
+        titel: z.string(),
+        resultaat: z.string(),
+        rang: z.number(),
+        kerntaakId: uuidSchema,
+      }),
+    ),
+    async ({ kerntaakOnderdeelId }) => {
+      const query = useQuery();
+
+      const rows = await query
+        .select({
+          id: s.werkproces.id,
+          titel: s.werkproces.titel,
+          resultaat: s.werkproces.resultaat,
+          rang: s.werkproces.rang,
+          kerntaakId: s.werkproces.kerntaakId,
+        })
+        .from(s.werkproces)
+        .innerJoin(
+          s.werkprocesKerntaakOnderdeel,
+          and(
+            eq(s.werkprocesKerntaakOnderdeel.werkprocesId, s.werkproces.id),
+            eq(
+              s.werkprocesKerntaakOnderdeel.kerntaakId,
+              s.werkproces.kerntaakId,
+            ),
+          ),
+        )
+        .where(
+          eq(
+            s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
+            kerntaakOnderdeelId,
+          ),
+        )
+        .orderBy(s.werkproces.rang);
+
+      return rows;
     },
   ),
 );

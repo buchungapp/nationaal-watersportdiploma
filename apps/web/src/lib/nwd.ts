@@ -3656,3 +3656,76 @@ export const grantPvbLeercoachPermission = async ({
     });
   });
 };
+
+export const getKssKerntaakDetails = cache(async (kerntaakId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    // Get the kerntaak
+    const kerntaak = await KSS.Kwalificatieprofiel.getKerntaakById({
+      kerntaakId,
+    });
+
+    if (!kerntaak) {
+      return null;
+    }
+
+    // Get the kwalificatieprofiel details
+    const kwalificatieprofiel = await KSS.Kwalificatieprofiel.byId({
+      id: kerntaak.kwalificatieprofielId,
+    });
+
+    if (!kwalificatieprofiel) {
+      return null;
+    }
+
+    // Get onderdelen
+    const niveaus = await KSS.Kwalificatieprofiel.listNiveaus();
+    let onderdelen: Array<{ id: string; type: "portfolio" | "praktijk" }> = [];
+
+    for (const niveau of niveaus) {
+      const profielen = await KSS.Kwalificatieprofiel.listWithOnderdelen({
+        niveauId: niveau.id,
+      });
+
+      for (const profiel of profielen) {
+        const foundKerntaak = profiel.kerntaken.find(
+          (k) => k.id === kerntaakId,
+        );
+        if (foundKerntaak) {
+          onderdelen = foundKerntaak.onderdelen;
+          break;
+        }
+      }
+      if (onderdelen.length > 0) break;
+    }
+
+    // Get werkprocessen for this kerntaak
+    const werkprocessen = await KSS.Kwalificatieprofiel.listWerkprocessen({
+      kerntaakId,
+    });
+
+    // Get beoordelingscriteria for each werkproces
+    const werkprocessenWithCriteria = await Promise.all(
+      werkprocessen.map(async (werkproces) => {
+        const criteria = await KSS.Kwalificatieprofiel.listBeoordelingscriteria(
+          {
+            werkprocesId: werkproces.id,
+          },
+        );
+        return { ...werkproces, beoordelingscriteria: criteria };
+      }),
+    );
+
+    return {
+      id: kerntaak.id,
+      titel: kerntaak.titel,
+      type: kerntaak.type,
+      rang: kerntaak.rang,
+      onderdelen,
+      kwalificatieprofiel,
+      werkprocessen: werkprocessenWithCriteria,
+    };
+  });
+});

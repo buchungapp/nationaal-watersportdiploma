@@ -114,6 +114,31 @@ export const werkproces = kssSchema.table(
   ],
 );
 
+// Junction table: Specifies which werkprocessen are required for each kerntaakOnderdeel
+export const werkprocesKerntaakOnderdeel = kssSchema.table(
+  "werkproces_kerntaak_onderdeel",
+  {
+    id: uuid("id")
+      .default(sql`extensions.uuid_generate_v4()`)
+      .primaryKey()
+      .notNull(),
+    werkprocesId: uuid("werkproces_id").notNull(),
+    kerntaakOnderdeelId: uuid("kerntaak_onderdeel_id").notNull(),
+    kerntaakId: uuid("kerntaak_id").notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.werkprocesId, table.kerntaakId],
+      foreignColumns: [werkproces.id, werkproces.kerntaakId],
+    }),
+    foreignKey({
+      columns: [table.kerntaakOnderdeelId, table.kerntaakId],
+      foreignColumns: [kerntaakOnderdeel.id, kerntaakOnderdeel.kerntaakId],
+    }),
+    unique().on(table.werkprocesId, table.kerntaakOnderdeelId),
+  ],
+);
+
 // Stelt zich stimulerend, positief en open op tegenover individu en groep. Houdt goed contact met alle cursisten.
 export const beoordelingscriterium = kssSchema.table(
   "beoordelingscriterium",
@@ -125,6 +150,7 @@ export const beoordelingscriterium = kssSchema.table(
     werkprocesId: uuid("werkproces_id").notNull(),
     kerntaakId: uuid("kerntaak_id").notNull(),
     rang: integer("rang").notNull(),
+    title: text("title").notNull(),
     omschrijving: text("omschrijving").notNull(),
   },
   (table) => [

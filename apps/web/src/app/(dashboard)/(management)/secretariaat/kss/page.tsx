@@ -1,7 +1,5 @@
 import {
   AcademicCapIcon,
-  BriefcaseIcon,
-  CheckBadgeIcon,
   DocumentTextIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
@@ -19,21 +17,9 @@ const kssManagementSections = [
   },
   {
     title: "Kerntaken",
-    description: "Beheer kerntaken binnen kwalificatieprofielen",
+    description: "Beheer kerntaken, werkprocessen en beoordelingscriteria",
     href: "/secretariaat/kss/kerntaken",
     icon: DocumentTextIcon,
-  },
-  {
-    title: "Werkprocessen",
-    description: "Beheer werkprocessen binnen kerntaken",
-    href: "/secretariaat/kss/werkprocessen",
-    icon: BriefcaseIcon,
-  },
-  {
-    title: "Beoordelingscriteria",
-    description: "Beheer beoordelingscriteria voor werkprocessen",
-    href: "/secretariaat/kss/beoordelingscriteria",
-    icon: CheckBadgeIcon,
   },
   {
     title: "Instructiegroepen",
@@ -45,32 +31,44 @@ const kssManagementSections = [
 
 export default function Page() {
   return (
-    <>
-      <Heading>KSS Beheer</Heading>
-      <Text>
-        Beheer de Kwalificatie Structuur Sport (KSS) onderdelen voor
-        toetsdocumenten en PVB aanvragen.
-      </Text>
+    <div className="mx-auto max-w-7xl">
+      <div className="mb-8">
+        <Heading level={1}>KSS Beheer</Heading>
+        <Text className="mt-2">
+          Beheer de Kwalificatie Structuur Sport (KSS) voor instructeurs,
+          leercoaches en PVB beoordelaars.
+        </Text>
+      </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {kssManagementSections.map((section) => (
           <Link
             key={section.href}
             href={section.href}
-            className="group relative rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors"
+            className="group relative rounded-lg border border-gray-200 p-6 hover:border-gray-300 hover:shadow-sm transition-all"
           >
-            <div className="flex items-start gap-x-3">
-              <section.icon className="h-6 w-6 text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                  {section.title}
-                </h3>
-                <Text className="text-sm">{section.description}</Text>
-              </div>
+            <div>
+              <span className="inline-flex rounded-lg p-3 bg-branding-light/10 text-branding-dark group-hover:bg-branding-light/20 transition-colors">
+                <section.icon className="h-6 w-6" aria-hidden="true" />
+              </span>
             </div>
+            <div className="mt-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {section.title}
+              </h3>
+              <Text className="mt-2 text-sm">{section.description}</Text>
+            </div>
+            <span
+              className="pointer-events-none absolute right-6 top-6 text-gray-300 group-hover:text-gray-400"
+              aria-hidden="true"
+            >
+              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z" />
+              </svg>
+            </span>
           </Link>
         ))}
       </div>
-    </>
+    </div>
   );
 }

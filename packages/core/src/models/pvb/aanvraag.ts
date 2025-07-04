@@ -2231,19 +2231,19 @@ export const getToetsdocumenten = wrapCommand(
                 "niet_behaald",
                 "nog_niet_bekend",
               ]),
-            }),
-          ),
-          werkprocessen: z.array(
-            z.object({
-              id: z.string().uuid(),
-              titel: z.string(),
-              resultaat: z.string(),
-              rang: z.number(),
-              beoordelingscriteria: z.array(
+              werkprocessen: z.array(
                 z.object({
                   id: z.string().uuid(),
-                  omschrijving: z.string().nullable(),
-                  rang: z.number().nullable(),
+                  titel: z.string(),
+                  resultaat: z.string(),
+                  rang: z.number(),
+                  beoordelingscriteria: z.array(
+                    z.object({
+                      id: z.string().uuid(),
+                      omschrijving: z.string().nullable(),
+                      rang: z.number().nullable(),
+                    }),
+                  ),
                 }),
               ),
             }),
@@ -2317,10 +2317,12 @@ export const getToetsdocumenten = wrapCommand(
         )
         .orderBy(s.kerntaak.rang, s.kerntaak.titel);
 
-      // Get werkprocessen and beoordelingscriteria
-      const werkprocessen = await query
+      // Get werkprocessen per onderdeel with beoordelingscriteria
+      const werkprocessenPerOnderdeel = await query
         .select({
-          kerntaakId: s.werkproces.kerntaakId,
+          kerntaakOnderdeelId:
+            s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
+          kerntaakId: s.werkprocesKerntaakOnderdeel.kerntaakId,
           werkprocesId: s.werkproces.id,
           werkprocesTitel: s.werkproces.titel,
           werkprocesResultaat: s.werkproces.resultaat,
@@ -2329,7 +2331,17 @@ export const getToetsdocumenten = wrapCommand(
           criteriumOmschrijving: s.beoordelingscriterium.omschrijving,
           criteriumRang: s.beoordelingscriterium.rang,
         })
-        .from(s.werkproces)
+        .from(s.werkprocesKerntaakOnderdeel)
+        .innerJoin(
+          s.werkproces,
+          and(
+            eq(s.werkprocesKerntaakOnderdeel.werkprocesId, s.werkproces.id),
+            eq(
+              s.werkprocesKerntaakOnderdeel.kerntaakId,
+              s.werkproces.kerntaakId,
+            ),
+          ),
+        )
         .innerJoin(s.kerntaak, eq(s.werkproces.kerntaakId, s.kerntaak.id))
         .leftJoin(
           s.beoordelingscriterium,
@@ -2344,7 +2356,7 @@ export const getToetsdocumenten = wrapCommand(
           s.beoordelingscriterium.rang,
         );
 
-      // Group data by kerntaak
+      // Group data by kerntaak and onderdeel
       const kerntaakMap = new Map<
         string,
         {
@@ -2352,24 +2364,27 @@ export const getToetsdocumenten = wrapCommand(
           titel: string;
           type: "verplicht" | "facultatief";
           rang: number | null;
-          onderdelen: Array<{
-            id: string;
-            type: "portfolio" | "praktijk";
-            pvbOnderdeelId: string | null;
-            behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
-          }>;
-          werkprocessen: Map<
+          onderdelen: Map<
             string,
             {
               id: string;
-              titel: string;
-              resultaat: string;
-              rang: number;
-              beoordelingscriteria: Array<{
-                id: string;
-                omschrijving: string | null;
-                rang: number | null;
-              }>;
+              type: "portfolio" | "praktijk";
+              pvbOnderdeelId: string | null;
+              behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
+              werkprocessen: Map<
+                string,
+                {
+                  id: string;
+                  titel: string;
+                  resultaat: string;
+                  rang: number;
+                  beoordelingscriteria: Array<{
+                    id: string;
+                    omschrijving: string | null;
+                    rang: number | null;
+                  }>;
+                }
+              >;
             }
           >;
         }
@@ -2383,44 +2398,51 @@ export const getToetsdocumenten = wrapCommand(
             titel: row.kerntaakTitel,
             type: row.kerntaakType,
             rang: row.kerntaakRang,
-            onderdelen: [],
+            onderdelen: new Map(),
+          });
+        }
+
+        const kerntaak = kerntaakMap.get(row.kerntaakId);
+        if (!kerntaak) continue;
+
+        if (!kerntaak.onderdelen.has(row.onderdeelId)) {
+          kerntaak.onderdelen.set(row.onderdeelId, {
+            id: row.onderdeelId,
+            type: row.onderdeelType,
+            pvbOnderdeelId: row.pvbOnderdeelId,
+            behaaldStatus: row.pvbOnderdeelUitslag || "nog_niet_bekend",
             werkprocessen: new Map(),
           });
         }
-
-        const kerntaak = kerntaakMap.get(row.kerntaakId);
-        if (!kerntaak) continue;
-        kerntaak.onderdelen.push({
-          id: row.onderdeelId,
-          type: row.onderdeelType,
-          pvbOnderdeelId: row.pvbOnderdeelId,
-          behaaldStatus: row.pvbOnderdeelUitslag || "nog_niet_bekend",
-        });
       }
 
-      // Process werkprocessen and criteria
-      for (const row of werkprocessen) {
-        const kerntaak = kerntaakMap.get(row.kerntaakId);
-        if (!kerntaak) continue;
+      // Process werkprocessen per onderdeel and criteria
+      for (const row of werkprocessenPerOnderdeel) {
+        // Find the kerntaak that contains this onderdeel
+        for (const [, kerntaak] of kerntaakMap) {
+          const onderdeel = kerntaak.onderdelen.get(row.kerntaakOnderdeelId);
+          if (!onderdeel) continue;
 
-        if (!kerntaak.werkprocessen.has(row.werkprocesId)) {
-          kerntaak.werkprocessen.set(row.werkprocesId, {
-            id: row.werkprocesId,
-            titel: row.werkprocesTitel,
-            resultaat: row.werkprocesResultaat,
-            rang: row.werkprocesRang,
-            beoordelingscriteria: [],
-          });
-        }
+          if (!onderdeel.werkprocessen.has(row.werkprocesId)) {
+            onderdeel.werkprocessen.set(row.werkprocesId, {
+              id: row.werkprocesId,
+              titel: row.werkprocesTitel,
+              resultaat: row.werkprocesResultaat,
+              rang: row.werkprocesRang,
+              beoordelingscriteria: [],
+            });
+          }
 
-        const werkproces = kerntaak.werkprocessen.get(row.werkprocesId);
-        if (!werkproces) continue;
-        if (row.criteriumId) {
-          werkproces.beoordelingscriteria.push({
-            id: row.criteriumId,
-            omschrijving: row.criteriumOmschrijving,
-            rang: row.criteriumRang,
-          });
+          const werkproces = onderdeel.werkprocessen.get(row.werkprocesId);
+          if (!werkproces) continue;
+
+          if (row.criteriumId) {
+            werkproces.beoordelingscriteria.push({
+              id: row.criteriumId,
+              omschrijving: row.criteriumOmschrijving,
+              rang: row.criteriumRang,
+            });
+          }
         }
       }
 
@@ -2428,8 +2450,13 @@ export const getToetsdocumenten = wrapCommand(
       const kerntakenArray = Array.from(kerntaakMap.values()).map(
         (kerntaak) => ({
           ...kerntaak,
-          werkprocessen: Array.from(kerntaak.werkprocessen.values()).sort(
-            (a, b) => a.rang - b.rang,
+          onderdelen: Array.from(kerntaak.onderdelen.values()).map(
+            (onderdeel) => ({
+              ...onderdeel,
+              werkprocessen: Array.from(onderdeel.werkprocessen.values()).sort(
+                (a, b) => a.rang - b.rang,
+              ),
+            }),
           ),
         }),
       );
