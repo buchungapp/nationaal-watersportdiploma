@@ -1,18 +1,48 @@
 import { schema as s } from "@nawadi/db";
 import { type SQLWrapper, and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   possibleSingleRow,
+  singleRow,
   uuidSchema,
   withZod,
+  wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
 import {
+  createBeoordelingscriteriumOutputSchema,
+  createBeoordelingscriteriumSchema,
+  createKerntaakOnderdeelOutputSchema,
+  createKerntaakOnderdeelSchema,
+  createKerntaakOutputSchema,
+  createKerntaakSchema,
+  createKwalificatieprofielOutputSchema,
+  createKwalificatieprofielSchema,
+  createWerkprocesOutputSchema,
+  createWerkprocesSchema,
+  deleteBeoordelingscriteriumOutputSchema,
+  deleteBeoordelingscriteriumSchema,
+  deleteKerntaakOnderdeelOutputSchema,
+  deleteKerntaakOnderdeelSchema,
+  deleteKerntaakOutputSchema,
+  deleteKerntaakSchema,
+  deleteKwalificatieprofielOutputSchema,
+  deleteKwalificatieprofielSchema,
+  deleteWerkprocesOutputSchema,
+  deleteWerkprocesSchema,
   kwalificatieprofielOutputSchema,
   kwalificatieprofielWithOnderdelenOutputSchema,
   listKwalificatieprofielenSchema,
   niveauOutputSchema,
+  updateBeoordelingscriteriumOutputSchema,
+  updateBeoordelingscriteriumSchema,
+  updateKerntaakOutputSchema,
+  updateKerntaakSchema,
+  updateKwalificatieprofielOutputSchema,
+  updateKwalificatieprofielSchema,
+  updateWerkprocesOutputSchema,
+  updateWerkprocesSchema,
 } from "./kwalificatieprofiel.schema.js";
 
 export const listNiveaus = wrapQuery(
@@ -85,7 +115,7 @@ export const listWithOnderdelen = wrapQuery(
           eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id),
         )
         .where(and(...whereClausules))
-        .orderBy(s.kwalificatieprofiel.titel, s.kerntaak.rang);
+        .orderBy(s.kerntaak.rang);
 
       // Group the results by kwalificatieprofiel
       type GroupedResult = z.infer<
@@ -140,7 +170,19 @@ export const listWithOnderdelen = wrapQuery(
         {} as Record<string, GroupedResult>,
       );
 
-      return Object.values(groupedResults);
+      // Sort kwalificatieprofielen by niveau rang, and kerntaken within each by their rang
+      return Object.values(groupedResults)
+        .map((profile) => ({
+          ...profile,
+          kerntaken: profile.kerntaken.sort((a, b) => {
+            // Sort by rang first (nulls last)
+            if (a.rang === null && b.rang === null) return 0;
+            if (a.rang === null) return 1;
+            if (b.rang === null) return -1;
+            return a.rang - b.rang;
+          }),
+        }))
+        .sort((a, b) => a.niveau.rang - b.niveau.rang);
     },
   ),
 );
@@ -218,6 +260,496 @@ export const byId = wrapQuery(
         .then((res) => possibleSingleRow(res) ?? null);
 
       return row;
+    },
+  ),
+);
+
+// Mutation handlers
+
+export const create = wrapCommand(
+  "kss.kwalificatieprofiel.create",
+  withZod(
+    createKwalificatieprofielSchema,
+    createKwalificatieprofielOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate niveau exists
+        const niveauResult = await tx
+          .select({ id: s.niveau.id })
+          .from(s.niveau)
+          .where(eq(s.niveau.id, input.niveauId));
+
+        if (niveauResult.length === 0) {
+          throw new Error("Opgegeven niveau bestaat niet");
+        }
+
+        // Create kwalificatieprofiel
+        const result = await tx
+          .insert(s.kwalificatieprofiel)
+          .values({
+            titel: input.titel,
+            richting: input.richting,
+            niveauId: input.niveauId,
+          })
+          .returning({ id: s.kwalificatieprofiel.id });
+
+        return singleRow(result);
+      });
+    },
+  ),
+);
+
+export const update = wrapCommand(
+  "kss.kwalificatieprofiel.update",
+  withZod(
+    updateKwalificatieprofielSchema,
+    updateKwalificatieprofielOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate kwalificatieprofiel exists
+        const existing = await tx
+          .select({ id: s.kwalificatieprofiel.id })
+          .from(s.kwalificatieprofiel)
+          .where(eq(s.kwalificatieprofiel.id, input.id));
+
+        if (existing.length === 0) {
+          throw new Error("Kwalificatieprofiel niet gevonden");
+        }
+
+        // If updating niveau, validate it exists
+        if (input.niveauId) {
+          const niveauResult = await tx
+            .select({ id: s.niveau.id })
+            .from(s.niveau)
+            .where(eq(s.niveau.id, input.niveauId));
+
+          if (niveauResult.length === 0) {
+            throw new Error("Opgegeven niveau bestaat niet");
+          }
+        }
+
+        // Update kwalificatieprofiel
+        const updateData: Partial<{
+          titel: string;
+          richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
+          niveauId: string;
+        }> = {};
+
+        if (input.titel !== undefined) updateData.titel = input.titel;
+        if (input.richting !== undefined) updateData.richting = input.richting;
+        if (input.niveauId !== undefined) updateData.niveauId = input.niveauId;
+
+        await tx
+          .update(s.kwalificatieprofiel)
+          .set(updateData)
+          .where(eq(s.kwalificatieprofiel.id, input.id));
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+export const remove = wrapCommand(
+  "kss.kwalificatieprofiel.delete",
+  withZod(
+    deleteKwalificatieprofielSchema,
+    deleteKwalificatieprofielOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Check if kwalificatieprofiel has kerntaken
+        const kerntaken = await tx
+          .select({ id: s.kerntaak.id })
+          .from(s.kerntaak)
+          .where(eq(s.kerntaak.kwalificatieprofielId, input.id))
+          .limit(1);
+
+        if (kerntaken.length > 0) {
+          throw new Error(
+            "Kwalificatieprofiel kan niet verwijderd worden omdat er kerntaken aan gekoppeld zijn",
+          );
+        }
+
+        // Delete kwalificatieprofiel
+        await tx
+          .delete(s.kwalificatieprofiel)
+          .where(eq(s.kwalificatieprofiel.id, input.id));
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+// Kerntaak mutations
+
+export const createKerntaak = wrapCommand(
+  "kss.kerntaak.create",
+  withZod(createKerntaakSchema, createKerntaakOutputSchema, async (input) => {
+    return withTransaction(async (tx) => {
+      // Validate kwalificatieprofiel exists
+      const kwalificatieprofielResult = await tx
+        .select({ id: s.kwalificatieprofiel.id })
+        .from(s.kwalificatieprofiel)
+        .where(eq(s.kwalificatieprofiel.id, input.kwalificatieprofielId));
+
+      if (kwalificatieprofielResult.length === 0) {
+        throw new Error("Opgegeven kwalificatieprofiel bestaat niet");
+      }
+
+      // Create kerntaak
+      const result = await tx
+        .insert(s.kerntaak)
+        .values({
+          kwalificatieprofielId: input.kwalificatieprofielId,
+          titel: input.titel,
+          type: input.type,
+          rang: input.rang ?? null,
+        })
+        .returning({ id: s.kerntaak.id });
+
+      return singleRow(result);
+    });
+  }),
+);
+
+export const updateKerntaak = wrapCommand(
+  "kss.kerntaak.update",
+  withZod(updateKerntaakSchema, updateKerntaakOutputSchema, async (input) => {
+    return withTransaction(async (tx) => {
+      // Validate kerntaak exists
+      const existing = await tx
+        .select({ id: s.kerntaak.id })
+        .from(s.kerntaak)
+        .where(eq(s.kerntaak.id, input.id));
+
+      if (existing.length === 0) {
+        throw new Error("Kerntaak niet gevonden");
+      }
+
+      // Update kerntaak
+      const updateData: Partial<{
+        titel: string;
+        type: "verplicht" | "facultatief";
+        rang: number | null;
+      }> = {};
+
+      if (input.titel !== undefined) updateData.titel = input.titel;
+      if (input.type !== undefined) updateData.type = input.type;
+      if (input.rang !== undefined) updateData.rang = input.rang;
+
+      await tx
+        .update(s.kerntaak)
+        .set(updateData)
+        .where(eq(s.kerntaak.id, input.id));
+
+      return { success: true };
+    });
+  }),
+);
+
+export const deleteKerntaak = wrapCommand(
+  "kss.kerntaak.delete",
+  withZod(deleteKerntaakSchema, deleteKerntaakOutputSchema, async (input) => {
+    return withTransaction(async (tx) => {
+      // Check if kerntaak has onderdelen or werkprocessen
+      const [onderdelen, werkprocessen] = await Promise.all([
+        tx
+          .select({ id: s.kerntaakOnderdeel.id })
+          .from(s.kerntaakOnderdeel)
+          .where(eq(s.kerntaakOnderdeel.kerntaakId, input.id))
+          .limit(1),
+        tx
+          .select({ id: s.werkproces.id })
+          .from(s.werkproces)
+          .where(eq(s.werkproces.kerntaakId, input.id))
+          .limit(1),
+      ]);
+
+      if (onderdelen.length > 0) {
+        throw new Error(
+          "Kerntaak kan niet verwijderd worden omdat er onderdelen aan gekoppeld zijn",
+        );
+      }
+
+      if (werkprocessen.length > 0) {
+        throw new Error(
+          "Kerntaak kan niet verwijderd worden omdat er werkprocessen aan gekoppeld zijn",
+        );
+      }
+
+      // Delete kerntaak
+      await tx.delete(s.kerntaak).where(eq(s.kerntaak.id, input.id));
+
+      return { success: true };
+    });
+  }),
+);
+
+// Kerntaak onderdeel mutations
+
+export const createKerntaakOnderdeel = wrapCommand(
+  "kss.kerntaakOnderdeel.create",
+  withZod(
+    createKerntaakOnderdeelSchema,
+    createKerntaakOnderdeelOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate kerntaak exists
+        const kerntaakResult = await tx
+          .select({ id: s.kerntaak.id })
+          .from(s.kerntaak)
+          .where(eq(s.kerntaak.id, input.kerntaakId));
+
+        if (kerntaakResult.length === 0) {
+          throw new Error("Opgegeven kerntaak bestaat niet");
+        }
+
+        // Create kerntaak onderdeel
+        const result = await tx
+          .insert(s.kerntaakOnderdeel)
+          .values({
+            kerntaakId: input.kerntaakId,
+            type: input.type,
+          })
+          .returning({ id: s.kerntaakOnderdeel.id });
+
+        return singleRow(result);
+      });
+    },
+  ),
+);
+
+export const deleteKerntaakOnderdeel = wrapCommand(
+  "kss.kerntaakOnderdeel.delete",
+  withZod(
+    deleteKerntaakOnderdeelSchema,
+    deleteKerntaakOnderdeelOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Check if onderdeel is used in any PVB
+        const pvbOnderdelen = await tx
+          .select({ id: s.pvbOnderdeel.id })
+          .from(s.pvbOnderdeel)
+          .where(eq(s.pvbOnderdeel.kerntaakOnderdeelId, input.id))
+          .limit(1);
+
+        if (pvbOnderdelen.length > 0) {
+          throw new Error(
+            "Kerntaak onderdeel kan niet verwijderd worden omdat het gebruikt wordt in PVB aanvragen",
+          );
+        }
+
+        // Delete kerntaak onderdeel
+        await tx
+          .delete(s.kerntaakOnderdeel)
+          .where(eq(s.kerntaakOnderdeel.id, input.id));
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+// Werkproces mutations
+
+export const createWerkproces = wrapCommand(
+  "kss.werkproces.create",
+  withZod(
+    createWerkprocesSchema,
+    createWerkprocesOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate kerntaak exists
+        const kerntaakResult = await tx
+          .select({ id: s.kerntaak.id })
+          .from(s.kerntaak)
+          .where(eq(s.kerntaak.id, input.kerntaakId));
+
+        if (kerntaakResult.length === 0) {
+          throw new Error("Opgegeven kerntaak bestaat niet");
+        }
+
+        // Create werkproces
+        const result = await tx
+          .insert(s.werkproces)
+          .values({
+            kerntaakId: input.kerntaakId,
+            titel: input.titel,
+            resultaat: input.resultaat,
+            rang: input.rang,
+          })
+          .returning({ id: s.werkproces.id });
+
+        return singleRow(result);
+      });
+    },
+  ),
+);
+
+export const updateWerkproces = wrapCommand(
+  "kss.werkproces.update",
+  withZod(
+    updateWerkprocesSchema,
+    updateWerkprocesOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate werkproces exists
+        const existing = await tx
+          .select({ id: s.werkproces.id })
+          .from(s.werkproces)
+          .where(eq(s.werkproces.id, input.id));
+
+        if (existing.length === 0) {
+          throw new Error("Werkproces niet gevonden");
+        }
+
+        // Update werkproces
+        const updateData: Partial<{
+          titel: string;
+          resultaat: string;
+          rang: number;
+        }> = {};
+
+        if (input.titel !== undefined) updateData.titel = input.titel;
+        if (input.resultaat !== undefined)
+          updateData.resultaat = input.resultaat;
+        if (input.rang !== undefined) updateData.rang = input.rang;
+
+        await tx
+          .update(s.werkproces)
+          .set(updateData)
+          .where(eq(s.werkproces.id, input.id));
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+export const deleteWerkproces = wrapCommand(
+  "kss.werkproces.delete",
+  withZod(
+    deleteWerkprocesSchema,
+    deleteWerkprocesOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Check if werkproces has beoordelingscriteria
+        const criteria = await tx
+          .select({ id: s.beoordelingscriterium.id })
+          .from(s.beoordelingscriterium)
+          .where(eq(s.beoordelingscriterium.werkprocesId, input.id))
+          .limit(1);
+
+        if (criteria.length > 0) {
+          throw new Error(
+            "Werkproces kan niet verwijderd worden omdat er beoordelingscriteria aan gekoppeld zijn",
+          );
+        }
+
+        // Delete werkproces
+        await tx.delete(s.werkproces).where(eq(s.werkproces.id, input.id));
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+// Beoordelingscriterium mutations
+
+export const createBeoordelingscriterium = wrapCommand(
+  "kss.beoordelingscriterium.create",
+  withZod(
+    createBeoordelingscriteriumSchema,
+    createBeoordelingscriteriumOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate werkproces exists and get kerntaakId
+        const werkprocesResult = await tx
+          .select({
+            id: s.werkproces.id,
+            kerntaakId: s.werkproces.kerntaakId,
+          })
+          .from(s.werkproces)
+          .where(eq(s.werkproces.id, input.werkprocesId));
+
+        if (werkprocesResult.length === 0) {
+          throw new Error("Opgegeven werkproces bestaat niet");
+        }
+
+        const werkproces = singleRow(werkprocesResult);
+
+        // Create beoordelingscriterium
+        const result = await tx
+          .insert(s.beoordelingscriterium)
+          .values({
+            werkprocesId: input.werkprocesId,
+            kerntaakId: werkproces.kerntaakId,
+            omschrijving: input.omschrijving,
+            rang: input.rang ?? 1, // Default to 1 if not provided, since it's required
+          })
+          .returning({ id: s.beoordelingscriterium.id });
+
+        return singleRow(result);
+      });
+    },
+  ),
+);
+
+export const updateBeoordelingscriterium = wrapCommand(
+  "kss.beoordelingscriterium.update",
+  withZod(
+    updateBeoordelingscriteriumSchema,
+    updateBeoordelingscriteriumOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Validate beoordelingscriterium exists
+        const existing = await tx
+          .select({ id: s.beoordelingscriterium.id })
+          .from(s.beoordelingscriterium)
+          .where(eq(s.beoordelingscriterium.id, input.id));
+
+        if (existing.length === 0) {
+          throw new Error("Beoordelingscriterium niet gevonden");
+        }
+
+        // Update beoordelingscriterium
+        const updateData: Partial<{
+          omschrijving: string;
+          rang: number;
+        }> = {};
+
+        if (input.omschrijving !== undefined)
+          updateData.omschrijving = input.omschrijving;
+        if (input.rang !== undefined && input.rang !== null)
+          updateData.rang = input.rang;
+
+        await tx
+          .update(s.beoordelingscriterium)
+          .set(updateData)
+          .where(eq(s.beoordelingscriterium.id, input.id));
+
+        return { success: true };
+      });
+    },
+  ),
+);
+
+export const deleteBeoordelingscriterium = wrapCommand(
+  "kss.beoordelingscriterium.delete",
+  withZod(
+    deleteBeoordelingscriteriumSchema,
+    deleteBeoordelingscriteriumOutputSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        // Delete beoordelingscriterium
+        await tx
+          .delete(s.beoordelingscriterium)
+          .where(eq(s.beoordelingscriterium.id, input.id));
+
+        return { success: true };
+      });
     },
   ),
 );
