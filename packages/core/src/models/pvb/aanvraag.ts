@@ -309,7 +309,7 @@ export const addOnderdeel = wrapCommand(
           opmerkingen: input.opmerkingen,
         },
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? "Onderdeel toegevoegd",
+        reden: input.reden ?? "",
       });
 
       return {
@@ -391,7 +391,7 @@ export const updateBeoordelaar = wrapCommand(
             nieuweBeoordelaarId: input.beoordelaarId,
           },
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: input.reden ?? "Beoordelaar gewijzigd",
+          reden: input.reden ?? "",
         });
 
         return {
@@ -709,7 +709,7 @@ export const requestLeercoachPermission = wrapCommand(
           leercoachId: input.leercoachId,
           status: "gevraagd",
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: input.reden ?? "Toestemming leercoach gevraagd",
+          reden: input.reden ?? "",
         })
         .returning({ id: s.pvbLeercoachToestemming.id });
 
@@ -720,7 +720,7 @@ export const requestLeercoachPermission = wrapCommand(
         pvbAanvraagId: input.pvbAanvraagId,
         gebeurtenisType: "leercoach_toestemming_gevraagd",
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? "Leercoach heeft toestemming gevraagd",
+        reden: input.reden ?? "",
       });
 
       return {
@@ -771,7 +771,7 @@ export const setLeercoachPermission = wrapCommand(
         leercoachId: toestemming.leercoachId,
         status: input.status,
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? `Leercoach toestemming ${input.status}`,
+        reden: input.reden ?? "",
       });
 
       // Log the event
@@ -789,7 +789,7 @@ export const setLeercoachPermission = wrapCommand(
           beslissing: input.status,
         },
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? `Leercoach toestemming ${input.status}`,
+        reden: input.reden ?? "",
       });
 
       // Update aanvraag status based on permission decision
@@ -798,7 +798,7 @@ export const setLeercoachPermission = wrapCommand(
           pvbAanvraagId: toestemming.pvbAanvraagId,
           gebeurtenisType: "leercoach_toestemming_gegeven",
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: input.reden ?? "Leercoach heeft toestemming gegeven",
+          reden: input.reden ?? "",
         });
 
         // Check if all prerequisites are now met (assessors might already be assigned)
@@ -812,7 +812,7 @@ export const setLeercoachPermission = wrapCommand(
           pvbAanvraagId: toestemming.pvbAanvraagId,
           gebeurtenisType: "leercoach_toestemming_geweigerd",
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: input.reden ?? "Leercoach heeft toestemming geweigerd",
+          reden: input.reden ?? "",
         });
       }
 
@@ -884,7 +884,7 @@ export const submitAanvraag = wrapCommand(
         pvbAanvraagId: input.pvbAanvraagId,
         status: newStatus,
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? "Aanvraag ingediend",
+        reden: input.reden ?? "",
       });
 
       // If leercoach is assigned, automatically request permission
@@ -893,7 +893,7 @@ export const submitAanvraag = wrapCommand(
           pvbAanvraagId: input.pvbAanvraagId,
           leercoachId: activeLeercoach.leercoachId,
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: "Automatisch gevraagd bij indienen aanvraag",
+          reden: "",
         });
       }
 
@@ -905,7 +905,7 @@ export const submitAanvraag = wrapCommand(
           pvbAanvraagId: input.pvbAanvraagId,
           status: "gereed_voor_beoordeling",
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: "Alle voorwaarden al vervuld bij indienen",
+          reden: "",
         });
       }
 
@@ -914,7 +914,7 @@ export const submitAanvraag = wrapCommand(
         pvbAanvraagId: input.pvbAanvraagId,
         gebeurtenisType: "aanvraag_ingediend",
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? "Aanvraag ingediend",
+        reden: input.reden ?? "",
       });
 
       return {
@@ -968,7 +968,7 @@ export const withdrawAanvraag = wrapCommand(
         pvbAanvraagId: input.pvbAanvraagId,
         status: "ingetrokken",
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? "Aanvraag ingetrokken",
+        reden: input.reden ?? "",
       });
 
       // Log the withdrawal event
@@ -980,7 +980,7 @@ export const withdrawAanvraag = wrapCommand(
           voorigeStatus: currentStatus.status,
         },
         aangemaaktDoor: input.aangemaaktDoor,
-        reden: input.reden ?? "Aanvraag ingetrokken",
+        reden: input.reden ?? "",
       });
 
       return {
@@ -1455,9 +1455,7 @@ export const updateStartTimeForMultiple = wrapCommand(
                 },
                 pvbOnderdeelId: onderdeel.id,
                 aangemaaktDoor: input.aangemaaktDoor,
-                reden:
-                  input.reden ??
-                  "Aanvangsdatum/tijd voor alle onderdelen bijgewerkt",
+                reden: input.reden ?? "",
               });
             }
 
@@ -1518,7 +1516,7 @@ export const updateLeercoachForMultiple = wrapCommand(
             pvbAanvraagId: aanvraagId,
             leercoachId: input.leercoachId,
             aangemaaktDoor: input.aangemaaktDoor,
-            reden: input.reden ?? "Leercoach toegewezen via bulk actie",
+            reden: input.reden ?? "",
           });
           updatedCount++;
         } catch (error) {
@@ -1559,7 +1557,7 @@ export const cancelMultiple = wrapCommand(
           await withdrawAanvraag({
             pvbAanvraagId: aanvraagId,
             aangemaaktDoor: input.aangemaaktDoor,
-            reden: input.reden ?? "Aanvraag geannuleerd via bulk actie",
+            reden: input.reden ?? "",
           });
           cancelledCount++;
         } catch (error) {
@@ -1608,7 +1606,7 @@ export const submitMultiple = wrapCommand(
           const result = await submitAanvraag({
             pvbAanvraagId: aanvraagId,
             aangemaaktDoor: input.aangemaaktDoor,
-            reden: input.reden ?? "Aanvraag ingediend via bulk actie",
+            reden: input.reden ?? "",
           });
 
           results.push({
@@ -1683,7 +1681,7 @@ export const updateBeoordelaarForMultiple = wrapCommand(
               pvbOnderdeelId: onderdeel.id,
               beoordelaarId: input.beoordelaarId,
               aangemaaktDoor: input.aangemaaktDoor,
-              reden: input.reden ?? "Beoordelaar toegewezen via bulk actie",
+              reden: input.reden ?? "",
             });
           }
 
@@ -1782,9 +1780,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
             leercoachId: latestPermission.leercoachId,
             status: "gegeven",
             aangemaaktDoor: input.aangemaaktDoor,
-            reden:
-              input.reden ??
-              "Toestemming gegeven door locatiebeheerder namens leercoach",
+            reden: input.reden ?? "",
           });
 
           // Log the event
@@ -1798,9 +1794,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
               namensLeercoach: true,
             },
             aangemaaktDoor: input.aangemaaktDoor,
-            reden:
-              input.reden ??
-              "Toestemming gegeven door locatiebeheerder namens leercoach",
+            reden: input.reden ?? "",
           });
 
           // Check if all prerequisites are now met
