@@ -3609,9 +3609,7 @@ export const updatePvbLeercoach = async ({
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // Get the PVB aanvraag to retrieve the location
-    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
-      handle: pvbAanvraagId,
-    });
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
     // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
@@ -3644,9 +3642,7 @@ export const updatePvbBeoordelaar = async ({
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // Get the PVB aanvraag to retrieve the location
-    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
-      handle: pvbAanvraagId,
-    });
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
     // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
@@ -3679,9 +3675,7 @@ export const updatePvbStartTime = async ({
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // Get the PVB aanvraag to retrieve the location
-    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
-      handle: pvbAanvraagId,
-    });
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
     // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
@@ -3714,9 +3708,7 @@ export const grantPvbLeercoachPermission = async ({
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // Get the PVB aanvraag to retrieve the location
-    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
-      handle: pvbAanvraagId,
-    });
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
     // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
@@ -3748,9 +3740,7 @@ export const submitPvbAanvraag = async ({
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // Get the PVB aanvraag to retrieve the location
-    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
-      handle: pvbAanvraagId,
-    });
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
     // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
@@ -3783,9 +3773,7 @@ export const withdrawPvbAanvraag = async ({
     const primaryPerson = await getPrimaryPerson(authUser);
 
     // Get the PVB aanvraag to retrieve the location
-    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
-      handle: pvbAanvraagId,
-    });
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
 
     // Get the location_admin actor for this person at this location
     const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
