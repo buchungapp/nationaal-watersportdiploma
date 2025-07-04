@@ -1,27 +1,22 @@
 "use server";
 
-import { Pvb } from "@nawadi/core";
-import { createSafeActionClient } from "next-safe-action";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
-  getPrimaryPerson,
-  getUserOrThrow,
-  retrieveLocationByHandle,
+  cancelPvbsForMultiple,
+  grantPvbLeercoachPermissionForMultiple,
+  submitPvbsForMultiple,
+  updatePvbBeoordelaarForMultiple,
+  updatePvbLeercoachForMultiple,
+  updatePvbStartTimeForMultiple,
 } from "~/lib/nwd";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "../utils";
-
-const actionClient = createSafeActionClient({
-  handleServerError(e) {
-    if (e instanceof Error) {
-      return e.message;
-    }
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  },
-});
+import { actionClientWithMeta } from "../safe-action";
 
 // Update start time for multiple PVB aanvragen
-export const updatePvbStartTimeAction = actionClient
+export const updatePvbStartTimeAction = actionClientWithMeta
+  .metadata({
+    name: "update-pvb-start-time-bulk",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -32,24 +27,9 @@ export const updatePvbStartTimeAction = actionClient
   .action(async ({ parsedInput }) => {
     const { locationHandle, pvbAanvraagIds, startDatumTijd } = parsedInput;
 
-    const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    const locationAdminActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "location_admin" && actor.locationId === location.id,
-    );
-
-    if (!locationAdminActor) {
-      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
-    }
-
-    const result = await Pvb.Aanvraag.updateStartTimeForMultiple({
+    const result = await updatePvbStartTimeForMultiple({
       pvbAanvraagIds,
       startDatumTijd,
-      aangemaaktDoor: locationAdminActor.id,
-      reden: "Aanvangsdatum/tijd aangepast via locatiebeheer",
     });
 
     revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
@@ -61,7 +41,10 @@ export const updatePvbStartTimeAction = actionClient
   });
 
 // Update leercoach for multiple PVB aanvragen
-export const updatePvbLeercoachAction = actionClient
+export const updatePvbLeercoachAction = actionClientWithMeta
+  .metadata({
+    name: "update-pvb-leercoach-bulk",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -72,24 +55,9 @@ export const updatePvbLeercoachAction = actionClient
   .action(async ({ parsedInput }) => {
     const { locationHandle, pvbAanvraagIds, leercoachId } = parsedInput;
 
-    const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    const locationAdminActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "location_admin" && actor.locationId === location.id,
-    );
-
-    if (!locationAdminActor) {
-      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
-    }
-
-    const result = await Pvb.Aanvraag.updateLeercoachForMultiple({
+    const result = await updatePvbLeercoachForMultiple({
       pvbAanvraagIds,
       leercoachId,
-      aangemaaktDoor: locationAdminActor.id,
-      reden: "Leercoach toegewezen via locatiebeheer",
     });
 
     revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
@@ -101,7 +69,10 @@ export const updatePvbLeercoachAction = actionClient
   });
 
 // Update beoordelaar for multiple PVB aanvragen
-export const updatePvbBeoordelaarAction = actionClient
+export const updatePvbBeoordelaarAction = actionClientWithMeta
+  .metadata({
+    name: "update-pvb-beoordelaar-bulk",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -112,24 +83,9 @@ export const updatePvbBeoordelaarAction = actionClient
   .action(async ({ parsedInput }) => {
     const { locationHandle, pvbAanvraagIds, beoordelaarId } = parsedInput;
 
-    const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    const locationAdminActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "location_admin" && actor.locationId === location.id,
-    );
-
-    if (!locationAdminActor) {
-      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
-    }
-
-    const result = await Pvb.Aanvraag.updateBeoordelaarForMultiple({
+    const result = await updatePvbBeoordelaarForMultiple({
       pvbAanvraagIds,
       beoordelaarId,
-      aangemaaktDoor: locationAdminActor.id,
-      reden: "Beoordelaar toegewezen via locatiebeheer",
     });
 
     revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
@@ -141,7 +97,10 @@ export const updatePvbBeoordelaarAction = actionClient
   });
 
 // Cancel multiple PVB aanvragen
-export const cancelPvbsAction = actionClient
+export const cancelPvbsAction = actionClientWithMeta
+  .metadata({
+    name: "cancel-pvb-bulk",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -151,23 +110,8 @@ export const cancelPvbsAction = actionClient
   .action(async ({ parsedInput }) => {
     const { locationHandle, pvbAanvraagIds } = parsedInput;
 
-    const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    const locationAdminActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "location_admin" && actor.locationId === location.id,
-    );
-
-    if (!locationAdminActor) {
-      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
-    }
-
-    const result = await Pvb.Aanvraag.cancelMultiple({
+    const result = await cancelPvbsForMultiple({
       pvbAanvraagIds,
-      aangemaaktDoor: locationAdminActor.id,
-      reden: "Aanvraag geannuleerd via locatiebeheer",
     });
 
     revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
@@ -179,7 +123,10 @@ export const cancelPvbsAction = actionClient
   });
 
 // Submit multiple PVB aanvragen
-export const submitPvbsAction = actionClient
+export const submitPvbsAction = actionClientWithMeta
+  .metadata({
+    name: "submit-pvb-bulk",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -189,23 +136,8 @@ export const submitPvbsAction = actionClient
   .action(async ({ parsedInput }) => {
     const { locationHandle, pvbAanvraagIds } = parsedInput;
 
-    const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    const locationAdminActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "location_admin" && actor.locationId === location.id,
-    );
-
-    if (!locationAdminActor) {
-      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
-    }
-
-    const result = await Pvb.Aanvraag.submitMultiple({
+    const result = await submitPvbsForMultiple({
       pvbAanvraagIds,
-      aangemaaktDoor: locationAdminActor.id,
-      reden: "Aanvraag ingediend via locatiebeheer",
     });
 
     revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
@@ -218,7 +150,10 @@ export const submitPvbsAction = actionClient
   });
 
 // Grant leercoach permission for multiple PVB aanvragen (on behalf of leercoach)
-export const grantLeercoachPermissionAction = actionClient
+export const grantLeercoachPermissionAction = actionClientWithMeta
+  .metadata({
+    name: "grant-pvb-leercoach-permission-bulk",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -228,23 +163,8 @@ export const grantLeercoachPermissionAction = actionClient
   .action(async ({ parsedInput }) => {
     const { locationHandle, pvbAanvraagIds } = parsedInput;
 
-    const location = await retrieveLocationByHandle(locationHandle);
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    const locationAdminActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "location_admin" && actor.locationId === location.id,
-    );
-
-    if (!locationAdminActor) {
-      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
-    }
-
-    const result = await Pvb.Aanvraag.grantLeercoachPermissionForMultiple({
+    const result = await grantPvbLeercoachPermissionForMultiple({
       pvbAanvraagIds,
-      aangemaaktDoor: locationAdminActor.id,
-      reden: "Toestemming gegeven door locatiebeheerder namens leercoach",
     });
 
     revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);

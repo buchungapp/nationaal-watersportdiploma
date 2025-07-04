@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { grantPvbLeercoachPermissionAction } from "../actions";
+import { grantPvbLeercoachPermissionAction } from "~/app/_actions/pvb/single-operations-action";
 
 export function PermissionDialog({
   open,
@@ -29,10 +29,11 @@ export function PermissionDialog({
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await grantPvbLeercoachPermissionAction(
-          resolvedParams.handle,
-          reason || undefined,
-        );
+        await grantPvbLeercoachPermissionAction({
+          locationHandle: resolvedParams.location,
+          handle: resolvedParams.handle,
+          reason: reason || undefined,
+        });
 
         router.refresh();
         onClose();

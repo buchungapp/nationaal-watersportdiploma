@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
-import { updatePvbBeoordelaarAction } from "../actions";
+import { updatePvbBeoordelaarAction } from "~/app/_actions/pvb/single-operations-action";
 
 interface Person {
   id: string;
@@ -63,7 +63,11 @@ export function BeoordelaarDialog({
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await updatePvbBeoordelaarAction(resolvedParams.handle, beoordelaarId);
+        await updatePvbBeoordelaarAction({
+          locationHandle: resolvedParams.location,
+          handle: resolvedParams.handle,
+          beoordelaarId,
+        });
 
         router.refresh();
         onClose();

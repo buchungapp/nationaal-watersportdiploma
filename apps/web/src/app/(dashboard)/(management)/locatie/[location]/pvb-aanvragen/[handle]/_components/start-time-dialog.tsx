@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { updatePvbStartTimeAction } from "../actions";
+import { updatePvbStartTimeAction } from "~/app/_actions/pvb/single-operations-action";
 
 export function StartTimeDialog({
   open,
@@ -31,7 +31,13 @@ export function StartTimeDialog({
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await updatePvbStartTimeAction(resolvedParams.handle, startDatumTijd);
+        // Convert datetime-local to ISO string
+        const isoDateTime = new Date(startDatumTijd).toISOString();
+        await updatePvbStartTimeAction({
+          locationHandle: resolvedParams.location,
+          handle: resolvedParams.handle,
+          startDatumTijd: isoDateTime,
+        });
 
         router.refresh();
         onClose();

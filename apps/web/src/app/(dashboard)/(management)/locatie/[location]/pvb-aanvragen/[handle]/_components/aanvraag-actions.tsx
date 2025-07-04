@@ -52,9 +52,13 @@ export function AanvraagActions({
       aanvraag.status === "wacht_op_voorwaarden") &&
     (!aanvraag.leercoach || aanvraag.leercoach.status !== "gegeven");
   const canManageStartTime =
-    aanvraag.status === "concept" || aanvraag.status === "wacht_op_voorwaarden";
+    aanvraag.status === "concept" ||
+    aanvraag.status === "wacht_op_voorwaarden" ||
+    aanvraag.status === "gereed_voor_beoordeling";
   const canManageBeoordelaar =
-    aanvraag.status === "concept" || aanvraag.status === "wacht_op_voorwaarden";
+    aanvraag.status === "concept" ||
+    aanvraag.status === "wacht_op_voorwaarden" ||
+    aanvraag.status === "gereed_voor_beoordeling";
   const canGrantPermission =
     aanvraag.status === "wacht_op_voorwaarden" &&
     aanvraag.leercoach &&

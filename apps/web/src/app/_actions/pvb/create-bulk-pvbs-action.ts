@@ -1,26 +1,12 @@
 "use server";
 
-import { Location, Pvb } from "@nawadi/core";
 import dayjs from "dayjs";
-import { createSafeActionClient } from "next-safe-action";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import {
-  getPrimaryPerson,
-  getUserOrThrow,
-  retrieveLocationByHandle,
-} from "~/lib/nwd";
+import { createBulkPvbs, retrieveLocationByHandle } from "~/lib/nwd";
+import { actionClientWithMeta } from "../safe-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "../utils";
-
-const actionClient = createSafeActionClient({
-  handleServerError(e) {
-    if (e instanceof Error) {
-      return e.message;
-    }
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  },
-});
 
 // Helper function to parse dynamic arrays from FormData
 function parseDynamicArray<T>(
@@ -111,25 +97,15 @@ const createBulkPvbsSchema = z.object({
  * - At least one onderdeel (component) is selected
  * - No duplicate qualifications exist for the candidate
  */
-export const createBulkPvbsAction = actionClient
+export const createBulkPvbsAction = actionClientWithMeta
+  .metadata({
+    name: "create-pvb-bulk",
+  })
   .schema(createBulkPvbsSchema)
   .stateAction(async ({ parsedInput }) => {
     try {
       const { locationHandle, formData } = parsedInput;
       const location = await retrieveLocationByHandle(locationHandle);
-      const user = await getUserOrThrow();
-      const primaryPerson = await getPrimaryPerson(user);
-
-      const locationAdminActor =
-        await Location.Person.getActorByPersonIdAndType({
-          locationId: location.id,
-          actorType: "location_admin",
-          personId: primaryPerson.id,
-        });
-
-      if (!locationAdminActor) {
-        throw new Error("Aanvrager is geen locatiebeheerder");
-      }
 
       // Parse basic form fields with zod-form-data
       const baseData = baseFormDataSchema.parse(formData);
@@ -229,148 +205,19 @@ export const createBulkPvbsAction = actionClient
         throw new Error("Selecteer een niveau");
       }
 
-      if (kandidaten.length === 0) {
-        throw new Error("Selecteer minimaal één kandidaat");
-      }
-
-      if (!kwalificatieprofielen.some((kp) => kp.hoofdcursus)) {
-        throw new Error("Selecteer minimaal één hoofdcursus");
-      }
-
-      if (!selectedOnderdelen || selectedOnderdelen.length === 0) {
-        throw new Error("Selecteer minimaal één onderdeel");
-      }
-
-      const results = [];
-
-      // Create PvB aanvraag for each kandidaat
-      for (const kandidaat of kandidaten) {
-        try {
-          // Collect all courses
-          const allCourses: Array<{
-            courseId: string;
-            instructieGroepId: string;
-            isMainCourse: boolean;
-            opmerkingen: string | null;
-          }> = [];
-
-          // Process kwalificatieprofielen and their courses
-          for (const kp of kwalificatieprofielen) {
-            if (kp.hoofdcursus && kp.instructieGroepId) {
-              const instructieGroepId = kp.instructieGroepId;
-
-              allCourses.push({
-                courseId: kp.hoofdcursus.courseId,
-                instructieGroepId,
-                isMainCourse: true,
-                opmerkingen: null,
-              });
-            }
-
-            for (const aanvullendeCursus of kp.aanvullendeCursussen) {
-              if (kp.instructieGroepId) {
-                const instructieGroepId = kp.instructieGroepId;
-
-                allCourses.push({
-                  courseId: aanvullendeCursus.courseId,
-                  instructieGroepId,
-                  isMainCourse: false,
-                  opmerkingen: null,
-                });
-              }
-            }
-          }
-
-          // Validate that we have at least one course
-          if (allCourses.length === 0) {
-            throw new Error(
-              "Geen geldige cursussen gevonden. Zorg ervoor dat alle hoofdcursussen zijn geselecteerd.",
-            );
-          }
-
-          // Ensure at least one course is marked as main
-          if (!allCourses.some((c) => c.isMainCourse)) {
-            const firstCourse = allCourses[0];
-            if (firstCourse) {
-              firstCourse.isMainCourse = true;
-            }
-          }
-
-          const aanvraagInput = {
-            type: "intern" as const,
-            aangevraagdDoor: locationAdminActor.id,
-            locatieId: location.id,
-            kandidaatId: kandidaat.id,
-            leercoachId: kandidaat.leercoach || null,
-            opmerkingen: opmerkingen || null,
-            startDatumTijd: kandidaat.startDatumTijd || null,
-            courses: allCourses as [
-              {
-                courseId: string;
-                instructieGroepId: string;
-                isMainCourse: boolean;
-                opmerkingen: string | null;
-              },
-              ...{
-                courseId: string;
-                instructieGroepId: string;
-                isMainCourse: boolean;
-                opmerkingen: string | null;
-              }[],
-            ],
-            onderdelen: selectedOnderdelen.map((onderdeelId: string) => ({
-              kerntaakOnderdeelId: onderdeelId,
-              beoordelaarId: kandidaat.beoordelaar || null,
-              opmerkingen: null,
-            })) as [
-              {
-                kerntaakOnderdeelId: string;
-                beoordelaarId: string | null;
-                opmerkingen: string | null;
-              },
-              ...{
-                kerntaakOnderdeelId: string;
-                beoordelaarId: string | null;
-                opmerkingen: string | null;
-              }[],
-            ],
-          };
-
-          const result = await Pvb.Aanvraag.createAanvraag(aanvraagInput);
-
-          results.push({
-            kandidaatId: kandidaat.id,
-            success: true,
-            aanvraagId: result.id,
-          });
-        } catch (error) {
-          // Log errors only in development
-          if (process.env.NODE_ENV === "development") {
-            console.error(
-              `Failed to create PvB for kandidaat ${kandidaat.id}:`,
-              error,
-            );
-          }
-          results.push({
-            kandidaatId: kandidaat.id,
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error",
-          });
-        }
-      }
+      // Use the createBulkPvbs function from lib/nwd.ts
+      const result = await createBulkPvbs({
+        locationId: location.id,
+        kandidaten,
+        kwalificatieprofielen,
+        selectedOnderdelen: selectedOnderdelen as string[],
+        opmerkingen,
+      });
 
       // Revalidate the PvB list page
       revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
 
-      const successCount = results.filter((r) => r.success).length;
-      const failureCount = results.filter((r) => !r.success).length;
-
-      return {
-        message: `${successCount} PvB aanvragen succesvol aangemaakt${failureCount > 0 ? `, ${failureCount} gefaald` : ""}`,
-        results,
-        successCount,
-        failureCount,
-      };
+      return result;
     } catch (error) {
       // Log errors only in development
       if (process.env.NODE_ENV === "development") {

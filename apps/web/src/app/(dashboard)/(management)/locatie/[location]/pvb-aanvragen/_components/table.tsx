@@ -229,15 +229,6 @@ interface PvbTableProps {
     id: string;
     handle: string;
   };
-  onUpdateStartTime: (pvbIds: string[], startTime: string) => Promise<void>;
-  onUpdateLeercoach: (pvbIds: string[], leercoachId: string) => Promise<void>;
-  onUpdateBeoordelaar: (
-    pvbIds: string[],
-    beoordelaarId: string,
-  ) => Promise<void>;
-  onGrantLeercoachPermission: (pvbIds: string[]) => Promise<void>;
-  onCancel: (pvbIds: string[]) => Promise<void>;
-  onSubmit: (pvbIds: string[]) => Promise<void>;
 }
 
 export default function PvbTable({
@@ -245,12 +236,6 @@ export default function PvbTable({
   totalItems,
   placeholderRows,
   location,
-  onUpdateStartTime,
-  onUpdateLeercoach,
-  onUpdateBeoordelaar,
-  onGrantLeercoachPermission,
-  onCancel,
-  onSubmit,
 }: PvbTableProps) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -314,12 +299,7 @@ export default function PvbTable({
         <PvbTableActions
           selectedPvbs={selectedPvbs}
           locationId={location.id}
-          onUpdateStartTime={onUpdateStartTime}
-          onUpdateLeercoach={onUpdateLeercoach}
-          onUpdateBeoordelaar={onUpdateBeoordelaar}
-          onGrantLeercoachPermission={onGrantLeercoachPermission}
-          onCancel={onCancel}
-          onSubmit={onSubmit}
+          locationHandle={location.handle}
           onClearSelection={() => setRowSelection({})}
         />
       </TableSelection>

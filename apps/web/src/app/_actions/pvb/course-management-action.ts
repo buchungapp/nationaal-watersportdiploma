@@ -1,7 +1,6 @@
 "use server";
 
 import { Pvb } from "@nawadi/core";
-import { createSafeActionClient } from "next-safe-action";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
@@ -9,19 +8,13 @@ import {
   getUserOrThrow,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "../utils";
-
-const actionClient = createSafeActionClient({
-  handleServerError(e) {
-    if (e instanceof Error) {
-      return e.message;
-    }
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  },
-});
+import { actionClientWithMeta } from "../safe-action";
 
 // Add course to PVB aanvraag
-export const addPvbCourseAction = actionClient
+export const addPvbCourseAction = actionClientWithMeta
+  .metadata({
+    name: "add-pvb-course",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -74,7 +67,10 @@ export const addPvbCourseAction = actionClient
   });
 
 // Remove course from PVB aanvraag
-export const removePvbCourseAction = actionClient
+export const removePvbCourseAction = actionClientWithMeta
+  .metadata({
+    name: "remove-pvb-course",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),
@@ -116,7 +112,10 @@ export const removePvbCourseAction = actionClient
   });
 
 // Set main course for PVB aanvraag
-export const setMainPvbCourseAction = actionClient
+export const setMainPvbCourseAction = actionClientWithMeta
+  .metadata({
+    name: "set-main-pvb-course",
+  })
   .schema(
     z.object({
       locationHandle: z.string(),

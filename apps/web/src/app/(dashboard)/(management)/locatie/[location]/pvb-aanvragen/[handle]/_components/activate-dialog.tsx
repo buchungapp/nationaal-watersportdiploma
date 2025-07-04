@@ -9,7 +9,7 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { submitPvbAanvraagAction } from "../actions";
+import { submitPvbAanvraagAction } from "~/app/_actions/pvb/single-operations-action";
 
 export function ActivateDialog({
   open,
@@ -27,7 +27,10 @@ export function ActivateDialog({
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await submitPvbAanvraagAction(resolvedParams.handle);
+        await submitPvbAanvraagAction({
+          locationHandle: resolvedParams.location,
+          handle: resolvedParams.handle,
+        });
 
         router.refresh();
         onClose();

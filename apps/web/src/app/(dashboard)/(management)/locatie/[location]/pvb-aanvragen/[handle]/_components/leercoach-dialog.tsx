@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
-import { updatePvbLeercoachAction } from "../actions";
+import { updatePvbLeercoachAction } from "~/app/_actions/pvb/single-operations-action";
 
 interface Person {
   id: string;
@@ -63,7 +63,11 @@ export function LeercoachDialog({
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await updatePvbLeercoachAction(resolvedParams.handle, leercoachId);
+        await updatePvbLeercoachAction({
+          locationHandle: resolvedParams.location,
+          handle: resolvedParams.handle,
+          leercoachId,
+        });
 
         router.refresh();
         onClose();

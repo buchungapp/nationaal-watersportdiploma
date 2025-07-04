@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { withdrawPvbAanvraagAction } from "../actions";
+import { withdrawPvbAanvraagAction } from "~/app/_actions/pvb/single-operations-action";
 
 export function WithdrawDialog({
   open,
@@ -29,10 +29,11 @@ export function WithdrawDialog({
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await withdrawPvbAanvraagAction(
-          resolvedParams.handle,
-          reason || undefined,
-        );
+        await withdrawPvbAanvraagAction({
+          locationHandle: resolvedParams.location,
+          handle: resolvedParams.handle,
+          reason: reason || undefined,
+        });
 
         router.refresh();
         onClose();

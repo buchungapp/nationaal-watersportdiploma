@@ -24,6 +24,14 @@ import {
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
+import {
+  cancelPvbsAction,
+  grantLeercoachPermissionAction,
+  submitPvbsAction,
+  updatePvbBeoordelaarAction,
+  updatePvbLeercoachAction,
+  updatePvbStartTimeAction,
+} from "~/app/_actions/pvb/bulk-operations-action";
 import type { listPvbs } from "~/lib/nwd";
 
 type PvbAanvraag = Awaited<ReturnType<typeof listPvbs>>[number];
@@ -38,15 +46,7 @@ type Person = {
 interface PvbTableActionsProps {
   selectedPvbs: PvbAanvraag[];
   locationId: string;
-  onUpdateStartTime: (pvbIds: string[], startTime: string) => Promise<void>;
-  onUpdateLeercoach: (pvbIds: string[], leercoachId: string) => Promise<void>;
-  onUpdateBeoordelaar: (
-    pvbIds: string[],
-    beoordelaarId: string,
-  ) => Promise<void>;
-  onCancel: (pvbIds: string[]) => Promise<void>;
-  onSubmit: (pvbIds: string[]) => Promise<void>;
-  onGrantLeercoachPermission: (pvbIds: string[]) => Promise<void>;
+  locationHandle: string;
   onClearSelection: () => void;
 }
 
@@ -70,12 +70,7 @@ type DialogType =
 export function PvbTableActions({
   selectedPvbs,
   locationId,
-  onUpdateStartTime,
-  onUpdateLeercoach,
-  onUpdateBeoordelaar,
-  onCancel,
-  onSubmit,
-  onGrantLeercoachPermission,
+  locationHandle,
   onClearSelection,
 }: PvbTableActionsProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -101,18 +96,38 @@ export function PvbTableActions({
 
   // Calculate what actions are available
   const selectedIds = selectedPvbs.map((pvb) => pvb.id);
-  const canSubmit = selectedPvbs.some((pvb) => pvb.status === "concept");
-  const canCancel = selectedPvbs.some((pvb) =>
-    ["concept", "wacht_op_voorwaarden", "gereed_voor_beoordeling"].includes(
-      pvb.status,
-    ),
+
+  // Check if all selected PVBs have a final status where no actions should be possible
+  const finalStatuses = ["afgerond", "ingetrokken", "afgebroken"];
+  const someHaveFinalStatus = selectedPvbs.some((pvb) =>
+    finalStatuses.includes(pvb.status),
   );
-  const canAssignBeoordelaar = selectedPvbs.every(
-    (pvb) => pvb.type === "intern",
-  );
-  const canGrantLeercoachPermission = selectedPvbs.some(
-    (pvb) => pvb.leercoach && pvb.status === "wacht_op_voorwaarden",
-  );
+
+  // Actions are only available if ALL selected PVBs meet the criteria
+  const canUpdateStartTime = !someHaveFinalStatus;
+  const canUpdateLeercoach =
+    !someHaveFinalStatus &&
+    selectedPvbs.every(
+      (pvb) =>
+        pvb.status === "concept" || pvb.status === "wacht_op_voorwaarden",
+    );
+  const canSubmit =
+    !someHaveFinalStatus &&
+    selectedPvbs.every((pvb) => pvb.status === "concept");
+  const canCancel =
+    !someHaveFinalStatus &&
+    selectedPvbs.every((pvb) =>
+      ["concept", "wacht_op_voorwaarden", "gereed_voor_beoordeling"].includes(
+        pvb.status,
+      ),
+    );
+  const canAssignBeoordelaar =
+    !someHaveFinalStatus && selectedPvbs.every((pvb) => pvb.type === "intern");
+  const canGrantLeercoachPermission =
+    !someHaveFinalStatus &&
+    selectedPvbs.every(
+      (pvb) => pvb.leercoach && pvb.status === "wacht_op_voorwaarden",
+    );
 
   // Reset form state when dialog closes
   useEffect(() => {
@@ -132,9 +147,35 @@ export function PvbTableActions({
 
   const handleUpdateStartTime = async () => {
     if (!startDateTime) return;
+
+    // Guard against empty selection
+    if (selectedIds.length === 0) {
+      toast.error("Selecteer minimaal één aanvraag");
+      return;
+    }
+
+    // Check if action is allowed
+    if (!canUpdateStartTime) {
+      toast.error(
+        "Deze actie kan niet worden uitgevoerd op aanvragen met een definitieve status",
+      );
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await onUpdateStartTime(selectedIds, startDateTime);
+      // Convert datetime-local to ISO string
+      const isoDateTime = new Date(startDateTime).toISOString();
+      const result = await updatePvbStartTimeAction({
+        locationHandle,
+        pvbAanvraagIds: selectedIds as [string, ...string[]],
+        startDatumTijd: isoDateTime,
+      });
+
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+
       toast.success(
         `Aanvangsdatum is bijgewerkt voor ${selectedIds.length} aanvragen.`,
       );
@@ -142,7 +183,9 @@ export function PvbTableActions({
       onClearSelection();
     } catch (error) {
       toast.error(
-        "Er is iets misgegaan bij het bijwerken van de aanvangsdatum.",
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan bij het bijwerken van de aanvangsdatum.",
       );
     } finally {
       setIsProcessing(false);
@@ -151,16 +194,44 @@ export function PvbTableActions({
 
   const handleUpdateLeercoach = async () => {
     if (!selectedLeercoach) return;
+
+    // Guard against empty selection
+    if (selectedIds.length === 0) {
+      toast.error("Selecteer minimaal één aanvraag");
+      return;
+    }
+
+    // Check if action is allowed
+    if (!canUpdateLeercoach) {
+      toast.error(
+        "Deze actie kan niet worden uitgevoerd op aanvragen met een definitieve status",
+      );
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await onUpdateLeercoach(selectedIds, selectedLeercoach.id);
+      const result = await updatePvbLeercoachAction({
+        locationHandle,
+        pvbAanvraagIds: selectedIds as [string, ...string[]],
+        leercoachId: selectedLeercoach.id,
+      });
+
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+
       toast.success(
         `${formatPersonName(selectedLeercoach)} is toegewezen aan ${selectedIds.length} aanvragen.`,
       );
       closeDialog();
       onClearSelection();
     } catch (error) {
-      toast.error("Er is iets misgegaan bij het toewijzen van de leercoach.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan bij het toewijzen van de leercoach.",
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -168,53 +239,153 @@ export function PvbTableActions({
 
   const handleUpdateBeoordelaar = async () => {
     if (!selectedBeoordelaar) return;
+
+    // Guard against empty selection
+    if (selectedIds.length === 0) {
+      toast.error("Selecteer minimaal één aanvraag");
+      return;
+    }
+
+    // Check if action is allowed
+    if (!canAssignBeoordelaar) {
+      toast.error(
+        "Deze actie kan alleen worden uitgevoerd op interne aanvragen zonder definitieve status",
+      );
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await onUpdateBeoordelaar(selectedIds, selectedBeoordelaar.id);
+      const result = await updatePvbBeoordelaarAction({
+        locationHandle,
+        pvbAanvraagIds: selectedIds as [string, ...string[]],
+        beoordelaarId: selectedBeoordelaar.id,
+      });
+
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+
       toast.success(
         `${formatPersonName(selectedBeoordelaar)} is toegewezen aan ${selectedIds.length} aanvragen.`,
       );
       closeDialog();
       onClearSelection();
     } catch (error) {
-      toast.error("Er is iets misgegaan bij het toewijzen van de beoordelaar.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan bij het toewijzen van de beoordelaar.",
+      );
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleCancel = async () => {
+    // Guard against empty selection
+    if (selectedIds.length === 0) {
+      toast.error("Selecteer minimaal één aanvraag");
+      return;
+    }
+
+    // Check if action is allowed
+    if (!canCancel) {
+      toast.error(
+        "Alleen aanvragen in concept, wacht op voorwaarden of gereed voor beoordeling status kunnen worden geannuleerd",
+      );
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await onCancel(selectedIds);
+      const result = await cancelPvbsAction({
+        locationHandle,
+        pvbAanvraagIds: selectedIds as [string, ...string[]],
+      });
+
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+
       toast.success(`${selectedIds.length} aanvragen zijn geannuleerd.`);
       closeDialog();
       onClearSelection();
     } catch (error) {
-      toast.error("Er is iets misgegaan bij het annuleren van de aanvragen.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan bij het annuleren van de aanvragen.",
+      );
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleSubmit = async () => {
+    // Guard against empty selection
+    if (selectedIds.length === 0) {
+      toast.error("Selecteer minimaal één aanvraag");
+      return;
+    }
+
+    // Check if action is allowed
+    if (!canSubmit) {
+      toast.error("Alleen aanvragen in concept status kunnen worden ingediend");
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await onSubmit(selectedIds);
+      const result = await submitPvbsAction({
+        locationHandle,
+        pvbAanvraagIds: selectedIds as [string, ...string[]],
+      });
+
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+
       toast.success(`${selectedIds.length} aanvragen zijn ingediend.`);
       closeDialog();
       onClearSelection();
     } catch (error) {
-      toast.error("Er is iets misgegaan bij het indienen van de aanvragen.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan bij het indienen van de aanvragen.",
+      );
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleGrantLeercoachPermission = async () => {
+    // Guard against empty selection
+    if (selectedIds.length === 0) {
+      toast.error("Selecteer minimaal één aanvraag");
+      return;
+    }
+
+    // Check if action is allowed
+    if (!canGrantLeercoachPermission) {
+      toast.error(
+        "Deze actie kan alleen worden uitgevoerd op aanvragen met een leercoach in wacht op voorwaarden status",
+      );
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      await onGrantLeercoachPermission(selectedIds);
+      const result = await grantLeercoachPermissionAction({
+        locationHandle,
+        pvbAanvraagIds: selectedIds as [string, ...string[]],
+      });
+
+      if (result?.serverError) {
+        throw new Error(result.serverError);
+      }
+
       toast.success(
         `Leercoach toestemming is gegeven voor ${selectedIds.length} aanvragen.`,
       );
@@ -222,7 +393,9 @@ export function PvbTableActions({
       onClearSelection();
     } catch (error) {
       toast.error(
-        "Er is iets misgegaan bij het geven van leercoach toestemming.",
+        error instanceof Error
+          ? error.message
+          : "Er is iets misgegaan bij het geven van leercoach toestemming.",
       );
     } finally {
       setIsProcessing(false);
@@ -240,41 +413,49 @@ export function PvbTableActions({
           Bulk acties ({selectedIds.length})
         </DropdownButton>
         <DropdownMenu anchor="top">
-          <DropdownItem onClick={() => setActiveDialog("startTime")}>
+          <DropdownItem
+            onClick={() => setActiveDialog("startTime")}
+            disabled={!canUpdateStartTime}
+          >
             Aanvangsdatum/tijd aanpassen
           </DropdownItem>
 
-          <DropdownItem onClick={() => setActiveDialog("leercoach")}>
+          <DropdownItem
+            onClick={() => setActiveDialog("leercoach")}
+            disabled={!canUpdateLeercoach}
+          >
             Leercoach toewijzen
           </DropdownItem>
 
-          {canGrantLeercoachPermission && (
-            <DropdownItem
-              onClick={() => setActiveDialog("grantLeercoachPermission")}
-            >
-              Toestemming namens leercoach geven
-            </DropdownItem>
-          )}
+          <DropdownItem
+            onClick={() => setActiveDialog("grantLeercoachPermission")}
+            disabled={!canGrantLeercoachPermission}
+          >
+            Toestemming namens leercoach geven
+          </DropdownItem>
 
-          {canAssignBeoordelaar && (
-            <DropdownItem onClick={() => setActiveDialog("beoordelaar")}>
-              Beoordelaar toewijzen
-            </DropdownItem>
-          )}
+          <DropdownItem
+            onClick={() => setActiveDialog("beoordelaar")}
+            disabled={!canAssignBeoordelaar}
+          >
+            Beoordelaar toewijzen
+          </DropdownItem>
 
-          {(canSubmit || canCancel) && <hr className="my-1" />}
+          <hr className="my-1" />
 
-          {canSubmit && (
-            <DropdownItem onClick={() => setActiveDialog("submit")}>
-              Indienen ({selectedIds.length})
-            </DropdownItem>
-          )}
+          <DropdownItem
+            onClick={() => setActiveDialog("submit")}
+            disabled={!canSubmit}
+          >
+            Indienen ({selectedIds.length})
+          </DropdownItem>
 
-          {canCancel && (
-            <DropdownItem onClick={() => setActiveDialog("cancel")}>
-              Annuleren ({selectedIds.length})
-            </DropdownItem>
-          )}
+          <DropdownItem
+            onClick={() => setActiveDialog("cancel")}
+            disabled={!canCancel}
+          >
+            Intrekken ({selectedIds.length})
+          </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
