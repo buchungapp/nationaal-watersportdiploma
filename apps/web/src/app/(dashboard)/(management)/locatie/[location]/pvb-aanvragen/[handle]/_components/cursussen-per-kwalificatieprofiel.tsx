@@ -3,7 +3,6 @@
 import { PlusIcon, TrashIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -151,15 +150,14 @@ export function CursussenPerKwalificatieprofiel({
           Hoofdcursus
         </h5>
         <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              {hoofdcursus.code} - {hoofdcursus.title}
-            </span>
-            <Badge color="blue">Hoofdcursus</Badge>
-          </div>
-          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-            De hoofdcursus kan niet gewijzigd worden. Bij wijziging moet de
-            aanvraag ingetrokken worden.
+          <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+            {hoofdcursus.code &&
+              hoofdcursus.code !== "-" &&
+              `${hoofdcursus.code} - `}
+            {hoofdcursus.title || "Geen titel"}
+          </span>
+          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+            Aanpassing vereist intrekken aanvraag
           </p>
         </div>
       </div>
@@ -167,22 +165,36 @@ export function CursussenPerKwalificatieprofiel({
       {/* Aanvullende cursussen */}
       {instructiegroep && (
         <div>
-          <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Aanvullende cursussen
-          </h5>
+          <div className="flex items-center justify-between mb-2">
+            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Aanvullende cursussen
+            </h5>
+            {aanvullendeCursussen.length > 0 && (
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {aanvullendeCursussen.length} cursus
+                {aanvullendeCursussen.length !== 1 ? "sen" : ""}
+              </span>
+            )}
+          </div>
           {aanvullendeCursussen.length > 0 ? (
-            <ul className="space-y-2">
+            <ul className="space-y-1.5">
               {aanvullendeCursussen.map((course) => (
                 <li
                   key={course.id}
-                  className="flex items-center justify-between gap-2 p-2 rounded-md bg-gray-50 dark:bg-gray-800"
+                  className="flex items-center justify-between gap-2 p-2 rounded-md bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   <span className="text-sm text-gray-900 dark:text-gray-100">
-                    {course.code} - {course.title}
+                    {course.code && course.code !== "-" && `${course.code} - `}
+                    {course.title || "Geen titel"}
                   </span>
                   {canEdit && (
-                    <Button plain onClick={() => handleRemoveCourse(course.id)}>
+                    <Button
+                      plain
+                      onClick={() => handleRemoveCourse(course.id)}
+                      className="opacity-70 hover:opacity-100"
+                    >
                       <TrashIcon className="w-4 h-4 text-red-500" />
+                      <span className="sr-only">Verwijder cursus</span>
                     </Button>
                   )}
                 </li>
@@ -190,25 +202,29 @@ export function CursussenPerKwalificatieprofiel({
             </ul>
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-              Geen aanvullende cursussen toegevoegd
+              Geen aanvullende cursussen
             </p>
           )}
         </div>
       )}
 
       {canEdit && instructiegroep && (
-        <Button outline onClick={() => setIsAddDialogOpen(true)}>
+        <Button
+          outline
+          onClick={() => setIsAddDialogOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <PlusIcon data-slot="icon" />
-          Aanvullende cursussen toevoegen
+          Cursussen toevoegen
         </Button>
       )}
 
       <Dialog open={isAddDialogOpen} onClose={setIsAddDialogOpen}>
         <DialogBody>
-          <DialogTitle>Aanvullende cursussen toevoegen</DialogTitle>
+          <DialogTitle>Aanvullende cursussen selecteren</DialogTitle>
           <DialogDescription>
-            Selecteer de aanvullende cursussen die u wilt toevoegen. Deze
-            cursussen zijn gebaseerd op de instructiegroep van de hoofdcursus.
+            Geselecteerde cursussen ontvangen dezelfde kwalificaties bij
+            succesvol behalen van de PvB.
           </DialogDescription>
 
           <div className="mt-4">
@@ -216,25 +232,16 @@ export function CursussenPerKwalificatieprofiel({
               <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded">
                 <Spinner className="h-4 w-4 text-zinc-600" />
                 <Text className="text-sm text-zinc-600">
-                  Beschikbare cursussen laden...
+                  Cursussen laden...
                 </Text>
               </div>
             ) : availableCourses.length > 0 ? (
               <>
-                <div className="bg-zinc-50 p-2.5 rounded border border-zinc-100 mb-3">
-                  <Text className="text-sm text-zinc-600 leading-relaxed">
-                    Door aanvullende cursussen aan te vinken worden de
-                    kwalificaties van deze PvB ook meteen toegepast op deze
-                    cursussen bij succesvol behalen. De aanvrager is er voor
-                    verantwoordelijk enkel cursussen aan te klikken waarin de
-                    kandidaat bekwaam is.
-                  </Text>
-                </div>
-                <CheckboxGroup className="space-y-2 max-h-64 overflow-y-auto">
+                <CheckboxGroup className="space-y-1 max-h-64 overflow-y-auto border border-zinc-200 rounded-md p-2">
                   {availableCourses.map((course) => (
                     <CheckboxField
                       key={course.id}
-                      className="py-2 px-3 rounded hover:bg-zinc-50 border border-transparent hover:border-zinc-200"
+                      className="py-2 px-3 rounded hover:bg-zinc-50"
                     >
                       <Checkbox
                         checked={selectedCourseIds.has(course.id)}
@@ -247,12 +254,14 @@ export function CursussenPerKwalificatieprofiel({
                     </CheckboxField>
                   ))}
                 </CheckboxGroup>
+                <Text className="text-xs text-zinc-500 mt-2">
+                  Selecteer alleen cursussen waarin de kandidaat bekwaam is.
+                </Text>
               </>
             ) : (
               <div className="p-3 bg-zinc-50 rounded border border-zinc-100">
                 <Text className="text-sm text-zinc-500">
-                  Geen aanvullende cursussen beschikbaar voor deze
-                  instructiegroep.
+                  Geen cursussen beschikbaar.
                 </Text>
               </div>
             )}
@@ -272,9 +281,7 @@ export function CursussenPerKwalificatieprofiel({
               onClick={handleAddCourses}
               disabled={selectedCourseIds.size === 0}
             >
-              {selectedCourseIds.size > 0
-                ? `${selectedCourseIds.size} cursus(sen) toevoegen`
-                : "Cursussen toevoegen"}
+              Toevoegen ({selectedCourseIds.size})
             </Button>
           </DialogActions>
         </DialogBody>
