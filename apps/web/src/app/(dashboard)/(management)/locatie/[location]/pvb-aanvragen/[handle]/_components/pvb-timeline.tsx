@@ -24,16 +24,14 @@ function getEventDescription(
 }
 
 function getEventColor(type: string): string {
+  // Using subtle grayscale colors for less visual emphasis
   if (type.includes("gegeven") || type.includes("voltooid")) {
-    return "bg-green-500 dark:bg-green-600";
+    return "bg-gray-600 dark:bg-gray-500"; // Darker gray for positive events
   }
   if (type.includes("geweigerd") || type.includes("ingetrokken")) {
-    return "bg-red-500 dark:bg-red-600";
+    return "bg-gray-400 dark:bg-gray-600"; // Lighter gray for negative events
   }
-  if (type.includes("gevraagd")) {
-    return "bg-yellow-500 dark:bg-yellow-600";
-  }
-  return "bg-blue-500 dark:bg-blue-600";
+  return "bg-gray-500 dark:bg-gray-600"; // Medium gray for neutral events
 }
 
 export default async function PvbTimeline({
@@ -61,44 +59,49 @@ export default async function PvbTimeline({
   return (
     <div className="lg:col-start-3 lg:row-start-1">
       <Subheading>Tijdlijn</Subheading>
-      <div className="mt-4 flow-root">
-        <ul className="-mb-8">
+      <div className="mt-3 flow-root">
+        <ul className="-mb-4">
           {gebeurtenissen.map((gebeurtenis, eventIdx) => (
             <li key={gebeurtenis.id}>
-              <div className="relative pb-8">
+              <div className="relative pb-4">
                 {eventIdx !== gebeurtenissen.length - 1 ? (
                   <span
-                    className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
+                    className="absolute left-2.5 top-2.5 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700"
                     aria-hidden="true"
                   />
                 ) : null}
-                <div className="relative flex space-x-3">
+                <div className="relative flex space-x-2">
                   <div>
                     <span
-                      className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-gray-900 ${getEventColor(
+                      className={`h-5 w-5 rounded-full flex items-center justify-center ring-4 ring-gray-50 dark:ring-gray-900 ${getEventColor(
                         gebeurtenis.gebeurtenisType,
                       )}`}
                     >
-                      <span className="h-2.5 w-2.5 rounded-full bg-white" />
+                      <span className="h-1.5 w-1.5 rounded-full bg-white dark:bg-gray-200" />
                     </span>
                   </div>
-                  <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                    <div>
-                      <Text className="font-medium">
-                        {getEventDescription(
-                          gebeurtenis.gebeurtenisType,
-                          gebeurtenis.data,
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-x-2">
+                      <div className="min-w-0 flex-1">
+                        <Text className="text-xs font-medium leading-tight text-gray-700 dark:text-gray-300">
+                          {getEventDescription(
+                            gebeurtenis.gebeurtenisType,
+                            gebeurtenis.data,
+                          )}
+                        </Text>
+                        {gebeurtenis.reden && (
+                          <Text className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                            {gebeurtenis.reden}
+                          </Text>
                         )}
-                      </Text>
-                      {gebeurtenis.reden && (
-                        <Text className="mt-0.5">{gebeurtenis.reden}</Text>
-                      )}
-                      <Text className="mt-0.5 text-gray-500 dark:text-gray-400">
-                        Door {formatName(gebeurtenis.persoon)}
-                      </Text>
-                    </div>
-                    <div className="whitespace-nowrap text-right text-sm text-gray-500 dark:text-gray-400">
-                      <time dateTime={gebeurtenis.aangemaaktOp}>
+                        <Text className="text-xs text-gray-500 dark:text-gray-400 leading-tight">
+                          Door {formatName(gebeurtenis.persoon)}
+                        </Text>
+                      </div>
+                      <time
+                        dateTime={gebeurtenis.aangemaaktOp}
+                        className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap flex-shrink-0"
+                      >
                         {dayjs(gebeurtenis.aangemaaktOp).format(
                           "DD-MM-YYYY HH:mm",
                         )}

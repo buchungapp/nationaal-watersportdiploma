@@ -162,6 +162,7 @@ export const listWithCourses = wrapQuery(
             id: s.course.id,
             handle: s.course.handle,
             title: s.course.title,
+            code: s.course.abbreviation,
           },
         })
         .from(s.instructieGroep)
@@ -200,6 +201,7 @@ export const listWithCourses = wrapQuery(
               id: course.id,
               handle: course.handle,
               title: course.title,
+              code: course.code,
             });
           }
 

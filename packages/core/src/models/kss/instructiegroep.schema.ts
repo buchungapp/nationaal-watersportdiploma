@@ -15,6 +15,7 @@ export const instructiegroepWithCoursesOutputSchema =
         id: uuidSchema,
         handle: z.string(),
         title: z.string().nullable(),
+        code: z.string().nullable(),
       }),
     ),
   });

@@ -132,24 +132,6 @@ export async function AanvraagCard(props: {
         )}
       </dl>
 
-      <Divider />
-
-      <div>
-        <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">
-          Cursussen
-        </h4>
-        <ul className="space-y-2">
-          {aanvraag.courses.map((course) => (
-            <li key={course.id} className="flex items-center gap-2">
-              <span className="text-sm text-gray-900 dark:text-gray-100">
-                {course.code} - {course.title}
-              </span>
-              {course.isMainCourse && <Badge color="blue">Hoofdcursus</Badge>}
-            </li>
-          ))}
-        </ul>
-      </div>
-
       {aanvraag.status === "wacht_op_voorwaarden" && (
         <>
           <Divider />

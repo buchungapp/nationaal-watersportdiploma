@@ -1,17 +1,23 @@
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
+import { retrievePvbAanvraagByHandle } from "~/lib/nwd";
 import { AanvraagActions } from "./_components/aanvraag-actions";
 import { AanvraagCard } from "./_components/aanvraag-card";
 import PvbTimeline from "./_components/pvb-timeline";
 import { ToetsdocumentenCard } from "./_components/toetsdocumenten-card";
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     location: string;
     handle: string;
   }>;
 }) {
+  const params = await props.params;
+
+  // Fetch the PVB aanvraag details
+  const aanvraag = await retrievePvbAanvraagByHandle(params.handle);
+
   return (
     <>
       <div className="max-lg:hidden">
@@ -35,7 +41,7 @@ export default function Page(props: {
             <Subheading>Toetsdocumenten</Subheading>
           </div>
           <Divider className="mt-4" />
-          <ToetsdocumentenCard params={props.params} />
+          <ToetsdocumentenCard params={props.params} aanvraag={aanvraag} />
         </div>
       </div>
     </>

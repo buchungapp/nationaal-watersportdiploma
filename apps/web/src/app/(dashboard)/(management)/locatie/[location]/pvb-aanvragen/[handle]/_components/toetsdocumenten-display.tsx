@@ -10,6 +10,7 @@ import { CalendarIcon, UserIcon } from "@heroicons/react/20/solid";
 import dayjs from "dayjs";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import { CursussenPerKwalificatieprofiel } from "./cursussen-per-kwalificatieprofiel";
 
 interface Toetsdocumenten {
   kwalificatieprofiel: {
@@ -43,8 +44,17 @@ interface Toetsdocumenten {
   }>;
 }
 
+interface Course {
+  id: string;
+  title: string | null;
+  code: string | null;
+  isMainCourse: boolean;
+}
+
 interface Aanvraag {
   id: string;
+  status: string;
+  courses: Course[];
   onderdelen: Array<{
     id: string;
     kerntaakOnderdeelId: string;
@@ -62,9 +72,11 @@ interface Aanvraag {
 export function ToetsdocumentenDisplay({
   toetsdocumenten,
   aanvraag,
+  params,
 }: {
   toetsdocumenten: Toetsdocumenten;
   aanvraag: Aanvraag;
+  params: { location: string; handle: string };
 }) {
   const formatRichting = (richting: string) => {
     const richtingLabels: Record<string, string> = {
@@ -124,8 +136,34 @@ export function ToetsdocumentenDisplay({
         </h3>
       </div>
 
+      {/* Cursussen Section */}
+      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 border-b border-gray-200 dark:border-gray-700">
+          <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+            Cursussen
+          </h4>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Beheer de cursussen voor dit kwalificatieprofiel. Er moet altijd een
+            hoofdcursus ingesteld zijn.
+          </p>
+        </div>
+        <div className="p-4">
+          <CursussenPerKwalificatieprofiel
+            pvbAanvraagId={aanvraag.id}
+            locationHandle={params.location}
+            existingCourses={aanvraag.courses}
+            status={aanvraag.status}
+            richting={toetsdocumenten.kwalificatieprofiel.richting}
+          />
+        </div>
+      </div>
+
       {/* Kerntaken */}
       <div className="space-y-4">
+        <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+          Toetsdocumenten
+        </h4>
+
         {toetsdocumenten.kerntaken.map((kerntaak) => (
           <div
             key={kerntaak.id}

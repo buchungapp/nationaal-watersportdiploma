@@ -1,6 +1,6 @@
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
-import { and, countDistinct, desc, eq, sql } from "drizzle-orm";
+import { and, countDistinct, desc, eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
@@ -2182,7 +2182,8 @@ export const listGebeurtenissen = wrapCommand(
           persoonLastName: s.person.lastName,
         })
         .from(s.pvbGebeurtenis)
-        .innerJoin(s.person, eq(s.pvbGebeurtenis.aangemaaktDoor, s.person.id))
+        .innerJoin(s.actor, eq(s.pvbGebeurtenis.aangemaaktDoor, s.actor.id))
+        .innerJoin(s.person, eq(s.actor.personId, s.person.id))
         .where(eq(s.pvbGebeurtenis.pvbAanvraagId, input.pvbAanvraagId))
         .orderBy(desc(s.pvbGebeurtenis.aangemaaktOp));
 
@@ -2214,116 +2215,153 @@ export const getToetsdocumenten = wrapCommand(
     z.object({
       pvbAanvraagId: z.string().uuid(),
     }),
-    z.object({
-      kerntaken: z.array(
-        z.object({
+    z
+      .object({
+        kerntaken: z.array(
+          z.object({
+            id: z.string().uuid(),
+            titel: z.string(),
+            type: z.enum(["verplicht", "facultatief"]),
+            rang: z.number().int().nullable(),
+            onderdelen: z.array(
+              z.object({
+                id: z.string().uuid(),
+                type: z.enum(["portfolio", "praktijk"]),
+                pvbOnderdeelId: z.string().uuid().nullable(),
+                behaaldStatus: z.enum([
+                  "behaald",
+                  "niet_behaald",
+                  "nog_niet_bekend",
+                ]),
+                werkprocessen: z.array(
+                  z.object({
+                    id: z.string().uuid(),
+                    titel: z.string(),
+                    resultaat: z.string(),
+                    rang: z.number(),
+                    beoordelingscriteria: z.array(
+                      z.object({
+                        id: z.string().uuid(),
+                        title: z.string(),
+                        omschrijving: z.string().nullable(),
+                        rang: z.number().nullable(),
+                      }),
+                    ),
+                  }),
+                ),
+              }),
+            ),
+          }),
+        ),
+        kwalificatieprofiel: z.object({
           id: z.string().uuid(),
           titel: z.string(),
-          type: z.enum(["verplicht", "facultatief"]),
-          rang: z.number().int().nullable(),
-          onderdelen: z.array(
-            z.object({
-              id: z.string().uuid(),
-              type: z.enum(["portfolio", "praktijk"]),
-              pvbOnderdeelId: z.string().uuid().nullable(),
-              behaaldStatus: z.enum([
-                "behaald",
-                "niet_behaald",
-                "nog_niet_bekend",
-              ]),
-              werkprocessen: z.array(
-                z.object({
-                  id: z.string().uuid(),
-                  titel: z.string(),
-                  resultaat: z.string(),
-                  rang: z.number(),
-                  beoordelingscriteria: z.array(
-                    z.object({
-                      id: z.string().uuid(),
-                      title: z.string(),
-                      omschrijving: z.string().nullable(),
-                      rang: z.number().nullable(),
-                    }),
-                  ),
-                }),
-              ),
-            }),
-          ),
+          richting: z.enum(["instructeur", "leercoach", "pvb_beoordelaar"]),
+          niveau: z.object({
+            id: z.string().uuid(),
+            rang: z.number(),
+          }),
         }),
-      ),
-      kwalificatieprofiel: z.object({
-        id: z.string().uuid(),
-        titel: z.string(),
-        richting: z.enum(["instructeur", "leercoach", "pvb_beoordelaar"]),
-        niveau: z.object({
-          id: z.string().uuid(),
-          rang: z.number(),
-        }),
-      }),
-    }),
+      })
+      .array()
+      .nonempty(),
     async (input) => {
       const query = useQuery();
 
-      // First get the kwalificatieprofiel from the aanvraag's onderdelen
-      const profielResults = await query
-        .selectDistinct({
+      // Single optimized query to get all data at once
+      const toetsdocumentData = await query
+        .select({
+          // Kwalificatieprofiel info
           kwalificatieprofielId: s.kwalificatieprofiel.id,
           kwalificatieprofielTitel: s.kwalificatieprofiel.titel,
           kwalificatieprofielRichting: s.kwalificatieprofiel.richting,
           niveauId: s.niveau.id,
           niveauRang: s.niveau.rang,
+
+          // Kerntaak info
+          kerntaakId: s.kerntaak.id,
+          kerntaakTitel: s.kerntaak.titel,
+          kerntaakType: s.kerntaak.type,
+          kerntaakRang: s.kerntaak.rang,
+
+          // Onderdeel info (from two sources)
+          onderdeelId: s.kerntaakOnderdeel.id,
+          onderdeelType: s.kerntaakOnderdeel.type,
+          pvbOnderdeelId: s.pvbOnderdeel.id,
+          pvbOnderdeelUitslag: s.pvbOnderdeel.uitslag,
+
+          // Werkproces info
+          werkprocesId: s.werkproces.id,
+          werkprocesTitel: s.werkproces.titel,
+          werkprocesResultaat: s.werkproces.resultaat,
+          werkprocesRang: s.werkproces.rang,
+
+          // Beoordelingscriterium info
+          criteriumId: s.beoordelingscriterium.id,
+          criteriumTitle: s.beoordelingscriterium.title,
+          criteriumOmschrijving: s.beoordelingscriterium.omschrijving,
+          criteriumRang: s.beoordelingscriterium.rang,
         })
         .from(s.pvbOnderdeel)
-        .innerJoin(s.kerntaak, eq(s.pvbOnderdeel.kerntaakId, s.kerntaak.id))
+        .innerJoin(
+          s.kerntaakOnderdeel,
+          eq(s.pvbOnderdeel.kerntaakOnderdeelId, s.kerntaakOnderdeel.id),
+        )
+        .innerJoin(
+          s.kerntaak,
+          eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id),
+        )
         .innerJoin(
           s.kwalificatieprofiel,
           eq(s.kerntaak.kwalificatieprofielId, s.kwalificatieprofiel.id),
         )
         .innerJoin(s.niveau, eq(s.kwalificatieprofiel.niveauId, s.niveau.id))
+        .leftJoin(
+          s.werkprocesKerntaakOnderdeel,
+          eq(
+            s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
+            s.kerntaakOnderdeel.id,
+          ),
+        )
+        .leftJoin(
+          s.werkproces,
+          and(
+            eq(s.werkprocesKerntaakOnderdeel.werkprocesId, s.werkproces.id),
+            eq(s.werkproces.kerntaakId, s.kerntaak.id),
+          ),
+        )
+        .leftJoin(
+          s.beoordelingscriterium,
+          eq(s.beoordelingscriterium.werkprocesId, s.werkproces.id),
+        )
         .where(eq(s.pvbOnderdeel.pvbAanvraagId, input.pvbAanvraagId))
-        .limit(1);
+        .orderBy(
+          s.kwalificatieprofiel.titel,
+          s.kerntaak.rang,
+          s.kerntaak.titel,
+          s.werkproces.rang,
+          s.werkproces.titel,
+          s.beoordelingscriterium.rang,
+        );
 
-      if (profielResults.length === 0) {
-        throw new Error("Geen kwalificatieprofiel gevonden voor deze aanvraag");
+      if (toetsdocumentData.length === 0) {
+        throw new Error("Geen toetsdocumenten gevonden voor deze aanvraag");
       }
 
-      const profiel = singleRow(profielResults);
+      // Also get all kerntaken for each found kwalificatieprofiel (including ones without pvbOnderdeel)
+      const kwalificatieprofielIds = [
+        ...new Set(toetsdocumentData.map((row) => row.kwalificatieprofielId)),
+      ];
 
-      // Get all kerntaken for this kwalificatieprofiel with their onderdelen
-      const kerntaken = await query
+      const allKerntakenData = await query
         .select({
+          kwalificatieprofielId: s.kwalificatieprofiel.id,
           kerntaakId: s.kerntaak.id,
           kerntaakTitel: s.kerntaak.titel,
           kerntaakType: s.kerntaak.type,
           kerntaakRang: s.kerntaak.rang,
           onderdeelId: s.kerntaakOnderdeel.id,
           onderdeelType: s.kerntaakOnderdeel.type,
-          pvbOnderdeelId: s.pvbOnderdeel.id,
-          pvbOnderdeelUitslag: s.pvbOnderdeel.uitslag,
-        })
-        .from(s.kerntaak)
-        .innerJoin(
-          s.kerntaakOnderdeel,
-          eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id),
-        )
-        .leftJoin(
-          s.pvbOnderdeel,
-          and(
-            eq(s.pvbOnderdeel.kerntaakOnderdeelId, s.kerntaakOnderdeel.id),
-            eq(s.pvbOnderdeel.pvbAanvraagId, input.pvbAanvraagId),
-          ),
-        )
-        .where(
-          eq(s.kerntaak.kwalificatieprofielId, profiel.kwalificatieprofielId),
-        )
-        .orderBy(s.kerntaak.rang, s.kerntaak.titel);
-
-      // Get werkprocessen per onderdeel with beoordelingscriteria
-      const werkprocessenPerOnderdeel = await query
-        .select({
-          kerntaakOnderdeelId:
-            s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
-          kerntaakId: s.werkprocesKerntaakOnderdeel.kerntaakId,
           werkprocesId: s.werkproces.id,
           werkprocesTitel: s.werkproces.titel,
           werkprocesResultaat: s.werkproces.resultaat,
@@ -2333,70 +2371,134 @@ export const getToetsdocumenten = wrapCommand(
           criteriumOmschrijving: s.beoordelingscriterium.omschrijving,
           criteriumRang: s.beoordelingscriterium.rang,
         })
-        .from(s.werkprocesKerntaakOnderdeel)
+        .from(s.kwalificatieprofiel)
         .innerJoin(
+          s.kerntaak,
+          eq(s.kerntaak.kwalificatieprofielId, s.kwalificatieprofiel.id),
+        )
+        .innerJoin(
+          s.kerntaakOnderdeel,
+          eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id),
+        )
+        .leftJoin(
+          s.werkprocesKerntaakOnderdeel,
+          eq(
+            s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
+            s.kerntaakOnderdeel.id,
+          ),
+        )
+        .leftJoin(
           s.werkproces,
           and(
             eq(s.werkprocesKerntaakOnderdeel.werkprocesId, s.werkproces.id),
-            eq(
-              s.werkprocesKerntaakOnderdeel.kerntaakId,
-              s.werkproces.kerntaakId,
-            ),
+            eq(s.werkproces.kerntaakId, s.kerntaak.id),
           ),
         )
-        .innerJoin(s.kerntaak, eq(s.werkproces.kerntaakId, s.kerntaak.id))
         .leftJoin(
           s.beoordelingscriterium,
           eq(s.beoordelingscriterium.werkprocesId, s.werkproces.id),
         )
-        .where(
-          eq(s.kerntaak.kwalificatieprofielId, profiel.kwalificatieprofielId),
-        )
+        .where(inArray(s.kwalificatieprofiel.id, kwalificatieprofielIds))
         .orderBy(
+          s.kerntaak.rang,
+          s.kerntaak.titel,
           s.werkproces.rang,
           s.werkproces.titel,
           s.beoordelingscriterium.rang,
         );
 
-      // Group data by kerntaak and onderdeel
-      const kerntaakMap = new Map<
+      // Build a map of pvbOnderdeel status by kerntaakOnderdeelId
+      const pvbOnderdeelStatusMap = new Map<
         string,
         {
-          id: string;
-          titel: string;
-          type: "verplicht" | "facultatief";
-          rang: number | null;
-          onderdelen: Map<
-            string,
-            {
-              id: string;
-              type: "portfolio" | "praktijk";
-              pvbOnderdeelId: string | null;
-              behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
-              werkprocessen: Map<
-                string,
-                {
-                  id: string;
-                  titel: string;
-                  resultaat: string;
-                  rang: number;
-                  beoordelingscriteria: Array<{
-                    id: string;
-                    title: string;
-                    omschrijving: string | null;
-                    rang: number | null;
-                  }>;
-                }
-              >;
-            }
-          >;
+          pvbOnderdeelId: string;
+          behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
         }
       >();
 
-      // Process kerntaken and onderdelen
-      for (const row of kerntaken) {
-        if (!kerntaakMap.has(row.kerntaakId)) {
-          kerntaakMap.set(row.kerntaakId, {
+      for (const row of toetsdocumentData) {
+        if (row.pvbOnderdeelId && !pvbOnderdeelStatusMap.has(row.onderdeelId)) {
+          pvbOnderdeelStatusMap.set(row.onderdeelId, {
+            pvbOnderdeelId: row.pvbOnderdeelId,
+            behaaldStatus: row.pvbOnderdeelUitslag || "nog_niet_bekend",
+          });
+        }
+      }
+
+      // Build the result structure grouped by kwalificatieprofiel
+      type KwalificatieStructure = {
+        kwalificatieprofiel: {
+          id: string;
+          titel: string;
+          richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
+          niveau: {
+            id: string;
+            rang: number;
+          };
+        };
+        kerntaken: Map<
+          string,
+          {
+            id: string;
+            titel: string;
+            type: "verplicht" | "facultatief";
+            rang: number | null;
+            onderdelen: Map<
+              string,
+              {
+                id: string;
+                type: "portfolio" | "praktijk";
+                pvbOnderdeelId: string | null;
+                behaaldStatus: "behaald" | "niet_behaald" | "nog_niet_bekend";
+                werkprocessen: Map<
+                  string,
+                  {
+                    id: string;
+                    titel: string;
+                    resultaat: string;
+                    rang: number;
+                    beoordelingscriteria: Array<{
+                      id: string;
+                      title: string;
+                      omschrijving: string | null;
+                      rang: number | null;
+                    }>;
+                  }
+                >;
+              }
+            >;
+          }
+        >;
+      };
+
+      const kwalificatieMap = new Map<string, KwalificatieStructure>();
+
+      // First, create kwalificatieprofiel entries from toetsdocumentData
+      for (const row of toetsdocumentData) {
+        if (!kwalificatieMap.has(row.kwalificatieprofielId)) {
+          kwalificatieMap.set(row.kwalificatieprofielId, {
+            kwalificatieprofiel: {
+              id: row.kwalificatieprofielId,
+              titel: row.kwalificatieprofielTitel,
+              richting: row.kwalificatieprofielRichting,
+              niveau: {
+                id: row.niveauId,
+                rang: row.niveauRang,
+              },
+            },
+            kerntaken: new Map(),
+          });
+        }
+      }
+
+      // Process all kerntaken data (includes ones without pvbOnderdeel)
+      for (const row of allKerntakenData) {
+        const kwalificatie = kwalificatieMap.get(row.kwalificatieprofielId);
+        if (!kwalificatie) continue;
+
+        // Add kerntaak
+        if (!kwalificatie.kerntaken.has(row.kerntaakId)) {
+          kwalificatie.kerntaken.set(row.kerntaakId, {
             id: row.kerntaakId,
             titel: row.kerntaakTitel,
             type: row.kerntaakType,
@@ -2405,78 +2507,83 @@ export const getToetsdocumenten = wrapCommand(
           });
         }
 
-        const kerntaak = kerntaakMap.get(row.kerntaakId);
+        const kerntaak = kwalificatie.kerntaken.get(row.kerntaakId);
         if (!kerntaak) continue;
 
+        // Add onderdeel
         if (!kerntaak.onderdelen.has(row.onderdeelId)) {
+          const pvbStatus = pvbOnderdeelStatusMap.get(row.onderdeelId);
           kerntaak.onderdelen.set(row.onderdeelId, {
             id: row.onderdeelId,
             type: row.onderdeelType,
-            pvbOnderdeelId: row.pvbOnderdeelId,
-            behaaldStatus: row.pvbOnderdeelUitslag || "nog_niet_bekend",
+            pvbOnderdeelId: pvbStatus?.pvbOnderdeelId || null,
+            behaaldStatus: pvbStatus?.behaaldStatus || "nog_niet_bekend",
             werkprocessen: new Map(),
+          });
+        }
+
+        const onderdeel = kerntaak.onderdelen.get(row.onderdeelId);
+        if (!onderdeel || !row.werkprocesId) continue;
+
+        // Add werkproces
+        if (!onderdeel.werkprocessen.has(row.werkprocesId)) {
+          onderdeel.werkprocessen.set(row.werkprocesId, {
+            id: row.werkprocesId,
+            titel: row.werkprocesTitel || "",
+            resultaat: row.werkprocesResultaat || "",
+            rang: row.werkprocesRang || 0,
+            beoordelingscriteria: [],
+          });
+        }
+
+        const werkproces = onderdeel.werkprocessen.get(row.werkprocesId);
+        if (!werkproces) continue;
+
+        // Add beoordelingscriterium
+        if (
+          row.criteriumId &&
+          !werkproces.beoordelingscriteria.some((c) => c.id === row.criteriumId)
+        ) {
+          werkproces.beoordelingscriteria.push({
+            id: row.criteriumId,
+            title: row.criteriumTitle || "",
+            omschrijving: row.criteriumOmschrijving,
+            rang: row.criteriumRang,
           });
         }
       }
 
-      // Process werkprocessen per onderdeel and criteria
-      for (const row of werkprocessenPerOnderdeel) {
-        // Find the kerntaak that contains this onderdeel
-        for (const [, kerntaak] of kerntaakMap) {
-          const onderdeel = kerntaak.onderdelen.get(row.kerntaakOnderdeelId);
-          if (!onderdeel) continue;
-
-          if (!onderdeel.werkprocessen.has(row.werkprocesId)) {
-            onderdeel.werkprocessen.set(row.werkprocesId, {
-              id: row.werkprocesId,
-              titel: row.werkprocesTitel,
-              resultaat: row.werkprocesResultaat,
-              rang: row.werkprocesRang,
-              beoordelingscriteria: [],
-            });
-          }
-
-          const werkproces = onderdeel.werkprocessen.get(row.werkprocesId);
-          if (!werkproces) continue;
-
-          if (row.criteriumId) {
-            werkproces.beoordelingscriteria.push({
-              id: row.criteriumId,
-              title: row.criteriumTitle || "",
-              omschrijving: row.criteriumOmschrijving,
-              rang: row.criteriumRang,
-            });
-          }
-        }
-      }
-
-      // Convert maps to arrays
-      const kerntakenArray = Array.from(kerntaakMap.values()).map(
-        (kerntaak) => ({
-          ...kerntaak,
-          onderdelen: Array.from(kerntaak.onderdelen.values()).map(
-            (onderdeel) => ({
-              ...onderdeel,
-              werkprocessen: Array.from(onderdeel.werkprocessen.values()).sort(
-                (a, b) => a.rang - b.rang,
+      // Convert maps to arrays and sort
+      const result = Array.from(kwalificatieMap.values()).map(
+        (kwalificatie) => ({
+          kwalificatieprofiel: kwalificatie.kwalificatieprofiel,
+          kerntaken: Array.from(kwalificatie.kerntaken.values())
+            .map((kerntaak) => ({
+              ...kerntaak,
+              onderdelen: Array.from(kerntaak.onderdelen.values()).map(
+                (onderdeel) => ({
+                  ...onderdeel,
+                  werkprocessen: Array.from(
+                    onderdeel.werkprocessen.values(),
+                  ).sort((a, b) => a.rang - b.rang),
+                }),
               ),
+            }))
+            .sort((a, b) => {
+              if (a.rang !== null && b.rang !== null) return a.rang - b.rang;
+              if (a.rang !== null) return -1;
+              if (b.rang !== null) return 1;
+              return a.titel.localeCompare(b.titel);
             }),
-          ),
         }),
       );
 
-      return {
-        kerntaken: kerntakenArray,
-        kwalificatieprofiel: {
-          id: profiel.kwalificatieprofielId,
-          titel: profiel.kwalificatieprofielTitel,
-          richting: profiel.kwalificatieprofielRichting,
-          niveau: {
-            id: profiel.niveauId,
-            rang: profiel.niveauRang,
-          },
-        },
-      };
+      // Ensure non-empty array as required by schema
+      if (result.length === 0) {
+        throw new Error("Geen toetsdocumenten gevonden voor deze aanvraag");
+      }
+
+      return result as [(typeof result)[0]];
     },
   ),
 );
