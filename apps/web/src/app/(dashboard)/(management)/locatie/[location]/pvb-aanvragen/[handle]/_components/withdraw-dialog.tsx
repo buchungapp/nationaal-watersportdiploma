@@ -10,9 +10,9 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { grantPvbLeercoachPermissionAction } from "../actions";
+import { withdrawPvbAanvraagAction } from "../actions";
 
-export function PermissionDialog({
+export function WithdrawDialog({
   open,
   onClose,
   params,
@@ -25,11 +25,11 @@ export function PermissionDialog({
   const [reason, setReason] = useState("");
   const router = useRouter();
 
-  const handleGrantPermission = async () => {
+  const handleWithdraw = async () => {
     startTransition(async () => {
       try {
         const resolvedParams = await params;
-        await grantPvbLeercoachPermissionAction(
+        await withdrawPvbAanvraagAction(
           resolvedParams.handle,
           reason || undefined,
         );
@@ -38,7 +38,7 @@ export function PermissionDialog({
         onClose();
         setReason(""); // Reset the form
       } catch (error) {
-        console.error("Failed to grant leercoach permission:", error);
+        console.error("Failed to withdraw aanvraag:", error);
       }
     });
   };
@@ -50,17 +50,17 @@ export function PermissionDialog({
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Toestemming namens leercoach</DialogTitle>
+      <DialogTitle>Aanvraag intrekken</DialogTitle>
       <DialogBody>
         <div className="space-y-4">
           <div className="space-y-3">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              U staat op het punt om toestemming te geven namens de leercoach
-              voor deze PvB aanvraag.
+              Weet u zeker dat u deze PvB aanvraag wilt intrekken? Deze actie
+              kan niet ongedaan gemaakt worden.
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Deze actie geeft toestemming voor de beoordeling namens de
-              toegewezen leercoach.
+              Na het intrekken van de aanvraag zal deze niet meer beoordeeld
+              kunnen worden en zal de status wijzigen naar "Ingetrokken".
             </p>
           </div>
           <div>
@@ -68,7 +68,7 @@ export function PermissionDialog({
               htmlFor="reason"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              Reden (optioneel)
+              Reden voor intrekken (optioneel)
             </label>
             <Textarea
               id="reason"
@@ -76,7 +76,7 @@ export function PermissionDialog({
               rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Geef een reden op voor het verlenen van toestemming namens de leercoach..."
+              placeholder="Geef een reden op voor het intrekken van deze aanvraag..."
               className="w-full"
             />
           </div>
@@ -88,11 +88,11 @@ export function PermissionDialog({
         </Button>
         <Button
           type="button"
-          color="branding-orange"
-          onClick={handleGrantPermission}
+          color="red"
+          onClick={handleWithdraw}
           disabled={isPending}
         >
-          {isPending ? "Bezig..." : "Toestemming geven"}
+          {isPending ? "Bezig..." : "Intrekken"}
         </Button>
       </DialogActions>
     </Dialog>

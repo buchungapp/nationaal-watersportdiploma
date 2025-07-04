@@ -3584,6 +3584,19 @@ export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
   });
 };
 
+export const getPvbBeoordelingsCriteria = async (pvbAanvraagId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const result = await Pvb.Aanvraag.getBeoordelingsCriteria({
+      pvbAanvraagId,
+    });
+
+    return result;
+  });
+};
+
 export const updatePvbLeercoach = async ({
   pvbAanvraagId,
   leercoachId,
@@ -3595,10 +3608,26 @@ export const updatePvbLeercoach = async ({
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
+      handle: pvbAanvraagId,
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
     await Pvb.Aanvraag.updateLeercoach({
       pvbAanvraagId,
       leercoachId,
-      aangemaaktDoor: primaryPerson.id,
+      aangemaaktDoor: locationAdminActor.id,
     });
   });
 };
@@ -3614,10 +3643,26 @@ export const updatePvbBeoordelaar = async ({
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
+      handle: pvbAanvraagId,
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
     await Pvb.Aanvraag.updateBeoordelaarForAll({
       pvbAanvraagId,
       beoordelaarId,
-      aangemaaktDoor: primaryPerson.id,
+      aangemaaktDoor: locationAdminActor.id,
     });
   });
 };
@@ -3633,15 +3678,67 @@ export const updatePvbStartTime = async ({
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
+      handle: pvbAanvraagId,
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
     await Pvb.Aanvraag.updateStartTime({
       pvbAanvraagId,
       startDatumTijd,
-      aangemaaktDoor: primaryPerson.id,
+      aangemaaktDoor: locationAdminActor.id,
     });
   });
 };
 
 export const grantPvbLeercoachPermission = async ({
+  pvbAanvraagId,
+  reden,
+}: {
+  pvbAanvraagId: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
+      handle: pvbAanvraagId,
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.grantLeercoachPermission({
+      pvbAanvraagId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden:
+        reden || "Toestemming gegeven door locatiebeheerder namens leercoach",
+    });
+  });
+};
+
+export const submitPvbAanvraag = async ({
   pvbAanvraagId,
 }: {
   pvbAanvraagId: string;
@@ -3650,9 +3747,61 @@ export const grantPvbLeercoachPermission = async ({
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await Pvb.Aanvraag.grantLeercoachPermission({
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
+      handle: pvbAanvraagId,
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.submitAanvraag({
       pvbAanvraagId,
-      aangemaaktDoor: primaryPerson.id,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: "Aanvraag geactiveerd via locatiebeheer",
+    });
+  });
+};
+
+export const withdrawPvbAanvraag = async ({
+  pvbAanvraagId,
+  reden,
+}: {
+  pvbAanvraagId: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({
+      handle: pvbAanvraagId,
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.withdrawAanvraag({
+      pvbAanvraagId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Aanvraag ingetrokken via locatiebeheer",
     });
   });
 };

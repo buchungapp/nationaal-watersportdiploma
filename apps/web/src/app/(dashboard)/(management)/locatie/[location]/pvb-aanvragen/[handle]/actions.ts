@@ -3,9 +3,11 @@
 import {
   grantPvbLeercoachPermission,
   retrievePvbAanvraagByHandle,
+  submitPvbAanvraag,
   updatePvbBeoordelaar,
   updatePvbLeercoach,
   updatePvbStartTime,
+  withdrawPvbAanvraag,
 } from "~/lib/nwd";
 
 export async function updatePvbLeercoachAction(
@@ -41,9 +43,31 @@ export async function updatePvbStartTimeAction(
   });
 }
 
-export async function grantPvbLeercoachPermissionAction(handle: string) {
+export async function grantPvbLeercoachPermissionAction(
+  handle: string,
+  reason?: string,
+) {
   const aanvraag = await retrievePvbAanvraagByHandle(handle);
   await grantPvbLeercoachPermission({
     pvbAanvraagId: aanvraag.id,
+    reden: reason,
+  });
+}
+
+export async function submitPvbAanvraagAction(handle: string) {
+  const aanvraag = await retrievePvbAanvraagByHandle(handle);
+  await submitPvbAanvraag({
+    pvbAanvraagId: aanvraag.id,
+  });
+}
+
+export async function withdrawPvbAanvraagAction(
+  handle: string,
+  reason?: string,
+) {
+  const aanvraag = await retrievePvbAanvraagByHandle(handle);
+  await withdrawPvbAanvraag({
+    pvbAanvraagId: aanvraag.id,
+    reden: reason,
   });
 }

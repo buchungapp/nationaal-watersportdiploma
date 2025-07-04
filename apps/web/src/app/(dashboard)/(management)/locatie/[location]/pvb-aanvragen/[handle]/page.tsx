@@ -28,7 +28,11 @@ export default async function Page(props: {
         <div className="lg:col-start-3 lg:row-end-1">
           <div className="flex justify-between items-center">
             <Subheading>PvB Aanvraag</Subheading>
-            <AanvraagActions params={props.params} />
+            <AanvraagActions
+              params={props.params}
+              aanvraag={aanvraag}
+              locatieId={aanvraag.locatie.id}
+            />
           </div>
           <Divider className="mt-4" />
           <AanvraagCard params={props.params} />

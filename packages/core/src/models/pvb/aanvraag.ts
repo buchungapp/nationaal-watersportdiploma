@@ -2616,6 +2616,54 @@ export const updateLeercoach = wrapCommand(
   ),
 );
 
+// Get beoordelingscriteria status for all onderdelen in a PvB aanvraag
+export const getBeoordelingsCriteria = wrapCommand(
+  "pvb.getBeoordelingsCriteria",
+  withZod(
+    z.object({
+      pvbAanvraagId: z.string().uuid(),
+    }),
+    z.object({
+      items: z.array(
+        z.object({
+          pvbOnderdeelId: z.string().uuid(),
+          kerntaakId: z.string().uuid(),
+          beoordelingscriteriumId: z.string().uuid(),
+          behaald: z.boolean().nullable(),
+          opmerkingen: z.string().nullable(),
+        }),
+      ),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      // Get all beoordelingscriteria for all onderdelen in this aanvraag
+      const results = await query
+        .select({
+          pvbOnderdeelId: s.pvbOnderdeelBeoordelingsCriterium.pvbOnderdeelId,
+          kerntaakId: s.pvbOnderdeelBeoordelingsCriterium.kerntaakId,
+          beoordelingscriteriumId:
+            s.pvbOnderdeelBeoordelingsCriterium.beoordelingscriteriumId,
+          behaald: s.pvbOnderdeelBeoordelingsCriterium.behaald,
+          opmerkingen: s.pvbOnderdeelBeoordelingsCriterium.opmerkingen,
+        })
+        .from(s.pvbOnderdeelBeoordelingsCriterium)
+        .innerJoin(
+          s.pvbOnderdeel,
+          eq(
+            s.pvbOnderdeel.id,
+            s.pvbOnderdeelBeoordelingsCriterium.pvbOnderdeelId,
+          ),
+        )
+        .where(eq(s.pvbOnderdeel.pvbAanvraagId, input.pvbAanvraagId));
+
+      return {
+        items: results,
+      };
+    },
+  ),
+);
+
 // Update beoordelaar for all onderdelen in a single PvB aanvraag
 export const updateBeoordelaarForAll = wrapCommand(
   "pvb.updateBeoordelaarForAll",

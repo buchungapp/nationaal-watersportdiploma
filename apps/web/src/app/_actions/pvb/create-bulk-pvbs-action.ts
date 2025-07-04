@@ -1,6 +1,6 @@
 "use server";
 
-import { Pvb } from "@nawadi/core";
+import { Location, Pvb } from "@nawadi/core";
 import dayjs from "dayjs";
 import { createSafeActionClient } from "next-safe-action";
 import { revalidatePath } from "next/cache";
@@ -118,12 +118,14 @@ export const createBulkPvbsAction = actionClient
       const { locationHandle, formData } = parsedInput;
       const location = await retrieveLocationByHandle(locationHandle);
       const user = await getUserOrThrow();
-
       const primaryPerson = await getPrimaryPerson(user);
-      const locationAdminActor = primaryPerson.actors.find(
-        (actor) =>
-          actor.type === "location_admin" && actor.locationId === location.id,
-      );
+
+      const locationAdminActor =
+        await Location.Person.getActorByPersonIdAndType({
+          locationId: location.id,
+          actorType: "location_admin",
+          personId: primaryPerson.id,
+        });
 
       if (!locationAdminActor) {
         throw new Error("Aanvrager is geen locatiebeheerder");

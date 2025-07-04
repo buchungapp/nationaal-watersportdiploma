@@ -69,24 +69,25 @@ interface Aanvraag {
   }>;
 }
 
+interface BeoordelingsCriterium {
+  pvbOnderdeelId: string;
+  kerntaakId: string;
+  beoordelingscriteriumId: string;
+  behaald: boolean | null;
+  opmerkingen: string | null;
+}
+
 export function ToetsdocumentenDisplay({
   toetsdocumenten,
   aanvraag,
   params,
+  beoordelingsCriteria,
 }: {
   toetsdocumenten: Toetsdocumenten;
   aanvraag: Aanvraag;
   params: { location: string; handle: string };
+  beoordelingsCriteria: BeoordelingsCriterium[];
 }) {
-  const formatRichting = (richting: string) => {
-    const richtingLabels: Record<string, string> = {
-      instructeur: "Instructeur",
-      leercoach: "Leercoach",
-      pvb_beoordelaar: "PvB Beoordelaar",
-    };
-    return richtingLabels[richting] || richting;
-  };
-
   const formatOnderdeelType = (type: string) => {
     const typeLabels: Record<string, string> = {
       portfolio: "Portfolio",
@@ -126,6 +127,47 @@ export function ToetsdocumentenDisplay({
       onderdeel,
     ]),
   );
+
+  // Create a map to quickly lookup beoordelingscriteria status
+  const criteriaStatusMap = new Map(
+    beoordelingsCriteria.map((criteria) => [
+      `${criteria.pvbOnderdeelId}-${criteria.beoordelingscriteriumId}`,
+      criteria,
+    ]),
+  );
+
+  // Helper function to get werkproces status based on its beoordelingscriteria
+  const getWerkprocesStatus = (
+    pvbOnderdeelId: string | null,
+    werkproces: { beoordelingscriteria: Array<{ id: string }> },
+  ): "checked" | "indeterminate" | "unchecked" => {
+    if (!pvbOnderdeelId) return "unchecked";
+
+    // If there are no beoordelingscriteria, return unchecked
+    if (werkproces.beoordelingscriteria.length === 0) return "unchecked";
+
+    let behaaldCount = 0;
+    const totalCount = werkproces.beoordelingscriteria.length;
+
+    for (const criterium of werkproces.beoordelingscriteria) {
+      const key = `${pvbOnderdeelId}-${criterium.id}`;
+      const criteriumStatus = criteriaStatusMap.get(key);
+      if (criteriumStatus?.behaald === true) {
+        behaaldCount++;
+      }
+    }
+
+    // All criteria are behaald
+    if (behaaldCount === totalCount) {
+      return "checked";
+    }
+    // Some (but not all) criteria are behaald
+    if (behaaldCount > 0) {
+      return "indeterminate";
+    }
+    // No criteria are behaald
+    return "unchecked";
+  };
 
   return (
     <div className="space-y-6">
@@ -248,84 +290,124 @@ export function ToetsdocumentenDisplay({
                             Werkprocessen:
                           </h6>
                           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {onderdeel.werkprocessen.map((werkproces) => (
-                              <Disclosure
-                                key={werkproces.id}
-                                defaultOpen={false}
-                              >
-                                {({ open }) => (
-                                  <div>
-                                    <DisclosureButton className="flex w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                      <div className="flex items-start gap-3 flex-1">
-                                        <div className="mt-0.5">
-                                          {open ? (
-                                            <ChevronDownIcon className="h-5 w-5 text-gray-500" />
-                                          ) : (
-                                            <ChevronRightIcon className="h-5 w-5 text-gray-500" />
-                                          )}
-                                        </div>
-                                        <div className="mt-1">
-                                          <Checkbox
-                                            checked={false}
-                                            disabled
-                                            className="pointer-events-none"
-                                          />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-baseline gap-2">
-                                            <h6 className="font-medium text-gray-900 dark:text-gray-100">
-                                              {werkproces.titel}
-                                            </h6>
-                                          </div>
-                                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-justify">
-                                            {werkproces.resultaat}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </DisclosureButton>
+                            {onderdeel.werkprocessen.map((werkproces) => {
+                              const werkprocesStatus = getWerkprocesStatus(
+                                pvbData?.id || null,
+                                werkproces,
+                              );
 
-                                    <DisclosurePanel className="pr-4 pl-8 pb-3">
-                                      {werkproces.beoordelingscriteria.length >
-                                        0 && (
-                                        <div className="ml-11 mt-2 space-y-2">
-                                          <h6 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                            Beoordelingscriteria
-                                          </h6>
-                                          <div className="space-y-2">
-                                            {werkproces.beoordelingscriteria.map(
-                                              (criterium) => (
-                                                <div
-                                                  key={criterium.id}
-                                                  className="flex items-start gap-3"
-                                                >
-                                                  <div className="mt-0.5">
-                                                    <Checkbox
-                                                      checked={false}
-                                                      disabled
-                                                      className="pointer-events-none"
-                                                    />
-                                                  </div>
-                                                  <div className="flex-1 pt-0.5">
-                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                      {criterium.title}
-                                                    </p>
-                                                    {criterium.omschrijving && (
-                                                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 text-justify">
-                                                        {criterium.omschrijving}
-                                                      </p>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              ),
+                              return (
+                                <Disclosure
+                                  key={werkproces.id}
+                                  defaultOpen={false}
+                                >
+                                  {({ open }) => (
+                                    <div>
+                                      <DisclosureButton className="flex w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                        <div className="flex items-start gap-3 flex-1">
+                                          <div className="mt-0.5">
+                                            {open ? (
+                                              <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                                            ) : (
+                                              <ChevronRightIcon className="h-5 w-5 text-gray-500" />
                                             )}
                                           </div>
+                                          <div className="mt-1">
+                                            <Checkbox
+                                              checked={
+                                                werkprocesStatus !== "unchecked"
+                                              }
+                                              indeterminate={
+                                                werkprocesStatus ===
+                                                "indeterminate"
+                                              }
+                                              disabled
+                                              className="pointer-events-none"
+                                            />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-baseline gap-2">
+                                              <h6 className="font-medium text-gray-900 dark:text-gray-100">
+                                                {werkproces.titel}
+                                              </h6>
+                                            </div>
+                                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-justify">
+                                              {werkproces.resultaat}
+                                            </p>
+                                          </div>
                                         </div>
-                                      )}
-                                    </DisclosurePanel>
-                                  </div>
-                                )}
-                              </Disclosure>
-                            ))}
+                                      </DisclosureButton>
+
+                                      <DisclosurePanel className="pr-4 pl-8 pb-3">
+                                        {werkproces.beoordelingscriteria
+                                          .length > 0 && (
+                                          <div className="ml-11 mt-2 space-y-2">
+                                            <h6 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                              Beoordelingscriteria
+                                            </h6>
+                                            <div className="space-y-2">
+                                              {werkproces.beoordelingscriteria.map(
+                                                (criterium) => {
+                                                  const criteriumStatus =
+                                                    pvbData?.id
+                                                      ? criteriaStatusMap.get(
+                                                          `${pvbData.id}-${criterium.id}`,
+                                                        )
+                                                      : null;
+
+                                                  return (
+                                                    <div
+                                                      key={criterium.id}
+                                                      className="flex items-start gap-3"
+                                                    >
+                                                      <div className="mt-0.5">
+                                                        <Checkbox
+                                                          checked={
+                                                            criteriumStatus?.behaald ===
+                                                            true
+                                                          }
+                                                          disabled
+                                                          className="pointer-events-none"
+                                                        />
+                                                      </div>
+                                                      <div className="flex-1 pt-0.5">
+                                                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                          {criterium.title}
+                                                        </p>
+                                                        {criterium.omschrijving && (
+                                                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 text-justify">
+                                                            {
+                                                              criterium.omschrijving
+                                                            }
+                                                          </p>
+                                                        )}
+                                                        {criteriumStatus?.opmerkingen && (
+                                                          <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+                                                            <p className="text-sm text-blue-900 dark:text-blue-200">
+                                                              <span className="font-medium">
+                                                                Opmerking
+                                                                beoordelaar:
+                                                              </span>{" "}
+                                                              {
+                                                                criteriumStatus.opmerkingen
+                                                              }
+                                                            </p>
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                },
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </DisclosurePanel>
+                                    </div>
+                                  )}
+                                </Disclosure>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

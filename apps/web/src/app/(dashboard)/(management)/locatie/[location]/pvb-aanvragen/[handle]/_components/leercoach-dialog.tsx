@@ -4,26 +4,58 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
+  Combobox,
+  ComboboxLabel,
+  ComboboxOption,
+} from "~/app/(dashboard)/_components/combobox";
+import {
   Dialog,
   DialogActions,
   DialogBody,
-  DialogDescription,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
+import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
 import { updatePvbLeercoachAction } from "../actions";
+
+interface Person {
+  id: string;
+  firstName: string;
+  lastName: string | null;
+  lastNamePrefix: string | null;
+  email: string | null;
+}
 
 export function LeercoachDialog({
   open,
   onClose,
   params,
+  locatieId,
 }: {
   open: boolean;
   onClose: () => void;
   params: Promise<{ location: string; handle: string }>;
+  locatieId: string;
 }) {
   const [leercoachId, setLeercoachId] = useState("");
+  const [query, setQuery] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+
+  // Fetch instructors for the location
+  const { data: persons } = usePersonsForLocation(locatieId, {
+    filter: { query, actorType: "instructor" },
+  });
+
+  const instructors = persons?.items || [];
+  const selectedInstructor =
+    instructors.find((p) => p.id === leercoachId) || null;
+
+  const formatPersonName = (person: Person) => {
+    const parts = [person.firstName];
+    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
+    if (person.lastName) parts.push(person.lastName);
+    return parts.join(" ");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,47 +67,74 @@ export function LeercoachDialog({
 
         router.refresh();
         onClose();
+        setLeercoachId("");
+        setQuery("");
       } catch (error) {
         console.error("Failed to update leercoach:", error);
       }
     });
   };
 
+  const handleClose = () => {
+    onClose();
+    setLeercoachId("");
+    setQuery("");
+  };
+
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={handleClose}>
       <form onSubmit={handleSubmit}>
         <DialogTitle>Leercoach toewijzen</DialogTitle>
-        <DialogDescription>
-          Selecteer een leercoach voor deze PvB aanvraag. De leercoach zal een
-          verzoek ontvangen om toestemming te geven.
-        </DialogDescription>
         <DialogBody>
           <div className="space-y-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Selecteer een leercoach voor deze PvB aanvraag.
+            </p>
             <div>
               <label
                 htmlFor="leercoach"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 Leercoach
               </label>
-              <select
-                id="leercoach"
-                name="leercoach"
-                value={leercoachId}
-                onChange={(e) => setLeercoachId(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-800 dark:border-gray-600"
-                required
+              <Combobox
+                options={instructors}
+                value={selectedInstructor}
+                onChange={(person) => setLeercoachId(person?.id || "")}
+                displayValue={(person) =>
+                  person ? formatPersonName(person) : ""
+                }
+                setQuery={setQuery}
+                filter={() => true} // Server-side filtering via query
+                placeholder="Zoek een instructeur..."
               >
-                <option value="">Selecteer een leercoach</option>
-                {/* In a real implementation, this would be populated with actual instructors */}
-                <option value="instructor-1">Instructeur 1</option>
-                <option value="instructor-2">Instructeur 2</option>
-              </select>
+                {(person) => (
+                  <ComboboxOption key={person.id} value={person}>
+                    <ComboboxLabel>
+                      <div className="flex">
+                        <span className="truncate">
+                          {formatPersonName(person)}
+                        </span>
+                        {person.email && (
+                          <span className="ml-2 text-slate-500 truncate">
+                            ({person.email})
+                          </span>
+                        )}
+                      </div>
+                    </ComboboxLabel>
+                  </ComboboxOption>
+                )}
+              </Combobox>
             </div>
           </div>
         </DialogBody>
         <DialogActions>
-          <Button type="button" plain onClick={onClose} disabled={isPending}>
+          <Button
+            type="button"
+            plain
+            onClick={handleClose}
+            disabled={isPending}
+          >
             Annuleren
           </Button>
           <Button

@@ -5,7 +5,7 @@ import {
   TabPanel,
   TabPanels,
 } from "~/app/(dashboard)/_components/tabs";
-import { getPvbToetsdocumenten } from "~/lib/nwd";
+import { getPvbBeoordelingsCriteria, getPvbToetsdocumenten } from "~/lib/nwd";
 import { ToetsdocumentenDisplay } from "./toetsdocumenten-display";
 
 interface Course {
@@ -40,7 +40,10 @@ export async function ToetsdocumentenCard({
   };
 }) {
   const resolvedParams = await params;
-  const toetsdocumentenList = await getPvbToetsdocumenten(aanvraag.id);
+  const [toetsdocumentenList, beoordelingsCriteria] = await Promise.all([
+    getPvbToetsdocumenten(aanvraag.id),
+    getPvbBeoordelingsCriteria(aanvraag.id),
+  ]);
 
   // If only one kwalificatieprofiel, show it directly
   if (toetsdocumentenList.length === 1) {
@@ -50,6 +53,7 @@ export async function ToetsdocumentenCard({
           toetsdocumenten={toetsdocumentenList[0]}
           aanvraag={aanvraag}
           params={resolvedParams}
+          beoordelingsCriteria={beoordelingsCriteria.items}
         />
       </div>
     );
@@ -85,6 +89,7 @@ export async function ToetsdocumentenCard({
                 toetsdocumenten={item}
                 aanvraag={aanvraag}
                 params={resolvedParams}
+                beoordelingsCriteria={beoordelingsCriteria.items}
               />
             </TabPanel>
           ))}
