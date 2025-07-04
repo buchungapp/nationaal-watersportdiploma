@@ -225,7 +225,10 @@ interface PvbTableProps {
   pvbs: PvbAanvraag[];
   totalItems: number;
   placeholderRows?: number;
-  locationId: string;
+  location: {
+    id: string;
+    handle: string;
+  };
   onUpdateStartTime: (pvbIds: string[], startTime: string) => Promise<void>;
   onUpdateLeercoach: (pvbIds: string[], leercoachId: string) => Promise<void>;
   onUpdateBeoordelaar: (
@@ -241,7 +244,7 @@ export default function PvbTable({
   pvbs,
   totalItems,
   placeholderRows,
-  locationId,
+  location,
   onUpdateStartTime,
   onUpdateLeercoach,
   onUpdateBeoordelaar,
@@ -277,7 +280,12 @@ export default function PvbTable({
         <TableBody>
           <PlaceholderTableRows table={table} rows={placeholderRows}>
             <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-            <DefaultTableRows table={table}>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/locatie/${location.handle}/pvb-aanvragen/${row.original.handle}`
+              }
+            >
               {(cell, index, row) => (
                 <DefaultTableCell
                   key={cell.id}
@@ -305,7 +313,7 @@ export default function PvbTable({
       >
         <PvbTableActions
           selectedPvbs={selectedPvbs}
-          locationId={locationId}
+          locationId={location.id}
           onUpdateStartTime={onUpdateStartTime}
           onUpdateLeercoach={onUpdateLeercoach}
           onUpdateBeoordelaar={onUpdateBeoordelaar}

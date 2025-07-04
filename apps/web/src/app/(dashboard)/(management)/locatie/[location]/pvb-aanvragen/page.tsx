@@ -34,7 +34,7 @@ async function PvbsTable(props: {
     <PvbTableWrapper
       pvbs={pvbs.items}
       totalItems={pvbs.count}
-      locationId={location.id}
+      location={location}
     />
   );
 }
@@ -79,7 +79,7 @@ export default function Page(props: {
             placeholderRows={10}
             pvbs={[]}
             totalItems={0}
-            locationId=""
+            location={{ id: "", handle: "" }}
           />
         }
       >

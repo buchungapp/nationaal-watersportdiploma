@@ -3375,12 +3375,22 @@ export const listAllCashbacks = cache(async () => {
 
 export const updateCurrentUserDisplayName = async (displayName: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const authUser = await getUserOrThrow();
 
-    return await User.updateDisplayName({
-      userId: user.authUserId,
+    await User.updateDisplayName({
+      userId: authUser.authUserId,
       displayName,
     });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "update_display_name",
+      properties: {
+        $set: { email: authUser.email, displayName: displayName },
+      },
+    });
+
+    await posthog.shutdown();
   });
 };
 
@@ -3458,3 +3468,147 @@ export const getInstructiegroepByCourseId = cache(
     });
   },
 );
+
+export const getIsActiveStudent = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow().catch(() => null);
+
+    if (!user) {
+      return false;
+    }
+
+    // TODO: This should probably move to a check on the primary person
+    const activeActorTypes = await User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+
+    return activeActorTypes.some((type) => ["student"].includes(type));
+  });
+});
+
+export const getActiveActorTypes = async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    return User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+  });
+};
+
+export const retrievePvbAanvraagByHandle = async (handle: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({ handle });
+
+    // Check if user has access to this location
+    const isLocationAdmin = await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: aanvraag.locatie.id,
+      personId: primaryPerson.id,
+    }).catch(() => false);
+
+    if (!isLocationAdmin) {
+      throw new Error("Unauthorized");
+    }
+
+    return aanvraag;
+  });
+};
+
+export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const result = await Pvb.Aanvraag.listGebeurtenissen({ pvbAanvraagId });
+
+    return result.items;
+  });
+};
+
+export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const result = await Pvb.Aanvraag.getToetsdocumenten({ pvbAanvraagId });
+
+    return result;
+  });
+};
+
+export const updatePvbLeercoach = async ({
+  pvbAanvraagId,
+  leercoachId,
+}: {
+  pvbAanvraagId: string;
+  leercoachId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await Pvb.Aanvraag.updateLeercoach({
+      pvbAanvraagId,
+      leercoachId,
+      aangemaaktDoor: primaryPerson.id,
+    });
+  });
+};
+
+export const updatePvbBeoordelaar = async ({
+  pvbAanvraagId,
+  beoordelaarId,
+}: {
+  pvbAanvraagId: string;
+  beoordelaarId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await Pvb.Aanvraag.updateBeoordelaarForAll({
+      pvbAanvraagId,
+      beoordelaarId,
+      aangemaaktDoor: primaryPerson.id,
+    });
+  });
+};
+
+export const updatePvbStartTime = async ({
+  pvbAanvraagId,
+  startDatumTijd,
+}: {
+  pvbAanvraagId: string;
+  startDatumTijd: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await Pvb.Aanvraag.updateStartTime({
+      pvbAanvraagId,
+      startDatumTijd,
+      aangemaaktDoor: primaryPerson.id,
+    });
+  });
+};
+
+export const grantPvbLeercoachPermission = async ({
+  pvbAanvraagId,
+}: {
+  pvbAanvraagId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    await Pvb.Aanvraag.grantLeercoachPermission({
+      pvbAanvraagId,
+      aangemaaktDoor: primaryPerson.id,
+    });
+  });
+};

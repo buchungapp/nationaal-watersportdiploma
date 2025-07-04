@@ -19,7 +19,10 @@ interface PvbTableWrapperProps {
   pvbs: PvbAanvraag[];
   totalItems: number;
   placeholderRows?: number;
-  locationId: string;
+  location: {
+    id: string;
+    handle: string;
+  };
 }
 
 // Helper function to check if array has at least one item and act as type guard
@@ -31,7 +34,7 @@ export function PvbTableWrapper({
   pvbs,
   totalItems,
   placeholderRows,
-  locationId,
+  location,
 }: PvbTableWrapperProps) {
   const params = useParams();
   const locationHandle = params.location as string;
@@ -120,7 +123,7 @@ export function PvbTableWrapper({
       pvbs={pvbs}
       totalItems={totalItems}
       placeholderRows={placeholderRows}
-      locationId={locationId}
+      location={location}
       onUpdateStartTime={handleUpdateStartTime}
       onUpdateLeercoach={handleUpdateLeercoach}
       onUpdateBeoordelaar={handleUpdateBeoordelaar}
