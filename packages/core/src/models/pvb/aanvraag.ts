@@ -2240,6 +2240,7 @@ export const getToetsdocumenten = wrapCommand(
                   beoordelingscriteria: z.array(
                     z.object({
                       id: z.string().uuid(),
+                      title: z.string(),
                       omschrijving: z.string().nullable(),
                       rang: z.number().nullable(),
                     }),
@@ -2328,6 +2329,7 @@ export const getToetsdocumenten = wrapCommand(
           werkprocesResultaat: s.werkproces.resultaat,
           werkprocesRang: s.werkproces.rang,
           criteriumId: s.beoordelingscriterium.id,
+          criteriumTitle: s.beoordelingscriterium.title,
           criteriumOmschrijving: s.beoordelingscriterium.omschrijving,
           criteriumRang: s.beoordelingscriterium.rang,
         })
@@ -2380,6 +2382,7 @@ export const getToetsdocumenten = wrapCommand(
                   rang: number;
                   beoordelingscriteria: Array<{
                     id: string;
+                    title: string;
                     omschrijving: string | null;
                     rang: number | null;
                   }>;
@@ -2439,6 +2442,7 @@ export const getToetsdocumenten = wrapCommand(
           if (row.criteriumId) {
             werkproces.beoordelingscriteria.push({
               id: row.criteriumId,
+              title: row.criteriumTitle || "",
               omschrijving: row.criteriumOmschrijving,
               rang: row.criteriumRang,
             });

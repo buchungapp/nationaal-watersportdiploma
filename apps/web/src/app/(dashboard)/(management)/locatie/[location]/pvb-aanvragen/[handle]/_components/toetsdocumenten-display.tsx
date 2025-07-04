@@ -1,48 +1,15 @@
 "use client";
 
 import {
-  CalendarIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  DocumentTextIcon,
-  UserIcon,
-} from "@heroicons/react/20/solid";
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+} from "@headlessui/react";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/16/solid";
+import { CalendarIcon, UserIcon } from "@heroicons/react/20/solid";
 import dayjs from "dayjs";
-import { useState } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
-import { Text } from "~/app/(dashboard)/_components/text";
-
-function CollapsibleSection({
-  title,
-  children,
-  defaultOpen = false,
-}: {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between text-left focus:outline-none"
-      >
-        <span className="flex items-center gap-2">
-          {isOpen ? (
-            <ChevronDownIcon className="h-4 w-4 text-gray-400" />
-          ) : (
-            <ChevronRightIcon className="h-4 w-4 text-gray-400" />
-          )}
-          {title}
-        </span>
-      </button>
-      {isOpen && <div className="mt-2 ml-6">{children}</div>}
-    </div>
-  );
-}
+import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 
 interface Toetsdocumenten {
   kwalificatieprofiel: {
@@ -68,6 +35,7 @@ interface Toetsdocumenten {
         beoordelingscriteria: Array<{
           id: string;
           rang: number | null;
+          title: string;
           omschrijving: string | null;
         }>;
       }>;
@@ -161,15 +129,17 @@ export function ToetsdocumentenDisplay({
         {toetsdocumenten.kerntaken.map((kerntaak) => (
           <div
             key={kerntaak.id}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
           >
-            <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-              {kerntaak.titel}
-            </h4>
+            <div className="p-4">
+              <h4 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                {kerntaak.titel}
+              </h4>
+            </div>
 
             {/* Toetsvormen/Onderdelen */}
             {kerntaak.onderdelen.length > 0 && (
-              <div className="mt-4 space-y-4">
+              <div className="border-t border-gray-200 dark:border-gray-700">
                 {kerntaak.onderdelen.map((onderdeel) => {
                   const pvbData = onderdeelDataMap.get(onderdeel.id);
                   const borderColor =
@@ -180,11 +150,11 @@ export function ToetsdocumentenDisplay({
                   return (
                     <div
                       key={onderdeel.id}
-                      className={`border-l-4 ${borderColor} bg-gray-50 dark:bg-gray-800/50 rounded-r-lg`}
+                      className={`border-l-4 ${borderColor}`}
                     >
                       {/* Header section */}
-                      <div className="p-4">
-                        <div className="flex items-start justify-between gap-4">
+                      <div className="bg-gray-50 dark:bg-gray-800/50 p-4">
+                        <div className="flex items-start justify-between gap-4 mb-3">
                           <h5 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                             {formatOnderdeelType(onderdeel.type)}
                           </h5>
@@ -202,36 +172,32 @@ export function ToetsdocumentenDisplay({
                         </div>
 
                         {/* Metadata section */}
-                        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm">
                           {/* Beoordelaar */}
-                          <div className="flex items-center gap-2">
-                            <UserIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                            <span>
-                              <span className="text-gray-500 dark:text-gray-400">
-                                Beoordelaar:
-                              </span>{" "}
-                              <span className="text-gray-700 dark:text-gray-300">
-                                {pvbData?.beoordelaar
-                                  ? formatName(pvbData.beoordelaar)
-                                  : "Nog niet toegewezen"}
-                              </span>
+                          <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+                            <UserIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-500 dark:text-gray-400">
+                              Beoordelaar:
+                            </span>
+                            <span className="font-medium">
+                              {pvbData?.beoordelaar
+                                ? formatName(pvbData.beoordelaar)
+                                : "Nog niet toegewezen"}
                             </span>
                           </div>
 
                           {/* Start datum */}
-                          <div className="flex items-center gap-2">
-                            <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                            <span>
-                              <span className="text-gray-500 dark:text-gray-400">
-                                Aanvangstijdstip:
-                              </span>{" "}
-                              <span className="text-gray-700 dark:text-gray-300">
-                                {pvbData?.startDatumTijd
-                                  ? dayjs(pvbData.startDatumTijd).format(
-                                      "DD-MM-YYYY HH:mm [uur]",
-                                    )
-                                  : "Nog niet gepland"}
-                              </span>
+                          <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+                            <CalendarIcon className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-500 dark:text-gray-400">
+                              Aanvangstijdstip:
+                            </span>
+                            <span className="font-medium">
+                              {pvbData?.startDatumTijd
+                                ? dayjs(pvbData.startDatumTijd).format(
+                                    "DD-MM-YYYY HH:mm [uur]",
+                                  )
+                                : "Nog niet gepland"}
                             </span>
                           </div>
                         </div>
@@ -239,59 +205,98 @@ export function ToetsdocumentenDisplay({
 
                       {/* Werkprocessen for this onderdeel */}
                       {onderdeel.werkprocessen.length > 0 && (
-                        <div className="border-t border-gray-200 dark:border-gray-700 px-4 pb-4 pt-3">
-                          <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Werkprocessen voor{" "}
-                            {formatOnderdeelType(onderdeel.type).toLowerCase()}:
+                        <div className="bg-white dark:bg-gray-900">
+                          <h6 className="px-4 pt-3 pb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Werkprocessen:
                           </h6>
-                          <div className="space-y-2">
+                          <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             {onderdeel.werkprocessen.map((werkproces) => (
-                              <CollapsibleSection
+                              <Disclosure
                                 key={werkproces.id}
-                                title={
-                                  <div className="text-sm">
-                                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                                      {werkproces.titel}
-                                    </span>
-                                    <Text className="text-xs text-gray-500 dark:text-gray-400">
-                                      {werkproces.resultaat}
-                                    </Text>
-                                  </div>
-                                }
+                                defaultOpen={false}
                               >
-                                {werkproces.beoordelingscriteria.length > 0 && (
-                                  <div className="space-y-2">
-                                    <h6 className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                                      Beoordelingscriteria
-                                    </h6>
-                                    <ul className="space-y-1">
-                                      {werkproces.beoordelingscriteria.map(
-                                        (criterium) => (
-                                          <li
-                                            key={criterium.id}
-                                            className="flex items-start gap-2"
-                                          >
-                                            <DocumentTextIcon className="h-3.5 w-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
-                                            <Text className="text-xs text-gray-600 dark:text-gray-400">
-                                              {criterium.omschrijving}
-                                            </Text>
-                                          </li>
-                                        ),
+                                {({ open }) => (
+                                  <div>
+                                    <DisclosureButton className="flex w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                      <div className="flex items-start gap-3 flex-1">
+                                        <div className="mt-0.5">
+                                          {open ? (
+                                            <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                                          ) : (
+                                            <ChevronRightIcon className="h-5 w-5 text-gray-500" />
+                                          )}
+                                        </div>
+                                        <div className="mt-1">
+                                          <Checkbox
+                                            checked={false}
+                                            disabled
+                                            className="pointer-events-none"
+                                          />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-baseline gap-2">
+                                            <h6 className="font-medium text-gray-900 dark:text-gray-100">
+                                              {werkproces.titel}
+                                            </h6>
+                                          </div>
+                                          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 text-justify">
+                                            {werkproces.resultaat}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </DisclosureButton>
+
+                                    <DisclosurePanel className="pr-4 pl-8 pb-3">
+                                      {werkproces.beoordelingscriteria.length >
+                                        0 && (
+                                        <div className="ml-11 mt-2 space-y-2">
+                                          <h6 className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            Beoordelingscriteria
+                                          </h6>
+                                          <div className="space-y-2">
+                                            {werkproces.beoordelingscriteria.map(
+                                              (criterium) => (
+                                                <div
+                                                  key={criterium.id}
+                                                  className="flex items-start gap-3"
+                                                >
+                                                  <div className="mt-0.5">
+                                                    <Checkbox
+                                                      checked={false}
+                                                      disabled
+                                                      className="pointer-events-none"
+                                                    />
+                                                  </div>
+                                                  <div className="flex-1 pt-0.5">
+                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                      {criterium.title}
+                                                    </p>
+                                                    {criterium.omschrijving && (
+                                                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5 text-justify">
+                                                        {criterium.omschrijving}
+                                                      </p>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              ),
+                                            )}
+                                          </div>
+                                        </div>
                                       )}
-                                    </ul>
+                                    </DisclosurePanel>
                                   </div>
                                 )}
-                              </CollapsibleSection>
+                              </Disclosure>
                             ))}
                           </div>
                         </div>
                       )}
 
                       {onderdeel.werkprocessen.length === 0 && (
-                        <div className="px-4 pb-4">
-                          <Text className="text-sm text-gray-500 dark:text-gray-400 italic">
+                        <div className="px-4 pb-4 bg-white dark:bg-gray-900">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 italic">
                             Geen werkprocessen toegewezen aan dit onderdeel
-                          </Text>
+                          </p>
                         </div>
                       )}
                     </div>
