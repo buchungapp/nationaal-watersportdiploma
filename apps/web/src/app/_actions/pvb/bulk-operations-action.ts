@@ -216,3 +216,42 @@ export const submitPvbsAction = actionClient
       results: result.results,
     };
   });
+
+// Grant leercoach permission for multiple PVB aanvragen (on behalf of leercoach)
+export const grantLeercoachPermissionAction = actionClient
+  .schema(
+    z.object({
+      locationHandle: z.string(),
+      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const { locationHandle, pvbAanvraagIds } = parsedInput;
+
+    const location = await retrieveLocationByHandle(locationHandle);
+    const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
+
+    const locationAdminActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "location_admin" && actor.locationId === location.id,
+    );
+
+    if (!locationAdminActor) {
+      throw new Error("Je hebt geen rechten om deze actie uit te voeren");
+    }
+
+    const result = await Pvb.Aanvraag.grantLeercoachPermissionForMultiple({
+      pvbAanvraagIds,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: "Toestemming gegeven door locatiebeheerder namens leercoach",
+    });
+
+    revalidatePath(`/locatie/${locationHandle}/pvb-aanvragen`);
+
+    return {
+      success: result.success,
+      updatedCount: result.updatedCount,
+      results: result.results,
+    };
+  });

@@ -36,7 +36,7 @@ async function checkVoorwaardenAndUpdateStatus(
   pvbAanvraagId: string,
   aangemaaktDoor: string,
   reden?: string,
-): Promise<void> {
+) {
   const query = useQuery();
 
   // Get current status
@@ -78,6 +78,8 @@ async function checkVoorwaardenAndUpdateStatus(
       reden: reden ?? "Alle voorwaarden zijn vervuld",
     });
   }
+
+  return voorwaarden;
 }
 
 /**
@@ -360,7 +362,7 @@ export const updateBeoordelaar = wrapCommand(
             .from(s.actor)
             .where(
               and(
-                eq(s.actor.id, input.beoordelaarId),
+                eq(s.actor.personId, input.beoordelaarId),
                 eq(s.actor.type, "pvb_beoordelaar"),
                 eq(s.actor.locationId, onderdeel.locatieId),
               ),
@@ -1172,7 +1174,6 @@ export const list = wrapCommand(
       const leercoachPerson = alias(s.person, "leercoachPerson");
       const hoofdCursus = alias(s.pvbAanvraagCourse, "hoofdCursus");
       const hoofdCourse = alias(s.course, "hoofdCourse");
-      const beoordelaarActor = alias(s.actor, "beoordelaarActor");
       const beoordelaarPerson = alias(s.person, "beoordelaarPerson");
 
       // CTE for latest status per aanvraag using selectDistinctOn
@@ -1322,12 +1323,8 @@ export const list = wrapCommand(
           eq(s.kwalificatieprofiel.id, s.kerntaak.kwalificatieprofielId),
         )
         .leftJoin(
-          beoordelaarActor,
-          eq(beoordelaarActor.id, s.pvbOnderdeel.beoordelaarId),
-        )
-        .leftJoin(
           beoordelaarPerson,
-          eq(beoordelaarPerson.id, beoordelaarActor.personId),
+          eq(beoordelaarPerson.id, s.pvbOnderdeel.beoordelaarId),
         )
         .where(eq(s.pvbAanvraag.locatieId, input.filter.locationId))
         .groupBy(
@@ -1463,6 +1460,12 @@ export const updateStartTimeForMultiple = wrapCommand(
                   "Aanvangsdatum/tijd voor alle onderdelen bijgewerkt",
               });
             }
+
+            // Update status to ready for assessment
+            await checkVoorwaardenAndUpdateStatus(
+              aanvraagId,
+              input.aangemaaktDoor,
+            );
           }
         }
 
@@ -1699,6 +1702,132 @@ export const updateBeoordelaarForMultiple = wrapCommand(
       return {
         success: true,
         updatedCount,
+      };
+    },
+  ),
+);
+
+// Grant leercoach permission for multiple PvB aanvragen (on behalf of leercoach)
+export const grantLeercoachPermissionForMultiple = wrapCommand(
+  "pvb.grantLeercoachPermissionForMultiple",
+  withZod(
+    z.object({
+      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string().optional(),
+    }),
+    z.object({
+      success: z.boolean(),
+      updatedCount: z.number().int().nonnegative(),
+      results: z.array(
+        z.object({
+          aanvraagId: z.string().uuid(),
+          success: z.boolean(),
+          error: z.string().optional(),
+        }),
+      ),
+    }),
+    async (input) => {
+      const query = useQuery();
+      const results = [];
+      let updatedCount = 0;
+
+      for (const aanvraagId of input.pvbAanvraagIds) {
+        try {
+          // Get the latest leercoach permission record for this aanvraag
+          const latestPermissionResults = await query
+            .select({
+              id: s.pvbLeercoachToestemming.id,
+              leercoachId: s.pvbLeercoachToestemming.leercoachId,
+              status: s.pvbLeercoachToestemming.status,
+            })
+            .from(s.pvbLeercoachToestemming)
+            .where(eq(s.pvbLeercoachToestemming.pvbAanvraagId, aanvraagId))
+            .orderBy(desc(s.pvbLeercoachToestemming.aangemaaktOp))
+            .limit(1);
+
+          const latestPermission = possibleSingleRow(latestPermissionResults);
+
+          if (!latestPermission) {
+            results.push({
+              aanvraagId,
+              success: false,
+              error: "Geen leercoach toegewezen aan deze aanvraag",
+            });
+            continue;
+          }
+
+          if (latestPermission.status === "gegeven") {
+            results.push({
+              aanvraagId,
+              success: false,
+              error: "Leercoach heeft al toestemming gegeven",
+            });
+            continue;
+          }
+
+          if (latestPermission.status === "geweigerd") {
+            results.push({
+              aanvraagId,
+              success: false,
+              error:
+                "Leercoach heeft toestemming geweigerd, kan niet overschreven worden",
+            });
+            continue;
+          }
+
+          // Grant permission on behalf of leercoach (status: gevraagd -> gegeven)
+          await query.insert(s.pvbLeercoachToestemming).values({
+            pvbAanvraagId: aanvraagId,
+            leercoachId: latestPermission.leercoachId,
+            status: "gegeven",
+            aangemaaktDoor: input.aangemaaktDoor,
+            reden:
+              input.reden ??
+              "Toestemming gegeven door locatiebeheerder namens leercoach",
+          });
+
+          // Log the event
+          await logPvbEvent({
+            pvbAanvraagId: aanvraagId,
+            gebeurtenisType: "leercoach_toestemming_gegeven",
+            data: {
+              leercoachId: latestPermission.leercoachId,
+              toestemmingId: latestPermission.id,
+              beslissing: "gegeven",
+              namensLeercoach: true,
+            },
+            aangemaaktDoor: input.aangemaaktDoor,
+            reden:
+              input.reden ??
+              "Toestemming gegeven door locatiebeheerder namens leercoach",
+          });
+
+          // Check if all prerequisites are now met
+          await checkVoorwaardenAndUpdateStatus(
+            aanvraagId,
+            input.aangemaaktDoor,
+            "Leercoach toestemming gegeven namens leercoach - voorwaarden gecontroleerd",
+          );
+
+          results.push({
+            aanvraagId,
+            success: true,
+          });
+          updatedCount++;
+        } catch (error) {
+          results.push({
+            aanvraagId,
+            success: false,
+            error: error instanceof Error ? error.message : "Onbekende fout",
+          });
+        }
+      }
+
+      return {
+        success: true,
+        updatedCount,
+        results,
       };
     },
   ),

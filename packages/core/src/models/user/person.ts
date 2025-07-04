@@ -567,7 +567,9 @@ export const listActiveRolesForLocation = wrapQuery(
       personId: uuidSchema,
       locationId: uuidSchema,
     }),
-    z.array(z.enum(["student", "instructor", "location_admin"])),
+    z.array(
+      z.enum(["student", "instructor", "location_admin", "pvb_beoordelaar"]),
+    ),
     async (input) => {
       const query = useQuery();
 
@@ -586,10 +588,20 @@ export const listActiveRolesForLocation = wrapQuery(
         .then((rows) =>
           rows
             .filter(({ type }) =>
-              ["student", "instructor", "location_admin"].includes(type),
+              [
+                "student",
+                "instructor",
+                "location_admin",
+                "pvb_beoordelaar",
+              ].includes(type),
             )
             .map(
-              ({ type }) => type as "student" | "instructor" | "location_admin",
+              ({ type }) =>
+                type as
+                  | "student"
+                  | "instructor"
+                  | "location_admin"
+                  | "pvb_beoordelaar",
             ),
         );
     },

@@ -183,7 +183,7 @@ export const pvbOnderdeel = kssSchema.table(
     }),
     foreignKey({
       columns: [table.beoordelaarId],
-      foreignColumns: [actor.id],
+      foreignColumns: [person.id],
     }),
     uniqueIndex(
       "pvb_onderdeel_aanvraag_id_kerntaak_onderdeel_id_beoordelaar_id_unique",
@@ -258,7 +258,7 @@ export const pvbBeoordelaarBeschikbaarheid = kssSchema.table(
     }),
     foreignKey({
       columns: [table.beoordelaarId],
-      foreignColumns: [actor.id],
+      foreignColumns: [person.id],
     }),
     foreignKey({
       columns: [table.pvbVoorstelDatumId, table.pvbAanvraagId],

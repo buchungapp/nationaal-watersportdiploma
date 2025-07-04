@@ -46,6 +46,7 @@ interface PvbTableActionsProps {
   ) => Promise<void>;
   onCancel: (pvbIds: string[]) => Promise<void>;
   onSubmit: (pvbIds: string[]) => Promise<void>;
+  onGrantLeercoachPermission: (pvbIds: string[]) => Promise<void>;
   onClearSelection: () => void;
 }
 
@@ -61,6 +62,7 @@ type DialogType =
   | "startTime"
   | "leercoach"
   | "beoordelaar"
+  | "grantLeercoachPermission"
   | "cancel"
   | "submit"
   | null;
@@ -73,6 +75,7 @@ export function PvbTableActions({
   onUpdateBeoordelaar,
   onCancel,
   onSubmit,
+  onGrantLeercoachPermission,
   onClearSelection,
 }: PvbTableActionsProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -88,25 +91,13 @@ export function PvbTableActions({
   const [beoordelaarQuery, setBeoordelaarQuery] = useState("");
 
   // Get instructors and beoordelaars
-  const { data: instructors } = usePersonsForLocation(
-    locationId,
-    {
-      filter: { actorType: "instructor", query: leercoachQuery },
-    },
-    {
-      enabled: activeDialog === "leercoach",
-    },
-  );
+  const { data: instructors } = usePersonsForLocation(locationId, {
+    filter: { actorType: "instructor", query: leercoachQuery },
+  });
 
-  const { data: beoordelaars } = usePersonsForLocation(
-    locationId,
-    {
-      filter: { actorType: "pvb_beoordelaar", query: beoordelaarQuery },
-    },
-    {
-      enabled: activeDialog === "beoordelaar",
-    },
-  );
+  const { data: beoordelaars } = usePersonsForLocation(locationId, {
+    filter: { actorType: "pvb_beoordelaar", query: beoordelaarQuery },
+  });
 
   // Calculate what actions are available
   const selectedIds = selectedPvbs.map((pvb) => pvb.id);
@@ -118,6 +109,9 @@ export function PvbTableActions({
   );
   const canAssignBeoordelaar = selectedPvbs.every(
     (pvb) => pvb.type === "intern",
+  );
+  const canGrantLeercoachPermission = selectedPvbs.some(
+    (pvb) => pvb.leercoach && pvb.status === "wacht_op_voorwaarden",
   );
 
   // Reset form state when dialog closes
@@ -217,6 +211,24 @@ export function PvbTableActions({
     }
   };
 
+  const handleGrantLeercoachPermission = async () => {
+    setIsProcessing(true);
+    try {
+      await onGrantLeercoachPermission(selectedIds);
+      toast.success(
+        `Leercoach toestemming is gegeven voor ${selectedIds.length} aanvragen.`,
+      );
+      closeDialog();
+      onClearSelection();
+    } catch (error) {
+      toast.error(
+        "Er is iets misgegaan bij het geven van leercoach toestemming.",
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (selectedPvbs.length === 0) {
     return null;
   }
@@ -235,6 +247,14 @@ export function PvbTableActions({
           <DropdownItem onClick={() => setActiveDialog("leercoach")}>
             Leercoach toewijzen
           </DropdownItem>
+
+          {canGrantLeercoachPermission && (
+            <DropdownItem
+              onClick={() => setActiveDialog("grantLeercoachPermission")}
+            >
+              Toestemming namens leercoach geven
+            </DropdownItem>
+          )}
 
           {canAssignBeoordelaar && (
             <DropdownItem onClick={() => setActiveDialog("beoordelaar")}>
@@ -443,6 +463,33 @@ export function PvbTableActions({
           </Button>
           <Button color="blue" onClick={handleSubmit} disabled={isProcessing}>
             Indienen
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Grant Leercoach Permission Dialog */}
+      <Dialog
+        open={activeDialog === "grantLeercoachPermission"}
+        onClose={closeDialog}
+      >
+        <DialogTitle>Leercoach toestemming geven</DialogTitle>
+        <DialogDescription>
+          Je staat op het punt om namens de leercoach toestemming te geven voor{" "}
+          {selectedIds.length} aanvragen. Dit betekent dat je als
+          locatiebeheerder handelt namens de leercoach. Deze actie kan alleen
+          uitgevoerd worden voor aanvragen waar reeds een leercoach is
+          toegewezen, welke zelf nog geen reactie heeft gegeven.
+        </DialogDescription>
+        <DialogActions>
+          <Button plain onClick={closeDialog}>
+            Terug
+          </Button>
+          <Button
+            color="blue"
+            onClick={handleGrantLeercoachPermission}
+            disabled={isProcessing}
+          >
+            Toestemming geven
           </Button>
         </DialogActions>
       </Dialog>

@@ -181,10 +181,9 @@ const columns = [
     cell: ({ getValue }) => {
       const cursus = getValue();
       return cursus ? (
-        <div>
-          <span className="font-medium text-zinc-900">{cursus.title}</span>
-          <span className="text-zinc-500 text-sm ml-1">({cursus.code})</span>
-        </div>
+        <span className="font-medium text-zinc-900">
+          {cursus.code ?? cursus.title}
+        </span>
       ) : (
         <span className="text-zinc-400 italic">Geen hoofdcursus</span>
       );
@@ -229,10 +228,11 @@ interface PvbTableProps {
   locationId: string;
   onUpdateStartTime: (pvbIds: string[], startTime: string) => Promise<void>;
   onUpdateLeercoach: (pvbIds: string[], leercoachId: string) => Promise<void>;
-  onUpdateBeoordelaar?: (
+  onUpdateBeoordelaar: (
     pvbIds: string[],
     beoordelaarId: string,
   ) => Promise<void>;
+  onGrantLeercoachPermission: (pvbIds: string[]) => Promise<void>;
   onCancel: (pvbIds: string[]) => Promise<void>;
   onSubmit: (pvbIds: string[]) => Promise<void>;
 }
@@ -245,6 +245,7 @@ export default function PvbTable({
   onUpdateStartTime,
   onUpdateLeercoach,
   onUpdateBeoordelaar,
+  onGrantLeercoachPermission,
   onCancel,
   onSubmit,
 }: PvbTableProps) {
@@ -307,7 +308,8 @@ export default function PvbTable({
           locationId={locationId}
           onUpdateStartTime={onUpdateStartTime}
           onUpdateLeercoach={onUpdateLeercoach}
-          onUpdateBeoordelaar={onUpdateBeoordelaar ?? (async () => {})}
+          onUpdateBeoordelaar={onUpdateBeoordelaar}
+          onGrantLeercoachPermission={onGrantLeercoachPermission}
           onCancel={onCancel}
           onSubmit={onSubmit}
           onClearSelection={() => setRowSelection({})}

@@ -40,6 +40,12 @@ const ROLES = [
     description:
       "Algemeen beheer van de locatie, kan alle locatiegegevens inzien en aanpassen.",
   },
+  {
+    type: "pvb_beoordelaar",
+    label: "Interne beoordelaar",
+    description:
+      "Kan interne PvB aanvragen op deze locatie beoordelen. Dit is een organisatorische rol, en staat los van de formele bevoegdheden van deze persoon.",
+  },
 ] as const;
 
 async function RolesContent(props: RolesProps) {

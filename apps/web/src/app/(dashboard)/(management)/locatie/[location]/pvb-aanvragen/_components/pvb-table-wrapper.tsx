@@ -4,6 +4,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useParams } from "next/navigation";
 import {
   cancelPvbsAction,
+  grantLeercoachPermissionAction,
   submitPvbsAction,
   updatePvbBeoordelaarAction,
   updatePvbLeercoachAction,
@@ -19,6 +20,11 @@ interface PvbTableWrapperProps {
   totalItems: number;
   placeholderRows?: number;
   locationId: string;
+}
+
+// Helper function to check if array has at least one item and act as type guard
+function hasMinimumOneItem<T>(arr: T[]): arr is [T, ...T[]] {
+  return arr.length > 0;
 }
 
 export function PvbTableWrapper({
@@ -41,8 +47,13 @@ export function PvbTableWrapper({
   );
   const { execute: executeCancel } = useAction(cancelPvbsAction);
   const { execute: executeSubmit } = useAction(submitPvbsAction);
+  const { execute: executeGrantLeercoachPermission } = useAction(
+    grantLeercoachPermissionAction,
+  );
 
   const handleUpdateStartTime = async (pvbIds: string[], startTime: string) => {
+    if (!hasMinimumOneItem(pvbIds)) return;
+
     const isoDateTime = new Date(startTime).toISOString();
     executeUpdateStartTime({
       locationHandle,
@@ -55,6 +66,8 @@ export function PvbTableWrapper({
     pvbIds: string[],
     leercoachId: string,
   ) => {
+    if (!hasMinimumOneItem(pvbIds)) return;
+
     await executeUpdateLeercoach({
       locationHandle,
       pvbAanvraagIds: pvbIds,
@@ -66,6 +79,8 @@ export function PvbTableWrapper({
     pvbIds: string[],
     beoordelaarId: string,
   ) => {
+    if (!hasMinimumOneItem(pvbIds)) return;
+
     await executeUpdateBeoordelaar({
       locationHandle,
       pvbAanvraagIds: pvbIds,
@@ -74,6 +89,8 @@ export function PvbTableWrapper({
   };
 
   const handleCancel = async (pvbIds: string[]) => {
+    if (!hasMinimumOneItem(pvbIds)) return;
+
     await executeCancel({
       locationHandle,
       pvbAanvraagIds: pvbIds,
@@ -81,7 +98,18 @@ export function PvbTableWrapper({
   };
 
   const handleSubmit = async (pvbIds: string[]) => {
+    if (!hasMinimumOneItem(pvbIds)) return;
+
     await executeSubmit({
+      locationHandle,
+      pvbAanvraagIds: pvbIds,
+    });
+  };
+
+  const handleGrantLeercoachPermission = async (pvbIds: string[]) => {
+    if (!hasMinimumOneItem(pvbIds)) return;
+
+    await executeGrantLeercoachPermission({
       locationHandle,
       pvbAanvraagIds: pvbIds,
     });
@@ -96,6 +124,7 @@ export function PvbTableWrapper({
       onUpdateStartTime={handleUpdateStartTime}
       onUpdateLeercoach={handleUpdateLeercoach}
       onUpdateBeoordelaar={handleUpdateBeoordelaar}
+      onGrantLeercoachPermission={handleGrantLeercoachPermission}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
     />

@@ -1,5 +1,5 @@
 {
-  "id": "6cd83dd9-4c9e-4da6-8bb1-2baace62c376",
+  "id": "49fec42f-ecca-4d1b-8990-abaea1a4726f",
   "prevId": "7f7e35f6-6ba3-45c2-81ae-fe062cb4240e",
   "version": "7",
   "dialect": "postgresql",
@@ -3465,10 +3465,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "pvb_beoordelaar_beschikbaarheid_beoordelaar_id_actor_id_fk": {
-          "name": "pvb_beoordelaar_beschikbaarheid_beoordelaar_id_actor_id_fk",
+        "pvb_beoordelaar_beschikbaarheid_beoordelaar_id_person_id_fk": {
+          "name": "pvb_beoordelaar_beschikbaarheid_beoordelaar_id_person_id_fk",
           "tableFrom": "pvb_beoordelaar_beschikbaarheid",
-          "tableTo": "actor",
+          "tableTo": "person",
           "columnsFrom": [
             "beoordelaar_id"
           ],
@@ -4071,10 +4071,10 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "pvb_onderdeel_beoordelaar_id_actor_id_fk": {
-          "name": "pvb_onderdeel_beoordelaar_id_actor_id_fk",
+        "pvb_onderdeel_beoordelaar_id_person_id_fk": {
+          "name": "pvb_onderdeel_beoordelaar_id_person_id_fk",
           "tableFrom": "pvb_onderdeel",
-          "tableTo": "actor",
+          "tableTo": "person",
           "columnsFrom": [
             "beoordelaar_id"
           ],
@@ -6510,7 +6510,8 @@
         "aanvraag_ingetrokken",
         "onderdeel_toegevoegd",
         "onderdeel_beoordelaar_gewijzigd",
-        "onderdeel_uitslag_gewijzigd"
+        "onderdeel_uitslag_gewijzigd",
+        "onderdeel_startdatum_gewijzigd"
       ]
     },
     "kss.pvb_onderdeel_uitslag": {
