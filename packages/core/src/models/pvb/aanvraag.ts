@@ -2379,6 +2379,71 @@ export const grantLeercoachPermission = wrapCommand(
   ),
 );
 
+// Deny leercoach permission for a single PvB aanvraag
+export const denyLeercoachPermission = wrapCommand(
+  "pvb.denyLeercoachPermission",
+  withZod(
+    z.object({
+      pvbAanvraagId: z.string().uuid(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string(),
+    }),
+    z.object({
+      success: z.boolean(),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      // Get the latest leercoach permission request
+      const latestPermissionResults = await query
+        .select({
+          id: s.pvbLeercoachToestemming.id,
+          leercoachId: s.pvbLeercoachToestemming.leercoachId,
+          status: s.pvbLeercoachToestemming.status,
+        })
+        .from(s.pvbLeercoachToestemming)
+        .where(eq(s.pvbLeercoachToestemming.pvbAanvraagId, input.pvbAanvraagId))
+        .orderBy(desc(s.pvbLeercoachToestemming.aangemaaktOp))
+        .limit(1);
+
+      const latestPermission = possibleSingleRow(latestPermissionResults);
+
+      if (!latestPermission) {
+        throw new Error("Geen leercoach toestemming gevonden voor deze aanvraag");
+      }
+
+      if (latestPermission.status !== "gevraagd") {
+        throw new Error("Toestemming kan alleen worden geweigerd als deze is gevraagd");
+      }
+
+      // Create a new permission entry with 'geweigerd' status
+      await query.insert(s.pvbLeercoachToestemming).values({
+        pvbAanvraagId: input.pvbAanvraagId,
+        leercoachId: latestPermission.leercoachId,
+        status: "geweigerd",
+        aangemaaktDoor: input.aangemaaktDoor,
+        reden: input.reden,
+      });
+
+      // Log the event
+      await logPvbEvent({
+        pvbAanvraagId: input.pvbAanvraagId,
+        gebeurtenisType: "leercoach_toestemming_geweigerd",
+        data: {
+          leercoachId: latestPermission.leercoachId,
+          weigeringsReden: input.reden,
+        },
+        aangemaaktDoor: input.aangemaaktDoor,
+        reden: input.reden,
+      });
+
+      return {
+        success: true,
+      };
+    },
+  ),
+);
+
 // Get PvB gebeurtenissen (events) for timeline
 export const listGebeurtenissen = wrapCommand(
   "pvb.listGebeurtenissen",

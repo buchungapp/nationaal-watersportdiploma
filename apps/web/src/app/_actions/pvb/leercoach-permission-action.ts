@@ -1,8 +1,13 @@
 "use server";
 
+import { Pvb } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getUserOrThrow, retrievePvbAanvraagByHandle } from "~/lib/nwd";
+import {
+  getPrimaryPerson,
+  getUserOrThrow,
+  retrievePvbAanvraagByHandle,
+} from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 // Grant leercoach permission
@@ -12,39 +17,38 @@ export const grantLeercoachPermissionAction = actionClientWithMeta
   })
   .schema(
     z.object({
-      aanvraagHandle: z.string(),
-      reason: z.string().optional(),
+      handle: z.string(),
+      pvbAanvraagId: z.string().uuid(),
+      remarks: z.string().optional(),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { aanvraagHandle, reason } = parsedInput;
+    const { handle, pvbAanvraagId, remarks } = parsedInput;
+
     const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
 
-    const aanvraag = await retrievePvbAanvraagByHandle(aanvraagHandle);
+    // Get the aanvraag to find the leercoach actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
     
-    // Check if user is the leercoach
-    if (aanvraag.leercoach?.id !== user.personId) {
-      throw new Error("Je bent niet de leercoach van deze aanvraag");
+    // Find the leercoach actor for this person
+    const leercoachActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
+    );
+
+    if (!leercoachActor) {
+      throw new Error("Je bent geen leercoach voor deze aanvraag");
     }
 
-    // Check if aanvraag is in the right status
-    if (aanvraag.status !== "wacht_op_voorwaarden") {
-      throw new Error("Deze aanvraag wacht niet op toestemming");
-    }
-
-    // Check if permission hasn't already been given
-    if (aanvraag.leercoach.status === "gegeven") {
-      throw new Error("Je hebt al toestemming gegeven");
-    }
-
-    // Grant permission using existing grantPvbLeercoachPermission function
-    const { grantPvbLeercoachPermission } = await import("~/lib/nwd");
-    await grantPvbLeercoachPermission({
-      pvbAanvraagId: aanvraag.id,
-      reden: reason,
+    await Pvb.Aanvraag.grantLeercoachPermission({
+      pvbAanvraagId,
+      aangemaaktDoor: leercoachActor.id,
+      reden: remarks || "Toestemming verleend via dashboard",
     });
 
-    revalidatePath(`/profiel/[handle]/pvb-aanvraag/${aanvraagHandle}`, "page");
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -59,45 +63,41 @@ export const denyLeercoachPermissionAction = actionClientWithMeta
   })
   .schema(
     z.object({
-      aanvraagHandle: z.string(),
-      reason: z.string(),
+      handle: z.string(),
+      pvbAanvraagId: z.string().uuid(),
+      reason: z.string().min(1, "Reden is verplicht"),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { aanvraagHandle, reason } = parsedInput;
+    const { handle, pvbAanvraagId, reason } = parsedInput;
+
     const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
 
-    const aanvraag = await retrievePvbAanvraagByHandle(aanvraagHandle);
+    // Get the aanvraag to find the leercoach actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
     
-    // Check if user is the leercoach
-    if (aanvraag.leercoach?.id !== user.personId) {
-      throw new Error("Je bent niet de leercoach van deze aanvraag");
+    // Find the leercoach actor for this person
+    const leercoachActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
+    );
+
+    if (!leercoachActor) {
+      throw new Error("Je bent geen leercoach voor deze aanvraag");
     }
 
-    // Check if aanvraag is in the right status
-    if (aanvraag.status !== "wacht_op_voorwaarden") {
-      throw new Error("Deze aanvraag wacht niet op toestemming");
-    }
+    await Pvb.Aanvraag.denyLeercoachPermission({
+      pvbAanvraagId,
+      aangemaaktDoor: leercoachActor.id,
+      reden: reason,
+    });
 
-    // Check if permission hasn't already been given
-    if (aanvraag.leercoach.status === "gegeven") {
-      throw new Error("Je hebt al toestemming gegeven");
-    }
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
-    // For now, we'll need to add a denyPvbLeercoachPermission function to the core
-    // Since it doesn't exist yet, we'll throw an error
-    throw new Error("Toestemming weigeren is momenteel niet beschikbaar");
-
-    // TODO: When the function is available, use:
-    // await denyPvbLeercoachPermission({
-    //   pvbAanvraagId: aanvraag.id,
-    //   reden: reason,
-    // });
-
-    // revalidatePath(`/profiel/[handle]/pvb-aanvraag/${aanvraagHandle}`, "page");
-
-    // return {
-    //   success: true,
-    //   message: "Toestemming geweigerd",
-    // };
+    return {
+      success: true,
+      message: "Toestemming succesvol geweigerd",
+    };
   });

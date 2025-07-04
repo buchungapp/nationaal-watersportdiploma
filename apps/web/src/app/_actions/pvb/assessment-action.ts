@@ -1,44 +1,53 @@
 "use server";
 
+import { Pvb } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { Pvb, getUserOrThrow, retrievePvbAanvraagByHandle } from "~/lib/nwd";
+import {
+  getPrimaryPerson,
+  getUserOrThrow,
+  retrievePvbAanvraagByHandle,
+} from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
-// Start PvB assessment (beoordelaar)
+// Start PvB assessment
 export const startPvbAssessmentAction = actionClientWithMeta
   .metadata({
     name: "start-pvb-assessment",
   })
   .schema(
     z.object({
-      aanvraagHandle: z.string(),
+      handle: z.string(),
+      pvbAanvraagId: z.string().uuid(),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { aanvraagHandle } = parsedInput;
+    const { handle, pvbAanvraagId } = parsedInput;
+
     const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
 
-    const aanvraag = await retrievePvbAanvraagByHandle(aanvraagHandle);
+    // Get the aanvraag to find the beoordelaar actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
     
-    // Check if user is the beoordelaar
-    const isBeoordelaar = aanvraag.onderdelen.some(
-      (onderdeel) => onderdeel.beoordelaar?.id === user.personId
+    // Find the beoordelaar actor for this person
+    const beoordelaarActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
     );
-    
-    if (!isBeoordelaar) {
-      throw new Error("Je bent niet de beoordelaar van deze aanvraag");
+
+    if (!beoordelaarActor) {
+      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
     }
 
-    if (aanvraag.status !== "gereed_voor_beoordeling") {
-      throw new Error("Deze aanvraag is niet gereed voor beoordeling");
-    }
-
-    await Pvb.Aanvraag.startBeoordeling({
-      pvbAanvraagId: aanvraag.id,
+    await Pvb.Beoordeling.startBeoordeling({
+      pvbAanvraagId,
+      aangemaaktDoor: beoordelaarActor.id,
+      reden: "Beoordeling gestart via dashboard",
     });
 
-    revalidatePath(`/profiel/[handle]/pvb-aanvraag/${aanvraagHandle}`, "page");
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
@@ -46,13 +55,14 @@ export const startPvbAssessmentAction = actionClientWithMeta
     };
   });
 
-// Update beoordelingscriterium status
+// Update single PvB beoordelingscriterium
 export const updatePvbBeoordelingsCriteriumAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-beoordelingscriterium",
   })
   .schema(
     z.object({
+      handle: z.string(),
       pvbOnderdeelId: z.string().uuid(),
       beoordelingscriteriumId: z.string().uuid(),
       behaald: z.boolean().nullable(),
@@ -60,179 +70,233 @@ export const updatePvbBeoordelingsCriteriumAction = actionClientWithMeta
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { pvbOnderdeelId, beoordelingscriteriumId, behaald, opmerkingen } = parsedInput;
-    const user = await getUserOrThrow();
-
-    // Update the beoordelingscriterium
-    await Pvb.Onderdeel.updateBeoordelingsCriterium({
+    const {
+      handle,
       pvbOnderdeelId,
       beoordelingscriteriumId,
       behaald,
       opmerkingen,
+    } = parsedInput;
+
+    const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
+
+    // Get the aanvraag to find the beoordelaar actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
+    
+    // Find the beoordelaar actor for this person
+    const beoordelaarActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
+    );
+
+    if (!beoordelaarActor) {
+      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
+    }
+
+    await Pvb.Beoordeling.updateBeoordelingsCriterium({
+      pvbOnderdeelId,
+      beoordelingscriteriumId,
+      behaald,
+      opmerkingen,
+      aangemaaktDoor: beoordelaarActor.id,
     });
+
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
-      message: "Beoordelingscriterium bijgewerkt",
+      message: "Criterium succesvol bijgewerkt",
     };
   });
 
-// Update multiple beoordelingscriteria at once
+// Update multiple PvB beoordelingscriteria
 export const updatePvbBeoordelingsCriteriaAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-beoordelingscriteria",
   })
   .schema(
     z.object({
-      pvbOnderdeelId: z.string().uuid(),
+      handle: z.string(),
       updates: z.array(
         z.object({
+          pvbOnderdeelId: z.string().uuid(),
           beoordelingscriteriumId: z.string().uuid(),
           behaald: z.boolean().nullable(),
           opmerkingen: z.string().optional(),
-        })
+        }),
       ),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { pvbOnderdeelId, updates } = parsedInput;
-    const user = await getUserOrThrow();
+    const { handle, updates } = parsedInput;
 
-    // Update all criteria
-    await Promise.all(
-      updates.map((update) =>
-        Pvb.Onderdeel.updateBeoordelingsCriterium({
-          pvbOnderdeelId,
-          beoordelingscriteriumId: update.beoordelingscriteriumId,
-          behaald: update.behaald,
-          opmerkingen: update.opmerkingen,
-        })
-      )
+    const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
+
+    // Get the aanvraag to find the beoordelaar actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
+    
+    // Find the beoordelaar actor for this person
+    const beoordelaarActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
     );
+
+    if (!beoordelaarActor) {
+      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
+    }
+
+    const result = await Pvb.Beoordeling.updateBeoordelingsCriteria({
+      updates,
+      aangemaaktDoor: beoordelaarActor.id,
+    });
+
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
-      message: "Beoordelingscriteria bijgewerkt",
+      message: `${result.updatedCount} criteria succesvol bijgewerkt`,
     };
   });
 
-// Update onderdeel uitslag
+// Update PvB onderdeel uitslag
 export const updatePvbOnderdeelUitslagAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-onderdeel-uitslag",
   })
   .schema(
     z.object({
+      handle: z.string(),
       pvbOnderdeelId: z.string().uuid(),
       uitslag: z.enum(["behaald", "niet_behaald", "nog_niet_bekend"]),
-      opmerkingen: z.string().optional(),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { pvbOnderdeelId, uitslag, opmerkingen } = parsedInput;
-    const user = await getUserOrThrow();
+    const { handle, pvbOnderdeelId, uitslag } = parsedInput;
 
-    await Pvb.Onderdeel.updateUitslag({
+    const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
+
+    // Get the aanvraag to find the beoordelaar actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
+    
+    // Find the beoordelaar actor for this person
+    const beoordelaarActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
+    );
+
+    if (!beoordelaarActor) {
+      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
+    }
+
+    await Pvb.Beoordeling.updateOnderdeelUitslag({
       pvbOnderdeelId,
       uitslag,
-      opmerkingen,
+      aangemaaktDoor: beoordelaarActor.id,
+      reden: `Uitslag bijgewerkt naar ${uitslag}`,
     });
+
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
-      message: "Onderdeel uitslag bijgewerkt",
+      message: "Onderdeel uitslag succesvol bijgewerkt",
     };
   });
 
-// Abort PvB
+// Abort PvB assessment
 export const abortPvbAction = actionClientWithMeta
   .metadata({
-    name: "abort-pvb",
+    name: "abort-pvb-assessment",
   })
   .schema(
     z.object({
-      aanvraagHandle: z.string(),
-      reden: z.string(),
+      handle: z.string(),
+      pvbAanvraagId: z.string().uuid(),
+      reason: z.string().min(1, "Reden is verplicht"),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { aanvraagHandle, reden } = parsedInput;
+    const { handle, pvbAanvraagId, reason } = parsedInput;
+
     const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
 
-    const aanvraag = await retrievePvbAanvraagByHandle(aanvraagHandle);
+    // Get the aanvraag to find the beoordelaar actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
     
-    // Check if user is the beoordelaar
-    const isBeoordelaar = aanvraag.onderdelen.some(
-      (onderdeel) => onderdeel.beoordelaar?.id === user.personId
+    // Find the beoordelaar actor for this person
+    const beoordelaarActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
     );
-    
-    if (!isBeoordelaar) {
-      throw new Error("Je bent niet de beoordelaar van deze aanvraag");
+
+    if (!beoordelaarActor) {
+      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
     }
 
-    if (aanvraag.status !== "in_beoordeling") {
-      throw new Error("Deze aanvraag is niet in beoordeling");
-    }
-
-    await Pvb.Aanvraag.abortBeoordeling({
-      pvbAanvraagId: aanvraag.id,
-      reden,
+    await Pvb.Beoordeling.abortBeoordeling({
+      pvbAanvraagId,
+      aangemaaktDoor: beoordelaarActor.id,
+      reden: reason,
     });
 
-    revalidatePath(`/profiel/[handle]/pvb-aanvraag/${aanvraagHandle}`, "page");
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
-      message: "PvB beoordeling afgebroken",
+      message: "Beoordeling succesvol afgebroken",
     };
   });
 
-// Finalize assessment
+// Finalize PvB assessment
 export const finalizePvbAssessmentAction = actionClientWithMeta
   .metadata({
     name: "finalize-pvb-assessment",
   })
   .schema(
     z.object({
-      aanvraagHandle: z.string(),
+      handle: z.string(),
+      pvbAanvraagId: z.string().uuid(),
     }),
   )
   .action(async ({ parsedInput }) => {
-    const { aanvraagHandle } = parsedInput;
+    const { handle, pvbAanvraagId } = parsedInput;
+
     const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
 
-    const aanvraag = await retrievePvbAanvraagByHandle(aanvraagHandle);
+    // Get the aanvraag to find the beoordelaar actor
+    const aanvraag = await retrievePvbAanvraagByHandle(handle);
     
-    // Check if user is the beoordelaar
-    const isBeoordelaar = aanvraag.onderdelen.some(
-      (onderdeel) => onderdeel.beoordelaar?.id === user.personId
-    );
-    
-    if (!isBeoordelaar) {
-      throw new Error("Je bent niet de beoordelaar van deze aanvraag");
-    }
-
-    if (aanvraag.status !== "in_beoordeling") {
-      throw new Error("Deze aanvraag is niet in beoordeling");
-    }
-
-    // Check if all onderdelen have been assessed
-    const allAssessed = aanvraag.onderdelen.every(
-      (onderdeel) => onderdeel.uitslag !== "nog_niet_bekend"
+    // Find the beoordelaar actor for this person
+    const beoordelaarActor = primaryPerson.actors.find(
+      (actor) =>
+        actor.type === "instructor" && 
+        actor.locationId === aanvraag.locatie.id
     );
 
-    if (!allAssessed) {
-      throw new Error("Niet alle onderdelen zijn beoordeeld");
+    if (!beoordelaarActor) {
+      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
     }
 
-    await Pvb.Aanvraag.finalizeBeoordeling({
-      pvbAanvraagId: aanvraag.id,
+    const result = await Pvb.Beoordeling.finalizeBeoordeling({
+      pvbAanvraagId,
+      aangemaaktDoor: beoordelaarActor.id,
+      reden: "Beoordeling afgerond via dashboard",
     });
 
-    revalidatePath(`/profiel/[handle]/pvb-aanvraag/${aanvraagHandle}`, "page");
+    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
 
     return {
       success: true,
       message: "Beoordeling succesvol afgerond",
+      alleOnderdelenBeoordeeld: result.alleOnderdelenBeoordeeld,
     };
   });

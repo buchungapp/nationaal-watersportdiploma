@@ -1,182 +1,213 @@
 "use client";
 
-import {
-  CheckIcon,
-  EllipsisVerticalIcon,
-  XMarkIcon,
-} from "@heroicons/react/16/solid";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import {
+  CheckCircleIcon,
+  ChevronDownIcon,
+  XCircleIcon,
+} from "@heroicons/react/16/solid";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
   DialogActions,
   DialogBody,
+  DialogDescription,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
+import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { useAction } from "next-safe-action/hooks";
-import { grantLeercoachPermissionAction } from "~/app/_actions/pvb/leercoach-permission-action";
+import {
+  denyLeercoachPermissionAction,
+  grantLeercoachPermissionAction,
+} from "~/app/_actions/pvb/leercoach-permission-action";
 import type { retrievePvbAanvraagByHandle } from "~/lib/nwd";
-import Spinner from "~/app/_components/spinner";
 
-type AanvraagType = Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>;
+interface LeercoachViewProps {
+  aanvraag: Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>;
+  personId: string;
+}
 
-export function LeercoachView({ aanvraag }: { aanvraag: AanvraagType }) {
-  const router = useRouter();
+export function LeercoachView({ aanvraag, personId }: LeercoachViewProps) {
   const [isGrantDialogOpen, setIsGrantDialogOpen] = useState(false);
   const [isDenyDialogOpen, setIsDenyDialogOpen] = useState(false);
-  const [reason, setReason] = useState("");
+  const [grantRemarks, setGrantRemarks] = useState("");
+  const [denyReason, setDenyReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { execute: grantPermission, isPending: isGranting } = useAction(
-    grantLeercoachPermissionAction,
-    {
-      onSuccess: () => {
+  // Check if user is the leercoach
+  const isLeercoach = aanvraag.leercoach?.id === personId;
+
+  if (!isLeercoach) {
+    return null;
+  }
+
+  const canGivePermission =
+    aanvraag.status === "wacht_op_voorwaarden" &&
+    aanvraag.leercoach?.status === "gevraagd";
+
+  const handleGrant = async () => {
+    setIsSubmitting(true);
+    try {
+      const result = await grantLeercoachPermissionAction({
+        handle: aanvraag.handle,
+        pvbAanvraagId: aanvraag.id,
+        remarks: grantRemarks,
+      });
+
+      if (result?.success) {
+        toast.success(result.message);
         setIsGrantDialogOpen(false);
-        setReason("");
-        toast.success("Toestemming succesvol verleend");
-        router.refresh();
-      },
-      onError: (error) => {
-        toast.error(error.serverError || "Er is een fout opgetreden");
-      },
+        setGrantRemarks("");
+      } else {
+        throw new Error("Er is een fout opgetreden");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Er is een fout opgetreden bij het verlenen van toestemming"
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-  );
+  };
 
-  // Only show actions if status is "wacht_op_voorwaarden" and permission hasn't been given yet
-  if (
-    aanvraag.status !== "wacht_op_voorwaarden" ||
-    aanvraag.leercoach?.status === "gegeven"
-  ) {
+  const handleDeny = async () => {
+    if (!denyReason.trim()) {
+      toast.error("Vul een reden in");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const result = await denyLeercoachPermissionAction({
+        handle: aanvraag.handle,
+        pvbAanvraagId: aanvraag.id,
+        reason: denyReason,
+      });
+
+      if (result?.success) {
+        toast.success(result.message);
+        setIsDenyDialogOpen(false);
+        setDenyReason("");
+      } else {
+        throw new Error("Er is een fout opgetreden");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Er is een fout opgetreden bij het weigeren van toestemming"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!canGivePermission) {
     return null;
   }
 
   return (
     <>
-      <Menu as="div" className="relative inline-block text-left">
-        <MenuButton className="inline-flex items-center rounded-md bg-white dark:bg-gray-800 p-1.5 text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-          <EllipsisVerticalIcon className="h-5 w-5" aria-hidden="true" />
+      <Menu>
+        <MenuButton as={Button} color="dark/white">
+          Toestemming
+          <ChevronDownIcon />
         </MenuButton>
-
-        <MenuItems className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <div className="py-1">
-            <MenuItem>
-              {({ focus }) => (
-                <button
-                  type="button"
-                  onClick={() => setIsGrantDialogOpen(true)}
-                  className={`${
-                    focus
-                      ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      : "text-gray-700 dark:text-gray-300"
-                  } block w-full px-4 py-2 text-left text-sm flex items-center gap-2`}
-                >
-                  <CheckIcon className="h-4 w-4 text-green-600" />
-                  Toestemming geven
-                </button>
-              )}
-            </MenuItem>
-            <MenuItem>
-              {({ focus }) => (
-                <button
-                  type="button"
-                  onClick={() => setIsDenyDialogOpen(true)}
-                  className={`${
-                    focus
-                      ? "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      : "text-gray-700 dark:text-gray-300"
-                  } block w-full px-4 py-2 text-left text-sm flex items-center gap-2`}
-                >
-                  <XMarkIcon className="h-4 w-4 text-red-600" />
-                  Toestemming weigeren
-                </button>
-              )}
-            </MenuItem>
-          </div>
+        <MenuItems anchor="bottom end" className="z-10">
+          <MenuItem>
+            <button
+              onClick={() => setIsGrantDialogOpen(true)}
+              className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 data-[focus]:bg-white/10"
+            >
+              <CheckCircleIcon className="size-4 fill-white/30" />
+              Toestemming verlenen
+            </button>
+          </MenuItem>
+          <MenuItem>
+            <button
+              onClick={() => setIsDenyDialogOpen(true)}
+              className="group flex w-full items-center gap-2 rounded-lg py-1.5 px-3 data-[focus]:bg-white/10"
+            >
+              <XCircleIcon className="size-4 fill-white/30" />
+              Toestemming weigeren
+            </button>
+          </MenuItem>
         </MenuItems>
       </Menu>
 
-      {/* Grant Permission Dialog */}
-      <Dialog open={isGrantDialogOpen} onClose={() => setIsGrantDialogOpen(false)}>
-        <DialogTitle>Toestemming geven voor PvB</DialogTitle>
+      {/* Grant Dialog */}
+      <Dialog open={isGrantDialogOpen} onClose={setIsGrantDialogOpen}>
+        <DialogTitle>Toestemming verlenen</DialogTitle>
+        <DialogDescription>
+          Je staat op het punt om toestemming te verlenen voor deze PvB
+          aanvraag. Hierna kan de beoordeling worden gestart.
+        </DialogDescription>
         <DialogBody>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Je staat op het punt om toestemming te geven voor deze PvB aanvraag.
-              Dit betekent dat je bevestigt dat de kandidaat klaar is voor de
-              beoordeling.
-            </p>
-            <div>
-              <label
-                htmlFor="reason"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Opmerkingen (optioneel)
-              </label>
-              <Textarea
-                id="reason"
-                name="reason"
-                rows={3}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Eventuele opmerkingen..."
-                className="w-full"
-              />
-            </div>
-          </div>
+          <Field>
+            <Label>Opmerkingen (optioneel)</Label>
+            <Textarea
+              value={grantRemarks}
+              onChange={(e) => setGrantRemarks(e.target.value)}
+              placeholder="Eventuele opmerkingen..."
+              rows={3}
+            />
+          </Field>
         </DialogBody>
         <DialogActions>
           <Button
-            type="button"
             plain
             onClick={() => {
               setIsGrantDialogOpen(false);
-              setReason("");
+              setGrantRemarks("");
             }}
-            disabled={isGranting}
           >
             Annuleren
           </Button>
-          <Button
-            type="button"
-            color="branding-orange"
-            onClick={() =>
-              grantPermission({
-                aanvraagHandle: aanvraag.handle,
-                reason: reason || undefined,
-              })
-            }
-            disabled={isGranting}
-          >
-            {isGranting ? <Spinner className="text-white" /> : <CheckIcon />}
-            Toestemming geven
+          <Button color="green" onClick={handleGrant} disabled={isSubmitting}>
+            {isSubmitting ? "Bezig..." : "Toestemming verlenen"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Deny Permission Dialog - Currently not implemented */}
-      <Dialog open={isDenyDialogOpen} onClose={() => setIsDenyDialogOpen(false)}>
-        <DialogTitle>Toestemming weigeren voor PvB</DialogTitle>
+      {/* Deny Dialog */}
+      <Dialog open={isDenyDialogOpen} onClose={setIsDenyDialogOpen}>
+        <DialogTitle>Toestemming weigeren</DialogTitle>
+        <DialogDescription>
+          Weet je zeker dat je de toestemming wilt weigeren? De aanvraag kan
+          hierna niet worden beoordeeld.
+        </DialogDescription>
         <DialogBody>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Deze functie is momenteel niet beschikbaar. Neem contact op met het
-              secretariaat als je de toestemming wilt weigeren.
-            </p>
-          </div>
+          <Field>
+            <Label>Reden voor weigering</Label>
+            <Textarea
+              value={denyReason}
+              onChange={(e) => setDenyReason(e.target.value)}
+              placeholder="Geef een reden op..."
+              rows={3}
+              required
+            />
+          </Field>
         </DialogBody>
         <DialogActions>
           <Button
-            type="button"
             plain
             onClick={() => {
               setIsDenyDialogOpen(false);
-              setReason("");
+              setDenyReason("");
             }}
           >
-            Sluiten
+            Annuleren
+          </Button>
+          <Button
+            color="red"
+            onClick={handleDeny}
+            disabled={isSubmitting || !denyReason.trim()}
+          >
+            {isSubmitting ? "Bezig..." : "Toestemming weigeren"}
           </Button>
         </DialogActions>
       </Dialog>

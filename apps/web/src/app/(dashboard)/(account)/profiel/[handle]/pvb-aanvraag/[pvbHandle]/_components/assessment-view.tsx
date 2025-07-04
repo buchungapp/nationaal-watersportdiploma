@@ -25,6 +25,10 @@ import type {
   getPvbToetsdocumenten,
   retrievePvbAanvraagByHandle,
 } from "~/lib/nwd";
+import {
+  updatePvbBeoordelingsCriteriumAction,
+  updatePvbOnderdeelUitslagAction,
+} from "~/app/_actions/pvb/assessment-action";
 
 interface AssessmentViewProps {
   toetsdocumenten: Awaited<ReturnType<typeof getPvbToetsdocumenten>>[number];
@@ -172,10 +176,25 @@ export function AssessmentView({
     });
 
     try {
-      // TODO: Call updatePvbBeoordelingsCriteriumAction
-      toast.error("Beoordeling bijwerken is nog niet geïmplementeerd");
+      const result = await updatePvbBeoordelingsCriteriumAction({
+        handle: aanvraag.handle,
+        pvbOnderdeelId,
+        beoordelingscriteriumId,
+        behaald,
+        opmerkingen: remark,
+      });
+
+      if (result?.success) {
+        toast.success("Criterium bijgewerkt");
+      } else {
+        throw new Error("Er is een fout opgetreden");
+      }
     } catch (error) {
-      toast.error("Er is een fout opgetreden");
+      toast.error("Er is een fout opgetreden bij het bijwerken");
+      // Revert optimistic update on error
+      startTransition(() => {
+        setOptimisticCriteria([]);
+      });
     }
   };
 
@@ -194,10 +213,23 @@ export function AssessmentView({
     });
 
     try {
-      // TODO: Call updatePvbOnderdeelUitslagAction
-      toast.error("Onderdeel uitslag bijwerken is nog niet geïmplementeerd");
+      const result = await updatePvbOnderdeelUitslagAction({
+        handle: aanvraag.handle,
+        pvbOnderdeelId,
+        uitslag,
+      });
+
+      if (result?.success) {
+        toast.success("Onderdeel uitslag bijgewerkt");
+      } else {
+        throw new Error("Er is een fout opgetreden");
+      }
     } catch (error) {
-      toast.error("Er is een fout opgetreden");
+      toast.error("Er is een fout opgetreden bij het bijwerken");
+      // Revert optimistic update on error
+      startTransition(() => {
+        setOptimisticOnderdelen([]);
+      });
     }
   };
 

@@ -73,13 +73,20 @@ export default async function Page(props: {
         <div className="lg:col-start-3 lg:row-end-1">
           <div className="flex justify-between items-center">
             <Subheading>PvB Aanvraag</Subheading>
-            {/* Role-specific actions */}
-            {role === "leercoach" && (
-              <LeercoachView aanvraag={aanvraag} />
-            )}
-            {role === "beoordelaar" && (
-              <BeoordelaarView aanvraag={aanvraag} />
-            )}
+            <div className="flex items-center gap-4">
+              {/* Show role-specific actions */}
+              {role === "kandidaat" && (
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  Je hebt alleen leesrechten voor deze aanvraag
+                </span>
+              )}
+              {role === "leercoach" && (
+                <LeercoachView aanvraag={aanvraag} personId={person.id} />
+              )}
+              {role === "beoordelaar" && (
+                <BeoordelaarView aanvraag={aanvraag} personId={person.id} />
+              )}
+            </div>
           </div>
           <Divider className="mt-4" />
           <AanvraagCard aanvraag={aanvraag} />
