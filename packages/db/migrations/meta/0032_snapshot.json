@@ -1,5 +1,5 @@
 {
-  "id": "1e7a436a-b38c-4ce6-bd90-6670dcf93ca4",
+  "id": "63b4e71e-ace6-42ac-8c1c-37420f0d0ae4",
   "prevId": "7f7e35f6-6ba3-45c2-81ae-fe062cb4240e",
   "version": "7",
   "dialect": "postgresql",
@@ -2992,20 +2992,18 @@
         }
       },
       "foreignKeys": {
-        "persoon_kwalificatie_direct_behaalde_pvb_onderdeel_id_kerntaak_onderdeel_id_toegevoegd_door_pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_fk": {
-          "name": "persoon_kwalificatie_direct_behaalde_pvb_onderdeel_id_kerntaak_onderdeel_id_toegevoegd_door_pvb_onderdeel_id_kerntaak_onderdeel_id_beoordelaar_id_fk",
+        "persoon_kwalificatie_direct_behaalde_pvb_onderdeel_id_kerntaak_onderdeel_id_pvb_onderdeel_id_kerntaak_onderdeel_id_fk": {
+          "name": "persoon_kwalificatie_direct_behaalde_pvb_onderdeel_id_kerntaak_onderdeel_id_pvb_onderdeel_id_kerntaak_onderdeel_id_fk",
           "tableFrom": "persoon_kwalificatie",
           "tableTo": "pvb_onderdeel",
           "schemaTo": "kss",
           "columnsFrom": [
             "direct_behaalde_pvb_onderdeel_id",
-            "kerntaak_onderdeel_id",
-            "toegevoegd_door"
+            "kerntaak_onderdeel_id"
           ],
           "columnsTo": [
             "id",
-            "kerntaak_onderdeel_id",
-            "beoordelaar_id"
+            "kerntaak_onderdeel_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

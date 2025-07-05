@@ -21,6 +21,7 @@ function getEventDescription(
     onderdeel_startdatum_gewijzigd: "Startdatum gewijzigd",
     beoordeling_gestart: "Beoordeling gestart",
     beoordeling_afgerond: "Beoordeling afgerond",
+    onderdeel_uitslag_gewijzigd: "Onderdeel uitslag gewijzigd",
   };
 
   return descriptions[type] || type;
@@ -277,7 +278,7 @@ export default async function PvbTimeline({
                       </div>
                       <div className="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
                         {dayjs(gebeurtenis.aangemaaktOp).format(
-                          "DD MMM YYYY om HH:mm",
+                          "DD MMM YYYY HH:mm uur",
                         )}
                       </div>
                     </div>

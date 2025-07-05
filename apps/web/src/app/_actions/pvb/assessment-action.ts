@@ -159,52 +159,6 @@ export const updatePvbBeoordelingsCriteriaAction = actionClientWithMeta
     };
   });
 
-// Update PvB onderdeel uitslag
-export const updatePvbOnderdeelUitslagAction = actionClientWithMeta
-  .metadata({
-    name: "update-pvb-onderdeel-uitslag",
-  })
-  .schema(
-    z.object({
-      handle: z.string(),
-      pvbOnderdeelId: z.string().uuid(),
-      uitslag: z.enum(["behaald", "niet_behaald", "nog_niet_bekend"]),
-    }),
-  )
-  .action(async ({ parsedInput }) => {
-    const { handle, pvbOnderdeelId, uitslag } = parsedInput;
-
-    const user = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(user);
-
-    // Get the aanvraag to find the beoordelaar actor
-    const aanvraag = await retrievePvbAanvraagByHandle(handle);
-
-    // Find the beoordelaar actor for this person
-    const beoordelaarActor = primaryPerson.actors.find(
-      (actor) =>
-        actor.type === "instructor" && actor.locationId === aanvraag.locatie.id,
-    );
-
-    if (!beoordelaarActor) {
-      throw new Error("Je bent geen beoordelaar voor deze aanvraag");
-    }
-
-    await Pvb.Beoordeling.updateOnderdeelUitslag({
-      pvbOnderdeelId,
-      uitslag,
-      aangemaaktDoor: beoordelaarActor.id,
-      reden: `Uitslag bijgewerkt naar ${uitslag}`,
-    });
-
-    revalidatePath(`/profiel/${primaryPerson.handle}/pvb-aanvraag/${handle}`);
-
-    return {
-      success: true,
-      message: "Onderdeel uitslag succesvol bijgewerkt",
-    };
-  });
-
 // Abort PvB assessment
 export const abortPvbAction = actionClientWithMeta
   .metadata({

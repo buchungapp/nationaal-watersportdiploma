@@ -49,16 +49,8 @@ export const persoonKwalificatie = kssSchema.table(
   (table) => [
     // Achieved PVB foreign key - enforces that beoordeeldDoor matches the original assessor
     foreignKey({
-      columns: [
-        table.directBehaaldePvbOnderdeelId,
-        table.kerntaakOnderdeelId,
-        table.toegevoegdDoor,
-      ],
-      foreignColumns: [
-        pvbOnderdeel.id,
-        pvbOnderdeel.kerntaakOnderdeelId,
-        pvbOnderdeel.beoordelaarId,
-      ],
+      columns: [table.directBehaaldePvbOnderdeelId, table.kerntaakOnderdeelId],
+      foreignColumns: [pvbOnderdeel.id, pvbOnderdeel.kerntaakOnderdeelId],
     }),
     // Basis PVB foreign key - references the original PVB from instruction group
     foreignKey({
