@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   getPrimaryPerson,
   getUserOrThrow,
+  grantPvbLeercoachPermissionAsLeercoach,
   retrievePvbAanvraagByHandle,
 } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
@@ -97,5 +98,38 @@ export const denyLeercoachPermissionAction = actionClientWithMeta
     return {
       success: true,
       message: "Toestemming succesvol geweigerd",
+    };
+  });
+
+// Bulk grant leercoach permission
+export const bulkGrantLeercoachPermissionAction = actionClientWithMeta
+  .metadata({
+    name: "bulk-grant-leercoach-permission",
+  })
+  .schema(
+    z.object({
+      pvbAanvraagIds: z
+        .array(z.string().uuid())
+        .nonempty("Selecteer minimaal één aanvraag"),
+      remarks: z.string().optional(),
+    }),
+  )
+  .action(async ({ parsedInput }) => {
+    const { pvbAanvraagIds, remarks } = parsedInput;
+
+    const result = await grantPvbLeercoachPermissionAsLeercoach({
+      pvbAanvraagIds,
+      reden: remarks || "Toestemming verleend via dashboard",
+    });
+
+    const user = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(user);
+
+    revalidatePath(`/profiel/${primaryPerson.handle}`);
+
+    return {
+      success: true,
+      message: `Toestemming verleend voor ${result.updatedCount} aanvragen`,
+      updatedCount: result.updatedCount,
     };
   });

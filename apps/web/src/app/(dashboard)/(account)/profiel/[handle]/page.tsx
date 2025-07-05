@@ -7,6 +7,7 @@ import { Logbook } from "./_components/logbook/logbook";
 import { News } from "./_components/news";
 import { Personalia } from "./_components/person/personalia";
 import ProgressSection from "./_components/progress/progress";
+import PvbOverviewSection from "./_components/pvb/pvb-overview";
 import { Socials } from "./_components/socials";
 import WatersportCertificatesSection from "./_components/watersport-certificates-section";
 import { Welcome } from "./_components/welcome";
@@ -60,6 +61,8 @@ export default function Page(props: {
 
         <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-3 lg:order-none flex flex-col gap-2">
           <ProgressSection personPromise={personPromise} />
+
+          <PvbOverviewSection personPromise={personPromise} />
 
           <WatersportCertificatesSection
             personPromise={personPromise}

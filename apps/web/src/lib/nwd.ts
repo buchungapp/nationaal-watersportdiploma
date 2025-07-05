@@ -3568,6 +3568,139 @@ export const retrievePvbAanvraagByHandle = async (handle: string) => {
   });
 };
 
+export const listPvbsForPersonAsKandidaat = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    // Check if the user is viewing their own data
+    const isSelf = authUser.persons.some((p) => p.id === personId);
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    // Use the new filter to get all PvBs where person is kandidaat in a single query
+    const result = await Pvb.Aanvraag.list({
+      filter: {
+        kandidaatId: personId,
+      },
+    });
+
+    return result.items;
+  });
+});
+
+export const listPvbsForPersonAsLeercoach = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    // Check if the user is viewing their own data
+    const isSelf = authUser.persons.some((p) => p.id === personId);
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    // Use the new filter to get all PvBs where person is leercoach in a single query
+    const result = await Pvb.Aanvraag.list({
+      filter: {
+        leercoachId: personId,
+      },
+    });
+
+    return result.items;
+  });
+});
+
+export const listPvbsForPersonAsBeoordelaar = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+
+      // Check if the user is viewing their own data
+      const isSelf = authUser.persons.some((p) => p.id === personId);
+      if (!isSelf) {
+        throw new Error("Unauthorized");
+      }
+
+      // Use the new filter to get all PvBs where person is beoordelaar in a single query
+      const result = await Pvb.Aanvraag.list({
+        filter: {
+          beoordelaarId: personId,
+        },
+      });
+
+      return result.items;
+    });
+  },
+);
+
+export const grantPvbLeercoachPermissionAsLeercoach = async ({
+  pvbAanvraagIds,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const allAanvragen = await Pvb.Aanvraag.list({
+      filter: {
+        id: nonEmptyPvbAanvraagIds,
+      },
+    });
+
+    if (allAanvragen.items.length !== nonEmptyPvbAanvraagIds.length) {
+      throw new Error("Een of meer PVB aanvragen zijn niet gevonden");
+    }
+
+    if (
+      allAanvragen.items.some(
+        (aanvraag) => aanvraag.leercoach?.id !== primaryPerson.id,
+      )
+    ) {
+      throw new Error("Je bent geen leercoach voor een van deze aanvragen");
+    }
+
+    return await Pvb.Aanvraag.grantLeercoachPermissionForMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds.map((id) => {
+        const relevantAanvraag = allAanvragen.items.find(
+          (aanvraag) => aanvraag.id === id,
+        );
+        if (!relevantAanvraag) {
+          throw new Error("Aanvraag niet gevonden");
+        }
+
+        const relevantActor = primaryPerson.actors.find(
+          (actor) =>
+            actor.type === "instructor" &&
+            actor.locationId === relevantAanvraag.locatie?.id,
+        );
+
+        if (!relevantActor) {
+          throw new Error("Je bent geen instructeur voor deze locatie");
+        }
+
+        return {
+          id,
+          aangemaaktDoor: relevantActor.id,
+        };
+      }) as [
+        { id: string; aangemaaktDoor: string },
+        ...{ id: string; aangemaaktDoor: string }[],
+      ],
+      reden: reden || "Toestemming gegeven door leercoach",
+    });
+  });
+};
+
 export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
@@ -4129,8 +4262,13 @@ export const grantPvbLeercoachPermissionForMultiple = async ({
     }
 
     return await Pvb.Aanvraag.grantLeercoachPermissionForMultiple({
-      pvbAanvraagIds: nonEmptyPvbAanvraagIds,
-      aangemaaktDoor: locationAdminActor.id,
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds.map((id) => ({
+        id,
+        aangemaaktDoor: locationAdminActor.id,
+      })) as [
+        { id: string; aangemaaktDoor: string },
+        ...{ id: string; aangemaaktDoor: string }[],
+      ],
       reden:
         reden || "Toestemming gegeven door locatiebeheerder namens leercoach",
     });

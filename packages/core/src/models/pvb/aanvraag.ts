@@ -8,6 +8,8 @@ import { possibleSingleRow, singleRow } from "../../utils/data-helpers.js";
 import {
   generatePvbAanvraagID,
   jsonBuildObject,
+  singleOrArray,
+  uuidSchema,
   withLimitOffset,
   withZod,
   wrapCommand,
@@ -1088,10 +1090,16 @@ export const list = wrapCommand(
   "pvb.listAanvragen",
   withZod(
     z.object({
-      filter: z.object({
-        locationId: z.string().uuid(),
-        q: z.string().optional(),
-      }),
+      filter: z
+        .object({
+          id: singleOrArray(uuidSchema).optional(),
+          locationId: singleOrArray(uuidSchema).optional(),
+          kandidaatId: singleOrArray(uuidSchema).optional(),
+          leercoachId: singleOrArray(uuidSchema).optional(),
+          beoordelaarId: singleOrArray(uuidSchema).optional(),
+          q: z.string().optional(),
+        })
+        .default({}),
       limit: z.number().int().positive().optional(),
       offset: z.number().int().nonnegative().default(0),
     }),
@@ -1106,6 +1114,12 @@ export const list = wrapCommand(
             lastNamePrefix: z.string().nullable(),
             lastName: z.string().nullable(),
           }),
+          locatie: z
+            .object({
+              id: z.string().uuid(),
+              name: z.string().nullable(),
+            })
+            .optional(),
           type: z.enum(["intern", "extern"]),
           status: z.enum([
             "concept",
@@ -1124,6 +1138,9 @@ export const list = wrapCommand(
               firstName: z.string().nullable(),
               lastNamePrefix: z.string().nullable(),
               lastName: z.string().nullable(),
+              status: z
+                .enum(["gevraagd", "gegeven", "geweigerd", "herroepen"])
+                .nullable(),
             })
             .nullable(),
           hoofdcursus: z
@@ -1191,12 +1208,13 @@ export const list = wrapCommand(
           ),
       );
 
-      // CTE for latest leercoach per aanvraag using selectDistinctOn
+      // CTE for latest leercoach per aanvraag with status using selectDistinctOn
       const latestLeercoachCTE = query.$with("latest_leercoach").as(
         query
           .selectDistinctOn([s.pvbLeercoachToestemming.pvbAanvraagId], {
             pvbAanvraagId: s.pvbLeercoachToestemming.pvbAanvraagId,
             leercoachId: s.pvbLeercoachToestemming.leercoachId,
+            status: s.pvbLeercoachToestemming.status,
           })
           .from(s.pvbLeercoachToestemming)
           .orderBy(
@@ -1205,6 +1223,59 @@ export const list = wrapCommand(
           ),
       );
 
+      // Build WHERE conditions dynamically
+      const whereConditions = [];
+
+      // Id filter
+      if (input.filter.id) {
+        whereConditions.push(
+          Array.isArray(input.filter.id)
+            ? inArray(s.pvbAanvraag.id, input.filter.id)
+            : eq(s.pvbAanvraag.id, input.filter.id),
+        );
+      }
+
+      // Location filter
+      if (input.filter.locationId) {
+        whereConditions.push(
+          Array.isArray(input.filter.locationId)
+            ? inArray(s.pvbAanvraag.locatieId, input.filter.locationId)
+            : eq(s.pvbAanvraag.locatieId, input.filter.locationId),
+        );
+      }
+
+      // Kandidaat filter
+      if (input.filter.kandidaatId) {
+        whereConditions.push(
+          Array.isArray(input.filter.kandidaatId)
+            ? inArray(s.pvbAanvraag.kandidaatId, input.filter.kandidaatId)
+            : eq(s.pvbAanvraag.kandidaatId, input.filter.kandidaatId),
+        );
+      }
+
+      // Leercoach filter (needs to be applied after join)
+      const leercoachFilter = input.filter.leercoachId
+        ? Array.isArray(input.filter.leercoachId)
+          ? inArray(latestLeercoachCTE.leercoachId, input.filter.leercoachId)
+          : eq(latestLeercoachCTE.leercoachId, input.filter.leercoachId)
+        : undefined;
+
+      // Beoordelaar filter (needs subquery to find PvB aanvragen with this beoordelaar)
+      if (input.filter.beoordelaarId) {
+        const beoordelaarIds = Array.isArray(input.filter.beoordelaarId)
+          ? input.filter.beoordelaarId
+          : [input.filter.beoordelaarId];
+
+        const aanvraagIdsWithBeoordelaar = query
+          .selectDistinct({ pvbAanvraagId: s.pvbOnderdeel.pvbAanvraagId })
+          .from(s.pvbOnderdeel)
+          .where(inArray(s.pvbOnderdeel.beoordelaarId, beoordelaarIds));
+
+        whereConditions.push(
+          inArray(s.pvbAanvraag.id, aanvraagIdsWithBeoordelaar),
+        );
+      }
+
       // Query to get basic aanvraag info with current status and aggregated onderdelen
       const aanvragenQuery = query
         .with(latestStatusCTE, latestLeercoachCTE)
@@ -1212,6 +1283,8 @@ export const list = wrapCommand(
           id: s.pvbAanvraag.id,
           handle: s.pvbAanvraag.handle,
           kandidaatId: s.pvbAanvraag.kandidaatId,
+          locatieId: s.pvbAanvraag.locatieId,
+          locatieName: s.location.name,
           type: s.pvbAanvraag.type,
           opmerkingen: s.pvbAanvraag.opmerkingen,
           kandidaatFirstName: s.person.firstName,
@@ -1221,6 +1294,7 @@ export const list = wrapCommand(
           lastStatusChange: latestStatusCTE.aangemaaktOp,
           // Leercoach info
           leercoachId: latestLeercoachCTE.leercoachId,
+          leercoachStatus: latestLeercoachCTE.status,
           leercoachFirstName: leercoachPerson.firstName,
           leercoachLastNamePrefix: leercoachPerson.lastNamePrefix,
           leercoachLastName: leercoachPerson.lastName,
@@ -1281,6 +1355,7 @@ export const list = wrapCommand(
         })
         .from(s.pvbAanvraag)
         .innerJoin(s.person, eq(s.pvbAanvraag.kandidaatId, s.person.id))
+        .innerJoin(s.location, eq(s.pvbAanvraag.locatieId, s.location.id))
         .innerJoin(
           latestStatusCTE,
           eq(latestStatusCTE.pvbAanvraagId, s.pvbAanvraag.id),
@@ -1326,13 +1401,20 @@ export const list = wrapCommand(
           beoordelaarPerson,
           eq(beoordelaarPerson.id, s.pvbOnderdeel.beoordelaarId),
         )
-        .where(eq(s.pvbAanvraag.locatieId, input.filter.locationId))
+        .where(
+          and(
+            whereConditions.length > 0 ? and(...whereConditions) : undefined,
+            leercoachFilter,
+          ),
+        )
         .groupBy(
           s.pvbAanvraag.id,
+          s.location.id,
           s.person.id,
           latestStatusCTE.status,
           latestStatusCTE.aangemaaktOp,
           latestLeercoachCTE.leercoachId,
+          latestLeercoachCTE.status,
           leercoachPerson.id,
           hoofdCursus.courseId,
           hoofdCourse.id,
@@ -1340,11 +1422,41 @@ export const list = wrapCommand(
         .orderBy(desc(latestStatusCTE.aangemaaktOp))
         .$dynamic();
 
-      // Get count
-      const countQuery = query
-        .select({ count: countDistinct(s.pvbAanvraag.id) })
-        .from(s.pvbAanvraag)
-        .where(eq(s.pvbAanvraag.locatieId, input.filter.locationId));
+      // Optimized count query - only include necessary joins based on filters
+      const needsLeercoachJoin = !!input.filter.leercoachId;
+
+      const countQuery = needsLeercoachJoin
+        ? query
+            .with(latestStatusCTE, latestLeercoachCTE)
+            .select({ count: countDistinct(s.pvbAanvraag.id) })
+            .from(s.pvbAanvraag)
+            .innerJoin(
+              latestStatusCTE,
+              eq(latestStatusCTE.pvbAanvraagId, s.pvbAanvraag.id),
+            )
+            .leftJoin(
+              latestLeercoachCTE,
+              eq(latestLeercoachCTE.pvbAanvraagId, s.pvbAanvraag.id),
+            )
+            .where(
+              and(
+                whereConditions.length > 0
+                  ? and(...whereConditions)
+                  : undefined,
+                leercoachFilter,
+              ),
+            )
+        : query
+            .with(latestStatusCTE)
+            .select({ count: countDistinct(s.pvbAanvraag.id) })
+            .from(s.pvbAanvraag)
+            .innerJoin(
+              latestStatusCTE,
+              eq(latestStatusCTE.pvbAanvraagId, s.pvbAanvraag.id),
+            )
+            .where(
+              whereConditions.length > 0 ? and(...whereConditions) : undefined,
+            );
 
       const [aanvragen, { count }] = await Promise.all([
         withLimitOffset(aanvragenQuery, input.limit, input.offset),
@@ -1369,6 +1481,10 @@ export const list = wrapCommand(
           lastNamePrefix: row.kandidaatLastNamePrefix,
           lastName: row.kandidaatLastName,
         },
+        locatie: {
+          id: row.locatieId,
+          name: row.locatieName,
+        },
         type: row.type,
         status: row.status,
         lastStatusChange: dayjs(row.lastStatusChange).toISOString(),
@@ -1379,6 +1495,7 @@ export const list = wrapCommand(
               firstName: row.leercoachFirstName,
               lastNamePrefix: row.leercoachLastNamePrefix,
               lastName: row.leercoachLastName,
+              status: row.leercoachStatus,
             }
           : null,
         hoofdcursus: row.hoofdcursusId
@@ -1710,8 +1827,14 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
   "pvb.grantLeercoachPermissionForMultiple",
   withZod(
     z.object({
-      pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
-      aangemaaktDoor: z.string().uuid(),
+      pvbAanvraagIds: z
+        .array(
+          z.object({
+            id: z.string().uuid(),
+            aangemaaktDoor: z.string().uuid(),
+          }),
+        )
+        .nonempty(),
       reden: z.string().optional(),
     }),
     z.object({
@@ -1730,7 +1853,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
       const results = [];
       let updatedCount = 0;
 
-      for (const aanvraagId of input.pvbAanvraagIds) {
+      for (const aanvraag of input.pvbAanvraagIds) {
         try {
           // Get the latest leercoach permission record for this aanvraag
           const latestPermissionResults = await query
@@ -1740,7 +1863,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
               status: s.pvbLeercoachToestemming.status,
             })
             .from(s.pvbLeercoachToestemming)
-            .where(eq(s.pvbLeercoachToestemming.pvbAanvraagId, aanvraagId))
+            .where(eq(s.pvbLeercoachToestemming.pvbAanvraagId, aanvraag.id))
             .orderBy(desc(s.pvbLeercoachToestemming.aangemaaktOp))
             .limit(1);
 
@@ -1748,7 +1871,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
 
           if (!latestPermission) {
             results.push({
-              aanvraagId,
+              aanvraagId: aanvraag.id,
               success: false,
               error: "Geen leercoach toegewezen aan deze aanvraag",
             });
@@ -1757,7 +1880,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
 
           if (latestPermission.status === "gegeven") {
             results.push({
-              aanvraagId,
+              aanvraagId: aanvraag.id,
               success: false,
               error: "Leercoach heeft al toestemming gegeven",
             });
@@ -1766,7 +1889,7 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
 
           if (latestPermission.status === "geweigerd") {
             results.push({
-              aanvraagId,
+              aanvraagId: aanvraag.id,
               success: false,
               error:
                 "Leercoach heeft toestemming geweigerd, kan niet overschreven worden",
@@ -1776,16 +1899,16 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
 
           // Grant permission on behalf of leercoach (status: gevraagd -> gegeven)
           await query.insert(s.pvbLeercoachToestemming).values({
-            pvbAanvraagId: aanvraagId,
+            pvbAanvraagId: aanvraag.id,
             leercoachId: latestPermission.leercoachId,
             status: "gegeven",
-            aangemaaktDoor: input.aangemaaktDoor,
+            aangemaaktDoor: aanvraag.aangemaaktDoor,
             reden: input.reden ?? "",
           });
 
           // Log the event
           await logPvbEvent({
-            pvbAanvraagId: aanvraagId,
+            pvbAanvraagId: aanvraag.id,
             gebeurtenisType: "leercoach_toestemming_gegeven",
             data: {
               leercoachId: latestPermission.leercoachId,
@@ -1793,25 +1916,25 @@ export const grantLeercoachPermissionForMultiple = wrapCommand(
               beslissing: "gegeven",
               namensLeercoach: true,
             },
-            aangemaaktDoor: input.aangemaaktDoor,
+            aangemaaktDoor: aanvraag.aangemaaktDoor,
             reden: input.reden ?? "",
           });
 
           // Check if all prerequisites are now met
           await checkVoorwaardenAndUpdateStatus(
-            aanvraagId,
-            input.aangemaaktDoor,
+            aanvraag.id,
+            aanvraag.aangemaaktDoor,
             "Leercoach toestemming gegeven namens leercoach - voorwaarden gecontroleerd",
           );
 
           results.push({
-            aanvraagId,
+            aanvraagId: aanvraag.id,
             success: true,
           });
           updatedCount++;
         } catch (error) {
           results.push({
-            aanvraagId,
+            aanvraagId: aanvraag.id,
             success: false,
             error: error instanceof Error ? error.message : "Onbekende fout",
           });
@@ -2359,8 +2482,12 @@ export const grantLeercoachPermission = wrapCommand(
     }),
     async (input) => {
       const result = await grantLeercoachPermissionForMultiple({
-        pvbAanvraagIds: [input.pvbAanvraagId],
-        aangemaaktDoor: input.aangemaaktDoor,
+        pvbAanvraagIds: [
+          {
+            id: input.pvbAanvraagId,
+            aangemaaktDoor: input.aangemaaktDoor,
+          },
+        ],
         reden: input.reden,
       });
 
