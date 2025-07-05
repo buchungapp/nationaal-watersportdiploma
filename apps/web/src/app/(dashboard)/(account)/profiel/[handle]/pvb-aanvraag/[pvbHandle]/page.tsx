@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
@@ -10,7 +9,6 @@ import {
 } from "~/lib/nwd";
 import { AanvraagCard } from "./_components/aanvraag-card";
 import { BeoordelaarView } from "./_components/beoordelaar-view";
-import { DevRoleSwitcher } from "./_components/dev-role-switcher";
 import { LeercoachView } from "./_components/leercoach-view";
 import PvbTimeline from "./_components/pvb-timeline";
 import { ToetsdocumentenCard } from "./_components/toetsdocumenten-card";
@@ -20,15 +18,6 @@ async function getUserRole(
   userPersonId: string,
   aanvraag: Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>,
 ) {
-  // In development mode, check for override role from cookie
-  if (process.env.NODE_ENV === "development") {
-    const cookieStore = await cookies();
-    const overrideRole = cookieStore.get("dev-pvb-role")?.value;
-    if (overrideRole && overrideRole !== "") {
-      return overrideRole as "kandidaat" | "leercoach" | "beoordelaar" | null;
-    }
-  }
-
   if (aanvraag.kandidaat.id === userPersonId) {
     return "kandidaat";
   }
@@ -74,11 +63,6 @@ export default async function Page(props: {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Development mode role switcher */}
-      {process.env.NODE_ENV === "development" && (
-        <DevRoleSwitcher currentRole={role} />
-      )}
-
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         {/* Header Section */}
         <div className="mb-6">

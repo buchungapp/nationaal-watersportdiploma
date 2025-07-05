@@ -36,7 +36,7 @@ export function AanvraagCard({ aanvraag }: { aanvraag: AanvraagType }) {
       person.lastNamePrefix,
       person.lastName,
     ].filter(Boolean);
-    return parts.join("") || "Onbekend";
+    return parts.join(" ") || "Onbekend";
   };
 
   return (
