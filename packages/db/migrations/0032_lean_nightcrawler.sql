@@ -23,3 +23,4 @@ ALTER TABLE "kss"."pvb_aanvraag" ADD CONSTRAINT "pvb_aanvraag_kandidaat_id_perso
 ALTER TABLE "kss"."pvb_beoordelaar_beschikbaarheid" ADD CONSTRAINT "pvb_beoordelaar_beschikbaarheid_beoordelaar_id_person_id_fk" FOREIGN KEY ("beoordelaar_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_leercoach_toestemming" ADD CONSTRAINT "pvb_leercoach_toestemming_leercoach_id_person_id_fk" FOREIGN KEY ("leercoach_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."pvb_onderdeel" ADD CONSTRAINT "pvb_onderdeel_beoordelaar_id_person_id_fk" FOREIGN KEY ("beoordelaar_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "kss"."pvb_onderdeel_beoordelingscriterium" ADD CONSTRAINT "pvb_onderdeel_beoordelingscriterium_pvb_onderdeel_id_beoordelingscriterium_id_unique" UNIQUE("pvb_onderdeel_id","beoordelingscriterium_id");

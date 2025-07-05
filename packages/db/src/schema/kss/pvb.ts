@@ -466,5 +466,6 @@ export const pvbOnderdeelBeoordelingsCriterium = kssSchema.table(
       columns: [table.kerntaakId],
       foreignColumns: [kerntaak.id],
     }),
+    unique().on(table.pvbOnderdeelId, table.beoordelingscriteriumId),
   ],
 );

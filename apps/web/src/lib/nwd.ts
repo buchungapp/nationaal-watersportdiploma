@@ -3547,14 +3547,20 @@ export const retrievePvbAanvraagByHandle = async (handle: string) => {
 
     const aanvraag = await Pvb.Aanvraag.retrieveByHandle({ handle });
 
-    // Check if user has access to this location
+    // Check if user has access to this PVB aanvraag
     const isLocationAdmin = await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: aanvraag.locatie.id,
       personId: primaryPerson.id,
     }).catch(() => false);
 
-    if (!isLocationAdmin) {
+    const isLeercoach = aanvraag.leercoach?.id === primaryPerson.id;
+    const isBeoordelaar = aanvraag.onderdelen.some(
+      (o) => o.beoordelaar?.id === primaryPerson.id,
+    );
+
+    // User must be either a location admin, the assigned leercoach, or a beoordelaar
+    if (!isLocationAdmin && !isLeercoach && !isBeoordelaar) {
       throw new Error("Unauthorized");
     }
 

@@ -322,7 +322,7 @@ export const addOnderdeel = wrapCommand(
           pvbOnderdeelId: result.id,
           beoordelaarId: input.beoordelaarId,
           aangemaaktDoor: input.aangemaaktDoor,
-          reden: "Beoordelaar toegewezen bij toevoegen onderdeel",
+          reden: "",
         });
       }
 
@@ -977,7 +977,7 @@ export const withdrawAanvraag = wrapCommand(
         gebeurtenisType: "aanvraag_ingetrokken",
         data: {
           ingetrokkenDoor: input.aangemaaktDoor,
-          voorigeStatus: currentStatus.status,
+          vorigeStatus: currentStatus.status,
         },
         aangemaaktDoor: input.aangemaaktDoor,
         reden: input.reden ?? "",
@@ -1039,7 +1039,7 @@ export const createAanvraag = wrapCommand(
         pvbAanvraagId: pvbAanvraag.id,
         status: "concept",
         aangemaaktDoor: input.aangevraagdDoor,
-        reden: "Nieuwe aanvraag aangemaakt",
+        reden: "",
       });
 
       for (const course of input.courses) {
@@ -1050,7 +1050,7 @@ export const createAanvraag = wrapCommand(
           isMainCourse: course.isMainCourse,
           opmerkingen: course.opmerkingen,
           aangemaaktDoor: input.aangevraagdDoor,
-          reden: "Initiele aanvraag cursus",
+          reden: "",
         });
       }
 
@@ -1063,7 +1063,7 @@ export const createAanvraag = wrapCommand(
           startDatumTijd: input.startDatumTijd,
           opmerkingen: onderdeel.opmerkingen,
           aangemaaktDoor: input.aangevraagdDoor,
-          reden: "Initiele aanvraag onderdeel",
+          reden: "",
         });
       }
 
@@ -1072,7 +1072,7 @@ export const createAanvraag = wrapCommand(
           pvbAanvraagId: pvbAanvraag.id,
           leercoachId: input.leercoachId,
           aangemaaktDoor: input.aangevraagdDoor,
-          reden: "Initiele leercoach toewijzing",
+          reden: "",
         });
       }
 
@@ -2371,6 +2371,75 @@ export const grantLeercoachPermission = wrapCommand(
       if (!aanvraagResult?.success) {
         throw new Error(aanvraagResult?.error || "Onbekende fout");
       }
+
+      return {
+        success: true,
+      };
+    },
+  ),
+);
+
+// Deny leercoach permission for a single PvB aanvraag
+export const denyLeercoachPermission = wrapCommand(
+  "pvb.denyLeercoachPermission",
+  withZod(
+    z.object({
+      pvbAanvraagId: z.string().uuid(),
+      aangemaaktDoor: z.string().uuid(),
+      reden: z.string(),
+    }),
+    z.object({
+      success: z.boolean(),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      // Get the latest leercoach permission request
+      const latestPermissionResults = await query
+        .select({
+          id: s.pvbLeercoachToestemming.id,
+          leercoachId: s.pvbLeercoachToestemming.leercoachId,
+          status: s.pvbLeercoachToestemming.status,
+        })
+        .from(s.pvbLeercoachToestemming)
+        .where(eq(s.pvbLeercoachToestemming.pvbAanvraagId, input.pvbAanvraagId))
+        .orderBy(desc(s.pvbLeercoachToestemming.aangemaaktOp))
+        .limit(1);
+
+      const latestPermission = possibleSingleRow(latestPermissionResults);
+
+      if (!latestPermission) {
+        throw new Error(
+          "Geen leercoach toestemming gevonden voor deze aanvraag",
+        );
+      }
+
+      if (latestPermission.status !== "gevraagd") {
+        throw new Error(
+          "Toestemming kan alleen worden geweigerd als deze is gevraagd",
+        );
+      }
+
+      // Create a new permission entry with 'geweigerd' status
+      await query.insert(s.pvbLeercoachToestemming).values({
+        pvbAanvraagId: input.pvbAanvraagId,
+        leercoachId: latestPermission.leercoachId,
+        status: "geweigerd",
+        aangemaaktDoor: input.aangemaaktDoor,
+        reden: input.reden,
+      });
+
+      // Log the event
+      await logPvbEvent({
+        pvbAanvraagId: input.pvbAanvraagId,
+        gebeurtenisType: "leercoach_toestemming_geweigerd",
+        data: {
+          leercoachId: latestPermission.leercoachId,
+          weigeringsReden: input.reden,
+        },
+        aangemaaktDoor: input.aangemaaktDoor,
+        reden: input.reden,
+      });
 
       return {
         success: true,

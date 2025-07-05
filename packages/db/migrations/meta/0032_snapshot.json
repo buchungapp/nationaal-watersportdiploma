@@ -1,5 +1,5 @@
 {
-  "id": "d62f2cb0-66cd-4a2e-bace-ee24b4f40bb2",
+  "id": "1e7a436a-b38c-4ce6-bd90-6670dcf93ca4",
   "prevId": "7f7e35f6-6ba3-45c2-81ae-fe062cb4240e",
   "version": "7",
   "dialect": "postgresql",
@@ -4209,7 +4209,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "pvb_onderdeel_beoordelingscriterium_pvb_onderdeel_id_beoordelingscriterium_id_unique": {
+          "name": "pvb_onderdeel_beoordelingscriterium_pvb_onderdeel_id_beoordelingscriterium_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "pvb_onderdeel_id",
+            "beoordelingscriterium_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
