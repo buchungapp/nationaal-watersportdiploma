@@ -4,10 +4,12 @@ import {
   Cohort,
   Course,
   Curriculum,
+  KSS,
   Location,
   Logbook,
   Marketing,
   Platform,
+  Pvb,
   Student,
   User,
   withRedisClient,
@@ -29,7 +31,11 @@ import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
 
-export type ActorType = "student" | "instructor" | "location_admin";
+export type ActorType =
+  | "student"
+  | "instructor"
+  | "location_admin"
+  | "pvb_beoordelaar";
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -111,7 +117,7 @@ async function createOrReplaceMedia<
   return { id, remove } as MediaCreateOrReplaceResult<Media, OldId>;
 }
 
-async function getPrimaryPerson<T extends boolean = true>(
+export async function getPrimaryPerson<T extends boolean = true>(
   user: Awaited<ReturnType<typeof getUserOrThrow>>,
   force = true as T,
 ): Promise<
@@ -331,7 +337,7 @@ async function validatePersonAccessCheck({
 
   const isRequestedPersonAnActivePersonForLocationRequest =
     isActiveActorTypeInLocation({
-      actorType: ["instructor", "student", "location_admin"],
+      actorType: ["instructor", "student", "location_admin", "pvb_beoordelaar"],
       locationId,
       personId: requestedPersonId,
     });
@@ -730,12 +736,20 @@ export const retrieveDisciplineByHandle = async (handle: string) => {
   });
 };
 
-export const listCourses = async () => {
+export const listCourses = async (
+  typeOfCourses?: "consument" | "instructeur",
+  locationId?: string,
+) => {
   "use cache";
   cacheLife("days");
 
   return makeRequest(async () => {
-    const courses = await Course.list();
+    const courses = await Course.list({
+      filter: {
+        type: typeOfCourses,
+        ...(locationId && { locationId }),
+      },
+    });
 
     return courses;
   });
@@ -2177,7 +2191,6 @@ export async function releaseStudentFromCohortByAllocationId({
         personId: primaryPerson.id,
       }),
     ]);
-
     if (!isLocationAdmin && !privileges.includes("manage_cohort_students")) {
       throw new Error("Unauthorized");
     }
@@ -2716,7 +2729,6 @@ export const listDistinctTagsForCohort = async (cohortId: string) => {
     });
   });
 };
-
 export async function upsertActorForLocation({
   locationId,
   personId,
@@ -2938,7 +2950,6 @@ export const updateDefaultCertificateVisibleFromDate = async ({
     });
   });
 };
-
 export const updateCohortDetails = async ({
   cohortId,
   label,
@@ -3364,11 +3375,1074 @@ export const listAllCashbacks = cache(async () => {
 
 export const updateCurrentUserDisplayName = async (displayName: string) => {
   return makeRequest(async () => {
-    const user = await getUserOrThrow();
+    const authUser = await getUserOrThrow();
 
-    return await User.updateDisplayName({
-      userId: user.authUserId,
+    await User.updateDisplayName({
+      userId: authUser.authUserId,
       displayName,
     });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "update_display_name",
+      properties: {
+        $set: { email: authUser.email, displayName: displayName },
+      },
+    });
+
+    await posthog.shutdown();
+  });
+};
+
+export const listPvbs = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: person.id,
+    });
+
+    const pvbs = await Pvb.Aanvraag.list({
+      filter: { locationId },
+    });
+
+    return pvbs.items;
+  });
+});
+
+export const listPvbsWithPagination = cache(
+  async (
+    locationId: string,
+    { q, limit, offset }: { q: string; limit: number; offset: number },
+  ) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      });
+
+      return await Pvb.Aanvraag.list({
+        filter: { locationId, q },
+        limit,
+        offset,
+      });
+    });
+  },
+);
+
+export const listKssNiveaus = cache(async () => {
+  return makeRequest(async () => {
+    return await KSS.Kwalificatieprofiel.listNiveaus();
+  });
+});
+
+export const listKssKwalificatieprofielenWithOnderdelen = cache(
+  async (niveauId: string) => {
+    return makeRequest(async () => {
+      return await KSS.Kwalificatieprofiel.listWithOnderdelen({
+        niveauId,
+      });
+    });
+  },
+);
+
+export const listKssKwalificatieprofielen = cache(
+  async (filter?: {
+    richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";
+    niveauId?: string;
+  }) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      // This is a secretariaat function, so we need to verify access
+      // For now, we'll allow any logged in user, but you may want to restrict this
+      return await KSS.Kwalificatieprofiel.list({ filter: filter || {} });
+    });
+  },
+);
+
+export const listKssInstructiegroepen = cache(
+  async (filter?: {
+    richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";
+  }) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      return await KSS.InstructieGroep.list({ filter: filter || {} });
+    });
+  },
+);
+
+export const listKssInstructiegroepenWithCourses = cache(
+  async (filter?: {
+    richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";
+  }) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+      const person = await getPrimaryPerson(user);
+
+      return await KSS.InstructieGroep.listWithCourses({
+        filter: filter || {},
+      });
+    });
+  },
+);
+
+export const getInstructiegroepByCourseId = cache(
+  async (
+    courseId: string,
+    richting: "instructeur" | "leercoach" | "pvb_beoordelaar",
+  ) => {
+    return makeRequest(async () => {
+      const result = await KSS.InstructieGroep.findByCourseId({
+        courseId,
+        richting,
+      });
+
+      return result;
+    });
+  },
+);
+
+export const getIsActiveStudent = cache(async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow().catch(() => null);
+
+    if (!user) {
+      return false;
+    }
+
+    // TODO: This should probably move to a check on the primary person
+    const activeActorTypes = await User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+
+    return activeActorTypes.some((type) => ["student"].includes(type));
+  });
+});
+
+export const getActiveActorTypes = async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    return User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+    });
+  });
+};
+
+export const retrievePvbAanvraagByHandle = async (handle: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const aanvraag = await Pvb.Aanvraag.retrieveByHandle({ handle });
+
+    // Check if user has access to this PVB aanvraag
+    const isLocationAdmin = await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId: aanvraag.locatie.id,
+      personId: primaryPerson.id,
+    }).catch(() => false);
+
+    const isLeercoach = aanvraag.leercoach?.id === primaryPerson.id;
+    const isBeoordelaar = aanvraag.onderdelen.some(
+      (o) => o.beoordelaar?.id === primaryPerson.id,
+    );
+
+    // User must be either a location admin, the assigned leercoach, or a beoordelaar
+    if (!isLocationAdmin && !isLeercoach && !isBeoordelaar) {
+      throw new Error("Unauthorized");
+    }
+
+    return aanvraag;
+  });
+};
+
+export const listPvbsForPersonAsKandidaat = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    // Check if the user is viewing their own data
+    const isSelf = authUser.persons.some((p) => p.id === personId);
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    // Use the new filter to get all PvBs where person is kandidaat in a single query
+    const result = await Pvb.Aanvraag.list({
+      filter: {
+        kandidaatId: personId,
+      },
+    });
+
+    return result.items;
+  });
+});
+
+export const listPvbsForPersonAsLeercoach = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    // Check if the user is viewing their own data
+    const isSelf = authUser.persons.some((p) => p.id === personId);
+    if (!isSelf) {
+      throw new Error("Unauthorized");
+    }
+
+    // Use the new filter to get all PvBs where person is leercoach in a single query
+    const result = await Pvb.Aanvraag.list({
+      filter: {
+        leercoachId: personId,
+      },
+    });
+
+    return result.items;
+  });
+});
+
+export const listPvbsForPersonAsBeoordelaar = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const authUser = await getUserOrThrow();
+
+      // Check if the user is viewing their own data
+      const isSelf = authUser.persons.some((p) => p.id === personId);
+      if (!isSelf) {
+        throw new Error("Unauthorized");
+      }
+
+      // Use the new filter to get all PvBs where person is beoordelaar in a single query
+      const result = await Pvb.Aanvraag.list({
+        filter: {
+          beoordelaarId: personId,
+        },
+      });
+
+      return result.items;
+    });
+  },
+);
+
+export const grantPvbLeercoachPermissionAsLeercoach = async ({
+  pvbAanvraagIds,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const allAanvragen = await Pvb.Aanvraag.list({
+      filter: {
+        id: nonEmptyPvbAanvraagIds,
+      },
+    });
+
+    if (allAanvragen.items.length !== nonEmptyPvbAanvraagIds.length) {
+      throw new Error("Een of meer PVB aanvragen zijn niet gevonden");
+    }
+
+    if (
+      allAanvragen.items.some(
+        (aanvraag) => aanvraag.leercoach?.id !== primaryPerson.id,
+      )
+    ) {
+      throw new Error("Je bent geen leercoach voor een van deze aanvragen");
+    }
+
+    return await Pvb.Aanvraag.grantLeercoachPermissionForMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds.map((id) => {
+        const relevantAanvraag = allAanvragen.items.find(
+          (aanvraag) => aanvraag.id === id,
+        );
+        if (!relevantAanvraag) {
+          throw new Error("Aanvraag niet gevonden");
+        }
+
+        const relevantActor = primaryPerson.actors.find(
+          (actor) =>
+            actor.type === "instructor" &&
+            actor.locationId === relevantAanvraag.locatie?.id,
+        );
+
+        if (!relevantActor) {
+          throw new Error("Je bent geen instructeur voor deze locatie");
+        }
+
+        return {
+          id,
+          aangemaaktDoor: relevantActor.id,
+        };
+      }) as [
+        { id: string; aangemaaktDoor: string },
+        ...{ id: string; aangemaaktDoor: string }[],
+      ],
+      reden: reden || "Toestemming gegeven door leercoach",
+    });
+  });
+};
+
+export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const result = await Pvb.Aanvraag.listGebeurtenissen({ pvbAanvraagId });
+
+    return result.items;
+  });
+};
+
+export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const result = await Pvb.Aanvraag.getToetsdocumenten({ pvbAanvraagId });
+
+    return result;
+  });
+};
+
+export const getPvbBeoordelingsCriteria = async (pvbAanvraagId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    const result = await Pvb.Aanvraag.getBeoordelingsCriteria({
+      pvbAanvraagId,
+    });
+
+    return result;
+  });
+};
+
+export const updatePvbLeercoach = async ({
+  pvbAanvraagId,
+  leercoachId,
+}: {
+  pvbAanvraagId: string;
+  leercoachId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.updateLeercoach({
+      pvbAanvraagId,
+      leercoachId,
+      aangemaaktDoor: locationAdminActor.id,
+    });
+  });
+};
+
+export const updatePvbBeoordelaar = async ({
+  pvbAanvraagId,
+  beoordelaarId,
+}: {
+  pvbAanvraagId: string;
+  beoordelaarId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.updateBeoordelaarForAll({
+      pvbAanvraagId,
+      beoordelaarId,
+      aangemaaktDoor: locationAdminActor.id,
+    });
+  });
+};
+
+export const updatePvbStartTime = async ({
+  pvbAanvraagId,
+  startDatumTijd,
+}: {
+  pvbAanvraagId: string;
+  startDatumTijd: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.updateStartTime({
+      pvbAanvraagId,
+      startDatumTijd: dayjs(startDatumTijd).toISOString(),
+      aangemaaktDoor: locationAdminActor.id,
+    });
+  });
+};
+
+export const grantPvbLeercoachPermission = async ({
+  pvbAanvraagId,
+  reden,
+}: {
+  pvbAanvraagId: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.grantLeercoachPermission({
+      pvbAanvraagId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden:
+        reden || "Toestemming gegeven door locatiebeheerder namens leercoach",
+    });
+  });
+};
+
+export const submitPvbAanvraag = async ({
+  pvbAanvraagId,
+}: {
+  pvbAanvraagId: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.submitAanvraag({
+      pvbAanvraagId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: "Aanvraag geactiveerd via locatiebeheer",
+    });
+  });
+};
+
+export const withdrawPvbAanvraag = async ({
+  pvbAanvraagId,
+  reden,
+}: {
+  pvbAanvraagId: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the PVB aanvraag to retrieve the location
+    const aanvraag = await Pvb.Aanvraag.retrieveById({ id: pvbAanvraagId });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: aanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    await Pvb.Aanvraag.withdrawAanvraag({
+      pvbAanvraagId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Aanvraag ingetrokken via locatiebeheer",
+    });
+  });
+};
+
+export const getKssKerntaakDetails = cache(async (kerntaakId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    // Get the kerntaak
+    const kerntaak = await KSS.Kwalificatieprofiel.getKerntaakById({
+      kerntaakId,
+    });
+
+    if (!kerntaak) {
+      return null;
+    }
+
+    // Get the kwalificatieprofiel details
+    const kwalificatieprofiel = await KSS.Kwalificatieprofiel.byId({
+      id: kerntaak.kwalificatieprofielId,
+    });
+
+    if (!kwalificatieprofiel) {
+      return null;
+    }
+
+    // Get onderdelen
+    const niveaus = await KSS.Kwalificatieprofiel.listNiveaus();
+    let onderdelen: Array<{ id: string; type: "portfolio" | "praktijk" }> = [];
+
+    for (const niveau of niveaus) {
+      const profielen = await KSS.Kwalificatieprofiel.listWithOnderdelen({
+        niveauId: niveau.id,
+      });
+
+      for (const profiel of profielen) {
+        const foundKerntaak = profiel.kerntaken.find(
+          (k) => k.id === kerntaakId,
+        );
+        if (foundKerntaak) {
+          onderdelen = foundKerntaak.onderdelen;
+          break;
+        }
+      }
+      if (onderdelen.length > 0) break;
+    }
+
+    // Get werkprocessen for this kerntaak
+    const werkprocessen = await KSS.Kwalificatieprofiel.listWerkprocessen({
+      kerntaakId,
+    });
+
+    // Get beoordelingscriteria for each werkproces
+    const werkprocessenWithCriteria = await Promise.all(
+      werkprocessen.map(async (werkproces) => {
+        const criteria = await KSS.Kwalificatieprofiel.listBeoordelingscriteria(
+          {
+            werkprocesId: werkproces.id,
+          },
+        );
+        return { ...werkproces, beoordelingscriteria: criteria };
+      }),
+    );
+
+    return {
+      id: kerntaak.id,
+      titel: kerntaak.titel,
+      type: kerntaak.type,
+      rang: kerntaak.rang,
+      onderdelen,
+      kwalificatieprofiel,
+      werkprocessen: werkprocessenWithCriteria,
+    };
+  });
+});
+
+// Bulk PVB operations
+
+export const updatePvbStartTimeForMultiple = async ({
+  pvbAanvraagIds,
+  startDatumTijd,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  startDatumTijd: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the first PVB aanvraag to retrieve the location
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const firstAanvraag = await Pvb.Aanvraag.retrieveById({
+      id: nonEmptyPvbAanvraagIds[0],
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: firstAanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    return await Pvb.Aanvraag.updateStartTimeForMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds,
+      startDatumTijd,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Aanvangsdatum/tijd aangepast via locatiebeheer",
+    });
+  });
+};
+
+export const updatePvbLeercoachForMultiple = async ({
+  pvbAanvraagIds,
+  leercoachId,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  leercoachId: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the first PVB aanvraag to retrieve the location
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const firstAanvraag = await Pvb.Aanvraag.retrieveById({
+      id: nonEmptyPvbAanvraagIds[0],
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: firstAanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    return await Pvb.Aanvraag.updateLeercoachForMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds,
+      leercoachId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Leercoach toegewezen via locatiebeheer",
+    });
+  });
+};
+
+export const updatePvbBeoordelaarForMultiple = async ({
+  pvbAanvraagIds,
+  beoordelaarId,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  beoordelaarId: string;
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the first PVB aanvraag to retrieve the location
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const firstAanvraag = await Pvb.Aanvraag.retrieveById({
+      id: nonEmptyPvbAanvraagIds[0],
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: firstAanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    return await Pvb.Aanvraag.updateBeoordelaarForMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds,
+      beoordelaarId,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Beoordelaar toegewezen via locatiebeheer",
+    });
+  });
+};
+
+export const cancelPvbsForMultiple = async ({
+  pvbAanvraagIds,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the first PVB aanvraag to retrieve the location
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const firstAanvraag = await Pvb.Aanvraag.retrieveById({
+      id: nonEmptyPvbAanvraagIds[0],
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: firstAanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    return await Pvb.Aanvraag.cancelMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Aanvraag geannuleerd via locatiebeheer",
+    });
+  });
+};
+
+export const submitPvbsForMultiple = async ({
+  pvbAanvraagIds,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the first PVB aanvraag to retrieve the location
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const firstAanvraag = await Pvb.Aanvraag.retrieveById({
+      id: nonEmptyPvbAanvraagIds[0],
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: firstAanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    return await Pvb.Aanvraag.submitMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds,
+      aangemaaktDoor: locationAdminActor.id,
+      reden: reden || "Aanvraag ingediend via locatiebeheer",
+    });
+  });
+};
+
+export const grantPvbLeercoachPermissionForMultiple = async ({
+  pvbAanvraagIds,
+  reden,
+}: {
+  pvbAanvraagIds: string[];
+  reden?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the first PVB aanvraag to retrieve the location
+    if (pvbAanvraagIds.length === 0) {
+      throw new Error("Geen PVB aanvragen opgegeven");
+    }
+
+    // Type assertion after length check
+    const nonEmptyPvbAanvraagIds = pvbAanvraagIds as [string, ...string[]];
+
+    const firstAanvraag = await Pvb.Aanvraag.retrieveById({
+      id: nonEmptyPvbAanvraagIds[0],
+    });
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId: firstAanvraag.locatie.id,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    return await Pvb.Aanvraag.grantLeercoachPermissionForMultiple({
+      pvbAanvraagIds: nonEmptyPvbAanvraagIds.map((id) => ({
+        id,
+        aangemaaktDoor: locationAdminActor.id,
+      })) as [
+        { id: string; aangemaaktDoor: string },
+        ...{ id: string; aangemaaktDoor: string }[],
+      ],
+      reden:
+        reden || "Toestemming gegeven door locatiebeheerder namens leercoach",
+    });
+  });
+};
+
+export const createBulkPvbs = async ({
+  locationId,
+  kandidaten,
+  kwalificatieprofielen,
+  selectedOnderdelen,
+  opmerkingen,
+}: {
+  locationId: string;
+  kandidaten: Array<{
+    id: string;
+    leercoach?: string;
+    beoordelaar?: string;
+    startDatumTijd?: string | null;
+  }>;
+  kwalificatieprofielen: Array<{
+    id: string;
+    titel: string;
+    richting: string;
+    hoofdcursus?: { courseId: string };
+    aanvullendeCursussen: Array<{ courseId: string }>;
+    instructieGroepId: string | null;
+  }>;
+  selectedOnderdelen: string[];
+  opmerkingen?: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const primaryPerson = await getPrimaryPerson(authUser);
+
+    // Get the location_admin actor for this person at this location
+    const locationAdminActor = await Location.Person.getActorByPersonIdAndType({
+      locationId,
+      actorType: "location_admin",
+      personId: primaryPerson.id,
+    });
+
+    if (!locationAdminActor) {
+      throw new Error("Aanvrager is geen locatiebeheerder");
+    }
+
+    // Validation
+    if (kandidaten.length === 0) {
+      throw new Error("Selecteer minimaal één kandidaat");
+    }
+
+    if (!kwalificatieprofielen.some((kp) => kp.hoofdcursus)) {
+      throw new Error("Selecteer minimaal één hoofdcursus");
+    }
+
+    if (!selectedOnderdelen || selectedOnderdelen.length === 0) {
+      throw new Error("Selecteer minimaal één onderdeel");
+    }
+
+    const results = [];
+
+    // Create PvB aanvraag for each kandidaat
+    for (const kandidaat of kandidaten) {
+      try {
+        // Collect all courses
+        const allCourses: Array<{
+          courseId: string;
+          instructieGroepId: string;
+          isMainCourse: boolean;
+          opmerkingen: string | null;
+        }> = [];
+
+        // Process kwalificatieprofielen and their courses
+        for (const kp of kwalificatieprofielen) {
+          if (kp.hoofdcursus && kp.instructieGroepId) {
+            allCourses.push({
+              courseId: kp.hoofdcursus.courseId,
+              instructieGroepId: kp.instructieGroepId,
+              isMainCourse: true,
+              opmerkingen: null,
+            });
+          }
+
+          for (const aanvullendeCursus of kp.aanvullendeCursussen) {
+            if (kp.instructieGroepId) {
+              allCourses.push({
+                courseId: aanvullendeCursus.courseId,
+                instructieGroepId: kp.instructieGroepId,
+                isMainCourse: false,
+                opmerkingen: null,
+              });
+            }
+          }
+        }
+
+        // Validate that we have at least one course
+        if (allCourses.length === 0) {
+          throw new Error(
+            "Geen geldige cursussen gevonden. Zorg ervoor dat alle hoofdcursussen zijn geselecteerd.",
+          );
+        }
+
+        // Ensure at least one course is marked as main
+        if (!allCourses.some((c) => c.isMainCourse)) {
+          const firstCourse = allCourses[0];
+          if (firstCourse) {
+            firstCourse.isMainCourse = true;
+          }
+        }
+
+        const aanvraagInput = {
+          type: "intern" as const,
+          aangevraagdDoor: locationAdminActor.id,
+          locatieId: locationId,
+          kandidaatId: kandidaat.id,
+          leercoachId: kandidaat.leercoach || null,
+          opmerkingen: opmerkingen || null,
+          startDatumTijd: kandidaat.startDatumTijd || null,
+          courses: allCourses as [
+            {
+              courseId: string;
+              instructieGroepId: string;
+              isMainCourse: boolean;
+              opmerkingen: string | null;
+            },
+            ...{
+              courseId: string;
+              instructieGroepId: string;
+              isMainCourse: boolean;
+              opmerkingen: string | null;
+            }[],
+          ],
+          onderdelen: selectedOnderdelen.map((onderdeelId: string) => ({
+            kerntaakOnderdeelId: onderdeelId,
+            beoordelaarId: kandidaat.beoordelaar || null,
+            opmerkingen: null,
+          })) as [
+            {
+              kerntaakOnderdeelId: string;
+              beoordelaarId: string | null;
+              opmerkingen: string | null;
+            },
+            ...{
+              kerntaakOnderdeelId: string;
+              beoordelaarId: string | null;
+              opmerkingen: string | null;
+            }[],
+          ],
+        };
+
+        const result = await Pvb.Aanvraag.createAanvraag(aanvraagInput);
+
+        results.push({
+          kandidaatId: kandidaat.id,
+          success: true,
+          aanvraagId: result.id,
+        });
+      } catch (error) {
+        results.push({
+          kandidaatId: kandidaat.id,
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    }
+
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
+
+    return {
+      message: `${successCount} PvB aanvragen succesvol aangemaakt${failureCount > 0 ? `, ${failureCount} gefaald` : ""}`,
+      results,
+      successCount,
+      failureCount,
+    };
   });
 };

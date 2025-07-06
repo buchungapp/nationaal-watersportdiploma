@@ -5,8 +5,12 @@ import {
   type SQLWrapper,
   and,
   eq,
+  exists,
   getTableColumns,
   inArray,
+  like,
+  not,
+  sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";
@@ -16,6 +20,7 @@ import {
   handleSchema,
   possibleSingleRow,
   singleOrArray,
+  singleOrNonEmptyArray,
   singleRow,
   successfulCreateResponse,
   uuidSchema,
@@ -68,6 +73,10 @@ export const list = wrapQuery(
         filter: z
           .object({
             id: singleOrArray(uuidSchema).optional(),
+            type: singleOrNonEmptyArray(
+              z.enum(["consument", "instructeur"]),
+            ).optional(),
+            locationId: uuidSchema.optional(),
           })
           .default({}),
       })
@@ -84,6 +93,48 @@ export const list = wrapQuery(
         } else {
           whereClausules.push(eq(s.course.id, filter.id));
         }
+      }
+
+      if (filter.type) {
+        // If both types are selected, no additional filtering needed
+        if (Array.isArray(filter.type) && filter.type.length === 2) {
+          // Both 'consument' and 'instructeur' selected - include all courses
+        } else {
+          const types = Array.isArray(filter.type)
+            ? filter.type
+            : [filter.type];
+
+          if (types.includes("consument") && !types.includes("instructeur")) {
+            // Only 'consument' selected - exclude courses ending with '-instructeurs'
+            whereClausules.push(not(like(s.course.handle, "%-instructeurs")));
+          } else if (
+            types.includes("instructeur") &&
+            !types.includes("consument")
+          ) {
+            // Only 'instructeur' selected - include only courses ending with '-instructeurs'
+            whereClausules.push(like(s.course.handle, "%-instructeurs"));
+          }
+        }
+      }
+
+      if (filter.locationId) {
+        whereClausules.push(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.locationResourceLink)
+              .innerJoin(
+                s.discipline,
+                eq(s.discipline.id, s.locationResourceLink.disciplineId),
+              )
+              .where(
+                and(
+                  eq(s.locationResourceLink.locationId, filter.locationId),
+                  eq(s.discipline.id, s.course.disciplineId),
+                ),
+              ),
+          ),
+        );
       }
 
       // Prepare a database query to fetch programs and their categories using joins.

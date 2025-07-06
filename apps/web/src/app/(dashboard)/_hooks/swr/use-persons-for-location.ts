@@ -37,16 +37,13 @@ export function usePersonsForLocation(
   const { data, error, isLoading } = useSWR<
     Awaited<ReturnType<typeof listPersonsForLocationWithPagination>>
   >(
-    ["allStudents", locationId, searchParams],
+    ["allPersons", locationId, searchParams],
     () => jsonFetcher(`/api/persons/list/${locationId}${searchParams}`),
     {
       keepPreviousData: true,
-      revalidateOnMount: false,
+      revalidateOnMount: true,
     },
   );
-
-  if (!data)
-    throw new Error("Person list data must be available through fallback");
 
   return {
     data,

@@ -30,6 +30,9 @@ export type DateTime = z.infer<typeof dateTimeSchema>;
 export const singleOrArray = <T extends z.ZodTypeAny>(schema: T) =>
   z.union([schema, schema.array()]);
 
+export const singleOrNonEmptyArray = <T extends z.ZodTypeAny>(schema: T) =>
+  z.union([schema, schema.array().nonempty()]);
+
 export const successfulCreateResponse = z.object({
   id: uuidSchema,
 });

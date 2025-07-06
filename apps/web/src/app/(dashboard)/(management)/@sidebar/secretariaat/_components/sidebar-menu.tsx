@@ -66,6 +66,37 @@ export function SecretariaatSidebarMenu() {
       </SidebarSection>
 
       <SidebarSection>
+        <SidebarHeading>KSS</SidebarHeading>
+        {[
+          {
+            name: "Overzicht",
+            href: "/secretariaat/kss",
+            current: segments[0] === "kss" && !segments[1],
+          },
+          {
+            name: "Kwalificatieprofielen",
+            href: "/secretariaat/kss/kwalificatieprofielen",
+            current:
+              segments.slice(0, 2).join("/") === "kss/kwalificatieprofielen",
+          },
+          {
+            name: "Kerntaken",
+            href: "/secretariaat/kss/kerntaken",
+            current: segments.slice(0, 2).join("/") === "kss/kerntaken",
+          },
+          {
+            name: "Instructiegroepen",
+            href: "/secretariaat/kss/instructiegroepen",
+            current: segments.slice(0, 2).join("/") === "kss/instructiegroepen",
+          },
+        ].map((item) => (
+          <SidebarItem key={item.name} href={item.href} current={item.current}>
+            <SidebarLabel> {item.name}</SidebarLabel>
+          </SidebarItem>
+        ))}
+      </SidebarSection>
+
+      <SidebarSection>
         <SidebarHeading>Vaarlocaties</SidebarHeading>
         {[
           {

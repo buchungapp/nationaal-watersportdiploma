@@ -12,7 +12,12 @@ const searchParams = {
   limit: parseAsInteger.withDefault(50),
   offset: parseAsInteger,
   actorType: parseAsArrayOf(
-    parseAsStringLiteral(["student", "instructor", "location_admin"] as const),
+    parseAsStringLiteral([
+      "student",
+      "instructor",
+      "location_admin",
+      "pvb_beoordelaar",
+    ] as const),
   ).withDefault([]),
 };
 

@@ -25,5 +25,6 @@ test("discipline crud", () =>
       updatedAt: item.updatedAt,
       deletedAt: null,
       weight: 1,
+      abbreviation: null,
     } satisfies Output);
   }));

@@ -34,12 +34,14 @@ const createPersonSchema = zfd
     "role-student": zfd.checkbox(),
     "role-instructor": zfd.checkbox(),
     "role-location_admin": zfd.checkbox(),
+    "role-pvb_beoordelaar": zfd.checkbox(),
   })
   .refine(
     (data) =>
       !!data["role-student"] ||
       !!data["role-instructor"] ||
-      !!data["role-location_admin"],
+      !!data["role-location_admin"] ||
+      !!data["role-pvb_beoordelaar"],
     {
       message: "At least one role must be selected",
       path: ["roles"],
@@ -55,6 +57,9 @@ const createPersonSchema = zfd
     }
     if (parsed["role-location_admin"]) {
       roles.push("location_admin");
+    }
+    if (parsed["role-pvb_beoordelaar"]) {
+      roles.push("pvb_beoordelaar");
     }
 
     return {

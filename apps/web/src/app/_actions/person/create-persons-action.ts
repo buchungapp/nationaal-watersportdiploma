@@ -27,7 +27,11 @@ const createPersonsArgsSchema: [
   countries: typeof countriesSchema,
 ] = [
   z.string().uuid(),
-  z.array(z.enum(["student", "instructor", "location_admin"])).nonempty(),
+  z
+    .array(
+      z.enum(["student", "instructor", "location_admin", "pvb_beoordelaar"]),
+    )
+    .nonempty(),
   csvDataSchema,
   countriesSchema,
 ];

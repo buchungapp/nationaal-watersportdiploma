@@ -8,7 +8,9 @@ import { actionClientWithMeta } from "../safe-action";
 
 const addActorToLocationSchema = zfd.formData({
   personId: zfd.text(z.string().uuid()),
-  type: zfd.text(z.enum(["student", "instructor", "location_admin"])),
+  type: zfd.text(
+    z.enum(["student", "instructor", "location_admin", "pvb_beoordelaar"]),
+  ),
 });
 
 const addActorToLocationArgsSchema: [locationId: z.ZodString] = [
