@@ -15,7 +15,7 @@ import {
   GridListItemHeader,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
-import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
+import { LayoutCard } from "~/app/(dashboard)/_components/layout-card";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { AnimatedWave } from "~/app/_components/animated-wave";
 import { listCountries, listPersonsForUser } from "~/lib/nwd";
@@ -34,7 +34,7 @@ async function PersonsList() {
           <GridListItem key={person.id} className="!border-sky-200">
             <header
               className={clsx(
-                "flex justify-between relative items-center sm:items-start -mt-3",
+                "relative flex justify-between items-center sm:items-start -mt-3",
                 "p-2 sm:p-4 pb-8 sm:pb-12",
                 "bg-sky-50/50",
               )}
@@ -76,8 +76,8 @@ async function PersonsList() {
         ))}
     </GridList>
   ) : (
-    <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
-      <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+    <div className="relative bg-zinc-50/50 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
+      <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
         <div className="space-y-2">
           <div>
             <Heading>
@@ -139,7 +139,7 @@ export function Persons() {
 
   return (
     <div>
-      <StackedLayoutCard className="mb-3">
+      <LayoutCard className="mb-3">
         <div className="flex justify-between items-start gap-x-2.5">
           <div className="flex flex-col">
             <Subheading>Gekoppelde profielen</Subheading>
@@ -156,20 +156,20 @@ export function Persons() {
           </Suspense>
         </div>
 
-        <div className="bg-yellow-50 p-4 rounded-md mt-4">
-          <p className="text-sm text-yellow-700">
+        <div className="bg-yellow-50 mt-4 p-4 rounded-md">
+          <p className="text-yellow-700 text-sm">
             Zie je niet alle personen die je verwacht, of juist teveel?{" "}
             <Link
               href="/help/artikel/personenbeheer"
               target="_blank"
-              className="font-medium text-yellow-700 underline hover:text-yellow-600"
+              className="font-medium text-yellow-700 hover:text-yellow-600 underline"
             >
               Lees hier waarom en hoe je dit kunt oplossen
             </Link>
             .
           </p>
         </div>
-      </StackedLayoutCard>
+      </LayoutCard>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
   DescriptionDetails,
   DescriptionList,
   DescriptionTerm,
-} from "~/app/(dashboard)/_components/description-list";
+} from "~/app/(dashboard)/_components/description-list-v2";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
@@ -115,7 +115,7 @@ async function CourseCardContent(props: CourseCardProps) {
   return (
     <CourseCardProvider>
       <div>
-        <DescriptionList>
+        <DescriptionList className="mb-4">
           <DescriptionTerm>Programma</DescriptionTerm>
           <DescriptionDetails>
             <TextLink
@@ -218,7 +218,7 @@ async function CourseCardContent(props: CourseCardProps) {
 export function CourseCardFallback() {
   return (
     <div>
-      <DescriptionList>
+      <DescriptionList className="mb-4">
         <DescriptionTerm>Programma</DescriptionTerm>
         <DescriptionDetails>
           <span className="inline-block bg-gray-200 rounded w-48 h-4 align-middle animate-pulse" />

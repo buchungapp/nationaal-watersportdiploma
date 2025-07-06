@@ -7,6 +7,7 @@ import {
 } from "nuqs/server";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
+import { LayoutSingleCard } from "~/app/(dashboard)/_components/layout-card";
 import {
   listPersonsForLocationWithPagination,
   retrieveLocationByHandle,
@@ -63,24 +64,29 @@ export default function Page(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <DialogWrapper>
-      <div className="flex flex-wrap justify-between items-end gap-4">
-        <div className="sm:flex-1 max-sm:w-full">
-          <Heading>Personen</Heading>
-          <div className="flex gap-4 mt-4 max-w-xl">
-            <Search placeholder="Doorzoek personen..." />
-            <FilterSelect />
+    <LayoutSingleCard>
+      <DialogWrapper>
+        <div className="flex flex-wrap justify-between items-end gap-4">
+          <div className="sm:flex-1 max-sm:w-full">
+            <Heading>Personen</Heading>
+            <div className="flex gap-4 mt-4 max-w-xl">
+              <Search placeholder="Doorzoek personen..." />
+              <FilterSelect />
+            </div>
           </div>
+
+          <Dialogs params={props.params} />
         </div>
 
-        <Dialogs params={props.params} />
-      </div>
-
-      <Suspense
-        fallback={<Table persons={[]} totalItems={0} placeholderRows={10} />}
-      >
-        <PersonsTable params={props.params} searchParams={props.searchParams} />
-      </Suspense>
-    </DialogWrapper>
+        <Suspense
+          fallback={<Table persons={[]} totalItems={0} placeholderRows={10} />}
+        >
+          <PersonsTable
+            params={props.params}
+            searchParams={props.searchParams}
+          />
+        </Suspense>
+      </DialogWrapper>
+    </LayoutSingleCard>
   );
 }
