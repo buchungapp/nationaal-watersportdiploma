@@ -66,6 +66,7 @@ export default function KerntaakDetailClient({
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-800">
               <strong>Let op:</strong> Deze kerntaak heeft {onderdelen.length}{" "}
+              {/* cSpell:ignore onderde */}
               onderde{onderdelen.length === 1 ? "el" : "len"}:{" "}
               {onderdelen.map((o, idx) => (
                 <span key={o.id}>

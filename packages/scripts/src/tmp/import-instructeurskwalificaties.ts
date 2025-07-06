@@ -262,7 +262,8 @@ const qualificationToCourseIdsMap: Record<
   },
 };
 
-const degreeToKssoIdsMap: Record<
+const degreeToKssIdsMap: Record<
+  // cSpell:ignore Geldigheids
   z.infer<typeof rowSchema>["Hoogste Geldigheids Niveau"],
   string[] | null
 > = {
@@ -583,21 +584,21 @@ async function processRow(
     return;
   }
 
-  const degreeToKssoIds = degreeToKssoIdsMap[qualification.level];
+  const degreeToKssIds = degreeToKssIdsMap[qualification.level];
 
-  if (!degreeToKssoIds) {
+  if (!degreeToKssIds) {
     throw new Error("No KSS IDs found for qualification level");
   }
 
   const valuesToInsert: (typeof schema.persoonKwalificatie.$inferInsert)[] =
     qualificationToCourseIds.courseIds.flatMap((courseId) => {
-      return degreeToKssoIds.map((kssoId) => {
+      return degreeToKssIds.map((kssId) => {
         return {
           directBehaaldePvbOnderdeelId: null,
           afgeleidePvbOnderdeelId: null,
           courseId: courseId,
           personId: person.id,
-          kerntaakOnderdeelId: kssoId,
+          kerntaakOnderdeelId: kssId,
           verkregenReden: "onbekend",
           toegevoegdOp: new Date("2024-01-01").toISOString(),
           toegevoegdDoor: null,
