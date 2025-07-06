@@ -51,6 +51,7 @@ test("course crud", () =>
 
     const expected = {
       id,
+      abbreviation: null,
       title: "course-1",
       description: null,
       handle: "pr1",
