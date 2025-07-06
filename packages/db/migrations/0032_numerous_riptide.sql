@@ -17,7 +17,7 @@ ALTER TABLE "kss"."pvb_leercoach_toestemming" DROP CONSTRAINT "pvb_leercoach_toe
 
 ALTER TABLE "kss"."pvb_onderdeel" DROP CONSTRAINT "pvb_onderdeel_beoordelaar_id_actor_id_fk";
 
-DROP INDEX "pvb_onderdeel_aanvraag_id_kerntaak_id_unique";
+DROP INDEX "kss"."pvb_onderdeel_aanvraag_id_kerntaak_id_unique";
 ALTER TABLE "kss"."beoordelingscriterium" ADD COLUMN "title" text NOT NULL;
 ALTER TABLE "kss"."werkproces_kerntaak_onderdeel" ADD CONSTRAINT "werkproces_kerntaak_onderdeel_werkproces_id_kerntaak_id_werkproces_id_kerntaak_id_fk" FOREIGN KEY ("werkproces_id","kerntaak_id") REFERENCES "kss"."werkproces"("id","kerntaak_id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "kss"."werkproces_kerntaak_onderdeel" ADD CONSTRAINT "werkproces_kerntaak_onderdeel_kerntaak_onderdeel_id_kerntaak_id_kerntaak_onderdeel_id_kerntaak_id_fk" FOREIGN KEY ("kerntaak_onderdeel_id","kerntaak_id") REFERENCES "kss"."kerntaak_onderdeel"("id","kerntaak_id") ON DELETE no action ON UPDATE no action;

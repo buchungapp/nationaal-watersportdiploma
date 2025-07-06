@@ -846,7 +846,7 @@ export const submitAanvraag = wrapCommand(
         .select({ status: s.pvbAanvraagStatus.status })
         .from(s.pvbAanvraagStatus)
         .where(eq(s.pvbAanvraagStatus.pvbAanvraagId, input.pvbAanvraagId))
-        .orderBy(s.pvbAanvraagStatus.aangemaaktOp)
+        .orderBy(desc(s.pvbAanvraagStatus.aangemaaktOp))
         .limit(1);
 
       const currentStatus = singleRow(currentStatusResults);
@@ -947,7 +947,7 @@ export const withdrawAanvraag = wrapCommand(
         .select({ status: s.pvbAanvraagStatus.status })
         .from(s.pvbAanvraagStatus)
         .where(eq(s.pvbAanvraagStatus.pvbAanvraagId, input.pvbAanvraagId))
-        .orderBy(s.pvbAanvraagStatus.aangemaaktOp)
+        .orderBy(desc(s.pvbAanvraagStatus.aangemaaktOp))
         .limit(1);
 
       const currentStatus = singleRow(currentStatusResults);
