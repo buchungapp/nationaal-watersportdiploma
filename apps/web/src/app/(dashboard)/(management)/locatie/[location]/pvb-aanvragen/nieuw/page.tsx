@@ -29,7 +29,7 @@ async function CreatePvbContent(props: {
 
   // Transform courses to match the expected interface (filter out nulls)
   const niveaus = niveausResult.filter(
-    (niveau): niveau is typeof niveau & { rang: number } => niveau.rang < 5,
+    (niveau): niveau is typeof niveau & { rang: number } => niveau.rang < 4,
   );
   const courses = coursesResult
     .filter(

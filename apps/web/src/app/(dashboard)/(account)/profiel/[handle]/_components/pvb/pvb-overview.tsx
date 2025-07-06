@@ -72,20 +72,25 @@ function SuspendedBadge({
   );
 }
 
-export default function PvbOverviewSection({
+async function PvbOverviewContent({
   personPromise,
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
 }) {
-  const kandidaatPvbsPromise = personPromise.then((person) =>
+  const person = await personPromise;
+
+  const [kandidaatPvbs, leercoachPvbs, beoordelaarPvbs] = await Promise.all([
     fetchKandidaatPvbs(person.id),
-  );
-  const leercoachPvbsPromise = personPromise.then((person) =>
     fetchLeercoachPvbs(person.id),
-  );
-  const beoordelaarPvbsPromise = personPromise.then((person) =>
     fetchBeoordelaarPvbs(person.id),
-  );
+  ]);
+
+  // Only render if at least one PvB exists
+  const totalPvbs =
+    kandidaatPvbs.length + leercoachPvbs.length + beoordelaarPvbs.length;
+  if (totalPvbs === 0) {
+    return null;
+  }
 
   return (
     <StackedLayoutCardDisclosure
@@ -93,11 +98,12 @@ export default function PvbOverviewSection({
       header={
         <>
           <div className="flex justify-between items-center gap-2">
-            <Subheading>Praktijkbeoordelingen (PvB)</Subheading>
+            <Subheading>Proeve van Bekwaamheid (PvB)</Subheading>
             <StackedLayoutCardDisclosureChevron />
           </div>
           <Text>
-            Bekijk je PvB aanvragen als kandidaat, leercoach of beoordelaar.
+            Bekijk de PvB aanvragen waar je een rol in hebt als kandidaat,
+            leercoach of beoordelaar.
           </Text>
         </>
       }
@@ -107,21 +113,21 @@ export default function PvbOverviewSection({
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Kandidaat
             <SuspendedBadge
-              promise={kandidaatPvbsPromise.then((pvbs) => pvbs.length)}
+              promise={Promise.resolve(kandidaatPvbs.length)}
               color="branding-orange"
             />
           </Tab>
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Leercoach
             <SuspendedBadge
-              promise={leercoachPvbsPromise.then((pvbs) => pvbs.length)}
+              promise={Promise.resolve(leercoachPvbs.length)}
               color="branding-light"
             />
           </Tab>
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Beoordelaar
             <SuspendedBadge
-              promise={beoordelaarPvbsPromise.then((pvbs) => pvbs.length)}
+              promise={Promise.resolve(beoordelaarPvbs.length)}
               color="branding-dark"
             />
           </Tab>
@@ -139,6 +145,18 @@ export default function PvbOverviewSection({
         </TabPanels>
       </TabGroup>
     </StackedLayoutCardDisclosure>
+  );
+}
+
+export default function PvbOverviewSection({
+  personPromise,
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <PvbOverviewContent personPromise={personPromise} />
+    </Suspense>
   );
 }
 
