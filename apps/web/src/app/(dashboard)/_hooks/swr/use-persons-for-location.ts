@@ -42,6 +42,13 @@ export function usePersonsForLocation(
     {
       keepPreviousData: true,
       revalidateOnMount: true,
+      // TODO: find out where this bug is coming from
+      fallbackData: {
+        items: [],
+        limit: null,
+        offset: 0,
+        count: 0,
+      },
     },
   );
 
