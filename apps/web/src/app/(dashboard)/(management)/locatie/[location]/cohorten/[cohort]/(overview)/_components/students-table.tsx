@@ -270,7 +270,12 @@ export default function StudentsTable({
   students: Awaited<ReturnType<typeof listStudentsWithCurriculaByCohortId>>;
   totalItems: number;
   noOptionsLabel?: React.ReactNode;
-  locationRoles: ("student" | "instructor" | "location_admin")[];
+  locationRoles: (
+    | "student"
+    | "instructor"
+    | "location_admin"
+    | "pvb_beoordelaar"
+  )[];
   view: "allen" | "geclaimd" | null;
   studentsProgressPromise: Promise<StudentsProgressData>;
 }) {
