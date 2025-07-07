@@ -166,14 +166,9 @@ export const productFeedbackAction = actionClientWithMeta
         ],
         threadFields: [
           {
-            type: ThreadFieldSchemaType.String,
+            type: ThreadFieldSchemaType.Enum,
             key: "feedback_type",
             stringValue: data.type,
-          },
-          {
-            type: ThreadFieldSchemaType.String,
-            key: "priority",
-            stringValue: data.priority,
           },
           ...(data.path
             ? [
