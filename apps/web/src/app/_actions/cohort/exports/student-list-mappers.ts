@@ -48,7 +48,10 @@ const instructorFieldMappers: Record<string, FieldMapper<Data>> = {
 };
 
 const studentCurriculumFieldMappers: Record<string, FieldMapper<Data>> = {
-  program: ({ student }) => student.studentCurriculum?.program.title ?? "",
+  program: ({ student }) =>
+    (student.studentCurriculum?.program.title ?? student.studentCurriculum)
+      ? `${student.studentCurriculum.course.title} ${student.studentCurriculum.degree.title}`
+      : "",
   course: ({ student }) => student.studentCurriculum?.course.title ?? "",
   degree: ({ student }) => student.studentCurriculum?.degree.title ?? "",
   gearType: ({ student }) => student.studentCurriculum?.gearType.title ?? "",
@@ -144,7 +147,7 @@ export const studentListFields: {
 }[] = [
   {
     id: "personHandle",
-    label: "Handle",
+    label: "NWD-ID",
     category: "person",
   },
   {
@@ -184,22 +187,22 @@ export const studentListFields: {
   },
   {
     id: "instructorFirstName",
-    label: "Voornaam",
+    label: "Instructeur voornaam",
     category: "instructor",
   },
   {
     id: "instructorLastNamePrefix",
-    label: "Tussenvoegsel",
+    label: "Instructeur tussenvoegsel",
     category: "instructor",
   },
   {
     id: "instructorLastName",
-    label: "Achternaam",
+    label: "Instructeur achternaam",
     category: "instructor",
   },
   {
     id: "instructorFullName",
-    label: "Volledige naam",
+    label: "Instructeur volledige naam",
     category: "instructor",
   },
   {
@@ -224,7 +227,7 @@ export const studentListFields: {
   },
   {
     id: "progress",
-    label: "Opleidingen",
+    label: "Historische opleidingen",
     category: "progress",
   },
   {
