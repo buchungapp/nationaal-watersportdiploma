@@ -29,6 +29,7 @@ export function Tab({ children, ...props }: Headless.TabProps) {
       {...props}
       className={clsx(
         props.className,
+        "inline-flex items-center justify-center gap-1.5",
         "flex-1 px-3 py-2 rounded-md font-medium text-sm transition-colors group/tab text-left sm:text-center",
         "focus:outline-hidden data-focus:outline-2 data-focus:outline-offset-2 data-focus:outline-branding-light",
         "data-selected:bg-white data-selected:text-zinc-900 data-selected:shadow-sm data-selected:dark:bg-zinc-700 data-selected:dark:text-white",
