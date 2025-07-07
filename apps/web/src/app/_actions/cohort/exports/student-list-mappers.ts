@@ -28,7 +28,7 @@ const personFieldMappers: Record<string, FieldMapper<Data>> = {
     exportFormatters.age(student.person.dateOfBirth, cohort.accessStartTime),
   personBirthDate: ({ student }) =>
     exportFormatters.date(student.person.dateOfBirth) ?? "",
-  // TODO: in the future maybe a seperate column per tag, with a boolean true/false?
+  // TODO: in the future maybe a separate column per tag, with a boolean true/false?
   tags: ({ student }) => student.tags.join(", "),
 };
 
