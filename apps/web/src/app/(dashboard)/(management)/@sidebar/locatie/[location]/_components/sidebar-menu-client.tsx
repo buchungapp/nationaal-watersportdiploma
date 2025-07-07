@@ -4,6 +4,7 @@ import {
   AcademicCapIcon,
   CalendarDaysIcon,
   ChartBarIcon,
+  ClipboardDocumentListIcon,
   DocumentTextIcon,
   FolderIcon,
   UserGroupIcon,
@@ -57,6 +58,13 @@ export function LocationSidebarMenuClient({
           Icon: DocumentTextIcon,
           active: hasRole(["location_admin"]),
           current: segments[0] === "pvb-aanvragen",
+        },
+        {
+          name: "Kwalificaties",
+          href: `/locatie/${params.location}/instructeurskwalificaties`,
+          Icon: ClipboardDocumentListIcon,
+          active: hasRole(["location_admin"]),
+          current: segments[0] === "instructeurskwalificaties",
         },
         {
           name: "Kennisbank",
