@@ -99,7 +99,7 @@ export function KwalificatiesTable({
   const normalizeString = useCallback((str: string) => {
     return str
       .normalize("NFD")
-      .replace(/\u0300-\u036f/g, "") // Remove diacritics
+      .replace(/\p{Diacritic}/gu, "") // Remove diacritics
       .toLowerCase();
   }, []);
 
@@ -130,9 +130,8 @@ export function KwalificatiesTable({
     let filtered = instructors;
 
     if (searchQuery) {
-      // Normalize the search query too
-      const normalizedQuery = normalizeString(searchQuery);
-      filtered = fuse.search(normalizedQuery).map((result) => result.item);
+      // Don't normalize the search query - Fuse.js handles normalization via getFn
+      filtered = fuse.search(searchQuery).map((result) => result.item);
     }
 
     return filtered.sort((a, b) => {
@@ -140,7 +139,7 @@ export function KwalificatiesTable({
       const nameB = formatName(b);
       return nameA.localeCompare(nameB);
     });
-  }, [instructors, searchQuery, fuse, normalizeString]);
+  }, [instructors, searchQuery, fuse]);
 
   // Set up the virtualizer
   const rowVirtualizer = useVirtualizer({
