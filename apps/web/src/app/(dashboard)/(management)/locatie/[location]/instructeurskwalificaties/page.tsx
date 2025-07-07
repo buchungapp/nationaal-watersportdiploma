@@ -8,16 +8,16 @@ import {
 } from "~/lib/nwd";
 import { KwalificatiesTable } from "./_components/kwalificaties-table";
 
-export default async function InstructeurskwalificatiesPage(props: {
+export default function InstructeurskwalificatiesPage(props: {
   params: Promise<{ location: string }>;
 }) {
-  const params = await props.params;
-
   return (
     <div className="mx-auto max-w-7xl">
       <Heading>Instructeurskwalificaties</Heading>
       <Suspense fallback={null}>
-        <KwalificatiesTableWrapper locationHandle={params.location} />
+        <KwalificatiesTableWrapper
+          locationHandle={props.params.then((p) => p.location)}
+        />
       </Suspense>
     </div>
   );
@@ -26,33 +26,30 @@ export default async function InstructeurskwalificatiesPage(props: {
 async function KwalificatiesTableWrapper({
   locationHandle,
 }: {
-  locationHandle: string;
+  locationHandle: Promise<string>;
 }) {
-  const location = await retrieveLocationByHandle(locationHandle);
+  const location = await retrieveLocationByHandle(await locationHandle);
 
-  // Fetch all instructors for the location
-  const instructors = await listPersonsForLocationWithPagination(location.id, {
-    filter: { actorType: "instructor" },
-    limit: 1000, // Get all instructors
-  });
-
-  // Fetch all courses
-  const allCourses = await listCourses("consument");
-
-  // Get the highest qualifications for all instructors at this location
-  const kwalificaties =
-    await KSS.Kwalificaties.listHighestKwalificatiePerCourseAndRichting({
+  // Fetch instructors, courses, and kwalificaties in parallel
+  const [instructors, allCourses, kwalificaties] = await Promise.all([
+    listPersonsForLocationWithPagination(location.id, {
+      filter: { actorType: "instructor" },
+      limit: 1000, // Get all instructors
+    }),
+    listCourses("consument"),
+    KSS.Kwalificaties.listHighestKwalificatiePerCourseAndRichting({
       filter: {
         locationId: location.id,
       },
-    });
+    }),
+  ]);
 
   return (
     <KwalificatiesTable
       instructors={instructors.items}
       courses={allCourses}
       kwalificaties={kwalificaties}
-      locationHandle={locationHandle}
+      locationHandle={location.handle}
     />
   );
 }

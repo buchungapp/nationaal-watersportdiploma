@@ -209,7 +209,7 @@ export function KwalificatiesTable({
 
     // Format the display with visual separation
     return (
-      <div className="flex flex-wrap gap-0.5 justify-center">
+      <div className="flex flex-wrap gap-1 justify-center">
         {sortedEntries.map(([richting, niveau]) => {
           const richtingConfig = {
             instructeur: {
@@ -237,32 +237,32 @@ export function KwalificatiesTable({
           const getColorClasses = (baseColor: string, niveau: number) => {
             const colorMap = {
               blue: {
-                1: "bg-blue-100 text-blue-700 border-blue-200",
-                2: "bg-blue-100 text-blue-800 border-blue-300",
-                3: "bg-blue-200 text-blue-900 border-blue-400",
-                4: "bg-blue-500 text-white border-blue-600",
-                5: "bg-blue-600 text-white border-blue-700",
+                1: "bg-blue-50 text-blue-600 border-blue-200",
+                2: "bg-blue-100 text-blue-700 border-blue-300",
+                3: "bg-blue-200 text-blue-800 border-blue-400",
+                4: "bg-blue-300 text-blue-900 border-blue-500",
+                5: "bg-blue-400 text-white border-blue-600",
               },
               green: {
-                1: "bg-lime-100 text-lime-700 border-lime-200",
-                2: "bg-lime-100 text-lime-800 border-lime-300",
-                3: "bg-lime-200 text-lime-900 border-lime-400",
-                4: "bg-lime-500 text-white border-lime-600",
-                5: "bg-lime-600 text-white border-lime-700",
+                1: "bg-emerald-50 text-emerald-600 border-emerald-200",
+                2: "bg-emerald-100 text-emerald-700 border-emerald-300",
+                3: "bg-emerald-200 text-emerald-800 border-emerald-400",
+                4: "bg-emerald-300 text-emerald-900 border-emerald-500",
+                5: "bg-emerald-500 text-white border-emerald-700",
               },
               purple: {
-                1: "bg-violet-100 text-violet-700 border-violet-200",
-                2: "bg-violet-100 text-violet-800 border-violet-300",
-                3: "bg-violet-200 text-violet-900 border-violet-400",
-                4: "bg-violet-500 text-white border-violet-600",
-                5: "bg-violet-600 text-white border-violet-700",
+                1: "bg-purple-50 text-purple-600 border-purple-200",
+                2: "bg-purple-100 text-purple-700 border-purple-300",
+                3: "bg-purple-200 text-purple-800 border-purple-400",
+                4: "bg-purple-300 text-purple-900 border-purple-500",
+                5: "bg-purple-500 text-white border-purple-700",
               },
               gray: {
-                1: "bg-gray-100 text-gray-700 border-gray-200",
-                2: "bg-gray-100 text-gray-800 border-gray-300",
-                3: "bg-gray-200 text-gray-900 border-gray-400",
-                4: "bg-gray-500 text-white border-gray-600",
-                5: "bg-gray-600 text-white border-gray-700",
+                1: "bg-gray-100 text-gray-700 border-gray-300",
+                2: "bg-gray-200 text-gray-800 border-gray-400",
+                3: "bg-gray-300 text-gray-900 border-gray-500",
+                4: "bg-gray-400 text-gray-950 border-gray-600",
+                5: "bg-gray-500 text-white border-gray-700",
               },
             };
 
@@ -276,7 +276,7 @@ export function KwalificatiesTable({
           return (
             <span
               key={richting}
-              className={`inline-flex items-center px-0.5 sm:px-1 py-0 rounded text-[10px] sm:text-xs font-medium border ${colorClasses}`}
+              className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium border ${colorClasses}`}
             >
               {config.abbr}-{niveau}
             </span>
@@ -363,7 +363,7 @@ export function KwalificatiesTable({
             <thead className="text-zinc-500 dark:text-zinc-400">
               <tr>
                 <th
-                  className="border-b border-b-zinc-950/10 px-4 py-2 font-medium bg-white border-r border-gray-200 min-w-[120px] sm:min-w-[200px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)]"
+                  className="border-b border-b-zinc-950/10 px-4 py-1.5 font-medium bg-white border-r border-gray-200 min-w-[120px] sm:min-w-[200px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)]"
                   style={{
                     position: "sticky",
                     top: 0,
@@ -376,7 +376,7 @@ export function KwalificatiesTable({
                 {displayCourses.map((course) => (
                   <th
                     key={course.id}
-                    className="border-b border-b-zinc-950/10 px-2 sm:px-4 py-2 font-medium text-center min-w-[60px] sm:min-w-[100px] bg-white"
+                    className="border-b border-b-zinc-950/10 px-2 sm:px-4 py-1.5 font-medium text-center min-w-[60px] sm:min-w-[100px] bg-white"
                     style={{
                       position: "sticky",
                       top: 0,
@@ -433,7 +433,7 @@ export function KwalificatiesTable({
                         className={isEven ? "bg-gray-50" : ""}
                       >
                         <td
-                          className={`relative px-2 sm:px-4 py-2 font-medium border-r border-gray-200 min-w-[120px] sm:min-w-[200px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)] ${isEven ? "bg-gray-50" : "bg-white"}`}
+                          className={`relative px-2 sm:px-4 py-3 font-medium border-r border-gray-200 min-w-[120px] sm:min-w-[200px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)] ${isEven ? "bg-gray-50" : "bg-white"}`}
                           style={{
                             position: "sticky",
                             left: 0,
@@ -448,7 +448,7 @@ export function KwalificatiesTable({
                               <div className="truncate sm:whitespace-normal sm:break-words text-zinc-700 hover:text-zinc-900">
                                 {formatName(instructor)}
                               </div>
-                              <div className="text-xs text-gray-500 font-normal truncate">
+                              <div className="text-xs text-gray-500 font-normal truncate font-mono">
                                 {instructor.handle}
                               </div>
                             </div>
@@ -457,7 +457,7 @@ export function KwalificatiesTable({
                         {displayCourses.map((course) => (
                           <td
                             key={course.id}
-                            className="relative px-1 sm:px-4 py-2 text-center min-w-[60px] sm:min-w-[100px] align-middle"
+                            className="relative px-1 sm:px-4 py-3 text-center min-w-[60px] sm:min-w-[100px] align-middle"
                           >
                             {getKwalificatieDisplay(instructor.id, course.id)}
                           </td>
