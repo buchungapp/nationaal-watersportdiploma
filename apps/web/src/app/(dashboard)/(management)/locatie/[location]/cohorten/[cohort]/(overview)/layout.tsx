@@ -145,7 +145,7 @@ async function LayoutContent(props: {
         fallback: {
           countries: listCountries(),
           [unstable_serialize([
-            "allStudents",
+            "allPersons",
             location.id,
             "?actorType=student",
           ])]: listPersonsForLocationWithPagination(location.id, {
