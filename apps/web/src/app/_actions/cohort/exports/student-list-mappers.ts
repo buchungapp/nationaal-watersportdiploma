@@ -49,7 +49,8 @@ const instructorFieldMappers: Record<string, FieldMapper<Data>> = {
 
 const studentCurriculumFieldMappers: Record<string, FieldMapper<Data>> = {
   program: ({ student }) =>
-    (student.studentCurriculum?.program.title ?? student.studentCurriculum)
+    student.studentCurriculum?.course?.title &&
+    student.studentCurriculum?.degree?.title
       ? `${student.studentCurriculum.course.title} ${student.studentCurriculum.degree.title}`
       : "",
   course: ({ student }) => student.studentCurriculum?.course.title ?? "",
