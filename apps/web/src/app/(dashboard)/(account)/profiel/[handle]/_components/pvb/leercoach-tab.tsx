@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "~/app/(dashboard)/_components/table";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { listPvbsForPersonAsLeercoach } from "~/lib/nwd";
+import type { listPvbsForPersonAsLeercoach } from "~/lib/nwd";
 import { LeercoachBulkActions } from "./leercoach-bulk-actions";
 
 const statusColors = {
@@ -35,44 +35,17 @@ const statusLabels = {
   afgebroken: "Afgebroken",
 } as const;
 
-type PvbListItem = {
-  id: string;
-  handle: string;
-  status:
-    | "concept"
-    | "wacht_op_voorwaarden"
-    | "gereed_voor_beoordeling"
-    | "in_beoordeling"
-    | "afgerond"
-    | "ingetrokken"
-    | "afgebroken";
-  type: "intern" | "extern";
-  lastStatusChange: string;
-  locatie?: { id: string; name: string };
-  kandidaat: {
-    id: string;
-    firstName: string | null;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-  };
-  leercoach?: {
-    id: string;
-    firstName: string | null;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-    status?: "gevraagd" | "gegeven" | "geweigerd";
-  };
-  kerntaakOnderdelen: Array<{ id: string }>;
-};
-
 async function LeercoachContent({
-  personId,
-  handle,
+  personPromise,
+  leercoachPvbsPromise,
 }: {
-  personId: string;
-  handle: string;
+  personPromise: Promise<User.Person.$schema.Person>;
+  leercoachPvbsPromise: ReturnType<typeof listPvbsForPersonAsLeercoach>;
 }) {
-  const pvbs = (await listPvbsForPersonAsLeercoach(personId)) as PvbListItem[];
+  const [person, pvbs] = await Promise.all([
+    personPromise,
+    leercoachPvbsPromise,
+  ]);
 
   // Filter PvBs that need leercoach permission
   const pvbsNeedingPermission = pvbs.filter(
@@ -126,10 +99,7 @@ async function LeercoachContent({
   return (
     <div>
       {pvbsNeedingPermission.length > 0 && (
-        <LeercoachBulkActions
-          pvbsNeedingPermission={pvbsNeedingPermission}
-          personId={personId}
-        />
+        <LeercoachBulkActions pvbsNeedingPermission={pvbsNeedingPermission} />
       )}
 
       <div className="overflow-x-auto">
@@ -150,7 +120,7 @@ async function LeercoachContent({
                 <TableRow key={pvb.id}>
                   <TableCell>
                     <Link
-                      href={`/profiel/${handle}/pvb-aanvraag/${pvb.handle}`}
+                      href={`/profiel/${person.handle}/pvb-aanvraag/${pvb.handle}`}
                       className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       {pvb.handle}
@@ -204,8 +174,10 @@ async function LeercoachContent({
 
 export function LeercoachTab({
   personPromise,
+  leercoachPvbsPromise,
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
+  leercoachPvbsPromise: ReturnType<typeof listPvbsForPersonAsLeercoach>;
 }) {
   return (
     <Suspense
@@ -217,13 +189,10 @@ export function LeercoachTab({
         </div>
       }
     >
-      {personPromise.then(async (person) => (
-        <LeercoachContent personId={person.id} handle={person.handle} />
-      ))}
+      <LeercoachContent
+        personPromise={personPromise}
+        leercoachPvbsPromise={leercoachPvbsPromise}
+      />
     </Suspense>
   );
-}
-
-export async function fetchLeercoachPvbs(personId: string) {
-  return listPvbsForPersonAsLeercoach(personId);
 }

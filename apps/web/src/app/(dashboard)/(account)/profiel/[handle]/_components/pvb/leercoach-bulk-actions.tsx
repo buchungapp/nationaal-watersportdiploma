@@ -8,43 +8,14 @@ import { Button } from "~/app/(dashboard)/_components/button";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { bulkGrantLeercoachPermissionAction } from "~/app/_actions/pvb/leercoach-permission-action";
-
-type PvbListItem = {
-  id: string;
-  handle: string;
-  status:
-    | "concept"
-    | "wacht_op_voorwaarden"
-    | "gereed_voor_beoordeling"
-    | "in_beoordeling"
-    | "afgerond"
-    | "ingetrokken"
-    | "afgebroken";
-  type: "intern" | "extern";
-  lastStatusChange: string;
-  locatie?: { id: string; name: string };
-  kandidaat: {
-    id: string;
-    firstName: string | null;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-  };
-  leercoach?: {
-    id: string;
-    firstName: string | null;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-    status?: "gevraagd" | "gegeven" | "geweigerd";
-  };
-  kerntaakOnderdelen: Array<{ id: string }>;
-};
+import type { listPvbsForPersonAsLeercoach } from "~/lib/nwd";
 
 export function LeercoachBulkActions({
   pvbsNeedingPermission,
-  personId,
 }: {
-  pvbsNeedingPermission: PvbListItem[];
-  personId: string;
+  pvbsNeedingPermission: Awaited<
+    ReturnType<typeof listPvbsForPersonAsLeercoach>
+  >;
 }) {
   const [selectedPvbs, setSelectedPvbs] = useState<Set<string>>(new Set());
   const bulkGrantAction = useAction(bulkGrantLeercoachPermissionAction);

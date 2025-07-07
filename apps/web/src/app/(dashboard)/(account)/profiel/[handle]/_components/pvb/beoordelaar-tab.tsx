@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "~/app/(dashboard)/_components/table";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { listPvbsForPersonAsBeoordelaar } from "~/lib/nwd";
+import type { listPvbsForPersonAsBeoordelaar } from "~/lib/nwd";
 
 const statusColors = {
   concept: "zinc",
@@ -34,47 +34,17 @@ const statusLabels = {
   afgebroken: "Afgebroken",
 } as const;
 
-type PvbListItem = {
-  id: string;
-  handle: string;
-  status:
-    | "concept"
-    | "wacht_op_voorwaarden"
-    | "gereed_voor_beoordeling"
-    | "in_beoordeling"
-    | "afgerond"
-    | "ingetrokken"
-    | "afgebroken";
-  type: "intern" | "extern";
-  lastStatusChange: string;
-  locatie?: { id: string; name: string };
-  kandidaat: {
-    id: string;
-    firstName: string | null;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-  };
-  kerntaakOnderdelen: Array<{
-    id: string;
-    beoordelaar?: {
-      id: string;
-      firstName: string | null;
-      lastNamePrefix: string | null;
-      lastName: string | null;
-    };
-  }>;
-};
-
 async function BeoordelaarContent({
-  personId,
-  handle,
+  personPromise,
+  beoordelaarPvbsPromise,
 }: {
-  personId: string;
-  handle: string;
+  personPromise: Promise<User.Person.$schema.Person>;
+  beoordelaarPvbsPromise: ReturnType<typeof listPvbsForPersonAsBeoordelaar>;
 }) {
-  const pvbs = (await listPvbsForPersonAsBeoordelaar(
-    personId,
-  )) as PvbListItem[];
+  const [person, pvbs] = await Promise.all([
+    personPromise,
+    beoordelaarPvbsPromise,
+  ]);
 
   if (pvbs.length === 0) {
     return (
@@ -135,14 +105,14 @@ async function BeoordelaarContent({
           {sortedPvbs.map((pvb) => {
             // Count onderdelen where this person is beoordelaar
             const onderdelenCount = pvb.kerntaakOnderdelen.filter(
-              (onderdeel) => onderdeel.beoordelaar?.id === personId,
+              (onderdeel) => onderdeel.beoordelaar?.id === person.id,
             ).length;
 
             return (
               <TableRow key={pvb.id}>
                 <TableCell>
                   <Link
-                    href={`/profiel/${handle}/pvb-aanvraag/${pvb.handle}`}
+                    href={`/profiel/${person.handle}/pvb-aanvraag/${pvb.handle}`}
                     className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
                   >
                     {pvb.handle}
@@ -182,8 +152,10 @@ async function BeoordelaarContent({
 
 export function BeoordelaarTab({
   personPromise,
+  beoordelaarPvbsPromise,
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
+  beoordelaarPvbsPromise: ReturnType<typeof listPvbsForPersonAsBeoordelaar>;
 }) {
   return (
     <Suspense
@@ -195,13 +167,10 @@ export function BeoordelaarTab({
         </div>
       }
     >
-      {personPromise.then((person) => (
-        <BeoordelaarContent personId={person.id} handle={person.handle} />
-      ))}
+      <BeoordelaarContent
+        personPromise={personPromise}
+        beoordelaarPvbsPromise={beoordelaarPvbsPromise}
+      />
     </Suspense>
   );
-}
-
-export async function fetchBeoordelaarPvbs(personId: string) {
-  return listPvbsForPersonAsBeoordelaar(personId);
 }

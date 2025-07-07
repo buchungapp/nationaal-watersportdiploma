@@ -3630,6 +3630,25 @@ export const getIsActiveStudent = cache(async () => {
   });
 });
 
+export const listActiveActorTypesForPerson = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow().catch(() => null);
+
+    if (!user?.persons.find((p) => p.id === personId)) {
+      throw new Error("Unauthorized");
+    }
+
+    const activeActorTypes = await User.Actor.listActiveTypesForUser({
+      userId: user.authUserId,
+      filter: {
+        personId,
+      },
+    });
+
+    return activeActorTypes;
+  });
+});
+
 export const getActiveActorTypes = async () => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();

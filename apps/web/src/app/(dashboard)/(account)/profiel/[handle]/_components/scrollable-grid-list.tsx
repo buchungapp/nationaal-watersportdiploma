@@ -57,7 +57,11 @@ export function ScrollableGridList({
   return (
     <div className="relative">
       <div ref={containerRef} className={className}>
-        <GridList className={hasOverflow ? "pb-8" : ""}>{children}</GridList>
+        <GridList
+          className={`${hasOverflow ? "pb-8" : ""} @lg/grid-list:grid-cols-2 gap-3 lg:gap-4`}
+        >
+          {children}
+        </GridList>
       </div>
       {/* Fade overlay that only shows when there's overflow */}
       {hasOverflow && (
