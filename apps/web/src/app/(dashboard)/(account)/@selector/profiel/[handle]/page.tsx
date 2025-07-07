@@ -17,13 +17,13 @@ export default async function PersonSelector(props: {
       as={NavbarItem}
       className="[&>*]:bg-white [&>*]:border [&>*]:border-slate-200"
     >
-      <UsersIcon />
-      <NavbarLabel className="max-w-[120px] truncate">
+      <UsersIcon className="hidden md:block" />
+      <NavbarLabel className="max-w-[80px] truncate">
         {[person.firstName, person.lastNamePrefix, person.lastName]
           .filter(Boolean)
           .join(" ")}
       </NavbarLabel>
-      <Badge className="-my-1">{persons.length}</Badge>
+      <Badge className="-my-1 invisible md:visible">{persons.length}</Badge>
       <ChevronDownIcon />
     </DropdownButton>
   );

@@ -12,9 +12,11 @@ import { StackedLayout } from "../_components/stacked-layout";
 export default function Layout({
   children,
   selector,
+  dashboard,
 }: Readonly<{
   children: React.ReactNode;
   selector: React.ReactNode;
+  dashboard: React.ReactNode;
 }>) {
   return (
     <StackedLayout
@@ -23,6 +25,8 @@ export default function Layout({
           <Link href="/profiel?_cacheBust=1">
             <Logo className="size-8 text-white" />
           </Link>
+
+          {dashboard}
 
           <NavbarSpacer />
           <NavbarSection>

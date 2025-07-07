@@ -1,5 +1,6 @@
 import type { User } from "@nawadi/core";
 import { after } from "next/server";
+import { Suspense } from "react";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import {
   getPersonByHandle,
@@ -7,6 +8,7 @@ import {
   listActiveActorTypesForPerson,
 } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
+import type { DashboardView } from "./_components/dashboard-toggle";
 import { Locations } from "./_components/locations";
 import { Logbook } from "./_components/logbook/logbook";
 import { News } from "./_components/news";
@@ -36,7 +38,7 @@ function InstructorDashboard({ personPromise, searchParams }: DashboardProps) {
       </div>
 
       <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2">
-        <News />
+        <News categories={["consument", "achterban", "vereniging"]} />
 
         <Socials />
       </div>
@@ -63,7 +65,7 @@ function StudentDashboard({ personPromise, searchParams }: DashboardProps) {
       </div>
 
       <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2">
-        <News />
+        <News categories={["consument"]} />
 
         <Socials />
       </div>
@@ -75,27 +77,61 @@ async function DecideDashboard({
   personPromise,
   searchParams,
 }: DashboardProps) {
-  const person = await personPromise;
+  const [person, params] = await Promise.all([personPromise, searchParams]);
   const rolesForPerson = await listActiveActorTypesForPerson(person.id);
 
   const hasInstructorView = (
     ["instructor", "pvb_beoordelaar", "location_admin"] as const
   ).some((role) => rolesForPerson.includes(role));
 
-  if (hasInstructorView) {
+  // Parse the view from search params
+  const view = (params.view as DashboardView) || "instructor";
+
+  // If user doesn't have instructor view, always show student dashboard
+  if (!hasInstructorView || view === "student") {
     return (
-      <InstructorDashboard
+      <StudentDashboard
         personPromise={personPromise}
         searchParams={searchParams}
       />
     );
   }
 
+  // Default to instructor dashboard
   return (
-    <StudentDashboard
+    <InstructorDashboard
       personPromise={personPromise}
       searchParams={searchParams}
     />
+  );
+}
+
+// Loading component for the Suspense boundary
+function DashboardSkeleton() {
+  return (
+    <>
+      {/* Toggle skeleton */}
+      <div className="col-span-full order-1 mb-2 animate-pulse">
+        <div className="h-11 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
+
+      {/* Right column - top (Personalia) */}
+      <div className="order-3 lg:order-none lg:col-start-3 lg:row-end-1 animate-pulse">
+        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
+
+      {/* Left columns - main content area */}
+      <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-2 lg:order-none flex flex-col gap-2 animate-pulse">
+        <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
+
+      {/* Right column - bottom (News + Socials) */}
+      <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2 animate-pulse">
+        <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      </div>
+    </>
   );
 }
 
@@ -140,10 +176,12 @@ export default function Page(props: {
       </div>
 
       <div className="mt-2 mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-        <DecideDashboard
-          personPromise={personPromise}
-          searchParams={props.searchParams}
-        />
+        <Suspense fallback={<DashboardSkeleton />}>
+          <DecideDashboard
+            personPromise={personPromise}
+            searchParams={props.searchParams}
+          />
+        </Suspense>
       </div>
     </div>
   );

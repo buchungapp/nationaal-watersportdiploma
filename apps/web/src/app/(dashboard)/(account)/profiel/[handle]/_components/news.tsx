@@ -8,14 +8,18 @@ import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import { getAllArticles } from "~/lib/articles";
+import { type ArticleCategory, getAllArticles } from "~/lib/articles";
 
-async function NewsContent() {
+async function NewsContent({ categories }: { categories?: ArticleCategory[] }) {
   const articles = await getAllArticles();
+
+  const filteredArticles = categories
+    ? articles.filter((article) => categories.includes(article.category))
+    : articles;
 
   return (
     <ul className="flex flex-col gap-y-2">
-      {articles.slice(0, 2).map((article) => (
+      {filteredArticles.slice(0, 2).map((article) => (
         <li key={article.id}>
           <Link
             href={`/actueel/${article.slug}`}
@@ -58,7 +62,10 @@ async function NewsContent() {
   );
 }
 
-export async function News({ className }: { className?: string }) {
+export async function News({
+  className,
+  categories,
+}: { className?: string; categories?: ArticleCategory[] }) {
   return (
     <StackedLayoutCard className={className}>
       <Subheading className="mb-3">Blijf op de hoogte</Subheading>
@@ -74,7 +81,7 @@ export async function News({ className }: { className?: string }) {
           </ul>
         }
       >
-        <NewsContent />
+        <NewsContent categories={categories} />
       </Suspense>
 
       <Divider className="my-4" />
