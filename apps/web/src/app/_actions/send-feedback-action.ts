@@ -109,6 +109,7 @@ export const productFeedbackAction = actionClientWithMeta
         customerIdentifier: {
           customerId: customerResult.data.customer.id,
         },
+        // cSpell:ignore lt_01JZJ4HNFPT5Q1CCW7M1RCJGG4
         labelTypeIds: ["lt_01JZJ4HNFPT5Q1CCW7M1RCJGG4"], // Support label
         components: [
           {
