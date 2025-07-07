@@ -3658,9 +3658,10 @@ export const retrievePvbAanvraagByHandle = async (handle: string) => {
     const isBeoordelaar = aanvraag.onderdelen.some(
       (o) => o.beoordelaar?.id === primaryPerson.id,
     );
+    const isKandidaat = aanvraag.kandidaat?.id === primaryPerson.id;
 
     // User must be either a location admin, the assigned leercoach, or a beoordelaar
-    if (!isLocationAdmin && !isLeercoach && !isBeoordelaar) {
+    if (!isLocationAdmin && !isLeercoach && !isBeoordelaar && !isKandidaat) {
       throw new Error("Unauthorized");
     }
 

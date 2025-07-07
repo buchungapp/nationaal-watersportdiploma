@@ -106,7 +106,7 @@ export default async function Page(props: {
                 </h3>
                 <p className="text-sm text-amber-700 dark:text-amber-300">
                   Deze aanvraag is nog in concept en moet eerst worden ingediend
-                  door de kandidaat.
+                  door de vaarlocatie.
                 </p>
               </div>
             </div>
