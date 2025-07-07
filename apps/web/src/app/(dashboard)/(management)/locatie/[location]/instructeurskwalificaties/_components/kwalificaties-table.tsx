@@ -16,6 +16,7 @@ import {
   PopoverButton,
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
+import { ExportQualificationsDialog } from "./export-qualifications-dialog";
 
 type Instructor = {
   id: string;
@@ -23,6 +24,13 @@ type Instructor = {
   lastNamePrefix: string | null;
   lastName: string | null;
   handle: string;
+  dateOfBirth: string | null;
+  birthCity: string | null;
+  birthCountry: {
+    name: string;
+    code: string;
+  } | null;
+  email: string | null;
 };
 
 type Course = {
@@ -347,6 +355,13 @@ export function KwalificatiesTable({
             </PopoverPanel>
           </Popover>
         </div>
+
+        <ExportQualificationsDialog
+          instructors={filteredAndSortedInstructors}
+          courses={courses}
+          kwalificaties={kwalificaties}
+          locationHandle={locationHandle}
+        />
       </div>
 
       {/* Table */}
