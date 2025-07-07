@@ -10,6 +10,7 @@ import { BASE_URL } from "~/constants";
 import { constants } from "@nawadi/lib";
 import Analytics from "../_components/analytics";
 import { CommonProviders } from "../_components/providers";
+import { ImpersonationBarWrapper } from "./_components/impersonation-bar-wrapper";
 import "../globals.css";
 
 const inter = Inter({
@@ -63,6 +64,7 @@ export default function DashboardLayout({
     >
       <body>
         <CommonProviders>
+          <ImpersonationBarWrapper />
           <NuqsAdapter>{children}</NuqsAdapter>
 
           <Toaster richColors />

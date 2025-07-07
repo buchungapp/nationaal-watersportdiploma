@@ -214,9 +214,34 @@ export const getUserOrThrow = cache(async () => {
   const { user: authUser } = userResponse.data;
 
   return makeRequest(async () => {
-    const userData = await User.fromId(authUser.id);
+    // Check for impersonation
+    const impersonatedUserId = cookieStore.get("impersonated_user_id")?.value;
+    const isImpersonating = !!impersonatedUserId;
+
+    let targetUserId = authUser.id;
+    let originalUser = null;
+
+    if (isImpersonating) {
+      // Verify the current user is a system admin
+      const currentUserData = await User.fromId(authUser.id);
+      const isSystemAdmin = currentUserData?.email === "maurits@buchung.nl";
+
+      if (!isSystemAdmin) {
+        // Remove invalid impersonation cookie
+        cookieStore.delete("impersonated_user_id");
+        throw new Error("Unauthorized impersonation attempt");
+      }
+
+      // Store original user info for audit/context
+      originalUser = currentUserData;
+      targetUserId = impersonatedUserId;
+    }
+
+    const userData = await User.fromId(targetUserId);
     // We can't run this in parallel, because fromId will create the user if it doesn't exist
-    const persons = await User.Person.list({ filter: { userId: authUser.id } });
+    const persons = await User.Person.list({
+      filter: { userId: targetUserId },
+    });
 
     if (!userData) {
       throw new Error("User not found");
@@ -233,9 +258,84 @@ export const getUserOrThrow = cache(async () => {
           ? [primaryPerson, ...nonPrimaryPersons]
           : nonPrimaryPersons;
       })(),
+      // Add impersonation metadata
+      _impersonation: isImpersonating
+        ? {
+            isImpersonating: true,
+            originalUserId: authUser.id,
+            originalUser,
+            impersonatedUserId: targetUserId,
+          }
+        : undefined,
     };
   });
 });
+
+export const startImpersonation = async (targetUserId: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    // Verify system admin permissions
+    const isSystemAdmin = authUser.email === "maurits@buchung.nl";
+    if (!isSystemAdmin) {
+      throw new Error("Unauthorized");
+    }
+
+    // Verify target user exists
+    const targetUser = await User.fromId(targetUserId);
+    if (!targetUser) {
+      throw new Error("Target user not found");
+    }
+
+    // Set impersonation cookie
+    const cookieStore = await cookies();
+    cookieStore.set("impersonated_user_id", targetUserId, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24, // 24 hours
+    });
+
+    posthog.capture({
+      distinctId: authUser.authUserId,
+      event: "start_impersonation",
+      properties: {
+        targetUserId,
+        adminEmail: authUser.email,
+      },
+    });
+
+    await posthog.shutdown();
+
+    return { success: true };
+  });
+};
+
+export const stopImpersonation = async () => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!user._impersonation?.isImpersonating) {
+      throw new Error("Not currently impersonating");
+    }
+
+    // Remove impersonation cookie
+    const cookieStore = await cookies();
+    cookieStore.delete("impersonated_user_id");
+
+    posthog.capture({
+      distinctId: user._impersonation.originalUserId,
+      event: "stop_impersonation",
+      properties: {
+        impersonatedUserId: user._impersonation.impersonatedUserId,
+      },
+    });
+
+    await posthog.shutdown();
+
+    return { success: true };
+  });
+};
 
 export const findCertificate = async ({
   handle,
