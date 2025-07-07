@@ -45,14 +45,6 @@ export function usePersonsForLocation(
     },
   );
 
-  if (!data) {
-    console.log("[usePersonsForLocation] no data with key", [
-      "allPersons",
-      locationId,
-      searchParams,
-    ]);
-  }
-
   return {
     data,
     error,
