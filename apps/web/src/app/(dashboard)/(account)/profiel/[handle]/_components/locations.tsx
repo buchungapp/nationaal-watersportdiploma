@@ -97,7 +97,7 @@ async function LocationsList({
       {locations.map((location) => (
         <GridListItem
           key={location.id}
-          className="bg-white px-2 lg:px-4 duration-200 lg:border-zinc-200/80 min-h-[100px] lg:min-h-[120px] flex flex-col"
+          className="bg-white px-2 lg:px-4 duration-200 lg:border-zinc-200/80 flex flex-col"
         >
           <Link
             href={`/locatie/${location.handle}/cohorten`}

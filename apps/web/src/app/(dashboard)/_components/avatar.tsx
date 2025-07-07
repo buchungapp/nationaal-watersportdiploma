@@ -59,7 +59,7 @@ export function Avatar({
         <img
           src={src}
           alt={alt}
-          className="object-contain object-center h-full w-full p-0.5"
+          className="object-contain object-center h-full w-full p-0.5 bg-white"
         />
       )}
       {/* Add an inset border that sits on top of the image */}
