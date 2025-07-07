@@ -11,6 +11,7 @@ import { BASE_URL } from "~/constants";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter } from "next/font/google";
 
+import { ImpersonationBarWrapper } from "~/app/(dashboard)/_components/impersonation-bar-wrapper";
 import Analytics from "~/app/_components/analytics";
 import { CommonProviders } from "~/app/_components/providers";
 import "../globals.css";
@@ -61,6 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     >
       <body className="h-full">
         <CommonProviders>
+          <ImpersonationBarWrapper />
           {/*  Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
           <div className="h-full">
             <div className="flex min-h-full flex-1">

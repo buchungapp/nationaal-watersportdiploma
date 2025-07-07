@@ -135,7 +135,7 @@ export const list = wrapQuery(
     const locations = await query
       .select()
       .from(s.location)
-      .where(eq(s.location.status, "active"))
+      // .where(eq(s.location.status, "active"))
       .orderBy(asc(s.location.name));
 
     // const uniqueMediaIds = Array.from(

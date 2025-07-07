@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { BASE_URL } from "~/constants";
 
+import { ImpersonationBarWrapper } from "../(dashboard)/_components/impersonation-bar-wrapper";
 import Analytics from "../_components/analytics";
 import "../globals.css";
 import { Suspense } from "react";
@@ -67,6 +68,7 @@ export default function RootLayout({
           <CommonProviders />
         </Suspense>
         <MarketingProviders>
+          <ImpersonationBarWrapper />
           {/* Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
           <div>
             <Header />

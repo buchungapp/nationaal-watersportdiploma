@@ -72,25 +72,20 @@ function SuspendedBadge({
   );
 }
 
-async function PvbOverviewContent({
+export default function PvbOverviewSection({
   personPromise,
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
 }) {
-  const person = await personPromise;
-
-  const [kandidaatPvbs, leercoachPvbs, beoordelaarPvbs] = await Promise.all([
-    fetchKandidaatPvbs(person.id),
-    fetchLeercoachPvbs(person.id),
-    fetchBeoordelaarPvbs(person.id),
-  ]);
-
-  // Only render if at least one PvB exists
-  const totalPvbs =
-    kandidaatPvbs.length + leercoachPvbs.length + beoordelaarPvbs.length;
-  if (totalPvbs === 0) {
-    return null;
-  }
+  const kandidaatPvbsPromise = personPromise.then((person) =>
+    listPvbsForPersonAsKandidaat(person.id),
+  );
+  const leercoachPvbsPromise = personPromise.then((person) =>
+    listPvbsForPersonAsLeercoach(person.id),
+  );
+  const beoordelaarPvbsPromise = personPromise.then((person) =>
+    listPvbsForPersonAsBeoordelaar(person.id),
+  );
 
   return (
     <StackedLayoutCardDisclosure
@@ -113,62 +108,46 @@ async function PvbOverviewContent({
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Kandidaat
             <SuspendedBadge
-              promise={Promise.resolve(kandidaatPvbs.length)}
+              promise={kandidaatPvbsPromise.then((pvbs) => pvbs.length)}
               color="branding-orange"
             />
           </Tab>
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Leercoach
             <SuspendedBadge
-              promise={Promise.resolve(leercoachPvbs.length)}
+              promise={leercoachPvbsPromise.then((pvbs) => pvbs.length)}
               color="branding-light"
             />
           </Tab>
           <Tab className="flex justify-between sm:justify-center items-center gap-2">
             Beoordelaar
             <SuspendedBadge
-              promise={Promise.resolve(beoordelaarPvbs.length)}
+              promise={beoordelaarPvbsPromise.then((pvbs) => pvbs.length)}
               color="branding-dark"
             />
           </Tab>
         </TabList>
         <TabPanels className="mt-4">
           <TabPanel>
-            <KandidaatTab personPromise={personPromise} />
+            <KandidaatTab
+              personPromise={personPromise}
+              kandidaatPvbsPromise={kandidaatPvbsPromise}
+            />
           </TabPanel>
           <TabPanel>
-            <LeercoachTab personPromise={personPromise} />
+            <LeercoachTab
+              personPromise={personPromise}
+              leercoachPvbsPromise={leercoachPvbsPromise}
+            />
           </TabPanel>
           <TabPanel>
-            <BeoordelaarTab personPromise={personPromise} />
+            <BeoordelaarTab
+              personPromise={personPromise}
+              beoordelaarPvbsPromise={beoordelaarPvbsPromise}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>
     </StackedLayoutCardDisclosure>
   );
-}
-
-export default function PvbOverviewSection({
-  personPromise,
-}: {
-  personPromise: Promise<User.Person.$schema.Person>;
-}) {
-  return (
-    <Suspense fallback={null}>
-      <PvbOverviewContent personPromise={personPromise} />
-    </Suspense>
-  );
-}
-
-// Export data fetchers for use in Suspense
-export async function fetchKandidaatPvbs(personId: string) {
-  return listPvbsForPersonAsKandidaat(personId);
-}
-
-export async function fetchLeercoachPvbs(personId: string) {
-  return listPvbsForPersonAsLeercoach(personId);
-}
-
-export async function fetchBeoordelaarPvbs(personId: string) {
-  return listPvbsForPersonAsBeoordelaar(personId);
 }
