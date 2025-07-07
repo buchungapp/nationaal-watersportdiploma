@@ -334,6 +334,7 @@ export const list = wrapQuery(
               ) @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})
             `
           : undefined,
+        isNull(s.person.deletedAt),
       ];
 
       if (filter.locationId) {
