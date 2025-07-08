@@ -1,4 +1,5 @@
 "use client";
+import { formatters } from "@nawadi/lib";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -51,14 +52,6 @@ interface PvbTableActionsProps {
   onClearSelection: () => void;
 }
 
-// Helper function to format person names
-function formatPersonName(person: Person): string {
-  const parts = [person.firstName, person.lastNamePrefix, person.lastName]
-    .filter(Boolean)
-    .join(" ");
-  return parts || "Onbekend";
-}
-
 type DialogType =
   | "startTime"
   | "leercoach"
@@ -95,7 +88,8 @@ export function PvbTableActions({
     useBeoordelaarsForLocation(locationId);
 
   const beoordelaars = allBeoordelaars.filter((beoordelaar) =>
-    formatPersonName(beoordelaar)
+    formatters
+      .formatPersonName(beoordelaar)
       .toLowerCase()
       .includes(beoordelaarQuery.toLowerCase()),
   );
@@ -228,7 +222,7 @@ export function PvbTableActions({
       }
 
       toast.success(
-        `${formatPersonName(selectedLeercoach)} is toegewezen aan ${selectedIds.length} aanvragen.`,
+        `${formatters.formatPersonName(selectedLeercoach)} is toegewezen aan ${selectedIds.length} aanvragen.`,
       );
       closeDialog();
       onClearSelection();
@@ -273,7 +267,7 @@ export function PvbTableActions({
       }
 
       toast.success(
-        `${formatPersonName(selectedBeoordelaar)} is toegewezen aan ${selectedIds.length} aanvragen.`,
+        `${formatters.formatPersonName(selectedBeoordelaar)} is toegewezen aan ${selectedIds.length} aanvragen.`,
       );
       closeDialog();
       onClearSelection();
@@ -514,7 +508,7 @@ export function PvbTableActions({
               value={selectedLeercoach}
               onChange={setSelectedLeercoach}
               displayValue={(person) =>
-                person ? formatPersonName(person as Person) : ""
+                person ? formatters.formatPersonName(person as Person) : ""
               }
               setQuery={setLeercoachQuery}
               filter={() => true}
@@ -525,7 +519,7 @@ export function PvbTableActions({
                   <ComboboxLabel>
                     <div className="flex">
                       <span className="truncate">
-                        {formatPersonName(person)}
+                        {formatters.formatPersonName(person)}
                       </span>
                       {person.email && (
                         <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
@@ -569,7 +563,7 @@ export function PvbTableActions({
               value={selectedBeoordelaar}
               onChange={setSelectedBeoordelaar}
               displayValue={(person) =>
-                person ? formatPersonName(person as Person) : ""
+                person ? formatters.formatPersonName(person as Person) : ""
               }
               setQuery={setBeoordelaarQuery}
               filter={() => true}
@@ -580,7 +574,7 @@ export function PvbTableActions({
                   <ComboboxLabel>
                     <div className="flex">
                       <span className="truncate">
-                        {formatPersonName(person)}
+                        {formatters.formatPersonName(person)}
                       </span>
                       {person.email && (
                         <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">

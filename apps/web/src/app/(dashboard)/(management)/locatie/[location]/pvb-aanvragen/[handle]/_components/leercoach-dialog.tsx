@@ -1,5 +1,6 @@
 "use client";
 
+import { formatters } from "@nawadi/lib";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -50,13 +51,6 @@ export function LeercoachDialog({
   const selectedInstructor =
     instructors.find((p) => p.id === leercoachId) || null;
 
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -106,7 +100,7 @@ export function LeercoachDialog({
                 value={selectedInstructor}
                 onChange={(person) => setLeercoachId(person?.id || "")}
                 displayValue={(person) =>
-                  person ? formatPersonName(person) : ""
+                  person ? formatters.formatPersonName(person) : ""
                 }
                 setQuery={setQuery}
                 filter={() => true} // Server-side filtering via query
@@ -117,7 +111,7 @@ export function LeercoachDialog({
                     <ComboboxLabel>
                       <div className="flex">
                         <span className="truncate">
-                          {formatPersonName(person)}
+                          {formatters.formatPersonName(person)}
                         </span>
                         {person.email && (
                           <span className="ml-2 text-slate-500 truncate">

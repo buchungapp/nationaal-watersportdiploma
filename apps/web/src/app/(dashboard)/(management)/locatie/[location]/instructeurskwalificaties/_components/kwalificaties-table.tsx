@@ -4,11 +4,12 @@ import {
   AdjustmentsHorizontalIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import { formatters } from "@nawadi/lib";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import Fuse from "fuse.js";
 import Link from "next/link";
 import type React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import { Input } from "~/app/(dashboard)/_components/input";
 import {
@@ -103,50 +104,43 @@ export function KwalificatiesTable({
     [courses, visibleCourseIds],
   );
 
-  // Helper function to normalize strings for search
-  const normalizeString = useCallback((str: string) => {
-    return str
-      .normalize("NFD")
-      .replace(/\p{Diacritic}/gu, "") // Remove diacritics
-      .toLowerCase();
-  }, []);
-
   // Set up Fuse.js for fuzzy search
   const fuse = useMemo(
     () =>
       new Fuse(instructors, {
-        keys: ["firstName", "lastNamePrefix", "lastName", "handle"],
+        keys: [
+          "firstName",
+          "lastName",
+          "lastNamePrefix",
+          "handle",
+          {
+            name: "fullName",
+            getFn: (instructor) => formatters.formatPersonName(instructor),
+          },
+        ],
         threshold: 0.3,
-        // Make search less strict for special characters
         shouldSort: true,
-        includeScore: false,
-        useExtendedSearch: false,
-        // Handle diacritics and special characters
-        getFn: (obj, path) => {
-          const value = Fuse.config.getFn(obj, path);
-          if (typeof value === "string") {
-            return normalizeString(value);
-          }
-          return value;
-        },
+        ignoreDiacritics: true,
+        isCaseSensitive: false,
+        ignoreLocation: true,
+        minMatchCharLength: 1,
       }),
-    [instructors, normalizeString],
+    [instructors],
   );
 
   // Filter and sort instructors
   const filteredAndSortedInstructors = useMemo(() => {
     let filtered = instructors;
 
-    if (searchQuery) {
-      // Don't normalize the search query - Fuse.js handles normalization via getFn
-      filtered = fuse.search(searchQuery).map((result) => result.item);
+    if (searchQuery.trim()) {
+      const results = fuse.search(searchQuery.trim());
+
+      filtered = results.map((result) => result.item);
+    } else {
+      filtered = instructors;
     }
 
-    return filtered.sort((a, b) => {
-      const nameA = formatName(a);
-      const nameB = formatName(b);
-      return nameA.localeCompare(nameB);
-    });
+    return filtered;
   }, [instructors, searchQuery, fuse]);
 
   // Set up the virtualizer
@@ -156,13 +150,6 @@ export function KwalificatiesTable({
     estimateSize: () => 60, // Increased estimated row height for longer names
     overscan: 5, // Render 5 items outside of the visible area
   });
-
-  function formatName(person: Instructor): string {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  }
 
   function toggleCourseVisibility(courseId: string) {
     setVisibleCourseIds((prev) => {
@@ -461,7 +448,7 @@ export function KwalificatiesTable({
                           >
                             <div className="break-words leading-tight">
                               <div className="truncate sm:whitespace-normal sm:break-words text-zinc-700 hover:text-zinc-900">
-                                {formatName(instructor)}
+                                {formatters.formatPersonName(instructor)}
                               </div>
                               <div className="text-xs text-gray-500 font-normal truncate font-mono">
                                 {instructor.handle}

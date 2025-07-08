@@ -2,6 +2,7 @@
 
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { DocumentDuplicateIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { formatters } from "@nawadi/lib";
 import { useStateAction } from "next-safe-action/stateful-hooks";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -36,6 +37,8 @@ import { useKwalificatieprofielenByNiveau } from "~/app/(dashboard)/_hooks/swr/u
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
 import { createBulkPvbsAction } from "~/app/_actions/pvb/create-bulk-pvbs-action";
 import Spinner from "~/app/_components/spinner";
+
+const formatPersonName = formatters.formatPersonName;
 
 interface Person {
   id: string;
@@ -325,13 +328,6 @@ function PersonCombobox({
   const personsItems = persons ? persons.items : [];
   const selectedPerson = personsItems.find((p) => p.id === value) || null;
 
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
-
   // Determine if we should show the empty state message
   const showEmptyMessage = persons && personsItems.length === 0;
 
@@ -441,17 +437,6 @@ function BeoordelaarCombobox({
 
   const selectedBeoordelaar =
     filteredBeoordelaars.find((b) => b.id === value) || null;
-
-  const formatPersonName = (person: {
-    firstName: string;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-  }) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
 
   // Show loading state
   if (isLoading) {
@@ -740,13 +725,6 @@ export default function CreatePvbForm({
       toast.error(error.serverError || "Er is een fout opgetreden");
     },
   });
-
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
 
   // Add kandidaat
   const addKandidaat = (person: Person) => {
