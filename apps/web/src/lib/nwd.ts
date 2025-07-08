@@ -2965,12 +2965,6 @@ export async function updateEmailForPerson({
       getUserOrThrow().then(getPrimaryPerson),
     ]);
 
-    await listRolesForLocation(locationId, personId).then((roles) => {
-      if (roles.length < 1) {
-        throw new Error("Unauthorized");
-      }
-    });
-
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],
       locationId: locationId,

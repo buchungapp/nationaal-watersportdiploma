@@ -1,6 +1,5 @@
 import type { User } from "@nawadi/core";
 import dayjs from "dayjs";
-import Link from "next/link";
 import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
@@ -117,14 +116,13 @@ async function LeercoachContent({
           <TableBody>
             {sortedPvbs.map((pvb) => {
               return (
-                <TableRow key={pvb.id}>
-                  <TableCell>
-                    <Link
-                      href={`/profiel/${person.handle}/pvb-aanvraag/${pvb.handle}`}
-                      className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
-                    >
-                      {pvb.handle}
-                    </Link>
+                <TableRow
+                  key={pvb.id}
+                  href={`/profiel/${person.handle}/pvb-aanvraag/${pvb.handle}`}
+                  className="group"
+                >
+                  <TableCell className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    {pvb.handle}
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {pvb.type === "intern" ? "Intern" : "Extern"}
                     </div>

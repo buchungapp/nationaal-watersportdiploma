@@ -613,7 +613,7 @@ export const moveToAccountByEmail = wrapCommand(
       async function updatePersonUser(personId: string, userId: string) {
         return query
           .update(s.person)
-          .set({ userId: userId, updatedAt: sql`NOW()` })
+          .set({ userId: userId, updatedAt: sql`NOW()`, isPrimary: false })
           .where(eq(s.person.id, personId))
           .returning({ id: s.person.id })
           .then(singleRow);

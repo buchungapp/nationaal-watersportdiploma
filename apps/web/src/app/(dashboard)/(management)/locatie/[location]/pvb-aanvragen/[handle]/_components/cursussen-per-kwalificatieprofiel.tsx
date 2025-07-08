@@ -98,6 +98,7 @@ export function CursussenPerKwalificatieprofiel({
       const errors = results.filter((r) => r?.serverError);
 
       if (errors.length > 0) {
+        console.log("ERRORS", errors);
         toast.error(
           `${errors.length} cursus(sen) konden niet worden toegevoegd`,
         );
