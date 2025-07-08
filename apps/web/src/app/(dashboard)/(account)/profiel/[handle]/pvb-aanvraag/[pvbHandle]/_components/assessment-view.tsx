@@ -12,7 +12,7 @@ import {
 } from "@heroicons/react/16/solid";
 import dayjs from "dayjs";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
@@ -33,6 +33,67 @@ interface AssessmentViewProps {
     ReturnType<typeof getPvbBeoordelingsCriteria>
   >["items"];
   personId: string;
+}
+
+interface SelectAllCheckboxProps {
+  id: string;
+  criteriaKeys: string[];
+  selectedCriteria: Set<string>;
+  setSelectedCriteria: (selected: Set<string>) => void;
+}
+
+function SelectAllCheckbox({
+  id,
+  criteriaKeys,
+  selectedCriteria,
+  setSelectedCriteria,
+}: SelectAllCheckboxProps) {
+  const checkboxRef = useRef<HTMLInputElement>(null);
+
+  // Calculate selection state
+  const selectedCount = criteriaKeys.filter((key) =>
+    selectedCriteria.has(key),
+  ).length;
+  const totalCount = criteriaKeys.length;
+
+  const isAllSelected = selectedCount === totalCount && totalCount > 0;
+  const isIndeterminate = selectedCount > 0 && selectedCount < totalCount;
+
+  // Set indeterminate state on the DOM element
+  useEffect(() => {
+    if (checkboxRef.current) {
+      checkboxRef.current.indeterminate = isIndeterminate;
+    }
+  }, [isIndeterminate]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSelection = new Set(selectedCriteria);
+
+    if (e.target.checked) {
+      // Add all criteria keys
+      for (const key of criteriaKeys) {
+        newSelection.add(key);
+      }
+    } else {
+      // Remove all criteria keys
+      for (const key of criteriaKeys) {
+        newSelection.delete(key);
+      }
+    }
+
+    setSelectedCriteria(newSelection);
+  };
+
+  return (
+    <input
+      ref={checkboxRef}
+      id={id}
+      type="checkbox"
+      checked={isAllSelected}
+      onChange={handleChange}
+      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+    />
+  );
 }
 
 interface OptimisticState {
@@ -711,44 +772,27 @@ export function AssessmentView({
                                                 Beoordelingscriteria
                                               </h6>
                                               {pvbData && (
-                                                <label className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer">
-                                                  <input
-                                                    type="checkbox"
-                                                    onChange={(e) => {
-                                                      const newSelection =
-                                                        new Set(
-                                                          selectedCriteria,
-                                                        );
-                                                      for (const criterium of werkproces.beoordelingscriteria) {
-                                                        const key = `${pvbData.id}___${criterium.id}`;
-                                                        if (e.target.checked) {
-                                                          newSelection.add(key);
-                                                        } else {
-                                                          newSelection.delete(
-                                                            key,
-                                                          );
-                                                        }
-                                                      }
-                                                      setSelectedCriteria(
-                                                        newSelection,
-                                                      );
-                                                    }}
-                                                    checked={
-                                                      pvbData &&
-                                                      werkproces
-                                                        .beoordelingscriteria
-                                                        .length > 0 &&
-                                                      werkproces.beoordelingscriteria.every(
-                                                        (criterium) =>
-                                                          selectedCriteria.has(
-                                                            `${pvbData.id}___${criterium.id}`,
-                                                          ),
-                                                      )
+                                                <div className="flex items-center gap-1">
+                                                  <label
+                                                    htmlFor={`select-all-${pvbData.id}-${werkproces.id}`}
+                                                    className="text-xs text-gray-500 dark:text-gray-400"
+                                                  >
+                                                    Selecteer alle:
+                                                  </label>
+                                                  <SelectAllCheckbox
+                                                    id={`select-all-${pvbData.id}-${werkproces.id}`}
+                                                    criteriaKeys={werkproces.beoordelingscriteria.map(
+                                                      (criterium) =>
+                                                        `${pvbData.id}___${criterium.id}`,
+                                                    )}
+                                                    selectedCriteria={
+                                                      selectedCriteria
                                                     }
-                                                    className="h-3 w-3 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                                                    setSelectedCriteria={
+                                                      setSelectedCriteria
+                                                    }
                                                   />
-                                                  Selecteer alle
-                                                </label>
+                                                </div>
                                               )}
                                             </div>
                                             <div className="space-y-3">
@@ -767,41 +811,39 @@ export function AssessmentView({
                                                       key={criterium.id}
                                                       className="space-y-2 py-2"
                                                     >
-                                                      <div className="flex items-start gap-2">
-                                                        {/* Selection checkbox */}
-                                                        <input
-                                                          type="checkbox"
-                                                          checked={selectedCriteria.has(
-                                                            remarkKey,
+                                                      <div className="flex items-start gap-3">
+                                                        {/* Assessment status indicator */}
+                                                        <div className="flex items-center justify-center w-5 h-5 rounded-full mt-1 flex-shrink-0">
+                                                          {criteriumStatus?.behaald ===
+                                                          true ? (
+                                                            <div className="w-5 h-5 bg-green-100 border border-green-300 rounded-full flex items-center justify-center">
+                                                              <CheckIcon className="w-3 h-3 text-green-600" />
+                                                            </div>
+                                                          ) : criteriumStatus?.behaald ===
+                                                            false ? (
+                                                            <div className="w-5 h-5 bg-red-100 border border-red-300 rounded-full flex items-center justify-center">
+                                                              <svg
+                                                                className="w-3 h-3 text-red-600"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                              >
+                                                                <path
+                                                                  strokeLinecap="round"
+                                                                  strokeLinejoin="round"
+                                                                  strokeWidth={
+                                                                    2
+                                                                  }
+                                                                  d="M6 18L18 6M6 6l12 12"
+                                                                />
+                                                              </svg>
+                                                            </div>
+                                                          ) : (
+                                                            <div className="w-5 h-5 bg-gray-100 border border-gray-300 rounded-full dark:bg-gray-700 dark:border-gray-600" />
                                                           )}
-                                                          onChange={(e) => {
-                                                            const newSelection =
-                                                              new Set(
-                                                                selectedCriteria,
-                                                              );
-                                                            if (
-                                                              e.target.checked
-                                                            ) {
-                                                              newSelection.add(
-                                                                remarkKey,
-                                                              );
-                                                            } else {
-                                                              newSelection.delete(
-                                                                remarkKey,
-                                                              );
-                                                            }
-                                                            setSelectedCriteria(
-                                                              newSelection,
-                                                            );
-                                                          }}
-                                                          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
-                                                          disabled={
-                                                            criteriumAction.isPending ||
-                                                            batchCriteriaAction.isPending
-                                                          }
-                                                        />
+                                                        </div>
 
-                                                        <div className="flex-1 space-y-1.5">
+                                                        <div className="flex-1 space-y-2">
                                                           <div>
                                                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                                                               {criterium.title}
@@ -815,9 +857,9 @@ export function AssessmentView({
                                                             )}
                                                           </div>
 
-                                                          {/* Assessment buttons and remark in one line */}
-                                                          <div className="flex items-start gap-2">
-                                                            <div className="flex items-center gap-1 pt-1">
+                                                          {/* Assessment actions */}
+                                                          <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-1">
                                                               <button
                                                                 type="button"
                                                                 onClick={() =>
@@ -832,12 +874,12 @@ export function AssessmentView({
                                                                   criteriumAction.isPending
                                                                 }
                                                                 className={`
-                                                                  px-2 py-1 text-xs rounded transition-colors
+                                                                  px-3 py-1.5 text-xs font-medium rounded transition-colors
                                                                   ${
                                                                     criteriumStatus?.behaald ===
                                                                     true
-                                                                      ? "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                                                                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                                      ? "bg-green-500 text-white shadow-sm"
+                                                                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-900/20 dark:hover:text-green-400"
                                                                   }
                                                                   disabled:opacity-50 disabled:cursor-not-allowed
                                                                 `}
@@ -859,12 +901,12 @@ export function AssessmentView({
                                                                   criteriumAction.isPending
                                                                 }
                                                                 className={`
-                                                                  px-2 py-1 text-xs rounded transition-colors
+                                                                  px-3 py-1.5 text-xs font-medium rounded transition-colors
                                                                   ${
                                                                     criteriumStatus?.behaald ===
                                                                     false
-                                                                      ? "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
-                                                                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                                      ? "bg-red-500 text-white shadow-sm"
+                                                                      : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                                                                   }
                                                                   disabled:opacity-50 disabled:cursor-not-allowed
                                                                 `}
@@ -873,10 +915,58 @@ export function AssessmentView({
                                                               </button>
                                                             </div>
 
+                                                            {/* Batch selection checkbox - moved to the right with clear label */}
+                                                            <div className="flex items-center gap-1 ml-auto">
+                                                              <label
+                                                                htmlFor={`checkbox-${remarkKey}`}
+                                                                className="text-xs text-gray-500 dark:text-gray-400"
+                                                              >
+                                                                Selecteer:
+                                                              </label>
+                                                              <input
+                                                                id={`checkbox-${remarkKey}`}
+                                                                type="checkbox"
+                                                                checked={selectedCriteria.has(
+                                                                  remarkKey,
+                                                                )}
+                                                                onChange={(
+                                                                  e,
+                                                                ) => {
+                                                                  const newSelection =
+                                                                    new Set(
+                                                                      selectedCriteria,
+                                                                    );
+                                                                  if (
+                                                                    e.target
+                                                                      .checked
+                                                                  ) {
+                                                                    newSelection.add(
+                                                                      remarkKey,
+                                                                    );
+                                                                  } else {
+                                                                    newSelection.delete(
+                                                                      remarkKey,
+                                                                    );
+                                                                  }
+                                                                  setSelectedCriteria(
+                                                                    newSelection,
+                                                                  );
+                                                                }}
+                                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+                                                                disabled={
+                                                                  criteriumAction.isPending ||
+                                                                  batchCriteriaAction.isPending
+                                                                }
+                                                              />
+                                                            </div>
+                                                          </div>
+
+                                                          {/* Comments section */}
+                                                          <div>
                                                             <Textarea
                                                               placeholder="Opmerking..."
                                                               rows={1}
-                                                              className="text-xs flex-1"
+                                                              className="text-xs"
                                                               value={
                                                                 criteriaRemarks[
                                                                   remarkKey
