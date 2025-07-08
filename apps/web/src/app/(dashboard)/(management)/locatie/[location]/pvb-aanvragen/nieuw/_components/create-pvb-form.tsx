@@ -30,6 +30,7 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
 import { useKwalificatieprofielenByNiveau } from "~/app/(dashboard)/_hooks/swr/use-kwalificatieprofielen-by-niveau";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
@@ -316,13 +317,43 @@ function PersonCombobox({
     setValue(parentValue || "");
   }, [parentValue]);
 
+  // Use different hooks based on actorType
   const { data: persons } = usePersonsForLocation(locationId, {
     filter: { query, actorType },
   });
 
-  // Handle undefined data during loading
-  const personsItems = persons ? persons.items : [];
-  const selectedPerson = personsItems.find((p) => p.id === value) || null;
+  const { beoordelaars, isLoading: isLoadingBeoordelaars } =
+    useBeoordelaarsForLocation(
+      actorType === "pvb_beoordelaar" ? locationId : null,
+    );
+
+  // Determine which data to use based on actorType
+  let personsItems: Person[] = [];
+  let selectedPerson: Person | null = null;
+
+  if (actorType === "pvb_beoordelaar") {
+    // Beoordelaars already have the correct property structure, just need to add actors array
+    personsItems = beoordelaars
+      .map((b) => ({
+        ...b,
+        actors: [],
+      }))
+      .filter((b) => {
+        // Apply query filter for beoordelaars
+        if (!query) return true;
+        const fullName = formatPersonName(b);
+        return (
+          fullName.toLowerCase().includes(query.toLowerCase()) ||
+          b.email?.toLowerCase().includes(query.toLowerCase()) ||
+          false
+        );
+      });
+    selectedPerson = personsItems.find((p) => p.id === value) || null;
+  } else {
+    // Use persons data for other actor types
+    personsItems = persons ? persons.items : [];
+    selectedPerson = personsItems.find((p) => p.id === value) || null;
+  }
 
   const formatPersonName = (person: Person) => {
     const parts = [person.firstName];
@@ -332,7 +363,9 @@ function PersonCombobox({
   };
 
   // Determine if we should show the empty state message
-  const showEmptyMessage = persons && personsItems.length === 0;
+  const showEmptyMessage =
+    (actorType === "pvb_beoordelaar" ? !isLoadingBeoordelaars : persons) &&
+    personsItems.length === 0;
 
   // Get appropriate empty message based on actor type
   const getEmptyMessage = () => {
@@ -343,8 +376,9 @@ function PersonCombobox({
             Er zijn geen beoordelaars gevonden op deze locatie
           </div>
           <div className="text-xs text-amber-700 mt-1">
-            Beoordelaars worden aangewezen door personen binnen de locatie te
-            voorzien van de 'interne beoordelaar' rol.
+            Beoordelaars zijn personen die de rol 'instructeur' hebben binnen de
+            locatie én minimaal het kwalificatieprofiel 'Beoordelaar-4' hebben
+            afgerond.
           </div>
         </div>
       );
@@ -372,9 +406,7 @@ function PersonCombobox({
     );
   };
 
-  // If there's a selected value but no items, still show the combobox
-  // Otherwise hide it when empty
-  if (showEmptyMessage && !value) {
+  if (showEmptyMessage && !value && !query) {
     return (
       <>
         <input type="hidden" name={name} value={value} />

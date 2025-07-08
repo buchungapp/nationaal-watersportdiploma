@@ -593,8 +593,9 @@ export function PvbTableActions({
                 Er zijn geen beoordelaars gevonden op deze locatie
               </div>
               <div className="text-xs text-amber-700 mt-1">
-                Beoordelaars worden aangewezen door personen binnen de locatie
-                te voorzien van de 'interne beoordelaar' rol.
+                Beoordelaars zijn personen die de rol 'instructeur' hebben
+                binnen de locatie én minimaal het kwalificatieprofiel
+                'Beoordelaar-4' hebben afgerond.
               </div>
             </div>
           )}

@@ -1103,6 +1103,31 @@ export const listPersonsForLocationWithPagination = cache(
   },
 );
 
+export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    const isLocationAdmin = await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: person.id,
+    }).catch(() => false);
+
+    if (!isLocationAdmin) {
+      return [];
+    }
+
+    const persons = await KSS.Kwalificaties.listBeoordelaars({
+      filter: {
+        locationId,
+      },
+    });
+
+    return persons;
+  });
+});
+
 export const getPersonById = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
