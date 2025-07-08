@@ -52,7 +52,11 @@ export function CursussenPerKwalificatieprofiel({
     new Set(),
   );
 
-  const canEdit = ["concept", "wacht_op_voorwaarden"].includes(status);
+  const canEdit = [
+    "concept",
+    "wacht_op_voorwaarden",
+    "gereed_voor_beoordeling",
+  ].includes(status);
   const hoofdcursus = existingCourses.find((course) => course.isMainCourse);
   const aanvullendeCursussen = existingCourses.filter(
     (course) => !course.isMainCourse,

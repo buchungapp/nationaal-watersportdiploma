@@ -417,6 +417,7 @@ export const addCourse = wrapCommand(
       // Run independent validation queries in parallel
       const [
         aanvragenResults,
+        currentStatusResults,
         courseResults,
         existingCourses,
         existingKwalificaties,
@@ -430,7 +431,17 @@ export const addCourse = wrapCommand(
           .from(s.pvbAanvraag)
           .where(eq(s.pvbAanvraag.id, input.pvbAanvraagId)),
 
-        // 2. Validate course exists and get its instructieGroep
+        // 2. Check current status - only allow adding courses in certain states
+        tx
+          .select({
+            status: s.pvbAanvraagStatus.status,
+          })
+          .from(s.pvbAanvraagStatus)
+          .where(eq(s.pvbAanvraagStatus.pvbAanvraagId, input.pvbAanvraagId))
+          .orderBy(desc(s.pvbAanvraagStatus.aangemaaktOp))
+          .limit(1),
+
+        // 3. Validate course exists and get its instructieGroep
         tx
           .select({
             courseId: s.course.id,
@@ -448,7 +459,7 @@ export const addCourse = wrapCommand(
           )
           .where(eq(s.course.id, input.courseId)),
 
-        // 3. Check if course is already added to this aanvraag
+        // 4. Check if course is already added to this aanvraag
         tx
           .select({ id: s.pvbAanvraagCourse.id })
           .from(s.pvbAanvraagCourse)
@@ -463,7 +474,7 @@ export const addCourse = wrapCommand(
             ),
           ),
 
-        // 4. Check if person already has qualifications for this course + any existing onderdelen
+        // 5. Check if person already has qualifications for this course + any existing onderdelen
         tx
           .select({
             id: s.persoonKwalificatie.id,
@@ -493,7 +504,21 @@ export const addCourse = wrapCommand(
       ]);
 
       const _aanvraag = singleRow(aanvragenResults);
+      const currentStatus = singleRow(currentStatusResults);
       const _course = singleRow(courseResults);
+
+      // Validate status - only allow adding courses in certain states
+      if (
+        ![
+          "concept",
+          "wacht_op_voorwaarden",
+          "gereed_voor_beoordeling",
+        ].includes(currentStatus.status)
+      ) {
+        throw new Error(
+          "Cursussen kunnen alleen toegevoegd worden in concept, wacht_op_voorwaarden of gereed_voor_beoordeling status",
+        );
+      }
 
       // Validate course is not already added
       if (existingCourses.length > 0) {
@@ -570,8 +595,7 @@ export const removeCourse = wrapCommand(
   "pvb.removeCourse",
   withZod(removeCourseSchema, removeCourseOutputSchema, async (input) => {
     return withTransaction(async (tx) => {
-      // Validate the course exists in this aanvraag and get course count in one query
-      const [courseResults] = await Promise.all([
+      const [courseResults, currentStatusResults] = await Promise.all([
         tx
           .select({
             id: s.pvbAanvraagCourse.id,
@@ -588,9 +612,33 @@ export const removeCourse = wrapCommand(
               ),
             ),
           ),
+
+        // Check current status - only allow removing courses in certain states
+        tx
+          .select({
+            status: s.pvbAanvraagStatus.status,
+          })
+          .from(s.pvbAanvraagStatus)
+          .where(eq(s.pvbAanvraagStatus.pvbAanvraagId, input.pvbAanvraagId))
+          .orderBy(desc(s.pvbAanvraagStatus.aangemaaktOp))
+          .limit(1),
       ]);
 
       const course = singleRow(courseResults);
+      const currentStatus = singleRow(currentStatusResults);
+
+      // Validate status - only allow removing courses in certain states
+      if (
+        ![
+          "concept",
+          "wacht_op_voorwaarden",
+          "gereed_voor_beoordeling",
+        ].includes(currentStatus.status)
+      ) {
+        throw new Error(
+          "Cursussen kunnen alleen verwijderd worden in concept, wacht_op_voorwaarden of gereed_voor_beoordeling status",
+        );
+      }
 
       // Remove the course
       await tx

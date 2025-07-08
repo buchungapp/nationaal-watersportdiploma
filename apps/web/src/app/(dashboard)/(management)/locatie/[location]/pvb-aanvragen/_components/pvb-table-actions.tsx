@@ -447,14 +447,14 @@ export function PvbTableActions({
             onClick={() => setActiveDialog("submit")}
             disabled={!canSubmit}
           >
-            Indienen ({selectedIds.length})
+            Aanvragen indienen ({selectedIds.length})
           </DropdownItem>
 
           <DropdownItem
             onClick={() => setActiveDialog("cancel")}
             disabled={!canCancel}
           >
-            Intrekken ({selectedIds.length})
+            Aanvragen intrekken ({selectedIds.length})
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
