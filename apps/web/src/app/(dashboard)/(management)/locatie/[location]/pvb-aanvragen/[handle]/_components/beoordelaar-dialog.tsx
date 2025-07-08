@@ -14,7 +14,7 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
+import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { updatePvbBeoordelaarAction } from "~/app/_actions/pvb/single-operations-action";
 
 interface Person {
@@ -42,11 +42,13 @@ export function BeoordelaarDialog({
   const router = useRouter();
 
   // Fetch beoordelaars for the location
-  const { data: persons } = usePersonsForLocation(locatieId, {
-    filter: { query, actorType: "pvb_beoordelaar" },
-  });
+  const { beoordelaars: allBeoordelaars } =
+    useBeoordelaarsForLocation(locatieId);
 
-  const beoordelaars = persons?.items || [];
+  const beoordelaars = allBeoordelaars.filter((beoordelaar) =>
+    formatPersonName(beoordelaar).toLowerCase().includes(query.toLowerCase()),
+  );
+
   const selectedBeoordelaar =
     beoordelaars.find((p) => p.id === beoordelaarId) || null;
 
@@ -85,7 +87,7 @@ export function BeoordelaarDialog({
     setQuery("");
   };
 
-  const showEmptyMessage = persons && beoordelaars.length === 0;
+  const showEmptyMessage = beoordelaars.length === 0;
 
   return (
     <Dialog open={open} onClose={handleClose}>

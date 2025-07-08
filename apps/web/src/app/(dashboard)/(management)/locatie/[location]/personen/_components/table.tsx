@@ -21,7 +21,10 @@ import {
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import type { listPersonsForLocationWithPagination } from "~/lib/nwd";
+import type {
+  ActorType,
+  listPersonsForLocationWithPagination,
+} from "~/lib/nwd";
 import PersonRoleBadge from "../../_components/person-role-badge";
 type Person = Awaited<
   ReturnType<typeof listPersonsForLocationWithPagination>
@@ -66,7 +69,10 @@ const columns = [
       return (
         <div className="flex items-center gap-x-2">
           {getValue().map((actor) => (
-            <PersonRoleBadge key={actor.id} role={actor.type} />
+            <PersonRoleBadge
+              key={actor.id}
+              role={actor.type as Exclude<ActorType, "pvb_beoordelaar">}
+            />
           ))}
         </div>
       );

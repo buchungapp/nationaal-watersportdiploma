@@ -23,6 +23,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
+import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
 import {
   cancelPvbsAction,
@@ -90,9 +91,14 @@ export function PvbTableActions({
     filter: { actorType: "instructor", query: leercoachQuery },
   });
 
-  const { data: beoordelaars } = usePersonsForLocation(locationId, {
-    filter: { actorType: "pvb_beoordelaar", query: beoordelaarQuery },
-  });
+  const { beoordelaars: allBeoordelaars } =
+    useBeoordelaarsForLocation(locationId);
+
+  const beoordelaars = allBeoordelaars.filter((beoordelaar) =>
+    formatPersonName(beoordelaar)
+      .toLowerCase()
+      .includes(beoordelaarQuery.toLowerCase()),
+  );
 
   // Calculate what actions are available
   const selectedIds = selectedPvbs.map((pvb) => pvb.id);
@@ -559,7 +565,7 @@ export function PvbTableActions({
           <Field>
             <Label>Beoordelaar</Label>
             <Combobox
-              options={beoordelaars?.items ?? []}
+              options={beoordelaars}
               value={selectedBeoordelaar}
               onChange={setSelectedBeoordelaar}
               displayValue={(person) =>
@@ -587,7 +593,7 @@ export function PvbTableActions({
               )}
             </Combobox>
           </Field>
-          {beoordelaars?.items?.length === 0 && (
+          {beoordelaars.length === 0 && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
               <div className="text-sm font-medium text-amber-900">
                 Er zijn geen beoordelaars gevonden op deze locatie

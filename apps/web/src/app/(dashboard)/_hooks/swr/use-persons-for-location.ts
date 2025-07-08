@@ -12,7 +12,13 @@ export function usePersonsForLocation(
   options: {
     filter?: {
       query?: string | null;
-      actorType?: ActorType | [ActorType, ...ActorType[]] | null;
+      actorType?:
+        | Exclude<ActorType, "pvb_beoordelaar">
+        | [
+            Exclude<ActorType, "pvb_beoordelaar">,
+            ...Exclude<ActorType, "pvb_beoordelaar">[],
+          ]
+        | null;
     };
     limit?: number;
     offset?: number;

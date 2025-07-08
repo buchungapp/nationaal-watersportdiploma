@@ -296,14 +296,14 @@ function KwalificatieprofielCard({
 // Helper component for person selection that manages its own search state
 function PersonCombobox({
   locationId,
-  type,
+  actorType,
   placeholder,
   name,
   value: parentValue,
   onSelect,
 }: {
   locationId: string;
-  type: "instructor" | "pvb_beoordelaar";
+  actorType: "student" | "instructor" | "location_admin";
   placeholder: string;
   name: string;
   value?: string;
@@ -317,41 +317,13 @@ function PersonCombobox({
     setValue(parentValue || "");
   }, [parentValue]);
 
-  // Use different hooks based on actorType
   const { data: persons } = usePersonsForLocation(locationId, {
-    filter: { query, actorType: type },
+    filter: { query, actorType },
   });
 
-  const { beoordelaars, isLoading: isLoadingBeoordelaars } =
-    useBeoordelaarsForLocation(type === "pvb_beoordelaar" ? locationId : null);
-
-  // Determine which data to use based on actorType
-  let personsItems: Person[] = [];
-  let selectedPerson: Person | null = null;
-
-  if (type === "pvb_beoordelaar") {
-    // Beoordelaars already have the correct property structure, just need to add actors array
-    personsItems = beoordelaars
-      .map((b) => ({
-        ...b,
-        actors: [],
-      }))
-      .filter((b) => {
-        // Apply query filter for beoordelaars
-        if (!query) return true;
-        const fullName = formatPersonName(b);
-        return (
-          fullName.toLowerCase().includes(query.toLowerCase()) ||
-          b.email?.toLowerCase().includes(query.toLowerCase()) ||
-          false
-        );
-      });
-    selectedPerson = personsItems.find((p) => p.id === value) || null;
-  } else {
-    // Use persons data for other actor types
-    personsItems = persons ? persons.items : [];
-    selectedPerson = personsItems.find((p) => p.id === value) || null;
-  }
+  // Handle undefined data during loading
+  const personsItems = persons ? persons.items : [];
+  const selectedPerson = personsItems.find((p) => p.id === value) || null;
 
   const formatPersonName = (person: Person) => {
     const parts = [person.firstName];
@@ -361,27 +333,11 @@ function PersonCombobox({
   };
 
   // Determine if we should show the empty state message
-  const showEmptyMessage =
-    (type === "pvb_beoordelaar" ? !isLoadingBeoordelaars : persons) &&
-    personsItems.length === 0;
+  const showEmptyMessage = persons && personsItems.length === 0;
 
   // Get appropriate empty message based on actor type
   const getEmptyMessage = () => {
-    if (type === "pvb_beoordelaar") {
-      return (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
-          <div className="text-sm font-medium text-amber-900">
-            Er zijn geen beoordelaars gevonden op deze locatie
-          </div>
-          <div className="text-xs text-amber-700 mt-1">
-            Beoordelaars zijn personen die de rol 'instructeur' hebben binnen de
-            locatie én minimaal het kwalificatieprofiel 'Beoordelaar-4' hebben
-            afgerond.
-          </div>
-        </div>
-      );
-    }
-    if (type === "instructor") {
+    if (actorType === "instructor") {
       return (
         <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
           <div className="text-sm text-zinc-600">
@@ -390,7 +346,7 @@ function PersonCombobox({
         </div>
       );
     }
-    if (type === "student") {
+    if (actorType === "student") {
       return (
         <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
           <div className="text-sm text-zinc-600">Geen studenten gevonden</div>
@@ -437,6 +393,122 @@ function PersonCombobox({
                 {person.email && (
                   <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
                     ({person.email})
+                  </span>
+                )}
+              </div>
+            </ComboboxLabel>
+          </ComboboxOption>
+        )}
+      </Combobox>
+    </>
+  );
+}
+
+// Separate component for beoordelaar selection
+function BeoordelaarCombobox({
+  locationId,
+  placeholder,
+  name,
+  value: parentValue,
+  onSelect,
+}: {
+  locationId: string;
+  placeholder: string;
+  name: string;
+  value?: string;
+  onSelect?: (personId: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [value, setValue] = useState(parentValue || "");
+
+  // Sync with parent value changes
+  useEffect(() => {
+    setValue(parentValue || "");
+  }, [parentValue]);
+
+  const { beoordelaars, isLoading } = useBeoordelaarsForLocation(locationId);
+
+  // Filter beoordelaars based on query
+  const filteredBeoordelaars = beoordelaars.filter((b) => {
+    if (!query) return true;
+    const fullName = formatPersonName(b);
+    return (
+      fullName.toLowerCase().includes(query.toLowerCase()) ||
+      b.email?.toLowerCase().includes(query.toLowerCase()) ||
+      false
+    );
+  });
+
+  const selectedBeoordelaar =
+    filteredBeoordelaars.find((b) => b.id === value) || null;
+
+  const formatPersonName = (person: {
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string | null;
+  }) => {
+    const parts = [person.firstName];
+    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
+    if (person.lastName) parts.push(person.lastName);
+    return parts.join(" ");
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 p-2">
+        <Spinner className="h-4 w-4 text-zinc-600" />
+        <Text className="text-sm text-zinc-600">Beoordelaars laden...</Text>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (beoordelaars.length === 0 && !query) {
+    return (
+      <>
+        <input type="hidden" name={name} value={value} />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
+          <div className="text-sm font-medium text-amber-900">
+            Er zijn geen beoordelaars gevonden op deze locatie
+          </div>
+          <div className="text-xs text-amber-700 mt-1">
+            Beoordelaars zijn personen die een kwalificatieprofiel met richting
+            'pvb_beoordelaar' hebben afgerond.
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <input type="hidden" name={name} value={value} />
+      <Combobox
+        options={filteredBeoordelaars}
+        value={selectedBeoordelaar}
+        onChange={(beoordelaar) => {
+          const newValue = beoordelaar?.id || "";
+          setValue(newValue);
+          onSelect?.(newValue);
+        }}
+        displayValue={(beoordelaar) =>
+          beoordelaar ? formatPersonName(beoordelaar) : ""
+        }
+        setQuery={setQuery}
+        filter={() => true}
+        placeholder={placeholder}
+      >
+        {(beoordelaar) => (
+          <ComboboxOption key={beoordelaar.id} value={beoordelaar}>
+            <ComboboxLabel>
+              <div className="flex">
+                <span className="truncate">
+                  {formatPersonName(beoordelaar)}
+                </span>
+                {beoordelaar.email && (
+                  <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
+                    ({beoordelaar.email})
                   </span>
                 )}
               </div>
@@ -499,7 +571,7 @@ function KandidaatRow({
           <div className="flex-1">
             <PersonCombobox
               locationId={locationId}
-              type="instructor"
+              actorType="instructor"
               placeholder="Selecteer leercoach..."
               name={`kandidaten[${index}].leercoach`}
               value={leercoach}
@@ -526,9 +598,8 @@ function KandidaatRow({
       <TableCell>
         <div className="flex items-center gap-1">
           <div className="flex-1">
-            <PersonCombobox
+            <BeoordelaarCombobox
               locationId={locationId}
-              type="pvb_beoordelaar"
               placeholder="Selecteer beoordelaar..."
               name={`kandidaten[${index}].beoordelaar`}
               value={beoordelaar}

@@ -103,7 +103,13 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
 
   const [hasSelectedRole, setHasSelectedRole] = useState(true);
-  const [roles, setRoles] = useState<[ActorType, ...ActorType[]] | null>(null);
+  const [roles, setRoles] = useState<
+    | [
+        Exclude<ActorType, "pvb_beoordelaar">,
+        ...Exclude<ActorType, "pvb_beoordelaar">[],
+      ]
+    | null
+  >(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -142,7 +148,12 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     });
 
     setData({ labels, rows: data });
-    setRoles(roles as [ActorType, ...ActorType[]]);
+    setRoles(
+      roles as [
+        Exclude<ActorType, "pvb_beoordelaar">,
+        ...Exclude<ActorType, "pvb_beoordelaar">[],
+      ],
+    );
     setIsUpload(false);
   };
 
@@ -252,7 +263,10 @@ function SubmitForm({
   close,
 }: {
   data: CSVData;
-  roles: [ActorType, ...ActorType[]];
+  roles: [
+    Exclude<ActorType, "pvb_beoordelaar">,
+    ...Exclude<ActorType, "pvb_beoordelaar">[],
+  ];
   locationId: string;
   countries: { code: string; name: string }[];
   close: () => void;
