@@ -78,10 +78,7 @@ export function FilterSelect() {
 
   const [optimisticSelectedStatus, setOptimisticSelectedStatus] = useOptimistic(
     filter ?? [],
-    (
-      current,
-      toggle: "student" | "instructor" | "location_admin" | "pvb_beoordelaar",
-    ) => {
+    (current, toggle: "student" | "instructor" | "location_admin") => {
       return current.includes(toggle)
         ? current.filter((item) => item !== toggle)
         : [...current, toggle];
@@ -89,7 +86,7 @@ export function FilterSelect() {
   );
 
   const handleToggle = (
-    toggle: "student" | "instructor" | "location_admin" | "pvb_beoordelaar",
+    toggle: "student" | "instructor" | "location_admin",
   ) => {
     setOptimisticSelectedStatus(toggle);
 
@@ -126,12 +123,6 @@ export function FilterSelect() {
           checked={optimisticSelectedStatus.includes("location_admin")}
         >
           Locatie-beheerder
-        </CheckboxButton>
-        <CheckboxButton
-          onClick={() => handleToggle("pvb_beoordelaar")}
-          checked={optimisticSelectedStatus.includes("pvb_beoordelaar")}
-        >
-          Interne beoordelaar
         </CheckboxButton>
       </PopoverPanel>
     </Popover>

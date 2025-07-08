@@ -71,10 +71,7 @@ export const listHighestKwalificatiePerCourseAndRichting = wrapQuery(
                     .where(
                       and(
                         eq(s.actor.personId, s.persoonKwalificatie.personId),
-                        inArray(s.actor.type, [
-                          "instructor",
-                          "pvb_beoordelaar",
-                        ]),
+                        eq(s.actor.type, "instructor"),
                         inArray(s.actor.locationId, locationIds),
                       ),
                     ),
@@ -212,6 +209,66 @@ export const listBeoordelaars = wrapQuery(
         .orderBy(s.person.firstName, s.person.lastName);
 
       return rows;
+    },
+  ),
+);
+
+export const isQualifiedBeoordelaar = wrapQuery(
+  "kss.kwalificaties.isQualifiedBeoordelaar",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+    }),
+    z.object({
+      isQualified: z.boolean(),
+      kwalificatieprofielIds: z.array(uuidSchema),
+    }),
+    async ({ personId }) => {
+      const query = useQuery();
+
+      // Check if the person has completed any pvb_beoordelaar kwalificatieprofiel
+      const completedBeoordelaarProfielen = await query
+        .select({
+          kwalificatieprofielId: s.kwalificatieprofiel.id,
+        })
+        .from(s.kwalificatieprofiel)
+        .innerJoin(
+          s.kerntaak,
+          eq(s.kerntaak.kwalificatieprofielId, s.kwalificatieprofiel.id),
+        )
+        .innerJoin(
+          s.kerntaakOnderdeel,
+          eq(s.kerntaakOnderdeel.kerntaakId, s.kerntaak.id),
+        )
+        .innerJoin(
+          s.persoonKwalificatie,
+          eq(s.persoonKwalificatie.kerntaakOnderdeelId, s.kerntaakOnderdeel.id),
+        )
+        .where(
+          and(
+            eq(s.persoonKwalificatie.personId, personId),
+            eq(s.kwalificatieprofiel.richting, "pvb_beoordelaar"),
+            eq(s.kerntaak.type, "verplicht"),
+          ),
+        )
+        .groupBy(s.kwalificatieprofiel.id)
+        .having(
+          // Check that the count of achieved verplichte kerntaakonderdelen equals the total count
+          sql`COUNT(DISTINCT ${s.kerntaakOnderdeel.id}) = (
+            SELECT COUNT(DISTINCT ko2.id)
+            FROM ${s.kerntaak} k2
+            INNER JOIN ${s.kerntaakOnderdeel} ko2 ON ko2.kerntaak_id = k2.id
+            WHERE k2.kwalificatieprofiel_id = ${s.kwalificatieprofiel.id}
+            AND k2.type = 'verplicht'
+          )`,
+        );
+
+      return {
+        isQualified: completedBeoordelaarProfielen.length > 0,
+        kwalificatieprofielIds: completedBeoordelaarProfielen.map(
+          (p) => p.kwalificatieprofielId,
+        ),
+      };
     },
   ),
 );

@@ -39,7 +39,7 @@ import Spinner from "~/app/_components/spinner";
 import type { ActorType } from "~/lib/nwd";
 
 const ROLES: {
-  type: ActorType;
+  type: Exclude<ActorType, "pvb_beoordelaar">;
   label: string;
   description: string;
   defaultChecked?: boolean;
@@ -60,12 +60,6 @@ const ROLES: {
     type: "location_admin",
     label: "Locatiebeheerder",
     description: "Heeft alle rechten, kan de locatie en cohorten beheren.",
-  },
-  {
-    type: "pvb_beoordelaar",
-    label: "Interne beoordelaar",
-    description:
-      "Kan interne PvB aanvragen op deze locatie beoordelen. Dit is een organisatorische rol, en staat los van de formele bevoegdheden van deze persoon.",
   },
 ] as const;
 

@@ -14,6 +14,7 @@ import {
   withZod,
   wrapCommand,
 } from "../../utils/index.js";
+import { KSS } from "../index.js";
 import {
   aanvraagSchema,
   addCourseOutputSchema,
@@ -339,6 +340,19 @@ export const updateBeoordelaar = wrapCommand(
     updateBeoordelaarSchema,
     updateBeoordelaarOutputSchema,
     async (input) => {
+      // Check if the beoordelaar is qualified (outside transaction)
+      if (input.beoordelaarId) {
+        const { isQualified } = await KSS.Kwalificaties.isQualifiedBeoordelaar({
+          personId: input.beoordelaarId,
+        });
+
+        if (!isQualified) {
+          throw new Error(
+            "De geselecteerde persoon is geen gekwalificeerde PvB beoordelaar",
+          );
+        }
+      }
+
       return withTransaction(async (tx) => {
         // Validate the pvbOnderdeel exists and get aanvraag location
         const onderdeelResults = await tx
@@ -356,26 +370,6 @@ export const updateBeoordelaar = wrapCommand(
           .where(eq(s.pvbOnderdeel.id, input.pvbOnderdeelId));
 
         const onderdeel = singleRow(onderdeelResults);
-
-        // Validate new beoordelaar if provided
-        if (input.beoordelaarId) {
-          const beoordelaarActors = await tx
-            .select({ id: s.actor.id })
-            .from(s.actor)
-            .where(
-              and(
-                eq(s.actor.personId, input.beoordelaarId),
-                eq(s.actor.type, "pvb_beoordelaar"),
-                eq(s.actor.locationId, onderdeel.locatieId),
-              ),
-            );
-
-          if (beoordelaarActors.length === 0) {
-            throw new Error(
-              "Opgegeven beoordelaar is niet geldig of niet beschikbaar op deze locatie",
-            );
-          }
-        }
 
         // Update the beoordelaar
         await tx
@@ -1766,21 +1760,6 @@ export const updateBeoordelaarForMultiple = wrapCommand(
     }),
     async (input) => {
       const query = useQuery();
-
-      // Validate beoordelaar is a pvb_beoordelaar
-      const beoordelaarActors = await query
-        .select({ locationId: s.actor.locationId })
-        .from(s.actor)
-        .where(
-          and(
-            eq(s.actor.personId, input.beoordelaarId),
-            eq(s.actor.type, "pvb_beoordelaar"),
-          ),
-        );
-
-      if (beoordelaarActors.length === 0) {
-        throw new Error("De geselecteerde beoordelaar is geen PvB beoordelaar");
-      }
 
       let updatedCount = 0;
 

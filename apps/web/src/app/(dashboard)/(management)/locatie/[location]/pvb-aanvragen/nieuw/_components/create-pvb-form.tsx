@@ -296,14 +296,14 @@ function KwalificatieprofielCard({
 // Helper component for person selection that manages its own search state
 function PersonCombobox({
   locationId,
-  actorType,
+  type,
   placeholder,
   name,
   value: parentValue,
   onSelect,
 }: {
   locationId: string;
-  actorType: "student" | "instructor" | "location_admin" | "pvb_beoordelaar";
+  type: "instructor" | "pvb_beoordelaar";
   placeholder: string;
   name: string;
   value?: string;
@@ -319,19 +319,17 @@ function PersonCombobox({
 
   // Use different hooks based on actorType
   const { data: persons } = usePersonsForLocation(locationId, {
-    filter: { query, actorType },
+    filter: { query, actorType: type },
   });
 
   const { beoordelaars, isLoading: isLoadingBeoordelaars } =
-    useBeoordelaarsForLocation(
-      actorType === "pvb_beoordelaar" ? locationId : null,
-    );
+    useBeoordelaarsForLocation(type === "pvb_beoordelaar" ? locationId : null);
 
   // Determine which data to use based on actorType
   let personsItems: Person[] = [];
   let selectedPerson: Person | null = null;
 
-  if (actorType === "pvb_beoordelaar") {
+  if (type === "pvb_beoordelaar") {
     // Beoordelaars already have the correct property structure, just need to add actors array
     personsItems = beoordelaars
       .map((b) => ({
@@ -364,12 +362,12 @@ function PersonCombobox({
 
   // Determine if we should show the empty state message
   const showEmptyMessage =
-    (actorType === "pvb_beoordelaar" ? !isLoadingBeoordelaars : persons) &&
+    (type === "pvb_beoordelaar" ? !isLoadingBeoordelaars : persons) &&
     personsItems.length === 0;
 
   // Get appropriate empty message based on actor type
   const getEmptyMessage = () => {
-    if (actorType === "pvb_beoordelaar") {
+    if (type === "pvb_beoordelaar") {
       return (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
           <div className="text-sm font-medium text-amber-900">
@@ -383,7 +381,7 @@ function PersonCombobox({
         </div>
       );
     }
-    if (actorType === "instructor") {
+    if (type === "instructor") {
       return (
         <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
           <div className="text-sm text-zinc-600">
@@ -392,7 +390,7 @@ function PersonCombobox({
         </div>
       );
     }
-    if (actorType === "student") {
+    if (type === "student") {
       return (
         <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
           <div className="text-sm text-zinc-600">Geen studenten gevonden</div>
@@ -501,7 +499,7 @@ function KandidaatRow({
           <div className="flex-1">
             <PersonCombobox
               locationId={locationId}
-              actorType="instructor"
+              type="instructor"
               placeholder="Selecteer leercoach..."
               name={`kandidaten[${index}].leercoach`}
               value={leercoach}
@@ -530,7 +528,7 @@ function KandidaatRow({
           <div className="flex-1">
             <PersonCombobox
               locationId={locationId}
-              actorType="pvb_beoordelaar"
+              type="pvb_beoordelaar"
               placeholder="Selecteer beoordelaar..."
               name={`kandidaten[${index}].beoordelaar`}
               value={beoordelaar}

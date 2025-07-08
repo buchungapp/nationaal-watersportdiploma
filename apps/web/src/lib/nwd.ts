@@ -154,7 +154,7 @@ async function isActiveActorTypeInLocation({
 }: {
   personId: string;
   locationId: string;
-  actorType: ActorType[];
+  actorType: Exclude<ActorType, "pvb_beoordelaar">[];
 }) {
   const availableLocations = await User.Person.listLocationsByRole({
     personId: personId,
@@ -437,7 +437,7 @@ async function validatePersonAccessCheck({
 
   const isRequestedPersonAnActivePersonForLocationRequest =
     isActiveActorTypeInLocation({
-      actorType: ["instructor", "student", "location_admin", "pvb_beoordelaar"],
+      actorType: ["instructor", "student", "location_admin"],
       locationId,
       personId: requestedPersonId,
     });
@@ -1172,7 +1172,7 @@ export const listPersonsForUser = cache(async () => {
 });
 
 export const listPersonsForLocationByRole = cache(
-  async (locationId: string, role: ActorType) => {
+  async (locationId: string, role: Exclude<ActorType, "pvb_beoordelaar">) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
@@ -1198,7 +1198,10 @@ export const listPersonsForLocationByRole = cache(
 );
 
 export const listLocationsForPerson = cache(
-  async (personId?: string, roles?: ActorType[]) => {
+  async (
+    personId?: string,
+    roles?: Exclude<ActorType, "pvb_beoordelaar">[],
+  ) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);

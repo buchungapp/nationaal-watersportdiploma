@@ -8,9 +8,7 @@ import { actionClientWithMeta } from "../safe-action";
 
 const removeActorFromLocationSchema = zfd.formData({
   personId: zfd.text(z.string().uuid()),
-  type: zfd.text(
-    z.enum(["student", "instructor", "location_admin", "pvb_beoordelaar"]),
-  ),
+  type: zfd.text(z.enum(["student", "instructor", "location_admin"])),
 });
 
 const removeActorFromLocationArgsSchema: [locationId: z.ZodString] = [

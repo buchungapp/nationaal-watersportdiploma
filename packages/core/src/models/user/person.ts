@@ -452,32 +452,13 @@ export const listLocationsByRole = wrapQuery(
     z.object({
       personId: uuidSchema,
       roles: z
-        .array(
-          z.enum([
-            "student",
-            "instructor",
-            "location_admin",
-            "pvb_beoordelaar",
-          ]),
-        )
-        .default([
-          "instructor",
-          "student",
-          "location_admin",
-          "pvb_beoordelaar",
-        ]),
+        .array(z.enum(["student", "instructor", "location_admin"]))
+        .default(["instructor", "student", "location_admin"]),
     }),
     z.array(
       z.object({
         locationId: uuidSchema,
-        roles: z.array(
-          z.enum([
-            "student",
-            "instructor",
-            "location_admin",
-            "pvb_beoordelaar",
-          ]),
-        ),
+        roles: z.array(z.enum(["student", "instructor", "location_admin"])),
       }),
     ),
     async (input) => {
@@ -568,9 +549,7 @@ export const listActiveRolesForLocation = wrapQuery(
       personId: uuidSchema,
       locationId: uuidSchema,
     }),
-    z.array(
-      z.enum(["student", "instructor", "location_admin", "pvb_beoordelaar"]),
-    ),
+    z.array(z.enum(["student", "instructor", "location_admin"])),
     async (input) => {
       const query = useQuery();
 
@@ -589,20 +568,10 @@ export const listActiveRolesForLocation = wrapQuery(
         .then((rows) =>
           rows
             .filter(({ type }) =>
-              [
-                "student",
-                "instructor",
-                "location_admin",
-                "pvb_beoordelaar",
-              ].includes(type),
+              ["student", "instructor", "location_admin"].includes(type),
             )
             .map(
-              ({ type }) =>
-                type as
-                  | "student"
-                  | "instructor"
-                  | "location_admin"
-                  | "pvb_beoordelaar",
+              ({ type }) => type as "student" | "instructor" | "location_admin",
             ),
         );
     },

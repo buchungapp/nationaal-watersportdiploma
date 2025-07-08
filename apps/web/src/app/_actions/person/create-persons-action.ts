@@ -22,16 +22,15 @@ const createPersonsSchema = zfd
 
 const createPersonsArgsSchema: [
   locationId: z.ZodString,
-  roles: z.ZodArray<z.ZodEnum<[ActorType, ...ActorType[]]>, "atleastone">,
+  roles: z.ZodArray<
+    z.ZodEnum<["student", "instructor", "location_admin"]>,
+    "atleastone"
+  >,
   csvData: typeof csvDataSchema,
   countries: typeof countriesSchema,
 ] = [
   z.string().uuid(),
-  z
-    .array(
-      z.enum(["student", "instructor", "location_admin", "pvb_beoordelaar"]),
-    )
-    .nonempty(),
+  z.array(z.enum(["student", "instructor", "location_admin"])).nonempty(),
   csvDataSchema,
   countriesSchema,
 ];

@@ -27,12 +27,7 @@ export const list = wrapQuery(
       filter: z
         .object({
           type: singleOrArray(
-            z.enum([
-              "student",
-              "instructor",
-              "location_admin",
-              "pvb_beoordelaar",
-            ]),
+            z.enum(["student", "instructor", "location_admin"]),
           ).optional(),
         })
         .default({}),
@@ -90,12 +85,7 @@ export const getActorByPersonIdAndType = wrapQuery(
     z.object({
       locationId: uuidSchema,
       personId: uuidSchema,
-      actorType: z.enum([
-        "student",
-        "instructor",
-        "location_admin",
-        "pvb_beoordelaar",
-      ]),
+      actorType: z.enum(["student", "instructor", "location_admin"]),
     }),
     async (input) => {
       const query = useQuery();
