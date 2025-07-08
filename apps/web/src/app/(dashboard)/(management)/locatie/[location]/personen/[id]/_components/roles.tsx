@@ -38,13 +38,7 @@ const ROLES = [
     type: "location_admin",
     label: "Locatiebeheerder",
     description:
-      "Algemeen beheer van de locatie, kan alle locatiegegevens inzien en aanpassen.",
-  },
-  {
-    type: "pvb_beoordelaar",
-    label: "Interne beoordelaar",
-    description:
-      "Kan interne PvB aanvragen op deze locatie beoordelen. Dit is een organisatorische rol, en staat los van de formele bevoegdheden van deze persoon.",
+      "Algemeen beheer van de locatie, kan alle locatiegegevens inzien en aanpassen, kan PvB's aanvragen en kwalificaties inzien.",
   },
 ] as const;
 

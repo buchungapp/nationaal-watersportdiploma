@@ -1,4 +1,5 @@
 "use client";
+import { formatters } from "@nawadi/lib";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
+import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
 import {
   cancelPvbsAction,
@@ -48,14 +50,6 @@ interface PvbTableActionsProps {
   locationId: string;
   locationHandle: string;
   onClearSelection: () => void;
-}
-
-// Helper function to format person names
-function formatPersonName(person: Person): string {
-  const parts = [person.firstName, person.lastNamePrefix, person.lastName]
-    .filter(Boolean)
-    .join(" ");
-  return parts || "Onbekend";
 }
 
 type DialogType =
@@ -90,9 +84,15 @@ export function PvbTableActions({
     filter: { actorType: "instructor", query: leercoachQuery },
   });
 
-  const { data: beoordelaars } = usePersonsForLocation(locationId, {
-    filter: { actorType: "pvb_beoordelaar", query: beoordelaarQuery },
-  });
+  const { beoordelaars: allBeoordelaars } =
+    useBeoordelaarsForLocation(locationId);
+
+  const beoordelaars = allBeoordelaars.filter((beoordelaar) =>
+    formatters
+      .formatPersonName(beoordelaar)
+      .toLowerCase()
+      .includes(beoordelaarQuery.toLowerCase()),
+  );
 
   // Calculate what actions are available
   const selectedIds = selectedPvbs.map((pvb) => pvb.id);
@@ -222,7 +222,7 @@ export function PvbTableActions({
       }
 
       toast.success(
-        `${formatPersonName(selectedLeercoach)} is toegewezen aan ${selectedIds.length} aanvragen.`,
+        `${formatters.formatPersonName(selectedLeercoach)} is toegewezen aan ${selectedIds.length} aanvragen.`,
       );
       closeDialog();
       onClearSelection();
@@ -267,7 +267,7 @@ export function PvbTableActions({
       }
 
       toast.success(
-        `${formatPersonName(selectedBeoordelaar)} is toegewezen aan ${selectedIds.length} aanvragen.`,
+        `${formatters.formatPersonName(selectedBeoordelaar)} is toegewezen aan ${selectedIds.length} aanvragen.`,
       );
       closeDialog();
       onClearSelection();
@@ -447,14 +447,14 @@ export function PvbTableActions({
             onClick={() => setActiveDialog("submit")}
             disabled={!canSubmit}
           >
-            Indienen ({selectedIds.length})
+            Aanvragen indienen ({selectedIds.length})
           </DropdownItem>
 
           <DropdownItem
             onClick={() => setActiveDialog("cancel")}
             disabled={!canCancel}
           >
-            Intrekken ({selectedIds.length})
+            Aanvragen intrekken ({selectedIds.length})
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
@@ -508,7 +508,7 @@ export function PvbTableActions({
               value={selectedLeercoach}
               onChange={setSelectedLeercoach}
               displayValue={(person) =>
-                person ? formatPersonName(person as Person) : ""
+                person ? formatters.formatPersonName(person as Person) : ""
               }
               setQuery={setLeercoachQuery}
               filter={() => true}
@@ -519,7 +519,7 @@ export function PvbTableActions({
                   <ComboboxLabel>
                     <div className="flex">
                       <span className="truncate">
-                        {formatPersonName(person)}
+                        {formatters.formatPersonName(person)}
                       </span>
                       {person.email && (
                         <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
@@ -559,11 +559,11 @@ export function PvbTableActions({
           <Field>
             <Label>Beoordelaar</Label>
             <Combobox
-              options={beoordelaars?.items ?? []}
+              options={beoordelaars}
               value={selectedBeoordelaar}
               onChange={setSelectedBeoordelaar}
               displayValue={(person) =>
-                person ? formatPersonName(person as Person) : ""
+                person ? formatters.formatPersonName(person as Person) : ""
               }
               setQuery={setBeoordelaarQuery}
               filter={() => true}
@@ -574,7 +574,7 @@ export function PvbTableActions({
                   <ComboboxLabel>
                     <div className="flex">
                       <span className="truncate">
-                        {formatPersonName(person)}
+                        {formatters.formatPersonName(person)}
                       </span>
                       {person.email && (
                         <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
@@ -587,14 +587,15 @@ export function PvbTableActions({
               )}
             </Combobox>
           </Field>
-          {beoordelaars?.items?.length === 0 && (
+          {beoordelaars.length === 0 && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
               <div className="text-sm font-medium text-amber-900">
                 Er zijn geen beoordelaars gevonden op deze locatie
               </div>
               <div className="text-xs text-amber-700 mt-1">
-                Beoordelaars worden aangewezen door personen binnen de locatie
-                te voorzien van de 'interne beoordelaar' rol.
+                Beoordelaars zijn personen die de rol 'instructeur' hebben
+                binnen de locatie én minimaal het kwalificatieprofiel
+                'Beoordelaar-4' hebben afgerond.
               </div>
             </div>
           )}

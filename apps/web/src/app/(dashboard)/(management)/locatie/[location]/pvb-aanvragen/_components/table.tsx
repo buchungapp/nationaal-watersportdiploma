@@ -1,4 +1,5 @@
 "use client";
+import { formatters } from "@nawadi/lib";
 import type { RowSelectionState } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -31,20 +32,6 @@ import type { listPvbs } from "~/lib/nwd";
 import { PvbTableActions } from "./pvb-table-actions";
 
 type PvbAanvraag = Awaited<ReturnType<typeof listPvbs>>[number];
-
-// Helper function to format person names
-function formatPersonName(
-  person: {
-    firstName?: string | null;
-    lastNamePrefix?: string | null;
-    lastName?: string | null;
-  } | null,
-) {
-  if (!person) return null;
-  return [person.firstName, person.lastNamePrefix, person.lastName]
-    .filter(Boolean)
-    .join(" ");
-}
 
 // Status badge colors
 const statusColors: Record<
@@ -110,7 +97,7 @@ const columns = [
     header: "ID",
     cell: ({ getValue }) => <Code>{getValue()}</Code>,
   }),
-  columnHelper.accessor((data) => formatPersonName(data.kandidaat), {
+  columnHelper.accessor((data) => formatters.formatPersonName(data.kandidaat), {
     header: "Kandidaat",
     cell: ({ getValue }) => (
       <span className="font-medium text-zinc-950">{getValue()}</span>
@@ -130,18 +117,22 @@ const columns = [
     },
   }),
 
-  columnHelper.accessor((data) => formatPersonName(data.leercoach), {
-    id: "leercoach",
-    header: "Leercoach",
-    cell: ({ getValue }) => {
-      const name = getValue();
-      return name ? (
-        <span className="text-zinc-700">{name}</span>
-      ) : (
-        <span className="text-zinc-400 italic">Niet toegewezen</span>
-      );
+  columnHelper.accessor(
+    (data) =>
+      data.leercoach ? formatters.formatPersonName(data.leercoach) : null,
+    {
+      id: "leercoach",
+      header: "Leercoach",
+      cell: ({ getValue }) => {
+        const name = getValue();
+        return name ? (
+          <span className="text-zinc-700">{name}</span>
+        ) : (
+          <span className="text-zinc-400 italic">Niet toegewezen</span>
+        );
+      },
     },
-  }),
+  ),
   columnHelper.accessor(
     (data) => {
       // Get unique beoordelaars from kerntaakOnderdelen
@@ -151,7 +142,7 @@ const columns = [
           (beoordelaar): beoordelaar is NonNullable<typeof beoordelaar> =>
             beoordelaar !== null,
         )
-        .map((beoordelaar) => formatPersonName(beoordelaar))
+        .map((beoordelaar) => formatters.formatPersonName(beoordelaar))
         .filter((name, index, self) => self.indexOf(name) === index);
       return beoordelaars;
     },

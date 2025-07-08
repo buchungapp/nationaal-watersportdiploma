@@ -57,12 +57,7 @@ interface Props {
   }[];
   cohortId: string;
   locationId: string;
-  locationRoles: (
-    | "student"
-    | "instructor"
-    | "location_admin"
-    | "pvb_beoordelaar"
-  )[];
+  locationRoles: ("student" | "instructor" | "location_admin")[];
 }
 
 function Claim({ rows, cohortId }: Props) {

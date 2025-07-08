@@ -1,5 +1,6 @@
 "use client";
 
+import { formatters } from "@nawadi/lib";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -14,7 +15,7 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
+import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { updatePvbBeoordelaarAction } from "~/app/_actions/pvb/single-operations-action";
 
 interface Person {
@@ -42,20 +43,18 @@ export function BeoordelaarDialog({
   const router = useRouter();
 
   // Fetch beoordelaars for the location
-  const { data: persons } = usePersonsForLocation(locatieId, {
-    filter: { query, actorType: "pvb_beoordelaar" },
-  });
+  const { beoordelaars: allBeoordelaars } =
+    useBeoordelaarsForLocation(locatieId);
 
-  const beoordelaars = persons?.items || [];
+  const beoordelaars = allBeoordelaars.filter((beoordelaar) =>
+    formatters
+      .formatPersonName(beoordelaar)
+      .toLowerCase()
+      .includes(query.toLowerCase()),
+  );
+
   const selectedBeoordelaar =
     beoordelaars.find((p) => p.id === beoordelaarId) || null;
-
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +84,7 @@ export function BeoordelaarDialog({
     setQuery("");
   };
 
-  const showEmptyMessage = persons && beoordelaars.length === 0;
+  const showEmptyMessage = beoordelaars.length === 0;
 
   return (
     <Dialog open={open} onClose={handleClose}>
@@ -110,8 +109,9 @@ export function BeoordelaarDialog({
                     Er zijn geen beoordelaars gevonden op deze locatie
                   </div>
                   <div className="text-xs text-amber-700 mt-1">
-                    Beoordelaars worden aangewezen door personen binnen de
-                    locatie te voorzien van de 'interne beoordelaar' rol.
+                    Beoordelaars zijn personen die de rol 'instructeur' hebben
+                    binnen de locatie én minimaal het kwalificatieprofiel
+                    'Beoordelaar-4' hebben afgerond.
                   </div>
                 </div>
               ) : (
@@ -120,7 +120,7 @@ export function BeoordelaarDialog({
                   value={selectedBeoordelaar}
                   onChange={(person) => setBeoordelaarId(person?.id || "")}
                   displayValue={(person) =>
-                    person ? formatPersonName(person) : ""
+                    person ? formatters.formatPersonName(person) : ""
                   }
                   setQuery={setQuery}
                   filter={() => true} // Server-side filtering via query
@@ -131,7 +131,7 @@ export function BeoordelaarDialog({
                       <ComboboxLabel>
                         <div className="flex">
                           <span className="truncate">
-                            {formatPersonName(person)}
+                            {formatters.formatPersonName(person)}
                           </span>
                           {person.email && (
                             <span className="ml-2 text-slate-500 truncate">

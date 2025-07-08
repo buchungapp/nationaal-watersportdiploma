@@ -2,6 +2,7 @@
 
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { DocumentDuplicateIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { formatters } from "@nawadi/lib";
 import { useStateAction } from "next-safe-action/stateful-hooks";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,11 +31,14 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
 import { useKwalificatieprofielenByNiveau } from "~/app/(dashboard)/_hooks/swr/use-kwalificatieprofielen-by-niveau";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
 import { createBulkPvbsAction } from "~/app/_actions/pvb/create-bulk-pvbs-action";
 import Spinner from "~/app/_components/spinner";
+
+const formatPersonName = formatters.formatPersonName;
 
 interface Person {
   id: string;
@@ -302,7 +306,7 @@ function PersonCombobox({
   onSelect,
 }: {
   locationId: string;
-  actorType: "student" | "instructor" | "location_admin" | "pvb_beoordelaar";
+  actorType: "student" | "instructor" | "location_admin";
   placeholder: string;
   name: string;
   value?: string;
@@ -324,31 +328,11 @@ function PersonCombobox({
   const personsItems = persons ? persons.items : [];
   const selectedPerson = personsItems.find((p) => p.id === value) || null;
 
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
-
   // Determine if we should show the empty state message
   const showEmptyMessage = persons && personsItems.length === 0;
 
   // Get appropriate empty message based on actor type
   const getEmptyMessage = () => {
-    if (actorType === "pvb_beoordelaar") {
-      return (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
-          <div className="text-sm font-medium text-amber-900">
-            Er zijn geen beoordelaars gevonden op deze locatie
-          </div>
-          <div className="text-xs text-amber-700 mt-1">
-            Beoordelaars worden aangewezen door personen binnen de locatie te
-            voorzien van de 'interne beoordelaar' rol.
-          </div>
-        </div>
-      );
-    }
     if (actorType === "instructor") {
       return (
         <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 w-64 text-wrap">
@@ -372,9 +356,7 @@ function PersonCombobox({
     );
   };
 
-  // If there's a selected value but no items, still show the combobox
-  // Otherwise hide it when empty
-  if (showEmptyMessage && !value) {
+  if (showEmptyMessage && !value && !query) {
     return (
       <>
         <input type="hidden" name={name} value={value} />
@@ -407,6 +389,111 @@ function PersonCombobox({
                 {person.email && (
                   <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
                     ({person.email})
+                  </span>
+                )}
+              </div>
+            </ComboboxLabel>
+          </ComboboxOption>
+        )}
+      </Combobox>
+    </>
+  );
+}
+
+// Separate component for beoordelaar selection
+function BeoordelaarCombobox({
+  locationId,
+  placeholder,
+  name,
+  value: parentValue,
+  onSelect,
+}: {
+  locationId: string;
+  placeholder: string;
+  name: string;
+  value?: string;
+  onSelect?: (personId: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [value, setValue] = useState(parentValue || "");
+
+  // Sync with parent value changes
+  useEffect(() => {
+    setValue(parentValue || "");
+  }, [parentValue]);
+
+  const { beoordelaars, isLoading } = useBeoordelaarsForLocation(locationId);
+
+  // Filter beoordelaars based on query
+  const filteredBeoordelaars = beoordelaars.filter((b) => {
+    if (!query) return true;
+    const fullName = formatPersonName(b);
+    return (
+      fullName.toLowerCase().includes(query.toLowerCase()) ||
+      b.email?.toLowerCase().includes(query.toLowerCase()) ||
+      false
+    );
+  });
+
+  const selectedBeoordelaar =
+    filteredBeoordelaars.find((b) => b.id === value) || null;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 p-2">
+        <Spinner className="h-4 w-4 text-zinc-600" />
+        <Text className="text-sm text-zinc-600">Beoordelaars laden...</Text>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (beoordelaars.length === 0 && !query) {
+    return (
+      <>
+        <input type="hidden" name={name} value={value} />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
+          <div className="text-sm font-medium text-amber-900">
+            Er zijn geen beoordelaars gevonden op deze locatie
+          </div>
+          <div className="text-xs text-amber-700 mt-1">
+            Beoordelaars zijn personen die een kwalificatieprofiel met richting
+            'pvb_beoordelaar' hebben afgerond.
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <input type="hidden" name={name} value={value} />
+      <Combobox
+        options={filteredBeoordelaars}
+        value={selectedBeoordelaar}
+        onChange={(beoordelaar) => {
+          const newValue = beoordelaar?.id || "";
+          setValue(newValue);
+          onSelect?.(newValue);
+        }}
+        displayValue={(beoordelaar) =>
+          beoordelaar ? formatPersonName(beoordelaar) : ""
+        }
+        setQuery={setQuery}
+        filter={() => true}
+        placeholder={placeholder}
+      >
+        {(beoordelaar) => (
+          <ComboboxOption key={beoordelaar.id} value={beoordelaar}>
+            <ComboboxLabel>
+              <div className="flex">
+                <span className="truncate">
+                  {formatPersonName(beoordelaar)}
+                </span>
+                {beoordelaar.email && (
+                  <span className="ml-2 text-slate-500 group-data-active/option:text-white truncate">
+                    ({beoordelaar.email})
                   </span>
                 )}
               </div>
@@ -496,9 +583,8 @@ function KandidaatRow({
       <TableCell>
         <div className="flex items-center gap-1">
           <div className="flex-1">
-            <PersonCombobox
+            <BeoordelaarCombobox
               locationId={locationId}
-              actorType="pvb_beoordelaar"
               placeholder="Selecteer beoordelaar..."
               name={`kandidaten[${index}].beoordelaar`}
               value={beoordelaar}
@@ -639,13 +725,6 @@ export default function CreatePvbForm({
       toast.error(error.serverError || "Er is een fout opgetreden");
     },
   });
-
-  const formatPersonName = (person: Person) => {
-    const parts = [person.firstName];
-    if (person.lastNamePrefix) parts.push(person.lastNamePrefix);
-    if (person.lastName) parts.push(person.lastName);
-    return parts.join(" ");
-  };
 
   // Add kandidaat
   const addKandidaat = (person: Person) => {

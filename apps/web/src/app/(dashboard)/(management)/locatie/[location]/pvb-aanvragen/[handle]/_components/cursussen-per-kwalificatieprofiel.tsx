@@ -52,7 +52,11 @@ export function CursussenPerKwalificatieprofiel({
     new Set(),
   );
 
-  const canEdit = ["concept", "wacht_op_voorwaarden"].includes(status);
+  const canEdit = [
+    "concept",
+    "wacht_op_voorwaarden",
+    "gereed_voor_beoordeling",
+  ].includes(status);
   const hoofdcursus = existingCourses.find((course) => course.isMainCourse);
   const aanvullendeCursussen = existingCourses.filter(
     (course) => !course.isMainCourse,
@@ -94,6 +98,7 @@ export function CursussenPerKwalificatieprofiel({
       const errors = results.filter((r) => r?.serverError);
 
       if (errors.length > 0) {
+        console.log("ERRORS", errors);
         toast.error(
           `${errors.length} cursus(sen) konden niet worden toegevoegd`,
         );

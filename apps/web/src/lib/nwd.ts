@@ -154,7 +154,7 @@ async function isActiveActorTypeInLocation({
 }: {
   personId: string;
   locationId: string;
-  actorType: ActorType[];
+  actorType: Exclude<ActorType, "pvb_beoordelaar">[];
 }) {
   const availableLocations = await User.Person.listLocationsByRole({
     personId: personId,
@@ -437,7 +437,7 @@ async function validatePersonAccessCheck({
 
   const isRequestedPersonAnActivePersonForLocationRequest =
     isActiveActorTypeInLocation({
-      actorType: ["instructor", "student", "location_admin", "pvb_beoordelaar"],
+      actorType: ["instructor", "student", "location_admin"],
       locationId,
       personId: requestedPersonId,
     });
@@ -1103,6 +1103,31 @@ export const listPersonsForLocationWithPagination = cache(
   },
 );
 
+export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    const isLocationAdmin = await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: person.id,
+    }).catch(() => false);
+
+    if (!isLocationAdmin) {
+      return [];
+    }
+
+    const persons = await KSS.Kwalificaties.listBeoordelaars({
+      filter: {
+        locationId,
+      },
+    });
+
+    return persons;
+  });
+});
+
 export const getPersonById = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
@@ -1147,7 +1172,7 @@ export const listPersonsForUser = cache(async () => {
 });
 
 export const listPersonsForLocationByRole = cache(
-  async (locationId: string, role: ActorType) => {
+  async (locationId: string, role: Exclude<ActorType, "pvb_beoordelaar">) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
@@ -1173,7 +1198,10 @@ export const listPersonsForLocationByRole = cache(
 );
 
 export const listLocationsForPerson = cache(
-  async (personId?: string, roles?: ActorType[]) => {
+  async (
+    personId?: string,
+    roles?: Exclude<ActorType, "pvb_beoordelaar">[],
+  ) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
@@ -2936,12 +2964,6 @@ export async function updateEmailForPerson({
     const [primaryPerson] = await Promise.all([
       getUserOrThrow().then(getPrimaryPerson),
     ]);
-
-    await listRolesForLocation(locationId, personId).then((roles) => {
-      if (roles.length < 1) {
-        throw new Error("Unauthorized");
-      }
-    });
 
     await isActiveActorTypeInLocation({
       actorType: ["location_admin"],

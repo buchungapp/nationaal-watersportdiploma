@@ -42,16 +42,16 @@ export function ActivateDialog({
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Aanvraag activeren</DialogTitle>
+      <DialogTitle>Aanvraag indienen</DialogTitle>
       <DialogBody>
         <div className="space-y-3">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Weet u zeker dat u deze PvB aanvraag wilt activeren? De aanvraag
+            Weet u zeker dat u deze PvB aanvraag wilt indienen? De aanvraag
             wordt zichtbaar voor het Secretariaat en de leercoach kan
             toestemming geven.
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Na activering zal de status wijzigen naar "Wacht op voorwaarden" en
+            Na indienen zal de status wijzigen naar "Wacht op voorwaarden" en
             kunnen de benodigde stappen worden uitgevoerd om de beoordeling te
             starten.
           </p>
@@ -67,7 +67,7 @@ export function ActivateDialog({
           onClick={handleActivate}
           disabled={isPending}
         >
-          {isPending ? "Bezig..." : "Activeren"}
+          {isPending ? "Bezig..." : "Indienen"}
         </Button>
       </DialogActions>
     </Dialog>

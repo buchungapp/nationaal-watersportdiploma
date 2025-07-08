@@ -30,14 +30,27 @@ import {
   finalizePvbAssessmentAction,
   startPvbAssessmentAction,
 } from "~/app/_actions/pvb/assessment-action";
-import type { retrievePvbAanvraagByHandle } from "~/lib/nwd";
+import type {
+  getPvbBeoordelingsCriteria,
+  getPvbToetsdocumenten,
+  retrievePvbAanvraagByHandle,
+} from "~/lib/nwd";
 
 interface BeoordelaarViewProps {
   aanvraag: Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>;
+  toetsdocumentenList: Awaited<ReturnType<typeof getPvbToetsdocumenten>>;
+  beoordelingsCriteria: Awaited<
+    ReturnType<typeof getPvbBeoordelingsCriteria>
+  >["items"];
   personId: string;
 }
 
-export function BeoordelaarView({ aanvraag, personId }: BeoordelaarViewProps) {
+export function BeoordelaarView({
+  aanvraag,
+  toetsdocumentenList,
+  beoordelingsCriteria,
+  personId,
+}: BeoordelaarViewProps) {
   const [openDialog, setOpenDialog] = useState<
     "start" | "abort" | "finalize" | null
   >(null);
@@ -57,15 +70,85 @@ export function BeoordelaarView({ aanvraag, personId }: BeoordelaarViewProps) {
     return null;
   }
 
+  // Create maps for quick lookups similar to AssessmentView
+  const onderdeelDataMap = new Map(
+    aanvraag.onderdelen.map((onderdeel) => [
+      onderdeel.kerntaakOnderdeelId,
+      onderdeel,
+    ]),
+  );
+
+  const criteriaStatusMap = new Map(
+    beoordelingsCriteria.map((criteria) => [
+      `${criteria.pvbOnderdeelId}___${criteria.beoordelingscriteriumId}`,
+      criteria,
+    ]),
+  );
+
+  const areAllCriteriaAssessed = (): boolean => {
+    // Check all onderdelen where the current person is the beoordelaar
+    for (const onderdeelData of aanvraag.onderdelen) {
+      // Skip onderdelen where the current person is not the beoordelaar
+      if (onderdeelData.beoordelaar?.id !== personId) {
+        continue;
+      }
+
+      // Find the kerntaak and onderdeel in toetsdocumenten
+      let allCriteriaAssessed = false;
+
+      for (const toetsdocument of toetsdocumentenList) {
+        const kerntaak = toetsdocument.kerntaken.find((k) =>
+          k.onderdelen.some(
+            (o) => onderdeelDataMap.get(o.id)?.id === onderdeelData.id,
+          ),
+        );
+        if (!kerntaak) continue;
+
+        const onderdeel = kerntaak.onderdelen.find(
+          (o) => onderdeelDataMap.get(o.id)?.id === onderdeelData.id,
+        );
+        if (!onderdeel) continue;
+
+        // Get all criteria for this onderdeel
+        const allCriteriaIds: string[] = [];
+        for (const werkproces of onderdeel.werkprocessen) {
+          for (const criterium of werkproces.beoordelingscriteria) {
+            allCriteriaIds.push(criterium.id);
+          }
+        }
+
+        // Check if all criteria have been assessed (behaald !== null)
+        let allAssessed = true;
+        for (const criteriumId of allCriteriaIds) {
+          const key = `${onderdeelData.id}___${criteriumId}`;
+          const status = criteriaStatusMap.get(key);
+          if (!status || status.behaald === null) {
+            allAssessed = false;
+            break;
+          }
+        }
+
+        if (allAssessed) {
+          allCriteriaAssessed = true;
+          break;
+        }
+      }
+
+      // If any onderdeel is not fully assessed, return false
+      if (!allCriteriaAssessed) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const canStart = aanvraag.status === "gereed_voor_beoordeling";
   const canAbort = aanvraag.status === "in_beoordeling";
+
+  // Use the same logic as AssessmentView to check if all criteria are assessed
   const canFinalize =
-    aanvraag.status === "in_beoordeling" &&
-    aanvraag.onderdelen.every(
-      (onderdeel) =>
-        onderdeel.beoordelaar?.id !== personId ||
-        onderdeel.uitslag !== "nog_niet_bekend",
-    );
+    aanvraag.status === "in_beoordeling" && areAllCriteriaAssessed();
 
   const handleStart = () => {
     startAction.execute({
@@ -217,8 +300,9 @@ export function BeoordelaarView({ aanvraag, personId }: BeoordelaarViewProps) {
       >
         <DialogTitle>Beoordeling afronden</DialogTitle>
         <DialogDescription>
-          Weet je zeker dat je de beoordeling wilt afronden? Controleer of alle
-          onderdelen zijn beoordeeld.
+          Weet je zeker dat je de beoordeling wilt afronden? Je kan de uitslag
+          daarna niet meer wijzigen. Neem contact op met het Secretariaat als er
+          nog vragen zijn.
         </DialogDescription>
         <DialogActions>
           <Button plain onClick={() => setOpenDialog(null)}>

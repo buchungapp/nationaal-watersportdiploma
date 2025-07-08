@@ -22,12 +22,7 @@ export const maxDuration = 240;
 
 const searchParamsParser = createLoader({
   filter: parseAsArrayOf(
-    parseAsStringLiteral([
-      "student",
-      "instructor",
-      "location_admin",
-      "pvb_beoordelaar",
-    ] as const),
+    parseAsStringLiteral(["student", "instructor", "location_admin"] as const),
   ),
   query: parseAsString.withDefault(""),
   page: parseAsInteger.withDefault(1),

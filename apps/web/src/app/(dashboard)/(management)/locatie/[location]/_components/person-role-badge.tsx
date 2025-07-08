@@ -5,8 +5,7 @@ type Role =
   | "instructor"
   | "location_admin"
   | "secretariaat"
-  | "system"
-  | "pvb_beoordelaar";
+  | "system";
 
 const dictionary: Record<Role, string> = {
   student: "Cursist",
@@ -14,7 +13,6 @@ const dictionary: Record<Role, string> = {
   location_admin: "Locatiebeheerder",
   secretariaat: "Secretariaat",
   system: "Systeem",
-  pvb_beoordelaar: "Interne beoordelaar",
 } as const;
 
 const colors: Record<
@@ -44,7 +42,6 @@ const colors: Record<
   location_admin: "purple",
   secretariaat: "yellow",
   system: "zinc",
-  pvb_beoordelaar: "red",
 } as const;
 
 export default function PersonRoleBadge({ role }: { role: Role }) {

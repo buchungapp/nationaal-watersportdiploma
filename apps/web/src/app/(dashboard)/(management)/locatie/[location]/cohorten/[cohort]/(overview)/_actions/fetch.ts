@@ -61,7 +61,7 @@ export async function listCountries() {
 
 export async function listPersonsForLocationByRole(
   locationId: string,
-  role: ActorType,
+  role: Exclude<ActorType, "pvb_beoordelaar">,
 ) {
   return listPersonsForLocationByRoleInner(locationId, role);
 }

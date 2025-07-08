@@ -110,7 +110,7 @@ export function AanvraagActions({
                         : "text-gray-700 dark:text-gray-300"
                     } block w-full px-4 py-2 text-left text-sm`}
                   >
-                    Aanvraag activeren
+                    Aanvraag indienen
                   </button>
                 )}
               </MenuItem>

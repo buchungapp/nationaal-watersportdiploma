@@ -4,6 +4,8 @@ import { RouterPreviousButton } from "~/app/(dashboard)/_components/navigation";
 import {
   getPersonByHandle,
   getPrimaryPerson,
+  getPvbBeoordelingsCriteria,
+  getPvbToetsdocumenten,
   getUserOrThrow,
   retrievePvbAanvraagByHandle,
 } from "~/lib/nwd";
@@ -59,6 +61,19 @@ export default async function Page(props: {
 
   if (!role) {
     notFound();
+  }
+
+  // Fetch additional data for beoordelaar if needed
+  let toetsdocumentenList = null;
+  let beoordelingsCriteria = null;
+
+  if (role === "beoordelaar") {
+    const [toetsdocumenten, criteria] = await Promise.all([
+      getPvbToetsdocumenten(aanvraag.id),
+      getPvbBeoordelingsCriteria(aanvraag.id),
+    ]);
+    toetsdocumentenList = toetsdocumenten;
+    beoordelingsCriteria = criteria.items;
   }
 
   return (
@@ -151,9 +166,16 @@ export default async function Page(props: {
                   {role === "leercoach" && (
                     <LeercoachView aanvraag={aanvraag} personId={person.id} />
                   )}
-                  {role === "beoordelaar" && (
-                    <BeoordelaarView aanvraag={aanvraag} personId={person.id} />
-                  )}
+                  {role === "beoordelaar" &&
+                    toetsdocumentenList &&
+                    beoordelingsCriteria && (
+                      <BeoordelaarView
+                        aanvraag={aanvraag}
+                        personId={person.id}
+                        toetsdocumentenList={toetsdocumentenList}
+                        beoordelingsCriteria={beoordelingsCriteria}
+                      />
+                    )}
                 </div>
               </div>
 
