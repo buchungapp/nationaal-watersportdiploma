@@ -140,7 +140,18 @@ export function KwalificatiesTable({
       filtered = instructors;
     }
 
-    return filtered;
+    return filtered.sort((a, b) => {
+      const aName = formatters.formatPersonName(a);
+      const bName = formatters.formatPersonName(b);
+
+      if (aName < bName) return -1;
+      if (aName > bName) return 1;
+
+      if (a.handle < b.handle) return -1;
+      if (a.handle > b.handle) return 1;
+
+      return 0;
+    });
   }, [instructors, searchQuery, fuse]);
 
   // Set up the virtualizer

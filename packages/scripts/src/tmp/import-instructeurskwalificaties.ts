@@ -1,4 +1,5 @@
 import {
+  Certificate,
   Location,
   useQuery,
   withDatabase,
@@ -8,8 +9,9 @@ import { schema } from "@nawadi/db";
 import csv from "csvtojson";
 import "dotenv/config";
 import assert from "node:assert";
+import fs from "node:fs";
 import path from "node:path";
-import { and, eq, exists, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, exists, isNull, sql } from "drizzle-orm";
 import inquirer from "inquirer";
 import { chunk } from "lodash-es";
 import pThrottle from "p-throttle";
@@ -21,11 +23,26 @@ const OPERATIONS_PER_SECOND = 10;
 // Cache for person lookups to avoid redundant database queries
 const personCache = new Map<string, string | null>();
 
+// Add a new type to track rows that need user interaction
+interface InteractiveRow {
+  row: z.infer<typeof rowSchema>;
+  rowIndex: number;
+  persons: Array<{
+    id: string;
+    firstName: string;
+    lastName: string | null;
+    lastNamePrefix: string | null;
+    dateOfBirth: string | null;
+    birthCity: string | null;
+    handle: string | null;
+  }>;
+}
+
 const throttledProcess = pThrottle({
   interval: 1000,
   limit: OPERATIONS_PER_SECOND,
 })((row: z.infer<typeof rowSchema>, locationId: string, rowIndex?: number) =>
-  processRow(row, locationId, rowIndex),
+  processRowAutomated(row, locationId, rowIndex),
 );
 
 // Helper function to create a cache key for person lookup
@@ -43,6 +60,85 @@ function createPersonCacheKey(
 // Cache statistics tracking
 let cacheHits = 0;
 let cacheMisses = 0;
+
+// Track skipped rows for reporting
+interface SkippedRow {
+  rowIndex: number;
+  reason: string;
+  data: Record<string, unknown>;
+  timestamp: string;
+}
+
+const skippedRows: SkippedRow[] = [];
+
+function addSkippedRow(
+  rowIndex: number,
+  reason: string,
+  data: Record<string, unknown>,
+) {
+  skippedRows.push({
+    rowIndex,
+    reason,
+    data,
+    timestamp: new Date().toISOString(),
+  });
+}
+
+async function writeSkippedRowsReport(filePath: string) {
+  if (skippedRows.length === 0) {
+    console.log("No skipped rows to report.");
+    return;
+  }
+
+  const reportPath = path.join(
+    path.dirname(filePath),
+    `skipped-rows-${Date.now()}.txt`,
+  );
+
+  let reportContent = `SKIPPED ROWS REPORT
+Generated: ${new Date().toISOString()}
+Source file: ${path.basename(filePath)}
+Total skipped rows: ${skippedRows.length}
+
+`;
+
+  // Group by reason for better analysis
+  const groupedByReason = new Map<string, SkippedRow[]>();
+  for (const row of skippedRows) {
+    if (!groupedByReason.has(row.reason)) {
+      groupedByReason.set(row.reason, []);
+    }
+    const rows = groupedByReason.get(row.reason);
+    if (rows) {
+      rows.push(row);
+    }
+  }
+
+  // Write summary
+  reportContent += "SUMMARY BY REASON:\n";
+  reportContent += "==================\n";
+  for (const [reason, rows] of groupedByReason) {
+    reportContent += `${reason}: ${rows.length} rows\n`;
+  }
+
+  reportContent += "\n\nDETAILED REPORT:\n";
+  reportContent += "================\n";
+
+  // Write detailed report
+  for (const row of skippedRows) {
+    reportContent += `Row ${row.rowIndex} (${row.timestamp}):\n`;
+    reportContent += `Reason: ${row.reason}\n`;
+    reportContent += `Data: ${JSON.stringify(row.data, null, 2)}\n`;
+    reportContent += "---\n\n";
+  }
+
+  try {
+    fs.writeFileSync(reportPath, reportContent, "utf8");
+    console.log(`📄 Skipped rows report written to: ${reportPath}`);
+  } catch (error) {
+    console.error("Error writing skipped rows report:", error);
+  }
+}
 
 function reportCacheStats() {
   const totalLookups = cacheHits + cacheMisses;
@@ -124,6 +220,8 @@ const rowSchema = z.object({
     "Instructeur - Windsurfen",
     "Instructeur - Zwaardboot eenmans",
     "Instructeur - Zwaardboot tweemans",
+    "Instructeur - Motorboot",
+    "Instructeur - Roeien",
   ]),
   "Hoogste Geldigheids Niveau": z.enum([
     "2",
@@ -131,6 +229,7 @@ const rowSchema = z.object({
     "4",
     "4*",
     "5*",
+    "5",
     "I-2",
     "IV",
     "IV+",
@@ -145,40 +244,48 @@ const qualificationToCourseIdsMap: Record<
     }
   | {
       _type: "eigenvaardigheid";
-      courseId: string | null;
+      discipline:
+        | "Zwaardboot eenmans"
+        | "Zwaardboot tweemans"
+        | "Catamaran"
+        | "Windsurfen"
+        | "Kielboot"
+        | "Jachtzeilen Non Tidal"
+        | "Jachtzeilen Tidal"
+        | "Kajuitzeilen";
     }
 > = {
   "Eigen vaardigheid - Catamaran": {
     _type: "eigenvaardigheid",
-    courseId: "50e1e7c0-791e-4e86-8825-6a0f6575837e",
+    discipline: "Catamaran",
   },
   "Eigen vaardigheid - Jachtzeilen Non Tidal": {
     _type: "eigenvaardigheid",
-    courseId: null,
+    discipline: "Jachtzeilen Non Tidal",
   },
   "Eigen vaardigheid - Jachtzeilen Tidal": {
     _type: "eigenvaardigheid",
-    courseId: null,
+    discipline: "Jachtzeilen Tidal",
   },
   "Eigen vaardigheid - Kajuitzeilen": {
     _type: "eigenvaardigheid",
-    courseId: null,
+    discipline: "Kajuitzeilen",
   },
   "Eigen vaardigheid - Kielboot": {
     _type: "eigenvaardigheid",
-    courseId: "5b50a748-cdcd-4541-9303-2aaefe2e19d8",
+    discipline: "Kielboot",
   },
   "Eigen vaardigheid - Windsurfen": {
     _type: "eigenvaardigheid",
-    courseId: "19a0d0b4-71e2-46dd-8a64-e9e5daef1e18",
+    discipline: "Windsurfen",
   },
   "Eigen vaardigheid - Zwaardboot eenmans": {
     _type: "eigenvaardigheid",
-    courseId: "ca6dd2f2-0dc2-490d-86a9-96894b6332ea",
+    discipline: "Zwaardboot eenmans",
   },
   "Eigen vaardigheid - Zwaardboot tweemans": {
     _type: "eigenvaardigheid",
-    courseId: "99558cab-5797-4cde-9e7d-5dc85460048a",
+    discipline: "Zwaardboot tweemans",
   },
   "Instructeur - Buitenboordmotor": {
     _type: "kss",
@@ -260,6 +367,14 @@ const qualificationToCourseIdsMap: Record<
     _type: "kss",
     courseIds: ["eb472ee4-08c9-4036-b6b6-d0395fddde43"],
   },
+  "Instructeur - Motorboot": {
+    _type: "kss",
+    courseIds: [],
+  },
+  "Instructeur - Roeien": {
+    _type: "kss",
+    courseIds: [],
+  },
 };
 
 const degreeToKssIdsMap: Record<
@@ -296,6 +411,7 @@ const degreeToKssIdsMap: Record<
     "47426de1-9fc0-4793-bdf1-b2ad838edbbb",
     "618f1248-3f6a-4cd4-b69a-66e419e38759",
     "c9048d27-b2de-44ca-a776-9cef69c6d7bb",
+    "5c8993ba-b913-42ef-8dd9-3db917fca7f9",
   ],
   "4*": [
     "1fd944f4-5be0-4d7e-afcd-d6fdfdd819e0",
@@ -311,6 +427,28 @@ const degreeToKssIdsMap: Record<
     "618f1248-3f6a-4cd4-b69a-66e419e38759",
     "c9048d27-b2de-44ca-a776-9cef69c6d7bb",
     "5c8993ba-b913-42ef-8dd9-3db917fca7f9",
+  ],
+  "5": [
+    "1fd944f4-5be0-4d7e-afcd-d6fdfdd819e0",
+    "f05aacbe-4206-40c7-99f6-a8a10a48da7d",
+    "1eedd811-afc9-4d2f-9ee0-fbc29fef705a",
+    "256fbc15-5094-4f64-a03a-a9f0025a1ca3",
+    "467c3f5d-13d2-4e52-b37d-23d3f4d3a3af",
+    "8ce62770-17b0-4c82-aa4f-73d544a54389",
+    "9f452308-409c-4ceb-a51d-150a47b16d91",
+    "6ed32341-9a1a-46c9-9e00-e4d297768a61",
+    "d46ebf91-a6fd-4e9c-b771-450e5321263a",
+    "47426de1-9fc0-4793-bdf1-b2ad838edbbb",
+    "618f1248-3f6a-4cd4-b69a-66e419e38759",
+    "c9048d27-b2de-44ca-a776-9cef69c6d7bb",
+    "5c8993ba-b913-42ef-8dd9-3db917fca7f9",
+    "3e9d59c2-b4a6-4bb1-ad9d-4ebcb1a7d7d6",
+    "680328ab-b283-472e-a571-03f45f996179",
+    "00e53941-3d60-4d80-acd8-4013ac2986cf",
+    "c8ef83e4-6461-4273-9991-1975632b1b40",
+    "4657c45a-8e1d-41f9-942d-38f0e95187cc",
+    "65e99d50-970e-4ee3-975c-63dac5742cdb",
+    "7fc9247b-caa6-4889-b64b-b4394e293506",
   ],
   "5*": [
     "1fd944f4-5be0-4d7e-afcd-d6fdfdd819e0",
@@ -352,64 +490,231 @@ async function parseCsv(filePath: string) {
   }
 }
 
+async function validateAndParseRows(csvRows: Record<string, unknown>[]) {
+  console.log(`Total rows to validate: ${csvRows.length}`);
+
+  // Clean the rows first
+  const cleanedRows = csvRows
+    .filter((row) => {
+      // At least one value is required
+      return Object.values(row).some((value) => value !== "");
+    })
+    .map((row) => {
+      // Set all empty strings to null
+      for (const key in row) {
+        if (row[key] === "") {
+          row[key] = null;
+        }
+      }
+      return row;
+    });
+
+  console.log(`Rows after cleaning: ${cleanedRows.length}`);
+
+  // Validate all rows and collect errors
+  const validationResults = cleanedRows.map((row, index) => ({
+    row,
+    index: index + 1, // 1-based indexing for user display
+    result: rowSchema.safeParse(row),
+  }));
+
+  // Separate valid and invalid rows
+  const validRows: z.infer<typeof rowSchema>[] = validationResults
+    .filter((item) => item.result.success)
+    .map((item) => item.result.data as z.infer<typeof rowSchema>);
+
+  const invalidRows = validationResults.filter((item) => !item.result.success);
+
+  // Report validation summary
+  console.log(`✅ Valid rows: ${validRows.length}`);
+  console.log(`❌ Invalid rows: ${invalidRows.length}`);
+
+  // Show detailed errors for invalid rows
+  if (invalidRows.length > 0) {
+    console.log("\n--- Validation Errors ---");
+
+    // Group errors by type for summary
+    const errorSummary = new Map<string, number>();
+
+    for (const { index, result, row } of invalidRows) {
+      console.log(`\nRow ${index}:`);
+      console.log(`Raw data: ${JSON.stringify(row, null, 2)}`);
+
+      if (!result.success) {
+        for (const error of result.error.errors) {
+          const fieldPath =
+            error.path.length > 0 ? error.path.join(".") : "root";
+          const errorKey = `${fieldPath}: ${error.message}`;
+
+          console.log(`  ❌ Field "${fieldPath}": ${error.message}`);
+          if (error.code === "invalid_type") {
+            console.log(
+              `     Expected: ${error.expected}, Received: ${error.received}`,
+            );
+          }
+
+          // Track error frequency
+          errorSummary.set(errorKey, (errorSummary.get(errorKey) || 0) + 1);
+
+          // Add to skipped rows for reporting
+          addSkippedRow(
+            index,
+            `Validation error: ${fieldPath} - ${error.message}`,
+            row,
+          );
+        }
+      }
+    }
+
+    // Show error summary
+    console.log("\n--- Error Summary ---");
+    const sortedErrors = Array.from(errorSummary.entries()).sort(
+      (a, b) => b[1] - a[1],
+    ); // Sort by frequency, most common first
+
+    for (const [error, count] of sortedErrors) {
+      console.log(`${count}x: ${error}`);
+    }
+
+    console.log("------------------------\n");
+  }
+
+  return {
+    validRows,
+    invalidRows,
+    totalRows: csvRows.length,
+    cleanedRows: cleanedRows.length,
+  };
+}
+
 async function processRows(
   rows: z.infer<typeof rowSchema>[],
   locationId: string,
 ) {
-  // Process rows in batches
-  const batches = chunk(rows, BATCH_SIZE);
+  console.log("\n=== ANALYZING ROWS ===");
+  console.log("Checking which rows need user interaction...");
 
-  let index = 0;
-  let totalErrors = 0;
-  let totalProcessed = 0;
+  // First, identify which rows need user interaction
+  const interactiveRows: InteractiveRow[] = [];
+  const automatedRows: Array<{
+    row: z.infer<typeof rowSchema>;
+    rowIndex: number;
+  }> = [];
 
-  for (const batch of batches) {
-    index++;
-    console.log(`Processing batch ${index} of ${batches.length} ...`);
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue; // Skip undefined rows
+    const rowIndex = i + 1;
 
-    const result = await Promise.allSettled(
-      batch.map((chunk, chunkIndex) =>
-        throttledProcess(
-          chunk,
-          locationId,
-          (index - 1) * BATCH_SIZE + chunkIndex + 1,
-        ),
-      ),
-    );
-
-    const errors = result.filter((r) => r.status === "rejected");
-    const successes = result.filter((r) => r.status === "fulfilled");
-
-    console.log(`Batch processed: ${result.length} items`);
-    console.log(`✅ Successful: ${successes.length}`);
-    console.log(`❌ Errors: ${errors.length}`);
-
-    // Log detailed error information
-    if (errors.length > 0) {
-      console.log("\n--- Batch Error Details ---");
-      errors.forEach((error, errorIndex) => {
-        const rowIndex = (index - 1) * BATCH_SIZE + errorIndex + 1;
-        console.error(`Error in row ${rowIndex}:`);
-        console.error(
-          `  Message: ${error.reason instanceof Error ? error.reason.message : String(error.reason)}`,
-        );
-        if (error.reason instanceof Error && error.reason.stack) {
-          console.error(
-            `  Stack: ${error.reason.stack.split("\n").slice(0, 3).join("\n")}`,
-          );
-        }
-        console.error("---");
-      });
-      console.log("--- End Batch Error Details ---\n");
+    if (!row.Voornaam || !row.Achternaam) {
+      // Skip rows with missing names
+      addSkippedRow(rowIndex, "Missing first name or last name", row);
+      continue;
     }
 
-    totalErrors += errors.length;
-    totalProcessed += successes.length;
+    // Check if this row needs user interaction
+    const checkResult = await checkIfNeedsUserInteraction(
+      row,
+      locationId,
+      rowIndex,
+    );
+
+    if (checkResult.needsInteraction) {
+      interactiveRows.push({
+        row,
+        rowIndex,
+        persons: checkResult.persons || [],
+      });
+    } else if (checkResult.skip) {
+      // Already added to skipped rows in the check function
+    } else {
+      automatedRows.push({ row, rowIndex });
+    }
+  }
+
+  console.log("\n📊 Row Analysis Complete:");
+  console.log(`  - Automated processing: ${automatedRows.length} rows`);
+  console.log(`  - User interaction needed: ${interactiveRows.length} rows`);
+  console.log(`  - Skipped: ${skippedRows.length} rows`);
+
+  // Process automated rows in parallel batches
+  if (automatedRows.length > 0) {
+    console.log("\n=== AUTOMATED PROCESSING ===");
+    console.log(`Processing ${automatedRows.length} rows automatically...`);
+
+    const batches = chunk(automatedRows, BATCH_SIZE);
+    let batchIndex = 0;
+    let totalErrors = 0;
+    let totalProcessed = 0;
+
+    for (const batch of batches) {
+      batchIndex++;
+      console.log(`Processing batch ${batchIndex} of ${batches.length} ...`);
+
+      const result = await Promise.allSettled(
+        batch.map((item) =>
+          throttledProcess(item.row, locationId, item.rowIndex),
+        ),
+      );
+
+      const errors = result.filter((r) => r.status === "rejected");
+      const successes = result.filter((r) => r.status === "fulfilled");
+
+      console.log(`Batch processed: ${result.length} items`);
+      console.log(`✅ Successful: ${successes.length}`);
+      console.log(`❌ Errors: ${errors.length}`);
+
+      if (errors.length > 0) {
+        console.log("\n--- Batch Error Details ---");
+        errors.forEach((error, errorIndex) => {
+          const item = batch[errorIndex];
+          if (item) {
+            console.error(`Error in row ${item.rowIndex}:`);
+            console.error(
+              `  Message: ${error.reason instanceof Error ? error.reason.message : String(error.reason)}`,
+            );
+          }
+        });
+        console.log("--- End Batch Error Details ---\n");
+      }
+
+      totalErrors += errors.length;
+      totalProcessed += successes.length;
+    }
+
+    console.log(
+      `\n✅ Automated processing complete: ${totalProcessed} successful, ${totalErrors} errors`,
+    );
+  }
+
+  // Process interactive rows sequentially
+  if (interactiveRows.length > 0) {
+    console.log("\n=== INTERACTIVE PROCESSING ===");
+    console.log(
+      `Processing ${interactiveRows.length} rows that need user interaction...`,
+    );
+    console.log(
+      "These will be processed one at a time to avoid console interference.\n",
+    );
+
+    for (const interactiveRow of interactiveRows) {
+      console.log(`\n--- Processing Row ${interactiveRow.rowIndex} ---`);
+      try {
+        await processInteractiveRow(interactiveRow, locationId);
+      } catch (error) {
+        console.error(
+          `Error processing row ${interactiveRow.rowIndex}:`,
+          error,
+        );
+      }
+    }
   }
 
   console.log("\n=== FINAL SUMMARY ===");
-  console.log(`✅ Total processed successfully: ${totalProcessed}`);
-  console.log(`❌ Total errors: ${totalErrors}`);
+  console.log(
+    `✅ Total processed successfully: ${rows.length - skippedRows.length}`,
+  );
+  console.log(`❌ Total skipped: ${skippedRows.length}`);
   console.log(`📊 Total rows attempted: ${rows.length}`);
   console.log("====================\n");
 
@@ -417,7 +722,173 @@ async function processRows(
   reportCacheStats();
 }
 
-async function processRow(
+async function checkIfNeedsUserInteraction(
+  row: z.infer<typeof rowSchema>,
+  locationId: string,
+  rowIndex: number,
+): Promise<{
+  needsInteraction: boolean;
+  skip: boolean;
+  persons?: Array<{
+    id: string;
+    firstName: string;
+    lastName: string | null;
+    lastNamePrefix: string | null;
+    dateOfBirth: string | null;
+    birthCity: string | null;
+    handle: string | null;
+  }>;
+}> {
+  const db = useQuery();
+
+  // Create cache key for person lookup
+  const cacheKey = createPersonCacheKey(
+    row.Voornaam as string,
+    row.Achternaam as string,
+    row.Tussenvoegsel,
+    row.Geboortedatum ?? null,
+    row.Geboorteplaats,
+    locationId,
+  );
+
+  // Check cache first
+  const cachedPersonId = personCache.get(cacheKey);
+  if (cachedPersonId !== undefined) {
+    // Already in cache
+    if (cachedPersonId === null) {
+      // Cached failed lookup - need to add to skipped rows
+      addSkippedRow(rowIndex, "No person found (cached)", row);
+    }
+    return { needsInteraction: false, skip: cachedPersonId === null };
+  }
+
+  // Not in cache, perform database query
+  const persons = await db
+    .select({
+      id: schema.person.id,
+      firstName: schema.person.firstName,
+      lastName: schema.person.lastName,
+      lastNamePrefix: schema.person.lastNamePrefix,
+      dateOfBirth: schema.person.dateOfBirth,
+      birthCity: schema.person.birthCity,
+      handle: schema.person.handle,
+    })
+    .from(schema.person)
+    .where(
+      and(
+        eq(schema.person.firstName, row.Voornaam as string),
+        eq(schema.person.lastName, row.Achternaam as string),
+        row.Tussenvoegsel
+          ? eq(schema.person.lastNamePrefix, row.Tussenvoegsel)
+          : isNull(schema.person.lastNamePrefix),
+        row.Geboortedatum
+          ? eq(schema.person.dateOfBirth, row.Geboortedatum)
+          : undefined,
+        row.Geboorteplaats
+          ? eq(schema.person.birthCity, row.Geboorteplaats)
+          : undefined,
+        exists(
+          db
+            .select({ id: sql`1` })
+            .from(schema.actor)
+            .where(
+              and(
+                eq(schema.actor.personId, schema.person.id),
+                eq(schema.actor.locationId, locationId),
+                eq(schema.actor.type, "instructor"),
+              ),
+            ),
+        ),
+      ),
+    );
+
+  if (persons.length === 0) {
+    // No person found, skip this row
+    personCache.set(cacheKey, null);
+    addSkippedRow(rowIndex, "No person found", row);
+    return { needsInteraction: false, skip: true };
+  }
+
+  if (persons.length === 1) {
+    // Exactly one person found, cache it
+    const firstPerson = persons[0];
+    if (firstPerson) {
+      personCache.set(cacheKey, firstPerson.id);
+    }
+    return { needsInteraction: false, skip: false };
+  }
+
+  // Multiple persons found, needs user interaction
+  return { needsInteraction: true, skip: false, persons };
+}
+
+async function processInteractiveRow(
+  interactiveRow: InteractiveRow,
+  locationId: string,
+) {
+  const { row, rowIndex, persons } = interactiveRow;
+
+  const fullName = [row.Voornaam, row.Tussenvoegsel, row.Achternaam]
+    .filter(Boolean)
+    .join(" ");
+
+  console.log(`\n🤔 Multiple persons found for row ${rowIndex}:`);
+  console.log(`Name: ${fullName}`);
+  console.log(`Date of Birth: ${row.Geboortedatum || "Not provided"}`);
+  console.log(`Birth City: ${row.Geboorteplaats || "Not provided"}`);
+  console.log(`Qualification: ${row["Kwalificatie: Naam van Kwalificatie"]}`);
+  console.log(`Level: ${row["Hoogste Geldigheids Niveau"]}`);
+
+  const { selectedPersonId } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "selectedPersonId",
+      message: `Which person matches row ${rowIndex}?`,
+      choices: [
+        ...persons.map((person) => ({
+          name: `${person.firstName} ${person.lastNamePrefix || ""} ${person.lastName || ""} | DOB: ${person.dateOfBirth || "Unknown"} | City: ${person.birthCity || "Unknown"} | Handle: ${person.handle || "Unknown"}`.trim(),
+          value: person.id,
+        })),
+        {
+          name: "❌ Skip this row (none of the above match)",
+          value: null,
+        },
+      ],
+    },
+  ]);
+
+  if (selectedPersonId === null) {
+    // User chose to skip this row
+    const cacheKey = createPersonCacheKey(
+      row.Voornaam as string,
+      row.Achternaam as string,
+      row.Tussenvoegsel,
+      row.Geboortedatum ?? null,
+      row.Geboorteplaats,
+      locationId,
+    );
+    personCache.set(cacheKey, null);
+    console.log(`Row ${rowIndex} skipped as requested by user`);
+    addSkippedRow(rowIndex, "User chose to skip", row);
+    return;
+  }
+
+  // Store the user's selection in cache
+  const cacheKey = createPersonCacheKey(
+    row.Voornaam as string,
+    row.Achternaam as string,
+    row.Tussenvoegsel,
+    row.Geboortedatum ?? null,
+    row.Geboorteplaats,
+    locationId,
+  );
+  personCache.set(cacheKey, selectedPersonId);
+
+  // Now process the row with the selected person ID
+  await processRowWithPersonId(row, selectedPersonId, rowIndex);
+}
+
+async function processRowAutomated(
   row: z.infer<typeof rowSchema>,
   locationId: string,
   rowIndex?: number,
@@ -429,6 +900,7 @@ async function processRow(
       `${rowInfo}Skipping row, missing first name or last name:`,
       row,
     );
+    addSkippedRow(rowIndex || 0, "Missing first name or last name", row);
     return;
   }
 
@@ -485,85 +957,50 @@ async function processRow(
       // Store null in cache to avoid repeated failed lookups
       personCache.set(cacheKey, null);
       console.error(`${rowInfo}Skipping row, no person found:`, row);
+      addSkippedRow(rowIndex || 0, "No person found", row);
       return;
     }
 
     if (persons.length > 1) {
-      // Multiple persons found - ask user to select the correct one
-      console.log(`\n🤔 ${rowInfo}Multiple persons found for row:`);
-      const fullName = [row.Voornaam, row.Tussenvoegsel, row.Achternaam]
-        .filter(Boolean)
-        .join(" ");
-      console.log(`Name: ${fullName}`);
-      console.log(`Date of Birth: ${row.Geboortedatum || "Not provided"}`);
-      console.log(`Birth City: ${row.Geboorteplaats || "Not provided"}`);
-      console.log(
-        `Qualification: ${row["Kwalificatie: Naam van Kwalificatie"]}`,
+      // This shouldn't happen in automated processing
+      // The checkIfNeedsUserInteraction should have caught this
+      console.error(
+        `${rowInfo}Unexpected: Multiple persons found in automated processing`,
       );
-      console.log(`Level: ${row["Hoogste Geldigheids Niveau"]}`);
-
-      // Get additional person details for better selection using the IDs we already found
-      const personIds = persons.map((person) => person.id);
-      const personsWithDetails = await db
-        .select({
-          id: schema.person.id,
-          firstName: schema.person.firstName,
-          lastName: schema.person.lastName,
-          lastNamePrefix: schema.person.lastNamePrefix,
-          dateOfBirth: schema.person.dateOfBirth,
-          birthCity: schema.person.birthCity,
-          handle: schema.person.handle,
-        })
-        .from(schema.person)
-        .where(inArray(schema.person.id, personIds));
-
-      const { selectedPersonId } = await inquirer.prompt([
-        {
-          type: "list",
-          name: "selectedPersonId",
-          message: `Which person matches ${rowInfo.trim() || "this row"}?`,
-          choices: [
-            ...personsWithDetails.map((person) => ({
-              name: `${person.firstName} ${person.lastNamePrefix || ""} ${person.lastName} | DOB: ${person.dateOfBirth || "Unknown"} | City: ${person.birthCity || "Unknown"} | Handle: ${person.handle || "Unknown"}`.trim(),
-              value: person.id,
-            })),
-            {
-              name: "❌ Skip this row (none of the above match)",
-              value: null,
-            },
-          ],
-        },
-      ]);
-
-      if (selectedPersonId === null) {
-        // User chose to skip this row
-        personCache.set(cacheKey, null);
-        console.log(`${rowInfo}Skipping row as requested by user`);
-        return;
-      }
-
-      // Store the user's selection in cache
-      personCache.set(cacheKey, selectedPersonId);
-      personId = selectedPersonId;
+      addSkippedRow(rowIndex || 0, "Multiple persons found unexpectedly", row);
+      return;
     }
 
-    // biome-ignore lint/style/noNonNullAssertion: We know there is only one person
-    personId = persons[0]!.id;
+    // We know there is only one person
+    const firstPerson = persons[0];
+    if (!firstPerson) {
+      console.error(`${rowInfo}Unexpected: No person in array`);
+      addSkippedRow(rowIndex || 0, "No person in array", row);
+      return;
+    }
+    personId = firstPerson.id;
     // Store successful result in cache
     personCache.set(cacheKey, personId);
   } else if (personId === null) {
     // Cache hit with null value (previous failed lookup)
     cacheHits++;
     console.error(`${rowInfo}Skipping row, cached failed lookup:`, row);
+    addSkippedRow(rowIndex || 0, "No person found (cached)", row);
     return;
   } else {
     // Cache hit with valid person ID
     cacheHits++;
   }
 
-  // Use the cached or freshly queried person ID
-  const person = { id: personId };
+  // Process the row with the found person ID
+  await processRowWithPersonId(row, personId, rowIndex || 0);
+}
 
+async function processRowWithPersonId(
+  row: z.infer<typeof rowSchema>,
+  personId: string,
+  rowIndex: number,
+) {
   const qualification = {
     name: row["Kwalificatie: Naam van Kwalificatie"],
     level: row["Hoogste Geldigheids Niveau"],
@@ -580,7 +1017,47 @@ async function processRow(
   } => a._type === "kss";
 
   if (!isKssType(qualificationToCourseIds)) {
-    console.log(`${rowInfo}Skipping row, no KSS qualification found`);
+    const externalCertificateName = `${qualification.name} (${qualification.level})`;
+
+    // First check a external certificate with the same title already exists
+    const existing = await useQuery()
+      .select()
+      .from(schema.externalCertificate)
+      .where(
+        and(
+          eq(schema.externalCertificate.title, externalCertificateName),
+          eq(schema.externalCertificate.personId, personId),
+          eq(
+            sql`${schema.externalCertificate._metadata}->>'__verified'`,
+            "true",
+          ),
+        ),
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      console.log(
+        `External certificate with title ${qualification.name} (${qualification.level}) already exists for person ${personId}`,
+      );
+      return;
+    }
+
+    await Certificate.External.create({
+      personId,
+      title: externalCertificateName,
+      additionalComments: null,
+      awardedAt: null,
+      identifier: null,
+      issuingAuthority: "CWO",
+      issuingLocation: null,
+      mediaId: null,
+      metadata: {
+        __verified: true,
+        level: qualification.level,
+        discipline: qualification.name,
+      },
+    });
+
     return;
   }
 
@@ -597,7 +1074,7 @@ async function processRow(
           directBehaaldePvbOnderdeelId: null,
           afgeleidePvbOnderdeelId: null,
           courseId: courseId,
-          personId: person.id,
+          personId: personId,
           kerntaakOnderdeelId: kssId,
           verkregenReden: "onbekend",
           toegevoegdOp: new Date("2024-01-01").toISOString(),
@@ -609,11 +1086,328 @@ async function processRow(
     });
 
   if (valuesToInsert.length > 0) {
+    const db = useQuery();
     await db
       .insert(schema.persoonKwalificatie)
       .values(valuesToInsert)
       .onConflictDoNothing();
   }
+}
+
+async function reprocessSkippedPersons(
+  skippedRows: SkippedRow[],
+  locationId: string,
+) {
+  // Filter for "No person found" rows (including cached)
+  const noPersonFoundRows = skippedRows.filter(
+    (row) =>
+      row.reason === "No person found" ||
+      row.reason === "No person found (cached)",
+  );
+
+  if (noPersonFoundRows.length === 0) {
+    console.log("No rows with 'No person found' reason to reprocess.");
+    return;
+  }
+
+  console.log("\n=== REPROCESSING SKIPPED ROWS ===");
+  console.log(
+    `Found ${noPersonFoundRows.length} rows with 'No person found' to reprocess.`,
+  );
+
+  const { shouldReprocess } = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "shouldReprocess",
+      message: "Would you like to manually process these rows?",
+      default: true,
+    },
+  ]);
+
+  if (!shouldReprocess) {
+    console.log("Skipping reprocessing.");
+    return;
+  }
+
+  let processedCount = 0;
+  let skippedCount = 0;
+  const processedIndices = new Set<number>();
+
+  for (const skippedRow of noPersonFoundRows) {
+    // Skip if already processed as part of a batch
+    if (processedIndices.has(skippedRow.rowIndex)) {
+      continue;
+    }
+
+    const row = skippedRow.data as z.infer<typeof rowSchema>;
+    const fullName = [row.Voornaam, row.Tussenvoegsel, row.Achternaam]
+      .filter(Boolean)
+      .join(" ");
+
+    console.log(`\n--- Row ${skippedRow.rowIndex} ---`);
+    console.log(`Name: ${fullName}`);
+    console.log(`Date of Birth: ${row.Geboortedatum || "Not provided"}`);
+    console.log(`Birth City: ${row.Geboorteplaats || "Not provided"}`);
+    console.log(`Qualification: ${row["Kwalificatie: Naam van Kwalificatie"]}`);
+    console.log(`Level: ${row["Hoogste Geldigheids Niveau"]}`);
+
+    const { action } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "action",
+        message: "What would you like to do with this row?",
+        choices: [
+          { name: "Enter person handle manually", value: "manual" },
+          { name: "Search by name (ignore other fields)", value: "search" },
+          { name: "Skip this row", value: "skip" },
+        ],
+      },
+    ]);
+
+    if (action === "skip") {
+      console.log("Row skipped.");
+      skippedCount++;
+      processedIndices.add(skippedRow.rowIndex);
+      continue;
+    }
+
+    let personId: string | null = null;
+
+    if (action === "manual") {
+      const { handle } = await inquirer.prompt([
+        {
+          type: "input",
+          name: "handle",
+          message: "Enter the person's handle:",
+          validate: (input) =>
+            input.trim().length > 0 || "Handle cannot be empty",
+        },
+      ]);
+
+      // Look up person by handle
+      const db = useQuery();
+      const persons = await db
+        .select({
+          id: schema.person.id,
+          firstName: schema.person.firstName,
+          lastName: schema.person.lastName,
+          lastNamePrefix: schema.person.lastNamePrefix,
+          dateOfBirth: schema.person.dateOfBirth,
+          birthCity: schema.person.birthCity,
+          handle: schema.person.handle,
+        })
+        .from(schema.person)
+        .where(
+          and(
+            eq(schema.person.handle, handle.trim()),
+            exists(
+              db
+                .select({ id: sql`1` })
+                .from(schema.actor)
+                .where(
+                  and(
+                    eq(schema.actor.personId, schema.person.id),
+                    eq(schema.actor.locationId, locationId),
+                    eq(schema.actor.type, "instructor"),
+                  ),
+                ),
+            ),
+          ),
+        );
+
+      if (persons.length === 0) {
+        console.log(`❌ No instructor found with handle: ${handle}`);
+        skippedCount++;
+        processedIndices.add(skippedRow.rowIndex);
+        continue;
+      }
+
+      if (persons.length > 1) {
+        console.log(`⚠️ Multiple persons found with handle: ${handle}`);
+        const { selectedPersonId } = await inquirer.prompt([
+          {
+            type: "list",
+            name: "selectedPersonId",
+            message: "Which person is correct?",
+            choices: persons.map((person) => ({
+              name: `${person.firstName} ${person.lastNamePrefix || ""} ${person.lastName || ""} | DOB: ${person.dateOfBirth || "Unknown"} | City: ${person.birthCity || "Unknown"}`.trim(),
+              value: person.id,
+            })),
+          },
+        ]);
+        personId = selectedPersonId;
+      } else {
+        const person = persons[0];
+        if (!person) {
+          console.error("❌ Unexpected: No person in array");
+          skippedCount++;
+          processedIndices.add(skippedRow.rowIndex);
+          continue;
+        }
+        console.log(
+          `✅ Found: ${person.firstName} ${person.lastNamePrefix || ""} ${person.lastName || ""}`,
+        );
+        personId = person.id;
+      }
+    } else if (action === "search") {
+      // Search by name only, ignoring other fields
+      const db = useQuery();
+      const persons = await db
+        .select({
+          id: schema.person.id,
+          firstName: schema.person.firstName,
+          lastName: schema.person.lastName,
+          lastNamePrefix: schema.person.lastNamePrefix,
+          dateOfBirth: schema.person.dateOfBirth,
+          birthCity: schema.person.birthCity,
+          handle: schema.person.handle,
+        })
+        .from(schema.person)
+        .where(
+          and(
+            eq(schema.person.firstName, row.Voornaam as string),
+            eq(schema.person.lastName, row.Achternaam as string),
+            row.Tussenvoegsel
+              ? eq(schema.person.lastNamePrefix, row.Tussenvoegsel)
+              : isNull(schema.person.lastNamePrefix),
+            exists(
+              db
+                .select({ id: sql`1` })
+                .from(schema.actor)
+                .where(
+                  and(
+                    eq(schema.actor.personId, schema.person.id),
+                    eq(schema.actor.locationId, locationId),
+                    eq(schema.actor.type, "instructor"),
+                  ),
+                ),
+            ),
+          ),
+        );
+
+      if (persons.length === 0) {
+        console.log("❌ No person found with that name.");
+        skippedCount++;
+        processedIndices.add(skippedRow.rowIndex);
+        continue;
+      }
+
+      const { selectedPersonId } = await inquirer.prompt([
+        {
+          type: "list",
+          name: "selectedPersonId",
+          message: "Select the correct person:",
+          choices: [
+            ...persons.map((person) => ({
+              name: `${person.firstName} ${person.lastNamePrefix || ""} ${person.lastName || ""} | DOB: ${person.dateOfBirth || "Unknown"} | City: ${person.birthCity || "Unknown"} | Handle: ${person.handle || "Unknown"}`.trim(),
+              value: person.id,
+            })),
+            {
+              name: "❌ None of these (skip)",
+              value: null,
+            },
+          ],
+        },
+      ]);
+
+      if (selectedPersonId === null) {
+        console.log("Row skipped.");
+        skippedCount++;
+        processedIndices.add(skippedRow.rowIndex);
+        continue;
+      }
+
+      personId = selectedPersonId;
+    }
+
+    if (personId) {
+      // Find all other skipped rows that match the same person
+      const matchingRows = noPersonFoundRows.filter((otherRow) => {
+        if (processedIndices.has(otherRow.rowIndex)) {
+          return false;
+        }
+        const otherRowData = otherRow.data as z.infer<typeof rowSchema>;
+        return (
+          otherRowData.Voornaam === row.Voornaam &&
+          otherRowData.Achternaam === row.Achternaam &&
+          otherRowData.Tussenvoegsel === row.Tussenvoegsel
+        );
+      });
+
+      console.log(
+        `\n🔍 Found ${matchingRows.length} rows for the same person.`,
+      );
+
+      if (matchingRows.length > 1) {
+        const { processAll } = await inquirer.prompt([
+          {
+            type: "confirm",
+            name: "processAll",
+            message: `Process all ${matchingRows.length} rows for this person?`,
+            default: true,
+          },
+        ]);
+
+        if (processAll) {
+          console.log(`\n📋 Processing all rows for ${fullName}:`);
+          for (const matchingRow of matchingRows) {
+            const matchingRowData = matchingRow.data as z.infer<
+              typeof rowSchema
+            >;
+            console.log(
+              `  - Row ${matchingRow.rowIndex}: ${matchingRowData["Kwalificatie: Naam van Kwalificatie"]} (${matchingRowData["Hoogste Geldigheids Niveau"]})`,
+            );
+          }
+        } else {
+          // Only process the current row
+          matchingRows.splice(0, matchingRows.length);
+          matchingRows.push(skippedRow);
+        }
+      }
+
+      // Process all matching rows
+      let batchProcessedCount = 0;
+      for (const matchingRow of matchingRows) {
+        try {
+          const matchingRowData = matchingRow.data as z.infer<typeof rowSchema>;
+          await processRowWithPersonId(
+            matchingRowData,
+            personId,
+            matchingRow.rowIndex,
+          );
+          console.log(`✅ Row ${matchingRow.rowIndex} processed successfully!`);
+          batchProcessedCount++;
+          processedIndices.add(matchingRow.rowIndex);
+
+          // Update cache for this row
+          const cacheKey = createPersonCacheKey(
+            matchingRowData.Voornaam as string,
+            matchingRowData.Achternaam as string,
+            matchingRowData.Tussenvoegsel,
+            matchingRowData.Geboortedatum ?? null,
+            matchingRowData.Geboorteplaats,
+            locationId,
+          );
+          personCache.set(cacheKey, personId);
+        } catch (error) {
+          console.error(
+            `❌ Error processing row ${matchingRow.rowIndex}:`,
+            error,
+          );
+        }
+      }
+
+      console.log(
+        `\n✅ Batch complete: ${batchProcessedCount} rows processed for ${fullName}`,
+      );
+      processedCount += batchProcessedCount;
+    }
+  }
+
+  console.log("\n=== REPROCESSING SUMMARY ===");
+  console.log(`✅ Successfully processed: ${processedCount} rows`);
+  console.log(`❌ Skipped: ${skippedCount} rows`);
+  console.log("===============================\n");
 }
 
 async function main(filePath: string) {
@@ -635,92 +1429,60 @@ async function main(filePath: string) {
     },
   ]);
 
-  const cleanedRows = csvRows
-    .filter((row) => {
-      // At least one value is required
-      return Object.values(row).some((value) => value !== "");
-    })
-    .map((row) => {
-      // Set all empty strings to null
-      for (const key in row) {
-        if (row[key] === "") {
-          row[key] = null;
-        }
-      }
+  // First, validate and parse all rows
+  console.log("\n=== VALIDATION PHASE ===");
+  const validationResult = await validateAndParseRows(csvRows);
 
-      return row;
-    });
-
-  console.log(`Total rows to validate: ${cleanedRows.length}`);
-
-  // Validate all rows and collect errors
-  const validationResults = cleanedRows.map((row, index) => ({
-    row,
-    index: index + 1, // 1-based indexing for user display
-    result: rowSchema.safeParse(row),
-  }));
-
-  // Separate valid and invalid rows
-  const validRows: z.infer<typeof rowSchema>[] = validationResults
-    .filter((item) => item.result.success)
-    .map((item) => item.result.data as z.infer<typeof rowSchema>);
-
-  const invalidRows = validationResults.filter((item) => !item.result.success);
-
-  // Report validation summary
-  console.log(`✅ Valid rows: ${validRows.length}`);
-  console.log(`❌ Invalid rows: ${invalidRows.length}`);
-
-  // Show detailed errors for invalid rows
-  if (invalidRows.length > 0) {
-    console.log("\n--- Validation Errors ---");
-
-    // Group errors by type for summary
-    const errorSummary = new Map<string, number>();
-
-    for (const { index, result, row } of invalidRows) {
-      console.log(`\nRow ${index}:`);
-      console.log(`Raw data: ${JSON.stringify(row, null, 2)}`);
-
-      if (!result.success) {
-        for (const error of result.error.errors) {
-          const fieldPath =
-            error.path.length > 0 ? error.path.join(".") : "root";
-          const errorKey = `${fieldPath}: ${error.message}`;
-
-          console.log(`  ❌ Field "${fieldPath}": ${error.message}`);
-          if (error.code === "invalid_type") {
-            console.log(
-              `     Expected: ${error.expected}, Received: ${error.received}`,
-            );
-          }
-
-          // Track error frequency
-          errorSummary.set(errorKey, (errorSummary.get(errorKey) || 0) + 1);
-        }
-      }
-    }
-
-    // Show error summary
-    console.log("\n--- Error Summary ---");
-    const sortedErrors = Array.from(errorSummary.entries()).sort(
-      (a, b) => b[1] - a[1],
-    ); // Sort by frequency, most common first
-
-    for (const [error, count] of sortedErrors) {
-      console.log(`${count}x: ${error}`);
-    }
-
-    console.log("------------------------\n");
-  }
-
-  if (validRows.length === 0) {
+  if (validationResult.validRows.length === 0) {
     console.log("No valid rows to process. Exiting.");
     return;
   }
 
-  console.log(`Proceeding with ${validRows.length} valid rows...`);
-  await processRows(validRows, location);
+  // Ask user whether to continue with processing
+  const { shouldContinue } = await inquirer.prompt([
+    {
+      type: "confirm",
+      name: "shouldContinue",
+      message: `Found ${validationResult.validRows.length} valid rows and ${validationResult.invalidRows.length} invalid rows. Do you want to continue with processing the valid rows?`,
+      default: true,
+    },
+  ]);
+
+  if (!shouldContinue) {
+    console.log("Processing cancelled by user. Exiting.");
+    return;
+  }
+
+  // Then proceed with batch processing
+  console.log("\n=== PROCESSING PHASE ===");
+  console.log(
+    `Proceeding with ${validationResult.validRows.length} valid rows...`,
+  );
+  await processRows(validationResult.validRows, location);
+
+  // Write skipped rows report after processing
+  await writeSkippedRowsReport(filePath);
+
+  // Show final summary
+  console.log("\n=== FINAL SUMMARY ===");
+  console.log(`📊 Total rows in file: ${validationResult.totalRows}`);
+  console.log(
+    `✅ Successfully processed: ${validationResult.validRows.length - skippedRows.filter((r) => r.reason.startsWith("Validation error")).length}`,
+  );
+  console.log(`❌ Skipped rows: ${skippedRows.length}`);
+  console.log("📄 Detailed report written to file");
+  console.log("====================\n");
+
+  // Offer to reprocess skipped rows
+  if (
+    skippedRows.filter(
+      (r) =>
+        r.reason === "No person found" ||
+        r.reason === "No person found (cached)",
+    ).length > 0
+  ) {
+    await reprocessSkippedPersons(skippedRows, location);
+  }
 }
 
 const pgUri = process.env.PGURI;
