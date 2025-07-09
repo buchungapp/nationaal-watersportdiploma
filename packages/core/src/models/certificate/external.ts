@@ -30,7 +30,7 @@ export const byId = wrapQuery(
       issuingAuthority: z.string().nullable(),
       title: z.string(),
       mediaId: z.string().nullable(),
-      metadata: z.record(z.string(), z.string()).nullable(),
+      metadata: z.record(z.string(), z.any()).nullable(),
       media: outputSchema.nullable(),
       additionalComments: z.string().nullable(),
     }),
@@ -103,7 +103,7 @@ export const listForPerson = wrapQuery(
         issuingAuthority: z.string().nullable(),
         title: z.string(),
         mediaId: z.string().nullable(),
-        metadata: z.record(z.string(), z.string()).nullable(),
+        metadata: z.record(z.string(), z.any()).nullable(),
         media: outputSchema.nullable(),
         additionalComments: z.string().nullable(),
       })
@@ -179,6 +179,7 @@ export const create = wrapCommand(
       title: z.string(),
       mediaId: uuidSchema.nullable(),
       additionalComments: z.string().nullable(),
+      metadata: z.record(z.string(), z.any()).nullish(),
     }),
     successfulCreateResponse,
     async (input) => {
@@ -195,6 +196,9 @@ export const create = wrapCommand(
           title: input.title,
           mediaId: input.mediaId,
           additionalComments: input.additionalComments,
+          _metadata: input.metadata
+            ? sql`(((${JSON.stringify(input.metadata)})::jsonb)#>> '{}')::jsonb`
+            : null,
         })
         .returning({
           id: s.externalCertificate.id,
