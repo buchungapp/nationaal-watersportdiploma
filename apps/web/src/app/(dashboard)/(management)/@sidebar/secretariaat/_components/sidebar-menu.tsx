@@ -117,7 +117,12 @@ export function SecretariaatSidebarMenu() {
           {
             name: "Overzicht",
             href: "/secretariaat/gebruikers",
-            current: lastSegment === "cohorten",
+            current: lastSegment === "gebruikers",
+          },
+          {
+            name: "Instructeurs",
+            href: "/secretariaat/instructeur",
+            current: lastSegment === "instructeur",
           },
         ].map((item) => (
           <SidebarItem key={item.name} href={item.href} current={item.current}>

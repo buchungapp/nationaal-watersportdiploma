@@ -205,6 +205,8 @@ const rowSchema = z.object({
     "Eigen vaardigheid - Windsurfen",
     "Eigen vaardigheid - Zwaardboot eenmans",
     "Eigen vaardigheid - Zwaardboot tweemans",
+    "Eigen vaardigheid - Jachtvaren Zeil non-tidal",
+    "Eigen vaardigheid - Zeezeilen",
     "Instructeur - Buitenboordmotor",
     "Instructeur - Catamaran",
     "Instructeur - Groot Motorschip",
@@ -222,6 +224,7 @@ const rowSchema = z.object({
     "Instructeur - Zwaardboot tweemans",
     "Instructeur - Motorboot",
     "Instructeur - Roeien",
+    "Instructeur - Zeezeilen",
   ]),
   "Hoogste Geldigheids Niveau": z.enum([
     "2",
@@ -286,6 +289,14 @@ const qualificationToCourseIdsMap: Record<
   "Eigen vaardigheid - Zwaardboot tweemans": {
     _type: "eigenvaardigheid",
     discipline: "Zwaardboot tweemans",
+  },
+  "Eigen vaardigheid - Jachtvaren Zeil non-tidal": {
+    _type: "eigenvaardigheid",
+    discipline: "Jachtzeilen Non Tidal",
+  },
+  "Eigen vaardigheid - Zeezeilen": {
+    _type: "eigenvaardigheid",
+    discipline: "Jachtzeilen Tidal",
   },
   "Instructeur - Buitenboordmotor": {
     _type: "kss",
@@ -374,6 +385,13 @@ const qualificationToCourseIdsMap: Record<
   "Instructeur - Roeien": {
     _type: "kss",
     courseIds: [],
+  },
+  "Instructeur - Zeezeilen": {
+    _type: "kss",
+    courseIds: [
+      "7d23de6f-b80e-4a79-a661-1e7bd8123a20",
+      "701de205-512a-40ad-a74d-87dded31d038",
+    ],
   },
 };
 

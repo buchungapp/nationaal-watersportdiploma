@@ -17,8 +17,6 @@ export default async function UsersPage() {
     );
   }
 
-  // For demo purposes, show some user IDs
-  // In a real implementation, you'd want to add search and pagination
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8">

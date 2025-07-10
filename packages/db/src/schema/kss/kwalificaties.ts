@@ -83,13 +83,5 @@ export const persoonKwalificatie = kssSchema.table(
       "verkregen_reden_pvb_behaald_constraint",
       sql`(${table.verkregenReden} != 'pvb_behaald') OR (${table.directBehaaldePvbOnderdeelId} IS NOT NULL AND ${table.afgeleidePvbOnderdeelId} IS NULL)`,
     ),
-    check(
-      "verkregen_reden_pvb_instructiegroep_basis_constraint",
-      sql`(${table.verkregenReden} != 'pvb_instructiegroep_basis') OR (${table.afgeleidePvbOnderdeelId} IS NOT NULL AND ${table.directBehaaldePvbOnderdeelId} IS NULL)`,
-    ),
-    check(
-      "verkregen_reden_onbekend_constraint",
-      sql`(${table.verkregenReden} != 'onbekend') OR (${table.directBehaaldePvbOnderdeelId} IS NULL AND ${table.afgeleidePvbOnderdeelId} IS NULL)`,
-    ),
   ],
 );
