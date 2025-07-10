@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import {
+  getAllExistingKerntaakOnderdeelIdsByCourse,
   getAvailableKerntaakonderdelen,
-  getExistingKerntaakOnderdeelIds,
   getPersonKwalificaties,
 } from "~/app/_actions/kss/manage-kwalificaties";
 import { getUserOrThrow, listCourses } from "~/lib/nwd";
@@ -33,10 +33,9 @@ async function KwalificatiesContent({
   // Prepare the kerntaakonderdelen promise without awaiting it
   const kerntaakonderdelenPromise = getAvailableKerntaakonderdelen();
 
-  // Get existing kerntaak onderdeel IDs for the selected course if available
-  const existingKerntaakOnderdeelIdsPromise = selectedCourseId
-    ? getExistingKerntaakOnderdeelIds(person.id, selectedCourseId)
-    : Promise.resolve([]);
+  // Get all existing kerntaak onderdeel IDs for the person, grouped by course
+  const existingKerntaakOnderdeelIdsByCoursePromise =
+    getAllExistingKerntaakOnderdeelIdsByCourse(person.id);
 
   return (
     <>
@@ -46,8 +45,8 @@ async function KwalificatiesContent({
         detailedKwalificaties={detailedKwalificaties}
         courses={courses}
         kerntaakonderdelenPromise={kerntaakonderdelenPromise}
-        existingKerntaakOnderdeelIdsPromise={
-          existingKerntaakOnderdeelIdsPromise
+        existingKerntaakOnderdeelIdsByCoursePromise={
+          existingKerntaakOnderdeelIdsByCoursePromise
         }
       />
     </>

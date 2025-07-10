@@ -35,7 +35,7 @@ export default function KwalificatiesTable({
   detailedKwalificaties: kwalificaties,
   courses,
   kerntaakonderdelenPromise,
-  existingKerntaakOnderdeelIdsPromise,
+  existingKerntaakOnderdeelIdsByCoursePromise,
 }: {
   personId: string;
   detailedKwalificaties: Kwalificatie[];
@@ -43,7 +43,9 @@ export default function KwalificatiesTable({
   kerntaakonderdelenPromise: Promise<
     Awaited<ReturnType<typeof getAvailableKerntaakonderdelen>>
   >;
-  existingKerntaakOnderdeelIdsPromise: Promise<string[]>;
+  existingKerntaakOnderdeelIdsByCoursePromise: Promise<
+    Record<string, string[]>
+  >;
 }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedKwalificatie, setSelectedKwalificatie] =
@@ -235,8 +237,8 @@ export default function KwalificatiesTable({
         personId={personId}
         courses={courses}
         kerntaakonderdelenPromise={kerntaakonderdelenPromise}
-        existingKerntaakOnderdeelIdsPromise={
-          existingKerntaakOnderdeelIdsPromise
+        existingKerntaakOnderdeelIdsByCoursePromise={
+          existingKerntaakOnderdeelIdsByCoursePromise
         }
       />
       <RemoveKwalificatieDialog

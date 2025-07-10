@@ -305,3 +305,35 @@ export async function getExistingKerntaakOnderdeelIds(
 
   return results.map((r) => r.kerntaakOnderdeelId);
 }
+
+// Helper function to get all existing kerntaak onderdeel IDs for a person, grouped by course
+export async function getAllExistingKerntaakOnderdeelIdsByCourse(
+  personId: string,
+) {
+  const user = await getUserOrThrow();
+
+  // Check if user is system admin
+  const isSystemAdmin = user.email === "maurits@buchung.nl";
+  if (!isSystemAdmin) {
+    throw new Error("Geen toegang tot deze functie");
+  }
+
+  const query = gebruikQuery();
+
+  const results = await query
+    .select({
+      courseId: s.persoonKwalificatie.courseId,
+      kerntaakOnderdeelId: s.persoonKwalificatie.kerntaakOnderdeelId,
+    })
+    .from(s.persoonKwalificatie)
+    .where(eq(s.persoonKwalificatie.personId, personId));
+
+  // Group by courseId
+  const grouped: Record<string, string[]> = {};
+  for (const result of results) {
+    const existing = grouped[result.courseId] || [];
+    grouped[result.courseId] = [...existing, result.kerntaakOnderdeelId];
+  }
+
+  return grouped;
+}
