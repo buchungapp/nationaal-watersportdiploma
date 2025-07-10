@@ -310,8 +310,11 @@ export const list = wrapQuery(
           : undefined,
         filter.actorType
           ? Array.isArray(filter.actorType)
-            ? inArray(s.actor.type, filter.actorType)
-            : eq(s.actor.type, filter.actorType)
+            ? and(
+                inArray(s.actor.type, filter.actorType),
+                isNull(s.actor.deletedAt),
+              )
+            : and(eq(s.actor.type, filter.actorType), isNull(s.actor.deletedAt))
           : undefined,
         filter.q
           ? sql`
