@@ -1,0 +1,2 @@
+ALTER TABLE "kss"."persoon_kwalificatie" DROP CONSTRAINT "verkregen_reden_pvb_instructiegroep_basis_constraint";
+ALTER TABLE "kss"."persoon_kwalificatie" DROP CONSTRAINT "verkregen_reden_onbekend_constraint";

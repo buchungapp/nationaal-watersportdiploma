@@ -232,6 +232,13 @@
       "when": 1751718077534,
       "tag": "0032_numerous_riptide",
       "breakpoints": false
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1752133325147,
+      "tag": "0033_sour_archangel",
+      "breakpoints": false
     }
   ]
 }
