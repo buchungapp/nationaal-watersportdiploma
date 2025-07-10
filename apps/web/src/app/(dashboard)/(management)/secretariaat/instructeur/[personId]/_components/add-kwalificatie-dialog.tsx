@@ -1,16 +1,31 @@
 "use client";
 
-import { Combobox, Dialog, Transition } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import { Fragment, useEffect, useState, useTransition } from "react";
+import { use, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
-import { Label } from "~/app/(dashboard)/_components/fieldset";
-import { Select } from "~/app/(dashboard)/_components/select";
-import { Code } from "~/app/(dashboard)/_components/text";
 import {
-  addKwalificatieAction,
-  getAvailableKerntaakonderdelen,
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
+import {
+  Combobox,
+  ComboboxOption,
+} from "~/app/(dashboard)/_components/combobox";
+import {
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogDescription,
+  DialogTitle,
+} from "~/app/(dashboard)/_components/dialog";
+import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
+import { Select } from "~/app/(dashboard)/_components/select";
+import { Code, Text } from "~/app/(dashboard)/_components/text";
+import { Textarea } from "~/app/(dashboard)/_components/textarea";
+import {
+  addBulkKwalificatiesAction,
+  type getAvailableKerntaakonderdelen,
 } from "~/app/_actions/kss/manage-kwalificaties";
 import type { listCourses } from "~/lib/nwd";
 
@@ -19,11 +34,15 @@ type KerntaakOnderdeel = Awaited<
 >[number];
 type Course = Awaited<ReturnType<typeof listCourses>>[number];
 
-function SubmitButton() {
+function SubmitButton({ selectedCount }: { selectedCount: number }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Toevoegen..." : "Toevoegen"}
+    <Button type="submit" disabled={pending || selectedCount === 0}>
+      {pending
+        ? "Toevoegen..."
+        : selectedCount === 0
+          ? "Selecteer kerntaken"
+          : `${selectedCount} kwalificatie${selectedCount > 1 ? "s" : ""} toevoegen`}
     </Button>
   );
 }
@@ -33,49 +52,27 @@ export default function AddKwalificatieDialog({
   onClose,
   personId,
   courses,
+  kerntaakonderdelenPromise,
 }: {
   isOpen: boolean;
   onClose: () => void;
   personId: string;
   courses: Course[];
+  kerntaakonderdelenPromise: Promise<KerntaakOnderdeel[]>;
 }) {
-  const [kerntaakonderdelen, setKerntaakonderdelen] = useState<
-    KerntaakOnderdeel[]
-  >([]);
+  // Use React.use() to unwrap the promise
+  const kerntaakonderdelen = use(kerntaakonderdelenPromise);
+
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedOnderdeel, setSelectedOnderdeel] =
-    useState<KerntaakOnderdeel | null>(null);
+  const [selectedOnderdelen, setSelectedOnderdelen] = useState<Set<string>>(
+    new Set(),
+  );
   const [verkregenReden, setVerkregenReden] = useState<
     "onbekend" | "pvb_instructiegroep_basis"
   >("onbekend");
   const [opmerkingen, setOpmerkingen] = useState("");
   const [courseQuery, setCourseQuery] = useState("");
   const [onderdeelQuery, setOnderdeelQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [, startTransition] = useTransition();
-
-  useEffect(() => {
-    if (isOpen) {
-      startTransition(async () => {
-        try {
-          const onderdelenData = await getAvailableKerntaakonderdelen();
-          setKerntaakonderdelen(onderdelenData);
-        } finally {
-          setIsLoading(false);
-        }
-      });
-    }
-  }, [isOpen]);
-
-  const filteredCourses =
-    courseQuery === ""
-      ? courses
-      : courses.filter(
-          (course) =>
-            (course.title?.toLowerCase().includes(courseQuery.toLowerCase()) ??
-              false) ||
-            course.handle.toLowerCase().includes(courseQuery.toLowerCase()),
-        );
 
   const filteredOnderdelen =
     onderdeelQuery === ""
@@ -90,25 +87,49 @@ export default function AddKwalificatieDialog({
               .includes(onderdeelQuery.toLowerCase()),
         );
 
+  const toggleOnderdeel = (onderdeelId: string) => {
+    setSelectedOnderdelen((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(onderdeelId)) {
+        newSet.delete(onderdeelId);
+      } else {
+        newSet.add(onderdeelId);
+      }
+      return newSet;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedCourse || !selectedOnderdeel) return;
+    if (!selectedCourse || selectedOnderdelen.size === 0) return;
 
-    const formData = new FormData(e.currentTarget);
-
-    const result = await addKwalificatieAction({
+    const result = await addBulkKwalificatiesAction({
       personId,
       courseId: selectedCourse.id,
-      kerntaakOnderdeelId: selectedOnderdeel.id,
+      kerntaakOnderdeelIds: Array.from(selectedOnderdelen),
       verkregenReden,
       opmerkingen: opmerkingen || undefined,
     });
 
     if (result?.data?.success) {
+      const { added, skipped, total } = result.data;
+
+      if (added > 0) {
+        toast.success(
+          `${added} kwalificatie${added > 1 ? "s" : ""} toegevoegd${
+            skipped > 0
+              ? ` (${skipped} bestond${skipped > 1 ? "en" : ""} al)`
+              : ""
+          }`,
+        );
+      } else if (skipped > 0) {
+        toast.info(`Alle ${skipped} kwalificaties bestonden al`);
+      }
+
       onClose();
       // Reset form
       setSelectedCourse(null);
-      setSelectedOnderdeel(null);
+      setSelectedOnderdelen(new Set());
       setVerkregenReden("onbekend");
       setOpmerkingen("");
       setCourseQuery("");
@@ -116,284 +137,161 @@ export default function AddKwalificatieDialog({
     }
   };
 
+  const handleClose = () => {
+    onClose();
+    // Reset form
+    setSelectedCourse(null);
+    setSelectedOnderdelen(new Set());
+    setVerkregenReden("onbekend");
+    setOpmerkingen("");
+    setCourseQuery("");
+    setOnderdeelQuery("");
+  };
+
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+    <Dialog open={isOpen} onClose={handleClose} size="4xl">
+      <DialogTitle>Kwalificaties toevoegen</DialogTitle>
+      <DialogDescription>
+        Selecteer een cursus en de kerntaken waarvoor je kwalificaties wilt
+        toevoegen.
+      </DialogDescription>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <form onSubmit={handleSubmit}>
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4"
-                  >
-                    Kwalificatie toevoegen
-                  </Dialog.Title>
-
-                  {isLoading ? (
-                    <div className="text-center py-4">Laden...</div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* Course selector */}
-                      <div>
-                        <Label htmlFor="course">Cursus</Label>
-                        <Combobox
-                          value={selectedCourse}
-                          onChange={setSelectedCourse}
-                        >
-                          <div className="relative mt-1">
-                            <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white dark:bg-gray-700 text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm">
-                              <Combobox.Input
-                                className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 dark:text-gray-100 bg-transparent focus:ring-0"
-                                displayValue={(course: Course | null) =>
-                                  course?.title || ""
-                                }
-                                onChange={(event) =>
-                                  setCourseQuery(event.target.value)
-                                }
-                                placeholder="Zoek een cursus..."
-                              />
-                              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                <ChevronUpDownIcon
-                                  className="h-5 w-5 text-gray-400"
-                                  aria-hidden="true"
-                                />
-                              </Combobox.Button>
-                            </div>
-                            <Transition
-                              as={Fragment}
-                              leave="transition ease-in duration-100"
-                              leaveFrom="opacity-100"
-                              leaveTo="opacity-0"
-                              afterLeave={() => setCourseQuery("")}
-                            >
-                              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
-                                {filteredCourses.length === 0 &&
-                                courseQuery !== "" ? (
-                                  <div className="relative cursor-default select-none px-4 py-2 text-gray-700 dark:text-gray-300">
-                                    Geen cursussen gevonden.
-                                  </div>
-                                ) : (
-                                  filteredCourses.map((course) => (
-                                    <Combobox.Option
-                                      key={course.id}
-                                      className={({ active }) =>
-                                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                          active
-                                            ? "bg-blue-600 text-white"
-                                            : "text-gray-900 dark:text-gray-100"
-                                        }`
-                                      }
-                                      value={course}
-                                    >
-                                      {({ selected, active }) => (
-                                        <>
-                                          <span
-                                            className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
-                                          >
-                                            {course.title || course.handle}
-                                          </span>
-                                          <span
-                                            className={`block text-sm ${active ? "text-blue-200" : "text-gray-500 dark:text-gray-400"}`}
-                                          >
-                                            <Code>{course.handle}</Code>
-                                          </span>
-                                          {selected ? (
-                                            <span
-                                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                                active
-                                                  ? "text-white"
-                                                  : "text-blue-600"
-                                              }`}
-                                            >
-                                              <CheckIcon
-                                                className="h-5 w-5"
-                                                aria-hidden="true"
-                                              />
-                                            </span>
-                                          ) : null}
-                                        </>
-                                      )}
-                                    </Combobox.Option>
-                                  ))
-                                )}
-                              </Combobox.Options>
-                            </Transition>
-                          </div>
-                        </Combobox>
+      <form onSubmit={handleSubmit}>
+        <DialogBody>
+          <Fieldset>
+            {/* Course selector */}
+            <Field>
+              <Label htmlFor="course">Cursus</Label>
+              <Combobox
+                value={selectedCourse}
+                onChange={setSelectedCourse}
+                options={courses}
+                displayValue={(course) => course?.title || course?.handle || ""}
+                filter={(course, query) =>
+                  course
+                    ? (course.title
+                        ?.toLowerCase()
+                        .includes(query.toLowerCase()) ??
+                        false) ||
+                      course.handle.toLowerCase().includes(query.toLowerCase())
+                    : false
+                }
+                placeholder="Zoek een cursus..."
+                setQuery={setCourseQuery}
+              >
+                {(course) => (
+                  <ComboboxOption value={course}>
+                    <div>
+                      <div className="font-medium">
+                        {course.title || course.handle}
                       </div>
-
-                      {/* Kerntaak onderdeel selector */}
-                      <div>
-                        <Label htmlFor="onderdeel">Kerntaak onderdeel</Label>
-                        <Combobox
-                          value={selectedOnderdeel}
-                          onChange={setSelectedOnderdeel}
-                        >
-                          <div className="relative mt-1">
-                            <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white dark:bg-gray-700 text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-blue-300 sm:text-sm">
-                              <Combobox.Input
-                                className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 dark:text-gray-100 bg-transparent focus:ring-0"
-                                displayValue={(
-                                  onderdeel: KerntaakOnderdeel | null,
-                                ) =>
-                                  onderdeel
-                                    ? `${onderdeel.kwalificatieprofielTitel} - ${onderdeel.kerntaakTitel}`
-                                    : ""
-                                }
-                                onChange={(event) =>
-                                  setOnderdeelQuery(event.target.value)
-                                }
-                                placeholder="Zoek een kerntaak onderdeel..."
-                              />
-                              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                                <ChevronUpDownIcon
-                                  className="h-5 w-5 text-gray-400"
-                                  aria-hidden="true"
-                                />
-                              </Combobox.Button>
-                            </div>
-                            <Transition
-                              as={Fragment}
-                              leave="transition ease-in duration-100"
-                              leaveFrom="opacity-100"
-                              leaveTo="opacity-0"
-                              afterLeave={() => setOnderdeelQuery("")}
-                            >
-                              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm z-50">
-                                {filteredOnderdelen.length === 0 &&
-                                onderdeelQuery !== "" ? (
-                                  <div className="relative cursor-default select-none px-4 py-2 text-gray-700 dark:text-gray-300">
-                                    Geen onderdelen gevonden.
-                                  </div>
-                                ) : (
-                                  filteredOnderdelen.map((onderdeel) => (
-                                    <Combobox.Option
-                                      key={onderdeel.id}
-                                      className={({ active }) =>
-                                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                          active
-                                            ? "bg-blue-600 text-white"
-                                            : "text-gray-900 dark:text-gray-100"
-                                        }`
-                                      }
-                                      value={onderdeel}
-                                    >
-                                      {({ selected, active }) => (
-                                        <>
-                                          <div>
-                                            <span
-                                              className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
-                                            >
-                                              {
-                                                onderdeel.kwalificatieprofielTitel
-                                              }
-                                            </span>
-                                            <span
-                                              className={`block text-sm ${active ? "text-blue-200" : "text-gray-500 dark:text-gray-400"}`}
-                                            >
-                                              {onderdeel.kerntaakTitel} •{" "}
-                                              {onderdeel.type} • Niveau{" "}
-                                              {onderdeel.niveau}
-                                            </span>
-                                          </div>
-                                          {selected ? (
-                                            <span
-                                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                                active
-                                                  ? "text-white"
-                                                  : "text-blue-600"
-                                              }`}
-                                            >
-                                              <CheckIcon
-                                                className="h-5 w-5"
-                                                aria-hidden="true"
-                                              />
-                                            </span>
-                                          ) : null}
-                                        </>
-                                      )}
-                                    </Combobox.Option>
-                                  ))
-                                )}
-                              </Combobox.Options>
-                            </Transition>
-                          </div>
-                        </Combobox>
-                      </div>
-
-                      {/* Verkregen reden */}
-                      <div>
-                        <Label htmlFor="verkregenReden">Verkregen reden</Label>
-                        <Select
-                          id="verkregenReden"
-                          name="verkregenReden"
-                          value={verkregenReden}
-                          onChange={(e) =>
-                            setVerkregenReden(
-                              e.target.value as
-                                | "onbekend"
-                                | "pvb_instructiegroep_basis",
-                            )
-                          }
-                          className="mt-1"
-                        >
-                          <option value="onbekend">Onbekend</option>
-                          <option value="pvb_instructiegroep_basis">
-                            PVB instructiegroep basis
-                          </option>
-                        </Select>
-                      </div>
-
-                      {/* Opmerkingen */}
-                      <div>
-                        <Label htmlFor="opmerkingen">
-                          Opmerkingen (optioneel)
-                        </Label>
-                        <textarea
-                          id="opmerkingen"
-                          rows={3}
-                          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:bg-gray-700 dark:text-gray-100"
-                          value={opmerkingen}
-                          onChange={(e) => setOpmerkingen(e.target.value)}
-                        />
+                      <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                        <Code>{course.handle}</Code>
                       </div>
                     </div>
-                  )}
+                  </ComboboxOption>
+                )}
+              </Combobox>
+            </Field>
 
-                  <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                    <SubmitButton />
-                    <Button type="button" outline onClick={onClose}>
-                      Annuleren
-                    </Button>
+            {/* Kerntaak onderdelen selector */}
+            {selectedCourse && (
+              <Field>
+                <Label htmlFor="onderdelen">Kerntaken</Label>
+                <div className="space-y-2">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      className="w-full rounded-lg border border-zinc-950/10 bg-white px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] text-sm/6 text-zinc-950 placeholder:text-zinc-500 focus:border-zinc-950/20 focus:outline-none focus:ring-4 focus:ring-zinc-950/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-zinc-400 dark:focus:border-white/20 dark:focus:ring-white/10"
+                      placeholder="Zoek kerntaken..."
+                      value={onderdeelQuery}
+                      onChange={(e) => setOnderdeelQuery(e.target.value)}
+                    />
                   </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+                  <div className="max-h-60 overflow-y-auto border border-zinc-950/10 rounded-lg bg-white dark:border-white/10 dark:bg-white/5">
+                    {filteredOnderdelen.length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-zinc-500">
+                        {onderdeelQuery
+                          ? "Geen kerntaken gevonden."
+                          : "Geen kerntaken beschikbaar."}
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-zinc-950/5 dark:divide-white/5">
+                        {filteredOnderdelen.map((onderdeel) => (
+                          <CheckboxField
+                            key={onderdeel.id}
+                            className="px-4 py-3"
+                          >
+                            <Checkbox
+                              checked={selectedOnderdelen.has(onderdeel.id)}
+                              onChange={() => toggleOnderdeel(onderdeel.id)}
+                            />
+                            <Label className="flex-1">
+                              <div>
+                                <div className="font-medium">
+                                  {onderdeel.kwalificatieprofielTitel}
+                                </div>
+                                <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                                  {onderdeel.kerntaakTitel} • {onderdeel.type} •
+                                  Niveau {onderdeel.niveau}
+                                </div>
+                              </div>
+                            </Label>
+                          </CheckboxField>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {selectedOnderdelen.size > 0 && (
+                    <Text className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {selectedOnderdelen.size} kerntaa
+                      {selectedOnderdelen.size > 1 ? "ken" : "k"} geselecteerd
+                    </Text>
+                  )}
+                </div>
+              </Field>
+            )}
+
+            {/* Verkregen reden */}
+            <Field>
+              <Label htmlFor="verkregenReden">Verkregen reden</Label>
+              <Select
+                id="verkregenReden"
+                name="verkregenReden"
+                value={verkregenReden}
+                onChange={(e) =>
+                  setVerkregenReden(
+                    e.target.value as "onbekend" | "pvb_instructiegroep_basis",
+                  )
+                }
+              >
+                <option value="onbekend">Onbekend</option>
+                <option value="pvb_instructiegroep_basis">
+                  PVB instructiegroep basis
+                </option>
+              </Select>
+            </Field>
+
+            {/* Opmerkingen */}
+            <Field>
+              <Label htmlFor="opmerkingen">Opmerkingen (optioneel)</Label>
+              <Textarea
+                id="opmerkingen"
+                rows={3}
+                value={opmerkingen}
+                onChange={(e) => setOpmerkingen(e.target.value)}
+              />
+            </Field>
+          </Fieldset>
+        </DialogBody>
+
+        <DialogActions>
+          <Button plain onClick={handleClose}>
+            Annuleren
+          </Button>
+          <SubmitButton selectedCount={selectedOnderdelen.size} />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }

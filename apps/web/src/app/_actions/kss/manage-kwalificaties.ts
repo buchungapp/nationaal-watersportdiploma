@@ -113,6 +113,79 @@ export const removeKwalificatieAction = actionClientWithMeta
     return { success: true };
   });
 
+// Schema for adding multiple kwalificaties
+const addBulkKwalificatiesSchema = z.object({
+  personId: z.string().uuid(),
+  courseId: z.string().uuid(),
+  kerntaakOnderdeelIds: z.array(z.string().uuid()).min(1),
+  verkregenReden: z.enum(["onbekend", "pvb_instructiegroep_basis"]),
+  opmerkingen: z.string().optional(),
+});
+
+export const addBulkKwalificatiesAction = actionClientWithMeta
+  .metadata({ name: "kss.add-bulk-kwalificaties" })
+  .schema(addBulkKwalificatiesSchema)
+  .action(async ({ parsedInput: input }) => {
+    const user = await getUserOrThrow();
+
+    // Check if user is system admin
+    const isSystemAdmin = user.email === "maurits@buchung.nl";
+    if (!isSystemAdmin) {
+      throw new Error("Geen toegang tot deze functie");
+    }
+
+    const results = await withTransaction(async (tx) => {
+      // Get the actor who is adding this (system admin)
+      const actor = user.persons[0]?.actors.find((a) => a.type === "system");
+
+      // Check for existing kwalificaties
+      const existing = await tx
+        .select({
+          kerntaakOnderdeelId: s.persoonKwalificatie.kerntaakOnderdeelId,
+        })
+        .from(s.persoonKwalificatie)
+        .where(
+          and(
+            eq(s.persoonKwalificatie.personId, input.personId),
+            eq(s.persoonKwalificatie.courseId, input.courseId),
+          ),
+        );
+
+      const existingIds = new Set(existing.map((e) => e.kerntaakOnderdeelId));
+      const newIds = input.kerntaakOnderdeelIds.filter(
+        (id) => !existingIds.has(id),
+      );
+      const skippedIds = input.kerntaakOnderdeelIds.filter((id) =>
+        existingIds.has(id),
+      );
+
+      // Create the new kwalificaties
+      if (newIds.length > 0) {
+        await tx.insert(s.persoonKwalificatie).values(
+          newIds.map((kerntaakOnderdeelId) => ({
+            personId: input.personId,
+            courseId: input.courseId,
+            kerntaakOnderdeelId,
+            verkregenReden: input.verkregenReden,
+            opmerkingen: input.opmerkingen,
+            toegevoegdDoor: actor?.id,
+            toegevoegdOp: new Date().toISOString(),
+          })),
+        );
+      }
+
+      return {
+        added: newIds.length,
+        skipped: skippedIds.length,
+        total: input.kerntaakOnderdeelIds.length,
+      };
+    });
+
+    revalidatePath(`/secretariaat/instructeur/${input.personId}`);
+
+    return { success: true, ...results };
+  });
+
 // Helper function to fetch available kerntaakonderdelen for adding
 export async function getAvailableKerntaakonderdelen() {
   const user = await getUserOrThrow();

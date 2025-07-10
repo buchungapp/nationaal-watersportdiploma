@@ -9,7 +9,10 @@ import {
 import { useState } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Code } from "~/app/(dashboard)/_components/text";
-import type { getPersonKwalificaties } from "~/app/_actions/kss/manage-kwalificaties";
+import type {
+  getAvailableKerntaakonderdelen,
+  getPersonKwalificaties,
+} from "~/app/_actions/kss/manage-kwalificaties";
 import type { listCourses } from "~/lib/nwd";
 import AddKwalificatieDialog from "./add-kwalificatie-dialog";
 import RemoveKwalificatieDialog from "./remove-kwalificatie-dialog";
@@ -31,10 +34,14 @@ export default function KwalificatiesTable({
   personId,
   detailedKwalificaties: kwalificaties,
   courses,
+  kerntaakonderdelenPromise,
 }: {
   personId: string;
   detailedKwalificaties: Kwalificatie[];
   courses: Course[];
+  kerntaakonderdelenPromise: Promise<
+    Awaited<ReturnType<typeof getAvailableKerntaakonderdelen>>
+  >;
 }) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedKwalificatie, setSelectedKwalificatie] =
@@ -122,7 +129,7 @@ export default function KwalificatiesTable({
               {richtingGroup.courses.map((courseGroup) => (
                 <Disclosure key={courseGroup.courseId}>
                   {({ open }) => (
-                    <>
+                    <div>
                       <Disclosure.Button className="w-full px-4 py-4 sm:px-6 text-left hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
@@ -211,7 +218,7 @@ export default function KwalificatiesTable({
                           </tbody>
                         </table>
                       </Disclosure.Panel>
-                    </>
+                    </div>
                   )}
                 </Disclosure>
               ))}
@@ -225,6 +232,7 @@ export default function KwalificatiesTable({
         onClose={() => setIsAddDialogOpen(false)}
         personId={personId}
         courses={courses}
+        kerntaakonderdelenPromise={kerntaakonderdelenPromise}
       />
       <RemoveKwalificatieDialog
         isOpen={isRemoveDialogOpen}

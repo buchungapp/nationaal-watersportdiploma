@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { getPersonKwalificaties } from "~/app/_actions/kss/manage-kwalificaties";
+import {
+  getAvailableKerntaakonderdelen,
+  getPersonKwalificaties,
+} from "~/app/_actions/kss/manage-kwalificaties";
 import { getUserOrThrow, listCourses } from "~/lib/nwd";
 import KwalificatiesTable from "./_components/kwalificaties-table";
 import { PersonInfo } from "./_components/person-info";
@@ -20,6 +23,9 @@ async function KwalificatiesContent({ personId }: { personId: string }) {
     getPersonKwalificaties(person.id),
   ]);
 
+  // Prepare the kerntaakonderdelen promise without awaiting it
+  const kerntaakonderdelenPromise = getAvailableKerntaakonderdelen();
+
   return (
     <>
       <PersonInfo person={person} />
@@ -27,6 +33,7 @@ async function KwalificatiesContent({ personId }: { personId: string }) {
         personId={person.id}
         detailedKwalificaties={detailedKwalificaties}
         courses={courses}
+        kerntaakonderdelenPromise={kerntaakonderdelenPromise}
       />
     </>
   );
