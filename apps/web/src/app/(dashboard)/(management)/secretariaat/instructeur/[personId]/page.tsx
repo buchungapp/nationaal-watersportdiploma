@@ -5,13 +5,20 @@ import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import {
   getAvailableKerntaakonderdelen,
+  getExistingKerntaakOnderdeelIds,
   getPersonKwalificaties,
 } from "~/app/_actions/kss/manage-kwalificaties";
 import { getUserOrThrow, listCourses } from "~/lib/nwd";
 import KwalificatiesTable from "./_components/kwalificaties-table";
 import { PersonInfo } from "./_components/person-info";
 
-async function KwalificatiesContent({ personId }: { personId: string }) {
+async function KwalificatiesContent({
+  personId,
+  selectedCourseId,
+}: {
+  personId: string;
+  selectedCourseId?: string;
+}) {
   const person = await User.Person.byIdOrHandle({ id: personId });
 
   if (!person) {
@@ -26,6 +33,11 @@ async function KwalificatiesContent({ personId }: { personId: string }) {
   // Prepare the kerntaakonderdelen promise without awaiting it
   const kerntaakonderdelenPromise = getAvailableKerntaakonderdelen();
 
+  // Get existing kerntaak onderdeel IDs for the selected course if available
+  const existingKerntaakOnderdeelIdsPromise = selectedCourseId
+    ? getExistingKerntaakOnderdeelIds(person.id, selectedCourseId)
+    : Promise.resolve([]);
+
   return (
     <>
       <PersonInfo person={person} />
@@ -34,6 +46,9 @@ async function KwalificatiesContent({ personId }: { personId: string }) {
         detailedKwalificaties={detailedKwalificaties}
         courses={courses}
         kerntaakonderdelenPromise={kerntaakonderdelenPromise}
+        existingKerntaakOnderdeelIdsPromise={
+          existingKerntaakOnderdeelIdsPromise
+        }
       />
     </>
   );
@@ -41,8 +56,10 @@ async function KwalificatiesContent({ personId }: { personId: string }) {
 
 export default async function PersonKwalificatiesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ personId: string }>;
+  searchParams: Promise<{ course?: string }>;
 }) {
   const user = await getUserOrThrow();
 
@@ -59,6 +76,7 @@ export default async function PersonKwalificatiesPage({
   }
 
   const { personId } = await params;
+  const { course: selectedCourseId } = await searchParams;
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -71,7 +89,10 @@ export default async function PersonKwalificatiesPage({
       </div>
 
       <Suspense fallback={<div>Laden...</div>}>
-        <KwalificatiesContent personId={personId} />
+        <KwalificatiesContent
+          personId={personId}
+          selectedCourseId={selectedCourseId}
+        />
       </Suspense>
     </div>
   );

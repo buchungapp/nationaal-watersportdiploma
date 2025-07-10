@@ -1,5 +1,6 @@
 "use client";
 
+import { parseAsString, useQueryState } from "nuqs";
 import { use, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -53,17 +54,26 @@ export default function AddKwalificatieDialog({
   personId,
   courses,
   kerntaakonderdelenPromise,
+  existingKerntaakOnderdeelIdsPromise,
 }: {
   isOpen: boolean;
   onClose: () => void;
   personId: string;
   courses: Course[];
   kerntaakonderdelenPromise: Promise<KerntaakOnderdeel[]>;
+  existingKerntaakOnderdeelIdsPromise: Promise<string[]>;
 }) {
-  // Use React.use() to unwrap the promise
+  // Use React.use() to unwrap the promises
   const kerntaakonderdelen = use(kerntaakonderdelenPromise);
+  const existingKerntaakOnderdeelIds = use(existingKerntaakOnderdeelIdsPromise);
 
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  // Use nuqs for course selection
+  const [selectedCourseId, setSelectedCourseId] = useQueryState(
+    "course",
+    parseAsString.withOptions({ shallow: false }),
+  );
+  const selectedCourse = courses.find((c) => c.id === selectedCourseId) || null;
+
   const [selectedOnderdelen, setSelectedOnderdelen] = useState<Set<string>>(
     new Set(),
   );
@@ -88,6 +98,11 @@ export default function AddKwalificatieDialog({
         );
 
   const toggleOnderdeel = (onderdeelId: string) => {
+    // Don't allow selection of existing onderdelen
+    if (selectedCourse && existingKerntaakOnderdeelIds.includes(onderdeelId)) {
+      return;
+    }
+
     setSelectedOnderdelen((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(onderdeelId)) {
@@ -128,7 +143,7 @@ export default function AddKwalificatieDialog({
 
       onClose();
       // Reset form
-      setSelectedCourse(null);
+      setSelectedCourseId(null);
       setSelectedOnderdelen(new Set());
       setVerkregenReden("onbekend");
       setOpmerkingen("");
@@ -140,7 +155,7 @@ export default function AddKwalificatieDialog({
   const handleClose = () => {
     onClose();
     // Reset form
-    setSelectedCourse(null);
+    setSelectedCourseId(null);
     setSelectedOnderdelen(new Set());
     setVerkregenReden("onbekend");
     setOpmerkingen("");
@@ -164,7 +179,7 @@ export default function AddKwalificatieDialog({
               <Label htmlFor="course">Cursus</Label>
               <Combobox
                 value={selectedCourse}
-                onChange={setSelectedCourse}
+                onChange={(course) => setSelectedCourseId(course?.id || null)}
                 options={courses}
                 displayValue={(course) => course?.title || course?.handle || ""}
                 filter={(course, query) =>
@@ -217,28 +232,43 @@ export default function AddKwalificatieDialog({
                       </div>
                     ) : (
                       <div className="divide-y divide-zinc-950/5 dark:divide-white/5">
-                        {filteredOnderdelen.map((onderdeel) => (
-                          <CheckboxField
-                            key={onderdeel.id}
-                            className="px-4 py-3"
-                          >
-                            <Checkbox
-                              checked={selectedOnderdelen.has(onderdeel.id)}
-                              onChange={() => toggleOnderdeel(onderdeel.id)}
-                            />
-                            <Label className="flex-1">
-                              <div>
-                                <div className="font-medium">
-                                  {onderdeel.kwalificatieprofielTitel}
+                        {filteredOnderdelen.map((onderdeel) => {
+                          const isExisting =
+                            selectedCourse &&
+                            existingKerntaakOnderdeelIds.includes(onderdeel.id);
+                          return (
+                            <CheckboxField
+                              key={onderdeel.id}
+                              className={`px-4 py-3 ${
+                                isExisting
+                                  ? "opacity-50 bg-zinc-50 dark:bg-zinc-800/50"
+                                  : ""
+                              }`}
+                            >
+                              <Checkbox
+                                checked={selectedOnderdelen.has(onderdeel.id)}
+                                onChange={() => toggleOnderdeel(onderdeel.id)}
+                                disabled={isExisting}
+                              />
+                              <Label className="flex-1">
+                                <div>
+                                  <div className="font-medium">
+                                    {onderdeel.kwalificatieprofielTitel}
+                                    {isExisting && (
+                                      <span className="ml-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                        (reeds behaald)
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-zinc-500 dark:text-zinc-400">
+                                    {onderdeel.kerntaakTitel} • {onderdeel.type}{" "}
+                                    • Niveau {onderdeel.niveau}
+                                  </div>
                                 </div>
-                                <div className="text-sm text-zinc-500 dark:text-zinc-400">
-                                  {onderdeel.kerntaakTitel} • {onderdeel.type} •
-                                  Niveau {onderdeel.niveau}
-                                </div>
-                              </div>
-                            </Label>
-                          </CheckboxField>
-                        ))}
+                              </Label>
+                            </CheckboxField>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

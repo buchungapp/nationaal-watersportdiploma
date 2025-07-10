@@ -275,3 +275,33 @@ export async function getPersonKwalificaties(personId: string) {
 
   return results;
 }
+
+// Helper function to get existing kerntaak onderdeel IDs for a person and course
+export async function getExistingKerntaakOnderdeelIds(
+  personId: string,
+  courseId: string,
+) {
+  const user = await getUserOrThrow();
+
+  // Check if user is system admin
+  const isSystemAdmin = user.email === "maurits@buchung.nl";
+  if (!isSystemAdmin) {
+    throw new Error("Geen toegang tot deze functie");
+  }
+
+  const query = gebruikQuery();
+
+  const results = await query
+    .select({
+      kerntaakOnderdeelId: s.persoonKwalificatie.kerntaakOnderdeelId,
+    })
+    .from(s.persoonKwalificatie)
+    .where(
+      and(
+        eq(s.persoonKwalificatie.personId, personId),
+        eq(s.persoonKwalificatie.courseId, courseId),
+      ),
+    );
+
+  return results.map((r) => r.kerntaakOnderdeelId);
+}
