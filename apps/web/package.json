@@ -52,7 +52,7 @@
     "fathom-client": "^3.7.2",
     "flags": "^4.0.0",
     "flexsearch": "^0.7.43",
-    "fuse.js": "^7.1.0",
+    "fuzzysort": "^3.1.0",
     "google-auth-library": "^9.14.1",
     "googleapis": "^140.0.1",
     "gray-matter": "^4.0.3",

@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { formatters } from "@nawadi/lib";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import Fuse from "fuse.js";
+import fuzzysort from "fuzzysort";
 import Link from "next/link";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
@@ -104,42 +104,44 @@ export function KwalificatiesTable({
     [courses, visibleCourseIds],
   );
 
-  // Set up Fuse.js for fuzzy search
-  const fuse = useMemo(
-    () =>
-      new Fuse(instructors, {
-        keys: [
-          "firstName",
-          "lastName",
-          "lastNamePrefix",
-          "handle",
-          {
-            name: "fullName",
-            getFn: (instructor) => formatters.formatPersonName(instructor),
-          },
-        ],
-        threshold: 0.3,
-        shouldSort: true,
-        ignoreDiacritics: true,
-        isCaseSensitive: false,
-        ignoreLocation: true,
-        minMatchCharLength: 1,
-      }),
-    [instructors],
-  );
+  // Prepare instructors for fuzzysort with multiple search keys
+  const preparedInstructors = useMemo(() => {
+    return instructors.map((instructor) => ({
+      instructor,
+      // Add formatted name for better search
+      fullName: formatters.formatPersonName(instructor),
+      // Add searchable fields
+      searchableText: [
+        instructor.firstName,
+        instructor.lastName,
+        instructor.lastNamePrefix,
+        instructor.handle,
+        formatters.formatPersonName(instructor),
+      ]
+        .filter(Boolean)
+        .join(" "),
+    }));
+  }, [instructors]);
 
-  // Filter and sort instructors
+  // Filter and sort instructors using fuzzysort
   const filteredAndSortedInstructors = useMemo(() => {
-    let filtered = instructors;
+    let filtered: Instructor[] = [];
 
     if (searchQuery.trim()) {
-      const results = fuse.search(searchQuery.trim());
+      // Use fuzzysort with multiple keys for better search results
+      const results = fuzzysort.go(searchQuery.trim(), preparedInstructors, {
+        keys: ["fullName", "searchableText"],
+        threshold: -10000, // Lower threshold for more inclusive results
+        limit: 1000, // High limit to get all relevant results
+      });
 
-      filtered = results.map((result) => result.item);
+      // Extract the original instructor objects from the results
+      filtered = results.map((result) => result.obj.instructor);
     } else {
       filtered = instructors;
     }
 
+    // Sort by name and handle
     return filtered.sort((a, b) => {
       const aName = formatters.formatPersonName(a);
       const bName = formatters.formatPersonName(b);
@@ -152,7 +154,7 @@ export function KwalificatiesTable({
 
       return 0;
     });
-  }, [instructors, searchQuery, fuse]);
+  }, [preparedInstructors, searchQuery, instructors]);
 
   // Set up the virtualizer
   const rowVirtualizer = useVirtualizer({
