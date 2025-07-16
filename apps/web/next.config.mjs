@@ -158,4 +158,7 @@ export default withPostHogConfig(withMDX(nextConfig), {
   personalApiKey: process.env.POSTHOG_API_KEY,
   host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   envId: process.env.POSTHOG_ENV_ID,
+  sourcemaps: {
+    enabled: false,
+  },
 });
