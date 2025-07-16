@@ -2,7 +2,7 @@ import nextMDX from "@next/mdx";
 
 const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.usefathom.com https://maps.googleapis.com https://vercel.live https://www.gstatic.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' blob: https://cdn.usefathom.com https://maps.googleapis.com https://vercel.live https://www.gstatic.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://vercel.live;
     img-src 'self' blob: data: https://*.mux.com https://*.googleapis.com https://*.gstatic.com https://vercel.live https://vercel.com https://cdn.usefathom.com https://service.nwd.nl 127.0.0.1:* localhost:*;
     font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com https://vercel.live https://assets.vercel.com;
