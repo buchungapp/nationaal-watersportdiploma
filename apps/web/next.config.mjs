@@ -1,4 +1,5 @@
 import nextMDX from "@next/mdx";
+import { withPostHogConfig } from "@posthog/nextjs-config";
 
 const cspHeader = `
     default-src 'self';
@@ -153,4 +154,8 @@ const withMDX = nextMDX({
   },
 });
 
-export default withMDX(nextConfig);
+export default withPostHogConfig(withMDX(nextConfig), {
+  personalApiKey: process.env.POSTHOG_API_KEY,
+  host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+  envId: process.env.POSTHOG_ENV_ID,
+});
