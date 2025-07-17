@@ -513,11 +513,27 @@ export const finalizeBeoordeling = wrapCommand(
         const criteriaResults = await tx
           .select({
             kerntaakId: s.beoordelingscriterium.kerntaakId,
+            kerntaakOnderdeelId:
+              s.werkprocesKerntaakOnderdeel.kerntaakOnderdeelId,
             beoordelingscriteriumId: s.beoordelingscriterium.id,
             pvbOnderdeelId: s.pvbOnderdeelBeoordelingsCriterium.pvbOnderdeelId,
             behaald: s.pvbOnderdeelBeoordelingsCriterium.behaald,
           })
           .from(s.beoordelingscriterium)
+          .innerJoin(
+            s.werkproces,
+            eq(s.werkproces.id, s.beoordelingscriterium.werkprocesId),
+          )
+          .innerJoin(
+            s.werkprocesKerntaakOnderdeel,
+            and(
+              eq(s.werkprocesKerntaakOnderdeel.werkprocesId, s.werkproces.id),
+              eq(
+                s.werkprocesKerntaakOnderdeel.kerntaakId,
+                s.beoordelingscriterium.kerntaakId,
+              ),
+            ),
+          )
           .leftJoin(
             s.pvbOnderdeelBeoordelingsCriterium,
             and(
@@ -553,7 +569,7 @@ export const finalizeBeoordeling = wrapCommand(
         for (const criterium of criteriaResults) {
           // Find the onderdeel that matches this criterium's kerntaakId
           const matchingOnderdeel = onderdelenResults.find(
-            (o) => o.kerntaakId === criterium.kerntaakId,
+            (o) => o.kerntaakOnderdeelId === criterium.kerntaakOnderdeelId,
           );
 
           if (matchingOnderdeel) {
