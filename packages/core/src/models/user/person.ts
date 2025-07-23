@@ -192,6 +192,31 @@ export const createLocationLink = wrapCommand(
   ),
 );
 
+export const isLinkedToLocation = wrapQuery(
+  "user.person.isLinkedToLocation",
+  withZod(
+    z.object({ personId: uuidSchema, locationId: uuidSchema }),
+    z.boolean(),
+    async (input) => {
+      const query = useQuery();
+
+      const result = await query
+        .select()
+        .from(s.personLocationLink)
+        .where(
+          and(
+            eq(s.personLocationLink.personId, input.personId),
+            eq(s.personLocationLink.locationId, input.locationId),
+            eq(s.personLocationLink.status, "linked"),
+          ),
+        )
+        .then(possibleSingleRow);
+
+      return result !== null;
+    },
+  ),
+);
+
 export const byIdOrHandle = wrapQuery(
   "user.person.byIdOrHandle",
   withZod(
