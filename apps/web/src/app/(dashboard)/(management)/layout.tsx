@@ -2,10 +2,13 @@ import {
   ArrowRightStartOnRectangleIcon,
   ShieldCheckIcon,
   UserIcon,
+  UsersIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import type React from "react";
+import { Suspense } from "react";
 import { Github } from "~/app/_components/socials";
+import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import {
   Dropdown,
@@ -43,9 +46,12 @@ export default function Layout({
               </DropdownButton>
               <DropdownMenu className="min-w-64" anchor="bottom end">
                 <DropdownItem href="/account">
-                  <UserIcon />
+                  <UsersIcon />
                   <DropdownLabel>Mijn account</DropdownLabel>
                 </DropdownItem>
+                <Suspense>
+                  <ProfileDropdownItem />
+                </Suspense>
                 <DropdownDivider />
                 <DropdownItem href="/privacy" target="_blank">
                   <ShieldCheckIcon />
@@ -69,5 +75,21 @@ export default function Layout({
     >
       {children}
     </SidebarLayout>
+  );
+}
+
+async function ProfileDropdownItem() {
+  const currentUser = await getUserOrThrow();
+  const primaryPerson = currentUser?.persons.find((person) => person.isPrimary);
+
+  if (!primaryPerson) {
+    return null;
+  }
+
+  return (
+    <DropdownItem href={`/profiel/${primaryPerson.handle}`}>
+      <UserIcon />
+      <DropdownLabel>Mijn profiel</DropdownLabel>
+    </DropdownItem>
   );
 }

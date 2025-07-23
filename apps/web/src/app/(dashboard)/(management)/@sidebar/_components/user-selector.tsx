@@ -3,6 +3,7 @@ import {
   ChevronUpIcon,
   ShieldCheckIcon,
   UserIcon,
+  UsersIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import { Suspense } from "react";
@@ -22,6 +23,7 @@ import { SidebarItem } from "../../../_components/sidebar";
 
 async function UserSelectorContent() {
   const currentUser = await getUserOrThrow();
+  const primaryPerson = currentUser?.persons.find((person) => person.isPrimary);
 
   return (
     <Dropdown>
@@ -49,9 +51,15 @@ async function UserSelectorContent() {
       </DropdownButton>
       <DropdownMenu className="z-50 min-w-(--button-width)">
         <DropdownItem href="/account">
-          <UserIcon />
+          <UsersIcon />
           <DropdownLabel>Mijn account</DropdownLabel>
         </DropdownItem>
+        {primaryPerson ? (
+          <DropdownItem href={`/profiel/${primaryPerson.handle}`}>
+            <UserIcon />
+            <DropdownLabel>Mijn profiel</DropdownLabel>
+          </DropdownItem>
+        ) : null}
         <DropdownDivider />
         <DropdownItem href="/privacy" target="_blank">
           <ShieldCheckIcon />
