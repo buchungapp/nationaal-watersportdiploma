@@ -2,15 +2,24 @@
 
 import {
   AdjustmentsHorizontalIcon,
+  FunnelIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 import { formatters } from "@nawadi/lib";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import clsx from "clsx";
 import fuzzysort from "fuzzysort";
 import Link from "next/link";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
-import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import { Button } from "~/app/(dashboard)/_components/button";
+import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
+import { Divider } from "~/app/(dashboard)/_components/divider";
+import { Label } from "~/app/(dashboard)/_components/fieldset";
+import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import {
   Popover,
@@ -55,6 +64,13 @@ interface KwalificatiesTableProps {
   locationHandle: string;
 }
 
+const niveaus = [1, 2, 3, 4, 5];
+const types = {
+  instructeur: "Instructeur",
+  leercoach: "Leercoach",
+  pvb_beoordelaar: "PVB beoordelaar",
+};
+
 export function KwalificatiesTable({
   instructors,
   courses,
@@ -66,6 +82,13 @@ export function KwalificatiesTable({
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<{
+    niveaus: typeof niveaus;
+    types: (keyof typeof types)[];
+  }>({
+    niveaus,
+    types: Object.keys(types) as (keyof typeof types)[],
+  });
 
   // Column visibility state - all courses visible by default
   const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(
@@ -125,11 +148,31 @@ export function KwalificatiesTable({
 
   // Filter and sort instructors using fuzzysort
   const filteredAndSortedInstructors = useMemo(() => {
-    const filtered: Instructor[] = [];
+    const isFiltered =
+      filters.niveaus.length < niveaus.length ||
+      filters.types.length < Object.keys(types).length;
+    const showWithoutKwalificaties =
+      filters.niveaus.length === 0 || filters.types.length === 0;
+
+    const filtered = isFiltered
+      ? preparedInstructors.filter((instructor) => {
+          const kwalificaties = kwalificatieMap.get(instructor.instructor.id);
+          if (!kwalificaties) return showWithoutKwalificaties;
+
+          return kwalificaties.entries().some(([courseId, kwalificaties]) => {
+            return kwalificaties.some((kwal) => {
+              return (
+                filters.niveaus.includes(kwal.hoogsteNiveau) &&
+                filters.types.includes(kwal.richting as keyof typeof types)
+              );
+            });
+          });
+        })
+      : preparedInstructors;
 
     if (searchQuery.trim()) {
       // Use fuzzysort with multiple keys for better search results
-      const results = fuzzysort.go(searchQuery.trim(), preparedInstructors, {
+      const results = fuzzysort.go(searchQuery.trim(), filtered, {
         keys: ["fullName", "searchableText"],
         threshold: -10000, // Lower threshold for more inclusive results
         limit: 1000, // High limit to get all relevant results
@@ -140,19 +183,21 @@ export function KwalificatiesTable({
     }
 
     // Sort by name and handle
-    return instructors.sort((a, b) => {
-      const aName = formatters.formatPersonName(a);
-      const bName = formatters.formatPersonName(b);
+    return filtered
+      .map((instructor) => instructor.instructor)
+      .sort((a, b) => {
+        const aName = formatters.formatPersonName(a);
+        const bName = formatters.formatPersonName(b);
 
-      if (aName < bName) return -1;
-      if (aName > bName) return 1;
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
 
-      if (a.handle < b.handle) return -1;
-      if (a.handle > b.handle) return 1;
+        if (a.handle < b.handle) return -1;
+        if (a.handle > b.handle) return 1;
 
-      return 0;
-    });
-  }, [preparedInstructors, searchQuery, instructors]);
+        return 0;
+      });
+  }, [preparedInstructors, searchQuery, kwalificatieMap, filters]);
 
   // Set up the virtualizer
   const rowVirtualizer = useVirtualizer({
@@ -353,6 +398,75 @@ export function KwalificatiesTable({
             </PopoverPanel>
           </Popover>
         </div>
+
+        <Popover>
+          <PopoverButton outline className={clsx("border-branding-dark/10")}>
+            <FunnelIcon /> Niveaus
+          </PopoverButton>
+          <PopoverPanel anchor="bottom end" modal className="min-w-64">
+            <div className="py-2.5">
+              <Subheading className="px-3">Niveaus</Subheading>
+              {niveaus.map((niveau) => (
+                <CheckboxField
+                  key={niveau}
+                  disabled={false}
+                  className={clsx("flex-1 px-4 py-1.5 cursor-default")}
+                >
+                  <Checkbox
+                    checked={filters.niveaus.includes(niveau)}
+                    onChange={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        niveaus: prev.niveaus.includes(niveau)
+                          ? prev.niveaus.filter((t) => t !== niveau)
+                          : [...prev.niveaus, niveau],
+                      }));
+                    }}
+                  />
+
+                  <Label className="w-full">Niveau {niveau}</Label>
+                </CheckboxField>
+              ))}
+            </div>
+            <div className="pb-2.5">
+              <Subheading className="px-3">Type</Subheading>
+              {Object.entries(types).map(([key, value]) => (
+                <CheckboxField
+                  key={key}
+                  disabled={false}
+                  className={clsx("flex-1 px-4 py-1.5 cursor-default")}
+                >
+                  <Checkbox
+                    checked={filters.types.includes(key as keyof typeof types)}
+                    onChange={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        types: prev.types.includes(key as keyof typeof types)
+                          ? prev.types.filter((t) => t !== key)
+                          : [...prev.types, key as keyof typeof types],
+                      }));
+                    }}
+                  />
+
+                  <Label className="w-full">{value}</Label>
+                </CheckboxField>
+              ))}
+            </div>
+            <Divider />
+            <Button
+              plain
+              className="rounded-none w-full"
+              onClick={() => {
+                setFilters({
+                  niveaus,
+                  types: Object.keys(types) as (keyof typeof types)[],
+                });
+              }}
+            >
+              Toon alles
+            </Button>
+          </PopoverPanel>
+        </Popover>
 
         <ExportQualificationsDialog
           instructors={filteredAndSortedInstructors}
