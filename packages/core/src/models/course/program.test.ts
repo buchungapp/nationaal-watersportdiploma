@@ -54,6 +54,7 @@ test("program crud", () =>
 
       course: {
         id: courseId,
+        abbreviation: null,
         title: "course-1",
         description: null,
         handle: "co1",
@@ -63,6 +64,7 @@ test("program crud", () =>
 
         discipline: {
           id: disciplineId,
+          abbreviation: null,
           title: "discipline-1",
           handle: "dc1",
           deletedAt: null,
