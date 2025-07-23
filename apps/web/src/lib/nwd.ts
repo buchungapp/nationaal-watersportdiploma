@@ -436,10 +436,9 @@ async function validatePersonAccessCheck({
     .catch(() => false);
 
   const isRequestedPersonAnActivePersonForLocationRequest =
-    isActiveActorTypeInLocation({
-      actorType: ["instructor", "student", "location_admin"],
-      locationId,
+    User.Person.isLinkedToLocation({
       personId: requestedPersonId,
+      locationId,
     });
 
   const [
