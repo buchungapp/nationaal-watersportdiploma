@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { actionClientWithMeta } from "~/app/_actions/safe-action";
@@ -33,6 +32,8 @@ export const downloadCertificatesAction = actionClientWithMeta
         sort,
       });
 
-      redirect(`/api/export/certificate/pdf/bulk/${uuid}`);
+      return {
+        redirectUrl: `/api/export/certificate/pdf/bulk/${uuid}`,
+      };
     },
   );
