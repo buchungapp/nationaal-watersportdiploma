@@ -448,7 +448,7 @@ function DownloadCertificatesDialog({
 }) {
   const closeDialog = () => {
     close();
-    reset();
+    window.location.reload();
   };
 
   const router = useRouter();

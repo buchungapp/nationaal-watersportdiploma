@@ -29,21 +29,3 @@ export async function GET(
     type,
   );
 }
-
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> },
-) {
-  const { handles, settings } = await retrieveCertificateHandles(
-    (await context.params).id,
-  );
-
-  return presentPDF(
-    `${
-      settings.fileName ??
-      `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
-    }.pdf`,
-    await generatePDF(handles, { sort: settings.sort }),
-    "download",
-  );
-}
