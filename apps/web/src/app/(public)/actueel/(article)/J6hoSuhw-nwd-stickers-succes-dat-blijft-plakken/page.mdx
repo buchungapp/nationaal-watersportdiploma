@@ -1,0 +1,48 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import { InstagramEmbed } from "../_components/instagram-embed";
+import featuredImage from "./opengraph-image.jpg";
+
+export const article = {
+  date: "2025-07-04T08:00:00Z",
+  category: "consument",
+  title: "Nieuw: NWD-stickers - succes dat blijft plakken!",
+  description:
+    "Ontdek de nieuwe officiële NWD-stickers! 15 kleurrijke bootstickers + 5 specials met motiverende teksten. Gratis verkrijgbaar op erkende vaarlocaties deze zomer. Doe mee aan de winactie en win een exclusieve NWD-merchandise set!",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/J6hoSuhw-nwd-stickers-succes-dat-blijft-plakken",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/J6hoSuhw-nwd-stickers-succes-dat-blijft-plakken",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+We hebben iets nieuws waarmee je jouw watersportmomenten nét dat beetje extra geeft: **de officiële NWD-stickers**! Een set van 15 kleurrijke bootstickers én 5 specials met het NWD-logo en woorden als **"Gefeliciteerd!"**, **"Topper!"** en **"Hard gaan!"**. Perfect om uit te delen bij een afgeronde module, een gewonnen wedstrijd of aan het eind van een lekkere zeildag.
+
+### Waarom stickers?
+
+Simpel: succes mag gevierd worden en stickers maken prestaties tastbaar. Of je nu je eerste zeilles hebt afgerond of een nieuw diploma hebt behaald; een sticker geeft dat moment de erkenning die het verdient. 
+
+Je krijgt ze deze zomer gratis op onze NWD-erkende vaarlocaties! 
+
+### 🎥 Winactie: waar plak jij ‘m?!
+
+Laat ons zien waar jouw sticker belandt! Maak een kort filmpje waarin je jouw NWD-sticker plakt op een toffe plek - je helm, waterfles, notitieboek, boot, of een andere originele locatie...
+
+De leukste inzending wint een **NWD-merchandise set**, inclusief trui!
+
+📲 Meedoen? Plaats jouw foto of video op Instagram of TikTok met #NWD en wie weet loop jij binnenkort in een exclusieve NWD trui!
+
+<InstagramEmbed url="https://www.instagram.com/reel/DMHngtFNR1G/?utm_source=ig_embed&utm_campaign=loading" />
