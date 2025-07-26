@@ -2,6 +2,7 @@ import {
   ArrowRightStartOnRectangleIcon,
   ShieldCheckIcon,
   UserIcon,
+  UsersIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import type React from "react";
@@ -43,8 +44,12 @@ export default function Layout({
               </DropdownButton>
               <DropdownMenu className="min-w-64" anchor="bottom end">
                 <DropdownItem href="/account">
-                  <UserIcon />
+                  <UsersIcon />
                   <DropdownLabel>Mijn account</DropdownLabel>
+                </DropdownItem>
+                <DropdownItem href="/profiel">
+                  <UserIcon />
+                  <DropdownLabel>Mijn profiel</DropdownLabel>
                 </DropdownItem>
                 <DropdownDivider />
                 <DropdownItem href="/privacy" target="_blank">
