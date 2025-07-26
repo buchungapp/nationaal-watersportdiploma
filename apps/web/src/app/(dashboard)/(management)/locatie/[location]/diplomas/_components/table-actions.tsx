@@ -6,7 +6,6 @@ import {
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -63,10 +62,8 @@ function DownloadCertificatesDialog({
 }) {
   const closeDialog = () => {
     close();
-    window.location.reload();
+    reset();
   };
-
-  const router = useRouter();
 
   const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
@@ -78,7 +75,7 @@ function DownloadCertificatesDialog({
         resetSelection();
         if (result?.data?.redirectUrl) {
           // Automatically start download
-          router.push(result.data.redirectUrl);
+          window.open(result.data.redirectUrl, "_blank");
         }
       },
       onError: () => {
@@ -100,10 +97,10 @@ function DownloadCertificatesDialog({
         <AlertTitle>Diploma's downloaden</AlertTitle>
         {downloadUrl ? (
           <AlertDescription className="space-y-3">
-            <p className="text-green-600 font-medium">
+            <p className="font-medium text-green-600">
               ✓ Download wordt automatisch gestart...
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-gray-600 text-sm">
               Werkt de download niet?
               <a
                 href={downloadUrl}
