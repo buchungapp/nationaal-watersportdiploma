@@ -28,6 +28,7 @@ import {
 } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
+import { isSecretariaat } from "~/utils/auth/is-secretariaat";
 import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
@@ -296,9 +297,8 @@ export const startImpersonation = async (targetUserId: string) => {
     const authUser = await getUserOrThrow();
 
     // Verify system admin permissions
-    const isSystemAdmin =
-      authUser.email === "info@nationaalwatersportdiploma.nl";
-    if (!isSystemAdmin) {
+    const isCurrentUserSystemAdmin = isSystemAdmin(authUser.email);
+    if (!isCurrentUserSystemAdmin) {
       throw new Error("Unauthorized");
     }
 
@@ -1077,6 +1077,43 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
     return persons.items;
   });
 });
+
+export const listPersonsWithPagination = cache(
+  async ({
+    limit,
+    offset,
+    filter,
+  }: {
+    limit?: number;
+    offset?: number;
+    filter?: {
+      actorType?: ActorType | ActorType[] | null;
+      q?: string;
+    };
+  } = {}) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      const isCurrentUserSystemAdmin = isSystemAdmin(user.email);
+      const isCurrentUserSecretariaat = isSecretariaat(user.email);
+
+      if (!isCurrentUserSystemAdmin && !isCurrentUserSecretariaat) {
+        throw new Error("Unauthorized");
+      }
+
+      const persons = await User.Person.list({
+        filter: {
+          q: filter?.q ?? undefined,
+          actorType: filter?.actorType ?? undefined,
+        },
+        limit,
+        offset,
+      });
+
+      return persons;
+    });
+  },
+);
 
 export const listPersonsForLocationWithPagination = cache(
   async (
