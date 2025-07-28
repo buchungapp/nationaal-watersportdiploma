@@ -39,7 +39,10 @@ export type ActorType =
   | "pvb_beoordelaar"
   | "secretariaat";
 
-type LocationActorType = Exclude<ActorType, "secretariaat" | "pvb_beoordelaar">;
+export type LocationActorType = Exclude<
+  ActorType,
+  "secretariaat" | "pvb_beoordelaar"
+>;
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
