@@ -28,6 +28,7 @@ import {
 } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
+import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
 
@@ -35,7 +36,10 @@ export type ActorType =
   | "student"
   | "instructor"
   | "location_admin"
-  | "pvb_beoordelaar";
+  | "pvb_beoordelaar"
+  | "secretariaat";
+
+type LocationActorType = Exclude<ActorType, "secretariaat" | "pvb_beoordelaar">;
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -147,6 +151,20 @@ export async function getPrimaryPerson<T extends boolean = true>(
   return primaryPerson;
 }
 
+// Should be used in the future to check if a user is secretariaat, but for now the middleware is hardcoded
+// export async function isUserActiveActorType(
+//   userId: string,
+//   actorType: ActorType,
+// ) {
+//   return makeRequest(async () => {
+//     const activeTypes = await User.Actor.listActiveTypesForUser({
+//       userId,
+//     });
+
+//     return activeTypes.includes(actorType);
+//   });
+// }
+
 async function isActiveActorTypeInLocation({
   actorType,
   locationId,
@@ -154,7 +172,7 @@ async function isActiveActorTypeInLocation({
 }: {
   personId: string;
   locationId: string;
-  actorType: Exclude<ActorType, "pvb_beoordelaar">[];
+  actorType: LocationActorType[];
 }) {
   const availableLocations = await User.Person.listLocationsByRole({
     personId: personId,
@@ -224,9 +242,8 @@ export const getUserOrThrow = cache(async () => {
     if (isImpersonating) {
       // Verify the current user is a system admin
       const currentUserData = await User.fromId(authUser.id);
-      const isSystemAdmin = currentUserData?.email === "maurits@buchung.nl";
 
-      if (!isSystemAdmin) {
+      if (!isSystemAdmin(currentUserData?.email)) {
         // Remove invalid impersonation cookie
         cookieStore.delete("impersonated_user_id");
         throw new Error("Unauthorized impersonation attempt");
@@ -276,7 +293,8 @@ export const startImpersonation = async (targetUserId: string) => {
     const authUser = await getUserOrThrow();
 
     // Verify system admin permissions
-    const isSystemAdmin = authUser.email === "maurits@buchung.nl";
+    const isSystemAdmin =
+      authUser.email === "info@nationaalwatersportdiploma.nl";
     if (!isSystemAdmin) {
       throw new Error("Unauthorized");
     }
@@ -1067,7 +1085,10 @@ export const listPersonsForLocationWithPagination = cache(
     }: {
       limit?: number;
       offset?: number;
-      filter?: { actorType?: ActorType | ActorType[] | null; q?: string };
+      filter?: {
+        actorType?: LocationActorType | LocationActorType[] | null;
+        q?: string;
+      };
     } = {},
   ) => {
     return makeRequest(async () => {
@@ -1173,7 +1194,7 @@ export const listPersonsForUser = cache(async () => {
 });
 
 export const listPersonsForLocationByRole = cache(
-  async (locationId: string, role: Exclude<ActorType, "pvb_beoordelaar">) => {
+  async (locationId: string, role: LocationActorType) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
@@ -1199,10 +1220,7 @@ export const listPersonsForLocationByRole = cache(
 );
 
 export const listLocationsForPerson = cache(
-  async (
-    personId?: string,
-    roles?: Exclude<ActorType, "pvb_beoordelaar">[],
-  ) => {
+  async (personId?: string, roles?: LocationActorType[]) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
@@ -1279,7 +1297,7 @@ export const createInstructorForLocation = async (
 
 export const createPersonForLocation = async (
   locationId: string,
-  roles: ActorType[],
+  roles: LocationActorType[],
   personInput: {
     email: string;
     firstName: string;
@@ -2903,7 +2921,7 @@ export async function upsertActorForLocation({
 }: {
   locationId: string;
   personId: string;
-  type: ActorType;
+  type: LocationActorType;
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([
@@ -2931,7 +2949,7 @@ export async function dropActorForLocation({
 }: {
   locationId: string;
   personId: string;
-  type: ActorType;
+  type: LocationActorType;
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([

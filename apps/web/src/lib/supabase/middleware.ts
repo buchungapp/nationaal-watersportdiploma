@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { isSecretariaat } from "~/utils/auth/is-secretariaat";
+import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { invariant } from "~/utils/invariant";
 
 export async function updateSession(request: NextRequest) {
@@ -42,12 +44,11 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (request.nextUrl.pathname.startsWith("/secretariaat")) {
-    if (
-      !user?.email ||
-      !["info@nationaalwatersportdiploma.nl", "maurits@buchung.nl"].includes(
-        user.email,
-      )
-    ) {
+    // Cannot use because middleware runs on the edge, and the function is not available
+    // const isSecretariaat =
+    //   user?.id && (await isUserActiveActorType(user?.id, "secretariaat"));
+
+    if (!isSystemAdmin(user?.email) && !isSecretariaat(user?.email)) {
       const url = request.nextUrl.clone();
       url.pathname = "/profiel?_cacheBust=1";
       return NextResponse.redirect(url);

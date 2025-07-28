@@ -1,14 +1,14 @@
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { getUserOrThrow } from "~/lib/nwd";
+import { isSecretariaat } from "~/utils/auth/is-secretariaat";
+import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 
 export default async function UsersPage() {
   const user = await getUserOrThrow();
 
-  // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-
-  if (!isSystemAdmin) {
+  // Check if user is system admin or secretariaat
+  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
     return (
       <div className="mx-auto max-w-7xl">
         <Heading level={1}>Geen toegang</Heading>
@@ -28,50 +28,50 @@ export default async function UsersPage() {
       </div>
 
       <div className="mt-8">
-        <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-md overflow-hidden">
+          <div className="px-4 sm:px-6 py-5">
+            <h3 className="font-medium text-gray-900 dark:text-white text-lg leading-6">
               Huidige gebruiker
             </h3>
           </div>
-          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-5 sm:px-6">
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <div className="px-4 sm:px-6 py-5 border-gray-200 dark:border-gray-700 border-t">
+            <dl className="gap-x-4 gap-y-6 grid grid-cols-1 sm:grid-cols-2">
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                   Naam
                 </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
                   {user.displayName || "Geen naam"}
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                   E-mail
                 </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
                   {user.email}
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                   Gebruikers-ID
                 </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 font-mono">
+                <dd className="mt-1 font-mono text-gray-900 dark:text-gray-100 text-sm">
                   {user.authUserId}
                 </dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                   Status
                 </dt>
-                <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100">
+                <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
                   {user._impersonation?.isImpersonating ? (
-                    <span className="text-orange-600 font-medium">
+                    <span className="font-medium text-orange-600">
                       Impersonatie actief (originele ID:{" "}
                       {user._impersonation.originalUserId})
                     </span>
                   ) : (
-                    <span className="text-green-600 font-medium">
+                    <span className="font-medium text-green-600">
                       Normale sessie
                     </span>
                   )}
@@ -82,7 +82,7 @@ export default async function UsersPage() {
         </div>
 
         <div className="mt-8">
-          <Text className="text-sm text-gray-600 dark:text-gray-400">
+          <Text className="text-gray-600 dark:text-gray-400 text-sm">
             Tip: Om een gebruiker te impersoneren, kopieer hun gebruikers-ID en
             gebruik de impersonatie balk bovenaan de pagina.
           </Text>
