@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import {
-  type ActorType,
+  type LocationActorType,
   createPersonForLocation,
   getUserOrThrow,
 } from "~/lib/nwd";
@@ -45,7 +45,7 @@ const createPersonSchema = zfd
       },
   )
   .transform((parsed) => {
-    const roles: ActorType[] = [];
+    const roles: LocationActorType[] = [];
     if (parsed["role-student"]) {
       roles.push("student");
     }

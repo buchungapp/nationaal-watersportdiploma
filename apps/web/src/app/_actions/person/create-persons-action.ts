@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import pLimit from "p-limit";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { type ActorType, createPersonForLocation } from "~/lib/nwd";
+import { type LocationActorType, createPersonForLocation } from "~/lib/nwd";
 import { dateInput } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
 import { voidActionSchema } from "../utils";
@@ -194,7 +194,7 @@ async function parsePersonsFromCsvData(
 
 async function uploadPersons(
   locationId: string,
-  roles: [ActorType, ...ActorType[]],
+  roles: [LocationActorType, ...LocationActorType[]],
   persons: NonNullable<createPersonsStateActionType["persons"]>,
 ): Promise<createPersonsStateActionType> {
   // Create a limit function that allows only 5 concurrent operations
