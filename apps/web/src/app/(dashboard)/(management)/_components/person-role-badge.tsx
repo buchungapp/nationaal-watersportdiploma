@@ -5,6 +5,7 @@ type Role =
   | "instructor"
   | "location_admin"
   | "secretariaat"
+  | "pvb_beoordelaar"
   | "system";
 
 const dictionary: Record<Role, string> = {
@@ -12,6 +13,7 @@ const dictionary: Record<Role, string> = {
   instructor: "Instructeur",
   location_admin: "Locatiebeheerder",
   secretariaat: "Secretariaat",
+  pvb_beoordelaar: "PVB Beoordelaar",
   system: "Systeem",
 } as const;
 
@@ -41,6 +43,7 @@ const colors: Record<
   instructor: "green",
   location_admin: "purple",
   secretariaat: "yellow",
+  pvb_beoordelaar: "purple",
   system: "zinc",
 } as const;
 

@@ -1,11 +1,12 @@
 "use client";
+import type { User } from "@nawadi/core";
 import {
   createColumnHelper,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import {
   DefaultTableCell,
@@ -21,14 +22,9 @@ import {
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
-import type {
-  LocationActorType,
-  listPersonsForLocationWithPagination,
-} from "~/lib/nwd";
-import PersonRoleBadge from "../../../../_components/person-role-badge";
-type Person = Awaited<
-  ReturnType<typeof listPersonsForLocationWithPagination>
->["items"][number];
+import PersonRoleBadge from "../../../_components/person-role-badge";
+
+type Person = Awaited<ReturnType<typeof User.Person.list>>["items"][number];
 
 const columnHelper = createColumnHelper<Person>();
 
@@ -44,8 +40,13 @@ const columns = [
         .join(" "),
     {
       header: "Naam",
-      cell: ({ getValue }) => (
-        <span className="font-medium text-zinc-950">{getValue()}</span>
+      cell: ({ getValue, row }) => (
+        <Link
+          href={`/secretariaat/instructeur/${row.original.id}`}
+          className="font-medium text-blue-600 hover:text-blue-800 dark:hover:text-blue-300 dark:text-blue-400"
+        >
+          {getValue()}
+        </Link>
       ),
     },
   ),
@@ -66,15 +67,36 @@ const columns = [
   columnHelper.accessor("actors", {
     header: "Rollen",
     cell: ({ getValue }) => {
+      const uniqueActorTypes = [
+        ...new Set(getValue().map((actor) => actor.type)),
+      ];
+
       return (
         <div className="flex items-center gap-x-2">
-          {getValue().map((actor) => (
-            <PersonRoleBadge
-              key={actor.id}
-              role={actor.type as LocationActorType}
-            />
+          {uniqueActorTypes.map((type) => (
+            <PersonRoleBadge key={type} role={type} />
           ))}
         </div>
+      );
+    },
+  }),
+  columnHelper.accessor("actors", {
+    id: "locations",
+    header: "Locaties",
+    cell: ({ getValue }) => {
+      const uniqueLocationIds = [
+        ...new Set(
+          getValue()
+            .filter((actor) => actor.locationId)
+            .map((actor) => actor.locationId),
+        ),
+      ];
+
+      return (
+        <span className="text-gray-600 text-sm">
+          {uniqueLocationIds.length} locatie
+          {uniqueLocationIds.length !== 1 ? "s" : ""}
+        </span>
       );
     },
   }),
@@ -85,14 +107,10 @@ export default function PersonsTable({
   totalItems,
   placeholderRows,
 }: {
-  persons: Awaited<
-    ReturnType<typeof listPersonsForLocationWithPagination>
-  >["items"];
+  persons: Person[];
   totalItems: number;
   placeholderRows?: number;
 }) {
-  const params = useParams();
-
   const table = useReactTable({
     data: persons,
     columns,
@@ -110,13 +128,10 @@ export default function PersonsTable({
         <DefaultTableHead table={table} />
         <TableBody>
           <PlaceholderTableRows table={table} rows={placeholderRows}>
-            <NoTableRows table={table}>Geen items gevonden</NoTableRows>
-            <DefaultTableRows
-              table={table}
-              href={(row) =>
-                `/locatie/${params.location as string}/personen/${row.original.id}`
-              }
-            >
+            <NoTableRows table={table}>
+              Geen instructeurs of beoordelaars gevonden
+            </NoTableRows>
+            <DefaultTableRows table={table}>
               {(cell, index, row) => (
                 <DefaultTableCell
                   key={cell.id}
