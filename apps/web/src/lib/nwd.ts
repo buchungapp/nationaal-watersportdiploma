@@ -489,15 +489,18 @@ export const listCertificatesForPerson = cache(
       const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
       if (!isSelf) {
-        if (!locationId) {
+        if (locationId) {
+          await validatePersonAccessCheck({
+            locationId,
+            requestedPersonId: personId,
+            requestingUser,
+          });
+        } else if (
+          !isSystemAdmin(requestingUser.email) &&
+          !isSecretariaat(requestingUser.email)
+        ) {
           throw new Error("Unauthorized");
         }
-
-        await validatePersonAccessCheck({
-          locationId,
-          requestedPersonId: personId,
-          requestingUser,
-        });
       }
 
       const certificates = await Certificate.list({
@@ -670,6 +673,7 @@ export const listCertificatesByNumber = cache(
       if (!user && numbers.length > 1) {
         // @TODO this is a temporary fix to allow for consumers to download their certificate without being logged in
         // we should find a better way to handle this
+        // @TODO: Also fix that the secretariaat can download certificates
         redirect("/login");
       }
 
@@ -1189,7 +1193,20 @@ export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
   });
 });
 
-export const getPersonById = cache(
+export const getPersonById = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    const person = await User.Person.byIdOrHandle({ id: personId });
+    return person;
+  });
+});
+
+export const getPersonByIdForLocation = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
@@ -3016,18 +3033,22 @@ export async function updateEmailForPerson({
 }: {
   personId: string;
   email: string;
-  locationId: string;
+  locationId?: string;
 }) {
   return makeRequest(async () => {
-    const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-    ]);
+    const user = await getUserOrThrow();
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: locationId,
-      personId: primaryPerson.id,
-    });
+    if (locationId) {
+      const primaryPerson = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: locationId,
+        personId: primaryPerson.id,
+      });
+    } else if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
 
     return await User.Person.moveToAccountByEmail({
       email,
@@ -3248,8 +3269,8 @@ export const updatePersonDetails = async ({
   birthCountry?: string;
 }) => {
   return makeRequest(async () => {
-    const [primaryPerson, person] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+    const [user, person] = await Promise.all([
+      getUserOrThrow(),
       User.Person.byIdOrHandle({ id: personId }),
     ]);
 
@@ -3258,6 +3279,7 @@ export const updatePersonDetails = async ({
     }
 
     if (locationId) {
+      const primaryPerson = await getPrimaryPerson(user);
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: locationId,
@@ -3274,7 +3296,8 @@ export const updatePersonDetails = async ({
       if (!associatedToLocation) {
         throw new Error("Unauthorized");
       }
-    } else {
+    } else if (!isSecretariaat(user.email) && !isSystemAdmin(user.email)) {
+      const primaryPerson = await getPrimaryPerson(user);
       if (person.userId !== primaryPerson.userId) {
         throw new Error("Unauthorized");
       }

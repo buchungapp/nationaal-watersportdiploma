@@ -47,5 +47,13 @@ export const updatePersonDetailsAction = actionClientWithMeta
       });
 
       revalidatePath("/profiel/[handle]", "page");
+      revalidatePath("/locatie/[location]/personen/[id]", "page");
+      revalidatePath(
+        "/locatie/[location]/cohorten/[cohort]/[student-allocation]",
+        "page",
+      );
+
+      revalidatePath("/secretariaat/gebruikers/[personId]", "page");
+      revalidatePath("/secretariaat/instructeurs/[personId]", "page");
     },
   );

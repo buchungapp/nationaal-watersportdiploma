@@ -11,9 +11,9 @@ const updatePersonEmailSchema = zfd.formData({
 });
 
 const updatePersonEmailArgsSchema: [
-  locationId: z.ZodString,
+  locationId: z.ZodOptional<z.ZodString>,
   personId: z.ZodString,
-] = [z.string().uuid(), z.string().uuid()];
+] = [z.string().uuid().optional(), z.string().uuid()];
 
 export const updatePersonEmailAction = actionClientWithMeta
   .metadata({
