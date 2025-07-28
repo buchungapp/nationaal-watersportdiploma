@@ -261,6 +261,7 @@ export const list = wrapQuery(
                 "instructor",
                 "location_admin",
                 "pvb_beoordelaar",
+                "secretariaat",
               ]),
             ).optional(),
             q: z.string().optional(),
