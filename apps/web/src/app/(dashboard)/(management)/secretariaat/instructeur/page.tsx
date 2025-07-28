@@ -10,6 +10,8 @@ import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { getUserOrThrow } from "~/lib/nwd";
+import { isSecretariaat } from "~/utils/auth/is-secretariaat";
+import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import Search from "../../_components/search";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
@@ -52,10 +54,8 @@ export default async function InstructeurPage(props: {
 }) {
   const user = await getUserOrThrow();
 
-  // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-
-  if (!isSystemAdmin) {
+  // Check if user is system admin or secretariaat
+  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
     return (
       <div className="mx-auto max-w-7xl">
         <Heading level={1}>Geen toegang</Heading>
