@@ -39,64 +39,66 @@ export default async function UsersPage({
             : "Beheer gebruikers"}
         </Text>
       </div>
-      <div className="mt-8">
-        <div className="bg-white dark:bg-gray-800 shadow sm:rounded-md overflow-hidden">
-          <div className="px-4 sm:px-6 py-5">
-            <h3 className="font-medium text-gray-900 dark:text-white text-lg leading-6">
-              Huidige gebruiker
-            </h3>
+      {isCurrentUserSystemAdmin ? (
+        <div className="mt-8">
+          <div className="bg-white dark:bg-gray-800 shadow sm:rounded-md overflow-hidden">
+            <div className="px-4 sm:px-6 py-5">
+              <h3 className="font-medium text-gray-900 dark:text-white text-lg leading-6">
+                Huidige gebruiker
+              </h3>
+            </div>
+            <div className="px-4 sm:px-6 py-5 border-gray-200 dark:border-gray-700 border-t">
+              <dl className="gap-x-4 gap-y-6 grid grid-cols-1 sm:grid-cols-2">
+                <div>
+                  <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
+                    Naam
+                  </dt>
+                  <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
+                    {user.displayName || "Geen naam"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
+                    E-mail
+                  </dt>
+                  <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
+                    {user.email}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
+                    Gebruikers-ID
+                  </dt>
+                  <dd className="mt-1 font-mono text-gray-900 dark:text-gray-100 text-sm">
+                    {user.authUserId}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
+                    Status
+                  </dt>
+                  <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
+                    {user._impersonation?.isImpersonating ? (
+                      <span className="font-medium text-orange-600">
+                        Impersonatie actief (originele ID:{" "}
+                        {user._impersonation.originalUserId})
+                      </span>
+                    ) : (
+                      <span className="font-medium text-green-600">
+                        Normale sessie
+                      </span>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </div>
-          <div className="px-4 sm:px-6 py-5 border-gray-200 dark:border-gray-700 border-t">
-            <dl className="gap-x-4 gap-y-6 grid grid-cols-1 sm:grid-cols-2">
-              <div>
-                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
-                  Naam
-                </dt>
-                <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
-                  {user.displayName || "Geen naam"}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
-                  E-mail
-                </dt>
-                <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
-                  {user.email}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
-                  Gebruikers-ID
-                </dt>
-                <dd className="mt-1 font-mono text-gray-900 dark:text-gray-100 text-sm">
-                  {user.authUserId}
-                </dd>
-              </div>
-              <div>
-                <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
-                  Status
-                </dt>
-                <dd className="mt-1 text-gray-900 dark:text-gray-100 text-sm">
-                  {user._impersonation?.isImpersonating ? (
-                    <span className="font-medium text-orange-600">
-                      Impersonatie actief (originele ID:{" "}
-                      {user._impersonation.originalUserId})
-                    </span>
-                  ) : (
-                    <span className="font-medium text-green-600">
-                      Normale sessie
-                    </span>
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </div>
+          <Text className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
+            Tip: Om een gebruiker te impersoneren, kopieer hun gebruikers-ID en
+            gebruik de impersonatie balk bovenaan de pagina.
+          </Text>
         </div>
-        <Text className="mt-2 text-gray-600 dark:text-gray-400 text-sm">
-          Tip: Om een gebruiker te impersoneren, kopieer hun gebruikers-ID en
-          gebruik de impersonatie balk bovenaan de pagina.
-        </Text>
-      </div>
+      ) : null}
 
       <div className="mt-8">
         <div className="flex gap-4 mt-4 max-w-xl">
