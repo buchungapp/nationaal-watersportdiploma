@@ -121,8 +121,8 @@ export function SecretariaatSidebarMenu() {
           },
           {
             name: "Instructeurs",
-            href: "/secretariaat/instructeur",
-            current: lastSegment === "instructeur",
+            href: "/secretariaat/instructeurs",
+            current: lastSegment === "instructeurs",
           },
         ].map((item) => (
           <SidebarItem key={item.name} href={item.href} current={item.current}>

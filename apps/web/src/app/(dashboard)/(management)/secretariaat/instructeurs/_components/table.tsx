@@ -22,6 +22,7 @@ import {
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
+import PersonRoleBadge from "../../../_components/person-role-badge";
 
 type Person = Awaited<ReturnType<typeof User.Person.list>>["items"][number];
 
@@ -42,7 +43,7 @@ const columns = [
       cell: ({ getValue, row }) => (
         <Link
           href={`/secretariaat/instructeur/${row.original.id}`}
-          className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+          className="font-medium text-blue-600 hover:text-blue-800 dark:hover:text-blue-300 dark:text-blue-400"
         >
           {getValue()}
         </Link>
@@ -73,18 +74,7 @@ const columns = [
       return (
         <div className="flex items-center gap-x-2">
           {uniqueActorTypes.map((type) => (
-            <span
-              key={type}
-              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                type === "instructor"
-                  ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                  : type === "pvb_beoordelaar"
-                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-              }`}
-            >
-              {type === "pvb_beoordelaar" ? "PVB Beoordelaar" : type}
-            </span>
+            <PersonRoleBadge key={type} role={type} />
           ))}
         </div>
       );
@@ -103,7 +93,7 @@ const columns = [
       ];
 
       return (
-        <span className="text-sm text-gray-600">
+        <span className="text-gray-600 text-sm">
           {uniqueLocationIds.length} locatie
           {uniqueLocationIds.length !== 1 ? "s" : ""}
         </span>
