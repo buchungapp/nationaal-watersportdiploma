@@ -42,7 +42,7 @@ const columns = [
       header: "Naam",
       cell: ({ getValue, row }) => (
         <Link
-          href={`/secretariaat/instructeur/${row.original.id}`}
+          href={`/secretariaat/instructeurs/${row.original.id}`}
           className="font-medium text-blue-600 hover:text-blue-800 dark:hover:text-blue-300 dark:text-blue-400"
         >
           {getValue()}
