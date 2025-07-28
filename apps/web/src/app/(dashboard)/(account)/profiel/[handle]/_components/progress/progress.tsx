@@ -73,8 +73,10 @@ function SuspendedBadge({
 
 export default function ProgressSection({
   personPromise,
+  description,
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
+  description: React.ReactNode;
 }) {
   const curriculaPromise = personPromise.then((person) =>
     listCurriculaByPersonId(person.id, false),
@@ -98,10 +100,7 @@ export default function ProgressSection({
             <Subheading>Nationaal Watersportdiploma</Subheading>
             <StackedLayoutCardDisclosureChevron />
           </div>
-          <Text>
-            Bekijk je diploma's, hoe je ervoor staat met je opleidingen, en hoe
-            het gaat met je huidige cursus.
-          </Text>
+          <Text>{description}</Text>
         </>
       }
     >
