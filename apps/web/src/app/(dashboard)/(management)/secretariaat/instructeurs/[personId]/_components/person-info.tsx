@@ -10,52 +10,52 @@ export function PersonInfo({ person }: { person: Person }) {
   return (
     <div className="mb-8">
       <Link
-        href="/secretariaat/instructeur"
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+        href="/secretariaat/instructeurs"
+        className="inline-flex items-center gap-2 mb-4 text-gray-600 hover:text-gray-900 text-sm"
       >
-        <ArrowLeftIcon className="h-4 w-4" />
+        <ArrowLeftIcon className="w-4 h-4" />
         Terug naar overzicht
       </Link>
 
-      <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-        <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
+      <div className="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
+        <div className="px-4 sm:px-6 py-5">
+          <h3 className="font-medium text-gray-900 dark:text-white text-lg leading-6">
             Persoonsinformatie
           </h3>
         </div>
-        <div className="border-t border-gray-200 dark:border-gray-700">
+        <div className="border-gray-200 dark:border-gray-700 border-t">
           <dl className="divide-y divide-gray-200 dark:divide-gray-700">
-            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <div className="sm:gap-4 sm:grid sm:grid-cols-3 px-4 sm:px-6 py-4">
+              <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                 Naam
               </dt>
-              <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+              <dd className="sm:col-span-2 mt-1 sm:mt-0 text-gray-900 dark:text-gray-100 text-sm">
                 {[person.firstName, person.lastNamePrefix, person.lastName]
                   .filter(Boolean)
                   .join(" ")}
               </dd>
             </div>
-            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <div className="sm:gap-4 sm:grid sm:grid-cols-3 px-4 sm:px-6 py-4">
+              <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                 NWD-id
               </dt>
-              <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+              <dd className="sm:col-span-2 mt-1 sm:mt-0 text-gray-900 dark:text-gray-100 text-sm">
                 <Code>{person.handle}</Code>
               </dd>
             </div>
-            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <div className="sm:gap-4 sm:grid sm:grid-cols-3 px-4 sm:px-6 py-4">
+              <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                 E-mailadres
               </dt>
-              <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+              <dd className="sm:col-span-2 mt-1 sm:mt-0 text-gray-900 dark:text-gray-100 text-sm">
                 {person.email || "-"}
               </dd>
             </div>
-            <div className="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt className="text-sm font-medium text-gray-500 dark:text-gray-400">
+            <div className="sm:gap-4 sm:grid sm:grid-cols-3 px-4 sm:px-6 py-4">
+              <dt className="font-medium text-gray-500 dark:text-gray-400 text-sm">
                 Geboortedatum
               </dt>
-              <dd className="mt-1 text-sm text-gray-900 dark:text-gray-100 sm:mt-0 sm:col-span-2">
+              <dd className="sm:col-span-2 mt-1 sm:mt-0 text-gray-900 dark:text-gray-100 text-sm">
                 {person.dateOfBirth
                   ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
                   : "-"}
