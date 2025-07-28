@@ -1,4 +1,3 @@
-import { User } from "@nawadi/core";
 import {
   createLoader,
   parseAsArrayOf,
@@ -9,7 +8,7 @@ import {
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getUserOrThrow, listPersonsWithPagination } from "~/lib/nwd";
 import { isSecretariaat } from "~/utils/auth/is-secretariaat";
 import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import Search from "../../_components/search";
@@ -37,7 +36,7 @@ async function InstructeurTable(props: {
     limit: paginationLimit,
   } = searchParamsParser(searchParams ?? {});
 
-  const persons = await User.Person.list({
+  const persons = await listPersonsWithPagination({
     filter: {
       actorType: filter,
       q: query,
