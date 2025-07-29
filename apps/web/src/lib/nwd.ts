@@ -1275,27 +1275,79 @@ export const listPersonsForLocationByRole = cache(
   },
 );
 
-export const listLocationsForPerson = cache(
+export const listActiveLocationsForPerson = cache(
   async (personId?: string, roles?: LocationActorType[]) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
 
-      if (personId && person.id !== personId) {
+      if (
+        personId &&
+        person.id !== personId &&
+        !isSystemAdmin(user.email) &&
+        !isSecretariaat(user.email)
+      ) {
         throw new Error("Unauthorized");
       }
 
-      const locations = await User.Person.listLocationsByRole({
-        personId: person.id,
-        roles,
-      });
+      const [locations, allLocations] = await Promise.all([
+        User.Person.listLocationsByRole({
+          personId: personId ?? person.id,
+          roles,
+        }),
+        Location.list(),
+      ]);
 
-      return await Location.list().then((locs) =>
-        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
-      );
+      return locations.map((l) => {
+        const location = allLocations.find((loc) => loc.id === l.locationId);
+        if (!location) {
+          throw new Error(`Location not found: ${l.locationId}`);
+        }
+
+        return {
+          ...location,
+          roles: l.roles,
+        };
+      });
     });
   },
 );
+
+export const listAllLocationsForPerson = cache(async (personId?: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    if (
+      personId &&
+      person.id !== personId &&
+      !isSystemAdmin(user.email) &&
+      !isSecretariaat(user.email)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const [locations, allLocations] = await Promise.all([
+      User.Person.listAllLocations({
+        personId: personId ?? person.id,
+      }),
+      Location.list(),
+    ]);
+
+    return locations.map((l) => {
+      const location = allLocations.find((loc) => loc.id === l.locationId);
+      if (!location) {
+        throw new Error(`Location not found: ${l.locationId}`);
+      }
+
+      return {
+        ...location,
+        linkStatus: l.linkStatus,
+        roles: l.roles,
+      };
+    });
+  });
+});
 
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {

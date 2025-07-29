@@ -8,6 +8,7 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { getPersonById, getUserOrThrow } from "~/lib/nwd";
 import { isSecretariaat } from "~/utils/auth/is-secretariaat";
 import { isSystemAdmin } from "~/utils/auth/is-system-admin";
+import { Locations } from "./_components/locations/locations";
 import { Personalia } from "./_components/personalia/personalia";
 
 export default async function PersonPage({
@@ -58,6 +59,8 @@ export default async function PersonPage({
                 description="Bekijk de diploma's, hoe deze persoon ervoor staat met zijn opleidingen, en hoe het gaat met de huidige cursus."
                 personPromise={personPromise}
               />
+
+              <Locations personPromise={personPromise} />
             </div>
           </Suspense>
         </div>
