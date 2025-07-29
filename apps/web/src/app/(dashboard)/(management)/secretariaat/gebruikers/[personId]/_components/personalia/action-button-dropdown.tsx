@@ -9,7 +9,7 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 
-import { EllipsisHorizontalIcon } from "@heroicons/react/16/solid";
+import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
 import type { User } from "@nawadi/core";
 import { useState } from "react";
 import type { listCountries } from "~/lib/nwd";
@@ -31,9 +31,10 @@ export async function ActionButtonDropdown({
     <>
       <Dropdown>
         <DropdownButton color="branding-light" className="-my-1.5">
-          <EllipsisHorizontalIcon />
+          <EllipsisVerticalIcon />
+          Bewerken
         </DropdownButton>
-        <DropdownMenu anchor="bottom end">
+        <DropdownMenu anchor="top end">
           <DropdownItem onClick={() => setOpenDialog("edit-personalia")}>
             <DropdownLabel>Personalia bewerken</DropdownLabel>
           </DropdownItem>

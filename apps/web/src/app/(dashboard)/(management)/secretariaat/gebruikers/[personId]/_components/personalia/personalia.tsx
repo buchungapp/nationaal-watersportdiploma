@@ -5,6 +5,7 @@ import {
   DescriptionList,
   DescriptionTerm,
 } from "~/app/(dashboard)/_components/description-list-v2";
+import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Code } from "~/app/(dashboard)/_components/text";
@@ -67,9 +68,6 @@ export async function Personalia({
     <StackedLayoutCard>
       <div className="flex justify-between items-center mb-3">
         <Subheading>Personalia</Subheading>
-        <div className="-mt-1.5 -mr-3">
-          <ActionButtons personPromise={personPromise} />
-        </div>
       </div>
       <Suspense
         fallback={
@@ -113,6 +111,10 @@ export async function Personalia({
       >
         <PersonaliaContent personPromise={personPromise} />
       </Suspense>
+      <Divider className="my-4" />
+      <div className="flex justify-end">
+        <ActionButtons personPromise={personPromise} />
+      </div>
     </StackedLayoutCard>
   );
 }
