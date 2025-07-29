@@ -31,24 +31,22 @@ export default async function PersonPage({
   const personPromise = getPersonById(personId).catch(() => notFound());
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <Heading level={1}>Persoon beheren</Heading>
-        <Text className="mt-2">
-          Beheer de persoon. Bekijk diplomas, locaties en meer.
-        </Text>
-      </div>
+    <>
+      <Heading level={1}>Persoon beheren</Heading>
+      <Text className="mt-2">
+        Beheer de persoon. Bekijk diplomas, locaties en meer.
+      </Text>
 
-      <div className="mb-8">
-        <Link
-          href="/secretariaat/gebruikers"
-          className="inline-flex items-center gap-2 mb-4 text-gray-600 hover:text-gray-900 text-sm"
-        >
-          <ArrowLeftIcon className="w-4 h-4" />
-          Terug naar overzicht
-        </Link>
+      <Link
+        href="/secretariaat/gebruikers"
+        className="inline-flex items-center gap-2 my-4 text-gray-600 hover:text-gray-900 text-sm"
+      >
+        <ArrowLeftIcon className="w-4 h-4" />
+        Terug naar overzicht
+      </Link>
 
-        <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-2 lg:max-w-none max-w-2xl">
+      <div className="bg-zinc-100 -mx-2 p-2 rounded-xl">
+        <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 lg:max-w-none max-w-2xl">
           <Suspense fallback={<div>Laden...</div>}>
             <div className="flex flex-col gap-2 order-3 lg:order-none lg:col-start-3 lg:row-end-1">
               <Personalia personPromise={personPromise} />
@@ -64,6 +62,6 @@ export default async function PersonPage({
           </Suspense>
         </div>
       </div>
-    </div>
+    </>
   );
 }
