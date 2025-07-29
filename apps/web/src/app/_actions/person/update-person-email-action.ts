@@ -32,7 +32,6 @@ export const updatePersonEmailAction = actionClientWithMeta
         email,
       });
 
-      revalidatePath("/locatie/[location]/personen", "page");
-      revalidatePath("/locatie/[location]/personen/[id]", "page");
+      revalidatePath("/(dashboard)", "page");
     },
   );
