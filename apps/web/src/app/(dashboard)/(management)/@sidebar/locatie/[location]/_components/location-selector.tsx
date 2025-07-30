@@ -1,7 +1,7 @@
 import { ChevronDownIcon, Cog8ToothIcon } from "@heroicons/react/16/solid";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { listLocationsForPerson, listRolesForLocation } from "~/lib/nwd";
+import { listActiveLocationsForPerson, listRolesForLocation } from "~/lib/nwd";
 import { Avatar } from "../../../../../_components/avatar";
 import {
   Dropdown,
@@ -20,7 +20,7 @@ async function LocationSelectorContent(props: {
 }) {
   const [params, locations] = await Promise.all([
     props.params,
-    listLocationsForPerson(),
+    listActiveLocationsForPerson(),
   ]);
 
   const currentLocation = locations.find(

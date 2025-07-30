@@ -59,15 +59,15 @@ export function ImpersonationBar({
   // Show orange floating bar when impersonating
   if (isImpersonating) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-        <div className="bg-orange-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 max-w-md">
-          <div className="flex items-center gap-3 flex-1">
-            <UserIcon className="h-5 w-5 shrink-0" />
+      <div className="right-4 bottom-4 slide-in-from-bottom-5 z-50 fixed animate-in duration-300 fade-in">
+        <div className="flex items-center gap-3 bg-orange-500 shadow-lg px-4 py-3 rounded-lg max-w-md text-white">
+          <div className="flex flex-1 items-center gap-3">
+            <UserIcon className="w-5 h-5 shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="font-medium text-sm truncate">
                 Impersonatie actief
               </p>
-              <p className="text-xs text-orange-100 truncate">
+              <p className="text-orange-100 text-xs truncate">
                 {impersonatedUser?.displayName ||
                   impersonatedUser?.email ||
                   "Onbekende gebruiker"}
@@ -77,9 +77,9 @@ export function ImpersonationBar({
           <Button
             onClick={handleStopImpersonation}
             disabled={isPending}
-            className="bg-white/20 hover:bg-white/30 text-white border-white/20 px-3 py-1.5 text-sm shrink-0"
+            className="bg-white/20 hover:bg-white/30 px-3 py-1.5 border-white/20 text-white text-sm shrink-0"
           >
-            <XMarkIcon className="h-4 w-4" />
+            <XMarkIcon className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -89,13 +89,13 @@ export function ImpersonationBar({
   // Show floating admin button when not impersonating and not searching
   if (!isSearching) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+      <div className="right-4 bottom-4 slide-in-from-bottom-5 z-50 fixed animate-in duration-300 fade-in">
         <Button
           onClick={() => setIsSearching(true)}
-          className="bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
+          className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 shadow-lg px-4 py-2 rounded-lg text-white"
         >
-          <UserIcon className="h-4 w-4" />
-          <span className="text-sm">Impersoneren</span>
+          <UserIcon className="w-4 h-4" />
+          <span className="max-sm:hidden text-sm">Impersoneren</span>
         </Button>
       </div>
     );
@@ -103,13 +103,13 @@ export function ImpersonationBar({
 
   // Show floating search interface
   return (
-    <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-lg">
+    <div className="right-4 bottom-4 slide-in-from-bottom-5 z-50 fixed animate-in duration-300 fade-in">
+      <div className="bg-white dark:bg-gray-800 shadow-lg p-4 rounded-lg max-w-lg">
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <label
               htmlFor="user-id"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block mb-1 font-medium text-gray-700 dark:text-gray-300 text-sm"
             >
               Gebruikers-ID
             </label>
@@ -141,7 +141,7 @@ export function ImpersonationBar({
           <Button
             onClick={handleStartImpersonation}
             disabled={isPending || !userId.trim()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-sm flex-1"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 text-white text-sm"
           >
             Start impersonatie
           </Button>
@@ -151,7 +151,7 @@ export function ImpersonationBar({
               setUserId("");
             }}
             disabled={isPending}
-            className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-1.5 text-sm"
+            className="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 px-3 py-1.5 text-gray-700 dark:text-gray-300 text-sm"
           >
             Annuleren
           </Button>
