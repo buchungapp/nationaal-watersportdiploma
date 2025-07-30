@@ -1,6 +1,6 @@
 import type { User } from "@nawadi/core";
 import { clsx } from "clsx";
-import { Suspense } from "react";
+import { type ComponentProps, Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import {
@@ -74,9 +74,29 @@ function SuspendedBadge({
 export default function ProgressSection({
   personPromise,
   description,
+
+  certificateActionButton,
+  programActionButton,
+  cohortProgressActionButton,
+
+  certificateEmptyState,
+  programEmptyState,
+  cohortProgressEmptyState,
+
+  programOptions,
 }: {
   personPromise: Promise<User.Person.$schema.Person>;
   description: React.ReactNode;
+
+  certificateActionButton?: React.ReactNode;
+  programActionButton?: React.ReactNode;
+  cohortProgressActionButton?: React.ReactNode;
+
+  certificateEmptyState?: React.ReactNode;
+  programEmptyState?: React.ReactNode;
+  cohortProgressEmptyState?: React.ReactNode;
+
+  programOptions?: ComponentProps<typeof ProgramsWithSuspense>["options"];
 }) {
   const curriculaPromise = personPromise.then((person) =>
     listCurriculaByPersonId(person.id, false),
@@ -119,9 +139,12 @@ export default function ProgressSection({
             Opleidingen
             <SuspendedBadge
               promise={programsPromise.then((programs) => {
-                const programsWithProgress = programs.filter(
-                  (program) => program.certificates.length > 0,
-                );
+                const programsWithProgress =
+                  programOptions?.showProgramsWithoutProgress
+                    ? programs
+                    : programs.filter(
+                        (program) => program.certificates.length > 0,
+                      );
                 return programsWithProgress.length;
               })}
               color="branding-light"
@@ -139,18 +162,27 @@ export default function ProgressSection({
         </TabList>
         <TabPanels className="mt-4">
           <TabPanel>
-            <CertificatesWithSuspense personPromise={personPromise} />
+            <CertificatesWithSuspense
+              personPromise={personPromise}
+              actionButton={certificateActionButton}
+              emptyState={certificateEmptyState}
+            />
           </TabPanel>
           <TabPanel>
             <ProgramsWithSuspense
               personPromise={personPromise}
               curriculaPromise={curriculaPromise}
+              actionButton={programActionButton}
+              emptyState={programEmptyState}
+              options={programOptions}
             />
           </TabPanel>
           <TabPanel>
             <CohortProgressWithSuspense
               personPromise={personPromise}
               curriculaPromise={curriculaPromise}
+              actionButton={cohortProgressActionButton}
+              emptyState={cohortProgressEmptyState}
             />
           </TabPanel>
         </TabPanels>
