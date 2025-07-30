@@ -1206,6 +1206,28 @@ export const getPersonById = cache(async (personId: string) => {
   });
 });
 
+export const mergePersons = async (
+  primaryPersonId: string,
+  secondaryPersonId: string,
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    // const primaryPerson = await getPrimaryPerson(user);
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    await User.Person.mergePersons({
+      personId: secondaryPersonId,
+      targetPersonId: primaryPersonId,
+      // createdBy:
+      //   primaryPerson.actors.find((actor) => actor.type === "secretariaat")
+      //     ?.id ?? undefined,
+    });
+  });
+};
+
 export const getPersonByIdForLocation = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
