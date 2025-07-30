@@ -56,15 +56,15 @@ export default async function InstructeurPage(props: {
   // Check if user is system admin or secretariaat
   if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
     return (
-      <div className="mx-auto max-w-7xl">
+      <>
         <Heading level={1}>Geen toegang</Heading>
         <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <>
       <div className="mb-8">
         <Heading level={1}>Instructeurs & Beoordelaars</Heading>
         <Text className="mt-2">
@@ -82,6 +82,6 @@ export default async function InstructeurPage(props: {
       >
         <InstructeurTable searchParams={props.searchParams} />
       </Suspense>
-    </div>
+    </>
   );
 }

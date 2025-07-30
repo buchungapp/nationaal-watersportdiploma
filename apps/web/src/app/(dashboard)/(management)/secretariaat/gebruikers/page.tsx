@@ -22,15 +22,15 @@ export default async function UsersPage({
   // Check if user is system admin or secretariaat
   if (!isCurrentUserSystemAdmin && !isCurrentUserSecretariaat) {
     return (
-      <div className="mx-auto max-w-7xl">
+      <>
         <Heading level={1}>Geen toegang</Heading>
         <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <>
       <div className="mb-8">
         <Heading level={1}>Gebruikersbeheer</Heading>
         <Text className="mt-2">
@@ -112,7 +112,7 @@ export default async function UsersPage({
           <PersonsTable searchParams={searchParams} />
         </Suspense>
       </div>
-    </div>
+    </>
   );
 }
 

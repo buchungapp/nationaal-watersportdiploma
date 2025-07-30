@@ -21,7 +21,7 @@ export default async function KerntaakDetailPage({
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <>
       <div className="mb-6">
         <Button href="/secretariaat/kss/kerntaken" plain>
           <ArrowLeftIcon />
@@ -66,6 +66,6 @@ export default async function KerntaakDetailPage({
         onderdelen={kerntaak.onderdelen}
         werkprocessen={kerntaak.werkprocessen}
       />
-    </div>
+    </>
   );
 }
