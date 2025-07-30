@@ -1715,6 +1715,52 @@ export const issueCertificatesInCohort = async ({
   });
 };
 
+export const removeStudentCurricula = async ({
+  studentCurriculaIds,
+}: {
+  studentCurriculaIds: string | [string, ...string[]];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+        throw new Error("Unauthorized");
+      }
+
+      await Student.Curriculum.remove({
+        id: studentCurriculaIds,
+      });
+
+      return;
+    });
+  });
+};
+
+export const withdrawCertificates = async ({
+  certificateIds,
+}: {
+  certificateIds: string[];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+        throw new Error("Unauthorized");
+      }
+
+      await Promise.all(
+        certificateIds.map((certificateId) =>
+          Certificate.withdraw({ certificateId, ignoreTimeLimit: true }),
+        ),
+      );
+
+      return;
+    });
+  });
+};
+
 export const withdrawCertificatesInCohort = async ({
   certificateIds,
   cohortId,
@@ -1754,7 +1800,13 @@ export const withdrawCertificatesInCohort = async ({
         throw new Error("Unauthorized");
       }
 
-      await Promise.all(certificateIds.map(Certificate.withdraw));
+      // TODO: Check if the certificates are in the cohort
+
+      await Promise.all(
+        certificateIds.map((certificateId) =>
+          Certificate.withdraw({ certificateId }),
+        ),
+      );
 
       return;
     });
