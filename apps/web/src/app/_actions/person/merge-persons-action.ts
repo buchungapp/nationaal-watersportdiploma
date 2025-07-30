@@ -7,7 +7,9 @@ import { mergePersons } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 const mergePersonsSchema = zfd.formData({
-  confirm: zfd.checkbox(),
+  confirm: zfd
+    .checkbox()
+    .refine((val) => val, "You must confirm to merge persons"),
 });
 
 const mergePersonsArgsSchema: [
