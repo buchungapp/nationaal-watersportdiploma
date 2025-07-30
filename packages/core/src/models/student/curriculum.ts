@@ -4,6 +4,8 @@ import {
   countDistinct,
   eq,
   exists,
+  getTableColumns,
+  getTableName,
   inArray,
   isNotNull,
   isNull,
@@ -11,7 +13,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery } from "../../contexts/index.js";
+import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   aliasedColumn,
   dateTimeSchema,
@@ -19,6 +21,7 @@ import {
   jsonBuildObject,
   possibleSingleRow,
   singleOrArray,
+  singleOrNonEmptyArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -107,6 +110,44 @@ export const findOrEnroll = wrapCommand(
       }
 
       return insert;
+    },
+  ),
+);
+
+export const remove = wrapCommand(
+  "student.curriculum.remove",
+  withZod(
+    z.object({ id: singleOrNonEmptyArray(uuidSchema) }),
+    async (input) => {
+      const studentCurriculumIds = Array.isArray(input.id)
+        ? input.id
+        : [input.id];
+
+      return withTransaction(async (tx) => {
+        await tx.execute(sql`
+        DELETE FROM ${sql.identifier(getTableName(s.studentCohortProgress))} studentCohortProgress
+        USING ${sql.identifier(getTableName(s.studentCurriculum))} studentCurriculum, ${sql.identifier(getTableName(s.curriculumCompetency))} curriculumCompetency
+        WHERE studentCurriculum.${sql.identifier(getTableColumns(s.studentCurriculum).curriculumId.name)} = curriculumCompetency.${sql.identifier(getTableColumns(s.curriculumCompetency).curriculumId.name)}
+        AND studentCohortProgress.${sql.identifier(getTableColumns(s.studentCohortProgress).competencyId.name)} = curriculumCompetency.${sql.identifier(getTableColumns(s.curriculumCompetency).id.name)}
+        AND studentCurriculum.${sql.identifier(getTableColumns(s.studentCurriculum).id.name)} = ANY(${sql.param(studentCurriculumIds)}::uuid[])`);
+
+        await tx
+          .update(s.cohortAllocation)
+          .set({
+            studentCurriculumId: null,
+          })
+          .where(
+            inArray(
+              s.cohortAllocation.studentCurriculumId,
+              studentCurriculumIds,
+            ),
+          );
+
+        await tx
+          .delete(s.studentCurriculum)
+          .where(inArray(s.studentCurriculum.id, studentCurriculumIds))
+          .returning({ id: s.studentCurriculum.id });
+      });
     },
   ),
 );

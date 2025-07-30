@@ -488,15 +488,18 @@ export const listCertificatesForPerson = cache(
       const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
       if (!isSelf) {
-        if (!locationId) {
+        if (locationId) {
+          await validatePersonAccessCheck({
+            locationId,
+            requestedPersonId: personId,
+            requestingUser,
+          });
+        } else if (
+          !isSystemAdmin(requestingUser.email) &&
+          !isSecretariaat(requestingUser.email)
+        ) {
           throw new Error("Unauthorized");
         }
-
-        await validatePersonAccessCheck({
-          locationId,
-          requestedPersonId: personId,
-          requestingUser,
-        });
       }
 
       const certificates = await Certificate.list({
@@ -670,6 +673,7 @@ export const listCertificatesByNumber = cache(
       if (!user && numbers.length > 1) {
         // @TODO this is a temporary fix to allow for consumers to download their certificate without being logged in
         // we should find a better way to handle this
+        // @TODO: Also fix that the secretariaat can download certificates
         redirect("/login");
       }
 
@@ -1190,7 +1194,20 @@ export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
   });
 });
 
-export const getPersonById = cache(
+export const getPersonById = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    const person = await User.Person.byIdOrHandle({ id: personId });
+    return person;
+  });
+});
+
+export const getPersonByIdForLocation = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
@@ -1259,27 +1276,79 @@ export const listPersonsForLocationByRole = cache(
   },
 );
 
-export const listLocationsForPerson = cache(
+export const listActiveLocationsForPerson = cache(
   async (personId?: string, roles?: LocationActorType[]) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
 
-      if (personId && person.id !== personId) {
+      if (
+        personId &&
+        person.id !== personId &&
+        !isSystemAdmin(user.email) &&
+        !isSecretariaat(user.email)
+      ) {
         throw new Error("Unauthorized");
       }
 
-      const locations = await User.Person.listLocationsByRole({
-        personId: person.id,
-        roles,
-      });
+      const [locations, allLocations] = await Promise.all([
+        User.Person.listLocationsByRole({
+          personId: personId ?? person.id,
+          roles,
+        }),
+        Location.list(),
+      ]);
 
-      return await Location.list().then((locs) =>
-        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
-      );
+      return locations.map((l) => {
+        const location = allLocations.find((loc) => loc.id === l.locationId);
+        if (!location) {
+          throw new Error(`Location not found: ${l.locationId}`);
+        }
+
+        return {
+          ...location,
+          roles: l.roles,
+        };
+      });
     });
   },
 );
+
+export const listAllLocationsForPerson = cache(async (personId?: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    if (
+      personId &&
+      person.id !== personId &&
+      !isSystemAdmin(user.email) &&
+      !isSecretariaat(user.email)
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const [locations, allLocations] = await Promise.all([
+      User.Person.listAllLocations({
+        personId: personId ?? person.id,
+      }),
+      Location.list(),
+    ]);
+
+    return locations.map((l) => {
+      const location = allLocations.find((loc) => loc.id === l.locationId);
+      if (!location) {
+        throw new Error(`Location not found: ${l.locationId}`);
+      }
+
+      return {
+        ...location,
+        linkStatus: l.linkStatus,
+        roles: l.roles,
+      };
+    });
+  });
+});
 
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {
@@ -1647,6 +1716,52 @@ export const issueCertificatesInCohort = async ({
   });
 };
 
+export const removeStudentCurricula = async ({
+  studentCurriculaIds,
+}: {
+  studentCurriculaIds: string | [string, ...string[]];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+        throw new Error("Unauthorized");
+      }
+
+      await Student.Curriculum.remove({
+        id: studentCurriculaIds,
+      });
+
+      return;
+    });
+  });
+};
+
+export const withdrawCertificates = async ({
+  certificateIds,
+}: {
+  certificateIds: string[];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+        throw new Error("Unauthorized");
+      }
+
+      await Promise.all(
+        certificateIds.map((certificateId) =>
+          Certificate.withdraw({ certificateId, ignoreTimeLimit: true }),
+        ),
+      );
+
+      return;
+    });
+  });
+};
+
 export const withdrawCertificatesInCohort = async ({
   certificateIds,
   cohortId,
@@ -1686,7 +1801,13 @@ export const withdrawCertificatesInCohort = async ({
         throw new Error("Unauthorized");
       }
 
-      await Promise.all(certificateIds.map(Certificate.withdraw));
+      // TODO: Check if the certificates are in the cohort
+
+      await Promise.all(
+        certificateIds.map((certificateId) =>
+          Certificate.withdraw({ certificateId }),
+        ),
+      );
 
       return;
     });
@@ -3017,18 +3138,22 @@ export async function updateEmailForPerson({
 }: {
   personId: string;
   email: string;
-  locationId: string;
+  locationId?: string;
 }) {
   return makeRequest(async () => {
-    const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-    ]);
+    const user = await getUserOrThrow();
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: locationId,
-      personId: primaryPerson.id,
-    });
+    if (locationId) {
+      const primaryPerson = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: locationId,
+        personId: primaryPerson.id,
+      });
+    } else if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
 
     return await User.Person.moveToAccountByEmail({
       email,
@@ -3249,8 +3374,8 @@ export const updatePersonDetails = async ({
   birthCountry?: string;
 }) => {
   return makeRequest(async () => {
-    const [primaryPerson, person] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+    const [user, person] = await Promise.all([
+      getUserOrThrow(),
       User.Person.byIdOrHandle({ id: personId }),
     ]);
 
@@ -3259,6 +3384,7 @@ export const updatePersonDetails = async ({
     }
 
     if (locationId) {
+      const primaryPerson = await getPrimaryPerson(user);
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: locationId,
@@ -3275,7 +3401,8 @@ export const updatePersonDetails = async ({
       if (!associatedToLocation) {
         throw new Error("Unauthorized");
       }
-    } else {
+    } else if (!isSecretariaat(user.email) && !isSystemAdmin(user.email)) {
+      const primaryPerson = await getPrimaryPerson(user);
       if (person.userId !== primaryPerson.userId) {
         throw new Error("Unauthorized");
       }

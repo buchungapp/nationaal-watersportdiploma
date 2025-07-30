@@ -9,7 +9,7 @@ import { Description, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import {
-  getPersonById,
+  getPersonByIdForLocation,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -47,7 +47,7 @@ async function RolesContent(props: RolesProps) {
   const retrieveLocationPromise = retrieveLocationByHandle(params.location);
   const retrievePersonPromise = retrieveLocationPromise.then(
     async (location) => {
-      const person = await getPersonById(params.id, location.id);
+      const person = await getPersonByIdForLocation(params.id, location.id);
 
       if (!person) {
         notFound();

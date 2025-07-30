@@ -1,22 +1,19 @@
 import type { User } from "@nawadi/core";
-import Link from "next/link";
 import { Suspense } from "react";
+import { ScrollableGridList } from "~/app/(dashboard)/(account)/profiel/[handle]/_components/scrollable-grid-list";
+import PersonRoleBadge from "~/app/(dashboard)/(management)/_components/person-role-badge";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
+import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   GridListItem,
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import {
-  StackedLayoutCardDisclosure,
-  StackedLayoutCardDisclosureChevron,
-} from "~/app/(dashboard)/_components/stacked-layout";
+import { Link } from "~/app/(dashboard)/_components/link";
+import { StackedLayoutCardDisclosureChevron } from "~/app/(dashboard)/_components/stacked-layout";
+import { StackedLayoutCardDisclosure } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
-import {
-  listActiveCohortsForPerson,
-  listActiveLocationsForPerson,
-} from "~/lib/nwd";
-import { ScrollableGridList } from "./scrollable-grid-list";
+import { listAllLocationsForPerson } from "~/lib/nwd";
 
 function LocationsListSkeleton() {
   return (
@@ -40,56 +37,12 @@ function LocationsListSkeleton() {
   );
 }
 
-async function ActiveCohortsForLocation({
-  location,
-  activeCohortsPromise,
-}: {
-  location: {
-    id: string;
-    handle: string;
-  };
-  activeCohortsPromise: ReturnType<typeof listActiveCohortsForPerson>;
-}) {
-  const activeCohorts = (await activeCohortsPromise)
-    .filter((cohort) => cohort.locationId === location.id)
-    .flatMap((cohort) => cohort.cohorts);
-
-  if (activeCohorts.length < 1) {
-    return null;
-  }
-
-  return (
-    <div className="mt-2 pl-8.5 lg:pl-14">
-      <Text className="font-medium text-zinc-600">Lopende cohorten</Text>
-      <ul className="flex flex-col flex-1 mt-1">
-        {activeCohorts.map((cohort) => (
-          <li key={cohort.id}>
-            <Link
-              href={`/locatie/${location.handle}/cohorten/${cohort.handle}`}
-              className="flex justify-between items-center gap-2 data-active:bg-zinc-50 data-hover:bg-zinc-50 -mx-2 px-2 py-1 rounded-md text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 lg:text-sm text-base transition-colors"
-            >
-              {cohort.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 async function LocationsList({
   personPromise,
 }: { personPromise: Promise<User.Person.$schema.Person> }) {
   const person = await personPromise;
 
-  const activeCohortsPromise = listActiveCohortsForPerson({
-    personId: person.id,
-  }).catch(() => []);
-
-  const locations = await listActiveLocationsForPerson(person.id, [
-    "instructor",
-    "location_admin",
-  ]).catch(() => []);
+  const locations = await listAllLocationsForPerson(person.id).catch(() => []);
 
   if (locations.length < 1) {
     return null;
@@ -100,28 +53,35 @@ async function LocationsList({
       {locations.map((location) => (
         <GridListItem
           key={location.id}
-          className="flex flex-col bg-white px-2 lg:px-4 lg:border-zinc-200/80 duration-200"
+          className="flex flex-col bg-white px-2 lg:border-zinc-200/80 duration-200"
         >
           <Link
             href={`/locatie/${location.handle}/cohorten`}
-            className="group flex items-center gap-2.5 lg:gap-4"
+            className="group flex items-center gap-2.5"
           >
             <Avatar
               square
-              className="group-hover:ring-2 group-hover:ring-branding-light/30 size-6 lg:size-10 transition-all duration-200"
+              className="group-hover:ring-2 group-hover:ring-branding-light/30 size-6 lg:size-10 transition-all duration-200 shrink-0"
               initials={location.name?.slice(0, 2)}
               src={location.logoSquare?.transformUrl}
             />
             <Text className="font-semibold text-zinc-800 group-hover:text-branding-dark transition-colors">
               {location.name}
             </Text>
+            <Badge color={location.linkStatus === "linked" ? "green" : "red"}>
+              {location.linkStatus === "linked"
+                ? "Actief"
+                : location.linkStatus === "revoked"
+                  ? "Ingetrokken"
+                  : "Verwijderd"}
+            </Badge>
           </Link>
-          <Suspense fallback={null}>
-            <ActiveCohortsForLocation
-              location={location}
-              activeCohortsPromise={activeCohortsPromise}
-            />
-          </Suspense>
+          <p className="mt-2 font-semibold text-xs">Rollen</p>
+          <div className="flex items-center gap-1">
+            {location.roles.map((role) => (
+              <PersonRoleBadge key={role} role={role} />
+            ))}
+          </div>
         </GridListItem>
       ))}
     </>
@@ -138,13 +98,10 @@ export async function Locations({
       header={
         <>
           <div className="flex justify-between items-center gap-2">
-            <Subheading>Jouw leslocaties</Subheading>
+            <Subheading>Locaties</Subheading>
             <StackedLayoutCardDisclosureChevron />
           </div>
-          <Text>
-            De locaties waar je als instructeur en/of beheerder aan gekoppeld
-            bent.
-          </Text>
+          <Text>De locaties waar deze gebruiker aan gekoppeld is.</Text>
         </>
       }
     >
