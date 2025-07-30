@@ -67,10 +67,10 @@ export default async function PersonKwalificatiesPage({
   // Check if user is system admin or secretariaat
   if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
     return (
-      <div className="mx-auto max-w-7xl">
+      <>
         <Heading level={1}>Geen toegang</Heading>
         <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </div>
+      </>
     );
   }
 
@@ -78,7 +78,7 @@ export default async function PersonKwalificatiesPage({
   const { course: selectedCourseId } = await searchParams;
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <>
       <div className="mb-8">
         <Heading level={1}>Kwalificaties beheren</Heading>
         <Text className="mt-2">
@@ -93,6 +93,6 @@ export default async function PersonKwalificatiesPage({
           selectedCourseId={selectedCourseId}
         />
       </Suspense>
-    </div>
+    </>
   );
 }

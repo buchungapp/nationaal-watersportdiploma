@@ -24,10 +24,10 @@ export default async function PersonPage({
   // Check if user is system admin or secretariaat
   if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
     return (
-      <div className="mx-auto max-w-7xl">
+      <>
         <Heading level={1}>Geen toegang</Heading>
         <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </div>
+      </>
     );
   }
 
