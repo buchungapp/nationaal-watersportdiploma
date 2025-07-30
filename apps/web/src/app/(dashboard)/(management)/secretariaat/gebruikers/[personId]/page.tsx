@@ -10,6 +10,9 @@ import { isSecretariaat } from "~/utils/auth/is-secretariaat";
 import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { Locations } from "./_components/locations/locations";
 import { Personalia } from "./_components/personalia/personalia";
+import { CertificateActions } from "./_components/progress/certificate-actions";
+import { ProgramActions } from "./_components/progress/program-actions";
+import { ProgressCardEmptyState } from "./_components/progress/progress-card-empty-state";
 
 export default async function PersonPage({
   params,
@@ -58,6 +61,18 @@ export default async function PersonPage({
               <ProgressSection
                 description="Bekijk de diploma's, hoe deze persoon ervoor staat met zijn opleidingen, en hoe het gaat met de huidige cursus."
                 personPromise={personPromise}
+                certificateActionButton={<CertificateActions />}
+                programActionButton={<ProgramActions />}
+                certificateEmptyState={
+                  <ProgressCardEmptyState type="certificate" />
+                }
+                programEmptyState={<ProgressCardEmptyState type="program" />}
+                cohortProgressEmptyState={
+                  <ProgressCardEmptyState type="course" />
+                }
+                programOptions={{
+                  showProgramsWithoutProgress: true,
+                }}
               />
 
               <Locations personPromise={personPromise} />

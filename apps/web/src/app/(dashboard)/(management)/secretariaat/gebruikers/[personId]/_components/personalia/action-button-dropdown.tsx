@@ -9,14 +9,19 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 
-import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
+import {
+  EllipsisVerticalIcon,
+  EnvelopeIcon,
+  PencilIcon,
+  UsersIcon,
+} from "@heroicons/react/16/solid";
 import type { User } from "@nawadi/core";
 import { useState } from "react";
 import type { listCountries } from "~/lib/nwd";
 import { ChangeEmail } from "./dialogs/change-email-dialog";
 import { EditPersonaliaDialog } from "./dialogs/edit-personalia-dialog";
 
-export async function ActionButtonDropdown({
+export function ActionButtonDropdown({
   person,
   countries,
 }: {
@@ -36,13 +41,18 @@ export async function ActionButtonDropdown({
         </DropdownButton>
         <DropdownMenu anchor="top end">
           <DropdownItem onClick={() => setOpenDialog("edit-personalia")}>
+            <PencilIcon />
             <DropdownLabel>Personalia bewerken</DropdownLabel>
           </DropdownItem>
           <DropdownItem onClick={() => setOpenDialog("change-email")}>
+            <EnvelopeIcon />
             <DropdownLabel>E-mailadres bewerken</DropdownLabel>
           </DropdownItem>
           <DropdownDivider />
-          <DropdownItem onClick={() => setOpenDialog("merge-persons")}>
+          <DropdownItem
+            href={`/secretariaat/gebruikers/samenvoegen?primaryPerson=${person.id}`}
+          >
+            <UsersIcon />
             <DropdownLabel>Personen samenvoegen</DropdownLabel>
           </DropdownItem>
         </DropdownMenu>
