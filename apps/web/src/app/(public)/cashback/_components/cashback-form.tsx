@@ -1,9 +1,9 @@
 import Balancer from "react-wrap-balancer";
-import { listAllLocations } from "~/lib/nwd";
+import { listAllActiveLocations } from "~/lib/nwd";
 import { CashbackFormClient } from "./cashback-form-client";
 
 export default async function CashbackForm() {
-  const locations = await listAllLocations();
+  const locations = await listAllActiveLocations();
 
   return (
     <section className="flex flex-col items-center gap-8 bg-branding-light sm:px-4 lg:px-16 pt-20 pb-4 sm:pb-20 rounded-t-[3rem] rounded-b-xl sm:rounded-b-[3rem] w-full">

@@ -33,6 +33,8 @@ import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
 
+export const validSlugRegex = new RegExp(/^[a-zA-Z0-9\-]+$/);
+
 export type ActorType =
   | "student"
   | "instructor"
@@ -1168,13 +1170,26 @@ export const listGearTypesByCurriculumForLocation = async (
   });
 };
 
+export const retrieveLocationById = async (id: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("locations");
+
+  return makeRequest(async () => {
+    return await Location.fromId(id);
+  });
+};
+
 export const retrieveLocationByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
   cacheTag("locations");
 
   return makeRequest(async () => {
-    return await Location.fromHandle(handle);
+    return await Location.fromHandle({
+      handle,
+      filter: { status: ["active", "hidden", "draft"] },
+    });
   });
 };
 
@@ -1445,7 +1460,9 @@ export const listActiveLocationsForPerson = cache(
           personId: personId ?? person.id,
           roles,
         }),
-        Location.list(),
+        Location.list({
+          filter: { status: ["hidden", "draft", "active"] },
+        }),
       ]);
 
       return locations.map((l) => {
@@ -1481,7 +1498,9 @@ export const listAllLocationsForPerson = cache(async (personId?: string) => {
       User.Person.listAllLocations({
         personId: personId ?? person.id,
       }),
-      Location.list(),
+      Location.list({
+        filter: { status: ["hidden", "draft", "active"] },
+      }),
     ]);
 
     return locations.map((l) => {
@@ -1510,16 +1529,37 @@ export const listLocationsWherePrimaryPersonHasManagementRole = cache(
         roles: ["instructor", "location_admin"],
       });
 
-      return await Location.list().then((locs) =>
+      return await Location.list({
+        filter: { status: ["hidden", "draft", "active"] },
+      }).then((locs) =>
         locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
       );
     });
   },
 );
 
-export const listAllLocations = cache(async () => {
+export const listLocations = cache(
+  async (filter?: {
+    status?:
+      | "active"
+      | "draft"
+      | "hidden"
+      | "archived"
+      | ("active" | "draft" | "hidden" | "archived")[];
+  }) => {
+    return makeRequest(async () => {
+      return await Location.list({
+        filter: { status: filter?.status },
+      });
+    });
+  },
+);
+
+export const listAllActiveLocations = cache(async () => {
   return makeRequest(async () => {
-    return await Location.list();
+    return await Location.list({
+      filter: { status: "active" },
+    });
   });
 });
 
@@ -2215,6 +2255,43 @@ export const getIsActiveInstructorByPersonId = cache(
   },
 );
 
+export const createLocation = async ({
+  name,
+  handle,
+}: {
+  name: string;
+  handle: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    await Location.create({
+      name,
+      handle,
+      status: "draft",
+    });
+  });
+};
+
+export const updateLocationStatus = async (
+  id: string,
+  status: "draft" | "hidden" | "archived" | "active",
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    await Location.updateDetails({ id, status });
+  });
+};
+
 export type SocialPlatform =
   | "facebook"
   | "instagram"
@@ -2240,11 +2317,13 @@ export const updateLocationLogos = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: id,
-      personId: primaryPerson.id,
-    });
+    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: id,
+        personId: primaryPerson.id,
+      });
+    }
 
     const location = await Location.fromId(id);
     const createOptions = { isPublic: true };
@@ -2296,11 +2375,13 @@ export const updateLocationDetails = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: id,
-      personId: primaryPerson.id,
-    });
+    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: id,
+        personId: primaryPerson.id,
+      });
+    }
 
     await Location.updateDetails({
       id,
@@ -2330,11 +2411,13 @@ export const updateLocationResources = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: id,
-      personId: primaryPerson.id,
-    });
+    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: id,
+        personId: primaryPerson.id,
+      });
+    }
 
     await Location.updateResources({
       id,
