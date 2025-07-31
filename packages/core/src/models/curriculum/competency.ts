@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { type SQL, and } from "drizzle-orm";
+import { type SQL, and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { singleRow } from "../../utils/data-helpers.js";
@@ -86,6 +86,30 @@ export const list = wrapQuery(
         .select()
         .from(s.curriculumCompetency)
         .where(and(...whereClausules));
+    },
+  ),
+);
+
+export const updateRequirement = wrapCommand(
+  "curriculum.competency.updateRequirement",
+  withZod(
+    insertSchema.pick({
+      competencyId: true,
+      requirement: true,
+    }),
+    successfulCreateResponse,
+    async (input) => {
+      const query = useQuery();
+
+      const result = await query
+        .update(s.curriculumCompetency)
+        .set({
+          requirement: input.requirement,
+        })
+        .where(eq(s.curriculumCompetency.id, input.competencyId))
+        .returning({ id: s.curriculumCompetency.id });
+
+      return singleRow(result);
     },
   ),
 );
