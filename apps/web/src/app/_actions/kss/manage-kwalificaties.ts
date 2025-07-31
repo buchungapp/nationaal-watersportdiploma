@@ -5,8 +5,7 @@ import { schema as s } from "@nawadi/db";
 import { and, eq } from "@nawadi/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getUserOrThrow } from "~/lib/nwd";
-import { isSecretariaat } from "~/utils/auth/is-secretariaat";
+import { getUserOrThrow, isSecretariaat } from "~/lib/nwd";
 import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { actionClientWithMeta } from "../safe-action";
 
@@ -26,7 +25,10 @@ export const addKwalificatieAction = actionClientWithMeta
     const user = await getUserOrThrow();
 
     // Check if user is system admin or secretariaat
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Geen toegang tot deze functie");
     }
 
@@ -84,7 +86,10 @@ export const removeKwalificatieAction = actionClientWithMeta
     const user = await getUserOrThrow();
 
     // Check if user is system admin or secretariaat
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Geen toegang tot deze functie");
     }
 
@@ -129,7 +134,10 @@ export const addBulkKwalificatiesAction = actionClientWithMeta
     const user = await getUserOrThrow();
 
     // Check if user is system admin or secretariaat
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Geen toegang tot deze functie");
     }
 
@@ -190,7 +198,7 @@ export async function getAvailableKerntaakonderdelen() {
   const user = await getUserOrThrow();
 
   // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+  if (!isSystemAdmin(user.email) && !(await isSecretariaat(user.authUserId))) {
     throw new Error("Geen toegang tot deze functie");
   }
 
@@ -227,7 +235,7 @@ export async function getPersonKwalificaties(personId: string) {
   const user = await getUserOrThrow();
 
   // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+  if (!isSystemAdmin(user.email) && !(await isSecretariaat(user.authUserId))) {
     throw new Error("Geen toegang tot deze functie");
   }
 
@@ -281,7 +289,7 @@ export async function getExistingKerntaakOnderdeelIds(
   const user = await getUserOrThrow();
 
   // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+  if (!isSystemAdmin(user.email) && !(await isSecretariaat(user.authUserId))) {
     throw new Error("Geen toegang tot deze functie");
   }
 
@@ -309,7 +317,7 @@ export async function getAllExistingKerntaakOnderdeelIdsByCourse(
   const user = await getUserOrThrow();
 
   // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+  if (!isSystemAdmin(user.email) && !(await isSecretariaat(user.authUserId))) {
     throw new Error("Geen toegang tot deze functie");
   }
 

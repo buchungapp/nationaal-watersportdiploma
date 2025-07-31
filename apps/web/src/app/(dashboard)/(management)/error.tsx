@@ -1,6 +1,7 @@
 "use client"; // Error components must be Client Components
 
 import { ArrowPathIcon } from "@heroicons/react/16/solid";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Button } from "../_components/button";
 import { Heading, Subheading } from "../_components/heading";
@@ -14,13 +15,29 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
   useEffect(() => {
     // TODO: Log the error to an error reporting service
     console.error(error);
-  }, [error]);
+
+    if (
+      error.name === "AuthorizationError" ||
+      error.name === "SecretariaatAuthorizationError"
+    ) {
+      router.replace("/unauthorized");
+      return;
+    }
+
+    if (error.name === "SystemAdminAuthorizationError") {
+      <>
+        <Heading>Geen toegang!</Heading>
+        <Text>Je hebt geen toegang tot deze pagina.</Text>
+      </>;
+    }
+  }, [error, router]);
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col justify-center h-full">
+    <div className="flex flex-col justify-center mx-auto max-w-xl h-full">
       <Heading>Er is iets misgegaan!</Heading>
       <Text>
         Oeps.. Er is iets misgegaan. We zijn op de hoogte, maar je kunt ons

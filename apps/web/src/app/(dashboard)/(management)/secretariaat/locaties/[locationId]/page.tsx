@@ -8,14 +8,11 @@ import {
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
 import {
-  getUserOrThrow,
   listDisciplines,
   listGearTypes,
   listResourcesForLocation,
   retrieveLocationById,
 } from "~/lib/nwd";
-import { isSecretariaat } from "~/utils/auth/is-secretariaat";
-import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import LogosForm from "../../../locatie/[location]/instellingen/_components/logos-form";
 import ResourcesForm from "../../../locatie/[location]/instellingen/_components/resources-form";
 import SettingsForm from "../../../locatie/[location]/instellingen/_components/settings-form";
@@ -28,18 +25,6 @@ export default async function LocationPage({
 }: {
   params: Promise<{ locationId: string }>;
 }) {
-  const user = await getUserOrThrow();
-
-  // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
-    return (
-      <>
-        <Heading level={1}>Geen toegang</Heading>
-        <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </>
-    );
-  }
-
   const { locationId } = await params;
   const locationPromise = retrieveLocationById(locationId).catch(() =>
     notFound(),

@@ -28,7 +28,6 @@ import {
 } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
-import { isSecretariaat } from "~/utils/auth/is-secretariaat";
 import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
@@ -157,19 +156,22 @@ export async function getPrimaryPerson<T extends boolean = true>(
   return primaryPerson;
 }
 
-// Should be used in the future to check if a user is secretariaat, but for now the middleware is hardcoded
-// export async function isUserActiveActorType(
-//   userId: string,
-//   actorType: ActorType,
-// ) {
-//   return makeRequest(async () => {
-//     const activeTypes = await User.Actor.listActiveTypesForUser({
-//       userId,
-//     });
+export async function isUserActiveActorType(
+  userId: string,
+  actorType: ActorType,
+) {
+  return makeRequest(async () => {
+    const activeTypes = await User.Actor.listActiveTypesForUser({
+      userId,
+    });
 
-//     return activeTypes.includes(actorType);
-//   });
-// }
+    return activeTypes.includes(actorType);
+  });
+}
+
+export async function isSecretariaat(userId: string) {
+  return await isUserActiveActorType(userId, "secretariaat");
+}
 
 async function isActiveActorTypeInLocation({
   actorType,
@@ -499,7 +501,7 @@ export const listCertificatesForPerson = cache(
           });
         } else if (
           !isSystemAdmin(requestingUser.email) &&
-          !isSecretariaat(requestingUser.email)
+          !(await isSecretariaat(requestingUser.authUserId))
         ) {
           throw new Error("Unauthorized");
         }
@@ -847,7 +849,10 @@ export const updateGearType = async (gearTypeId: string, title: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -862,7 +867,10 @@ export const updateGearTypeCurricula = async (
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -1084,7 +1092,10 @@ export const updateCurriculumCompetencyRequirement = async (
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -1102,7 +1113,10 @@ export const updateCurriculumGearTypes = async (
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -1120,7 +1134,10 @@ export const copyCurriculum = async ({
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -1241,7 +1258,7 @@ export const listPersonsWithPagination = cache(
       const user = await getUserOrThrow();
 
       const isCurrentUserSystemAdmin = isSystemAdmin(user.email);
-      const isCurrentUserSecretariaat = isSecretariaat(user.email);
+      const isCurrentUserSecretariaat = await isSecretariaat(user.authUserId);
 
       if (!isCurrentUserSystemAdmin && !isCurrentUserSecretariaat) {
         throw new Error("Unauthorized");
@@ -1340,7 +1357,10 @@ export const getPersonById = cache(async (personId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -1357,7 +1377,10 @@ export const mergePersons = async (
     const user = await getUserOrThrow();
     // const primaryPerson = await getPrimaryPerson(user);
 
-    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -1450,7 +1473,7 @@ export const listActiveLocationsForPerson = cache(
         personId &&
         person.id !== personId &&
         !isSystemAdmin(user.email) &&
-        !isSecretariaat(user.email)
+        !(await isSecretariaat(user.authUserId))
       ) {
         throw new Error("Unauthorized");
       }
@@ -1489,7 +1512,7 @@ export const listAllLocationsForPerson = cache(async (personId?: string) => {
       personId &&
       person.id !== personId &&
       !isSystemAdmin(user.email) &&
-      !isSecretariaat(user.email)
+      !(await isSecretariaat(user.authUserId))
     ) {
       throw new Error("Unauthorized");
     }
@@ -1914,7 +1937,10 @@ export const removeStudentCurricula = async ({
     return withTransaction(async () => {
       const authUser = await getUserOrThrow();
 
-      if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      if (
+        !isSystemAdmin(authUser.email) &&
+        !(await isSecretariaat(authUser.authUserId))
+      ) {
         throw new Error("Unauthorized");
       }
 
@@ -1936,7 +1962,10 @@ export const withdrawCertificates = async ({
     return withTransaction(async () => {
       const authUser = await getUserOrThrow();
 
-      if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+      if (
+        !isSystemAdmin(authUser.email) &&
+        !(await isSecretariaat(authUser.authUserId))
+      ) {
         throw new Error("Unauthorized");
       }
 
@@ -2265,7 +2294,10 @@ export const createLocation = async ({
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
 
-    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -2284,7 +2316,10 @@ export const updateLocationStatus = async (
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
 
-    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -2317,7 +2352,10 @@ export const updateLocationLogos = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: id,
@@ -2375,7 +2413,10 @@ export const updateLocationDetails = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: id,
@@ -2411,7 +2452,10 @@ export const updateLocationResources = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    if (!isSystemAdmin(authUser.email) && !isSecretariaat(authUser.email)) {
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: id,
@@ -3383,7 +3427,10 @@ export async function updateEmailForPerson({
         locationId: locationId,
         personId: primaryPerson.id,
       });
-    } else if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+    } else if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
       throw new Error("Unauthorized");
     }
 
@@ -3633,7 +3680,10 @@ export const updatePersonDetails = async ({
       if (!associatedToLocation) {
         throw new Error("Unauthorized");
       }
-    } else if (!isSecretariaat(user.email) && !isSystemAdmin(user.email)) {
+    } else if (
+      !(await isSecretariaat(user.authUserId)) &&
+      !isSystemAdmin(user.email)
+    ) {
       const primaryPerson = await getPrimaryPerson(user);
       if (person.userId !== primaryPerson.userId) {
         throw new Error("Unauthorized");
