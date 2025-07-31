@@ -8,9 +8,7 @@ import {
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { getUserOrThrow, listPersonsWithPagination } from "~/lib/nwd";
-import { isSecretariaat } from "~/utils/auth/is-secretariaat";
-import { isSystemAdmin } from "~/utils/auth/is-system-admin";
+import { listPersonsWithPagination } from "~/lib/nwd";
 import Search from "../../_components/search";
 import { FilterSelect } from "./_components/filter";
 import Table from "./_components/table";
@@ -51,18 +49,6 @@ async function InstructeurTable(props: {
 export default async function InstructeurPage(props: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const user = await getUserOrThrow();
-
-  // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
-    return (
-      <>
-        <Heading level={1}>Geen toegang</Heading>
-        <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </>
-    );
-  }
-
   return (
     <>
       <div className="mb-8">

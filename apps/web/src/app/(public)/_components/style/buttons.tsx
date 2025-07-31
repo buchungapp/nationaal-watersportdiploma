@@ -12,21 +12,39 @@ export function BoxedButton({
   className,
   children,
   ...props
-}: ComponentProps<typeof Link>) {
+}: ComponentProps<typeof Link | "button">) {
+  if ("href" in props) {
+    return (
+      <Link
+        {...props}
+        className={clsx(
+          "group flex justify-between gap-1 px-4 py-2 rounded-lg w-fit font-semibold text-sm transition-colors",
+          className,
+        )}
+      >
+        {children}
+        <ArrowLongRightIcon
+          className="size-5 transition-transform group-hover:translate-x-1 shrink-0"
+          strokeWidth={2.5}
+        />
+      </Link>
+    );
+  }
+
   return (
-    <Link
+    <button
       {...props}
       className={clsx(
-        "group flex w-fit gap-1 justify-between rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+        "group flex justify-between gap-1 px-4 py-2 rounded-lg w-fit font-semibold text-sm transition-colors",
         className,
       )}
     >
       {children}
       <ArrowLongRightIcon
-        className="size-5 shrink-0 transition-transform group-hover:translate-x-1"
+        className="size-5 transition-transform group-hover:translate-x-1 shrink-0"
         strokeWidth={2.5}
       />
-    </Link>
+    </button>
   );
 }
 
@@ -40,20 +58,20 @@ export function TekstButton({
     <Link
       {...props}
       className={clsx(
-        "group -mx-2.5 -my-1.5 flex w-fit items-center gap-1 justify-between rounded-lg px-2.5 py-1.5 text-sm font-semibold transition-colors",
+        "group flex justify-between items-center gap-1 -mx-2.5 -my-1.5 px-2.5 py-1.5 rounded-lg w-fit font-semibold text-sm transition-colors",
         className,
       )}
     >
       {backwards ? (
         <ArrowLeftIcon
-          className="size-4 shrink-0 transition-transform group-hover:-translate-x-1"
+          className="size-4 transition-transform group-hover:-translate-x-1 shrink-0"
           strokeWidth={2.5}
         />
       ) : null}
       {children}
       {!backwards ? (
         <ArrowRightIcon
-          className="size-4 shrink-0 transition-transform group-hover:translate-x-1"
+          className="size-4 transition-transform group-hover:translate-x-1 shrink-0"
           strokeWidth={2.5}
         />
       ) : null}
@@ -70,7 +88,7 @@ export function InlineButton({
     <Link
       {...props}
       className={clsx(
-        "rounded-lg transition-[padding,margin,background-color] hover:-mx-2 hover:bg-slate-100 hover:px-2",
+        "hover:bg-slate-100 hover:-mx-2 hover:px-2 rounded-lg transition-[padding,margin,background-color]",
         className,
       )}
     >
@@ -88,7 +106,7 @@ export function BoxedBackButton({
     <BackButton
       {...props}
       className={clsx(
-        "group flex w-fit items-center gap-1 rounded-lg px-4 py-2 text-sm font-semibold",
+        "group flex items-center gap-1 px-4 py-2 rounded-lg w-fit font-semibold text-sm",
         className,
       )}
     >
