@@ -185,7 +185,7 @@ export function KwalificatiesTable({
     // Sort by name and handle
     return filtered
       .map((instructor) => instructor.instructor)
-      .sort((a, b) => {
+      .toSorted((a, b) => {
         const aName = formatters.formatPersonName(a);
         const bName = formatters.formatPersonName(b);
 
