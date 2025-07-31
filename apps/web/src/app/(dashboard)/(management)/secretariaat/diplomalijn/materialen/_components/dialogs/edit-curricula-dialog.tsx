@@ -81,7 +81,12 @@ export function EditCurriculaDialog({
                     const program = allPrograms.find(
                       (program) => program.id === curriculum.programId,
                     );
-                    return `${program?.title} - ${curriculum.revision}`;
+
+                    if (!program) {
+                      return curriculum.revision;
+                    }
+
+                    return `${program.title ?? `${program.course.title} ${program.degree.title}`} - ${curriculum.revision}`;
                   }}
                   defaultValue={defaultCurricula}
                 />
