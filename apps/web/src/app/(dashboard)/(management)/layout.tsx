@@ -23,17 +23,15 @@ import {
 } from "../_components/navbar";
 import { SidebarLayout } from "../_components/sidebar-layout";
 import { UserAvatar } from "../_components/user-avatar";
-import { secretariaatAuthorization } from "./secretariaat/_utils/authorization";
+import { withSecretariaatAuthorization } from "./secretariaat/_components/unauthorized";
 
-export default async function Layout({
+async function Layout({
   children,
   sidebar,
 }: Readonly<{
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
-  await secretariaatAuthorization();
-
   return (
     <SidebarLayout
       navbar={
@@ -74,3 +72,5 @@ export default async function Layout({
     </SidebarLayout>
   );
 }
+
+export default withSecretariaatAuthorization(Layout, "notFound");
