@@ -1,5 +1,6 @@
 "use client";
 import clsx from "clsx";
+import { redirect } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useTransition } from "react";
 import {
@@ -8,27 +9,49 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 
-export type DashboardView = "instructor" | "student";
+const dashboardViews = ["instructor", "student"] as const;
+const redirectViews = { secretariaat: "/secretariaat" } as const;
+
+export type DashboardView = (typeof dashboardViews)[number];
+export type RedirectView = keyof typeof redirectViews;
 
 const dashboardViewParser = parseAsStringEnum<DashboardView>([
   "instructor",
   "student",
-]).withDefault("instructor");
+]);
 
-const viewLabels: Record<DashboardView, string> = {
+const viewLabels: Record<DashboardView | RedirectView, string> = {
   instructor: "Instructeur",
   student: "Consument",
+  secretariaat: "Secretariaat",
 };
 
-export function DashboardToggle() {
+export function DashboardToggle({
+  views,
+}: {
+  views: (DashboardView | RedirectView)[];
+}) {
   const [isPending, startTransition] = useTransition();
   const [view, setView] = useQueryState(
     "view",
-    dashboardViewParser.withOptions({ shallow: false, startTransition }),
+    dashboardViewParser
+      .withDefault(
+        views.find((v) =>
+          dashboardViews.includes(v as DashboardView),
+        ) as DashboardView,
+      )
+      .withOptions({
+        shallow: false,
+        startTransition,
+      }),
   );
 
-  const handleViewChange = (newView: DashboardView) => {
-    setView(newView);
+  const handleViewChange = (newView: DashboardView | RedirectView) => {
+    if (newView in redirectViews) {
+      redirect(redirectViews[newView as RedirectView]);
+    }
+
+    setView(newView as DashboardView);
   };
 
   return (
@@ -36,7 +59,7 @@ export function DashboardToggle() {
       {/* Mobile: Listbox */}
       <div className="md:hidden">
         <Listbox
-          value={view}
+          value={view as DashboardView | RedirectView}
           onChange={handleViewChange}
           className={clsx(
             "transition-opacity duration-200",
@@ -44,7 +67,7 @@ export function DashboardToggle() {
           )}
           aria-label="Kies een weergave"
         >
-          {(["instructor", "student"] as const).map((viewOption) => (
+          {views.map((viewOption) => (
             <ListboxOption key={viewOption} value={viewOption}>
               <ListboxLabel
                 className={clsx(
@@ -62,13 +85,13 @@ export function DashboardToggle() {
       {/* Desktop: Toggle */}
       <fieldset className="hidden md:block">
         <legend className="sr-only">Kies een weergave</legend>
-        <div className="flex items-center gap-x-2 rounded-lg bg-gray-100 p-1">
-          {(["instructor", "student"] as const).map((viewOption) => (
+        <div className="flex items-center gap-x-2 bg-gray-100 p-1 rounded-lg">
+          {views.map((viewOption) => (
             <label
               key={viewOption}
               aria-label={viewOption}
               className={clsx(
-                "group relative flex items-center justify-center rounded-md px-4 py-2",
+                "group relative flex justify-center items-center px-4 py-2 rounded-md",
                 "transition-all duration-200 ease-in-out cursor-pointer",
                 {
                   "bg-white shadow-sm": view === viewOption,
@@ -83,11 +106,11 @@ export function DashboardToggle() {
                 onChange={() => handleViewChange(viewOption)}
                 name="dashboard-view"
                 type="radio"
-                className="absolute inset-0 appearance-none focus:outline-none"
+                className="absolute inset-0 focus:outline-none appearance-none"
               />
               <span
                 className={clsx(
-                  "text-sm font-medium transition-colors duration-200",
+                  "font-medium text-sm transition-colors duration-200",
                   {
                     "text-gray-900": view === viewOption,
                     "text-gray-600 group-hover:text-gray-900":
