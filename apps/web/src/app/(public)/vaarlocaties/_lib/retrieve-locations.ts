@@ -4,7 +4,7 @@ import {
   unstable_cacheTag as cacheTag,
 } from "next/cache";
 import { cache } from "react";
-import { listAllLocations } from "~/lib/nwd";
+import { listAllActiveLocations } from "~/lib/nwd";
 
 // const mapsClient = new Client({});
 
@@ -13,7 +13,8 @@ async function retrieveLocationsWithAllMeta() {
   cacheLife("weeks");
   cacheTag("locations");
 
-  const locations = await listAllLocations();
+  const locations = await listAllActiveLocations();
+
   const locationsWithCity = await Promise.all(
     locations.map(async (location) => {
       if (
