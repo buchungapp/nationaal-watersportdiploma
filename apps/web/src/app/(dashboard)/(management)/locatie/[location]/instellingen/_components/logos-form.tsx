@@ -5,14 +5,8 @@ import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
-import {
-  FieldGroup,
-  Fieldset,
-  Legend,
-} from "~/app/(dashboard)/_components/fieldset";
-import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
 import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
-import { Text } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { updateLocationLogosAction } from "~/app/_actions/location/update-location-logos-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
@@ -64,17 +58,7 @@ export default function LogosForm({
   return (
     <form className={className} action={execute}>
       <Fieldset>
-        <Legend>
-          <Subheading className="select-none">Logo's</Subheading>
-        </Legend>
-        <Text>
-          We gebruiken verschillende variaties. Zorg dat ze allemaal up-to-date
-          zijn.
-        </Text>
-
         <FieldGroup>
-          <Divider soft className="my-10" />
-
           <FieldSection
             label="Standaard"
             description="Het algemene logo van de vaarlocatie."
