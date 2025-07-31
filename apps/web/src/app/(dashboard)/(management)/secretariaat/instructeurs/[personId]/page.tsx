@@ -8,9 +8,7 @@ import {
   getAvailableKerntaakonderdelen,
   getPersonKwalificaties,
 } from "~/app/_actions/kss/manage-kwalificaties";
-import { getUserOrThrow, listCourses } from "~/lib/nwd";
-import { isSecretariaat } from "~/utils/auth/is-secretariaat";
-import { isSystemAdmin } from "~/utils/auth/is-system-admin";
+import { listCourses } from "~/lib/nwd";
 import KwalificatiesTable from "./_components/kwalificaties-table";
 import { PersonInfo } from "./_components/person-info";
 
@@ -62,18 +60,6 @@ export default async function PersonKwalificatiesPage({
   params: Promise<{ personId: string }>;
   searchParams: Promise<{ course?: string }>;
 }) {
-  const user = await getUserOrThrow();
-
-  // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
-    return (
-      <>
-        <Heading level={1}>Geen toegang</Heading>
-        <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </>
-    );
-  }
-
   const { personId } = await params;
   const { course: selectedCourseId } = await searchParams;
 

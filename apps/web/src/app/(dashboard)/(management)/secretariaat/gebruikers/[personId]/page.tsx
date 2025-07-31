@@ -5,9 +5,7 @@ import { Suspense } from "react";
 import ProgressSection from "~/app/(dashboard)/(account)/profiel/[handle]/_components/progress/progress";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { getPersonById, getUserOrThrow } from "~/lib/nwd";
-import { isSecretariaat } from "~/utils/auth/is-secretariaat";
-import { isSystemAdmin } from "~/utils/auth/is-system-admin";
+import { getPersonById } from "~/lib/nwd";
 import { Locations } from "./_components/locations/locations";
 import { Personalia } from "./_components/personalia/personalia";
 import { CertificateActions } from "./_components/progress/certificate-actions";
@@ -19,18 +17,6 @@ export default async function PersonPage({
 }: {
   params: Promise<{ personId: string }>;
 }) {
-  const user = await getUserOrThrow();
-
-  // Check if user is system admin or secretariaat
-  if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
-    return (
-      <>
-        <Heading level={1}>Geen toegang</Heading>
-        <Text className="mt-2">Je hebt geen toegang tot deze pagina.</Text>
-      </>
-    );
-  }
-
   const { personId } = await params;
   const personPromise = getPersonById(personId).catch(() => notFound());
 

@@ -23,8 +23,9 @@ import {
 } from "../_components/navbar";
 import { SidebarLayout } from "../_components/sidebar-layout";
 import { UserAvatar } from "../_components/user-avatar";
+import { withSecretariaatAuthorization } from "./secretariaat/_components/unauthorized";
 
-export default function Layout({
+async function Layout({
   children,
   sidebar,
 }: Readonly<{
@@ -71,3 +72,5 @@ export default function Layout({
     </SidebarLayout>
   );
 }
+
+export default withSecretariaatAuthorization(Layout, "notFound");
