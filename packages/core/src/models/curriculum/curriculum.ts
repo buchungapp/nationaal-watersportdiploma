@@ -11,6 +11,7 @@ import {
   isNotNull,
   isNull,
   lte,
+  notInArray,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -556,6 +557,44 @@ export const linkModule = wrapCommand(
         curriculumId,
         moduleId,
       };
+    },
+  ),
+);
+
+export const updateGearTypes = wrapCommand(
+  "curriculum.updateGearTypes",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+      gearTypes: z.array(uuidSchema),
+    }),
+    async ({ curriculumId, gearTypes }) => {
+      const query = useQuery();
+
+      await Promise.all([
+        query
+          .delete(s.curriculumGearLink)
+          .where(
+            and(
+              eq(s.curriculumGearLink.curriculumId, curriculumId),
+              notInArray(s.curriculumGearLink.gearTypeId, gearTypes),
+            ),
+          ),
+        query
+          .insert(s.curriculumGearLink)
+          .values(
+            gearTypes.map((gearTypeId) => ({
+              gearTypeId,
+              curriculumId,
+            })),
+          )
+          .onConflictDoNothing({
+            target: [
+              s.curriculumGearLink.gearTypeId,
+              s.curriculumGearLink.curriculumId,
+            ],
+          }),
+      ]);
     },
   ),
 );

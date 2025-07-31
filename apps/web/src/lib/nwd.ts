@@ -793,6 +793,7 @@ export const listCompetencies = async () => {
 export const listGearTypes = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("gear-types");
 
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list();
@@ -804,6 +805,7 @@ export const listGearTypes = async () => {
 export const listGearTypesForLocation = async (locationId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("gear-types");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -930,6 +932,7 @@ export const listProgramsForCourse = async (courseId: string) => {
 export const listCurriculaByDiscipline = async (disciplineId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -943,6 +946,7 @@ export const listCurriculaByDiscipline = async (disciplineId: string) => {
 export const listCurriculaByIds = async (curriculumIds: string[]) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -959,6 +963,7 @@ export const listCurriculaByProgram = async (
 ) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -972,6 +977,7 @@ export const listCurriculaByProgram = async (
 export const retrieveCurriculumById = async (id: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     return await Curriculum.getById({ id });
@@ -990,6 +996,39 @@ export const countStartedStudentsForCurriculum = cache(
   },
 );
 
+export const updateCurriculumCompetencyRequirement = async (
+  competencyId: string,
+  requirement: string,
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.Competency.updateRequirement({
+      competencyId,
+      requirement,
+    });
+  });
+};
+
+export const updateCurriculumGearTypes = async (
+  curriculumId: string,
+  gearTypes: string[],
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.updateGearTypes({ curriculumId, gearTypes });
+  });
+};
+
 export const copyCurriculum = async ({
   curriculumId,
   revision,
@@ -998,6 +1037,12 @@ export const copyCurriculum = async ({
   revision?: string;
 }) => {
   return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
     return Curriculum.copy({
       curriculumId,
       revision: revision ?? `Copy of ${new Date().toISOString()}`,
@@ -1008,6 +1053,8 @@ export const copyCurriculum = async ({
 export const listGearTypesByCurriculum = async (curriculumId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
 
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list({
@@ -1026,6 +1073,8 @@ export const listGearTypesByCurriculumForLocation = async (
 ) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
