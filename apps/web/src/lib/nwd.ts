@@ -28,14 +28,23 @@ import {
 } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
+import { isSystemAdmin } from "~/utils/auth/is-system-admin";
 import { invariant } from "~/utils/invariant";
 import posthog from "./posthog";
+
+export const validSlugRegex = new RegExp(/^[a-zA-Z0-9\-]+$/);
 
 export type ActorType =
   | "student"
   | "instructor"
   | "location_admin"
-  | "pvb_beoordelaar";
+  | "pvb_beoordelaar"
+  | "secretariaat";
+
+export type LocationActorType = Exclude<
+  ActorType,
+  "secretariaat" | "pvb_beoordelaar"
+>;
 
 invariant(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -147,6 +156,23 @@ export async function getPrimaryPerson<T extends boolean = true>(
   return primaryPerson;
 }
 
+export async function isUserActiveActorType(
+  userId: string,
+  actorType: ActorType,
+) {
+  return makeRequest(async () => {
+    const activeTypes = await User.Actor.listActiveTypesForUser({
+      userId,
+    });
+
+    return activeTypes.includes(actorType);
+  });
+}
+
+export async function isSecretariaat(userId: string) {
+  return await isUserActiveActorType(userId, "secretariaat");
+}
+
 async function isActiveActorTypeInLocation({
   actorType,
   locationId,
@@ -154,7 +180,7 @@ async function isActiveActorTypeInLocation({
 }: {
   personId: string;
   locationId: string;
-  actorType: Exclude<ActorType, "pvb_beoordelaar">[];
+  actorType: LocationActorType[];
 }) {
   const availableLocations = await User.Person.listLocationsByRole({
     personId: personId,
@@ -224,9 +250,8 @@ export const getUserOrThrow = cache(async () => {
     if (isImpersonating) {
       // Verify the current user is a system admin
       const currentUserData = await User.fromId(authUser.id);
-      const isSystemAdmin = currentUserData?.email === "maurits@buchung.nl";
 
-      if (!isSystemAdmin) {
+      if (!isSystemAdmin(currentUserData?.email)) {
         // Remove invalid impersonation cookie
         cookieStore.delete("impersonated_user_id");
         throw new Error("Unauthorized impersonation attempt");
@@ -276,8 +301,8 @@ export const startImpersonation = async (targetUserId: string) => {
     const authUser = await getUserOrThrow();
 
     // Verify system admin permissions
-    const isSystemAdmin = authUser.email === "maurits@buchung.nl";
-    if (!isSystemAdmin) {
+    const isCurrentUserSystemAdmin = isSystemAdmin(authUser.email);
+    if (!isCurrentUserSystemAdmin) {
       throw new Error("Unauthorized");
     }
 
@@ -468,15 +493,18 @@ export const listCertificatesForPerson = cache(
       const isSelf = requestingUser.persons.map((p) => p.id).includes(personId);
 
       if (!isSelf) {
-        if (!locationId) {
+        if (locationId) {
+          await validatePersonAccessCheck({
+            locationId,
+            requestedPersonId: personId,
+            requestingUser,
+          });
+        } else if (
+          !isSystemAdmin(requestingUser.email) &&
+          !(await isSecretariaat(requestingUser.authUserId))
+        ) {
           throw new Error("Unauthorized");
         }
-
-        await validatePersonAccessCheck({
-          locationId,
-          requestedPersonId: personId,
-          requestingUser,
-        });
       }
 
       const certificates = await Certificate.list({
@@ -649,6 +677,7 @@ export const listCertificatesByNumber = cache(
       if (!user && numbers.length > 1) {
         // @TODO this is a temporary fix to allow for consumers to download their certificate without being logged in
         // we should find a better way to handle this
+        // @TODO: Also fix that the secretariaat can download certificates
         redirect("/login");
       }
 
@@ -768,6 +797,7 @@ export const listCompetencies = async () => {
 export const listGearTypes = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("gear-types");
 
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list();
@@ -779,6 +809,7 @@ export const listGearTypes = async () => {
 export const listGearTypesForLocation = async (locationId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("gear-types");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -789,6 +820,64 @@ export const listGearTypesForLocation = async (locationId: string) => {
     });
 
     return gearTypes;
+  });
+};
+
+export const listGearTypesWithCurricula = async () => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
+
+  return makeRequest(async () => {
+    const gearTypes = await Curriculum.GearType.list();
+
+    const gearTypesWithCurricula = await Promise.all(
+      gearTypes.map(async (gearType) => ({
+        ...gearType,
+        curricula: await Curriculum.list({
+          filter: { gearTypeId: gearType.id },
+        }),
+      })),
+    );
+
+    return gearTypesWithCurricula;
+  });
+};
+
+export const updateGearType = async (gearTypeId: string, title: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.GearType.update({ id: gearTypeId, title });
+  });
+};
+
+export const updateGearTypeCurricula = async (
+  gearTypeId: string,
+  curriculumIds: string[],
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.GearType.updateCurricula({
+      gearTypeId,
+      curriculumIds,
+    });
   });
 };
 
@@ -902,9 +991,37 @@ export const listProgramsForCourse = async (courseId: string) => {
   });
 };
 
+export const listCurricula = async () => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("curricula");
+
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list();
+
+    return curricula;
+  });
+};
+
+export const listCurriculaByGearType = async (gearTypeId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
+
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list({
+      filter: { gearTypeId },
+    });
+
+    return curricula;
+  });
+};
+
 export const listCurriculaByDiscipline = async (disciplineId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -918,6 +1035,7 @@ export const listCurriculaByDiscipline = async (disciplineId: string) => {
 export const listCurriculaByIds = async (curriculumIds: string[]) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -934,6 +1052,7 @@ export const listCurriculaByProgram = async (
 ) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -947,6 +1066,7 @@ export const listCurriculaByProgram = async (
 export const retrieveCurriculumById = async (id: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
 
   return makeRequest(async () => {
     return await Curriculum.getById({ id });
@@ -965,6 +1085,45 @@ export const countStartedStudentsForCurriculum = cache(
   },
 );
 
+export const updateCurriculumCompetencyRequirement = async (
+  competencyId: string,
+  requirement: string,
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.Competency.updateRequirement({
+      competencyId,
+      requirement,
+    });
+  });
+};
+
+export const updateCurriculumGearTypes = async (
+  curriculumId: string,
+  gearTypes: string[],
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.updateGearTypes({ curriculumId, gearTypes });
+  });
+};
+
 export const copyCurriculum = async ({
   curriculumId,
   revision,
@@ -973,6 +1132,15 @@ export const copyCurriculum = async ({
   revision?: string;
 }) => {
   return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
     return Curriculum.copy({
       curriculumId,
       revision: revision ?? `Copy of ${new Date().toISOString()}`,
@@ -983,6 +1151,8 @@ export const copyCurriculum = async ({
 export const listGearTypesByCurriculum = async (curriculumId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
 
   return makeRequest(async () => {
     const gearTypes = await Curriculum.GearType.list({
@@ -1001,6 +1171,8 @@ export const listGearTypesByCurriculumForLocation = async (
 ) => {
   "use cache";
   cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -1015,13 +1187,26 @@ export const listGearTypesByCurriculumForLocation = async (
   });
 };
 
+export const retrieveLocationById = async (id: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("locations");
+
+  return makeRequest(async () => {
+    return await Location.fromId(id);
+  });
+};
+
 export const retrieveLocationByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
   cacheTag("locations");
 
   return makeRequest(async () => {
-    return await Location.fromHandle(handle);
+    return await Location.fromHandle({
+      handle,
+      filter: { status: ["active", "hidden", "draft"] },
+    });
   });
 };
 
@@ -1056,6 +1241,43 @@ export const listPersonsForLocation = cache(async (locationId: string) => {
   });
 });
 
+export const listPersonsWithPagination = cache(
+  async ({
+    limit,
+    offset,
+    filter,
+  }: {
+    limit?: number;
+    offset?: number;
+    filter?: {
+      actorType?: ActorType | ActorType[] | null;
+      q?: string;
+    };
+  } = {}) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      const isCurrentUserSystemAdmin = isSystemAdmin(user.email);
+      const isCurrentUserSecretariaat = await isSecretariaat(user.authUserId);
+
+      if (!isCurrentUserSystemAdmin && !isCurrentUserSecretariaat) {
+        throw new Error("Unauthorized");
+      }
+
+      const persons = await User.Person.list({
+        filter: {
+          q: filter?.q ?? undefined,
+          actorType: filter?.actorType ?? undefined,
+        },
+        limit,
+        offset,
+      });
+
+      return persons;
+    });
+  },
+);
+
 export const listPersonsForLocationWithPagination = cache(
   async (
     locationId: string,
@@ -1066,7 +1288,10 @@ export const listPersonsForLocationWithPagination = cache(
     }: {
       limit?: number;
       offset?: number;
-      filter?: { actorType?: ActorType | ActorType[] | null; q?: string };
+      filter?: {
+        actorType?: LocationActorType | LocationActorType[] | null;
+        q?: string;
+      };
     } = {},
   ) => {
     return makeRequest(async () => {
@@ -1128,7 +1353,48 @@ export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
   });
 });
 
-export const getPersonById = cache(
+export const getPersonById = cache(async (personId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const person = await User.Person.byIdOrHandle({ id: personId });
+    return person;
+  });
+});
+
+export const mergePersons = async (
+  primaryPersonId: string,
+  secondaryPersonId: string,
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    // const primaryPerson = await getPrimaryPerson(user);
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await User.Person.mergePersons({
+      personId: secondaryPersonId,
+      targetPersonId: primaryPersonId,
+      // createdBy:
+      //   primaryPerson.actors.find((actor) => actor.type === "secretariaat")
+      //     ?.id ?? undefined,
+    });
+  });
+};
+
+export const getPersonByIdForLocation = cache(
   async (personId: string, locationId: string) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
@@ -1172,7 +1438,7 @@ export const listPersonsForUser = cache(async () => {
 });
 
 export const listPersonsForLocationByRole = cache(
-  async (locationId: string, role: Exclude<ActorType, "pvb_beoordelaar">) => {
+  async (locationId: string, role: LocationActorType) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
@@ -1197,30 +1463,83 @@ export const listPersonsForLocationByRole = cache(
   },
 );
 
-export const listLocationsForPerson = cache(
-  async (
-    personId?: string,
-    roles?: Exclude<ActorType, "pvb_beoordelaar">[],
-  ) => {
+export const listActiveLocationsForPerson = cache(
+  async (personId?: string, roles?: LocationActorType[]) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
 
-      if (personId && person.id !== personId) {
+      if (
+        personId &&
+        person.id !== personId &&
+        !isSystemAdmin(user.email) &&
+        !(await isSecretariaat(user.authUserId))
+      ) {
         throw new Error("Unauthorized");
       }
 
-      const locations = await User.Person.listLocationsByRole({
-        personId: person.id,
-        roles,
-      });
+      const [locations, allLocations] = await Promise.all([
+        User.Person.listLocationsByRole({
+          personId: personId ?? person.id,
+          roles,
+        }),
+        Location.list({
+          filter: { status: ["hidden", "draft", "active"] },
+        }),
+      ]);
 
-      return await Location.list().then((locs) =>
-        locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
-      );
+      return locations.map((l) => {
+        const location = allLocations.find((loc) => loc.id === l.locationId);
+        if (!location) {
+          throw new Error(`Location not found: ${l.locationId}`);
+        }
+
+        return {
+          ...location,
+          roles: l.roles,
+        };
+      });
     });
   },
 );
+
+export const listAllLocationsForPerson = cache(async (personId?: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+    const person = await getPrimaryPerson(user);
+
+    if (
+      personId &&
+      person.id !== personId &&
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const [locations, allLocations] = await Promise.all([
+      User.Person.listAllLocations({
+        personId: personId ?? person.id,
+      }),
+      Location.list({
+        filter: { status: ["hidden", "draft", "active"] },
+      }),
+    ]);
+
+    return locations.map((l) => {
+      const location = allLocations.find((loc) => loc.id === l.locationId);
+      if (!location) {
+        throw new Error(`Location not found: ${l.locationId}`);
+      }
+
+      return {
+        ...location,
+        linkStatus: l.linkStatus,
+        roles: l.roles,
+      };
+    });
+  });
+});
 
 export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   async () => {
@@ -1233,16 +1552,37 @@ export const listLocationsWherePrimaryPersonHasManagementRole = cache(
         roles: ["instructor", "location_admin"],
       });
 
-      return await Location.list().then((locs) =>
+      return await Location.list({
+        filter: { status: ["hidden", "draft", "active"] },
+      }).then((locs) =>
         locs.filter((l) => locations.some((loc) => loc.locationId === l.id)),
       );
     });
   },
 );
 
-export const listAllLocations = cache(async () => {
+export const listLocations = cache(
+  async (filter?: {
+    status?:
+      | "active"
+      | "draft"
+      | "hidden"
+      | "archived"
+      | ("active" | "draft" | "hidden" | "archived")[];
+  }) => {
+    return makeRequest(async () => {
+      return await Location.list({
+        filter: { status: filter?.status },
+      });
+    });
+  },
+);
+
+export const listAllActiveLocations = cache(async () => {
   return makeRequest(async () => {
-    return await Location.list();
+    return await Location.list({
+      filter: { status: "active" },
+    });
   });
 });
 
@@ -1278,7 +1618,7 @@ export const createInstructorForLocation = async (
 
 export const createPersonForLocation = async (
   locationId: string,
-  roles: ActorType[],
+  roles: LocationActorType[],
   personInput: {
     email: string;
     firstName: string;
@@ -1588,6 +1928,58 @@ export const issueCertificatesInCohort = async ({
   });
 };
 
+export const removeStudentCurricula = async ({
+  studentCurriculaIds,
+}: {
+  studentCurriculaIds: string | [string, ...string[]];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      if (
+        !isSystemAdmin(authUser.email) &&
+        !(await isSecretariaat(authUser.authUserId))
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      await Student.Curriculum.remove({
+        id: studentCurriculaIds,
+      });
+
+      return;
+    });
+  });
+};
+
+export const withdrawCertificates = async ({
+  certificateIds,
+}: {
+  certificateIds: string[];
+}) => {
+  return makeRequest(async () => {
+    return withTransaction(async () => {
+      const authUser = await getUserOrThrow();
+
+      if (
+        !isSystemAdmin(authUser.email) &&
+        !(await isSecretariaat(authUser.authUserId))
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      await Promise.all(
+        certificateIds.map((certificateId) =>
+          Certificate.withdraw({ certificateId, ignoreTimeLimit: true }),
+        ),
+      );
+
+      return;
+    });
+  });
+};
+
 export const withdrawCertificatesInCohort = async ({
   certificateIds,
   cohortId,
@@ -1627,7 +2019,13 @@ export const withdrawCertificatesInCohort = async ({
         throw new Error("Unauthorized");
       }
 
-      await Promise.all(certificateIds.map(Certificate.withdraw));
+      // TODO: Check if the certificates are in the cohort
+
+      await Promise.all(
+        certificateIds.map((certificateId) =>
+          Certificate.withdraw({ certificateId }),
+        ),
+      );
 
       return;
     });
@@ -1886,6 +2284,49 @@ export const getIsActiveInstructorByPersonId = cache(
   },
 );
 
+export const createLocation = async ({
+  name,
+  handle,
+}: {
+  name: string;
+  handle: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Location.create({
+      name,
+      handle,
+      status: "draft",
+    });
+  });
+};
+
+export const updateLocationStatus = async (
+  id: string,
+  status: "draft" | "hidden" | "archived" | "active",
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Location.updateDetails({ id, status });
+  });
+};
+
 export type SocialPlatform =
   | "facebook"
   | "instagram"
@@ -1911,11 +2352,16 @@ export const updateLocationLogos = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: id,
-      personId: primaryPerson.id,
-    });
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: id,
+        personId: primaryPerson.id,
+      });
+    }
 
     const location = await Location.fromId(id);
     const createOptions = { isPublic: true };
@@ -1967,11 +2413,16 @@ export const updateLocationDetails = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: id,
-      personId: primaryPerson.id,
-    });
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: id,
+        personId: primaryPerson.id,
+      });
+    }
 
     await Location.updateDetails({
       id,
@@ -2001,11 +2452,16 @@ export const updateLocationResources = async (
     const authUser = await getUserOrThrow();
     const primaryPerson = await getPrimaryPerson(authUser);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: id,
-      personId: primaryPerson.id,
-    });
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: id,
+        personId: primaryPerson.id,
+      });
+    }
 
     await Location.updateResources({
       id,
@@ -2902,7 +3358,7 @@ export async function upsertActorForLocation({
 }: {
   locationId: string;
   personId: string;
-  type: ActorType;
+  type: LocationActorType;
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([
@@ -2930,7 +3386,7 @@ export async function dropActorForLocation({
 }: {
   locationId: string;
   personId: string;
-  type: ActorType;
+  type: LocationActorType;
 }) {
   return makeRequest(async () => {
     const [primaryPerson] = await Promise.all([
@@ -2958,18 +3414,25 @@ export async function updateEmailForPerson({
 }: {
   personId: string;
   email: string;
-  locationId: string;
+  locationId?: string;
 }) {
   return makeRequest(async () => {
-    const [primaryPerson] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
-    ]);
+    const user = await getUserOrThrow();
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId: locationId,
-      personId: primaryPerson.id,
-    });
+    if (locationId) {
+      const primaryPerson = await getPrimaryPerson(user);
+
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId: locationId,
+        personId: primaryPerson.id,
+      });
+    } else if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
 
     return await User.Person.moveToAccountByEmail({
       email,
@@ -3190,8 +3653,8 @@ export const updatePersonDetails = async ({
   birthCountry?: string;
 }) => {
   return makeRequest(async () => {
-    const [primaryPerson, person] = await Promise.all([
-      getUserOrThrow().then(getPrimaryPerson),
+    const [user, person] = await Promise.all([
+      getUserOrThrow(),
       User.Person.byIdOrHandle({ id: personId }),
     ]);
 
@@ -3200,6 +3663,7 @@ export const updatePersonDetails = async ({
     }
 
     if (locationId) {
+      const primaryPerson = await getPrimaryPerson(user);
       await isActiveActorTypeInLocation({
         actorType: ["location_admin"],
         locationId: locationId,
@@ -3216,7 +3680,11 @@ export const updatePersonDetails = async ({
       if (!associatedToLocation) {
         throw new Error("Unauthorized");
       }
-    } else {
+    } else if (
+      !(await isSecretariaat(user.authUserId)) &&
+      !isSystemAdmin(user.email)
+    ) {
+      const primaryPerson = await getPrimaryPerson(user);
       if (person.userId !== primaryPerson.userId) {
         throw new Error("Unauthorized");
       }

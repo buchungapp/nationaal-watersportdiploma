@@ -10,7 +10,6 @@ import { Inter } from "next/font/google";
 
 import Analytics from "~/app/_components/analytics";
 import { CommonProviders } from "~/app/_components/providers";
-import "../globals.css";
 
 const inter = Inter({
   subsets: ["latin"],

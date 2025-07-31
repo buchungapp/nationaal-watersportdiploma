@@ -60,7 +60,7 @@ async function ProgramTable(props: {
   );
 }
 
-export default function Page(props: {
+export default async function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (

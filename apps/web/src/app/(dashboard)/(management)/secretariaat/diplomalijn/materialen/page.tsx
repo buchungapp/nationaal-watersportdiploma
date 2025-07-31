@@ -1,15 +1,23 @@
 import FlexSearch from "flexsearch";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listGearTypes } from "~/lib/nwd";
+import {
+  listCurricula,
+  listGearTypesWithCurricula,
+  listPrograms,
+} from "~/lib/nwd";
 import Search from "../../../_components/search";
-import GearTypeTableCLient from "./_components/gear-type-table";
+import GearTypeTableClient from "./_components/gear-type-table";
 
 async function GearTypeTable(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const searchParams = await props.searchParams;
-  const gearTypes = await listGearTypes();
+  const [gearTypes, allCurricula, allPrograms] = await Promise.all([
+    listGearTypesWithCurricula(),
+    listCurricula(),
+    listPrograms(),
+  ]);
   const searchQuery = searchParams?.query?.toString() ?? null;
 
   // Create a FlexSearch index
@@ -49,9 +57,11 @@ async function GearTypeTable(props: {
   );
 
   return (
-    <GearTypeTableCLient
+    <GearTypeTableClient
       gearTypes={paginatedGearTypes}
       totalItems={filteredGearTypes.length}
+      allCurricula={allCurricula}
+      allPrograms={allPrograms}
     />
   );
 }
@@ -71,8 +81,10 @@ export default function Page(props: {
       </div>
       <Suspense
         fallback={
-          <GearTypeTableCLient
+          <GearTypeTableClient
             gearTypes={[]}
+            allCurricula={[]}
+            allPrograms={[]}
             totalItems={0}
             placeholderRows={4}
           />

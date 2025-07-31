@@ -1,6 +1,6 @@
 "use server";
 import {
-  type ActorType,
+  type LocationActorType,
   getUserOrThrow,
   isInstructorInCohort as isInstructorInCohortInner,
   listCountries as listCountriesInner,
@@ -61,7 +61,7 @@ export async function listCountries() {
 
 export async function listPersonsForLocationByRole(
   locationId: string,
-  role: Exclude<ActorType, "pvb_beoordelaar">,
+  role: LocationActorType,
 ) {
   return listPersonsForLocationByRoleInner(locationId, role);
 }

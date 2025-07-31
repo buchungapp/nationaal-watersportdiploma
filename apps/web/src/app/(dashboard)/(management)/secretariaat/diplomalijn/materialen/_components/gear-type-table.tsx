@@ -26,28 +26,54 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
-import type { listGearTypes } from "~/lib/nwd";
+import type {
+  listCurricula,
+  listGearTypesWithCurricula,
+  listPrograms,
+} from "~/lib/nwd";
+import { EditCurriculaDialog } from "./dialogs/edit-curricula-dialog";
+import { EditGearTypeDialog } from "./dialogs/edit-gear-type";
 
-type GearType = Awaited<ReturnType<typeof listGearTypes>>[number];
+type GearType = Awaited<ReturnType<typeof listGearTypesWithCurricula>>[number];
 
 const columnHelper = createColumnHelper<GearType>();
-
-const columns = [
-  columnHelper.accessor("title", {
-    header: "Naam",
-  }),
-];
 
 export default function ModuleTable({
   gearTypes,
   totalItems,
   placeholderRows,
+  allCurricula,
+  allPrograms,
 }: {
   gearTypes: GearType[];
   totalItems: number;
   placeholderRows?: number;
+  allCurricula: Awaited<ReturnType<typeof listCurricula>>;
+  allPrograms: Awaited<ReturnType<typeof listPrograms>>;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const columns = [
+    columnHelper.accessor("title", {
+      header: "Naam",
+    }),
+    columnHelper.display({
+      id: "actions",
+      cell: ({ row }) => {
+        return (
+          <div className="flex justify-end items-center gap-x-2">
+            <EditGearTypeDialog gearType={row.original} />
+            <EditCurriculaDialog
+              gearTypeId={row.original.id}
+              allCurricula={allCurricula}
+              allPrograms={allPrograms}
+              currentCurricula={row.original.curricula}
+            />
+          </div>
+        );
+      },
+    }),
+  ];
 
   const table = useReactTable({
     data: gearTypes,

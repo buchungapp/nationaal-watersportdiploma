@@ -1,5 +1,14 @@
 import { schema as s } from "@nawadi/db";
-import { type SQL, and, asc, eq, exists, inArray, isNull } from "drizzle-orm";
+import {
+  type SQL,
+  and,
+  asc,
+  eq,
+  exists,
+  inArray,
+  isNull,
+  notInArray,
+} from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
@@ -125,6 +134,21 @@ export const list = wrapQuery(
   ),
 );
 
+export const update = wrapCommand(
+  "curriculum.gear-type.update",
+  withZod(
+    insertSchema.pick({ title: true }).extend({ id: uuidSchema }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+      await query
+        .update(s.gearType)
+        .set({ title: input.title })
+        .where(eq(s.gearType.id, input.id));
+    },
+  ),
+);
+
 export const fromHandle = wrapQuery(
   "curriculum.gear-type.fromHandle",
   withZod(handleSchema, selectSchema.nullable(), async (handle) => {
@@ -176,6 +200,44 @@ export const linkToCurriculum = wrapCommand(
             s.curriculumGearLink.curriculumId,
           ],
         });
+    },
+  ),
+);
+
+export const updateCurricula = wrapCommand(
+  "curriculum.gear-type.updateCurricula",
+  withZod(
+    z.object({
+      gearTypeId: uuidSchema,
+      curriculumIds: z.array(uuidSchema),
+    }),
+    async ({ gearTypeId, curriculumIds }) => {
+      const query = useQuery();
+
+      await Promise.all([
+        query
+          .delete(s.curriculumGearLink)
+          .where(
+            and(
+              eq(s.curriculumGearLink.gearTypeId, gearTypeId),
+              notInArray(s.curriculumGearLink.curriculumId, curriculumIds),
+            ),
+          ),
+        query
+          .insert(s.curriculumGearLink)
+          .values(
+            curriculumIds.map((curriculumId) => ({
+              gearTypeId,
+              curriculumId,
+            })),
+          )
+          .onConflictDoNothing({
+            target: [
+              s.curriculumGearLink.gearTypeId,
+              s.curriculumGearLink.curriculumId,
+            ],
+          }),
+      ]);
     },
   ),
 );

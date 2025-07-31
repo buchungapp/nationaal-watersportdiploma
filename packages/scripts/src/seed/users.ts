@@ -12,6 +12,25 @@ export async function deleteUsers() {
 }
 
 export async function addUsers() {
+  // Secretariaat
+  const secretariaatUser = await User.getOrCreateFromEmail({
+    email: "info@nationaalwatersportdiploma.nl",
+    displayName: "Secretariaat",
+  });
+
+  const secretariaatPerson = await User.Person.getOrCreate({
+    userId: secretariaatUser.id,
+    firstName: "Secretariaat",
+    lastName: "Nationaal Watersport Diploma",
+    lastNamePrefix: null,
+    dateOfBirth: new Date("01-01-1970").toISOString(),
+  });
+
+  await User.Actor.upsert({
+    type: "secretariaat",
+    personId: secretariaatPerson.id,
+  });
+
   // Admin
   const adminUser = await User.getOrCreateFromEmail({
     email: "info@zeilschool-de-optimist.nl",

@@ -11,7 +11,7 @@ type PageProps = {
   }>;
 };
 
-export default function Page({ params }: PageProps) {
+export default async function Page({ params }: PageProps) {
   return (
     <>
       <BackButton href={"/secretariaat/diplomalijn/cursussen"}>
