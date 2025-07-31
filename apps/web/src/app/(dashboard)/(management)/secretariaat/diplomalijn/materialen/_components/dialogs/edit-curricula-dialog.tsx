@@ -1,6 +1,6 @@
 "use client";
 
-import { PencilIcon } from "@heroicons/react/16/solid";
+import { AcademicCapIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -16,23 +16,29 @@ import {
 import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
 import { ListSelect } from "~/app/(dashboard)/_components/list-select";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { updateCurriculaGearTypesAction } from "~/app/_actions/secretariat/curricula/update-curriculum-gear-types-action";
+import { updateGearTypeCurriculaAction } from "~/app/_actions/secretariat/gear-type/update-curriculum-gear-types-action";
 import Spinner from "~/app/_components/spinner";
-import type { listGearTypes, listGearTypesByCurriculum } from "~/lib/nwd";
+import type {
+  listCurricula,
+  listCurriculaByGearType,
+  listPrograms,
+} from "~/lib/nwd";
 
-export function EditGearTypesDialog({
-  curriculumId,
-  allGearTypes,
-  currentGearTypes,
+export function EditCurriculaDialog({
+  gearTypeId,
+  allCurricula,
+  currentCurricula,
+  allPrograms,
 }: {
-  curriculumId: string;
-  allGearTypes: Awaited<ReturnType<typeof listGearTypes>>;
-  currentGearTypes: Awaited<ReturnType<typeof listGearTypesByCurriculum>>;
+  gearTypeId: string;
+  allCurricula: Awaited<ReturnType<typeof listCurricula>>;
+  currentCurricula: Awaited<ReturnType<typeof listCurriculaByGearType>>;
+  allPrograms: Awaited<ReturnType<typeof listPrograms>>;
 }) {
   const [isOpen, setisOpen] = useState(false);
 
   const { execute, input } = useAction(
-    updateCurriculaGearTypesAction.bind(null, curriculumId),
+    updateGearTypeCurriculaAction.bind(null, gearTypeId),
     {
       onSuccess: () => {
         setisOpen(false);
@@ -45,15 +51,16 @@ export function EditGearTypesDialog({
   );
 
   const { getInputValueAsArray } = useFormInput(input, {
-    gearTypes: currentGearTypes.map((gearType) => gearType.id),
+    curricula: currentCurricula.map((curriculum) => curriculum.id),
   });
 
-  const defaultGearTypes = getInputValueAsArray("gearTypes");
+  const defaultCurricula = getInputValueAsArray("curricula");
 
   return (
     <>
       <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
-        <PencilIcon />
+        <AcademicCapIcon />
+        Curricula
       </Button>
 
       <Dialog open={isOpen} onClose={() => setisOpen(false)}>
@@ -64,12 +71,19 @@ export function EditGearTypesDialog({
               <Field>
                 <Label>Boottypen</Label>
                 <ListSelect
-                  options={allGearTypes}
+                  options={allCurricula.sort((a, b) =>
+                    b.revision.localeCompare(a.revision),
+                  )}
                   by="id"
-                  name="gearTypes"
-                  defaultValue={defaultGearTypes}
-                  displayValue={(gearType) => gearType.title ?? ""}
-                  placeholder="Zoek boottypen..."
+                  name="curricula"
+                  placeholder="Zoek curricula..."
+                  displayValue={(curriculum) => {
+                    const program = allPrograms.find(
+                      (program) => program.id === curriculum.programId,
+                    );
+                    return `${program?.title} - ${curriculum.revision}`;
+                  }}
+                  defaultValue={defaultCurricula}
                 />
               </Field>
             </Fieldset>

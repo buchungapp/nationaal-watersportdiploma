@@ -14,29 +14,27 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
-import { ListSelect } from "~/app/(dashboard)/_components/list-select";
+import { Input } from "~/app/(dashboard)/_components/input";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { updateCurriculaGearTypesAction } from "~/app/_actions/secretariat/curricula/update-curriculum-gear-types-action";
+import { updateGearTypeAction } from "~/app/_actions/secretariat/gear-type/update-gear-type-action";
 import Spinner from "~/app/_components/spinner";
-import type { listGearTypes, listGearTypesByCurriculum } from "~/lib/nwd";
 
-export function EditGearTypesDialog({
-  curriculumId,
-  allGearTypes,
-  currentGearTypes,
+export function EditGearTypeDialog({
+  gearType,
 }: {
-  curriculumId: string;
-  allGearTypes: Awaited<ReturnType<typeof listGearTypes>>;
-  currentGearTypes: Awaited<ReturnType<typeof listGearTypesByCurriculum>>;
+  gearType: {
+    id: string;
+    title: string | null;
+  };
 }) {
   const [isOpen, setisOpen] = useState(false);
 
   const { execute, input } = useAction(
-    updateCurriculaGearTypesAction.bind(null, curriculumId),
+    updateGearTypeAction.bind(null, gearType.id),
     {
       onSuccess: () => {
         setisOpen(false);
-        toast.success("Boottypen bijgewerkt");
+        toast.success("Boottype bijgewerkt");
       },
       onError: () => {
         toast.error("Er is iets misgegaan");
@@ -44,32 +42,30 @@ export function EditGearTypesDialog({
     },
   );
 
-  const { getInputValueAsArray } = useFormInput(input, {
-    gearTypes: currentGearTypes.map((gearType) => gearType.id),
+  const { getInputValue } = useFormInput(input, {
+    title: gearType.title,
   });
-
-  const defaultGearTypes = getInputValueAsArray("gearTypes");
 
   return (
     <>
       <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
         <PencilIcon />
+        Bewerken
       </Button>
 
       <Dialog open={isOpen} onClose={() => setisOpen(false)}>
-        <DialogTitle>Wijzig boottypen</DialogTitle>
+        <DialogTitle>
+          Wijzig boottype {gearType.title ? `van '${gearType.title}'` : ""}
+        </DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
               <Field>
-                <Label>Boottypen</Label>
-                <ListSelect
-                  options={allGearTypes}
-                  by="id"
-                  name="gearTypes"
-                  defaultValue={defaultGearTypes}
-                  displayValue={(gearType) => gearType.title ?? ""}
-                  placeholder="Zoek boottypen..."
+                <Label>Naam</Label>
+                <Input
+                  name="title"
+                  defaultValue={getInputValue("title")}
+                  required
                 />
               </Field>
             </Fieldset>

@@ -72,6 +72,7 @@ export const list = wrapQuery(
             onlyCurrentActive: z.boolean().optional(),
             disciplineId: singleOrArray(uuidSchema).optional(),
             categoryId: singleOrArray(uuidSchema).optional(),
+            gearTypeId: singleOrArray(uuidSchema).optional(),
           })
           .default({}),
       })
@@ -167,6 +168,22 @@ export const list = wrapQuery(
             ),
           )
           .where(eq(s.curriculum.programId, s.program.id));
+
+        filters.push(exists(sq));
+      }
+
+      if (filter.gearTypeId) {
+        const sq = query
+          .select({ id: sql`1` })
+          .from(s.curriculumGearLink)
+          .where(
+            and(
+              eq(s.curriculumGearLink.curriculumId, s.curriculum.id),
+              Array.isArray(filter.gearTypeId)
+                ? inArray(s.curriculumGearLink.gearTypeId, filter.gearTypeId)
+                : eq(s.curriculumGearLink.gearTypeId, filter.gearTypeId),
+            ),
+          );
 
         filters.push(exists(sq));
       }
