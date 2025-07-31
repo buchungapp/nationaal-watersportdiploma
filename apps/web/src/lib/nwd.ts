@@ -820,6 +820,58 @@ export const listGearTypesForLocation = async (locationId: string) => {
   });
 };
 
+export const listGearTypesWithCurricula = async () => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
+
+  return makeRequest(async () => {
+    const gearTypes = await Curriculum.GearType.list();
+
+    const gearTypesWithCurricula = await Promise.all(
+      gearTypes.map(async (gearType) => ({
+        ...gearType,
+        curricula: await Curriculum.list({
+          filter: { gearTypeId: gearType.id },
+        }),
+      })),
+    );
+
+    return gearTypesWithCurricula;
+  });
+};
+
+export const updateGearType = async (gearTypeId: string, title: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.GearType.update({ id: gearTypeId, title });
+  });
+};
+
+export const updateGearTypeCurricula = async (
+  gearTypeId: string,
+  curriculumIds: string[],
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (!isSystemAdmin(user.email) && !isSecretariaat(user.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    return Curriculum.GearType.updateCurricula({
+      gearTypeId,
+      curriculumIds,
+    });
+  });
+};
+
 export const listCategories = async () => {
   "use cache";
   cacheLife("days");
@@ -927,6 +979,33 @@ export const listProgramsForCourse = async (courseId: string) => {
     const programs = await Course.Program.list({ filter: { courseId } });
 
     return programs;
+  });
+};
+
+export const listCurricula = async () => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("curricula");
+
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list();
+
+    return curricula;
+  });
+};
+
+export const listCurriculaByGearType = async (gearTypeId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("curricula");
+  cacheTag("gear-types");
+
+  return makeRequest(async () => {
+    const curricula = await Curriculum.list({
+      filter: { gearTypeId },
+    });
+
+    return curricula;
   });
 };
 

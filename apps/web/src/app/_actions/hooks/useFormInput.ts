@@ -30,6 +30,12 @@ type Input<T extends Record<string, unknown>> =
   | T
   | undefined;
 
+// Helper type to check if a type is an array
+type IsArray<T> = T extends readonly unknown[] ? true : false;
+
+// Helper type to get the element type of an array
+type ArrayElement<T> = T extends readonly (infer U)[] ? U : never;
+
 /**
  * @description This hook is used to get the input value from the form / execution
  * @param input The input from the useAction hook
@@ -63,5 +69,24 @@ export const useFormInput = <T extends Record<string, unknown>>(
     return (parsedInput[name] as AllValues[K]) ?? returnDefaultValue<K>(name);
   };
 
-  return { getInputValue };
+  /**
+   * @description Gets the input value and ensures it's an array if the expected type is an array
+   * @param name The name of the input
+   * @returns The input value as an array
+   */
+  const getInputValueAsArray = <K extends Key>(
+    name: K,
+  ): AllValues[K] | undefined => {
+    const value = getInputValue<K>(name);
+    if (value === undefined) return undefined;
+    if (value === null) return [] as AllValues[K];
+
+    if (!Array.isArray(value)) {
+      return [value] as AllValues[K];
+    }
+
+    return value;
+  };
+
+  return { getInputValue, getInputValueAsArray };
 };
