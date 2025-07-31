@@ -70,7 +70,9 @@ export const cohortAllocation = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex().on(table.cohortId, table.actorId, table.studentCurriculumId),
+    uniqueIndex()
+      .on(table.cohortId, table.actorId, table.studentCurriculumId)
+      .where(sql`${table.deletedAt} IS NULL`),
     index().on(table.cohortId, table.tags),
     foreignKey({
       columns: [table.cohortId],
