@@ -74,7 +74,7 @@ export default async function CertificateTemplate({
         gearTypeTitle={certificate.gearType.title}
         programTitle={certificate.program.title}
         courseTitle={certificate.program.course.title}
-        degreeRang={certificate.program.degree.rang}
+        degreeRang={certificate.program.degree.title}
       />
       <section className="grid aspect-2/1 w-full relative flex-1 grid-cols-1 lg:grid-cols-2 px-4 sm:px-8 lg:px-16 py-6 gap-16 lg:py-12">
         <div className="absolute inset-0 overflow-hidden">
