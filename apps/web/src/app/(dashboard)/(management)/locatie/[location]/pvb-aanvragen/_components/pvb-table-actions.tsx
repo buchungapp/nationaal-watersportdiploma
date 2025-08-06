@@ -292,7 +292,7 @@ export function PvbTableActions({
     // Check if action is allowed
     if (!canCancel) {
       toast.error(
-        "Alleen aanvragen in concept, wacht op voorwaarden of gereed voor beoordeling status kunnen worden geannuleerd",
+        "Alleen aanvragen in concept, wacht op voorwaarden of gereed voor beoordeling status kunnen worden ingetrokken",
       );
       return;
     }
@@ -308,14 +308,14 @@ export function PvbTableActions({
         throw new Error(result.serverError);
       }
 
-      toast.success(`${selectedIds.length} aanvragen zijn geannuleerd.`);
+      toast.success(`${selectedIds.length} aanvragen zijn ingetrokken.`);
       closeDialog();
       onClearSelection();
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Er is iets misgegaan bij het annuleren van de aanvragen.",
+          : "Er is iets misgegaan bij het intrekken van de aanvragen.",
       );
     } finally {
       setIsProcessing(false);
@@ -481,7 +481,7 @@ export function PvbTableActions({
         </DialogBody>
         <DialogActions>
           <Button plain onClick={closeDialog}>
-            Annuleren
+            Sluiten
           </Button>
           <Button
             color="blue"
@@ -535,7 +535,7 @@ export function PvbTableActions({
         </DialogBody>
         <DialogActions>
           <Button plain onClick={closeDialog}>
-            Annuleren
+            Sluiten
           </Button>
           <Button
             color="blue"
@@ -588,11 +588,11 @@ export function PvbTableActions({
             </Combobox>
           </Field>
           {beoordelaars.length === 0 && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
-              <div className="text-sm font-medium text-amber-900">
+            <div className="bg-amber-50 mt-3 p-3 border border-amber-200 rounded-lg">
+              <div className="font-medium text-amber-900 text-sm">
                 Er zijn geen beoordelaars gevonden op deze locatie
               </div>
-              <div className="text-xs text-amber-700 mt-1">
+              <div className="mt-1 text-amber-700 text-xs">
                 Beoordelaars zijn personen die de rol 'instructeur' hebben
                 binnen de locatie én minimaal het kwalificatieprofiel
                 'Beoordelaar-4' hebben afgerond.
@@ -602,7 +602,7 @@ export function PvbTableActions({
         </DialogBody>
         <DialogActions>
           <Button plain onClick={closeDialog}>
-            Annuleren
+            Sluiten
           </Button>
           <Button
             color="blue"
@@ -616,9 +616,9 @@ export function PvbTableActions({
 
       {/* Cancel Dialog */}
       <Dialog open={activeDialog === "cancel"} onClose={closeDialog}>
-        <DialogTitle>Aanvragen annuleren</DialogTitle>
+        <DialogTitle>Aanvragen intrekken</DialogTitle>
         <DialogDescription>
-          Weet je zeker dat je {selectedIds.length} aanvragen wilt annuleren?
+          Weet je zeker dat je {selectedIds.length} aanvragen wilt intrekken?
           Deze actie kan niet ongedaan worden gemaakt.
         </DialogDescription>
         <DialogActions>
@@ -626,7 +626,7 @@ export function PvbTableActions({
             Terug
           </Button>
           <Button color="red" onClick={handleCancel} disabled={isProcessing}>
-            Annuleren
+            Intrekken
           </Button>
         </DialogActions>
       </Dialog>
@@ -664,7 +664,7 @@ export function PvbTableActions({
         </DialogDescription>
         <DialogActions>
           <Button plain onClick={closeDialog}>
-            Terug
+            Sluiten
           </Button>
           <Button
             color="blue"
