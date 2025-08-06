@@ -5,14 +5,9 @@ import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
-import {
-  FieldGroup,
-  Fieldset,
-  Legend,
-} from "~/app/(dashboard)/_components/fieldset";
-import { Subheading } from "~/app/(dashboard)/_components/heading";
+import { FieldGroup, Fieldset } from "~/app/(dashboard)/_components/fieldset";
 import { Input, InputGroup } from "~/app/(dashboard)/_components/input";
-import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { TextLink } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { updateLocationSocialsAction } from "~/app/_actions/location/update-location-socials-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
@@ -85,14 +80,7 @@ export default function SocialsForm({
   return (
     <form className={className} action={execute}>
       <Fieldset>
-        <Legend>
-          <Subheading className="select-none">Socials</Subheading>
-        </Legend>
-        <Text>Beheer de links naar verschillende social media kanalen.</Text>
-
         <FieldGroup>
-          <Divider soft className="my-10" />
-
           <FieldSection
             label="Google Place ID"
             description={
