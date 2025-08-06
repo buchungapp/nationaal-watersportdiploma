@@ -2,15 +2,24 @@
 
 import {
   AdjustmentsHorizontalIcon,
+  FunnelIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
 import { formatters } from "@nawadi/lib";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import clsx from "clsx";
 import fuzzysort from "fuzzysort";
 import Link from "next/link";
 import type React from "react";
 import { useMemo, useRef, useState } from "react";
-import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import { Button } from "~/app/(dashboard)/_components/button";
+import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
+import { Divider } from "~/app/(dashboard)/_components/divider";
+import { Label } from "~/app/(dashboard)/_components/fieldset";
+import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import {
   Popover,
@@ -55,6 +64,13 @@ interface KwalificatiesTableProps {
   locationHandle: string;
 }
 
+const niveaus = [1, 2, 3, 4, 5];
+const types = {
+  instructeur: "Instructeur",
+  leercoach: "Leercoach",
+  pvb_beoordelaar: "PVB beoordelaar",
+};
+
 export function KwalificatiesTable({
   instructors,
   courses,
@@ -66,6 +82,13 @@ export function KwalificatiesTable({
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<{
+    niveaus: typeof niveaus;
+    types: (keyof typeof types)[];
+  }>({
+    niveaus,
+    types: Object.keys(types) as (keyof typeof types)[],
+  });
 
   // Column visibility state - all courses visible by default
   const [visibleCourseIds, setVisibleCourseIds] = useState<Set<string>>(
@@ -125,36 +148,56 @@ export function KwalificatiesTable({
 
   // Filter and sort instructors using fuzzysort
   const filteredAndSortedInstructors = useMemo(() => {
-    let filtered: Instructor[] = [];
+    const isFiltered =
+      filters.niveaus.length < niveaus.length ||
+      filters.types.length < Object.keys(types).length;
+    const showWithoutKwalificaties =
+      filters.niveaus.length === 0 || filters.types.length === 0;
+
+    const filtered = isFiltered
+      ? preparedInstructors.filter((instructor) => {
+          const kwalificaties = kwalificatieMap.get(instructor.instructor.id);
+          if (!kwalificaties) return showWithoutKwalificaties;
+
+          return kwalificaties.entries().some(([courseId, kwalificaties]) => {
+            return kwalificaties.some((kwal) => {
+              return (
+                filters.niveaus.includes(kwal.hoogsteNiveau) &&
+                filters.types.includes(kwal.richting as keyof typeof types)
+              );
+            });
+          });
+        })
+      : preparedInstructors;
 
     if (searchQuery.trim()) {
       // Use fuzzysort with multiple keys for better search results
-      const results = fuzzysort.go(searchQuery.trim(), preparedInstructors, {
+      const results = fuzzysort.go(searchQuery.trim(), filtered, {
         keys: ["fullName", "searchableText"],
         threshold: -10000, // Lower threshold for more inclusive results
         limit: 1000, // High limit to get all relevant results
       });
 
       // Extract the original instructor objects from the results
-      filtered = results.map((result) => result.obj.instructor);
-    } else {
-      filtered = instructors;
+      return results.map((result) => result.obj.instructor);
     }
 
     // Sort by name and handle
-    return filtered.sort((a, b) => {
-      const aName = formatters.formatPersonName(a);
-      const bName = formatters.formatPersonName(b);
+    return filtered
+      .map((instructor) => instructor.instructor)
+      .toSorted((a, b) => {
+        const aName = formatters.formatPersonName(a);
+        const bName = formatters.formatPersonName(b);
 
-      if (aName < bName) return -1;
-      if (aName > bName) return 1;
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
 
-      if (a.handle < b.handle) return -1;
-      if (a.handle > b.handle) return 1;
+        if (a.handle < b.handle) return -1;
+        if (a.handle > b.handle) return 1;
 
-      return 0;
-    });
-  }, [preparedInstructors, searchQuery, instructors]);
+        return 0;
+      });
+  }, [preparedInstructors, searchQuery, kwalificatieMap, filters]);
 
   // Set up the virtualizer
   const rowVirtualizer = useVirtualizer({
@@ -217,7 +260,7 @@ export function KwalificatiesTable({
 
     // Format the display with visual separation
     return (
-      <div className="flex flex-wrap gap-1 justify-center">
+      <div className="flex flex-wrap justify-center gap-1">
         {sortedEntries.map(([richting, niveau]) => {
           const richtingConfig = {
             instructeur: {
@@ -297,10 +340,10 @@ export function KwalificatiesTable({
   return (
     <div className="mt-8">
       {/* Search and column controls */}
-      <div className="mb-4 flex gap-4 items-center">
+      <div className="flex items-center gap-4 mb-4">
         <div className="flex-1 max-w-sm">
           <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-2.5 top-2.5 h-5 w-5 text-gray-400" />
+            <MagnifyingGlassIcon className="top-2.5 left-2.5 absolute w-5 h-5 text-gray-400" />
             <Input
               type="text"
               placeholder="Zoek instructeur..."
@@ -313,33 +356,33 @@ export function KwalificatiesTable({
         <div className="relative">
           <Popover className="relative">
             <PopoverButton outline>
-              <AdjustmentsHorizontalIcon className="h-4 w-4 mr-2" />
+              <AdjustmentsHorizontalIcon className="mr-2 w-4 h-4" />
               Kolommen ({visibleCourseIds.size}/{courses.length})
             </PopoverButton>
             <PopoverPanel
               anchor="bottom end"
-              className="flex flex-col gap-1 max-h-96 overflow-y-auto min-w-[250px] p-2"
+              className="flex flex-col gap-1 p-2 min-w-[250px] max-h-96 overflow-y-auto"
             >
               <button
                 type="button"
                 onClick={() => toggleAllCourses(true)}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded font-medium"
+                className="hover:bg-gray-50 px-3 py-2 rounded w-full font-medium text-sm text-left"
               >
                 Alles selecteren
               </button>
               <button
                 type="button"
                 onClick={() => toggleAllCourses(false)}
-                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded font-medium"
+                className="hover:bg-gray-50 px-3 py-2 rounded w-full font-medium text-sm text-left"
               >
                 Alles deselecteren
               </button>
-              <div className="border-t border-gray-200 my-1" />
+              <div className="my-1 border-gray-200 border-t" />
               {courses.map((course) => (
                 <button
                   key={course.id}
                   type="button"
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer w-full"
+                  className="flex items-center gap-2 hover:bg-gray-50 px-3 py-2 rounded w-full cursor-pointer"
                   onClick={() => toggleCourseVisibility(course.id)}
                 >
                   <Checkbox
@@ -355,6 +398,75 @@ export function KwalificatiesTable({
             </PopoverPanel>
           </Popover>
         </div>
+
+        <Popover>
+          <PopoverButton outline className={clsx("border-branding-dark/10")}>
+            <FunnelIcon /> Niveaus
+          </PopoverButton>
+          <PopoverPanel anchor="bottom end" modal className="min-w-64">
+            <div className="py-2.5">
+              <Subheading className="px-3">Niveaus</Subheading>
+              {niveaus.map((niveau) => (
+                <CheckboxField
+                  key={niveau}
+                  disabled={false}
+                  className={clsx("flex-1 px-4 py-1.5 cursor-default")}
+                >
+                  <Checkbox
+                    checked={filters.niveaus.includes(niveau)}
+                    onChange={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        niveaus: prev.niveaus.includes(niveau)
+                          ? prev.niveaus.filter((t) => t !== niveau)
+                          : [...prev.niveaus, niveau],
+                      }));
+                    }}
+                  />
+
+                  <Label className="w-full">Niveau {niveau}</Label>
+                </CheckboxField>
+              ))}
+            </div>
+            <div className="pb-2.5">
+              <Subheading className="px-3">Type</Subheading>
+              {Object.entries(types).map(([key, value]) => (
+                <CheckboxField
+                  key={key}
+                  disabled={false}
+                  className={clsx("flex-1 px-4 py-1.5 cursor-default")}
+                >
+                  <Checkbox
+                    checked={filters.types.includes(key as keyof typeof types)}
+                    onChange={() => {
+                      setFilters((prev) => ({
+                        ...prev,
+                        types: prev.types.includes(key as keyof typeof types)
+                          ? prev.types.filter((t) => t !== key)
+                          : [...prev.types, key as keyof typeof types],
+                      }));
+                    }}
+                  />
+
+                  <Label className="w-full">{value}</Label>
+                </CheckboxField>
+              ))}
+            </div>
+            <Divider />
+            <Button
+              plain
+              className="rounded-none w-full"
+              onClick={() => {
+                setFilters({
+                  niveaus,
+                  types: Object.keys(types) as (keyof typeof types)[],
+                });
+              }}
+            >
+              Toon alles
+            </Button>
+          </PopoverPanel>
+        </Popover>
 
         <ExportQualificationsDialog
           instructors={filteredAndSortedInstructors}
@@ -378,7 +490,7 @@ export function KwalificatiesTable({
             <thead className="text-zinc-500 dark:text-zinc-400">
               <tr>
                 <th
-                  className="border-b border-b-zinc-950/10 px-4 py-1.5 font-medium bg-white border-r border-gray-200 min-w-[120px] sm:min-w-[200px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)]"
+                  className="bg-white shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)] px-4 py-1.5 border-gray-200 border-r border-b border-b-zinc-950/10 min-w-[120px] sm:min-w-[200px] font-medium"
                   style={{
                     position: "sticky",
                     top: 0,
@@ -391,7 +503,7 @@ export function KwalificatiesTable({
                 {displayCourses.map((course) => (
                   <th
                     key={course.id}
-                    className="border-b border-b-zinc-950/10 px-2 sm:px-4 py-1.5 font-medium text-center min-w-[60px] sm:min-w-[100px] bg-white"
+                    className="bg-white px-2 sm:px-4 py-1.5 border-b border-b-zinc-950/10 min-w-[60px] sm:min-w-[100px] font-medium text-center"
                     style={{
                       position: "sticky",
                       top: 0,
@@ -413,7 +525,7 @@ export function KwalificatiesTable({
                 <tr>
                   <td
                     colSpan={displayCourses.length + 1}
-                    className="text-center py-8 text-gray-500"
+                    className="py-8 text-gray-500 text-center"
                   >
                     {searchQuery
                       ? "Geen instructeurs gevonden"
@@ -457,13 +569,13 @@ export function KwalificatiesTable({
                         >
                           <Link
                             href={`/locatie/${locationHandle}/personen/${instructor.id}`}
-                            className="hover:underline block"
+                            className="block hover:underline"
                           >
                             <div className="break-words leading-tight">
-                              <div className="truncate sm:whitespace-normal sm:break-words text-zinc-700 hover:text-zinc-900">
+                              <div className="text-zinc-700 hover:text-zinc-900 sm:break-words truncate sm:whitespace-normal">
                                 {formatters.formatPersonName(instructor)}
                               </div>
-                              <div className="text-xs text-gray-500 font-normal truncate font-mono">
+                              <div className="font-mono font-normal text-gray-500 text-xs truncate">
                                 {instructor.handle}
                               </div>
                             </div>
@@ -472,7 +584,7 @@ export function KwalificatiesTable({
                         {displayCourses.map((course) => (
                           <td
                             key={course.id}
-                            className="relative px-1 sm:px-4 py-3 text-center min-w-[60px] sm:min-w-[100px] align-middle"
+                            className="relative px-1 sm:px-4 py-3 min-w-[60px] sm:min-w-[100px] text-center align-middle"
                           >
                             {getKwalificatieDisplay(instructor.id, course.id)}
                           </td>
