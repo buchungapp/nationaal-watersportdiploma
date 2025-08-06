@@ -3,6 +3,7 @@ import {
   ChevronUpIcon,
   ShieldCheckIcon,
   UserIcon,
+  UsersIcon,
 } from "@heroicons/react/16/solid";
 import { constants } from "@nawadi/lib";
 import { Suspense } from "react";
@@ -49,8 +50,12 @@ async function UserSelectorContent() {
       </DropdownButton>
       <DropdownMenu className="z-50 min-w-(--button-width)">
         <DropdownItem href="/account">
-          <UserIcon />
+          <UsersIcon />
           <DropdownLabel>Mijn account</DropdownLabel>
+        </DropdownItem>
+        <DropdownItem href="/profiel">
+          <UserIcon />
+          <DropdownLabel>Mijn profiel</DropdownLabel>
         </DropdownItem>
         <DropdownDivider />
         <DropdownItem href="/privacy" target="_blank">
