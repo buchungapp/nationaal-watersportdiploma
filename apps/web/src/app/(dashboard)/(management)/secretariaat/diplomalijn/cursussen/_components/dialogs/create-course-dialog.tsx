@@ -47,10 +47,10 @@ export function CreateCourseDialog({
   parentCategories: ParentCategory[];
   allCategories: Category[];
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
-    setisOpen(false);
+    setIsOpen(false);
     reset();
   };
 
@@ -69,7 +69,7 @@ export function CreateCourseDialog({
 
   return (
     <>
-      <Button color="branding-orange" onClick={() => setisOpen(true)}>
+      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
         Nieuwe cursus
       </Button>

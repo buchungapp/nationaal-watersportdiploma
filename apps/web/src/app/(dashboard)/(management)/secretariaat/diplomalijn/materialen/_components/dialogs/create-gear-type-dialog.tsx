@@ -27,10 +27,10 @@ import { createGearTypeAction } from "~/app/_actions/secretariat/gear-type/creat
 import Spinner from "~/app/_components/spinner";
 
 export function CreateGearTypeDialog() {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
-    setisOpen(false);
+    setIsOpen(false);
     reset();
   };
 
@@ -49,7 +49,7 @@ export function CreateGearTypeDialog() {
 
   return (
     <>
-      <Button color="branding-orange" onClick={() => setisOpen(true)}>
+      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
         Nieuw materiaal
       </Button>

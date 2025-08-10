@@ -31,10 +31,10 @@ export function UpdateLocationStatusDialog({
   locationId: string;
   status: "draft" | "hidden" | "archived" | "active";
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
-    setisOpen(false);
+    setIsOpen(false);
     reset();
   };
 
@@ -57,7 +57,7 @@ export function UpdateLocationStatusDialog({
 
   return (
     <>
-      <Button onClick={() => setisOpen(true)}>
+      <Button onClick={() => setIsOpen(true)}>
         <BookmarkIcon />
         Status
       </Button>

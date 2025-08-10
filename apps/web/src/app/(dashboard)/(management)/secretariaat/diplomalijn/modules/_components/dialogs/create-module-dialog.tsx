@@ -27,10 +27,10 @@ import { createModuleAction } from "~/app/_actions/secretariat/module/create-mod
 import Spinner from "~/app/_components/spinner";
 
 export function CreateModuleDialog() {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
-    setisOpen(false);
+    setIsOpen(false);
     reset();
   };
 
@@ -49,7 +49,7 @@ export function CreateModuleDialog() {
 
   return (
     <>
-      <Button color="branding-orange" onClick={() => setisOpen(true)}>
+      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
         Nieuwe module
       </Button>

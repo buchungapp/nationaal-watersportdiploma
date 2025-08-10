@@ -33,13 +33,13 @@ export function EditModuleDialog({
     weight: number | null;
   };
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
     updateModuleAction.bind(null, module.id),
     {
       onSuccess: () => {
-        setisOpen(false);
+        setIsOpen(false);
         toast.success("Module bijgewerkt");
       },
       onError: () => {
@@ -55,12 +55,12 @@ export function EditModuleDialog({
 
   return (
     <>
-      <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <PencilIcon />
         Bewerken
       </Button>
 
-      <Dialog open={isOpen} onClose={() => setisOpen(false)}>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>
           Wijzig module{module.title ? ` '${module.title}'` : ""}
         </DialogTitle>

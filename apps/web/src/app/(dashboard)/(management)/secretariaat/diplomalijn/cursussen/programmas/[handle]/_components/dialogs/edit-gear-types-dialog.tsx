@@ -29,13 +29,13 @@ export function EditGearTypesDialog({
   allGearTypes: Awaited<ReturnType<typeof listGearTypes>>;
   currentGearTypes: Awaited<ReturnType<typeof listGearTypesByCurriculum>>;
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
     updateCurriculaGearTypesAction.bind(null, curriculumId),
     {
       onSuccess: () => {
-        setisOpen(false);
+        setIsOpen(false);
         toast.success("Boottypen bijgewerkt");
       },
       onError: () => {
@@ -52,11 +52,11 @@ export function EditGearTypesDialog({
 
   return (
     <>
-      <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <PencilIcon />
       </Button>
 
-      <Dialog open={isOpen} onClose={() => setisOpen(false)}>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>Wijzig boottypen</DialogTitle>
         <DialogBody>
           <form action={execute}>

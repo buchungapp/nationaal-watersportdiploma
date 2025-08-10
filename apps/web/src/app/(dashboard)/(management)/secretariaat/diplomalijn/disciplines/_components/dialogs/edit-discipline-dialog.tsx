@@ -33,13 +33,13 @@ export function EditDisciplineDialog({
     weight: number | null;
   };
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
     updateDisciplineAction.bind(null, discipline.id),
     {
       onSuccess: () => {
-        setisOpen(false);
+        setIsOpen(false);
         toast.success("Discipline bijgewerkt");
       },
       onError: () => {
@@ -55,12 +55,12 @@ export function EditDisciplineDialog({
 
   return (
     <>
-      <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <PencilIcon />
         Bewerken
       </Button>
 
-      <Dialog open={isOpen} onClose={() => setisOpen(false)}>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>
           Wijzig discipline{discipline.title ? ` '${discipline.title}'` : ""}
         </DialogTitle>

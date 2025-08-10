@@ -36,10 +36,10 @@ export function CreateCategoryDialog({
 }: {
   parentCategories: ParentCategory[];
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
-    setisOpen(false);
+    setIsOpen(false);
     reset();
   };
 
@@ -58,7 +58,7 @@ export function CreateCategoryDialog({
 
   return (
     <>
-      <Button color="branding-orange" onClick={() => setisOpen(true)}>
+      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
         Nieuwe categorie
       </Button>

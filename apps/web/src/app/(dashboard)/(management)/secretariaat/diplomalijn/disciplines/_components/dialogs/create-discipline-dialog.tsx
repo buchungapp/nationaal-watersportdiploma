@@ -27,10 +27,10 @@ import { createDisciplineAction } from "~/app/_actions/secretariat/discipline/cr
 import Spinner from "~/app/_components/spinner";
 
 export function CreateDisciplineDialog() {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
-    setisOpen(false);
+    setIsOpen(false);
     reset();
   };
 
@@ -49,7 +49,7 @@ export function CreateDisciplineDialog() {
 
   return (
     <>
-      <Button color="branding-orange" onClick={() => setisOpen(true)}>
+      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
         Nieuwe discipline
       </Button>

@@ -27,13 +27,13 @@ export function EditGearTypeDialog({
     title: string | null;
   };
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
     updateGearTypeAction.bind(null, gearType.id),
     {
       onSuccess: () => {
-        setisOpen(false);
+        setIsOpen(false);
         toast.success("Boottype bijgewerkt");
       },
       onError: () => {
@@ -48,12 +48,12 @@ export function EditGearTypeDialog({
 
   return (
     <>
-      <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <PencilIcon />
         Bewerken
       </Button>
 
-      <Dialog open={isOpen} onClose={() => setisOpen(false)}>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>
           Wijzig boottype{gearType.title ? ` '${gearType.title}'` : ""}
         </DialogTitle>

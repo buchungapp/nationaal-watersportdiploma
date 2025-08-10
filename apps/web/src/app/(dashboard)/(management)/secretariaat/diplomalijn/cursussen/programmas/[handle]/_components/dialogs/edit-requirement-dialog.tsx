@@ -28,13 +28,13 @@ export function EditRequirementDialog({
     requirement: string | null;
   };
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
     updateCurriculaCompetencyRequirementAction.bind(null, competency.id),
     {
       onSuccess: () => {
-        setisOpen(false);
+        setIsOpen(false);
         toast.success("Vereiste bijgewerkt");
       },
       onError: () => {
@@ -49,11 +49,11 @@ export function EditRequirementDialog({
 
   return (
     <>
-      <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <PencilIcon />
       </Button>
 
-      <Dialog open={isOpen} onClose={() => setisOpen(false)}>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>
           Wijzig vereiste {competency.title ? `van '${competency.title}'` : ""}
         </DialogTitle>
