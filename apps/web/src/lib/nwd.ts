@@ -777,6 +777,7 @@ export const listDegrees = async () => {
 export const listModules = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("modules");
 
   return makeRequest(async () => {
     const modules = await Course.Module.list();
@@ -5324,6 +5325,55 @@ export const updateDiscipline = async (
 
     await Course.Discipline.update({
       id: disciplineId,
+      title,
+      weight,
+    });
+  });
+};
+
+export const createModule = async ({
+  title,
+  handle,
+  weight,
+}: {
+  title: string;
+  handle: string;
+  weight: number;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Module.create({
+      title,
+      handle,
+      weight,
+    });
+  });
+};
+
+export const updateModule = async (
+  moduleId: string,
+  { title, weight }: { title: string; weight: number },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Module.update({
+      id: moduleId,
       title,
       weight,
     });
