@@ -881,6 +881,30 @@ export const updateGearTypeCurricula = async (
   });
 };
 
+export const createGearType = async ({
+  title,
+  handle,
+}: {
+  title: string;
+  handle: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.create({
+      title,
+      handle,
+    });
+  });
+};
+
 export const listCategories = async () => {
   "use cache";
   cacheLife("days");

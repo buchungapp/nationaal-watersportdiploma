@@ -55,7 +55,7 @@ export function EditGearTypeDialog({
 
       <Dialog open={isOpen} onClose={() => setisOpen(false)}>
         <DialogTitle>
-          Wijzig boottype {gearType.title ? `van '${gearType.title}'` : ""}
+          Wijzig boottype {gearType.title ? `'${gearType.title}'` : ""}
         </DialogTitle>
         <DialogBody>
           <form action={execute}>

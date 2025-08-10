@@ -32,7 +32,7 @@ import type {
   listPrograms,
 } from "~/lib/nwd";
 import { EditCurriculaDialog } from "./dialogs/edit-curricula-dialog";
-import { EditGearTypeDialog } from "./dialogs/edit-gear-type";
+import { EditGearTypeDialog } from "./dialogs/edit-gear-type-dialog";
 
 type GearType = Awaited<ReturnType<typeof listGearTypesWithCurricula>>[number];
 

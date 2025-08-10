@@ -64,7 +64,7 @@ export function EditCurriculaDialog({
       </Button>
 
       <Dialog open={isOpen} onClose={() => setisOpen(false)}>
-        <DialogTitle>Wijzig boottypen</DialogTitle>
+        <DialogTitle>Wijzig curricula voor dit materiaal</DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>

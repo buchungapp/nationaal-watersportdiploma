@@ -4,10 +4,10 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { actionClientWithMeta } from "~/app/_actions/safe-action";
-import { createLocation, validSlugRegex } from "~/lib/nwd";
+import { createGearType, validSlugRegex } from "~/lib/nwd";
 
-const createLocationSchema = zfd.formData({
-  name: zfd.text(),
+const createGearTypeSchema = zfd.formData({
+  title: zfd.text(),
 });
 
 const slugSchema = z
@@ -17,17 +17,17 @@ const slugSchema = z
   .transform((v) => slugify(v))
   .refine((v) => validSlugRegex.test(v), { message: "Invalid slug format" });
 
-export const createLocationAction = actionClientWithMeta
+export const createGearTypeAction = actionClientWithMeta
   .metadata({
-    name: "create-location",
+    name: "create-gear-type",
   })
-  .schema(createLocationSchema)
-  .action(async ({ parsedInput: { name } }) => {
-    await createLocation({
-      name,
-      handle: slugSchema.parse(name),
+  .schema(createGearTypeSchema)
+  .action(async ({ parsedInput: { title } }) => {
+    await createGearType({
+      title,
+      handle: slugSchema.parse(title),
     });
 
     revalidatePath("/", "page");
-    revalidateTag("locations");
+    revalidateTag("gear-types");
   });

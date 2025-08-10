@@ -7,6 +7,7 @@ import {
   listPrograms,
 } from "~/lib/nwd";
 import Search from "../../../_components/search";
+import { CreateGearTypeDialog } from "./_components/dialogs/create-gear-type-dialog";
 import GearTypeTableClient from "./_components/gear-type-table";
 
 async function GearTypeTable(props: {
@@ -71,13 +72,12 @@ export default function Page(props: {
 }) {
   return (
     <>
-      <div className="flex flex-wrap justify-between items-end gap-4">
-        <div className="sm:flex-1 max-sm:w-full">
-          <Heading>Materialen</Heading>
-          <div className="flex gap-4 mt-4 max-w-xl">
-            <Search placeholder="Doorzoek materialen..." />
-          </div>
+      <Heading level={1}>Materialen</Heading>
+      <div className="flex sm:flex-row flex-col justify-between gap-2 mt-4">
+        <div className="flex items-center gap-2 w-full max-w-lg">
+          <Search placeholder="Doorzoek materialen..." />
         </div>
+        <CreateGearTypeDialog />
       </div>
       <Suspense
         fallback={
