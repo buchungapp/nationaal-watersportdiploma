@@ -739,6 +739,7 @@ export const retrieveCertificateById = async (id: string) => {
 export const listDisciplines = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("disciplines");
 
   return makeRequest(async () => {
     const disciplines = await Course.Discipline.list();
@@ -750,6 +751,7 @@ export const listDisciplines = async () => {
 export const listDisciplinesForLocation = async (locationId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("disciplines");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -941,6 +943,7 @@ export const listCountries = async () => {
 export const retrieveDisciplineByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("disciplines");
 
   return makeRequest(async () => {
     const disciplines = await Course.Discipline.fromHandle(handle);
@@ -5275,5 +5278,54 @@ export const createBulkPvbs = async ({
       successCount,
       failureCount,
     };
+  });
+};
+
+export const createDiscipline = async ({
+  title,
+  handle,
+  weight,
+}: {
+  title: string;
+  handle: string;
+  weight: number;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Discipline.create({
+      title,
+      handle,
+      weight,
+    });
+  });
+};
+
+export const updateDiscipline = async (
+  disciplineId: string,
+  { title, weight }: { title: string; weight: number },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Discipline.update({
+      id: disciplineId,
+      title,
+      weight,
+    });
   });
 };

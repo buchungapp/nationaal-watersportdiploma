@@ -13,28 +13,34 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
+import {
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
+} from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { updateGearTypeAction } from "~/app/_actions/secretariat/gear-type/update-gear-type-action";
+import { updateDisciplineAction } from "~/app/_actions/secretariat/discipline/update-discipline-action";
 import Spinner from "~/app/_components/spinner";
 
-export function EditGearTypeDialog({
-  gearType,
+export function EditDisciplineDialog({
+  discipline,
 }: {
-  gearType: {
+  discipline: {
     id: string;
     title: string | null;
+    weight: number | null;
   };
 }) {
   const [isOpen, setisOpen] = useState(false);
 
   const { execute, input } = useAction(
-    updateGearTypeAction.bind(null, gearType.id),
+    updateDisciplineAction.bind(null, discipline.id),
     {
       onSuccess: () => {
         setisOpen(false);
-        toast.success("Boottype bijgewerkt");
+        toast.success("Discipline bijgewerkt");
       },
       onError: () => {
         toast.error("Er is iets misgegaan");
@@ -43,7 +49,8 @@ export function EditGearTypeDialog({
   );
 
   const { getInputValue } = useFormInput(input, {
-    title: gearType.title,
+    title: discipline.title,
+    weight: discipline.weight,
   });
 
   return (
@@ -55,19 +62,31 @@ export function EditGearTypeDialog({
 
       <Dialog open={isOpen} onClose={() => setisOpen(false)}>
         <DialogTitle>
-          Wijzig boottype{gearType.title ? ` '${gearType.title}'` : ""}
+          Wijzig discipline{discipline.title ? ` '${discipline.title}'` : ""}
         </DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
-              <Field>
-                <Label>Naam</Label>
-                <Input
-                  name="title"
-                  defaultValue={getInputValue("title")}
-                  required
-                />
-              </Field>
+              <FieldGroup>
+                <Field>
+                  <Label>Naam</Label>
+                  <Input
+                    name="title"
+                    defaultValue={getInputValue("title")}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Label>Sortering</Label>
+                  <Input
+                    name="weight"
+                    type="number"
+                    min={0}
+                    defaultValue={getInputValue("weight")}
+                    required
+                  />
+                </Field>
+              </FieldGroup>
             </Fieldset>
             <DialogActions>
               <SubmitButton />
