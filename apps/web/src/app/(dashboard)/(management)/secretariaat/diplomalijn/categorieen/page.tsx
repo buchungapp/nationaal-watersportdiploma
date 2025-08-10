@@ -1,15 +1,20 @@
 import FlexSearch from "flexsearch";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listCategories } from "~/lib/nwd";
+import { listCategories, listParentCategories } from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CategoryTableCLient from "./_components/category-table";
+import { CreateCategoryDialog } from "./_components/dialogs/create-category-dialog";
 
 async function CategoryTable(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const searchParams = await props.searchParams;
-  const categories = await listCategories();
+  const [categories, parentCategories] = await Promise.all([
+    listCategories(),
+    listParentCategories(),
+  ]);
+
   const searchQuery = searchParams?.query?.toString() ?? null;
 
   // Create a FlexSearch index
@@ -51,28 +56,38 @@ async function CategoryTable(props: {
   return (
     <CategoryTableCLient
       categories={paginatedCategories}
+      parentCategories={parentCategories}
       totalItems={filteredCategories.length}
     />
   );
 }
 
-export default async function Page(props: {
+async function CreateCategoryDialogSuspense() {
+  const parentCategories = await listParentCategories();
+  return <CreateCategoryDialog parentCategories={parentCategories} />;
+}
+
+export default function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
     <>
-      <div className="flex flex-wrap justify-between items-end gap-4">
-        <div className="sm:flex-1 max-sm:w-full">
-          <Heading>Categorieën</Heading>
-          <div className="flex gap-4 mt-4 max-w-xl">
-            <Search placeholder="Doorzoek categorieën..." />
-          </div>
+      <Heading level={1}>Categorieën</Heading>
+      <div className="flex sm:flex-row flex-col justify-between gap-2 mt-4">
+        <div className="flex items-center gap-2 w-full max-w-lg">
+          <Search placeholder="Doorzoek categorieën..." />
         </div>
+        <Suspense
+          fallback={<div className="rounded-lg w-40.5 h-9 animate-pulse" />}
+        >
+          <CreateCategoryDialogSuspense />
+        </Suspense>
       </div>
       <Suspense
         fallback={
           <CategoryTableCLient
             categories={[]}
+            parentCategories={[]}
             totalItems={0}
             placeholderRows={4}
           />

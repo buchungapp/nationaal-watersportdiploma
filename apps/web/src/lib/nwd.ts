@@ -912,6 +912,7 @@ export const createGearType = async ({
 export const listCategories = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("categories");
 
   return makeRequest(async () => {
     const categories = await Course.Category.list();
@@ -920,9 +921,77 @@ export const listCategories = async () => {
   });
 };
 
+export const createCategory = async ({
+  title,
+  description,
+  parentCategoryId,
+  handle,
+  weight,
+}: {
+  title: string;
+  description?: string;
+  parentCategoryId?: string | null;
+  handle: string;
+  weight?: number;
+}) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Course.Category.create({
+      title,
+      description,
+      parentCategoryId,
+      handle,
+      weight,
+    });
+  });
+};
+
+export const updateCategory = async (
+  categoryId: string,
+  {
+    title,
+    description,
+    parentCategoryId,
+    weight,
+  }: {
+    title?: string;
+    description?: string;
+    parentCategoryId?: string | null;
+    weight?: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Course.Category.update({
+      id: categoryId,
+      title,
+      description,
+      parentCategoryId,
+      weight,
+    });
+  });
+};
+
 export const listParentCategories = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("categories");
 
   return makeRequest(async () => {
     const categories = await Course.Category.listParentCategories();

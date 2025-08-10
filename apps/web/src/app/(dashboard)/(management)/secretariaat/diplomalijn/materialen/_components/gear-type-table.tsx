@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Popover,
   PopoverButton,
@@ -53,27 +53,30 @@ export default function ModuleTable({
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const columns = [
-    columnHelper.accessor("title", {
-      header: "Naam",
-    }),
-    columnHelper.display({
-      id: "actions",
-      cell: ({ row }) => {
-        return (
-          <div className="flex justify-end items-center gap-x-2">
-            <EditGearTypeDialog gearType={row.original} />
-            <EditCurriculaDialog
-              gearTypeId={row.original.id}
-              allCurricula={allCurricula}
-              allPrograms={allPrograms}
-              currentCurricula={row.original.curricula}
-            />
-          </div>
-        );
-      },
-    }),
-  ];
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("title", {
+        header: "Naam",
+      }),
+      columnHelper.display({
+        id: "actions",
+        cell: ({ row }) => {
+          return (
+            <div className="flex justify-end items-center gap-x-2">
+              <EditGearTypeDialog gearType={row.original} />
+              <EditCurriculaDialog
+                gearTypeId={row.original.id}
+                allCurricula={allCurricula}
+                allPrograms={allPrograms}
+                currentCurricula={row.original.curricula}
+              />
+            </div>
+          );
+        },
+      }),
+    ],
+    [allCurricula, allPrograms],
+  );
 
   const table = useReactTable({
     data: gearTypes,
