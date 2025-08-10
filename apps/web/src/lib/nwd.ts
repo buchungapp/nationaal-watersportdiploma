@@ -789,6 +789,7 @@ export const listModules = async () => {
 export const listCompetencies = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("competencies");
 
   return makeRequest(async () => {
     const competencies = await Course.Competency.list();
@@ -5375,6 +5376,63 @@ export const updateModule = async (
     await Course.Module.update({
       id: moduleId,
       title,
+      weight,
+    });
+  });
+};
+
+export const createCompetency = async ({
+  title,
+  type,
+  weight,
+  handle,
+}: {
+  title: string;
+  type: "skill" | "knowledge";
+  weight: number;
+  handle: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Competency.create({
+      title,
+      type,
+      weight,
+      handle,
+    });
+  });
+};
+
+export const updateCompetency = async (
+  competencyId: string,
+  {
+    title,
+    type,
+    weight,
+  }: { title: string; type: "skill" | "knowledge"; weight: number },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Competency.update({
+      id: competencyId,
+      title,
+      type,
       weight,
     });
   });
