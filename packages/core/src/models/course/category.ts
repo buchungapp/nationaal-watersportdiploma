@@ -1,11 +1,20 @@
 import { schema as s } from "@nawadi/db";
-import { asc, desc, eq, isNull } from "drizzle-orm";
+import {
+  type SQLWrapper,
+  and,
+  asc,
+  desc,
+  eq,
+  inArray,
+  isNull,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   handleSchema,
   possibleSingleRow,
+  singleOrNonEmptyArray,
   singleRow,
   successfulCreateResponse,
   withZod,
@@ -61,19 +70,44 @@ export const create = wrapCommand(
 
 export const list = wrapQuery(
   "course.category.list",
-  withZod(z.void(), outputSchema.array(), async () => {
-    const query = useQuery();
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            parentCategoryId: singleOrNonEmptyArray(
+              z.string().uuid(),
+            ).optional(),
+          })
+          .default({}),
+      })
+      .default({}),
+    outputSchema.array(),
+    async (input) => {
+      const query = useQuery();
 
-    const rows = await query
-      .select()
-      .from(s.category)
-      .orderBy(asc(s.category.weight));
+      const whereClauses: (SQLWrapper | undefined)[] = [
+        input.filter.parentCategoryId
+          ? Array.isArray(input.filter.parentCategoryId)
+            ? inArray(
+                s.category.parentCategoryId,
+                input.filter.parentCategoryId,
+              )
+            : eq(s.category.parentCategoryId, input.filter.parentCategoryId)
+          : undefined,
+      ];
+      const rows = await query
+        .select()
+        .from(s.category)
+        .orderBy(asc(s.category.weight))
+        .where(and(...whereClauses));
 
-    return rows.map(({ parentCategoryId, ...row }) => ({
-      ...row,
-      parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
-    }));
-  }),
+      return rows.map(({ parentCategoryId, ...row }) => ({
+        ...row,
+        parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
+      }));
+    },
+  ),
 );
 
 export const listParentCategories = wrapQuery(

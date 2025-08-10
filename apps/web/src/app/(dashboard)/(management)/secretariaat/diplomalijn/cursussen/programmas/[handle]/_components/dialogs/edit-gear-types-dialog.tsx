@@ -67,6 +67,7 @@ export function EditGearTypesDialog({
                   options={allGearTypes}
                   by="id"
                   name="gearTypes"
+                  minSelected={1}
                   defaultValue={defaultGearTypes}
                   displayValue={(gearType) => gearType.title ?? ""}
                   placeholder="Zoek boottypen..."

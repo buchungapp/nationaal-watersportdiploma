@@ -1000,6 +1000,20 @@ export const listParentCategories = async () => {
   });
 };
 
+export const listSubcategoriesForParent = async (parentCategoryId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("categories");
+
+  return makeRequest(async () => {
+    const subcategories = await Course.Category.list({
+      filter: { parentCategoryId },
+    });
+
+    return subcategories;
+  });
+};
+
 export const listCountries = async () => {
   "use cache";
   cacheLife("days");
@@ -1029,6 +1043,7 @@ export const listCourses = async (
 ) => {
   "use cache";
   cacheLife("days");
+  cacheTag("courses");
 
   return makeRequest(async () => {
     const courses = await Course.list({
@@ -1045,6 +1060,7 @@ export const listCourses = async (
 export const retrieveCourseByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("courses");
 
   return makeRequest(async () => {
     const courses = await Course.list();
@@ -1056,6 +1072,7 @@ export const retrieveCourseByHandle = async (handle: string) => {
 export const listPrograms = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("programs");
 
   return makeRequest(async () => {
     const programs = await Course.Program.list();
@@ -1067,6 +1084,7 @@ export const listPrograms = async () => {
 export const listProgramsForLocation = async (locationId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("programs");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -1081,6 +1099,8 @@ export const listProgramsForLocation = async (locationId: string) => {
 export const listProgramsForCourse = async (courseId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("programs");
+  cacheTag("courses");
 
   return makeRequest(async () => {
     const programs = await Course.Program.list({ filter: { courseId } });
@@ -1120,6 +1140,7 @@ export const listCurriculaByDiscipline = async (disciplineId: string) => {
   "use cache";
   cacheLife("days");
   cacheTag("curricula");
+  cacheTag("disciplines");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -1151,6 +1172,7 @@ export const listCurriculaByProgram = async (
   "use cache";
   cacheLife("days");
   cacheTag("curricula");
+  cacheTag("programs");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -5503,6 +5525,79 @@ export const updateCompetency = async (
       title,
       type,
       weight,
+    });
+  });
+};
+
+export const createCourse = async ({
+  title,
+  handle,
+  description,
+  disciplineId,
+  abbreviation,
+  categories,
+}: {
+  title: string;
+  handle: string;
+  description?: string;
+  disciplineId: string;
+  abbreviation?: string;
+  categories?: string[];
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.create({
+      title,
+      handle,
+      description,
+      disciplineId,
+      abbreviation,
+      categories,
+    });
+  });
+};
+
+export const updateCourse = async (
+  courseId: string,
+  {
+    title,
+    description,
+    disciplineId,
+    abbreviation,
+    categories,
+  }: {
+    title?: string;
+    description?: string;
+    disciplineId?: string;
+    abbreviation?: string;
+    categories?: string[];
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.update({
+      id: courseId,
+      title,
+      description,
+      disciplineId,
+      abbreviation,
+      categories,
     });
   });
 };

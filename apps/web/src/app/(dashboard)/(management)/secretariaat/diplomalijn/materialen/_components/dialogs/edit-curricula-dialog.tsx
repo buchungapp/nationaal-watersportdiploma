@@ -76,6 +76,7 @@ export function EditCurriculaDialog({
                   )}
                   by="id"
                   name="curricula"
+                  minSelected={1}
                   placeholder="Zoek curricula..."
                   displayValue={(curriculum) => {
                     const program = allPrograms.find(
