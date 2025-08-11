@@ -462,6 +462,7 @@ export default function AddKwalificatieDialog({
                   </div>
                   {selectedOnderdelen.size > 0 && (
                     <Text className="text-sm text-zinc-600 dark:text-zinc-400">
+                      {/*  cSpell:ignore kerntaa */}
                       {selectedOnderdelen.size} kerntaa
                       {selectedOnderdelen.size > 1 ? "ken" : "k"} geselecteerd
                     </Text>
