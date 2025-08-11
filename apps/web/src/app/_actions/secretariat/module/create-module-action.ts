@@ -4,10 +4,12 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import { actionClientWithMeta } from "~/app/_actions/safe-action";
-import { createLocation, validSlugRegex } from "~/lib/nwd";
+import { validSlugRegex } from "~/lib/nwd";
+import { createModule } from "~/lib/nwd";
 
-const createLocationSchema = zfd.formData({
-  name: zfd.text(),
+const createModuleSchema = zfd.formData({
+  title: zfd.text(),
+  weight: zfd.numeric(z.number().min(0)),
 });
 
 const slugSchema = z
@@ -17,17 +19,18 @@ const slugSchema = z
   .transform((v) => slugify(v))
   .refine((v) => validSlugRegex.test(v), { message: "Invalid slug format" });
 
-export const createLocationAction = actionClientWithMeta
+export const createModuleAction = actionClientWithMeta
   .metadata({
-    name: "create-location",
+    name: "create-module",
   })
-  .schema(createLocationSchema)
-  .action(async ({ parsedInput: { name } }) => {
-    await createLocation({
-      name,
-      handle: slugSchema.parse(name),
+  .schema(createModuleSchema)
+  .action(async ({ parsedInput: { title, weight } }) => {
+    await createModule({
+      title,
+      weight,
+      handle: slugSchema.parse(title),
     });
 
     revalidatePath("/", "page");
-    revalidateTag("locations");
+    revalidateTag("modules");
   });

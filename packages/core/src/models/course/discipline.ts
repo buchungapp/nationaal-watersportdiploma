@@ -27,32 +27,60 @@ import { insertSchema, selectSchema } from "./discipline.schema.js";
 export const create = wrapCommand(
   "course.discipline.create",
   withZod(
-    insertSchema.pick({
-      title: true,
-      handle: true,
-    }),
+    insertSchema
+      .pick({
+        title: true,
+        handle: true,
+      })
+      .extend({
+        weight: insertSchema.shape.weight.optional(),
+      }),
     successfulCreateResponse,
     async (item) =>
       withTransaction(async (tx) => {
-        const currentHeighestWeight = await tx
-          .select({ weight: s.discipline.weight })
-          .from(s.discipline)
-          .orderBy(desc(s.discipline.weight))
-          .limit(1)
-          .then((rows) => rows[0]?.weight ?? 0);
+        let currentWeight = item.weight;
+        if (!currentWeight) {
+          const currentHighestWeight = await tx
+            .select({ weight: s.discipline.weight })
+            .from(s.discipline)
+            .orderBy(desc(s.discipline.weight))
+            .limit(1)
+            .then((rows) => rows[0]?.weight ?? 0);
+
+          currentWeight = currentHighestWeight + 1;
+        }
 
         const rows = await tx
           .insert(s.discipline)
           .values({
             title: item.title,
             handle: item.handle,
-            weight: currentHeighestWeight + 1,
+            weight: currentWeight,
           })
           .returning({ id: s.discipline.id });
 
         const row = singleRow(rows);
         return row;
       }),
+  ),
+);
+
+export const update = wrapCommand(
+  "course.discipline.update",
+  withZod(
+    z.object({
+      id: uuidSchema,
+      title: insertSchema.shape.title.optional(),
+      weight: insertSchema.shape.weight.optional(),
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+      await query
+        .update(s.discipline)
+        .set({ title: input.title, weight: input.weight })
+        .where(eq(s.discipline.id, input.id));
+    },
   ),
 );
 

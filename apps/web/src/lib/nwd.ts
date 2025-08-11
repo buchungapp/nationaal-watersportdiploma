@@ -740,6 +740,7 @@ export const retrieveCertificateById = async (id: string) => {
 export const listDisciplines = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("disciplines");
 
   return makeRequest(async () => {
     const disciplines = await Course.Discipline.list();
@@ -751,6 +752,7 @@ export const listDisciplines = async () => {
 export const listDisciplinesForLocation = async (locationId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("disciplines");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -776,6 +778,7 @@ export const listDegrees = async () => {
 export const listModules = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("modules");
 
   return makeRequest(async () => {
     const modules = await Course.Module.list();
@@ -787,6 +790,7 @@ export const listModules = async () => {
 export const listCompetencies = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("competencies");
 
   return makeRequest(async () => {
     const competencies = await Course.Competency.list();
@@ -882,9 +886,34 @@ export const updateGearTypeCurricula = async (
   });
 };
 
+export const createGearType = async ({
+  title,
+  handle,
+}: {
+  title: string;
+  handle: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Curriculum.GearType.create({
+      title,
+      handle,
+    });
+  });
+};
+
 export const listCategories = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("categories");
 
   return makeRequest(async () => {
     const categories = await Course.Category.list();
@@ -893,14 +922,96 @@ export const listCategories = async () => {
   });
 };
 
+export const createCategory = async ({
+  title,
+  description,
+  parentCategoryId,
+  handle,
+  weight,
+}: {
+  title: string;
+  description?: string;
+  parentCategoryId?: string | null;
+  handle: string;
+  weight?: number;
+}) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Course.Category.create({
+      title,
+      description,
+      parentCategoryId,
+      handle,
+      weight,
+    });
+  });
+};
+
+export const updateCategory = async (
+  categoryId: string,
+  {
+    title,
+    description,
+    parentCategoryId,
+    weight,
+  }: {
+    title?: string;
+    description?: string;
+    parentCategoryId?: string | null;
+    weight?: number;
+  },
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Course.Category.update({
+      id: categoryId,
+      title,
+      description,
+      parentCategoryId,
+      weight,
+    });
+  });
+};
+
 export const listParentCategories = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("categories");
 
   return makeRequest(async () => {
     const categories = await Course.Category.listParentCategories();
 
     return categories;
+  });
+};
+
+export const listSubcategoriesForParent = async (parentCategoryId: string) => {
+  "use cache";
+  cacheLife("days");
+  cacheTag("categories");
+
+  return makeRequest(async () => {
+    const subcategories = await Course.Category.list({
+      filter: { parentCategoryId },
+    });
+
+    return subcategories;
   });
 };
 
@@ -918,6 +1029,7 @@ export const listCountries = async () => {
 export const retrieveDisciplineByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("disciplines");
 
   return makeRequest(async () => {
     const disciplines = await Course.Discipline.fromHandle(handle);
@@ -932,6 +1044,7 @@ export const listCourses = async (
 ) => {
   "use cache";
   cacheLife("days");
+  cacheTag("courses");
 
   return makeRequest(async () => {
     const courses = await Course.list({
@@ -948,6 +1061,7 @@ export const listCourses = async (
 export const retrieveCourseByHandle = async (handle: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("courses");
 
   return makeRequest(async () => {
     const courses = await Course.list();
@@ -959,6 +1073,7 @@ export const retrieveCourseByHandle = async (handle: string) => {
 export const listPrograms = async () => {
   "use cache";
   cacheLife("days");
+  cacheTag("programs");
 
   return makeRequest(async () => {
     const programs = await Course.Program.list();
@@ -970,6 +1085,7 @@ export const listPrograms = async () => {
 export const listProgramsForLocation = async (locationId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("programs");
   cacheTag(`${locationId}-resource-link`);
 
   return makeRequest(async () => {
@@ -984,6 +1100,8 @@ export const listProgramsForLocation = async (locationId: string) => {
 export const listProgramsForCourse = async (courseId: string) => {
   "use cache";
   cacheLife("days");
+  cacheTag("programs");
+  cacheTag("courses");
 
   return makeRequest(async () => {
     const programs = await Course.Program.list({ filter: { courseId } });
@@ -1023,6 +1141,7 @@ export const listCurriculaByDiscipline = async (disciplineId: string) => {
   "use cache";
   cacheLife("days");
   cacheTag("curricula");
+  cacheTag("disciplines");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -1054,6 +1173,7 @@ export const listCurriculaByProgram = async (
   "use cache";
   cacheLife("days");
   cacheTag("curricula");
+  cacheTag("programs");
 
   return makeRequest(async () => {
     const curricula = await Curriculum.list({
@@ -5253,5 +5373,233 @@ export const createBulkPvbs = async ({
       successCount,
       failureCount,
     };
+  });
+};
+
+export const createDiscipline = async ({
+  title,
+  handle,
+  weight,
+}: {
+  title: string;
+  handle: string;
+  weight: number;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Discipline.create({
+      title,
+      handle,
+      weight,
+    });
+  });
+};
+
+export const updateDiscipline = async (
+  disciplineId: string,
+  { title, weight }: { title: string; weight: number },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Discipline.update({
+      id: disciplineId,
+      title,
+      weight,
+    });
+  });
+};
+
+export const createModule = async ({
+  title,
+  handle,
+  weight,
+}: {
+  title: string;
+  handle: string;
+  weight: number;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Module.create({
+      title,
+      handle,
+      weight,
+    });
+  });
+};
+
+export const updateModule = async (
+  moduleId: string,
+  { title, weight }: { title: string; weight: number },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Module.update({
+      id: moduleId,
+      title,
+      weight,
+    });
+  });
+};
+
+export const createCompetency = async ({
+  title,
+  type,
+  weight,
+  handle,
+}: {
+  title: string;
+  type: "skill" | "knowledge";
+  weight: number;
+  handle: string;
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Competency.create({
+      title,
+      type,
+      weight,
+      handle,
+    });
+  });
+};
+
+export const updateCompetency = async (
+  competencyId: string,
+  {
+    title,
+    type,
+    weight,
+  }: { title: string; type: "skill" | "knowledge"; weight: number },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.Competency.update({
+      id: competencyId,
+      title,
+      type,
+      weight,
+    });
+  });
+};
+
+export const createCourse = async ({
+  title,
+  handle,
+  description,
+  disciplineId,
+  abbreviation,
+  categories,
+}: {
+  title: string;
+  handle: string;
+  description?: string;
+  disciplineId: string;
+  abbreviation?: string;
+  categories?: string[];
+}) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.create({
+      title,
+      handle,
+      description,
+      disciplineId,
+      abbreviation,
+      categories,
+    });
+  });
+};
+
+export const updateCourse = async (
+  courseId: string,
+  {
+    title,
+    description,
+    disciplineId,
+    abbreviation,
+    categories,
+  }: {
+    title?: string;
+    description?: string;
+    disciplineId?: string;
+    abbreviation?: string;
+    categories?: string[];
+  },
+) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await Course.update({
+      id: courseId,
+      title,
+      description,
+      disciplineId,
+      abbreviation,
+      categories,
+    });
   });
 };

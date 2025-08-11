@@ -16,26 +16,25 @@ import {
 import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { updateCurriculaCompetencyRequirementAction } from "~/app/_actions/secretariat/curricula/update-curriculum-competency-requirement-action";
+import { updateGearTypeAction } from "~/app/_actions/secretariat/gear-type/update-gear-type-action";
 import Spinner from "~/app/_components/spinner";
 
-export function EditRequirementDialog({
-  competency,
+export function EditGearTypeDialog({
+  gearType,
 }: {
-  competency: {
+  gearType: {
     id: string;
     title: string | null;
-    requirement: string | null;
   };
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
-    updateCurriculaCompetencyRequirementAction.bind(null, competency.id),
+    updateGearTypeAction.bind(null, gearType.id),
     {
       onSuccess: () => {
         setIsOpen(false);
-        toast.success("Vereiste bijgewerkt");
+        toast.success("Boottype bijgewerkt");
       },
       onError: () => {
         toast.error("Er is iets misgegaan");
@@ -44,27 +43,28 @@ export function EditRequirementDialog({
   );
 
   const { getInputValue } = useFormInput(input, {
-    requirement: competency.requirement ?? "",
+    title: gearType.title,
   });
 
   return (
     <>
       <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <PencilIcon />
+        Bewerken
       </Button>
 
       <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
         <DialogTitle>
-          Wijzig vereiste {competency.title ? `van '${competency.title}'` : ""}
+          Wijzig boottype{gearType.title ? ` '${gearType.title}'` : ""}
         </DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
               <Field>
-                <Label>Vereiste</Label>
+                <Label>Naam</Label>
                 <Input
-                  name="requirement"
-                  defaultValue={getInputValue("requirement")}
+                  name="title"
+                  defaultValue={getInputValue("title")}
                   required
                 />
               </Field>

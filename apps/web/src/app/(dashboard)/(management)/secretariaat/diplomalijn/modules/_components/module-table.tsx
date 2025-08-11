@@ -27,6 +27,7 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import type { listModules } from "~/lib/nwd";
+import { EditModuleDialog } from "./dialogs/edit-module-dialog";
 
 type Module = Awaited<ReturnType<typeof listModules>>[number];
 
@@ -38,6 +39,14 @@ const columns = [
   }),
   columnHelper.accessor("weight", {
     header: "Sortering",
+  }),
+  columnHelper.display({
+    id: "actions",
+    cell: ({ row }) => (
+      <div className="flex justify-end items-center gap-x-2">
+        <EditModuleDialog module={row.original} />
+      </div>
+    ),
   }),
 ];
 

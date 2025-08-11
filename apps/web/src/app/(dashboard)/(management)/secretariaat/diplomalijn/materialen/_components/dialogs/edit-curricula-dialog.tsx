@@ -35,13 +35,13 @@ export function EditCurriculaDialog({
   currentCurricula: Awaited<ReturnType<typeof listCurriculaByGearType>>;
   allPrograms: Awaited<ReturnType<typeof listPrograms>>;
 }) {
-  const [isOpen, setisOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { execute, input } = useAction(
     updateGearTypeCurriculaAction.bind(null, gearTypeId),
     {
       onSuccess: () => {
-        setisOpen(false);
+        setIsOpen(false);
         toast.success("Boottypen bijgewerkt");
       },
       onError: () => {
@@ -58,13 +58,13 @@ export function EditCurriculaDialog({
 
   return (
     <>
-      <Button outline className="-my-1.5" onClick={() => setisOpen(true)}>
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
         <AcademicCapIcon />
         Curricula
       </Button>
 
-      <Dialog open={isOpen} onClose={() => setisOpen(false)}>
-        <DialogTitle>Wijzig boottypen</DialogTitle>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+        <DialogTitle>Wijzig curricula voor dit materiaal</DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
@@ -76,6 +76,7 @@ export function EditCurriculaDialog({
                   )}
                   by="id"
                   name="curricula"
+                  minSelected={1}
                   placeholder="Zoek curricula..."
                   displayValue={(curriculum) => {
                     const program = allPrograms.find(

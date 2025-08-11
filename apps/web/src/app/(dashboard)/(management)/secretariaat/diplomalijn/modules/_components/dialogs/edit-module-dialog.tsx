@@ -1,7 +1,6 @@
 "use client";
 
-import { PlusIcon } from "@heroicons/react/16/solid";
-import slugify from "@sindresorhus/slugify";
+import { PencilIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -21,41 +20,50 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { Text } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createLocationAction } from "~/app/_actions/location/create-location-action";
+import { updateModuleAction } from "~/app/_actions/secretariat/module/update-module-action";
 import Spinner from "~/app/_components/spinner";
 
-export function CreateLocationDialog() {
+export function EditModuleDialog({
+  module,
+}: {
+  module: {
+    id: string;
+    title: string | null;
+    weight: number | null;
+  };
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const close = () => {
-    setIsOpen(false);
-    reset();
-  };
+  const { execute, input } = useAction(
+    updateModuleAction.bind(null, module.id),
+    {
+      onSuccess: () => {
+        setIsOpen(false);
+        toast.success("Module bijgewerkt");
+      },
+      onError: () => {
+        toast.error("Er is iets misgegaan");
+      },
+    },
+  );
 
-  const { execute, input, reset } = useAction(createLocationAction, {
-    onSuccess: () => {
-      close();
-      toast.success("Locatie aangemaakt");
-    },
-    onError: () => {
-      toast.error("Er is iets misgegaan");
-    },
+  const { getInputValue } = useFormInput(input, {
+    title: module.title,
+    weight: module.weight,
   });
-
-  const { getInputValue } = useFormInput(input);
-  const [slug, setSlug] = useState("");
 
   return (
     <>
-      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
-        <PlusIcon />
-        Nieuwe locatie
+      <Button outline className="-my-1.5" onClick={() => setIsOpen(true)}>
+        <PencilIcon />
+        Bewerken
       </Button>
 
-      <Dialog open={isOpen} onClose={close}>
-        <DialogTitle>Nieuwe locatie</DialogTitle>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)}>
+        <DialogTitle>
+          Wijzig module{module.title ? ` '${module.title}'` : ""}
+        </DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
@@ -63,21 +71,20 @@ export function CreateLocationDialog() {
                 <Field>
                   <Label>Naam</Label>
                   <Input
-                    name="name"
-                    defaultValue={getInputValue("name")}
+                    name="title"
+                    defaultValue={getInputValue("title")}
                     required
-                    onChange={(e) => {
-                      setSlug(slugify(e.target.value));
-                    }}
                   />
                 </Field>
                 <Field>
-                  <Label>Slug</Label>
-                  <Text className="text-sm">
-                    {slug.length > 0
-                      ? slug
-                      : "Slug wordt automatisch aangemaakt"}
-                  </Text>
+                  <Label>Sortering</Label>
+                  <Input
+                    name="weight"
+                    type="number"
+                    min={0}
+                    defaultValue={getInputValue("weight")}
+                    required
+                  />
                 </Field>
               </FieldGroup>
             </Fieldset>
@@ -97,7 +104,7 @@ function SubmitButton() {
   return (
     <Button type="submit" color="blue" disabled={pending}>
       {pending ? <Spinner className="text-white" /> : null}
-      Aanmaken
+      Opslaan
     </Button>
   );
 }

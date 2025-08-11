@@ -23,10 +23,10 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createLocationAction } from "~/app/_actions/location/create-location-action";
+import { createGearTypeAction } from "~/app/_actions/secretariat/gear-type/create-gear-type-action";
 import Spinner from "~/app/_components/spinner";
 
-export function CreateLocationDialog() {
+export function CreateGearTypeDialog() {
   const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
@@ -34,10 +34,10 @@ export function CreateLocationDialog() {
     reset();
   };
 
-  const { execute, input, reset } = useAction(createLocationAction, {
+  const { execute, input, reset } = useAction(createGearTypeAction, {
     onSuccess: () => {
       close();
-      toast.success("Locatie aangemaakt");
+      toast.success("Materiaal aangemaakt");
     },
     onError: () => {
       toast.error("Er is iets misgegaan");
@@ -51,11 +51,11 @@ export function CreateLocationDialog() {
     <>
       <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
-        Nieuwe locatie
+        Nieuw materiaal
       </Button>
 
       <Dialog open={isOpen} onClose={close}>
-        <DialogTitle>Nieuwe locatie</DialogTitle>
+        <DialogTitle>Nieuw materiaal</DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
@@ -63,8 +63,8 @@ export function CreateLocationDialog() {
                 <Field>
                   <Label>Naam</Label>
                   <Input
-                    name="name"
-                    defaultValue={getInputValue("name")}
+                    name="title"
+                    defaultValue={getInputValue("title")}
                     required
                     onChange={(e) => {
                       setSlug(slugify(e.target.value));

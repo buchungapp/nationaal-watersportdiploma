@@ -21,12 +21,21 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
+import { Listbox, ListboxOption } from "~/app/(dashboard)/_components/listbox";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createLocationAction } from "~/app/_actions/location/create-location-action";
+import { createCategoryAction } from "~/app/_actions/secretariat/category/create-category-action";
 import Spinner from "~/app/_components/spinner";
+import type { listParentCategories } from "~/lib/nwd";
 
-export function CreateLocationDialog() {
+type ParentCategory = Awaited<ReturnType<typeof listParentCategories>>[number];
+
+export function CreateCategoryDialog({
+  parentCategories,
+}: {
+  parentCategories: ParentCategory[];
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const close = () => {
@@ -34,10 +43,10 @@ export function CreateLocationDialog() {
     reset();
   };
 
-  const { execute, input, reset } = useAction(createLocationAction, {
+  const { execute, input, reset } = useAction(createCategoryAction, {
     onSuccess: () => {
       close();
-      toast.success("Locatie aangemaakt");
+      toast.success("Categorie aangemaakt");
     },
     onError: () => {
       toast.error("Er is iets misgegaan");
@@ -51,11 +60,11 @@ export function CreateLocationDialog() {
     <>
       <Button color="branding-orange" onClick={() => setIsOpen(true)}>
         <PlusIcon />
-        Nieuwe locatie
+        Nieuwe categorie
       </Button>
 
       <Dialog open={isOpen} onClose={close}>
-        <DialogTitle>Nieuwe locatie</DialogTitle>
+        <DialogTitle>Nieuwe categorie</DialogTitle>
         <DialogBody>
           <form action={execute}>
             <Fieldset>
@@ -63,12 +72,44 @@ export function CreateLocationDialog() {
                 <Field>
                   <Label>Naam</Label>
                   <Input
-                    name="name"
-                    defaultValue={getInputValue("name")}
+                    name="title"
+                    defaultValue={getInputValue("title")}
                     required
                     onChange={(e) => {
                       setSlug(slugify(e.target.value));
                     }}
+                  />
+                </Field>
+                <Field>
+                  <Label>Omschrijving</Label>
+                  <Textarea
+                    name="description"
+                    defaultValue={getInputValue("description")}
+                    rows={3}
+                  />
+                </Field>
+                <Field>
+                  <Label>Hoofdcategorie</Label>
+                  <Listbox
+                    name="parentCategoryId"
+                    defaultValue={getInputValue("parentCategoryId")}
+                  >
+                    <ListboxOption value="">Geen hoofdcategorie</ListboxOption>
+                    {parentCategories.map((category) => (
+                      <ListboxOption key={category.id} value={category.id}>
+                        {category.title ?? category.handle}
+                      </ListboxOption>
+                    ))}
+                  </Listbox>
+                </Field>
+                <Field>
+                  <Label>Sortering</Label>
+                  <Input
+                    name="weight"
+                    type="number"
+                    min={0}
+                    defaultValue={getInputValue("weight")}
+                    required
                   />
                 </Field>
                 <Field>

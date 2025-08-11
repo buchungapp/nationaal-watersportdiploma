@@ -20,7 +20,7 @@ export function ListSelect<
   placeholder,
   name,
   filter,
-  minSelected = 1,
+  minSelected = 0,
 }: {
   options: T[];
   by: BY;
