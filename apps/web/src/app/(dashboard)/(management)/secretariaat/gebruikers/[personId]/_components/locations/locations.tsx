@@ -9,7 +9,6 @@ import {
   gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { Link } from "~/app/(dashboard)/_components/link";
 import { StackedLayoutCardDisclosureChevron } from "~/app/(dashboard)/_components/stacked-layout";
 import { StackedLayoutCardDisclosure } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
@@ -55,10 +54,7 @@ async function LocationsList({
           key={location.id}
           className="flex flex-col bg-white px-2 lg:border-zinc-200/80 duration-200"
         >
-          <Link
-            href={`/locatie/${location.handle}/cohorten`}
-            className="group flex items-center gap-2.5"
-          >
+          <div className="group flex items-center gap-2.5">
             <Avatar
               square
               className="group-hover:ring-2 group-hover:ring-branding-light/30 size-6 lg:size-10 transition-all duration-200 shrink-0"
@@ -75,7 +71,7 @@ async function LocationsList({
                   ? "Ingetrokken"
                   : "Verwijderd"}
             </Badge>
-          </Link>
+          </div>
           <p className="mt-2 font-semibold text-xs">Rollen</p>
           <div className="flex items-center gap-1">
             {location.roles.map((role) => (

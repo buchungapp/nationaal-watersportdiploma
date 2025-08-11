@@ -14,10 +14,11 @@ import {
 import { setPrimaryPersonForUserAction } from "~/app/_actions/user/set-primary-person-action";
 
 export function PersonActions({
+  userId,
   person,
-}: { person: User.Person.$schema.Person }) {
+}: { userId: string; person: User.Person.$schema.Person }) {
   const { execute } = useAction(
-    setPrimaryPersonForUserAction.bind(null, undefined),
+    setPrimaryPersonForUserAction.bind(null, userId),
     {
       onSuccess: () => {
         toast.success("Hoofdprofiel bijgewerkt!");
@@ -34,7 +35,7 @@ export function PersonActions({
         <EllipsisHorizontalIcon />
       </DropdownButton>
       <DropdownMenu anchor="bottom end">
-        <DropdownItem href={`/profiel/${person.handle}`}>
+        <DropdownItem href={`/secretariaat/gebruikers/${person.id}`}>
           <DropdownLabel>Open profiel</DropdownLabel>
         </DropdownItem>
         {!person.isPrimary && (

@@ -61,7 +61,12 @@ export default function PersonsTable({
         <TableBody>
           <PlaceholderTableRows table={table} rows={placeholderRows}>
             <NoTableRows table={table}>Geen accounts gevonden</NoTableRows>
-            <DefaultTableRows table={table}>
+            <DefaultTableRows
+              table={table}
+              href={(row) =>
+                `/secretariaat/gebruikers/accounts/${row.original.authUserId}`
+              }
+            >
               {(cell, index, row) => (
                 <DefaultTableCell
                   key={cell.id}

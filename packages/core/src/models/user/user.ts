@@ -13,7 +13,11 @@ import {
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
-import { useQuery, withTransaction } from "../../contexts/index.js";
+import {
+  useQuery,
+  useSupabaseClient,
+  withTransaction,
+} from "../../contexts/index.js";
 import { createAuthUser } from "../../services/auth/handlers.js";
 import {
   formatSearchTerms,
@@ -216,6 +220,45 @@ export const updateDisplayName = wrapCommand(
         .update(s.user)
         .set({ displayName })
         .where(eq(s.user.authUserId, userId));
+    },
+  ),
+);
+
+export const updateEmail = wrapCommand(
+  "user.updateEmail",
+  withZod(
+    z.object({ userId: uuidSchema, email: z.string().email() }),
+    z.void(),
+    async ({ userId, email }) => {
+      const query = useQuery();
+      const supabase = useSupabaseClient();
+
+      const { data: userData } = await supabase.auth.admin.getUserById(userId);
+
+      if (!userData) {
+        throw new Error("User not found");
+      }
+
+      const existingUser = await query
+        .select()
+        .from(uncontrolledSchema._usersTable)
+        .where(eq(uncontrolledSchema._usersTable.email, email))
+        .then(possibleSingleRow);
+
+      if (existingUser) {
+        throw new Error("Email already in use");
+      }
+
+      await supabase.auth.admin.updateUserById(userId, {
+        email,
+      });
+
+      await supabase
+        .from("user")
+        .update({
+          email,
+        })
+        .eq("auth_user_id", userId);
     },
   ),
 );
