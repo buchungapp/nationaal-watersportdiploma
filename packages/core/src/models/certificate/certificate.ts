@@ -172,11 +172,19 @@ export const list = wrapQuery(
           .default(["createdAt"]),
         limit: z.number().int().positive().optional(),
         offset: z.number().int().nonnegative().default(0),
+        previousModules: z.boolean().default(false),
         // TODO: alter this default value to be true
         respectVisibility: z.boolean().default(false),
       })
       .default({}),
-    async ({ filter, sort, respectVisibility, limit, offset }) => {
+    async ({
+      filter,
+      sort,
+      respectVisibility,
+      limit,
+      offset,
+      previousModules,
+    }) => {
       const query = useQuery();
 
       const studentPerson = alias(s.person, "student_person");
@@ -333,10 +341,12 @@ export const list = wrapQuery(
               s.studentCompletedCompetency.studentCurriculumId,
               uniqueStudentCurriculumIds,
             ),
-            inArray(
-              s.studentCompletedCompetency.certificateId,
-              uniqueCertificateIds,
-            ),
+            previousModules
+              ? undefined
+              : inArray(
+                  s.studentCompletedCompetency.certificateId,
+                  uniqueCertificateIds,
+                ),
           ),
         );
 
@@ -393,7 +403,8 @@ export const list = wrapQuery(
           (cc) =>
             cc.student_completed_competency.studentCurriculumId ===
               studentCurriculum.id &&
-            cc.student_completed_competency.certificateId === certificate.id,
+            (previousModules ||
+              cc.student_completed_competency.certificateId === certificate.id),
         );
 
         const gearType = findItem({
@@ -507,8 +518,9 @@ export const storeHandles = wrapCommand(
         .union([z.literal("student"), z.literal("instructor")])
         .default("student"),
       handles: z.array(z.string().length(10)).min(1),
+      previousModules: z.boolean().default(false),
     }),
-    async ({ fileName, sort, handles }) => {
+    async ({ fileName, sort, handles, previousModules }) => {
       const redis = useRedisClient();
       const uuid = crypto.randomUUID();
       const key = `c-export:${uuid}`;
@@ -522,6 +534,7 @@ export const storeHandles = wrapCommand(
       pipeline.hset(`${key}:settings`, {
         fileName: fileName,
         sort,
+        previousModules,
       });
       pipeline.expire(`${key}:settings`, expirationTime);
 
@@ -542,6 +555,7 @@ export const retrieveHandles = wrapQuery(
       settings: z.object({
         fileName: z.string().optional(),
         sort: z.union([z.literal("student"), z.literal("instructor")]),
+        previousModules: z.boolean().default(false),
       }),
       handles: z.array(z.string().length(10)),
     }),
@@ -582,6 +596,10 @@ export const retrieveHandles = wrapQuery(
       const expectedSettingsSchema = z.object({
         fileName: z.string().optional(),
         sort: z.union([z.literal("student"), z.literal("instructor")]),
+        previousModules: z.preprocess(
+          (val) => val === "true",
+          z.boolean().default(false),
+        ),
       });
 
       return {

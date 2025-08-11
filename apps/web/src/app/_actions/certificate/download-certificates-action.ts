@@ -9,6 +9,7 @@ import { storeCertificateHandles } from "~/lib/nwd";
 const downloadCertificatesSchema = zfd.formData({
   filename: z.string().default(`${dayjs().toISOString()}-export-diplomas`),
   sort: z.enum(["student", "instructor"]).default("student"),
+  previousModules: zfd.checkbox().optional(),
 });
 
 const downloadCertificatesArgsSchema: [
@@ -23,13 +24,14 @@ export const downloadCertificatesAction = actionClientWithMeta
   .bindArgsSchemas(downloadCertificatesArgsSchema)
   .action(
     async ({
-      parsedInput: { filename, sort },
+      parsedInput: { filename, sort, previousModules },
       bindArgsParsedInputs: [certificateHandles],
     }) => {
       const uuid = await storeCertificateHandles({
         handles: certificateHandles,
         fileName: filename,
         sort,
+        previousModules,
       });
 
       return {
