@@ -19,6 +19,10 @@ import {
 } from "~/app/(dashboard)/_components/alert";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
+import {
   DropdownItem,
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
@@ -92,6 +96,7 @@ function DownloadCertificatesDialog({
   const { getInputValue } = useFormInput(input, {
     filename: `${dayjs().toISOString()}-export-diplomas`,
     sort: "student",
+    previousModules: "off",
   });
 
   return (
@@ -100,10 +105,10 @@ function DownloadCertificatesDialog({
         <AlertTitle>Diploma's downloaden</AlertTitle>
         {downloadUrl ? (
           <AlertDescription className="space-y-3">
-            <p className="text-green-600 font-medium">
+            <p className="font-medium text-green-600">
               ✓ Download wordt automatisch gestart...
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-gray-600 text-sm">
               Werkt de download niet?
               <a
                 href={downloadUrl}
@@ -167,6 +172,23 @@ function DownloadCertificatesDialog({
                         </Description>
                       </RadioField>
                     </RadioGroup>
+                  </Fieldset>
+
+                  <Fieldset className="mt-6">
+                    <Legend>Opleidingsvoortgang</Legend>
+                    <CheckboxField>
+                      <Checkbox
+                        name="previousModules"
+                        defaultChecked={
+                          getInputValue("previousModules") === "on"
+                        }
+                        key={`previousModules-${getInputValue("previousModules")}`}
+                      />
+                      <Label>
+                        Print ook de modules op het diploma die al via eerdere
+                        diploma's voor deze opleiding zijn behaald.
+                      </Label>
+                    </CheckboxField>
                   </Fieldset>
                 </HeadlessDisclosurePanel>
               </HeadlessDisclosure>

@@ -79,6 +79,7 @@ export async function generatePDF(
     sort = "student",
     style = "print",
     digitalSignature,
+    previousModules,
   }: {
     debug?: boolean;
     sort?: "student" | "instructor";
@@ -91,9 +92,14 @@ export async function generatePDF(
       contactInfo: string;
       name: string;
     };
+    previousModules?: boolean;
   } = {},
 ): Promise<ReadableStream> {
-  const data = await listCertificatesByNumber(certificateNumbers, sort);
+  const data = await listCertificatesByNumber(
+    certificateNumbers,
+    sort,
+    previousModules,
+  );
 
   assert.strictEqual(
     data.length,

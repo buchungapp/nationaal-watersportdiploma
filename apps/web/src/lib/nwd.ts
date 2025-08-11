@@ -641,6 +641,7 @@ export const listCertificatesByNumber = cache(
   async (
     numbers: string[],
     sort: "createdAt" | "student" | "instructor" = "createdAt",
+    previousModules?: boolean,
   ) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow().catch(() => null);
@@ -684,6 +685,7 @@ export const listCertificatesByNumber = cache(
             : sort === "student"
               ? ["student", "createdAt"]
               : ["instructor", "student", "createdAt"],
+        previousModules,
       });
 
       return certificates.items;
@@ -3235,6 +3237,7 @@ export const storeCertificateHandles = async (props: {
   handles: string[];
   fileName?: string;
   sort?: "student" | "instructor";
+  previousModules?: boolean;
 }) => {
   return makeRequest(async () => {
     return await withRedisClient(redisConfig, async () => {

@@ -25,7 +25,10 @@ export async function GET(
       settings.fileName ??
       `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
     }.pdf`,
-    await generatePDF(handles, { sort: settings.sort }),
+    await generatePDF(handles, {
+      sort: settings.sort,
+      previousModules: settings.previousModules,
+    }),
     type,
   );
 }
