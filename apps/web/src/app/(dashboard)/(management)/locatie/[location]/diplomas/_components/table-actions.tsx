@@ -6,6 +6,7 @@ import {
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -62,24 +63,31 @@ function DownloadCertificatesDialog({
 }) {
   const closeDialog = () => {
     close();
-    reset();
+    window.location.reload();
   };
 
-  const { execute, input, reset } = useAction(
+  const router = useRouter();
+
+  const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
       null,
       rows.map((row) => row.handle),
     ),
     {
-      onSuccess: () => {
-        closeDialog();
+      onSuccess: (result) => {
         resetSelection();
+        if (result?.data?.redirectUrl) {
+          // Automatically start download
+          router.push(result.data.redirectUrl);
+        }
       },
       onError: () => {
         toast.error(DEFAULT_SERVER_ERROR_MESSAGE);
       },
     },
   );
+
+  const downloadUrl = result?.data?.redirectUrl;
 
   const { getInputValue } = useFormInput(input, {
     filename: `${dayjs().toISOString()}-export-diplomas`,
@@ -90,61 +98,94 @@ function DownloadCertificatesDialog({
     <>
       <Alert open={isOpen} onClose={closeDialog} size="lg">
         <AlertTitle>Diploma's downloaden</AlertTitle>
-        <AlertDescription>
-          Download een PDF-bestand met de diploma's van de geselecteerde
-          cursisten.
-        </AlertDescription>
-        <form action={execute}>
-          <AlertBody>
-            <HeadlessDisclosure>
-              <HeadlessDisclosureButton className="flex">
-                <div className="flex justify-center items-center mr-6 h-6">
-                  <ChevronRightIcon className="w-3.5 h-3.5 ui-open:rotate-90 transition-transform shrink-0" />
-                </div>
-                <Subheading>Geavanceerde opties</Subheading>
-              </HeadlessDisclosureButton>
-              <HeadlessDisclosurePanel className="mt-2 pl-10">
-                <Field>
-                  <Label>Bestandsnaam</Label>
-                  <Input
-                    name="filename"
-                    type="text"
-                    required
-                    defaultValue={getInputValue("filename")}
-                  />
-                </Field>
+        {downloadUrl ? (
+          <AlertDescription className="space-y-3">
+            <p className="text-green-600 font-medium">
+              ✓ Download wordt automatisch gestart...
+            </p>
+            <p className="text-sm text-gray-600">
+              Werkt de download niet?
+              <a
+                href={downloadUrl}
+                className="ml-1 text-blue-600 hover:text-blue-800 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Klik hier om handmatig te downloaden
+              </a>
+            </p>
+          </AlertDescription>
+        ) : (
+          <AlertDescription>
+            Download een PDF-bestand met de diploma's van de geselecteerde
+            cursisten.
+          </AlertDescription>
+        )}
+        {!downloadUrl && (
+          <form action={execute}>
+            <AlertBody>
+              <HeadlessDisclosure>
+                <HeadlessDisclosureButton className="flex">
+                  <div className="flex justify-center items-center mr-6 h-6">
+                    <ChevronRightIcon className="w-3.5 h-3.5 ui-open:rotate-90 transition-transform shrink-0" />
+                  </div>
+                  <Subheading>Geavanceerde opties</Subheading>
+                </HeadlessDisclosureButton>
+                <HeadlessDisclosurePanel className="mt-2 pl-10">
+                  <Field>
+                    <Label>Bestandsnaam</Label>
+                    <Input
+                      name="filename"
+                      type="text"
+                      required
+                      defaultValue={getInputValue("filename")}
+                    />
+                  </Field>
 
-                <Fieldset className="mt-6">
-                  <Legend>Sortering</Legend>
-                  <Text>
-                    Hoe moeten de diploma's in de PDF gesorteerd zijn?
-                  </Text>
-                  <RadioGroup name="sort" defaultValue={getInputValue("sort")}>
-                    <RadioField>
-                      <Radio value="student" />
-                      <Label>Naam cursist</Label>
-                      <Description>Sortering op voornaam, A tot Z.</Description>
-                    </RadioField>
-                    <RadioField>
-                      <Radio value="instructor" />
-                      <Label>Naam instructeur</Label>
-                      <Description>
-                        Sortering op voornaam instructeur, A tot Z. Diploma's
-                        zonder instructeur worden als laatste getoond.
-                      </Description>
-                    </RadioField>
-                  </RadioGroup>
-                </Fieldset>
-              </HeadlessDisclosurePanel>
-            </HeadlessDisclosure>
-          </AlertBody>
+                  <Fieldset className="mt-6">
+                    <Legend>Sortering</Legend>
+                    <Text>
+                      Hoe moeten de diploma's in de PDF gesorteerd zijn?
+                    </Text>
+                    <RadioGroup
+                      name="sort"
+                      defaultValue={getInputValue("sort")}
+                    >
+                      <RadioField>
+                        <Radio value="student" />
+                        <Label>Naam cursist</Label>
+                        <Description>
+                          Sortering op voornaam, A tot Z.
+                        </Description>
+                      </RadioField>
+                      <RadioField>
+                        <Radio value="instructor" />
+                        <Label>Naam instructeur</Label>
+                        <Description>
+                          Sortering op voornaam instructeur, A tot Z. Diploma's
+                          zonder instructeur worden als laatste getoond.
+                        </Description>
+                      </RadioField>
+                    </RadioGroup>
+                  </Fieldset>
+                </HeadlessDisclosurePanel>
+              </HeadlessDisclosure>
+            </AlertBody>
+            <AlertActions>
+              <Button plain onClick={closeDialog}>
+                Annuleren
+              </Button>
+              <DownloadSubmitButton />
+            </AlertActions>
+          </form>
+        )}
+        {downloadUrl && (
           <AlertActions>
             <Button plain onClick={closeDialog}>
-              Annuleren
+              Sluiten
             </Button>
-            <DownloadSubmitButton />
           </AlertActions>
-        </form>
+        )}
       </Alert>
     </>
   );

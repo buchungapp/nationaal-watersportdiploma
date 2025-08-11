@@ -13,6 +13,6 @@
     "dump": "supabase db dump -s auth,public,storage -x auth.audit -f ./supabase/prod-seed.sql --data-only"
   },
   "devDependencies": {
-    "supabase": "^2.9.6"
+    "supabase": "^2.33.9"
   }
 }

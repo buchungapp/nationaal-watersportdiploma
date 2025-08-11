@@ -61,6 +61,7 @@ test("course crud", () =>
 
       discipline: {
         id: disciplineId,
+        abbreviation: null,
         title: "discipline-1",
         handle: "dc1",
         deletedAt: null,

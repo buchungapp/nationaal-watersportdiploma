@@ -1,0 +1,2 @@
+DROP INDEX "cohort_allocation_cohort_id_actor_id_student_curriculum_id_index";
+CREATE UNIQUE INDEX "cohort_allocation_cohort_id_actor_id_student_curriculum_id_index" ON "cohort_allocation" USING btree ("cohort_id","actor_id","student_curriculum_id") WHERE "cohort_allocation"."deleted_at" IS NULL;

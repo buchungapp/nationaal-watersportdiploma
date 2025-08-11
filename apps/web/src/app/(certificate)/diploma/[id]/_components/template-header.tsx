@@ -11,7 +11,7 @@ export function TemplateHeader({
   gearTypeTitle: TemplateData["gearType"]["title"];
   programTitle: TemplateData["program"]["title"];
   courseTitle: TemplateData["program"]["course"]["title"];
-  degreeRang: TemplateData["program"]["degree"]["rang"];
+  degreeRang: TemplateData["program"]["degree"]["title"];
 }) {
   return (
     <header className="bg-branding-light space-y-3 flex justify-center flex-col py-4">
