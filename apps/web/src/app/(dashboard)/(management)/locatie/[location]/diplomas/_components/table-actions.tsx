@@ -185,8 +185,8 @@ function DownloadCertificatesDialog({
                         key={`previousModules-${getInputValue("previousModules")}`}
                       />
                       <Label>
-                        Print alle behaalde modules op het diploma, voor dit
-                        programma.
+                        Print alle behaalde modules op de diploma's, voor het
+                        bijbehorend programma.
                       </Label>
                     </CheckboxField>
                   </Fieldset>
