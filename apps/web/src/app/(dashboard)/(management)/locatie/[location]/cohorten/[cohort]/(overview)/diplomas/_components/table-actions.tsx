@@ -557,7 +557,7 @@ function DownloadCertificatesDialog({
                   </Fieldset>
 
                   <Fieldset className="mt-6">
-                    <Legend>Alle behaalde modules</Legend>
+                    <Legend>Opleidingsvoortgang</Legend>
                     <CheckboxField>
                       <Checkbox
                         name="previousModules"
@@ -567,8 +567,8 @@ function DownloadCertificatesDialog({
                         key={`previousModules-${getInputValue("previousModules")}`}
                       />
                       <Label>
-                        Print alle behaalde modules op de diploma's, voor het
-                        bijbehorend programma.
+                        Print ook de modules op het diploma die al via eerdere
+                        diploma's voor deze opleiding zijn behaald.
                       </Label>
                     </CheckboxField>
                   </Fieldset>
