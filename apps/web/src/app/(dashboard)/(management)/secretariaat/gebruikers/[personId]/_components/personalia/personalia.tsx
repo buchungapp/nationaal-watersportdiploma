@@ -106,6 +106,11 @@ export async function Personalia({
             <DescriptionDetails>
               <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
             </DescriptionDetails>
+
+            <DescriptionTerm>E-mailadres</DescriptionTerm>
+            <DescriptionDetails>
+              <span className="block bg-gray-200 rounded w-32 h-6 animate-pulse" />
+            </DescriptionDetails>
           </DescriptionList>
         }
       >

@@ -120,6 +120,11 @@ export function SecretariaatSidebarMenu() {
             current: lastSegment === "gebruikers",
           },
           {
+            name: "Accounts",
+            href: "/secretariaat/gebruikers/accounts",
+            current: lastSegment === "accounts",
+          },
+          {
             name: "Instructeurs",
             href: "/secretariaat/instructeurs",
             current: lastSegment === "instructeurs",

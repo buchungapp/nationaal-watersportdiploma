@@ -4,15 +4,9 @@ import { Suspense } from "react";
 import Balancer from "react-wrap-balancer";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
 import {
-  DescriptionDetails,
-  DescriptionList,
-  DescriptionTerm,
-} from "~/app/(dashboard)/_components/description-list-v2";
-import {
   GridList,
   GridListItem,
   GridListItemDisclosure,
-  GridListItemHeader,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
@@ -23,8 +17,20 @@ import { PersonaliaContent } from "../../profiel/[handle]/_components/person/per
 import { AddPersonButton } from "./add-person-button";
 import { PersonActions } from "./persons-client";
 
-async function PersonsList() {
-  const persons = await listPersonsForUser();
+export async function PersonsList({
+  userId,
+  link,
+  actions,
+}: {
+  userId?: string;
+  link: (
+    person: Awaited<ReturnType<typeof listPersonsForUser>>[number],
+  ) => string;
+  actions?: (
+    person: Awaited<ReturnType<typeof listPersonsForUser>>[number],
+  ) => React.ReactNode;
+}) {
+  const persons = await listPersonsForUser(userId);
 
   return persons.length > 0 ? (
     <GridList>
@@ -34,15 +40,12 @@ async function PersonsList() {
           <GridListItem key={person.id} className="!border-sky-200">
             <header
               className={clsx(
-                "flex justify-between relative items-center sm:items-start -mt-3",
+                "relative flex justify-between items-center sm:items-start -mt-3",
                 "p-2 sm:p-4 pb-8 sm:pb-12",
                 "bg-sky-50/50",
               )}
             >
-              <Link
-                href={`/profiel/${person.handle}`}
-                className="flex items-center gap-3.5"
-              >
+              <Link href={link(person)} className="flex items-center gap-3.5">
                 <Avatar
                   square
                   initials={person.firstName.slice(0, 2)}
@@ -54,9 +57,9 @@ async function PersonsList() {
                     .join(" ")}
                 </div>
               </Link>
-              <div className="shrink-0">
-                <PersonActions person={person} />
-              </div>
+              {actions ? (
+                <div className="shrink-0">{actions(person)}</div>
+              ) : null}
               <AnimatedWave
                 offset={itemIndex * -30}
                 spacing={3 * itemIndex}
@@ -76,8 +79,8 @@ async function PersonsList() {
         ))}
     </GridList>
   ) : (
-    <div className="relative border-dashed border-2 rounded-md overflow-hidden pb-2 bg-zinc-50/50 border-zinc-200">
-      <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+    <div className="relative bg-zinc-50/50 pb-2 border-2 border-zinc-200 border-dashed rounded-md overflow-hidden">
+      <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
         <div className="space-y-2">
           <div>
             <Heading>
@@ -105,30 +108,10 @@ async function PersonsList() {
   );
 }
 
-function PersonsListFallback() {
+export function PersonsListFallback() {
   return (
     <GridList>
-      <GridListItem className="bg-white">
-        <GridListItemHeader>
-          <Avatar
-            square
-            initials={"..."}
-            className="bg-zinc-900 size-6 text-white"
-          />
-          <div className="bg-gray-200 rounded w-32 h-6 animate-pulse" />
-        </GridListItemHeader>
-        <DescriptionList>
-          <DescriptionTerm>NWD-id</DescriptionTerm>
-          <DescriptionDetails>
-            <div className="bg-gray-200 rounded w-24 h-5 animate-pulse [animation-delay:300ms]" />
-          </DescriptionDetails>
-
-          <DescriptionTerm>Geboortedatum</DescriptionTerm>
-          <DescriptionDetails>
-            <div className="bg-gray-200 rounded w-20 h-5 animate-pulse [animation-delay:600ms]" />
-          </DescriptionDetails>
-        </DescriptionList>
-      </GridListItem>
+      <li className="bg-gray-200 rounded-xl w-full h-96.25 animate-pulse" />
     </GridList>
   );
 }
@@ -152,17 +135,20 @@ export function Persons() {
         </div>
         <div className="mt-4">
           <Suspense fallback={<PersonsListFallback />}>
-            <PersonsList />
+            <PersonsList
+              link={(person) => `/profiel/${person.handle}`}
+              actions={(person) => <PersonActions person={person} />}
+            />
           </Suspense>
         </div>
 
-        <div className="bg-yellow-50 p-4 rounded-md mt-4">
-          <p className="text-sm text-yellow-700">
+        <div className="bg-yellow-50 mt-4 p-4 rounded-md">
+          <p className="text-yellow-700 text-sm">
             Zie je niet alle personen die je verwacht, of juist teveel?{" "}
             <Link
               href="/help/artikel/personenbeheer"
               target="_blank"
-              className="font-medium text-yellow-700 underline hover:text-yellow-600"
+              className="font-medium text-yellow-700 hover:text-yellow-600 underline"
             >
               Lees hier waarom en hoe je dit kunt oplossen
             </Link>

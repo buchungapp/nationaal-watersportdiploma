@@ -1328,6 +1328,41 @@ export const listPersonsForLocationWithPagination = cache(
   },
 );
 
+export const listAccountsWithPagination = cache(
+  async ({
+    limit,
+    offset,
+    filter,
+  }: {
+    limit?: number;
+    offset?: number;
+    filter?: {
+      q?: string;
+    };
+  }) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      if (
+        !isSystemAdmin(user.email) &&
+        !(await isSecretariaat(user.authUserId))
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      const accounts = await User.list({
+        filter: {
+          q: filter?.q ?? undefined,
+        },
+        limit,
+        offset,
+      });
+
+      return accounts;
+    });
+  },
+);
+
 export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
@@ -1350,6 +1385,21 @@ export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
     });
 
     return persons;
+  });
+});
+
+export const getUserById = cache(async (userId: string) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await User.fromId(userId);
   });
 });
 
@@ -1425,12 +1475,21 @@ export const getPersonByHandle = cache(async (handle: string) => {
   });
 });
 
-export const listPersonsForUser = cache(async () => {
+export const listPersonsForUser = cache(async (userId?: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
 
+    if (
+      userId &&
+      userId !== user.authUserId &&
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
     const persons = await User.Person.list({
-      filter: { userId: user.authUserId },
+      filter: { userId: userId ?? user.authUserId },
     });
 
     return persons.items;
@@ -1585,6 +1644,60 @@ export const listAllActiveLocations = cache(async () => {
     });
   });
 });
+
+export const setPrimaryPersonForUser = async (
+  personId: string,
+  userId?: string,
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      userId &&
+      userId !== user.authUserId &&
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    await User.setPrimaryPerson({
+      userId: userId ?? user.authUserId,
+      personId,
+    });
+  });
+};
+
+export const createPersonForUser = async (
+  personInput: {
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string;
+    dateOfBirth: Date;
+    birthCity: string;
+    birthCountry: string;
+  },
+  userId?: string,
+) => {
+  return makeRequest(async () => {
+    const user = await getUserOrThrow();
+
+    if (
+      userId &&
+      userId !== user.authUserId &&
+      !isSystemAdmin(user.email) &&
+      !(await isSecretariaat(user.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    return await User.Person.create({
+      userId: userId ?? user.authUserId,
+      ...personInput,
+      dateOfBirth: personInput.dateOfBirth.toISOString(),
+    });
+  });
+};
 
 export const createStudentForLocation = async (
   locationId: string,
@@ -4001,20 +4114,66 @@ export const listAllCashbacks = cache(async () => {
   });
 });
 
-export const updateCurrentUserDisplayName = async (displayName: string) => {
+export const updateUserDisplayName = async (
+  displayName: string,
+  userId?: string,
+) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
 
+    if (
+      userId &&
+      userId !== authUser.authUserId &&
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = userId ? await getUserById(userId) : authUser;
+
     await User.updateDisplayName({
-      userId: authUser.authUserId,
+      userId: user.authUserId,
       displayName,
     });
 
     posthog.capture({
-      distinctId: authUser.authUserId,
+      distinctId: user.authUserId,
       event: "update_display_name",
       properties: {
-        $set: { email: authUser.email, displayName: displayName },
+        $set: { email: user.email, displayName },
+      },
+    });
+
+    await posthog.shutdown();
+  });
+};
+
+export const updateUserEmail = async (email: string, userId?: string) => {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+
+    if (
+      userId &&
+      userId !== authUser.authUserId &&
+      !isSystemAdmin(authUser.email) &&
+      !(await isSecretariaat(authUser.authUserId))
+    ) {
+      throw new Error("Unauthorized");
+    }
+
+    const user = userId ? await getUserById(userId) : authUser;
+
+    await User.updateEmail({
+      userId: user.authUserId,
+      email,
+    });
+
+    posthog.capture({
+      distinctId: user.authUserId,
+      event: "update_email",
+      properties: {
+        $set: { email, displayName: user.displayName },
       },
     });
 
