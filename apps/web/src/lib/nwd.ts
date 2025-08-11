@@ -1328,6 +1328,41 @@ export const listPersonsForLocationWithPagination = cache(
   },
 );
 
+export const listAccountsWithPagination = cache(
+  async ({
+    limit,
+    offset,
+    filter,
+  }: {
+    limit?: number;
+    offset?: number;
+    filter?: {
+      q?: string;
+    };
+  }) => {
+    return makeRequest(async () => {
+      const user = await getUserOrThrow();
+
+      if (
+        !isSystemAdmin(user.email) &&
+        !(await isSecretariaat(user.authUserId))
+      ) {
+        throw new Error("Unauthorized");
+      }
+
+      const accounts = await User.list({
+        filter: {
+          q: filter?.q ?? undefined,
+        },
+        limit,
+        offset,
+      });
+
+      return accounts;
+    });
+  },
+);
+
 export const listBeoordelaarsForLocation = cache(async (locationId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();

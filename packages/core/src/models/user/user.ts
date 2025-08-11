@@ -1,17 +1,33 @@
 import { DatabaseError, schema as s, uncontrolledSchema } from "@nawadi/db";
 import { AuthApiError, AuthError } from "@supabase/supabase-js";
-import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
+import dayjs from "dayjs";
+import {
+  and,
+  asc,
+  countDistinct,
+  eq,
+  getTableColumns,
+  inArray,
+  isNotNull,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import { createAuthUser } from "../../services/auth/handlers.js";
 import {
+  formatSearchTerms,
+  jsonAggBuildObject,
+  jsonBuildObject,
   possibleSingleRow,
   singleRow,
   uuidSchema,
+  withLimitOffset,
   withZod,
   wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
+import { personSchema } from "./person.schema.js";
 import { selectSchema } from "./user.schema.js";
 
 /**
@@ -243,6 +259,180 @@ export const setPrimaryPerson = wrapCommand(
           // Check if the update affected any rows (validates person exists and belongs to user)
           .then(singleRow);
       });
+    },
+  ),
+);
+
+export const list = wrapQuery(
+  "user.list",
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            q: z.string().optional(),
+          })
+          .default({}),
+        limit: z.number().int().positive().optional(),
+        offset: z.number().int().nonnegative().default(0),
+      })
+      .default({}),
+    z.object({
+      items: selectSchema
+        .omit({
+          _metadata: true,
+        })
+        .extend({
+          persons: personSchema
+            .extend({
+              actors: z
+                .object({
+                  id: uuidSchema,
+                  createdAt: z.string(),
+                  type: z.enum([
+                    "student",
+                    "instructor",
+                    "location_admin",
+                    "system",
+                    "pvb_beoordelaar",
+                    "secretariaat",
+                  ]),
+                  locationId: uuidSchema.nullable(),
+                })
+                .array(),
+            })
+            .array(),
+        })
+        .array(),
+      count: z.number().int().nonnegative(),
+      limit: z.number().int().positive().nullable(),
+      offset: z.number().int().nonnegative(),
+    }),
+    async ({ limit, offset, filter }) => {
+      const query = useQuery();
+
+      const userCountQuery = query
+        .select({ count: countDistinct(s.user.authUserId) })
+        .from(s.user)
+        .then(singleRow);
+
+      const personQuery = query.$with("person").as(
+        query
+          .select({
+            ...getTableColumns(s.person),
+            birthCountry: {
+              code: s.country.alpha_2,
+              name: s.country.nl,
+            },
+            actors: jsonAggBuildObject(
+              {
+                ...getTableColumns(s.actor),
+              },
+              {
+                notNullColumn: "id",
+              },
+            ).as("actors"),
+          })
+          .from(s.person)
+          .leftJoin(s.country, eq(s.person.birthCountry, s.country.alpha_2))
+          .leftJoin(
+            s.actor,
+            and(
+              eq(s.actor.personId, s.person.id),
+              isNull(s.actor.deletedAt),
+              isNull(s.person.deletedAt),
+            ),
+          )
+          .groupBy(s.person.id, s.country.id),
+      );
+
+      const userQuery = query
+        .with(personQuery)
+        .select({
+          authUserId: s.user.authUserId,
+          email: s.user.email,
+          displayName: s.user.displayName,
+          persons: jsonAggBuildObject(
+            {
+              id: personQuery.id,
+              handle: personQuery.handle,
+              userId: personQuery.userId,
+              createdAt: personQuery.createdAt,
+              updatedAt: personQuery.updatedAt,
+              email: s.user.email,
+              firstName: personQuery.firstName,
+              lastName: personQuery.lastName,
+              lastNamePrefix: personQuery.lastNamePrefix,
+              dateOfBirth: personQuery.dateOfBirth,
+              birthCity: personQuery.birthCity,
+              birthCountry: jsonBuildObject({
+                code: personQuery.birthCountry.code,
+                name: personQuery.birthCountry.name,
+              }),
+              isPrimary: personQuery.isPrimary,
+              actors: personQuery.actors,
+            },
+            {
+              notNullColumn: "id",
+            },
+          ),
+        })
+        .from(s.user)
+        .leftJoin(personQuery, eq(s.user.authUserId, personQuery.userId))
+        .where(
+          filter.q
+            ? sql`
+                (
+                  setweight(to_tsvector('simple', 
+                    COALESCE(${s.user.email}, '')
+                  ), 'A') ||
+                  setweight(to_tsvector('simple', 
+                    COALESCE(split_part(${s.user.email}, '@', 1), '')
+                  ), 'B') ||
+                  setweight(to_tsvector('simple', 
+                    COALESCE(split_part(${s.user.email}, '@', 2), '')
+                  ), 'C') ||
+                  setweight(to_tsvector('simple', COALESCE(${s.person.handle}, '')), 'B') ||
+                  setweight(to_tsvector('simple', 
+                    COALESCE(${s.person.firstName}, '') || ' ' || 
+                    COALESCE(${s.person.lastNamePrefix}, '') || ' ' || 
+                    COALESCE(${s.person.lastName}, '')
+                  ), 'A')
+                ) @@ to_tsquery('simple', ${formatSearchTerms(filter.q, "and")})
+              `
+            : undefined,
+        )
+        .orderBy(asc(s.user.email))
+        .groupBy(s.user.authUserId)
+        .$dynamic();
+
+      const [{ count }, users] = await Promise.all([
+        userCountQuery,
+        withLimitOffset(userQuery, limit, offset),
+      ]);
+
+      return {
+        items: users.map((user) => ({
+          ...user,
+          persons: user.persons.map((person) => ({
+            ...person,
+            // biome-ignore lint/style/noNonNullAssertion: <explanation>
+            handle: person.handle!,
+            birthCountry:
+              person.birthCountry?.code && person.birthCountry.name
+                ? {
+                    code: person.birthCountry.code,
+                    name: person.birthCountry.name,
+                  }
+                : null,
+            createdAt: dayjs(person.createdAt).toISOString(),
+            updatedAt: dayjs(person.updatedAt).toISOString(),
+          })),
+        })),
+        count,
+        limit: limit ?? null,
+        offset,
+      };
     },
   ),
 );
