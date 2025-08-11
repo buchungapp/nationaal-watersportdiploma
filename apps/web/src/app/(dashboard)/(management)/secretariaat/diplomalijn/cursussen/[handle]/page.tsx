@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import {
@@ -54,7 +55,11 @@ export default async function Page({ params }: PageProps) {
       </BackButton>
       <div className="flex sm:flex-row flex-col sm:justify-between gap-4">
         <CourseHeading params={params} />
-        <EditCourseDialogSuspense params={params} />
+        <Suspense
+          fallback={<div className="rounded-lg w-40.5 h-9 animate-pulse" />}
+        >
+          <EditCourseDialogSuspense params={params} />
+        </Suspense>
       </div>
       <CourseInfo params={params} />
       <Divider className="my-10" />
