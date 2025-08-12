@@ -5,6 +5,7 @@ import {
   FunnelIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import type { KSS } from "@nawadi/core";
 import { formatters } from "@nawadi/lib";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
@@ -26,7 +27,9 @@ import {
   PopoverButton,
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
+import type { listCourses } from "~/lib/nwd";
 import { ExportQualificationsDialog } from "./export-qualifications-dialog";
+import { KwalificatieBadge } from "./kwalificatie-badge";
 
 type Instructor = {
   id: string;
@@ -43,19 +46,13 @@ type Instructor = {
   email: string | null;
 };
 
-type Course = {
-  id: string;
-  handle: string;
-  title: string | null;
-  abbreviation: string | null;
-};
+type Course = Awaited<ReturnType<typeof listCourses>>[number];
 
-type Kwalificatie = {
-  personId: string;
-  courseId: string;
-  richting: string;
-  hoogsteNiveau: number;
-};
+type Kwalificatie = Awaited<
+  ReturnType<
+    typeof KSS.Kwalificaties.listHighestKwalificatiePerCourseAndRichting
+  >
+>[number];
 
 interface KwalificatiesTableProps {
   instructors: Instructor[];
@@ -64,8 +61,14 @@ interface KwalificatiesTableProps {
   locationHandle: string;
 }
 
+const SORT_ORDER: Kwalificatie["richting"][] = [
+  "pvb_beoordelaar",
+  "leercoach",
+  "instructeur",
+];
+
 const niveaus = [1, 2, 3, 4, 5];
-const types = {
+const types: Record<Kwalificatie["richting"], string> = {
   instructeur: "Instructeur",
   leercoach: "Leercoach",
   pvb_beoordelaar: "PVB beoordelaar",
@@ -232,107 +235,25 @@ export function KwalificatiesTable({
     courseId: string,
   ): React.ReactNode {
     const personMap = kwalificatieMap.get(personId);
-    if (!personMap) return "";
+    if (!personMap) return null;
 
     const courseKwalificaties = personMap.get(courseId);
-    if (!courseKwalificaties || courseKwalificaties.length === 0) return "";
+    if (!courseKwalificaties || courseKwalificaties.length === 0) return null;
 
-    // Group by richting and show highest level for each
-    const byRichting = courseKwalificaties.reduce(
-      (acc, kwal) => {
-        const existing = acc[kwal.richting];
-        if (!existing || kwal.hoogsteNiveau > existing) {
-          acc[kwal.richting] = kwal.hoogsteNiveau;
-        }
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-
-    // Sort by priority: instructeur, leercoach, pvb_beoordelaar
-    const sortedEntries = Object.entries(byRichting).sort(([a], [b]) => {
-      const order = { instructeur: 0, leercoach: 1, pvb_beoordelaar: 2 };
-      return (
-        (order[a as keyof typeof order] || 3) -
-        (order[b as keyof typeof order] || 3)
-      );
-    });
-
-    // Format the display with visual separation
     return (
       <div className="flex flex-wrap justify-center gap-1">
-        {sortedEntries.map(([richting, niveau]) => {
-          const richtingConfig = {
-            instructeur: {
-              abbr: "I",
-              baseColor: "blue",
-            },
-            leercoach: {
-              abbr: "L",
-              baseColor: "green",
-            },
-            pvb_beoordelaar: {
-              abbr: "B",
-              baseColor: "purple",
-            },
-          };
-
-          const config = richtingConfig[
-            richting as keyof typeof richtingConfig
-          ] || {
-            abbr: richting.charAt(0).toUpperCase(),
-            baseColor: "gray",
-          };
-
-          // Create different intensities based on niveau (1-5 scale)
-          const getColorClasses = (baseColor: string, niveau: number) => {
-            const colorMap = {
-              blue: {
-                1: "bg-blue-50 text-blue-600 border-blue-200",
-                2: "bg-blue-100 text-blue-700 border-blue-300",
-                3: "bg-blue-200 text-blue-800 border-blue-400",
-                4: "bg-blue-300 text-blue-900 border-blue-500",
-                5: "bg-blue-400 text-white border-blue-600",
-              },
-              green: {
-                1: "bg-emerald-50 text-emerald-600 border-emerald-200",
-                2: "bg-emerald-100 text-emerald-700 border-emerald-300",
-                3: "bg-emerald-200 text-emerald-800 border-emerald-400",
-                4: "bg-emerald-300 text-emerald-900 border-emerald-500",
-                5: "bg-emerald-500 text-white border-emerald-700",
-              },
-              purple: {
-                1: "bg-purple-50 text-purple-600 border-purple-200",
-                2: "bg-purple-100 text-purple-700 border-purple-300",
-                3: "bg-purple-200 text-purple-800 border-purple-400",
-                4: "bg-purple-300 text-purple-900 border-purple-500",
-                5: "bg-purple-500 text-white border-purple-700",
-              },
-              gray: {
-                1: "bg-gray-100 text-gray-700 border-gray-300",
-                2: "bg-gray-200 text-gray-800 border-gray-400",
-                3: "bg-gray-300 text-gray-900 border-gray-500",
-                4: "bg-gray-400 text-gray-950 border-gray-600",
-                5: "bg-gray-500 text-white border-gray-700",
-              },
-            };
-
-            const colors =
-              colorMap[baseColor as keyof typeof colorMap] || colorMap.gray;
-            return colors[niveau as keyof typeof colors] || colors[3];
-          };
-
-          const colorClasses = getColorClasses(config.baseColor, niveau);
-
-          return (
-            <span
-              key={richting}
-              className={`inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium border ${colorClasses}`}
-            >
-              {config.abbr}-{niveau}
-            </span>
-          );
-        })}
+        {courseKwalificaties
+          .toSorted(
+            (a, b) =>
+              SORT_ORDER.indexOf(a.richting) - SORT_ORDER.indexOf(b.richting),
+          )
+          .map((k) => (
+            <KwalificatieBadge
+              key={k.courseId + k.richting}
+              richting={k.richting}
+              niveau={k.hoogsteNiveau}
+            />
+          ))}
       </div>
     );
   }
