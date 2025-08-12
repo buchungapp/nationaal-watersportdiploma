@@ -6,7 +6,6 @@ import {
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -67,10 +66,8 @@ function DownloadCertificatesDialog({
 }) {
   const closeDialog = () => {
     close();
-    window.location.reload();
+    reset();
   };
-
-  const router = useRouter();
 
   const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
@@ -82,7 +79,7 @@ function DownloadCertificatesDialog({
         resetSelection();
         if (result?.data?.redirectUrl) {
           // Automatically start download
-          router.push(result.data.redirectUrl);
+          window.open(result.data.redirectUrl, "_blank");
         }
       },
       onError: () => {

@@ -11,7 +11,6 @@ import {
   type InferUseActionHookReturn,
   useAction,
 } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Alert,
@@ -448,10 +447,8 @@ function DownloadCertificatesDialog({
 }) {
   const closeDialog = () => {
     close();
-    window.location.reload();
+    reset();
   };
-
-  const router = useRouter();
 
   const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
@@ -464,7 +461,7 @@ function DownloadCertificatesDialog({
         resetSelection();
         if (result?.data?.redirectUrl) {
           // Automatically start download
-          router.push(result.data.redirectUrl);
+          window.open(result.data.redirectUrl, "_blank");
         }
       },
       onError: () => {
