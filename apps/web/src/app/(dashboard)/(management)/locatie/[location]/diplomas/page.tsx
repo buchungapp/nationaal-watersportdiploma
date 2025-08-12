@@ -26,11 +26,14 @@ async function CertificatesTable(props: {
     query: q,
   } = loadSearchParams(searchParams ?? {});
 
-  const certificates = await listCertificatesWithPagination(location.id, {
-    q,
-    limit: paginationLimit,
-    offset: (currentPage - 1) * paginationLimit,
-  });
+  const certificates = await listCertificatesWithPagination(
+    {
+      q,
+      limit: paginationLimit,
+      offset: (currentPage - 1) * paginationLimit,
+    },
+    location.id,
+  );
 
   return (
     <Table certificates={certificates.items} totalItems={certificates.count} />
