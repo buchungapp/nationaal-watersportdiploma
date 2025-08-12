@@ -10,6 +10,7 @@ import {
 } from "~/app/(dashboard)/_components/dropdown";
 
 import {
+  ArrowTopRightOnSquareIcon,
   EllipsisVerticalIcon,
   EnvelopeIcon,
   PencilIcon,
@@ -54,6 +55,14 @@ export function ActionButtonDropdown({
           >
             <UsersIcon />
             <DropdownLabel>Personen samenvoegen</DropdownLabel>
+          </DropdownItem>
+          <DropdownDivider />
+          <DropdownItem
+            href={`/secretariaat/gebruikers/accounts/${person.userId}`}
+            target="_blank"
+          >
+            <ArrowTopRightOnSquareIcon />
+            <DropdownLabel>Account</DropdownLabel>
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
