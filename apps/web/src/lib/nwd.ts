@@ -677,7 +677,6 @@ export const listCertificatesByNumber = cache(
       const certificates = await Certificate.list({
         filter: {
           number: numbers,
-          ...(locationFilter.length > 0 && { locationId: locationFilter }),
         },
         sort:
           sort === "createdAt"
@@ -688,7 +687,11 @@ export const listCertificatesByNumber = cache(
         previousModules,
       });
 
-      return certificates.items;
+      return certificates.items.filter((c) => {
+        const isOwnCertificate = c.student?.userId === user?.authUserId;
+        const isLocationAllowed = locationFilter.includes(c.locationId);
+        return isOwnCertificate || isLocationAllowed;
+      });
     });
   },
 );
