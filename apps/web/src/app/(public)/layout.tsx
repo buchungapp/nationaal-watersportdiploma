@@ -10,10 +10,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { BASE_URL } from "~/constants";
 
+import { Suspense } from "react";
 import { ImpersonationBarWrapper } from "../(dashboard)/_components/impersonation-bar-wrapper";
 import Analytics from "../_components/analytics";
-import "../globals.css";
-import { Suspense } from "react";
 
 const inter = Inter({
   subsets: ["latin"],

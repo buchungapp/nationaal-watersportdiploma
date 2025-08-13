@@ -52,7 +52,7 @@ import {
 } from "~/app/_actions/person/person-bulk-csv-mappings";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
-import type { ActorType } from "~/lib/nwd";
+import type { ActorType, LocationActorType } from "~/lib/nwd";
 import { invariant } from "~/utils/invariant";
 
 const ROLES: {
@@ -104,11 +104,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
   const [hasSelectedRole, setHasSelectedRole] = useState(true);
   const [roles, setRoles] = useState<
-    | [
-        Exclude<ActorType, "pvb_beoordelaar">,
-        ...Exclude<ActorType, "pvb_beoordelaar">[],
-      ]
-    | null
+    [LocationActorType, ...LocationActorType[]] | null
   >(null);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -148,12 +144,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
     });
 
     setData({ labels, rows: data });
-    setRoles(
-      roles as [
-        Exclude<ActorType, "pvb_beoordelaar">,
-        ...Exclude<ActorType, "pvb_beoordelaar">[],
-      ],
-    );
+    setRoles(roles as [LocationActorType, ...LocationActorType[]]);
     setIsUpload(false);
   };
 
@@ -263,10 +254,7 @@ function SubmitForm({
   close,
 }: {
   data: CSVData;
-  roles: [
-    Exclude<ActorType, "pvb_beoordelaar">,
-    ...Exclude<ActorType, "pvb_beoordelaar">[],
-  ];
+  roles: [LocationActorType, ...LocationActorType[]];
   locationId: string;
   countries: { code: string; name: string }[];
   close: () => void;

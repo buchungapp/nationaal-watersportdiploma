@@ -119,12 +119,17 @@ export const listByPersonId = wrapQuery(
           locationHandle: s.location.handle,
           locationName: s.location.name,
           studentCurriculumId: s.cohortAllocation.studentCurriculumId,
-          progress: jsonAggBuildObject({
-            competencyId: latestProgress.competencyId,
-            moduleId: latestProgress.moduleId,
-            progress: sql<number>`${latestProgress.progress}::integer`,
-            createdAt: latestProgress.createdAt,
-          }).as("progress"),
+          progress: jsonAggBuildObject(
+            {
+              competencyId: latestProgress.competencyId,
+              moduleId: latestProgress.moduleId,
+              progress: sql<number>`${latestProgress.progress}::integer`,
+              createdAt: latestProgress.createdAt,
+            },
+            {
+              notNullColumn: "progress",
+            },
+          ).as("progress"),
           progressVisibleUpUntil: s.cohortAllocation.progressVisibleUpUntil,
         })
         .from(s.cohortAllocation)

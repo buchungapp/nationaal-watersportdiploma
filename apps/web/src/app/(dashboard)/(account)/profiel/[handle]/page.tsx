@@ -27,17 +27,17 @@ type DashboardProps = {
 function InstructorDashboard({ personPromise, searchParams }: DashboardProps) {
   return (
     <>
-      <div className="order-3 lg:order-none lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 order-3 lg:order-none lg:col-start-3 lg:row-end-1">
         <Personalia personPromise={personPromise} />
       </div>
 
-      <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-2 lg:order-none flex flex-col gap-2">
+      <div className="flex flex-col gap-2 order-2 lg:order-none lg:col-span-2 lg:row-span-2 lg:row-end-2">
         <Locations personPromise={personPromise} />
 
         <PvbOverviewSection personPromise={personPromise} />
       </div>
 
-      <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 order-4 lg:order-none lg:col-start-3">
         <News categories={["consument", "achterban", "vereniging"]} />
 
         <Socials />
@@ -49,12 +49,16 @@ function InstructorDashboard({ personPromise, searchParams }: DashboardProps) {
 function StudentDashboard({ personPromise, searchParams }: DashboardProps) {
   return (
     <>
-      <div className="order-2 lg:order-none lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 order-2 lg:order-none lg:col-start-3 lg:row-end-1">
         <Personalia personPromise={personPromise} />
       </div>
 
-      <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-3 lg:order-none flex flex-col gap-2">
-        <ProgressSection personPromise={personPromise} />
+      <div className="flex flex-col gap-2 order-3 lg:order-none lg:col-span-2 lg:row-span-2 lg:row-end-2">
+        <ProgressSection
+          personPromise={personPromise}
+          description="Bekijk je diploma's, hoe je ervoor staat met je opleidingen, en hoe
+            het gaat met je huidige cursus."
+        />
 
         <WatersportCertificatesSection
           personPromise={personPromise}
@@ -64,7 +68,7 @@ function StudentDashboard({ personPromise, searchParams }: DashboardProps) {
         <Logbook personPromise={personPromise} searchParams={searchParams} />
       </div>
 
-      <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2">
+      <div className="flex flex-col gap-2 order-4 lg:order-none lg:col-start-3">
         <News categories={["consument"]} />
 
         <Socials />
@@ -112,25 +116,25 @@ function DashboardSkeleton() {
   return (
     <>
       {/* Toggle skeleton */}
-      <div className="col-span-full order-1 mb-2 animate-pulse">
-        <div className="h-11 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      <div className="order-1 col-span-full mb-2 animate-pulse">
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-11" />
       </div>
 
       {/* Right column - top (Personalia) */}
       <div className="order-3 lg:order-none lg:col-start-3 lg:row-end-1 animate-pulse">
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64" />
       </div>
 
       {/* Left columns - main content area */}
-      <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-2 lg:order-none flex flex-col gap-2 animate-pulse">
-        <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-        <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      <div className="flex flex-col gap-2 order-2 lg:order-none lg:col-span-2 lg:row-span-2 lg:row-end-2 animate-pulse">
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-48" />
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64" />
       </div>
 
       {/* Right column - bottom (News + Socials) */}
-      <div className="order-4 lg:order-none lg:col-start-3 flex flex-col gap-2 animate-pulse">
-        <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-        <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+      <div className="flex flex-col gap-2 order-4 lg:order-none lg:col-start-3 animate-pulse">
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-40" />
+        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-32" />
       </div>
     </>
   );
@@ -166,7 +170,7 @@ export default function Page(props: {
 
   return (
     <div>
-      <div className="mx-auto max-w-2xl lg:max-w-none lg:mx-0">
+      <div className="mx-auto lg:mx-0 lg:max-w-none max-w-2xl">
         <Welcome params={props.params} />
         <Text className="max-w-prose">
           In je digitale watersportcentrum.{" "}
@@ -176,7 +180,7 @@ export default function Page(props: {
         </Text>
       </div>
 
-      <div className="mt-2 mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+      <div className="items-start gap-2 grid grid-cols-1 lg:grid-cols-3 grid-rows-1 mx-auto lg:mx-0 mt-2 lg:max-w-none max-w-2xl">
         <Suspense fallback={<DashboardSkeleton />}>
           <DecideDashboard
             personPromise={personPromise}
