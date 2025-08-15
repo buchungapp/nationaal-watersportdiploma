@@ -15,7 +15,7 @@ export default async function PersonSelector(props: {
   return (
     <DropdownButton
       as={NavbarItem}
-      className="[&>*]:bg-white [&>*]:border [&>*]:border-slate-200"
+      className="[&>*]:bg-white [&>*]:-my-0.25 [&>*]:border [&>*]:border-slate-200"
     >
       <UsersIcon className="hidden md:block" />
       <NavbarLabel className="max-w-[80px] truncate">
@@ -23,7 +23,7 @@ export default async function PersonSelector(props: {
           .filter(Boolean)
           .join(" ")}
       </NavbarLabel>
-      <Badge className="-my-1 invisible md:visible">{persons.length}</Badge>
+      <Badge className="invisible md:visible -my-1">{persons.length}</Badge>
       <ChevronDownIcon />
     </DropdownButton>
   );

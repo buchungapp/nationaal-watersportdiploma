@@ -9,6 +9,7 @@ import {
 } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import type { DashboardView } from "./_components/dashboard-toggle";
+import { Kwalificaties } from "./_components/kwalificaties/kwalificaties";
 import { Locations } from "./_components/locations";
 import { Logbook } from "./_components/logbook/logbook";
 import { News } from "./_components/news";
@@ -33,7 +34,7 @@ function InstructorDashboard({ personPromise, searchParams }: DashboardProps) {
 
       <div className="flex flex-col gap-2 order-2 lg:order-none lg:col-span-2 lg:row-span-2 lg:row-end-2">
         <Locations personPromise={personPromise} />
-
+        <Kwalificaties personPromise={personPromise} />
         <PvbOverviewSection personPromise={personPromise} />
       </div>
 
@@ -115,11 +116,6 @@ async function DecideDashboard({
 function DashboardSkeleton() {
   return (
     <>
-      {/* Toggle skeleton */}
-      <div className="order-1 col-span-full mb-2 animate-pulse">
-        <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-11" />
-      </div>
-
       {/* Right column - top (Personalia) */}
       <div className="order-3 lg:order-none lg:col-start-3 lg:row-end-1 animate-pulse">
         <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-64" />

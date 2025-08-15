@@ -83,7 +83,7 @@ export function DashboardToggle({
       </div>
 
       {/* Desktop: Toggle */}
-      <fieldset className="hidden md:block">
+      <fieldset className="hidden md:block -my-1">
         <legend className="sr-only">Kies een weergave</legend>
         <div className="flex items-center gap-x-2 bg-gray-100 p-1 rounded-lg">
           {views.map((viewOption) => (

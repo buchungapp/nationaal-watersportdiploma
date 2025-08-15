@@ -4,7 +4,7 @@ import { NavbarItem, NavbarLabel } from "~/app/(dashboard)/_components/navbar";
 
 export default function PersonSelector() {
   return (
-    <DropdownButton as={NavbarItem}>
+    <DropdownButton as={NavbarItem} className="[&>*]:-my-0.25">
       <NavbarLabel className="opacity-40">Selecteer persoon</NavbarLabel>
       <ChevronDownIcon />
     </DropdownButton>

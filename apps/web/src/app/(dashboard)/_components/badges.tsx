@@ -1,6 +1,6 @@
-import { Badge } from "./badge";
+import { Badge, type colors } from "./badge";
 
-export const DEGREE_COLORS = {
+export const DEGREE_COLORS: Record<string, keyof typeof colors> = {
   "niveau-1": "red",
   "niveau-2": "yellow",
   "niveau-3": "green",
