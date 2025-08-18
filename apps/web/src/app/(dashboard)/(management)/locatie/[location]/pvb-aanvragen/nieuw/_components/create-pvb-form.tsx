@@ -31,7 +31,10 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { useBeoordelaarsForLocation } from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
+import {
+  type Beoordelaar,
+  useBeoordelaarsForLocation,
+} from "~/app/(dashboard)/_hooks/swr/use-beoordelaars-for-location";
 import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
 import { useKwalificatieprofielenByNiveau } from "~/app/(dashboard)/_hooks/swr/use-kwalificatieprofielen-by-niveau";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
@@ -309,15 +312,15 @@ function PersonCombobox({
   actorType: "student" | "instructor" | "location_admin";
   placeholder: string;
   name: string;
-  value?: string;
-  onSelect?: (personId: string) => void;
+  value?: Person;
+  onSelect?: (person: Person | null) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [value, setValue] = useState(parentValue || "");
+  const [value, setValue] = useState<Person | null>(parentValue || null);
 
   // Sync with parent value changes
   useEffect(() => {
-    setValue(parentValue || "");
+    setValue(parentValue || null);
   }, [parentValue]);
 
   const { data: persons } = usePersonsForLocation(locationId, {
@@ -326,7 +329,6 @@ function PersonCombobox({
 
   // Handle undefined data during loading
   const personsItems = persons ? persons.items : [];
-  const selectedPerson = personsItems.find((p) => p.id === value) || null;
 
   // Determine if we should show the empty state message
   const showEmptyMessage = persons && personsItems.length === 0;
@@ -359,7 +361,7 @@ function PersonCombobox({
   if (showEmptyMessage && !value && !query) {
     return (
       <>
-        <input type="hidden" name={name} value={value} />
+        <input type="hidden" name={name} value={undefined} />
         <div className="w-full">{getEmptyMessage()}</div>
       </>
     );
@@ -367,14 +369,13 @@ function PersonCombobox({
 
   return (
     <>
-      <input type="hidden" name={name} value={value} />
+      <input type="hidden" name={name} value={value?.id} />
       <Combobox
         options={personsItems}
-        value={selectedPerson}
+        value={value}
         onChange={(person) => {
-          const newValue = person?.id || "";
-          setValue(newValue);
-          onSelect?.(newValue);
+          setValue(person);
+          onSelect?.(person);
         }}
         displayValue={(person) => (person ? formatPersonName(person) : "")}
         setQuery={setQuery}
@@ -411,15 +412,15 @@ function BeoordelaarCombobox({
   locationId: string;
   placeholder: string;
   name: string;
-  value?: string;
-  onSelect?: (personId: string) => void;
+  value?: Beoordelaar;
+  onSelect?: (beoordelaar: Beoordelaar | null) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [value, setValue] = useState(parentValue || "");
+  const [value, setValue] = useState<Beoordelaar | null>(parentValue || null);
 
   // Sync with parent value changes
   useEffect(() => {
-    setValue(parentValue || "");
+    setValue(parentValue || null);
   }, [parentValue]);
 
   const { beoordelaars, isLoading } = useBeoordelaarsForLocation(locationId);
@@ -436,7 +437,7 @@ function BeoordelaarCombobox({
   });
 
   const selectedBeoordelaar =
-    filteredBeoordelaars.find((b) => b.id === value) || null;
+    filteredBeoordelaars.find((b) => b.id === value?.id) || null;
 
   // Show loading state
   if (isLoading) {
@@ -452,7 +453,7 @@ function BeoordelaarCombobox({
   if (beoordelaars.length === 0 && !query) {
     return (
       <>
-        <input type="hidden" name={name} value={value} />
+        <input type="hidden" name={name} value={value?.id} />
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 w-64 text-wrap">
           <div className="text-sm font-medium text-amber-900">
             Er zijn geen beoordelaars gevonden op deze locatie
@@ -468,14 +469,13 @@ function BeoordelaarCombobox({
 
   return (
     <>
-      <input type="hidden" name={name} value={value} />
+      <input type="hidden" name={name} value={value?.id} />
       <Combobox
         options={filteredBeoordelaars}
         value={selectedBeoordelaar}
         onChange={(beoordelaar) => {
-          const newValue = beoordelaar?.id || "";
-          setValue(newValue);
-          onSelect?.(newValue);
+          setValue(beoordelaar);
+          onSelect?.(beoordelaar);
         }}
         displayValue={(beoordelaar) =>
           beoordelaar ? formatPersonName(beoordelaar) : ""
@@ -521,12 +521,12 @@ function KandidaatRow({
   personName: string;
   locationId: string;
   onRemove: () => void;
-  onCopyField: (field: string, value: string) => void;
-  globalLeercoach?: string;
-  globalBeoordelaar?: string;
+  onCopyField: (field: string, value: Person | Beoordelaar | string) => void;
+  globalLeercoach?: Person;
+  globalBeoordelaar?: Beoordelaar;
 }) {
-  const [leercoach, setLeercoach] = useState("");
-  const [beoordelaar, setBeoordelaar] = useState("");
+  const [leercoach, setLeercoach] = useState<Person | null>(null);
+  const [beoordelaar, setBeoordelaar] = useState<Beoordelaar | null>(null);
 
   // Update local state when global values change
   useEffect(() => {
@@ -559,7 +559,7 @@ function KandidaatRow({
               actorType="instructor"
               placeholder="Selecteer leercoach..."
               name={`kandidaten[${index}].leercoach`}
-              value={leercoach}
+              value={leercoach || undefined}
               onSelect={(value) => {
                 setLeercoach(value);
               }}
@@ -587,7 +587,7 @@ function KandidaatRow({
               locationId={locationId}
               placeholder="Selecteer beoordelaar..."
               name={`kandidaten[${index}].beoordelaar`}
-              value={beoordelaar}
+              value={beoordelaar || undefined}
               onSelect={(value) => {
                 setBeoordelaar(value);
               }}
@@ -673,9 +673,9 @@ export default function CreatePvbForm({
     useState<Set<string>>(new Set());
 
   // Global copy states for "copy to all rows" functionality
-  const [globalLeercoach, setGlobalLeercoach] = useState<string | undefined>();
+  const [globalLeercoach, setGlobalLeercoach] = useState<Person | undefined>();
   const [globalBeoordelaar, setGlobalBeoordelaar] = useState<
-    string | undefined
+    Beoordelaar | undefined
   >();
 
   // Fetch kwalificatieprofielen based on selected niveau
@@ -743,11 +743,14 @@ export default function CreatePvbForm({
   };
 
   // Copy field value to all kandidaten
-  const copyToAllRows = (field: string, value: string) => {
+  const copyToAllRows = (
+    field: string,
+    value: Person | Beoordelaar | string,
+  ) => {
     if (field === "leercoach") {
-      setGlobalLeercoach(value);
+      setGlobalLeercoach(value as Person);
     } else if (field === "beoordelaar") {
-      setGlobalBeoordelaar(value);
+      setGlobalBeoordelaar(value as Beoordelaar);
     } else if (field === "startDatumTijd") {
       // For datetime inputs, we still need to update DOM directly
       const form = document.querySelector("form");
