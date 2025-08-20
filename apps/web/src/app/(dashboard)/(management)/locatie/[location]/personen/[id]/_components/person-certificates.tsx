@@ -8,7 +8,7 @@ import {
 } from "~/app/(dashboard)/_components/nwd/certificates";
 import { Text } from "~/app/(dashboard)/_components/text";
 import {
-  getPersonById,
+  getPersonByIdForLocation,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -25,7 +25,7 @@ async function PersonCertificatesContent(props: PersonCertificatesProps) {
   const retrieveLocationPromise = retrieveLocationByHandle(params.location);
   const retrievePersonPromise = retrieveLocationPromise.then(
     async (location) => {
-      const person = await getPersonById(params.id, location.id);
+      const person = await getPersonByIdForLocation(params.id, location.id);
 
       if (!person) {
         notFound();

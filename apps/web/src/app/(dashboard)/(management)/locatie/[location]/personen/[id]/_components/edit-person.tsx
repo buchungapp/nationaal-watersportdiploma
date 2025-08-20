@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import {
-  getPersonById,
+  getPersonByIdForLocation,
   listCountries,
   listRolesForLocation,
   retrieveLocationByHandle,
@@ -20,7 +20,7 @@ async function EditPersonContent(props: EditPersonProps) {
   const retrieveLocationPromise = retrieveLocationByHandle(params.location);
   const retrievePersonPromise = retrieveLocationPromise.then(
     async (location) => {
-      const person = await getPersonById(params.id, location.id);
+      const person = await getPersonByIdForLocation(params.id, location.id);
 
       if (!person) {
         notFound();

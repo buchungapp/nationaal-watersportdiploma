@@ -29,45 +29,50 @@ import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
 import { AnimatedWave } from "~/app/_components/animated-wave";
 import { moduleTypeLabel } from "~/utils/labels";
 
-type CardType = "course" | "program" | "certificate";
+export type CardType = "course" | "program" | "certificate";
 
-interface ProgressCardContextType {
+interface ProgressCardContextType<T extends object | null> {
   type: CardType;
+  data: T;
 }
 
-const ProgressCardContext = createContext<ProgressCardContextType | undefined>(
-  undefined,
-);
+const ProgressCardContext = createContext<
+  ProgressCardContextType<object | null> | undefined
+>(undefined);
 
-function ProgressCardProvider({
+export function ProgressCardProvider({
   children,
   type,
+  data,
 }: {
   children: React.ReactNode;
   type: CardType;
+  data: object | null;
 }) {
   return (
-    <ProgressCardContext.Provider value={{ type }}>
+    <ProgressCardContext.Provider value={{ type, data }}>
       {children}
     </ProgressCardContext.Provider>
   );
 }
 
-function useProgressCard() {
+export function useProgressCard<T extends object = object>() {
   const context = useContext(ProgressCardContext);
   if (context === undefined) {
     throw new Error(
       "useProgressCard must be used within a ProgressCardProvider",
     );
   }
-  return context;
+  return context as ProgressCardContextType<T>;
 }
 
 export function ProgressCard({
   children,
   type,
+  data,
 }: PropsWithChildren<{
   type: CardType;
+  data: object;
 }>) {
   const styles: Record<
     CardType,
@@ -89,10 +94,10 @@ export function ProgressCard({
   const style = styles[type];
 
   return (
-    <ProgressCardProvider type={type}>
+    <ProgressCardProvider type={type} data={data}>
       <article
         className={clsx(
-          "relative border rounded-md overflow-hidden pb-2",
+          "relative pb-2 border rounded-md overflow-hidden",
           style.borderColor,
         )}
       >
@@ -107,10 +112,12 @@ export function ProgressCardHeader({
   program,
   gearType,
   itemIndex = 0,
+  actionButton,
 }: {
   degree: React.ReactNode;
   program: React.ReactNode;
   gearType: React.ReactNode;
+  actionButton?: React.ReactNode;
   itemIndex: number;
 }) {
   const { type } = useProgressCard();
@@ -153,7 +160,7 @@ export function ProgressCardHeader({
   return (
     <header
       className={clsx(
-        "flex justify-between relative items-center sm:items-start",
+        "relative flex justify-between items-center sm:items-start",
         "p-2 sm:p-4 pb-8 sm:pb-10",
         detail.background,
       )}
@@ -161,7 +168,7 @@ export function ProgressCardHeader({
       <div className="flex flex-col gap-y-2 w-full">
         <span
           className={clsx(
-            "font-medium tracking-wide sm:text-xs/5 text-sm/5 uppercase -mb-1",
+            "-mb-1 font-medium sm:text-xs/5 text-sm/5 uppercase tracking-wide",
             detail.typeLabelColor,
           )}
         >
@@ -170,7 +177,7 @@ export function ProgressCardHeader({
         <ProgressCardTitle>
           <ColoredText> {program}</ColoredText>
         </ProgressCardTitle>
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+        <div className="flex sm:flex-row flex-col sm:items-center gap-2">
           <ProgressCardDescriptiveBadge Icon={ArrowTrendingUpIcon}>
             {`Niveau ${degree}`}
           </ProgressCardDescriptiveBadge>
@@ -180,9 +187,9 @@ export function ProgressCardHeader({
           </ProgressCardDescriptiveBadge>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row items-end gap-y-2 sm:items-center gap-x-4 shrink-0">
+      <div className="flex sm:flex-row flex-col items-end sm:items-center gap-x-4 gap-y-2 shrink-0">
         <div
-          className={clsx("shrink-0 h-8", detail.text)}
+          className={clsx("h-8 shrink-0", detail.text)}
           style={{
             aspectRatio: `${watersportverbondGray.width} / ${watersportverbondGray.height}`,
             backgroundColor: "currentColor",
@@ -192,6 +199,7 @@ export function ProgressCardHeader({
           aria-label="Watersportverbond"
         />
         <Logo className={clsx("size-14 shrink-0", detail.text)} />
+        {actionButton}
       </div>
       <AnimatedWave
         offset={itemIndex * -30}
@@ -278,10 +286,10 @@ export function ProgressCardDegree({ children }: PropsWithChildren) {
         color,
       )}
     >
-      <span className="text-[11px] font-semibold tracking-wider uppercase leading-none">
+      <span className="font-semibold text-[11px] uppercase leading-none tracking-wider">
         Niveau
       </span>
-      <span className="text-xl sm:text-2xl lg:text-3xl font-black leading-none mt-0.5">
+      <span className="mt-0.5 font-black text-xl sm:text-2xl lg:text-3xl leading-none">
         {children}
       </span>
     </span>
@@ -351,17 +359,17 @@ export function ProgressCardEmptyState({
   const style = styles[type];
 
   return (
-    <ProgressCardProvider type={type}>
+    <ProgressCardProvider type={type} data={null}>
       <article
         className={clsx(
-          "relative border-dashed border-2 rounded-md overflow-hidden pb-2",
+          "relative pb-2 border-2 border-dashed rounded-md overflow-hidden",
           style.cardClassName,
         )}
       >
-        <div className="flex flex-col items-center text-center px-2 sm:px-4 pt-6 pb-10 max-w-lg mx-auto">
+        <div className="flex flex-col items-center mx-auto px-2 sm:px-4 pt-6 pb-10 max-w-lg text-center">
           <div
             className={clsx(
-              "size-16 rounded-full flex items-center justify-center",
+              "flex justify-center items-center rounded-full size-16",
               style.iconBackgroundClassName,
             )}
           >
@@ -372,7 +380,7 @@ export function ProgressCardEmptyState({
             <div>
               <h3
                 className={clsx(
-                  "text-2xl/7 font-semibold sm:text-xl/7",
+                  "font-semibold sm:text-xl/7 text-2xl/7",
                   style.headingClassName,
                 )}
               >
@@ -391,7 +399,7 @@ export function ProgressCardEmptyState({
             Vind een NWD-erkende locatie
           </Button>
 
-          <p className={clsx("text-base/6 sm:text-sm/6", style.textClassName)}>
+          <p className={clsx("sm:text-sm/6 text-base/6", style.textClassName)}>
             Denk je dat er een {style.label} ontbreekt?{" "}
             <TextLink
               href="/help/artikel/nwd-diplomas-opleidingen-en-cursussen-in-jouw-profiel"
@@ -408,7 +416,7 @@ export function ProgressCardEmptyState({
 }
 
 export function ProgressCardDescriptionList({ children }: PropsWithChildren) {
-  return <dl className="grid grid-cols-6 gap-x-4 gap-y-2">{children}</dl>;
+  return <dl className="gap-x-4 gap-y-2 grid grid-cols-6">{children}</dl>;
 }
 
 export function ProgressCardDescriptionListItem({
@@ -454,7 +462,7 @@ export function ProgressCardDisclosures({ children }: PropsWithChildren) {
 
   const color = colors[type];
 
-  return <div className={clsx("divide-y px-2 sm:px-4", color)}>{children}</div>;
+  return <div className={clsx("px-2 sm:px-4 divide-y", color)}>{children}</div>;
 }
 
 export function ProgressCardDisclosure({
@@ -467,7 +475,7 @@ export function ProgressCardDisclosure({
       <Headless.DisclosureButton
         disabled={disabled}
         className={clsx(
-          "group/progress-card-disclosure flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 py-2 sm:py-2.5 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] text-zinc-950 lg:text-sm text-base -mx-2 sm:-mx-4 px-2 sm:px-4",
+          "group/progress-card-disclosure flex justify-between items-center gap-2 data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 -mx-2 sm:-mx-4 px-2 sm:px-4 py-2 sm:py-2.5 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] text-zinc-950 lg:text-sm text-base",
         )}
       >
         <div className="flex items-center gap-2 font-medium">{header}</div>
@@ -490,7 +498,7 @@ export function ProgressCardStatusList({ children }: PropsWithChildren) {
   };
 
   return (
-    <ul className={clsx("lg:text-sm text-base divide-y", colors[type])}>
+    <ul className={clsx("divide-y lg:text-sm text-base", colors[type])}>
       {children}
     </ul>
   );
@@ -511,14 +519,14 @@ export function ProgressCardStatusIcon({
   progress: number;
 }) {
   if (progress >= 100) {
-    return <CheckCircleIcon className="size-5 text-green-500 flex-shrink-0" />;
+    return <CheckCircleIcon className="flex-shrink-0 size-5 text-green-500" />;
   }
 
   if (progress > 0) {
-    return <MinusCircleIcon className="size-5 text-yellow-500 flex-shrink-0" />;
+    return <MinusCircleIcon className="flex-shrink-0 size-5 text-yellow-500" />;
   }
 
-  return <CircleIcon className="size-5 text-zinc-500 flex-shrink-0" />;
+  return <CircleIcon className="flex-shrink-0 size-5 text-zinc-500" />;
 }
 
 export function ModuleDisclosure({
@@ -542,14 +550,14 @@ export function ModuleDisclosure({
 }>) {
   return (
     <Headless.Disclosure as="li">
-      <Headless.DisclosureButton className="group/progress-card-status-disclosure relative data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)] -mx-2 sm:-mx-4 px-2 sm:px-4">
+      <Headless.DisclosureButton className="group/progress-card-status-disclosure relative data-active:bg-zinc-100 data-hover:bg-zinc-50 data-disabled:opacity-50 -mx-2 sm:-mx-4 px-2 sm:px-4 focus:outline-none w-[calc(100%+1rem)] sm:w-[calc(100%+2rem)]">
         <span className="absolute inset-0 rounded-lg group-data-focus/progress-card-status-disclosure:outline-2 group-data-focus/progress-card-status-disclosure:outline-branding-light group-data-focus/progress-card-status-disclosure:outline-offset-2" />
         <div
           className={clsx(
             "flex max-sm:flex-col sm:justify-between sm:items-center py-2",
           )}
         >
-          <div className="flex gap-x-2 items-center w-full">
+          <div className="flex items-center gap-x-2 w-full">
             <div>
               <MinusIcon className="hidden group-data-open/progress-card-status-disclosure:block size-4 text-zinc-500" />
               <PlusIcon className="group-data-open/progress-card-status-disclosure:hidden block size-4 text-zinc-500" />
@@ -566,7 +574,7 @@ export function ModuleDisclosure({
       </Headless.DisclosureButton>
       <Headless.DisclosurePanel>
         {certificate ? (
-          <div className="pl-13 mb-2">
+          <div className="mb-2 pl-13">
             <ProgressCardDescriptionList>
               <ProgressCardDescriptionListItem
                 label="Diplomanummer"
@@ -609,12 +617,12 @@ export function Competency({
       )}
     >
       <div className="flex flex-col">
-        <div className="flex gap-x-2 items-start">
+        <div className="flex items-start gap-x-2">
           <ProgressCardStatusIcon progress={progress} />
           <span className="font-semibold leading-5">{competency.title}</span>
         </div>
         {competency.requirement && (
-          <p className="text-zinc-500 pl-7 mt-0.5 text-justify">
+          <p className="mt-0.5 pl-7 text-zinc-500 text-justify">
             {competency.requirement}
           </p>
         )}

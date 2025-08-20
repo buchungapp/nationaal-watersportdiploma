@@ -20,7 +20,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col justify-center h-full">
+    <div className="flex flex-col justify-center mx-auto max-w-xl h-full">
       <Heading>Er is iets misgegaan!</Heading>
       <Text>
         Oeps.. Er is iets misgegaan. We zijn op de hoogte, maar je kunt ons

@@ -27,6 +27,7 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import type { listDisciplines } from "~/lib/nwd";
+import { EditDisciplineDialog } from "./dialogs/edit-discipline-dialog";
 
 type Discipline = Awaited<ReturnType<typeof listDisciplines>>[number];
 
@@ -38,6 +39,14 @@ const columns = [
   }),
   columnHelper.accessor("weight", {
     header: "Sortering",
+  }),
+  columnHelper.display({
+    id: "actions",
+    cell: ({ row }) => (
+      <div className="flex justify-end items-center gap-x-2">
+        <EditDisciplineDialog discipline={row.original} />
+      </div>
+    ),
   }),
 ];
 

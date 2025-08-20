@@ -25,12 +25,12 @@ import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
 import { createCashbackAction } from "~/app/_actions/cashback/create-cashback-action";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import Spinner from "~/app/_components/spinner";
-import type { listAllLocations } from "~/lib/nwd";
+import type { listAllActiveLocations } from "~/lib/nwd";
 
 export function CashbackFormClient({
   locations,
 }: {
-  locations: Awaited<ReturnType<typeof listAllLocations>>;
+  locations: Awaited<ReturnType<typeof listAllActiveLocations>>;
 }) {
   const [isSuccess, setIsSuccess] = useState(false);
 

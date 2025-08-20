@@ -36,10 +36,10 @@ import { Text } from "~/app/(dashboard)/_components/text";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { createPersonForLocationAction } from "~/app/_actions/person/create-person-action";
 import Spinner from "~/app/_components/spinner";
-import type { ActorType } from "~/lib/nwd";
+import type { LocationActorType } from "~/lib/nwd";
 
 const ROLES: {
-  type: Exclude<ActorType, "pvb_beoordelaar">;
+  type: LocationActorType;
   label: string;
   description: string;
   defaultChecked?: boolean;

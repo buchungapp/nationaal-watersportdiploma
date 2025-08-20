@@ -46,6 +46,6 @@ export const updatePersonDetailsAction = actionClientWithMeta
         birthCountry: data.birthCountry.code,
       });
 
-      revalidatePath("/profiel/[handle]", "page");
+      revalidatePath("/(dashboard)", "page");
     },
   );
