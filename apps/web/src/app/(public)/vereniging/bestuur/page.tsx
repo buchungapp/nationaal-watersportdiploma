@@ -72,7 +72,7 @@ export default function Page() {
       </p>
 
       <p>
-        <strong>Sebastiaan Sargis</strong>
+        <strong>Ebel Zandbergen</strong>
         <br />
         Penningmeester
         <br />
