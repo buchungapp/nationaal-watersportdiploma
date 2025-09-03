@@ -1,13 +1,11 @@
 "use server";
-
-import { User } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
 import {
-  type ActorType,
+  type LocationActorType,
   createPersonForLocation,
-  getUserOrThrow,
+  createPersonForUser,
 } from "~/lib/nwd";
 import { dateInput } from "../dates";
 import { actionClientWithMeta } from "../safe-action";
@@ -45,7 +43,7 @@ const createPersonSchema = zfd
       },
   )
   .transform((parsed) => {
-    const roles: ActorType[] = [];
+    const roles: LocationActorType[] = [];
     if (parsed["role-student"]) {
       roles.push("student");
     }
@@ -103,20 +101,24 @@ const createPersonBaseSchema = zfd.formData({
   ),
 });
 
+const createPersonForUserArgsSchema: [userId: z.ZodOptional<z.ZodString>] = [
+  z.string().uuid().optional(),
+];
+
 export const createPersonForUserAction = actionClientWithMeta
   .metadata({ name: "create-person-for-user" })
   .schema(createPersonBaseSchema)
-  .action(async ({ parsedInput }) => {
-    const user = await getUserOrThrow();
+  .bindArgsSchemas(createPersonForUserArgsSchema)
+  .action(async ({ parsedInput, bindArgsParsedInputs: [userId] }) => {
+    const person = await createPersonForUser(
+      {
+        ...parsedInput,
+        birthCountry: parsedInput.birthCountry.code,
+      },
+      userId,
+    );
 
-    const person = await User.Person.create({
-      userId: user.authUserId,
-      ...parsedInput,
-      birthCountry: parsedInput.birthCountry.code,
-      dateOfBirth: parsedInput.dateOfBirth.toISOString(),
-    });
-
-    revalidatePath("/account");
+    revalidatePath("/");
 
     return {
       personId: person.id,

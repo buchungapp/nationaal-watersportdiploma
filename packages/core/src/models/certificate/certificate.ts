@@ -471,42 +471,50 @@ export const assignToCohortAllocation = wrapCommand(
 
 export const withdraw = wrapCommand(
   "certificate.withdraw",
-  withZod(uuidSchema, async (input) => {
-    return withTransaction(async (tx) => {
-      const certificate = await tx
-        .select()
-        .from(s.certificate)
-        .where(
-          and(
-            eq(s.certificate.id, input),
-            isNull(s.certificate.deletedAt),
-            // Must be maximum 72 hours after the certificate was issued
-            gte(
-              s.certificate.createdAt,
-              dayjs().subtract(72, "h").toISOString(),
-            ),
-          ),
-        )
-        .then(singleRow);
-
-      await Promise.all([
-        tx
-          .update(s.certificate)
-          .set({ deletedAt: new Date().toISOString() })
+  withZod(
+    z.object({
+      certificateId: uuidSchema,
+      ignoreTimeLimit: z.boolean().optional(),
+    }),
+    async ({ certificateId, ignoreTimeLimit }) => {
+      return withTransaction(async (tx) => {
+        const certificate = await tx
+          .select()
+          .from(s.certificate)
           .where(
             and(
-              eq(s.certificate.id, certificate.id),
+              eq(s.certificate.id, certificateId),
               isNull(s.certificate.deletedAt),
+              ignoreTimeLimit
+                ? undefined
+                : // Must be maximum 72 hours after the certificate was issued
+                  gte(
+                    s.certificate.createdAt,
+                    dayjs().subtract(72, "h").toISOString(),
+                  ),
             ),
-          ),
-        tx
-          .delete(s.studentCompletedCompetency)
-          .where(
-            eq(s.studentCompletedCompetency.certificateId, certificate.id),
-          ),
-      ]);
-    });
-  }),
+          )
+          .then(singleRow);
+
+        await Promise.all([
+          tx
+            .update(s.certificate)
+            .set({ deletedAt: new Date().toISOString() })
+            .where(
+              and(
+                eq(s.certificate.id, certificate.id),
+                isNull(s.certificate.deletedAt),
+              ),
+            ),
+          tx
+            .delete(s.studentCompletedCompetency)
+            .where(
+              eq(s.studentCompletedCompetency.certificateId, certificate.id),
+            ),
+        ]);
+      });
+    },
+  ),
 );
 
 export const storeHandles = wrapCommand(

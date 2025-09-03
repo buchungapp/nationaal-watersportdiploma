@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Popover,
   PopoverButton,
@@ -26,28 +26,57 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
-import type { listGearTypes } from "~/lib/nwd";
+import type {
+  listCurricula,
+  listGearTypesWithCurricula,
+  listPrograms,
+} from "~/lib/nwd";
+import { EditCurriculaDialog } from "./dialogs/edit-curricula-dialog";
+import { EditGearTypeDialog } from "./dialogs/edit-gear-type-dialog";
 
-type GearType = Awaited<ReturnType<typeof listGearTypes>>[number];
+type GearType = Awaited<ReturnType<typeof listGearTypesWithCurricula>>[number];
 
 const columnHelper = createColumnHelper<GearType>();
-
-const columns = [
-  columnHelper.accessor("title", {
-    header: "Naam",
-  }),
-];
 
 export default function ModuleTable({
   gearTypes,
   totalItems,
   placeholderRows,
+  allCurricula,
+  allPrograms,
 }: {
   gearTypes: GearType[];
   totalItems: number;
   placeholderRows?: number;
+  allCurricula: Awaited<ReturnType<typeof listCurricula>>;
+  allPrograms: Awaited<ReturnType<typeof listPrograms>>;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("title", {
+        header: "Naam",
+      }),
+      columnHelper.display({
+        id: "actions",
+        cell: ({ row }) => {
+          return (
+            <div className="flex justify-end items-center gap-x-2">
+              <EditGearTypeDialog gearType={row.original} />
+              <EditCurriculaDialog
+                gearTypeId={row.original.id}
+                allCurricula={allCurricula}
+                allPrograms={allPrograms}
+                currentCurricula={row.original.curricula}
+              />
+            </div>
+          );
+        },
+      }),
+    ],
+    [allCurricula, allPrograms],
+  );
 
   const table = useReactTable({
     data: gearTypes,

@@ -1,0 +1,113 @@
+"use client";
+
+import { PlusIcon } from "@heroicons/react/16/solid";
+import slugify from "@sindresorhus/slugify";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
+import { Button } from "~/app/(dashboard)/_components/button";
+
+import {
+  Dialog,
+  DialogActions,
+  DialogBody,
+  DialogTitle,
+} from "~/app/(dashboard)/_components/dialog";
+import {
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
+} from "~/app/(dashboard)/_components/fieldset";
+import { Input } from "~/app/(dashboard)/_components/input";
+import { Text } from "~/app/(dashboard)/_components/text";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { createModuleAction } from "~/app/_actions/secretariat/module/create-module-action";
+import Spinner from "~/app/_components/spinner";
+
+export function CreateModuleDialog() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const close = () => {
+    setIsOpen(false);
+    reset();
+  };
+
+  const { execute, input, reset } = useAction(createModuleAction, {
+    onSuccess: () => {
+      close();
+      toast.success("Module aangemaakt");
+    },
+    onError: () => {
+      toast.error("Er is iets misgegaan");
+    },
+  });
+
+  const { getInputValue } = useFormInput(input);
+  const [slug, setSlug] = useState("");
+
+  return (
+    <>
+      <Button color="branding-orange" onClick={() => setIsOpen(true)}>
+        <PlusIcon />
+        Nieuwe module
+      </Button>
+
+      <Dialog open={isOpen} onClose={close}>
+        <DialogTitle>Nieuwe module</DialogTitle>
+        <DialogBody>
+          <form action={execute}>
+            <Fieldset>
+              <FieldGroup>
+                <Field>
+                  <Label>Naam</Label>
+                  <Input
+                    name="title"
+                    defaultValue={getInputValue("title")}
+                    required
+                    onChange={(e) => {
+                      setSlug(slugify(e.target.value));
+                    }}
+                  />
+                </Field>
+                <Field>
+                  <Label>Sortering</Label>
+                  <Input
+                    name="weight"
+                    type="number"
+                    min={0}
+                    defaultValue={getInputValue("weight")}
+                    required
+                  />
+                </Field>
+                <Field>
+                  <Label>Slug</Label>
+                  <Text className="text-sm">
+                    {slug.length > 0
+                      ? slug
+                      : "Slug wordt automatisch aangemaakt"}
+                  </Text>
+                </Field>
+              </FieldGroup>
+            </Fieldset>
+            <DialogActions>
+              <SubmitButton />
+            </DialogActions>
+          </form>
+        </DialogBody>
+      </Dialog>
+    </>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" color="blue" disabled={pending}>
+      {pending ? <Spinner className="text-white" /> : null}
+      Aanmaken
+    </Button>
+  );
+}

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { listModules } from "~/lib/nwd";
 import Search from "../../../_components/search";
+import { CreateModuleDialog } from "./_components/dialogs/create-module-dialog";
 import ModuleTableCLient from "./_components/module-table";
 
 async function ModuleTable(props: {
@@ -61,13 +62,12 @@ export default function Page(props: {
 }) {
   return (
     <>
-      <div className="flex flex-wrap justify-between items-end gap-4">
-        <div className="sm:flex-1 max-sm:w-full">
-          <Heading>Modules</Heading>
-          <div className="flex gap-4 mt-4 max-w-xl">
-            <Search placeholder="Doorzoek modules..." />
-          </div>
+      <Heading level={1}>Modules</Heading>
+      <div className="flex sm:flex-row flex-col justify-between gap-2 mt-4">
+        <div className="flex items-center gap-2 w-full max-w-lg">
+          <Search placeholder="Doorzoek modules..." />
         </div>
+        <CreateModuleDialog />
       </div>
       <Suspense
         fallback={

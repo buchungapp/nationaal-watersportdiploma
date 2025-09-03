@@ -47,7 +47,6 @@ export default function CourseTable({
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("title", {
@@ -73,7 +72,7 @@ export default function CourseTable({
         }),
       ),
     ];
-  }, [courses]);
+  }, [parentCategories]);
 
   const table = useReactTable({
     data: courses,

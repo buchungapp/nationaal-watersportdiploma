@@ -24,18 +24,27 @@ import {
 type ProgramsProps = {
   personPromise: Promise<User.Person.$schema.Person>;
   curriculaPromise: Promise<Student.Curriculum.$schema.StudentCurriculum[]>;
+  actionButton?: React.ReactNode;
+  emptyState?: React.ReactNode;
+  options?: {
+    showProgramsWithoutProgress?: boolean;
+  };
 };
 
 export async function fetchCurriculaProgress(personId: string) {
   return listCurriculaProgressByPersonId(personId, true, true);
 }
 
+export type Program = Student.Curriculum.$schema.StudentCurriculum;
+
 async function Programs({
   curriculaProgress,
   curricula,
+  actionButton,
 }: {
   curriculaProgress: Awaited<ReturnType<typeof fetchCurriculaProgress>>;
   curricula: Student.Curriculum.$schema.StudentCurriculum[];
+  actionButton?: React.ReactNode;
 }) {
   return (
     <ul className="space-y-4">
@@ -58,7 +67,7 @@ async function Programs({
 
         return (
           <li key={studentCurriculum.id}>
-            <ProgressCard type="program">
+            <ProgressCard type="program" data={studentCurriculum}>
               <ProgressCardHeader
                 degree={studentCurriculum.curriculum.program.degree.title}
                 program={
@@ -67,6 +76,7 @@ async function Programs({
                 }
                 gearType={studentCurriculum.gearType.title}
                 itemIndex={index}
+                actionButton={actionButton}
               />
 
               <ProgressCardDisclosures>
@@ -214,21 +224,21 @@ async function Programs({
                             "w-full data-active:bg-zinc-950/5 data-hover:bg-zinc-950/5",
                           )}
                         >
-                          <div className="flex w-full justify-between gap-x-2 items-center">
-                            <div className="w-full flex items-center gap-x-2.5">
-                              <Strong className="text-blue-800 tabular-nums">
+                          <div className="flex justify-between items-center gap-x-2 w-full">
+                            <div className="flex items-center gap-x-2.5 w-full">
+                              <Strong className="tabular-nums text-blue-800">
                                 {`#${certificate.handle}`}
                               </Strong>
-                              <span className="text-zinc-500 font-normal text-sm tabular-nums">
+                              <span className="font-normal tabular-nums text-zinc-500 text-sm">
                                 {dayjs(certificate.issuedAt).format(
                                   "DD-MM-YYYY",
                                 )}
                               </span>
-                              <span className="text-zinc-500 font-normal text-sm">
+                              <span className="font-normal text-zinc-500 text-sm">
                                 {certificate.location.name}
                               </span>
                             </div>
-                            <ArrowTopRightOnSquareIcon className="size-4 text-zinc-400 group-hover:text-zinc-600 flex-shrink-0" />
+                            <ArrowTopRightOnSquareIcon className="flex-shrink-0 size-4 text-zinc-400 group-hover:text-zinc-600" />
                           </div>
                         </Link>
                       </li>
@@ -246,25 +256,29 @@ async function Programs({
 
 async function ProgramsContent(props: ProgramsProps) {
   const person = await props.personPromise;
+  const options = props.options;
   const [curriculaProgress, curricula] = await Promise.all([
     fetchCurriculaProgress(person.id),
     props.curriculaPromise,
   ]);
 
-  const onlyCurriculaWithProgress = curricula.filter((c) =>
-    curriculaProgress.some(
-      (p) => p.studentCurriculumId === c.id && p.modules.length > 0,
-    ),
-  );
+  const curriculaToShow = options?.showProgramsWithoutProgress
+    ? curricula
+    : curricula.filter((c) =>
+        curriculaProgress.some(
+          (p) => p.studentCurriculumId === c.id && p.modules.length > 0,
+        ),
+      );
 
-  if (onlyCurriculaWithProgress.length < 1) {
-    return <ProgressCardEmptyState type="program" />;
+  if (curriculaToShow.length < 1) {
+    return props.emptyState ?? <ProgressCardEmptyState type="program" />;
   }
 
   return (
     <Programs
       curriculaProgress={curriculaProgress}
-      curricula={onlyCurriculaWithProgress}
+      curricula={curriculaToShow}
+      actionButton={props.actionButton}
     />
   );
 }

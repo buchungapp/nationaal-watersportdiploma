@@ -77,7 +77,6 @@ export const outputSchema = selectSchema
     squareLogoMediaId: true,
     certificateMediaId: true,
     _metadata: true,
-    status: true,
   })
   .extend({
     logo: mediaOutputSchema.nullable(),
