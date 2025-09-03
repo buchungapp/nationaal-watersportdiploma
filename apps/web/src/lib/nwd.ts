@@ -383,16 +383,18 @@ export const findCertificate = async ({
   });
 };
 
-export const listCertificates = cache(async (locationId: string) => {
+export const listCertificates = cache(async (locationId?: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
     const person = await getPrimaryPerson(user);
 
-    await isActiveActorTypeInLocation({
-      actorType: ["location_admin"],
-      locationId,
-      personId: person.id,
-    });
+    if (locationId) {
+      await isActiveActorTypeInLocation({
+        actorType: ["location_admin"],
+        locationId,
+        personId: person.id,
+      });
+    }
 
     const certificates = await Certificate.list({
       filter: { locationId },
@@ -404,18 +406,20 @@ export const listCertificates = cache(async (locationId: string) => {
 
 export const listCertificatesWithPagination = cache(
   async (
-    locationId: string,
     { q, limit, offset }: { q: string; limit: number; offset: number },
+    locationId?: string,
   ) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
       const person = await getPrimaryPerson(user);
 
-      await isActiveActorTypeInLocation({
-        actorType: ["location_admin"],
-        locationId,
-        personId: person.id,
-      });
+      if (locationId) {
+        await isActiveActorTypeInLocation({
+          actorType: ["location_admin"],
+          locationId,
+          personId: person.id,
+        });
+      }
 
       return await Certificate.list({
         filter: { locationId, q },
@@ -672,23 +676,14 @@ export const listCertificatesByNumber = cache(
     previousModules?: boolean,
   ) => {
     return makeRequest(async () => {
-      const user = await getUserOrThrow().catch(() => null);
+      const user = await getUserOrThrow();
 
-      if (!user && numbers.length > 1) {
-        // @TODO this is a temporary fix to allow for consumers to download their certificate without being logged in
-        // we should find a better way to handle this
-        // @TODO: Also fix that the secretariaat can download certificates
-        redirect("/login");
-      }
-
-      const listAvailableLocationsForLoggedInUser = async (
-        loggedInUser: typeof user,
-      ) => {
-        if (!loggedInUser) {
-          return [];
-        }
-
-        const person = await getPrimaryPerson(loggedInUser);
+      let locations: string[] = [];
+      if (
+        !isSystemAdmin(user.email) &&
+        !(await isSecretariaat(user.authUserId))
+      ) {
+        const person = await getPrimaryPerson(user);
 
         // TODO: this authorization check should be more specific
         const availableLocations = await User.Person.listLocationsByRole({
@@ -696,17 +691,17 @@ export const listCertificatesByNumber = cache(
           roles: ["location_admin", "instructor"],
         });
 
-        return availableLocations.map((location) => location.locationId);
-      };
+        if (availableLocations.length < 1) {
+          throw new Error("Unauthorized");
+        }
 
-      const locationFilter = user
-        ? await listAvailableLocationsForLoggedInUser(user)
-        : [];
+        locations = availableLocations.map((location) => location.locationId);
+      }
 
       const certificates = await Certificate.list({
         filter: {
           number: numbers,
-          ...(locationFilter.length > 0 && { locationId: locationFilter }),
+          ...(locations.length > 0 && { locationId: locations }),
         },
         sort:
           sort === "createdAt"

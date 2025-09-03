@@ -1,39 +1,24 @@
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import {
-  listCertificatesWithPagination,
-  retrieveLocationByHandle,
-} from "~/lib/nwd";
+import { listCertificatesWithPagination } from "~/lib/nwd";
 import Search from "../../../_components/search";
-import CreateDialog from "./_components/create-dialog";
 import Table from "./_components/table";
 import { loadSearchParams } from "./_search-params";
 
 async function CertificatesTable(props: {
-  params: Promise<{ location: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [params, searchParams] = await Promise.all([
-    props.params,
-    props.searchParams,
-  ]);
-
-  const location = await retrieveLocationByHandle(params.location);
-
   const {
     limit: paginationLimit,
     page: currentPage,
     query: q,
-  } = loadSearchParams(searchParams ?? {});
+  } = await loadSearchParams(props.searchParams);
 
-  const certificates = await listCertificatesWithPagination(
-    {
-      q,
-      limit: paginationLimit,
-      offset: (currentPage - 1) * paginationLimit,
-    },
-    location.id,
-  );
+  const certificates = await listCertificatesWithPagination({
+    q,
+    limit: paginationLimit,
+    offset: (currentPage - 1) * paginationLimit,
+  });
 
   return (
     <Table certificates={certificates.items} totalItems={certificates.count} />
@@ -41,10 +26,7 @@ async function CertificatesTable(props: {
 }
 
 export default function Page(props: {
-  params: Promise<{
-    location: string;
-  }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
     <>
@@ -55,7 +37,7 @@ export default function Page(props: {
             <Search placeholder="Doorzoek diploma's..." />
           </div>
         </div>
-        <CreateDialog params={props.params} />
+        {/* <CreateDialog /> */}
       </div>
 
       <Suspense
@@ -63,10 +45,7 @@ export default function Page(props: {
           <Table placeholderRows={10} certificates={[]} totalItems={0} />
         }
       >
-        <CertificatesTable
-          params={props.params}
-          searchParams={props.searchParams}
-        />
+        <CertificatesTable searchParams={props.searchParams} />
       </Suspense>
     </>
   );

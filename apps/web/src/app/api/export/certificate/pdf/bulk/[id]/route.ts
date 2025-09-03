@@ -1,9 +1,13 @@
+import assert from "node:assert";
 import { constants } from "@nawadi/lib";
 import slugify from "@sindresorhus/slugify";
 import type { NextRequest } from "next/server";
 import dayjs from "~/lib/dayjs";
 import { generatePDF } from "~/lib/generate-certificate-pdf";
-import { retrieveCertificateHandles } from "~/lib/nwd";
+import {
+  listCertificatesByNumber,
+  retrieveCertificateHandles,
+} from "~/lib/nwd";
 import { presentPDF } from "../../_utils/present-pdf";
 
 export async function GET(
@@ -20,15 +24,24 @@ export async function GET(
     (await context.params).id,
   );
 
+  const data = await listCertificatesByNumber(
+    handles,
+    settings.sort,
+    settings.previousModules,
+  );
+
+  assert.strictEqual(
+    data.length,
+    handles.length,
+    "Some certificates were not found",
+  );
+
   return presentPDF(
     `${
       settings.fileName ??
       `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
     }.pdf`,
-    await generatePDF(handles, {
-      sort: settings.sort,
-      previousModules: settings.previousModules,
-    }),
+    await generatePDF(data),
     type,
   );
 }

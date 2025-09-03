@@ -24,6 +24,7 @@ export async function GET(
     notFound();
   }
 
+  // Auth check based on handle and issuedAt
   const [certificateFromParams, certificateFromId] = await Promise.all([
     findCertificate({
       handle: result.handle,
@@ -67,7 +68,7 @@ export async function GET(
 
   return presentPDF(
     filename,
-    await generatePDF([certificateFromParams.handle], {
+    await generatePDF([certificateFromId], {
       style: searchParams.has("print") ? "print" : "digital",
       debug: searchParams.has("debug"),
       digitalSignature,

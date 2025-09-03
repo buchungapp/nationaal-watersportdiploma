@@ -1,4 +1,3 @@
-import assert from "node:assert";
 import path from "node:path";
 import { constants } from "@nawadi/lib";
 import { pdfkitAddPlaceholder } from "@signpdf/placeholder-pdfkit";
@@ -9,7 +8,9 @@ import QRCode from "qrcode";
 import SVGtoPDF from "svg-to-pdfkit";
 import { generateAdvise } from "~/app/(certificate)/diploma/_utils/generate-advise";
 import dayjs from "~/lib/dayjs";
-import { listCertificatesByNumber } from "~/lib/nwd";
+import type { retrieveCertificateById } from "./nwd";
+
+type Certificate = Awaited<ReturnType<typeof retrieveCertificateById>>;
 
 function getPath(filename: string) {
   return path.join(process.cwd(), filename);
@@ -73,16 +74,13 @@ async function fetchLogoWithCache(
 }
 
 export async function generatePDF(
-  certificateNumbers: string[],
+  certificates: Certificate[],
   {
     debug = false,
-    sort = "student",
     style = "print",
     digitalSignature,
-    previousModules,
   }: {
     debug?: boolean;
-    sort?: "student" | "instructor";
     style?: "print" | "digital";
     digitalSignature?: {
       certificate: ArrayBuffer;
@@ -92,21 +90,8 @@ export async function generatePDF(
       contactInfo: string;
       name: string;
     };
-    previousModules?: boolean;
   } = {},
 ): Promise<ReadableStream> {
-  const data = await listCertificatesByNumber(
-    certificateNumbers,
-    sort,
-    previousModules,
-  );
-
-  assert.strictEqual(
-    data.length,
-    certificateNumbers.length,
-    "Some certificates were not found",
-  );
-
   const doc = new PDFDocument({
     size: "A4",
     layout: "landscape",
@@ -122,7 +107,7 @@ export async function generatePDF(
     doc.registerFont(key, getPath(value));
   }
 
-  for await (const certificate of data) {
+  for await (const certificate of certificates) {
     if (style === "digital") {
       doc.image(getPath(backgroundPaths.templateOutsideBack), 0, 0, {
         cover: [doc.page.width, doc.page.height],
@@ -410,7 +395,7 @@ export async function generatePDF(
     });
 
     // Add page if needed
-    if (data.indexOf(certificate) < data.length - 1) {
+    if (certificates.indexOf(certificate) < certificates.length - 1) {
       doc.addPage();
     }
   }
