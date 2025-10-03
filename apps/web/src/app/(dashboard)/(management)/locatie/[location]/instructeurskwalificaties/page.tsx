@@ -12,14 +12,14 @@ export default function InstructeurskwalificatiesPage(props: {
   params: Promise<{ location: string }>;
 }) {
   return (
-    <div className="mx-auto max-w-7xl">
+    <>
       <Heading>Instructeurskwalificaties</Heading>
       <Suspense fallback={null}>
         <KwalificatiesTableWrapper
           locationHandle={props.params.then((p) => p.location)}
         />
       </Suspense>
-    </div>
+    </>
   );
 }
 

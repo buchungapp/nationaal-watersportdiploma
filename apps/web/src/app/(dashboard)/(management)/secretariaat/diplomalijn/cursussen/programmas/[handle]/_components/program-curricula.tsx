@@ -16,10 +16,13 @@ import dayjs from "~/lib/dayjs";
 import {
   countStartedStudentsForCurriculum,
   listCurriculaByProgram,
+  listGearTypes,
   listGearTypesByCurriculum,
   listPrograms,
 } from "~/lib/nwd";
 import { CopyCurriculum } from "../../../_components/action-buttons";
+import { EditGearTypesDialog } from "./dialogs/edit-gear-types-dialog";
+import { EditRequirementDialog } from "./dialogs/edit-requirement-dialog";
 
 type ProgramCurriculaProps = {
   params: Promise<{ handle: string }>;
@@ -34,7 +37,8 @@ async function CurriculumContent({
   curriculum: Curriculum;
   isCurrent: boolean;
 }) {
-  const [gearTypes, count] = await Promise.all([
+  const [allGearTypes, gearTypes, count] = await Promise.all([
+    listGearTypes(),
     listGearTypesByCurriculum(curriculum.id),
     countStartedStudentsForCurriculum(curriculum.id),
   ]);
@@ -77,7 +81,14 @@ async function CurriculumContent({
           ) : null}
 
           <div className="flex flex-col space-y-1">
-            <Subheading level={3}>Boottypen</Subheading>
+            <div className="flex justify-between items-center">
+              <Subheading level={3}>Boottypen</Subheading>
+              <EditGearTypesDialog
+                curriculumId={curriculum.id}
+                allGearTypes={allGearTypes}
+                currentGearTypes={gearTypes}
+              />
+            </div>
             <ul className="">
               {gearTypes.map((gearType) => (
                 <li key={gearType.id}>
@@ -118,13 +129,14 @@ async function CurriculumContent({
                         <div className="w-12 shrink-0">
                           <Weight weight={competency.weight} />
                         </div>
-                        <div>
-                          <dt>
+                        <div className="w-full">
+                          <dt className="flex justify-between items-start">
                             <Text>
                               <CopyToClipboard copyValue={competency.id}>
                                 <Strong>{competency.title}</Strong>
                               </CopyToClipboard>
                             </Text>
+                            <EditRequirementDialog competency={competency} />
                           </dt>
                           <dd>
                             <Text>{competency.requirement}</Text>

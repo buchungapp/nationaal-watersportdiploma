@@ -25,11 +25,15 @@ import {
 
 type CertificatesProps = {
   personPromise: Promise<User.Person.$schema.Person>;
+  actionButton?: React.ReactNode;
+  emptyState?: React.ReactNode;
 };
 
 export async function fetchCertificates(personId: string) {
   return listCertificatesForPerson(personId).then(certificatesModules);
 }
+
+export type Certificate = Awaited<ReturnType<typeof fetchCertificates>>[number];
 
 function certificatesModules(
   certificates: Awaited<ReturnType<typeof listCertificatesForPerson>>,
@@ -79,7 +83,11 @@ function certificatesModules(
 
 async function Certificates({
   certificates,
-}: { certificates: Awaited<ReturnType<typeof fetchCertificates>> }) {
+  actionButton,
+}: {
+  certificates: Awaited<ReturnType<typeof fetchCertificates>>;
+  actionButton?: React.ReactNode;
+}) {
   return (
     <ul className="space-y-4">
       {certificates.map((certificate, index) => {
@@ -92,7 +100,7 @@ async function Certificates({
 
         return (
           <li key={certificate.id}>
-            <ProgressCard type="certificate">
+            <ProgressCard type="certificate" data={certificate}>
               <ProgressCardHeader
                 degree={certificate.program.degree.title}
                 program={
@@ -100,6 +108,7 @@ async function Certificates({
                 }
                 gearType={certificate.gearType.title}
                 itemIndex={index}
+                actionButton={actionButton}
               />
 
               <ProgressCardDisclosures>
@@ -123,7 +132,7 @@ async function Certificates({
                     >
                       {certificate.location.name}
                     </ProgressCardDescriptionListItem>
-                    <div className="col-span-full flex justify-end gap-x-4 sm:gap-x-6 mt-2">
+                    <div className="flex justify-end gap-x-4 sm:gap-x-6 col-span-full mt-2">
                       <TextButton
                         href={`/api/export/certificate/pdf/${certificate.id}?preview=true&signed=true&handle=${certificate.handle}&issuedDate=${dayjs(
                           certificate.issuedAt,
@@ -223,10 +232,15 @@ async function CertificatesContent(props: CertificatesProps) {
   const certificates = await fetchCertificates(person.id);
 
   if (certificates.length < 1) {
-    return <ProgressCardEmptyState type="certificate" />;
+    return props.emptyState ?? <ProgressCardEmptyState type="certificate" />;
   }
 
-  return <Certificates certificates={certificates} />;
+  return (
+    <Certificates
+      certificates={certificates}
+      actionButton={props.actionButton}
+    />
+  );
 }
 
 function CertificatesFallback() {

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { createCashback, listAllLocations } from "~/lib/nwd";
+import { createCashback, listAllActiveLocations } from "~/lib/nwd";
 import {
   ACCEPTED_IMAGE_TYPES,
   MAX_FILE_SIZE,
@@ -45,7 +45,7 @@ const createCashbackSchema = zfd.formData({
       .uuid("Vaarlocatie is verplicht")
       .refine(
         async (id) => {
-          const locations = await listAllLocations();
+          const locations = await listAllActiveLocations();
           return locations.some((location) => location.id === id);
         },
         {
