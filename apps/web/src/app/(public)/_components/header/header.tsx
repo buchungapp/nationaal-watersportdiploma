@@ -16,10 +16,10 @@ export default function Header() {
       ideally it take a function (segments: string[]) => boolean */}
       <Nav
         items={[
-          {
-            label: "Cashback",
-            href: "/cashback",
-          },
+          // {
+          //   label: "Cashback",
+          //   href: "/cashback",
+          // },
           {
             label: "Vaarlocaties",
             href: "/vaarlocaties",

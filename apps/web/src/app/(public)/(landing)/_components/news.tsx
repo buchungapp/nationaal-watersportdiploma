@@ -66,7 +66,9 @@ export default async function News() {
                 <h3 className="text-xl font-bold">
                   <Balancer>{news.title}</Balancer>
                 </h3>
-                <p className="text-slate-700">{news.description}</p>
+                <p className="text-slate-700 text-justify">
+                  {news.description}
+                </p>
               </div>
             </article>
           </Link>
