@@ -97,12 +97,24 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/de-nieuwe-standaard",
+        destination:
+          "/help/artikel/watersportverbond-kiest-voor-het-nwd-wat-betekent-dit-voor-jou",
+        permanent: true,
+      },
+      {
         source: "/helpcentrum/:path*",
         destination: "/help/:path*",
         permanent: true,
       },
       {
         source: "/aansluiten",
+        destination:
+          "/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd",
+        permanent: true,
+      },
+      {
+        source: "/aansluiting",
         destination:
           "/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd",
         permanent: true,
