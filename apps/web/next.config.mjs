@@ -97,7 +97,13 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/de-nieuwe-standaard",
+        source: "/cwo",
+        destination:
+          "/help/artikel/watersportverbond-kiest-voor-het-nwd-wat-betekent-dit-voor-jou",
+        permanent: true,
+      },
+      {
+        source: "/CWO",
         destination:
           "/help/artikel/watersportverbond-kiest-voor-het-nwd-wat-betekent-dit-voor-jou",
         permanent: true,
