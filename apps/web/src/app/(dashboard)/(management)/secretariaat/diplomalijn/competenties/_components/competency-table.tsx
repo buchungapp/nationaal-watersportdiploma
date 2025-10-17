@@ -28,6 +28,7 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import type { listCompetencies } from "~/lib/nwd";
+import { EditCompetencyDialog } from "./dialogs/edit-competency-dialog";
 
 type Competency = Awaited<ReturnType<typeof listCompetencies>>[number];
 
@@ -45,6 +46,23 @@ const columns = [
   }),
   columnHelper.accessor("weight", {
     header: "Sortering",
+  }),
+  columnHelper.display({
+    id: "actions",
+    cell: ({ row }) => {
+      return (
+        <div className="flex justify-end items-center gap-x-2">
+          <EditCompetencyDialog
+            competency={{
+              id: row.original.id,
+              title: row.original.title,
+              type: row.original.type,
+              weight: row.original.weight,
+            }}
+          />
+        </div>
+      );
+    },
   }),
 ];
 

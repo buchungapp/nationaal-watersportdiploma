@@ -22,10 +22,10 @@ import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import type {
-  ActorType,
+  LocationActorType,
   listPersonsForLocationWithPagination,
 } from "~/lib/nwd";
-import PersonRoleBadge from "../../_components/person-role-badge";
+import PersonRoleBadge from "../../../../_components/person-role-badge";
 type Person = Awaited<
   ReturnType<typeof listPersonsForLocationWithPagination>
 >["items"][number];
@@ -71,7 +71,7 @@ const columns = [
           {getValue().map((actor) => (
             <PersonRoleBadge
               key={actor.id}
-              role={actor.type as Exclude<ActorType, "pvb_beoordelaar">}
+              role={actor.type as LocationActorType}
             />
           ))}
         </div>

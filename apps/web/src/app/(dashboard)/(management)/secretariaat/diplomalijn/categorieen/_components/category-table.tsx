@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Popover,
   PopoverButton,
@@ -26,37 +26,61 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
-import type { listCategories } from "~/lib/nwd";
+import type { listCategories, listParentCategories } from "~/lib/nwd";
+import { EditCategoryDialog } from "./dialogs/edit-category-dialog";
 
 type Category = Awaited<ReturnType<typeof listCategories>>[number];
+type ParentCategory = Awaited<ReturnType<typeof listParentCategories>>[number];
 
 const columnHelper = createColumnHelper<Category>();
 
-const columns = [
-  columnHelper.accessor("title", {
-    header: "Naam",
-  }),
-  columnHelper.accessor("description", {
-    header: "Omschrijving",
-  }),
-  columnHelper.accessor("weight", {
-    header: "Sortering",
-  }),
-  columnHelper.accessor("parent.title", {
-    header: "Hoofdcategorie",
-  }),
-];
-
 export default function CategoryTable({
   categories,
+  parentCategories,
   totalItems,
   placeholderRows,
 }: {
   categories: Category[];
+  parentCategories: ParentCategory[];
   totalItems: number;
   placeholderRows?: number;
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("title", {
+        header: "Naam",
+      }),
+      columnHelper.accessor("description", {
+        header: "Omschrijving",
+      }),
+      columnHelper.accessor("weight", {
+        header: "Sortering",
+      }),
+      columnHelper.accessor("parent.title", {
+        header: "Hoofdcategorie",
+      }),
+      columnHelper.display({
+        id: "actions",
+        cell: ({ row }) => (
+          <div className="flex justify-end items-center gap-x-2">
+            <EditCategoryDialog
+              category={{
+                id: row.original.id,
+                title: row.original.title,
+                description: row.original.description,
+                parent: row.original.parent,
+                weight: row.original.weight,
+              }}
+              parentCategories={parentCategories}
+            />
+          </div>
+        ),
+      }),
+    ],
+    [parentCategories],
+  );
 
   const table = useReactTable({
     data: categories,

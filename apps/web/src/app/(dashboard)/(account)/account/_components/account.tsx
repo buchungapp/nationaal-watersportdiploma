@@ -12,11 +12,11 @@ async function AccountContent() {
   return (
     <AccountForm>
       <div className="">
-        <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+        <div className="gap-x-6 gap-y-8 grid grid-cols-1 sm:grid-cols-6 max-w-2xl">
           <div className="sm:col-span-2">
             <label
               htmlFor="displayName"
-              className="block text-sm/6 font-medium text-gray-900"
+              className="block font-medium text-gray-900 text-sm/6"
             >
               Hoe mogen we je noemen?
             </label>
@@ -35,7 +35,7 @@ async function AccountContent() {
           <div className="sm:col-span-4">
             <label
               htmlFor="email"
-              className="block text-sm/6 font-medium text-gray-900"
+              className="block font-medium text-gray-900 text-sm/6"
             >
               E-mailadres
             </label>
@@ -45,14 +45,13 @@ async function AccountContent() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                disabled
                 defaultValue={user.email}
               />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 mt-4 pt-4">
+      <div className="flex justify-end items-center gap-x-6 mt-4 pt-4 border-gray-900/10 border-t">
         <SubmitButton />
       </div>
     </AccountForm>

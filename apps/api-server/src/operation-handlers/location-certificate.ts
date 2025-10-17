@@ -11,7 +11,7 @@ export const getLocationCertificates: api.server.GetLocationCertificatesOperatio
   let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>;
 
   if (api.validators.isHandle(locationKey)) {
-    locationItem = await core.Location.fromHandle(locationKey);
+    locationItem = await core.Location.fromHandle({ handle: locationKey });
   } else if (api.validators.isId(locationKey)) {
     locationItem = await core.Location.fromId(locationKey);
   } else {
@@ -57,7 +57,7 @@ export const createLocationCertificate: api.server.CreateLocationCertificateOper
     let locationItem: Awaited<ReturnType<typeof core.Location.fromHandle>>;
 
     if (api.validators.isHandle(locationKey)) {
-      locationItem = await core.Location.fromHandle(locationKey);
+      locationItem = await core.Location.fromHandle({ handle: locationKey });
     } else if (api.validators.isId(locationKey)) {
       locationItem = await core.Location.fromId(locationKey);
     } else {

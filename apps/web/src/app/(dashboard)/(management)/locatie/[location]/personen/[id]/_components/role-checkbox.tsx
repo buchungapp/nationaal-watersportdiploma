@@ -6,9 +6,9 @@ import { toast } from "sonner";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import { addActorToLocationAction } from "~/app/_actions/person/add-actor-to-location-action";
 import { removeActorFromLocationAction } from "~/app/_actions/person/remove-actor-from-location-action";
-import type { ActorType } from "~/lib/nwd";
+import type { LocationActorType } from "~/lib/nwd";
 
-type Role = Exclude<ActorType, "pvb_beoordelaar">;
+type Role = LocationActorType;
 
 export function RoleToggleCheckbox({
   type,

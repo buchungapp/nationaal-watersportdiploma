@@ -84,3 +84,31 @@ export const fromHandle = wrapQuery(
     return possibleSingleRow(rows) ?? null;
   }),
 );
+
+export const update = wrapCommand(
+  "course.competency.update",
+  withZod(
+    z.object({
+      id: z.string().uuid(),
+      title: insertSchema.shape.title.optional(),
+      type: insertSchema.shape.type.optional(),
+      weight: insertSchema.shape.weight.optional(),
+    }),
+    successfulCreateResponse,
+    async (item) =>
+      withTransaction(async (tx) => {
+        const rows = await tx
+          .update(s.competency)
+          .set({
+            title: item.title,
+            type: item.type,
+            weight: item.weight,
+          })
+          .where(eq(s.competency.id, item.id))
+          .returning({ id: s.competency.id });
+
+        const row = singleRow(rows);
+        return row;
+      }),
+  ),
+);

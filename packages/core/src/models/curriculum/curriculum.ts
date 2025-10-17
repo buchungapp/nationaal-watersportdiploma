@@ -11,6 +11,7 @@ import {
   isNotNull,
   isNull,
   lte,
+  notInArray,
   sql,
 } from "drizzle-orm";
 import { z } from "zod";
@@ -71,6 +72,7 @@ export const list = wrapQuery(
             onlyCurrentActive: z.boolean().optional(),
             disciplineId: singleOrArray(uuidSchema).optional(),
             categoryId: singleOrArray(uuidSchema).optional(),
+            gearTypeId: singleOrArray(uuidSchema).optional(),
           })
           .default({}),
       })
@@ -166,6 +168,22 @@ export const list = wrapQuery(
             ),
           )
           .where(eq(s.curriculum.programId, s.program.id));
+
+        filters.push(exists(sq));
+      }
+
+      if (filter.gearTypeId) {
+        const sq = query
+          .select({ id: sql`1` })
+          .from(s.curriculumGearLink)
+          .where(
+            and(
+              eq(s.curriculumGearLink.curriculumId, s.curriculum.id),
+              Array.isArray(filter.gearTypeId)
+                ? inArray(s.curriculumGearLink.gearTypeId, filter.gearTypeId)
+                : eq(s.curriculumGearLink.gearTypeId, filter.gearTypeId),
+            ),
+          );
 
         filters.push(exists(sq));
       }
@@ -556,6 +574,44 @@ export const linkModule = wrapCommand(
         curriculumId,
         moduleId,
       };
+    },
+  ),
+);
+
+export const updateGearTypes = wrapCommand(
+  "curriculum.updateGearTypes",
+  withZod(
+    z.object({
+      curriculumId: uuidSchema,
+      gearTypes: z.array(uuidSchema),
+    }),
+    async ({ curriculumId, gearTypes }) => {
+      const query = useQuery();
+
+      await Promise.all([
+        query
+          .delete(s.curriculumGearLink)
+          .where(
+            and(
+              eq(s.curriculumGearLink.curriculumId, curriculumId),
+              notInArray(s.curriculumGearLink.gearTypeId, gearTypes),
+            ),
+          ),
+        query
+          .insert(s.curriculumGearLink)
+          .values(
+            gearTypes.map((gearTypeId) => ({
+              gearTypeId,
+              curriculumId,
+            })),
+          )
+          .onConflictDoNothing({
+            target: [
+              s.curriculumGearLink.gearTypeId,
+              s.curriculumGearLink.curriculumId,
+            ],
+          }),
+      ]);
     },
   ),
 );

@@ -2,7 +2,7 @@ import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 import { serializePersonListSearchParams } from "~/app/api/persons/list/[location]/_search-params";
 import type {
-  ActorType,
+  LocationActorType,
   listPersonsForLocationWithPagination,
 } from "~/lib/nwd";
 import { jsonFetcher } from "~/lib/swr";
@@ -13,11 +13,8 @@ export function usePersonsForLocation(
     filter?: {
       query?: string | null;
       actorType?:
-        | Exclude<ActorType, "pvb_beoordelaar">
-        | [
-            Exclude<ActorType, "pvb_beoordelaar">,
-            ...Exclude<ActorType, "pvb_beoordelaar">[],
-          ]
+        | LocationActorType
+        | [LocationActorType, ...LocationActorType[]]
         | null;
     };
     limit?: number;

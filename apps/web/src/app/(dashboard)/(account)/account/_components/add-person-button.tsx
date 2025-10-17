@@ -2,7 +2,7 @@
 
 import { PlusIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
-import { Suspense, use, useRef, useState } from "react";
+import { Suspense, use, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { Button } from "~/app/(dashboard)/_components/button";
@@ -31,9 +31,10 @@ import Spinner from "~/app/_components/spinner";
 
 interface Props {
   countriesPromise: Promise<{ code: string; name: string }[]>;
+  userPromise?: Promise<{ authUserId: string }>;
 }
 
-export function AddPersonButton({ countriesPromise }: Props) {
+export function AddPersonButton({ countriesPromise, userPromise }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -51,6 +52,7 @@ export function AddPersonButton({ countriesPromise }: Props) {
         <Suspense fallback={null}>
           <CreatePersonDialogWrapper
             countriesPromise={countriesPromise}
+            userPromise={userPromise}
             isOpen={isDialogOpen}
             close={() => setIsDialogOpen(false)}
           />
@@ -64,15 +66,23 @@ function CreatePersonDialogWrapper({
   countriesPromise,
   isOpen,
   close,
+  userPromise,
 }: {
   countriesPromise: Promise<{ code: string; name: string }[]>;
   isOpen: boolean;
   close: () => void;
+  userPromise: Promise<{ authUserId: string }> | undefined;
 }) {
+  const user = userPromise ? use(userPromise) : undefined;
   const countries = use(countriesPromise);
 
   return (
-    <CreatePersonDialog countries={countries} isOpen={isOpen} close={close} />
+    <CreatePersonDialog
+      countries={countries}
+      isOpen={isOpen}
+      close={close}
+      userId={user?.authUserId}
+    />
   );
 }
 
@@ -80,34 +90,12 @@ function CreatePersonDialog({
   countries,
   isOpen,
   close,
+  userId,
 }: {
   countries: { code: string; name: string }[];
   isOpen: boolean;
   close: () => void;
-}) {
-  const forceRerenderId = useRef(0);
-
-  return (
-    <CreatePersonDialogInternal
-      key={String(forceRerenderId.current)}
-      countries={countries}
-      isOpen={isOpen}
-      close={() => {
-        close();
-        forceRerenderId.current += 1;
-      }}
-    />
-  );
-}
-
-function CreatePersonDialogInternal({
-  countries,
-  isOpen,
-  close,
-}: {
-  countries: { code: string; name: string }[];
-  isOpen: boolean;
-  close: () => void;
+  userId: string | undefined;
 }) {
   const closeDialog = () => {
     close();
@@ -115,7 +103,7 @@ function CreatePersonDialogInternal({
   };
 
   const { execute, result, input, reset } = useAction(
-    createPersonForUserAction,
+    createPersonForUserAction.bind(null, userId),
     {
       onSuccess: () => {
         closeDialog();
