@@ -1,0 +1,70 @@
+import Link from "next/link";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpeg";
+import Image from "../../../_components/mdx-image";
+import Image1 from "./_assets/270A0446.jpg";
+import Image2 from "./_assets/270A0449.jpg";
+import Image3 from "./_assets/270A0535.jpg";
+import Image4 from "./_assets/270A0568.jpg";
+
+export const article = {
+  date: "2025-10-17T16:00:00Z",
+  category: "achterban",
+  title: "Succesvol NWD-C trainingsweekend: samen beter worden",
+  description:
+    "Het weekend van 10-12 oktober 2025 vond er weer een gezamenlijk trainingsweekend plaats voor het NWD-C eigenvaardigheidsniveau. Met een hoop nieuw behaalde kwalificaties was het weekend een groot succes.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical:
+      "/actueel/1PgQjdeQ-succesvol-nwd-c-trainingsweekend-samen-beter-worden",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/1PgQjdeQ-succesvol-nwd-c-trainingsweekend-samen-beter-worden",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het weekend van 10-12 oktober 2025 organiseerde het NWD opnieuw een gezamenlijk trainingsweekend voor alle aangesloten vaarscholen. Het doel: training voor het eigenvaardigheidsniveau NWD-C. Na de succesvolle editie dit voorjaar op Zeilschool Aalsmeer, vond het weekend deze keer plaats in de prachtig gerenoveerde accommodatie van Zeilschool het Molenhuis in Woudsend.
+
+## Doelstellingen en deelnemers
+
+Het weekend bood instructeurs de mogelijkheid om hun eerste stappen te zetten in het NWD-C traject, of juist hun opleiding af te ronden wanneer ze daar klaar voor waren. Daarnaast was het een uitgelezen kans voor trainers om verder te groeien in hun sportkaderopleiding.
+
+Een diverse groep deelnemers en trainers nam deel aan het weekend, met vertegenwoordigers van:
+- Zeilschool De Kikkert
+- Krekt Sailing  
+- Zeilschool het Molenhuis
+- Zeil- en Surfschool Neptunus
+- Zeilschool Vinkeveen
+
+## Resultaten
+
+Het weekend leverde mooie resultaten op met in totaal **12 nieuwe kwalificaties**:
+
+- **8x** NWD-C eigenvaardigheidsniveau
+- **3x** Trainer niveau 5 (PvB 5.1)
+- **1x** Trainer niveau 4 (PvB 4.1)
+
+## Belang
+
+Naast de individuele resultaten en kwalificaties zijn deze gezamenlijke trainingsweekenden van groot belang voor het NWD. Ze bieden een unieke gelegenheid voor visie-uitwisseling op het hoogste niveau tussen verschillende vaarscholen en locaties. Deze uitwisseling draagt bij aan de continue verbetering van de kwaliteit van onze opleidingen en fungeert als een belangrijke vorm van kwaliteitsborging voor alle aangesloten NWD-locaties.
+
+## Dank en vooruitblik
+
+We willen Zeilschool het Molenhuis hartelijk bedanken voor de uitstekende organisatie van dit goed verzorgde weekend. Ook onze trainers en opleiders verdienen waardering voor hun professionele inzet, net als alle deelnemers voor hun enthousiasme en inzet!
+
+**Begin 2026** zal het volgende gezamenlijke trainingsweekend plaatsvinden. Vraag bij je opleidingslocatie naar meer details over deelname!
+
+<Image src={Image4} className="rounded-none" />
+<Image src={Image3} className="rounded-none" />
+<Image src={Image2} className="rounded-none" />
+<Image src={Image1} className="rounded-none" />
