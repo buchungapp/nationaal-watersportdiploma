@@ -38,8 +38,10 @@ async function CourseInfoContent({ params }: CourseInfoProps) {
         <React.Fragment key={category.id}>
           <DescriptionTerm>{category.title}</DescriptionTerm>
           <DescriptionDetails>
-            {course.categories.find((c) => c.parent?.id === category.id)
-              ?.title ?? "-"}
+            {course.categories
+              .filter((c) => c.parent?.id === category.id)
+              .map((c) => c.title ?? c.handle)
+              .join(", ")}
           </DescriptionDetails>
         </React.Fragment>
       ))}

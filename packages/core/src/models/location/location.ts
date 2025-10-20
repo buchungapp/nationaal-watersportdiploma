@@ -1,8 +1,10 @@
 import { schema as s } from "@nawadi/db";
 import {
+  type SQLWrapper,
   and,
   asc,
   eq,
+  inArray,
   isNotNull,
   isNull,
   notInArray,
@@ -15,6 +17,7 @@ import { findItem, singleRow } from "../../utils/data-helpers.js";
 import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
   handleSchema,
+  singleOrArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -40,6 +43,7 @@ export const create = wrapCommand(
       handle: true,
       name: true,
       websiteUrl: true,
+      status: true,
     }),
     successfulCreateResponse,
     async (input) => {
@@ -73,6 +77,7 @@ export const updateDetails = wrapCommand(
         logoMediaId: true,
         squareLogoMediaId: true,
         certificateMediaId: true,
+        status: true,
       })
       .extend({
         googlePlaceId: z.string().nullish(),
@@ -110,6 +115,7 @@ export const updateDetails = wrapCommand(
           websiteUrl: input.websiteUrl,
           email: input.email,
           shortDescription: input.shortDescription,
+          status: input.status,
           _metadata: sql`(((${JSON.stringify({
             ...(existing._metadata as JSON),
             ...(input.googlePlaceId !== undefined && {
@@ -130,62 +136,85 @@ export const updateDetails = wrapCommand(
 
 export const list = wrapQuery(
   "location.list",
-  withZod(z.void(), outputSchema.array(), async () => {
-    const query = useQuery();
-    const locations = await query
-      .select()
-      .from(s.location)
-      // .where(eq(s.location.status, "active"))
-      .orderBy(asc(s.location.name));
-
-    // const uniqueMediaIds = Array.from(
-    //   new Set(
-    //     locations
-    //       .map((row) => [
-    //         row.logoMediaId,
-    //         row.squareLogoMediaId,
-    //         row.certificateMediaId,
-    //       ])
-    //       .flat(),
-    //   ),
-    // ).filter((id): id is string => !!id)
-
-    const allImages = await Platform.Media.listImages();
-
-    return locations.map((row) => {
-      const logo = row.logoMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.logoMediaId,
-            enforce: true,
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            status: singleOrArray(
+              z.enum(["draft", "active", "hidden", "archived"]),
+            ).optional(),
           })
-        : null;
+          .default({}),
+      })
+      .default({}),
+    outputSchema.array(),
+    async (input) => {
+      const query = useQuery();
 
-      const logoSquare = row.squareLogoMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.squareLogoMediaId,
-            enforce: true,
-          })
-        : null;
+      const whereClauses: (SQLWrapper | undefined)[] = [
+        input.filter.status
+          ? Array.isArray(input.filter.status)
+            ? inArray(s.location.status, input.filter.status)
+            : eq(s.location.status, input.filter.status)
+          : undefined,
+      ];
 
-      const logoCertificate = row.certificateMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.certificateMediaId,
-            enforce: true,
-          })
-        : null;
+      const locations = await query
+        .select()
+        .from(s.location)
+        .where(and(...whereClauses))
+        .orderBy(asc(s.location.name));
 
-      return {
-        ...row,
-        logo,
-        logoSquare,
-        logoCertificate,
-        ...mapMetaForLocation(row._metadata),
-      };
-    });
-  }),
+      // const uniqueMediaIds = Array.from(
+      //   new Set(
+      //     locations
+      //       .map((row) => [
+      //         row.logoMediaId,
+      //         row.squareLogoMediaId,
+      //         row.certificateMediaId,
+      //       ])
+      //       .flat(),
+      //   ),
+      // ).filter((id): id is string => !!id)
+
+      const allImages = await Platform.Media.listImages();
+
+      return locations.map((row) => {
+        const logo = row.logoMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.logoMediaId,
+              enforce: true,
+            })
+          : null;
+
+        const logoSquare = row.squareLogoMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.squareLogoMediaId,
+              enforce: true,
+            })
+          : null;
+
+        const logoCertificate = row.certificateMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.certificateMediaId,
+              enforce: true,
+            })
+          : null;
+
+        return {
+          ...row,
+          logo,
+          logoSquare,
+          logoCertificate,
+          ...mapMetaForLocation(row._metadata),
+        };
+      });
+    },
+  ),
 );
 
 export const fromId = wrapQuery(
@@ -220,33 +249,57 @@ export const fromId = wrapQuery(
 
 export const fromHandle = wrapQuery(
   "location.fromHandle",
-  withZod(handleSchema, outputSchema, async (handle) => {
-    const query = useQuery();
+  withZod(
+    z.object({
+      handle: handleSchema,
+      filter: z
+        .object({
+          status: singleOrArray(
+            z.enum(["draft", "active", "hidden", "archived"]),
+          ).optional(),
+        })
+        .default({}),
+    }),
+    outputSchema,
+    async (input) => {
+      const query = useQuery();
 
-    const location = await query
-      .select()
-      .from(s.location)
-      .where(eq(s.location.handle, handle))
-      .then((rows) => singleRow(rows));
+      const location = await query
+        .select()
+        .from(s.location)
+        .where(
+          and(
+            eq(s.location.handle, input.handle),
+            input.filter.status
+              ? Array.isArray(input.filter.status)
+                ? inArray(s.location.status, input.filter.status)
+                : eq(s.location.status, input.filter.status)
+              : undefined,
+          ),
+        )
+        .then((rows) => singleRow(rows));
 
-    const [logo, squareLogo, certificateLogo] = await Promise.all([
-      location.logoMediaId ? Platform.Media.fromId(location.logoMediaId) : null,
-      location.squareLogoMediaId
-        ? Platform.Media.fromId(location.squareLogoMediaId)
-        : null,
-      location.certificateMediaId
-        ? Platform.Media.fromId(location.certificateMediaId)
-        : null,
-    ]);
+      const [logo, squareLogo, certificateLogo] = await Promise.all([
+        location.logoMediaId
+          ? Platform.Media.fromId(location.logoMediaId)
+          : null,
+        location.squareLogoMediaId
+          ? Platform.Media.fromId(location.squareLogoMediaId)
+          : null,
+        location.certificateMediaId
+          ? Platform.Media.fromId(location.certificateMediaId)
+          : null,
+      ]);
 
-    return {
-      ...location,
-      logo,
-      logoSquare: squareLogo,
-      logoCertificate: certificateLogo,
-      ...mapMetaForLocation(location._metadata),
-    };
-  }),
+      return {
+        ...location,
+        logo,
+        logoSquare: squareLogo,
+        logoCertificate: certificateLogo,
+        ...mapMetaForLocation(location._metadata),
+      };
+    },
+  ),
 );
 
 export const listResources = wrapQuery(

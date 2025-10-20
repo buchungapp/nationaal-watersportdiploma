@@ -1,9 +1,15 @@
 import FlexSearch from "flexsearch";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { listCourses, listParentCategories } from "~/lib/nwd";
+import {
+  listCategories,
+  listCourses,
+  listDisciplines,
+  listParentCategories,
+} from "~/lib/nwd";
 import Search from "../../../_components/search";
 import CourseTableClient from "./_components/course-table";
+import { CreateCourseDialog } from "./_components/dialogs/create-course-dialog";
 
 async function ProgramTable(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -13,6 +19,7 @@ async function ProgramTable(props: {
     listCourses(),
     listParentCategories(),
   ]);
+
   const searchQuery = searchParams?.query?.toString() ?? null;
 
   // Create a FlexSearch index
@@ -60,7 +67,23 @@ async function ProgramTable(props: {
   );
 }
 
-export default function Page(props: {
+async function CreateCourseDialogSuspense() {
+  const [parentCategories, disciplines, allCategories] = await Promise.all([
+    listParentCategories(),
+    listDisciplines(),
+    listCategories(),
+  ]);
+
+  return (
+    <CreateCourseDialog
+      disciplines={disciplines}
+      parentCategories={parentCategories}
+      allCategories={allCategories}
+    />
+  );
+}
+
+export default async function Page(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
@@ -72,6 +95,11 @@ export default function Page(props: {
             <Search placeholder="Doorzoek cursussen..." />
           </div>
         </div>
+        <Suspense
+          fallback={<div className="rounded-lg w-40.5 h-9 animate-pulse" />}
+        >
+          <CreateCourseDialogSuspense />
+        </Suspense>
       </div>
       <Suspense
         fallback={

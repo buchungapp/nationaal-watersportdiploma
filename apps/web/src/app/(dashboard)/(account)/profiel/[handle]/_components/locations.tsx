@@ -12,7 +12,10 @@ import {
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { listActiveCohortsForPerson, listLocationsForPerson } from "~/lib/nwd";
+import {
+  listActiveCohortsForPerson,
+  listActiveLocationsForPerson,
+} from "~/lib/nwd";
 import { ScrollableGridList } from "./scrollable-grid-list";
 
 function LocationsListSkeleton() {
@@ -21,14 +24,14 @@ function LocationsListSkeleton() {
       {[1, 2].map((i) => (
         <GridListItem key={i} className="bg-white px-2 lg:px-4">
           <div className="flex items-center gap-2.5 lg:gap-4">
-            <div className="size-6 lg:size-10 bg-zinc-200 rounded animate-pulse" />
-            <div className="h-4 lg:h-5 bg-zinc-200 rounded animate-pulse w-32 lg:w-48" />
+            <div className="bg-zinc-200 rounded size-6 lg:size-10 animate-pulse" />
+            <div className="bg-zinc-200 rounded w-32 lg:w-48 h-4 lg:h-5 animate-pulse" />
           </div>
-          <div className="mt-2 pl-8.5 lg:mt-3 lg:pl-14">
-            <div className="h-3 bg-zinc-100 rounded animate-pulse w-24 mb-1 lg:mb-2" />
+          <div className="mt-2 lg:mt-3 pl-8.5 lg:pl-14">
+            <div className="bg-zinc-100 mb-1 lg:mb-2 rounded w-24 h-3 animate-pulse" />
             <div className="space-y-1">
-              <div className="h-3 bg-zinc-100 rounded animate-pulse w-40" />
-              <div className="h-3 bg-zinc-100 rounded animate-pulse w-36" />
+              <div className="bg-zinc-100 rounded w-40 h-3 animate-pulse" />
+              <div className="bg-zinc-100 rounded w-36 h-3 animate-pulse" />
             </div>
           </div>
         </GridListItem>
@@ -57,13 +60,13 @@ async function ActiveCohortsForLocation({
 
   return (
     <div className="mt-2 pl-8.5 lg:pl-14">
-      <Text className="text-zinc-600 font-medium">Lopende cohorten</Text>
+      <Text className="font-medium text-zinc-600">Lopende cohorten</Text>
       <ul className="flex flex-col flex-1 mt-1">
         {activeCohorts.map((cohort) => (
           <li key={cohort.id}>
             <Link
               href={`/locatie/${location.handle}/cohorten/${cohort.handle}`}
-              className="flex justify-between items-center gap-2 data-active:bg-zinc-50 data-hover:bg-zinc-50 py-1 text-zinc-500 dark:text-zinc-400 text-base lg:text-sm hover:text-zinc-700 transition-colors rounded-md px-2 -mx-2"
+              className="flex justify-between items-center gap-2 data-active:bg-zinc-50 data-hover:bg-zinc-50 -mx-2 px-2 py-1 rounded-md text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 lg:text-sm text-base transition-colors"
             >
               {cohort.label}
             </Link>
@@ -83,7 +86,7 @@ async function LocationsList({
     personId: person.id,
   }).catch(() => []);
 
-  const locations = await listLocationsForPerson(person.id, [
+  const locations = await listActiveLocationsForPerson(person.id, [
     "instructor",
     "location_admin",
   ]).catch(() => []);
@@ -97,15 +100,15 @@ async function LocationsList({
       {locations.map((location) => (
         <GridListItem
           key={location.id}
-          className="bg-white px-2 lg:px-4 duration-200 lg:border-zinc-200/80 flex flex-col"
+          className="flex flex-col bg-white px-2 lg:px-4 lg:border-zinc-200/80 duration-200"
         >
           <Link
             href={`/locatie/${location.handle}/cohorten`}
-            className="flex items-center gap-2.5 lg:gap-4 group"
+            className="group flex items-center gap-2.5 lg:gap-4"
           >
             <Avatar
               square
-              className="size-6 lg:size-10 group-hover:ring-2 group-hover:ring-branding-light/30 transition-all duration-200"
+              className="group-hover:ring-2 group-hover:ring-branding-light/30 size-6 lg:size-10 transition-all duration-200"
               initials={location.name?.slice(0, 2)}
               src={location.logoSquare?.transformUrl}
             />

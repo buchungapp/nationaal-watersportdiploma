@@ -22,18 +22,26 @@ import {
 type CohortProgressProps = {
   personPromise: Promise<User.Person.$schema.Person>;
   curriculaPromise: Promise<Student.Curriculum.$schema.StudentCurriculum[]>;
+  actionButton?: React.ReactNode;
+  emptyState?: React.ReactNode;
 };
 
 export async function fetchCohortProgress(personId: string) {
   return listStudentCohortProgressByPersonId(personId, true, true);
 }
 
+export type CohortProgress = Awaited<
+  ReturnType<typeof fetchCohortProgress>
+>[number];
+
 async function CohortProgress({
   allocationProgress,
   studentCurricula,
+  actionButton,
 }: {
   allocationProgress: Awaited<ReturnType<typeof fetchCohortProgress>>;
   studentCurricula: Student.Curriculum.$schema.StudentCurriculum[];
+  actionButton?: React.ReactNode;
 }) {
   return (
     <ul className="space-y-4">
@@ -65,7 +73,7 @@ async function CohortProgress({
 
         return (
           <li key={allocation.allocation.id}>
-            <ProgressCard type="course">
+            <ProgressCard type="course" data={allocation}>
               <ProgressCardHeader
                 degree={studentCurriculum.curriculum.program.degree.title}
                 program={
@@ -74,6 +82,7 @@ async function CohortProgress({
                 }
                 gearType={studentCurriculum.gearType.title}
                 itemIndex={index}
+                actionButton={actionButton}
               />
 
               <ProgressCardDisclosures>
@@ -210,13 +219,14 @@ async function CohortProgressContent(props: CohortProgressProps) {
   ]);
 
   if (allocations.length < 1) {
-    return <ProgressCardEmptyState type="course" />;
+    return props.emptyState ?? <ProgressCardEmptyState type="course" />;
   }
 
   return (
     <CohortProgress
       allocationProgress={allocations}
       studentCurricula={curricula}
+      actionButton={props.actionButton}
     />
   );
 }

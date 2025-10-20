@@ -17,6 +17,7 @@ import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   formatSearchTerms,
   generatePersonID,
+  jsonAgg,
   possibleSingleRow,
   singleOrArray,
   singleRow,
@@ -286,6 +287,7 @@ export const list = wrapQuery(
                 "instructor",
                 "location_admin",
                 "pvb_beoordelaar",
+                "secretariaat",
               ]),
             ).optional(),
             q: z.string().optional(),
@@ -470,6 +472,52 @@ export const list = wrapQuery(
         limit: limit ?? null,
         offset,
       };
+    },
+  ),
+);
+
+export const listAllLocations = wrapQuery(
+  "user.person.listAllLocations",
+  withZod(
+    z.object({ personId: uuidSchema }),
+    z.array(
+      z.object({
+        locationId: uuidSchema,
+        linkStatus: z.enum(["linked", "revoked", "removed"]),
+        roles: z.array(z.enum(["student", "instructor", "location_admin"])),
+      }),
+    ),
+    async (input) => {
+      const query = useQuery();
+
+      const result = await query
+        .select({
+          locationId: s.personLocationLink.locationId,
+          linkStatus: s.personLocationLink.status,
+          roles: jsonAgg(s.actor.type),
+        })
+        .from(s.personLocationLink)
+        .leftJoin(
+          s.actor,
+          and(
+            eq(s.actor.personId, s.personLocationLink.personId),
+            eq(s.actor.locationId, s.personLocationLink.locationId),
+            isNull(s.actor.deletedAt),
+          ),
+        )
+        .where(eq(s.personLocationLink.personId, input.personId))
+        .groupBy(s.personLocationLink.locationId, s.personLocationLink.status);
+
+      return result.map((x) => ({
+        locationId: x.locationId,
+        linkStatus: x.linkStatus,
+        roles: x.roles.filter(
+          (role) =>
+            role === "student" ||
+            role === "instructor" ||
+            role === "location_admin",
+        ) as ("student" | "instructor" | "location_admin")[],
+      }));
     },
   ),
 );

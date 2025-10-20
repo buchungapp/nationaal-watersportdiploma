@@ -19,13 +19,9 @@ export function FieldSection({
       className="gap-x-8 gap-y-6 grid sm:grid-cols-2"
     >
       <div className="space-y-1">
-        <Headless.Label>
-          <Subheading>{label}</Subheading>
-        </Headless.Label>
+        <Headless.Label as={Subheading}>{label}</Headless.Label>
         {description ? (
-          <Headless.Description>
-            <Text>{description}</Text>
-          </Headless.Description>
+          <Headless.Description as={Text}>{description}</Headless.Description>
         ) : null}
       </div>
       <div className={className}>{children}</div>

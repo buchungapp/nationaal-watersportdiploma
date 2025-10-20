@@ -1,11 +1,20 @@
 import { schema as s } from "@nawadi/db";
-import { asc, desc, eq, isNull } from "drizzle-orm";
+import {
+  type SQLWrapper,
+  and,
+  asc,
+  desc,
+  eq,
+  inArray,
+  isNull,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
   handleSchema,
   possibleSingleRow,
+  singleOrNonEmptyArray,
   singleRow,
   successfulCreateResponse,
   withZod,
@@ -17,21 +26,30 @@ import { insertSchema, outputSchema } from "./category.schema.js";
 export const create = wrapCommand(
   "course.category.create",
   withZod(
-    insertSchema.pick({
-      title: true,
-      handle: true,
-      description: true,
-      parentCategoryId: true,
-    }),
+    insertSchema
+      .pick({
+        title: true,
+        handle: true,
+        description: true,
+        parentCategoryId: true,
+      })
+      .extend({
+        weight: insertSchema.shape.weight.optional(),
+      }),
     successfulCreateResponse,
     async (item) =>
       withTransaction(async (tx) => {
-        const currentHeighestWeight = await tx
-          .select({ weight: s.category.weight })
-          .from(s.category)
-          .orderBy(desc(s.category.weight))
-          .limit(1)
-          .then((rows) => rows[0]?.weight ?? 0);
+        let currentWeight = item.weight;
+        if (!currentWeight) {
+          const currentHeighestWeight = await tx
+            .select({ weight: s.category.weight })
+            .from(s.category)
+            .orderBy(desc(s.category.weight))
+            .limit(1)
+            .then((rows) => rows[0]?.weight ?? 0);
+
+          currentWeight = currentHeighestWeight + 1;
+        }
 
         const rows = await tx
           .insert(s.category)
@@ -40,7 +58,7 @@ export const create = wrapCommand(
             handle: item.handle,
             description: item.description,
             parentCategoryId: item.parentCategoryId,
-            weight: currentHeighestWeight + 1,
+            weight: currentWeight,
           })
           .returning({ id: s.category.id });
 
@@ -52,19 +70,44 @@ export const create = wrapCommand(
 
 export const list = wrapQuery(
   "course.category.list",
-  withZod(z.void(), outputSchema.array(), async () => {
-    const query = useQuery();
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            parentCategoryId: singleOrNonEmptyArray(
+              z.string().uuid(),
+            ).optional(),
+          })
+          .default({}),
+      })
+      .default({}),
+    outputSchema.array(),
+    async (input) => {
+      const query = useQuery();
 
-    const rows = await query
-      .select()
-      .from(s.category)
-      .orderBy(asc(s.category.weight));
+      const whereClauses: (SQLWrapper | undefined)[] = [
+        input.filter.parentCategoryId
+          ? Array.isArray(input.filter.parentCategoryId)
+            ? inArray(
+                s.category.parentCategoryId,
+                input.filter.parentCategoryId,
+              )
+            : eq(s.category.parentCategoryId, input.filter.parentCategoryId)
+          : undefined,
+      ];
+      const rows = await query
+        .select()
+        .from(s.category)
+        .orderBy(asc(s.category.weight))
+        .where(and(...whereClauses));
 
-    return rows.map(({ parentCategoryId, ...row }) => ({
-      ...row,
-      parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
-    }));
-  }),
+      return rows.map(({ parentCategoryId, ...row }) => ({
+        ...row,
+        parent: rows.find(({ id }) => id === parentCategoryId) ?? null,
+      }));
+    },
+  ),
 );
 
 export const listParentCategories = wrapQuery(
@@ -109,4 +152,30 @@ export const fromHandle = wrapQuery(
       parent: row.parent,
     };
   }),
+);
+
+export const update = wrapCommand(
+  "course.category.update",
+  withZod(
+    z.object({
+      id: z.string().uuid(),
+      title: insertSchema.shape.title.optional(),
+      description: insertSchema.shape.description.optional(),
+      parentCategoryId: insertSchema.shape.parentCategoryId.optional(),
+      weight: insertSchema.shape.weight.optional(),
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+      await query
+        .update(s.category)
+        .set({
+          title: input.title,
+          description: input.description,
+          parentCategoryId: input.parentCategoryId,
+          weight: input.weight,
+        })
+        .where(eq(s.category.id, input.id));
+    },
+  ),
 );

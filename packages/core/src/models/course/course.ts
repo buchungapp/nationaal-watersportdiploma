@@ -10,6 +10,7 @@ import {
   inArray,
   like,
   not,
+  notInArray,
   sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
@@ -304,5 +305,61 @@ export const findOne = wrapQuery(
         ),
       };
     },
+  ),
+);
+
+export const update = wrapCommand(
+  "course.update",
+  withZod(
+    z.object({
+      id: z.string().uuid(),
+      title: insertSchema.shape.title.optional(),
+      description: insertSchema.shape.description.optional(),
+      disciplineId: insertSchema.shape.disciplineId.optional(),
+      abbreviation: insertSchema.shape.abbreviation.optional(),
+      categories: uuidSchema.array().optional(),
+    }),
+    z.void(),
+    async (input) =>
+      withTransaction(async (tx) => {
+        const row = await tx
+          .update(s.course)
+          .set({
+            title: input.title,
+            description: input.description,
+            disciplineId: input.disciplineId,
+            abbreviation: input.abbreviation,
+          })
+          .where(eq(s.course.id, input.id))
+          .returning({ id: s.course.id })
+          .then(singleRow);
+
+        if (!!input.categories && input.categories.length > 0) {
+          await Promise.all([
+            tx
+              .delete(s.courseCategory)
+              .where(
+                and(
+                  eq(s.courseCategory.courseId, input.id),
+                  notInArray(s.courseCategory.categoryId, input.categories),
+                ),
+              ),
+            tx
+              .insert(s.courseCategory)
+              .values(
+                input.categories.map((categoryId) => ({
+                  courseId: row.id,
+                  categoryId,
+                })),
+              )
+              .onConflictDoNothing({
+                target: [
+                  s.courseCategory.courseId,
+                  s.courseCategory.categoryId,
+                ],
+              }),
+          ]);
+        }
+      }),
   ),
 );

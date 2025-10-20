@@ -14,7 +14,6 @@ import { Inter } from "next/font/google";
 import { ImpersonationBarWrapper } from "~/app/(dashboard)/_components/impersonation-bar-wrapper";
 import Analytics from "~/app/_components/analytics";
 import { CommonProviders } from "~/app/_components/providers";
-import "../globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -65,13 +64,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <ImpersonationBarWrapper />
           {/*  Wrap in a div because of: https://github.com/tailwindlabs/headlessui/issues/2752#issuecomment-1724096430 */}
           <div className="h-full">
-            <div className="flex min-h-full flex-1">
-              <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+            <div className="flex flex-1 min-h-full">
+              <div className="flex flex-col flex-1 lg:flex-none justify-center px-4 sm:px-6 lg:px-20 xl:px-24 py-12">
                 {children}
               </div>
-              <div className="relative hidden w-0 flex-1 lg:block">
+              <div className="hidden lg:block relative flex-1 w-0">
                 <Image
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                   priority
                   src={coverImage}
                   placeholder="blur"

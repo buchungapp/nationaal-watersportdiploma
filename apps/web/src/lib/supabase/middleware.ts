@@ -41,19 +41,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (request.nextUrl.pathname.startsWith("/secretariaat")) {
-    if (
-      !user?.email ||
-      !["info@nationaalwatersportdiploma.nl", "maurits@buchung.nl"].includes(
-        user.email,
-      )
-    ) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/profiel?_cacheBust=1";
-      return NextResponse.redirect(url);
-    }
-  }
-
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
   // creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

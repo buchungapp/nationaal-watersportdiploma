@@ -8,7 +8,7 @@ import {
 import { Code } from "~/app/(dashboard)/_components/text";
 import dayjs from "~/lib/dayjs";
 import {
-  getPersonById,
+  getPersonByIdForLocation,
   listRolesForLocation,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
@@ -25,7 +25,7 @@ async function PersonSummaryContent(props: PersonSummaryProps) {
   const retrieveLocationPromise = retrieveLocationByHandle(params.location);
   const retrievePersonPromise = retrieveLocationPromise.then(
     async (location) => {
-      const person = await getPersonById(params.id, location.id);
+      const person = await getPersonByIdForLocation(params.id, location.id);
 
       if (!person) {
         notFound();

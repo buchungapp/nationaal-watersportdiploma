@@ -1,0 +1,134 @@
+"use client";
+
+import { ChevronDownIcon } from "@heroicons/react/16/solid";
+import clsx from "clsx";
+import { parseAsString, useQueryState } from "nuqs";
+import { parseAsArrayOf } from "nuqs";
+import type { ComponentProps } from "react";
+import { useOptimistic, useTransition } from "react";
+import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
+import {
+  Popover,
+  PopoverButton,
+  PopoverPanel,
+} from "~/app/(dashboard)/_components/popover";
+import Spinner from "~/app/_components/spinner";
+
+function CheckboxButton({
+  children,
+  className,
+  onClick,
+  ...props
+}: Pick<ComponentProps<"button">, "onClick" | "className" | "children"> &
+  ComponentProps<typeof Checkbox>) {
+  const [isPending, startTransition] = useTransition();
+
+  return (
+    <button
+      type="button"
+      className={clsx([
+        className,
+
+        // Base
+        "relative isolate inline-flex items-center gap-x-2 rounded-lg text-base/6",
+
+        // Sizing
+        "px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] sm:text-sm/6",
+
+        // Disabled
+        "data-disabled:opacity-50",
+      ])}
+      onClick={(...e) => {
+        if (!onClick) return;
+
+        return startTransition(() => {
+          onClick(...e);
+        });
+      }}
+    >
+      {isPending ? (
+        <Spinner className="text-slate-700" size="sm" />
+      ) : (
+        <Checkbox {...props} />
+      )}
+      {children}
+    </button>
+  );
+}
+
+export function FilterSelect() {
+  const [filter, setFilter] = useQueryState(
+    "filter",
+    parseAsArrayOf(parseAsString).withOptions({
+      shallow: false,
+    }),
+  );
+  const [, setPage] = useQueryState(
+    "page",
+    parseAsString.withOptions({
+      shallow: false,
+    }),
+  );
+  const [, setLimit] = useQueryState(
+    "limit",
+    parseAsString.withOptions({
+      shallow: false,
+    }),
+  );
+
+  const [optimisticSelectedStatus, setOptimisticSelectedStatus] = useOptimistic(
+    filter ?? ["active", "draft"],
+    (current, toggle: "active" | "draft" | "hidden" | "archived") => {
+      return current.includes(toggle)
+        ? current.filter((item) => item !== toggle)
+        : [...current, toggle];
+    },
+  );
+
+  const handleToggle = (toggle: "active" | "draft" | "hidden" | "archived") => {
+    setOptimisticSelectedStatus(toggle);
+
+    setFilter(
+      optimisticSelectedStatus.includes(toggle)
+        ? optimisticSelectedStatus.filter((item) => item !== toggle)
+        : [...optimisticSelectedStatus, toggle],
+    );
+
+    setPage(null);
+    setLimit(null);
+  };
+
+  return (
+    <Popover className="relative">
+      <PopoverButton outline>
+        Filter <ChevronDownIcon />
+      </PopoverButton>
+      <PopoverPanel anchor="bottom end" className="flex flex-col gap-1">
+        <CheckboxButton
+          onClick={() => handleToggle("active")}
+          checked={optimisticSelectedStatus.includes("active")}
+        >
+          Actief
+        </CheckboxButton>
+        <CheckboxButton
+          onClick={() => handleToggle("draft")}
+          checked={optimisticSelectedStatus.includes("draft")}
+        >
+          Concept
+        </CheckboxButton>
+        <CheckboxButton
+          onClick={() => handleToggle("hidden")}
+          checked={optimisticSelectedStatus.includes("hidden")}
+        >
+          Verborgen
+        </CheckboxButton>
+        <CheckboxButton
+          onClick={() => handleToggle("archived")}
+          checked={optimisticSelectedStatus.includes("archived")}
+        >
+          Gearchiveerd
+        </CheckboxButton>
+      </PopoverPanel>
+    </Popover>
+  );
+}

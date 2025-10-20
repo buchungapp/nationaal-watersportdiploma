@@ -77,3 +77,25 @@ export const fromHandle = wrapQuery(
     return possibleSingleRow(rows) ?? null;
   }),
 );
+
+export const update = wrapCommand(
+  "course.module.update",
+  withZod(
+    z.object({
+      id: z.string().uuid(),
+      title: insertSchema.shape.title.optional(),
+      weight: insertSchema.shape.weight.optional(),
+    }),
+    z.void(),
+    async ({ id, title, weight }) =>
+      withTransaction(async (tx) => {
+        await tx
+          .update(s.module)
+          .set({
+            title,
+            weight,
+          })
+          .where(eq(s.module.id, id));
+      }),
+  ),
+);

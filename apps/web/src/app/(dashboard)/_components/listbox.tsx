@@ -17,9 +17,9 @@ export function Listbox<T>({
   autoFocus?: boolean;
   "aria-label"?: string;
   children?: React.ReactNode;
-} & Omit<Headless.ListboxProps<typeof Fragment, T>, "multiple">) {
+} & Headless.ListboxProps<typeof Fragment, T>) {
   return (
-    <Headless.Listbox {...props} multiple={false}>
+    <Headless.Listbox {...props}>
       <Headless.ListboxButton
         autoFocus={autoFocus}
         data-slot="control"
@@ -45,7 +45,7 @@ export function Listbox<T>({
           options={options}
           placeholder={
             placeholder && (
-              <span className="block truncate text-zinc-500">
+              <span className="block text-zinc-500 truncate">
                 {placeholder}
               </span>
             )
@@ -69,9 +69,9 @@ export function Listbox<T>({
             "group-data-disabled:border-zinc-950/20 group-data-disabled:opacity-100 dark:group-data-disabled:border-white/15 dark:group-data-disabled:bg-white/[2.5%] dark:group-data-disabled:data-hover:border-white/15",
           ])}
         />
-        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+        <span className="right-0 absolute inset-y-0 flex items-center pr-2 pointer-events-none">
           <svg
-            className="size-5 stroke-zinc-500 group-data-disabled:stroke-zinc-600 sm:size-4 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText]"
+            className="stroke-zinc-500 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText] group-data-disabled:stroke-zinc-600 size-5 sm:size-4"
             viewBox="0 0 16 16"
             aria-hidden="true"
             fill="none"
@@ -161,7 +161,7 @@ export function ListboxOption<T>({
             )}
           >
             <svg
-              className="relative hidden size-5 self-center stroke-current group-data-selected/option:inline sm:size-4"
+              className="hidden group-data-selected/option:inline relative self-center stroke-current size-5 sm:size-4"
               viewBox="0 0 16 16"
               fill="none"
               aria-hidden="true"
