@@ -1,7 +1,9 @@
-export default function Layout({
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return <NuqsAdapter>{children}</NuqsAdapter>;
 }

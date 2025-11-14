@@ -4,22 +4,41 @@ import {
   unstable_cacheTag as cacheTag,
 } from "next/cache";
 import { cache } from "react";
-import { listAllLocations } from "~/lib/nwd";
+import { listActiveLocations } from "~/lib/nwd";
 
 // const mapsClient = new Client({});
 
-async function retrieveLocationsWithAllMeta() {
+function withoutEmptyArray<T>(
+  array: T | T[] | null | undefined,
+): T | [T, ...T[]] | undefined {
+  return Array.isArray(array)
+    ? array.length > 0
+      ? (array as [T, ...T[]])
+      : undefined
+    : (array ?? undefined);
+}
+
+async function retrieveLocationsWithAllMeta({
+  filter,
+}: {
+  filter?: {
+    disciplineId?: string | string[] | null;
+    categoryId?: string | string[] | null;
+  };
+} = {}) {
   "use cache";
   cacheLife("weeks");
   cacheTag("locations");
 
-  const locations = await listAllLocations();
+  const locations = await listActiveLocations({
+    filter: {
+      disciplineId: withoutEmptyArray(filter?.disciplineId),
+      categoryId: withoutEmptyArray(filter?.categoryId),
+    },
+  });
   const locationsWithCity = await Promise.all(
     locations.map(async (location) => {
-      if (
-        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY === undefined ||
-        !location.googlePlaceData
-      ) {
+      if (!location.googlePlaceData) {
         return {
           ...location,
           rating: undefined,

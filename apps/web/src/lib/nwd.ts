@@ -1244,11 +1244,20 @@ export const listLocationsWherePrimaryPersonHasManagementRole = cache(
   },
 );
 
-export const listAllLocations = cache(async () => {
-  return makeRequest(async () => {
-    return await Location.list();
-  });
-});
+export const listActiveLocations = cache(
+  async ({
+    filter,
+  }: {
+    filter?: {
+      disciplineId?: string | [string, ...string[]];
+      categoryId?: string | [string, ...string[]];
+    };
+  } = {}) => {
+    return makeRequest(async () => {
+      return await Location.list({ filter: { status: ["active"], ...filter } });
+    });
+  },
+);
 
 export const createStudentForLocation = async (
   locationId: string,

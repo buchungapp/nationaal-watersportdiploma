@@ -22,7 +22,7 @@ import {
 import { normalizeUrl } from "~/utils/normalize-url";
 import type { Location } from "../vaarlocaties/_lib/retrieve-locations";
 interface Props {
-  locations: Location[];
+  locations?: Location[];
 }
 
 export function LocationsMapContainer({ children }: PropsWithChildren) {
@@ -38,6 +38,7 @@ export function LocationsMapContainer({ children }: PropsWithChildren) {
 
 const SelectedLocationContext = createContext<
   | {
+      locations?: Location[];
       selectedLocation: Location | null;
       setSelectedLocation: (location: Location | null) => void;
     }
@@ -102,6 +103,7 @@ export function SelectedLocationProvider({
   return (
     <SelectedLocationContext.Provider
       value={{
+        locations,
         selectedLocation,
         setSelectedLocation: setSelectedLocationAndZoom,
       }}
@@ -123,12 +125,20 @@ export const useSelectedLocation = () => {
   return context;
 };
 
-export function LocationsMap({ locations }: Props) {
+export function LocationsMap(props: Props) {
   const center = useRef<google.maps.LatLngLiteral>({
     lat: 52.0889,
     lng: 5.6581,
   });
-  const isContextDefined = useContext(SelectedLocationContext) !== undefined;
+
+  const context = useContext(SelectedLocationContext);
+  const isContextDefined = context !== undefined;
+  const locations = isContextDefined ? context.locations : props.locations;
+  if (!locations) {
+    throw new Error(
+      "LocationsMap must be used within a SelectedLocationProvider or with locations prop",
+    );
+  }
 
   const MapComponent = (
     <GoogleMapsMap
@@ -182,7 +192,7 @@ function GoogleMapsMarker({ location }: { location: Location }) {
           maxWidth={200}
           onCloseClick={() => setSelectedLocation(null)}
         >
-          <h3 className="text-lg mt-1.5 font-semibold leading-5 text-slate-900">
+          <h3 className="mt-1.5 font-semibold text-slate-900 text-lg leading-5">
             {location.name}
           </h3>
           {location.websiteUrl ? (
@@ -194,7 +204,7 @@ function GoogleMapsMarker({ location }: { location: Location }) {
               {normalizeUrl(location.websiteUrl).split("//")[1]}
             </Link>
           ) : null}
-          <address className="mt-3 space-y-1 text-sm not-italic leading-6 text-slate-600">
+          <address className="space-y-1 mt-3 text-slate-600 text-sm not-italic leading-6">
             <p>{location.city}</p>
           </address>
         </InfoWindow>

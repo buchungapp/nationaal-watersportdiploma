@@ -1,8 +1,11 @@
 import { schema as s } from "@nawadi/db";
 import {
+  type SQLWrapper,
   and,
   asc,
   eq,
+  exists,
+  inArray,
   isNotNull,
   isNull,
   notInArray,
@@ -15,6 +18,7 @@ import { findItem, singleRow } from "../../utils/data-helpers.js";
 import { wrapCommand, wrapQuery } from "../../utils/index.js";
 import {
   handleSchema,
+  singleOrNonEmptyArray,
   successfulCreateResponse,
   uuidSchema,
   withZod,
@@ -130,62 +134,143 @@ export const updateDetails = wrapCommand(
 
 export const list = wrapQuery(
   "location.list",
-  withZod(z.void(), outputSchema.array(), async () => {
-    const query = useQuery();
-    const locations = await query
-      .select()
-      .from(s.location)
-      // .where(eq(s.location.status, "active"))
-      .orderBy(asc(s.location.name));
-
-    // const uniqueMediaIds = Array.from(
-    //   new Set(
-    //     locations
-    //       .map((row) => [
-    //         row.logoMediaId,
-    //         row.squareLogoMediaId,
-    //         row.certificateMediaId,
-    //       ])
-    //       .flat(),
-    //   ),
-    // ).filter((id): id is string => !!id)
-
-    const allImages = await Platform.Media.listImages();
-
-    return locations.map((row) => {
-      const logo = row.logoMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.logoMediaId,
-            enforce: true,
+  withZod(
+    z
+      .object({
+        filter: z
+          .object({
+            status: singleOrNonEmptyArray(
+              z.enum(["draft", "active", "hidden", "archived"]),
+            ).optional(),
+            disciplineId: singleOrNonEmptyArray(uuidSchema).optional(),
+            categoryId: singleOrNonEmptyArray(uuidSchema).optional(),
           })
-        : null;
+          .default({}),
+      })
+      .default({}),
+    outputSchema.array(),
+    async ({ filter }) => {
+      const query = useQuery();
 
-      const logoSquare = row.squareLogoMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.squareLogoMediaId,
-            enforce: true,
-          })
-        : null;
+      const filters: (SQLWrapper | undefined)[] = [];
+      if (filter.status) {
+        if (Array.isArray(filter.status)) {
+          filters.push(inArray(s.location.status, filter.status));
+        } else {
+          filters.push(eq(s.location.status, filter.status));
+        }
+      }
 
-      const logoCertificate = row.certificateMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.certificateMediaId,
-            enforce: true,
-          })
-        : null;
+      if (filter.disciplineId) {
+        filters.push(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.locationResourceLink)
+              .where(
+                and(
+                  isNull(s.locationResourceLink.deletedAt),
+                  eq(s.locationResourceLink.locationId, s.location.id),
+                  Array.isArray(filter.disciplineId)
+                    ? inArray(
+                        s.locationResourceLink.disciplineId,
+                        filter.disciplineId,
+                      )
+                    : eq(
+                        s.locationResourceLink.disciplineId,
+                        filter.disciplineId,
+                      ),
+                ),
+              ),
+          ),
+        );
+      }
 
-      return {
-        ...row,
-        logo,
-        logoSquare,
-        logoCertificate,
-        ...mapMetaForLocation(row._metadata),
-      };
-    });
-  }),
+      if (filter.categoryId) {
+        filters.push(
+          exists(
+            query
+              .select({ id: sql`1` })
+              .from(s.courseCategory)
+              .innerJoin(s.course, eq(s.courseCategory.courseId, s.course.id))
+              .innerJoin(
+                s.locationResourceLink,
+                and(
+                  eq(
+                    s.course.disciplineId,
+                    s.locationResourceLink.disciplineId,
+                  ),
+                  isNull(s.locationResourceLink.deletedAt),
+                ),
+              )
+              .where(
+                and(
+                  isNull(s.courseCategory.deletedAt),
+                  eq(s.locationResourceLink.locationId, s.location.id),
+                  Array.isArray(filter.categoryId)
+                    ? inArray(s.courseCategory.categoryId, filter.categoryId)
+                    : eq(s.courseCategory.categoryId, filter.categoryId),
+                ),
+              ),
+          ),
+        );
+      }
+
+      const locations = await query
+        .select()
+        .from(s.location)
+        .where(and(...filters))
+        .orderBy(asc(s.location.name));
+
+      // const uniqueMediaIds = Array.from(
+      //   new Set(
+      //     locations
+      //       .map((row) => [
+      //         row.logoMediaId,
+      //         row.squareLogoMediaId,
+      //         row.certificateMediaId,
+      //       ])
+      //       .flat(),
+      //   ),
+      // ).filter((id): id is string => !!id)
+
+      const allImages = await Platform.Media.listImages();
+
+      return locations.map((row) => {
+        const logo = row.logoMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.logoMediaId,
+              enforce: true,
+            })
+          : null;
+
+        const logoSquare = row.squareLogoMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.squareLogoMediaId,
+              enforce: true,
+            })
+          : null;
+
+        const logoCertificate = row.certificateMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.certificateMediaId,
+              enforce: true,
+            })
+          : null;
+
+        return {
+          ...row,
+          logo,
+          logoSquare,
+          logoCertificate,
+          ...mapMetaForLocation(row._metadata),
+        };
+      });
+    },
+  ),
 );
 
 export const fromId = wrapQuery(

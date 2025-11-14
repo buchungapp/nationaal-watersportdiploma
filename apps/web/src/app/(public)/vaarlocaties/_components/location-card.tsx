@@ -33,7 +33,7 @@ export default function LocationCard({
     <div
       ref={cardRef}
       className={clsx(
-        "rounded-2xl bg-slate-50 p-10 break-inside-avoid border-2",
+        "bg-slate-50 p-4 border-2 rounded-2xl break-inside-avoid",
         isSelected ? "border-branding-orange" : "border-slate-200",
       )}
     >

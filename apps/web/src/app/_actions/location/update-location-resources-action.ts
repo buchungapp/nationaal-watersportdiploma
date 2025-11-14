@@ -31,5 +31,6 @@ export const updateLocationResourcesAction = actionClientWithMeta
     }) => {
       await updateLocationResources(locationId, { gearTypes, disciplines });
       revalidateTag(`${locationId}-resource-link`);
+      revalidateTag("locations");
     },
   );
