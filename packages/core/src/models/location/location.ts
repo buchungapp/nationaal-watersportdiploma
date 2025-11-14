@@ -1,11 +1,12 @@
 import { schema as s } from "@nawadi/db";
+import { array } from "@nawadi/lib";
 import {
   type SQLWrapper,
   and,
   asc,
   eq,
   exists,
-  inArray,
+  getTableColumns,
   isNotNull,
   isNull,
   notInArray,
@@ -15,7 +16,12 @@ import {
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { findItem, singleRow } from "../../utils/data-helpers.js";
-import { wrapCommand, wrapQuery } from "../../utils/index.js";
+import {
+  applyArrayOrEqual,
+  jsonAggBuildObject,
+  wrapCommand,
+  wrapQuery,
+} from "../../utils/index.js";
 import {
   handleSchema,
   singleOrNonEmptyArray,
@@ -31,6 +37,7 @@ import {
   insertSchema,
   locationMetadataSchema,
   outputSchema,
+  outputSchemaWithIncludes,
 } from "./location.schema.js";
 
 function mapMetaForLocation(metadata: unknown): LocationMetadata {
@@ -146,19 +153,21 @@ export const list = wrapQuery(
             categoryId: singleOrNonEmptyArray(uuidSchema).optional(),
           })
           .default({}),
+        include: z
+          .object({
+            resources: z.boolean().optional(),
+            categories: z.boolean().optional(),
+          })
+          .default({}),
       })
       .default({}),
-    outputSchema.array(),
-    async ({ filter }) => {
+    outputSchemaWithIncludes.array(),
+    async ({ filter, include }) => {
       const query = useQuery();
 
       const filters: (SQLWrapper | undefined)[] = [];
       if (filter.status) {
-        if (Array.isArray(filter.status)) {
-          filters.push(inArray(s.location.status, filter.status));
-        } else {
-          filters.push(eq(s.location.status, filter.status));
-        }
+        filters.push(applyArrayOrEqual(s.location.status, filter.status));
       }
 
       if (filter.disciplineId) {
@@ -171,15 +180,10 @@ export const list = wrapQuery(
                 and(
                   isNull(s.locationResourceLink.deletedAt),
                   eq(s.locationResourceLink.locationId, s.location.id),
-                  Array.isArray(filter.disciplineId)
-                    ? inArray(
-                        s.locationResourceLink.disciplineId,
-                        filter.disciplineId,
-                      )
-                    : eq(
-                        s.locationResourceLink.disciplineId,
-                        filter.disciplineId,
-                      ),
+                  applyArrayOrEqual(
+                    s.locationResourceLink.disciplineId,
+                    filter.disciplineId,
+                  ),
                 ),
               ),
           ),
@@ -207,20 +211,122 @@ export const list = wrapQuery(
                 and(
                   isNull(s.courseCategory.deletedAt),
                   eq(s.locationResourceLink.locationId, s.location.id),
-                  Array.isArray(filter.categoryId)
-                    ? inArray(s.courseCategory.categoryId, filter.categoryId)
-                    : eq(s.courseCategory.categoryId, filter.categoryId),
+                  applyArrayOrEqual(
+                    s.courseCategory.categoryId,
+                    filter.categoryId,
+                  ),
                 ),
               ),
           ),
         );
       }
 
-      const locations = await query
-        .select()
+      const resources = query.$with("resources").as(
+        query
+          .select({
+            resources: jsonAggBuildObject(
+              getTableColumns(s.locationResourceLink),
+              {
+                orderBy: [
+                  {
+                    colName: s.locationResourceLink.disciplineId,
+                    direction: "ASC",
+                  },
+                  {
+                    colName: s.locationResourceLink.gearTypeId,
+                    direction: "ASC",
+                  },
+                ],
+              },
+            ).as("resources"),
+            locationId: s.locationResourceLink.locationId,
+          })
+          .from(s.locationResourceLink)
+          .where(isNull(s.locationResourceLink.deletedAt))
+          .groupBy(s.locationResourceLink.locationId),
+      );
+
+      const distinctCategoryLinks = query.$with("distinctCategoryLinks").as(
+        query
+          .selectDistinct({
+            categoryId: s.category.id,
+            locationId: s.locationResourceLink.locationId,
+          })
+          .from(s.category)
+          .innerJoin(
+            s.courseCategory,
+            and(
+              eq(s.category.id, s.courseCategory.categoryId),
+              isNull(s.courseCategory.deletedAt),
+            ),
+          )
+          .innerJoin(
+            s.course,
+            and(
+              eq(s.courseCategory.courseId, s.course.id),
+              isNull(s.course.deletedAt),
+            ),
+          )
+          .innerJoin(
+            s.locationResourceLink,
+            and(
+              eq(s.course.disciplineId, s.locationResourceLink.disciplineId),
+              isNull(s.locationResourceLink.deletedAt),
+            ),
+          )
+          .where(isNull(s.category.deletedAt)),
+      );
+
+      const categories = query.$with("categories").as(
+        query
+          .select({
+            categories: jsonAggBuildObject(getTableColumns(s.category), {
+              orderBy: { colName: s.category.weight, direction: "ASC" },
+            }).as("categories"),
+            locationId: distinctCategoryLinks.locationId,
+          })
+          .from(distinctCategoryLinks)
+          .innerJoin(
+            s.category,
+            eq(distinctCategoryLinks.categoryId, s.category.id),
+          )
+          .where(isNull(s.category.deletedAt))
+          .groupBy(distinctCategoryLinks.locationId),
+      );
+
+      const queryBuilder = query
+        .with(
+          ...[
+            include.resources ? resources : undefined,
+            include.categories ? distinctCategoryLinks : undefined,
+            include.categories ? categories : undefined,
+          ].filter(array.isNonNullable),
+        )
+        .select({
+          ...getTableColumns(s.location),
+          ...(include.resources ? { resources: resources.resources } : {}),
+          ...(include.categories ? { categories: categories.categories } : {}),
+        })
         .from(s.location)
         .where(and(...filters))
-        .orderBy(asc(s.location.name));
+        .orderBy(asc(s.location.name))
+        .$dynamic();
+
+      if (include.resources) {
+        queryBuilder.leftJoin(
+          resources,
+          eq(s.location.id, resources.locationId),
+        );
+      }
+
+      if (include.categories) {
+        queryBuilder.leftJoin(
+          categories,
+          eq(s.location.id, categories.locationId),
+        );
+      }
+
+      const locations = await queryBuilder;
 
       // const uniqueMediaIds = Array.from(
       //   new Set(

@@ -26,3 +26,7 @@ export function findItem<T, Enforce extends boolean = false>({
 
   return item as FindItemReturnType<T, Enforce>;
 }
+
+export function isNonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}

@@ -88,7 +88,7 @@ export function jsonBuildObject<T extends SelectedFields>(shape: T) {
       chunks.push(sql`${value}`);
     }
   }
-  return sql<SelectResultFields<T>>`json_build_object(${sql.join(chunks)})`;
+  return sql<SelectResultFields<T>>`jsonb_build_object(${sql.join(chunks)})`;
 }
 
 export function jsonAggBuildObject<T extends SelectedFields>(

@@ -1,6 +1,7 @@
 import { schema as s } from "@nawadi/db";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+import { selectSchema as categorySelectSchema } from "../course/category.schema.js";
 import { outputSchema as mediaOutputSchema } from "../platform/media.schema.js";
 export const insertSchema = createInsertSchema(s.location, {
   handle: (schema) =>
@@ -87,3 +88,12 @@ export const outputSchema = selectSchema
   .merge(locationMetadataSchema);
 
 export type Output = z.output<typeof outputSchema>;
+
+const locationResourceLinkSelectSchema = createSelectSchema(
+  s.locationResourceLink,
+);
+
+export const outputSchemaWithIncludes = outputSchema.extend({
+  resources: z.array(locationResourceLinkSelectSchema).optional(),
+  categories: z.array(categorySelectSchema).optional(),
+});

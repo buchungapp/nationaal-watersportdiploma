@@ -28,7 +28,10 @@ import { FilterCard } from "./_components/filter-card";
 import LocationCard, {
   SetActiveLocationButton,
 } from "./_components/location-card";
-import { retrieveLocations } from "./_lib/retrieve-locations";
+import {
+  type LocationWithIncludes,
+  retrieveLocations,
+} from "./_lib/retrieve-locations";
 import { loadSearchParams } from "./_search-params";
 
 export async function generateMetadata(
@@ -68,10 +71,14 @@ export default async function Page(props: {
   const searchParamsPromise = loadSearchParams(props.searchParams);
   const locationsPromise = searchParamsPromise.then(
     ({ disciplineId, categoryId }) =>
-      retrieveLocations({ filter: { disciplineId, categoryId } }),
+      retrieveLocations({
+        filter: { disciplineId, categoryId },
+        include: { resources: true, categories: true },
+      }) as Promise<LocationWithIncludes<true, true>[]>,
   );
   const disciplinesPromise = listDisciplines();
-  const ageCategoriesPromise = listCategories().then((categories) =>
+  const categoriesPromise = listCategories();
+  const ageCategoriesPromise = categoriesPromise.then((categories) =>
     categories.filter(
       (category) => category.parent?.handle === "leeftijdscategorie",
     ),
@@ -133,15 +140,15 @@ export default async function Page(props: {
           }
         >
           <SelectedLocationProviderServer locationPromise={locationsPromise}>
-            <div className="gap-12 grid grid-cols-1 lg:grid-cols-3 mt-16">
+            <div className="gap-12 grid grid-cols-1 lg:grid-cols-5 mt-16">
               <Suspense fallback={<LocationListSkeleton />}>
                 <RandomLocationList
                   locationsPromise={locationsPromise}
                   disciplinesPromise={disciplinesPromise}
-                  ageCategoriesPromise={ageCategoriesPromise}
+                  categoriesPromise={categoriesPromise}
                 />
               </Suspense>
-              <div className="lg:col-span-2 rounded-sm w-full h-[80vh] overflow-hidden">
+              <div className="lg:col-span-3 rounded-sm w-full h-[80vh] overflow-hidden">
                 <LocationsMap />
               </div>
             </div>
@@ -152,53 +159,99 @@ export default async function Page(props: {
   );
 }
 
+// for each possible color in the badge component, we want to assign a color to a province
+const provinceColors = {
+  Friesland: "blue",
+  "Noord-Holland": "orange",
+  "Zuid-Holland": "green",
+  Utrecht: "yellow",
+  Flevoland: "sky",
+  Overijssel: "rose",
+  Gelderland: "purple",
+  Drenthe: "violet",
+  Groningen: "cyan",
+  "Noord-Brabant": "amber",
+  Limburg: "red",
+  Zeeland: "teal",
+} as const;
+
+const ageCategoryColors = {
+  jeugd: "green",
+  jongeren: "blue",
+  volwassenen: "orange",
+} as const;
+
+const colorList = [
+  "blue",
+  "green",
+  "sky",
+  "purple",
+  "cyan",
+  "rose",
+  "teal",
+  "violet",
+  "yellow",
+  "orange",
+  "amber",
+  "red",
+] as const;
+
 async function RandomLocationList({
   locationsPromise,
   disciplinesPromise,
-  ageCategoriesPromise,
+  categoriesPromise,
 }: {
-  locationsPromise: ReturnType<typeof retrieveLocations>;
+  locationsPromise: Promise<LocationWithIncludes<true, true>[]>;
   disciplinesPromise: ReturnType<typeof listDisciplines>;
-  ageCategoriesPromise: ReturnType<typeof listCategories>;
+  categoriesPromise: ReturnType<typeof listCategories>;
 }) {
-  const [locations, disciplines, ageCategories] = await Promise.all([
+  const [locations, disciplines, categories] = await Promise.all([
     locationsPromise,
     disciplinesPromise,
-    ageCategoriesPromise,
+    categoriesPromise,
   ]);
+
+  const ageCategoryParent = categories.find(
+    (category) => category.handle === "leeftijdscategorie",
+  );
+  const sailingWaterParent = categories.find(
+    (category) => category.handle === "vaarwater",
+  );
+
+  if (!ageCategoryParent || !sailingWaterParent) {
+    throw new Error("Age category parent or sailing water parent not found");
+  }
 
   // This is necessary to enable dynamic IO
   await connection();
 
-  // for each possible color in the badge component, we want to assign a color to a province
-  const provinceColors = {
-    Friesland: "blue",
-    "Noord-Holland": "orange",
-    "Zuid-Holland": "green",
-    Utrecht: "yellow",
-    Flevoland: "sky",
-    Overijssel: "rose",
-    Gelderland: "purple",
-    Drenthe: "violet",
-    Groningen: "cyan",
-    "Noord-Brabant": "amber",
-    Limburg: "red",
-    Zeeland: "teal",
-  } as const;
-
   return (
-    <div className="flex flex-col space-y-4 h-full lg:max-h-[80vh] lg:overflow-y-auto">
+    <div className="flex flex-col space-y-4 lg:col-span-2 h-full lg:max-h-[80vh] lg:overflow-y-auto">
       {locations
         .toSorted(() => {
           // Random sort
           return Math.random() - 0.5;
         })
-        .map((location) => (
-          <LocationCard key={location.id} location={location}>
-            <div>
-              <div className="flex justify-between items-center">
-                {/* Star rating */}
-                {/* <Link
+        .map((location) => {
+          const ageCategories = location.categories.filter(
+            (category) => category.parentCategoryId === ageCategoryParent.id,
+          );
+          const sailingWaterCategories = location.categories.filter(
+            (category) => category.parentCategoryId === sailingWaterParent.id,
+          );
+          const locationDisciplines = disciplines.filter((discipline) =>
+            location.resources.some(
+              (resource) => resource.disciplineId === discipline.id,
+            ),
+          );
+
+          return (
+            <LocationCard key={location.id} location={location}>
+              <div className="flex justify-between gap-4">
+                <div>
+                  <div className="flex justify-between items-center">
+                    {/* Star rating */}
+                    {/* <Link
                         // Link to Google Maps page
                         href={location.googleUrl!}
                         target="_blank"
@@ -211,82 +264,161 @@ async function RandomLocationList({
                         </span>
                       </Link> */}
 
-                {location.province ? (
-                  <Badge
-                    color={
-                      provinceColors[
-                        location.province as keyof typeof provinceColors
-                      ]
-                    }
-                  >
-                    {location.province}
-                  </Badge>
+                    {location.province ? (
+                      <Badge
+                        color={
+                          provinceColors[
+                            location.province as keyof typeof provinceColors
+                          ]
+                        }
+                      >
+                        {location.province}
+                      </Badge>
+                    ) : null}
+                  </div>
+
+                  <div className="block">
+                    <SetActiveLocationButton location={location}>
+                      <h3 className="mt-1.5 font-semibold text-slate-900 text-lg text-left leading-6">
+                        {location.name}
+                      </h3>
+                    </SetActiveLocationButton>
+                  </div>
+                  {location.websiteUrl ? (
+                    <Link
+                      className="text-branding-dark hover:text-branding-light text-sm"
+                      href={location.websiteUrl}
+                      target="_blank"
+                    >
+                      {normalizeUrl(location.websiteUrl).split("//")[1]}
+                    </Link>
+                  ) : null}
+                </div>
+                {location.logoSquare ? (
+                  <div className="relative size-18">
+                    <Image
+                      src={location.logoSquare.url}
+                      alt={location.logoSquare.alt ?? ""}
+                      fill
+                      className="object-contain object-left"
+                    />
+                  </div>
                 ) : null}
               </div>
 
-              <div className="block">
-                <SetActiveLocationButton location={location}>
-                  <h3 className="mt-1.5 font-semibold text-slate-900 text-lg leading-6">
-                    {location.name}
-                  </h3>
-                </SetActiveLocationButton>
-              </div>
-              {location.websiteUrl ? (
-                <Link
-                  className="text-branding-dark hover:text-branding-light text-sm"
-                  href={location.websiteUrl}
-                  target="_blank"
-                >
-                  {normalizeUrl(location.websiteUrl).split("//")[1]}
-                </Link>
+              <address className="space-y-1 mt-3 text-slate-600 text-sm not-italic leading-6">
+                <p>{location.city}</p>
+              </address>
+
+              {ageCategories.length > 0 ? (
+                <>
+                  <h4 className="mt-2 font-semibold text-slate-600 text-sm">
+                    Leeftijdscategorieën
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {location.categories
+                      .filter(
+                        (category) =>
+                          category.parentCategoryId === ageCategoryParent.id,
+                      )
+                      .map((category) => (
+                        <Badge
+                          key={category.id}
+                          color={
+                            ageCategoryColors[
+                              category.handle as keyof typeof ageCategoryColors
+                            ]
+                          }
+                          className="whitespace-nowrap"
+                        >
+                          {category.title}
+                        </Badge>
+                      ))}
+                  </div>
+                </>
               ) : null}
-            </div>
 
-            <address className="space-y-1 mt-3 text-slate-600 text-sm not-italic leading-6">
-              <p>{location.city}</p>
-            </address>
+              {locationDisciplines.length > 0 ? (
+                <>
+                  <h4 className="mt-2 font-semibold text-slate-600 text-sm">
+                    Disciplines
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {disciplines
+                      .filter((discipline) =>
+                        location.resources.some(
+                          (resource) => resource.disciplineId === discipline.id,
+                        ),
+                      )
+                      .map((discipline, index) => (
+                        <Badge
+                          key={discipline.id}
+                          color={colorList[index % colorList.length]}
+                          className="whitespace-nowrap"
+                        >
+                          {discipline.title}
+                        </Badge>
+                      ))}
+                  </div>
+                </>
+              ) : null}
 
-            {location.logo ? (
-              <div className="relative mt-2 max-w-full h-24">
-                <Image
-                  src={location.logo.url}
-                  alt={location.logo.alt ?? ""}
-                  fill
-                  className="object-contain object-left"
-                />
-              </div>
-            ) : null}
-
-            {/* Socials */}
-            <ul className="flex gap-x-5 mt-6">
-              {location.socialMedia
-                .sort((a, b) => {
-                  const order: SocialPlatform[] = [
-                    "whatsapp",
-                    "instagram",
-                    "tiktok",
-                    "facebook",
-                    "youtube",
-                    "linkedin",
-                    "x",
-                  ];
-                  return order.indexOf(a.platform) - order.indexOf(b.platform);
-                })
-                .map(({ platform, url }) => {
-                  const IconComponent = platformComponents[platform];
-                  return IconComponent ? (
-                    <li key={platform}>
-                      <a href={url} target="_blank" rel="noopener noreferrer">
-                        <TouchTarget>
-                          <IconComponent className="size-4 text-branding-light/70 hover:text-branding-light" />
-                        </TouchTarget>
-                      </a>
-                    </li>
-                  ) : null;
-                })}
-            </ul>
-          </LocationCard>
-        ))}
+              {sailingWaterCategories.length > 0 ? (
+                <>
+                  <h4 className="mt-2 font-semibold text-slate-600 text-sm">
+                    Vaarwateren
+                  </h4>
+                  <div className="flex flex-wrap gap-1">
+                    {location.categories
+                      .filter(
+                        (category) =>
+                          category.parentCategoryId === sailingWaterParent.id,
+                      )
+                      .map((category, index) => (
+                        <Badge
+                          key={category.id}
+                          color={colorList[index % colorList.length]}
+                          className="whitespace-nowrap"
+                        >
+                          {category.title}
+                        </Badge>
+                      ))}
+                  </div>
+                </>
+              ) : null}
+              {/* Socials */}
+              <ul className="flex gap-x-5 mt-6">
+                {location.socialMedia
+                  .sort((a, b) => {
+                    const order: SocialPlatform[] = [
+                      "whatsapp",
+                      "instagram",
+                      "tiktok",
+                      "facebook",
+                      "youtube",
+                      "linkedin",
+                      "x",
+                    ];
+                    return (
+                      order.indexOf(a.platform) - order.indexOf(b.platform)
+                    );
+                  })
+                  .map(({ platform, url }) => {
+                    const IconComponent = platformComponents[platform];
+                    return IconComponent ? (
+                      <li key={platform}>
+                        <a href={url} target="_blank" rel="noopener noreferrer">
+                          <TouchTarget>
+                            <IconComponent className="size-4 text-branding-light/70 hover:text-branding-light" />
+                          </TouchTarget>
+                        </a>
+                      </li>
+                    ) : null;
+                  })}
+              </ul>
+            </LocationCard>
+          );
+        })}
     </div>
   );
 }

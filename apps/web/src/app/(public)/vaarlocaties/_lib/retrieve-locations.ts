@@ -20,10 +20,15 @@ function withoutEmptyArray<T>(
 
 async function retrieveLocationsWithAllMeta({
   filter,
+  include,
 }: {
   filter?: {
     disciplineId?: string | string[] | null;
     categoryId?: string | string[] | null;
+  };
+  include?: {
+    resources?: boolean;
+    categories?: boolean;
   };
 } = {}) {
   "use cache";
@@ -35,6 +40,7 @@ async function retrieveLocationsWithAllMeta({
       disciplineId: withoutEmptyArray(filter?.disciplineId),
       categoryId: withoutEmptyArray(filter?.categoryId),
     },
+    include,
   });
   const locationsWithCity = await Promise.all(
     locations.map(async (location) => {
@@ -94,5 +100,17 @@ async function retrieveLocationsWithAllMeta({
 export type Location = Awaited<
   ReturnType<typeof retrieveLocationsWithAllMeta>
 >[number];
+
+export type LocationWithIncludes<
+  CATEGORIES extends boolean,
+  RESOURCES extends boolean,
+> = Location & {
+  categories: CATEGORIES extends true
+    ? NonNullable<Location["categories"]>
+    : Location["categories"];
+  resources: RESOURCES extends true
+    ? NonNullable<Location["resources"]>
+    : Location["resources"];
+};
 
 export const retrieveLocations = cache(retrieveLocationsWithAllMeta);

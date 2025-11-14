@@ -1247,14 +1247,22 @@ export const listLocationsWherePrimaryPersonHasManagementRole = cache(
 export const listActiveLocations = cache(
   async ({
     filter,
+    include,
   }: {
     filter?: {
       disciplineId?: string | [string, ...string[]];
       categoryId?: string | [string, ...string[]];
     };
+    include?: {
+      resources?: boolean;
+      categories?: boolean;
+    };
   } = {}) => {
     return makeRequest(async () => {
-      return await Location.list({ filter: { status: ["active"], ...filter } });
+      return await Location.list({
+        filter: { status: ["active"], ...filter },
+        include,
+      });
     });
   },
 );
