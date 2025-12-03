@@ -25,7 +25,7 @@ export function Combobox<T>({
   placeholder?: string;
   autoFocus?: boolean;
   "aria-label"?: string;
-  children: (value: NonNullable<T>) => React.ReactElement;
+  children: (value: NonNullable<T>) => React.ReactElement<any>;
 } & Omit<Headless.ComboboxProps<T, false>, "as" | "multiple" | "children"> & {
     anchor?: "top" | "bottom";
   }) {
