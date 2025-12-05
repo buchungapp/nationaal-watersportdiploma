@@ -9,11 +9,11 @@ export default function Welcome() {
       <div className="grid justify-center gap-10 lg:justify-start">
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
-            href="/actueel/zc2GQupd-definitieve-keuze-gemaakt-nwd-diplomalijn-wordt-vanaf-2026-de-enige-erkende-standaard"
+            href="/actueel/jur1zF0r-van-cwo-naar-nwd-stap-over-naar-de-nieuwe-standaard-en-ontvang-50-euro-cadeau"
             className="w-fit rounded-full px-6 py-3 text-sm sm:text-base text-branding-dark font-bold bg-white transition-all duration-200 transform hover:scale-105 flex items-center gap-2 mb-4 leading-tight mx-auto sm:mx-0 shadow-xl"
           >
             <MegaphoneIcon className="h-4 w-4" />
-            Strategisch partnership met Watersportverbond
+            Stap over naar het NWD en ontvang €50 cashback!
             <span className="text-xs">→</span>
           </Link>
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">

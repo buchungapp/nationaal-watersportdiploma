@@ -15,7 +15,7 @@ export default async function CashbackForm() {
           <Balancer>
             Let op: je vult het formulier <strong>per deelnemer</strong> in.
             Zorg dat je je boekingsnummer van je zeilkamp of zeilcursus voor
-            2025 en een kopie van je CWO-diploma uit 2024 bij de hand hebt.
+            2026 en een kopie van je CWO-diploma uit 2025 bij de hand hebt.
           </Balancer>
         </p>
       </div>
