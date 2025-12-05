@@ -19,15 +19,16 @@ export default function CashbackConditions() {
           <li>Je krijgt €50 cashback op je nieuwe zeilcursus of zeilkamp</li>
           <li>De actie loopt van 5 december 2025 t/m 1 september 2026</li>
           <li>
-            Je kunt meedoen als je in 2025 een CWO-diploma of vorderingsstaat
-            hebt behaald
-          </li>
-          <li>
             Je moet een meerdaagse cursus of kamp boeken (minimaal 2 dagen)
           </li>
           <li>
             Je cursus voor 2026 moet bij een NWD-erkende vaarlocatie zijn
             geboekt (zie nwd.nl/vaarlocaties)
+          </li>
+          <li>
+            Je kunt meedoen als je in 2025 een CWO-diploma of vorderingsstaat
+            hebt behaald op een andere vaarlocatie dan de NWD-erkende
+            vaarlocatie waar je de cursus boekt
           </li>
           <li>De cursus moet vóór 1 september 2026 plaatsvinden</li>
           <li>
