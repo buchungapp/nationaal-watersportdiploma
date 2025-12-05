@@ -134,7 +134,7 @@ export function CashbackFormClient({
           </div>
         </Fieldset>
         <Fieldset>
-          <Legend>CWO cursus 2024</Legend>
+          <Legend>CWO cursus 2025</Legend>
           <div className="gap-8 grid grid-cols-1 @xl/cashback-fields:grid-cols-4">
             <Field className="@2xl/cashback-fields:col-span-2">
               <Label>

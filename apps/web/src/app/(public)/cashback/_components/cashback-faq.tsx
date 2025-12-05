@@ -5,19 +5,19 @@ const faqs = [
   {
     question: "Wat is de cashback-actie?",
     answer:
-      "De cashback-actie is een speciale aanbieding waarbij je €50 terugkrijgt op je meerdaagse zeilcursus of zeilkamp. De actie loopt van 9 april t/m 1 september 2025.",
+      "De cashback-actie is een speciale aanbieding waarbij je €50 terugkrijgt op je meerdaagse zeilcursus of zeilkamp. De actie loopt van 5 december 2025 t/m 1 september 2026.",
     categories: ["cashback"],
   },
   {
     question: "Wat is de aanleiding voor de cashback-actie?",
     answer:
-      "Het Watersportverbond heeft recent aangekondigd dat de NWD-diplomalijn op korte termijn de CWO standaard zal vervangen. Om dat te vieren, en iedereen kennis te laten maken met het NWD, hebben we deze cashback-actie gelanceerd.",
+      "Het Nationaal Watersportdiploma (NWD) is vanaf 2026 de enige erkende standaard voor vaaropleidingen in Nederland. Om de overstap makkelijk én voordelig te maken, belonen we overstappers met deze cashback-actie. Serieus Leuk!",
     categories: ["cashback"],
   },
   {
     question: "Hoe werkt de cashback-actie?",
     answer:
-      "1. Behaal een CWO-diploma of vorderingenstaat in 2024\n" +
+      "1. Behaal een CWO-diploma of vorderingenstaat in 2025\n" +
       "2. Boek een meerdaagse cursus of zeilkamp bij een NWD-erkende vaarlocatie\n" +
       "3. Vul het aanmeldformulier in en upload je diploma/vorderingenstaat\n" +
       "4. Na afloop van je cursus krijg je €50 terug op je rekening",
@@ -26,19 +26,19 @@ const faqs = [
   {
     question: "Wie kan meedoen aan de cashback-actie?",
     answer:
-      "Iedereen die in 2024 een CWO-diploma of vorderingenstaat heeft behaald, kan meedoen aan de actie. Je moet wel een meerdaagse cursus of zeilkamp boeken bij een NWD-erkende vaarlocatie.",
+      "Iedereen die in 2025 een CWO-diploma of vorderingenstaat heeft behaald, kan meedoen aan de actie. Je moet wel een meerdaagse cursus of zeilkamp boeken bij een NWD-erkende vaarlocatie.",
     categories: ["cashback"],
   },
   {
     question: "Wanneer krijg ik mijn cashback?",
     answer:
-      "De cashback van €50 wordt na afloop van je cursus uitbetaald, uiterlijk op 31 oktober 2025. Het bedrag wordt overgemaakt naar het door jou opgegeven IBAN-rekeningnummer.",
+      "De cashback van €50 wordt na afloop van je cursus uitbetaald, uiterlijk op 31 oktober 2026. Het bedrag wordt overgemaakt naar het door jou opgegeven IBAN-rekeningnummer.",
     categories: ["cashback"],
   },
   {
     question: "Wat gebeurt er met mijn cashback als ik de cursus annuleer?",
     answer:
-      "Bij annulering van je cursus of zeilkamp vervalt automatisch het recht op cashback. Dit geldt ook bij verplaatsing van de cursus naar een datum na 1 september 2025. Alleen volledig afgeronde cursussen komen in aanmerking.",
+      "Bij annulering van je cursus of zeilkamp vervalt automatisch het recht op cashback. Dit geldt ook bij verplaatsing van de cursus naar een datum na 1 september 2026. Alleen volledig afgeronde cursussen komen in aanmerking.",
     categories: ["cashback"],
   },
   {
@@ -71,7 +71,7 @@ const faqs = [
       "Als ouder kun je voor meerdere kinderen een cashback aanvragen, maar let op:\n\n" +
       "<ul>" +
       "<li>Elk kind (deelnemer) moet individueel aan alle voorwaarden voldoen</li>" +
-      "<li>Elk kind moet beschikken over een eigen CWO-diploma of vorderingenstaat uit 2024</li>" +
+      "<li>Elk kind moet beschikken over een eigen CWO-diploma of vorderingenstaat uit 2025</li>" +
       "<li>Per kind kan er maar één keer worden deelgenomen aan de actie</li>" +
       "<li>Voor elk kind moet een apart aanmeldformulier worden ingevuld met de eigen diplomagegevens</li>" +
       "</ul>",
@@ -80,19 +80,19 @@ const faqs = [
   {
     question: "Wanneer is de cashback-actie geldig?",
     answer:
-      "De actie loopt van 9 april t/m 1 september 2025. Je komt in aanmerking als je aan twee voorwaarden voldoet:\n1. Je hebt in 2024 een CWO-diploma of vorderingenstaat behaald\n2. Je boekt een meerdaagse zeilcursus of zeilkamp bij een NWD-erkende vaarlocatie",
+      "De actie loopt van 5 december 2025 t/m 1 september 2026. Je komt in aanmerking als je aan twee voorwaarden voldoet:\n1. Je hebt in 2025 een CWO-diploma of vorderingenstaat behaald\n2. Je boekt een meerdaagse zeilcursus of zeilkamp bij een NWD-erkende vaarlocatie",
     categories: ["cashback"],
   },
   {
     question: "Hoe vraag ik de cashback aan?",
     answer:
-      "Het aanvragen gaat in drie stappen:\n1. Vul het online aanmeldformulier in\n2. Upload een duidelijke scan of foto van je CWO-diploma/vorderingenstaat uit 2024\n3. Voeg je boekingsnummer van de vaarlocatie toe\nZorg dat de uitgiftedatum op je diploma goed leesbaar is.",
+      "Het aanvragen gaat in drie stappen:\n1. Vul het online aanmeldformulier in\n2. Upload een duidelijke scan of foto van je CWO-diploma/vorderingenstaat uit 2025\n3. Voeg je boekingsnummer van de vaarlocatie toe\nZorg dat de uitgiftedatum op je diploma goed leesbaar is.",
     categories: ["cashback"],
   },
   {
     question: "Hoe lang heb ik om de cashback aan te vragen?",
     answer:
-      "Je kunt je aanvraag indienen tot en met 1 september 2025, 23:59 uur. Let op: zowel je aanvraag als je cursus moeten vóór deze datum zijn afgerond. Na 1 september 2025 is deelname niet meer mogelijk.",
+      "Je kunt je aanvraag indienen tot en met 1 september 2026, 23:59 uur. Let op: zowel je aanvraag als je cursus moeten vóór deze datum zijn afgerond. Na 1 september 2026 is deelname niet meer mogelijk.",
     categories: ["cashback"],
   },
   {

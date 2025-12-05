@@ -17,7 +17,7 @@ export default function CashbackHow() {
           />
           <Step
             number={2}
-            title="Upload je CWO-bewijs uit 2024"
+            title="Upload je CWO-bewijs uit 2025"
             description="Vul het onderstaande formulier in en upload je bewijsstuk."
           />
           <Step

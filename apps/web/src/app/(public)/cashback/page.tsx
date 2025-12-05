@@ -13,24 +13,24 @@ export async function generateMetadata(
   const parentOpenGraph = (await parent).openGraph;
 
   return {
-    title: "€50 cashback bij inlevering van je CWO-diploma!",
+    title: "Je CWO-ervaring is geld waard! | €50 cashback",
     description:
-      "De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe landelijke standaard, en we helpen je graag om deze overstap te maken!",
+      "Stap over naar een NWD-erkende vaarlocatie en ontvang €50 cashback. Veiligheid met actie. Ofwel: Serieus Leuk.",
     alternates: {
       canonical: "/cashback",
     },
     openGraph: {
       ...parentOpenGraph,
-      title: "€50 cashback bij inlevering van je CWO-diploma!",
+      title: "Je CWO-ervaring is geld waard! | €50 cashback",
       description:
-        "De diplomalijn van het Nationaal Watersportdiploma wordt de nieuwe landelijke standaard, en we helpen je graag om deze overstap te maken!",
+        "Stap over naar een NWD-erkende vaarlocatie en ontvang €50 cashback. Veiligheid met actie. Ofwel: Serieus Leuk.",
       url: "/cashback",
       images: [
         {
-          url: "/cashback/opengraph-image.jpeg",
+          url: "/cashback/opengraph-image.jpg",
           width: 1200,
           height: 630,
-          alt: "€50 cashback bij inlevering van je CWO-diploma!",
+          alt: "Je CWO-ervaring is geld waard! | €50 cashback",
         },
       ],
     },
