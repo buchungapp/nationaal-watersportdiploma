@@ -1246,7 +1246,7 @@ export const listLocationsWherePrimaryPersonHasManagementRole = cache(
 
 export const listAllLocations = cache(async () => {
   return makeRequest(async () => {
-    return await Location.list();
+    return await Location.list({ filters: { status: ["active"] } });
   });
 });
 

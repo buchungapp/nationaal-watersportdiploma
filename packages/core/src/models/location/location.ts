@@ -3,6 +3,7 @@ import {
   and,
   asc,
   eq,
+  inArray,
   isNotNull,
   isNull,
   notInArray,
@@ -130,62 +131,80 @@ export const updateDetails = wrapCommand(
 
 export const list = wrapQuery(
   "location.list",
-  withZod(z.void(), outputSchema.array(), async () => {
-    const query = useQuery();
-    const locations = await query
-      .select()
-      .from(s.location)
-      // .where(eq(s.location.status, "active"))
-      .orderBy(asc(s.location.name));
-
-    // const uniqueMediaIds = Array.from(
-    //   new Set(
-    //     locations
-    //       .map((row) => [
-    //         row.logoMediaId,
-    //         row.squareLogoMediaId,
-    //         row.certificateMediaId,
-    //       ])
-    //       .flat(),
-    //   ),
-    // ).filter((id): id is string => !!id)
-
-    const allImages = await Platform.Media.listImages();
-
-    return locations.map((row) => {
-      const logo = row.logoMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.logoMediaId,
-            enforce: true,
+  withZod(
+    z
+      .object({
+        filters: z
+          .object({
+            status: z
+              .array(z.enum(["draft", "active", "hidden", "archived"]))
+              .optional(),
           })
-        : null;
+          .default({}),
+      })
+      .default({}),
+    outputSchema.array(),
+    async ({ filters }) => {
+      const query = useQuery();
+      const locations = await query
+        .select()
+        .from(s.location)
+        .where(
+          filters.status
+            ? inArray(s.location.status, filters.status)
+            : undefined,
+        )
+        .orderBy(asc(s.location.name));
 
-      const logoSquare = row.squareLogoMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.squareLogoMediaId,
-            enforce: true,
-          })
-        : null;
+      // const uniqueMediaIds = Array.from(
+      //   new Set(
+      //     locations
+      //       .map((row) => [
+      //         row.logoMediaId,
+      //         row.squareLogoMediaId,
+      //         row.certificateMediaId,
+      //       ])
+      //       .flat(),
+      //   ),
+      // ).filter((id): id is string => !!id)
 
-      const logoCertificate = row.certificateMediaId
-        ? findItem({
-            items: allImages,
-            predicate: (media) => media.id === row.certificateMediaId,
-            enforce: true,
-          })
-        : null;
+      const allImages = await Platform.Media.listImages();
 
-      return {
-        ...row,
-        logo,
-        logoSquare,
-        logoCertificate,
-        ...mapMetaForLocation(row._metadata),
-      };
-    });
-  }),
+      return locations.map((row) => {
+        const logo = row.logoMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.logoMediaId,
+              enforce: true,
+            })
+          : null;
+
+        const logoSquare = row.squareLogoMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.squareLogoMediaId,
+              enforce: true,
+            })
+          : null;
+
+        const logoCertificate = row.certificateMediaId
+          ? findItem({
+              items: allImages,
+              predicate: (media) => media.id === row.certificateMediaId,
+              enforce: true,
+            })
+          : null;
+
+        return {
+          ...row,
+          logo,
+          logoSquare,
+          logoCertificate,
+          ...mapMetaForLocation(row._metadata),
+        };
+      });
+    },
+  ),
 );
 
 export const fromId = wrapQuery(
