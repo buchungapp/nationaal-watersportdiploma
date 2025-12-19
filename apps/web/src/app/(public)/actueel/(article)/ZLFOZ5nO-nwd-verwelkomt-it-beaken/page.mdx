@@ -1,0 +1,42 @@
+import Link from "next/link";
+import Image from "../../../_components/mdx-image";
+import { ArticleLayout } from "../_components/news-article";
+import featuredImage from "./opengraph-image.jpeg";
+import welcomeImage from "./welkom.jpg";
+
+export const article = {
+  date: "2025-12-19T14:00:00Z",
+  category: "consument",
+  title: "NWD verwelkomt It Beaken als nieuwe NWD vaarlocatie",
+  description:
+    "Het Nationaal Watersportdiploma is verheugd om de toetreding van It Beaken als nieuwste vaarlocatie aan te kondigen.",
+  featuredImage,
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical: "/actueel/ZLFOZ5nO-nwd-verwelkomt-it-beaken",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/ZLFOZ5nO-nwd-verwelkomt-it-beaken",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het Nationaal Watersportdiploma is verheugd om de toetreding van <Link href="https://www.zeilschoolitbeaken.nl/">It Beaken</Link> als nieuwste vaarlocatie aan te kondigen. Gelegen aan de Friese meren is It Beaken een heus begrip onder de zeilscholen. Als een van de oudste zeilscholen van Nederland brengt It Beaken jarenlange traditie en ervaring met zich mee om het NWD netwerk mee uit te breiden.
+
+It Beaken biedt zowel de discipline kielboot als zwaardboot aan, waarbij ze veel ervaring hebben met zwaardboot 1-mans zeilen. Met hun populaire jeugdzeilkampen tijdens ze schoolvakanties, maakt It Beaken de watersport toegankelijk voor een groot aantal enthousiastelingen.
+
+De komende maanden zal It Beaken verder investeren in hun vloot, met plannen voor nieuwe boten. Dit past in hun streven naar continue verbetering en kwaliteit. Bovendien zullen ze, in lijn met de NWD-filosofie, deelnemen aan gezamenlijke trainingen en opleidingen van het NWD.
+
+Het NWD staat altijd open voor andere kwaliteitsgerichte vaarlocaties die zich willen aansluiten bij ons netwerk. Geïnteresseerde locaties kunnen <Link href="https://www.nationaalwatersportdiploma.nl/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd">hier</Link> meer informatie vinden over de aansluitprocedure.
+
+Met de toevoeging van It Beaken breidt het NWD zijn netwerk verder uit, waarmee we onze missie voortzetten om veilig, kwalitatief en plezierig watersportonderwijs toegankelijk te maken voor heel Nederland!
+
+<Image src={welcomeImage} />
