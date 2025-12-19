@@ -65,7 +65,7 @@
     "marked": "^12.0.2",
     "micromark": "^4.0.0",
     "motion": "^12.0.8",
-    "next": "15.4.8",
+    "next": "15.4.10",
     "next-mdx-remote": "5.0.0",
     "next-safe-action": "7.10.8",
     "node-forge": "^1.3.1",
