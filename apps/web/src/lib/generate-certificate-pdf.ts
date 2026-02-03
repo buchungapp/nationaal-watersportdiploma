@@ -68,7 +68,7 @@ async function fetchLogoWithCache(
     );
   }
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: intentional
   return cache.get(cacheKey)!;
 }
 

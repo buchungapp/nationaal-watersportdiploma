@@ -134,7 +134,9 @@ function ExternalCertificateHeader({
 
 function ExternalCertificateDescriptionList({
   certificate,
-}: { certificate: ExternalCertificate }) {
+}: {
+  certificate: ExternalCertificate;
+}) {
   return (
     <>
       <DescriptionTerm>Uitgevende instantie</DescriptionTerm>

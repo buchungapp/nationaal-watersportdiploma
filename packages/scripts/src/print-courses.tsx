@@ -8,13 +8,13 @@ import {
   Image,
   Page,
   type PageProps,
+  renderToFile,
   StyleSheet,
   Text,
   View,
-  renderToFile,
 } from "@react-pdf/renderer";
-// biome-ignore lint/style/useImportType: <explanation>
-import React, { Fragment, type PropsWithChildren } from "react";
+// biome-ignore lint/style/useImportType: intentional
+import React, { type PropsWithChildren } from "react";
 import { projectRoot } from "./utils/root.js";
 
 async function main() {
@@ -68,7 +68,7 @@ async function main() {
     ...pageProps
   }: PropsWithChildren<
     {
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: intentional
       style?: any;
       footerTitle?: string | undefined;
     } & PageProps
@@ -200,22 +200,20 @@ async function main() {
 
               <View>
                 <ModuleCardRow label="Competenties">
-                  <Fragment>
-                    {module.competencies.map((competency) => (
-                      <View
-                        key={competency.handle}
-                        style={programStyles.competencySection}
-                        wrap={false}
-                      >
-                        <Text style={programStyles.comptencyTitle}>
-                          {competency.title}
-                        </Text>
-                        <Text style={programStyles.comptencyContent}>
-                          {competency.requirement}
-                        </Text>
-                      </View>
-                    ))}
-                  </Fragment>
+                  {module.competencies.map((competency) => (
+                    <View
+                      key={competency.handle}
+                      style={programStyles.competencySection}
+                      wrap={false}
+                    >
+                      <Text style={programStyles.comptencyTitle}>
+                        {competency.title}
+                      </Text>
+                      <Text style={programStyles.comptencyContent}>
+                        {competency.requirement}
+                      </Text>
+                    </View>
+                  ))}
                 </ModuleCardRow>
               </View>
             </View>

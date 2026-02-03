@@ -1,5 +1,5 @@
-import { getPvbBeoordelingsCriteria, getPvbToetsdocumenten } from "~/lib/nwd";
 import type { retrievePvbAanvraagByHandle } from "~/lib/nwd";
+import { getPvbBeoordelingsCriteria, getPvbToetsdocumenten } from "~/lib/nwd";
 import { ToetsdocumentenClient } from "./toetsdocumenten-client";
 
 type AanvraagType = Awaited<ReturnType<typeof retrievePvbAanvraagByHandle>>;

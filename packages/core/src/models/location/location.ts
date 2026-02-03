@@ -24,8 +24,8 @@ import { selectSchema as disciplineSelectSchema } from "../course/discipline.sch
 import { selectSchema as gearTypeSelectSchema } from "../curriculum/gear-type.schema.js";
 import { Platform } from "../index.js";
 import {
-  type LocationMetadata,
   insertSchema,
+  type LocationMetadata,
   locationMetadataSchema,
   outputSchema,
 } from "./location.schema.js";

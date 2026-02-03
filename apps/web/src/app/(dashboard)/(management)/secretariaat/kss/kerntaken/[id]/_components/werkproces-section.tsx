@@ -10,6 +10,10 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  deleteBeoordelingscriterium,
+  deleteWerkproces,
+} from "~/app/_actions/kss/kwalificatieprofiel";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
@@ -20,10 +24,6 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Text } from "~/app/(dashboard)/_components/text";
-import {
-  deleteBeoordelingscriterium,
-  deleteWerkproces,
-} from "~/app/_actions/kss/kwalificatieprofiel";
 import { BeoordelingscriteriaBulkModal } from "./beoordelingscriteria-bulk-modal";
 import { BeoordelingscriteriumModal } from "./beoordelingscriterium-modal";
 import { WerkprocesModal } from "./werkproces-modal";
@@ -100,12 +100,12 @@ export default function WerkprocesSection({
       await deleteWerkproces({ id: werkprocesId });
       toast.success("Werkproces verwijderd");
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Fout bij verwijderen werkproces");
     }
   };
 
-  const handleAddCriterium = (werkprocesId: string) => {
+  const _handleAddCriterium = (werkprocesId: string) => {
     setSelectedWerkprocesId(werkprocesId);
     setSelectedCriterium(undefined);
     setCriteriumModalOpen(true);
@@ -133,7 +133,7 @@ export default function WerkprocesSection({
       await deleteBeoordelingscriterium({ id: criteriumId });
       toast.success("Beoordelingscriterium verwijderd");
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Fout bij verwijderen beoordelingscriterium");
     }
   };

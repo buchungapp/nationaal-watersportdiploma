@@ -166,7 +166,7 @@ const nextConfig = {
       },
     ];
   },
-  webpack: (config, context) => {
+  webpack: (config, _context) => {
     /** Uncomment to enable WhyDidYouRender */
     // injectWhyDidYouRender(config, context);
 

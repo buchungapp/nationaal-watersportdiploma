@@ -24,14 +24,14 @@ interface MDXData<T> {
   pathSegments: string[];
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: intentional
 async function getMDXData<T extends z.ZodSchema<any>>(
   dir: string,
   metadataSchema: T,
 ): Promise<MDXData<z.infer<T>>[]>;
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: intentional
 async function getMDXData(dir: string): Promise<MDXData<Record<string, any>>[]>;
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: intentional
 async function getMDXData<T extends z.ZodSchema<any>>(
   dir: string,
   metadataSchema?: T,
@@ -75,7 +75,7 @@ export const getHelpArticles = async () => {
       1,
       "Help articles should be in a category folder",
     );
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: intentional
     const category = pathSegments[0]!;
     return {
       category,

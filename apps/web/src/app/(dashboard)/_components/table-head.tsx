@@ -1,16 +1,15 @@
 import {
+  ArrowDownIcon,
+  ArrowsUpDownIcon,
+  ArrowUpIcon,
+} from "@heroicons/react/16/solid";
+import {
+  flexRender,
   type SortDirection,
   type Table,
-  flexRender,
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { TableHead, TableHeader, TableRow } from "./table";
-
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  ArrowsUpDownIcon,
-} from "@heroicons/react/16/solid";
 
 export function DefaultTableHead<T>({ table }: { table: Table<T> }) {
   return (

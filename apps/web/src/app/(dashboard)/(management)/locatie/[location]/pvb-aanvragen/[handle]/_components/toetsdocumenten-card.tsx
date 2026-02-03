@@ -69,7 +69,7 @@ export async function ToetsdocumentenCard({
             gridTemplateColumns: `repeat(${toetsdocumentenList.length}, 1fr)`,
           }}
         >
-          {toetsdocumentenList.map((item, index) => (
+          {toetsdocumentenList.map((item, _index) => (
             <Tab key={`tab-${item.kwalificatieprofiel.id}`}>
               <div className="text-center">
                 <div className="font-medium">

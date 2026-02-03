@@ -1,9 +1,7 @@
-import Link from "next/link";
-
-import { constants } from "@nawadi/lib";
-
 import { DataInteractive } from "@headlessui/react";
 import { ArrowRightIcon } from "@heroicons/react/16/solid";
+import { constants } from "@nawadi/lib";
+import Link from "next/link";
 import { Suspense } from "react";
 import { getUserOrThrow } from "~/lib/nwd";
 import {

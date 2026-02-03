@@ -2,6 +2,7 @@ import { clsx } from "clsx";
 import Link from "next/link";
 import { Suspense } from "react";
 import Balancer from "react-wrap-balancer";
+import { AnimatedWave } from "~/app/_components/animated-wave";
 import { Avatar } from "~/app/(dashboard)/_components/avatar";
 import {
   DescriptionDetails,
@@ -17,7 +18,6 @@ import {
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { AnimatedWave } from "~/app/_components/animated-wave";
 import { listCountries, listPersonsForUser } from "~/lib/nwd";
 import { PersonaliaContent } from "../../profiel/[handle]/_components/person/personalia";
 import { AddPersonButton } from "./add-person-button";

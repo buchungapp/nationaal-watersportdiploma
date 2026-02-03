@@ -3,10 +3,12 @@
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { DocumentDuplicateIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { formatters } from "@nawadi/lib";
-import { useStateAction } from "next-safe-action/stateful-hooks";
 import { useParams, useRouter } from "next/navigation";
+import { useStateAction } from "next-safe-action/stateful-hooks";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { createBulkPvbsAction } from "~/app/_actions/pvb/create-bulk-pvbs-action";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -38,8 +40,6 @@ import {
 import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
 import { useKwalificatieprofielenByNiveau } from "~/app/(dashboard)/_hooks/swr/use-kwalificatieprofielen-by-niveau";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
-import { createBulkPvbsAction } from "~/app/_actions/pvb/create-bulk-pvbs-action";
-import Spinner from "~/app/_components/spinner";
 
 const formatPersonName = formatters.formatPersonName;
 

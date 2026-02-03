@@ -10,7 +10,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { timestamps } from "../utils/sql.js";
-import { module, competency, gearType, program } from "./course.js";
+import { competency, gearType, module, program } from "./course.js";
 
 export const curriculum = pgTable(
   "curriculum",

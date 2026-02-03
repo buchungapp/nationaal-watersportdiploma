@@ -1,20 +1,18 @@
 import { constants } from "@nawadi/lib";
-import Image from "next/image";
-import coverImage from "./_assets/zeilen-4.jpg";
-import SessionCheck from "./login/_components/session-check";
-
 import { clsx } from "clsx";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Toaster } from "sonner";
+import coverImage from "./_assets/zeilen-4.jpg";
+import SessionCheck from "./login/_components/session-check";
 import "sonner/dist/styles.css";
-import { BASE_URL } from "~/constants";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter } from "next/font/google";
-
-import { ImpersonationBarWrapper } from "~/app/(dashboard)/_components/impersonation-bar-wrapper";
 import Analytics from "~/app/_components/analytics";
 import { CommonProviders } from "~/app/_components/providers";
+import { ImpersonationBarWrapper } from "~/app/(dashboard)/_components/impersonation-bar-wrapper";
+import { BASE_URL } from "~/constants";
 import "../globals.css";
 
 const inter = Inter({

@@ -4,7 +4,7 @@ import "dotenv/config";
 import inquirer from "inquirer";
 import { z } from "zod";
 
-export const validSlugRegex = new RegExp(/^[a-zA-Z0-9\-]+$/);
+export const validSlugRegex = new RegExp(/^[a-zA-Z0-9-]+$/);
 
 async function main() {
   const result = await inquirer.prompt([

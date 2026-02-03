@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  APIProvider,
   AdvancedMarker,
+  APIProvider,
   Map as GoogleMapsMap,
   InfoWindow,
   Pin,
@@ -21,6 +21,7 @@ import {
 } from "react";
 import { normalizeUrl } from "~/utils/normalize-url";
 import type { Location } from "../vaarlocaties/_lib/retrieve-locations";
+
 interface Props {
   locations: Location[];
 }
@@ -64,7 +65,7 @@ function useBounds(map: google.maps.Map | null, locations: Location[]) {
     }
   }, [map, locations, bounds]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     setBoundsCallback();
   }, [map, locations, setBoundsCallback]);
@@ -82,7 +83,7 @@ export function SelectedLocationProvider({
   const map = useMap();
   const resetBounds = useBounds(map, locations);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const setSelectedLocationAndZoom = useCallback(
     (location: Location | null) => {
       if (location === null) {

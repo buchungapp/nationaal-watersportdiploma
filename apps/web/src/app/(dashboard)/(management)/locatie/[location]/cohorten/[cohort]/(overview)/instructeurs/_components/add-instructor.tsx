@@ -4,15 +4,15 @@ import { clsx } from "clsx";
 import { parseAsString, useQueryState } from "nuqs";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { addInstructorToCohortAction } from "~/app/_actions/cohort/add-instructor-to-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
+import Spinner from "~/app/_components/spinner";
 import {
   Combobox,
   ComboboxLabel,
   ComboboxOption,
 } from "~/app/(dashboard)/_components/combobox";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { addInstructorToCohortAction } from "~/app/_actions/cohort/add-instructor-to-cohort-action";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import type { listPersonsForLocationWithPagination } from "~/lib/nwd";
 
@@ -30,7 +30,7 @@ export function AddInstructor({
   const [forceRerenderId, setForceRerenderId] = useState(0);
   const [isSearchPending, startTransition] = useTransition();
 
-  const [query, setQuery] = useQueryState(
+  const [_query, setQuery] = useQueryState(
     "query",
     parseAsString.withOptions({
       startTransition,

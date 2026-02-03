@@ -2,8 +2,7 @@
 import { XMarkIcon } from "@heroicons/react/16/solid";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { parseAsString } from "nuqs";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
 import type { PropsWithChildren } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -49,11 +48,7 @@ export function MediaViewerButton({
   );
 }
 
-export default function MediaViewer({
-  media,
-}: {
-  media: Media;
-}) {
+export default function MediaViewer({ media }: { media: Media }) {
   const [isOpen, setIsOpen] = useQueryState("media-viewer", parseAsString);
 
   const close = () => {

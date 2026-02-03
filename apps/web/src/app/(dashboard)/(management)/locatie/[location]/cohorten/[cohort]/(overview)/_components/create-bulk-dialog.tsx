@@ -6,6 +6,15 @@ import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { addStudentsToCohortAction } from "~/app/_actions/cohort/add-students-to-cohort-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import {
+  COLUMN_MAPPING_WITH_TAG,
+  type CSVData,
+  SELECT_LABEL,
+} from "~/app/_actions/person/person-bulk-csv-mappings";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -31,15 +40,6 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { Code, Strong, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { addStudentsToCohortAction } from "~/app/_actions/cohort/add-students-to-cohort-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import {
-  COLUMN_MAPPING_WITH_TAG,
-  type CSVData,
-  SELECT_LABEL,
-} from "~/app/_actions/person/person-bulk-csv-mappings";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
 import { listCountries } from "../_actions/fetch";
@@ -103,64 +103,62 @@ function CreateDialog({ locationId, isOpen, setIsOpen, cohortId }: Props) {
   };
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
-        <DialogTitle>Cursisten toevoegen (bulk)</DialogTitle>
+    <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
+      <DialogTitle>Cursisten toevoegen (bulk)</DialogTitle>
 
-        {isUpload ? (
-          <form onSubmit={handleSubmit}>
-            <DialogDescription>
-              Importeer data door deze te kopiëren en plakken vanuit het{" "}
-              <TextLink
-                href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
-                target="_blank"
-              >
-                template
-              </TextLink>{" "}
-              of je eigen databron. <br /> Let op het volgende:
-              <ul className="list-disc list-inside">
-                <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
-                <li>
-                  Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
-                  <i>(jaar-maand-dag)</i> voor geboortedata.
-                </li>
-                <li>
-                  Tags kunnen aangemaakt worden door extra kolommen toe te
-                  voegen, waarbij elke extra kolom een tag representeert. <br />
-                  <i>
-                    Tip: Start de naam van de kolom met 'Tag' om deze
-                    automatisch te kunnen herkennen.
-                  </i>
-                </li>
-              </ul>
-            </DialogDescription>
-            <DialogBody>
-              <Fieldset>
-                <Field>
-                  <Label>Data</Label>
-                  <Textarea name="data" required />
-                </Field>
-              </Fieldset>
-            </DialogBody>
-            <DialogActions>
-              <Button plain onClick={() => setIsOpen(false)}>
-                Sluiten
-              </Button>
-              <Button color="branding-dark" type="submit">
-                Verder
-              </Button>
-            </DialogActions>
-          </form>
-        ) : (
-          <SubmitForm
-            data={data}
-            cohortId={cohortId}
-            locationId={locationId}
-            close={() => setIsOpen(false)}
-          />
-        )}
-      </Dialog>
-    </>
+      {isUpload ? (
+        <form onSubmit={handleSubmit}>
+          <DialogDescription>
+            Importeer data door deze te kopiëren en plakken vanuit het{" "}
+            <TextLink
+              href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
+              target="_blank"
+            >
+              template
+            </TextLink>{" "}
+            of je eigen databron. <br /> Let op het volgende:
+            <ul className="list-disc list-inside">
+              <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
+              <li>
+                Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
+                <i>(jaar-maand-dag)</i> voor geboortedata.
+              </li>
+              <li>
+                Tags kunnen aangemaakt worden door extra kolommen toe te voegen,
+                waarbij elke extra kolom een tag representeert. <br />
+                <i>
+                  Tip: Start de naam van de kolom met 'Tag' om deze automatisch
+                  te kunnen herkennen.
+                </i>
+              </li>
+            </ul>
+          </DialogDescription>
+          <DialogBody>
+            <Fieldset>
+              <Field>
+                <Label>Data</Label>
+                <Textarea name="data" required />
+              </Field>
+            </Fieldset>
+          </DialogBody>
+          <DialogActions>
+            <Button plain onClick={() => setIsOpen(false)}>
+              Sluiten
+            </Button>
+            <Button color="branding-dark" type="submit">
+              Verder
+            </Button>
+          </DialogActions>
+        </form>
+      ) : (
+        <SubmitForm
+          data={data}
+          cohortId={cohortId}
+          locationId={locationId}
+          close={() => setIsOpen(false)}
+        />
+      )}
+    </Dialog>
   );
 }
 
@@ -266,7 +264,7 @@ function SubmitForm({
                         ?.name ?? person.birthCountry}
                     </TableCell>
                     {person.tags.map((tag, index) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                      // biome-ignore lint/suspicious/noArrayIndexKey: intentional
                       <TableCell key={index}>{tag}</TableCell>
                     ))}
                   </TableRow>
@@ -298,14 +296,14 @@ function SubmitForm({
               <TableBody>
                 {data?.labels?.map((item, index) => {
                   return (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    // biome-ignore lint/suspicious/noArrayIndexKey: intentional
                     <TableRow key={index}>
                       <TableCell>{item.label}</TableCell>
                       <TableCell className="space-x-2">
                         {item.value
                           .filter((val) => !!val)
                           .map((value, index) => (
-                            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                            // biome-ignore lint/suspicious/noArrayIndexKey: intentional
                             <Code key={index}>{String(value)}</Code>
                           ))}
                       </TableCell>

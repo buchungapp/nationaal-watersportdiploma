@@ -1,5 +1,5 @@
-import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
+import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
 import { CourseHeading } from "./_components/course-heading";
 import { CourseInfo } from "./_components/course-info";
 import { CourseModules } from "./_components/course-modules";

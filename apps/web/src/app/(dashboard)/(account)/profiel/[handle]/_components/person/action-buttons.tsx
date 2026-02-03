@@ -1,10 +1,13 @@
 "use client";
-import { useState } from "react";
-import { useFormStatus } from "react-dom";
-import { toast } from "sonner";
 
 import { ArrowRightIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { updatePersonDetailsAction } from "~/app/_actions/person/update-person-details-action";
+import Spinner from "~/app/_components/spinner";
 import { Button, TextButton } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -24,9 +27,6 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { updatePersonDetailsAction } from "~/app/_actions/person/update-person-details-action";
-import Spinner from "~/app/_components/spinner";
 
 export function EditDetails({
   person,

@@ -231,9 +231,7 @@ async function AllocationCardContent(props: AllocationCardProps) {
             .tz()
             .format("DD-MM-YYYY HH:mm")
         ) : (
-          <>
-            <span className="text-zinc-500">Niet zichtbaar</span>
-          </>
+          <span className="text-zinc-500">Niet zichtbaar</span>
         )}
         <div className="-my-2">
           <UpdateProgressVisibility

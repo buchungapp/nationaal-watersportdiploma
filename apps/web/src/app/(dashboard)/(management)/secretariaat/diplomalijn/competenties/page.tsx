@@ -34,7 +34,7 @@ async function CompetencyTable(props: {
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCompetencies = results.map(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       (result) => competencies.find((competency) => competency.id === result)!,
     );
   }

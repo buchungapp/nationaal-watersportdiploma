@@ -108,7 +108,7 @@ export function useColumnOrdering(
     [setColumnVisibility, posthog],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const options = useMemo(
     () => ({
       state: {

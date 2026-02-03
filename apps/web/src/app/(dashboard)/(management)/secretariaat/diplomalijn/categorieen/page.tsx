@@ -34,7 +34,7 @@ async function CategoryTable(props: {
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredCategories = results.map(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       (result) => categories.find((category) => category.id === result)!,
     );
   }

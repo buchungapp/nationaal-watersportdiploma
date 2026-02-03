@@ -14,8 +14,8 @@ import {
 import clsx from "clsx";
 import { useAction } from "next-safe-action/hooks";
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   startTransition,
   useContext,
   useOptimistic,
@@ -23,6 +23,11 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import { updateCompetencyProgressForStudentInCohortAction } from "~/app/_actions/cohort/student/update-competency-progress-for-student-in-cohort-action";
+import { updateCompetencyProgressesForStudentInCohortAction } from "~/app/_actions/cohort/student/update-competency-progresses-for-student-in-cohort-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
+import Spinner from "~/app/_components/spinner";
+import { Weight } from "~/app/_components/weight";
 import { ModuleRequiredBadge } from "~/app/(dashboard)/_components/badges";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -47,11 +52,6 @@ import {
   SwitchGroup,
 } from "~/app/(dashboard)/_components/switch";
 import { Strong } from "~/app/(dashboard)/_components/text";
-import { updateCompetencyProgressForStudentInCohortAction } from "~/app/_actions/cohort/student/update-competency-progress-for-student-in-cohort-action";
-import { updateCompetencyProgressesForStudentInCohortAction } from "~/app/_actions/cohort/student/update-competency-progresses-for-student-in-cohort-action";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
-import { Weight } from "~/app/_components/weight";
 import type { retrieveCurriculumById } from "~/lib/nwd";
 
 const CourseCardContext = createContext<
@@ -265,7 +265,6 @@ function ProgressInput({
 
 export function ModuleFallback({ index = 1 }: { index?: number }) {
   return (
-    /* biome-ignore lint/a11y/useSemanticElements: <explanation> */
     <CheckboxGroup role="group">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-x-2">
@@ -367,7 +366,6 @@ export function Module({
   return (
     <Disclosure>
       {({ open: panelOpen }) => (
-        // biome-ignore lint/a11y/useSemanticElements: <explanation>
         <CheckboxGroup role="group">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-x-2">

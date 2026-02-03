@@ -22,10 +22,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
-import {
-  cacheLife,
-  cacheTag,
-} from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";
 import { invariant } from "~/utils/invariant";
@@ -131,7 +128,7 @@ export async function getPrimaryPerson<T extends boolean = true>(
 
   const primaryPerson =
     user.persons.find((person) => person.isPrimary) ??
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: intentional
     user.persons[0]!;
 
   if (!primaryPerson.isPrimary && !force) {
@@ -1303,7 +1300,7 @@ export const createPersonForLocation = async (
       personId: primaryPerson.id,
     });
 
-    // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+    // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
     let user;
 
     if (personInput.email) {
@@ -1639,11 +1636,7 @@ export const withdrawCertificatesInCohort = async ({
 };
 
 export const listActiveCohortsForPerson = cache(
-  async ({
-    personId,
-  }: {
-    personId?: string;
-  } = {}) => {
+  async ({ personId }: { personId?: string } = {}) => {
     return makeRequest(async () => {
       const authUser = await getUserOrThrow();
       const primaryPerson = await getPrimaryPerson(authUser);
@@ -2983,9 +2976,7 @@ export async function updateEmailForPerson({
 }
 
 export const listKnowledgeCenterDocuments = cache(
-  async (filter?: {
-    q?: string;
-  }) => {
+  async (filter?: { q?: string }) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
 
@@ -3625,7 +3616,7 @@ export const listKssKwalificatieprofielen = cache(
   }) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const _person = await getPrimaryPerson(user);
 
       // This is a secretariaat function, so we need to verify access
       // For now, we'll allow any logged in user, but you may want to restrict this
@@ -3640,7 +3631,7 @@ export const listKssInstructiegroepen = cache(
   }) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const _person = await getPrimaryPerson(user);
 
       return await KSS.InstructieGroep.list({ filter: filter || {} });
     });
@@ -3653,7 +3644,7 @@ export const listKssInstructiegroepenWithCourses = cache(
   }) => {
     return makeRequest(async () => {
       const user = await getUserOrThrow();
-      const person = await getPrimaryPerson(user);
+      const _person = await getPrimaryPerson(user);
 
       return await KSS.InstructieGroep.listWithCourses({
         filter: filter || {},
@@ -3889,7 +3880,7 @@ export const grantPvbLeercoachPermissionAsLeercoach = async ({
 export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const _primaryPerson = await getPrimaryPerson(authUser);
 
     const result = await Pvb.Aanvraag.listGebeurtenissen({ pvbAanvraagId });
 
@@ -3900,7 +3891,7 @@ export const listPvbGebeurtenissen = async (pvbAanvraagId: string) => {
 export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const _primaryPerson = await getPrimaryPerson(authUser);
 
     const result = await Pvb.Aanvraag.getToetsdocumenten({ pvbAanvraagId });
 
@@ -3911,7 +3902,7 @@ export const getPvbToetsdocumenten = async (pvbAanvraagId: string) => {
 export const getPvbBeoordelingsCriteria = async (pvbAanvraagId: string) => {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
-    const primaryPerson = await getPrimaryPerson(authUser);
+    const _primaryPerson = await getPrimaryPerson(authUser);
 
     const result = await Pvb.Aanvraag.getBeoordelingsCriteria({
       pvbAanvraagId,
@@ -4121,7 +4112,7 @@ export const withdrawPvbAanvraag = async ({
 export const getKssKerntaakDetails = cache(async (kerntaakId: string) => {
   return makeRequest(async () => {
     const user = await getUserOrThrow();
-    const person = await getPrimaryPerson(user);
+    const _person = await getPrimaryPerson(user);
 
     // Get the kerntaak
     const kerntaak = await KSS.Kwalificatieprofiel.getKerntaakById({

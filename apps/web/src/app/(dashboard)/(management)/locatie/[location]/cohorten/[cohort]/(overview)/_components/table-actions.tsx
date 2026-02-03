@@ -1,11 +1,17 @@
+import { useAction } from "next-safe-action/hooks";
 import { type FormEventHandler, useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { ReactTags, type Tag } from "react-tag-autocomplete";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { assignInstructorToStudentInCohortAction } from "~/app/_actions/cohort/student/assign-instructor-to-student-in-cohort-action";
+import { claimStudentsInCohortAction } from "~/app/_actions/cohort/student/claim-students-in-cohort-action";
+import { enrollStudentsInCurriculumInCohortAction } from "~/app/_actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
+import { releaseStudentsInCohortAction } from "~/app/_actions/cohort/student/release-students-in-cohort-action";
+import { updateStudentTagsInCohortAction } from "~/app/_actions/cohort/student/update-student-tags-in-cohort-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
-
-import { useAction } from "next-safe-action/hooks";
-import { ReactTags, type Tag } from "react-tag-autocomplete";
 import {
   Combobox,
   ComboboxLabel,
@@ -29,13 +35,6 @@ import {
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
 import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
-import { assignInstructorToStudentInCohortAction } from "~/app/_actions/cohort/student/assign-instructor-to-student-in-cohort-action";
-import { claimStudentsInCohortAction } from "~/app/_actions/cohort/student/claim-students-in-cohort-action";
-import { enrollStudentsInCurriculumInCohortAction } from "~/app/_actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
-import { releaseStudentsInCohortAction } from "~/app/_actions/cohort/student/release-students-in-cohort-action";
-import { updateStudentTagsInCohortAction } from "~/app/_actions/cohort/student/update-student-tags-in-cohort-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import Spinner from "~/app/_components/spinner";
 import {
   isInstructorInCohort,
   listCurriculaByProgram,
@@ -87,7 +86,7 @@ function Claim({ rows, cohortId }: Props) {
             );
             toast.success("Cursisten toegekent");
           }
-        } catch (error) {
+        } catch (_error) {
           toast.error("Er is iets misgegaan");
         }
       }}
@@ -110,19 +109,17 @@ function StartProgram({
   const areAllRowsUnassigned = rows.every((row) => !row.studentCurriculum);
 
   return (
-    <>
-      <DropdownItem
-        onClick={openDialog}
-        disabled={!areAllRowsUnassigned}
-        title={
-          !areAllRowsUnassigned
-            ? "Sommige cursisten zijn al aan een programma gestart"
-            : undefined
-        }
-      >
-        <DropdownLabel>Start programma</DropdownLabel>
-      </DropdownItem>
-    </>
+    <DropdownItem
+      onClick={openDialog}
+      disabled={!areAllRowsUnassigned}
+      title={
+        !areAllRowsUnassigned
+          ? "Sommige cursisten zijn al aan een programma gestart"
+          : undefined
+      }
+    >
+      <DropdownLabel>Start programma</DropdownLabel>
+    </DropdownItem>
   );
 }
 
@@ -209,84 +206,79 @@ function StartProgramDialog({
   if (!programs) throw new Error("Data should be defined through fallback");
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={closeDialog} size="2xl">
-        <DialogTitle>Start programma</DialogTitle>
-        <form action={execute}>
-          <DialogBody>
-            {/* Hidden input for curriculumId */}
-            <input
-              type="hidden"
-              name="curriculum[id]"
-              value={
-                activeCurriculumForProgram?.curriculum?.id ??
-                getInputValue("curriculum")?.id ??
-                ""
-              }
-            />
-            <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
-              <Field>
-                <Label>Programma</Label>
-                <Combobox
-                  name="program"
-                  options={programs}
-                  displayValue={(program) => {
-                    if (!program) return "";
-                    return (
-                      program.title ??
-                      `${program.course.title} ${program.degree.title}`
-                    );
-                  }}
-                  onChange={setSelectedProgram}
-                  value={selectedProgram}
-                  defaultValue={programs?.find(
-                    (program) => program.id === getInputValue("curriculum")?.id,
-                  )}
-                  invalid={!!result?.validationErrors?.curriculum}
-                >
-                  {(program) => {
-                    return (
-                      <ComboboxOption key={program.id} value={program}>
-                        <ComboboxLabel>
-                          {program.title ??
-                            `${program.course.title} ${program.degree.title}`}
-                        </ComboboxLabel>
-                      </ComboboxOption>
-                    );
-                  }}
-                </Combobox>
-              </Field>
-              <Field>
-                <Label>Vaartuig</Label>
-                <Listbox
-                  name="gearType[id]"
-                  disabled={
-                    !(
-                      selectedProgram &&
-                      !!activeCurriculumForProgram?.curriculum
-                    )
-                  }
-                  defaultValue={getInputValue("gearType")?.id}
-                  invalid={!!result?.validationErrors?.gearType}
-                >
-                  {activeCurriculumForProgram?.gearTypes.map((gearType) => (
-                    <ListboxOption key={gearType.id} value={gearType.id}>
-                      <ListboxLabel>{gearType.title}</ListboxLabel>
-                    </ListboxOption>
-                  ))}
-                </Listbox>
-              </Field>
-            </div>
-          </DialogBody>
-          <DialogActions>
-            <Button plain onClick={closeDialog}>
-              Annuleren
-            </Button>
-            <ProgramSubmitButton />
-          </DialogActions>
-        </form>
-      </Dialog>
-    </>
+    <Dialog open={isOpen} onClose={closeDialog} size="2xl">
+      <DialogTitle>Start programma</DialogTitle>
+      <form action={execute}>
+        <DialogBody>
+          {/* Hidden input for curriculumId */}
+          <input
+            type="hidden"
+            name="curriculum[id]"
+            value={
+              activeCurriculumForProgram?.curriculum?.id ??
+              getInputValue("curriculum")?.id ??
+              ""
+            }
+          />
+          <div className="gap-x-4 gap-y-2 grid grid-cols-1 lg:grid-cols-2">
+            <Field>
+              <Label>Programma</Label>
+              <Combobox
+                name="program"
+                options={programs}
+                displayValue={(program) => {
+                  if (!program) return "";
+                  return (
+                    program.title ??
+                    `${program.course.title} ${program.degree.title}`
+                  );
+                }}
+                onChange={setSelectedProgram}
+                value={selectedProgram}
+                defaultValue={programs?.find(
+                  (program) => program.id === getInputValue("curriculum")?.id,
+                )}
+                invalid={!!result?.validationErrors?.curriculum}
+              >
+                {(program) => {
+                  return (
+                    <ComboboxOption key={program.id} value={program}>
+                      <ComboboxLabel>
+                        {program.title ??
+                          `${program.course.title} ${program.degree.title}`}
+                      </ComboboxLabel>
+                    </ComboboxOption>
+                  );
+                }}
+              </Combobox>
+            </Field>
+            <Field>
+              <Label>Vaartuig</Label>
+              <Listbox
+                name="gearType[id]"
+                disabled={
+                  !(selectedProgram && !!activeCurriculumForProgram?.curriculum)
+                }
+                defaultValue={getInputValue("gearType")?.id}
+                invalid={!!result?.validationErrors?.gearType}
+              >
+                {activeCurriculumForProgram?.gearTypes.map((gearType) => (
+                  <ListboxOption key={gearType.id} value={gearType.id}>
+                    <ListboxLabel>{gearType.title}</ListboxLabel>
+                  </ListboxOption>
+                ))}
+              </Listbox>
+            </Field>
+          </div>
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={closeDialog}>
+            Annuleren
+          </Button>
+          <ProgramSubmitButton />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
 
@@ -358,11 +350,9 @@ function AssignInstructor({
   }
 
   return (
-    <>
-      <DropdownItem onClick={openDialog}>
-        <DropdownLabel>Instructeur toewijzen</DropdownLabel>
-      </DropdownItem>
-    </>
+    <DropdownItem onClick={openDialog}>
+      <DropdownLabel>Instructeur toewijzen</DropdownLabel>
+    </DropdownItem>
   );
 }
 
@@ -407,61 +397,59 @@ function AssignInstructorDialog({
   if (!instructors) throw new Error("Data should be defined through fallback");
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={closeDialog} size="md">
-        <DialogTitle>Instructeur toewijzen</DialogTitle>
-        <DialogDescription>
-          Laat leeg om de instructeur te verwijderen.
-        </DialogDescription>
-        <form action={execute}>
-          <DialogBody>
-            <Field>
-              <Combobox
-                name="instructor"
-                options={instructors}
-                displayValue={(instructor) => {
-                  if (!instructor) return "";
-                  return [
-                    instructor.person.firstName,
-                    instructor.person.lastNamePrefix,
-                    instructor.person.lastName,
-                  ]
-                    .filter(Boolean)
-                    .join(" ");
-                }}
-                defaultValue={instructors.find(
-                  (instructor) =>
-                    instructor.person.id ===
-                    getInputValue("instructor")?.person.id,
-                )}
-              >
-                {(instructor) => {
-                  return (
-                    <ComboboxOption key={instructor.id} value={instructor}>
-                      <ComboboxLabel>
-                        {[
-                          instructor.person.firstName,
-                          instructor.person.lastNamePrefix,
-                          instructor.person.lastName,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      </ComboboxLabel>
-                    </ComboboxOption>
-                  );
-                }}
-              </Combobox>
-            </Field>
-          </DialogBody>
-          <DialogActions>
-            <Button plain onClick={closeDialog}>
-              Annuleren
-            </Button>
-            <StudentSubmitButton />
-          </DialogActions>
-        </form>
-      </Dialog>
-    </>
+    <Dialog open={isOpen} onClose={closeDialog} size="md">
+      <DialogTitle>Instructeur toewijzen</DialogTitle>
+      <DialogDescription>
+        Laat leeg om de instructeur te verwijderen.
+      </DialogDescription>
+      <form action={execute}>
+        <DialogBody>
+          <Field>
+            <Combobox
+              name="instructor"
+              options={instructors}
+              displayValue={(instructor) => {
+                if (!instructor) return "";
+                return [
+                  instructor.person.firstName,
+                  instructor.person.lastNamePrefix,
+                  instructor.person.lastName,
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+              }}
+              defaultValue={instructors.find(
+                (instructor) =>
+                  instructor.person.id ===
+                  getInputValue("instructor")?.person.id,
+              )}
+            >
+              {(instructor) => {
+                return (
+                  <ComboboxOption key={instructor.id} value={instructor}>
+                    <ComboboxLabel>
+                      {[
+                        instructor.person.firstName,
+                        instructor.person.lastNamePrefix,
+                        instructor.person.lastName,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    </ComboboxLabel>
+                  </ComboboxOption>
+                );
+              }}
+            </Combobox>
+          </Field>
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={closeDialog}>
+            Annuleren
+          </Button>
+          <StudentSubmitButton />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
 
@@ -496,11 +484,9 @@ function AddTag({
   }
 
   return (
-    <>
-      <DropdownItem onClick={openDialog}>
-        <DropdownLabel>Tag toevoegen</DropdownLabel>
-      </DropdownItem>
-    </>
+    <DropdownItem onClick={openDialog}>
+      <DropdownLabel>Tag toevoegen</DropdownLabel>
+    </DropdownItem>
   );
 }
 
@@ -584,44 +570,40 @@ function AddTagDialog({
     throw new Error("Data should be defined through fallback");
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={closeDialog} size="md">
-        <DialogTitle>Tags toevoegen</DialogTitle>
-        <DialogDescription>
-          Welke tag(s) wil je toevoegen aan de geselecteerde cursisten? Om een
-          nieuwe tag aan te maken typ je de tag in het invoerveld en druk je op
-          enter.
-        </DialogDescription>
-        <form onSubmit={submit}>
-          <DialogBody>
-            <ReactTags
-              labelText={undefined}
-              selected={tagsToAdd}
-              suggestions={
-                allCohortTags
-                  .filter(
-                    (tag) => !tagsToAdd.some(({ value }) => value === tag),
-                  )
-                  .map((tag) => ({ label: tag, value: tag })) as Tag[]
-              }
-              onAdd={handleAddition}
-              onDelete={handleDelete}
-              newOptionText="%value% toevoegen"
-              placeholderText="Tag toevoegen"
-              onValidate={(tag) => tag.trim().length > 0}
-              allowNew
-              activateFirstOption
-            />
-          </DialogBody>
-          <DialogActions>
-            <Button plain onClick={closeDialog}>
-              Annuleren
-            </Button>
-            <TagSubmitButton />
-          </DialogActions>
-        </form>
-      </Dialog>
-    </>
+    <Dialog open={isOpen} onClose={closeDialog} size="md">
+      <DialogTitle>Tags toevoegen</DialogTitle>
+      <DialogDescription>
+        Welke tag(s) wil je toevoegen aan de geselecteerde cursisten? Om een
+        nieuwe tag aan te maken typ je de tag in het invoerveld en druk je op
+        enter.
+      </DialogDescription>
+      <form onSubmit={submit}>
+        <DialogBody>
+          <ReactTags
+            labelText={undefined}
+            selected={tagsToAdd}
+            suggestions={
+              allCohortTags
+                .filter((tag) => !tagsToAdd.some(({ value }) => value === tag))
+                .map((tag) => ({ label: tag, value: tag })) as Tag[]
+            }
+            onAdd={handleAddition}
+            onDelete={handleDelete}
+            newOptionText="%value% toevoegen"
+            placeholderText="Tag toevoegen"
+            onValidate={(tag) => tag.trim().length > 0}
+            allowNew
+            activateFirstOption
+          />
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={closeDialog}>
+            Annuleren
+          </Button>
+          <TagSubmitButton />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
 

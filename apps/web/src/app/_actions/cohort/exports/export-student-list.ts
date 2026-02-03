@@ -1,8 +1,8 @@
 "use server";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { studentProgress } from "~/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/(overview)/_student-progress";
 import { actionClientWithMeta } from "~/app/_actions/safe-action";
+import { studentProgress } from "~/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/(overview)/_student-progress";
 import {
   createExportData,
   exportDataToBlob,
@@ -20,7 +20,7 @@ const [firstFieldId, ...fieldIds] = typedObjectKeys(studentListFieldMappers);
 
 const exportStudentListSchema = zfd.formData({
   field: z.record(
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: intentional
     z.enum([firstFieldId!, ...fieldIds]),
     z.object({ selected: zfd.checkbox(), label: zfd.text() }),
   ),

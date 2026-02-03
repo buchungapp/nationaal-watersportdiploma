@@ -30,7 +30,7 @@ export async function getAllDiplomalijnInstructeurPages() {
 
       const filePath = pageFilename.replace(/\/page.mdx$/, "");
 
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       const slug = filePath === "page.mdx" ? null : filePath.split("/").at(-1)!;
 
       return {
@@ -72,7 +72,7 @@ export async function getAllDiplomalijnConsumentenPages() {
 
       const filePath = pageFilename.replace(/\/page.mdx$/, "");
 
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       const slug = filePath === "page.mdx" ? null : filePath.split("/").at(-1)!;
 
       return {

@@ -106,7 +106,7 @@ function batchProgress(progress: ProgressItem[]) {
         continue;
       }
 
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       const lastBatch = batchedItems[batchedItems.length - 1]!;
       lastBatch.push(progressItem);
     }
@@ -161,7 +161,7 @@ function batchProgress(progress: ProgressItem[]) {
 
     for (const batch of mergedBatchedItems) {
       batchedProgress.push({
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         date: batch[0]!.createdAt,
         modules: batch.reduce(
           (acc, item) => {

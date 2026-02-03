@@ -3,6 +3,9 @@
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { copyCurriculumAction } from "~/app/_actions/secretariat/copy-curriculum-action";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import {
   Alert,
   AlertActions,
@@ -12,9 +15,6 @@ import {
 } from "~/app/(dashboard)/_components/alert";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { copyCurriculumAction } from "~/app/_actions/secretariat/copy-curriculum-action";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 
 export function CopyCurriculum({ curriculumId }: { curriculumId: string }) {
   const [isOpen, setIsOpen] = useState(false);

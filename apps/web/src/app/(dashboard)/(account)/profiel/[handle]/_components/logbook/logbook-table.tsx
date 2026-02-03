@@ -20,17 +20,19 @@ import {
   PlaceholderTableRows,
 } from "~/app/(dashboard)/_components/table-content";
 import {
+  TableFooter,
   TablePagination,
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
-import { TableFooter } from "~/app/(dashboard)/_components/table-footer";
 import { SortableTableHead } from "~/app/(dashboard)/_components/table-head";
 import {
   getOrderableColumnIds,
   useColumnOrdering,
 } from "~/app/(dashboard)/_hooks/use-column-ordering";
-import { useSorting } from "~/app/(dashboard)/_hooks/use-sorting";
-import { getSortableColumnIds } from "~/app/(dashboard)/_hooks/use-sorting";
+import {
+  getSortableColumnIds,
+  useSorting,
+} from "~/app/(dashboard)/_hooks/use-sorting";
 import dayjs from "~/lib/dayjs";
 import type { listLogbooksForPerson } from "~/lib/nwd";
 import { LogbookTableActionsButton } from "./logbook-table-actions";

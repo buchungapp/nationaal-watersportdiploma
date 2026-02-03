@@ -35,7 +35,11 @@ function Step({
   number,
   title,
   description,
-}: { number: number; title: ReactNode; description: ReactNode }) {
+}: {
+  number: number;
+  title: ReactNode;
+  description: ReactNode;
+}) {
   return (
     <article className="flex flex-col items-center gap-2 px-4 py-12 border-2 border-branding-light rounded-xl">
       <span className="flex justify-center items-center bg-branding-orange mb-4 p-4 rounded-full size-15 aspect-square text-white text-2xl">

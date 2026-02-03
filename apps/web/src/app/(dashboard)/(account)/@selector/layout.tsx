@@ -16,8 +16,8 @@ import {
   DropdownMenu,
 } from "../../_components/dropdown";
 import FeedbackDialog, {
-  FeedbackProvider,
   FeedbackButton,
+  FeedbackProvider,
 } from "../_components/feedback";
 import { PersonItem } from "./_components/person-item";
 

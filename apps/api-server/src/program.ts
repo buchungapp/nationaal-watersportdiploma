@@ -12,7 +12,7 @@ async function main() {
 
   programs.configureServerProgram(program);
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: intentional
   program.version(packageInfo.version!);
   program.demandCommand();
 

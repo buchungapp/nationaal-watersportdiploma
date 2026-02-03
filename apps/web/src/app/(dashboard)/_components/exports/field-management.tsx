@@ -90,7 +90,7 @@ function FieldGroup({
   const allFieldsSelected = categoryFields.every((field) =>
     selectedFields.has(field.id),
   );
-  const someFieldsSelected = categoryFields.some((field) =>
+  const _someFieldsSelected = categoryFields.some((field) =>
     selectedFields.has(field.id),
   );
 

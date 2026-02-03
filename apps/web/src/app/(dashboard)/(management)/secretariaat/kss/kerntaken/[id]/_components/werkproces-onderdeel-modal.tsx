@@ -1,8 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  assignWerkprocessenToOnderdeel,
+  listWerkprocessenByOnderdeel,
+} from "~/app/_actions/kss/kwalificatieprofiel";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import {
@@ -14,10 +18,6 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
-import {
-  assignWerkprocessenToOnderdeel,
-  listWerkprocessenByOnderdeel,
-} from "~/app/_actions/kss/kwalificatieprofiel";
 
 interface WerkprocesOnderdeelModalProps {
   isOpen: boolean;
@@ -49,14 +49,7 @@ export function WerkprocesOnderdeelModal({
   );
   const [loadingAssignments, setLoadingAssignments] = useState(true);
 
-  // Load current assignments when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      loadCurrentAssignments();
-    }
-  }, [isOpen]);
-
-  const loadCurrentAssignments = async () => {
+  const loadCurrentAssignments = useCallback(async () => {
     setLoadingAssignments(true);
     const newAssignments: Record<string, Set<string>> = {};
 
@@ -89,7 +82,14 @@ export function WerkprocesOnderdeelModal({
     } finally {
       setLoadingAssignments(false);
     }
-  };
+  }, [onderdelen]);
+
+  // Load current assignments when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadCurrentAssignments();
+    }
+  }, [isOpen, loadCurrentAssignments]);
 
   const toggleWerkproces = (onderdeelId: string, werkprocesId: string) => {
     setAssignments((prev) => {
@@ -129,7 +129,7 @@ export function WerkprocesOnderdeelModal({
       toast.success("Werkprocessen succesvol toegewezen");
       router.refresh();
       onClose();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Fout bij toewijzen werkprocessen");
     } finally {
       setIsSubmitting(false);

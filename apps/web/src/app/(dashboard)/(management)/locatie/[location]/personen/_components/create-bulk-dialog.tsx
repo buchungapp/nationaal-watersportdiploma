@@ -1,13 +1,20 @@
 "use client";
 
+import type { InferUseStateActionHookReturn } from "next-safe-action/hooks";
+import { useStateAction } from "next-safe-action/stateful-hooks";
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { createPersonsAction } from "~/app/_actions/person/create-persons-action";
+import {
+  COLUMN_MAPPING,
+  type CSVData,
+  SELECT_LABEL,
+} from "~/app/_actions/person/person-bulk-csv-mappings";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
-import dayjs from "~/lib/dayjs";
-
-import type { InferUseStateActionHookReturn } from "next-safe-action/hooks";
-import { useStateAction } from "next-safe-action/stateful-hooks";
 import {
   Checkbox,
   CheckboxField,
@@ -43,15 +50,7 @@ import {
   TextLink,
 } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createPersonsAction } from "~/app/_actions/person/create-persons-action";
-import {
-  COLUMN_MAPPING,
-  type CSVData,
-  SELECT_LABEL,
-} from "~/app/_actions/person/person-bulk-csv-mappings";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
+import dayjs from "~/lib/dayjs";
 import type { ActorType } from "~/lib/nwd";
 import { invariant } from "~/utils/invariant";
 
@@ -158,82 +157,80 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
   };
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
-        <DialogTitle>Personen toevoegen (bulk)</DialogTitle>
+    <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
+      <DialogTitle>Personen toevoegen (bulk)</DialogTitle>
 
-        {isUpload ? (
-          <form onSubmit={handleSubmit}>
-            <DialogBody>
-              <Fieldset>
-                <Legend>Data</Legend>
-                <Text>
-                  Importeer data door deze te kopiëren en plakken vanuit het{" "}
-                  <TextLink
-                    href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
-                    target="_blank"
-                  >
-                    template
-                  </TextLink>{" "}
-                  of je eigen databron. <br /> Let op het volgende:
-                  <ul className="list-disc list-inside">
-                    <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
-                    <li>
-                      Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
-                      <i>(jaar-maand-dag)</i> voor geboortedata.
-                    </li>
-                  </ul>
-                </Text>
-                <Textarea name="data" required />
-              </Fieldset>
+      {isUpload ? (
+        <form onSubmit={handleSubmit}>
+          <DialogBody>
+            <Fieldset>
+              <Legend>Data</Legend>
+              <Text>
+                Importeer data door deze te kopiëren en plakken vanuit het{" "}
+                <TextLink
+                  href="https://docs.google.com/spreadsheets/d/1et2mVz12w65ZDSvwVMGE1rIQyaesr4DDkeb-Fq5SUsc/template/preview"
+                  target="_blank"
+                >
+                  template
+                </TextLink>{" "}
+                of je eigen databron. <br /> Let op het volgende:
+                <ul className="list-disc list-inside">
+                  <li>Zorg dat de kolomnamen worden meegekopieerd.</li>
+                  <li>
+                    Gebruik het formaat <Code>YYYY-MM-DD</Code>{" "}
+                    <i>(jaar-maand-dag)</i> voor geboortedata.
+                  </li>
+                </ul>
+              </Text>
+              <Textarea name="data" required />
+            </Fieldset>
 
-              <Fieldset className="mt-6">
-                <Legend>Rollen</Legend>
-                <Text>
-                  Welke rol(len) vervullen deze personen in jullie locatie?
-                </Text>
-                {!hasSelectedRole && (
-                  <ErrorMessage>
-                    Selecteer minimaal één rol voor de personen.
-                  </ErrorMessage>
-                )}
-                <CheckboxGroup>
-                  {ROLES.map((role) => (
-                    <CheckboxField key={role.type}>
-                      <Checkbox
-                        name={`role-${role.type}`}
-                        defaultChecked={
-                          "defaultChecked" in role && role.defaultChecked
-                        }
-                      />
-                      <Label>{role.label}</Label>
-                      <Description>{role.description}</Description>
-                    </CheckboxField>
-                  ))}
-                </CheckboxGroup>
-              </Fieldset>
-            </DialogBody>
-            <DialogActions>
-              <Button plain onClick={() => setIsOpen(false)}>
-                Sluiten
-              </Button>
-              <Button color="branding-dark" type="submit">
-                Verder
-              </Button>
-            </DialogActions>
-          </form>
-        ) : (
-          <SubmitForm
-            data={data}
-            countries={countries}
-            // biome-ignore lint/style/noNonNullAssertion: roles is set when upload is completed
-            roles={roles!}
-            locationId={locationId}
-            close={() => setIsOpen(false)}
-          />
-        )}
-      </Dialog>
-    </>
+            <Fieldset className="mt-6">
+              <Legend>Rollen</Legend>
+              <Text>
+                Welke rol(len) vervullen deze personen in jullie locatie?
+              </Text>
+              {!hasSelectedRole && (
+                <ErrorMessage>
+                  Selecteer minimaal één rol voor de personen.
+                </ErrorMessage>
+              )}
+              <CheckboxGroup>
+                {ROLES.map((role) => (
+                  <CheckboxField key={role.type}>
+                    <Checkbox
+                      name={`role-${role.type}`}
+                      defaultChecked={
+                        "defaultChecked" in role && role.defaultChecked
+                      }
+                    />
+                    <Label>{role.label}</Label>
+                    <Description>{role.description}</Description>
+                  </CheckboxField>
+                ))}
+              </CheckboxGroup>
+            </Fieldset>
+          </DialogBody>
+          <DialogActions>
+            <Button plain onClick={() => setIsOpen(false)}>
+              Sluiten
+            </Button>
+            <Button color="branding-dark" type="submit">
+              Verder
+            </Button>
+          </DialogActions>
+        </form>
+      ) : (
+        <SubmitForm
+          data={data}
+          countries={countries}
+          // biome-ignore lint/style/noNonNullAssertion: roles is set when upload is completed
+          roles={roles!}
+          locationId={locationId}
+          close={() => setIsOpen(false)}
+        />
+      )}
+    </Dialog>
   );
 }
 

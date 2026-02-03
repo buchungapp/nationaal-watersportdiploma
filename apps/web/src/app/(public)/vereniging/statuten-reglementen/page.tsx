@@ -1,7 +1,6 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/24/solid";
-import Link from "next/link";
-
 import type { Metadata, ResolvingMetadata } from "next";
+import Link from "next/link";
 
 export async function generateMetadata(
   _props: unknown,

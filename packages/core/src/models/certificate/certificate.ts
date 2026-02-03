@@ -3,7 +3,6 @@ import crypto from "node:crypto";
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import {
-  type SQL,
   and,
   asc,
   countDistinct,
@@ -15,6 +14,7 @@ import {
   isNull,
   lt,
   lte,
+  type SQL,
   sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";

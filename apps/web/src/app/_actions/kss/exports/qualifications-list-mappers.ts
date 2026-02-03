@@ -1,4 +1,4 @@
-import { type FieldMapper, exportFormatters } from "~/lib/export";
+import { exportFormatters, type FieldMapper } from "~/lib/export";
 
 type Instructor = {
   id: string;

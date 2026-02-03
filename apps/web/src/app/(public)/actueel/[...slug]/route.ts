@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { findArticleById } from "~/lib/articles";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   props: { params: Promise<{ slug: string[] }> },
 ) {
   const params = await props.params;

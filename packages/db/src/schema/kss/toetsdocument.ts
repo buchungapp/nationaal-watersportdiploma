@@ -28,7 +28,7 @@ export const niveau = kssSchema.table(
       .notNull(),
     rang: integer("rang").notNull(),
   },
-  (table) => [],
+  (_table) => [],
 );
 
 // Instructeur 2, Leercoach 3 etc.

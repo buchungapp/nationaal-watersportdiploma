@@ -1,6 +1,7 @@
 "use client";
 import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { useTransition } from "react";
+import Spinner from "~/app/_components/spinner";
 import {
   Dropdown,
   DropdownButton,
@@ -9,7 +10,6 @@ import {
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
 import { Input } from "~/app/(dashboard)/_components/input";
-import Spinner from "~/app/_components/spinner";
 
 export function DateSelector({
   name,

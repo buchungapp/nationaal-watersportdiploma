@@ -126,7 +126,7 @@ export const fromId = wrapQuery(
         .select()
         .from(s.user)
         .where(eq(s.user.authUserId, id))
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        // biome-ignore lint/suspicious/noExplicitAny: intentional
         .then(singleRow)) as any; // Metadata does not match the type,  but we have Zod to validate
     } catch (error) {
       if (
@@ -146,10 +146,10 @@ export const fromId = wrapQuery(
           .insert(s.user)
           .values({
             authUserId: authUser.id,
-            // biome-ignore lint/style/noNonNullAssertion: <explanation>
+            // biome-ignore lint/style/noNonNullAssertion: intentional
             email: authUser.email!,
           })
-          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+          // biome-ignore lint/suspicious/noExplicitAny: intentional
           .returning()) as any; // Metadata does not match the type,  but we have Zod to validate
       }
     }

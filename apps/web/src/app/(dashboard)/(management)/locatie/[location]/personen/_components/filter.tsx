@@ -2,17 +2,16 @@
 
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import clsx from "clsx";
-import { parseAsString, useQueryState } from "nuqs";
-import { parseAsArrayOf } from "nuqs";
+import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import type { ComponentProps } from "react";
 import { useOptimistic, useTransition } from "react";
+import Spinner from "~/app/_components/spinner";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import {
   Popover,
   PopoverButton,
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
-import Spinner from "~/app/_components/spinner";
 
 function CheckboxButton({
   children,

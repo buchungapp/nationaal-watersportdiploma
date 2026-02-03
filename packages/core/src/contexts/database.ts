@@ -11,7 +11,7 @@ type Database = ReturnType<typeof db.createDatabase>;
 // Instance of AsyncLocalStorage to maintain database connections scoped to specific async operations.
 const storage = new AsyncLocalStorage<Database>();
 
-let defaultDatabase: Database | undefined = undefined;
+let defaultDatabase: Database | undefined;
 
 /**
  * Executes a given job with a database connection.
@@ -68,7 +68,7 @@ export function useDatabase(): db.Database {
 
       // lazily set default database and use that
       defaultDatabase = createDatabase();
-      process.on("beforeExit", async (code) => {
+      process.on("beforeExit", async (_code) => {
         assert(defaultDatabase != null);
         await defaultDatabase.$client.end();
       });

@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react";
 import { Button } from "./button";
 import { Dropdown, DropdownButton, DropdownMenu } from "./dropdown";
 
-export function TableSelection<T>({
+export function TableSelection<_T>({
   selectedRows,
   clearRowSelection,
   children,

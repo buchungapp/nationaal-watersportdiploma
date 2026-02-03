@@ -76,7 +76,9 @@ async function ActiveCohortsForLocation({
 
 async function LocationsList({
   personPromise,
-}: { personPromise: Promise<User.Person.$schema.Person> }) {
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
   const person = await personPromise;
 
   const activeCohortsPromise = listActiveCohortsForPerson({
@@ -127,7 +129,9 @@ async function LocationsList({
 
 export async function Locations({
   personPromise,
-}: { personPromise: Promise<User.Person.$schema.Person> }) {
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
   return (
     <StackedLayoutCardDisclosure
       defaultOpen

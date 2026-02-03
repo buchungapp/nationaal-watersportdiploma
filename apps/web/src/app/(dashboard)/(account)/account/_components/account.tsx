@@ -1,8 +1,8 @@
 import { Suspense } from "react";
+import Spinner from "~/app/_components/spinner";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
-import Spinner from "~/app/_components/spinner";
 import { getUserOrThrow } from "~/lib/nwd";
 import { AccountForm, SubmitButton } from "./account-client";
 

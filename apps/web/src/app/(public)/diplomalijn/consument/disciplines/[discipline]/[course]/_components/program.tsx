@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Weight } from "~/app/_components/weight";
 import {
   CompetencyTypeBadge,
   ModuleRequiredBadge,
 } from "~/app/(dashboard)/_components/badges";
 import Disclosure from "~/app/(public)/_components/disclosure";
-import { Weight } from "~/app/_components/weight";
 import type { retrieveCourseByHandle } from "~/lib/nwd";
 import {
   getIsActiveInstructor,

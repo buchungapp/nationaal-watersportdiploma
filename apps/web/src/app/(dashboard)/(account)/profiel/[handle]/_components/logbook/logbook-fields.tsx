@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
-import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
-import { CheckboxField } from "~/app/(dashboard)/_components/checkbox";
+import {
+  Checkbox,
+  CheckboxField,
+} from "~/app/(dashboard)/_components/checkbox";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Listbox, ListboxOption } from "~/app/(dashboard)/_components/listbox";

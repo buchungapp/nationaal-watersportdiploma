@@ -2,15 +2,15 @@
 
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
+import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
 import Disclosure from "../../_components/disclosure";
 import FaqDisclosure from "../../_components/faq/faq";
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: intentional
 function CustomLink(props: any) {
   const href = typeof props.href === "string" ? props.href : props.href.href;
 
@@ -46,8 +46,8 @@ function slugify(str: string) {
     .trim() // Remove whitespace from both ends of a string
     .replace(/\s+/g, "-") // Replace spaces with -
     .replace(/&/g, "-en-") // Replace & with 'and'
-    .replace(/[^\w\-]+/g, "") // Remove all non-word characters except for -
-    .replace(/\-\-+/g, "-"); // Replace multiple - with single -
+    .replace(/[^\w-]+/g, "") // Remove all non-word characters except for -
+    .replace(/--+/g, "-"); // Replace multiple - with single -
 }
 
 function createHeading(level: number) {

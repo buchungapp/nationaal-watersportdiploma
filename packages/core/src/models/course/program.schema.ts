@@ -10,7 +10,7 @@ export const insertSchema = createInsertSchema(s.program, {
       .trim()
       .toLowerCase()
       .min(3)
-      .regex(/^[a-z0-9\-]+$/),
+      .regex(/^[a-z0-9-]+$/),
   title: (schema) => schema.title.trim(),
   degreeId: (schema) => schema.degreeId.uuid(),
 });

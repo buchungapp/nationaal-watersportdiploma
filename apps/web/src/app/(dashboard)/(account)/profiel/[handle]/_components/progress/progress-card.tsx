@@ -16,17 +16,17 @@ import type { Student } from "@nawadi/core";
 import clsx from "clsx";
 import dayjs from "dayjs";
 import type React from "react";
-import { type PropsWithChildren, createContext, useContext } from "react";
+import { createContext, type PropsWithChildren, useContext } from "react";
 import Balancer from "react-wrap-balancer";
+import { Logo } from "~/app/_assets/logo";
+import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
+import { AnimatedWave } from "~/app/_components/animated-wave";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { BoatIcon } from "~/app/(dashboard)/_components/icons/boat-icon";
 import { CircleIcon } from "~/app/(dashboard)/_components/icons/circle-icon";
 import { MedailIcon } from "~/app/(dashboard)/_components/icons/medail-icon";
 import { TextLink } from "~/app/(dashboard)/_components/text";
-import { Logo } from "~/app/_assets/logo";
-import watersportverbondGray from "~/app/_assets/watersportverbond-white.png";
-import { AnimatedWave } from "~/app/_components/animated-wave";
 import { moduleTypeLabel } from "~/utils/labels";
 
 type CardType = "course" | "program" | "certificate";
@@ -189,6 +189,7 @@ export function ProgressCardHeader({
             mask: `url(${watersportverbondGray.src}) no-repeat center/contain`,
             WebkitMask: `url(${watersportverbondGray.src}) no-repeat center/contain`,
           }}
+          role="img"
           aria-label="Watersportverbond"
         />
         <Logo className={clsx("size-14 shrink-0", detail.text)} />
@@ -505,11 +506,7 @@ export function ProgressCardStatusSubList({
   return <ul className={clsx("pl-6", className)}>{children}</ul>;
 }
 
-export function ProgressCardStatusIcon({
-  progress,
-}: {
-  progress: number;
-}) {
+export function ProgressCardStatusIcon({ progress }: { progress: number }) {
   if (progress >= 100) {
     return <CheckCircleIcon className="size-5 text-green-500 flex-shrink-0" />;
   }

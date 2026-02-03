@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import { GridList } from "~/app/(dashboard)/_components/grid-list-v2";
 
 interface ScrollableGridListProps {

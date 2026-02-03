@@ -30,7 +30,7 @@ async function importArticle(
   const slug = articleFilename.replace(/\/page.mdx$/, "");
 
   return {
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: intentional
     id: slug.split("-").at(0)!,
     slug,
     ...article,

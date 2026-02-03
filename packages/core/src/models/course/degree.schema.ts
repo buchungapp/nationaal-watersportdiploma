@@ -9,7 +9,7 @@ export const insertSchema = createInsertSchema(s.degree, {
       .trim()
       .toLowerCase()
       .min(3)
-      .regex(/^[a-z0-9\-]+$/),
+      .regex(/^[a-z0-9-]+$/),
   title: (schema) => schema.title.trim(),
   rang: (schema) => schema.rang.int().positive(),
 });

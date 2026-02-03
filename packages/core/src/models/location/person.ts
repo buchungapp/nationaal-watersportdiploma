@@ -1,12 +1,12 @@
 import { schema as s } from "@nawadi/db";
 import {
-  type SQL,
   and,
   eq,
   exists,
   getTableColumns,
   inArray,
   isNull,
+  type SQL,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
 import { z } from "zod";

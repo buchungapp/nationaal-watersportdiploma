@@ -103,16 +103,14 @@ export async function ExternalCertificates({
               </DescriptionDetails>
               <DescriptionTerm>Opleiding</DescriptionTerm>
               <DescriptionDetails>{certificate.title}</DescriptionDetails>
-              {metadataEntries.length > 0 ? (
-                <>
-                  {metadataEntries.map(([key, value]) => (
+              {metadataEntries.length > 0
+                ? metadataEntries.map(([key, value]) => (
                     <React.Fragment key={key}>
                       <DescriptionTerm>{key}</DescriptionTerm>
                       <DescriptionDetails>{value}</DescriptionDetails>
                     </React.Fragment>
-                  ))}
-                </>
-              ) : null}
+                  ))
+                : null}
               {certificate.awardedAt ? (
                 <React.Fragment>
                   <DescriptionTerm>Behaald op</DescriptionTerm>

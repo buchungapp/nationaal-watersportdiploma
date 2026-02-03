@@ -1,11 +1,9 @@
 import { constants } from "@nawadi/lib";
+import { cacheLife } from "next/cache";
+import Image from "next/image";
 import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import watersportverbondWhite from "~/app/_assets/watersportverbond-white.png";
-
-import { cacheLife } from "next/cache";
-import Image from "next/image";
-import { Line, LineWave } from "~/app/(public)/_assets/wave";
 import NWDWordmark from "~/app/_components/brand/wordmark";
 import {
   Facebook,
@@ -14,6 +12,7 @@ import {
   TikTok,
   YouTube,
 } from "~/app/_components/socials";
+import { Line, LineWave } from "~/app/(public)/_assets/wave";
 
 function FooterLink({ href, children }: PropsWithChildren<{ href: string }>) {
   return (

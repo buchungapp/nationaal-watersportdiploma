@@ -1,6 +1,8 @@
 export default function NWDPreviousCWO({
   className = "",
-}: { className?: string }) {
+}: {
+  className?: string;
+}) {
   return (
     <svg
       width="204"

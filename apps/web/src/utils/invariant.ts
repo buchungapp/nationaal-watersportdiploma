@@ -8,7 +8,7 @@ export function invariant(
   condition: unknown,
   message?: string | (() => string),
 ): asserts condition {
-  // biome-ignore lint/complexity/noExtraBooleanCast: <explanation>
+  // biome-ignore lint/complexity/noExtraBooleanCast: intentional
   if (!Boolean(condition)) {
     const errorMessage = typeof message === "function" ? message() : message;
     throw new Error(`Invariant violation: ${errorMessage}`);

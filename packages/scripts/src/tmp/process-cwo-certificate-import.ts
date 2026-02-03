@@ -119,7 +119,7 @@ async function processRow(row: z.infer<typeof rowSchema>, locationId: string) {
     throw new Error("Multiple persons found");
   }
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: intentional
   const person = persons[0]!;
 
   await query.insert(schema.externalCertificate).values({

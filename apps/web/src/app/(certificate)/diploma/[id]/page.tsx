@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Button } from "~/app/(dashboard)/_components/button";
 import Logo from "~/app/_components/brand/logo";
 import {
   Facebook,
@@ -13,6 +12,7 @@ import {
   TikTok,
   YouTube,
 } from "~/app/_components/socials";
+import { Button } from "~/app/(dashboard)/_components/button";
 import dayjs from "~/lib/dayjs";
 import { retrieveCertificateById } from "~/lib/nwd";
 import { Text, TextLink } from "../../../(dashboard)/_components/text";

@@ -1,6 +1,7 @@
 import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import Balancer from "react-wrap-balancer";
+import { AnimatedWave } from "~/app/_components/animated-wave";
 import {
   GridList,
   gridContainer,
@@ -11,7 +12,6 @@ import {
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { AnimatedWave } from "~/app/_components/animated-wave";
 import { AddCertificate } from "./external-certificate/add-certificate";
 import { ExternalCertificatesList } from "./external-certificate/certificates-list";
 
@@ -78,7 +78,9 @@ function AddCertificateButtonFallback() {
 
 async function AddCertificateButton({
   personPromise,
-}: { personPromise: Promise<User.Person.$schema.Person> }) {
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
   const person = await personPromise;
 
   return <AddCertificate className="" personId={person.id} />;

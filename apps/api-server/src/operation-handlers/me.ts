@@ -4,7 +4,7 @@ import type * as application from "../application/index.js";
 
 export const me: api.server.MeOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (_incomingRequest, authentication) => {
   let id: string | undefined;
   // TODO make this more ergonomic
   if ("apiKey" in authentication && authentication.apiKey != null) {

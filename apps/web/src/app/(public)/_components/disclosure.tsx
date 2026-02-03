@@ -6,8 +6,8 @@ import {
   DisclosurePanel as HeadlessDisclosurePanel,
 } from "@headlessui/react";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
-import type { PropsWithChildren } from "react";
 import type React from "react";
+import type { PropsWithChildren } from "react";
 
 export default function Disclosure({
   button,

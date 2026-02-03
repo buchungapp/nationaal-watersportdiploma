@@ -2,9 +2,8 @@ import assert from "node:assert";
 import test from "node:test";
 import { withTestTransaction } from "../../contexts/index.js";
 import dayjs from "../../utils/dayjs.js";
-import { Degree, Discipline } from "../course/index.js";
-
 import { DEFAULT_TEST_TIMESTAMP, defaultTimestamps } from "../../utils/test.js";
+import { Degree, Discipline } from "../course/index.js";
 import { Course } from "../index.js";
 import * as Curriculum from "./curriculum.js";
 

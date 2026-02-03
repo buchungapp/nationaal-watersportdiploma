@@ -80,7 +80,7 @@ async function main() {
 
   const row = rowSchema.parse(answers);
 
-  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+  // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
   let user;
 
   if (row.email) {

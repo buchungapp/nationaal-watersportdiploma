@@ -4,7 +4,11 @@ export function AnimatedWave({
   offset = 0,
   spacing = 0,
   textColorClassName = "text-white",
-}: { offset?: number; spacing?: number; textColorClassName?: string }) {
+}: {
+  offset?: number;
+  spacing?: number;
+  textColorClassName?: string;
+}) {
   return (
     <div
       className={clsx(

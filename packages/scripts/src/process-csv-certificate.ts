@@ -14,6 +14,7 @@ import assert from "node:assert";
 import path from "node:path";
 import inquirer from "inquirer";
 import { z } from "zod";
+
 async function parseCsv(filePath: string) {
   try {
     const csvFilePath = path.resolve(filePath);
@@ -91,7 +92,7 @@ async function main(filePath: string) {
     try {
       console.info(`Processing ${row.Voornaam} ${row.Achternaam}`);
 
-      // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+      // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
       let user;
 
       if (row["E-mailadres"]) {

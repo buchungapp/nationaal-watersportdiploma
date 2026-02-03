@@ -1,10 +1,8 @@
+import type { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
-
 import { InlineButton } from "~/app/(public)/_components/style/buttons";
 import CopyToClipboard from "~/app/(public)/_components/style/copy-to-clipboard";
 import vertrouwenspersoon from "./_assets/IMG_3314.jpg";
-
-import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
   _props: unknown,

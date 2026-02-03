@@ -1,8 +1,5 @@
 import { AddressType } from "@googlemaps/google-maps-services-js";
-import {
-  cacheLife,
-  cacheTag,
-} from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { cache } from "react";
 import { listAllLocations } from "~/lib/nwd";
 

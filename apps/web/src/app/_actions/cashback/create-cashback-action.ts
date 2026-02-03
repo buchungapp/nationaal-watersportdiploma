@@ -5,8 +5,8 @@ import { zfd } from "zod-form-data";
 import { createCashback, listAllLocations } from "~/lib/nwd";
 import {
   ACCEPTED_IMAGE_TYPES,
-  MAX_FILE_SIZE,
   extractFileExtension,
+  MAX_FILE_SIZE,
 } from "../files";
 import { smellsLikeIban, validateIbanChecksum } from "../iban";
 import { actionClientWithMeta } from "../safe-action";

@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { type SQL, and } from "drizzle-orm";
+import { and, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
 import { singleRow } from "../../utils/data-helpers.js";

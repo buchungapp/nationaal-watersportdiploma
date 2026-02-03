@@ -1,10 +1,9 @@
 "use cache";
 import { cacheLife } from "next/cache";
-import PageHero from "../_components/style/page-hero";
-import SearchClient from "./_components/search-client";
-
 import type { PropsWithChildren } from "react";
 import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
+import PageHero from "../_components/style/page-hero";
+import SearchClient from "./_components/search-client";
 
 export default async function Layout({ children }: PropsWithChildren) {
   cacheLife("days");

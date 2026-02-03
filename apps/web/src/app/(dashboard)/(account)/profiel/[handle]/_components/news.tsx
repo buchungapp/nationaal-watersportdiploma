@@ -65,7 +65,10 @@ async function NewsContent({ categories }: { categories?: ArticleCategory[] }) {
 export async function News({
   className,
   categories,
-}: { className?: string; categories?: ArticleCategory[] }) {
+}: {
+  className?: string;
+  categories?: ArticleCategory[];
+}) {
   return (
     <StackedLayoutCard className={className}>
       <Subheading className="mb-3">Blijf op de hoogte</Subheading>

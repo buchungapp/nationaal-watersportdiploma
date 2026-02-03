@@ -35,9 +35,7 @@ async function PvbsTable(props: {
   );
 }
 
-async function CreateButton(props: {
-  params: Promise<{ location: string }>;
-}) {
+async function CreateButton(props: { params: Promise<{ location: string }> }) {
   const params = await props.params;
 
   return (

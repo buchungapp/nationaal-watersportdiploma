@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Breadcrumb from "~/app/(public)/_components/breadcrumb";
 import { Weight } from "~/app/_components/weight";
+import Breadcrumb from "~/app/(public)/_components/breadcrumb";
 import {
   listCurriculaByDiscipline,
   listProgramsForCourse,

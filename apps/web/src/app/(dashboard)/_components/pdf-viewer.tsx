@@ -29,7 +29,7 @@ export function PDFViewer({
     }
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     setDivSize();
     window.addEventListener("resize", setDivSize);

@@ -1,7 +1,6 @@
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
 import {
-  type SQL,
   and,
   countDistinct,
   eq,
@@ -9,6 +8,7 @@ import {
   getTableColumns,
   inArray,
   isNull,
+  type SQL,
   sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";
@@ -261,7 +261,7 @@ export const byIdOrHandle = wrapQuery(
 
       return {
         ...res,
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         handle: res.handle!,
         createdAt: dayjs(res.createdAt).toISOString(),
         updatedAt: dayjs(res.updatedAt).toISOString(),
@@ -461,7 +461,7 @@ export const list = wrapQuery(
       return {
         items: persons.map((person) => ({
           ...person,
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: intentional
           handle: person.handle!,
           createdAt: dayjs(person.createdAt).toISOString(),
           updatedAt: dayjs(person.updatedAt).toISOString(),
@@ -515,7 +515,7 @@ export const listLocationsByRole = wrapQuery(
         )
         .then(aggregate({ pkey: "locationId", fields: { roles: "role" } }));
 
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: intentional
       return result as any;
     },
   ),
@@ -798,7 +798,7 @@ export const mergePersons = wrapCommand(
 
                 await tx
                   .update(s.cohortAllocation)
-                  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  // biome-ignore lint/style/noNonNullAssertion: intentional
                   .set({ actorId: targetActor[0]!.id })
                   .where(eq(s.cohortAllocation.id, cohortAllocation.id));
               }

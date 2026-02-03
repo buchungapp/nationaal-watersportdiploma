@@ -4,6 +4,11 @@ import { parseAsString, useQueryState } from "nuqs";
 import { use, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import {
+  addBulkKwalificatiesAction,
+  type getAvailableKerntaakonderdelen,
+} from "~/app/_actions/kss/manage-kwalificaties";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -26,11 +31,6 @@ import { Select } from "~/app/(dashboard)/_components/select";
 import { Code, Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
-import {
-  addBulkKwalificatiesAction,
-  type getAvailableKerntaakonderdelen,
-} from "~/app/_actions/kss/manage-kwalificaties";
-import Spinner from "~/app/_components/spinner";
 import type { listCourses } from "~/lib/nwd";
 
 type KerntaakOnderdeel = Awaited<
@@ -90,7 +90,7 @@ export default function AddKwalificatieDialog({
     "onbekend" | "pvb_instructiegroep_basis"
   >("onbekend");
   const [opmerkingen, setOpmerkingen] = useState("");
-  const [courseQuery, setCourseQuery] = useState("");
+  const [_courseQuery, setCourseQuery] = useState("");
   const [onderdeelQuery, setOnderdeelQuery] = useState("");
 
   // Fetch instructiegroep data when hoofdcursus is selected

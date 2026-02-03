@@ -3,7 +3,7 @@ import "dotenv/config";
 import inquirer from "inquirer";
 
 async function main() {
-  const result = await inquirer.prompt([
+  const _result = await inquirer.prompt([
     {
       type: "input",
       name: "number",

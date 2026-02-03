@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
-import { getPersonById } from "~/lib/nwd";
-import { retrieveLocationByHandle } from "~/lib/nwd";
+import { getPersonById, retrieveLocationByHandle } from "~/lib/nwd";
 
 type PersonNameProps = {
   params: Promise<{

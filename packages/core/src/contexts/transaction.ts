@@ -2,9 +2,8 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 import * as db from "@nawadi/db";
 import { trace } from "@opentelemetry/api";
-import { useDatabase, withDatabase } from "./database.js";
-
 import type { PgTransactionConfig } from "drizzle-orm/pg-core";
+import { useDatabase, withDatabase } from "./database.js";
 
 // Initializes an instance of AsyncLocalStorage to store database transaction contexts.
 const storage = new AsyncLocalStorage<db.Transaction>();
@@ -119,7 +118,7 @@ export async function withTestTransaction<T>(
         throw error;
       }
     }
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: intentional
     return result!;
   });
 

@@ -99,7 +99,7 @@ export function InstagramEmbed({ url, caption }: InstagramEmbedProps) {
         onReady={handleScriptLoad}
       />
       <div
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional
         dangerouslySetInnerHTML={{
           __html: embedHTML,
         }}

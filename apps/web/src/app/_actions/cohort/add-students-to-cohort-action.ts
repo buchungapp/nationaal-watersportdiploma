@@ -4,16 +4,19 @@ import { revalidatePath } from "next/cache";
 import pLimit from "p-limit";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { addStudentToCohortByPersonId, setAllocationTags } from "~/lib/nwd";
-import { createStudentForLocation } from "~/lib/nwd";
+import {
+  addStudentToCohortByPersonId,
+  createStudentForLocation,
+  setAllocationTags,
+} from "~/lib/nwd";
 import { dateInput } from "../dates";
 import {
   COLUMN_MAPPING_WITH_TAG,
   type CSVData,
-  SELECT_LABEL,
   countriesSchema,
   csvColumnLiteral,
   csvDataSchema,
+  SELECT_LABEL,
 } from "../person/person-bulk-csv-mappings";
 import { actionClientWithMeta } from "../safe-action";
 import { voidActionSchema } from "../utils";
@@ -65,7 +68,7 @@ export const addStudentsToCohortAction = actionClientWithMeta
       }
 
       if (prevResult.data?.state === "parsed") {
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         return uploadPersons(locationId, cohortId, prevResult.data.persons!);
       }
 
@@ -91,8 +94,8 @@ async function parsePersonsFromCsvData(
   );
   const notSelectedIndices = Object.entries(indexToColumnSelection)
     .filter(([_, value]) => value === SELECT_LABEL)
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    .map(([key]) => Number.parseInt(key.split("-").pop()!));
+    // biome-ignore lint/style/noNonNullAssertion: intentional
+    .map(([key]) => Number.parseInt(key.split("-").pop()!, 10));
 
   const filteredData = csvData.rows.map((item) =>
     item.filter((_, index) => !notSelectedIndices.includes(index)),
@@ -126,7 +129,7 @@ async function parsePersonsFromCsvData(
 
     row.forEach((value, index) => {
       const column = selectedFields[index];
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: intentional
       const columnIndex = nonTagColumns.indexOf(column as any);
 
       if (columnIndex !== -1) {

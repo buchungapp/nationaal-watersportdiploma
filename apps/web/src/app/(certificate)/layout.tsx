@@ -4,13 +4,12 @@ import { clsx } from "clsx";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import "sonner/dist/styles.css";
-import { BASE_URL } from "~/constants";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Inter } from "next/font/google";
-
 import Analytics from "~/app/_components/analytics";
 import { CommonProviders } from "~/app/_components/providers";
+import { BASE_URL } from "~/constants";
 import "../globals.css";
 
 const inter = Inter({

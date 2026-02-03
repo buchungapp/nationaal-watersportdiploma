@@ -7,12 +7,12 @@ import {
   TrashIcon,
 } from "@heroicons/react/20/solid";
 import { useState } from "react";
-import { Button } from "~/app/(dashboard)/_components/button";
-import { Code } from "~/app/(dashboard)/_components/text";
 import type {
   getAvailableKerntaakonderdelen,
   getPersonKwalificaties,
 } from "~/app/_actions/kss/manage-kwalificaties";
+import { Button } from "~/app/(dashboard)/_components/button";
+import { Code } from "~/app/(dashboard)/_components/text";
 import type { listCourses } from "~/lib/nwd";
 import AddKwalificatieDialog from "./add-kwalificatie-dialog";
 import RemoveKwalificatieDialog from "./remove-kwalificatie-dialog";

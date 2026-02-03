@@ -3,6 +3,7 @@
 import { formatters } from "@nawadi/lib";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { updatePvbLeercoachAction } from "~/app/_actions/pvb/single-operations-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -16,7 +17,6 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
-import { updatePvbLeercoachAction } from "~/app/_actions/pvb/single-operations-action";
 
 interface Person {
   id: string;

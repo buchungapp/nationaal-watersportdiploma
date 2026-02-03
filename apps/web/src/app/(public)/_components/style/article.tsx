@@ -1,9 +1,9 @@
 import {
   Children,
   type ComponentProps,
-  type ReactElement,
   cloneElement,
   isValidElement,
+  type ReactElement,
 } from "react";
 import Balancer from "react-wrap-balancer";
 import { twMerge } from "tailwind-merge";
@@ -20,7 +20,7 @@ export default function Article({
 }) {
   const childrenWithProps = Children.map(children, (child) =>
     isValidElement(child)
-      ? // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      ? // biome-ignore lint/suspicious/noExplicitAny: intentional
         cloneElement(child as ReactElement<any>, {
           justify,
           ...(child.props as object),

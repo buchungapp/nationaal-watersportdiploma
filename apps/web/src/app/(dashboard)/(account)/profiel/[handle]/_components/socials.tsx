@@ -1,9 +1,9 @@
 import { constants } from "@nawadi/lib";
 import clsx from "clsx";
+import { Instagram, LinkedIn, TikTok } from "~/app/_components/socials";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { StackedLayoutCard } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { Instagram, LinkedIn, TikTok } from "~/app/_components/socials";
 
 export function Socials({ className }: { className?: string }) {
   return (

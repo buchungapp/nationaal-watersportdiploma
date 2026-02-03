@@ -8,7 +8,7 @@ export const insertSchema = createInsertSchema(s.module, {
       .trim()
       .toLowerCase()
       .min(3)
-      .regex(/^[a-z0-9\-]+$/),
+      .regex(/^[a-z0-9-]+$/),
   title: (schema) => schema.title.trim(),
   weight: (schema) => schema.weight.int().min(1).optional(),
 });

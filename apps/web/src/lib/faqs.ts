@@ -35,11 +35,7 @@ interface FaqFilters {
   featured?: true;
 }
 
-async function retrieveQuestions({
-  filter,
-}: {
-  filter?: FaqFilters;
-} = {}) {
+async function retrieveQuestions({ filter }: { filter?: FaqFilters } = {}) {
   try {
     const result = await service.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_FAQ_SPREADSHEET_ID,
@@ -79,7 +75,7 @@ async function retrieveQuestions({
         }
 
         validQuestions.push(parsed);
-      } catch (err) {}
+      } catch (_err) {}
     }
 
     return validQuestions.map(([category, question, answer, featured]) => ({
@@ -95,11 +91,7 @@ async function retrieveQuestions({
   }
 }
 
-export async function listFaqs({
-  filter,
-}: {
-  filter?: FaqFilters;
-} = {}) {
+export async function listFaqs({ filter }: { filter?: FaqFilters } = {}) {
   "use cache";
   cacheLife("days");
 

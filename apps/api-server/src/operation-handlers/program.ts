@@ -3,7 +3,7 @@ import type * as application from "../application/index.js";
 
 export const listPrograms: api.server.ListProgramsOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (_incomingRequest, _authentication) => {
   // const list = await core.Program.list()
 
   // const listEntity = list.map((item) => ({

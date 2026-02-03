@@ -81,7 +81,7 @@ export function useSorting({
     parseAsString.withDefault(serializeSorting(defaultSorting)),
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const wrapper = useCallback(
     (
       value: SortingState | ((old: SortingState) => SortingState | null) | null,
@@ -96,7 +96,7 @@ export function useSorting({
     [setSorting, sorting],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const options = useMemo(
     () => ({
       state: {

@@ -3,8 +3,8 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
-import { Button } from "~/app/(dashboard)/_components/button";
 import { removeKwalificatieAction } from "~/app/_actions/kss/manage-kwalificaties";
+import { Button } from "~/app/(dashboard)/_components/button";
 
 type Kwalificatie = {
   personId: string;

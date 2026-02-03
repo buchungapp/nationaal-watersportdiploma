@@ -3,7 +3,6 @@ import { DocumentTextIcon } from "@heroicons/react/20/solid";
 import { createLoader, parseAsString } from "nuqs/server";
 import prettyBytes from "pretty-bytes";
 import { type PropsWithChildren, Suspense } from "react";
-import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -16,6 +15,7 @@ import {
 } from "~/app/(dashboard)/_components/table";
 import { PlaceholderTableRows } from "~/app/(dashboard)/_components/table-content";
 import { TextLink } from "~/app/(dashboard)/_components/text";
+import Search from "~/app/(dashboard)/(management)/_components/search";
 import dayjs from "~/lib/dayjs";
 import { listKnowledgeCenterDocuments } from "~/lib/nwd";
 

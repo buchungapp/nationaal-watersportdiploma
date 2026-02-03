@@ -10,6 +10,10 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  createInstructiegroep,
+  deleteInstructiegroep,
+} from "~/app/_actions/kss/instructiegroep";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -44,10 +48,6 @@ import {
   TableRowSelection,
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
-import {
-  createInstructiegroep,
-  deleteInstructiegroep,
-} from "~/app/_actions/kss/instructiegroep";
 import InstructiegroepDialog from "./instructiegroep-dialog";
 
 type Instructiegroep = {

@@ -1,14 +1,13 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
-import type React from "react";
-
 import {
   Disclosure,
   DisclosureButton,
   DisclosurePanel,
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
+import type React from "react";
+import type { PropsWithChildren } from "react";
 
 export default function FaqDisclosure({
   question,

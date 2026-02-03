@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
 import { notFound } from "next/navigation";
 import React, { Suspense } from "react";
+import { Weight } from "~/app/_components/weight";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   CompetencyTypeBadge,
@@ -11,7 +12,6 @@ import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
-import { Weight } from "~/app/_components/weight";
 import dayjs from "~/lib/dayjs";
 import {
   countStartedStudentsForCurriculum,

@@ -217,7 +217,7 @@ async function main() {
     try {
       program = await programPromise;
       assert(program, "Program is expected to exist");
-    } catch (error) {
+    } catch (_error) {
       console.error(`Program not found: ${programHandle}`);
       continue;
     }
@@ -317,7 +317,7 @@ async function main() {
     await Curriculum.linkModule({
       curriculumId,
       moduleId,
-    }).catch((error) => {
+    }).catch((_error) => {
       console.error(
         `Error linking module: ${moduleId} to curriculum: ${curriculumId}`,
       );

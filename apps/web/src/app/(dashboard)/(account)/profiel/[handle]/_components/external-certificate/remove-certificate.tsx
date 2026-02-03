@@ -2,6 +2,8 @@
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { removeExternalCertificateAction } from "~/app/_actions/certificate/remove-external-certificate-action";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -14,8 +16,6 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
-import { removeExternalCertificateAction } from "~/app/_actions/certificate/remove-external-certificate-action";
-import Spinner from "~/app/_components/spinner";
 import type { ExternalCertificate } from "./certificates-list";
 
 export function RemoveCertificateButton() {

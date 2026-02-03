@@ -1,7 +1,6 @@
 import assert from "node:assert";
 import { schema as s } from "@nawadi/db";
 import {
-  type SQLWrapper,
   and,
   asc,
   eq,
@@ -9,6 +8,7 @@ import {
   getTableColumns,
   inArray,
   isNull,
+  type SQLWrapper,
 } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
@@ -179,7 +179,7 @@ export const fromHandle = wrapQuery(
 
     const [course, degree] = await Promise.all([
       findOneCourse({
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         id: program.courseId!,
       }),
       Degree.fromId(program.degreeId),
@@ -214,7 +214,7 @@ export const fromId = wrapQuery(
     }
 
     const [course, degree] = await Promise.all([
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       findOneCourse({ id: program.courseId! }),
       Degree.fromId(program.degreeId),
     ]);

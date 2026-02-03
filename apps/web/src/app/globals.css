@@ -6,13 +6,14 @@
 @import "./style/destructive.css";
 @import "./style/utilities.css";
 
-@config '../../tailwind.config.ts';
+@config "../../tailwind.config.ts";
 
 @plugin "@tailwindcss/typography";
 @plugin "@headlessui/tailwindcss";
 
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 

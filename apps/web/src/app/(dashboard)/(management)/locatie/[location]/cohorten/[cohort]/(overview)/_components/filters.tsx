@@ -22,7 +22,7 @@ export function SetView({
   );
 
   return (
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: intentional
     <Select value={value} onChange={(e) => setValue(e.target.value as any)}>
       {children}
     </Select>
