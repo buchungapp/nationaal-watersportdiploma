@@ -4,7 +4,7 @@ import type * as application from "../application/index.js";
 
 export const getLocationCertificates: api.server.GetLocationCertificatesOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (incomingRequest, _authentication) => {
   const { locationKey } = incomingRequest.parameters;
 
   // TODO get type from core
@@ -27,7 +27,7 @@ export const getLocationCertificates: api.server.GetLocationCertificatesOperatio
   }
 
   // TODO actually list certificates
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: intentional
   const certificateList: any[] = await (core.Certificate as any).byLocation(
     locationItem.id,
   );
@@ -48,7 +48,7 @@ export const getLocationCertificates: api.server.GetLocationCertificatesOperatio
 
 export const createLocationCertificate: api.server.CreateLocationCertificateOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) =>
+> = async (incomingRequest, _authentication) =>
   core.withTransaction(async () => {
     const { locationKey } = incomingRequest.parameters;
     const requestEntity = await incomingRequest.entity();
@@ -73,7 +73,7 @@ export const createLocationCertificate: api.server.CreateLocationCertificateOper
     }
 
     // TODO actually create a certificate
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: intentional
     const certificateItem: any = (core.Certificate as any).create({
       locationId: locationItem.id,
       handle: requestEntity.handle,

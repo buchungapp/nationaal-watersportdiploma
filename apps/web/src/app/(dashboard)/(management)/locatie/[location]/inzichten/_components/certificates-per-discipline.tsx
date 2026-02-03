@@ -53,7 +53,7 @@ async function CertificatesPerDisciplineContent(
             certificates: [],
             ...disciplines.reduce(
               (perDiscipline, discipline) => {
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                // biome-ignore lint/style/noNonNullAssertion: intentional
                 perDiscipline[discipline.title!] = 0;
                 return perDiscipline;
               },
@@ -63,11 +63,11 @@ async function CertificatesPerDisciplineContent(
         }
 
         acc[isoKey]?.certificates.push(certificate);
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         acc[isoKey]!.count += 1;
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         (acc[isoKey]![
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: intentional
           certificate.discipline.title!
         ] as number) += 1;
 
@@ -129,7 +129,7 @@ async function CertificatesPerDisciplineContent(
             disciplines
               .filter((discipline) => {
                 return certificatesPerWeek.some(
-                  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                  // biome-ignore lint/style/noNonNullAssertion: intentional
                   (week) => (week[discipline.title!]! as number) > 0,
                 );
               })

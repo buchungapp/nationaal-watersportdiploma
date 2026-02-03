@@ -8,7 +8,7 @@ export const insertSchema = createInsertSchema(s.cohort, {
       .trim()
       .toLowerCase()
       .min(3)
-      .regex(/^[a-z0-9\-]+$/),
+      .regex(/^[a-z0-9-]+$/),
   label: (schema) => schema.label.trim(),
   locationId: (schema) => schema.locationId.uuid(),
 });

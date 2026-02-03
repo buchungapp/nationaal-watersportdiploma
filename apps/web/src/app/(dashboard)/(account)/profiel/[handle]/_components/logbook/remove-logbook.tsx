@@ -2,6 +2,8 @@
 import { useAction } from "next-safe-action/hooks";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { removeLogbookAction } from "~/app/_actions/logbook/remove-logbook-action";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -10,8 +12,6 @@ import {
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
 import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
-import { removeLogbookAction } from "~/app/_actions/logbook/remove-logbook-action";
-import Spinner from "~/app/_components/spinner";
 import type { LogbookType } from "./logbook-table";
 
 export function RemoveLogbook({

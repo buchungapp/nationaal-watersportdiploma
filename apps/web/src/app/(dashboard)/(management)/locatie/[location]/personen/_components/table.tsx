@@ -26,6 +26,7 @@ import type {
   listPersonsForLocationWithPagination,
 } from "~/lib/nwd";
 import PersonRoleBadge from "../../_components/person-role-badge";
+
 type Person = Awaited<
   ReturnType<typeof listPersonsForLocationWithPagination>
 >["items"][number];

@@ -4,13 +4,13 @@ import { MinusIcon, PlusIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { bulkCreateBeoordelingscriteria } from "~/app/_actions/kss/kwalificatieprofiel";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Dialog } from "~/app/(dashboard)/_components/dialog";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import { bulkCreateBeoordelingscriteria } from "~/app/_actions/kss/kwalificatieprofiel";
 
 interface BeoordelingscriteriumInput {
   id: string;
@@ -96,7 +96,7 @@ export function BeoordelingscriteriaBulkModal({
       toast.success(`${validCriteria.length} beoordelingscriteria toegevoegd`);
       onClose();
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       toast.error("Fout bij toevoegen beoordelingscriteria");
     } finally {
       setIsSubmitting(false);

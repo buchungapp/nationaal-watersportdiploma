@@ -3,8 +3,8 @@
 import clsx from "clsx";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useTransition } from "react";
-import { Input } from "~/app/(dashboard)/_components/input";
 import Spinner from "~/app/_components/spinner";
+import { Input } from "~/app/(dashboard)/_components/input";
 
 export default function Search({
   placeholder = "Zoeken...",

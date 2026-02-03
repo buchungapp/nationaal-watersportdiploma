@@ -34,7 +34,7 @@ async function ProgramTable(props: {
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredPrograms = results.map(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       (result) => programs.find((program) => program.id === result)!,
     );
   }

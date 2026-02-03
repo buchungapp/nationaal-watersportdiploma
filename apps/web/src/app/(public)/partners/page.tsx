@@ -1,10 +1,9 @@
-import PageHero from "~/app/(public)/_components/style/page-hero";
+import type { Metadata, ResolvingMetadata } from "next";
 
 import Image from "next/image";
+import PageHero from "~/app/(public)/_components/style/page-hero";
 import { Prose } from "../_components/prose";
 import watersportverbond from "./_assets/watersportverbond.png";
-
-import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
   _props: unknown,

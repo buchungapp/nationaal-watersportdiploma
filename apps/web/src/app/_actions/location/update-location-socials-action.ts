@@ -3,8 +3,8 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { updateLocationDetails } from "~/lib/nwd";
 import type { SocialPlatform } from "~/lib/nwd";
+import { updateLocationDetails } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 const updateLocationSocialsSchema = zfd.formData({
@@ -29,7 +29,7 @@ const updateLocationSocialsArgsSchema: [locationId: z.ZodString] = [
 
 export const updateLocationSocialsAction = actionClientWithMeta
   .metadata({ name: "update-location-socials" })
-  .schema(updateLocationSocialsSchema)
+  .inputSchema(updateLocationSocialsSchema)
   .bindArgsSchemas(updateLocationSocialsArgsSchema)
   .action(
     async ({ parsedInput: parsed, bindArgsParsedInputs: [locationId] }) => {
@@ -43,7 +43,7 @@ export const updateLocationSocialsAction = actionClientWithMeta
           )
           .map(([key, url]) => ({
             platform: key.replace("socials-", "") as SocialPlatform,
-            // biome-ignore lint/style/noNonNullAssertion: <explanation>
+            // biome-ignore lint/style/noNonNullAssertion: intentional
             url: url!,
           })),
         googlePlaceId: parsed.googlePlaceId,
@@ -52,6 +52,6 @@ export const updateLocationSocialsAction = actionClientWithMeta
       await updateLocationDetails(locationId, data);
 
       revalidatePath("/locatie/[location]/instellingen", "page");
-      revalidateTag("locations");
+      revalidateTag("locations", { expire: 0 });
     },
   );

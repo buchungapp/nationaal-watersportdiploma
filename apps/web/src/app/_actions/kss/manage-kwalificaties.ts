@@ -19,7 +19,7 @@ const addKwalificatieSchema = z.object({
 
 export const addKwalificatieAction = actionClientWithMeta
   .metadata({ name: "kss.add-kwalificatie" })
-  .schema(addKwalificatieSchema)
+  .inputSchema(addKwalificatieSchema)
   .action(async ({ parsedInput: input }) => {
     const user = await getUserOrThrow();
 
@@ -78,7 +78,7 @@ const removeKwalificatieSchema = z.object({
 
 export const removeKwalificatieAction = actionClientWithMeta
   .metadata({ name: "kss.remove-kwalificatie" })
-  .schema(removeKwalificatieSchema)
+  .inputSchema(removeKwalificatieSchema)
   .action(async ({ parsedInput: input }) => {
     const user = await getUserOrThrow();
 
@@ -124,7 +124,7 @@ const addBulkKwalificatiesSchema = z.object({
 
 export const addBulkKwalificatiesAction = actionClientWithMeta
   .metadata({ name: "kss.add-bulk-kwalificaties" })
-  .schema(addBulkKwalificatiesSchema)
+  .inputSchema(addBulkKwalificatiesSchema)
   .action(async ({ parsedInput: input }) => {
     const user = await getUserOrThrow();
 

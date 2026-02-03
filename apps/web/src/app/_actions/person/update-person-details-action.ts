@@ -32,7 +32,7 @@ export const updatePersonDetailsAction = actionClientWithMeta
   .metadata({
     name: "update-person-details",
   })
-  .schema(updatePersonDetailsSchema)
+  .inputSchema(updatePersonDetailsSchema)
   .bindArgsSchemas(updatePersonDetailsArgsSchema)
   .action(
     async ({

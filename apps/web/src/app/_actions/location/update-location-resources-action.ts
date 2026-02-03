@@ -22,7 +22,7 @@ const updateLocationResourcesArgsSchema: [locationId: z.ZodString] = [
 
 export const updateLocationResourcesAction = actionClientWithMeta
   .metadata({ name: "update-location-resources" })
-  .schema(updateLocationResourcesSchema)
+  .inputSchema(updateLocationResourcesSchema)
   .bindArgsSchemas(updateLocationResourcesArgsSchema)
   .action(
     async ({
@@ -30,6 +30,6 @@ export const updateLocationResourcesAction = actionClientWithMeta
       bindArgsParsedInputs: [locationId],
     }) => {
       await updateLocationResources(locationId, { gearTypes, disciplines });
-      revalidateTag(`${locationId}-resource-link`);
+      revalidateTag(`${locationId}-resource-link`, { expire: 0 });
     },
   );

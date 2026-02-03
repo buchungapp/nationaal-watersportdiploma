@@ -5,8 +5,8 @@ import {
 } from "@heroicons/react/16/solid";
 import clsx from "clsx";
 import Link from "next/link";
-import type { PropsWithChildren } from "react";
 import type React from "react";
+import type { PropsWithChildren } from "react";
 import { Dropdown, DropdownButton, DropdownMenu } from "./dropdown";
 
 export const gridContainer = "@container/grid-list";

@@ -18,7 +18,7 @@ export const removeLogbookAction = actionClientWithMeta
   .metadata({
     name: "remove-logbook",
   })
-  .schema(voidActionSchema)
+  .inputSchema(voidActionSchema)
   .bindArgsSchemas(removeLogbookArgsSchema)
   .action(async ({ bindArgsParsedInputs: [personId, logbookId] }) => {
     if (Array.isArray(logbookId)) {

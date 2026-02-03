@@ -8,6 +8,9 @@ import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { addStudentToCohortAction } from "~/app/_actions/cohort/add-student-to-cohort-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -30,10 +33,6 @@ import {
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { usePersonsForLocation } from "~/app/(dashboard)/_hooks/swr/use-persons-for-location";
-import { addStudentToCohortAction } from "~/app/_actions/cohort/add-student-to-cohort-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import { listCountries } from "../_actions/fetch";
 
@@ -69,10 +68,6 @@ function addStudentToCohortErrorMessage(
 
   if (error.validationErrors) {
     return "Een van de velden is niet correct ingevuld.";
-  }
-
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
   }
 
   return null;
@@ -123,203 +118,201 @@ function CreateDialog({ locationId, cohortId, isOpen, setIsOpen }: Props) {
     throw new Error("Person list data must be available through fallback");
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={close}>
-        <DialogTitle>Cursist toevoegen</DialogTitle>
+    <Dialog open={isOpen} onClose={close}>
+      <DialogTitle>Cursist toevoegen</DialogTitle>
 
-        <form action={execute}>
-          <Field className="max-w-md">
-            <Label>Vind een bestaande</Label>
-            <div className="relative w-full">
-              <Combobox
-                name="person"
-                options={searchedStudents.items}
-                value={selectedStudent}
-                onChange={setSelectedStudent}
-                displayValue={(person) =>
-                  !person
-                    ? ""
-                    : [person.firstName, person.lastNamePrefix, person.lastName]
-                        .filter(Boolean)
-                        .join(" ")
-                }
-                invalid={
-                  result?.validationErrors &&
-                  "person[id]" in result.validationErrors &&
-                  !!result.validationErrors["person[id]"]
-                }
-                setQuery={setPersonQuery}
-                filter={() => true}
-              >
-                {(person) => (
-                  <ComboboxOption
-                    key={person.id}
-                    value={person}
-                    className="inset-x-0"
-                  >
-                    <ComboboxLabel>
-                      <div className="flex">
-                        <span className={clsx("truncate")}>
-                          {[
-                            person.firstName,
-                            person.lastNamePrefix,
-                            person.lastName,
-                          ]
-                            .filter(Boolean)
-                            .join(" ")}
-                        </span>
-                        <span
-                          className={clsx(
-                            "ml-2 text-slate-500 group-data-active/option:text-white truncate",
-                          )}
-                        >
-                          {person.dateOfBirth
-                            ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
-                            : null}
-                        </span>
-                      </div>
-                    </ComboboxLabel>
-                  </ComboboxOption>
-                )}
-              </Combobox>
-              {isPersonsLoading && (
-                <div className="right-8 absolute inset-y-0 flex items-center">
-                  <Spinner />
-                </div>
+      <form action={execute}>
+        <Field className="max-w-md">
+          <Label>Vind een bestaande</Label>
+          <div className="relative w-full">
+            <Combobox
+              name="person"
+              options={searchedStudents.items}
+              value={selectedStudent}
+              onChange={setSelectedStudent}
+              displayValue={(person) =>
+                !person
+                  ? ""
+                  : [person.firstName, person.lastNamePrefix, person.lastName]
+                      .filter(Boolean)
+                      .join(" ")
+              }
+              invalid={
+                result?.validationErrors &&
+                "person[id]" in result.validationErrors &&
+                !!result.validationErrors["person[id]"]
+              }
+              setQuery={setPersonQuery}
+              filter={() => true}
+            >
+              {(person) => (
+                <ComboboxOption
+                  key={person.id}
+                  value={person}
+                  className="inset-x-0"
+                >
+                  <ComboboxLabel>
+                    <div className="flex">
+                      <span className={clsx("truncate")}>
+                        {[
+                          person.firstName,
+                          person.lastNamePrefix,
+                          person.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      </span>
+                      <span
+                        className={clsx(
+                          "ml-2 text-slate-500 group-data-active/option:text-white truncate",
+                        )}
+                      >
+                        {person.dateOfBirth
+                          ? dayjs(person.dateOfBirth).format("DD-MM-YYYY")
+                          : null}
+                      </span>
+                    </div>
+                  </ComboboxLabel>
+                </ComboboxOption>
               )}
-            </div>
-          </Field>
+            </Combobox>
+            {isPersonsLoading && (
+              <div className="right-8 absolute inset-y-0 flex items-center">
+                <Spinner />
+              </div>
+            )}
+          </div>
+        </Field>
 
-          <Divider className="my-6" />
-          <Subheading>Maak een nieuwe</Subheading>
+        <Divider className="my-6" />
+        <Subheading>Maak een nieuwe</Subheading>
 
-          <DialogBody>
-            <Fieldset disabled={!!selectedStudent}>
-              <FieldGroup>
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
-                  <Field>
-                    <Label>Voornaam</Label>
-                    <Input
-                      name="firstName"
-                      invalid={
-                        result?.validationErrors &&
-                        "firstName" in result.validationErrors &&
-                        !!result.validationErrors.firstName
-                      }
-                      required
-                      minLength={1}
-                      defaultValue={getInputValue("firstName")}
-                    />
-                  </Field>
-                  <Field>
-                    <Label>Tussenvoegsel</Label>
-                    <Input
-                      name="lastNamePrefix"
-                      invalid={
-                        result?.validationErrors &&
-                        "lastNamePrefix" in result.validationErrors &&
-                        !!result.validationErrors.lastNamePrefix
-                      }
-                      defaultValue={getInputValue("lastNamePrefix")}
-                    />
-                  </Field>
-                  <Field>
-                    <Label>Achternaam</Label>
-                    <Input
-                      name="lastName"
-                      invalid={
-                        result?.validationErrors &&
-                        "lastName" in result.validationErrors &&
-                        !!result.validationErrors.lastName
-                      }
-                      required
-                      minLength={1}
-                      defaultValue={getInputValue("lastName")}
-                    />
-                  </Field>
-                </div>
+        <DialogBody>
+          <Fieldset disabled={!!selectedStudent}>
+            <FieldGroup>
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
+                <Field>
+                  <Label>Voornaam</Label>
+                  <Input
+                    name="firstName"
+                    invalid={
+                      result?.validationErrors &&
+                      "firstName" in result.validationErrors &&
+                      !!result.validationErrors.firstName
+                    }
+                    required
+                    minLength={1}
+                    defaultValue={getInputValue("firstName")}
+                  />
+                </Field>
+                <Field>
+                  <Label>Tussenvoegsel</Label>
+                  <Input
+                    name="lastNamePrefix"
+                    invalid={
+                      result?.validationErrors &&
+                      "lastNamePrefix" in result.validationErrors &&
+                      !!result.validationErrors.lastNamePrefix
+                    }
+                    defaultValue={getInputValue("lastNamePrefix")}
+                  />
+                </Field>
+                <Field>
+                  <Label>Achternaam</Label>
+                  <Input
+                    name="lastName"
+                    invalid={
+                      result?.validationErrors &&
+                      "lastName" in result.validationErrors &&
+                      !!result.validationErrors.lastName
+                    }
+                    required
+                    minLength={1}
+                    defaultValue={getInputValue("lastName")}
+                  />
+                </Field>
+              </div>
 
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-5">
-                  <Field className="sm:col-span-3">
-                    <Label>E-mail</Label>
-                    <Input
-                      name="email"
-                      type="email"
-                      invalid={
-                        result?.validationErrors &&
-                        "email" in result.validationErrors &&
-                        !!result.validationErrors.email
-                      }
-                      required
-                      defaultValue={getInputValue("email")}
-                    />
-                  </Field>
-                  <Field className="sm:col-span-2">
-                    <Label>Geboortedatum</Label>
-                    <Input
-                      name="dateOfBirth"
-                      type="date"
-                      invalid={
-                        result?.validationErrors &&
-                        "dateOfBirth" in result.validationErrors &&
-                        !!result.validationErrors.dateOfBirth
-                      }
-                      required
-                      defaultValue={getInputValue("dateOfBirth")}
-                    />
-                  </Field>
-                </div>
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-5">
+                <Field className="sm:col-span-3">
+                  <Label>E-mail</Label>
+                  <Input
+                    name="email"
+                    type="email"
+                    invalid={
+                      result?.validationErrors &&
+                      "email" in result.validationErrors &&
+                      !!result.validationErrors.email
+                    }
+                    required
+                    defaultValue={getInputValue("email")}
+                  />
+                </Field>
+                <Field className="sm:col-span-2">
+                  <Label>Geboortedatum</Label>
+                  <Input
+                    name="dateOfBirth"
+                    type="date"
+                    invalid={
+                      result?.validationErrors &&
+                      "dateOfBirth" in result.validationErrors &&
+                      !!result.validationErrors.dateOfBirth
+                    }
+                    required
+                    defaultValue={getInputValue("dateOfBirth")}
+                  />
+                </Field>
+              </div>
 
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
-                  <Field>
-                    <Label>Geboorteplaats</Label>
-                    <Input
-                      name="birthCity"
-                      invalid={
-                        result?.validationErrors &&
-                        "birthCity" in result.validationErrors &&
-                        !!result.validationErrors.birthCity
-                      }
-                      required
-                      defaultValue={getInputValue("birthCity")}
-                    />
-                  </Field>
-                  <Field>
-                    <Label>Geboorteland</Label>
-                    <Combobox
-                      name="birthCountry"
-                      invalid={
-                        result?.validationErrors &&
-                        "birthCountry" in result.validationErrors &&
-                        !!result.validationErrors.birthCountry
-                      }
-                      options={countries}
-                      displayValue={(country) => country?.name}
-                      defaultValue={countries.find(
-                        (country) =>
-                          country.code === getInputValue("birthCountry")?.code,
-                      )}
-                    >
-                      {(country) => (
-                        <ComboboxOption key={country.code} value={country}>
-                          <ComboboxLabel>{country.name}</ComboboxLabel>
-                        </ComboboxOption>
-                      )}
-                    </Combobox>
-                  </Field>
-                </div>
-              </FieldGroup>
-            </Fieldset>
-          </DialogBody>
-          <DialogActions>
-            <Button plain onClick={close}>
-              Sluiten
-            </Button>
-            <SubmitButton />
-          </DialogActions>
-        </form>
-      </Dialog>
-    </>
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
+                <Field>
+                  <Label>Geboorteplaats</Label>
+                  <Input
+                    name="birthCity"
+                    invalid={
+                      result?.validationErrors &&
+                      "birthCity" in result.validationErrors &&
+                      !!result.validationErrors.birthCity
+                    }
+                    required
+                    defaultValue={getInputValue("birthCity")}
+                  />
+                </Field>
+                <Field>
+                  <Label>Geboorteland</Label>
+                  <Combobox
+                    name="birthCountry"
+                    invalid={
+                      result?.validationErrors &&
+                      "birthCountry" in result.validationErrors &&
+                      !!result.validationErrors.birthCountry
+                    }
+                    options={countries}
+                    displayValue={(country) => country?.name}
+                    defaultValue={countries.find(
+                      (country) =>
+                        country.code === getInputValue("birthCountry")?.code,
+                    )}
+                  >
+                    {(country) => (
+                      <ComboboxOption key={country.code} value={country}>
+                        <ComboboxLabel>{country.name}</ComboboxLabel>
+                      </ComboboxOption>
+                    )}
+                  </Combobox>
+                </Field>
+              </div>
+            </FieldGroup>
+          </Fieldset>
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={close}>
+            Sluiten
+          </Button>
+          <SubmitButton />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
 

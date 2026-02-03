@@ -26,7 +26,7 @@ export default function Spinner({
       >
         {[...Array(12)].map((_, i) => (
           <div
-            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+            // biome-ignore lint/suspicious/noArrayIndexKey: intentional
             key={i}
             style={{
               animationDelay: `${-1.2 + 0.1 * i}s`,

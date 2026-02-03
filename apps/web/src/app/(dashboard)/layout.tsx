@@ -1,13 +1,13 @@
 import { clsx } from "clsx";
 import { Toaster } from "sonner";
+import "sonner/dist/styles.css";
 
+import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { BASE_URL } from "~/constants";
-
-import { constants } from "@nawadi/lib";
 import Analytics from "../_components/analytics";
 import { CommonProviders } from "../_components/providers";
 import { ImpersonationBarWrapper } from "./_components/impersonation-bar-wrapper";

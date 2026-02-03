@@ -1,7 +1,6 @@
+import type { Metadata, ResolvingMetadata } from "next";
 import { Suspense } from "react";
 import PageHero from "../_components/style/page-hero";
-
-import type { Metadata, ResolvingMetadata } from "next";
 import ArticlesList from "./_components/articles-list";
 import ArticlesLoading from "./_components/articles-loading";
 import SideNavActueel from "./_components/side-nav";

@@ -18,7 +18,7 @@ export const updatePvbLeercoachAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-leercoach",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       handle: z.string(),
@@ -47,7 +47,7 @@ export const updatePvbBeoordelaarAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-beoordelaar",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       handle: z.string(),
@@ -76,7 +76,7 @@ export const updatePvbStartTimeAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-start-time",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       handle: z.string(),
@@ -105,7 +105,7 @@ export const grantPvbLeercoachPermissionAction = actionClientWithMeta
   .metadata({
     name: "grant-pvb-leercoach-permission",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       handle: z.string(),
@@ -134,7 +134,7 @@ export const submitPvbAanvraagAction = actionClientWithMeta
   .metadata({
     name: "submit-pvb-aanvraag",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       handle: z.string(),
@@ -162,7 +162,7 @@ export const withdrawPvbAanvraagAction = actionClientWithMeta
   .metadata({
     name: "withdraw-pvb-aanvraag",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       handle: z.string(),

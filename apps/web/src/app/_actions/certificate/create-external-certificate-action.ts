@@ -25,7 +25,7 @@ export const createExternalCertificateAction = actionClientWithMeta
   .metadata({
     name: "create-external-certificate",
   })
-  .schema(createExternalCertificateSchema)
+  .inputSchema(createExternalCertificateSchema)
   .bindArgsSchemas(createExternalCertificateArgsSchema)
   .action(async ({ parsedInput: data, bindArgsParsedInputs: [personId] }) => {
     await createExternalCertificate({

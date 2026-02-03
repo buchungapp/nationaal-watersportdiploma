@@ -8,7 +8,7 @@ export const insertSchema = createInsertSchema(s.discipline, {
       .trim()
       .toLowerCase()
       .min(3)
-      .regex(/^[a-z0-9\-]+$/),
+      .regex(/^[a-z0-9-]+$/),
   title: (schema) => schema.title.trim(),
 });
 export type Input = z.input<typeof insertSchema>;

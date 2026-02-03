@@ -1,8 +1,8 @@
 import path from "node:path";
-import { type NodePgDatabase, drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import pg from "pg";
 import type { PoolConfig } from "pg";
+import pg from "pg";
 import { projectRoot } from "./root.js";
 import * as schema from "./schema/index.js";
 import type { FullSchema } from "./types.js";

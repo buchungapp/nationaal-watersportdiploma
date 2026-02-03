@@ -1017,7 +1017,7 @@ async function processRowAutomated(
 async function processRowWithPersonId(
   row: z.infer<typeof rowSchema>,
   personId: string,
-  rowIndex: number,
+  _rowIndex: number,
 ) {
   const qualification = {
     name: row["Kwalificatie: Naam van Kwalificatie"],

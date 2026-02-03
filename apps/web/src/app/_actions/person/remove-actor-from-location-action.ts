@@ -19,7 +19,7 @@ export const removeActorFromLocationAction = actionClientWithMeta
   .metadata({
     name: "remove-actor-from-location",
   })
-  .schema(removeActorFromLocationSchema)
+  .inputSchema(removeActorFromLocationSchema)
   .bindArgsSchemas(removeActorFromLocationArgsSchema)
   .action(
     async ({

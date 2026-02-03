@@ -2,18 +2,17 @@ import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
 import {
-  listCertificateOverviewByCohortId,
-  retrieveCohortByHandle,
-  retrieveDefaultCertificateVisibleFromDate,
-  retrieveLocationByHandle,
-} from "~/lib/nwd";
-
-import {
   createLoader,
   parseAsArrayOf,
   parseAsString,
   parseAsStringLiteral,
 } from "nuqs/server";
+import {
+  listCertificateOverviewByCohortId,
+  retrieveCohortByHandle,
+  retrieveDefaultCertificateVisibleFromDate,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import StudentsTable from "./_components/students-table";
 
 const searchParamsParser = createLoader({
@@ -98,7 +97,6 @@ export default async function Page(props: {
   });
 
   // Add students to the index
-  // biome-ignore lint/complexity/noForEach: <explanation>
   filteredStudents.forEach((student) => {
     index.add({
       id: student.id,

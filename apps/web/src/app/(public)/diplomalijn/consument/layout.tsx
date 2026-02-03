@@ -2,7 +2,7 @@
 import { constants } from "@nawadi/lib";
 
 import type { Metadata } from "next";
-import { unstable_cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import MdxPageHeader from "~/app/(public)/_components/mdx-page-header";
 import { Prose } from "~/app/(public)/_components/prose";
 import { getAllDiplomalijnConsumentenPages } from "~/lib/mdx-pages";
@@ -22,7 +22,7 @@ export default async function Layout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  unstable_cacheLife("days");
+  cacheLife("days");
 
   const [pages, disciplines] = await Promise.all([
     getAllDiplomalijnConsumentenPages(),

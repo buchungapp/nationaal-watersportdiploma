@@ -2,7 +2,6 @@ import assert from "node:assert";
 import crypto from "node:crypto";
 import { schema as s, uncontrolledSchema } from "@nawadi/db";
 import {
-  type SQL,
   and,
   arrayContains,
   asc,
@@ -10,6 +9,7 @@ import {
   getTableColumns,
   isNotNull,
   isNull,
+  type SQL,
   sql,
 } from "drizzle-orm";
 import { fileTypeFromBuffer } from "file-type";

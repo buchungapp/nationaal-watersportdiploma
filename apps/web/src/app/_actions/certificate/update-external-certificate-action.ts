@@ -32,7 +32,7 @@ export const updateExternalCertificateAction = actionClientWithMeta
   .metadata({
     name: "update-external-certificate",
   })
-  .schema(updateExternalCertificateSchema)
+  .inputSchema(updateExternalCertificateSchema)
   .bindArgsSchemas(updateExternalCertificateArgsSchema)
   .action(
     async ({

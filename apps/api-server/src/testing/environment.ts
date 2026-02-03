@@ -14,11 +14,11 @@ export async function withTestEnvironment<T>(
   configuration: TestEnvironmentConfiguration,
   job: (context: TestEnvironmentContext) => Promise<T>,
 ): Promise<T> {
-  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
-  let lastError;
+  // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
+  let _lastError;
   const logConfiguration: core.LogConfiguration = {
     error: (error) => {
-      lastError = error;
+      _lastError = error;
     },
   };
 

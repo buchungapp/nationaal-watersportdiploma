@@ -15,7 +15,7 @@ export const removeExternalCertificateAction = actionClientWithMeta
   .metadata({
     name: "remove-external-certificate",
   })
-  .schema(voidActionSchema)
+  .inputSchema(voidActionSchema)
   .bindArgsSchemas(removeExternalCertificateArgsSchema)
   .action(
     async ({ bindArgsParsedInputs: [personId, externalCertificateId] }) => {

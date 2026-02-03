@@ -20,7 +20,7 @@ export default function MediaKit() {
   const router = useRouter();
   const intent = useRef<"homepage" | "context">("homepage");
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       if (intent.current === "homepage") {
@@ -31,7 +31,7 @@ export default function MediaKit() {
     [router, intent.current],
   );
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const handleContextMenu = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       intent.current = "context";

@@ -49,7 +49,9 @@ export async function GET(
         : `${dayjs().toISOString()}-export-diplomas-${slugify(constants.APP_NAME)}`
     }.pdf`;
 
-    let digitalSignature = undefined;
+    let digitalSignature:
+      | Awaited<ReturnType<typeof createDigitalSignatureConfig>>
+      | undefined;
     if (
       searchParams.has("signed") &&
       process.env.DIGITAL_SIGNATURE_CERT_PATH &&

@@ -9,6 +9,9 @@ import {
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
+import { addRoleToInstructorInCohortAction } from "~/app/_actions/cohort/instructor/add-role-to-instructor-in-cohort-action";
+import { removeRoleFromInstructorInCohortAction } from "~/app/_actions/cohort/instructor/remove-role-from-instructor-in-cohort-action";
+import { removeInstructorFromCohortAction } from "~/app/_actions/cohort/remove-instructor-from-cohort-action";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Dropdown,
@@ -29,9 +32,6 @@ import {
 } from "~/app/(dashboard)/_components/table-footer";
 import { DefaultTableHead } from "~/app/(dashboard)/_components/table-head";
 import { TextLink } from "~/app/(dashboard)/_components/text";
-import { addRoleToInstructorInCohortAction } from "~/app/_actions/cohort/instructor/add-role-to-instructor-in-cohort-action";
-import { removeRoleFromInstructorInCohortAction } from "~/app/_actions/cohort/instructor/remove-role-from-instructor-in-cohort-action";
-import { removeInstructorFromCohortAction } from "~/app/_actions/cohort/remove-instructor-from-cohort-action";
 import dayjs from "~/lib/dayjs";
 import type { listInstructorsByCohortId } from "~/lib/nwd";
 
@@ -54,7 +54,7 @@ export default function InstructorsTable({
 }) {
   const params = useParams();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const columns = useMemo(
     () => [
       columnHelper.accessor(
@@ -133,31 +133,29 @@ export default function InstructorsTable({
           };
 
           return (
-            <>
-              <div className="-mx-3 sm:-mx-2.5 -my-1.5">
-                <Dropdown>
-                  <DropdownButton outline aria-label="Meer opties">
-                    <EllipsisHorizontalIcon />
-                  </DropdownButton>
-                  <DropdownMenu anchor="bottom end">
-                    <DropdownItem onClick={deleteInstructor}>
-                      <DropdownLabel>Verwijder uit cohort</DropdownLabel>
+            <div className="-mx-3 sm:-mx-2.5 -my-1.5">
+              <Dropdown>
+                <DropdownButton outline aria-label="Meer opties">
+                  <EllipsisHorizontalIcon />
+                </DropdownButton>
+                <DropdownMenu anchor="bottom end">
+                  <DropdownItem onClick={deleteInstructor}>
+                    <DropdownLabel>Verwijder uit cohort</DropdownLabel>
+                  </DropdownItem>
+                  {row.original.roles.some(
+                    (role) => role.handle === "cohort_admin",
+                  ) ? (
+                    <DropdownItem onClick={removeAdmin}>
+                      <DropdownLabel>Verwijder als beheerder</DropdownLabel>
                     </DropdownItem>
-                    {row.original.roles.some(
-                      (role) => role.handle === "cohort_admin",
-                    ) ? (
-                      <DropdownItem onClick={removeAdmin}>
-                        <DropdownLabel>Verwijder als beheerder</DropdownLabel>
-                      </DropdownItem>
-                    ) : (
-                      <DropdownItem onClick={makeAdmin}>
-                        <DropdownLabel>Maak beheerder</DropdownLabel>
-                      </DropdownItem>
-                    )}
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
-            </>
+                  ) : (
+                    <DropdownItem onClick={makeAdmin}>
+                      <DropdownLabel>Maak beheerder</DropdownLabel>
+                    </DropdownItem>
+                  )}
+                </DropdownMenu>
+              </Dropdown>
+            </div>
           );
         },
       }),

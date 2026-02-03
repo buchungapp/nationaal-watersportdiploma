@@ -3,6 +3,11 @@ import { PlusIcon, TrashIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  addCourseToInstructiegroep,
+  removeCourseFromInstructiegroep,
+  updateInstructiegroep,
+} from "~/app/_actions/kss/instructiegroep";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -19,11 +24,6 @@ import {
 import { Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
-import {
-  addCourseToInstructiegroep,
-  removeCourseFromInstructiegroep,
-  updateInstructiegroep,
-} from "~/app/_actions/kss/instructiegroep";
 
 type Instructiegroep = {
   id: string;

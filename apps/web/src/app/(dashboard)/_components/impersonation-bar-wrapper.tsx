@@ -30,7 +30,7 @@ async function ImpersonationBarContent() {
         impersonatedUser={impersonatedUser}
       />
     );
-  } catch (error) {
+  } catch (_error) {
     // If user is not logged in, don't show the bar
     return null;
   }

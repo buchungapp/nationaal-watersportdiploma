@@ -4,7 +4,7 @@ import type * as application from "../application/index.js";
 
 export const getLocations: api.server.GetLocationsOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (_incomingRequest, _authentication) => {
   const list = await core.Location.list();
 
   const listEntity = list.map((item) => ({
@@ -24,7 +24,7 @@ export const getLocations: api.server.GetLocationsOperationHandler<
 
 export const createLocation: api.server.CreateLocationOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) =>
+> = async (incomingRequest, _authentication) =>
   core.withTransaction(async () => {
     const entity = await incomingRequest.entity();
 

@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import clsx from "clsx";
+import Link from "next/link";
 import MediaKit from "./media-kit";
 import MobileDisclosure from "./mobile/mobile-disclosure";
 import MobileItem from "./mobile/mobile-item";

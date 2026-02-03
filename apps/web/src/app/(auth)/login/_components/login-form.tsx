@@ -8,15 +8,13 @@ import {
 } from "next-safe-action/hooks";
 import { type PropsWithChildren, useRef } from "react";
 import { useFormStatus } from "react-dom";
-import { Button } from "~/app/(dashboard)/_components/button";
-import { Field } from "~/app/(dashboard)/_components/fieldset";
-import { Label } from "~/app/(dashboard)/_components/fieldset";
-import { Input } from "~/app/(dashboard)/_components/input";
 import { loginAction } from "~/app/_actions/auth/login-action";
 import { verifyAction } from "~/app/_actions/auth/verify-action";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
+import { Button } from "~/app/(dashboard)/_components/button";
+import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
+import { Input } from "~/app/(dashboard)/_components/input";
 
 export function SubmitButton({ children }: PropsWithChildren) {
   const { pending } = useFormStatus();
@@ -36,10 +34,6 @@ function loginErrorMessage(
 
   if (error.validationErrors) {
     return "Ongeldig e-mailadres";
-  }
-
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
   }
 
   return null;
@@ -106,10 +100,6 @@ function verifyErrorMessage(
     return "Ongeldige OTP";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return "Ongeldige e-mailadres";
-  }
-
   return null;
 }
 
@@ -160,7 +150,7 @@ export function OtpForm({
               {slots.map(({ char, hasFakeCaret, isActive }, idx) => {
                 return (
                   <div
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    // biome-ignore lint/suspicious/noArrayIndexKey: intentional
                     key={idx}
                     className={clsx([
                       // Basic layout

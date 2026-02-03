@@ -3,8 +3,7 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
-import { useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
-import { DialogProvider } from "~/app/(dashboard)/_hooks/use-dialog";
+import { DialogProvider, useDialog } from "~/app/(dashboard)/_hooks/use-dialog";
 import { EditLogbook } from "./edit-logbook";
 import type { LogbookType } from "./logbook-table";
 import { RemoveLogbook } from "./remove-logbook";

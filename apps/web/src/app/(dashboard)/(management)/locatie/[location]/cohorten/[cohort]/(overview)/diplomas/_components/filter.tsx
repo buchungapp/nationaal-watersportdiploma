@@ -3,6 +3,7 @@
 import { ChevronDownIcon } from "@heroicons/react/16/solid";
 import { parseAsArrayOf, parseAsStringLiteral, useQueryState } from "nuqs";
 import { useTransition } from "react";
+import Spinner from "~/app/_components/spinner";
 import {
   Checkbox,
   CheckboxField,
@@ -14,7 +15,6 @@ import {
   PopoverButton,
   PopoverPanel,
 } from "~/app/(dashboard)/_components/popover";
-import Spinner from "~/app/_components/spinner";
 
 const options = [
   "uitgegeven",

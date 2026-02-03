@@ -3,7 +3,7 @@ import type * as application from "../application/index.js";
 
 export const listDisciplines: api.server.ListDisciplinesOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (_incomingRequest, _authentication) => {
   // const disciplineList = await core.Program.Discipline.list()
 
   // const responseEntity = disciplineList.map((item) => ({
@@ -21,7 +21,7 @@ export const listDisciplines: api.server.ListDisciplinesOperationHandler<
 
 export const retrieveDiscipline: api.server.RetrieveDisciplineOperationHandler<
   application.Authentication
-> = async (incomingRequest, authentication) => {
+> = async (_incomingRequest, _authentication) => {
   // const { disciplineKey } = incomingRequest.parameters
 
   // // TODO get discipline type from core

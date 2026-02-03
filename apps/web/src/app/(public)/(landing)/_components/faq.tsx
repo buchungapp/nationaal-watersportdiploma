@@ -1,5 +1,5 @@
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import Double from "~/app/_components/brand/double-line";
+import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { getHelpArticles } from "~/lib/article-2";
 
 export default async function Faq() {
@@ -14,7 +14,7 @@ export default async function Faq() {
       }),
   );
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: intentional
   const featuredArticle = articles.shift()!;
 
   return (

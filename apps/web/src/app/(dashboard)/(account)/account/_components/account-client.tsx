@@ -4,9 +4,9 @@ import { useAction } from "next-safe-action/hooks";
 import type { PropsWithChildren } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { Button } from "~/app/(dashboard)/_components/button";
 import { updateUserDisplayNameAction } from "~/app/_actions/user/update-user-display-name-action";
 import Spinner from "~/app/_components/spinner";
+import { Button } from "~/app/(dashboard)/_components/button";
 
 export function AccountForm({ children }: PropsWithChildren) {
   const { execute } = useAction(updateUserDisplayNameAction, {

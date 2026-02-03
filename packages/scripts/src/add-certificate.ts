@@ -62,7 +62,7 @@ async function main() {
 
   assert.strictEqual(curricula.length, 1, "Curriculum not found");
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  // biome-ignore lint/style/noNonNullAssertion: intentional
   const curriculum = curricula[0]!;
 
   const { gearType, modules } = await inquirer.prompt([

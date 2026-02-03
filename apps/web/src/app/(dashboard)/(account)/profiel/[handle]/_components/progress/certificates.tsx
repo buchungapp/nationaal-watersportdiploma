@@ -79,7 +79,9 @@ function certificatesModules(
 
 async function Certificates({
   certificates,
-}: { certificates: Awaited<ReturnType<typeof fetchCertificates>> }) {
+}: {
+  certificates: Awaited<ReturnType<typeof fetchCertificates>>;
+}) {
   return (
     <ul className="space-y-4">
       {certificates.map((certificate, index) => {

@@ -108,7 +108,7 @@ async function main(filePath: string) {
       continue;
     }
 
-    // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+    // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
     let user;
 
     if (row["E-mail"]) {

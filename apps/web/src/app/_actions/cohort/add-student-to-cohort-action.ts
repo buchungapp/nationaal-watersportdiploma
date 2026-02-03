@@ -47,7 +47,7 @@ export const addStudentToCohortAction = actionClientWithMeta
   .metadata({
     name: "add-student-to-cohort",
   })
-  .schema(addStudentToCohortSchema)
+  .inputSchema(addStudentToCohortSchema)
   .bindArgsSchemas(addStudentToCohortArgsSchema)
   .action(
     async ({
@@ -64,7 +64,7 @@ export const addStudentToCohortAction = actionClientWithMeta
             birthCountry: data.birthCountry.code,
           });
           personId = result.id;
-        } catch (error) {
+        } catch (_error) {
           throw new Error(DEFAULT_SERVER_ERROR_MESSAGE);
         }
       }

@@ -1,8 +1,6 @@
 import assert from "node:assert";
 import { schema as s } from "@nawadi/db";
 import {
-  type SQL,
-  type SQLWrapper,
   and,
   eq,
   exists,
@@ -10,6 +8,8 @@ import {
   inArray,
   like,
   not,
+  type SQL,
+  type SQLWrapper,
   sql,
 } from "drizzle-orm";
 import { aggregate } from "drizzle-toolbelt";

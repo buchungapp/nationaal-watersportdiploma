@@ -33,7 +33,7 @@ export const createLogbookAction = actionClientWithMeta
   .metadata({
     name: "create-logbook",
   })
-  .schema(createLogbookSchema)
+  .inputSchema(createLogbookSchema)
   .bindArgsSchemas(createLogbookArgsSchema)
   .action(async ({ parsedInput: data, bindArgsParsedInputs: [personId] }) => {
     await createLogbook({

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { submitPvbAanvraagAction } from "~/app/_actions/pvb/single-operations-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -9,7 +10,6 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { submitPvbAanvraagAction } from "~/app/_actions/pvb/single-operations-action";
 
 export function ActivateDialog({
   open,

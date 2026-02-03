@@ -34,7 +34,7 @@ async function DegreesTable(props: {
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredDegrees = results.map(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       (result) => degrees.find((degree) => degree.id === result)!,
     );
   }

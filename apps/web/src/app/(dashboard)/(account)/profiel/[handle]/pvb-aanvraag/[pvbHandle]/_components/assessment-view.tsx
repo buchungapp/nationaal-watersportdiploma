@@ -14,12 +14,12 @@ import dayjs from "dayjs";
 import { useOptimisticAction } from "next-safe-action/hooks";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "~/app/(dashboard)/_components/badge";
-import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import {
   updatePvbBeoordelingsCriteriaAction,
   updatePvbBeoordelingsCriteriumAction,
 } from "~/app/_actions/pvb/assessment-action";
+import { Badge } from "~/app/(dashboard)/_components/badge";
+import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import type {
   getPvbBeoordelingsCriteria,
   getPvbToetsdocumenten,
@@ -218,7 +218,7 @@ export function AssessmentView({
     return typeLabels[type] || type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  const getBehaaldStatusLabel = (status: string | null | undefined) => {
+  const _getBehaaldStatusLabel = (status: string | null | undefined) => {
     switch (status) {
       case "behaald":
         return "Behaald";

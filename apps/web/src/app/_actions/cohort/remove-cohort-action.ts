@@ -12,7 +12,7 @@ export const removeCohortAction = actionClientWithMeta
   .metadata({
     name: "remove-cohort",
   })
-  .schema(voidActionSchema)
+  .inputSchema(voidActionSchema)
   .bindArgsSchemas(removeCohortArgsSchema)
   .action(async ({ bindArgsParsedInputs: [cohortId] }) => {
     await deleteCohort(cohortId);

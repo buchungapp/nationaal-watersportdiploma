@@ -1,6 +1,5 @@
-import CopyToClipboard from "~/app/(public)/_components/style/copy-to-clipboard";
-
 import type { Metadata, ResolvingMetadata } from "next";
+import CopyToClipboard from "~/app/(public)/_components/style/copy-to-clipboard";
 
 export async function generateMetadata(
   _props: unknown,

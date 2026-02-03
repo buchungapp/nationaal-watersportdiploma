@@ -1,17 +1,11 @@
-import Link from "next/link";
-import { normalizeUrl } from "~/utils/normalize-url";
-import {
-  LocationsMap,
-  SelectedLocationProvider,
-} from "../_components/locations-map";
-import PageHero from "../_components/style/page-hero";
-
 import type { Metadata, ResolvingMetadata } from "next";
+import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { TouchTarget } from "~/app/(dashboard)/_components/button";
 import type { SocialPlatform } from "~/lib/nwd";
+import { normalizeUrl } from "~/utils/normalize-url";
 import {
   Facebook,
   Instagram,
@@ -21,6 +15,11 @@ import {
   X,
   YouTube,
 } from "../../_components/socials";
+import {
+  LocationsMap,
+  SelectedLocationProvider,
+} from "../_components/locations-map";
+import PageHero from "../_components/style/page-hero";
 import LocationCard, {
   SetActiveLocationButton,
 } from "./_components/location-card";
@@ -225,7 +224,7 @@ function LocationListSkeleton() {
     <div className="flex flex-col space-y-4 h-full lg:max-h-[80vh] lg:overflow-y-auto">
       {[...Array(6)].map((_, i) => (
         <div
-          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+          // biome-ignore lint/suspicious/noArrayIndexKey: intentional
           key={i}
           className="p-6 rounded-lg border border-slate-200 bg-white animate-pulse"
         >
@@ -243,7 +242,7 @@ function LocationListSkeleton() {
           </div>
           <div className="flex gap-x-5 mt-6">
             {[...Array(4)].map((_, j) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+              // biome-ignore lint/suspicious/noArrayIndexKey: intentional
               <div key={j} className="h-4 w-4 bg-slate-200 rounded" />
             ))}
           </div>

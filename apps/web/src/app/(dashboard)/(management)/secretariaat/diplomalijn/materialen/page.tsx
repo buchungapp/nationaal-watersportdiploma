@@ -34,7 +34,7 @@ async function GearTypeTable(props: {
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredGearTypes = results.map(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       (result) => gearTypes.find((gearType) => gearType.id === result)!,
     );
   }

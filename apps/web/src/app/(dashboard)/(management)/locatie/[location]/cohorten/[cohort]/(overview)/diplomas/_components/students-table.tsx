@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-table";
 import { useParams } from "next/navigation";
 import React from "react";
-import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import Breakout, {
   BreakoutCenter,
@@ -36,6 +35,7 @@ import {
   getSortableColumnIds,
   useSorting,
 } from "~/app/(dashboard)/_hooks/use-sorting";
+import Search from "~/app/(dashboard)/(management)/_components/search";
 import dayjs from "~/lib/dayjs";
 import type { listCertificateOverviewByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
@@ -44,6 +44,7 @@ import { ActionButtons } from "./table-actions";
 export type Student = Awaited<
   ReturnType<typeof listCertificateOverviewByCohortId>
 >[number];
+
 import { TableSelection } from "~/app/(dashboard)/_components/table-action";
 import {
   DefaultTableCell,
@@ -315,7 +316,7 @@ export default function StudentsTable({
     >
   >({});
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const onRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
     (updater) => {
       setRowSelection((prev) => {
@@ -332,12 +333,12 @@ export default function StudentsTable({
             return [
               key,
               Object.hasOwn(rowSelection, key)
-                ? // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                ? // biome-ignore lint/style/noNonNullAssertion: intentional
                   rowSelection[key]!
                 : {
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
                     certificate: student!.certificate,
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
                     studentCurriculum: student!.studentCurriculum,
                   },
             ];

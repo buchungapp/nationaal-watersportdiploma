@@ -905,7 +905,7 @@ export const submitAanvraag = wrapCommand(
         .from(s.pvbAanvraag)
         .where(eq(s.pvbAanvraag.id, input.pvbAanvraagId));
 
-      const aanvraag = singleRow(aanvraagDetails);
+      const _aanvraag = singleRow(aanvraagDetails);
 
       // Check if there's a leercoach via the event sourcing table
       const latestLeercoachToestemming = await query

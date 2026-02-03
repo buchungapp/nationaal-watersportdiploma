@@ -1,9 +1,13 @@
 "use client";
 
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { enrollStudentsInCurriculumInCohortAction } from "~/app/_actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -16,12 +20,7 @@ import {
   ListboxLabel,
   ListboxOption,
 } from "~/app/(dashboard)/_components/listbox";
-
-import { useAction } from "next-safe-action/hooks";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { enrollStudentsInCurriculumInCohortAction } from "~/app/_actions/cohort/student/enroll-students-in-curriculum-in-cohort-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import Spinner from "~/app/_components/spinner";
 import {
   listCurriculaByProgram,
   listGearTypesByCurriculumForLocation,

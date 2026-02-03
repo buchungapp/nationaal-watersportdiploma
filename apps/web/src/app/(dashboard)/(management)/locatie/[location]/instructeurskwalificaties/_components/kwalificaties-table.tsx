@@ -159,7 +159,7 @@ export function KwalificatiesTable({
           const kwalificaties = kwalificatieMap.get(instructor.instructor.id);
           if (!kwalificaties) return showWithoutKwalificaties;
 
-          return kwalificaties.entries().some(([courseId, kwalificaties]) => {
+          return kwalificaties.entries().some(([_courseId, kwalificaties]) => {
             return kwalificaties.some((kwal) => {
               return (
                 filters.niveaus.includes(kwal.hoogsteNiveau) &&

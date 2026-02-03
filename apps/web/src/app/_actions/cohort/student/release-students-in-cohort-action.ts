@@ -15,7 +15,7 @@ export const releaseStudentsInCohortAction = actionClientWithMeta
   .metadata({
     name: "release-students-in-cohort",
   })
-  .schema(voidActionSchema)
+  .inputSchema(voidActionSchema)
   .bindArgsSchemas(releaseStudentsInCohortArgsSchema)
   .action(
     async ({ bindArgsParsedInputs: [cohortId, studentAllocationIds] }) => {

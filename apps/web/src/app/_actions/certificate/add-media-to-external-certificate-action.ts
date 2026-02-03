@@ -20,7 +20,7 @@ export const addMediaToExternalCertificateAction = actionClientWithMeta
   .metadata({
     name: "add-media-to-external-certificate",
   })
-  .schema(addMediaToExternalCertificateSchema)
+  .inputSchema(addMediaToExternalCertificateSchema)
   .bindArgsSchemas(addMediaToExternalCertificateArgsSchema)
   .action(
     async ({

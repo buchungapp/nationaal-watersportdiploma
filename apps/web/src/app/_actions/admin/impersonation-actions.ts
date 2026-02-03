@@ -11,7 +11,7 @@ const impersonateSchema = z.object({
 
 export const startImpersonationAction = actionClientWithMeta
   .metadata({ name: "start-impersonation" })
-  .schema(impersonateSchema)
+  .inputSchema(impersonateSchema)
   .action(async ({ parsedInput: { targetUserId } }) => {
     await startImpersonation(targetUserId);
     revalidatePath("/", "layout");
@@ -19,7 +19,7 @@ export const startImpersonationAction = actionClientWithMeta
 
 export const stopImpersonationAction = actionClientWithMeta
   .metadata({ name: "stop-impersonation" })
-  .schema(z.object({}))
+  .inputSchema(z.object({}))
   .action(async () => {
     await stopImpersonation();
     revalidatePath("/", "layout");

@@ -31,7 +31,7 @@ export const enrollStudentsInCurriculumInCohortAction = actionClientWithMeta
   .metadata({
     name: "enroll-students-in-curriculum-in-cohort",
   })
-  .schema(enrollStudentsInCurriculumInCohortSchema)
+  .inputSchema(enrollStudentsInCurriculumInCohortSchema)
   .bindArgsSchemas(enrollStudentsInCurriculumInCohortArgsSchema)
   .action(
     async ({

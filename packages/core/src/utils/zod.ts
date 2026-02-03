@@ -6,7 +6,7 @@ export const handleSchema = z
   .trim()
   .toLowerCase()
   .min(3)
-  .regex(/^[a-z0-9\-]+$/);
+  .regex(/^[a-z0-9-]+$/);
 export type Handle = z.infer<typeof handleSchema>;
 
 export const uuidSchema = z.string().uuid();
@@ -52,7 +52,7 @@ const test = z
   })
   .default({});
 
-const a: z.input<typeof test> = undefined;
+const _a: z.input<typeof test> = undefined;
 
 export function withZod<
   // biome-ignore lint/suspicious/noExplicitAny: Explicit any is required for zod to work

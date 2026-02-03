@@ -118,7 +118,7 @@ async function processRow(row: z.infer<typeof rowSchema>, locationId: string) {
     return;
   }
 
-  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+  // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
   let user;
 
   if (row.Email) {
@@ -152,7 +152,7 @@ async function processRow(row: z.infer<typeof rowSchema>, locationId: string) {
     const combinedMetadata = defaultsDeep({}, existingMetadata, {
       cwo: {
         ids: [
-          // @ts-ignore
+          // @ts-expect-error
           ...(Array.isArray(existingMetadata?.cwo?.ids)
             ? // @ts-ignore
               existingMetadata.cwo.ids

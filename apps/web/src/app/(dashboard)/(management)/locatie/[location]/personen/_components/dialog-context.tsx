@@ -5,8 +5,7 @@ import {
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
-import { listCountries } from "~/lib/nwd";
-import { retrieveLocationByHandle } from "~/lib/nwd";
+import { listCountries, retrieveLocationByHandle } from "~/lib/nwd";
 import { DialogButtons, DialogsClient } from "./dialog-context-client";
 
 type DialogsProps = { params: Promise<{ location: string }> };

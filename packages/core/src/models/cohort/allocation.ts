@@ -1,7 +1,6 @@
 import { schema as s } from "@nawadi/db";
 import { enums } from "@nawadi/lib";
 import {
-  type SQL,
   and,
   arrayContains,
   asc,
@@ -15,6 +14,7 @@ import {
   lte,
   notExists,
   or,
+  type SQL,
   sql,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core/alias";
@@ -736,7 +736,7 @@ export const listStudentsWithCurricula = wrapQuery(
         progressVisibleForStudentUpUntil: row.progressVisibleUpUntil,
         person: {
           id: row.person.id,
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: intentional
           handle: row.person.handle!,
           firstName: row.person.firstName,
           lastNamePrefix: row.person.lastNamePrefix,
@@ -763,15 +763,15 @@ export const listStudentsWithCurricula = wrapQuery(
           ? {
               id: row.studentCurriculumId,
               curriculumId: row.curriculum?.id,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               program: row.program!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               course: row.course!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               degree: row.degree!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               discipline: row.discipline!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               gearType: row.gearType!,
             }
           : null,
@@ -948,7 +948,7 @@ export const retrieveStudentWithCurriculum = wrapQuery(
         },
         person: {
           id: row.person.id,
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: intentional
           handle: row.person.handle!,
           firstName: row.person.firstName,
           lastNamePrefix: row.person.lastNamePrefix,
@@ -967,15 +967,15 @@ export const retrieveStudentWithCurriculum = wrapQuery(
           ? {
               id: row.studentCurriculumId,
               curriculumId: row.curriculum?.id,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               program: row.program!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               course: row.course!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               degree: row.degree!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               discipline: row.discipline!,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               gearType: row.gearType!,
             }
           : null,
@@ -1088,7 +1088,7 @@ export const listInstructors = wrapQuery(
             id: row.id,
             person: {
               id: row.person.id,
-              // biome-ignore lint/style/noNonNullAssertion: <explanation>
+              // biome-ignore lint/style/noNonNullAssertion: intentional
               handle: row.person.handle!,
               firstName: row.person.firstName,
               lastNamePrefix: row.person.lastNamePrefix,
@@ -1101,7 +1101,7 @@ export const listInstructors = wrapQuery(
           });
         }
 
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         const instructor = instructorsMap.get(row.person.id)!;
         if (row.role && !instructor.roles.some((r) => r.id === row.role?.id)) {
           instructor.roles.push({

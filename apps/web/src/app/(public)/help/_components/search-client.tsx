@@ -62,7 +62,7 @@ export default function SearchClient({
     });
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     for (const article of articles) {
       index.add({
@@ -78,7 +78,7 @@ export default function SearchClient({
     }
   }, [articles]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     for (const question of questions) {
       index.add({
@@ -90,14 +90,14 @@ export default function SearchClient({
     }
   }, [questions]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     posthog.capture("searched_faq", {
       query: deferredQuery,
     });
   }, [deferredQuery]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const filteredArticles = useMemo(() => {
     if (query === "") return [];
 
@@ -105,7 +105,7 @@ export default function SearchClient({
 
     if (searchResult.length === 0) return [];
 
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    // biome-ignore lint/style/noNonNullAssertion: intentional
     return searchResult[0]!.result.map(
       // @ts-expect-error Type does not account for the enrich option
       (article: {
@@ -128,7 +128,7 @@ export default function SearchClient({
     <div className="relative mx-auto w-full transform divide-y divide-slate-100 rounded-sm bg-white ring-1 ring-branding-light/95 transition-all">
       <Combobox
         multiple={false}
-        onChange={(value: { url: string }) => {
+        onChange={(value: { url: string } | null) => {
           if (!value) return;
 
           router.push(value.url);

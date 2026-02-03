@@ -1,14 +1,13 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
-import type React from "react";
-
 import {
   Disclosure as HeadlessDisclosure,
   DisclosureButton as HeadlessDisclosureButton,
   DisclosurePanel as HeadlessDisclosurePanel,
 } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
+import type React from "react";
+import type { PropsWithChildren } from "react";
 import { Divider } from "./divider";
 
 export default function Disclosure({

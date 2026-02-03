@@ -5,6 +5,6 @@
     "dev": "mintlify dev --port 3334"
   },
   "devDependencies": {
-    "mintlify": "^4.0.393"
+    "mintlify": "4.2.314"
   }
 }

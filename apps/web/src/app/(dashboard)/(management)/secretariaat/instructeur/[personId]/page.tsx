@@ -1,13 +1,13 @@
 import { User } from "@nawadi/core";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Heading } from "~/app/(dashboard)/_components/heading";
-import { Text } from "~/app/(dashboard)/_components/text";
 import {
   getAllExistingKerntaakOnderdeelIdsByCourse,
   getAvailableKerntaakonderdelen,
   getPersonKwalificaties,
 } from "~/app/_actions/kss/manage-kwalificaties";
+import { Heading } from "~/app/(dashboard)/_components/heading";
+import { Text } from "~/app/(dashboard)/_components/text";
 import { getUserOrThrow, listCourses } from "~/lib/nwd";
 import KwalificatiesTable from "./_components/kwalificaties-table";
 import { PersonInfo } from "./_components/person-info";

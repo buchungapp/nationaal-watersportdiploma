@@ -1,8 +1,7 @@
-import Link from "next/link";
-
 import { DataInteractive } from "@headlessui/react";
 import { ArrowRightIcon } from "@heroicons/react/16/solid";
 import { BellIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 const notification = {
   title: "Nieuws: Dit is een testbericht",

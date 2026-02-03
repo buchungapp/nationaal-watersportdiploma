@@ -3,16 +3,14 @@ import {
   EnvelopeIcon,
   PhoneIcon,
 } from "@heroicons/react/24/outline";
+import type { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-
 import Article from "../_components/style/article";
 import { InlineButton, TekstButton } from "../_components/style/buttons";
 import CopyToClipboard from "../_components/style/copy-to-clipboard";
 import PageHero from "../_components/style/page-hero";
 import contact from "./_assets/contact.jpg";
-
-import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
   _props: unknown,

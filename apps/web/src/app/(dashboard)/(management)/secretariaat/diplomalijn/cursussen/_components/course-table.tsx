@@ -47,7 +47,7 @@ export default function CourseTable({
 }) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   const columns = useMemo(() => {
     return [
       columnHelper.accessor("title", {
@@ -59,7 +59,7 @@ export default function CourseTable({
       ...parentCategories.map((category) =>
         columnHelper.display({
           id: `category-${category.id}`,
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: intentional
           header: category.title!,
           cell: ({ row }) => (
             <div className="flex items-center gap-x-2.5">

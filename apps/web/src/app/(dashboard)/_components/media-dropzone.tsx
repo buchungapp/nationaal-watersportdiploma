@@ -1,10 +1,15 @@
 "use client";
 import clsx from "clsx";
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "~/app/_actions/files";
-import { PDFViewer } from "./pdf-viewer";
+
+const PDFViewer = dynamic(
+  () => import("./pdf-viewer").then((mod) => mod.PDFViewer),
+  { ssr: false },
+);
 
 export function MediaDropzone({
   required,

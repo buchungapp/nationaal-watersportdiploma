@@ -1,14 +1,13 @@
 import type { User } from "@nawadi/core";
 import { Suspense } from "react";
 import Balancer from "react-wrap-balancer";
-import { Subheading } from "~/app/(dashboard)/_components/heading";
-import { Heading } from "~/app/(dashboard)/_components/heading";
+import { AnimatedWave } from "~/app/_components/animated-wave";
+import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import {
   StackedLayoutCardDisclosure,
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { AnimatedWave } from "~/app/_components/animated-wave";
 import { listLogbooksForPerson } from "~/lib/nwd";
 import { parseLogbookSearchParams } from "../../_searchParams";
 import { AddLogbook } from "./add-logbook";

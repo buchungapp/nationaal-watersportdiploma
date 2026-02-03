@@ -74,35 +74,33 @@ async function RolesContent(props: RolesProps) {
   if (!isLocationAdmin) return null;
 
   return (
-    <>
-      <div className="lg:col-start-3">
-        <div>
-          <Subheading>Rollen</Subheading>
-          <Divider className="mt-2 mb-4" />
-          <Text>
-            Geef de rollen aan die deze persoon heeft binnen de locatie.{" "}
-            <Strong>
-              Als er geen rollen meer zijn aangevinkt, wordt de persoon uit de
-              locatie verwijderd!
-            </Strong>
-          </Text>
-          <CheckboxGroup className="mt-4">
-            {ROLES.map((role) => (
-              <CheckboxField key={role.type}>
-                <RoleToggleCheckbox
-                  roles={rolesInLocation}
-                  type={role.type}
-                  locationId={location.id}
-                  personId={person.id}
-                />
-                <Label>{role.label}</Label>
-                <Description>{role.description}</Description>
-              </CheckboxField>
-            ))}
-          </CheckboxGroup>
-        </div>
+    <div className="lg:col-start-3">
+      <div>
+        <Subheading>Rollen</Subheading>
+        <Divider className="mt-2 mb-4" />
+        <Text>
+          Geef de rollen aan die deze persoon heeft binnen de locatie.{" "}
+          <Strong>
+            Als er geen rollen meer zijn aangevinkt, wordt de persoon uit de
+            locatie verwijderd!
+          </Strong>
+        </Text>
+        <CheckboxGroup className="mt-4">
+          {ROLES.map((role) => (
+            <CheckboxField key={role.type}>
+              <RoleToggleCheckbox
+                roles={rolesInLocation}
+                type={role.type}
+                locationId={location.id}
+                personId={person.id}
+              />
+              <Label>{role.label}</Label>
+              <Description>{role.description}</Description>
+            </CheckboxField>
+          ))}
+        </CheckboxGroup>
       </div>
-    </>
+    </div>
   );
 }
 

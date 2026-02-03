@@ -1,7 +1,6 @@
+import type { Metadata, ResolvingMetadata } from "next";
 import { Prose } from "~/app/(public)/_components/prose";
 import PageHero from "~/app/(public)/_components/style/page-hero";
-
-import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
   _props: unknown,

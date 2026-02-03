@@ -21,7 +21,7 @@ import {
   CohortProgressWithSuspense,
   fetchCohortProgress,
 } from "./cohort-progress";
-import { ProgramsWithSuspense, fetchCurriculaProgress } from "./programs";
+import { fetchCurriculaProgress, ProgramsWithSuspense } from "./programs";
 
 type BadgeColor = "branding-orange" | "branding-light" | "branding-dark";
 

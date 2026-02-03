@@ -1,12 +1,11 @@
+import type { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 import PageHero from "~/app/(public)/_components/style/page-hero";
 import CopyToClipboard from "../_components/style/copy-to-clipboard";
 import SideNav from "../_components/style/side-nav";
-import icon from "./_assets/NWD-logo-final.svg";
 import lint from "./_assets/combined-lint-final.png";
+import icon from "./_assets/NWD-logo-final.svg";
 import wordmark from "./_assets/wordmark-final.svg";
-
-import type { Metadata, ResolvingMetadata } from "next";
 
 export async function generateMetadata(
   _props: unknown,

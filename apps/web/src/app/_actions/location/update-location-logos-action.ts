@@ -21,7 +21,7 @@ export const updateLocationLogosAction = actionClientWithMeta
   .metadata({
     name: "update-location-logos",
   })
-  .schema(updateLocationLogosSchema)
+  .inputSchema(updateLocationLogosSchema)
   .bindArgsSchemas(updateLocationLogosArgsSchema)
   .action(
     async ({
@@ -35,6 +35,6 @@ export const updateLocationLogosAction = actionClientWithMeta
       });
 
       revalidatePath("/locatie/[location]", "layout");
-      revalidateTag("locations");
+      revalidateTag("locations", { expire: 0 });
     },
   );

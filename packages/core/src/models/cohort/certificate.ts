@@ -241,15 +241,15 @@ export const listStatus = wrapQuery(
             ? {
                 id: student.studentCurriculumId,
                 curriculumId: student.curriculum?.id,
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                // biome-ignore lint/style/noNonNullAssertion: intentional
                 program: student.program!,
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                // biome-ignore lint/style/noNonNullAssertion: intentional
                 course: student.course!,
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                // biome-ignore lint/style/noNonNullAssertion: intentional
                 degree: student.degree!,
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                // biome-ignore lint/style/noNonNullAssertion: intentional
                 discipline: student.discipline!,
-                // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                // biome-ignore lint/style/noNonNullAssertion: intentional
                 gearType: student.gearType!,
                 moduleStatus: moduleStatusForStudent.map((status) => ({
                   module: status.module,

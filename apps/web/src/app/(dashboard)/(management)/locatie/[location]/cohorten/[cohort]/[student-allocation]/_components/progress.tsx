@@ -3,10 +3,10 @@
 import { ArrowPathRoundedSquareIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
-import { Button } from "~/app/(dashboard)/_components/button";
 import { makeProgressVisibleForStudentInCohortAction } from "~/app/_actions/cohort/student/make-progress-visible-for-student-in-cohort-action";
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
+import { Button } from "~/app/(dashboard)/_components/button";
 
 export function UpdateProgressVisibility({
   allocationId,

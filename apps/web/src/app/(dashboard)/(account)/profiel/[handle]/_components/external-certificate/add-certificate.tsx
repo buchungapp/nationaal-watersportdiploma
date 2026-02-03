@@ -5,6 +5,9 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createExternalCertificateAction } from "~/app/_actions/certificate/create-external-certificate-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -15,9 +18,6 @@ import {
 import { FieldGroup } from "~/app/(dashboard)/_components/fieldset";
 import { Notification } from "~/app/(dashboard)/_components/notification";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { createExternalCertificateAction } from "~/app/_actions/certificate/create-external-certificate-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import Spinner from "~/app/_components/spinner";
 import { CertificateTemplatePicker } from "./certificate-template-picker";
 import type { CertificateTemplate } from "./certificate-templates";
 import Media from "./media";
@@ -122,19 +122,17 @@ export function AddCertificate({
             </FieldGroup>
             {currentStep === "metadata" &&
             selectedCertificateTemplate !== null ? (
-              <>
-                <Notification color="zinc" className="justify-between mt-3">
-                  <InformationCircleIcon /> Je gegevens worden veilig opgeslagen
-                  en zijn alleen zichtbaar voor jou. Je kunt later kiezen om
-                  specifieke diploma's te delen met anderen.
-                  <br />
-                  <br /> Let op: Dit overzicht is alleen bedoeld voor je
-                  persoonlijke administratie. Deze digitale registraties worden
-                  niet geaccepteerd als geldig bewijs door officiële instanties
-                  - je moet altijd je originele diploma's of officieel
-                  gewaarmerkte kopieën kunnen tonen.
-                </Notification>
-              </>
+              <Notification color="zinc" className="justify-between mt-3">
+                <InformationCircleIcon /> Je gegevens worden veilig opgeslagen
+                en zijn alleen zichtbaar voor jou. Je kunt later kiezen om
+                specifieke diploma's te delen met anderen.
+                <br />
+                <br /> Let op: Dit overzicht is alleen bedoeld voor je
+                persoonlijke administratie. Deze digitale registraties worden
+                niet geaccepteerd als geldig bewijs door officiële instanties -
+                je moet altijd je originele diploma's of officieel gewaarmerkte
+                kopieën kunnen tonen.
+              </Notification>
             ) : null}
           </DialogBody>
           <DialogActions>

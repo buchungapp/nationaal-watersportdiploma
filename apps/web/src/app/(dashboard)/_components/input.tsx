@@ -67,7 +67,7 @@ export const Input = forwardRef(function Input(
         className={clsx([
           // Date classes
           props.type &&
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // biome-ignore lint/suspicious/noExplicitAny: intentional
             dateTypes.includes(props.type as any) && [
               "[&::-webkit-datetime-edit-fields-wrapper]:p-0",
               "[&::-webkit-date-and-time-value]:min-h-[1.5em]",

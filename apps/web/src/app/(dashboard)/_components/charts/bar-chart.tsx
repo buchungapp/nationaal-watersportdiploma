@@ -4,6 +4,8 @@
 
 "use client";
 
+import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/16/solid";
+import clsx from "clsx";
 // import { RiArrowLeftSLine, RiArrowRightSLine } from "@remixicon/react";
 import React from "react";
 import {
@@ -18,9 +20,6 @@ import {
   YAxis,
 } from "recharts";
 import type { AxisDomain } from "recharts/types/util/types";
-
-import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/16/solid";
-import clsx from "clsx";
 import {
   AvailableChartColors,
   type AvailableChartColorsKeys,
@@ -347,33 +346,31 @@ const Legend = React.forwardRef<HTMLOListElement, LegendProps>((props, ref) => {
         ))}
       </div>
       {enableLegendSlider && (hasScroll?.right || hasScroll?.left) ? (
-        <>
-          <div
-            className={clsx(
-              // base
-              "absolute top-0 right-0 bottom-0 flex h-full items-center justify-center pr-1",
-              // background color
-              "bg-white dark:bg-gray-950",
-            )}
-          >
-            <ScrollButton
-              icon={ArrowLeftIcon}
-              onClick={() => {
-                setIsKeyDowned(null);
-                scrollToTest("left");
-              }}
-              disabled={!hasScroll?.left}
-            />
-            <ScrollButton
-              icon={ArrowRightIcon}
-              onClick={() => {
-                setIsKeyDowned(null);
-                scrollToTest("right");
-              }}
-              disabled={!hasScroll?.right}
-            />
-          </div>
-        </>
+        <div
+          className={clsx(
+            // base
+            "absolute top-0 right-0 bottom-0 flex h-full items-center justify-center pr-1",
+            // background color
+            "bg-white dark:bg-gray-950",
+          )}
+        >
+          <ScrollButton
+            icon={ArrowLeftIcon}
+            onClick={() => {
+              setIsKeyDowned(null);
+              scrollToTest("left");
+            }}
+            disabled={!hasScroll?.left}
+          />
+          <ScrollButton
+            icon={ArrowRightIcon}
+            onClick={() => {
+              setIsKeyDowned(null);
+              scrollToTest("right");
+            }}
+            disabled={!hasScroll?.right}
+          />
+        </div>
       ) : null}
     </ol>
   );
@@ -392,8 +389,10 @@ const ChartLegend = (
   legendPosition?: "left" | "center" | "right",
   yAxisWidth?: number,
 ) => {
+  // biome-ignore lint/correctness/useHookAtTopLevel: Tremor helper function always called in same order
   const legendRef = React.useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useHookAtTopLevel: Tremor helper function always called in same order
   useOnWindowResize(() => {
     const calculateHeight = (height: number | undefined) =>
       height ? Number(height) + 15 : 60;
@@ -451,7 +450,7 @@ type PayloadItem = {
 interface ChartTooltipProps {
   active: boolean | undefined;
   payload: PayloadItem[];
-  label: string;
+  label: string | number | undefined;
   valueFormatter: (value: number) => string;
 }
 
@@ -623,7 +622,7 @@ const BarChart = React.forwardRef<HTMLDivElement, BarChartProps>(
     const stacked = type === "stacked" || type === "percent";
 
     const prevActiveRef = React.useRef<boolean | undefined>(undefined);
-    const prevLabelRef = React.useRef<string | undefined>(undefined);
+    const prevLabelRef = React.useRef<string | number | undefined>(undefined);
 
     function valueToPercent(value: number) {
       return `${(value * 100).toFixed(0)}%`;

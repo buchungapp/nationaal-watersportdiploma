@@ -1,6 +1,5 @@
 import { DocumentTextIcon, TableCellsIcon } from "@heroicons/react/16/solid";
-import { Tab, TabGroup } from "~/app/(dashboard)/_components/tabs";
-import { TabList } from "~/app/(dashboard)/_components/tabs";
+import { Tab, TabGroup, TabList } from "~/app/(dashboard)/_components/tabs";
 import { useExportFormat } from "./use-export-format";
 
 export function FormatSelector() {

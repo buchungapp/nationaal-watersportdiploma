@@ -1,7 +1,7 @@
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { micromark } from "micromark";
-import { unstable_cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import slugify from "slugify";
 import { z } from "zod";
 
@@ -30,11 +30,7 @@ interface FaqFilters {
   category?: string;
 }
 
-async function retrieveQuestions({
-  filter,
-}: {
-  filter?: FaqFilters;
-} = {}) {
+async function retrieveQuestions({ filter }: { filter?: FaqFilters } = {}) {
   try {
     const result = await service.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_FAQ_SPREADSHEET_ID,
@@ -67,7 +63,7 @@ async function retrieveQuestions({
         }
 
         validQuestions.push(parsed);
-      } catch (err) {}
+      } catch (_err) {}
     }
 
     return validQuestions.map(([category, question, answer]) => ({
@@ -82,13 +78,9 @@ async function retrieveQuestions({
   }
 }
 
-export async function listFaqs({
-  filter,
-}: {
-  filter?: FaqFilters;
-} = {}) {
+export async function listFaqs({ filter }: { filter?: FaqFilters } = {}) {
   "use cache";
-  unstable_cacheLife("days");
+  cacheLife("days");
 
   return retrieveQuestions({ filter });
 }

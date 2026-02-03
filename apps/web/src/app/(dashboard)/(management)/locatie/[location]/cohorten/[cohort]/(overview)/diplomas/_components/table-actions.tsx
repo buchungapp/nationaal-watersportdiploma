@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { useFormStatus } from "react-dom";
-
 import {
   Disclosure as HeadlessDisclosure,
   DisclosureButton as HeadlessDisclosureButton,
@@ -11,7 +8,17 @@ import {
   type InferUseActionHookReturn,
   useAction,
 } from "next-safe-action/hooks";
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { downloadCertificatesAction } from "~/app/_actions/certificate/download-certificates-action";
+import { issueCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/issue-certificates-in-cohort-action";
+import { withdrawCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/withdraw-certificates-in-cohort-action";
+import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/app/_actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
+import { CONFIRMATION_WORD } from "~/app/_actions/cohort/student/confirm-word";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
+import Spinner from "~/app/_components/spinner";
 import {
   Alert,
   AlertActions,
@@ -46,14 +53,6 @@ import {
 } from "~/app/(dashboard)/_components/radio";
 import { TableSelectionButton } from "~/app/(dashboard)/_components/table-action";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
-import { downloadCertificatesAction } from "~/app/_actions/certificate/download-certificates-action";
-import { issueCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/issue-certificates-in-cohort-action";
-import { withdrawCertificatesInCohortAction } from "~/app/_actions/cohort/certificate/withdraw-certificates-in-cohort-action";
-import { completeAllCoreCompetenciesForStudentInCohortAction } from "~/app/_actions/cohort/student/complete-all-core-competencies-for-student-in-cohort-action";
-import { CONFIRMATION_WORD } from "~/app/_actions/cohort/student/confirm-word";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
 import dayjs from "~/lib/dayjs";
 import type { Student } from "./students-table";
 
@@ -189,10 +188,6 @@ function issueCertificatesInCohortErrorMessage(
     return "Een van de velden is niet correct ingevuld.";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  }
-
   return null;
 }
 
@@ -295,10 +290,6 @@ function withdrawCertificatesInCohortErrorMessage(
     return "Een van de velden is niet correct ingevuld.";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  }
-
   return null;
 }
 
@@ -316,7 +307,7 @@ export function RemoveCertificateDialog({
     withdrawCertificatesInCohortAction.bind(
       null,
       cohortId,
-      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
+      // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
       rows.map((row) => row.certificate?.id!),
     ),
     {
@@ -382,47 +373,42 @@ function CompleteCoreModulesDialog({
   );
 
   return (
-    <>
-      <Alert open={isOpen} onClose={close} size="lg">
-        <AlertTitle>Alle kernmodules afronden</AlertTitle>
-        <AlertDescription>
-          With great power comes great responsibility. Houd rekening met het
-          volgende:
-          <ul className="mt-2 mb-4 list-disc list-inside">
-            <li>
-              Niet alle kernmodules zijn vereist voor het behalen van een
-              diploma.
-            </li>
-            <li>
-              Het doel is een realistisch en herkenbaar diploma dat alleen de
-              daadwerkelijk geoefende en beheerste modules weergeeft.
-            </li>
-            <li>
-              Niet alle kernmodules kunnen in elk vaartuig worden afgerond.
-            </li>
-          </ul>
-          Als je zeker bent van wat je doet en de gevolgen begrijpt, typ dan het
-          woord <Strong>{CONFIRMATION_WORD}</Strong> om de kernmodules af te
-          ronden.
-        </AlertDescription>
-        <form action={execute}>
-          <AlertBody>
-            <Input
-              name="confirm"
-              type="text"
-              required
-              pattern={CONFIRMATION_WORD}
-            />
-          </AlertBody>
-          <AlertActions>
-            <Button plain onClick={close}>
-              Annuleren
-            </Button>
-            <CoreModulesSubmitButton />
-          </AlertActions>
-        </form>
-      </Alert>
-    </>
+    <Alert open={isOpen} onClose={close} size="lg">
+      <AlertTitle>Alle kernmodules afronden</AlertTitle>
+      <AlertDescription>
+        With great power comes great responsibility. Houd rekening met het
+        volgende:
+        <ul className="mt-2 mb-4 list-disc list-inside">
+          <li>
+            Niet alle kernmodules zijn vereist voor het behalen van een diploma.
+          </li>
+          <li>
+            Het doel is een realistisch en herkenbaar diploma dat alleen de
+            daadwerkelijk geoefende en beheerste modules weergeeft.
+          </li>
+          <li>Niet alle kernmodules kunnen in elk vaartuig worden afgerond.</li>
+        </ul>
+        Als je zeker bent van wat je doet en de gevolgen begrijpt, typ dan het
+        woord <Strong>{CONFIRMATION_WORD}</Strong> om de kernmodules af te
+        ronden.
+      </AlertDescription>
+      <form action={execute}>
+        <AlertBody>
+          <Input
+            name="confirm"
+            type="text"
+            required
+            pattern={CONFIRMATION_WORD}
+          />
+        </AlertBody>
+        <AlertActions>
+          <Button plain onClick={close}>
+            Annuleren
+          </Button>
+          <CoreModulesSubmitButton />
+        </AlertActions>
+      </form>
+    </Alert>
   );
 }
 
@@ -453,7 +439,7 @@ function DownloadCertificatesDialog({
   const { execute, input, reset, result } = useAction(
     downloadCertificatesAction.bind(
       null,
-      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
+      // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
       rows.map((row) => row.certificate?.handle!),
     ),
     {
@@ -479,116 +465,107 @@ function DownloadCertificatesDialog({
   });
 
   return (
-    <>
-      <Alert open={isOpen} onClose={closeDialog} size="lg">
-        <AlertTitle>Diploma's downloaden</AlertTitle>
-        {downloadUrl ? (
-          <AlertDescription className="space-y-3">
-            <p className="font-medium text-green-600">
-              ✓ Download wordt automatisch gestart...
-            </p>
-            <p className="text-gray-600 text-sm">
-              Werkt de download niet?
-              <a
-                href={downloadUrl}
-                className="ml-1 text-blue-600 hover:text-blue-800 underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Klik hier om handmatig te downloaden
-              </a>
-            </p>
-          </AlertDescription>
-        ) : (
-          <AlertDescription>
-            Download een PDF-bestand met de diploma's van de geselecteerde
-            cursisten.
-          </AlertDescription>
-        )}
-        {!downloadUrl && (
-          <form action={execute}>
-            <AlertBody>
-              <HeadlessDisclosure>
-                <HeadlessDisclosureButton className="flex">
-                  <div className="flex justify-center items-center mr-6 h-6">
-                    <ChevronRightIcon className="w-3.5 h-3.5 ui-open:rotate-90 transition-transform shrink-0" />
-                  </div>
-                  <Subheading>Geavanceerde opties</Subheading>
-                </HeadlessDisclosureButton>
-                <HeadlessDisclosurePanel className="mt-2 pl-10">
-                  <Field>
-                    <Label>Bestandsnaam</Label>
-                    <Input
-                      name="filename"
-                      type="text"
-                      required
-                      defaultValue={getInputValue("filename")}
+    <Alert open={isOpen} onClose={closeDialog} size="lg">
+      <AlertTitle>Diploma's downloaden</AlertTitle>
+      {downloadUrl ? (
+        <AlertDescription className="space-y-3">
+          <p className="font-medium text-green-600">
+            ✓ Download wordt automatisch gestart...
+          </p>
+          <p className="text-gray-600 text-sm">
+            Werkt de download niet?
+            <a
+              href={downloadUrl}
+              className="ml-1 text-blue-600 hover:text-blue-800 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Klik hier om handmatig te downloaden
+            </a>
+          </p>
+        </AlertDescription>
+      ) : (
+        <AlertDescription>
+          Download een PDF-bestand met de diploma's van de geselecteerde
+          cursisten.
+        </AlertDescription>
+      )}
+      {!downloadUrl && (
+        <form action={execute}>
+          <AlertBody>
+            <HeadlessDisclosure>
+              <HeadlessDisclosureButton className="flex">
+                <div className="flex justify-center items-center mr-6 h-6">
+                  <ChevronRightIcon className="w-3.5 h-3.5 ui-open:rotate-90 transition-transform shrink-0" />
+                </div>
+                <Subheading>Geavanceerde opties</Subheading>
+              </HeadlessDisclosureButton>
+              <HeadlessDisclosurePanel className="mt-2 pl-10">
+                <Field>
+                  <Label>Bestandsnaam</Label>
+                  <Input
+                    name="filename"
+                    type="text"
+                    required
+                    defaultValue={getInputValue("filename")}
+                  />
+                </Field>
+
+                <Fieldset className="mt-6">
+                  <Legend>Sortering</Legend>
+                  <Text>
+                    Hoe moeten de diploma's in de PDF gesorteerd zijn?
+                  </Text>
+                  <RadioGroup name="sort" defaultValue={getInputValue("sort")}>
+                    <RadioField>
+                      <Radio value="student" />
+                      <Label>Naam cursist</Label>
+                      <Description>Sortering op voornaam, A tot Z.</Description>
+                    </RadioField>
+                    <RadioField>
+                      <Radio value="instructor" />
+                      <Label>Naam instructeur</Label>
+                      <Description>
+                        Sortering op voornaam instructeur, A tot Z. Diploma's
+                        zonder instructeur worden als laatste getoond.
+                      </Description>
+                    </RadioField>
+                  </RadioGroup>
+                </Fieldset>
+
+                <Fieldset className="mt-6">
+                  <Legend>Opleidingsvoortgang</Legend>
+                  <CheckboxField>
+                    <Checkbox
+                      name="previousModules"
+                      defaultChecked={getInputValue("previousModules") === "on"}
+                      key={`previousModules-${getInputValue("previousModules")}`}
                     />
-                  </Field>
-
-                  <Fieldset className="mt-6">
-                    <Legend>Sortering</Legend>
-                    <Text>
-                      Hoe moeten de diploma's in de PDF gesorteerd zijn?
-                    </Text>
-                    <RadioGroup
-                      name="sort"
-                      defaultValue={getInputValue("sort")}
-                    >
-                      <RadioField>
-                        <Radio value="student" />
-                        <Label>Naam cursist</Label>
-                        <Description>
-                          Sortering op voornaam, A tot Z.
-                        </Description>
-                      </RadioField>
-                      <RadioField>
-                        <Radio value="instructor" />
-                        <Label>Naam instructeur</Label>
-                        <Description>
-                          Sortering op voornaam instructeur, A tot Z. Diploma's
-                          zonder instructeur worden als laatste getoond.
-                        </Description>
-                      </RadioField>
-                    </RadioGroup>
-                  </Fieldset>
-
-                  <Fieldset className="mt-6">
-                    <Legend>Opleidingsvoortgang</Legend>
-                    <CheckboxField>
-                      <Checkbox
-                        name="previousModules"
-                        defaultChecked={
-                          getInputValue("previousModules") === "on"
-                        }
-                        key={`previousModules-${getInputValue("previousModules")}`}
-                      />
-                      <Label>
-                        Print ook de modules op het diploma die al via eerdere
-                        diploma's voor deze opleiding zijn behaald.
-                      </Label>
-                    </CheckboxField>
-                  </Fieldset>
-                </HeadlessDisclosurePanel>
-              </HeadlessDisclosure>
-            </AlertBody>
-            <AlertActions>
-              <Button plain onClick={closeDialog}>
-                Annuleren
-              </Button>
-              <DownloadSubmitButton />
-            </AlertActions>
-          </form>
-        )}
-        {downloadUrl && (
+                    <Label>
+                      Print ook de modules op het diploma die al via eerdere
+                      diploma's voor deze opleiding zijn behaald.
+                    </Label>
+                  </CheckboxField>
+                </Fieldset>
+              </HeadlessDisclosurePanel>
+            </HeadlessDisclosure>
+          </AlertBody>
           <AlertActions>
             <Button plain onClick={closeDialog}>
-              Sluiten
+              Annuleren
             </Button>
+            <DownloadSubmitButton />
           </AlertActions>
-        )}
-      </Alert>
-    </>
+        </form>
+      )}
+      {downloadUrl && (
+        <AlertActions>
+          <Button plain onClick={closeDialog}>
+            Sluiten
+          </Button>
+        </AlertActions>
+      )}
+    </Alert>
   );
 }
 

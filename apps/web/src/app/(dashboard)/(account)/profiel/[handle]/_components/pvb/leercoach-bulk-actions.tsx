@@ -4,10 +4,10 @@ import { CheckIcon } from "@heroicons/react/16/solid";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { bulkGrantLeercoachPermissionAction } from "~/app/_actions/pvb/leercoach-permission-action";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Checkbox } from "~/app/(dashboard)/_components/checkbox";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { bulkGrantLeercoachPermissionAction } from "~/app/_actions/pvb/leercoach-permission-action";
 import type { listPvbsForPersonAsLeercoach } from "~/lib/nwd";
 
 export function LeercoachBulkActions({

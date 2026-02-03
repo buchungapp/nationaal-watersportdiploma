@@ -1,19 +1,19 @@
 "use client";
 
 import {
+  closestCenter,
   DndContext,
   type DragEndEvent,
   type SensorDescriptor,
   type SensorOptions,
-  closestCenter,
 } from "@dnd-kit/core";
 import {
   restrictToHorizontalAxis,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
@@ -22,7 +22,7 @@ import type { PopoverPanelProps } from "@headlessui/react";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/16/solid";
 import type { Column, Table as TableType } from "@tanstack/react-table";
 import { clsx } from "clsx";
-import { type PropsWithChildren, createContext, useContext } from "react";
+import { createContext, type PropsWithChildren, useContext } from "react";
 import DragIcon from "~/app/_components/drag-icon";
 import type { useColumnOrdering } from "../_hooks/use-column-ordering";
 import { useCustomSensors } from "../_hooks/use-custom-sensors";

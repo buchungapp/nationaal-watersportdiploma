@@ -13,9 +13,13 @@ words:
   - diplomeringslijn
   - eigenvaardigheidslijn
   - esbenp
+  - Ebel
   - Gelicentieerd
+  - Gelicentieerde
   - ggik
   - HACCP
+  - NLQF
+  - NWDC
   - headlessui
   - hgetall
   - HISWA
@@ -39,7 +43,9 @@ words:
   - nawadi
   - nums
   - nuqs
+  - ongelicentieerd
   - ongelicentieerde
+  - Ongelicentieerd
   - onnotice
   - otel
   - Outro
@@ -93,6 +99,8 @@ ignoreWords:
   - PDF
   - GEWICHTSTRIM
   - PICO
+  - Qjde
+  - ZLFOZ
 allowCompoundWords: true
 useGitignore: true
 ignorePaths:

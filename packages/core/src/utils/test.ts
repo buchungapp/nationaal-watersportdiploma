@@ -15,7 +15,7 @@ export function defaultTimestamps<T>(
     ) as unknown as T;
   }
   if (obj !== null && typeof obj === "object") {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: intentional
     const sanitizedObj: Record<string, any> = {};
 
     for (const [key, value] of Object.entries(obj)) {

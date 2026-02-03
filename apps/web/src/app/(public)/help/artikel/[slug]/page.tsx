@@ -3,13 +3,13 @@ import { constants } from "@nawadi/lib";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { LinkedIn, Whatsapp, Twitter as X } from "~/app/_components/socials";
 import CopyToClipboard from "~/app/(public)/_components/copy-to-clipboard-simple";
 import { FindNWDCourse } from "~/app/(public)/_components/cta";
 import PrintPage from "~/app/(public)/_components/print-page";
 import { Prose } from "~/app/(public)/_components/prose";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import { LinkedIn, Whatsapp, Twitter as X } from "~/app/_components/socials";
 import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
 import Breadcrumb from "../../../_components/breadcrumb";
 import { HelpArticle } from "../../_components/article";
@@ -82,7 +82,7 @@ export default async function Page(props: Props) {
       <script
         type="application/ld+json"
         suppressHydrationWarning
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",

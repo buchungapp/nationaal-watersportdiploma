@@ -3,6 +3,11 @@
 import { PlusIcon, TrashIcon } from "@heroicons/react/16/solid";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  addPvbCourseAction,
+  removePvbCourseAction,
+} from "~/app/_actions/pvb/course-management-action";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -19,11 +24,6 @@ import {
 import { Label } from "~/app/(dashboard)/_components/fieldset";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { useInstructiegroepByCourse } from "~/app/(dashboard)/_hooks/swr/use-instructiegroep-by-course";
-import {
-  addPvbCourseAction,
-  removePvbCourseAction,
-} from "~/app/_actions/pvb/course-management-action";
-import Spinner from "~/app/_components/spinner";
 
 interface Course {
   id: string;
@@ -109,7 +109,7 @@ export function CursussenPerKwalificatieprofiel({
         setIsAddDialogOpen(false);
         setSelectedCourseIds(new Set());
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Er is een fout opgetreden");
     }
   };
@@ -130,7 +130,7 @@ export function CursussenPerKwalificatieprofiel({
       } else {
         toast.success("Cursus verwijderd");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Er is een fout opgetreden");
     }
   };

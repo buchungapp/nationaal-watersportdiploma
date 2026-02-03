@@ -1,5 +1,5 @@
 import type { StudentsProgressData } from "~/app/(dashboard)/(management)/locatie/[location]/cohorten/[cohort]/(overview)/_student-progress";
-import { type FieldMapper, exportFormatters } from "~/lib/export";
+import { exportFormatters, type FieldMapper } from "~/lib/export";
 import type {
   listStudentsWithCurriculaByCohortId,
   retrieveCohortById,

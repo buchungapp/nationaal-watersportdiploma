@@ -61,7 +61,9 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     container: node:21.5.0-alpine3.19
+    # Known issues: mintlify has vulnerable transitive deps (express/path-to-regexp),
+    # xlsx has no patched version available, node-forge needs upstream fix in @signpdf/signer-p12
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - run: pnpm audit
+      - run: pnpm audit --audit-level=high

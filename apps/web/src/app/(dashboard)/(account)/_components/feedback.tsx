@@ -1,18 +1,23 @@
 "use client";
 
-import {
-  type PropsWithChildren,
-  Suspense,
-  createContext,
-  useContext,
-  useState,
-} from "react";
-
+import { LightBulbIcon } from "@heroicons/react/16/solid";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   type InferUseActionHookReturn,
   useAction,
 } from "next-safe-action/hooks";
+import {
+  createContext,
+  type PropsWithChildren,
+  Suspense,
+  useContext,
+  useState,
+} from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import Spinner from "~/app/_components/spinner";
+import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
   DialogActions,
@@ -25,16 +30,7 @@ import {
   Fieldset,
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
-
-import { Button } from "~/app/(dashboard)/_components/button";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-
-import { LightBulbIcon } from "@heroicons/react/16/solid";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useFormStatus } from "react-dom";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
-import Spinner from "~/app/_components/spinner";
 import { productFeedbackAction } from "../../../_actions/send-feedback-action";
 import { DropdownItem, DropdownLabel } from "../../_components/dropdown";
 
@@ -98,10 +94,6 @@ export function productFeedbackErrorMessage(
     return "Een van de velden is niet correct ingevuld.";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  }
-
   return null;
 }
 
@@ -130,48 +122,46 @@ function Feedback() {
   const placeholder = "Het zou super zijn als...";
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={closeDialog}>
-        <DialogTitle>Neem contact op</DialogTitle>
+    <Dialog open={isOpen} onClose={closeDialog}>
+      <DialogTitle>Neem contact op</DialogTitle>
 
-        <form
-          action={(formData) =>
-            execute({
-              type: "product-feedback",
-              priority: "normal",
-              message: formData.get("comment") as string,
-              path: pathname,
-              query: urlSearchParamsToObject(searchParams),
-              headers: {
-                "user-agent": navigator.userAgent,
-              },
-            })
-          }
-        >
-          <DialogBody>
-            <Fieldset>
-              <Field>
-                <Label>{label}</Label>
-                <Textarea
-                  name="comment"
-                  required
-                  placeholder={placeholder}
-                  defaultValue={getInputValue("message")}
-                />
-              </Field>
-            </Fieldset>
+      <form
+        action={(formData) =>
+          execute({
+            type: "product-feedback",
+            priority: "normal",
+            message: formData.get("comment") as string,
+            path: pathname,
+            query: urlSearchParamsToObject(searchParams),
+            headers: {
+              "user-agent": navigator.userAgent,
+            },
+          })
+        }
+      >
+        <DialogBody>
+          <Fieldset>
+            <Field>
+              <Label>{label}</Label>
+              <Textarea
+                name="comment"
+                required
+                placeholder={placeholder}
+                defaultValue={getInputValue("message")}
+              />
+            </Field>
+          </Fieldset>
 
-            {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
-          </DialogBody>
-          <DialogActions>
-            <Button plain onClick={closeDialog}>
-              Sluiten
-            </Button>
-            <SubmitButton />
-          </DialogActions>
-        </form>
-      </Dialog>
-    </>
+          {errorMessage ? <ErrorMessage>{errorMessage}</ErrorMessage> : null}
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={closeDialog}>
+            Sluiten
+          </Button>
+          <SubmitButton />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
 

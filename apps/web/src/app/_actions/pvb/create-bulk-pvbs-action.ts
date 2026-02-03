@@ -101,7 +101,7 @@ export const createBulkPvbsAction = actionClientWithMeta
   .metadata({
     name: "create-pvb-bulk",
   })
-  .schema(createBulkPvbsSchema)
+  .inputSchema(createBulkPvbsSchema)
   .stateAction(async ({ parsedInput }) => {
     try {
       const { locationHandle, formData } = parsedInput;

@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-table";
 import { useParams } from "next/navigation";
 import React, { Suspense, use, useMemo } from "react";
-import Search from "~/app/(dashboard)/(management)/_components/search";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import {
   Checkbox,
@@ -16,8 +15,8 @@ import {
 } from "~/app/(dashboard)/_components/checkbox";
 import { Table, TableBody } from "~/app/(dashboard)/_components/table";
 import { TableSelection } from "~/app/(dashboard)/_components/table-action";
-import { DefaultTableCell } from "~/app/(dashboard)/_components/table-content";
 import {
+  DefaultTableCell,
   DefaultTableRows,
   NoTableRows,
 } from "~/app/(dashboard)/_components/table-content";
@@ -38,6 +37,7 @@ import {
   getSortableColumnIds,
   useSorting,
 } from "~/app/(dashboard)/_hooks/use-sorting";
+import Search from "~/app/(dashboard)/(management)/_components/search";
 import dayjs from "~/lib/dayjs";
 import type { listStudentsWithCurriculaByCohortId } from "~/lib/nwd";
 import { transformSelectionState } from "~/utils/table-state";
@@ -55,7 +55,10 @@ const columnHelper = createColumnHelper<Student>();
 const ProgramProgress = ({
   studentProgress: studentProgressPromise,
   personId,
-}: { studentProgress: Promise<StudentsProgressData>; personId: string }) => {
+}: {
+  studentProgress: Promise<StudentsProgressData>;
+  personId: string;
+}) => {
   const data = use(studentProgressPromise);
 
   const studentProgress = data.find(
@@ -320,16 +323,16 @@ export default function StudentsTable({
             return [
               key,
               Object.hasOwn(prev, key)
-                ? // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                ? // biome-ignore lint/style/noNonNullAssertion: intentional
                   prev[key]!
                 : {
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
                     instructor: student!.instructor,
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
                     studentCurriculum: student!.studentCurriculum,
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
                     person: student!.person,
-                    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
                     tags: student!.tags,
                   },
             ];

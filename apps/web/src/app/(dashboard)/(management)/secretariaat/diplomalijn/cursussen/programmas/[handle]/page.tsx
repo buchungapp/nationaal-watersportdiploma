@@ -1,6 +1,6 @@
-import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
 import { Divider } from "~/app/(dashboard)/_components/divider";
 import { Heading } from "~/app/(dashboard)/_components/heading";
+import BackButton from "~/app/(dashboard)/(management)/_components/back-button";
 import { ProgramCurricula } from "./_components/program-curricula";
 import { ProgramHeading } from "./_components/program-heading";
 import { ProgramInfo } from "./_components/program-info";

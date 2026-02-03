@@ -8,9 +8,5 @@ export default async function LaunchFaq({ category }: { category: string }) {
     },
   });
 
-  return (
-    <>
-      <FaqGroup faqs={questions} />
-    </>
-  );
+  return <FaqGroup faqs={questions} />;
 }

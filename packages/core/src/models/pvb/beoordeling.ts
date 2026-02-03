@@ -366,7 +366,7 @@ export const updateOnderdeelUitslag = wrapCommand(
     z.object({
       success: z.boolean(),
     }),
-    async (input) => {
+    async (_input) => {
       // This function is deprecated and can no longer be called independently
       // Use finalizeBeoordeling instead, which will automatically determine
       // the uitslag for all onderdelen based on their criteria

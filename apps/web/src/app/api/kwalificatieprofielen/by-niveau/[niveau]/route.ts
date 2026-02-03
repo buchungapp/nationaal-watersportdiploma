@@ -7,7 +7,7 @@ const paramsSchema = z.object({
 });
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ niveau: string }> },
 ) {
   try {

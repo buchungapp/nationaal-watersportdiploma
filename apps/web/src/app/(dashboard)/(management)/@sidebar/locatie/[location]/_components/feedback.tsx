@@ -1,26 +1,32 @@
 "use client";
 
-import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
-import { Suspense, useState } from "react";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import {
-  SidebarItem,
-  SidebarLabel,
-} from "~/app/(dashboard)/_components/sidebar";
-
+  BugAntIcon,
+  ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSm,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/16/solid";
+import { ChatBubbleOvalLeftIcon } from "@heroicons/react/20/solid";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
+import { Suspense, useState } from "react";
+import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { productFeedbackAction } from "~/app/_actions/send-feedback-action";
+import Spinner from "~/app/_components/spinner";
+import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
   CheckboxField,
   CheckboxGroup,
 } from "~/app/(dashboard)/_components/checkbox";
-
 import {
   Dialog,
   DialogActions,
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-
-import { toast } from "sonner";
 import {
   Description,
   ErrorMessage,
@@ -28,23 +34,13 @@ import {
   Fieldset,
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
-
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { Button } from "~/app/(dashboard)/_components/button";
-import { Textarea } from "~/app/(dashboard)/_components/textarea";
-
 import {
-  BugAntIcon,
-  ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSm,
-  QuestionMarkCircleIcon,
-} from "@heroicons/react/16/solid";
-import { useAction } from "next-safe-action/hooks";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useFormStatus } from "react-dom";
+  SidebarItem,
+  SidebarLabel,
+} from "~/app/(dashboard)/_components/sidebar";
+import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import { productFeedbackErrorMessage } from "~/app/(dashboard)/(account)/_components/feedback";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { productFeedbackAction } from "~/app/_actions/send-feedback-action";
-import Spinner from "~/app/_components/spinner";
+
 const feedbackLabels = {
   bug: {
     label: "Wat heb je gevonden?",

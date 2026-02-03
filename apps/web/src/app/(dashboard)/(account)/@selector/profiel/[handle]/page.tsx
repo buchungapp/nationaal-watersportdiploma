@@ -2,8 +2,7 @@ import { ChevronDownIcon, UsersIcon } from "@heroicons/react/16/solid";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { DropdownButton } from "~/app/(dashboard)/_components/dropdown";
 import { NavbarItem, NavbarLabel } from "~/app/(dashboard)/_components/navbar";
-import { getPersonByHandle } from "~/lib/nwd";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getPersonByHandle, getUserOrThrow } from "~/lib/nwd";
 
 export default async function PersonSelector(props: {
   params: Promise<{ handle: string }>;

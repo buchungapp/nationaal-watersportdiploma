@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Suspense } from "react";
+import { Weight } from "~/app/_components/weight";
 import {
   Table,
   TableBody,
@@ -9,7 +10,6 @@ import {
   TableRow,
 } from "~/app/(dashboard)/_components/table";
 import { TextLink } from "~/app/(dashboard)/_components/text";
-import { Weight } from "~/app/_components/weight";
 import {
   listCourses,
   listCurriculaByDiscipline,

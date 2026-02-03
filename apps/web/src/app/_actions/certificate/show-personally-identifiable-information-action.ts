@@ -21,7 +21,7 @@ export const showPersonallyIdentifiableInformationAction = actionClientWithMeta
   .metadata({
     name: "show-personally-identifiable-information",
   })
-  .schema(showPersonallyIdentifiableInformationSchema)
+  .inputSchema(showPersonallyIdentifiableInformationSchema)
   .bindArgsSchemas(showPersonallyIdentifiableInformationArgsSchema)
   .action(
     async ({ parsedInput: data, bindArgsParsedInputs: [certificateId] }) => {

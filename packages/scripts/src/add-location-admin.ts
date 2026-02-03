@@ -55,7 +55,7 @@ async function main() {
     },
   }).then((res) => res.items);
 
-  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+  // biome-ignore lint/suspicious/noImplicitAnyLet: intentional
   let personId;
 
   if (personsForUser.length > 0) {

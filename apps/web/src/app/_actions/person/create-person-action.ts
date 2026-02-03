@@ -68,7 +68,7 @@ const createPersonForLocationArgsSchema: [locationId: z.ZodString] = [
 
 export const createPersonForLocationAction = actionClientWithMeta
   .metadata({ name: "create-person-for-location" })
-  .schema(createPersonSchema)
+  .inputSchema(createPersonSchema)
   .bindArgsSchemas(createPersonForLocationArgsSchema)
   .action(
     async ({
@@ -105,7 +105,7 @@ const createPersonBaseSchema = zfd.formData({
 
 export const createPersonForUserAction = actionClientWithMeta
   .metadata({ name: "create-person-for-user" })
-  .schema(createPersonBaseSchema)
+  .inputSchema(createPersonBaseSchema)
   .action(async ({ parsedInput }) => {
     const user = await getUserOrThrow();
 

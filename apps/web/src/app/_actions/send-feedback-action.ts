@@ -44,7 +44,7 @@ const sendFeedbackSchema = z.object({
 });
 
 export const productFeedbackAction = actionClientWithMeta
-  .schema(sendFeedbackSchema)
+  .inputSchema(sendFeedbackSchema)
   .metadata({
     name: "send-feedback",
   })

@@ -1,5 +1,5 @@
-import { type Row, type Table, flexRender } from "@tanstack/react-table";
 import type { Cell } from "@tanstack/react-table";
+import { flexRender, type Row, type Table } from "@tanstack/react-table";
 import type { PropsWithChildren } from "react";
 import { TableCell, TableRow } from "./table";
 

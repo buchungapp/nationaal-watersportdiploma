@@ -5,8 +5,8 @@ import { zfd } from "zod-form-data";
 import { createCashback, listAllLocations } from "~/lib/nwd";
 import {
   ACCEPTED_IMAGE_TYPES,
-  MAX_FILE_SIZE,
   extractFileExtension,
+  MAX_FILE_SIZE,
 } from "../files";
 import { smellsLikeIban, validateIbanChecksum } from "../iban";
 import { actionClientWithMeta } from "../safe-action";
@@ -71,7 +71,7 @@ export const createCashbackAction = actionClientWithMeta
   .metadata({
     name: "create-cashback",
   })
-  .schema(createCashbackSchema)
+  .inputSchema(createCashbackSchema)
   .action(async ({ parsedInput: { verificationMedia, terms, ...fields } }) => {
     const cashback = await createCashback({
       media: verificationMedia,

@@ -1,6 +1,5 @@
-import { uuidSchema } from "../../utils/index.js";
-
 import { z } from "zod";
+import { uuidSchema } from "../../utils/index.js";
 
 export const logbookSchema = z.object({
   id: uuidSchema,

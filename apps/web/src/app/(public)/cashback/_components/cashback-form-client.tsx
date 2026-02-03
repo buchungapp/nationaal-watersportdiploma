@@ -1,11 +1,14 @@
 "use client";
 
 import JSConfetti from "js-confetti";
-import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
+import { useAction } from "next-safe-action/hooks";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { createCashbackAction } from "~/app/_actions/cashback/create-cashback-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Checkbox,
@@ -22,9 +25,6 @@ import {
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Listbox, ListboxOption } from "~/app/(dashboard)/_components/listbox";
 import { MediaDropzone } from "~/app/(dashboard)/_components/media-dropzone";
-import { createCashbackAction } from "~/app/_actions/cashback/create-cashback-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import Spinner from "~/app/_components/spinner";
 import type { listAllLocations } from "~/lib/nwd";
 
 export function CashbackFormClient({

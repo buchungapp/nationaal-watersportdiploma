@@ -5,6 +5,9 @@ import { useAction } from "next-safe-action/hooks";
 import { Suspense, use, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+import { createPersonForUserAction } from "~/app/_actions/person/create-person-action";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Combobox,
@@ -25,9 +28,6 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
-import { createPersonForUserAction } from "~/app/_actions/person/create-person-action";
-import Spinner from "~/app/_components/spinner";
 
 interface Props {
   countriesPromise: Promise<{ code: string; name: string }[]>;
@@ -140,102 +140,99 @@ function CreatePersonDialogInternal({
   });
 
   return (
-    <>
-      <Dialog open={isOpen} onClose={closeDialog}>
-        <DialogTitle>Profiel toevoegen</DialogTitle>
-        <DialogDescription>
-          Vul de gegevens in om een nieuw profiel toe te voegen aan jouw
-          account.
-        </DialogDescription>
-        <form action={execute}>
-          <DialogBody>
-            <Fieldset>
-              <FieldGroup>
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
-                  <Field>
-                    <Label>Voornaam</Label>
-                    <Input
-                      name="firstName"
-                      invalid={!!result.validationErrors?.firstName}
-                      required
-                      minLength={1}
-                      defaultValue={getInputValue("firstName")}
-                    />
-                  </Field>
-                  <Field>
-                    <Label>Tussenvoegsel</Label>
-                    <Input
-                      name="lastNamePrefix"
-                      invalid={!!result.validationErrors?.lastNamePrefix}
-                      defaultValue={getInputValue("lastNamePrefix")}
-                    />
-                  </Field>
-                  <Field>
-                    <Label>Achternaam</Label>
-                    <Input
-                      name="lastName"
-                      invalid={!!result.validationErrors?.lastName}
-                      required
-                      minLength={1}
-                      defaultValue={getInputValue("lastName")}
-                    />
-                  </Field>
-                </div>
+    <Dialog open={isOpen} onClose={closeDialog}>
+      <DialogTitle>Profiel toevoegen</DialogTitle>
+      <DialogDescription>
+        Vul de gegevens in om een nieuw profiel toe te voegen aan jouw account.
+      </DialogDescription>
+      <form action={execute}>
+        <DialogBody>
+          <Fieldset>
+            <FieldGroup>
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-3">
+                <Field>
+                  <Label>Voornaam</Label>
+                  <Input
+                    name="firstName"
+                    invalid={!!result.validationErrors?.firstName}
+                    required
+                    minLength={1}
+                    defaultValue={getInputValue("firstName")}
+                  />
+                </Field>
+                <Field>
+                  <Label>Tussenvoegsel</Label>
+                  <Input
+                    name="lastNamePrefix"
+                    invalid={!!result.validationErrors?.lastNamePrefix}
+                    defaultValue={getInputValue("lastNamePrefix")}
+                  />
+                </Field>
+                <Field>
+                  <Label>Achternaam</Label>
+                  <Input
+                    name="lastName"
+                    invalid={!!result.validationErrors?.lastName}
+                    required
+                    minLength={1}
+                    defaultValue={getInputValue("lastName")}
+                  />
+                </Field>
+              </div>
 
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
-                  <Field>
-                    <Label>Geboortedatum</Label>
-                    <Input
-                      name="dateOfBirth"
-                      type="date"
-                      invalid={!!result.validationErrors?.dateOfBirth}
-                      required
-                      defaultValue={getInputValue("dateOfBirth")}
-                    />
-                  </Field>
-                  <Field>
-                    <Label>Geboorteplaats</Label>
-                    <Input
-                      name="birthCity"
-                      invalid={!!result.validationErrors?.birthCity}
-                      required
-                      defaultValue={getInputValue("birthCity")}
-                    />
-                  </Field>
-                </div>
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
+                <Field>
+                  <Label>Geboortedatum</Label>
+                  <Input
+                    name="dateOfBirth"
+                    type="date"
+                    invalid={!!result.validationErrors?.dateOfBirth}
+                    required
+                    defaultValue={getInputValue("dateOfBirth")}
+                  />
+                </Field>
+                <Field>
+                  <Label>Geboorteplaats</Label>
+                  <Input
+                    name="birthCity"
+                    invalid={!!result.validationErrors?.birthCity}
+                    required
+                    defaultValue={getInputValue("birthCity")}
+                  />
+                </Field>
+              </div>
 
-                <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
-                  <Field>
-                    <Label>Geboorteland</Label>
-                    <Combobox
-                      name="birthCountry"
-                      invalid={!!result.validationErrors?.birthCountry}
-                      options={countries}
-                      displayValue={(value) => value?.name}
-                      defaultValue={countries.find(
-                        (c) => c.code === getInputValue("birthCountry")?.code,
-                      )}
-                    >
-                      {(country) => (
-                        <ComboboxOption key={country.code} value={country}>
-                          <ComboboxLabel>{country.name}</ComboboxLabel>
-                        </ComboboxOption>
-                      )}
-                    </Combobox>
-                  </Field>
-                </div>
-              </FieldGroup>
-            </Fieldset>
-          </DialogBody>
-          <DialogActions>
-            <Button plain onClick={closeDialog}>
-              Sluiten
-            </Button>
-            <SubmitButton />
-          </DialogActions>
-        </form>
-      </Dialog>
-    </>
+              <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
+                <Field>
+                  <Label>Geboorteland</Label>
+                  <Combobox
+                    name="birthCountry"
+                    invalid={!!result.validationErrors?.birthCountry}
+                    options={countries}
+                    displayValue={(value) => value?.name}
+                    defaultValue={countries.find(
+                      (c) => c.code === getInputValue("birthCountry")?.code,
+                    )}
+                  >
+                    {(country) => (
+                      <ComboboxOption key={country.code} value={country}>
+                        <ComboboxLabel>{country.name}</ComboboxLabel>
+                      </ComboboxOption>
+                    )}
+                  </Combobox>
+                </Field>
+              </div>
+            </FieldGroup>
+          </Fieldset>
+        </DialogBody>
+        <DialogActions>
+          <Button plain onClick={closeDialog}>
+            Sluiten
+          </Button>
+          <SubmitButton />
+        </DialogActions>
+      </form>
+    </Dialog>
   );
 }
 

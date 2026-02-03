@@ -14,7 +14,7 @@ export const instructieGroep = kssSchema.table(
     title: text("title").notNull(),
     richting: richting("richting").notNull(),
   },
-  (table) => [],
+  (_table) => [],
 );
 
 export const instructieGroepCursus = kssSchema.table(

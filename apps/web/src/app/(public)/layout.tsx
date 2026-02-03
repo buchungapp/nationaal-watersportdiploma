@@ -1,17 +1,17 @@
 import { clsx } from "clsx";
 import { Toaster } from "sonner";
-import { CommonProviders, MarketingProviders } from "../_components/providers";
-import Footer from "./_components/footer/footer";
-import Header from "./_components/header/header";
+import "sonner/dist/styles.css";
 
 import { constants } from "@nawadi/lib";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { BASE_URL } from "~/constants";
-
-import { ImpersonationBarWrapper } from "../(dashboard)/_components/impersonation-bar-wrapper";
 import Analytics from "../_components/analytics";
+import { CommonProviders, MarketingProviders } from "../_components/providers";
+import { ImpersonationBarWrapper } from "../(dashboard)/_components/impersonation-bar-wrapper";
+import Footer from "./_components/footer/footer";
+import Header from "./_components/header/header";
 import "../globals.css";
 import { Suspense } from "react";
 

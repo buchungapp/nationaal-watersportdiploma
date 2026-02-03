@@ -15,7 +15,9 @@ import { EditDetails } from "./action-buttons";
 
 async function ActionButton({
   personPromise,
-}: { personPromise: Promise<User.Person.$schema.Person> }) {
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
   const [person, countries] = await Promise.all([
     personPromise,
     listCountries(),
@@ -26,7 +28,9 @@ async function ActionButton({
 
 export async function PersonaliaContent({
   personPromise,
-}: { personPromise: Promise<User.Person.$schema.Person> }) {
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
   const person = await personPromise;
 
   return (
@@ -72,7 +76,9 @@ export async function PersonaliaContent({
 
 export async function Personalia({
   personPromise,
-}: { personPromise: Promise<User.Person.$schema.Person> }) {
+}: {
+  personPromise: Promise<User.Person.$schema.Person>;
+}) {
   return (
     <StackedLayoutCard>
       <Subheading className="mb-3">Personalia</Subheading>

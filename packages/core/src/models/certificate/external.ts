@@ -79,7 +79,7 @@ export const byId = wrapQuery(
         title: external_certificate.title,
         mediaId: external_certificate.mediaId,
         additionalComments: external_certificate.additionalComments,
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        // biome-ignore lint/suspicious/noExplicitAny: intentional
         metadata: external_certificate._metadata as any,
         media,
       };
@@ -157,7 +157,7 @@ export const listForPerson = wrapQuery(
             title: external_certificate.title,
             mediaId: external_certificate.mediaId,
             additionalComments: external_certificate.additionalComments,
-            // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+            // biome-ignore lint/suspicious/noExplicitAny: intentional
             metadata: external_certificate._metadata as any,
             media,
           };

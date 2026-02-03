@@ -9,7 +9,7 @@ import assert from "node:assert";
 import fs from "node:fs";
 import inquirer from "inquirer";
 
-export const validSlugRegex = new RegExp(/^[a-zA-Z0-9\-]+$/);
+export const validSlugRegex = new RegExp(/^[a-zA-Z0-9-]+$/);
 
 async function processFile(filePath: string) {
   // Read the file into a buffer

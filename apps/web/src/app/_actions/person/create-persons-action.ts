@@ -10,10 +10,10 @@ import { voidActionSchema } from "../utils";
 import {
   COLUMN_MAPPING,
   type CSVData,
-  SELECT_LABEL,
   countriesSchema,
   csvColumnLiteral,
   csvDataSchema,
+  SELECT_LABEL,
 } from "./person-bulk-csv-mappings";
 
 const createPersonsSchema = zfd
@@ -53,7 +53,7 @@ export const createPersonsAction = actionClientWithMeta
   .metadata({
     name: "create-persons",
   })
-  .schema(createPersonsSchema)
+  .inputSchema(createPersonsSchema)
   .bindArgsSchemas(createPersonsArgsSchema)
   .stateAction<createPersonsStateActionType>(
     async (
@@ -70,7 +70,7 @@ export const createPersonsAction = actionClientWithMeta
       }
 
       if (prevResult.data?.state === "parsed") {
-        // biome-ignore lint/style/noNonNullAssertion: <explanation>
+        // biome-ignore lint/style/noNonNullAssertion: intentional
         return uploadPersons(locationId, roles, prevResult.data.persons!);
       }
 
@@ -96,8 +96,8 @@ async function parsePersonsFromCsvData(
   );
   const notSelectedIndices = Object.entries(indexToColumnSelection)
     .filter(([_, value]) => value === SELECT_LABEL)
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    .map(([key]) => Number.parseInt(key.split("-").pop()!));
+    // biome-ignore lint/style/noNonNullAssertion: intentional
+    .map(([key]) => Number.parseInt(key.split("-").pop()!, 10));
 
   const filteredData = csvData.rows.map((item) =>
     item.filter((_, index) => !notSelectedIndices.includes(index)),
@@ -125,7 +125,7 @@ async function parsePersonsFromCsvData(
 
   // Sort data so that we can parse it correctly.
   const indices = selectedFields.map((columnName) =>
-    COLUMN_MAPPING.findIndex((key) => key === columnName),
+    COLUMN_MAPPING.indexOf(columnName),
   );
 
   const sortedData = filteredData?.map((row) =>

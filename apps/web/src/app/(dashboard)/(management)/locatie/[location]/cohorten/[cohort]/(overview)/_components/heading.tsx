@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Heading as HeadingComponent } from "~/app/(dashboard)/_components/heading";
 import { retrieveCohortByHandle, retrieveLocationByHandle } from "~/lib/nwd";
+
 type HeadingProps = {
   params: Promise<{ location: string; cohort: string }>;
 };

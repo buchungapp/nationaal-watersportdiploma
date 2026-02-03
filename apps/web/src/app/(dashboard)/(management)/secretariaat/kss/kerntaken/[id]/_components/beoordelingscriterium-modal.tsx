@@ -3,16 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import {
+  createBeoordelingscriterium,
+  updateBeoordelingscriterium,
+} from "~/app/_actions/kss/kwalificatieprofiel";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Dialog } from "~/app/(dashboard)/_components/dialog";
 import { Field, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
-import {
-  createBeoordelingscriterium,
-  updateBeoordelingscriterium,
-} from "~/app/_actions/kss/kwalificatieprofiel";
 
 interface BeoordelingscriteriumModalProps {
   isOpen: boolean;
@@ -69,7 +69,7 @@ export function BeoordelingscriteriumModal({
       }
       onClose();
       router.refresh();
-    } catch (error) {
+    } catch (_error) {
       toast.error(
         beoordelingscriterium
           ? "Fout bij bijwerken beoordelingscriterium"
@@ -130,7 +130,7 @@ export function BeoordelingscriteriumModal({
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  rang: Number.parseInt(e.target.value) || 1,
+                  rang: Number.parseInt(e.target.value, 10) || 1,
                 })
               }
               required

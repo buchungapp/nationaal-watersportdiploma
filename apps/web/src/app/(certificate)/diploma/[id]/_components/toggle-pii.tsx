@@ -1,10 +1,12 @@
 "use client";
 
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/16/solid";
-import { useAction } from "next-safe-action/hooks";
 import { useParams, usePathname } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
 import { useCallback, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { showPersonallyIdentifiableInformationAction } from "~/app/_actions/certificate/show-personally-identifiable-information-action";
+import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -20,8 +22,7 @@ import {
   Label,
 } from "~/app/(dashboard)/_components/fieldset";
 import { Input } from "~/app/(dashboard)/_components/input";
-import { showPersonallyIdentifiableInformationAction } from "~/app/_actions/certificate/show-personally-identifiable-information-action";
-import { useFormInput } from "~/app/_actions/hooks/useFormInput";
+
 function Submit() {
   const { pending } = useFormStatus();
 
@@ -121,17 +122,9 @@ function HideButton() {
   const pathname = usePathname();
 
   return (
-    <>
-      <Button
-        type="button"
-        plain
-        href={pathname}
-        prefetch={false}
-        scroll={false}
-      >
-        <EyeSlashIcon /> Verberg gegevens
-      </Button>
-    </>
+    <Button type="button" plain href={pathname} prefetch={false} scroll={false}>
+      <EyeSlashIcon /> Verberg gegevens
+    </Button>
   );
 }
 

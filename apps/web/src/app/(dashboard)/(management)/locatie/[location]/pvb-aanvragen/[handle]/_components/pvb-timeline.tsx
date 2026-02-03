@@ -5,8 +5,8 @@ import { listPvbGebeurtenissen, retrievePvbAanvraagByHandle } from "~/lib/nwd";
 
 function getEventDescription(
   type: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  data: Record<string, any> | null,
+  // biome-ignore lint/suspicious/noExplicitAny: intentional
+  _data: Record<string, any> | null,
 ): string {
   const descriptions: Record<string, string> = {
     aanvraag_ingediend: "Aanvraag ingediend",

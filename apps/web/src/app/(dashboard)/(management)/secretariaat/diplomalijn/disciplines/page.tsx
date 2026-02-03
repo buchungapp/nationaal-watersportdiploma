@@ -34,7 +34,7 @@ async function DisciplineTable(props: {
   if (searchQuery) {
     const results = index.search(decodeURIComponent(searchQuery));
     filteredDisciplines = results.map(
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: intentional
       (result) => disciplines.find((discipline) => discipline.id === result)!,
     );
   }
