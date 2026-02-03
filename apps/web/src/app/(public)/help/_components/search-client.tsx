@@ -128,7 +128,7 @@ export default function SearchClient({
     <div className="relative mx-auto w-full transform divide-y divide-slate-100 rounded-sm bg-white ring-1 ring-branding-light/95 transition-all">
       <Combobox
         multiple={false}
-        onChange={(value: { url: string }) => {
+        onChange={(value: { url: string } | null) => {
           if (!value) return;
 
           router.push(value.url);

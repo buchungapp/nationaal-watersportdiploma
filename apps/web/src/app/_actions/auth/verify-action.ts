@@ -13,7 +13,7 @@ const verifySchema = zfd.formData({
 const verifyArgsSchema: [email: z.ZodString] = [z.string().email()];
 
 export const verifyAction = actionClientWithMeta
-  .schema(verifySchema)
+  .inputSchema(verifySchema)
   .metadata({
     name: "auth.verify",
   })

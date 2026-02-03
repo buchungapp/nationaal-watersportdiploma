@@ -18,7 +18,7 @@ export const copyCurriculumAction = actionClientWithMeta
   .metadata({
     name: "copy-curriculum",
   })
-  .schema(copyCurriculumSchema)
+  .inputSchema(copyCurriculumSchema)
   .bindArgsSchemas(copyCurriculumArgsSchema)
   .action(
     async ({

@@ -71,7 +71,7 @@ export const createCashbackAction = actionClientWithMeta
   .metadata({
     name: "create-cashback",
   })
-  .schema(createCashbackSchema)
+  .inputSchema(createCashbackSchema)
   .action(async ({ parsedInput: { verificationMedia, terms, ...fields } }) => {
     const cashback = await createCashback({
       media: verificationMedia,

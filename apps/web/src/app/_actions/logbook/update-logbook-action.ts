@@ -34,7 +34,7 @@ export const updateLogbookAction = actionClientWithMeta
   .metadata({
     name: "update-logbook",
   })
-  .schema(updateLogbookSchema)
+  .inputSchema(updateLogbookSchema)
   .bindArgsSchemas(updateLogbookArgsSchema)
   .action(
     async ({

@@ -24,7 +24,7 @@ const updateLocationSettingsArgsSchema: [locationId: z.ZodString] = [
 
 export const updateLocationSettingsAction = actionClientWithMeta
   .metadata({ name: "update-location-settings" })
-  .schema(updateLocationSettingsSchema)
+  .inputSchema(updateLocationSettingsSchema)
   .bindArgsSchemas(updateLocationSettingsArgsSchema)
   .action(
     async ({
@@ -39,6 +39,6 @@ export const updateLocationSettingsAction = actionClientWithMeta
       });
 
       revalidatePath("/locatie/[location]", "layout");
-      revalidateTag("locations");
+      revalidateTag("locations", { expire: 0 });
     },
   );

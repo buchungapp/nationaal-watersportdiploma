@@ -33,7 +33,7 @@ export const exportStudentListAction = actionClientWithMeta
   .metadata({
     name: "export-student-list",
   })
-  .schema(exportStudentListSchema)
+  .inputSchema(exportStudentListSchema)
   .bindArgsSchemas(bindArgsSchemas)
   .action(
     async ({

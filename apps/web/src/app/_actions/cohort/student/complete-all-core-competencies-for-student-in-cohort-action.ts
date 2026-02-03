@@ -20,7 +20,7 @@ export const completeAllCoreCompetenciesForStudentInCohortAction =
     .metadata({
       name: "complete-all-core-competencies-for-student-in-cohort",
     })
-    .schema(completeAllCoreCompetenciesForStudentInCohortSchema)
+    .inputSchema(completeAllCoreCompetenciesForStudentInCohortSchema)
     .bindArgsSchemas(completeAllCoreCompetenciesForStudentInCohortArgsSchema)
     .action(async ({ bindArgsParsedInputs: [studentAllocationId] }) => {
       await completeAllCoreCompetencies({

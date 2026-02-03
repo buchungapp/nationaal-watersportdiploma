@@ -17,7 +17,7 @@ export const updatePvbStartTimeAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-start-time-bulk",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
@@ -45,7 +45,7 @@ export const updatePvbLeercoachAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-leercoach-bulk",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
@@ -73,7 +73,7 @@ export const updatePvbBeoordelaarAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-beoordelaar-bulk",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
@@ -101,7 +101,7 @@ export const cancelPvbsAction = actionClientWithMeta
   .metadata({
     name: "cancel-pvb-bulk",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
@@ -127,7 +127,7 @@ export const submitPvbsAction = actionClientWithMeta
   .metadata({
     name: "submit-pvb-bulk",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),
@@ -154,7 +154,7 @@ export const grantLeercoachPermissionAction = actionClientWithMeta
   .metadata({
     name: "grant-pvb-leercoach-permission-bulk",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagIds: z.array(z.string().uuid()).nonempty(),

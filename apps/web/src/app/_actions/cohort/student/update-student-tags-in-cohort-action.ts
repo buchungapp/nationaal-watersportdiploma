@@ -20,7 +20,7 @@ export const updateStudentTagsInCohortAction = actionClientWithMeta
   .metadata({
     name: "update-student-tags-in-cohort",
   })
-  .schema(updateStudentTagsInCohortSchema)
+  .inputSchema(updateStudentTagsInCohortSchema)
   .bindArgsSchemas(updateStudentTagsInCohortArgsSchema)
   .action(async ({ parsedInput: tags, bindArgsParsedInputs: [cohortId] }) => {
     const tagsArray = Array.isArray(tags) ? tags : [tags];

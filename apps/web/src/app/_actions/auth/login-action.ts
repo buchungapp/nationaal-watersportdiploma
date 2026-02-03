@@ -10,7 +10,7 @@ const loginSchema = zfd.formData({
 });
 
 export const loginAction = actionClientWithMeta
-  .schema(loginSchema)
+  .inputSchema(loginSchema)
   .metadata({
     name: "auth.login",
   })

@@ -6,6 +6,7 @@ import SessionCheck from "./login/_components/session-check";
 import { clsx } from "clsx";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import "sonner/dist/styles.css";
 import { BASE_URL } from "~/constants";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";

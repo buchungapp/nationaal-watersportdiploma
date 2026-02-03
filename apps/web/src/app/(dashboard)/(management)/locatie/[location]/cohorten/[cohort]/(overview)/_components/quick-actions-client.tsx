@@ -99,10 +99,6 @@ function updateCohortErrorMessage(
     return "Een van de velden is niet correct ingevuld.";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  }
-
   return null;
 }
 
@@ -213,10 +209,6 @@ function removeCohortErrorMessage(
 ) {
   if (error.serverError) {
     return error.serverError;
-  }
-
-  if (error.bindArgsValidationErrors || error.validationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
   }
 
   return null;

@@ -25,7 +25,7 @@ export const assignInstructorToStudentInCohortAction = actionClientWithMeta
   .metadata({
     name: "assign-instructor-to-student-in-cohort",
   })
-  .schema(assignInstructorToStudentInCohortSchema)
+  .inputSchema(assignInstructorToStudentInCohortSchema)
   .bindArgsSchemas(assignInstructorToStudentInCohortArgsSchema)
   .action(
     async ({

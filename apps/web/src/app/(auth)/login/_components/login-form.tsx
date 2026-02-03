@@ -38,10 +38,6 @@ function loginErrorMessage(
     return "Ongeldig e-mailadres";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  }
-
   return null;
 }
 
@@ -104,10 +100,6 @@ function verifyErrorMessage(
 
   if (error.validationErrors) {
     return "Ongeldige OTP";
-  }
-
-  if (error.bindArgsValidationErrors) {
-    return "Ongeldige e-mailadres";
   }
 
   return null;

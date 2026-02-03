@@ -15,6 +15,9 @@ export function Combobox<T>({
   "aria-label": ariaLabel,
   children,
   setQuery: setExternalQuery,
+  value,
+  defaultValue,
+  onChange,
   ...props
 }: {
   options: T[];
@@ -26,7 +29,13 @@ export function Combobox<T>({
   autoFocus?: boolean;
   "aria-label"?: string;
   children: (value: NonNullable<T>) => React.ReactElement<any>;
-} & Omit<Headless.ComboboxProps<T, false>, "as" | "multiple" | "children"> & {
+  value?: T | null;
+  defaultValue?: T | null;
+  onChange?: (value: T | null) => void;
+} & Omit<
+  Headless.ComboboxProps<T, false>,
+  "as" | "multiple" | "children" | "value" | "defaultValue" | "onChange"
+> & {
     anchor?: "top" | "bottom";
   }) {
   const [query, setQuery] = useState("");
@@ -43,6 +52,9 @@ export function Combobox<T>({
   return (
     <Headless.Combobox<T, false>
       {...props}
+      value={value ?? undefined}
+      defaultValue={defaultValue ?? undefined}
+      onChange={onChange}
       multiple={false}
       virtual={{ options: filteredOptions }}
       onClose={() => {

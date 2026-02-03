@@ -1,22 +1,21 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "files": {
-    "ignore": [
-      "dist/*",
-      "node_modules/*",
-      "*.tsconfig.json",
-      "migrations/*",
-      "out/*",
-      ".next/*",
-      ".turbo/*",
-      "generated/*",
-      "_deprecated/*",
-      ".snaplet/*",
-      "pnpm-lock.yaml",
-      "!packages/scripts/src/migrations"
+    "includes": [
+      "**",
+      "!**/dist/**/*",
+      "!**/node_modules/**/*",
+      "!**/*.tsconfig.json",
+      "!**/migrations/**/*",
+      "!**/out/**/*",
+      "!**/.next/**/*",
+      "!**/.turbo/**/*",
+      "!**/generated/**/*",
+      "!**/_deprecated/**/*",
+      "!**/.snaplet/**/*",
+      "!**/pnpm-lock.yaml",
+      "packages/scripts/src/migrations/**/*"
     ]
   },
   "linter": {

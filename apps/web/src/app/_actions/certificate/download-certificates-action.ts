@@ -20,7 +20,7 @@ export const downloadCertificatesAction = actionClientWithMeta
   .metadata({
     name: "download-certificates",
   })
-  .schema(downloadCertificatesSchema)
+  .inputSchema(downloadCertificatesSchema)
   .bindArgsSchemas(downloadCertificatesArgsSchema)
   .action(
     async ({

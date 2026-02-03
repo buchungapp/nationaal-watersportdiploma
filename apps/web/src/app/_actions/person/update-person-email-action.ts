@@ -19,7 +19,7 @@ export const updatePersonEmailAction = actionClientWithMeta
   .metadata({
     name: "update-person-email",
   })
-  .schema(updatePersonEmailSchema)
+  .inputSchema(updatePersonEmailSchema)
   .bindArgsSchemas(updatePersonEmailArgsSchema)
   .action(
     async ({

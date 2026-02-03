@@ -8,7 +8,7 @@ import { actionClientWithMeta } from "../safe-action";
 // Create kwalificatieprofiel
 export const createKwalificatieprofiel = actionClientWithMeta
   .metadata({ name: "kss.kwalificatieprofiel.create" })
-  .schema(KSS.createKwalificatieprofielSchema)
+  .inputSchema(KSS.createKwalificatieprofielSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.create(parsedInput);
     revalidatePath("/secretariaat/kss/kwalificatieprofielen");
@@ -18,7 +18,7 @@ export const createKwalificatieprofiel = actionClientWithMeta
 // Update kwalificatieprofiel
 export const updateKwalificatieprofiel = actionClientWithMeta
   .metadata({ name: "kss.kwalificatieprofiel.update" })
-  .schema(KSS.updateKwalificatieprofielSchema)
+  .inputSchema(KSS.updateKwalificatieprofielSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.update(parsedInput);
     revalidatePath("/secretariaat/kss/kwalificatieprofielen");
@@ -28,7 +28,7 @@ export const updateKwalificatieprofiel = actionClientWithMeta
 // Delete kwalificatieprofiel
 export const deleteKwalificatieprofiel = actionClientWithMeta
   .metadata({ name: "kss.kwalificatieprofiel.delete" })
-  .schema(KSS.deleteKwalificatieprofielSchema)
+  .inputSchema(KSS.deleteKwalificatieprofielSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.remove(parsedInput);
     revalidatePath("/secretariaat/kss/kwalificatieprofielen");
@@ -38,7 +38,7 @@ export const deleteKwalificatieprofiel = actionClientWithMeta
 // Create kerntaak
 export const createKerntaak = actionClientWithMeta
   .metadata({ name: "kss.kerntaak.create" })
-  .schema(KSS.createKerntaakSchema)
+  .inputSchema(KSS.createKerntaakSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.createKerntaak(parsedInput);
     revalidatePath("/secretariaat/kss/kerntaken");
@@ -48,7 +48,7 @@ export const createKerntaak = actionClientWithMeta
 // Update kerntaak
 export const updateKerntaak = actionClientWithMeta
   .metadata({ name: "kss.kerntaak.update" })
-  .schema(KSS.updateKerntaakSchema)
+  .inputSchema(KSS.updateKerntaakSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.updateKerntaak(parsedInput);
     revalidatePath("/secretariaat/kss/kerntaken");
@@ -58,7 +58,7 @@ export const updateKerntaak = actionClientWithMeta
 // Delete kerntaak
 export const deleteKerntaak = actionClientWithMeta
   .metadata({ name: "kss.kerntaak.delete" })
-  .schema(KSS.deleteKerntaakSchema)
+  .inputSchema(KSS.deleteKerntaakSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.deleteKerntaak(parsedInput);
     revalidatePath("/secretariaat/kss/kerntaken");
@@ -68,7 +68,7 @@ export const deleteKerntaak = actionClientWithMeta
 // Create kerntaak onderdeel
 export const createKerntaakOnderdeel = actionClientWithMeta
   .metadata({ name: "kss.kerntaakOnderdeel.create" })
-  .schema(KSS.createKerntaakOnderdeelSchema)
+  .inputSchema(KSS.createKerntaakOnderdeelSchema)
   .action(async ({ parsedInput }) => {
     const result =
       await KSS.Kwalificatieprofiel.createKerntaakOnderdeel(parsedInput);
@@ -79,7 +79,7 @@ export const createKerntaakOnderdeel = actionClientWithMeta
 // Delete kerntaak onderdeel
 export const deleteKerntaakOnderdeel = actionClientWithMeta
   .metadata({ name: "kss.kerntaakOnderdeel.delete" })
-  .schema(KSS.deleteKerntaakOnderdeelSchema)
+  .inputSchema(KSS.deleteKerntaakOnderdeelSchema)
   .action(async ({ parsedInput }) => {
     const result =
       await KSS.Kwalificatieprofiel.deleteKerntaakOnderdeel(parsedInput);
@@ -90,7 +90,7 @@ export const deleteKerntaakOnderdeel = actionClientWithMeta
 // Create werkproces
 export const createWerkproces = actionClientWithMeta
   .metadata({ name: "kss.werkproces.create" })
-  .schema(KSS.createWerkprocesSchema)
+  .inputSchema(KSS.createWerkprocesSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.createWerkproces(parsedInput);
     revalidatePath("/secretariaat/kss/werkprocessen");
@@ -100,7 +100,7 @@ export const createWerkproces = actionClientWithMeta
 // Update werkproces
 export const updateWerkproces = actionClientWithMeta
   .metadata({ name: "kss.werkproces.update" })
-  .schema(KSS.updateWerkprocesSchema)
+  .inputSchema(KSS.updateWerkprocesSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.updateWerkproces(parsedInput);
     revalidatePath("/secretariaat/kss/werkprocessen");
@@ -110,7 +110,7 @@ export const updateWerkproces = actionClientWithMeta
 // Delete werkproces
 export const deleteWerkproces = actionClientWithMeta
   .metadata({ name: "kss.werkproces.delete" })
-  .schema(KSS.deleteWerkprocesSchema)
+  .inputSchema(KSS.deleteWerkprocesSchema)
   .action(async ({ parsedInput }) => {
     const result = await KSS.Kwalificatieprofiel.deleteWerkproces(parsedInput);
     revalidatePath("/secretariaat/kss/werkprocessen");
@@ -120,7 +120,7 @@ export const deleteWerkproces = actionClientWithMeta
 // Create beoordelingscriterium
 export const createBeoordelingscriterium = actionClientWithMeta
   .metadata({ name: "kss.beoordelingscriterium.create" })
-  .schema(KSS.createBeoordelingscriteriumSchema)
+  .inputSchema(KSS.createBeoordelingscriteriumSchema)
   .action(async ({ parsedInput }) => {
     const result =
       await KSS.Kwalificatieprofiel.createBeoordelingscriterium(parsedInput);
@@ -131,7 +131,7 @@ export const createBeoordelingscriterium = actionClientWithMeta
 // Update beoordelingscriterium
 export const updateBeoordelingscriterium = actionClientWithMeta
   .metadata({ name: "kss.beoordelingscriterium.update" })
-  .schema(KSS.updateBeoordelingscriteriumSchema)
+  .inputSchema(KSS.updateBeoordelingscriteriumSchema)
   .action(async ({ parsedInput }) => {
     const result =
       await KSS.Kwalificatieprofiel.updateBeoordelingscriterium(parsedInput);
@@ -142,7 +142,7 @@ export const updateBeoordelingscriterium = actionClientWithMeta
 // Delete beoordelingscriterium
 export const deleteBeoordelingscriterium = actionClientWithMeta
   .metadata({ name: "kss.beoordelingscriterium.delete" })
-  .schema(KSS.deleteBeoordelingscriteriumSchema)
+  .inputSchema(KSS.deleteBeoordelingscriteriumSchema)
   .action(async ({ parsedInput }) => {
     const result =
       await KSS.Kwalificatieprofiel.deleteBeoordelingscriterium(parsedInput);
@@ -153,7 +153,7 @@ export const deleteBeoordelingscriterium = actionClientWithMeta
 // Bulk create beoordelingscriteria
 export const bulkCreateBeoordelingscriteria = actionClientWithMeta
   .metadata({ name: "kss.beoordelingscriterium.bulkCreate" })
-  .schema(
+  .inputSchema(
     z.object({
       werkprocesId: z.string().uuid(),
       criteria: z
@@ -186,7 +186,7 @@ export const bulkCreateBeoordelingscriteria = actionClientWithMeta
 // Assign werkprocessen to onderdeel
 export const assignWerkprocessenToOnderdeel = actionClientWithMeta
   .metadata({ name: "kss.werkproces.assignToOnderdeel" })
-  .schema(
+  .inputSchema(
     z.object({
       kerntaakOnderdeelId: z.string().uuid(),
       werkprocesIds: z.array(z.string().uuid()),
@@ -202,7 +202,7 @@ export const assignWerkprocessenToOnderdeel = actionClientWithMeta
 // List werkprocessen by onderdeel
 export const listWerkprocessenByOnderdeel = actionClientWithMeta
   .metadata({ name: "kss.werkproces.listByOnderdeel" })
-  .schema(
+  .inputSchema(
     z.object({
       kerntaakOnderdeelId: z.string().uuid(),
     }),

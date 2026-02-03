@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { Toaster } from "sonner";
+import "sonner/dist/styles.css";
 
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";

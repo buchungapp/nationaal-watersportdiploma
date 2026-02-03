@@ -15,7 +15,7 @@ export const startPvbAssessmentAction = actionClientWithMeta
   .metadata({
     name: "start-pvb-assessment",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       pvbAanvraagId: z.string().uuid(),
@@ -59,7 +59,7 @@ export const updatePvbBeoordelingsCriteriumAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-beoordelingscriterium",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       pvbOnderdeelId: z.string().uuid(),
@@ -114,7 +114,7 @@ export const updatePvbBeoordelingsCriteriaAction = actionClientWithMeta
   .metadata({
     name: "update-pvb-beoordelingscriteria",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       updates: z.array(
@@ -164,7 +164,7 @@ export const abortPvbAction = actionClientWithMeta
   .metadata({
     name: "abort-pvb-assessment",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       pvbAanvraagId: z.string().uuid(),
@@ -209,7 +209,7 @@ export const finalizePvbAssessmentAction = actionClientWithMeta
   .metadata({
     name: "finalize-pvb-assessment",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       pvbAanvraagId: z.string().uuid(),

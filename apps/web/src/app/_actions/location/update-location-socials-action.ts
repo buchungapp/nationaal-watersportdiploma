@@ -29,7 +29,7 @@ const updateLocationSocialsArgsSchema: [locationId: z.ZodString] = [
 
 export const updateLocationSocialsAction = actionClientWithMeta
   .metadata({ name: "update-location-socials" })
-  .schema(updateLocationSocialsSchema)
+  .inputSchema(updateLocationSocialsSchema)
   .bindArgsSchemas(updateLocationSocialsArgsSchema)
   .action(
     async ({ parsedInput: parsed, bindArgsParsedInputs: [locationId] }) => {
@@ -52,6 +52,6 @@ export const updateLocationSocialsAction = actionClientWithMeta
       await updateLocationDetails(locationId, data);
 
       revalidatePath("/locatie/[location]/instellingen", "page");
-      revalidateTag("locations");
+      revalidateTag("locations", { expire: 0 });
     },
   );

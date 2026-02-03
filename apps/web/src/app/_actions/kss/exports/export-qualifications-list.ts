@@ -92,7 +92,7 @@ export const exportQualificationsListAction = actionClientWithMeta
   .metadata({
     name: "export-qualifications-list",
   })
-  .schema(exportQualificationsListSchema)
+  .inputSchema(exportQualificationsListSchema)
   .bindArgsSchemas(bindArgsSchemas)
   .action(
     async ({

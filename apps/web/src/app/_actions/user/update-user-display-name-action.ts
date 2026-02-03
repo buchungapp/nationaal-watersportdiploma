@@ -14,7 +14,7 @@ export const updateUserDisplayNameAction = actionClientWithMeta
   .metadata({
     name: "update-user-display-name",
   })
-  .schema(updateUserDisplayNameSchema)
+  .inputSchema(updateUserDisplayNameSchema)
   .action(async ({ parsedInput: { displayName } }) => {
     await updateCurrentUserDisplayName(displayName);
 

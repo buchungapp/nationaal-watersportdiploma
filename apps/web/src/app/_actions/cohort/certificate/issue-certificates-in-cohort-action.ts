@@ -22,7 +22,7 @@ export const issueCertificatesInCohortAction = actionClientWithMeta
   .metadata({
     name: "issue-certificates-in-cohort",
   })
-  .schema(issueCertificatesInCohortSchema)
+  .inputSchema(issueCertificatesInCohortSchema)
   .bindArgsSchemas(issueCertificatesInCohortArgsSchema)
   .action(
     async ({

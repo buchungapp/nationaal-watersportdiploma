@@ -19,7 +19,7 @@ export const updateCompetencyProgressesForStudentInCohortAction =
     .metadata({
       name: "update-competency-progresses-for-student-in-cohort",
     })
-    .schema(updateCompetencyProgressesForStudentInCohortSchema)
+    .inputSchema(updateCompetencyProgressesForStudentInCohortSchema)
     .bindArgsSchemas(bindArgsSchemas)
     .action(
       async ({

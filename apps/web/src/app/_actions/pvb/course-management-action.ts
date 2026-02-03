@@ -15,7 +15,7 @@ export const addPvbCourseAction = actionClientWithMeta
   .metadata({
     name: "add-pvb-course",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagId: z.string().uuid(),
@@ -71,7 +71,7 @@ export const removePvbCourseAction = actionClientWithMeta
   .metadata({
     name: "remove-pvb-course",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagId: z.string().uuid(),
@@ -116,7 +116,7 @@ export const setMainPvbCourseAction = actionClientWithMeta
   .metadata({
     name: "set-main-pvb-course",
   })
-  .schema(
+  .inputSchema(
     z.object({
       locationHandle: z.string(),
       pvbAanvraagId: z.string().uuid(),

@@ -62,10 +62,6 @@ function createCohortErrorMessage(
     return "Een van de velden is niet correct ingevuld.";
   }
 
-  if (error.bindArgsValidationErrors) {
-    return DEFAULT_SERVER_ERROR_MESSAGE;
-  }
-
   return null;
 }
 

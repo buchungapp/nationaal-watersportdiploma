@@ -16,7 +16,7 @@ export const grantLeercoachPermissionAction = actionClientWithMeta
   .metadata({
     name: "grant-leercoach-permission",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       pvbAanvraagId: z.string().uuid(),
@@ -61,7 +61,7 @@ export const denyLeercoachPermissionAction = actionClientWithMeta
   .metadata({
     name: "deny-leercoach-permission",
   })
-  .schema(
+  .inputSchema(
     z.object({
       handle: z.string(),
       pvbAanvraagId: z.string().uuid(),
@@ -106,7 +106,7 @@ export const bulkGrantLeercoachPermissionAction = actionClientWithMeta
   .metadata({
     name: "bulk-grant-leercoach-permission",
   })
-  .schema(
+  .inputSchema(
     z.object({
       pvbAanvraagIds: z
         .array(z.string().uuid())

@@ -47,7 +47,7 @@ export const addStudentToCohortAction = actionClientWithMeta
   .metadata({
     name: "add-student-to-cohort",
   })
-  .schema(addStudentToCohortSchema)
+  .inputSchema(addStudentToCohortSchema)
   .bindArgsSchemas(addStudentToCohortArgsSchema)
   .action(
     async ({

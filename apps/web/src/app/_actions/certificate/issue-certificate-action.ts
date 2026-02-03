@@ -30,7 +30,7 @@ export const issueCertificateAction = actionClientWithMeta
   .metadata({
     name: "issue-certificate",
   })
-  .schema(issueCertificateSchema)
+  .inputSchema(issueCertificateSchema)
   .bindArgsSchemas(issueCertificateArgsSchema)
   .action(
     async ({

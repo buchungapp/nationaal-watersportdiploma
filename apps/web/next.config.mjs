@@ -43,13 +43,22 @@ const nextConfig = {
   turbopack: {
     resolveAlias: {
       canvas: "./empty-module.ts",
+      worker_threads: "./empty-module.ts",
     },
   },
   serverExternalPackages: [
     "require-in-the-middle",
+    "import-in-the-middle",
     "@opentelemetry/auto-instrumentations-node",
     "@opentelemetry/instrumentation",
     "@opentelemetry/sdk-node",
+    "@vercel/otel",
+    "flexsearch",
+    "pdfkit",
+    "svg-to-pdfkit",
+    "@signpdf/placeholder-pdfkit",
+    "@signpdf/signer-p12",
+    "@signpdf/signpdf",
   ],
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf/**/*": [

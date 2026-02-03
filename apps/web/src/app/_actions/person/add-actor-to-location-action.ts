@@ -19,7 +19,7 @@ export const addActorToLocationAction = actionClientWithMeta
   .metadata({
     name: "add-actor-to-location",
   })
-  .schema(addActorToLocationSchema)
+  .inputSchema(addActorToLocationSchema)
   .bindArgsSchemas(addActorToLocationArgsSchema)
   .action(
     async ({

@@ -1,5 +1,6 @@
 "use client";
 import { XMarkIcon } from "@heroicons/react/16/solid";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { parseAsString } from "nuqs";
 import { useQueryState } from "nuqs";
@@ -10,8 +11,15 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { PDFViewer } from "~/app/(dashboard)/_components/pdf-viewer";
 import type { ExternalCertificate } from "./external-certificate/certificates-list";
+
+const PDFViewer = dynamic(
+  () =>
+    import("~/app/(dashboard)/_components/pdf-viewer").then(
+      (mod) => mod.PDFViewer,
+    ),
+  { ssr: false },
+);
 
 type Media = NonNullable<ExternalCertificate["media"]>;
 

@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { Toaster } from "sonner";
+import "sonner/dist/styles.css";
 import { CommonProviders, MarketingProviders } from "../_components/providers";
 import Footer from "./_components/footer/footer";
 import Header from "./_components/header/header";

@@ -22,7 +22,7 @@ export const updateCohortAction = actionClientWithMeta
   .metadata({
     name: "update-cohort",
   })
-  .schema(updateCohortSchema)
+  .inputSchema(updateCohortSchema)
   .bindArgsSchemas(updateCohortArgsSchema)
   .action(async ({ parsedInput: data, bindArgsParsedInputs: [cohortId] }) => {
     await updateCohortDetails({

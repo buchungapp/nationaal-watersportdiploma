@@ -53,7 +53,7 @@ export const createPersonsAction = actionClientWithMeta
   .metadata({
     name: "create-persons",
   })
-  .schema(createPersonsSchema)
+  .inputSchema(createPersonsSchema)
   .bindArgsSchemas(createPersonsArgsSchema)
   .stateAction<createPersonsStateActionType>(
     async (
