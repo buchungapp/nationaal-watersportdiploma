@@ -1,4 +1,5 @@
 import { DatabaseError } from "@nawadi/db";
+import { DrizzleQueryError } from "drizzle-orm";
 import zod from "zod";
 
 export enum CoreErrorType {
@@ -71,19 +72,52 @@ export class CoreError extends Error {
       return CoreError.fromPostgresError(error);
     }
 
+    // Drizzle ORM 0.45+ wraps database errors in DrizzleQueryError
+    if (error instanceof DrizzleQueryError) {
+      const dbError = CoreError.tryExtractDatabaseError(error.cause);
+      if (dbError) {
+        return CoreError.fromPostgresError(dbError);
+      }
+    }
+
     if (error instanceof zod.ZodError) {
       return CoreError.fromZodError(error);
     }
 
     if (error instanceof Error) {
       // Check if the error has a cause that is a DatabaseError (e.g., wrapped by Drizzle)
-      if (error.cause instanceof DatabaseError) {
-        return CoreError.fromPostgresError(error.cause);
+      const dbError = CoreError.tryExtractDatabaseError(error.cause);
+      if (dbError) {
+        return CoreError.fromPostgresError(dbError);
       }
       return CoreError.fromError(error);
     }
 
     return new CoreError(CoreErrorType.Unexpected, { cause: error });
+  }
+
+  /**
+   * Try to extract a DatabaseError from an unknown value.
+   * Handles both direct DatabaseError instances and duck-typing for cases
+   * where instanceof fails due to module resolution differences.
+   */
+  private static tryExtractDatabaseError(err: unknown): DatabaseError | null {
+    if (err instanceof DatabaseError) {
+      return err;
+    }
+
+    // Duck-type check for DatabaseError-like objects
+    // This handles cases where the pg module is loaded from different paths
+    if (
+      err instanceof Error &&
+      "code" in err &&
+      typeof (err as DatabaseError).code === "string" &&
+      "severity" in err
+    ) {
+      return err as DatabaseError;
+    }
+
+    return null;
   }
 
   public static fromError(error: Error) {
