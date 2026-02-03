@@ -76,6 +76,10 @@ export class CoreError extends Error {
     }
 
     if (error instanceof Error) {
+      // Check if the error has a cause that is a DatabaseError (e.g., wrapped by Drizzle)
+      if (error.cause instanceof DatabaseError) {
+        return CoreError.fromPostgresError(error.cause);
+      }
       return CoreError.fromError(error);
     }
 
