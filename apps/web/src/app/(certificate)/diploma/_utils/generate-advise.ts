@@ -1,4 +1,4 @@
-import { unstable_cacheLife as cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import { retrieveCertificateById } from "~/lib/nwd";
 export async function generateAdvise(
   input: string | Awaited<ReturnType<typeof retrieveCertificateById>>,

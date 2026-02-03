@@ -1,7 +1,7 @@
 import { GoogleAuth } from "google-auth-library";
 import { google } from "googleapis";
 import { micromark } from "micromark";
-import { unstable_cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import slugify from "slugify";
 import { z } from "zod";
 
@@ -88,7 +88,7 @@ export async function listFaqs({
   filter?: FaqFilters;
 } = {}) {
   "use cache";
-  unstable_cacheLife("days");
+  cacheLife("days");
 
   return retrieveQuestions({ filter });
 }

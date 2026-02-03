@@ -1,7 +1,7 @@
 "use cache";
 
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { unstable_cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -12,7 +12,7 @@ export default async function Page(props: {
     discipline: string;
   }>;
 }) {
-  unstable_cacheLife("days");
+  cacheLife("days");
 
   const params = await props.params;
   const [discipline, courses] = await Promise.all([

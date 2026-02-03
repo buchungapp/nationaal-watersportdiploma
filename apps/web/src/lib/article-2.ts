@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import glob from "fast-glob";
 import matter from "gray-matter";
-import { unstable_cacheLife as cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import { z } from "zod";
 
 function getMDXFiles(dir: string) {

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { PropsWithChildren } from "react";
 import watersportverbondWhite from "~/app/_assets/watersportverbond-white.png";
 
-import { unstable_cacheLife as cacheLife } from "next/cache";
+import { cacheLife } from "next/cache";
 import Image from "next/image";
 import { Line, LineWave } from "~/app/(public)/_assets/wave";
 import NWDWordmark from "~/app/_components/brand/wordmark";

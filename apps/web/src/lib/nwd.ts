@@ -23,8 +23,8 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import {
-  unstable_cacheLife as cacheLife,
-  unstable_cacheTag as cacheTag,
+  cacheLife,
+  cacheTag,
 } from "next/cache";
 import packageInfo from "~/../package.json";
 import dayjs from "~/lib/dayjs";

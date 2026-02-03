@@ -1,7 +1,7 @@
 import { AddressType } from "@googlemaps/google-maps-services-js";
 import {
-  unstable_cacheLife as cacheLife,
-  unstable_cacheTag as cacheTag,
+  cacheLife,
+  cacheTag,
 } from "next/cache";
 import { cache } from "react";
 import { listAllLocations } from "~/lib/nwd";
