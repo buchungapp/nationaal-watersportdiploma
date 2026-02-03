@@ -78,6 +78,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "kfwvxetvsoujgiighiqx.supabase.co",
       },
+      {
+        protocol: "https",
+        hostname: "service.nwd.nl",
+      },
     ],
   },
   transpilePackages: ["next-mdx-remote"],
