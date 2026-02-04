@@ -28,7 +28,12 @@ jobs:
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - name: Build Project Artifacts
-        run: pnpm -w turbo run build --affected
+        run: >
+          pnpm -w turbo run build --affected
+          --filter @nawadi/lib
+          --filter @nawadi/db
+          --filter @nawadi/core
+          --filter @nawadi/api-server
 
   test:
     strategy:
@@ -55,7 +60,12 @@ jobs:
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
-      - run: pnpm -w turbo run build --affected
+      - run: >
+          pnpm -w turbo run build --affected
+          --filter @nawadi/lib
+          --filter @nawadi/db
+          --filter @nawadi/core
+          --filter @nawadi/scripts
       - run: pnpm db:reset
       # node test runner seems to support globs since v21
       - if: ${{ matrix.node-version >= 21 }}
