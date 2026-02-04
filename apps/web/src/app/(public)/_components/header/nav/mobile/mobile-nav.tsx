@@ -52,7 +52,7 @@ export default function MobileNav({ children }: { children: React.ReactNode }) {
 }
 
 export function MobileNavButton() {
-  const [_, setOpen] = useMobileMenuState();
+  const [, setOpen] = useMobileMenuState();
 
   return (
     <button type="button" onClick={() => setOpen(true)}>

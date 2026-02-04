@@ -8,7 +8,7 @@ import type { NavItem } from "../nav";
 
 export default function MobileItem({ item }: { item: NavItem }) {
   const segment = useSelectedLayoutSegment();
-  const [_, setOpen] = useMobileMenuState();
+  const [, setOpen] = useMobileMenuState();
 
   if (!item.href) return null;
 

@@ -10,7 +10,7 @@ import type { NavItem } from "../nav";
 
 export default function MobileDisclosure({ item }: { item: NavItem }) {
   const segment = useSelectedLayoutSegment();
-  const [_, setOpen] = useMobileMenuState();
+  const [, setOpen] = useMobileMenuState();
 
   if (!item.component) return null;
 
