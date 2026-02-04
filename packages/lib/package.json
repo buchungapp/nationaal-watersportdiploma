@@ -19,6 +19,7 @@
     "prepack": "tsc --build",
     "pretest": "tsc --build",
     "build": "tsc --build",
+    "dev": "tsc --watch",
     "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test ./out/**/*.test.js"

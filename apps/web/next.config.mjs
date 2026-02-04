@@ -84,7 +84,12 @@ const nextConfig = {
       },
     ],
   },
-  transpilePackages: ["next-mdx-remote"],
+  transpilePackages: [
+    "next-mdx-remote",
+    "@nawadi/core",
+    "@nawadi/db",
+    "@nawadi/lib",
+  ],
   async redirects() {
     return [
       {

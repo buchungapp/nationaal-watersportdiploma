@@ -14,22 +14,24 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: pnpm/action-setup@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - name: Build Project Artifacts
-        run: >
-          pnpm
-          --filter @nawadi/lib
-          --filter @nawadi/db
-          --filter @nawadi/core
-          --filter @nawadi/api-server
-          run build
+        run: pnpm -w turbo run build --affected
 
   test:
     strategy:
@@ -39,19 +41,27 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: pnpm/action-setup@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ hashFiles('**/turbo.json', 'pnpm-lock.yaml') }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
       - uses: supabase/setup-cli@v1
         with:
           version: latest
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
-      - run: pnpm build:packages
+      - run: pnpm -w turbo run build --affected
       - run: pnpm db:reset
       # node test runner seems to support globs since v21
       - if: ${{ matrix.node-version >= 21 }}

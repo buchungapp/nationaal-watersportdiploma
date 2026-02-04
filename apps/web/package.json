@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:workspace": "pnpm -w turbo run dev --filter=@nawadi/web...",
     "build": "next build",
     "build:all-ts-errors": "set __NEXT_TEST_MODE=true && pnpm build",
     "start": "next start",
