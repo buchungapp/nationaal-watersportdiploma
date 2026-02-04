@@ -86,7 +86,7 @@ function SessionProvider({ children }: PropsWithChildren) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [posthog]);
 
   return (
     <SessionContext.Provider value={{ session }}>
