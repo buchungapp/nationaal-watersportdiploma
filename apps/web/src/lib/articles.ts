@@ -1,7 +1,7 @@
 import path from "node:path";
 import glob from "fast-glob";
-import type { StaticImageData } from "next/image";
 import { cacheLife } from "next/cache";
+import type { StaticImageData } from "next/image";
 import { cache } from "react";
 
 export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";

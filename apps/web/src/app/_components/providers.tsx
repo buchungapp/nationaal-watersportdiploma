@@ -68,7 +68,6 @@ function SessionProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const posthog = usePostHog();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     const {
       data: { subscription },
@@ -105,7 +104,6 @@ export function MarketingProviders({
 
   const [isSticky, setIsSticky] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     const threshold = TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
     const handleScroll = () => {
