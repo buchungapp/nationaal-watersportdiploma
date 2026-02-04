@@ -9,6 +9,8 @@ import {
 } from "../_components/navbar";
 import { StackedLayout } from "../_components/stacked-layout";
 
+export const dynamic = "force-dynamic";
+
 export default function Layout({
   children,
   selector,
