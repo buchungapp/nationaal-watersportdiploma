@@ -7,4 +7,3 @@ import "@mux/mux-player-react/themes/minimal";
 export function MuxPlayerClient(props: MuxPlayerProps) {
   return <MuxPlayer theme="minimal" disableTracking {...props} />;
 }
-

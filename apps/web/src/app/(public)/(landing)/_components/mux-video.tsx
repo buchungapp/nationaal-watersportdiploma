@@ -18,4 +18,3 @@ const MuxPlayerClient = dynamic(
 export default function MuxVideo(props: MuxPlayerProps) {
   return <MuxPlayerClient {...props} preload={props.preload ?? "metadata"} />;
 }
-

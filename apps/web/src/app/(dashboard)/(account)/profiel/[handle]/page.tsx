@@ -24,7 +24,7 @@ type DashboardProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function InstructorDashboard({ personPromise, searchParams }: DashboardProps) {
+function InstructorDashboard({ personPromise }: DashboardProps) {
   return (
     <>
       <div className="order-3 lg:order-none lg:col-start-3 lg:row-end-1 flex flex-col gap-2">

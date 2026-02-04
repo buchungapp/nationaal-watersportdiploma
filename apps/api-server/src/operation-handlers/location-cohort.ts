@@ -5,7 +5,8 @@ import type * as application from "../application/index.js";
 export const getLocationCohorts: api.server.GetLocationCohortsOperationHandler<
   application.Authentication
 > = async (incomingRequest, _authentication) => {
-  const { locationKey } = incomingRequest.parameters;
+  const { locationKey: _locationKey } = incomingRequest.parameters;
+  void _locationKey;
 
   // TODO list cohorts
 
@@ -32,7 +33,8 @@ export const createLocationCohort: api.server.CreateLocationCohortOperationHandl
   application.Authentication
 > = async (incomingRequest, _authentication) =>
   core.withTransaction(async () => {
-    const { locationKey } = incomingRequest.parameters;
+    const { locationKey: _locationKey } = incomingRequest.parameters;
+    void _locationKey;
     const _entity = await incomingRequest.entity();
 
     // TODO create cohort
