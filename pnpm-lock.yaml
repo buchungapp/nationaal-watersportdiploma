@@ -284,6 +284,9 @@ importers:
       p-limit:
         specifier: 7.2.0
         version: 7.2.0
+      pdfjs-dist:
+        specifier: 5.4.296
+        version: 5.4.296
       pdfkit:
         specifier: 0.16.0
         version: 0.16.0

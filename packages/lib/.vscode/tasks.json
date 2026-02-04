@@ -2,9 +2,10 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
+      "type": "shell",
       "label": "build",
-      "script": "build",
+      "command": "pnpm",
+      "args": ["run", "build"],
       "problemMatcher": ["$tsc"],
       "group": {
         "kind": "build",

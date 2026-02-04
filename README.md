@@ -83,7 +83,7 @@ Then go to render.com and find the `nawadi-api-server` service, in the `Manual D
 
 The `db` database is hosted on supabase. We use drizzle as an orm and migration tool. To create a database migration we need drizzle-kit, this is installed as a dev dependency. To execute the migration we use drizzle as a library. We use this library from a program.
 
-We are going to use drizzle-kit and the db program via an npm script.
+We are going to use drizzle-kit and the db program via a package script.
 
 First, you might want to generate migrations scripts. Be sure to check these in into git after they are generated. Generate migration scripts (and metadata) via:
 
