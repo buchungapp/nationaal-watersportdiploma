@@ -1,17 +1,21 @@
 "use client";
+
 import clsx from "clsx";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { useMobileMenuState } from "~/app/_components/providers";
 import type { NavItem } from "../nav";
 
 export default function MobileItem({ item }: { item: NavItem }) {
   const segment = useSelectedLayoutSegment();
+  const [_, setOpen] = useMobileMenuState();
 
   if (!item.href) return null;
 
   return (
     <Link
       href={item.href}
+      onClick={() => setOpen(false)}
       className={clsx(
         segment && item.href.includes(segment)
           ? "bg-branding-dark/10"

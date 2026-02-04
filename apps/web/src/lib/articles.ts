@@ -1,6 +1,8 @@
 import path from "node:path";
 import glob from "fast-glob";
 import type { StaticImageData } from "next/image";
+import { cacheLife } from "next/cache";
+import { cache } from "react";
 
 export type ArticleCategory = "consument" | "achterban" | "vereniging" | "pers";
 
@@ -37,7 +39,10 @@ async function importArticle(
   };
 }
 
-export async function getAllArticles() {
+const getAllArticlesUncached = async () => {
+  "use cache";
+  cacheLife("days");
+
   const workingPath = process.cwd();
   const contentPath = "./src/app/(public)/actueel/(article)";
   const articleFilenames = await glob("*/page.mdx", {
@@ -47,7 +52,9 @@ export async function getAllArticles() {
   const articles = await Promise.all(articleFilenames.map(importArticle));
 
   return articles.sort((a, z) => +new Date(z.date) - +new Date(a.date));
-}
+};
+
+export const getAllArticles = cache(getAllArticlesUncached);
 
 export async function findArticleById(id: string) {
   const articles = await getAllArticles();

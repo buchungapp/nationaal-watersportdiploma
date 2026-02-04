@@ -46,10 +46,11 @@ export default async function News() {
               {news.featuredImage ? (
                 <Image
                   src={news.featuredImage}
-                  alt={""}
+                  alt=""
                   width={news.featuredImage.width}
                   height={news.featuredImage.height}
                   placeholder="blur"
+                  sizes="(min-width: 1024px) 33vw, 100vw"
                   className="aspect-video rounded-2xl object-cover"
                 />
               ) : null}

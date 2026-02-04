@@ -121,6 +121,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ).map((page) => ({
     ...page,
     url: page.url.replace(/\/$/, ""),
-    lastModified: page.lastModified ?? new Date(),
   }));
 }

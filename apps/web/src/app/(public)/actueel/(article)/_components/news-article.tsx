@@ -57,6 +57,7 @@ export function ArticleLayout({
                 src={article.featuredImage}
                 alt={article.title}
                 fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 className="object-cover"
                 priority
               />

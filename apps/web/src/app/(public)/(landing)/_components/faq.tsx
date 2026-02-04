@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { getHelpArticles } from "~/lib/article-2";
@@ -51,13 +52,13 @@ export default async function Faq() {
             </p>
             <div className="mt-4 flex flex-col justify-between gap-6 sm:mt-8 sm:flex-row-reverse sm:gap-8 lg:mt-4 lg:flex-col">
               <div className="flex">
-                <a
+                <Link
                   href={`/help/artikel/${featuredArticle.slug}`}
                   className="text-sm font-semibold leading-6 text-branding-dark"
                   aria-describedby="featured-post"
                 >
                   Verder lezen <span aria-hidden="true">&rarr;</span>
-                </a>
+                </Link>
               </div>
             </div>
           </article>
@@ -67,10 +68,10 @@ export default async function Faq() {
                 <article key={article.slug} className="py-12">
                   <div className="group relative max-w-xl">
                     <h2 className="mt-2 text-lg font-semibold text-slate-900 group-hover:text-slate-600">
-                      <a href={`/help/artikel/${article.slug}`}>
+                      <Link href={`/help/artikel/${article.slug}`}>
                         <span className="absolute inset-0" />
                         {article.metadata.title}
-                      </a>
+                      </Link>
                     </h2>
                     <p className="mt-4 text-sm leading-6 text-slate-600">
                       {article.metadata.summary}
