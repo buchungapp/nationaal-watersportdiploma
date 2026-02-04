@@ -17,6 +17,7 @@ import {
 } from "../../_components/socials";
 import {
   LocationsMap,
+  LocationsMapContainer,
   SelectedLocationProvider,
 } from "../_components/locations-map";
 import PageHero from "../_components/style/page-hero";
@@ -92,16 +93,18 @@ export default async function Page() {
           </p>
         </div>
 
-        <SelectedLocationProvider locations={locations}>
-          <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
-            <Suspense fallback={<LocationListSkeleton />}>
-              <RandomLocationList />
-            </Suspense>
-            <div className="w-full lg:col-span-2 h-[80vh] rounded-sm overflow-hidden">
-              <LocationsMap locations={locations} />
+        <LocationsMapContainer>
+          <SelectedLocationProvider locations={locations}>
+            <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
+              <Suspense fallback={<LocationListSkeleton />}>
+                <RandomLocationList />
+              </Suspense>
+              <div className="w-full lg:col-span-2 h-[80vh] rounded-sm overflow-hidden">
+                <LocationsMap locations={locations} />
+              </div>
             </div>
-          </div>
-        </SelectedLocationProvider>
+          </SelectedLocationProvider>
+        </LocationsMapContainer>
       </div>
     </>
   );

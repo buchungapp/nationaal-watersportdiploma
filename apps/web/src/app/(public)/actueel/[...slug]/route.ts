@@ -1,8 +1,9 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
+import { NextResponse } from "next/server";
 import { findArticleById } from "~/lib/articles";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   props: { params: Promise<{ slug: string[] }> },
 ) {
   const params = await props.params;
@@ -20,5 +21,8 @@ export async function GET(
     notFound();
   }
 
-  redirect(`/actueel/${article.slug}`);
+  return NextResponse.redirect(
+    new URL(`/actueel/${article.slug}`, request.url),
+    308,
+  );
 }

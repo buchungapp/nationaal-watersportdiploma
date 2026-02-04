@@ -46,7 +46,7 @@ export default function Welcome() {
           }}
           playbackId="7lX3InLCH2hfWQGRJnXtOybImuqggOzkPgHEgHi9isY"
           streamType="on-demand"
-          preload="auto"
+          preload="metadata"
           loop
           muted
           autoPlay

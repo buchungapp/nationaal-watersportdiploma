@@ -1,7 +1,6 @@
 "use client";
 
 import type { Session } from "@supabase/supabase-js";
-import { usePathname } from "next/navigation";
 import posthog from "posthog-js";
 import { PostHogProvider, usePostHog } from "posthog-js/react";
 import type { PropsWithChildren } from "react";
@@ -10,7 +9,6 @@ import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
 import { createClient } from "~/lib/supabase/client";
 import { invariant } from "~/utils/invariant";
-import { LocationsMapContainer } from "../(public)/_components/locations-map";
 
 if (typeof window !== "undefined") {
   const currentUrl = new URL(BASE_URL);
@@ -32,12 +30,12 @@ function PHProvider({ children }: { children: React.ReactNode }) {
 const AppContext = createContext<{
   isMobileMenuOpen: boolean;
   setMobileMenuOpen: (open?: boolean) => void;
-  scrollPosition: number;
+  isSticky: boolean;
 }>({
   isMobileMenuOpen: false,
 
   setMobileMenuOpen: () => {},
-  scrollPosition: 0,
+  isSticky: false,
 });
 
 export function useMobileMenuState() {
@@ -50,8 +48,8 @@ export const TRUSTBAR_HEIGHT = 36;
 const STICKY_NAV_OFFSET = 16;
 
 export function useIsSticky() {
-  const { scrollPosition } = useContext(AppContext);
-  return scrollPosition > TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
+  const { isSticky } = useContext(AppContext);
+  return isSticky;
 }
 
 export function CommonProviders({ children }: { children?: React.ReactNode }) {
@@ -70,7 +68,6 @@ function SessionProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const posthog = usePostHog();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
     const {
       data: { subscription },
@@ -89,7 +86,7 @@ function SessionProvider({ children }: PropsWithChildren) {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [posthog]);
 
   return (
     <SessionContext.Provider value={{ session }}>
@@ -103,36 +100,24 @@ export function MarketingProviders({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const [previousPathname, setPreviousPathname] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  if (pathname !== previousPathname) {
-    if (mobileMenuOpen) {
-      setMobileMenuOpen(false);
-    }
+  const [isSticky, setIsSticky] = useState(false);
 
-    setPreviousPathname(pathname);
-  }
-
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const handleScroll = () => {
-    const position = window.scrollY;
-    setScrollPosition(position);
-  };
-
-  const isClient = typeof window !== "undefined";
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
   useEffect(() => {
-    if (!isClient) return;
+    const threshold = TRUSTBAR_HEIGHT - STICKY_NAV_OFFSET;
+    const handleScroll = () => {
+      const nextIsSticky = window.scrollY > threshold;
+      setIsSticky((prev) => (prev === nextIsSticky ? prev : nextIsSticky));
+    };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [isClient]);
+  }, []);
 
   return (
     <AppContext.Provider
@@ -147,12 +132,10 @@ export function MarketingProviders({
           setMobileMenuOpen(newState);
           return;
         },
-        scrollPosition,
+        isSticky,
       }}
     >
-      <LocationsMapContainer>
-        <BalancerProvider>{children}</BalancerProvider>
-      </LocationsMapContainer>
+      <BalancerProvider>{children}</BalancerProvider>
     </AppContext.Provider>
   );
 }

@@ -3,17 +3,20 @@
 import { Disclosure } from "@headlessui/react";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { useMobileMenuState } from "~/app/_components/providers";
 import type { NavItem } from "../nav";
 
 export default function MobileDisclosure({ item }: { item: NavItem }) {
   const segment = useSelectedLayoutSegment();
+  const [, setOpen] = useMobileMenuState();
 
   if (!item.component) return null;
 
   return (
     <Disclosure as="div">
-      {({ open }) => (
+      {({ open, close }) => (
         <>
           <Disclosure.Button
             className={clsx(
@@ -37,16 +40,19 @@ export default function MobileDisclosure({ item }: { item: NavItem }) {
           <Disclosure.Panel as="ul" className="mt-1 px-2">
             {item.component.map((subItem) => (
               <li key={subItem.label}>
-                <Disclosure.Button
-                  as="a"
+                <Link
                   href={subItem.href}
+                  onClick={() => {
+                    close();
+                    setOpen(false);
+                  }}
                   className={clsx(
                     "hover:bg-slate-50",
                     "block rounded-md py-2 px-2 text-sm leading-6 text-branding-dark font-semibold",
                   )}
                 >
                   {subItem.label}
-                </Disclosure.Button>
+                </Link>
               </li>
             ))}
           </Disclosure.Panel>
