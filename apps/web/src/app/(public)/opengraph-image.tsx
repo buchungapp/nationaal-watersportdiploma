@@ -8,15 +8,11 @@ export const alt = constants.APP_NAME;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-function toArrayBuffer(data: Uint8Array) {
-  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-}
-
 export default async function Image() {
   const [interRegular, interBold] = await Promise.all([
     readFile(new URL("../../assets/fonts/Inter-Regular.ttf", import.meta.url)),
     readFile(new URL("../../assets/fonts/Inter-Bold.ttf", import.meta.url)),
-  ]).then((buffers) => buffers.map(toArrayBuffer));
+  ]);
 
   return new ImageResponse(
     <div
