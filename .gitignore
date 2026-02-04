@@ -24,3 +24,6 @@ coverage/
 
 .vercel
 prod-seed.sql
+
+# Turborepo
+.turbo

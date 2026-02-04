@@ -37,6 +37,17 @@ Start by running `pnpm run initialize`. Do this before installing! This command 
 
 Before running tests, first start the supabase development environment via `pnpm --filter supabase start`. You need to have [docker](https://docs.docker.com/get-docker/) installed and running for this. Then run `pnpm --recursive test` to run the tests. This assumes that the database can be reached via `postgresql://postgres:postgres@127.0.0.1:54322/postgres`. If this is not the case, set the `PGURI` environment variable.
 
+### Turborepo Remote Cache (Vercel)
+
+This repo uses Turborepo. If Vercel Remote Caching is enabled for your Vercel team, you can opt-in locally to share cached build artifacts across your team/CI:
+
+```sh
+pnpm turbo login
+pnpm turbo link
+```
+
+This creates `.turbo/config.json` locally (it should not be committed).
+
 ### Docker
 
 we like to use docker as a container for hosting so we have complete control over the environment. The images used in the container should be the same in ci so we test in a production like environment.

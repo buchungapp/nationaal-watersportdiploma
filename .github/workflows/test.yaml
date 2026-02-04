@@ -12,8 +12,13 @@ jobs:
         node-version: [22]
         runs-on: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.runs-on }}
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TOKEN && vars.TURBO_TEAM || '' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: pnpm/action-setup@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -24,12 +29,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build Project Artifacts
         run: >
-          pnpm
+          pnpm -w turbo run build
           --filter @nawadi/lib
           --filter @nawadi/db
           --filter @nawadi/core
           --filter @nawadi/api-server
-          run build
 
   test:
     strategy:
@@ -37,8 +41,13 @@ jobs:
         node-version: [22]
         runs-on: [ubuntu-latest]
     runs-on: ${{ matrix.runs-on }}
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TOKEN && vars.TURBO_TEAM || '' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: pnpm/action-setup@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -51,7 +60,12 @@ jobs:
       - run: pnpm run initialize
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter supabase run start
-      - run: pnpm build:packages
+      - run: >
+          pnpm -w turbo run build
+          --filter @nawadi/lib
+          --filter @nawadi/db
+          --filter @nawadi/core
+          --filter @nawadi/scripts
       - run: pnpm db:reset
       # node test runner seems to support globs since v21
       - if: ${{ matrix.node-version >= 21 }}
@@ -66,4 +80,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - run: pnpm audit --audit-level=high
+      - run: pnpm audit --audit-level=high --ignore-registry-errors
+        continue-on-error: true

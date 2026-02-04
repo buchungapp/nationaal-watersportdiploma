@@ -1,0 +1,61 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.local",
+        ".env.development",
+        ".env.development.local",
+        ".env.production",
+        ".env.production.local"
+      ],
+      "env": [
+        "NODE_ENV",
+        "VERCEL",
+        "VERCEL_ENV",
+        "NEXT_PUBLIC_*",
+        "SUPABASE_*",
+        "POSTHOG_*",
+        "AXIOM_*",
+        "GOOGLE_*",
+        "PGURI",
+        "REDIS_URL",
+        "FLAGS_SECRET",
+        "LOOPS_API_URL",
+        "PLAIN_API_KEY",
+        "DIGITAL_SIGNATURE_CERT_PATH",
+        "DIGITAL_SIGNATURE_CERT_PASSPHRASE"
+      ]
+    },
+    "dev": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.local",
+        ".env.development",
+        ".env.development.local",
+        ".env.production",
+        ".env.production.local"
+      ],
+      "passThroughEnv": [
+        "NODE_ENV",
+        "VERCEL",
+        "VERCEL_ENV",
+        "NEXT_PUBLIC_*",
+        "SUPABASE_*",
+        "POSTHOG_*",
+        "AXIOM_*",
+        "GOOGLE_*",
+        "PGURI",
+        "REDIS_URL",
+        "FLAGS_SECRET",
+        "LOOPS_API_URL",
+        "PLAIN_API_KEY",
+        "DIGITAL_SIGNATURE_CERT_PATH",
+        "DIGITAL_SIGNATURE_CERT_PASSPHRASE"
+      ]
+    }
+  }
+}
