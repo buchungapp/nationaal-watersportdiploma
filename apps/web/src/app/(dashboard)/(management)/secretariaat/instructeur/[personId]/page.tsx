@@ -8,6 +8,7 @@ import {
 } from "~/app/_actions/kss/manage-kwalificaties";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow, listCourses } from "~/lib/nwd";
 import KwalificatiesTable from "./_components/kwalificaties-table";
 import { PersonInfo } from "./_components/person-info";
@@ -62,10 +63,7 @@ export default async function PersonKwalificatiesPage({
 }) {
   const user = await getUserOrThrow();
 
-  // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-
-  if (!isSystemAdmin) {
+  if (!isSystemAdmin(user.email)) {
     return (
       <div className="mx-auto max-w-7xl">
         <Heading level={1}>Geen toegang</Heading>

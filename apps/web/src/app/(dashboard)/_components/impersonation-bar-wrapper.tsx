@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow } from "~/lib/nwd";
 import { ImpersonationBar } from "./impersonation-bar";
 
@@ -6,11 +7,11 @@ async function ImpersonationBarContent() {
   try {
     const user = await getUserOrThrow();
 
-    const isSystemAdmin = user._impersonation?.isImpersonating
-      ? user._impersonation.originalUser?.email === "maurits@buchung.nl"
-      : user.email === "maurits@buchung.nl";
+    const isAdmin = user._impersonation?.isImpersonating
+      ? isSystemAdmin(user._impersonation.originalUser?.email)
+      : isSystemAdmin(user.email);
 
-    if (!isSystemAdmin) {
+    if (!isAdmin) {
       return null;
     }
 

@@ -221,9 +221,10 @@ export const getUserOrThrow = cache(async () => {
     if (isImpersonating) {
       // Verify the current user is a system admin
       const currentUserData = await User.fromId(authUser.id);
-      const isSystemAdmin = currentUserData?.email === "maurits@buchung.nl";
+      const { isSystemAdmin } = await import("~/lib/authorization");
+      const isAdmin = isSystemAdmin(currentUserData?.email);
 
-      if (!isSystemAdmin) {
+      if (!isAdmin) {
         // Remove invalid impersonation cookie
         cookieStore.delete("impersonated_user_id");
         throw new Error("Unauthorized impersonation attempt");
@@ -273,8 +274,8 @@ export const startImpersonation = async (targetUserId: string) => {
     const authUser = await getUserOrThrow();
 
     // Verify system admin permissions
-    const isSystemAdmin = authUser.email === "maurits@buchung.nl";
-    if (!isSystemAdmin) {
+    const { isSystemAdmin } = await import("~/lib/authorization");
+    if (!isSystemAdmin(authUser.email)) {
       throw new Error("Unauthorized");
     }
 

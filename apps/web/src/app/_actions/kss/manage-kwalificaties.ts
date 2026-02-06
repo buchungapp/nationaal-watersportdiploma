@@ -5,6 +5,7 @@ import { schema as s } from "@nawadi/db";
 import { and, eq } from "@nawadi/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
@@ -24,8 +25,7 @@ export const addKwalificatieAction = actionClientWithMeta
     const user = await getUserOrThrow();
 
     // Check if user is system admin
-    const isSystemAdmin = user.email === "maurits@buchung.nl";
-    if (!isSystemAdmin) {
+    if (!isSystemAdmin(user.email)) {
       throw new Error("Geen toegang tot deze functie");
     }
 
@@ -83,8 +83,7 @@ export const removeKwalificatieAction = actionClientWithMeta
     const user = await getUserOrThrow();
 
     // Check if user is system admin
-    const isSystemAdmin = user.email === "maurits@buchung.nl";
-    if (!isSystemAdmin) {
+    if (!isSystemAdmin(user.email)) {
       throw new Error("Geen toegang tot deze functie");
     }
 
@@ -129,8 +128,7 @@ export const addBulkKwalificatiesAction = actionClientWithMeta
     const user = await getUserOrThrow();
 
     // Check if user is system admin
-    const isSystemAdmin = user.email === "maurits@buchung.nl";
-    if (!isSystemAdmin) {
+    if (!isSystemAdmin(user.email)) {
       throw new Error("Geen toegang tot deze functie");
     }
 
@@ -191,8 +189,7 @@ export async function getAvailableKerntaakonderdelen() {
   const user = await getUserOrThrow();
 
   // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-  if (!isSystemAdmin) {
+  if (!isSystemAdmin(user.email)) {
     throw new Error("Geen toegang tot deze functie");
   }
 
@@ -229,8 +226,7 @@ export async function getPersonKwalificaties(personId: string) {
   const user = await getUserOrThrow();
 
   // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-  if (!isSystemAdmin) {
+  if (!isSystemAdmin(user.email)) {
     throw new Error("Geen toegang tot deze functie");
   }
 
@@ -284,8 +280,7 @@ export async function getExistingKerntaakOnderdeelIds(
   const user = await getUserOrThrow();
 
   // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-  if (!isSystemAdmin) {
+  if (!isSystemAdmin(user.email)) {
     throw new Error("Geen toegang tot deze functie");
   }
 
@@ -313,8 +308,7 @@ export async function getAllExistingKerntaakOnderdeelIdsByCourse(
   const user = await getUserOrThrow();
 
   // Check if user is system admin
-  const isSystemAdmin = user.email === "maurits@buchung.nl";
-  if (!isSystemAdmin) {
+  if (!isSystemAdmin(user.email)) {
     throw new Error("Geen toegang tot deze functie");
   }
 

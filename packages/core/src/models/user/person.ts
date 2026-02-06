@@ -8,6 +8,7 @@ import {
   getTableColumns,
   inArray,
   isNull,
+  ne,
   type SQL,
   sql,
 } from "drizzle-orm";
@@ -474,6 +475,80 @@ export const list = wrapQuery(
   ),
 );
 
+export const searchForAutocomplete = wrapQuery(
+  "user.person.searchForAutocomplete",
+  withZod(
+    z.object({
+      q: z.string().min(1),
+      limit: z.number().int().positive().default(10),
+      excludePersonId: uuidSchema.optional(),
+    }),
+    z.array(
+      personSchema.pick({
+        id: true,
+        handle: true,
+        firstName: true,
+        lastNamePrefix: true,
+        lastName: true,
+        email: true,
+        dateOfBirth: true,
+        userId: true,
+        isPrimary: true,
+      }),
+    ),
+    async ({ q, limit, excludePersonId }) => {
+      const query = useQuery();
+
+      const whereClausules: (SQL | undefined)[] = [
+        sql`
+          (
+            setweight(to_tsvector('simple', 
+              COALESCE(${s.user.email}, '')
+            ), 'A') ||
+            setweight(to_tsvector('simple', 
+              COALESCE(split_part(${s.user.email}, '@', 1), '')
+            ), 'B') ||
+            setweight(to_tsvector('simple', 
+              COALESCE(split_part(${s.user.email}, '@', 2), '')
+            ), 'C') ||
+            setweight(to_tsvector('simple', COALESCE(${s.person.handle}, '')), 'B') ||
+            setweight(to_tsvector('simple', 
+              COALESCE(${s.person.firstName}, '') || ' ' || 
+              COALESCE(${s.person.lastNamePrefix}, '') || ' ' || 
+              COALESCE(${s.person.lastName}, '')
+            ), 'A')
+          ) @@ to_tsquery('simple', ${formatSearchTerms(q, "and")})
+        `,
+        isNull(s.person.deletedAt),
+        excludePersonId ? ne(s.person.id, excludePersonId) : undefined,
+      ];
+
+      const persons = await query
+        .select({
+          id: s.person.id,
+          handle: s.person.handle,
+          firstName: s.person.firstName,
+          lastNamePrefix: s.person.lastNamePrefix,
+          lastName: s.person.lastName,
+          email: s.user.email,
+          dateOfBirth: s.person.dateOfBirth,
+          userId: s.person.userId,
+          isPrimary: s.person.isPrimary,
+        })
+        .from(s.person)
+        .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+        .where(and(...whereClausules))
+        .limit(limit);
+
+      return persons.map((person) => ({
+        ...person,
+        // biome-ignore lint/style/noNonNullAssertion: intentional
+        handle: person.handle!,
+      }));
+    },
+  ),
+);
+
 export const listLocationsByRole = wrapQuery(
   "user.person.listLocationsByRole",
   withZod(
@@ -707,11 +782,12 @@ export const mergePersons = wrapCommand(
     }),
     async (input) => {
       return await withTransaction(async (tx) => {
-        // First validate that both persons exist and belong to the same user
-        const [personOne, personTwo] = await tx
+        // First validate that both persons exist
+        const persons = await tx
           .select({
             id: s.person.id,
             userId: s.person.userId,
+            isPrimary: s.person.isPrimary,
           })
           .from(s.person)
           .where(
@@ -721,12 +797,8 @@ export const mergePersons = wrapCommand(
             ),
           );
 
-        if (!personOne || !personTwo) {
+        if (persons.length !== 2) {
           throw new Error("One or both persons not found");
-        }
-
-        if (personOne.userId !== personTwo.userId) {
-          throw new Error("Persons do not belong to the same user");
         }
 
         await Promise.all([
@@ -810,7 +882,7 @@ export const mergePersons = wrapCommand(
           })(),
 
           // Transfer student curricula
-          await tx
+          tx
             .update(s.studentCurriculum)
             .set({
               personId: input.targetPersonId,
@@ -854,7 +926,90 @@ export const mergePersons = wrapCommand(
               personId: input.targetPersonId,
             })
             .where(eq(s.logbook.personId, input.personId)),
+
+          // Transfer person roles (PK: personId + roleId)
+          (async () => {
+            const roles = await tx
+              .select()
+              .from(s.personRole)
+              .where(eq(s.personRole.personId, input.personId));
+
+            if (roles.length > 0) {
+              await tx
+                .delete(s.personRole)
+                .where(eq(s.personRole.personId, input.personId));
+
+              await tx
+                .insert(s.personRole)
+                .values(
+                  roles.map((role) => ({
+                    ...role,
+                    personId: input.targetPersonId,
+                  })),
+                )
+                .onConflictDoNothing();
+            }
+          })(),
+
+          // Transfer KSS qualifications (unique: personId + courseId + kerntaakOnderdeelId)
+          (async () => {
+            const kwalificaties = await tx
+              .select()
+              .from(s.persoonKwalificatie)
+              .where(eq(s.persoonKwalificatie.personId, input.personId));
+
+            if (kwalificaties.length > 0) {
+              await tx
+                .delete(s.persoonKwalificatie)
+                .where(eq(s.persoonKwalificatie.personId, input.personId));
+
+              await tx
+                .insert(s.persoonKwalificatie)
+                .values(
+                  kwalificaties.map((kwalificatie) => ({
+                    ...kwalificatie,
+                    id: undefined,
+                    personId: input.targetPersonId,
+                  })),
+                )
+                .onConflictDoNothing();
+            }
+          })(),
         ]);
+
+        // Handle isPrimary constraint before delete
+        const duplicatePerson = persons.find((p) => p.id === input.personId);
+
+        if (duplicatePerson?.isPrimary && duplicatePerson?.userId) {
+          // FIRST: Unset isPrimary on the person we're about to delete
+          // This avoids constraint violation if we try to set another as primary first
+          await tx
+            .update(s.person)
+            .set({ isPrimary: false, updatedAt: sql`NOW()` })
+            .where(eq(s.person.id, input.personId));
+
+          // THEN: Find another person for this user to make primary
+          const otherPerson = await tx
+            .select({ id: s.person.id })
+            .from(s.person)
+            .where(
+              and(
+                eq(s.person.userId, duplicatePerson.userId),
+                ne(s.person.id, input.personId),
+                isNull(s.person.deletedAt),
+              ),
+            )
+            .limit(1)
+            .then((rows) => rows[0]);
+
+          if (otherPerson) {
+            await tx
+              .update(s.person)
+              .set({ isPrimary: true, updatedAt: sql`NOW()` })
+              .where(eq(s.person.id, otherPerson.id));
+          }
+          // If no other person exists, user account becomes orphaned (accepted risk)
+        }
 
         await tx.delete(s.person).where(eq(s.person.id, input.personId));
       });
