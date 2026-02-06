@@ -1,10 +1,11 @@
 "use client";
 
+import * as Headless from "@headlessui/react";
 import {
   ArrowsRightLeftIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/20/solid";
-import * as Headless from "@headlessui/react";
+import type { User } from "@nawadi/core";
 import clsx from "clsx";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsBoolean, parseAsString, useQueryState } from "nuqs";
@@ -18,7 +19,6 @@ import {
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "~/app/_actions/utils";
 import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
-import { usePersonSearch } from "~/app/(dashboard)/_hooks/swr/use-person-search";
 import {
   Dialog,
   DialogActions,
@@ -28,8 +28,7 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { Field, Fieldset, Label } from "~/app/(dashboard)/_components/fieldset";
 import { Code } from "~/app/(dashboard)/_components/text";
-
-import type { User } from "@nawadi/core";
+import { usePersonSearch } from "~/app/(dashboard)/_hooks/swr/use-person-search";
 
 type SearchPerson = Awaited<
   ReturnType<typeof User.Person.searchForAutocomplete>
@@ -122,7 +121,7 @@ function PersonSearchCombobox({
         <Headless.ComboboxInput
           aria-label={label}
           data-slot="control"
-          value={isTyping ? query : selectedPersonName ?? ""}
+          value={isTyping ? query : (selectedPersonName ?? "")}
           onChange={(event) => {
             onQueryChange(event.target.value);
           }}
@@ -131,7 +130,10 @@ function PersonSearchCombobox({
           spellCheck={false}
           className={inputClasses}
         />
-        <Headless.ComboboxButton className="group right-0 absolute inset-y-0 flex items-center px-2" aria-label="Opties tonen">
+        <Headless.ComboboxButton
+          className="group right-0 absolute inset-y-0 flex items-center px-2"
+          aria-label="Opties tonen"
+        >
           <svg
             className="stroke-zinc-500 dark:group-data-hover:stroke-zinc-300 dark:stroke-zinc-400 forced-colors:stroke-[CanvasText] group-data-disabled:stroke-zinc-600 group-data-hover:stroke-zinc-700 size-5 sm:size-4"
             viewBox="0 0 16 16"
@@ -159,7 +161,10 @@ function PersonSearchCombobox({
         className={optionsClasses}
       >
         {isSearching && (
-          <div className="flex items-center gap-2 px-3.5 py-2 text-sm text-zinc-500" aria-live="polite">
+          <div
+            className="flex items-center gap-2 px-3.5 py-2 text-sm text-zinc-500"
+            aria-live="polite"
+          >
             <Spinner className="h-3 w-3" aria-hidden="true" /> Zoeken…
           </div>
         )}
@@ -488,7 +493,14 @@ export default function MergePersonsDialog() {
     setDuplicatePersonData(primaryPersonData);
     setPrimaryQuery("");
     setDuplicateQuery("");
-  }, [primaryId, duplicateId, setPrimaryId, setDuplicateId, primaryPersonData, duplicatePersonData]);
+  }, [
+    primaryId,
+    duplicateId,
+    setPrimaryId,
+    setDuplicateId,
+    primaryPersonData,
+    duplicatePersonData,
+  ]);
 
   const handleMerge = useCallback(() => {
     if (primaryId && duplicateId) {
