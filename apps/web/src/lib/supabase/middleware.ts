@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { isSystemAdmin } from "~/lib/authorization";
 import { invariant } from "~/utils/invariant";
 
 export async function updateSession(request: NextRequest) {
@@ -44,9 +45,7 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/secretariaat")) {
     if (
       !user?.email ||
-      !["info@nationaalwatersportdiploma.nl", "maurits@buchung.nl"].includes(
-        user.email,
-      )
+      !isSystemAdmin(user.email)
     ) {
       const url = request.nextUrl.clone();
       url.pathname = "/profiel?_cacheBust=1";
