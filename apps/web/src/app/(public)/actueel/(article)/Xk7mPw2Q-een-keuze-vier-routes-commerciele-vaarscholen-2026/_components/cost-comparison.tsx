@@ -8,115 +8,222 @@ import {
 } from "@heroicons/react/20/solid";
 import { useState } from "react";
 
-type Size = "large" | "small";
-
-const SIZES = [
-  { id: "large" as const, label: "Grote locatie (>750 diploma's/jaar)" },
-  { id: "small" as const, label: "Kleine locatie (150\u2013300 diploma's/jaar)" },
-];
-
 // ---------------------------------------------------------------------------
-// Cost data
+// Category data (7 tiers matching Academy cat 1-7 / CWO Mini - cat 5)
 // ---------------------------------------------------------------------------
 
-interface CostData {
-  annual: [number, number, number, number]; // NWD, Academy, KSS+CWO, CWO
-  oneTime: [number, number, number, number];
-  perDiploma: [string, string, string, string];
+interface CategoryData {
+  label: string;
+  valueText: string;
+  tickLabel: string;
+  sectionLabel: string;
+  /** [NWD, Academy, KSS+CWO, CWO] */
+  annual: [number, number, number, number];
   disclosure: {
-    oneTime: {
-      intake: [string, string, string, string];
-      investment: [string, string, string, string];
-      onboarding: [string, string, string, string];
-      totalOneTime: [string, string, string, string];
-    };
-    annual: {
-      contribution: [string, string, string, string];
-      kssLicense: [string, string, string, string];
-      knwvMembership: [string, string, string, string];
-      marketing: [string, string, string, string];
-      totalAnnual: [string, string, string, string];
-    };
-    perDiploma: {
-      digital: [string, string, string, string];
-      printed: [string, string, string, string];
-      totalPerDiploma: [string, string, string, string];
-    };
+    contribution: [string, string, string, string];
+    kssLicense: [string, string, string, string];
+    knwvMembership: [string, string, string, string];
+    marketing: [string, string, string, string];
+    totalAnnual: [string, string, string, string];
   };
   footnote: string;
   disclosureNote: string;
-  sectionLabel: string;
 }
 
-const COST_DATA: Record<Size, CostData> = {
-  large: {
+const CWO_DISCLAIMER =
+  "(HISWA/KNWV-lidtarief 2025). CWO-tarieven 2026 zijn op het moment van schrijven nog niet openbaar beschikbaar.";
+
+const NWD_NOTE_LOW =
+  "Vanaf 150 diploma\u2019s per jaar gaan we uit van het hogere NWD-tarief (contributie \u20AC1.000). Bij een omzet uit zeilcursussen/-kampen onder \u20AC100.000 (excl. btw) is de contributie \u20AC650.";
+
+const NWD_NOTE_HIGH =
+  "NWD-contributie is \u20AC650 bij omzet uit zeilcursussen/-kampen onder \u20AC100.000 (excl. btw).";
+
+const CATEGORIES: CategoryData[] = [
+  {
+    label: "1\u201330 diploma\u2019s per jaar",
+    valueText: "1 tot 30 diploma\u2019s per jaar",
+    tickLabel: "1-30",
+    sectionLabel: "Kosten (o.b.v. 1\u201330 diploma\u2019s/jaar)",
+    annual: [1_600, 195, 482, 189],
+    disclosure: {
+      contribution: ["\u20AC650", "\u20AC195", "\u20AC189", "\u20AC189"],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC293", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: ["\u20AC1.600", "\u20AC195", "\u20AC482", "\u20AC189"],
+    },
+    footnote: `Academy categorie 1, CWO categorie Mini ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_LOW,
+  },
+  {
+    label: "30\u201360 diploma\u2019s per jaar",
+    valueText: "30 tot 60 diploma\u2019s per jaar",
+    tickLabel: "30-60",
+    sectionLabel: "Kosten (o.b.v. 30\u201360 diploma\u2019s/jaar)",
+    annual: [1_600, 325, 802, 314],
+    disclosure: {
+      contribution: ["\u20AC650", "\u20AC325", "\u20AC314", "\u20AC314"],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC488", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: ["\u20AC1.600", "\u20AC325", "\u20AC802", "\u20AC314"],
+    },
+    footnote: `Academy categorie 2, CWO categorie 0 ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_LOW,
+  },
+  {
+    label: "60\u2013150 diploma\u2019s per jaar",
+    valueText: "60 tot 150 diploma\u2019s per jaar",
+    tickLabel: "60-150",
+    sectionLabel: "Kosten (o.b.v. 60\u2013150 diploma\u2019s/jaar)",
+    annual: [1_600, 450, 1_114, 439],
+    disclosure: {
+      contribution: ["\u20AC650", "\u20AC450", "\u20AC439", "\u20AC439"],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC675", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: ["\u20AC1.600", "\u20AC450", "\u20AC1.114", "\u20AC439"],
+    },
+    footnote: `Academy categorie 3, CWO categorie 1 ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_LOW,
+  },
+  {
+    label: "150\u2013300 diploma\u2019s per jaar",
+    valueText: "150 tot 300 diploma\u2019s per jaar",
+    tickLabel: "150-300",
+    sectionLabel: "Kosten (o.b.v. 150\u2013300 diploma\u2019s/jaar)",
+    annual: [1_950, 900, 2_230, 880],
+    disclosure: {
+      contribution: ["\u20AC1.000", "\u20AC900", "\u20AC880", "\u20AC880"],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC1.350", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: ["\u20AC1.950", "\u20AC900", "\u20AC2.230", "\u20AC880"],
+    },
+    footnote: `Academy categorie 4, CWO categorie 2 ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_HIGH,
+  },
+  {
+    label: "300\u2013500 diploma\u2019s per jaar",
+    valueText: "300 tot 500 diploma\u2019s per jaar",
+    tickLabel: "300-500",
+    sectionLabel: "Kosten (o.b.v. 300\u2013500 diploma\u2019s/jaar)",
+    annual: [1_950, 1_500, 3_695, 1_445],
+    disclosure: {
+      contribution: [
+        "\u20AC1.000",
+        "\u20AC1.500",
+        "\u20AC1.445",
+        "\u20AC1.445",
+      ],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC2.250", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: [
+        "\u20AC1.950",
+        "\u20AC1.500",
+        "\u20AC3.695",
+        "\u20AC1.445",
+      ],
+    },
+    footnote: `Academy categorie 5, CWO categorie 3 ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_HIGH,
+  },
+  {
+    label: "500\u2013750 diploma\u2019s per jaar",
+    valueText: "500 tot 750 diploma\u2019s per jaar",
+    tickLabel: "500-750",
+    sectionLabel: "Kosten (o.b.v. 500\u2013750 diploma\u2019s/jaar)",
+    annual: [1_950, 1_950, 4_810, 1_885],
+    disclosure: {
+      contribution: [
+        "\u20AC1.000",
+        "\u20AC1.950",
+        "\u20AC1.885",
+        "\u20AC1.885",
+      ],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC2.925", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: [
+        "\u20AC1.950",
+        "\u20AC1.950",
+        "\u20AC4.810",
+        "\u20AC1.885",
+      ],
+    },
+    footnote: `Academy categorie 6, CWO categorie 4 ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_HIGH,
+  },
+  {
+    label: "Meer dan 750 diploma\u2019s per jaar",
+    valueText: "meer dan 750 diploma\u2019s per jaar",
+    tickLabel: "750+",
+    sectionLabel: "Kosten (o.b.v. >750 diploma\u2019s/jaar)",
     annual: [1_950, 2_950, 7_314, 2_889],
-    oneTime: [2_000, 795, 544, 214],
-    perDiploma: ["€3,35", "€3,65", "€3,55", "€3,55"],
     disclosure: {
-      oneTime: {
-        intake: ["€750", "€750", "€330 + €214", "€214"],
-        investment: ["€1.250", "—", "—", "—"],
-        onboarding: ["inbegrepen", "€45 (vlag)", "—", "—"],
-        totalOneTime: ["€2.000", "€795", "€544", "€214"],
-      },
-      annual: {
-        contribution: ["€1.000", "€2.950", "€2.889", "€2.889"],
-        kssLicense: ["inbegrepen", "inbegrepen", "€4.425", "—"],
-        knwvMembership: ["€450", "inbegrepen", "—", "—"],
-        marketing: ["€500", "—", "—", "—"],
-        totalAnnual: ["€1.950", "€2.950", "€7.314", "€2.889"],
-      },
-      perDiploma: {
-        digital: ["€3,00", "€3,25", "€3,15", "€3,15"],
-        printed: ["€0,35", "€0,40", "€0,40", "€0,40"],
-        totalPerDiploma: ["€3,35", "€3,65", "€3,55", "€3,55"],
-      },
+      contribution: [
+        "\u20AC1.000",
+        "\u20AC2.950",
+        "\u20AC2.889",
+        "\u20AC2.889",
+      ],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC4.425", "\u2014"],
+      knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
+      marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
+      totalAnnual: [
+        "\u20AC1.950",
+        "\u20AC2.950",
+        "\u20AC7.314",
+        "\u20AC2.889",
+      ],
     },
-    footnote:
-      "Academy categorie 7, CWO categorie 5 (HISWA/KNWV-lidtarief 2025). CWO-tarieven 2026 zijn op het moment van schrijven nog niet openbaar beschikbaar.",
-    disclosureNote:
-      "NWD-contributie is €650 bij omzet uit zeilcursussen/-kampen onder €100.000 (excl. btw).",
-    sectionLabel: "Kosten (o.b.v. >750 diploma's/jaar)",
+    footnote: `Academy categorie 7, CWO categorie 5 ${CWO_DISCLAIMER}`,
+    disclosureNote: NWD_NOTE_HIGH,
   },
-  small: {
-    annual: [1_600, 900, 2_230, 880],
-    oneTime: [2_000, 795, 544, 214],
-    perDiploma: ["€3,35", "€3,65", "€3,55", "€3,55"],
-    disclosure: {
-      oneTime: {
-        intake: ["€750", "€750", "€330 + €214", "€214"],
-        investment: ["€1.250", "—", "—", "—"],
-        onboarding: ["inbegrepen", "€45 (vlag)", "—", "—"],
-        totalOneTime: ["€2.000", "€795", "€544", "€214"],
-      },
-      annual: {
-        contribution: ["€650", "€900", "€880", "€880"],
-        kssLicense: ["inbegrepen", "inbegrepen", "€1.350", "—"],
-        knwvMembership: ["€450", "inbegrepen", "—", "—"],
-        marketing: ["€500", "—", "—", "—"],
-        totalAnnual: ["€1.600", "€900", "€2.230", "€880"],
-      },
-      perDiploma: {
-        digital: ["€3,00", "€3,25", "€3,15", "€3,15"],
-        printed: ["€0,35", "€0,40", "€0,40", "€0,40"],
-        totalPerDiploma: ["€3,35", "€3,65", "€3,55", "€3,55"],
-      },
+];
+
+// ---------------------------------------------------------------------------
+// Shared data (identical across all categories)
+// ---------------------------------------------------------------------------
+
+const SHARED = {
+  oneTime: [2_000, 795, 544, 214] as [number, number, number, number],
+  perDiploma: ["\u20AC3,35", "\u20AC3,65", "\u20AC3,55", "\u20AC3,55"] as [
+    string,
+    string,
+    string,
+    string,
+  ],
+  disclosure: {
+    oneTime: {
+      intake: ["\u20AC750", "\u20AC750", "\u20AC330 + \u20AC214", "\u20AC214"],
+      investment: ["\u20AC1.250", "\u2014", "\u2014", "\u2014"],
+      onboarding: ["inbegrepen", "\u20AC45 (vlag)", "\u2014", "\u2014"],
+      totalOneTime: ["\u20AC2.000", "\u20AC795", "\u20AC544", "\u20AC214"],
     },
-    footnote:
-      "Academy categorie 4, CWO categorie 2 (HISWA/KNWV-lidtarief 2025). CWO-tarieven 2026 zijn op het moment van schrijven nog niet openbaar beschikbaar.",
-    disclosureNote:
-      "NWD-contributie is €1.000 bij omzet uit zeilcursussen/-kampen boven €100.000 (excl. btw).",
-    sectionLabel: "Kosten (o.b.v. 150\u2013300 diploma's/jaar)",
+    perDiploma: {
+      digital: ["\u20AC3,00", "\u20AC3,25", "\u20AC3,15", "\u20AC3,15"],
+      printed: ["\u20AC0,35", "\u20AC0,40", "\u20AC0,40", "\u20AC0,40"],
+      totalPerDiploma: [
+        "\u20AC3,35",
+        "\u20AC3,65",
+        "\u20AC3,55",
+        "\u20AC3,55",
+      ],
+    },
   },
-};
+} as const;
+
+const DEFAULT_CATEGORY = 6; // 750+
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const fmt = (n: number) =>
-  `€${n.toLocaleString("nl-NL", { minimumFractionDigits: 0 })}`;
+  `\u20AC${n.toLocaleString("nl-NL", { minimumFractionDigits: 0 })}`;
 
 function IconCell({
   variant,
@@ -194,44 +301,56 @@ function NeutralCell({
 // ---------------------------------------------------------------------------
 
 export function CostComparison() {
-  const [size, setSize] = useState<Size>("large");
-  const data = COST_DATA[size];
+  const [catIndex, setCatIndex] = useState(DEFAULT_CATEGORY);
+  // biome-ignore lint/style/noNonNullAssertion: catIndex is bounded by CATEGORIES.length
+  const cat = CATEGORIES[catIndex]!;
 
   return (
     <div className="not-prose my-12">
-      {/* Segmented control */}
-      <fieldset className="flex justify-center mb-8">
-        <legend className="sr-only">Locatiegrootte</legend>
-        <div className="inline-flex rounded-full bg-zinc-100 p-1 dark:bg-zinc-800 touch-manipulation">
-          {SIZES.map((s) => (
-            <label
-              key={s.id}
-              className={`relative cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-branding-light focus-within:ring-offset-2 motion-safe:transition-all motion-safe:duration-200 ${
-                size === s.id
-                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100"
-                  : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-              }`}
+      {/* Range slider */}
+      <div className="mb-8 px-2">
+        <label
+          htmlFor="category-slider"
+          className="block text-center text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-4"
+        >
+          {cat.label}
+        </label>
+        <input
+          id="category-slider"
+          type="range"
+          min={0}
+          max={CATEGORIES.length - 1}
+          step={1}
+          value={catIndex}
+          onChange={(e) => setCatIndex(Number(e.target.value))}
+          aria-valuetext={cat.valueText}
+          className="category-slider w-full touch-manipulation focus-visible:outline-none"
+        />
+        <div
+          className="mt-2 flex justify-between text-xs text-zinc-400 dark:text-zinc-500 select-none"
+          aria-hidden="true"
+        >
+          {CATEGORIES.map((c, i) => (
+            <span
+              key={c.tickLabel}
+              className={`transition-colors duration-150 ${
+                i === catIndex
+                  ? "font-medium text-zinc-900 dark:text-zinc-100"
+                  : ""
+              } ${i !== 0 && i !== 3 && i !== CATEGORIES.length - 1 ? "hidden sm:inline" : ""}`}
             >
-              <input
-                type="radio"
-                name="location-size"
-                value={s.id}
-                checked={size === s.id}
-                onChange={() => setSize(s.id)}
-                className="sr-only"
-              />
-              {s.label}
-            </label>
+              {c.tickLabel}
+            </span>
           ))}
         </div>
-      </fieldset>
+      </div>
 
       {/* Main comparison table */}
       <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
         <table className="w-full min-w-[800px] border-collapse text-sm">
           <caption className="sr-only">
-            Vergelijking van vier scenario&apos;s voor commerciële vaarscholen
-            in 2026
+            Vergelijking van vier scenario&apos;s voor commerci&#235;le
+            vaarscholen in 2026
           </caption>
 
           <thead>
@@ -245,7 +364,7 @@ export function CostComparison() {
                   NWD Lidmaatschap
                 </div>
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  De standaard voor commerciële vaarscholen
+                  De standaard voor commerci&#235;le vaarscholen
                 </div>
               </th>
               <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
@@ -282,7 +401,7 @@ export function CostComparison() {
                 colSpan={5}
                 className="px-3 py-2 font-semibold text-zinc-700 dark:text-zinc-300 text-xs uppercase tracking-wide"
               >
-                {data.sectionLabel}
+                {cat.sectionLabel}
               </td>
             </tr>
             {/* Annual */}
@@ -294,16 +413,16 @@ export function CostComparison() {
                 Jaarlijkse bijdrage
               </th>
               <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">
-                {fmt(data.annual[0])}
+                {fmt(cat.annual[0])}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.annual[1])}
+                {fmt(cat.annual[1])}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.annual[2])}
+                {fmt(cat.annual[2])}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.annual[3])}
+                {fmt(cat.annual[3])}
               </td>
             </tr>
             {/* One-time */}
@@ -315,16 +434,16 @@ export function CostComparison() {
                 Eenmalige kosten
               </th>
               <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.oneTime[0])}
+                {fmt(SHARED.oneTime[0])}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.oneTime[1])}
+                {fmt(SHARED.oneTime[1])}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.oneTime[2])}
+                {fmt(SHARED.oneTime[2])}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {fmt(data.oneTime[3])}
+                {fmt(SHARED.oneTime[3])}
               </td>
             </tr>
             {/* Per diploma */}
@@ -336,16 +455,16 @@ export function CostComparison() {
                 Per diploma
               </th>
               <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">
-                {data.perDiploma[0]}
+                {SHARED.perDiploma[0]}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {data.perDiploma[1]}
+                {SHARED.perDiploma[1]}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {data.perDiploma[2]}
+                {SHARED.perDiploma[2]}
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
-                {data.perDiploma[3]}
+                {SHARED.perDiploma[3]}
               </td>
             </tr>
 
@@ -465,9 +584,9 @@ export function CostComparison() {
               <IconCell variant="check" highlight>
                 Gezamenlijk
               </IconCell>
-              <NeutralCell>—</NeutralCell>
-              <NeutralCell>—</NeutralCell>
-              <NeutralCell>—</NeutralCell>
+              <NeutralCell>{"\u2014"}</NeutralCell>
+              <NeutralCell>{"\u2014"}</NeutralCell>
+              <NeutralCell>{"\u2014"}</NeutralCell>
             </tr>
             <tr>
               <th
@@ -493,7 +612,7 @@ export function CostComparison() {
       {/* Footnote */}
       <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
         {"* "}
-        {data.footnote} Bekijk de volledige kostenopbouw hieronder.
+        {cat.footnote} Bekijk de volledige kostenopbouw hieronder.
       </p>
 
       {/* Disclosure */}
@@ -536,16 +655,16 @@ export function CostComparison() {
                   </td>
                 </tr>
                 <DisclosureRow label="Intake">
-                  {data.disclosure.oneTime.intake}
+                  {SHARED.disclosure.oneTime.intake}
                 </DisclosureRow>
                 <DisclosureRow label="Investeringsbijdrage">
-                  {data.disclosure.oneTime.investment}
+                  {SHARED.disclosure.oneTime.investment}
                 </DisclosureRow>
                 <DisclosureRow label="Onboardingpakket (vlag, gevelbord)">
-                  {data.disclosure.oneTime.onboarding}
+                  {SHARED.disclosure.oneTime.onboarding}
                 </DisclosureRow>
                 <DisclosureTotalRow label="Totaal eenmalig">
-                  {data.disclosure.oneTime.totalOneTime}
+                  {SHARED.disclosure.oneTime.totalOneTime}
                 </DisclosureTotalRow>
 
                 {/* Annual section */}
@@ -554,23 +673,23 @@ export function CostComparison() {
                     colSpan={5}
                     className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400"
                   >
-                    {data.sectionLabel.replace("Kosten", "Jaarlijks")}
+                    {cat.sectionLabel.replace("Kosten", "Jaarlijks")}
                   </td>
                 </tr>
                 <DisclosureRow label="Contributie / jaarbijdrage">
-                  {data.disclosure.annual.contribution}
+                  {cat.disclosure.contribution}
                 </DisclosureRow>
                 <DisclosureRow label="Licentiegeld KSS">
-                  {data.disclosure.annual.kssLicense}
+                  {cat.disclosure.kssLicense}
                 </DisclosureRow>
                 <DisclosureRow label="Bijzonder lidmaatschap KNWV">
-                  {data.disclosure.annual.knwvMembership}
+                  {cat.disclosure.knwvMembership}
                 </DisclosureRow>
                 <DisclosureRow label="Marketingbijdrage">
-                  {data.disclosure.annual.marketing}
+                  {cat.disclosure.marketing}
                 </DisclosureRow>
                 <DisclosureTotalRow label="Totaal jaarlijks">
-                  {data.disclosure.annual.totalAnnual}
+                  {cat.disclosure.totalAnnual}
                 </DisclosureTotalRow>
 
                 {/* Per diploma section */}
@@ -583,23 +702,96 @@ export function CostComparison() {
                   </td>
                 </tr>
                 <DisclosureRow label="Registratie (digitaal)">
-                  {data.disclosure.perDiploma.digital}
+                  {SHARED.disclosure.perDiploma.digital}
                 </DisclosureRow>
                 <DisclosureRow label="Voorbedrukt fysiek diploma">
-                  {data.disclosure.perDiploma.printed}
+                  {SHARED.disclosure.perDiploma.printed}
                 </DisclosureRow>
                 <DisclosureTotalRow label="Totaal per diploma">
-                  {data.disclosure.perDiploma.totalPerDiploma}
+                  {SHARED.disclosure.perDiploma.totalPerDiploma}
                 </DisclosureTotalRow>
               </tbody>
             </table>
           </div>
           <div className="px-4 py-3 text-xs text-zinc-400 dark:text-zinc-500 space-y-1">
-            <p>* {data.footnote}</p>
-            <p>{data.disclosureNote}</p>
+            <p>* {cat.footnote}</p>
+            <p>{cat.disclosureNote}</p>
           </div>
         </div>
       </details>
+
+      {/* Slider styling */}
+      <style>{`
+        .category-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 6px;
+          border-radius: 3px;
+          background: linear-gradient(
+            to right,
+            var(--color-branding-light) 0%,
+            var(--color-branding-light) ${(catIndex / (CATEGORIES.length - 1)) * 100}%,
+            #d4d4d8 ${(catIndex / (CATEGORIES.length - 1)) * 100}%,
+            #d4d4d8 100%
+          );
+          outline: none;
+          cursor: pointer;
+        }
+        :is(.dark) .category-slider {
+          background: linear-gradient(
+            to right,
+            var(--color-branding-dark) 0%,
+            var(--color-branding-dark) ${(catIndex / (CATEGORIES.length - 1)) * 100}%,
+            #3f3f46 ${(catIndex / (CATEGORIES.length - 1)) * 100}%,
+            #3f3f46 100%
+          );
+        }
+        .category-slider:focus-visible {
+          box-shadow: 0 0 0 2px white, 0 0 0 4px var(--color-branding-light);
+          border-radius: 3px;
+        }
+        .category-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--color-branding-light);
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          cursor: pointer;
+          transition: transform 150ms, box-shadow 150ms;
+        }
+        .category-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.15);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+        .category-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: var(--color-branding-light);
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          cursor: pointer;
+          transition: transform 150ms, box-shadow 150ms;
+        }
+        .category-slider::-moz-range-thumb:hover {
+          transform: scale(1.15);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+        .category-slider::-moz-range-track {
+          height: 6px;
+          border-radius: 3px;
+          background: transparent;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .category-slider::-webkit-slider-thumb,
+          .category-slider::-moz-range-thumb {
+            transition: none;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -613,7 +805,7 @@ function DisclosureRow({
   children,
 }: {
   label: string;
-  children: [string, string, string, string];
+  children: readonly [string, string, string, string];
 }) {
   return (
     <tr className="border-t border-zinc-100 dark:border-zinc-800">
@@ -624,7 +816,7 @@ function DisclosureRow({
         className={`px-3 py-1.5 text-right bg-branding-light/5 dark:bg-branding-dark/10 ${
           children[0] === "inbegrepen"
             ? "text-zinc-500 dark:text-zinc-400 italic text-xs"
-            : children[0] === "—"
+            : children[0] === "\u2014"
               ? "text-zinc-400"
               : "tabular-nums"
         }`}
@@ -637,7 +829,7 @@ function DisclosureRow({
           className={`px-3 py-1.5 text-right ${
             children[i] === "inbegrepen"
               ? "text-zinc-500 dark:text-zinc-400 italic text-xs"
-              : children[i] === "—"
+              : children[i] === "\u2014"
                 ? "text-zinc-400"
                 : "tabular-nums"
           }`}
@@ -654,7 +846,7 @@ function DisclosureTotalRow({
   children,
 }: {
   label: string;
-  children: [string, string, string, string];
+  children: readonly [string, string, string, string];
 }) {
   return (
     <tr className="border-t border-zinc-200 dark:border-zinc-700">
