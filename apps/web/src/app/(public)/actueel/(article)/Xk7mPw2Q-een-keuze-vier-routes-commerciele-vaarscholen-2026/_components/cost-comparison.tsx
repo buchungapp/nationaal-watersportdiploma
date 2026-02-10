@@ -274,6 +274,46 @@ function NeutralCell({
 }
 
 // ---------------------------------------------------------------------------
+// Scrollable table wrapper — right-edge fade + scroll hint (CSS-only, no JS)
+// ---------------------------------------------------------------------------
+
+function ScrollableTableWrapper({
+  children,
+  className,
+  innerClassName,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  innerClassName?: string;
+}) {
+  return (
+    <div className={`relative ${className ?? ""}`}>
+      {/* Scrollable area */}
+      <div className={`overflow-x-auto ${innerClassName ?? ""}`}>
+        {children}
+      </div>
+
+      {/* Right-edge fade */}
+      <div
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-white to-transparent"
+        aria-hidden="true"
+      />
+
+      {/* Scroll hint pill */}
+      <div
+        className="pointer-events-none absolute right-3 top-1/2 z-20 flex -translate-y-1/2 items-center gap-0.5 rounded-full bg-zinc-900/75 px-2.5 py-1 text-xs font-medium text-white shadow-lg backdrop-blur-sm"
+        aria-hidden="true"
+      >
+        Scroll
+        <span className="scroll-hint-arrow inline-flex">
+          <ChevronRightIcon className="h-3.5 w-3.5" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -323,7 +363,7 @@ export function CostComparison() {
       </div>
 
       {/* Main comparison table */}
-      <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+      <ScrollableTableWrapper className="-mx-4 lg:mx-0" innerClassName="px-4 lg:px-0">
         <table className="w-full min-w-[800px] border-collapse text-sm">
           <caption className="sr-only">
             Vergelijking van vier scenario&apos;s voor commerci&#235;le
@@ -604,7 +644,7 @@ export function CostComparison() {
             </tr>
           </tbody>
         </table>
-      </div>
+      </ScrollableTableWrapper>
 
       {/* Footnotes */}
       <ol className="mt-4 list-none space-y-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -639,7 +679,7 @@ export function CostComparison() {
           Bekijk de volledige kostenopbouw per scenario
         </summary>
         <div className="border-t border-zinc-200 dark:border-zinc-700">
-          <div className="overflow-x-auto">
+          <ScrollableTableWrapper>
             <table className="w-full min-w-[640px] border-collapse text-sm">
               <caption className="sr-only">
                 Volledige kostenopbouw per scenario
@@ -736,7 +776,7 @@ export function CostComparison() {
                 </DisclosureTotalRow>
               </tbody>
             </table>
-          </div>
+          </ScrollableTableWrapper>
           <ol className="px-4 py-3 list-none space-y-0.5 text-xs text-zinc-400 dark:text-zinc-500">
             <li className="flex gap-1">
               <span className="shrink-0 tabular-nums">1.</span>
@@ -833,6 +873,18 @@ export function CostComparison() {
           .category-slider::-webkit-slider-thumb,
           .category-slider::-moz-range-thumb {
             transition: none;
+          }
+        }
+        @keyframes scroll-hint-bounce {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(3px); }
+        }
+        .scroll-hint-arrow {
+          animation: scroll-hint-bounce 1.5s ease-in-out infinite;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .scroll-hint-arrow {
+            animation: none;
           }
         }
       `}</style>
