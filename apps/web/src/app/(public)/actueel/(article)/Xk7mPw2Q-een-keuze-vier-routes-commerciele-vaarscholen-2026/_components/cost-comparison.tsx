@@ -392,7 +392,8 @@ export function CostComparison() {
                   Watersport Academy
                 </div>
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                  Platform voor verenigingen
+                  Platform voor verenigingen en overige vaarscholen die zich
+                  niet bij het NWD willen aansluiten
                 </div>
               </th>
               <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
@@ -610,7 +611,7 @@ export function CostComparison() {
               <IconCell variant="check" highlight>
                 Mede-eigenaar + ALV
               </IconCell>
-              <IconCell variant="warning">Indirect, geen stemrecht</IconCell>
+              <IconCell variant="warning">Indirecte inspraak</IconCell>
               <IconCell variant="x">Geen</IconCell>
               <IconCell variant="x">Geen</IconCell>
             </tr>
