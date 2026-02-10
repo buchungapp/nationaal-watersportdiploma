@@ -363,7 +363,10 @@ export function CostComparison() {
       </div>
 
       {/* Main comparison table */}
-      <ScrollableTableWrapper className="-mx-4 lg:mx-0" innerClassName="px-4 lg:px-0">
+      <ScrollableTableWrapper
+        className="-mx-4 lg:mx-0"
+        innerClassName="px-4 lg:px-0"
+      >
         <table className="w-full min-w-[800px] border-collapse text-sm">
           <caption className="sr-only">
             Vergelijking van vier scenario&apos;s voor commerci&#235;le
