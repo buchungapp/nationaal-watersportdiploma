@@ -1,0 +1,558 @@
+import { ArticleLayout } from "../_components/news-article";
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
+
+export const article = {
+  date: "2026-02-10T10:00:00Z",
+  category: "achterban",
+  title: "Eén keuze, vier routes: wat elke commerciële vaarschool moet weten voor 2026",
+  description:
+    "Met de publicatie van de Watersport Academy Richtlijnen 2026 moeten commerciële vaarscholen een keuze maken. Wij zetten de vier scenario's naast elkaar: wat kost het, wat krijg je ervoor, en welke route past bij jouw vaarschool?",
+};
+
+export const metadata = {
+  title: article.title,
+  description: article.description,
+  alternates: {
+    canonical: "/actueel/Xk7mPw2Q-een-keuze-vier-routes-commerciele-vaarscholen-2026",
+  },
+  openGraph: {
+    title: article.title,
+    description: article.description,
+    url: "/actueel/Xk7mPw2Q-een-keuze-vier-routes-commerciele-vaarscholen-2026",
+    type: "article",
+  },
+};
+
+export default (props) => <ArticleLayout article={article} {...props} />;
+
+Het Watersportverbond heeft de [Watersport Academy Richtlijnen 2026](/actueel/i62T54pW-richtlijnen-2026-de-standaard-is-er-wij-doen-meer) gepubliceerd. Voor commerciële vaarscholen betekent dit: het moment van kiezen is nu. Seizoen 2026 staat voor de deur en de keuze die je nu maakt bepaalt hoe jouw vaarschool de komende jaren opereert.
+
+In dit artikel zetten we de vier mogelijke scenario's naast elkaar. Wat kost elke route? Wat krijg je ervoor terug? En welke past het beste bij een professionele, commerciële vaarschool?
+
+## De vier scenario's op een rij
+
+Voor commerciële vaarscholen zijn er vier routes mogelijk:
+
+1. **Lidmaatschap Vereniging Nationaal Watersportdiploma** — De standaard voor commerciële vaarscholen
+2. **Aansluiting bij Watersport Academy** — Het platform van het Watersportverbond, primair gericht op verenigingen
+3. **Alternatieve diplomalijn (bijv. CWO) + losse KSS-licentie** — Dubbele kosten voor beperkte erkenning
+4. **Alternatieve diplomalijn zonder KSS** — Geen erkende instructeursopleiding mogelijk
+
+Hieronder vergelijken we deze scenario's op kosten, erkenning, ondersteuning en toekomstperspectief.
+
+## Vergelijking: wat krijg je voor je geld?
+
+<div className="not-prose my-12">
+  <div className="overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+    <table className="w-full min-w-[800px] border-collapse text-sm">
+      <caption className="sr-only">
+        Vergelijking van vier scenario's voor commerciële vaarscholen in 2026
+      </caption>
+      
+      <thead>
+        <tr>
+          <th className="w-48 p-3 text-left font-medium text-zinc-600 dark:text-zinc-400" />
+          <th className="p-3 text-center bg-branding-light/10 dark:bg-branding-dark/20 border-t-4 border-branding-orange rounded-t-lg">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-branding-orange text-white text-xs font-medium mb-2">
+              Aanbevolen
+            </div>
+            <div className="font-semibold text-zinc-900 dark:text-zinc-100">NWD Lidmaatschap</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">De standaard voor commerciële vaarscholen</div>
+          </th>
+          <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-100">Watersport Academy</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Platform voor verenigingen</div>
+          </th>
+          <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-100">KSS + CWO</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Dubbele kosten, beperkte erkenning</div>
+          </th>
+          <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-100">CWO zonder KSS</div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Geen erkende opleiding</div>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
+        <tr className="bg-zinc-100 dark:bg-zinc-900">
+          <td colSpan={5} className="px-3 py-2 font-semibold text-zinc-700 dark:text-zinc-300 text-xs uppercase tracking-wide">
+            Kosten (grote locatie, &gt;750 diploma's/jaar)
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">Jaarlijkse bijdrage</th>
+          <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">€1.950</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€2.950</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€7.314*</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€2.889*</td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">Eenmalige kosten</th>
+          <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums text-zinc-700 dark:text-zinc-300">€2.000</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€265</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€544</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€214</td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">Per diploma</th>
+          <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">€3,35</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€3,65</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€3,55*</td>
+          <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">€3,55*</td>
+        </tr>
+
+        <tr className="bg-zinc-100 dark:bg-zinc-900">
+          <td colSpan={5} className="px-3 py-2 font-semibold text-zinc-700 dark:text-zinc-300 text-xs uppercase tracking-wide">
+            Erkenning & kwaliteit
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">
+            <div>Eigenvaardigheidslijn</div>
+            <div className="text-xs font-normal text-zinc-400 dark:text-zinc-500 mt-0.5">Het diplomasysteem voor consumenten</div>
+          </th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Modern</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Modern</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Verouderd</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Verouderd</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">
+            <div>Diplomalijn</div>
+            <div className="text-xs font-normal text-zinc-400 dark:text-zinc-500 mt-0.5">Status volgens het Watersportverbond</div>
+          </th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Nationale standaard</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Nationale standaard</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Geen standaard</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Geen standaard</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">
+            <div>KSS-instructeurs</div>
+            <div className="text-xs font-normal text-zinc-400 dark:text-zinc-500 mt-0.5">Opleiden via Kwalificatiestructuur Sport</div>
+          </th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Inbegrepen</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Inbegrepen</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+              <ExclamationTriangleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Via losse licentie</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Niet mogelijk</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">
+            <div>Aansprakelijkheidsverzekering</div>
+            <div className="text-xs font-normal text-zinc-400 dark:text-zinc-500 mt-0.5">Vereist KSS-gekwalificeerde instructeurs</div>
+          </th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Voldoet</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Voldoet</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Voldoet</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-red-600 dark:text-red-500">
+              <ExclamationTriangleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Mogelijk niet gedekt</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr className="bg-zinc-100 dark:bg-zinc-900">
+          <td colSpan={5} className="px-3 py-2 font-semibold text-zinc-700 dark:text-zinc-300 text-xs uppercase tracking-wide">
+            Ondersteuning & toekomst
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">
+            <div>Inspraak</div>
+            <div className="text-xs font-normal text-zinc-400 dark:text-zinc-500 mt-0.5">Formele stem over diplomalijn en kwaliteitseisen</div>
+          </th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Formeel via ALV</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500">
+              <ExclamationTriangleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Indirect, geen stemrecht</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Geen</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Geen</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">Marketing</th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Gezamenlijk</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">—</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">—</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">—</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">
+            <div>Diplomaregistratie</div>
+            <div className="text-xs font-normal text-zinc-400 dark:text-zinc-500 mt-0.5">Online systeem voor locaties en cursisten</div>
+          </th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Gebouwd voor grote locaties</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center text-zinc-700 dark:text-zinc-300">Via Watersportverbond</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center text-zinc-500 dark:text-zinc-400">CWO legacy</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center text-zinc-500 dark:text-zinc-400">CWO legacy</span>
+            </div>
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row" className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400">Toekomst</th>
+          <td className="p-3 bg-branding-light/5 dark:bg-branding-dark/10">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 font-medium">
+              <CheckCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Groei</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center text-zinc-700 dark:text-zinc-300">Stabiel</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Krimp</span>
+            </div>
+          </td>
+          <td className="p-3">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <XCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1 text-center">Krimp</span>
+            </div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+    * CWO-tarieven op basis van gepubliceerde 2025-tarieven (HISWA/KNWV-lidtarief, categorie 5). Tarieven voor 2026 zijn op het moment van schrijven nog niet openbaar beschikbaar. Bekijk de volledige kostenopbouw hieronder.
+  </p>
+
+  <details className="mt-6 rounded-lg border border-zinc-200 dark:border-zinc-700 group">
+    <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-zinc-700 dark:text-zinc-300 select-none list-none [&::-webkit-details-marker]:hidden flex items-center gap-2">
+      <ChevronRightIcon className="h-4 w-4 shrink-0 text-zinc-400 transition-transform duration-200 group-open:rotate-90" />
+      Bekijk de volledige kostenopbouw per scenario
+    </summary>
+    <div className="border-t border-zinc-200 dark:border-zinc-700">
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse text-sm">
+          <caption className="sr-only">Volledige kostenopbouw per scenario</caption>
+          <thead>
+            <tr>
+              <th className="w-48 px-3 py-2 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400" />
+              <th className="px-3 py-2 text-right text-xs font-medium text-zinc-900 dark:text-zinc-100 bg-branding-light/5 dark:bg-branding-dark/10">NWD</th>
+              <th className="px-3 py-2 text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">Academy</th>
+              <th className="px-3 py-2 text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">KSS + CWO</th>
+              <th className="px-3 py-2 text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">CWO alleen</th>
+            </tr>
+          </thead>
+          <tbody className="text-zinc-600 dark:text-zinc-400">
+            <tr className="bg-zinc-50 dark:bg-zinc-800/50">
+              <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Eenmalig</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Intake</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€750</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€220</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€330 + €214</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€214</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Investeringsbijdrage</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€1.250</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Onboardingpakket (vlag, gevelbord)</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10 text-zinc-500 dark:text-zinc-400 italic text-xs">inbegrepen</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€45 (vlag)</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+            </tr>
+            <tr className="border-t border-zinc-200 dark:border-zinc-700">
+              <th scope="row" className="px-3 py-1.5 text-left font-medium text-zinc-900 dark:text-zinc-100">Totaal eenmalig</th>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100 bg-branding-light/5 dark:bg-branding-dark/10">€2.000</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€265</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€544</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€214</td>
+            </tr>
+
+            <tr className="bg-zinc-50 dark:bg-zinc-800/50">
+              <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Jaarlijks (grote locatie, &gt;750 diploma's)</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Lidmaatschap Watersportverbond</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€450</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Licentie / contributie</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€1.000</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€2.950</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€4.425</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">CWO jaarbijdrage (HISWA/KNWV cat. 5)*</th>
+              <td className="px-3 py-1.5 text-right text-zinc-400 bg-branding-light/5 dark:bg-branding-dark/10">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€2.889</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€2.889</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Marketingbijdrage</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€500</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+              <td className="px-3 py-1.5 text-right text-zinc-400">—</td>
+            </tr>
+            <tr className="border-t border-zinc-200 dark:border-zinc-700">
+              <th scope="row" className="px-3 py-1.5 text-left font-medium text-zinc-900 dark:text-zinc-100">Totaal jaarlijks</th>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100 bg-branding-light/5 dark:bg-branding-dark/10">€1.950</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€2.950</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€7.314*</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€2.889*</td>
+            </tr>
+
+            <tr className="bg-zinc-50 dark:bg-zinc-800/50">
+              <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Per diploma</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Registratie (digitaal)</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€3,00</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€3,25</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€3,15*</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€3,15*</td>
+            </tr>
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <th scope="row" className="px-3 py-1.5 text-left font-normal">Voorbedrukt fysiek diploma</th>
+              <td className="px-3 py-1.5 text-right tabular-nums bg-branding-light/5 dark:bg-branding-dark/10">€0,35</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€0,40</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€0,40*</td>
+              <td className="px-3 py-1.5 text-right tabular-nums">€0,40*</td>
+            </tr>
+            <tr className="border-t border-zinc-200 dark:border-zinc-700">
+              <th scope="row" className="px-3 py-1.5 text-left font-medium text-zinc-900 dark:text-zinc-100">Totaal per diploma</th>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100 bg-branding-light/5 dark:bg-branding-dark/10">€3,35</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€3,65</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€3,55*</td>
+              <td className="px-3 py-1.5 text-right tabular-nums font-medium text-zinc-900 dark:text-zinc-100">€3,55*</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="px-4 py-3 text-xs text-zinc-400 dark:text-zinc-500 space-y-1">
+        <p>* CWO-tarieven op basis van gepubliceerde 2025-tarieven (HISWA/KNWV-lidtarief, categorie 5). Tarieven voor 2026 zijn op het moment van schrijven nog niet openbaar beschikbaar.</p>
+      </div>
+    </div>
+  </details>
+</div>
+
+## Scenario 1: NWD Lidmaatschap — De logische keuze
+
+Het Nationaal Watersportdiploma is opgericht door en voor commerciële vaarscholen. Als lid van de vereniging werk je met een moderne, resultaatgerichte diplomalijn die door het [Watersportverbond — dé nationale sportbond](/help/artikel/watersportverbond-kiest-voor-het-nwd-wat-betekent-dit-voor-jou) is aangewezen als de nieuwe standaard voor de Nederlandse watersport.
+
+**Wat maakt het NWD uniek voor commerciële vaarscholen?**
+
+- **Directe inspraak via de ALV** — Als lid beslis je mee over de ontwikkeling van de diplomalijn en de kwaliteitseisen. Geen beslissingen over je hoofd heen.
+- **Gezamenlijke marketing** — Van de jaarlijkse bijdrage gaat een deel naar gezamenlijke marketingacties die de hele sector promoten.
+- **Trainingsweekenden** — Locaties leren van elkaar op gezamenlijke bijeenkomsten. Kwaliteitsverbetering door kennisdeling.
+- **Diplomaregistratie gebouwd voor grote locaties** — Het [open source](https://github.com/buchungapp/nationaal-watersportdiploma) NWD-systeem is ingericht op efficiënt werken met grote aantallen cursisten: bulkverwerking, een doordachte consumentervaring en koppelingen met je eigen systemen.
+- **KSS-kwalificaties inbegrepen** — Instructeursdiploma's zijn direct erkend via de Kwalificatiestructuur Sport.
+
+**Wat kost het?**
+
+De eenmalige instapkosten van het NWD (€2.000) zijn hoger dan bij andere routes. Maar die investering maakt je mede-eigenaar van de vereniging: je krijgt formele inspraak in de diplomalijn en de kwaliteitseisen, via stemrecht op de ALV. Dat is iets wat geen enkel ander scenario biedt.
+
+Tegelijkertijd zijn de jaarlijkse kosten met €1.950 substantieel lager dan welk alternatief ook — de Watersport Academy kost €2.950 per jaar, en de combinatie KSS + CWO loopt op tot ruim €7.300. En bij het NWD zit daar ook nog eens gezamenlijke marketing bij in: een deel van je bijdrage gaat direct naar het promoten van jouw sector. Bekijk de volledige kostenopbouw in de vergelijkingstabel hierboven.
+
+## Scenario 2: Watersport Academy — Voor verenigingen
+
+De Watersport Academy is het platform van het Watersportverbond voor vaarlocaties die willen werken met de moderne eigenvaardigheidslijn. Het platform is primair ingericht voor verenigingen, Scouting-locaties en andere niet-commerciële opleidingslocaties.
+
+**Kenmerken:**
+
+- Dezelfde eigenvaardigheidslijn als het NWD
+- KSS-kwalificaties inbegrepen
+- Ondersteuning vanuit het Watersportverbond
+- Geen formele inspraak — als commerciële vaarschool kun je geen lid worden van het Watersportverbond (KNWV) en heb je dus geen stemrecht op hun ALV
+- Geen gezamenlijke marketing voor commerciële doeleinden
+
+Voor een commerciële vaarschool is aansluiting bij de Watersport Academy technisch mogelijk, maar het platform is niet ontworpen met commerciële belangen als uitgangspunt. Je hebt geen formele stem in de ontwikkeling van de diplomalijn of kwaliteitseisen.
+
+## Scenario 3: CWO + losse KSS-licentie — Duur en beperkt
+
+Vaarscholen die willen vasthouden aan de CWO-diplomalijn kunnen een losse KSS-licentie aanvragen bij het Watersportverbond. Dit betekent dubbele kosten: zowel de CWO-bijdrage als de KSS-licentie.
+
+**Belangrijke beperkingen:**
+
+- **CWO is niet langer de standaard** — Het Watersportverbond heeft de CWO-diplomalijn vervangen door de modulaire NWD-diplomalijn als nationale standaard.
+- **Dubbele administratie** — Twee systemen bijhouden voor diploma's en kwalificaties.
+- **Hogere kosten** — Jaarlijks ruim €7.300 voor een grote locatie (zelfs met HISWA-korting), tegenover €1.950 bij het NWD.
+- **Geen toekomstperspectief** — Met het wegvallen van de Watersportverbond-erkenning krimpt het CWO-netwerk.
+
+De CWO-tarieven zijn berekend op basis van het HISWA/KNWV-lidtarief 2025 (categorie 5), dat de meeste grote vaarscholen op dit moment betalen. Tarieven voor 2026 zijn nog niet openbaar beschikbaar.
+
+## Scenario 4: CWO zonder KSS — Niet levensvatbaar
+
+De laatste optie is doorgaan met een alternatieve diplomalijn zonder KSS-accreditatie. Dit betekent dat je geen erkende instructeurs kunt opleiden.
+
+**Consequenties:**
+
+- **Geen erkende instructeursopleiding** — Nieuwe instructeurs krijgen geen KSS-kwalificatie.
+- **Verzekeringsrisico** — Veel aansprakelijkheidsverzekeringen vereisen dat instructeurs erkend gekwalificeerd zijn.
+- **Geïsoleerd van de sector** — Geen aansluiting bij landelijke structuren of kwaliteitskaders.
+- **Diplomawaarde onduidelijk** — Consumenten weten niet wat een niet-erkend diploma waard is.
+
+Voor een professionele, commerciële vaarschool is dit geen realistische optie.
+
+## De keuze is helder
+
+De vergelijking spreekt voor zich. Voor commerciële vaarscholen die professioneel willen opereren, die willen meebeslissen over de toekomst van hun sector, en die een fair geprijsd systeem willen dat daadwerkelijk is ontworpen voor hun situatie, is het Nationaal Watersportdiploma de logische keuze.
+
+Wil je weten hoe de aansluitingsprocedure werkt? Lees verder in ons artikel [Hoe werkt de aansluitingsprocedure van het NWD?](/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd)
+
+Heb je vragen? [Neem contact met ons op](/contact) — we denken graag met je mee.
