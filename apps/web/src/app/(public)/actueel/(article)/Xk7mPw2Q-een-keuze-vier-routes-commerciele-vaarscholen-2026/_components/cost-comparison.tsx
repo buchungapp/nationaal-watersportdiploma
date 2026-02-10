@@ -6,7 +6,7 @@ import {
   ExclamationTriangleIcon,
   XCircleIcon,
 } from "@heroicons/react/20/solid";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 // ---------------------------------------------------------------------------
 // Category data (7 tiers matching Academy cat 1-7 / CWO Mini - cat 5)
@@ -33,11 +33,8 @@ interface CategoryData {
 const CWO_DISCLAIMER =
   "(HISWA/KNWV-lidtarief 2025). CWO-tarieven 2026 zijn op het moment van schrijven nog niet openbaar beschikbaar.";
 
-const NWD_NOTE_LOW =
-  "Vanaf 150 diploma\u2019s per jaar gaan we uit van het hogere NWD-tarief (contributie \u20AC1.000). Bij een omzet uit zeilcursussen/-kampen onder \u20AC100.000 (excl. btw) is de contributie \u20AC650.";
-
-const NWD_NOTE_HIGH =
-  "NWD-contributie is \u20AC650 bij omzet uit zeilcursussen/-kampen onder \u20AC100.000 (excl. btw).";
+const NWD_NOTE =
+  "De NWD-contributie in deze tabel is \u20AC650 (tot 150 diploma\u2019s) of \u20AC1.000 (vanaf 150 diploma\u2019s). In de praktijk is altijd de omzet uit zeilcursussen/-kampen leidend: bij een omzet onder \u20AC100.000 (excl. btw) is de contributie \u20AC650, daarboven \u20AC1.000.";
 
 const CATEGORIES: CategoryData[] = [
   {
@@ -54,7 +51,7 @@ const CATEGORIES: CategoryData[] = [
       totalAnnual: ["\u20AC1.600", "\u20AC195", "\u20AC482", "\u20AC189"],
     },
     footnote: `Academy categorie 1, CWO categorie Mini ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_LOW,
+    disclosureNote: NWD_NOTE,
   },
   {
     label: "30\u201360 diploma\u2019s per jaar",
@@ -70,23 +67,23 @@ const CATEGORIES: CategoryData[] = [
       totalAnnual: ["\u20AC1.600", "\u20AC325", "\u20AC802", "\u20AC314"],
     },
     footnote: `Academy categorie 2, CWO categorie 0 ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_LOW,
+    disclosureNote: NWD_NOTE,
   },
   {
     label: "60\u2013150 diploma\u2019s per jaar",
     valueText: "60 tot 150 diploma\u2019s per jaar",
     tickLabel: "60-150",
     sectionLabel: "Kosten (o.b.v. 60\u2013150 diploma\u2019s/jaar)",
-    annual: [1_600, 450, 1_114, 439],
+    annual: [1_600, 450, 1_069, 439],
     disclosure: {
       contribution: ["\u20AC650", "\u20AC450", "\u20AC439", "\u20AC439"],
-      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC675", "\u2014"],
+      kssLicense: ["inbegrepen", "inbegrepen", "\u20AC630", "\u2014"],
       knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
       marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
-      totalAnnual: ["\u20AC1.600", "\u20AC450", "\u20AC1.114", "\u20AC439"],
+      totalAnnual: ["\u20AC1.600", "\u20AC450", "\u20AC1.069", "\u20AC439"],
     },
     footnote: `Academy categorie 3, CWO categorie 1 ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_LOW,
+    disclosureNote: NWD_NOTE,
   },
   {
     label: "150\u2013300 diploma\u2019s per jaar",
@@ -102,7 +99,7 @@ const CATEGORIES: CategoryData[] = [
       totalAnnual: ["\u20AC1.950", "\u20AC900", "\u20AC2.230", "\u20AC880"],
     },
     footnote: `Academy categorie 4, CWO categorie 2 ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_HIGH,
+    disclosureNote: NWD_NOTE,
   },
   {
     label: "300\u2013500 diploma\u2019s per jaar",
@@ -120,15 +117,10 @@ const CATEGORIES: CategoryData[] = [
       kssLicense: ["inbegrepen", "inbegrepen", "\u20AC2.250", "\u2014"],
       knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
       marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
-      totalAnnual: [
-        "\u20AC1.950",
-        "\u20AC1.500",
-        "\u20AC3.695",
-        "\u20AC1.445",
-      ],
+      totalAnnual: ["\u20AC1.950", "\u20AC1.500", "\u20AC3.695", "\u20AC1.445"],
     },
     footnote: `Academy categorie 5, CWO categorie 3 ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_HIGH,
+    disclosureNote: NWD_NOTE,
   },
   {
     label: "500\u2013750 diploma\u2019s per jaar",
@@ -146,15 +138,10 @@ const CATEGORIES: CategoryData[] = [
       kssLicense: ["inbegrepen", "inbegrepen", "\u20AC2.925", "\u2014"],
       knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
       marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
-      totalAnnual: [
-        "\u20AC1.950",
-        "\u20AC1.950",
-        "\u20AC4.810",
-        "\u20AC1.885",
-      ],
+      totalAnnual: ["\u20AC1.950", "\u20AC1.950", "\u20AC4.810", "\u20AC1.885"],
     },
     footnote: `Academy categorie 6, CWO categorie 4 ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_HIGH,
+    disclosureNote: NWD_NOTE,
   },
   {
     label: "Meer dan 750 diploma\u2019s per jaar",
@@ -172,15 +159,10 @@ const CATEGORIES: CategoryData[] = [
       kssLicense: ["inbegrepen", "inbegrepen", "\u20AC4.425", "\u2014"],
       knwvMembership: ["\u20AC450", "inbegrepen", "\u2014", "\u2014"],
       marketing: ["\u20AC500", "\u2014", "\u2014", "\u2014"],
-      totalAnnual: [
-        "\u20AC1.950",
-        "\u20AC2.950",
-        "\u20AC7.314",
-        "\u20AC2.889",
-      ],
+      totalAnnual: ["\u20AC1.950", "\u20AC2.950", "\u20AC7.314", "\u20AC2.889"],
     },
     footnote: `Academy categorie 7, CWO categorie 5 ${CWO_DISCLAIMER}`,
-    disclosureNote: NWD_NOTE_HIGH,
+    disclosureNote: NWD_NOTE,
   },
 ];
 
@@ -189,7 +171,7 @@ const CATEGORIES: CategoryData[] = [
 // ---------------------------------------------------------------------------
 
 const SHARED = {
-  oneTime: [2_000, 795, 544, 214] as [number, number, number, number],
+  oneTime: [750, 795, 544, 214] as [number, number, number, number],
   perDiploma: ["\u20AC3,35", "\u20AC3,65", "\u20AC3,55", "\u20AC3,55"] as [
     string,
     string,
@@ -199,19 +181,14 @@ const SHARED = {
   disclosure: {
     oneTime: {
       intake: ["\u20AC750", "\u20AC750", "\u20AC330 + \u20AC214", "\u20AC214"],
-      investment: ["\u20AC1.250", "\u2014", "\u2014", "\u2014"],
+      investment: ["\u20AC1.250\u00B2", "\u2014", "\u2014", "\u2014"],
       onboarding: ["inbegrepen", "\u20AC45 (vlag)", "\u2014", "\u2014"],
-      totalOneTime: ["\u20AC2.000", "\u20AC795", "\u20AC544", "\u20AC214"],
+      totalOneTime: ["\u20AC750", "\u20AC795", "\u20AC544", "\u20AC214"],
     },
     perDiploma: {
       digital: ["\u20AC3,00", "\u20AC3,25", "\u20AC3,15", "\u20AC3,15"],
       printed: ["\u20AC0,35", "\u20AC0,40", "\u20AC0,40", "\u20AC0,40"],
-      totalPerDiploma: [
-        "\u20AC3,35",
-        "\u20AC3,65",
-        "\u20AC3,55",
-        "\u20AC3,55",
-      ],
+      totalPerDiploma: ["\u20AC3,35", "\u20AC3,65", "\u20AC3,55", "\u20AC3,55"],
     },
   },
 } as const;
@@ -377,7 +354,7 @@ export function CostComparison() {
               </th>
               <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
                 <div className="font-semibold text-zinc-900 dark:text-zinc-100">
-                  KSS + CWO*
+                  KSS + CWO<sup className="text-zinc-400 ml-0.5">1</sup>
                 </div>
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Dubbele kosten, beperkte erkenning
@@ -385,7 +362,7 @@ export function CostComparison() {
               </th>
               <th className="p-3 text-center bg-zinc-50 dark:bg-zinc-800">
                 <div className="font-semibold text-zinc-900 dark:text-zinc-100">
-                  CWO zonder KSS*
+                  CWO zonder KSS<sup className="text-zinc-400 ml-0.5">1</sup>
                 </div>
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   Geen erkende opleiding
@@ -444,6 +421,28 @@ export function CostComparison() {
               </td>
               <td className="p-3 text-center tabular-nums text-zinc-700 dark:text-zinc-300">
                 {fmt(SHARED.oneTime[3])}
+              </td>
+            </tr>
+            {/* Investment contribution (NWD only, spread over 3 years) */}
+            <tr>
+              <th
+                scope="row"
+                className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400"
+              >
+                Investeringsbijdrage (jaar&nbsp;1&#8209;3)
+                <sup className="text-zinc-400 ml-0.5">2</sup>
+              </th>
+              <td className="p-3 text-center bg-branding-light/5 dark:bg-branding-dark/10 tabular-nums text-zinc-700 dark:text-zinc-300">
+                &euro;1.250<sup className="text-zinc-400 ml-0.5">2</sup>
+              </td>
+              <td className="p-3 text-center tabular-nums text-zinc-400 dark:text-zinc-500">
+                &mdash;
+              </td>
+              <td className="p-3 text-center tabular-nums text-zinc-400 dark:text-zinc-500">
+                &mdash;
+              </td>
+              <td className="p-3 text-center tabular-nums text-zinc-400 dark:text-zinc-500">
+                &mdash;
               </td>
             </tr>
             {/* Per diploma */}
@@ -568,9 +567,7 @@ export function CostComparison() {
               <IconCell variant="check" highlight>
                 Mede-eigenaar + ALV
               </IconCell>
-              <IconCell variant="warning">
-                Indirect, geen stemrecht
-              </IconCell>
+              <IconCell variant="warning">Indirect, geen stemrecht</IconCell>
               <IconCell variant="x">Geen</IconCell>
               <IconCell variant="x">Geen</IconCell>
             </tr>
@@ -609,11 +606,31 @@ export function CostComparison() {
         </table>
       </div>
 
-      {/* Footnote */}
-      <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
-        {"* "}
-        {cat.footnote} Bekijk de volledige kostenopbouw hieronder.
-      </p>
+      {/* Footnotes */}
+      <ol className="mt-4 list-none space-y-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <li className="flex gap-1.5">
+          <span className="shrink-0 tabular-nums">1.</span>
+          <span>
+            {cat.footnote} Bekijk de volledige kostenopbouw hieronder.
+          </span>
+        </li>
+        <li className="flex gap-1.5">
+          <span className="shrink-0 tabular-nums">2.</span>
+          <span>
+            De investeringsbijdrage van {"\u20AC"}1.250 wordt verdeeld over de
+            eerste drie verenigingsjaren: {"\u20AC"}500 in jaar 1, {"\u20AC"}500
+            in jaar 2, {"\u20AC"}250 in jaar 3.
+          </span>
+        </li>
+        <li className="flex gap-1.5">
+          <span className="shrink-0 tabular-nums">3.</span>
+          <span>{cat.disclosureNote}</span>
+        </li>
+        <li className="flex gap-1.5">
+          <span className="shrink-0 tabular-nums">4.</span>
+          <span>Bedragen zijn afgerond op hele euro{"\u2019"}s excl. btw.</span>
+        </li>
+      </ol>
 
       {/* Disclosure */}
       <details className="mt-6 rounded-lg border border-zinc-200 dark:border-zinc-700 group">
@@ -637,10 +654,10 @@ export function CostComparison() {
                     Academy
                   </th>
                   <th className="px-3 py-2 text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                    KSS + CWO*
+                    KSS + CWO<sup className="text-zinc-400 ml-0.5">1</sup>
                   </th>
                   <th className="px-3 py-2 text-right text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                    CWO alleen*
+                    CWO alleen<sup className="text-zinc-400 ml-0.5">1</sup>
                   </th>
                 </tr>
               </thead>
@@ -657,7 +674,14 @@ export function CostComparison() {
                 <DisclosureRow label="Intake">
                   {SHARED.disclosure.oneTime.intake}
                 </DisclosureRow>
-                <DisclosureRow label="Investeringsbijdrage">
+                <DisclosureRow
+                  label={
+                    <>
+                      Investeringsbijdrage (jaar&nbsp;1&#8209;3)
+                      <sup className="text-zinc-400 ml-0.5">2</sup>
+                    </>
+                  }
+                >
                   {SHARED.disclosure.oneTime.investment}
                 </DisclosureRow>
                 <DisclosureRow label="Onboardingpakket (vlag, gevelbord)">
@@ -713,10 +737,30 @@ export function CostComparison() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 text-xs text-zinc-400 dark:text-zinc-500 space-y-1">
-            <p>* {cat.footnote}</p>
-            <p>{cat.disclosureNote}</p>
-          </div>
+          <ol className="px-4 py-3 list-none space-y-0.5 text-xs text-zinc-400 dark:text-zinc-500">
+            <li className="flex gap-1">
+              <span className="shrink-0 tabular-nums">1.</span>
+              <span>{cat.footnote}</span>
+            </li>
+            <li className="flex gap-1">
+              <span className="shrink-0 tabular-nums">2.</span>
+              <span>
+                De investeringsbijdrage van {"\u20AC"}1.250 wordt verdeeld over
+                de eerste drie verenigingsjaren: {"\u20AC"}500 in jaar 1,{" "}
+                {"\u20AC"}500 in jaar 2, {"\u20AC"}250 in jaar 3.
+              </span>
+            </li>
+            <li className="flex gap-1">
+              <span className="shrink-0 tabular-nums">3.</span>
+              <span>{cat.disclosureNote}</span>
+            </li>
+            <li className="flex gap-1">
+              <span className="shrink-0 tabular-nums">4.</span>
+              <span>
+                Bedragen zijn afgerond op hele euro{"\u2019"}s excl. btw.
+              </span>
+            </li>
+          </ol>
         </div>
       </details>
 
@@ -804,7 +848,7 @@ function DisclosureRow({
   label,
   children,
 }: {
-  label: string;
+  label: ReactNode;
   children: readonly [string, string, string, string];
 }) {
   return (
