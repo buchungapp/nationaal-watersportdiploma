@@ -295,13 +295,13 @@ function ScrollableTableWrapper({
 
       {/* Right-edge fade */}
       <div
-        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-white to-transparent"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-white to-transparent lg:hidden"
         aria-hidden="true"
       />
 
       {/* Scroll hint pill */}
       <div
-        className="pointer-events-none absolute right-3 top-1/2 z-20 flex -translate-y-1/2 items-center gap-0.5 rounded-full bg-zinc-900/75 px-2.5 py-1 text-xs font-medium text-white shadow-lg backdrop-blur-sm"
+        className="pointer-events-none absolute right-3 top-1/2 z-20 flex -translate-y-1/2 items-center gap-0.5 rounded-full bg-zinc-900/75 px-2.5 py-1 text-xs font-medium text-white shadow-lg backdrop-blur-sm lg:hidden"
         aria-hidden="true"
       >
         Scroll
@@ -364,18 +364,25 @@ export function CostComparison() {
 
       {/* Main comparison table */}
       <ScrollableTableWrapper
-        className="-mx-4 lg:mx-0"
+        className="-mx-4 lg:mx-0 lg:relative lg:left-1/2 lg:w-[min(calc(100vw-6rem),78rem)] lg:-translate-x-1/2"
         innerClassName="px-4 lg:px-0"
       >
-        <table className="w-full min-w-[800px] border-collapse text-sm">
+        <table className="w-full min-w-[800px] table-fixed border-collapse text-sm">
           <caption className="sr-only">
             Vergelijking van vier scenario&apos;s voor commerci&#235;le
             vaarscholen in 2026
           </caption>
+          <colgroup>
+            <col className="w-1/5" />
+            <col className="w-1/5" />
+            <col className="w-1/5" />
+            <col className="w-1/5" />
+            <col className="w-1/5" />
+          </colgroup>
 
           <thead>
             <tr>
-              <th className="w-48 p-3 text-left font-medium text-zinc-600 dark:text-zinc-400" />
+              <th className="p-3 text-left font-medium text-zinc-600 dark:text-zinc-400" />
               <th className="p-3 text-center bg-branding-light/10 dark:bg-branding-dark/20 border-t-4 border-branding-orange rounded-t-lg">
                 <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-branding-orange text-white text-xs font-medium mb-2">
                   Aanbevolen
