@@ -90,7 +90,7 @@ export async function News({
       <Divider className="my-4" />
 
       <div className="flex justify-end">
-        <TextButton>
+        <TextButton href="/actueel" target="_blank">
           Bekijk nieuwsoverzicht <ArrowRightIcon />
         </TextButton>
       </div>
