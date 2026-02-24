@@ -1,4 +1,4 @@
-import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
+import { getHelpArticles, getHelpFaqs } from "~/lib/help-content";
 import SearchClient from "./search-client";
 
 export default async function Search() {
@@ -7,5 +7,17 @@ export default async function Search() {
     getHelpArticles(),
   ]);
 
-  return <SearchClient questions={questions} articles={articles} />;
+  return (
+    <SearchClient
+      questions={questions.map((question) => ({
+        metadata: question.metadata,
+        slug: question.slug,
+      }))}
+      articles={articles.map((article) => ({
+        category: article.category,
+        metadata: article.metadata,
+        slug: article.slug,
+      }))}
+    />
+  );
 }

@@ -27,7 +27,6 @@ export default function SearchClient({
       lastUpdatedAt: string;
     };
     slug: string;
-    content: string;
   }[];
   articles: {
     metadata: {
@@ -37,7 +36,6 @@ export default function SearchClient({
       summary: string;
     };
     slug: string;
-    content: string;
     category: string;
   }[];
 }) {
@@ -69,11 +67,7 @@ export default function SearchClient({
         url: article.slug,
         title: article.metadata.title,
         type: "article",
-        content: [
-          article.metadata.title,
-          article.metadata.summary,
-          article.content,
-        ].join("\\n"),
+        content: [article.metadata.title, article.metadata.summary].join("\\n"),
       });
     }
   }, [articles]);
@@ -85,7 +79,7 @@ export default function SearchClient({
         url: question.slug,
         title: question.metadata.question,
         type: "question",
-        content: [question.metadata.question, question.content].join("\\n"),
+        content: question.metadata.question,
       });
     }
   }, [questions]);

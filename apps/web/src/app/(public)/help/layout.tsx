@@ -1,17 +1,23 @@
-"use cache";
-import { cacheLife } from "next/cache";
 import type { PropsWithChildren } from "react";
-import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
+import { getHelpArticles, getHelpFaqs } from "~/lib/help-content";
 import PageHero from "../_components/style/page-hero";
 import SearchClient from "./_components/search-client";
 
 export default async function Layout({ children }: PropsWithChildren) {
-  cacheLife("days");
-
   const [questions, articles] = await Promise.all([
     getHelpFaqs(),
     getHelpArticles(),
   ]);
+
+  const searchableQuestions = questions.map((question) => ({
+    metadata: question.metadata,
+    slug: question.slug,
+  }));
+  const searchableArticles = articles.map((article) => ({
+    category: article.category,
+    metadata: article.metadata,
+    slug: article.slug,
+  }));
 
   return (
     <main className="flex flex-col items-center">
@@ -21,7 +27,10 @@ export default async function Layout({ children }: PropsWithChildren) {
             Hoe kunnen we helpen?
           </h2>
           <div className="mt-6">
-            <SearchClient questions={questions} articles={articles} />
+            <SearchClient
+              questions={searchableQuestions}
+              articles={searchableArticles}
+            />
           </div>
         </div>
       </PageHero>

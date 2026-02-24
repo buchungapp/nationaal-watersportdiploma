@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
-import { getHelpArticles } from "~/lib/article-2";
+import { getHelpArticles } from "~/lib/help-content";
 
 export default async function Faq() {
   const articles = await getHelpArticles().then((articles) =>

@@ -85,7 +85,6 @@ const nextConfig = {
     ],
   },
   transpilePackages: [
-    "next-mdx-remote",
     "@nawadi/core",
     "@nawadi/db",
     "@nawadi/lib",
