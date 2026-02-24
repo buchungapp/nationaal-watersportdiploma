@@ -10,9 +10,9 @@ import PrintPage from "~/app/(public)/_components/print-page";
 import { Prose } from "~/app/(public)/_components/prose";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
+import { getHelpArticles, getHelpCategories } from "~/lib/help-content";
 import Breadcrumb from "../../../_components/breadcrumb";
-import { HelpArticle } from "../../_components/article";
+import { helpMdxComponents } from "../../_components/article";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
@@ -76,6 +76,8 @@ export default async function Page(props: Props) {
   if (!post) {
     notFound();
   }
+
+  const PostComponent = post.Component;
 
   return (
     <>
@@ -144,7 +146,7 @@ export default async function Page(props: Props) {
             </div>
 
             <Prose className="-mt-7" data-mdx-content>
-              <HelpArticle source={post.content} />
+              <PostComponent components={helpMdxComponents} />
             </Prose>
           </article>
         </div>

@@ -1,15 +1,13 @@
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { constants } from "@nawadi/lib";
-import { marked } from "marked";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FindNWDCourse } from "~/app/(public)/_components/cta";
 import { Prose } from "~/app/(public)/_components/prose";
 import { formatDate } from "~/app/(public)/_utils/format-date";
-import { getHelpFaqs } from "~/lib/article-2";
+import { getHelpFaqs } from "~/lib/help-content";
 import Breadcrumb from "../../../_components/breadcrumb";
-import { HelpArticle } from "../../_components/article";
+import { helpMdxComponents } from "../../_components/article";
 
 // Return a list of `params` to populate the [slug] dynamic segment
 export async function generateStaticParams() {
@@ -77,31 +75,10 @@ export default async function Page(props: Props) {
     notFound();
   }
 
+  const QuestionComponent = question.Component;
+
   return (
     <>
-      <script
-        type="application/ld+json"
-        suppressHydrationWarning
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: [
-              {
-                "@type": "Question",
-                name: question.metadata.question,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: marked.parse(question.content),
-                },
-              },
-            ],
-            url: `${constants.WEBSITE_URL}/help/veelgestelde-vragen/${question.slug}`,
-          }),
-        }}
-      />
-
       <Breadcrumb
         items={[
           {
@@ -142,7 +119,7 @@ export default async function Page(props: Props) {
           <span className="font-semibold text-base text-slate-600">
             Antwoord:
           </span>
-          <HelpArticle source={question.content} />
+          <QuestionComponent components={helpMdxComponents} />
         </Prose>
       </article>
 

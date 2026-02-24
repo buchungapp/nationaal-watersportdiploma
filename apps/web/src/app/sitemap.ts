@@ -4,7 +4,7 @@ import {
   getHelpArticles,
   getHelpCategories,
   getHelpFaqs,
-} from "~/lib/article-2";
+} from "~/lib/help-content";
 import { getAllArticles } from "~/lib/articles";
 import {
   getAllDiplomalijnConsumentenPages,

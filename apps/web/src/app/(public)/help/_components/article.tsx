@@ -2,31 +2,44 @@
 
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
+import type { MDXComponents } from "mdx/types";
 import type { ImageProps } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
-import { MDXRemote, type MDXRemoteProps } from "next-mdx-remote/rsc";
 import React from "react";
 import Disclosure from "../../_components/disclosure";
 import FaqDisclosure from "../../_components/faq/faq";
 
-// biome-ignore lint/suspicious/noExplicitAny: intentional
-function CustomLink(props: any) {
-  const href = typeof props.href === "string" ? props.href : props.href.href;
+type CustomLinkProps = Omit<
+  React.ComponentPropsWithoutRef<"a">,
+  "href"
+> & {
+  href?: string | { href: string };
+};
+
+function CustomLink(props: CustomLinkProps) {
+  const { href: hrefProp, ...restProps } = props;
+  const href = typeof hrefProp === "string" ? hrefProp : hrefProp?.href;
+
+  if (!href) {
+    return <a {...restProps} />;
+  }
 
   if (href.startsWith("/")) {
     return (
-      <Link href={href} {...props}>
-        {props.children}
+      <Link href={href} {...restProps}>
+        {restProps.children}
       </Link>
     );
   }
 
   if (href.startsWith("#")) {
-    return <a {...props} />;
+    return <a {...restProps} href={href} />;
   }
 
-  return <a target="_blank" rel="noopener noreferrer" {...props} />;
+  return (
+    <a {...restProps} href={href} target="_blank" rel="noopener noreferrer" />
+  );
 }
 
 function RoundedImage({ alt, className, ...props }: ImageProps) {
@@ -50,9 +63,26 @@ function slugify(str: string) {
     .replace(/--+/g, "-"); // Replace multiple - with single -
 }
 
+function flattenText(children: React.ReactNode): string {
+  if (typeof children === "string" || typeof children === "number") {
+    return children.toString();
+  }
+
+  if (Array.isArray(children)) {
+    return children.map(flattenText).join(" ");
+  }
+
+  if (React.isValidElement<{ children?: React.ReactNode }>(children)) {
+    return flattenText(children.props.children);
+  }
+
+  return "";
+}
+
 function createHeading(level: number) {
-  return ({ children }: { children: string }) => {
-    const slug = slugify(children);
+  const Heading = ({ children }: { children: React.ReactNode }) => {
+    const slug = slugify(flattenText(children));
+
     return React.createElement(
       `h${level}`,
       { id: slug, className: "scroll-mt-[calc(var(--header-height)+16px)]" },
@@ -69,6 +99,10 @@ function createHeading(level: number) {
       ],
     );
   };
+
+  Heading.displayName = `MdxHeading${level}`;
+
+  return Heading;
 }
 
 function Note({ children }: { children: React.ReactNode }) {
@@ -82,7 +116,7 @@ function Note({ children }: { children: React.ReactNode }) {
   );
 }
 
-const components = {
+export const helpMdxComponents = {
   h1: createHeading(1),
   h2: createHeading(2),
   h3: createHeading(3),
@@ -92,17 +126,6 @@ const components = {
   Image: RoundedImage,
   a: CustomLink,
   Faq: FaqDisclosure,
-  Note: Note,
-  Disclosure: Disclosure,
-};
-
-export function HelpArticle(props: MDXRemoteProps) {
-  return (
-    <div className="">
-      <MDXRemote
-        {...props}
-        components={{ ...components, ...(props.components || {}) }}
-      />
-    </div>
-  );
-}
+  Note,
+  Disclosure,
+} satisfies MDXComponents;

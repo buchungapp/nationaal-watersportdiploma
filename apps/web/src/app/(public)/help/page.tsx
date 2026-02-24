@@ -3,7 +3,7 @@ import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
 import { cacheLife } from "next/cache";
 import Link from "next/link";
-import { getHelpArticles, getHelpCategories } from "~/lib/article-2";
+import { getHelpArticles, getHelpCategories } from "~/lib/help-content";
 import CategorieCard from "./_components/categorie-card";
 
 export async function generateMetadata(
