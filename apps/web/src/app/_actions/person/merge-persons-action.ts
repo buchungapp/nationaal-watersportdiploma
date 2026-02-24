@@ -1,12 +1,16 @@
 "use server";
 
-import { useQuery as gebruikQuery, User } from "@nawadi/core";
+import {
+  useQuery as gebruikQuery,
+  User,
+  withSupabaseClient,
+} from "@nawadi/core";
 import { schema as s } from "@nawadi/db";
 import { and, count, eq, isNull, ne } from "@nawadi/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isSystemAdmin } from "~/lib/authorization";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getUserOrThrow, supabaseConfig } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 // Action 0: Get a single person by ID (lightweight, for pre-populating the dialog)
@@ -234,10 +238,12 @@ export const updatePersonEmailForAdminAction = actionClientWithMeta
       throw new Error("Geen toegang");
     }
 
-    await User.Person.moveToAccountByEmail({
-      personId: parsedInput.personId,
-      email: parsedInput.email,
-    });
+    await withSupabaseClient(supabaseConfig, () =>
+      User.Person.moveToAccountByEmail({
+        personId: parsedInput.personId,
+        email: parsedInput.email,
+      }),
+    );
 
     revalidatePath("/secretariaat/gebruikers");
 
