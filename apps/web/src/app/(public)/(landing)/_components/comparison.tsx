@@ -32,10 +32,10 @@ export default function Comparison() {
               Kies voor zekerheid, niet voor een gok
             </h2>
             <Link
-              href="/vaarlocaties/kwaliteitseisen"
+              href="/vaarlocaties/kwaliteitsgarantie"
               className="hidden shrink-0 rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 sm:inline-flex items-center gap-1.5 transition-colors"
             >
-              Alle kwaliteitseisen
+              De kwaliteitsgarantie
               <span aria-hidden="true">{"\u2192"}</span>
             </Link>
           </div>
@@ -45,10 +45,10 @@ export default function Comparison() {
             dezelfde hoge standaard.
           </p>
           <Link
-            href="/vaarlocaties/kwaliteitseisen"
+            href="/vaarlocaties/kwaliteitsgarantie"
             className="self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors sm:hidden"
           >
-            Alle kwaliteitseisen
+            De kwaliteitsgarantie
             <span aria-hidden="true">{"\u2192"}</span>
           </Link>
         </div>

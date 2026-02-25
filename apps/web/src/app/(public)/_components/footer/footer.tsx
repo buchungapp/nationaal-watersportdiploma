@@ -106,8 +106,8 @@ export default async function Footer() {
               <FooterLink href="/voor-vaarlocaties">
                 Voor vaarlocaties
               </FooterLink>
-              <FooterLink href="/vaarlocaties/kwaliteitseisen">
-                Kwaliteitseisen
+              <FooterLink href="/vaarlocaties/kwaliteitsgarantie">
+                Kwaliteitsgarantie
               </FooterLink>
             </ul>
           </div>
