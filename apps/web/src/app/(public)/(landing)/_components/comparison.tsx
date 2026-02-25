@@ -33,7 +33,7 @@ export default function Comparison() {
             </h2>
             <Link
               href="/vaarlocaties/kwaliteitseisen"
-              className="hidden shrink-0 text-sm font-semibold text-branding-dark hover:underline sm:inline-flex items-center gap-1"
+              className="hidden shrink-0 text-sm font-bold text-branding-dark hover:text-branding-light sm:inline-flex items-center gap-1.5 transition-colors"
             >
               Alle kwaliteitseisen
               <span aria-hidden="true">{"\u2192"}</span>
@@ -75,8 +75,8 @@ export default function Comparison() {
             <ul className="space-y-4">
               {benefitsWith.map((benefit) => (
                 <li key={benefit} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-branding-orange/15">
-                    <CheckIcon className="size-3.5 text-branding-orange" />
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-branding-light/15">
+                    <CheckIcon className="size-3.5 text-branding-light" />
                   </span>
                   <span className="text-slate-700 text-sm leading-relaxed">
                     {benefit}

@@ -24,7 +24,7 @@ export default async function News() {
             </h3>
             <Link
               href="/actueel"
-              className="hidden shrink-0 text-sm font-semibold text-branding-dark hover:underline sm:inline-flex items-center gap-1"
+              className="hidden shrink-0 text-sm font-bold text-branding-dark hover:text-branding-light sm:inline-flex items-center gap-1.5 transition-colors"
             >
               Alle artikelen
               <span aria-hidden="true">{"\u2192"}</span>
