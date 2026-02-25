@@ -1,4 +1,5 @@
 import Double from "~/app/_components/brand/double-line";
+import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { FeatureCard } from "./feature-card";
 
 export default function About() {
@@ -143,6 +144,15 @@ export default function About() {
           title="Flexibele en modulaire diplomalijn"
           description="Stel je eigen leertraject samen. Of je nu wilt leren zeilen, surfen of motorboot varen, je leert precies wat jij wilt op jouw tempo."
         />
+      </div>
+
+      <div className="flex justify-center">
+        <BoxedButton
+          href="/vaarlocaties/kwaliteitseisen"
+          className="bg-branding-dark text-white"
+        >
+          Bekijk alle kwaliteitseisen
+        </BoxedButton>
       </div>
     </section>
   );
