@@ -5,7 +5,6 @@ import {
   LifebuoyIcon,
 } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
 import FaqDisclosure from "~/app/(public)/_components/faq/faq";
@@ -548,16 +547,29 @@ export default function Page() {
               Lees de volledige aansluitprocedure
               <ArrowTopRightOnSquareIcon className="size-4" />
             </Link>
-            <div className="mt-6 rounded-xl border border-slate-200 bg-white p-3">
-              <Image
-                src="/images/aansluitingsprocedure/20250923-aansluitprocedure-nwd.png"
-                alt="Schematische weergave van de NWD-aansluitprocedure"
-                width={1200}
-                height={3668}
-                className="mx-auto h-auto max-h-80 w-auto rounded-md sm:max-h-96"
-                sizes="(min-width: 640px) 360px, 100vw"
-              />
-            </div>
+            <Link
+              href="/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd"
+              className="group mt-6 block rounded-xl border border-slate-200 bg-linear-to-b from-white to-slate-50 p-4 transition-all hover:border-branding-light/40 hover:shadow-sm"
+              aria-label="Open de volledige aansluitprocedure"
+            >
+              <div className="mx-auto max-w-sm">
+                <div className="mx-auto mb-3 h-1.5 w-24 rounded-full bg-branding-light/20" />
+                <div className="space-y-3">
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <div key={index} className="relative">
+                      <div className="rounded-lg border border-branding-light/25 bg-white px-3 py-2">
+                        <div className="h-1.5 w-16 rounded-full bg-branding-light/30" />
+                        <div className="mt-2 h-1.5 w-full rounded-full bg-slate-200" />
+                        <div className="mt-1 h-1.5 w-3/4 rounded-full bg-slate-200" />
+                      </div>
+                      {index < 4 ? (
+                        <div className="absolute left-1/2 top-full h-3 w-px -translate-x-1/2 bg-branding-light/30" />
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Link>
           </article>
 
           <article className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
