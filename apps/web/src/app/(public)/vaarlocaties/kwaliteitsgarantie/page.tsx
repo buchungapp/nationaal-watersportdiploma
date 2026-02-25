@@ -1,5 +1,6 @@
 import {
   AcademicCapIcon,
+  ArrowRightIcon,
   ClipboardDocumentCheckIcon,
   LifebuoyIcon,
   ShieldCheckIcon,
@@ -367,7 +368,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-6 rounded-2xl bg-branding-dark p-6 text-white sm:p-8 md:grid-cols-[1.3fr_1fr]">
+        <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-6 rounded-2xl bg-branding-dark p-6 text-white sm:p-8 md:grid-cols-[1.3fr_1fr] md:items-center">
           <div className="grid gap-3">
             <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
               <LifebuoyIcon className="size-4" />
@@ -383,18 +384,33 @@ export default function Page() {
               zorgvuldig kunnen worden opgepakt.
             </p>
           </div>
-          <div className="grid content-start gap-3">
+          <div className="grid content-start gap-3 md:justify-self-end md:w-full md:max-w-md">
+            <p className="text-xs font-medium uppercase tracking-wide text-white/70">
+              Direct naar hulp en afspraken
+            </p>
             <Link
               href="/vereniging/vertrouwenspersoon"
-              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-branding-dark transition-colors hover:bg-slate-100"
+              className="group rounded-xl bg-white p-4 text-branding-dark shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-branding-dark"
             >
-              Naar de vertrouwenspersoon
+              <span className="flex items-center justify-between gap-3 text-sm font-semibold">
+                Naar de vertrouwenspersoon
+                <ArrowRightIcon className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <span className="mt-1 block text-xs text-slate-600">
+                Contactgegevens en uitleg over hoe begeleiding werkt.
+              </span>
             </Link>
             <Link
               href="/vereniging/gedragscode"
-              className="rounded-lg border border-white/30 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+              className="group rounded-xl border border-white/30 bg-white/5 p-4 transition-all hover:-translate-y-0.5 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-branding-dark"
             >
-              Bekijk de gedragscode
+              <span className="flex items-center justify-between gap-3 text-sm font-semibold text-white">
+                Bekijk de gedragscode
+                <ArrowRightIcon className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
+              </span>
+              <span className="mt-1 block text-xs text-slate-200">
+                De basisafspraken voor veilig en respectvol gedrag.
+              </span>
             </Link>
           </div>
         </section>
