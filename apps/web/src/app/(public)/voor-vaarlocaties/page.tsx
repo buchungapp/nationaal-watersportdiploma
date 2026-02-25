@@ -7,10 +7,10 @@ import {
 import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
+import { CostComparison } from "~/app/(public)/_components/cost-comparison";
 import FaqDisclosure from "~/app/(public)/_components/faq/faq";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import PageHero from "~/app/(public)/_components/style/page-hero";
-import { CostComparison } from "~/app/(public)/_components/cost-comparison";
 
 export async function generateMetadata(
   _props: unknown,
@@ -45,8 +45,7 @@ const whyNowArticles = [
       "Vergelijk de vier scenario's op kosten, erkenning, ondersteuning en toekomstperspectief.",
   },
   {
-    title:
-      "Richtlijnen 2026: de standaard is er, en waar NWD verder gaat",
+    title: "Richtlijnen 2026: de standaard is er, en waar NWD verder gaat",
     href: "/actueel/i62T54pW-richtlijnen-2026-de-standaard-is-er-wij-doen-meer",
     date: "8 februari 2026",
     summary:
@@ -213,7 +212,8 @@ export default function Page() {
             </h2>
             <p className="max-w-3xl text-lg text-slate-600 text-pretty">
               In februari 2026 zijn de kaders voor de sector concreet gemaakt.
-              Deze twee artikelen geven je in korte tijd het volledige overzicht.
+              Deze twee artikelen geven je in korte tijd het volledige
+              overzicht.
             </p>
           </div>
 
@@ -372,8 +372,8 @@ export default function Page() {
               Wat krijg je voor je investering?
             </h2>
             <p className="max-w-3xl text-lg text-slate-600">
-              Vergelijk de routes op kosten, erkenning en ondersteuning, en
-              kies de route die past bij jouw locatie en seizoenplanning.
+              Vergelijk de routes op kosten, erkenning en ondersteuning, en kies
+              de route die past bij jouw locatie en seizoenplanning.
             </p>
           </div>
           <CostComparison />
@@ -419,7 +419,10 @@ export default function Page() {
                   </li>
                 ))}
               </ol>
-              <BoxedButton href="/contact" className="mt-6 bg-white text-branding-dark">
+              <BoxedButton
+                href="/contact"
+                className="mt-6 bg-white text-branding-dark"
+              >
                 Bespreek mijn overstap
               </BoxedButton>
             </article>
@@ -446,7 +449,10 @@ export default function Page() {
                   </li>
                 ))}
               </ol>
-              <BoxedButton href="/contact" className="mt-6 bg-branding-dark text-white">
+              <BoxedButton
+                href="/contact"
+                className="mt-6 bg-branding-dark text-white"
+              >
                 Maak een opstartplan
               </BoxedButton>
             </article>
@@ -456,16 +462,18 @@ export default function Page() {
         <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-8 lg:grid-cols-[1.1fr_1fr] lg:items-start">
           <div className="grid gap-3">
             <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
-              <span className="whitespace-nowrap">Diplomalijn in de praktijk</span>
+              <span className="whitespace-nowrap">
+                Diplomalijn in de praktijk
+              </span>
               <Double />
             </div>
             <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
               Een moderne, modulaire lijn die werkt op het water
             </h2>
             <p className="text-lg text-slate-600">
-              Het NWD werkt met een flexibele diplomalijn die realistisch is voor
-              instructeurs en motiverend voor cursisten. Bekijk de video en lees
-              daarna het volledige artikel met alle details.
+              Het NWD werkt met een flexibele diplomalijn die realistisch is
+              voor instructeurs en motiverend voor cursisten. Bekijk de video en
+              lees daarna het volledige artikel met alle details.
             </p>
             <Link
               href="/help/artikel/hoe-is-de-diplomalijn-van-het-nwd-opgebouwd"
@@ -498,21 +506,27 @@ export default function Page() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <h3 className="text-base font-bold text-slate-900">Erkende lijn</h3>
+              <h3 className="text-base font-bold text-slate-900">
+                Erkende lijn
+              </h3>
               <p className="mt-2 text-sm text-slate-600">
                 NWD is onderdeel van de landelijke structuur met duidelijke
                 kwaliteitskaders voor opleidingslocaties.
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <h3 className="text-base font-bold text-slate-900">KSS in de praktijk</h3>
+              <h3 className="text-base font-bold text-slate-900">
+                KSS in de praktijk
+              </h3>
               <p className="mt-2 text-sm text-slate-600">
                 KSS-kwalificaties blijven cruciaal voor erkend opleiden. Wij
                 helpen je om dit praktisch in je organisatie te borgen.
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-white p-5">
-              <h3 className="text-base font-bold text-slate-900">Transparant kader</h3>
+              <h3 className="text-base font-bold text-slate-900">
+                Transparant kader
+              </h3>
               <p className="mt-2 text-sm text-slate-600">
                 Je weet vooraf waar je aan toe bent qua eisen, proces en
                 begeleiding richting seizoenstart.
@@ -594,7 +608,9 @@ export default function Page() {
           </article>
 
           <article className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-            <h2 className="text-lg font-bold text-slate-900">Veelgestelde vragen</h2>
+            <h2 className="text-lg font-bold text-slate-900">
+              Veelgestelde vragen
+            </h2>
             <dl className="mt-4 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
               {faqItems.map((faq, index) => (
                 <FaqDisclosure
@@ -617,8 +633,8 @@ export default function Page() {
               Sluit je voor 1 april 2026 aan voor dit vaarseizoen
             </h2>
             <p className="mx-auto max-w-3xl text-slate-200 text-lg leading-relaxed">
-              Plan een vrijblijvend gesprek met het secretariaat. We bespreken je
-              situatie, je team en een realistische route naar aansluiting.
+              Plan een vrijblijvend gesprek met het secretariaat. We bespreken
+              je situatie, je team en een realistische route naar aansluiting.
             </p>
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
               <BoxedButton
