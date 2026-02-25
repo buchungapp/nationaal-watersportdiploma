@@ -12,31 +12,31 @@ export default async function News() {
   const featuredArticles = articles.slice(0, 3);
 
   return (
-    <section className="rounded-[3rem] bg-slate-950 py-16 lg:py-24">
-      <div className="mx-auto grid max-w-(--breakpoint-xl) gap-12 px-8 lg:px-16">
+    <section className="mx-auto w-full max-w-(--breakpoint-xl)">
+      <div className="grid gap-12">
         <div className="flex items-end justify-between gap-8">
           <div className="grid gap-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-500">
+            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
               Actueel
             </span>
-            <h3 className="text-2xl font-bold text-white sm:text-3xl">
+            <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
               De laatste ontwikkelingen
             </h3>
           </div>
           <BoxedButton
             href="/actueel"
-            className="hidden shrink-0 border border-slate-700 text-white hover:bg-slate-800 sm:inline-flex"
+            className="hidden shrink-0 border border-slate-200 text-slate-900 hover:bg-slate-50 sm:inline-flex"
           >
             Alle artikelen
           </BoxedButton>
         </div>
 
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-slate-800 bg-slate-800 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 lg:grid-cols-3">
           {featuredArticles.map((news) => (
             <Link
               key={news.slug}
               href={`/actueel/${news.slug}`}
-              className="group bg-slate-950 transition-colors hover:bg-slate-900"
+              className="group bg-white transition-colors hover:bg-slate-50"
             >
               <article className="grid h-full">
                 {news.featuredImage ? (
@@ -52,17 +52,17 @@ export default async function News() {
                 ) : null}
                 <div className="grid gap-3 p-6 content-start">
                   <div className="flex items-center gap-x-3">
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-medium text-slate-400">
                       {formatDate(news.date)}
                     </span>
-                    <span className="text-xs font-medium text-slate-600 capitalize">
+                    <span className="text-xs font-medium text-slate-400 capitalize">
                       {news.category}
                     </span>
                   </div>
-                  <h4 className="text-lg font-bold text-white leading-snug group-hover:text-branding-orange transition-colors">
+                  <h4 className="text-lg font-bold text-slate-900 leading-snug group-hover:text-branding-dark transition-colors">
                     <Balancer>{news.title}</Balancer>
                   </h4>
-                  <p className="text-sm text-slate-400 leading-relaxed line-clamp-3">
+                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
                     {news.description}
                   </p>
                 </div>
@@ -74,7 +74,7 @@ export default async function News() {
         <div className="flex justify-center sm:hidden">
           <BoxedButton
             href="/actueel"
-            className="border border-slate-700 text-white hover:bg-slate-800"
+            className="border border-slate-200 text-slate-900 hover:bg-slate-50"
           >
             Alle artikelen
           </BoxedButton>
