@@ -19,11 +19,9 @@ export default async function Locations() {
             Vind jouw NWD vaarschool.
           </h3>
           <p className="mt-2.5 text-orange-100">
-            NWD vaarlocaties voldoen aan de strengste kwaliteitseisen op gebied
-            van persoonlijke- en sociale veiligheid. Verder hebben zij zich
-            gecommitteerd aan de visie van het NWD: veiligheid, kwaliteit en
-            plezier op het water. Daarom zijn zij gelicenseerd om het
-            NWD-diploma uit te geven.
+            Elke stip op de kaart is een locatie die voldoet aan de strengste
+            eisen voor veiligheid, instructeurskwaliteit en materiaal. Kies een
+            NWD-school bij jou in de buurt en ga zorgeloos het water op.
           </p>
 
           <div className="mt-8 flex items-center gap-x-6">
@@ -31,7 +29,7 @@ export default async function Locations() {
               href="/vaarlocaties"
               className="bg-white text-slate-900"
             >
-              Bekijk NWD vaarlocaties
+              Vind een veilige locatie
             </BoxedButton>
           </div>
         </div>
