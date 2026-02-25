@@ -22,7 +22,32 @@ const disciplineDescriptions: Record<string, string> = {
     "Combineer wind en golven op een surfplank met zeil. Een dynamische manier om het water te verkennen.",
   jachtzeilen:
     "Leer navigeren en zeilen op een zeiljacht. Van opstapper tot zelfstandig schipper op open water.",
+  bijboot:
+    "Leer varen met een bijboot. De ideale basis voor het begeleiden op het water.",
 };
+
+const levels = [
+  {
+    number: 1,
+    label: "Kennismaken",
+    description: "De eerste stappen op het water",
+  },
+  {
+    number: 2,
+    label: "Basis",
+    description: "Zelfstandig varen onder begeleiding",
+  },
+  {
+    number: 3,
+    label: "Gevorderd",
+    description: "Varen in wisselende omstandigheden",
+  },
+  {
+    number: 4,
+    label: "Zelfstandig",
+    description: "Zelfstandig en verantwoord het water op",
+  },
+];
 
 export default function DiplomaTabs({
   disciplines,
@@ -58,24 +83,51 @@ export default function DiplomaTabs({
         ))}
       </div>
 
-      {/* Active discipline content */}
+      {/* Two-column content area */}
       <div className="rounded-xl border border-slate-200 p-5 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-          <div className="grid gap-2 min-w-0">
-            <h3 className="text-lg font-bold text-slate-900">
-              {displayTitle}
-            </h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              {description}
-            </p>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px] lg:gap-10">
+          {/* Left: discipline info */}
+          <div className="grid content-start gap-4">
+            <div className="grid gap-2">
+              <h3 className="text-lg font-bold text-slate-900">
+                {displayTitle}
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {description}
+              </p>
+            </div>
+            <Link
+              href={`/diplomalijn/consument/disciplines/${active.handle}`}
+              className="self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors"
+            >
+              Bekijk cursussen
+              <span aria-hidden="true">{"\u2192"}</span>
+            </Link>
           </div>
-          <Link
-            href={`/diplomalijn/consument/disciplines/${active.handle}`}
-            className="shrink-0 self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors"
-          >
-            Bekijk cursussen
-            <span aria-hidden="true">{"\u2192"}</span>
-          </Link>
+
+          {/* Right: 4 levels progression */}
+          <div className="border-t pt-5 lg:border-t-0 lg:border-l lg:border-slate-200 lg:pl-10 lg:pt-0">
+            <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-3">
+              4 niveaus
+            </p>
+            <div className="grid gap-3">
+              {levels.map((level) => (
+                <div key={level.number} className="flex items-start gap-3">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-branding-light/10 text-xs font-bold text-branding-light">
+                    {level.number}
+                  </span>
+                  <div className="grid gap-0.5 min-w-0">
+                    <span className="text-sm font-semibold text-slate-900">
+                      {level.label}
+                    </span>
+                    <span className="text-xs text-slate-500 leading-relaxed">
+                      {level.description}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
