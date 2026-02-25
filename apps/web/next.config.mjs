@@ -141,6 +141,16 @@ const nextConfig = {
         destination: "/voor-vaarlocaties",
         permanent: true,
       },
+      {
+        source: "/vaarlocaties/kwaliteitseisen",
+        destination: "/vaarlocaties/kwaliteitsgarantie",
+        permanent: true,
+      },
+      {
+        source: "/veiligheid-kwaliteit-plezier",
+        destination: "/vaarlocaties/kwaliteitsgarantie",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

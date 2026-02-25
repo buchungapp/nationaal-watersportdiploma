@@ -148,10 +148,10 @@ export default function About() {
 
       <div className="flex">
         <BoxedButton
-          href="/vaarlocaties/kwaliteitseisen"
+          href="/vaarlocaties/kwaliteitsgarantie"
           className="bg-branding-dark text-white"
         >
-          Bekijk alle kwaliteitseisen
+          Bekijk de kwaliteitsgarantie
         </BoxedButton>
       </div>
     </section>
