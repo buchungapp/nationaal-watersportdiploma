@@ -296,9 +296,8 @@ export default function Page() {
               Wat krijg je voor je investering?
             </h2>
             <p className="max-w-3xl text-lg text-slate-600">
-              Deze tabel is gelijk aan de versie in het artikel over de vier
-              routes, en wordt centraal beheerd zodat cijfers op alle plekken
-              synchroon blijven.
+              Vergelijk de routes op kosten, erkenning en ondersteuning, en
+              kies de route die past bij jouw locatie en seizoenplanning.
             </p>
           </div>
           <CostComparison />
