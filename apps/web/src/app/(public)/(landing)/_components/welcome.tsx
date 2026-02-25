@@ -16,11 +16,13 @@ export default function Welcome() {
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
             href="/actueel/jur1zF0r-van-cwo-naar-nwd-stap-over-naar-de-nieuwe-standaard-en-ontvang-50-euro-cadeau"
-            className="w-fit rounded-full px-6 py-3 text-sm sm:text-base text-branding-dark font-bold bg-white transition-all duration-200 transform hover:scale-105 flex items-center gap-2 leading-tight mx-auto sm:mx-0 shadow-xl"
+            className="group w-fit rounded-md border border-white/25 bg-white/10 backdrop-blur-sm px-4 py-2 text-sm text-white font-medium transition-colors hover:bg-white/20 flex items-center gap-2.5 leading-tight mx-auto sm:mx-0"
           >
-            <MegaphoneIcon className="h-4 w-4" />
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-branding-orange">
+              <MegaphoneIcon className="size-2.5 text-white" />
+            </span>
             {"Stap over naar het NWD en ontvang \u20AC50 cashback!"}
-            <span className="text-xs">{"→"}</span>
+            <span className="text-white/50 transition-transform group-hover:translate-x-0.5">{"→"}</span>
           </Link>
           <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl text-balance">
             Zorgeloos het water op, met een erkend diploma.
