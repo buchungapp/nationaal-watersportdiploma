@@ -17,9 +17,9 @@ const benefitsWith = [
 
 export default function Comparison() {
   return (
-    <section className="container mx-auto px-4 lg:px-16">
+    <section className="mx-auto w-full max-w-(--breakpoint-xl)">
       <div className="grid gap-8">
-        <div className="max-w-(--breakpoint-lg) mx-auto text-center grid gap-4">
+        <div className="mx-auto text-center grid gap-4">
           <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
             <span className="whitespace-nowrap">De nationale standaard</span>
             <Double />
@@ -29,7 +29,7 @@ export default function Comparison() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-(--breakpoint-lg) mx-auto w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {/* Without NWD */}
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
             <h3 className="text-lg font-bold text-slate-900 mb-6">

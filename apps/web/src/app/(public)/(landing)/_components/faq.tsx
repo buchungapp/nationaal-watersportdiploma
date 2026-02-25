@@ -23,8 +23,8 @@ export default async function Faq() {
   }));
 
   return (
-    <section className="container mx-auto grid gap-12 px-4 lg:px-16">
-      <div className="max-w-(--breakpoint-lg) mx-auto text-center grid gap-4">
+    <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-12">
+      <div className="mx-auto text-center grid gap-4">
         <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
           <span className="whitespace-nowrap">Al je vragen beantwoord</span>
           <Double />
@@ -34,7 +34,7 @@ export default async function Faq() {
         </h2>
       </div>
 
-      <div className="max-w-(--breakpoint-md) mx-auto w-full">
+      <div className="max-w-(--breakpoint-lg) mx-auto w-full">
         <FaqAccordion
           items={faqItems.map(({ question, answer, slug }) => ({
             question,

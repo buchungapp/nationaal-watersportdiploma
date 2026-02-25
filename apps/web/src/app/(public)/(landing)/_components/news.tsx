@@ -12,8 +12,8 @@ export default async function News() {
   const featuredArticles = articles.slice(0, 3);
 
   return (
-    <section className="rounded-[3rem] bg-slate-950 px-4 py-16 lg:px-16 lg:py-24">
-      <div className="container mx-auto grid gap-12">
+    <section className="rounded-[3rem] bg-slate-950 py-16 lg:py-24">
+      <div className="mx-auto grid max-w-(--breakpoint-xl) gap-12 px-8 lg:px-16">
         <div className="flex items-end justify-between gap-8">
           <div className="grid gap-2">
             <span className="text-xs font-bold uppercase tracking-widest text-slate-500">

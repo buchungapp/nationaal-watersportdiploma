@@ -15,7 +15,7 @@ export default function Home() {
       <PageHero>
         <Welcome />
       </PageHero>
-      <div className="mt-12 flex w-full flex-col gap-36">
+      <div className="mt-12 flex w-full max-w-(--breakpoint-2xl) mx-auto flex-col gap-24 px-4 lg:px-8">
         <Photos />
         <Comparison />
         <About />

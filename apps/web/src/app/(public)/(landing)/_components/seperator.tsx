@@ -5,7 +5,7 @@ import WaveAnimation from "../../_components/style/wave-animation";
 export default function Seperator() {
   return (
     <section className="relative z-10 flex flex-col items-center gap-8 overflow-hidden rounded-[3rem] bg-branding-light py-12 lg:gap-12 lg:py-20">
-      <div className="grid gap-4 text-center max-w-(--breakpoint-md) px-8 lg:px-16">
+      <div className="grid gap-4 text-center max-w-(--breakpoint-lg) px-8 lg:px-16">
         <h2 className="text-3xl font-bold text-white lg:text-5xl xl:text-6xl text-balance">
           Klaar voor een zorgeloze tijd op het water?
         </h2>

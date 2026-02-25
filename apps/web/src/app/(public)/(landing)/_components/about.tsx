@@ -4,8 +4,8 @@ import { FeatureCard } from "./feature-card";
 
 export default function About() {
   return (
-    <section className="container mx-auto flex flex-col gap-12 px-4 lg:px-16">
-      <div className="grid max-w-(--breakpoint-lg) gap-4 self-center text-center">
+    <section className="mx-auto flex w-full max-w-(--breakpoint-xl) flex-col gap-12">
+      <div className="grid gap-4 self-center text-center">
         <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
           <span className="whitespace-nowrap">De NWD kwaliteitsgarantie</span>
           <Double />
