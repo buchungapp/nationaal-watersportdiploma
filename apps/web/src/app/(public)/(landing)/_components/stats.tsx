@@ -28,6 +28,7 @@ export default function Stats() {
         <div className="grid gap-16">
           <div className="mx-auto text-center grid gap-4">
             <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-white/60">
+              <Double className="text-white/40" />
               <span className="whitespace-nowrap">Kwaliteit is geen keuze</span>
               <Double className="text-white/40" />
             </div>
