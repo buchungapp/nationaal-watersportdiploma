@@ -1,6 +1,6 @@
 import { CheckIcon, XMarkIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { FeatureCard } from "./feature-card";
 
 const risksWithout = [
@@ -27,9 +27,18 @@ export default function Comparison() {
             <span className="whitespace-nowrap">De nationale standaard</span>
             <Double />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
-            Kies voor zekerheid, niet voor een gok
-          </h2>
+          <div className="flex items-end justify-between gap-8">
+            <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
+              Kies voor zekerheid, niet voor een gok
+            </h2>
+            <Link
+              href="/vaarlocaties/kwaliteitseisen"
+              className="hidden shrink-0 text-sm font-semibold text-branding-dark hover:underline sm:inline-flex items-center gap-1"
+            >
+              Alle kwaliteitseisen
+              <span aria-hidden="true">{"\u2192"}</span>
+            </Link>
+          </div>
           <p className="text-lg text-slate-600 text-pretty max-w-2xl">
             Niet elke vaarschool biedt dezelfde garanties. NWD-locaties worden
             getoetst op de strengste eisen, zodat jij altijd kunt rekenen op
@@ -59,17 +68,17 @@ export default function Comparison() {
           </div>
 
           {/* With NWD */}
-          <div className="rounded-2xl border-2 border-branding-dark bg-branding-dark p-6 sm:p-8 shadow-lg ring-4 ring-branding-dark/10">
-            <h3 className="text-lg font-bold text-white mb-6">
+          <div className="rounded-2xl border-2 border-branding-light/20 bg-branding-light/5 p-6 sm:p-8">
+            <h3 className="text-lg font-bold text-branding-dark mb-6">
               Leren bij een NWD-locatie
             </h3>
             <ul className="space-y-4">
               {benefitsWith.map((benefit) => (
                 <li key={benefit} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/20">
-                    <CheckIcon className="size-3.5 text-white" />
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-branding-orange/15">
+                    <CheckIcon className="size-3.5 text-branding-orange" />
                   </span>
-                  <span className="text-white/85 text-sm leading-relaxed">
+                  <span className="text-slate-700 text-sm leading-relaxed">
                     {benefit}
                   </span>
                 </li>
@@ -138,15 +147,7 @@ export default function Comparison() {
           />
         </div>
 
-        {/* CTA */}
-        <div className="flex">
-          <BoxedButton
-            href="/vaarlocaties/kwaliteitseisen"
-            className="bg-branding-dark text-white"
-          >
-            Bekijk alle kwaliteitseisen
-          </BoxedButton>
-        </div>
+
       </div>
     </section>
   );

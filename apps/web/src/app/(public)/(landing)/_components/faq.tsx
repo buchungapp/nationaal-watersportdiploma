@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { getHelpArticles } from "~/lib/article-2";
 import FaqAccordion from "./faq-accordion";
 
@@ -29,9 +28,18 @@ export default async function Faq() {
           <span className="whitespace-nowrap">Al je vragen beantwoord</span>
           <Double />
         </div>
-        <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
-          Veelgestelde vragen
-        </h2>
+        <div className="flex items-end justify-between gap-8">
+          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
+            Veelgestelde vragen
+          </h2>
+          <Link
+            href="/help"
+            className="hidden shrink-0 text-sm font-semibold text-branding-dark hover:underline sm:inline-flex items-center gap-1"
+          >
+            Naar het helpcentrum
+            <span aria-hidden="true">{"\u2192"}</span>
+          </Link>
+        </div>
       </div>
 
       <div className="w-full">
@@ -44,11 +52,7 @@ export default async function Faq() {
         />
       </div>
 
-      <div className="flex">
-        <BoxedButton href="/help" className="bg-branding-dark text-white">
-          Bezoek het helpcentrum
-        </BoxedButton>
-      </div>
+
     </section>
   );
 }

@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { getAllArticles } from "~/lib/articles";
 
@@ -14,22 +13,23 @@ export default async function News() {
   return (
     <section className="mx-auto w-full max-w-(--breakpoint-xl)">
       <div className="grid gap-12">
-        <div className="flex items-end justify-between gap-8">
-          <div className="grid gap-3 min-w-0 flex-1">
-            <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
-              <span className="whitespace-nowrap">Actueel</span>
-              <Double />
-            </div>
+        <div className="grid gap-3">
+          <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+            <span className="whitespace-nowrap">Actueel</span>
+            <Double />
+          </div>
+          <div className="flex items-end justify-between gap-8">
             <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
               De laatste ontwikkelingen
             </h3>
+            <Link
+              href="/actueel"
+              className="hidden shrink-0 text-sm font-semibold text-branding-dark hover:underline sm:inline-flex items-center gap-1"
+            >
+              Alle artikelen
+              <span aria-hidden="true">{"\u2192"}</span>
+            </Link>
           </div>
-          <BoxedButton
-            href="/actueel"
-            className="hidden shrink-0 border border-slate-200 text-slate-900 hover:bg-slate-50 sm:inline-flex"
-          >
-            Alle artikelen
-          </BoxedButton>
         </div>
 
         <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 lg:grid-cols-3">
@@ -72,14 +72,7 @@ export default async function News() {
           ))}
         </div>
 
-        <div className="flex justify-center sm:hidden">
-          <BoxedButton
-            href="/actueel"
-            className="border border-slate-200 text-slate-900 hover:bg-slate-50"
-          >
-            Alle artikelen
-          </BoxedButton>
-        </div>
+
       </div>
     </section>
   );
