@@ -11,7 +11,7 @@ const heroBullets = [
 
 export default function Welcome() {
   return (
-    <div className="mx-auto grid max-w-(--breakpoint-2xl) grid-cols-1 items-center gap-8 px-4 lg:grid-cols-[1fr_1fr] lg:px-16 xl:grid-cols-[3fr_2fr] xl:gap-16">
+    <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[1fr_1fr] lg:px-16 xl:grid-cols-[3fr_2fr] xl:gap-16 xl:px-20">
       <div className="grid justify-center gap-8 lg:justify-start">
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
