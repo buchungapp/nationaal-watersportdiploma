@@ -11,7 +11,7 @@ const heroBullets = [
 
 export default function Welcome() {
   return (
-    <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[1fr_1fr] lg:px-16 xl:grid-cols-[3fr_2fr] xl:gap-16 xl:px-20">
+    <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[1fr_1fr] lg:gap-12 lg:px-16 xl:grid-cols-[1fr_1fr] xl:px-20">
       <div className="grid justify-center gap-8 lg:justify-start">
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
@@ -24,10 +24,10 @@ export default function Welcome() {
             {"Stap over naar het NWD en ontvang \u20AC50 cashback!"}
             <span className="text-white/50 transition-transform group-hover:translate-x-0.5">{"→"}</span>
           </Link>
-          <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl text-balance">
+          <h1 className="max-w-xl text-4xl font-bold lg:text-5xl xl:text-6xl text-balance">
             Zorgeloos het water op, met een erkend diploma.
           </h1>
-          <p className="text-lg text-slate-100 max-w-lg leading-relaxed">
+          <p className="text-lg text-slate-100 max-w-xl leading-relaxed">
             Kies voor een watersportlocatie die voldoet aan de strengste eisen
             voor veiligheid en kwaliteit. Zo focus jij je op wat echt telt:
             plezier maken en beter worden.
