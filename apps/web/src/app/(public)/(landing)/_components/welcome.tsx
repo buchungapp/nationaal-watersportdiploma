@@ -48,7 +48,7 @@ export default function Welcome() {
             href="/vaarlocaties"
             className="bg-white text-branding-dark font-bold"
           >
-            Vind een veilige locatie
+            Vind jouw vaarlocatie
           </BoxedButton>
           <BoxedButton
             href="/diplomalijn/consument"

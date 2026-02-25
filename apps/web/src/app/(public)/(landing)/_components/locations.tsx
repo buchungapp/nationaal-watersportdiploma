@@ -64,7 +64,7 @@ export default async function Locations() {
             href="/vaarlocaties"
             className="bg-white text-slate-900 w-fit"
           >
-            Vind een veilige locatie
+            Vind jouw vaarlocatie
           </BoxedButton>
         </div>
       </div>

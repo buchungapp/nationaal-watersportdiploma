@@ -55,7 +55,7 @@ export default function HowItWorks() {
             href="/vaarlocaties"
             className="bg-branding-light text-white"
           >
-            Vind een veilige locatie
+            Vind jouw vaarlocatie
           </BoxedButton>
         </div>
       </div>
