@@ -2,22 +2,22 @@ import Double from "~/app/_components/brand/double-line";
 
 const stats = [
   {
-    value: "1 norm",
-    label: "Officieel erkend vanaf 2026",
+    value: "11",
+    label: "Erkende vaarlocaties",
     description:
-      "Het Watersportverbond stelt duidelijkheid voorop. Dit is de enige standaard.",
+      "Van Friesland tot Zeeland: overal dezelfde hoge standaard.",
   },
   {
-    value: "126.570+",
-    label: "Behaalde competenties in 2025",
+    value: "804",
+    label: "Actieve instructeurs",
     description:
-      "De groeiende beweging van watersporters die kiest voor bewezen veiligheid.",
+      "Een groeiende community van gedreven professionals op het water.",
   },
   {
-    value: "100%",
-    label: "Getoetste instructeurs",
+    value: "5.500+",
+    label: "Diploma's in 2025",
     description:
-      "Wij garanderen topkwaliteit door continue bijscholing. Zonder uitzonderingen.",
+      "In ons tweede vaarseizoen behaalden duizenden cursisten hun NWD-diploma.",
   },
 ];
 
