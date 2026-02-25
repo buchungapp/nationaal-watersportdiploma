@@ -138,7 +138,7 @@ export default function Page() {
   return (
     <main className="flex flex-col items-center">
       <PageHero>
-        <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[1fr_380px] lg:gap-12 lg:px-16 xl:px-20">
+        <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-8 lg:px-16 xl:grid-cols-[minmax(0,1fr)_480px] xl:px-20">
           <div className="grid gap-6 text-white">
             <div className="flex w-fit items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-sm font-medium">
               <ClockIcon className="size-4" />
