@@ -1,5 +1,4 @@
 import PageHero from "../_components/style/page-hero";
-import About from "./_components/about";
 import Comparison from "./_components/comparison";
 import Faq from "./_components/faq";
 import Locations from "./_components/locations";
@@ -18,7 +17,6 @@ export default function Home() {
       <div className="mt-12 flex w-full max-w-(--breakpoint-2xl) mx-auto flex-col gap-24 px-4 lg:px-8">
         <Photos />
         <Comparison />
-        <About />
         <Stats />
         <Locations />
         <Faq />
