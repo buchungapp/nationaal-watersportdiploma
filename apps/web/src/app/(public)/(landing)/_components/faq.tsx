@@ -1,21 +1,25 @@
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
-import { getHelpArticles } from "~/lib/article-2";
+import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
 import FaqAccordion from "./faq-accordion";
+import FaqSearch from "./faq-search";
 
 export default async function Faq() {
-  const articles = await getHelpArticles().then((articles) =>
-    articles
-      .filter((x) => x.metadata.isPopulair)
-      .sort((a, b) => {
-        const dateA = new Date(a.metadata.lastUpdatedAt);
-        const dateB = new Date(b.metadata.lastUpdatedAt);
-        return dateB.getTime() - dateA.getTime();
-      })
-      .slice(0, 5),
-  );
+  const [allArticles, questions] = await Promise.all([
+    getHelpArticles(),
+    getHelpFaqs(),
+  ]);
 
-  const faqItems = articles.map((article) => ({
+  const popularArticles = allArticles
+    .filter((x) => x.metadata.isPopulair)
+    .sort((a, b) => {
+      const dateA = new Date(a.metadata.lastUpdatedAt);
+      const dateB = new Date(b.metadata.lastUpdatedAt);
+      return dateB.getTime() - dateA.getTime();
+    })
+    .slice(0, 5);
+
+  const faqItems = popularArticles.map((article) => ({
     question: article.metadata.title,
     answer: article.metadata.summary,
     slug: article.slug,
@@ -47,6 +51,10 @@ export default async function Faq() {
           Naar het helpcentrum
           <span aria-hidden="true">{"\u2192"}</span>
         </Link>
+      </div>
+
+      <div className="w-full max-w-3xl">
+        <FaqSearch questions={questions} articles={allArticles} />
       </div>
 
       <div className="w-full max-w-3xl">
