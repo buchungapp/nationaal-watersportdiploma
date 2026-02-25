@@ -30,7 +30,7 @@ export default function Faq() {
     <section className="container mx-auto grid gap-12 px-4 lg:px-16">
       <div className="max-w-(--breakpoint-lg) mx-auto text-center grid gap-4">
         <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
-          Al je vragen beantwoord
+          <span className="whitespace-nowrap">Al je vragen beantwoord</span>
           <Double />
         </div>
         <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">

@@ -21,7 +21,7 @@ export default function Comparison() {
       <div className="grid gap-8">
         <div className="max-w-(--breakpoint-lg) mx-auto text-center grid gap-4">
           <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
-            De nationale standaard
+            <span className="whitespace-nowrap">De nationale standaard</span>
             <Double />
           </div>
           <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">

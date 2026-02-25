@@ -6,7 +6,7 @@ export default function About() {
     <section className="container mx-auto flex flex-col gap-12 px-4 lg:px-16">
       <div className="grid max-w-(--breakpoint-lg) gap-4 self-center text-center">
         <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
-          De NWD kwaliteitsgarantie
+          <span className="whitespace-nowrap">De NWD kwaliteitsgarantie</span>
           <Double />
         </div>
         <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
