@@ -167,7 +167,8 @@ const faqItems: FaqItem[] = [
       "Nee. De NWD-kwaliteitsgarantie kijkt ook naar sociale veiligheid, accommodaties, verzekeringen, leskwaliteit en begeleiding.",
   },
   {
-    question: "Waar kan ik terecht als ik zorgen heb over gedrag of integriteit?",
+    question:
+      "Waar kan ik terecht als ik zorgen heb over gedrag of integriteit?",
     answer:
       "Je kunt terecht bij de vertrouwenscontactpersoon van de locatie en daarnaast bij de onafhankelijke vertrouwenspersoon van het NWD.",
   },
@@ -272,9 +273,7 @@ export default function Page() {
         <section className="mx-auto w-full max-w-(--breakpoint-xl)">
           <div className="grid gap-3">
             <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
-              <span className="whitespace-nowrap">
-                Wat je mag verwachten
-              </span>
+              <span className="whitespace-nowrap">Wat je mag verwachten</span>
               <Double />
             </div>
             <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
@@ -380,8 +379,8 @@ export default function Page() {
             <p className="text-sm leading-relaxed text-slate-200 sm:text-base">
               Sociale veiligheid is een vast onderdeel van de NWD-standaard.
               Daarom werken locaties met gedragscodes en een interne én externe
-              onafhankelijke vertrouwenspersoon, zodat zorgen snel en
-              zorgvuldig kunnen worden opgepakt.
+              onafhankelijke vertrouwenspersoon, zodat zorgen snel en zorgvuldig
+              kunnen worden opgepakt.
             </p>
           </div>
           <div className="grid content-start gap-3 md:justify-self-end md:w-full md:max-w-md">
@@ -450,7 +449,10 @@ export default function Page() {
           </div>
         </section>
 
-        <section id="veelgestelde-vragen" className="mx-auto w-full max-w-(--breakpoint-xl)">
+        <section
+          id="veelgestelde-vragen"
+          className="mx-auto w-full max-w-(--breakpoint-xl)"
+        >
           <div className="grid gap-3">
             <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
               <span className="whitespace-nowrap">Veelgestelde vragen</span>

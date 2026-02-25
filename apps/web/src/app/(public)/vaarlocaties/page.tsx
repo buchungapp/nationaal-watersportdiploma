@@ -81,8 +81,8 @@ export default async function Page() {
             informatie.
           </p>
           <p>
-            Benieuwd wat je bij een NWD-vaarlocatie qua veiligheid, kwaliteit
-            en plezier mag verwachten?{" "}
+            Benieuwd wat je bij een NWD-vaarlocatie qua veiligheid, kwaliteit en
+            plezier mag verwachten?{" "}
             <Link
               href="/vaarlocaties/kwaliteitsgarantie"
               className="text-branding-dark hover:underline"
