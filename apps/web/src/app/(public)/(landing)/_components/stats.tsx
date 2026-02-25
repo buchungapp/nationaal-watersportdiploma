@@ -33,7 +33,7 @@ export default function Stats() {
               <Double className="text-white/40" />
             </div>
             <h2 className="text-3xl font-bold text-white sm:text-4xl text-balance">
-              De cijfers achter Nederlands veiligste water
+              Een groeiende beweging
             </h2>
           </div>
 
