@@ -6,7 +6,7 @@ import Link from "next/link";
 interface Discipline {
   id: string;
   handle: string;
-  title: string;
+  title: string | null;
 }
 
 const disciplineDescriptions: Record<string, string> = {
@@ -34,9 +34,10 @@ export default function DiplomaTabs({
 
   if (!active) return null;
 
+  const displayTitle = active.title ?? active.handle;
   const description =
     disciplineDescriptions[active.handle] ??
-    `Bekijk de cursussen binnen ${active.title}.`;
+    `Bekijk de cursussen binnen ${displayTitle}.`;
 
   return (
     <div className="grid gap-6">
@@ -52,7 +53,7 @@ export default function DiplomaTabs({
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
           >
-            {d.title}
+            {d.title ?? d.handle}
           </button>
         ))}
       </div>
@@ -62,7 +63,7 @@ export default function DiplomaTabs({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
           <div className="grid gap-2 min-w-0">
             <h3 className="text-lg font-bold text-slate-900">
-              {active.title}
+              {displayTitle}
             </h3>
             <p className="text-sm text-slate-600 leading-relaxed">
               {description}
