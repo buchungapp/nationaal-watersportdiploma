@@ -30,6 +30,13 @@ export default async function News() {
               <span aria-hidden="true">{"\u2192"}</span>
             </Link>
           </div>
+          <Link
+            href="/actueel"
+            className="text-sm font-bold text-branding-dark hover:text-branding-light inline-flex items-center gap-1.5 transition-colors sm:hidden"
+          >
+            Alle artikelen
+            <span aria-hidden="true">{"\u2192"}</span>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 lg:grid-cols-3">
@@ -51,7 +58,7 @@ export default async function News() {
                     className="aspect-video w-full object-cover"
                   />
                 ) : null}
-                <div className="grid gap-3 p-6 content-start">
+                <div className="grid gap-3 p-4 sm:p-6 content-start">
                   <div className="flex items-center gap-x-3">
                     <span className="text-xs font-medium text-slate-400">
                       {formatDate(news.date)}

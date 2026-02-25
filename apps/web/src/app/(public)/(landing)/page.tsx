@@ -14,7 +14,7 @@ export default function Home() {
       <PageHero>
         <Welcome />
       </PageHero>
-      <div className="mt-12 flex w-full max-w-(--breakpoint-2xl) mx-auto flex-col gap-24 px-4 lg:px-8">
+      <div className="mt-8 flex w-full max-w-(--breakpoint-2xl) mx-auto flex-col gap-16 px-4 pb-16 lg:mt-12 lg:gap-24 lg:px-8">
         <Photos />
         <Comparison />
         <Stats />

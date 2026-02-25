@@ -20,7 +20,7 @@ const benefitsWith = [
 export default function Comparison() {
   return (
     <section className="mx-auto w-full max-w-(--breakpoint-xl)">
-      <div className="grid gap-12">
+      <div className="grid gap-8 lg:gap-12">
         {/* Header */}
         <div className="grid gap-3">
           <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
@@ -44,6 +44,13 @@ export default function Comparison() {
             getoetst op de strengste eisen, zodat jij altijd kunt rekenen op
             dezelfde hoge standaard.
           </p>
+          <Link
+            href="/vaarlocaties/kwaliteitseisen"
+            className="text-sm font-bold text-branding-dark hover:text-branding-light inline-flex items-center gap-1.5 transition-colors sm:hidden"
+          >
+            Alle kwaliteitseisen
+            <span aria-hidden="true">{"\u2192"}</span>
+          </Link>
         </div>
 
         {/* Comparison cards */}

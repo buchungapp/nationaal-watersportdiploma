@@ -40,6 +40,13 @@ export default async function Faq() {
             <span aria-hidden="true">{"\u2192"}</span>
           </Link>
         </div>
+        <Link
+          href="/help"
+          className="text-sm font-bold text-branding-dark hover:text-branding-light inline-flex items-center gap-1.5 transition-colors sm:hidden"
+        >
+          Naar het helpcentrum
+          <span aria-hidden="true">{"\u2192"}</span>
+        </Link>
       </div>
 
       <div className="w-full max-w-3xl">

@@ -23,8 +23,8 @@ const stats = [
 
 export default function Stats() {
   return (
-    <section className="relative z-10 overflow-hidden rounded-[3rem] bg-branding-dark py-16 sm:py-24">
-      <div className="mx-auto max-w-(--breakpoint-xl) px-8 lg:px-16">
+    <section className="relative z-10 overflow-hidden rounded-2xl bg-branding-dark py-12 sm:rounded-[3rem] sm:py-24">
+      <div className="mx-auto max-w-(--breakpoint-xl) px-6 sm:px-8 lg:px-16">
         <div className="grid gap-16">
           <div className="mx-auto text-center grid gap-4">
             <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-white/60">
