@@ -133,14 +133,12 @@ const nextConfig = {
       },
       {
         source: "/aansluiten",
-        destination:
-          "/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd",
+        destination: "/voor-vaarlocaties",
         permanent: true,
       },
       {
         source: "/aansluiting",
-        destination:
-          "/help/artikel/hoe-werkt-de-aansluitingsprocedure-van-het-nwd",
+        destination: "/voor-vaarlocaties",
         permanent: true,
       },
     ];
