@@ -15,7 +15,7 @@ export default async function News() {
     <section className="mx-auto w-full max-w-(--breakpoint-xl)">
       <div className="grid gap-12">
         <div className="flex items-end justify-between gap-8">
-          <div className="grid gap-3">
+          <div className="grid gap-3 min-w-0 flex-1">
             <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
               <span className="whitespace-nowrap">Actueel</span>
               <Double />
