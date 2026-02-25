@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface Discipline {
   id: string;
