@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
-import { listDisciplines } from "~/lib/nwd";
+import { listCourses, listDisciplines } from "~/lib/nwd";
 import DiplomaTabs from "./diplomalijn-tabs";
 
 const usps = [
@@ -70,7 +70,10 @@ const usps = [
 ];
 
 export default async function Diplomalijn() {
-  const disciplines = await listDisciplines();
+  const [disciplines, courses] = await Promise.all([
+    listDisciplines(),
+    listCourses("consument"),
+  ]);
 
   return (
     <section className="mx-auto w-full max-w-(--breakpoint-xl)">
@@ -130,7 +133,15 @@ export default async function Diplomalijn() {
         </div>
 
         {/* Interactive discipline tabs */}
-        <DiplomaTabs disciplines={disciplines} />
+        <DiplomaTabs
+          disciplines={disciplines}
+          courses={courses.map((c) => ({
+            id: c.id,
+            handle: c.handle,
+            title: c.title,
+            disciplineId: c.discipline.id,
+          }))}
+        />
       </div>
     </section>
   );
