@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import FaqDisclosure from "~/app/(public)/_components/faq/faq.tsx";
 
 interface FaqItem {
   question: string;
   answer: string;
+  link?: string;
 }
 
 export default function FaqAccordion({ items }: { items: FaqItem[] }) {
@@ -19,6 +21,14 @@ export default function FaqAccordion({ items }: { items: FaqItem[] }) {
           <p className="text-sm text-slate-600 leading-relaxed">
             {item.answer}
           </p>
+          {item.link ? (
+            <Link
+              href={item.link}
+              className="mt-3 inline-block text-sm font-semibold text-branding-dark hover:underline"
+            >
+              {"Verder lezen \u2192"}
+            </Link>
+          ) : null}
         </FaqDisclosure>
       ))}
     </dl>
