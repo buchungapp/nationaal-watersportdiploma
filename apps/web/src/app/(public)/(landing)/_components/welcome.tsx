@@ -22,7 +22,9 @@ export default function Welcome() {
               <SparklesIcon className="size-3 text-white" />
             </span>
             {"Stap over naar het NWD en ontvang \u20AC50 cashback!"}
-            <span className="text-white/50 transition-transform group-hover:translate-x-0.5">{"→"}</span>
+            <span className="text-white/50 transition-transform group-hover:translate-x-0.5">
+              {"→"}
+            </span>
           </Link>
           <h1 className="max-w-xl text-4xl font-bold lg:text-5xl xl:text-6xl text-balance">
             Zorgeloos het water op, met een erkend diploma.

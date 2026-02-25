@@ -60,6 +60,7 @@ export default function DiplomaTabs({
         {disciplines.map((d, i) => (
           <button
             key={d.id}
+            type="button"
             onClick={() => setActiveIndex(i)}
             className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               i === activeIndex

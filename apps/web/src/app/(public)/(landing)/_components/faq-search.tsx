@@ -97,24 +97,22 @@ export default function FaqSearch({
     if (searchResult.length === 0) return [];
 
     // biome-ignore lint/style/noNonNullAssertion: intentional
-    return searchResult[0]!.result
-      .slice(0, 5)
-      .map(
-        // @ts-expect-error Type does not account for the enrich option
-        (article: {
-          id: string;
-          doc: { type: "article" | "question"; title: string };
-        }) => {
-          return {
-            url:
-              article.doc.type === "article"
-                ? `/help/artikel/${article.id}`
-                : `/help/veelgestelde-vragen/${article.id}`,
-            title: article.doc.title,
-            type: article.doc.type,
-          };
-        },
-      );
+    return searchResult[0]!.result.slice(0, 5).map(
+      // @ts-expect-error Type does not account for the enrich option
+      (article: {
+        id: string;
+        doc: { type: "article" | "question"; title: string };
+      }) => {
+        return {
+          url:
+            article.doc.type === "article"
+              ? `/help/artikel/${article.id}`
+              : `/help/veelgestelde-vragen/${article.id}`,
+          title: article.doc.title,
+          type: article.doc.type,
+        };
+      },
+    );
   }, [deferredQuery, articles, index]);
 
   return (

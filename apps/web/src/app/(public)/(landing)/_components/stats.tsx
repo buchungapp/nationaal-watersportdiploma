@@ -4,8 +4,7 @@ const stats = [
   {
     value: "11",
     label: "Erkende vaarlocaties",
-    description:
-      "Van Friesland tot Zeeland: overal dezelfde hoge standaard.",
+    description: "Van Friesland tot Zeeland: overal dezelfde hoge standaard.",
   },
   {
     value: "804",
