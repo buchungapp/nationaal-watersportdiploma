@@ -4,7 +4,7 @@ import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 const steps = [
   {
     number: "1",
-    title: "Vind een school op de kaart",
+    title: "Vind een vaarlocatie op de kaart",
     description:
       "Kies een NWD-locatie bij jou in de buurt. Elke stip op de kaart staat voor gegarandeerde veiligheid en gecontroleerde kwaliteit.",
   },
