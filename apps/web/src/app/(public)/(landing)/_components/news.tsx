@@ -24,7 +24,7 @@ export default async function News() {
             </h3>
             <Link
               href="/actueel"
-              className="hidden shrink-0 text-sm font-bold text-branding-dark hover:text-branding-light sm:inline-flex items-center gap-1.5 transition-colors"
+              className="hidden shrink-0 rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 sm:inline-flex items-center gap-1.5 transition-colors"
             >
               Alle artikelen
               <span aria-hidden="true">{"\u2192"}</span>
@@ -32,7 +32,7 @@ export default async function News() {
           </div>
           <Link
             href="/actueel"
-            className="text-sm font-bold text-branding-dark hover:text-branding-light inline-flex items-center gap-1.5 transition-colors sm:hidden"
+            className="self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors sm:hidden"
           >
             Alle artikelen
             <span aria-hidden="true">{"\u2192"}</span>

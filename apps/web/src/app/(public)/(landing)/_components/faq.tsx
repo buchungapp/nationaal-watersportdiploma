@@ -34,7 +34,7 @@ export default async function Faq() {
           </h2>
           <Link
             href="/help"
-            className="hidden shrink-0 text-sm font-bold text-branding-dark hover:text-branding-light sm:inline-flex items-center gap-1.5 transition-colors"
+            className="hidden shrink-0 rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 sm:inline-flex items-center gap-1.5 transition-colors"
           >
             Naar het helpcentrum
             <span aria-hidden="true">{"\u2192"}</span>
@@ -42,7 +42,7 @@ export default async function Faq() {
         </div>
         <Link
           href="/help"
-          className="text-sm font-bold text-branding-dark hover:text-branding-light inline-flex items-center gap-1.5 transition-colors sm:hidden"
+          className="self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors sm:hidden"
         >
           Naar het helpcentrum
           <span aria-hidden="true">{"\u2192"}</span>
