@@ -15,10 +15,11 @@ export default async function News() {
     <section className="mx-auto w-full max-w-(--breakpoint-xl)">
       <div className="grid gap-12">
         <div className="flex items-end justify-between gap-8">
-          <div className="grid gap-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Actueel
-            </span>
+          <div className="grid gap-3">
+            <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+              <span className="whitespace-nowrap">Actueel</span>
+              <Double />
+            </div>
             <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
               De laatste ontwikkelingen
             </h3>

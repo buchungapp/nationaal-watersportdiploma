@@ -19,8 +19,8 @@ export default function Comparison() {
   return (
     <section className="mx-auto w-full max-w-(--breakpoint-xl)">
       <div className="grid gap-8">
-        <div className="mx-auto text-center grid gap-4">
-          <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
+        <div className="grid gap-3">
+          <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
             <span className="whitespace-nowrap">De nationale standaard</span>
             <Double />
           </div>

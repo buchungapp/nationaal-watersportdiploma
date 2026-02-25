@@ -5,15 +5,15 @@ import { FeatureCard } from "./feature-card";
 export default function About() {
   return (
     <section className="mx-auto flex w-full max-w-(--breakpoint-xl) flex-col gap-12">
-      <div className="grid gap-4 self-center text-center">
-        <div className="flex items-center justify-center gap-x-3 font-bold uppercase text-branding-dark">
+      <div className="grid gap-3">
+        <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
           <span className="whitespace-nowrap">De NWD kwaliteitsgarantie</span>
           <Double />
         </div>
         <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
           De zekerheden van een NWD-erkende locatie
         </h2>
-        <p className="text-lg text-slate-600 text-pretty">
+        <p className="text-lg text-slate-600 text-pretty max-w-2xl">
           Elke NWD-locatie wordt getoetst op de strengste eisen. Dat betekent
           dat je altijd kunt rekenen op dezelfde hoge standaard, waar je ook
           vaart.
@@ -146,7 +146,7 @@ export default function About() {
         />
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex">
         <BoxedButton
           href="/vaarlocaties/kwaliteitseisen"
           className="bg-branding-dark text-white"
