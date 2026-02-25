@@ -5,14 +5,13 @@ import MuxVideo from "./mux-video";
 
 const heroBullets = [
   "Behaal een diploma dat er echt toe doet",
-  "Weet dat je tijdens de les volledig verzekerd bent",
   "Vaar met modern en gekeurd materiaal",
   "Leer van de beste, gecertificeerde instructeurs",
 ];
 
 export default function Welcome() {
   return (
-    <div className="grid grid-cols-1 items-center gap-8 px-4 lg:grid-cols-2 lg:px-16">
+    <div className="mx-auto grid max-w-(--breakpoint-2xl) grid-cols-1 items-center gap-8 px-4 lg:grid-cols-[1fr_1fr] lg:px-16 xl:grid-cols-[3fr_2fr] xl:gap-16">
       <div className="grid justify-center gap-8 lg:justify-start">
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
@@ -53,7 +52,7 @@ export default function Welcome() {
             href="/diplomalijn/consument"
             className="text-white hover:bg-white/10"
           >
-            Ontdek jouw vaarroute
+            Bekijk alle diploma's en cursussen
           </BoxedButton>
         </div>
       </div>
