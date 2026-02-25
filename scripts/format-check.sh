@@ -1,3 +1,0 @@
-#!/bin/bash
-cd /vercel/share/v0-project
-npx @biomejs/biome check ./apps/web/src/app/\(public\)/\(landing\)/_components/faq-search.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/diplomalijn-tabs.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/diplomalijn.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/faq.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/welcome.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/stats.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/comparison.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/news.tsx ./apps/web/src/app/\(public\)/\(landing\)/_components/how-it-works.tsx ./apps/web/src/app/\(public\)/\(landing\)/page.tsx 2>&1 || true

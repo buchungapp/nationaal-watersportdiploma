@@ -49,9 +49,7 @@ export default async function Locations() {
                   {step.number}
                 </span>
                 <div className="grid gap-1">
-                  <h4 className="font-bold text-white text-sm">
-                    {step.title}
-                  </h4>
+                  <h4 className="font-bold text-white text-sm">{step.title}</h4>
                   <p className="text-orange-100/80 text-sm leading-relaxed">
                     {step.description}
                   </p>

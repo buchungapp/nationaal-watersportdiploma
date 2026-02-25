@@ -78,8 +78,6 @@ export default async function News() {
             </Link>
           ))}
         </div>
-
-
       </div>
     </section>
   );

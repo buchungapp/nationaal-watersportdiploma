@@ -153,8 +153,6 @@ export default function Comparison() {
             description="Stel je eigen leertraject samen. Of je nu wilt leren zeilen, surfen of motorboot varen, je leert precies wat jij wilt op jouw tempo."
           />
         </div>
-
-
       </div>
     </section>
   );
