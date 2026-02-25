@@ -50,17 +50,17 @@ export default function Comparison() {
           </div>
 
           {/* With NWD */}
-          <div className="rounded-2xl border-2 border-branding-light/30 bg-blue-50/50 p-6 sm:p-8 shadow-sm">
-            <h3 className="text-lg font-bold text-branding-dark mb-6">
+          <div className="rounded-2xl border-2 border-branding-dark bg-branding-dark p-6 sm:p-8 shadow-lg ring-4 ring-branding-dark/10">
+            <h3 className="text-lg font-bold text-white mb-6">
               Leren bij een NWD-locatie
             </h3>
             <ul className="space-y-4">
               {benefitsWith.map((benefit) => (
                 <li key={benefit} className="flex items-start gap-3">
-                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-green-100">
-                    <CheckIcon className="size-3.5 text-green-600" />
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/20">
+                    <CheckIcon className="size-3.5 text-white" />
                   </span>
-                  <span className="text-slate-700 text-sm leading-relaxed">
+                  <span className="text-white/85 text-sm leading-relaxed">
                     {benefit}
                   </span>
                 </li>
