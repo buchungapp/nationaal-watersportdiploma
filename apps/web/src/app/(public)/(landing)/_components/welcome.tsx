@@ -1,4 +1,4 @@
-import { CheckIcon, MegaphoneIcon } from "@heroicons/react/16/solid";
+import { CheckIcon, SparklesIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import MuxVideo from "./mux-video";
@@ -19,7 +19,7 @@ export default function Welcome() {
             className="group w-fit rounded-md border border-white/25 bg-white/10 backdrop-blur-sm px-4 py-2 text-sm text-white font-medium transition-colors hover:bg-white/20 flex items-center gap-2.5 leading-tight mx-auto sm:mx-0"
           >
             <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-branding-orange">
-              <MegaphoneIcon className="size-2.5 text-white" />
+              <SparklesIcon className="size-3 text-white" />
             </span>
             {"Stap over naar het NWD en ontvang \u20AC50 cashback!"}
             <span className="text-white/50 transition-transform group-hover:translate-x-0.5">{"→"}</span>
