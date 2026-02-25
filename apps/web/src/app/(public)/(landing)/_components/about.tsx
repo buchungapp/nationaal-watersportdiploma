@@ -1,46 +1,27 @@
-import Balancer from "react-wrap-balancer";
-import { BoxedButton } from "../../_components/style/buttons";
+import Double from "~/app/_components/brand/double-line";
+import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { FeatureCard } from "./feature-card";
 
 export default function About() {
   return (
-    <section className="container mx-auto flex flex-col gap-12 px-4 lg:px-16">
-      <div className="grid max-w-(--breakpoint-lg) gap-4 self-center text-center">
-        <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-          <Balancer>
-            Kies voor zekerheid met een{" "}
-            <span className="text-branding-orange font-extrabold">
-              NWD-erkende
-            </span>{" "}
-            vaarlocatie.
-          </Balancer>
-        </h2>
-        <p className="text-lg text-slate-600">
-          <Balancer>
-            Het Nationaal Watersportdiploma (NWD) staat voor de hoogste
-            standaard in veiligheid, kwaliteit en plezier op het water.
-          </Balancer>
-        </p>
-
-        <div className="mt-6 mx-auto flex flex-col md:flex-row items-center gap-x-6 gap-y-4">
-          <BoxedButton
-            href="/vaarlocaties/kwaliteitseisen"
-            className="text-white bg-branding-light"
-          >
-            Kwaliteitseisen voor locaties
-          </BoxedButton>
-          <BoxedButton
-            href="/vereniging/manifest"
-            className="text-branding-dark hover:bg-white/10"
-          >
-            Ons manifest
-          </BoxedButton>
+    <section className="mx-auto flex w-full max-w-(--breakpoint-xl) flex-col gap-12">
+      <div className="grid gap-3">
+        <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+          <span className="whitespace-nowrap">De NWD kwaliteitsgarantie</span>
+          <Double />
         </div>
+        <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
+          De zekerheden van een NWD-erkende locatie
+        </h2>
+        <p className="text-lg text-slate-600 text-pretty max-w-2xl">
+          Elke NWD-locatie wordt getoetst op de strengste eisen. Dat betekent
+          dat je altijd kunt rekenen op dezelfde hoge standaard, waar je ook
+          vaart.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <FeatureCard
-          className="md:col-span-2 lg:col-span-2"
           icon={
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -142,6 +123,36 @@ export default function About() {
           title="Complete verzekeringsbescherming"
           description="Uitgebreide dekking inclusief alle wettelijk vereiste verzekeringen voor maximale zekerheid tijdens je verblijf."
         />
+
+        <FeatureCard
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
+              />
+            </svg>
+          }
+          title="Flexibele en modulaire diplomalijn"
+          description="Stel je eigen leertraject samen. Of je nu wilt leren zeilen, surfen of motorboot varen, je leert precies wat jij wilt op jouw tempo."
+        />
+      </div>
+
+      <div className="flex">
+        <BoxedButton
+          href="/vaarlocaties/kwaliteitseisen"
+          className="bg-branding-dark text-white"
+        >
+          Bekijk alle kwaliteitseisen
+        </BoxedButton>
       </div>
     </section>
   );

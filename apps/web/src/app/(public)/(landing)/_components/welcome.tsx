@@ -1,40 +1,62 @@
-import { MegaphoneIcon } from "@heroicons/react/16/solid";
+import { CheckIcon, SparklesIcon } from "@heroicons/react/16/solid";
 import Link from "next/link";
 import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import MuxVideo from "./mux-video";
 
+const heroBullets = [
+  "Behaal een diploma dat er echt toe doet",
+  "Vaar met modern en gekeurd materiaal",
+  "Leer van de beste, gecertificeerde instructeurs",
+];
+
 export default function Welcome() {
   return (
-    <div className="grid grid-cols-1 items-center gap-8 px-4 lg:grid-cols-2 lg:px-16">
-      <div className="grid justify-center gap-10 lg:justify-start">
+    <div className="mx-auto grid w-full max-w-[1800px] grid-cols-1 items-center gap-8 px-4 sm:px-8 lg:grid-cols-[1fr_1fr] lg:gap-12 lg:px-16 xl:grid-cols-[1fr_1fr] xl:px-20">
+      <div className="grid justify-center gap-8 lg:justify-start">
         <div className="grid gap-6 text-white text-center sm:text-left">
           <Link
             href="/actueel/jur1zF0r-van-cwo-naar-nwd-stap-over-naar-de-nieuwe-standaard-en-ontvang-50-euro-cadeau"
-            className="w-fit rounded-full px-6 py-3 text-sm sm:text-base text-branding-dark font-bold bg-white transition-all duration-200 transform hover:scale-105 flex items-center gap-2 mb-4 leading-tight mx-auto sm:mx-0 shadow-xl"
+            className="group w-fit rounded-md border border-white/25 bg-white/10 backdrop-blur-sm px-4 py-2 text-sm text-white font-medium transition-colors hover:bg-white/20 flex items-center gap-2.5 leading-tight mx-auto sm:mx-0"
           >
-            <MegaphoneIcon className="h-4 w-4" />
-            Stap over naar het NWD en ontvang €50 cashback!
-            <span className="text-xs">→</span>
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-branding-orange">
+              <SparklesIcon className="size-3 text-white" />
+            </span>
+            {"Stap over naar het NWD en ontvang \u20AC50 cashback!"}
+            <span className="text-white/50 transition-transform group-hover:translate-x-0.5">
+              {"→"}
+            </span>
           </Link>
-          <h1 className="max-w-lg text-4xl font-bold lg:text-5xl xl:text-6xl">
-            Welkom bij het Nationaal Watersportdiploma.
+          <h1 className="max-w-xl text-4xl font-bold lg:text-5xl xl:text-6xl text-balance">
+            Zorgeloos het water op, met een erkend diploma.
           </h1>
-          <p className="text-xl text-slate-100">
-            Wij zijn klaar voor het nieuwe vaarseizoen, jij ook?
+          <p className="text-lg text-slate-100 max-w-xl leading-relaxed">
+            Kies voor een watersportlocatie die voldoet aan de strengste eisen
+            voor veiligheid en kwaliteit. Zo focus jij je op wat echt telt:
+            plezier maken en beter worden.
           </p>
+          <ul className="grid gap-3 text-left mx-auto sm:mx-0">
+            {heroBullets.map((bullet) => (
+              <li key={bullet} className="flex items-center gap-3">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white/20">
+                  <CheckIcon className="size-3 text-white" />
+                </span>
+                <span className="text-sm text-white/90">{bullet}</span>
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="flex flex-col items-center sm:items-start gap-x-6 gap-y-4 sm:flex-row">
           <BoxedButton
             href="/vaarlocaties"
-            className="bg-white text-branding-dark"
+            className="bg-white text-branding-dark font-bold"
           >
-            Vind een NWD vaarschool
+            Vind jouw vaarlocatie
           </BoxedButton>
           <BoxedButton
             href="/diplomalijn/consument"
             className="text-white hover:bg-white/10"
           >
-            Ontdek de diplomalijn
+            Bekijk alle diploma's en cursussen
           </BoxedButton>
         </div>
       </div>
