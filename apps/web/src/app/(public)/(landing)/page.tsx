@@ -1,5 +1,6 @@
 import PageHero from "../_components/style/page-hero";
 import Comparison from "./_components/comparison";
+import Diplomalijn from "./_components/diplomalijn";
 import Faq from "./_components/faq";
 import Locations from "./_components/locations";
 import News from "./_components/news";
@@ -18,10 +19,11 @@ export default function Home() {
         <Photos />
         <Comparison />
         <Stats />
+        <Diplomalijn />
+        <News />
         <Locations />
         <Faq />
         <Seperator />
-        <News />
       </div>
     </main>
   );
