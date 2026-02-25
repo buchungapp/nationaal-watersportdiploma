@@ -5,6 +5,7 @@ import {
   LifebuoyIcon,
 } from "@heroicons/react/24/outline";
 import type { Metadata, ResolvingMetadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
 import FaqDisclosure from "~/app/(public)/_components/faq/faq";
@@ -492,6 +493,16 @@ export default function Page() {
               Lees de volledige aansluitprocedure
               <ArrowTopRightOnSquareIcon className="size-4" />
             </Link>
+            <div className="mt-6 rounded-xl border border-slate-200 bg-white p-3">
+              <Image
+                src="/images/aansluitingsprocedure/20250923-aansluitprocedure-nwd.png"
+                alt="Schematische weergave van de NWD-aansluitprocedure"
+                width={1200}
+                height={3668}
+                className="mx-auto h-auto max-h-80 w-auto rounded-md sm:max-h-96"
+                sizes="(min-width: 640px) 360px, 100vw"
+              />
+            </div>
           </article>
 
           <article className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
