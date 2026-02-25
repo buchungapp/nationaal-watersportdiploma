@@ -78,9 +78,21 @@ const nwdReasons = [
 ] as const;
 
 const techOutcomes = [
-  "Locaties zijn veel minder tijd kwijt met diploma-uitgifte, met minder fouten.",
-  "Instructeurs vinden het veel makkelijker om voortgang tijdens cursussen bij te houden.",
-  "Consumenten ervaren het platform als overzichtelijk en eenvoudig in gebruik.",
+  {
+    title: "Sneller diploma's uitgeven",
+    description:
+      "Locaties zijn veel minder tijd kwijt met diploma-uitgifte, terwijl er tegelijk minder fouten worden gemaakt.",
+  },
+  {
+    title: "Makkelijker voor instructeurs",
+    description:
+      "Instructeurs vinden het veel eenvoudiger om voortgang tijdens cursussen bij te houden.",
+  },
+  {
+    title: "Overzichtelijk voor consumenten",
+    description:
+      "Consumenten ervaren het platform als helder, logisch en eenvoudig in gebruik.",
+  },
 ] as const;
 
 const scenarioSteps = {
@@ -309,22 +321,34 @@ export default function Page() {
             </p>
           </div>
 
+          <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+            <span className="whitespace-nowrap">
+              Wat we terughoren uit de praktijk
+            </span>
+            <Double />
+          </div>
+
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {techOutcomes.map((item) => (
-              <div
-                key={item}
-                className="rounded-xl border border-slate-200 bg-white p-5"
+              <article
+                key={item.title}
+                className="rounded-xl border-2 border-branding-light/20 bg-branding-light/5 p-5 sm:p-6"
               >
-                <div className="flex items-start gap-2">
-                  <CheckCircleIcon className="mt-0.5 size-5 shrink-0 text-emerald-600" />
-                  <p className="text-sm leading-relaxed text-slate-700">{item}</p>
+                <div className="inline-flex rounded-full bg-white p-2 text-emerald-600 shadow-sm ring-1 ring-emerald-200">
+                  <CheckCircleIcon className="size-5" />
                 </div>
-              </div>
+                <h3 className="mt-4 text-base font-bold text-slate-900">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                  {item.description}
+                </p>
+              </article>
             ))}
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
-            <p className="text-sm leading-relaxed text-slate-700">
+          <div className="border-t border-slate-200 pt-5">
+            <p className="text-sm leading-relaxed text-slate-600">
               Daarnaast is er een API beschikbaar voor koppelingen en eigen
               doorontwikkeling, en is het volledige platform open source zodat
               je ook zelf kunt bijdragen aan verbetering van de sector.
@@ -333,7 +357,7 @@ export default function Page() {
               href="https://github.com/buchungapp/nationaal-watersportdiploma"
               target="_blank"
               rel="noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-branding-dark hover:underline"
+              className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-700 hover:text-branding-dark hover:underline"
             >
               Bekijk het open source platform op GitHub
               <ArrowTopRightOnSquareIcon className="size-4" />
