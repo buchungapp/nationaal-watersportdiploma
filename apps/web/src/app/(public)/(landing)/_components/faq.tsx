@@ -42,7 +42,7 @@ export default async function Faq() {
         </div>
       </div>
 
-      <div className="w-full">
+      <div className="w-full max-w-3xl">
         <FaqAccordion
           items={faqItems.map(({ question, answer, slug }) => ({
             question,
