@@ -78,6 +78,12 @@ const nwdReasons = [
   },
 ] as const;
 
+const techOutcomes = [
+  "Locaties zijn veel minder tijd kwijt met diploma-uitgifte, met minder fouten.",
+  "Instructeurs vinden het veel makkelijker om voortgang tijdens cursussen bij te houden.",
+  "Consumenten ervaren het platform als overzichtelijk en eenvoudig in gebruik.",
+] as const;
+
 const scenarioSteps = {
   cwo: [
     "Inventariseer welke instructeurs al via de KSS geaccrediteerd zijn.",
@@ -283,6 +289,55 @@ export default function Page() {
               className="rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10"
             >
               Secretariaat
+            </Link>
+          </div>
+        </section>
+
+        <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-8 lg:gap-12">
+          <div className="grid gap-3">
+            <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+              <span className="whitespace-nowrap">Ondersteunende techniek</span>
+              <Double />
+            </div>
+            <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
+              Technologie die dient, niet vertraagt
+            </h2>
+            <p className="max-w-3xl text-lg text-slate-600 text-pretty">
+              Het platform is gebouwd voor semi-grote tot grote vaarlocaties,
+              waar snelheid en betrouwbaarheid in de uitvoering cruciaal zijn.
+              Daarom hebben we scherp gestuurd op UI en UX: minder klikken,
+              minder twijfel, minder herstelwerk.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {techOutcomes.map((item) => (
+              <div
+                key={item}
+                className="rounded-xl border border-slate-200 bg-white p-5"
+              >
+                <div className="flex items-start gap-2">
+                  <CheckCircleIcon className="mt-0.5 size-5 shrink-0 text-emerald-600" />
+                  <p className="text-sm leading-relaxed text-slate-700">{item}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
+            <p className="text-sm leading-relaxed text-slate-700">
+              Daarnaast is er een API beschikbaar voor koppelingen en eigen
+              doorontwikkeling, en is het volledige platform open source zodat
+              je ook zelf kunt bijdragen aan verbetering van de sector.
+            </p>
+            <Link
+              href="https://github.com/buchungapp/nationaal-watersportdiploma"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-branding-dark hover:underline"
+            >
+              Bekijk het open source platform op GitHub
+              <ArrowTopRightOnSquareIcon className="size-4" />
             </Link>
           </div>
         </section>
