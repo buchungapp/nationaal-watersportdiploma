@@ -321,12 +321,9 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
-            <span className="whitespace-nowrap">
-              Wat we terughoren uit de praktijk
-            </span>
-            <Double />
-          </div>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Wat we terughoren uit de praktijk
+          </h3>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {techOutcomes.map((item) => (
