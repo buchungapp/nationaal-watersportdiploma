@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
+  boolean,
   foreignKey,
   index,
   jsonb,
@@ -133,13 +134,25 @@ export const studentCompletedCompetency = pgTable(
     studentCurriculumId: uuid("student_curriculum_id").notNull(),
     competencyId: uuid("curriculum_module_competency_id").notNull(),
     certificateId: uuid("certificate_id").notNull(),
+    isMergeConflictDuplicate: boolean("is_merge_conflict_duplicate")
+      .notNull()
+      .default(false),
     ...timestamps,
   },
   (table) => [
     primaryKey({
-      columns: [table.studentCurriculumId, table.competencyId],
+      columns: [
+        table.studentCurriculumId,
+        table.competencyId,
+        table.certificateId,
+      ],
       name: "student_completed_competency_pk",
     }),
+    uniqueIndex("student_completed_competency_unq_active_non_merge")
+      .on(table.studentCurriculumId, table.competencyId)
+      .where(
+        sql`${table.isMergeConflictDuplicate} = false AND ${table.deletedAt} IS NULL`,
+      ),
     foreignKey({
       columns: [table.studentCurriculumId],
       foreignColumns: [studentCurriculum.id],
