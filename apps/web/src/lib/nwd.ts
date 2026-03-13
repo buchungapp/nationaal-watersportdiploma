@@ -1267,6 +1267,19 @@ export const listAllLocations = cache(async () => {
   });
 });
 
+export const listAllLocationsAsAdmin = cache(async () => {
+  return makeRequest(async () => {
+    const requestingUser = await getUserOrThrow();
+    const { isSystemAdmin } = await import("~/lib/authorization");
+
+    if (!isSystemAdmin(requestingUser.email)) {
+      throw new Error("Unauthorized");
+    }
+
+    return await Location.list();
+  });
+});
+
 export const createStudentForLocation = async (
   locationId: string,
   personInput: {
