@@ -15,7 +15,7 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <div
-      className={`group px-6 py-4 rounded-xl border border-gray-200 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-300 ${className}`}
+      className={`group px-5 py-4 sm:px-6 rounded-xl border border-slate-200 transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50/50 ${className}`}
     >
       <div className="inline-flex p-3 rounded-full bg-blue-50 text-branding-dark group-hover:bg-blue-100 group-hover:text-branding-orange transition-all duration-200">
         {icon}

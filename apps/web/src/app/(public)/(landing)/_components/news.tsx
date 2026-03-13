@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Balancer from "react-wrap-balancer";
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
 import { formatDate } from "~/app/(public)/_utils/format-date";
 import { getAllArticles } from "~/lib/articles";
 
@@ -12,67 +11,73 @@ export default async function News() {
   const featuredArticles = articles.slice(0, 3);
 
   return (
-    <section className="container mx-auto grid gap-20 px-4 lg:px-16">
-      <div className="flex w-full flex-col items-center text-center">
-        <div className="flex w-full items-center gap-x-3 font-bold uppercase text-branding-orange">
-          <Double />
-          Actueel
-          <Double />
-        </div>
-        <h3 className="mt-1.5 text-2xl font-bold text-slate-900">
-          De laatste ontwikkelingen.
-        </h3>
-        <p className="mx-auto mt-2.5 max-w-prose text-slate-700">
-          Lees aankondigingen, updates en nieuws over het Nationaal
-          Watersportdiploma. Of je nou consument, instructeur of
-          vaarschoolhouder bent, hier vind je het laatste ontwikkelingen.
-        </p>
-
-        <BoxedButton
-          href="/actueel"
-          className="mt-8 bg-branding-orange text-white"
-        >
-          Meer nieuws
-        </BoxedButton>
-      </div>
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-3">
-        {featuredArticles.map((news) => (
+    <section className="mx-auto w-full max-w-(--breakpoint-xl)">
+      <div className="grid gap-12">
+        <div className="grid gap-3">
+          <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+            <span className="whitespace-nowrap">Actueel</span>
+            <Double />
+          </div>
+          <div className="flex items-end justify-between gap-8">
+            <h3 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              De laatste ontwikkelingen
+            </h3>
+            <Link
+              href="/actueel"
+              className="hidden shrink-0 rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 sm:inline-flex items-center gap-1.5 transition-colors"
+            >
+              Alle artikelen
+              <span aria-hidden="true">{"\u2192"}</span>
+            </Link>
+          </div>
           <Link
-            key={news.slug}
-            href={`/actueel/${news.slug}`}
-            className="-m-4 rounded-3xl p-4 transition-colors hover:bg-slate-100"
+            href="/actueel"
+            className="self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors sm:hidden"
           >
-            <article className="grid">
-              {news.featuredImage ? (
-                <Image
-                  src={news.featuredImage}
-                  alt=""
-                  width={news.featuredImage.width}
-                  height={news.featuredImage.height}
-                  placeholder="blur"
-                  sizes="(min-width: 1024px) 33vw, 100vw"
-                  className="aspect-video rounded-2xl object-cover"
-                />
-              ) : null}
-              <div className="grid gap-2 py-4">
-                <div className="flex items-center gap-x-4">
-                  <span className="text-sm text-branding-dark">
-                    {formatDate(news.date)}
-                  </span>
-                  <span className="text-sm text-slate-400 capitalize">
-                    {news.category}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold">
-                  <Balancer>{news.title}</Balancer>
-                </h3>
-                <p className="text-slate-700 text-justify">
-                  {news.description}
-                </p>
-              </div>
-            </article>
+            Alle artikelen
+            <span aria-hidden="true">{"\u2192"}</span>
           </Link>
-        ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 lg:grid-cols-3">
+          {featuredArticles.map((news) => (
+            <Link
+              key={news.slug}
+              href={`/actueel/${news.slug}`}
+              className="group bg-white transition-colors hover:bg-slate-50"
+            >
+              <article className="grid h-full">
+                {news.featuredImage ? (
+                  <Image
+                    src={news.featuredImage}
+                    alt=""
+                    width={news.featuredImage.width}
+                    height={news.featuredImage.height}
+                    placeholder="blur"
+                    sizes="(min-width: 1024px) 33vw, 100vw"
+                    className="aspect-video w-full object-cover"
+                  />
+                ) : null}
+                <div className="grid gap-3 p-4 sm:p-6 content-start">
+                  <div className="flex items-center gap-x-3">
+                    <span className="text-xs font-medium text-slate-400">
+                      {formatDate(news.date)}
+                    </span>
+                    <span className="text-xs font-medium text-slate-400 capitalize">
+                      {news.category}
+                    </span>
+                  </div>
+                  <h4 className="text-lg font-bold text-slate-900 leading-snug group-hover:text-branding-dark transition-colors">
+                    <Balancer>{news.title}</Balancer>
+                  </h4>
+                  <p className="text-sm text-slate-500 leading-relaxed line-clamp-3">
+                    {news.description}
+                  </p>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

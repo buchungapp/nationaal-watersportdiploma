@@ -81,13 +81,13 @@ export default async function Page() {
             informatie.
           </p>
           <p>
-            Benieuwd aan welke kwaliteitseisen een vaarlocatie moet voldoen om
-            mee te doen aan het NWD?{" "}
+            Benieuwd wat je bij een NWD-vaarlocatie qua veiligheid, kwaliteit en
+            plezier mag verwachten?{" "}
             <Link
-              href="/vaarlocaties/kwaliteitseisen"
+              href="/vaarlocaties/kwaliteitsgarantie"
               className="text-branding-dark hover:underline"
             >
-              Bekijk de kwaliteitseisen
+              Bekijk de kwaliteitsgarantie
             </Link>
             .
           </p>

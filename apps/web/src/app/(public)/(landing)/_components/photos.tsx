@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import Image from "next/image";
 
 import image1 from "./_assets/1.jpg";
@@ -8,30 +7,22 @@ import image5 from "./_assets/5.jpg";
 import image6 from "./_assets/jacht.jpg";
 import image3 from "./_assets/photo-6.png";
 
-export default function Photos() {
-  const rotations = ["rotate-2", "-rotate-2", "rotate-2"];
+const images = [image6, image3, image4, image2, image5, image1];
 
+export default function Photos() {
   return (
-    <section className="-my-2 flex w-full justify-center gap-5 overflow-hidden py-4 sm:gap-8">
-      {[image6, image3, image4, image2, image5, image1].map(
-        (image, imageIndex) => (
-          <div
-            key={image.src}
-            className={clsx(
-              "relative aspect-9/10 w-32 flex-none overflow-hidden rounded-xl bg-zinc-100 sm:w-56 sm:rounded-2xl dark:bg-zinc-800",
-              rotations[imageIndex % rotations.length],
-            )}
-          >
-            <Image
-              src={image}
-              alt=""
-              placeholder="blur"
-              sizes="(min-width: 640px) 18rem, 11rem"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
-        ),
-      )}
+    <section className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-6">
+      {images.map((image) => (
+        <div key={image.src} className="relative aspect-square bg-slate-100">
+          <Image
+            src={image}
+            alt=""
+            placeholder="blur"
+            sizes="(min-width: 640px) 16.67vw, 33.33vw"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </div>
+      ))}
     </section>
   );
 }

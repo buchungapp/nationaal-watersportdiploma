@@ -60,7 +60,10 @@ export default function Page() {
         <p>
           Voor de kwaliteitseisen die gesteld worden aan vaarlocaties verwijzen
           we je naar de{" "}
-          <Link href="/vaarlocaties/kwaliteitseisen">kwaliteitseisen</Link>.
+          <Link href="/vaarlocaties/kwaliteitsgarantie">
+            kwaliteitsgarantie
+          </Link>
+          .
         </p>
       </div>
     </article>

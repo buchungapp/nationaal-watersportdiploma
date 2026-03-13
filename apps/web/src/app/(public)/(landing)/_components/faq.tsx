@@ -1,88 +1,104 @@
 import Link from "next/link";
 import Double from "~/app/_components/brand/double-line";
-import { BoxedButton } from "~/app/(public)/_components/style/buttons";
-import { getHelpArticles } from "~/lib/article-2";
+import { getHelpArticles, getHelpFaqs } from "~/lib/article-2";
+import FaqAccordion from "./faq-accordion";
+import FaqSearch from "./faq-search";
 
 export default async function Faq() {
-  const articles = await getHelpArticles().then((articles) =>
-    articles
-      .filter((x) => x.metadata.isPopulair)
-      .sort((a, b) => {
-        // sort on lastUpdatedAt
-        const dateA = new Date(a.metadata.lastUpdatedAt);
-        const dateB = new Date(b.metadata.lastUpdatedAt);
-        return dateB.getTime() - dateA.getTime();
-      }),
-  );
+  const [allArticles, questions] = await Promise.all([
+    getHelpArticles(),
+    getHelpFaqs(),
+  ]);
 
-  // biome-ignore lint/style/noNonNullAssertion: intentional
-  const featuredArticle = articles.shift()!;
+  const popularArticles = allArticles
+    .filter((x) => x.metadata.isPopulair)
+    .sort((a, b) => {
+      const dateA = new Date(a.metadata.lastUpdatedAt);
+      const dateB = new Date(b.metadata.lastUpdatedAt);
+      return dateB.getTime() - dateA.getTime();
+    })
+    .slice(0, 5);
+
+  const faqItems = popularArticles.map((article) => ({
+    question: article.metadata.title,
+    answer: article.metadata.summary,
+    slug: article.slug,
+  }));
 
   return (
-    <section className="container mx-auto grid gap-20 px-4 lg:px-16">
-      <div className="flex w-full flex-col">
-        <div className="flex w-full whitespace-nowrap items-center gap-x-3 font-bold uppercase text-branding-dark">
-          Hoe zit het?
+    <section className="mx-auto grid w-full max-w-(--breakpoint-xl) gap-8 lg:gap-12">
+      {/* Header */}
+      <div className="grid gap-3">
+        <div className="flex items-center gap-x-3 font-bold uppercase text-branding-dark">
+          <span className="whitespace-nowrap">Al je vragen beantwoord</span>
           <Double />
         </div>
-        <h3 className="mt-1.5 text-2xl font-bold text-slate-900">
-          Helpcentrum
-        </h3>
-        <p className="mt-2.5 max-w-prose text-slate-700">
-          Heb je vragen over het NWD? De artikelen in ons helpcentrum helpen je
-          op weg.
-        </p>
-
-        <BoxedButton href="/help" className="mt-8 bg-branding-dark text-white">
-          Bezoek het helpcentrum
-        </BoxedButton>
+        <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl text-balance">
+          Veelgestelde vragen
+        </h2>
       </div>
 
-      <div className="bg-white">
-        <div className="mx-auto grid grid-cols-1 gap-x-8 gap-y-12 sm:gap-y-16 lg:grid-cols-2">
-          <article className="mx-auto w-full max-w-2xl lg:mx-0 lg:max-w-lg">
-            <h2
-              id="featured-post"
-              className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"
+      {/* Two-column: FAQ content + support card */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:gap-12 items-start">
+        {/* Left: search + accordion */}
+        <div className="grid gap-8">
+          <FaqSearch questions={questions} articles={allArticles} />
+          <FaqAccordion
+            items={faqItems.map(({ question, answer, slug }) => ({
+              question,
+              answer,
+              link: `/help/artikel/${slug}`,
+            }))}
+          />
+        </div>
+
+        {/* Right: sticky support card */}
+        <div className="hidden lg:block lg:sticky lg:top-8">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 grid gap-4">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-branding-dark/10">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="size-5 text-branding-dark"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"
+                />
+              </svg>
+            </div>
+            <div className="grid gap-1.5">
+              <h3 className="text-base font-bold text-slate-900">
+                Kun je het antwoord niet vinden?
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Zoek verder in ons helpcentrum of neem direct contact op. We
+                helpen je graag.
+              </p>
+            </div>
+            <Link
+              href="/help"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-branding-dark px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-branding-dark/90"
             >
-              {featuredArticle.metadata.title}
-            </h2>
-            <p className="mt-4 text-lg leading-8 text-slate-600">
-              {featuredArticle.metadata.summary}
-            </p>
-            <div className="mt-4 flex flex-col justify-between gap-6 sm:mt-8 sm:flex-row-reverse sm:gap-8 lg:mt-4 lg:flex-col">
-              <div className="flex">
-                <Link
-                  href={`/help/artikel/${featuredArticle.slug}`}
-                  className="text-sm font-semibold leading-6 text-branding-dark"
-                  aria-describedby="featured-post"
-                >
-                  Verder lezen <span aria-hidden="true">&rarr;</span>
-                </Link>
-              </div>
-            </div>
-          </article>
-          <div className="mx-auto w-full max-w-2xl border-t border-slate-900/10 pt-12 sm:pt-16 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-0">
-            <div className="-my-12 divide-y divide-slate-900/10">
-              {articles.map((article) => (
-                <article key={article.slug} className="py-12">
-                  <div className="group relative max-w-xl">
-                    <h2 className="mt-2 text-lg font-semibold text-slate-900 group-hover:text-slate-600">
-                      <Link href={`/help/artikel/${article.slug}`}>
-                        <span className="absolute inset-0" />
-                        {article.metadata.title}
-                      </Link>
-                    </h2>
-                    <p className="mt-4 text-sm leading-6 text-slate-600">
-                      {article.metadata.summary}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
+              Naar het helpcentrum
+              <span aria-hidden="true">{"\u2192"}</span>
+            </Link>
           </div>
         </div>
       </div>
+
+      {/* Mobile support link (shown below accordion on small screens) */}
+      <Link
+        href="/help"
+        className="self-start rounded-full bg-branding-dark/5 px-4 py-2 text-sm font-bold text-branding-dark hover:bg-branding-dark/10 inline-flex items-center gap-1.5 transition-colors lg:hidden"
+      >
+        Naar het helpcentrum
+        <span aria-hidden="true">{"\u2192"}</span>
+      </Link>
     </section>
   );
 }
