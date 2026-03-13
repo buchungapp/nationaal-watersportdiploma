@@ -486,6 +486,25 @@ export const listCertificatesForPerson = cache(
   },
 );
 
+export const listCertificatesForPersonAsAdmin = cache(
+  async (personId: string) => {
+    return makeRequest(async () => {
+      const requestingUser = await getUserOrThrow();
+      const { isSystemAdmin } = await import("~/lib/authorization");
+
+      if (!isSystemAdmin(requestingUser.email)) {
+        throw new Error("Unauthorized");
+      }
+
+      const certificates = await Certificate.list({
+        filter: { personId },
+      });
+
+      return certificates.items;
+    });
+  },
+);
+
 export const listExternalCertificatesForPerson = cache(
   async (personId: string, locationId?: string) => {
     return makeRequest(async () => {
