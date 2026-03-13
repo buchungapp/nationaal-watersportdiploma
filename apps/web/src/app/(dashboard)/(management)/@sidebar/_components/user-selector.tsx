@@ -23,6 +23,7 @@ import { SidebarItem } from "../../../_components/sidebar";
 
 async function UserSelectorContent() {
   const currentUser = await getUserOrThrow();
+  const primaryPerson = currentUser.persons.find((p) => p.isPrimary);
 
   return (
     <Dropdown>
@@ -53,7 +54,7 @@ async function UserSelectorContent() {
           <UsersIcon />
           <DropdownLabel>Mijn account</DropdownLabel>
         </DropdownItem>
-        <DropdownItem href="/profiel">
+        <DropdownItem href={primaryPerson ? `/profiel/${primaryPerson.handle}` : "/account"}>
           <UserIcon />
           <DropdownLabel>Mijn profiel</DropdownLabel>
         </DropdownItem>

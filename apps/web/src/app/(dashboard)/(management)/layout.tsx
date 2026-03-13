@@ -7,6 +7,7 @@ import {
 import { constants } from "@nawadi/lib";
 import type React from "react";
 import { Github } from "~/app/_components/socials";
+import { getUserOrThrow } from "~/lib/nwd";
 import { LogOutDropdownItem } from "../_components/auth";
 import {
   Dropdown,
@@ -25,13 +26,15 @@ import {
 import { SidebarLayout } from "../_components/sidebar-layout";
 import { UserAvatar } from "../_components/user-avatar";
 
-export default function Layout({
+export default async function Layout({
   children,
   sidebar,
 }: Readonly<{
   children: React.ReactNode;
   sidebar: React.ReactNode;
 }>) {
+  const currentUser = await getUserOrThrow();
+  const primaryPerson = currentUser.persons.find((p) => p.isPrimary);
   return (
     <SidebarLayout
       navbar={
@@ -47,7 +50,7 @@ export default function Layout({
                   <UsersIcon />
                   <DropdownLabel>Mijn account</DropdownLabel>
                 </DropdownItem>
-                <DropdownItem href="/profiel">
+                <DropdownItem href={primaryPerson ? `/profiel/${primaryPerson.handle}` : "/account"}>
                   <UserIcon />
                   <DropdownLabel>Mijn profiel</DropdownLabel>
                 </DropdownItem>
