@@ -1,13 +1,13 @@
 import type { Instrumentation } from "next";
 
-export async function register() {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./instrumentation/instrumentation.node.ts");
-    return;
-  }
+// export async function register() {
+//   if (process.env.NEXT_RUNTIME === "nodejs") {
+//     await import("./instrumentation/instrumentation.node.ts");
+//     return;
+//   }
 
-  await import("./instrumentation/instrumentation.edge.ts");
-}
+//   await import("./instrumentation/instrumentation.edge.ts");
+// }
 
 export const onRequestError: Instrumentation.onRequestError = async (
   err,

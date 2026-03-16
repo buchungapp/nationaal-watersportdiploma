@@ -14,7 +14,7 @@ try {
   console.log("pnpm build completed successfully");
 
   console.log("Executing seed script...");
-  cp.execFileSync("node", ["./packages/scripts/out/seed/seed"], {
+  cp.execFileSync("node", ["./packages/scripts/out/seed/seed.js"], {
     ...options,
     env: {
       ...process.env,
