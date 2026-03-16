@@ -42,7 +42,13 @@ async function KwalificatiesContent({
   return (
     <>
       <PersonInfo person={person} />
-      <Suspense fallback={<div className="mt-8 text-sm text-gray-500">Eigenvaardigheid laden...</div>}>
+      <Suspense
+        fallback={
+          <div className="mt-8 text-sm text-gray-500">
+            Eigenvaardigheid laden...
+          </div>
+        }
+      >
         <EigenvaardigheidOverview personId={person.id} />
       </Suspense>
       <KwalificatiesTable
