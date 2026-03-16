@@ -35,19 +35,16 @@ export async function EigenvaardigheidOverview({
     );
   }
 
-  const grouped: GroupedByDiscipline[] = certificates.reduce(
-    (acc, cert) => {
-      const courseTitle = cert.program.course.title;
-      let group = acc.find((g) => g.courseTitle === courseTitle);
-      if (!group) {
-        group = { courseTitle, certificates: [] };
-        acc.push(group);
-      }
-      group.certificates.push(cert);
-      return acc;
-    },
-    [] as GroupedByDiscipline[],
-  );
+  const grouped: GroupedByDiscipline[] = certificates.reduce((acc, cert) => {
+    const courseTitle = cert.program.course.title;
+    let group = acc.find((g) => g.courseTitle === courseTitle);
+    if (!group) {
+      group = { courseTitle, certificates: [] };
+      acc.push(group);
+    }
+    group.certificates.push(cert);
+    return acc;
+  }, [] as GroupedByDiscipline[]);
 
   return (
     <div className="mt-8">
