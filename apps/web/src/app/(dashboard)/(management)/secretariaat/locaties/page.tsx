@@ -27,7 +27,9 @@ export default async function LocatiesPage() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-8">
         <Heading level={1}>Vaarlocaties</Heading>
-        <Text className="mt-2">Overzicht van alle vaarlocaties.</Text>
+        <Text className="mt-2">
+          Overzicht van alle vaarlocaties.
+        </Text>
       </div>
 
       <Suspense
