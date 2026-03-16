@@ -3,13 +3,13 @@
 import * as Headless from "@headlessui/react";
 import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import type { User } from "@nawadi/core";
-import clsx from "clsx";
 import {
   createColumnHelper,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import clsx from "clsx";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -323,7 +323,10 @@ function RowActions({ location }: { location: Location }) {
             disabled={!selectedPersonId}
             onClick={() => {
               if (selectedPersonId) {
-                execute({ locationId: location.id, personId: selectedPersonId });
+                execute({
+                  locationId: location.id,
+                  personId: selectedPersonId,
+                });
               }
             }}
           >
