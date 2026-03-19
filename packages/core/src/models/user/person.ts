@@ -801,94 +801,429 @@ export const mergePersons = wrapCommand(
           throw new Error("One or both persons not found");
         }
 
-        await Promise.all([
-          // Transfer actors
-          (async () => {
-            const actors = await tx
-              .select({
-                id: s.actor.id,
-                type: s.actor.type,
-                locationId: s.actor.locationId,
-              })
-              .from(s.actor)
-              .where(eq(s.actor.personId, input.personId));
+        // Transfer actors first so allocations point to the target person's actors.
+        const actors = await tx
+          .select({
+            id: s.actor.id,
+            type: s.actor.type,
+            locationId: s.actor.locationId,
+          })
+          .from(s.actor)
+          .where(eq(s.actor.personId, input.personId));
 
-            if (actors.length > 0) {
-              await tx
-                .insert(s.actor)
-                .values(
-                  actors.map((actor) => ({
-                    ...actor,
-                    id: undefined,
-                    personId: input.targetPersonId,
-                  })),
-                )
-                .onConflictDoNothing();
+        if (actors.length > 0) {
+          await tx
+            .insert(s.actor)
+            .values(
+              actors.map((actor) => ({
+                ...actor,
+                id: undefined,
+                personId: input.targetPersonId,
+              })),
+            )
+            .onConflictDoNothing();
 
-              const [targetPersonActors, cohortAllocationsToUpdate] =
-                await Promise.all([
-                  tx
-                    .select({
-                      id: s.actor.id,
-                      type: s.actor.type,
-                      locationId: s.actor.locationId,
-                    })
-                    .from(s.actor)
-                    .where(eq(s.actor.personId, input.targetPersonId)),
-                  tx
-                    .select({
-                      id: s.cohortAllocation.id,
-                      actorId: s.cohortAllocation.actorId,
-                    })
-                    .from(s.cohortAllocation)
-                    .where(
-                      inArray(
-                        s.cohortAllocation.actorId,
-                        actors.map((actor) => actor.id),
-                      ),
-                    ),
-                ]);
+          const [targetPersonActors, cohortAllocationsToUpdate] =
+            await Promise.all([
+              tx
+                .select({
+                  id: s.actor.id,
+                  type: s.actor.type,
+                  locationId: s.actor.locationId,
+                })
+                .from(s.actor)
+                .where(eq(s.actor.personId, input.targetPersonId)),
+              tx
+                .select({
+                  id: s.cohortAllocation.id,
+                  actorId: s.cohortAllocation.actorId,
+                })
+                .from(s.cohortAllocation)
+                .where(
+                  inArray(
+                    s.cohortAllocation.actorId,
+                    actors.map((actor) => actor.id),
+                  ),
+                ),
+            ]);
 
-              for (const cohortAllocation of cohortAllocationsToUpdate) {
-                const currentActor = actors.find(
-                  (actor) => actor.id === cohortAllocation.actorId,
-                );
+          for (const cohortAllocation of cohortAllocationsToUpdate) {
+            const currentActor = actors.find(
+              (actor) => actor.id === cohortAllocation.actorId,
+            );
 
-                if (!currentActor) {
-                  throw new Error("Actor not found");
-                }
-
-                const targetActor = targetPersonActors.filter(
-                  (actor) =>
-                    actor.locationId === currentActor.locationId &&
-                    actor.type === currentActor.type,
-                );
-
-                if (targetActor.length !== 1) {
-                  throw new Error("Target actor not found");
-                }
-
-                await tx
-                  .update(s.cohortAllocation)
-                  // biome-ignore lint/style/noNonNullAssertion: intentional
-                  .set({ actorId: targetActor[0]!.id })
-                  .where(eq(s.cohortAllocation.id, cohortAllocation.id));
-              }
-
-              await tx
-                .delete(s.actor)
-                .where(eq(s.actor.personId, input.personId));
+            if (!currentActor) {
+              throw new Error("Actor not found");
             }
-          })(),
 
-          // Transfer student curricula
-          tx
+            const targetActor = targetPersonActors.filter(
+              (actor) =>
+                actor.locationId === currentActor.locationId &&
+                actor.type === currentActor.type,
+            );
+
+            if (targetActor.length !== 1) {
+              throw new Error("Target actor not found");
+            }
+
+            await tx
+              .update(s.cohortAllocation)
+              // biome-ignore lint/style/noNonNullAssertion: intentional
+              .set({ actorId: targetActor[0]!.id })
+              .where(eq(s.cohortAllocation.id, cohortAllocation.id));
+          }
+
+          await tx.delete(s.actor).where(eq(s.actor.personId, input.personId));
+        }
+
+        const sourceStudentCurricula = await tx
+          .select({
+            id: s.studentCurriculum.id,
+            curriculumId: s.studentCurriculum.curriculumId,
+            gearTypeId: s.studentCurriculum.gearTypeId,
+            createdAt: s.studentCurriculum.createdAt,
+          })
+          .from(s.studentCurriculum)
+          .where(eq(s.studentCurriculum.personId, input.personId));
+
+        const targetStudentCurricula = await tx
+          .select({
+            id: s.studentCurriculum.id,
+            curriculumId: s.studentCurriculum.curriculumId,
+            gearTypeId: s.studentCurriculum.gearTypeId,
+            createdAt: s.studentCurriculum.createdAt,
+          })
+          .from(s.studentCurriculum)
+          .where(eq(s.studentCurriculum.personId, input.targetPersonId));
+
+        const targetCurriculumByIdentity = new Map<
+          string,
+          {
+            id: string;
+            curriculumId: string;
+            gearTypeId: string;
+            createdAt: string;
+          }
+        >(
+          targetStudentCurricula.map((curriculum) => [
+            `${curriculum.curriculumId}:${curriculum.gearTypeId}`,
+            curriculum,
+          ]),
+        );
+
+        const conflictingCurriculumPairs: {
+          sourceStudentCurriculumId: string;
+          targetStudentCurriculumId: string;
+        }[] = [];
+
+        const nonConflictingStudentCurriculumIds: string[] = [];
+
+        for (const sourceStudentCurriculum of sourceStudentCurricula) {
+          const matchingTargetStudentCurriculum = targetCurriculumByIdentity.get(
+            `${sourceStudentCurriculum.curriculumId}:${sourceStudentCurriculum.gearTypeId}`,
+          );
+
+          if (!matchingTargetStudentCurriculum) {
+            nonConflictingStudentCurriculumIds.push(sourceStudentCurriculum.id);
+            continue;
+          }
+
+          conflictingCurriculumPairs.push({
+            sourceStudentCurriculumId: sourceStudentCurriculum.id,
+            targetStudentCurriculumId: matchingTargetStudentCurriculum.id,
+          });
+        }
+
+        if (nonConflictingStudentCurriculumIds.length > 0) {
+          await tx
             .update(s.studentCurriculum)
             .set({
               personId: input.targetPersonId,
             })
-            .where(eq(s.studentCurriculum.personId, input.personId)),
+            .where(
+              inArray(
+                s.studentCurriculum.id,
+                nonConflictingStudentCurriculumIds,
+              ),
+            );
+        }
 
+        for (const {
+          sourceStudentCurriculumId,
+          targetStudentCurriculumId,
+        } of conflictingCurriculumPairs) {
+          const targetCompletedCompetencies = await tx
+            .select({
+              competencyId: s.studentCompletedCompetency.competencyId,
+            })
+            .from(s.studentCompletedCompetency)
+            .where(
+              and(
+                eq(
+                  s.studentCompletedCompetency.studentCurriculumId,
+                  targetStudentCurriculumId,
+                ),
+                isNull(s.studentCompletedCompetency.deletedAt),
+              ),
+            );
+
+          if (targetCompletedCompetencies.length > 0) {
+            await tx
+              .update(s.studentCompletedCompetency)
+              .set({
+                isMergeConflictDuplicate: true,
+              })
+              .where(
+                and(
+                  eq(
+                    s.studentCompletedCompetency.studentCurriculumId,
+                    sourceStudentCurriculumId,
+                  ),
+                  inArray(
+                    s.studentCompletedCompetency.competencyId,
+                    targetCompletedCompetencies.map(
+                      (competency) => competency.competencyId,
+                    ),
+                  ),
+                  isNull(s.studentCompletedCompetency.deletedAt),
+                ),
+              );
+          }
+
+          await Promise.all([
+            tx
+              .update(s.studentCompletedCompetency)
+              .set({
+                studentCurriculumId: targetStudentCurriculumId,
+              })
+              .where(
+                eq(
+                  s.studentCompletedCompetency.studentCurriculumId,
+                  sourceStudentCurriculumId,
+                ),
+              ),
+            tx
+              .update(s.certificate)
+              .set({
+                studentCurriculumId: targetStudentCurriculumId,
+              })
+              .where(
+                eq(s.certificate.studentCurriculumId, sourceStudentCurriculumId),
+              ),
+          ]);
+
+          const [sourceAllocations, targetAllocations] = await Promise.all([
+            tx
+              .select({
+                id: s.cohortAllocation.id,
+                cohortId: s.cohortAllocation.cohortId,
+                actorId: s.cohortAllocation.actorId,
+                createdAt: s.cohortAllocation.createdAt,
+              })
+              .from(s.cohortAllocation)
+              .where(
+                and(
+                  eq(
+                    s.cohortAllocation.studentCurriculumId,
+                    sourceStudentCurriculumId,
+                  ),
+                  isNull(s.cohortAllocation.deletedAt),
+                ),
+              ),
+            tx
+              .select({
+                id: s.cohortAllocation.id,
+                cohortId: s.cohortAllocation.cohortId,
+                actorId: s.cohortAllocation.actorId,
+                createdAt: s.cohortAllocation.createdAt,
+              })
+              .from(s.cohortAllocation)
+              .where(
+                and(
+                  eq(
+                    s.cohortAllocation.studentCurriculumId,
+                    targetStudentCurriculumId,
+                  ),
+                  isNull(s.cohortAllocation.deletedAt),
+                ),
+              ),
+          ]);
+
+          const targetAllocationByIdentity = new Map<
+            string,
+            {
+              id: string;
+              cohortId: string;
+              actorId: string;
+              createdAt: string;
+            }
+          >(
+            targetAllocations.map((allocation) => [
+              `${allocation.cohortId}:${allocation.actorId}`,
+              allocation,
+            ]),
+          );
+
+          for (const sourceAllocation of sourceAllocations) {
+            const collidingTargetAllocation = targetAllocationByIdentity.get(
+              `${sourceAllocation.cohortId}:${sourceAllocation.actorId}`,
+            );
+
+            if (!collidingTargetAllocation) {
+              await tx
+                .update(s.cohortAllocation)
+                .set({
+                  studentCurriculumId: targetStudentCurriculumId,
+                })
+                .where(eq(s.cohortAllocation.id, sourceAllocation.id));
+              continue;
+            }
+
+            const [sourceHasLinkedCertificates, targetHasLinkedCertificates] =
+              await Promise.all([
+                tx
+                  .select({
+                    count: countDistinct(s.certificate.id),
+                  })
+                  .from(s.certificate)
+                  .where(
+                    and(
+                      eq(s.certificate.cohortAllocationId, sourceAllocation.id),
+                      isNull(s.certificate.deletedAt),
+                    ),
+                  )
+                  .then((rows) => Number(rows[0]?.count ?? 0) > 0),
+                tx
+                  .select({
+                    count: countDistinct(s.certificate.id),
+                  })
+                  .from(s.certificate)
+                  .where(
+                    and(
+                      eq(
+                        s.certificate.cohortAllocationId,
+                        collidingTargetAllocation.id,
+                      ),
+                      isNull(s.certificate.deletedAt),
+                    ),
+                  )
+                  .then((rows) => Number(rows[0]?.count ?? 0) > 0),
+              ]);
+
+            let winnerAllocation = sourceAllocation;
+            let loserAllocation = collidingTargetAllocation;
+
+            if (sourceHasLinkedCertificates !== targetHasLinkedCertificates) {
+              if (targetHasLinkedCertificates) {
+                winnerAllocation = collidingTargetAllocation;
+                loserAllocation = sourceAllocation;
+              }
+            } else if (
+              dayjs(sourceAllocation.createdAt).isAfter(
+                collidingTargetAllocation.createdAt,
+              ) ||
+              (dayjs(sourceAllocation.createdAt).isSame(
+                collidingTargetAllocation.createdAt,
+              ) &&
+                sourceAllocation.id > collidingTargetAllocation.id)
+            ) {
+              winnerAllocation = collidingTargetAllocation;
+              loserAllocation = sourceAllocation;
+            }
+
+            const winnerProgressCompetencies = await tx
+              .selectDistinct({
+                competencyId: s.studentCohortProgress.competencyId,
+              })
+              .from(s.studentCohortProgress)
+              .where(
+                eq(
+                  s.studentCohortProgress.cohortAllocationId,
+                  winnerAllocation.id,
+                ),
+              );
+
+            if (winnerProgressCompetencies.length > 0) {
+              await tx
+                .delete(s.studentCohortProgress)
+                .where(
+                  and(
+                    eq(
+                      s.studentCohortProgress.cohortAllocationId,
+                      loserAllocation.id,
+                    ),
+                    inArray(
+                      s.studentCohortProgress.competencyId,
+                      winnerProgressCompetencies.map(
+                        (competency) => competency.competencyId,
+                      ),
+                    ),
+                  ),
+                );
+            }
+
+            await tx
+              .update(s.studentCohortProgress)
+              .set({
+                cohortAllocationId: winnerAllocation.id,
+              })
+              .where(
+                eq(
+                  s.studentCohortProgress.cohortAllocationId,
+                  loserAllocation.id,
+                ),
+              );
+
+            await Promise.all([
+              tx
+                .update(s.certificate)
+                .set({
+                  cohortAllocationId: null,
+                })
+                .where(
+                  and(
+                    eq(s.certificate.cohortAllocationId, loserAllocation.id),
+                    isNull(s.certificate.deletedAt),
+                  ),
+                ),
+              tx
+                .update(s.cohortAllocation)
+                .set({
+                  deletedAt: new Date().toISOString(),
+                  updatedAt: sql`NOW()`,
+                  studentCurriculumId: targetStudentCurriculumId,
+                })
+                .where(eq(s.cohortAllocation.id, loserAllocation.id)),
+            ]);
+
+            if (winnerAllocation.id === sourceAllocation.id) {
+              await tx
+                .update(s.cohortAllocation)
+                .set({
+                  studentCurriculumId: targetStudentCurriculumId,
+                })
+                .where(eq(s.cohortAllocation.id, winnerAllocation.id));
+            }
+          }
+
+          await tx
+            .update(s.cohortAllocation)
+            .set({
+              studentCurriculumId: targetStudentCurriculumId,
+            })
+            .where(
+              eq(
+                s.cohortAllocation.studentCurriculumId,
+                sourceStudentCurriculumId,
+              ),
+            );
+
+          await tx
+            .delete(s.studentCurriculum)
+            .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId));
+        }
+
+        await Promise.all([
           // Transfer location links
           (async () => {
             const links = await tx
