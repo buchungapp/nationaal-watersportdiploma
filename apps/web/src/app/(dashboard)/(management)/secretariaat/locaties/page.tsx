@@ -11,9 +11,7 @@ async function LocatiesTableData(props: {
   const searchParams = await props.searchParams;
   const locations = await listAllLocationsAsAdmin();
 
-  const paginationLimit = searchParams?.limit
-    ? Number(searchParams.limit)
-    : 25;
+  const paginationLimit = searchParams?.limit ? Number(searchParams.limit) : 25;
   const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
 
   const paginatedLocations = locations.slice(
