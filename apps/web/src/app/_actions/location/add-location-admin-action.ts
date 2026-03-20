@@ -1,10 +1,10 @@
 "use server";
 
-import { User } from "@nawadi/core";
+import { User, withSupabaseClient } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isSystemAdmin } from "~/lib/authorization";
-import { getUserOrThrow } from "~/lib/nwd";
+import { getUserOrThrow, supabaseConfig } from "~/lib/nwd";
 import { actionClientWithMeta } from "../safe-action";
 
 export const addLocationAdminAsSystemAdminAction = actionClientWithMeta
@@ -21,15 +21,17 @@ export const addLocationAdminAsSystemAdminAction = actionClientWithMeta
       throw new Error("Geen toegang");
     }
 
-    await User.Person.createLocationLink({
-      personId,
-      locationId,
-    });
+    await withSupabaseClient(supabaseConfig, async () => {
+      await User.Person.createLocationLink({
+        personId,
+        locationId,
+      });
 
-    await User.Actor.upsert({
-      personId,
-      locationId,
-      type: "location_admin",
+      await User.Actor.upsert({
+        personId,
+        locationId,
+        type: "location_admin",
+      });
     });
 
     revalidatePath("/secretariaat/locaties", "page");
