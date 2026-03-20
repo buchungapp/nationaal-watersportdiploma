@@ -6,7 +6,7 @@ type Certificate = Awaited<
 >[number];
 
 interface GroupedByDiscipline {
-  courseTitle: string;
+  disciplineTitle: string;
   certificates: Certificate[];
 }
 
@@ -36,10 +36,10 @@ export async function EigenvaardigheidOverview({
   }
 
   const grouped: GroupedByDiscipline[] = certificates.reduce((acc, cert) => {
-    const courseTitle = cert.program.course.title;
-    let group = acc.find((g) => g.courseTitle === courseTitle);
+    const disciplineTitle = cert.program.course.discipline.title;
+    let group = acc.find((g) => g.disciplineTitle === disciplineTitle);
     if (!group) {
-      group = { courseTitle, certificates: [] };
+      group = { disciplineTitle, certificates: [] };
       acc.push(group);
     }
     group.certificates.push(cert);
@@ -60,12 +60,12 @@ export async function EigenvaardigheidOverview({
       <div className="space-y-4">
         {grouped.map((group) => (
           <div
-            key={group.courseTitle}
+            key={group.disciplineTitle}
             className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg"
           >
             <div className="px-4 py-5 sm:px-6">
               <h4 className="text-base font-medium text-gray-900 dark:text-white capitalize">
-                {group.courseTitle}
+                {group.disciplineTitle}
               </h4>
             </div>
             <div className="border-t border-gray-200 dark:border-gray-700">
