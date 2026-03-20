@@ -5,13 +5,28 @@ import { isSystemAdmin } from "~/lib/authorization";
 import { getUserOrThrow, listAllLocationsAsAdmin } from "~/lib/nwd";
 import Table from "./_components/table";
 
-async function LocatiesTableData() {
+async function LocatiesTableData(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const searchParams = await props.searchParams;
   const locations = await listAllLocationsAsAdmin();
 
-  return <Table locations={locations} totalItems={locations.length} />;
+  const paginationLimit = searchParams?.limit
+    ? Number(searchParams.limit)
+    : 25;
+  const currentPage = searchParams?.page ? Number(searchParams.page) : 1;
+
+  const paginatedLocations = locations.slice(
+    (currentPage - 1) * paginationLimit,
+    currentPage * paginationLimit,
+  );
+
+  return <Table locations={paginatedLocations} totalItems={locations.length} />;
 }
 
-export default async function LocatiesPage() {
+export default async function LocatiesPage(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await getUserOrThrow();
 
   if (!isSystemAdmin(user.email)) {
@@ -33,7 +48,7 @@ export default async function LocatiesPage() {
       <Suspense
         fallback={<Table locations={[]} totalItems={0} placeholderRows={10} />}
       >
-        <LocatiesTableData />
+        <LocatiesTableData searchParams={props.searchParams} />
       </Suspense>
     </div>
   );
