@@ -34,6 +34,15 @@ async function PersonsDropdownMenu() {
         <DropdownItem disabled>
           <DropdownLabel>Geen personen beschikbaar.</DropdownLabel>
         </DropdownItem>
+        {showSecretariaat && (
+          <>
+            <DropdownDivider />
+            <DropdownItem href="/secretariaat">
+              <Cog6ToothIcon />
+              <DropdownLabel>Secretariaat</DropdownLabel>
+            </DropdownItem>
+          </>
+        )}
         <DropdownDivider />
         <DropdownItem href="/account">
           <UserIcon />
