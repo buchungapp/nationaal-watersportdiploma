@@ -67,9 +67,13 @@ export const completeCompetency = wrapCommand(
         throw new Error("No (mutable) certificate found");
       }
 
-      const competencies = Array.isArray(input.competencyId)
-        ? input.competencyId
-        : [input.competencyId];
+      const competencies = Array.from(
+        new Set(
+          Array.isArray(input.competencyId)
+            ? input.competencyId
+            : [input.competencyId],
+        ),
+      );
 
       // Check if all competencies belong to the student's curriculum
       const validCompetencies = await query
@@ -102,11 +106,34 @@ export const completeCompetency = wrapCommand(
         );
       }
 
+      const existingCompletedCompetencies = await query
+        .select({
+          competencyId: s.studentCompletedCompetency.competencyId,
+        })
+        .from(s.studentCompletedCompetency)
+        .where(
+          and(
+            eq(
+              s.studentCompletedCompetency.studentCurriculumId,
+              input.studentCurriculumId,
+            ),
+            inArray(s.studentCompletedCompetency.competencyId, competencies),
+            isNull(s.studentCompletedCompetency.deletedAt),
+          ),
+        );
+
+      if (existingCompletedCompetencies.length > 0) {
+        throw new Error(
+          `Competencies [${existingCompletedCompetencies.map((competency) => competency.competencyId).join(", ")}] already completed for this student curriculum`,
+        );
+      }
+
       await query.insert(s.studentCompletedCompetency).values(
         competencies.map((competencyId) => ({
           studentCurriculumId: input.studentCurriculumId,
           competencyId,
           certificateId: input.certificateId,
+          isMergeConflictDuplicate: false,
         })),
       );
 

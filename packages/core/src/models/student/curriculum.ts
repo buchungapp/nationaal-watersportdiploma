@@ -404,9 +404,9 @@ export const listProgressByPersonId = wrapQuery(
         ? input.personId
         : [input.personId];
 
-      const withModules = query.$with("modules").as(
+      const withModulesRanked = query.$with("modules_ranked").as(
         query
-          .selectDistinct({
+          .select({
             personId: aliasedColumn(
               s.studentCurriculum.personId,
               "modules_person_id",
@@ -423,6 +423,12 @@ export const listProgressByPersonId = wrapQuery(
               s.certificate.id,
               "modules_certificate_id",
             ),
+            rank: sql<number>`ROW_NUMBER() OVER (
+              PARTITION BY ${s.studentCurriculum.id}, ${s.curriculumCompetency.moduleId}
+              ORDER BY ${s.certificate.issuedAt} ASC, ${s.certificate.id} ASC
+            )`
+              .mapWith(Number)
+              .as("modules_rank"),
           })
           .from(s.studentCurriculum)
           .innerJoin(
@@ -457,6 +463,18 @@ export const listProgressByPersonId = wrapQuery(
                 : undefined,
             ),
           ),
+      );
+
+      const withModules = query.$with("modules").as(
+        query
+          .select({
+            personId: withModulesRanked.personId,
+            studentCurriculumId: withModulesRanked.studentCurriculumId,
+            moduleId: withModulesRanked.moduleId,
+            certificateId: withModulesRanked.certificateId,
+          })
+          .from(withModulesRanked)
+          .where(eq(withModulesRanked.rank, 1)),
       );
 
       const withModulesAgg = query.$with("modules_agg").as(
@@ -526,7 +544,7 @@ export const listProgressByPersonId = wrapQuery(
       );
 
       const rows = await query
-        .with(withModules, withModulesAgg, withCertificates)
+        .with(withModulesRanked, withModules, withModulesAgg, withCertificates)
         .select({
           personId: s.studentCurriculum.personId,
           studentCurriculumId: s.studentCurriculum.id,
