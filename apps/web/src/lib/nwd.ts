@@ -3610,6 +3610,26 @@ export const listKssKwalificatieprofielenWithOnderdelen = cache(
   },
 );
 
+// Public, no-auth read helpers used by the portfolio-helper-sandbox route.
+// They only expose rubric data that is already public in the offered kwalificaties.
+export const listKssWerkprocessenByKerntaakId = cache(
+  async (kerntaakId: string) => {
+    return makeRequest(async () => {
+      return await KSS.Kwalificatieprofiel.listWerkprocessen({ kerntaakId });
+    });
+  },
+);
+
+export const listKssBeoordelingscriteriaByWerkprocesId = cache(
+  async (werkprocesId: string) => {
+    return makeRequest(async () => {
+      return await KSS.Kwalificatieprofiel.listBeoordelingscriteria({
+        werkprocesId,
+      });
+    });
+  },
+);
+
 export const listKssKwalificatieprofielen = cache(
   async (filter?: {
     richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";
