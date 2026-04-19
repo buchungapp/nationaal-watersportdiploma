@@ -7,38 +7,18 @@ import {
   type UIMessage,
 } from "ai";
 import { after, NextResponse } from "next/server";
+import { buildSystemPrompt } from "~/app/(public)/leercoach/_lib/system-prompt";
 import { createClient } from "~/lib/supabase/server";
 
 // Chat API for /leercoach — streaming text completions via AI Gateway.
 // v1 scope: text-only messages, no tools, no artifacts, no resumable streams.
-// Later phases add rubric-aware system prompt (P2), tool calls for
-// corpus retrieval + prior-portfolio lookup (P2), and bewijs-draft
-// artifacts (P4).
+// System prompt now includes the full scoped rubric (werkprocessen +
+// beoordelingscriteria). Later phases add tool calls for corpus retrieval
+// + prior-portfolio lookup (P2 continued), and bewijs-draft artifacts (P4).
 
 export const maxDuration = 60;
 
 const MODEL_ID = "anthropic/claude-sonnet-4-5";
-
-const SYSTEM_PROMPT_V1 = `Je bent een digitale leercoach voor een kandidaat die werkt aan hun PvB-portfolio voor de NOC*NSF-kwalificatie binnen de watersport.
-
-Je rol:
-- Je helpt de kandidaat hun eigen verhaal te vormen. Je schrijft NIET voor ze.
-- Je stelt gerichte, open vragen die concrete praktijkvoorbeelden uitlokken (situatie, taak, actie, resultaat).
-- Je wijst op blinde vlekken zonder ze in te vullen.
-- Je reageert warm en respectvol, als een ervaren collega-instructeur die nieuwsgierig is naar hun verhaal.
-
-Schrijfstijl:
-- Nederlands, ik-vorm waar natuurlijk.
-- Korte zinnen, praktijktaal.
-- Geen em-dashes (—); gebruik komma's, punten of haakjes.
-- Geen clichés zoals "cruciaal", "essentieel", "resulteerde in".
-- Geen meta-samenvattingen ("dit laat zien dat…"). Laat de kandidaat zelf betekenis geven.
-
-Beperkingen van deze prototype-versie:
-- Je hebt nog geen toegang tot de specifieke beoordelingscriteria van de kandidaat's profiel; dat komt later.
-- Je hebt nog geen toegang tot hun eerdere portfolio's; dat komt later.
-
-Voor nu: help ze hun gedachten ordenen, stel zinvolle vragen, en reageer op wat ze vertellen.`;
 
 export async function POST(req: Request) {
   if (!process.env.AI_GATEWAY_API_KEY) {
@@ -85,11 +65,14 @@ export async function POST(req: Request) {
     .reverse()
     .find((m) => m.role === "user");
 
-  const modelMessages = await convertToModelMessages(body.messages);
+  const [modelMessages, systemPrompt] = await Promise.all([
+    convertToModelMessages(body.messages),
+    buildSystemPrompt({ profielId: chat.profielId, scope: chat.scope }),
+  ]);
 
   const result = streamText({
     model: gateway(MODEL_ID),
-    system: SYSTEM_PROMPT_V1,
+    system: systemPrompt,
     messages: modelMessages,
     temperature: 0.6,
     stopWhen: stepCountIs(5),

@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 type Props = {
   chatId: string;
@@ -19,7 +19,11 @@ type Props = {
 // streams come in later phases.
 export function ChatShell({ chatId, initialMessages }: Props) {
   const [inputValue, setInputValue] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // Track whether the user has intentionally scrolled up. If they have, we
+  // do NOT hijack their scroll when new tokens stream in — reading older
+  // messages shouldn't yank you back to the bottom on every chunk.
+  const stickToBottomRef = useRef(true);
 
   const { messages, sendMessage, status, error } = useChat({
     id: chatId,
@@ -35,8 +39,32 @@ export function ChatShell({ chatId, initialMessages }: Props) {
     }),
   });
 
+  // Watch the chat-container's scroll position. Within 80px of the bottom is
+  // "at the bottom" and future updates auto-scroll. If the user scrolls up
+  // further, we release the sticky behaviour until they scroll back.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    function onScroll() {
+      if (!el) return;
+      const distanceFromBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight;
+      stickToBottomRef.current = distanceFromBottom < 80;
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // On every message update, scroll the INNER container to bottom — never
+  // the page. Previously this used messagesEndRef.scrollIntoView, which
+  // bubbles up and scrolls the nearest overflow ancestor (the document on
+  // large screens), pushing the chat header out of view with every token.
+  // useLayoutEffect so the scroll happens before paint and there's no flash.
+  useLayoutEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (!stickToBottomRef.current) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   function handleSubmit(e: React.FormEvent) {
@@ -64,7 +92,10 @@ export function ChatShell({ chatId, initialMessages }: Props) {
 
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-hidden">
-      <div className="flex-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-4">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-4"
+      >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-slate-600">
             <p className="font-semibold text-slate-900">
@@ -92,7 +123,6 @@ export function ChatShell({ chatId, initialMessages }: Props) {
             ))}
           </ul>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {error ? (
