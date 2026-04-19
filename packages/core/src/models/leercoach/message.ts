@@ -33,7 +33,7 @@ export const saveMessageOutput = z.object({
   messageId: uuidSchema,
 });
 
-export const saveMessage = wrapCommand(
+export const save = wrapCommand(
   "leercoach.message.save",
   withZod(saveMessageInput, saveMessageOutput, async (input) => {
     return withTransaction(async (tx) => {
@@ -86,7 +86,7 @@ export const getMessagesByChatIdOutput = z.array(
  * deliberately does not accept userId as a parameter so composition stays
  * simple.
  */
-export const getMessagesByChatId = wrapQuery(
+export const getByChatId = wrapQuery(
   "leercoach.message.getByChatId",
   withZod(
     getMessagesByChatIdInput,

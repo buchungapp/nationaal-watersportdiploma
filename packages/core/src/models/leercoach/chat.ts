@@ -38,7 +38,7 @@ export const createChatOutput = z.object({
   chatId: uuidSchema,
 });
 
-export const createChat = wrapCommand(
+export const create = wrapCommand(
   "leercoach.chat.create",
   withZod(createChatInput, createChatOutput, async (input) => {
     return withTransaction(async (tx) => {
@@ -87,7 +87,7 @@ export const getChatByIdOutput = z
  * does not exist OR belongs to a different user — never throws on mismatch so
  * callers can't probe for chat existence across users.
  */
-export const getChatById = wrapQuery(
+export const getById = wrapQuery(
   "leercoach.chat.getById",
   withZod(getChatByIdInput, getChatByIdOutput, async (input) => {
     const query = useQuery();
@@ -145,7 +145,7 @@ export const listChatsByUserIdOutput = z.array(
   }),
 );
 
-export const listChatsByUserId = wrapQuery(
+export const listByUserId = wrapQuery(
   "leercoach.chat.listByUserId",
   withZod(listChatsByUserIdInput, listChatsByUserIdOutput, async (input) => {
     const query = useQuery();
@@ -187,7 +187,7 @@ export const updateChatTitleInput = z.object({
   title: z.string().min(1).max(200),
 });
 
-export const updateChatTitle = wrapCommand(
+export const updateTitle = wrapCommand(
   "leercoach.chat.updateTitle",
   withZod(updateChatTitleInput, z.void(), async (input) => {
     return withTransaction(async (tx) => {
@@ -216,7 +216,7 @@ export const softDeleteChatInput = z.object({
  * Implemented as soft delete (rather than CASCADE delete) so that we can
  * reverse accidental deletions and preserve the history for compliance.
  */
-export const softDeleteChat = wrapCommand(
+export const softDelete = wrapCommand(
   "leercoach.chat.softDelete",
   withZod(softDeleteChatInput, z.void(), async (input) => {
     return withTransaction(async (tx) => {
