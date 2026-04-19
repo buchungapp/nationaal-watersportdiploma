@@ -1,3 +1,4 @@
+export * as AiCorpus from "./ai-corpus/index.js";
 export * as ApiKey from "./api-key/index.js";
 export * as Certificate from "./certificate/index.js";
 export * as Cohort from "./cohort/index.js";

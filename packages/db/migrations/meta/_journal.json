@@ -246,6 +246,20 @@
       "when": 1753958008932,
       "tag": "0034_sleepy_the_professor",
       "breakpoints": false
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1776519835726,
+      "tag": "0035_closed_maverick",
+      "breakpoints": false
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1776547145550,
+      "tag": "0036_overjoyed_calypso",
+      "breakpoints": false
     }
   ]
 }
