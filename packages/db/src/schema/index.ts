@@ -1,5 +1,6 @@
 export * from "./ai_corpus/index.js";
 export * from "./authn.js";
+export * from "./leercoach/index.js";
 export * from "./authz.js";
 export * from "./certificate.js";
 export * from "./cohort.js";

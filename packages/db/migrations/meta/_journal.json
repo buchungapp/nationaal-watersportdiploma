@@ -260,6 +260,13 @@
       "when": 1776547145550,
       "tag": "0036_overjoyed_calypso",
       "breakpoints": false
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1776606168378,
+      "tag": "0037_hot_wong",
+      "breakpoints": false
     }
   ]
 }
