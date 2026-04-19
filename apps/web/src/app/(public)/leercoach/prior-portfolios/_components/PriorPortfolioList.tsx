@@ -14,14 +14,13 @@ type PriorSource = {
 };
 
 export function PriorPortfolioList({ priors }: { priors: PriorSource[] }) {
+  // Empty state is handled by the parent page (PriorPortfolioDropZone
+  // is shown instead when there are no uploads). This defensive branch
+  // only fires if the list is rendered without a preceding gate.
   if (priors.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
-        <p className="font-semibold text-slate-900">Nog niks geüpload.</p>
-        <p className="mt-1">
-          Heb je een eerder PvB-portfolio liggen? Upload hem hierboven — één
-          per niveau. Je leercoach kan er tijdens sessies naar verwijzen.
-        </p>
+      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-600">
+        <p>Geen portfolio's geüpload.</p>
       </div>
     );
   }
