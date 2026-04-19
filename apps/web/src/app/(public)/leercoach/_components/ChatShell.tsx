@@ -153,26 +153,35 @@ export function ChatShell({ chatId, initialMessages }: Props) {
   );
 }
 
-// Three starter chips matching the three user archetypes in the opening
-// message: orienting, starting from scratch, bringing existing material.
-// Each chip sends a full first-person prompt straight into the chat so the
-// leercoach knows exactly where the kandidaat is and can respond
+// Four starter chips matching the archetypes in the opening message.
+// The key distinction the product owner flagged: "eerdere portfolio's
+// voor lager niveau" is a different starting point than "materiaal voor
+// dit portfolio" — collapsing them confuses N4/N5 kandidaten who have
+// N3 PvB's but haven't written anything new yet.
+//
+// Each chip sends a full first-person prompt straight into the chat so
+// the leercoach knows exactly where the kandidaat is and can respond
 // appropriately without another round of "waar begin je?".
 const STARTER_SUGGESTIONS: Array<{ label: string; prompt: string }> = [
   {
-    label: "Ik ben nieuw — leg het me uit",
+    label: "Leg me uit wat dit portfolio moet zijn",
     prompt:
-      "Ik ben nieuw hier. Kun je me vertellen wat dit portfolio eigenlijk moet zijn, hoe de opbouw werkt, en wat een beoordelaar wil zien? Ik wil eerst overzicht voor we gaan schrijven.",
+      "Kun je me eerst uitleggen wat dit portfolio moet zijn? Hoe is het opgebouwd, wat zoekt een beoordelaar, en waar werk ik uiteindelijk naartoe? Ik wil overzicht voor we aan de slag gaan.",
   },
   {
-    label: "Ik ben klaar om te schrijven",
+    label: "Ik heb eerdere PvB-portfolio's geschreven",
     prompt:
-      "Ik heb nog niks op papier maar ben er wel klaar voor om te beginnen. Waar zullen we starten? Stel gerust eerst een paar vragen om erachter te komen wat ik al heb meegemaakt.",
+      "Ik heb voor een lager niveau al een PvB-portfolio geschreven. Voor dit portfolio heb ik nog niks nieuws op papier, maar ik wil niet alles opnieuw doen. Hoe kunnen we daarop voortbouwen?",
   },
   {
-    label: "Ik heb al materiaal liggen",
+    label: "Ik heb aantekeningen voor dit portfolio",
     prompt:
-      "Ik heb al wat geschreven of aantekeningen over dit onderwerp. Kun je me helpen om het bij elkaar te brengen? Ik kan het zo delen zodra je klaar bent.",
+      "Ik heb al aantekeningen of wat tekst voor dit specifieke portfolio liggen. Kun je me helpen om dat materiaal bij elkaar te brengen? Ik kan het zo delen zodra je klaar bent.",
+  },
+  {
+    label: "Ik begin helemaal blanco",
+    prompt:
+      "Ik begin helemaal blanco. Geen eerdere portfolio's, geen aantekeningen, we starten vanaf nul. Waar zullen we starten? Stel gerust eerst een paar vragen om erachter te komen wat ik al heb meegemaakt in mijn praktijk.",
   },
 ];
 
