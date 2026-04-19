@@ -204,6 +204,51 @@ export const updateTitle = wrapCommand(
   }),
 );
 
+// ---- Update: scope ----
+
+export const updateScopeInput = z.object({
+  chatId: uuidSchema,
+  userId: uuidSchema,
+  scope: leercoachChatScopeSchema,
+  /** Optional new title; if omitted, existing title is preserved. */
+  title: z.string().min(1).max(200).optional(),
+});
+
+/**
+ * Change the scope of an existing chat. Used when a kandidaat realises
+ * partway through a session that they actually want to focus on a single
+ * kerntaak instead of their full profiel (or vice versa). Touches updatedAt
+ * so the session bubbles to the top of the sidebar.
+ *
+ * The scope change itself does not rewrite message history — callers can
+ * save an informational assistant/system message noting the transition.
+ */
+export const updateScope = wrapCommand(
+  "leercoach.chat.updateScope",
+  withZod(updateScopeInput, z.void(), async (input) => {
+    return withTransaction(async (tx) => {
+      const patch: {
+        scope: typeof input.scope;
+        updatedAt: string;
+        title?: string;
+      } = {
+        scope: input.scope,
+        updatedAt: new Date().toISOString(),
+      };
+      if (input.title) patch.title = input.title;
+      await tx
+        .update(s.leercoachChat)
+        .set(patch)
+        .where(
+          and(
+            eq(s.leercoachChat.id, input.chatId),
+            eq(s.leercoachChat.userId, input.userId),
+          ),
+        );
+    });
+  }),
+);
+
 // ---- Soft delete ----
 
 export const softDeleteChatInput = z.object({

@@ -88,3 +88,65 @@ export async function deleteChatAction(input: {
 
   revalidatePath("/leercoach");
 }
+
+// Change the scope of an existing chat mid-session. Used when a kandidaat
+// realises they want to zoom in on a single kerntaak (or zoom back out to
+// the whole profiel). Saves an informational assistant message explaining
+// the shift so the conversation record stays coherent, then revalidates
+// so the chat view picks up the new scope on the next render.
+export async function updateChatScopeAction(input: {
+  chatId: string;
+  scope: CreateChatInput["scope"];
+}): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("Niet ingelogd.");
+  }
+
+  // Fetch the chat first so we can resolve the new scope label in the
+  // same profiel context (kerntaak titel lookups need the profielId) AND
+  // build a new title that reflects the fresh scope.
+  const chat = await Leercoach.Chat.getById({
+    chatId: input.chatId,
+    userId: user.id,
+  });
+  if (!chat) {
+    throw new Error("Chat niet gevonden.");
+  }
+
+  const ctx = await resolveChatContext({
+    profielId: chat.profielId,
+    scope: input.scope,
+  });
+  const newTitle = buildChatTitle(ctx);
+
+  await Leercoach.Chat.updateScope({
+    chatId: input.chatId,
+    userId: user.id,
+    scope: input.scope,
+    title: newTitle,
+  });
+
+  // Log the transition as an assistant message so the conversation shows
+  // "we zijn nu op kerntaak 5.1 gefocust" inline. Non-fatal if save fails.
+  try {
+    await Leercoach.Message.save({
+      chatId: input.chatId,
+      role: "assistant",
+      parts: [
+        {
+          type: "text",
+          text: `_Scope gewijzigd naar **${ctx.scopeLabel}**._ Vanaf nu richten we ons specifiek daarop. Laat me weten wat je als eerste wilt bespreken.`,
+        },
+      ],
+    });
+  } catch (err) {
+    console.error("Failed to save scope-change message", err);
+  }
+
+  revalidatePath(`/leercoach/chat/${input.chatId}`);
+  revalidatePath("/leercoach");
+}
