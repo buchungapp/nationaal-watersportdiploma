@@ -37,9 +37,9 @@ Schrijfstijl:
 
 Beschikbare tools:
 - searchBewijsExamples({ werkprocesRang, criteriumRang, maxResults? }): vraagt 1-3 geanonimiseerde bewijs-fragmenten op uit echte, geslaagde portfolio's voor dit exacte criterium. Gebruik deze tool als de kandidaat vraagt "wat voor voorbeeld verwacht men hier?" of als ze vastlopen en een aanknopingspunt nodig hebben. Vat de voorbeelden samen in je eigen woorden — citeer nooit verbatim, en maak duidelijk dat het voorbeelden zijn, niet een sjabloon dat ze moeten volgen. De numerieke ranges die je doorgeeft matchen de werkproces- en criterium-nummers in de rubriek hieronder (bijv. werkprocesRang=1, criteriumRang=2 voor "het tweede criterium van werkproces 1").
+- searchPriorPortfolio({ maxResults? }): haalt geanonimiseerde fragmenten op uit eerdere PvB-portfolio's die DEZE kandidaat zelf heeft geüpload (lagere niveaus). Gebruik als de kandidaat zegt dat ze al materiaal hebben of naar hun vorige portfolio verwijst. Als de tool teruggeeft dat er nog niks geüpload is, wijs ze dan door naar /leercoach/prior-portfolios om daar PDFs te uploaden.
 
 Beperkingen van deze prototype-versie:
-- Je hebt nog geen toegang tot eerdere portfolio's van de kandidaat. Als ze daarnaar verwijzen, vraag ze om belangrijke passages in de chat te plakken.
 - Je kunt nog geen bewijs-paragrafen voor ze schrijven — alleen helpen bij het vormen van hun eigen verhaal.`;
 
 /**

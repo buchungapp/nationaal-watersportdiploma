@@ -58,6 +58,12 @@ export default async function LeercoachChatPage({
             />
           ) : null}
           <a
+            href="/leercoach/prior-portfolios"
+            className="text-sm text-slate-600 hover:text-slate-900"
+          >
+            Eerdere portfolio's
+          </a>
+          <a
             href="/leercoach"
             className="text-sm text-slate-600 hover:text-slate-900"
           >

@@ -243,3 +243,182 @@ export const getChunksForCriterium = wrapQuery(
   ),
 );
 
+// ---- User-owned prior portfolios ----
+//
+// Helpers for the "kandidaat uploads their prior PvB portfolios as
+// reference material" flow. Access is strictly user-scoped:
+// consent_level must be "user_only" AND contributedByUserId must match.
+// No cross-user visibility here; the public retrieval helper above is
+// the only path that returns seed + opt_in_shared chunks.
+
+export const listUserPriorSourcesInput = z.object({
+  userId: uuidSchema,
+});
+
+export const listUserPriorSourcesOutput = z.array(
+  z.object({
+    sourceId: uuidSchema,
+    sourceIdentifier: z.string(),
+    niveauRang: z.number().int().nullable(),
+    charCount: z.number().int(),
+    pageCount: z.number().int().nullable(),
+    createdAt: z.string(),
+    chunkCount: z.number().int(),
+  }),
+);
+
+/**
+ * List all of a user's prior-portfolio sources (consent_level="user_only")
+ * for display in the management UI. Includes a cheap chunk-count so the
+ * list can show how much content is available per source.
+ */
+export const listUserPriorSources = wrapQuery(
+  "aiCorpus.source.listUserPrior",
+  withZod(
+    listUserPriorSourcesInput,
+    listUserPriorSourcesOutput,
+    async (input) => {
+      const query = useQuery();
+      const sources = await query
+        .select({
+          id: s.source.id,
+          sourceIdentifier: s.source.sourceIdentifier,
+          niveauRang: s.source.niveauRang,
+          charCount: s.source.charCount,
+          pageCount: s.source.pageCount,
+          createdAt: s.source.createdAt,
+        })
+        .from(s.source)
+        .where(
+          and(
+            eq(s.source.consentLevel, "user_only"),
+            eq(s.source.contributedByUserId, input.userId),
+            isNull(s.source.revokedAt),
+          ),
+        )
+        .orderBy(desc(s.source.createdAt));
+
+      if (sources.length === 0) return [];
+
+      // Count chunks per source in one pass so the list render doesn't
+      // N+1. We'd use a SUM + GROUP BY but Drizzle's raw SQL here keeps
+      // the surface simple.
+      const sourceIds = sources.map((src) => src.id);
+      const counts = await query
+        .select({
+          sourceId: s.chunk.sourceId,
+        })
+        .from(s.chunk)
+        .where(inArray(s.chunk.sourceId, sourceIds));
+      const countBySource = new Map<string, number>();
+      for (const row of counts) {
+        countBySource.set(
+          row.sourceId,
+          (countBySource.get(row.sourceId) ?? 0) + 1,
+        );
+      }
+
+      return sources.map((src) => ({
+        sourceId: src.id,
+        sourceIdentifier: src.sourceIdentifier,
+        niveauRang: src.niveauRang,
+        charCount: src.charCount,
+        pageCount: src.pageCount,
+        createdAt: src.createdAt,
+        chunkCount: countBySource.get(src.id) ?? 0,
+      }));
+    },
+  ),
+);
+
+export const getUserPriorChunksInput = z.object({
+  userId: uuidSchema,
+  maxResults: z.number().int().min(1).max(20).default(6),
+});
+
+export const getUserPriorChunksOutput = z.array(
+  z.object({
+    chunkId: uuidSchema,
+    sourceId: uuidSchema,
+    sourceIdentifier: z.string(),
+    niveauRang: z.number().int().nullable(),
+    content: z.string(),
+    wordCount: z.number().int(),
+  }),
+);
+
+/**
+ * Retrieve the user's own prior-portfolio chunks, ordered newest-source
+ * first then by chunk order. For v1 we don't do keyword search — the
+ * leercoach receives a few representative chunks and decides what's
+ * relevant. Add full-text or embedding filtering when chunk volume
+ * grows past ~20 per user.
+ */
+export const getUserPriorChunks = wrapQuery(
+  "aiCorpus.chunk.getUserPrior",
+  withZod(
+    getUserPriorChunksInput,
+    getUserPriorChunksOutput,
+    async (input) => {
+      const query = useQuery();
+      const rows = await query
+        .select({
+          chunkId: s.chunk.id,
+          sourceId: s.chunk.sourceId,
+          sourceIdentifier: s.source.sourceIdentifier,
+          niveauRang: s.source.niveauRang,
+          content: s.chunk.content,
+          wordCount: s.chunk.wordCount,
+          createdAt: s.source.createdAt,
+        })
+        .from(s.chunk)
+        .innerJoin(s.source, eq(s.source.id, s.chunk.sourceId))
+        .where(
+          and(
+            eq(s.source.consentLevel, "user_only"),
+            eq(s.source.contributedByUserId, input.userId),
+            isNull(s.source.revokedAt),
+          ),
+        )
+        .orderBy(desc(s.source.createdAt), s.chunk.createdAt)
+        .limit(input.maxResults);
+
+      return rows.map((r) => ({
+        chunkId: r.chunkId,
+        sourceId: r.sourceId,
+        sourceIdentifier: r.sourceIdentifier,
+        niveauRang: r.niveauRang,
+        content: r.content,
+        wordCount: r.wordCount,
+      }));
+    },
+  ),
+);
+
+export const revokeUserPriorSourceInput = z.object({
+  userId: uuidSchema,
+  sourceId: uuidSchema,
+});
+
+/**
+ * Revoke a prior-portfolio source. Soft-delete via `revoked_at` so the
+ * data stays for audit but stops appearing in retrieval. userId match
+ * prevents cross-user revocation even with a guessed sourceId.
+ */
+export const revokeUserPriorSource = wrapCommand(
+  "aiCorpus.source.revokeUserPrior",
+  withZod(revokeUserPriorSourceInput, z.void(), async (input) => {
+    return withTransaction(async (tx) => {
+      await tx
+        .update(s.source)
+        .set({ revokedAt: new Date().toISOString() })
+        .where(
+          and(
+            eq(s.source.id, input.sourceId),
+            eq(s.source.consentLevel, "user_only"),
+            eq(s.source.contributedByUserId, input.userId),
+          ),
+        );
+    });
+  }),
+);

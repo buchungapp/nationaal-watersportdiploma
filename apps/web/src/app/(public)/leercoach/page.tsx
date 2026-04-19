@@ -50,12 +50,20 @@ export default async function LeercoachPage() {
           <h2 className="text-xl font-semibold text-slate-900">
             Jouw sessies
           </h2>
-          <Link
-            href="/leercoach/new"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-          >
-            Nieuwe sessie
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/leercoach/prior-portfolios"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
+            >
+              Eerdere portfolio's
+            </Link>
+            <Link
+              href="/leercoach/new"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+            >
+              Nieuwe sessie
+            </Link>
+          </div>
         </div>
 
         {chats.length === 0 ? (

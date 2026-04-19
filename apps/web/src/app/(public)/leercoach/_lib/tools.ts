@@ -116,13 +116,85 @@ export function createSearchBewijsExamplesTool(context: ToolContext) {
   });
 }
 
+// ---- searchPriorPortfolio ----
+
+const searchPriorPortfolioInputSchema = z.object({
+  maxResults: z
+    .number()
+    .int()
+    .min(1)
+    .max(10)
+    .default(5)
+    .describe(
+      "Aantal fragmenten uit de eerdere portfolio('s) van de kandidaat. Houd bescheiden (3-5) zodat de context niet explodeert.",
+    ),
+});
+
+type SearchPriorPortfolioOutput =
+  | {
+      ok: true;
+      totalSources: number;
+      fragments: Array<{
+        content: string;
+        wordCount: number;
+        niveauRang: number | null;
+        sourceRef: string;
+      }>;
+    }
+  | { ok: false; reason: string };
+
+export function createSearchPriorPortfolioTool(context: ToolContext) {
+  return tool({
+    description: [
+      "Haalt fragmenten op uit eerdere PvB-portfolio's die DEZE kandidaat zelf heeft geüpload (bijvoorbeeld hun niveau 3 of 4 portfolio).",
+      "Gebruik deze tool als de kandidaat verwijst naar eerder werk, of als ze aangeven dat ze al ervaring hebben die relevant is voor het huidige criterium.",
+      "De fragmenten zijn al geanonimiseerd. Vat samen in je eigen woorden en stel daarna een vervolgvraag over hoe hun denken geëvolueerd is naar dit niveau.",
+      "Roep deze tool NIET aan als de kandidaat nog niks heeft geüpload (check eerst of ze ernaar verwezen hebben).",
+    ].join(" "),
+    inputSchema: searchPriorPortfolioInputSchema,
+    execute: async (input): Promise<SearchPriorPortfolioOutput> => {
+      const chunks = await AiCorpus.getUserPriorChunks({
+        userId: context.userId,
+        maxResults: input.maxResults,
+      });
+
+      if (chunks.length === 0) {
+        return {
+          ok: false,
+          reason:
+            "deze kandidaat heeft nog geen eerdere portfolio's geüpload — vraag ze eerst om dat te doen via /leercoach/prior-portfolios",
+        };
+      }
+
+      const uniqueSources = new Set(chunks.map((c) => c.sourceId));
+
+      return {
+        ok: true,
+        totalSources: uniqueSources.size,
+        fragments: chunks.map((c) => ({
+          content: c.content,
+          wordCount: c.wordCount,
+          niveauRang: c.niveauRang,
+          sourceRef: c.sourceIdentifier,
+        })),
+      };
+    },
+  });
+}
+
 /**
  * Build the full tools object for a chat. Adding more tools later
- * (searchPriorPortfolio, proposeBewijsDraft, etc.) extends this record.
+ * (proposeBewijsDraft, etc.) extends this record.
+ *
+ * Tool availability can depend on context: searchPriorPortfolio only
+ * makes sense if the user has prior portfolios uploaded. For now we
+ * always expose it and let the tool itself return a helpful "nothing
+ * uploaded yet" message — simpler than conditional tool construction.
  */
 export function buildLeercoachTools(context: ToolContext) {
   return {
     searchBewijsExamples: createSearchBewijsExamplesTool(context),
+    searchPriorPortfolio: createSearchPriorPortfolioTool(context),
   };
 }
 
