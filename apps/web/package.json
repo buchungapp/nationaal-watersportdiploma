@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "test:sandbox": "node --test --experimental-strip-types 'src/app/(public)/portfolio-helper-sandbox/**/*.test.ts'",
+    "test:ai-chat": "node --test --experimental-strip-types 'src/app/_components/ai-chat/**/*.test.ts'",
     "corpus:extract": "node --experimental-strip-types scripts/corpus/extract.ts",
     "corpus:anonymize": "node --env-file-if-exists=.env.local --experimental-strip-types scripts/corpus/anonymize.ts",
     "corpus:report": "node --experimental-strip-types scripts/corpus/report.ts",
