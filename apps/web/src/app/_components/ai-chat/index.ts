@@ -14,4 +14,4 @@ export type {
   AiChatStarter,
   AiChatWindowProps,
 } from "./types";
-export { useStickyScroll, isNearBottom } from "./use-sticky-scroll";
+export { isNearBottom, useStickyScroll } from "./use-sticky-scroll";
