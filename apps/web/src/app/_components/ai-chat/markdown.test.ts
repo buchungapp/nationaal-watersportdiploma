@@ -71,6 +71,70 @@ describe("splitIntoBlocks", () => {
   it("handles empty input", () => {
     assert.deepEqual(splitIntoBlocks(""), []);
   });
+
+  it("detects `## Heading` as a heading block with level 2", () => {
+    const blocks = splitIntoBlocks("## Wat is dit portfolio?");
+    assert.equal(blocks.length, 1);
+    assert.deepEqual(blocks[0], {
+      kind: "heading",
+      level: 2,
+      text: "Wat is dit portfolio?",
+    });
+  });
+
+  it("detects heading levels 1 through 6", () => {
+    for (let n = 1; n <= 6; n++) {
+      const hashes = "#".repeat(n);
+      const blocks = splitIntoBlocks(`${hashes} title`);
+      const block = blocks[0];
+      if (block?.kind !== "heading") {
+        throw new Error(`expected heading for level ${n}, got ${block?.kind}`);
+      }
+      assert.equal(block.level, n);
+      assert.equal(block.text, "title");
+    }
+  });
+
+  it("does not treat `#tag` (no space) as a heading", () => {
+    const blocks = splitIntoBlocks("#tag rest");
+    assert.equal(blocks[0]?.kind, "p");
+  });
+
+  it("detects `---` as a horizontal rule", () => {
+    const blocks = splitIntoBlocks("---");
+    assert.equal(blocks.length, 1);
+    assert.equal(blocks[0]?.kind, "hr");
+  });
+
+  it("detects `***` and `___` as horizontal rules", () => {
+    assert.equal(splitIntoBlocks("***")[0]?.kind, "hr");
+    assert.equal(splitIntoBlocks("___")[0]?.kind, "hr");
+  });
+
+  it("does not treat a single `-` line as hr (that's an empty list item)", () => {
+    // A single `-` alone isn't a list item we care about; we'd rather
+    // render it as a paragraph than misclassify.
+    const blocks = splitIntoBlocks("-");
+    assert.notEqual(blocks[0]?.kind, "hr");
+  });
+
+  it("interleaves heading + paragraph + hr + heading correctly", () => {
+    const text = [
+      "## First",
+      "",
+      "Some paragraph.",
+      "",
+      "---",
+      "",
+      "### Second",
+    ].join("\n");
+    const blocks = splitIntoBlocks(text);
+    assert.equal(blocks.length, 4);
+    assert.equal(blocks[0]?.kind, "heading");
+    assert.equal(blocks[1]?.kind, "p");
+    assert.equal(blocks[2]?.kind, "hr");
+    assert.equal(blocks[3]?.kind, "heading");
+  });
 });
 
 describe("parseInlineSegments", () => {

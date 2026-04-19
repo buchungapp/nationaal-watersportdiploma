@@ -32,6 +32,21 @@ export function SimpleMarkdown({ text }: { text: string }) {
             </ol>
           );
         }
+        if (block.kind === "heading") {
+          return (
+            <Heading key={`h-${i}`} level={block.level}>
+              {renderInline(block.text)}
+            </Heading>
+          );
+        }
+        if (block.kind === "hr") {
+          return (
+            <hr
+              key={`hr-${i}`}
+              className="my-1 border-t border-slate-300/70"
+            />
+          );
+        }
         return (
           <p key={`p-${i}`} className="whitespace-pre-wrap">
             {renderInline(block.text)}
@@ -40,6 +55,27 @@ export function SimpleMarkdown({ text }: { text: string }) {
       })}
     </div>
   );
+}
+
+// Render a heading at the given level with size + weight scaled down from
+// the default browser defaults — chat bubbles are narrow so h1 at 2em eats
+// the bubble. Levels 4–6 collapse onto the same small style; we rarely see
+// deeply-nested headings in LLM output.
+function Heading({
+  level,
+  children,
+}: { level: 1 | 2 | 3 | 4 | 5 | 6; children: ReactNode }) {
+  const cls = "font-semibold text-slate-900";
+  if (level === 1) {
+    return <h1 className={`mt-1 text-base ${cls}`}>{children}</h1>;
+  }
+  if (level === 2) {
+    return <h2 className={`mt-1 text-sm uppercase tracking-wide ${cls}`}>{children}</h2>;
+  }
+  if (level === 3) {
+    return <h3 className={`mt-1 text-sm ${cls}`}>{children}</h3>;
+  }
+  return <h4 className={`mt-1 text-xs uppercase tracking-wider ${cls}`}>{children}</h4>;
 }
 
 function renderInline(text: string): ReactNode {

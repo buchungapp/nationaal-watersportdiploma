@@ -5,19 +5,32 @@
 export type MarkdownBlock =
   | { kind: "p"; text: string }
   | { kind: "ul"; items: string[] }
-  | { kind: "ol"; items: string[] };
+  | { kind: "ol"; items: string[] }
+  | { kind: "heading"; level: 1 | 2 | 3 | 4 | 5 | 6; text: string }
+  | { kind: "hr" };
 
 export type MarkdownInlineSegment =
   | { kind: "text"; text: string }
   | { kind: "bold"; text: string };
 
+// A line of just `---`, `***`, or `___` is a horizontal rule. Require 3+ of
+// the same char on their own line; leaves single dashes in prose alone.
+const HR_LINE = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
+// `# heading`, `## heading`, up to 6. Captures level + text.
+const HEADING_LINE = /^(#{1,6})\s+(.+?)\s*$/;
+
 /**
  * Split a raw string into block-level markdown primitives:
- * paragraphs, unordered lists (`- item`), and ordered lists (`1. item`).
+ *   - paragraphs
+ *   - unordered lists (`- item`)
+ *   - ordered lists (`1. item`)
+ *   - headings (`## Heading`) — level 1–6
+ *   - horizontal rules (`---`, `***`, `___`)
  *
  * Blocks are separated by blank lines. A paragraph whose every non-empty
- * line starts with `- ` or `1. ` is treated as a list; mixed blocks stay
- * as plain paragraphs.
+ * line starts with `- ` or `1. ` is treated as a list; a single-line
+ * paragraph that matches the heading or hr pattern is treated as such.
+ * Everything else falls through to a plain paragraph.
  */
 export function splitIntoBlocks(text: string): MarkdownBlock[] {
   const paragraphs = text.split(/\n\s*\n/);
@@ -26,6 +39,26 @@ export function splitIntoBlocks(text: string): MarkdownBlock[] {
     const lines = para.split("\n");
     const nonEmpty = lines.filter((l) => l.trim() !== "");
     if (nonEmpty.length === 0) continue;
+
+    // Single-line special blocks: heading + hr.
+    if (nonEmpty.length === 1) {
+      const only = nonEmpty[0] ?? "";
+      if (HR_LINE.test(only)) {
+        blocks.push({ kind: "hr" });
+        continue;
+      }
+      const hm = HEADING_LINE.exec(only);
+      if (hm?.[1] && hm[2]) {
+        const level = Math.min(
+          6,
+          Math.max(1, hm[1].length),
+        ) as MarkdownBlock extends { kind: "heading"; level: infer L }
+          ? L
+          : never;
+        blocks.push({ kind: "heading", level, text: hm[2] });
+        continue;
+      }
+    }
 
     const isBullet = nonEmpty.every((l) => /^\s*-\s+/.test(l));
     const isNumber = nonEmpty.every((l) => /^\s*\d+\.\s+/.test(l));
