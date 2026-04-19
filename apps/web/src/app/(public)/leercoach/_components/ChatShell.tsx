@@ -49,6 +49,19 @@ export function ChatShell({ chatId, initialMessages }: Props) {
 
   const isLoading = status === "streaming" || status === "submitted";
 
+  // Starter suggestions: only show when the conversation hasn't really
+  // started yet (just the leercoach's opening message, no user turns).
+  // Three concrete starter prompts matching the options laid out in the
+  // opening message — keeps the kandidaat moving if they don't know
+  // what to type.
+  const userTurnCount = messages.filter((m) => m.role === "user").length;
+  const showStarters = userTurnCount === 0;
+
+  function handleStarter(text: string) {
+    if (isLoading) return;
+    sendMessage({ text });
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-hidden">
       <div className="flex-1 overflow-y-auto rounded-xl border border-slate-200 bg-white p-4">
@@ -89,6 +102,27 @@ export function ChatShell({ chatId, initialMessages }: Props) {
         </div>
       ) : null}
 
+      {showStarters ? (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Of begin met een van deze
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {STARTER_SUGGESTIONS.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                disabled={isLoading}
+                onClick={() => handleStarter(s.prompt)}
+                className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <form
         onSubmit={handleSubmit}
         className="flex items-end gap-2 rounded-xl border border-slate-200 bg-white p-2"
@@ -119,6 +153,29 @@ export function ChatShell({ chatId, initialMessages }: Props) {
   );
 }
 
+// Three starter chips matching the three user archetypes in the opening
+// message: orienting, starting from scratch, bringing existing material.
+// Each chip sends a full first-person prompt straight into the chat so the
+// leercoach knows exactly where the kandidaat is and can respond
+// appropriately without another round of "waar begin je?".
+const STARTER_SUGGESTIONS: Array<{ label: string; prompt: string }> = [
+  {
+    label: "Ik ben nieuw — leg het me uit",
+    prompt:
+      "Ik ben nieuw hier. Kun je me vertellen wat dit portfolio eigenlijk moet zijn, hoe de opbouw werkt, en wat een beoordelaar wil zien? Ik wil eerst overzicht voor we gaan schrijven.",
+  },
+  {
+    label: "Ik ben klaar om te schrijven",
+    prompt:
+      "Ik heb nog niks op papier maar ben er wel klaar voor om te beginnen. Waar zullen we starten? Stel gerust eerst een paar vragen om erachter te komen wat ik al heb meegemaakt.",
+  },
+  {
+    label: "Ik heb al materiaal liggen",
+    prompt:
+      "Ik heb al wat geschreven of aantekeningen over dit onderwerp. Kun je me helpen om het bij elkaar te brengen? Ik kan het zo delen zodra je klaar bent.",
+  },
+];
+
 // Render UIMessage parts. v1 handles text only; other part types (tool-call,
 // tool-result, source, etc.) fall through to JSON for debugging until we
 // wire proper renderers in later phases.
@@ -136,12 +193,10 @@ function RenderParts({ parts }: { parts: unknown }) {
           typeof (part as { text: unknown }).text === "string"
         ) {
           return (
-            <p
+            <SimpleMarkdown
               key={`text-${i}-${(part as { text: string }).text.slice(0, 20)}`}
-              className="whitespace-pre-wrap"
-            >
-              {(part as { text: string }).text}
-            </p>
+              text={(part as { text: string }).text}
+            />
           );
         }
         return (
@@ -155,4 +210,92 @@ function RenderParts({ parts }: { parts: unknown }) {
       })}
     </>
   );
+}
+
+// Minimal safe markdown renderer — handles only the primitives our
+// templates + the LLM actually use. No HTML parsing, no deps, no XSS
+// surface; everything lands in React elements, not dangerouslySetInnerHTML.
+//
+// Supported: **bold**, paragraphs separated by blank lines, `- item`
+// bullet lists, and `1. item` numbered lists. Anything else renders as
+// preserved-whitespace plain text inside a <p>.
+function SimpleMarkdown({ text }: { text: string }) {
+  const blocks = splitIntoBlocks(text);
+  return (
+    <div className="flex flex-col gap-2">
+      {blocks.map((block, i) => {
+        if (block.kind === "ul") {
+          return (
+            <ul key={`ul-${i}`} className="ml-5 list-disc space-y-1">
+              {block.items.map((item, j) => (
+                <li key={`ul-${i}-li-${j}`}>{renderInline(item)}</li>
+              ))}
+            </ul>
+          );
+        }
+        if (block.kind === "ol") {
+          return (
+            <ol key={`ol-${i}`} className="ml-5 list-decimal space-y-1">
+              {block.items.map((item, j) => (
+                <li key={`ol-${i}-li-${j}`}>{renderInline(item)}</li>
+              ))}
+            </ol>
+          );
+        }
+        return (
+          <p key={`p-${i}`} className="whitespace-pre-wrap">
+            {renderInline(block.text)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+type Block =
+  | { kind: "p"; text: string }
+  | { kind: "ul"; items: string[] }
+  | { kind: "ol"; items: string[] };
+
+function splitIntoBlocks(text: string): Block[] {
+  const paragraphs = text.split(/\n\s*\n/);
+  const blocks: Block[] = [];
+  for (const para of paragraphs) {
+    const lines = para.split("\n");
+    const isBullet = lines.every((l) => /^\s*-\s+/.test(l) || l.trim() === "");
+    const isNumber = lines.every(
+      (l) => /^\s*\d+\.\s+/.test(l) || l.trim() === "",
+    );
+    if (isBullet && lines.some((l) => l.trim() !== "")) {
+      blocks.push({
+        kind: "ul",
+        items: lines
+          .filter((l) => l.trim() !== "")
+          .map((l) => l.replace(/^\s*-\s+/, "")),
+      });
+    } else if (isNumber && lines.some((l) => l.trim() !== "")) {
+      blocks.push({
+        kind: "ol",
+        items: lines
+          .filter((l) => l.trim() !== "")
+          .map((l) => l.replace(/^\s*\d+\.\s+/, "")),
+      });
+    } else {
+      blocks.push({ kind: "p", text: para });
+    }
+  }
+  return blocks;
+}
+
+// Replace **bold** with React <strong> nodes while leaving everything else
+// as plain text. Splits on the regex so we never dangerouslySetInnerHTML.
+function renderInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    const match = /^\*\*([^*]+)\*\*$/.exec(part);
+    if (match?.[1]) {
+      return <strong key={`b-${i}`}>{match[1]}</strong>;
+    }
+    return <span key={`t-${i}`}>{part}</span>;
+  });
 }

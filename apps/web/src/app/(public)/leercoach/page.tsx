@@ -2,6 +2,7 @@ import { Leercoach } from "@nawadi/core";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "~/lib/supabase/server";
+import { SessionRow } from "./_components/SessionRow";
 
 export const metadata: Metadata = {
   title: "Leercoach",
@@ -71,25 +72,11 @@ export default async function LeercoachPage() {
           <ul className="flex flex-col gap-2">
             {chats.map((chat) => (
               <li key={chat.chatId}>
-                <Link
-                  href={`/leercoach/chat/${chat.chatId}`}
-                  className="block rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-blue-300 hover:bg-blue-50"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-slate-900">
-                        {chat.title ||
-                          scopeLabel(chat.scope) ||
-                          "Nieuwe sessie"}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {scopeLabel(chat.scope)} ·{" "}
-                        {formatRelative(chat.updatedAt)}
-                      </span>
-                    </div>
-                    <span className="text-slate-400">→</span>
-                  </div>
-                </Link>
+                <SessionRow
+                  chatId={chat.chatId}
+                  title={chat.title || scopeLabel(chat.scope)}
+                  subtitle={formatRelative(chat.updatedAt)}
+                />
               </li>
             ))}
           </ul>
@@ -99,6 +86,9 @@ export default async function LeercoachPage() {
   );
 }
 
+// Fallback only — new chats land with a rich title like "Instructeur 5 —
+// Hele profiel" (see actions.ts). Kept for rows created before the title
+// refactor so nothing renders blank.
 function scopeLabel(
   scope:
     | { type: "full_profiel" }

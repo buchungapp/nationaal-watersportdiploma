@@ -32,12 +32,9 @@ export default async function LeercoachChatPage({
   return (
     <main className="flex h-[calc(100vh-6rem)] flex-col gap-4">
       <header className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-3">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900">
-            {chat.title || "Leercoach-sessie"}
-          </h1>
-          <p className="text-xs text-slate-500">{scopeLabel(chat.scope)}</p>
-        </div>
+        <h1 className="text-xl font-semibold text-slate-900">
+          {chat.title || scopeLabel(chat.scope) || "Leercoach-sessie"}
+        </h1>
         <a
           href="/leercoach"
           className="text-sm text-slate-600 hover:text-slate-900"
