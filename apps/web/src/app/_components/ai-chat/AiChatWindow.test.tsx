@@ -136,22 +136,51 @@ describe("AiChatWindow — message rendering", () => {
     expect(rendered[1]).toHaveTextContent("Hi, welcome");
   });
 
-  test("renders non-text parts as JSON for debug visibility", () => {
+  test("renders unknown non-text non-tool parts as JSON for debug visibility", () => {
+    // Use a part type that matches neither isTextPart (type="text") nor
+    // isToolPart (type starts with "tool-"); confirms the last-resort
+    // <pre> fallback path still works for anything experimental the SDK
+    // ships in the future.
     setChatState({
       messages: [
         {
           id: "m1",
           role: "assistant",
           parts: [
-            { type: "tool-call", toolName: "search_corpus", args: { q: "x" } },
+            {
+              type: "experimental-attachment",
+              name: "screenshot.png",
+              url: "blob:abc",
+            },
           ],
         },
       ],
     });
     renderWindow();
-    // The fallback branch renders a <pre> with JSON.
-    const pre = screen.getByText(/tool-call/);
+    const pre = screen.getByText(/experimental-attachment/);
     expect(pre.tagName.toLowerCase()).toBe("pre");
+  });
+
+  test("renders tool parts via ToolPartRenderer, not as JSON", () => {
+    setChatState({
+      messages: [
+        {
+          id: "m1",
+          role: "assistant",
+          parts: [
+            {
+              type: "tool-searchBewijsExamples",
+              toolCallId: "call-1",
+              state: "input-streaming",
+            },
+          ],
+        },
+      ],
+    });
+    renderWindow();
+    expect(
+      screen.getByText(/zoekt voorbeelden in geslaagde portfolio/i),
+    ).toBeInTheDocument();
   });
 });
 

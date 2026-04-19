@@ -9,6 +9,8 @@
 
 export { AiChatWindow, isTextPart } from "./AiChatWindow";
 export { SimpleMarkdown } from "./markdown";
+export { isToolPart, ToolPartRenderer } from "./tool-parts";
+export type { ToolPart } from "./tool-parts";
 export type {
   AiChatInitialMessage,
   AiChatStarter,

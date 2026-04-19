@@ -1,114 +1,10 @@
 import "server-only";
-import {
-  listKssBeoordelingscriteriaByWerkprocesId,
-  listKssKwalificatieprofielenWithOnderdelen,
-  listKssNiveaus,
-  listKssWerkprocessenByKerntaakId,
-} from "~/lib/nwd";
 import type { ChatScope } from "./chat-context";
-
-// Flat rubric shape tailored for the leercoach system prompt. Intentionally
-// not reusing the sandbox's RubricTree type so we don't couple the
-// leercoach to code that will retire in P5 when the sandbox is removed.
-type LeercoachRubric = {
-  profielTitel: string;
-  niveauRang: number;
-  richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
-  werkprocessen: Array<{
-    id: string;
-    kerntaakId: string;
-    kerntaakCode: string;
-    kerntaakTitel: string;
-    rang: number;
-    titel: string;
-    resultaat: string;
-    criteria: Array<{
-      id: string;
-      rang: number;
-      title: string;
-      omschrijving: string;
-    }>;
-  }>;
-};
-
-// Load the full rubric for a profiel, with kerntaakCode + kerntaakTitel
-// duplicated onto each werkproces so scope filtering + prompt formatting
-// don't require a second lookup.
-async function loadLeercoachRubric(
-  profielId: string,
-): Promise<LeercoachRubric | null> {
-  const niveaus = await listKssNiveaus();
-  for (const niveau of niveaus) {
-    const profielen = await listKssKwalificatieprofielenWithOnderdelen(
-      niveau.id,
-    );
-    const match = profielen.find((p) => p.id === profielId);
-    if (!match) continue;
-
-    const werkprocessenNested = await Promise.all(
-      match.kerntaken.map(async (kt) => {
-        const wps = await listKssWerkprocessenByKerntaakId(kt.id);
-        return wps.map((wp) => ({
-          wp,
-          kerntaakCode: String(kt.rang ?? ""),
-          kerntaakTitel: kt.titel,
-        }));
-      }),
-    );
-    const werkprocessenFlat = werkprocessenNested.flat();
-
-    const werkprocessen = await Promise.all(
-      werkprocessenFlat.map(async ({ wp, kerntaakCode, kerntaakTitel }) => {
-        const criteria = await listKssBeoordelingscriteriaByWerkprocesId(
-          wp.id,
-        );
-        return {
-          id: wp.id,
-          kerntaakId: wp.kerntaakId,
-          kerntaakCode,
-          kerntaakTitel,
-          rang: wp.rang ?? 0,
-          titel: wp.titel,
-          resultaat: wp.resultaat,
-          criteria: criteria
-            .map((c) => ({
-              id: c.id,
-              rang: c.rang ?? 0,
-              title: c.title,
-              omschrijving: c.omschrijving,
-            }))
-            .sort((a, b) => a.rang - b.rang),
-        };
-      }),
-    );
-
-    return {
-      profielTitel: match.titel,
-      niveauRang: niveau.rang,
-      richting: match.richting,
-      werkprocessen: werkprocessen.sort((a, b) => a.rang - b.rang),
-    };
-  }
-  return null;
-}
-
-function filterWerkprocessenByScope<T extends { kerntaakCode: string }>(
-  werkprocessen: T[],
-  scope: ChatScope,
-): T[] {
-  switch (scope.type) {
-    case "full_profiel":
-      return werkprocessen;
-    case "kerntaak":
-      return werkprocessen.filter(
-        (wp) => wp.kerntaakCode === scope.kerntaakCode,
-      );
-    case "kerntaken":
-      return werkprocessen.filter((wp) =>
-        scope.kerntaakCodes.includes(wp.kerntaakCode),
-      );
-  }
-}
+import {
+  filterWerkprocessenByScope,
+  type LeercoachRubric,
+  loadLeercoachRubric,
+} from "./rubric";
 
 function richtingLabel(r: LeercoachRubric["richting"]): string {
   switch (r) {
@@ -138,6 +34,9 @@ Schrijfstijl:
 - Geen em-dashes (—); gebruik komma's, punten of haakjes.
 - Geen clichés zoals "cruciaal", "essentieel", "resulteerde in".
 - Geen meta-samenvattingen ("dit laat zien dat…"). Laat de kandidaat zelf betekenis geven.
+
+Beschikbare tools:
+- searchBewijsExamples({ werkprocesRang, criteriumRang, maxResults? }): vraagt 1-3 geanonimiseerde bewijs-fragmenten op uit echte, geslaagde portfolio's voor dit exacte criterium. Gebruik deze tool als de kandidaat vraagt "wat voor voorbeeld verwacht men hier?" of als ze vastlopen en een aanknopingspunt nodig hebben. Vat de voorbeelden samen in je eigen woorden — citeer nooit verbatim, en maak duidelijk dat het voorbeelden zijn, niet een sjabloon dat ze moeten volgen. De numerieke ranges die je doorgeeft matchen de werkproces- en criterium-nummers in de rubriek hieronder (bijv. werkprocesRang=1, criteriumRang=2 voor "het tweede criterium van werkproces 1").
 
 Beperkingen van deze prototype-versie:
 - Je hebt nog geen toegang tot eerdere portfolio's van de kandidaat. Als ze daarnaar verwijzen, vraag ze om belangrijke passages in de chat te plakken.

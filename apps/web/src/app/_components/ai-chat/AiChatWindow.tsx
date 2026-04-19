@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useState } from "react";
 import { SimpleMarkdown } from "./markdown";
+import { isToolPart, type ToolPart, ToolPartRenderer } from "./tool-parts";
 import type {
   AiChatInitialMessage,
   AiChatStarter,
@@ -176,9 +177,10 @@ function DefaultEmptyState() {
   );
 }
 
-// Render UIMessage parts. Handles text via SimpleMarkdown; other part types
-// (tool-call, tool-result, source, etc.) fall through to JSON for debug
-// visibility until we wire proper renderers.
+// Render UIMessage parts. Text parts go through SimpleMarkdown (streamdown);
+// tool parts (AI SDK v5+ shape: type="tool-<name>", state, input, output)
+// get rendered by ToolPartRenderer with per-tool disclosure UI. Anything
+// we don't recognize falls through to a JSON <pre> for debug visibility.
 function RenderMessageParts({ parts }: { parts: unknown }) {
   if (!Array.isArray(parts)) return null;
   return (
@@ -189,6 +191,14 @@ function RenderMessageParts({ parts }: { parts: unknown }) {
             <SimpleMarkdown
               key={`text-${i}-${part.text.slice(0, 20)}`}
               text={part.text}
+            />
+          );
+        }
+        if (isToolPart(part)) {
+          return (
+            <ToolPartRenderer
+              key={`tool-${(part as ToolPart).toolCallId ?? i}`}
+              part={part as ToolPart}
             />
           );
         }
