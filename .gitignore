@@ -24,6 +24,7 @@ coverage/
 
 .vercel
 prod-seed.sql
+supabase/kss-dev-seed.sql
 
 # Turborepo
 .turbo
