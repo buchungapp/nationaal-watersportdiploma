@@ -5,20 +5,24 @@ import {
   type AiChatInitialMessage,
   type AiChatStarter,
 } from "~/app/_components/ai-chat";
+import { UploadPriorPortfolioInline } from "./UploadPriorPortfolioInline";
 
 type Props = {
   chatId: string;
   initialMessages: AiChatInitialMessage[];
 };
 
-// Thin leercoach-specific wrapper around the reusable AiChatWindow. Only
-// responsibility: pass the leercoach API endpoint and the starter chips
-// matching the four user archetypes from the opening message. Everything
-// else — scroll behaviour, markdown rendering, message ordering, input
-// handling — lives in the shared component.
+// Thin leercoach-specific wrapper around the reusable AiChatWindow.
+// Responsibilities:
+//   - leercoach API endpoint
+//   - four starter chips matching our user archetypes
+//   - inline "Eerder portfolio uploaden" affordance right above the input
+//     (via the slotAboveInput render-prop). The upload flow runs server-
+//     side and on success auto-sends a confirmation message to the chat
+//     so the leercoach knows the portfolio is now retrievable.
 //
-// Future surfaces (portfolio-checker, portfolio-review) will instantiate
-// AiChatWindow directly with their own endpoint + starters.
+// Future surfaces (/portfolio-checker, /portfolio-review) instantiate
+// AiChatWindow directly with their own endpoint + starters + slots.
 export function ChatShell({ chatId, initialMessages }: Props) {
   return (
     <AiChatWindow
@@ -26,6 +30,12 @@ export function ChatShell({ chatId, initialMessages }: Props) {
       initialMessages={initialMessages}
       apiEndpoint="/api/leercoach/chat"
       starters={LEERCOACH_STARTERS}
+      slotAboveInput={({ sendMessage, isLoading }) => (
+        <UploadPriorPortfolioInline
+          disabled={isLoading}
+          onAfterUpload={(text) => sendMessage({ text })}
+        />
+      )}
     />
   );
 }
@@ -47,7 +57,7 @@ const LEERCOACH_STARTERS: AiChatStarter[] = [
   {
     label: "Ik heb eerdere PvB-portfolio's geschreven",
     prompt:
-      "Ik heb voor een lager niveau al een PvB-portfolio geschreven. Voor dit portfolio heb ik nog niks nieuws op papier, maar ik wil niet alles opnieuw doen. Hoe kunnen we daarop voortbouwen?",
+      "Ik heb voor een lager niveau al een PvB-portfolio geschreven. Als ik die upload via de knop hierboven, hoe gaan we er dan mee werken?",
   },
   {
     label: "Ik heb aantekeningen voor dit portfolio",

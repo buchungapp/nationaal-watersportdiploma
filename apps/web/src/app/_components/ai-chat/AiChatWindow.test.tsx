@@ -315,6 +315,70 @@ describe("AiChatWindow — className prop", () => {
   });
 });
 
+describe("AiChatWindow — slotAboveInput render-prop", () => {
+  test("renders the slot content above the input form", () => {
+    renderWindow({
+      slotAboveInput: () => (
+        <div data-testid="custom-slot">Custom stuff</div>
+      ),
+    });
+    expect(screen.getByTestId("custom-slot")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-slot")).toHaveTextContent("Custom stuff");
+  });
+
+  test("hands sendMessage to the slot so it can trigger sends", async () => {
+    const user = userEvent.setup();
+    renderWindow({
+      slotAboveInput: ({ sendMessage }) => (
+        <button
+          type="button"
+          onClick={() =>
+            sendMessage({ text: "triggered from slot" })
+          }
+          data-testid="slot-trigger"
+        >
+          Trigger
+        </button>
+      ),
+    });
+    await user.click(screen.getByTestId("slot-trigger"));
+    expect(mockSendMessage).toHaveBeenCalledWith({
+      text: "triggered from slot",
+    });
+  });
+
+  test("passes isLoading=true while the chat is streaming", () => {
+    setChatState({ status: "streaming" });
+    renderWindow({
+      slotAboveInput: ({ isLoading }) => (
+        <div data-testid="slot-loading">
+          {isLoading ? "streaming" : "idle"}
+        </div>
+      ),
+    });
+    expect(screen.getByTestId("slot-loading")).toHaveTextContent("streaming");
+  });
+
+  test("passes isLoading=false when status is ready", () => {
+    renderWindow({
+      slotAboveInput: ({ isLoading }) => (
+        <div data-testid="slot-loading">
+          {isLoading ? "streaming" : "idle"}
+        </div>
+      ),
+    });
+    expect(screen.getByTestId("slot-loading")).toHaveTextContent("idle");
+  });
+
+  test("renders nothing in the slot area when slotAboveInput is omitted", () => {
+    renderWindow();
+    // The slot itself isn't a named role; assert by absence of our test
+    // marker. If the slot renders falsy, the AiChatWindow simply omits
+    // that block — no extra empty wrapper.
+    expect(screen.queryByTestId("slot-loading")).not.toBeInTheDocument();
+  });
+});
+
 // --- sanity check so the fireEvent import isn't orphaned; it'll be used
 // by the useStickyScroll tests in a sibling file, but vitest errors on
 // unused named imports when `noUnusedLocals` is strict. Reference once. ---

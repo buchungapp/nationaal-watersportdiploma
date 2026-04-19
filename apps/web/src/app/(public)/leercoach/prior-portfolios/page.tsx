@@ -3,16 +3,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "~/lib/supabase/server";
 import { PriorPortfolioList } from "./_components/PriorPortfolioList";
-import { PriorPortfolioUploadForm } from "./_components/PriorPortfolioUploadForm";
 
 export const metadata: Metadata = {
   title: "Leercoach · eerdere portfolio's",
   robots: { index: false, follow: false },
 };
 
-// Management surface for user-uploaded prior PvB portfolios. The layout
-// above this page handles auth; anonymous users never reach this
-// component.
+// Management view for previously uploaded prior-portfolio PDFs.
+//
+// Upload happens INSIDE a leercoach chat session (see
+// _components/UploadPriorPortfolioInline.tsx) — that's the primary and
+// only entry point. This page is for after-the-fact management:
+// seeing what's stored, deleting what's no longer relevant.
+//
+// Rationale: uploading is a conversational action ("here's my N3
+// portfolio, can you read it?"). Extracting it to a separate route
+// broke that metaphor and forced a context switch. Management is
+// a separate mental model and earns its own route.
 export default async function PriorPortfoliosPage() {
   const supabase = await createClient();
   const {
@@ -35,31 +42,16 @@ export default async function PriorPortfoliosPage() {
           Jouw eerdere portfolio's
         </h1>
         <p className="max-w-2xl text-slate-700">
-          Upload PvB-portfolio's die je eerder hebt geschreven (voor lagere
-          niveaus). Je leercoach kan dan naar die tekst verwijzen zonder dat
-          je alles opnieuw hoeft te vertellen.
+          Hier zie je wat je tijdens je leercoach-sessies hebt geüpload.
+          Wil je iets toevoegen? Open een chat en gebruik de knop{" "}
+          <span className="font-mono text-xs">📎 Eerder portfolio uploaden</span>{" "}
+          boven het invoerveld.
         </p>
-        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-          <p className="font-semibold text-slate-900">
-            Privacy &amp; anonimisering
-          </p>
-          <p className="mt-1">
-            Je PDF wordt server-side verwerkt: we halen namen, locaties, dates
-            en verenigingsnamen eruit voordat iets opgeslagen wordt. De
-            geanonimiseerde tekst is alleen voor jouw account beschikbaar —
-            geen andere kandidaat ziet deze inhoud.
-          </p>
-        </div>
       </header>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-xl font-semibold text-slate-900">Nieuwe upload</h2>
-        <PriorPortfolioUploadForm />
-      </section>
-
-      <section className="flex flex-col gap-4">
         <h2 className="text-xl font-semibold text-slate-900">
-          Geüpload ({priors.length})
+          Opgeslagen ({priors.length})
         </h2>
         <PriorPortfolioList priors={priors} />
       </section>

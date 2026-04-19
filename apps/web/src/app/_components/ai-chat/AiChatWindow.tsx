@@ -33,6 +33,7 @@ export function AiChatWindow({
   placeholder = "Typ je bericht… (shift+enter voor een nieuwe regel)",
   starters,
   emptyState,
+  slotAboveInput,
   onError,
   className,
 }: AiChatWindowProps) {
@@ -135,6 +136,13 @@ export function AiChatWindow({
           </div>
         </div>
       ) : null}
+
+      {slotAboveInput
+        ? slotAboveInput({
+            sendMessage: (input) => sendMessage(input),
+            isLoading,
+          })
+        : null}
 
       <form
         onSubmit={handleSubmit}

@@ -13,6 +13,7 @@ export { isToolPart, ToolPartRenderer } from "./tool-parts";
 export type { ToolPart } from "./tool-parts";
 export type {
   AiChatInitialMessage,
+  AiChatInputSlotContext,
   AiChatStarter,
   AiChatWindowProps,
 } from "./types";
