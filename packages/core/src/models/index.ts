@@ -9,6 +9,7 @@ export * as Location from "./location/index.js";
 export * as Logbook from "./logbook/index.js";
 export * as Marketing from "./marketing/index.js";
 export * as Platform from "./platform/index.js";
+export * as PortfolioScoring from "./portfolio-scoring/index.js";
 export * as Pvb from "./pvb/index.js";
 export * as Student from "./student/index.js";
 export * as User from "./user/index.js";

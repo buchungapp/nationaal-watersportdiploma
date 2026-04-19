@@ -249,49 +249,26 @@ export async function loadRubricByProfielTitel(
 }
 
 // ---------- scoring primitives ----------
+//
+// These functions are now defined in @nawadi/core's portfolio-scoring module
+// so the leercoach + checker + review surfaces all share one implementation.
+// Re-exported here so existing imports (eval.ts, experiment-prior-context*.ts)
+// keep working without changes.
+//
+// Matrix noise floor (±0.6pp length, 0.0 concreteness) was measured against
+// the inlined implementations on 2026-04-19 and verified byte-identical after
+// extraction — see packages/core/src/models/portfolio-scoring/score.test.ts.
 
-const ANTI_TELLS = [
-  /\bzorgde voor\b/gi,
-  /\bimplementeerde\b/gi,
-  /\bfaciliteerde\b/gi,
-  /\bborgde\b/gi,
-  /\bzorgde ervoor dat\b/gi,
-  /\bdit laat zien dat\b/gi,
-  /\bhiermee heb ik aangetoond\b/gi,
-  /\bop effectieve wijze\b/gi,
-  /\bop een gestructureerde manier\b/gi,
-  /\bresulteerde in\b/gi,
-  /\bcruciaal\b/gi,
-  /\bessentieel\b/gi,
-];
+import { PortfolioScoring } from "@nawadi/core";
 
-const META_CODA =
-  /\b(dit laat zien dat|hiermee (heb|laat) ik|dit bewijst dat|dit illustreert)\b/gi;
-
-const SPORT_JARGON =
-  /\b(bft|knopen|gennaker|trapezium|overstag|halve wind|cwo|i[-]?\d|niveau \d|laser|dart|pico|optimist|valk|polyvalk|bakstag|zwaard|grootzeil|fok)\b/gi;
-
-export function wordCount(s: string): number {
-  return s.replace(/\s+/g, " ").trim().split(" ").filter(Boolean).length;
-}
-
-export function concretenessPer100(s: string): number {
-  const wc = wordCount(s);
-  if (wc === 0) return 0;
-  const tokens =
-    (s.match(/\[(KANDIDAAT|LOCATIE|VERENIGING|DATUM|PII|ID)\]/g)?.length ?? 0) +
-    (s.match(/\b\d+\b/g)?.length ?? 0) +
-    (s.match(SPORT_JARGON)?.length ?? 0);
-  return Math.round((tokens / wc) * 1000) / 10;
-}
-
-export function antiTellCount(s: string): number {
-  return ANTI_TELLS.reduce((sum, re) => sum + (s.match(re)?.length ?? 0), 0);
-}
-
-export function metaCodaCount(s: string): number {
-  return s.match(META_CODA)?.length ?? 0;
-}
+export const {
+  antiTellCount,
+  compareBewijs,
+  concretenessPer100,
+  metaCodaCount,
+  scoreBewijs,
+  wordCount,
+} = PortfolioScoring;
 
 // ---------- pipeline ----------
 
