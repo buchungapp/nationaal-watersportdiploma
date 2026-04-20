@@ -1,22 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useAiChatContext } from "~/app/_components/ai-chat";
 import { PriorPortfolioUploadDialog } from "./PriorPortfolioUploadDialog";
 
-// Inline upload affordance rendered inside the chat (via AiChatWindow's
-// slotAboveInput prop). Opens the shared PriorPortfolioUploadDialog and
-// on success auto-sends a confirmation message into the chat so the
-// leercoach knows the portfolio is now available.
+// Inline upload affordance rendered inside the chat. Lives as a child of
+// <AiChat.Frame> (or AiChatWindow's children slot) and grabs
+// sendMessage + isLoading from the shared AiChatContext via `use()` —
+// per the patterns-children-over-render-props + state-context-interface
+// rules, no render-prop callback needed.
+//
+// On successful upload: dialog closes, a confirmation message is
+// auto-posted into the chat so the leercoach can immediately call
+// searchPriorPortfolio and continue the conversation.
 
-type Props = {
-  disabled?: boolean;
-  onAfterUpload: (confirmationMessage: string) => void;
-};
-
-export function UploadPriorPortfolioInline({
-  disabled,
-  onAfterUpload,
-}: Props) {
+export function UploadPriorPortfolioInline() {
+  const { actions, meta } = useAiChatContext();
   const [open, setOpen] = useState(false);
 
   return (
@@ -25,7 +24,7 @@ export function UploadPriorPortfolioInline({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          disabled={disabled}
+          disabled={meta.isLoading}
           className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-medium text-slate-700 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span aria-hidden="true">📎</span>
@@ -44,7 +43,7 @@ export function UploadPriorPortfolioInline({
           const message = result.alreadyIngested
             ? `Ik heb mijn ${niveauLabel}portfolio geüpload — maar ik zie dat dezelfde versie er al stond, dus niets nieuws toegevoegd.`
             : `Ik heb zojuist mijn ${niveauLabel}portfolio geüpload (${result.pageCount} pagina's, ${result.chunkCount} fragmenten). Neem even de tijd om erin te kijken, dan kunnen we daarna bespreken hoe we dit gebruiken.`;
-          onAfterUpload(message);
+          actions.sendMessage({ text: message });
         }}
       />
     </>

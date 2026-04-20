@@ -43,15 +43,6 @@ export type AiChatWindowProps = {
   /** Custom empty-state rendered when there are no messages at all. */
   emptyState?: ReactNode;
   /**
-   * Render-prop slot rendered between the message list + starter chips and
-   * the input textarea form. Consumers use this for chat-adjacent
-   * affordances that need access to `sendMessage` — most common today:
-   * an inline upload button that auto-sends a confirmation message after
-   * a successful upload. Receives `{ sendMessage, isLoading }` so it can
-   * disable itself while streaming and trigger follow-up messages.
-   */
-  slotAboveInput?: (ctx: AiChatInputSlotContext) => ReactNode;
-  /**
    * Called whenever the streamed response errors. Consumer can show a toast
    * or log; the component already renders a default error box.
    */

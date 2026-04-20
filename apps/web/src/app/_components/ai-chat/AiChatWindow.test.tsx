@@ -1,24 +1,21 @@
-// Component tests for AiChatWindow.
+// Component tests for AiChatWindow (the thin wrapper around the AiChat
+// compound) + the AiChat pieces via their shared context.
 //
-// Strategy (Layer 1 per leercoach-pivot.md test plan): mock `useChat` and
+// Strategy (Layer 1 per leercoach-pivot.md): mock `useChat` and
 // `streamdown` at the module level so the test is isolated from
-// network + from streamdown's heavyweight rendering pipeline. Asserts the
-// component's observable UI behaviour: message rendering, starter chip
-// firing, input submission, keyboard handling, error surface, and lifecycle
-// around the `onError` callback.
-//
-// Streaming-integration tests (real useChat + simulateReadableStream + a
-// stubbed /api/chat endpoint) are a separate follow-up layer — they cover
-// partial-token rendering + scroll behaviour during actual streams, which
-// is different ground from "does clicking the chip call sendMessage".
+// network + heavyweight markdown rendering. Asserts observable UI
+// behaviour: message rendering, starter chips, input submission,
+// keyboard handling, error surface, lifecycle around `onError`, and
+// context-based composition (children access sendMessage +
+// isLoading via useAiChatContext).
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 // --- Mock @ai-sdk/react.useChat ---
-// useChat is called once per AiChatWindow render. We control its return
-// value per-test via the mockReturnValue helper below.
+// useChat is called once per AiChat.Provider render. We control its
+// return value per-test via the setChatState helper below.
 
 const mockSendMessage = vi.fn();
 let currentChatState: {
@@ -45,11 +42,8 @@ vi.mock("@ai-sdk/react", () => ({
 }));
 
 // --- Mock streamdown ---
-// We don't want to pull streamdown's full marked + rehype + mermaid stack
-// into jsdom for every component test; that's covered by streamdown's own
-// test suite in vercel/streamdown. We render its children as plain text so
-// assertions can look up message content without worrying about markdown
-// structure.
+// Reduce to plain text so assertions can find message content without
+// depending on streamdown's full markdown pipeline.
 
 vi.mock("streamdown", () => ({
   Streamdown: ({ children }: { children: string }) => (
@@ -57,14 +51,13 @@ vi.mock("streamdown", () => ({
   ),
 }));
 
-// --- Test harness ---
+// --- Imports after mocks so vi.mock hoists before module load ---
 
 import { AiChatWindow } from "./AiChatWindow";
+import { useAiChatContext } from "./context";
 import type { AiChatInitialMessage, AiChatStarter } from "./types";
 
-function setChatState(
-  partial: Partial<typeof currentChatState>,
-): void {
+function setChatState(partial: Partial<typeof currentChatState>): void {
   currentChatState = { ...currentChatState, ...partial };
 }
 
@@ -114,7 +107,6 @@ describe("AiChatWindow — empty state", () => {
   test("renders a custom emptyState when the consumer provides one", () => {
     renderWindow({ emptyState: <p>My custom welcome</p> });
     expect(screen.getByText("My custom welcome")).toBeInTheDocument();
-    // Default should NOT appear when override is used.
     expect(
       screen.queryByText(/klaar om te beginnen/i),
     ).not.toBeInTheDocument();
@@ -137,10 +129,6 @@ describe("AiChatWindow — message rendering", () => {
   });
 
   test("renders unknown non-text non-tool parts as JSON for debug visibility", () => {
-    // Use a part type that matches neither isTextPart (type="text") nor
-    // isToolPart (type starts with "tool-"); confirms the last-resort
-    // <pre> fallback path still works for anything experimental the SDK
-    // ships in the future.
     setChatState({
       messages: [
         {
@@ -204,9 +192,6 @@ describe("AiChatWindow — starter chips", () => {
   });
 
   test("keeps starter chips visible when only assistant messages exist (opening)", () => {
-    // Matches our real flow: createChatAction saves an opening assistant
-    // message, then the chat loads with starters still visible until the
-    // first user turn.
     setChatState({
       messages: [TEXT_MESSAGE("a1", "assistant", "Welkom.")],
     });
@@ -252,11 +237,9 @@ describe("AiChatWindow — input + submission", () => {
     renderWindow();
     const textarea = screen.getByRole("textbox");
     await user.type(textarea, "regel 1");
-    // Shift+Enter should not submit; should insert a newline.
     await user.keyboard("{Shift>}{Enter}{/Shift}");
     await user.type(textarea, "regel 2");
     expect(mockSendMessage).not.toHaveBeenCalled();
-    // A plain Enter submits.
     await user.keyboard("{Enter}");
     expect(mockSendMessage).toHaveBeenCalledTimes(1);
     const call = mockSendMessage.mock.calls[0]?.[0];
@@ -269,8 +252,6 @@ describe("AiChatWindow — input + submission", () => {
     renderWindow();
     const textarea = screen.getByRole("textbox");
     await user.type(textarea, "   ");
-    // Button is disabled; clicking does nothing. Keyboard Enter also
-    // bails out of handleSubmit early. Assert no send.
     await user.keyboard("{Enter}");
     expect(mockSendMessage).not.toHaveBeenCalled();
   });
@@ -279,7 +260,6 @@ describe("AiChatWindow — input + submission", () => {
     setChatState({ status: "streaming" });
     renderWindow();
     expect(screen.getByRole("textbox")).toBeDisabled();
-    // The send button shows "…" while loading.
     expect(screen.getByRole("button", { name: "…" })).toBeDisabled();
   });
 
@@ -308,78 +288,77 @@ describe("AiChatWindow — error surface", () => {
 });
 
 describe("AiChatWindow — className prop", () => {
-  test("appends consumer className to the outermost container", () => {
+  test("appends consumer className to the frame's outer container", () => {
     const { container } = renderWindow({ className: "my-custom-cls" });
-    const outer = container.firstElementChild;
-    expect(outer?.className).toContain("my-custom-cls");
+    // className lands on the Frame, which is nested inside the Provider.
+    // Walk the tree to find the element carrying our test class.
+    const match = container.querySelector(".my-custom-cls");
+    expect(match).not.toBeNull();
   });
 });
 
-describe("AiChatWindow — slotAboveInput render-prop", () => {
-  test("renders the slot content above the input form", () => {
+describe("AiChatWindow — context-aware children (composition via use())", () => {
+  // Follows the vercel-composition-patterns guidance: child UI that
+  // needs sendMessage + isLoading consumes useAiChatContext() instead
+  // of taking a render-prop callback.
+
+  function TestChild({ label }: { label: string }) {
+    const { actions, meta } = useAiChatContext();
+    return (
+      <button
+        type="button"
+        data-testid="context-child"
+        disabled={meta.isLoading}
+        onClick={() => actions.sendMessage({ text: "triggered from child" })}
+      >
+        {label} — loading: {meta.isLoading ? "yes" : "no"}
+      </button>
+    );
+  }
+
+  test("renders children between starters and the input form", () => {
     renderWindow({
-      slotAboveInput: () => (
-        <div data-testid="custom-slot">Custom stuff</div>
-      ),
+      children: <TestChild label="hello" />,
     });
-    expect(screen.getByTestId("custom-slot")).toBeInTheDocument();
-    expect(screen.getByTestId("custom-slot")).toHaveTextContent("Custom stuff");
+    expect(screen.getByTestId("context-child")).toHaveTextContent(
+      "hello — loading: no",
+    );
   });
 
-  test("hands sendMessage to the slot so it can trigger sends", async () => {
-    const user = userEvent.setup();
-    renderWindow({
-      slotAboveInput: ({ sendMessage }) => (
-        <button
-          type="button"
-          onClick={() =>
-            sendMessage({ text: "triggered from slot" })
-          }
-          data-testid="slot-trigger"
-        >
-          Trigger
-        </button>
-      ),
-    });
-    await user.click(screen.getByTestId("slot-trigger"));
-    expect(mockSendMessage).toHaveBeenCalledWith({
-      text: "triggered from slot",
-    });
-  });
-
-  test("passes isLoading=true while the chat is streaming", () => {
+  test("child can read isLoading from context (streaming)", () => {
     setChatState({ status: "streaming" });
     renderWindow({
-      slotAboveInput: ({ isLoading }) => (
-        <div data-testid="slot-loading">
-          {isLoading ? "streaming" : "idle"}
-        </div>
-      ),
+      children: <TestChild label="x" />,
     });
-    expect(screen.getByTestId("slot-loading")).toHaveTextContent("streaming");
+    expect(screen.getByTestId("context-child")).toHaveTextContent(
+      "loading: yes",
+    );
+    expect(screen.getByTestId("context-child")).toBeDisabled();
   });
 
-  test("passes isLoading=false when status is ready", () => {
+  test("child can call sendMessage via context", async () => {
+    const user = userEvent.setup();
     renderWindow({
-      slotAboveInput: ({ isLoading }) => (
-        <div data-testid="slot-loading">
-          {isLoading ? "streaming" : "idle"}
-        </div>
-      ),
+      children: <TestChild label="x" />,
     });
-    expect(screen.getByTestId("slot-loading")).toHaveTextContent("idle");
+    await user.click(screen.getByTestId("context-child"));
+    expect(mockSendMessage).toHaveBeenCalledWith({
+      text: "triggered from child",
+    });
   });
 
-  test("renders nothing in the slot area when slotAboveInput is omitted", () => {
-    renderWindow();
-    // The slot itself isn't a named role; assert by absence of our test
-    // marker. If the slot renders falsy, the AiChatWindow simply omits
-    // that block — no extra empty wrapper.
-    expect(screen.queryByTestId("slot-loading")).not.toBeInTheDocument();
+  test("useAiChatContext throws when used outside the provider", () => {
+    // Consuming the hook outside an <AiChat.Provider> should throw
+    // rather than silently no-op — prevents orphaned pieces.
+    function Orphan() {
+      useAiChatContext();
+      return null;
+    }
+    // Suppress React's error-boundary console noise for this assertion.
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(() => render(<Orphan />)).toThrow(
+      /must be used inside <AiChat\.Provider>/,
+    );
+    spy.mockRestore();
   });
 });
-
-// --- sanity check so the fireEvent import isn't orphaned; it'll be used
-// by the useStickyScroll tests in a sibling file, but vitest errors on
-// unused named imports when `noUnusedLocals` is strict. Reference once. ---
-void fireEvent;

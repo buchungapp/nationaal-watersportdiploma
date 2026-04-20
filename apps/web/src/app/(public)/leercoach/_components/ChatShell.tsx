@@ -12,17 +12,17 @@ type Props = {
   initialMessages: AiChatInitialMessage[];
 };
 
-// Thin leercoach-specific wrapper around the reusable AiChatWindow.
-// Responsibilities:
+// Thin leercoach-specific wrapper around AiChatWindow. Responsibilities:
 //   - leercoach API endpoint
 //   - four starter chips matching our user archetypes
-//   - inline "Eerder portfolio uploaden" affordance right above the input
-//     (via the slotAboveInput render-prop). The upload flow runs server-
-//     side and on success auto-sends a confirmation message to the chat
-//     so the leercoach knows the portfolio is now retrievable.
+//   - inline "Eerder portfolio uploaden" affordance as children
+//     (rendered between the starter chips and the input form).
+//     UploadPriorPortfolioInline consumes useAiChatContext() directly
+//     to grab sendMessage + isLoading — no render-prop needed.
 //
-// Future surfaces (/portfolio-checker, /portfolio-review) instantiate
-// AiChatWindow directly with their own endpoint + starters + slots.
+// Future surfaces (/portfolio-checker, /portfolio-review) consume
+// AiChatWindow the same way, or drop to the compound <AiChat.Provider>
+// + pieces if they need different ordering.
 export function ChatShell({ chatId, initialMessages }: Props) {
   return (
     <AiChatWindow
@@ -30,24 +30,21 @@ export function ChatShell({ chatId, initialMessages }: Props) {
       initialMessages={initialMessages}
       apiEndpoint="/api/leercoach/chat"
       starters={LEERCOACH_STARTERS}
-      slotAboveInput={({ sendMessage, isLoading }) => (
-        <UploadPriorPortfolioInline
-          disabled={isLoading}
-          onAfterUpload={(text) => sendMessage({ text })}
-        />
-      )}
-    />
+    >
+      <UploadPriorPortfolioInline />
+    </AiChatWindow>
   );
 }
 
 // Four starter chips matching the archetypes in the opening message.
-// Each chip sends a full first-person prompt straight into the chat so
-// the leercoach knows exactly where the kandidaat is and can respond
-// appropriately without another round of "waar begin je?".
+// Each chip sends a full first-person prompt so the leercoach knows
+// exactly where the kandidaat is and can respond without another round
+// of "waar begin je?".
 //
-// Key distinction: "eerdere portfolio's voor lager niveau" is a different
-// starting point than "materiaal voor dit portfolio" — collapsing them
-// confused N4/N5 kandidaten with N3 portfolios in the drawer.
+// Key distinction: "eerdere portfolio's voor lager niveau" is a
+// different starting point than "materiaal voor dit portfolio" —
+// collapsing them confused N4/N5 kandidaten with N3 portfolios in the
+// drawer.
 const LEERCOACH_STARTERS: AiChatStarter[] = [
   {
     label: "Leg me uit wat dit portfolio moet zijn",

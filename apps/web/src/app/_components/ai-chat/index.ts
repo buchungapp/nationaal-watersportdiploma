@@ -1,13 +1,35 @@
-// Public API of the reusable AI chat window.
+// Public API.
 //
-// Consumers (today: /leercoach. Tomorrow: /portfolio-checker chat, /portfolio-
-// review reviewer chat) do:
+// Two ways to consume the chat UI:
 //
-//   import { AiChatWindow, type AiChatStarter } from "~/app/_components/ai-chat";
+// 1. AiChat compound — full control over composition:
+//      <AiChat.Provider ...>
+//        <AiChat.Frame>
+//          <AiChat.MessageList />
+//          <AiChat.ErrorBanner />
+//          <AiChat.Starters />
+//          <YourCustomUI />  {/* uses useAiChatContext() */}
+//          <AiChat.InputForm />
+//        </AiChat.Frame>
+//      </AiChat.Provider>
 //
-// and pass apiEndpoint, initialMessages, and optional starters + emptyState.
+// 2. AiChatWindow — thin wrapper that renders the default composition.
+//    Any `children` land between Starters and InputForm.
 
-export { AiChatWindow, isTextPart } from "./AiChatWindow";
+export { AiChat, isTextPart } from "./AiChat";
+export { AiChatWindow } from "./AiChatWindow";
+export {
+  AiChatContext,
+  useAiChatContext,
+  useAiChatInputSlot,
+} from "./context";
+export type {
+  AiChatActions,
+  AiChatContextValue,
+  AiChatMessage,
+  AiChatMeta,
+  AiChatState,
+} from "./context";
 export { SimpleMarkdown } from "./markdown";
 export { isToolPart, ToolPartRenderer } from "./tool-parts";
 export type { ToolPart } from "./tool-parts";
