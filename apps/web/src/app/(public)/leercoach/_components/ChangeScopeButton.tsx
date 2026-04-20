@@ -1,5 +1,6 @@
 "use client";
 
+import { unstable_rethrow } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateChatScopeAction } from "../actions";
 
@@ -58,6 +59,10 @@ export function ChangeScopeButton({
         await updateChatScopeAction({ chatId, scope: nextScope });
         setOpen(false);
       } catch (e) {
+        // unstable_rethrow lets Next.js redirect/notFound sentinels
+        // propagate correctly. No-op for regular errors. Defensive
+        // even though updateChatScopeAction doesn't currently redirect.
+        unstable_rethrow(e);
         setError(e instanceof Error ? e.message : String(e));
       }
     });

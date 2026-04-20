@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { unstable_rethrow } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteChatAction } from "../actions";
 
@@ -26,6 +27,10 @@ export function SessionRow({ chatId, title, subtitle }: Props) {
       try {
         await deleteChatAction({ chatId });
       } catch (err) {
+        // Let Next.js redirect/notFound sentinels propagate (no-op
+        // for regular errors). Defensive — deleteChatAction doesn't
+        // redirect today but might in future.
+        unstable_rethrow(err);
         console.error("Failed to delete chat", err);
         setConfirming(false);
       }

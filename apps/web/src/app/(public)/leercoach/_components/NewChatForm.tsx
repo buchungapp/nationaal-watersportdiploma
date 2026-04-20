@@ -1,5 +1,6 @@
 "use client";
 
+import { unstable_rethrow } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createChatAction, type CreateChatInput } from "../actions";
 
@@ -48,6 +49,13 @@ export function NewChatForm({ profielen }: { profielen: ProfielOption[] }) {
         });
         // Redirect is handled inside createChatAction via `redirect()`.
       } catch (e) {
+        // redirect() throws a sentinel NEXT_REDIRECT error to signal
+        // the navigation. Without unstable_rethrow, this try/catch
+        // swallows it and the user sees a red "NEXT_REDIRECT" flash
+        // before the redirect wins the race. unstable_rethrow is a
+        // no-op for regular errors, so our error-message branch still
+        // fires for real failures.
+        unstable_rethrow(e);
         setError(e instanceof Error ? e.message : String(e));
       }
     });

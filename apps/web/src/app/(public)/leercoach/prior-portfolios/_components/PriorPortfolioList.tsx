@@ -1,5 +1,6 @@
 "use client";
 
+import { unstable_rethrow } from "next/navigation";
 import { useState, useTransition } from "react";
 import { revokePriorPortfolioAction } from "../actions";
 
@@ -43,6 +44,9 @@ function PriorRow({ prior }: { prior: PriorSource }) {
       try {
         await revokePriorPortfolioAction({ sourceId: prior.sourceId });
       } catch (err) {
+        // Let Next.js redirect/notFound sentinels propagate (no-op
+        // for regular errors).
+        unstable_rethrow(err);
         console.error("Failed to revoke", err);
         setConfirming(false);
       }
