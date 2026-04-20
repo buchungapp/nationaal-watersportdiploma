@@ -14,7 +14,13 @@
 // decouples the pieces from that implementation so swapping is cheap.
 
 import { createContext, use } from "react";
-import type { AiChatInputSlotContext, AiChatStarter } from "./types";
+import type {
+  AiChatDropHandler,
+  AiChatInputSlotContext,
+  AiChatPasteHandler,
+  AiChatStarter,
+  AiChatSubmitBlock,
+} from "./types";
 
 export type AiChatMessage = {
   id: string;
@@ -39,6 +45,28 @@ export type AiChatActions = {
   setInputValue: (v: string) => void;
   /** Submit whatever is currently in `inputValue` (no-op when empty or loading). */
   submitCurrentInput: () => void;
+  /**
+   * Abort the in-flight stream. Safe to call when not streaming — no-op.
+   * Used by the cancel button + Esc shortcut in the InputForm.
+   */
+  stop: () => void;
+  /**
+   * Consumer-supplied paste handler. Called by the InputForm when the
+   * clipboard carries an image or a large-enough text block to promote
+   * to an attachment. Return `true` to signal "I handled it; default
+   * paste should be suppressed". Return/undefined to let the textarea
+   * paste normally.
+   *
+   * Default behaviour (when no handler is provided): normal paste.
+   */
+  handlePaste: AiChatPasteHandler | null;
+  /**
+   * Consumer-supplied drop handler. Called by the Frame when files
+   * are dropped anywhere in the chat area. When null, drag-and-drop
+   * is inert (the Frame still suppresses browser-default open-file
+   * behaviour but discards the files).
+   */
+  handleDrop: AiChatDropHandler | null;
 };
 
 export type AiChatMeta = {
@@ -46,6 +74,13 @@ export type AiChatMeta = {
   isLoading: boolean;
   /** Ref to attach to the scrollable message container (sticky-scroll hook). */
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Consumer-supplied submit block. When set, the InputForm disables
+   * the submit button and Enter-to-send is ignored; the `reason`
+   * surfaces as the button's tooltip. Null when submission is
+   * allowed (the default).
+   */
+  submitBlock: AiChatSubmitBlock;
 };
 
 export type AiChatContextValue = {

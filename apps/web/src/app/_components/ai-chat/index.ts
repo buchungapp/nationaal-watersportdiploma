@@ -34,9 +34,12 @@ export { SimpleMarkdown } from "./markdown";
 export { isToolPart, ToolPartRenderer } from "./tool-parts";
 export type { ToolPart } from "./tool-parts";
 export type {
+  AiChatDropHandler,
   AiChatInitialMessage,
   AiChatInputSlotContext,
+  AiChatPasteHandler,
   AiChatStarter,
+  AiChatSubmitBlock,
   AiChatWindowProps,
 } from "./types";
 export { isNearBottom, useStickyScroll } from "./use-sticky-scroll";

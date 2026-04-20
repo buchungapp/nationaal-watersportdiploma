@@ -25,6 +25,49 @@ export type AiChatInputSlotContext = {
   isLoading: boolean;
 };
 
+/**
+ * Consumer-supplied paste interceptor. The AiChat's InputForm fires
+ * this BEFORE its own default paste handling when either:
+ *   - the clipboard contains an image (any item with type image/*), or
+ *   - the plain-text content is long enough (threshold owned by the
+ *     InputForm; consumers don't need to know it).
+ *
+ * Return `true` to signal the consumer handled it — the InputForm will
+ * preventDefault on the paste event so the content doesn't ALSO land
+ * in the textarea. Return anything else to let the default paste
+ * proceed.
+ */
+export type AiChatPasteHandler = (
+  input:
+    | { kind: "text"; content: string }
+    | { kind: "image"; file: File },
+) => boolean | Promise<boolean>;
+
+/**
+ * Consumer-supplied drop interceptor. The AiChat's Frame fires this
+ * when one or more FILES (not text, not URLs) are dropped anywhere
+ * inside the chat area. `preventDefault` is always called on the
+ * drop event regardless of the handler's return value — we never
+ * want the browser's default "navigate to dropped file" behaviour.
+ *
+ * The handler receives every File attached to `dataTransfer.files`;
+ * the consumer decides whether to upload all of them, only the first,
+ * or reject mixed-type drops.
+ */
+export type AiChatDropHandler = (
+  files: File[],
+) => boolean | Promise<boolean>;
+
+/**
+ * Consumer-supplied submit gate. When non-null, the InputForm
+ * disables the submit button and Enter-to-send is a no-op — useful
+ * while something async (an attachment upload, a background
+ * validation, …) hasn't finished yet and sending now would race.
+ * The `reason` is shown as the button's `title` tooltip so the user
+ * understands why it's greyed out.
+ */
+export type AiChatSubmitBlock = { reason: string } | null;
+
 export type AiChatWindowProps = {
   /** Stable chat identifier. Also used as the useChat hook id. */
   chatId: string;

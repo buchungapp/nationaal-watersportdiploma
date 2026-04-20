@@ -112,40 +112,23 @@ function SearchBewijsExamplesOutput({ output }: { output: unknown }) {
     );
   }
 
+  // Non-expandable metadata pill — deliberately does NOT surface the
+  // example content. These fragments come from other kandidaten's
+  // anonymised portfolios (the seed corpus); the system prompt tells
+  // the model to paraphrase in its own words instead of citing them
+  // verbatim. Letting the user click-to-expand and read the source
+  // text defeats that rule — they'd just copy it. The model still
+  // sees the full content in its tool result; the user sees only
+  // that a lookup happened + which criterium.
   return (
-    <details className="group my-1 max-w-[85%] rounded-lg border border-slate-200 bg-white text-sm shadow-sm">
-      <summary className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50">
-        <span>
-          <span className="font-semibold">
-            {parsed.examples.length} voorbeeld
-            {parsed.examples.length === 1 ? "" : "en"}
-          </span>{" "}
-          opgehaald voor{" "}
-          <span className="italic">{parsed.criteriumTitel}</span>
-        </span>
-        <span className="text-slate-400 transition-transform group-open:rotate-90">
-          ›
-        </span>
-      </summary>
-      <ul className="flex flex-col gap-2 border-t border-slate-200 px-3 py-2">
-        {parsed.examples.map((ex, i) => (
-          <li
-            key={`${ex.sourceRef}-${i}`}
-            className="rounded-lg bg-slate-50 p-2"
-          >
-            <p className="text-xs text-slate-500">
-              bron {ex.sourceRef} · {ex.wordCount} woorden
-              {ex.concretenessScore !== null
-                ? ` · concreetheid ${ex.concretenessScore}`
-                : ""}
-            </p>
-            <p className="mt-1 whitespace-pre-wrap text-slate-800">
-              {ex.content}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </details>
+    <div className="my-1 inline-flex max-w-[85%] flex-wrap items-baseline gap-x-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700">
+      <span className="font-semibold">
+        {parsed.examples.length} voorbeeld
+        {parsed.examples.length === 1 ? "" : "en"}
+      </span>
+      <span>opgehaald voor</span>
+      <span className="italic text-slate-600">{parsed.criteriumTitel}</span>
+    </div>
   );
 }
 

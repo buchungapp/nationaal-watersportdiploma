@@ -9,6 +9,7 @@ import {
 } from "~/lib/nwd";
 import posthog from "~/lib/posthog";
 import type { DashboardView } from "./_components/dashboard-toggle";
+import { LeercoachSection } from "./_components/leercoach-section";
 import { Locations } from "./_components/locations";
 import { Logbook } from "./_components/logbook/logbook";
 import { News } from "./_components/news";
@@ -20,11 +21,12 @@ import WatersportCertificatesSection from "./_components/watersport-certificates
 import { Welcome } from "./_components/welcome";
 
 type DashboardProps = {
+  handle: string;
   personPromise: Promise<User.Person.$schema.Person>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function InstructorDashboard({ personPromise }: DashboardProps) {
+function InstructorDashboard({ handle, personPromise }: DashboardProps) {
   return (
     <>
       <div className="order-3 lg:order-none lg:col-start-3 lg:row-end-1 flex flex-col gap-2">
@@ -33,6 +35,8 @@ function InstructorDashboard({ personPromise }: DashboardProps) {
 
       <div className="lg:col-span-2 lg:row-span-2 lg:row-end-2 order-2 lg:order-none flex flex-col gap-2">
         <Locations personPromise={personPromise} />
+
+        <LeercoachSection handle={handle} />
 
         <PvbOverviewSection personPromise={personPromise} />
       </div>
@@ -74,6 +78,7 @@ function StudentDashboard({ personPromise, searchParams }: DashboardProps) {
 }
 
 async function DecideDashboard({
+  handle,
   personPromise,
   searchParams,
 }: DashboardProps) {
@@ -92,6 +97,7 @@ async function DecideDashboard({
   if (!hasInstructorView || view === "student") {
     return (
       <StudentDashboard
+        handle={handle}
         personPromise={personPromise}
         searchParams={searchParams}
       />
@@ -101,6 +107,7 @@ async function DecideDashboard({
   // Default to instructor dashboard
   return (
     <InstructorDashboard
+      handle={handle}
       personPromise={personPromise}
       searchParams={searchParams}
     />
@@ -136,19 +143,15 @@ function DashboardSkeleton() {
   );
 }
 
-export default function Page(props: {
+export default async function Page(props: {
   params: Promise<{
     handle: string;
   }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const personPromise = (async () => {
-    const { handle } = await props.params;
+  const { handle } = await props.params;
 
-    const person = await getPersonByHandle(handle);
-
-    return person;
-  })();
+  const personPromise = getPersonByHandle(handle);
 
   after(async () => {
     const user = await getUserOrThrow();
@@ -179,6 +182,7 @@ export default function Page(props: {
       <div className="mt-2 mx-auto grid max-w-2xl grid-cols-1 grid-rows-1 items-start gap-2 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         <Suspense fallback={<DashboardSkeleton />}>
           <DecideDashboard
+            handle={handle}
             personPromise={personPromise}
             searchParams={props.searchParams}
           />

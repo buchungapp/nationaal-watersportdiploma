@@ -1,5 +1,5 @@
 import { gateway } from "@ai-sdk/gateway";
-import { Leercoach } from "@nawadi/core";
+import { AiCorpus, Leercoach } from "@nawadi/core";
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -9,8 +9,8 @@ import {
   type UIMessage,
 } from "ai";
 import { NextResponse } from "next/server";
-import { buildSystemPrompt } from "~/app/(public)/leercoach/_lib/system-prompt";
-import { buildLeercoachTools } from "~/app/(public)/leercoach/_lib/tools";
+import { buildSystemPrompt } from "~/app/(dashboard)/(account)/profiel/[handle]/leercoach/_lib/system-prompt";
+import { buildLeercoachTools } from "~/app/(dashboard)/(account)/profiel/[handle]/leercoach/_lib/tools";
 import { createClient } from "~/lib/supabase/server";
 
 // Chat API for /leercoach — streaming text completions via AI Gateway with
@@ -94,15 +94,30 @@ export async function POST(req: Request) {
     }
   }
 
+  // Resolve the user's prior-portfolio count once per turn and pass it
+  // to the system prompt. When the kandidaat has uploads the prompt
+  // tells the model to reach for searchPriorPortfolio proactively
+  // rather than explaining a hypothetical upload workflow — that was
+  // the observed failure mode when starter #2 fired after an upload.
+  const priorSources = await AiCorpus.listUserPriorSources({
+    userId: user.id,
+  });
+  const priorPortfolioCount = priorSources.length;
+
   const [modelMessages, systemPrompt] = await Promise.all([
     convertToModelMessages(body.messages),
-    buildSystemPrompt({ profielId: chat.profielId, scope: chat.scope }),
+    buildSystemPrompt({
+      profielId: chat.profielId,
+      scope: chat.scope,
+      priorPortfolioCount,
+    }),
   ]);
 
   const tools = buildLeercoachTools({
     profielId: chat.profielId,
     scope: chat.scope,
     userId: user.id,
+    chatId: chat.chatId,
   });
 
   const stream = createUIMessageStream({

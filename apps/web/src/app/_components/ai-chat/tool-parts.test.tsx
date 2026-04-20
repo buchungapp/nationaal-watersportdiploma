@@ -73,8 +73,7 @@ describe("ToolPartRenderer — busy state", () => {
 });
 
 describe("ToolPartRenderer — searchBewijsExamples success", () => {
-  test("renders a collapsible disclosure summarising the examples", async () => {
-    const user = userEvent.setup();
+  test("renders metadata only; never surfaces the raw example content", () => {
     render(
       <ToolPartRenderer
         part={{
@@ -104,31 +103,25 @@ describe("ToolPartRenderer — searchBewijsExamples success", () => {
       />,
     );
 
-    // Summary shows the count + criterium title.
+    // User sees: count + criterium title. The model still receives
+    // the examples internally via its tool result.
     expect(screen.getByText(/2 voorbeelden/i)).toBeInTheDocument();
     expect(
       screen.getByText(/motiveert, enthousiasmeert en stimuleert/i),
     ).toBeInTheDocument();
 
-    // Examples are inside a <details> element; hidden until opened.
+    // Raw example content + source refs MUST NOT leak to the DOM —
+    // examples come from other kandidaten's anonymised portfolios
+    // and the model is supposed to paraphrase, not let the user
+    // read + copy the text verbatim.
     expect(
       screen.queryByText(/in week 14 gaf ik een training/i),
-    ).not.toBeVisible();
-
-    // Open the disclosure by clicking the summary.
-    await user.click(screen.getByText(/2 voorbeelden/i));
+    ).toBeNull();
     expect(
-      screen.getByText(/in week 14 gaf ik een training/i),
-    ).toBeVisible();
-    expect(
-      screen.getByText(/tijdens de sbf-week observeerde ik/i),
-    ).toBeVisible();
-
-    // Meta line with source + word count visible too.
-    expect(
-      screen.getByText(/bron seed:alle_niveau_3_bob/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/130 woorden/i)).toBeInTheDocument();
+      screen.queryByText(/tijdens de sbf-week observeerde ik/i),
+    ).toBeNull();
+    expect(screen.queryByText(/seed:alle_niveau_3_bob/i)).toBeNull();
+    expect(screen.queryByText(/130 woorden/i)).toBeNull();
   });
 
   test("handles singular vs plural correctly", () => {

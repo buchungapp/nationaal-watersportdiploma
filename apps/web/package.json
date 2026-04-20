@@ -84,6 +84,7 @@
     "input-otp": "1.4.2",
     "js-confetti": "0.12.0",
     "libphonenumber-js": "1.12.36",
+    "mammoth": "^1.12.0",
     "marked": "12.0.2",
     "micromark": "4.0.2",
     "motion": "12.7.2",

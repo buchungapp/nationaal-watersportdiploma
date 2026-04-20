@@ -18,6 +18,13 @@ import {
 
 mkdirSync(EXTRACTED_DIR, { recursive: true });
 
+// Mirror the web pipeline's stripper: Postgres rejects U+0000 in text
+// columns, and other C0 controls are non-semantic. Applied here too so
+// the offline JSON output doesn't carry null bytes into downstream
+// ingest steps.
+// biome-ignore lint/suspicious/noControlCharactersInRegex: intentional
+const C0_STRIPPER = /[\x00-\x08\x0B\x0C\x0E-\x1F]/g;
+
 async function extractOne(file: string): Promise<ExtractedPortfolio> {
   const data = new Uint8Array(readFileSync(join(RAW_DIR, file)));
   const doc = await pdfjs.getDocument({ data }).promise;
@@ -30,7 +37,10 @@ async function extractOne(file: string): Promise<ExtractedPortfolio> {
       .join(" ");
     parts.push(pageText);
   }
-  const rawText = parts.join("\n\n--- PAGE BREAK ---\n\n");
+  const rawText = parts.join("\n\n--- PAGE BREAK ---\n\n").replace(
+    C0_STRIPPER,
+    "",
+  );
   return {
     sourceFile: file,
     parsed: parseFilename(file),

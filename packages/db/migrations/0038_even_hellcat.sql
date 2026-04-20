@@ -1,0 +1,1 @@
+ALTER TABLE "ai_corpus"."source" ADD COLUMN "richting" "kss"."richting";

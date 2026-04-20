@@ -59,6 +59,7 @@ type RubricCriterium = {
 type RubricContext = {
   profielId: string;
   profielTitel: string;
+  richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
   niveauRang: number;
   criteria: RubricCriterium[];
 };
@@ -70,6 +71,7 @@ async function loadRubricFlat(profielTitel: string): Promise<RubricContext> {
     const res = await client.query<{
       profielId: string;
       profielTitel: string;
+      richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
       niveauRang: number;
       werkprocesId: string | null;
       werkprocesTitel: string | null;
@@ -81,6 +83,7 @@ async function loadRubricFlat(profielTitel: string): Promise<RubricContext> {
       SELECT
         kp.id AS "profielId",
         kp.titel AS "profielTitel",
+        kp.richting AS richting,
         n.rang AS "niveauRang",
         wp.id AS "werkprocesId",
         wp.titel AS "werkprocesTitel",
@@ -118,6 +121,7 @@ async function loadRubricFlat(profielTitel: string): Promise<RubricContext> {
     return {
       profielId: first.profielId,
       profielTitel: first.profielTitel,
+      richting: first.richting,
       niveauRang: first.niveauRang,
       criteria,
     };
@@ -272,7 +276,9 @@ async function ingestOne(entry: MatrixEntry): Promise<{
       consentLevel: "seed",
       contributedByUserId: null,
       profielId: rubric.profielId,
+      richting: rubric.richting,
       niveauRang: rubric.niveauRang,
+      chatId: null,
       metadata: {
         original_filename: entry.portfolio,
         note: entry.note ?? null,

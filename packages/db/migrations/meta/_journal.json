@@ -267,6 +267,20 @@
       "when": 1776606168378,
       "tag": "0037_hot_wong",
       "breakpoints": false
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1776673759260,
+      "tag": "0038_even_hellcat",
+      "breakpoints": false
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1776678898498,
+      "tag": "0039_gorgeous_paper_doll",
+      "breakpoints": false
     }
   ]
 }

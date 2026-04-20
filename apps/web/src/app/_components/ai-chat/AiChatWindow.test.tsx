@@ -18,6 +18,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 // return value per-test via the setChatState helper below.
 
 const mockSendMessage = vi.fn();
+const mockStop = vi.fn();
 let currentChatState: {
   messages: Array<{
     id: string;
@@ -38,6 +39,7 @@ vi.mock("@ai-sdk/react", () => ({
     sendMessage: mockSendMessage,
     status: currentChatState.status,
     error: currentChatState.error,
+    stop: mockStop,
   }),
 }));
 
@@ -63,6 +65,7 @@ function setChatState(partial: Partial<typeof currentChatState>): void {
 
 beforeEach(() => {
   mockSendMessage.mockClear();
+  mockStop.mockClear();
   setChatState({ messages: [], status: "ready", error: undefined });
 });
 
@@ -227,7 +230,7 @@ describe("AiChatWindow — input + submission", () => {
     renderWindow();
     const textarea = screen.getByRole("textbox");
     await user.type(textarea, "hoi leercoach");
-    await user.click(screen.getByRole("button", { name: "Verstuur" }));
+    await user.click(screen.getByRole("button", { name: /verstuur/i }));
     expect(mockSendMessage).toHaveBeenCalledWith({ text: "hoi leercoach" });
     expect((textarea as HTMLTextAreaElement).value).toBe("");
   });
@@ -256,11 +259,41 @@ describe("AiChatWindow — input + submission", () => {
     expect(mockSendMessage).not.toHaveBeenCalled();
   });
 
-  test("input and send button disable while streaming", () => {
+  test("while streaming, the submit button is swapped for a Stop button and the textarea stays enabled (so users can draft ahead or cancel mid-stream)", () => {
     setChatState({ status: "streaming" });
     renderWindow();
-    expect(screen.getByRole("textbox")).toBeDisabled();
-    expect(screen.getByRole("button", { name: "…" })).toBeDisabled();
+    expect(screen.getByRole("textbox")).not.toBeDisabled();
+    expect(screen.queryByRole("button", { name: /verstuur/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /stop/i })).toBeInTheDocument();
+  });
+
+  test("Stop button calls stop() on click", async () => {
+    const user = userEvent.setup();
+    setChatState({ status: "streaming" });
+    renderWindow();
+    await user.click(screen.getByRole("button", { name: /stop/i }));
+    expect(mockStop).toHaveBeenCalledTimes(1);
+  });
+
+  test("Esc aborts the in-flight stream", async () => {
+    const user = userEvent.setup();
+    setChatState({ status: "streaming" });
+    renderWindow();
+    const textarea = screen.getByRole("textbox");
+    textarea.focus();
+    await user.keyboard("{Escape}");
+    expect(mockStop).toHaveBeenCalledTimes(1);
+  });
+
+  test("Enter during stream cancels instead of sending", async () => {
+    const user = userEvent.setup();
+    setChatState({ status: "streaming" });
+    renderWindow();
+    const textarea = screen.getByRole("textbox");
+    textarea.focus();
+    await user.keyboard("iets nieuws{Enter}");
+    expect(mockStop).toHaveBeenCalledTimes(1);
+    expect(mockSendMessage).not.toHaveBeenCalled();
   });
 
   test("placeholder can be overridden via props", () => {

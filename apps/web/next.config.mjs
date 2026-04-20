@@ -59,6 +59,13 @@ const nextConfig = {
     "@signpdf/placeholder-pdfkit",
     "@signpdf/signer-p12",
     "@signpdf/signpdf",
+    // pdfjs-dist resolves its worker module via a sibling relative import
+    // (`pdf.worker.mjs`). Bundling it into `.next/server/chunks/ssr/*`
+    // breaks that lookup ("Cannot find module pdf.worker.mjs"). Loading
+    // it at runtime from node_modules keeps the sibling file reachable.
+    // Used server-side by the portfolio ingest pipeline to extract PDF
+    // text before anonymisation.
+    "pdfjs-dist",
   ],
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf/**/*": [
