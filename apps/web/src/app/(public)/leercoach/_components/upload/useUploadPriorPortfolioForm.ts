@@ -46,25 +46,13 @@ export function useUploadPriorPortfolioForm({
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // When the dialog opens with a preselected file (drop-zone path),
-  // sync both React state AND the native <input type="file"> via
-  // DataTransfer. Without the native sync, the browser's `required`
-  // validation sees an empty FileList on submit and shows a "Geen
-  // bestand gekozen" tooltip even though React state is correct.
+  // Seed React state from a preselected file (drop-zone path). The
+  // native <input type="file"> is hidden in the fields component, so
+  // we don't need to sync its `files` property — React state is the
+  // single source of truth for both the visible UI and submission.
   useEffect(() => {
     if (open && preselectedFile) {
       setFile(preselectedFile);
-      if (fileInputRef.current) {
-        try {
-          const dt = new DataTransfer();
-          dt.items.add(preselectedFile);
-          fileInputRef.current.files = dt.files;
-        } catch {
-          // DataTransfer can throw in jsdom or very old browsers.
-          // React state is the source of truth for submission; native
-          // validation falls back to a manual re-pick in that case.
-        }
-      }
     }
   }, [open, preselectedFile]);
 
