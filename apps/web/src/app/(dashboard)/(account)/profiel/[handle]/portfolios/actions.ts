@@ -1,6 +1,6 @@
 "use server";
 
-import { AiCorpus } from "@nawadi/core";
+import { AiCorpus, Leercoach } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import {
   getUserOrThrow,
@@ -8,8 +8,12 @@ import {
   listKssNiveaus,
 } from "~/lib/nwd";
 import {
+  deletePortfolioOriginal,
+  uploadPortfolioOriginal,
+} from "~/lib/portfolio-storage";
+import { triggerIngestPortfolio } from "~/lib/workflow-client";
+import {
   type CoverageScope,
-  ingestPortfolio,
   type PortfolioRichting,
 } from "./_lib/portfolio-pipeline";
 
@@ -104,25 +108,38 @@ const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 export type UploadPriorPortfolioResult =
   | {
       ok: true;
-      sourceId: string;
-      chunkCount: number;
-      pageCount: number;
-      alreadyIngested: boolean;
+      /**
+       * Handle the client polls for completion. See
+       * /api/upload-job/[id]/status.
+       */
+      jobId: string;
+      /**
+       * Always "pending" on success — the actual work runs async in
+       * the Upstash Workflow. Included for clarity at the call site.
+       */
+      status: "pending";
     }
   | { ok: false; reason: string };
 
 /**
- * Accept a portfolio PDF upload, run it through the extract + anonymize
- * + ingest pipeline, and return a summary for the UI.
+ * Accept a portfolio PDF upload. Stashes the raw bytes in Supabase
+ * Storage, creates an upload_job row for status tracking, and fires
+ * an Upstash Workflow that runs the extract + anonymise + ingest
+ * pipeline durably in the background.
  *
- * A kwalificatieprofiel is required: it already encodes richting +
- * niveau. Coverage (whole profiel vs. specific kerntaken) is optional
- * metadata — default is the whole profiel.
+ * Returns fast (~1s) with a jobId the client uses to poll status.
+ * Previous behaviour ran the entire pipeline inside the action — the
+ * LLM anonymisation step regularly exceeded Vercel's 30s timeout and
+ * tore down unrelated server actions on the same route. See
+ * apps/web/src/app/api/workflow/ingest-portfolio/route.ts for the
+ * new pipeline shape.
  *
- * Revalidates both the portfolios management page AND the leercoach
- * session list for this handle so existing tabs reflect the new data.
- * The pipeline is idempotent (source_hash dedup) so re-uploading the
- * same PDF returns the existing row without touching anything.
+ * The original PDF is preserved in the `portfolio-uploads` bucket
+ * indefinitely — users retain access to their raw upload via a
+ * signed-URL flow (follow-up UI). The anonymised version is what
+ * gets chunked + stored in ai_corpus; `consentShared=true` at upload
+ * time marks it as opt_in_shared so we can use it to improve the
+ * model for other kandidaten.
  */
 export async function uploadPortfolioAction(
   formData: FormData,
@@ -170,59 +187,130 @@ export async function uploadPortfolioAction(
       ? labelRaw.trim()
       : file.name.replace(/\.pdf$/i, "");
 
+  // Opt-in consent for using the anonymised version to improve the
+  // digital leercoach model for other kandidaten. Default off —
+  // user's original + anonymised version are user_only unless they
+  // explicitly tick the box.
+  const consentRaw = formData.get("consentShared");
+  const consentShared = consentRaw === "true" || consentRaw === "on";
+
   const handleRaw = formData.get("handle");
   const handle = typeof handleRaw === "string" ? handleRaw : null;
 
   const arrayBuffer = await file.arrayBuffer();
   const bytes = new Uint8Array(arrayBuffer);
 
+  // Step 1: stash the raw bytes durably. No deletion after ingest —
+  // we preserve originals for the user's own retrieval.
+  let blobPath: string;
   try {
-    const result = await ingestPortfolio({
+    const stashed = await uploadPortfolioOriginal({
       userId: user.authUserId,
-      pdfBytes: bytes,
-      profielId,
-      richting: resolved.richting,
-      niveauRang: resolved.niveauRang,
-      coverage,
-      label,
+      bytes,
+      filename: file.name,
     });
-    if (handle) {
-      revalidatePath(`/profiel/${handle}/portfolios`);
-      revalidatePath(`/profiel/${handle}/leercoach`);
-      revalidatePath(`/profiel/${handle}`);
-    }
-    return {
-      ok: true,
-      sourceId: result.sourceId,
-      chunkCount: result.chunkCount,
-      pageCount: result.pageCount,
-      alreadyIngested: result.alreadyIngested,
-    };
+    blobPath = stashed.path;
   } catch (err) {
-    console.error("Portfolio ingest failed", err);
+    console.error("Portfolio Storage upload failed", err);
     return {
       ok: false,
       reason:
         err instanceof Error
-          ? `Verwerken mislukt: ${err.message}`
-          : "Verwerken mislukt.",
+          ? `Uploaden mislukt: ${err.message}`
+          : "Uploaden mislukt.",
     };
   }
+
+  // Step 2: create the upload_job row. This is the pollable handle
+  // the client uses to track completion.
+  const { jobId } = await Leercoach.UploadJob.create({
+    userId: user.authUserId,
+    kind: "portfolio",
+    blobPath,
+    label,
+    metadata: {
+      profielId,
+      richting: resolved.richting,
+      niveauRang: resolved.niveauRang,
+      coverage,
+      consentShared,
+    },
+  });
+
+  // Step 3: fire the workflow. On failure (QStash outage), flip the
+  // job to 'failed' so the UI can surface it. We still return ok:true
+  // with jobId so the client lands on the polling UI which then shows
+  // the error — better than a jarring inline error after the upload
+  // already "happened".
+  try {
+    const { workflowRunId } = await triggerIngestPortfolio(jobId);
+    await Leercoach.UploadJob.updateStatus({
+      jobId,
+      status: "pending",
+      workflowRunId,
+    });
+  } catch (err) {
+    console.error("Failed to trigger ingest-portfolio workflow", err);
+    await Leercoach.UploadJob.updateStatus({
+      jobId,
+      status: "failed",
+      errorMessage:
+        err instanceof Error ? err.message : "Workflow trigger failed",
+    });
+  }
+
+  if (handle) {
+    revalidatePath(`/profiel/${handle}/portfolios`);
+  }
+
+  return { ok: true, jobId, status: "pending" };
 }
 
 /**
- * Soft-delete (revoke) a portfolio source. userId scoping in the core
- * helper prevents cross-user revocations.
+ * Soft-delete (revoke) a portfolio source AND delete the original
+ * PDF from Supabase Storage. userId scoping in the core helper
+ * prevents cross-user revocations.
+ *
+ * Why both: the user's right to erasure (GDPR) covers both the
+ * anonymised-but-retrievable source row AND the raw bytes. Leaving
+ * the Storage object behind after revoke would be a compliance gap.
+ * Storage delete is best-effort (idempotent, swallows "not found");
+ * the source revoke is the authoritative user-visible action.
  */
 export async function revokePortfolioAction(input: {
   sourceId: string;
   handle: string;
 }): Promise<void> {
   const user = await getUserOrThrow();
+
+  // Look up the source first to grab its originalStoragePath before
+  // revoking. We want the Storage delete to happen only when the DB
+  // operation would succeed.
+  const source = await AiCorpus.getUserPriorSourceById({
+    userId: user.authUserId,
+    sourceId: input.sourceId,
+  });
+
   await AiCorpus.revokeUserPriorSource({
     userId: user.authUserId,
     sourceId: input.sourceId,
   });
+
+  // Best-effort cleanup of the raw bytes. A Storage failure doesn't
+  // roll back the revoke — a stale blob on its own is inert (nothing
+  // references it now that the source row is revoked), and the
+  // follow-up Storage lifecycle / cleanup can pick it up.
+  if (source?.originalStoragePath) {
+    try {
+      await deletePortfolioOriginal(source.originalStoragePath);
+    } catch (err) {
+      console.error(
+        `[revokePortfolio] failed to delete Storage blob for source=${input.sourceId}`,
+        err,
+      );
+    }
+  }
+
   revalidatePath(`/profiel/${input.handle}/portfolios`);
   revalidatePath(`/profiel/${input.handle}/leercoach`);
 }

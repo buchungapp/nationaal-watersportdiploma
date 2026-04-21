@@ -9,3 +9,8 @@ export {
   portfolioVersionCreatedBy,
 } from "./portfolio.js";
 export { leercoachSchema } from "./schema.js";
+export {
+  leercoachUploadJob,
+  uploadJobKind,
+  uploadJobStatus,
+} from "./upload-job.js";

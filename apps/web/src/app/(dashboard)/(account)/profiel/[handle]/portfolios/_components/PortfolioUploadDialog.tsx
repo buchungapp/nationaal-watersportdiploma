@@ -6,11 +6,11 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import type { UploadPriorPortfolioResult } from "../actions";
 import { UploadFields } from "./upload/UploadFields";
 import { UploadResultBanner } from "./upload/UploadResultBanner";
 import {
   type ProfielOption,
+  type UploadSuccessCtx,
   useUploadPortfolioForm,
 } from "./upload/useUploadPortfolioForm";
 
@@ -32,12 +32,13 @@ export type PortfolioUploadDialogProps = {
   handle: string;
   open: boolean;
   onClose: () => void;
-  /** Called after a successful upload — caller composes its follow-up (chat auto-send, toast, revalidate). */
-  onSuccess?: (ctx: {
-    result: Extract<UploadPriorPortfolioResult, { ok: true }>;
-    niveauRang: number | null;
-    label: string;
-  }) => void;
+  /**
+   * Called after the async workflow completes successfully — caller
+   * composes its follow-up (chat auto-send, toast, revalidate). Not
+   * called on failure; consumers can read `form.state.kind === "failed"`
+   * if they need to react.
+   */
+  onSuccess?: (ctx: UploadSuccessCtx) => void;
   /** Pre-populate the file input (e.g. from a drag-drop on the caller). */
   preselectedFile?: File | null;
   /** Full list of kwalificatieprofielen for the scope picker. */
@@ -96,7 +97,7 @@ export function PortfolioUploadDialog({
             </p>
 
             <UploadFields form={form} idPrefix="prior-dialog" />
-            <UploadResultBanner result={form.result} />
+            <UploadResultBanner state={form.state} />
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button

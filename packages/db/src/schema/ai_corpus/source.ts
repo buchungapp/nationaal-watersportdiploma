@@ -60,6 +60,14 @@ export const source = aiCorpusSchema.table(
       .notNull(),
     charCount: integer("char_count").notNull(),
     pageCount: integer("page_count"),
+    // Path in Supabase Storage to the original, un-anonymised file
+    // (null for text-only sources + legacy rows from before durable
+    // ingest landed). Stored so the uploader can always retrieve
+    // their original — the anonymised `content` above is what we
+    // search/ingest, but the user retains ownership of the raw bytes.
+    // Shape: "portfolio-uploads/{userId}/{hash}.pdf". ACL: private,
+    // signed-URL access only.
+    originalStoragePath: text("original_storage_path"),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),

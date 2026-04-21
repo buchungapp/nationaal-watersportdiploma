@@ -253,6 +253,13 @@
       "when": 1776787945892,
       "tag": "0035_opposite_tiger_shark",
       "breakpoints": false
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1776803414976,
+      "tag": "0036_uneven_amphibian",
+      "breakpoints": false
     }
   ]
 }
