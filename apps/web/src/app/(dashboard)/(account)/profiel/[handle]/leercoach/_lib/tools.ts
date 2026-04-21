@@ -2,6 +2,10 @@ import "server-only";
 import { AiCorpus, Leercoach } from "@nawadi/core";
 import { tool } from "ai";
 import { z } from "zod";
+import {
+  listKssKwalificatieprofielenWithOnderdelen,
+  listKssNiveaus,
+} from "~/lib/nwd";
 import type { ChatScope } from "./chat-context";
 import { loadLeercoachRubric, resolveCriteriumWithinScope } from "./rubric";
 
@@ -634,14 +638,249 @@ export function buildLeercoachTools(
   };
 }
 
-// Tool set for Q&A-sessies. Currently empty — new KSS/diplomalijn/KB
-// tools land here in a follow-up step. Returns the same shape as
-// buildLeercoachTools so callers can destructure/spread uniformly,
-// but with none of the portfolio-bound tools. Kept as a separate
-// function (rather than a null-branching buildLeercoachTools) so
-// type narrowing at call sites is explicit.
-export function buildQATools(_context: QAToolContext) {
-  return {} as const;
+// ---------------------------------------------------------------------------
+// Q&A-mode tools
+// ---------------------------------------------------------------------------
+//
+// Vraag-sessies have no profielId + no scope + no attached portfolio,
+// so the portfolio-bound tools above don't apply. Q&A mode still needs
+// to answer substantive questions about the KSS ("what does werkproces
+// 5.3 cover?") and to point at real-world bewijs-examples from the
+// corpus ("show me how others wrote about this").
+//
+// Three tools, each intentionally narrow + read-only (no writes, no
+// user-specific scoping — just public KSS metadata + consent-filtered
+// corpus lookups):
+//
+//   listKssProfielen           → discover which kwalificatieprofielen exist
+//   getProfielRubric           → fetch a specific profiel's werkprocessen + criteria
+//   getBewijsExamplesForCriterium
+//                              → fetch anonymised example fragments for one criterium
+//
+// The two-step pattern (discover → drill-down) keeps the responses
+// small; a blanket "dump every rubric + every example" would blow the
+// context window in one call.
+
+const listKssProfielenInputSchema = z.object({
+  richting: z
+    .enum(["instructeur", "leercoach", "pvb_beoordelaar"])
+    .optional()
+    .describe(
+      "Filter op richting. Instructeur = opleiden, Leercoach = begeleiden, PvB-beoordelaar = beoordelen. Weglaten voor alle richtingen.",
+    ),
+  niveauRang: z
+    .number()
+    .int()
+    .min(1)
+    .max(5)
+    .optional()
+    .describe(
+      "Filter op KSS-niveau 1-5. Weglaten voor alle niveaus. Niveau 3 is de instap, niveau 5 is het hoogste.",
+    ),
+});
+
+type KssProfielSummary = {
+  profielId: string;
+  titel: string;
+  richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
+  niveauRang: number;
+};
+
+type ListKssProfielenOutput =
+  | { ok: true; profielen: KssProfielSummary[] }
+  | { ok: false; reason: string };
+
+export function createListKssProfielenTool(_context: QAToolContext) {
+  return tool({
+    description: [
+      "Geeft een overzicht van alle (relevante) KSS-kwalificatieprofielen.",
+      "Gebruik om te ontdekken welke profielen er bestaan voordat je `getProfielRubric` aanroept voor details.",
+      "Filter op richting of niveau als de kandidaat een specifieke rol noemt (bv. 'leercoach 5' → richting=leercoach, niveauRang=5).",
+      "Output is compact (alleen profielId + titel + richting + niveau) — drill down met getProfielRubric als je kerntaken/werkprocessen/criteria nodig hebt.",
+    ].join(" "),
+    inputSchema: listKssProfielenInputSchema,
+    execute: async (input): Promise<ListKssProfielenOutput> => {
+      const niveaus = await listKssNiveaus();
+      const hits: KssProfielSummary[] = [];
+      for (const niveau of niveaus) {
+        if (input.niveauRang && niveau.rang !== input.niveauRang) continue;
+        const profielen = await listKssKwalificatieprofielenWithOnderdelen(
+          niveau.id,
+        );
+        for (const p of profielen) {
+          if (input.richting && p.richting !== input.richting) continue;
+          hits.push({
+            profielId: p.id,
+            titel: p.titel,
+            richting: p.richting as
+              | "instructeur"
+              | "leercoach"
+              | "pvb_beoordelaar",
+            niveauRang: niveau.rang,
+          });
+        }
+      }
+      if (hits.length === 0) {
+        return {
+          ok: false,
+          reason:
+            "Geen profielen gevonden met deze filters — laat de kandidaat opnieuw specificeren welk niveau/richting ze bedoelen.",
+        };
+      }
+      return { ok: true, profielen: hits };
+    },
+  });
+}
+
+const getProfielRubricInputSchema = z.object({
+  profielId: z
+    .string()
+    .uuid()
+    .describe(
+      "De profielId uit een eerdere listKssProfielen-aanroep. Deze moet je eerst ophalen; raden hier leidt tot 'niet gevonden'.",
+    ),
+});
+
+type GetProfielRubricOutput =
+  | {
+      ok: true;
+      profielTitel: string;
+      richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
+      niveauRang: number;
+      werkprocessen: Array<{
+        kerntaakCode: string;
+        kerntaakTitel: string;
+        rang: number;
+        titel: string;
+        resultaat: string;
+        criteria: Array<{
+          criteriumId: string;
+          rang: number;
+          title: string;
+          omschrijving: string;
+        }>;
+      }>;
+    }
+  | { ok: false; reason: string };
+
+export function createGetProfielRubricTool(_context: QAToolContext) {
+  return tool({
+    description: [
+      "Haalt de volledige rubriek op voor een kwalificatieprofiel: alle werkprocessen + per werkproces de criteria met hun criteriumId.",
+      "Gebruik als de kandidaat vraagt 'wat houdt werkproces X in' of 'welke criteria horen bij kerntaak Y'.",
+      "De criteriumId's uit dit antwoord kun je hergebruiken in `getBewijsExamplesForCriterium` om concrete voorbeelden uit het corpus op te halen.",
+      "Vat de inhoud samen in eigen woorden — de rubriek is soms droog; vertaal naar wat het voor de praktijk betekent.",
+    ].join(" "),
+    inputSchema: getProfielRubricInputSchema,
+    execute: async (input): Promise<GetProfielRubricOutput> => {
+      const rubric = await loadLeercoachRubric(input.profielId);
+      if (!rubric) {
+        return {
+          ok: false,
+          reason: `Profiel ${input.profielId} niet gevonden — roep eerst listKssProfielen aan om een geldige profielId te krijgen.`,
+        };
+      }
+      return {
+        ok: true,
+        profielTitel: rubric.profielTitel,
+        richting: rubric.richting,
+        niveauRang: rubric.niveauRang,
+        werkprocessen: rubric.werkprocessen.map((wp) => ({
+          kerntaakCode: wp.kerntaakCode,
+          kerntaakTitel: wp.kerntaakTitel,
+          rang: wp.rang,
+          titel: wp.titel,
+          resultaat: wp.resultaat,
+          criteria: wp.criteria.map((c) => ({
+            criteriumId: c.id,
+            rang: c.rang,
+            title: c.title,
+            omschrijving: c.omschrijving,
+          })),
+        })),
+      };
+    },
+  });
+}
+
+const getBewijsExamplesForCriteriumInputSchema = z.object({
+  criteriumId: z
+    .string()
+    .uuid()
+    .describe(
+      "De criteriumId uit een getProfielRubric-aanroep. Raden werkt niet; haal eerst de rubriek op.",
+    ),
+  maxResults: z
+    .number()
+    .int()
+    .min(1)
+    .max(3)
+    .default(2)
+    .describe(
+      "Aantal voorbeeld-fragmenten. Houd klein (1-2) om de context niet vol te zetten.",
+    ),
+});
+
+type GetBewijsExamplesOutput =
+  | {
+      ok: true;
+      examples: Array<{
+        content: string;
+        wordCount: number;
+        concretenessScore: number | null;
+        sourceRef: string;
+      }>;
+    }
+  | { ok: false; reason: string };
+
+export function createGetBewijsExamplesForCriteriumTool(
+  _context: QAToolContext,
+) {
+  return tool({
+    description: [
+      "Haalt 1-3 geanonimiseerde voorbeeld-fragmenten op uit het publieke corpus voor één specifiek criterium (via criteriumId).",
+      "Alleen publieke bronnen (seed + opt-in-shared) — geen user-only data, omdat vraag-sessies geen portfolio-context hebben.",
+      "Gebruik nadat je via getProfielRubric een criteriumId hebt. Vat samen in eigen woorden, nooit verbatim citeren, en maak duidelijk dat het inspiratie is — geen sjabloon.",
+    ].join(" "),
+    inputSchema: getBewijsExamplesForCriteriumInputSchema,
+    execute: async (input): Promise<GetBewijsExamplesOutput> => {
+      const chunks = await AiCorpus.getChunksForCriterium({
+        criteriumId: input.criteriumId,
+        maxResults: input.maxResults,
+        // No forUserId: Q&A mode only sees public (seed + opt_in_shared)
+        // sources. user_only rows are strictly portfolio-mode.
+      });
+      if (chunks.length === 0) {
+        return {
+          ok: false,
+          reason:
+            "Geen publieke voorbeelden voor dit criterium in het corpus — het corpus groeit naarmate kandidaten hun portfolio's opt-in delen.",
+        };
+      }
+      return {
+        ok: true,
+        examples: chunks.map((c) => ({
+          content: c.content,
+          wordCount: c.wordCount,
+          concretenessScore: c.qualityScore,
+          sourceRef: c.sourceIdentifier,
+        })),
+      };
+    },
+  });
+}
+
+// Tool set for Q&A-sessies. Three read-only tools for discovering the
+// KSS rubric + pulling public example fragments. No writes, no
+// user-specific data, no portfolio coupling — safe when profielId is
+// null and no chat-bound context exists.
+export function buildQATools(context: QAToolContext) {
+  return {
+    listKssProfielen: createListKssProfielenTool(context),
+    getProfielRubric: createGetProfielRubricTool(context),
+    getBewijsExamplesForCriterium:
+      createGetBewijsExamplesForCriteriumTool(context),
+  };
 }
 
 export type LeercoachTools = ReturnType<typeof buildLeercoachTools>;

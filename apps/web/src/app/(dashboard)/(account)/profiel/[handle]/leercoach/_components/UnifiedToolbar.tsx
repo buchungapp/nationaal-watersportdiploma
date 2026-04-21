@@ -67,13 +67,19 @@ export function UnifiedToolbar({
 }: Props) {
   return (
     <header
-      // Single-row top bar. `overflow-hidden` prevents content from
-      // pushing the toolbar taller than its intrinsic height when
-      // somehow too wide (defensive; our explicit zones should
-      // always fit). The background matches the doc-pane tonal
-      // choice — slightly off-white — so the toolbar reads as
-      // continuous with the doc surface when both are open.
-      className="flex h-12 shrink-0 items-center gap-2 overflow-hidden border-b border-slate-200 bg-white px-3"
+      // Single-row top bar. Previously had `overflow-hidden` as a
+      // defensive clamp against content pushing the toolbar taller,
+      // but `h-12 shrink-0` already pins the height, and the
+      // overflow rule was clipping the ⋮ menu's absolutely-positioned
+      // MenuItems panel (which extends below the toolbar into the
+      // chat canvas). `overflow-visible` lets the dropdown render
+      // above the chat content — the z-20 on MenuItems + Headless
+      // UI's internal portal handling do the rest.
+      //
+      // The background matches the doc-pane tonal choice — slightly
+      // off-white — so the toolbar reads as continuous with the doc
+      // surface when both are open.
+      className="relative z-30 flex h-12 shrink-0 items-center gap-2 overflow-visible border-b border-slate-200 bg-white px-3"
     >
       {/* Left: back link — icon only below lg, icon + label at lg+
           (matches the pre-v2 behaviour but with a smaller footprint
