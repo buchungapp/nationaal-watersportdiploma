@@ -188,6 +188,19 @@ export async function buildSystemPrompt(input: {
   artefactCount: number;
   /** Current workflow phase of the chat. */
   phase: LeercoachChatPhase;
+  /**
+   * Snapshot of the attached portfolio draft. Null for chats without
+   * an attached portfolio (legacy) or when the portfolio has zero
+   * versions. Feeds the dynamic block with a routing rule so the
+   * coach routes "wat ik heb geschreven" / "mijn tekst" / "de draft"
+   * to readDraft instead of searchPriorPortfolio — the two overlap
+   * for users who've uploaded a prior PDF AND have in-session
+   * writing, and without this hint the model picks the wrong one.
+   */
+  draftState: {
+    charCount: number;
+    lastEditedBy: "coach" | "user" | "imported";
+  } | null;
 }): Promise<SystemPromptParts> {
   // Q&A-sessie: no profiel context to load, no phase machinery.
   // Empty dynamic block keeps the whole prompt byte-stable so every
@@ -246,6 +259,30 @@ ${criteriaBlock}`;
       ? `- Chat-materiaal: ${input.artefactCount} artefact${input.artefactCount === 1 ? "" : "en"} in deze sessie geüpload (aantekeningen, screenshots, e.d.). Roep listArtefacten of readArtefact alleen aan wanneer de kandidaat naar dit materiaal verwijst of wanneer je een bewijs-paragraaf gaat schrijven waarin hun eigen aantekeningen verwerkt moeten worden.`
       : "- Chat-materiaal: nog geen artefacten in deze sessie. Roep listArtefacten NIET aan om dit te \"controleren\" — je weet al dat de lijst leeg is. Als de kandidaat aangeeft materiaal te hebben, verwijs ze naar het + menu onder het chatvenster.";
 
+  // Draft-awareness routing rule. The chat's portfolio-document and
+  // the kandidaat's eerder geüploade portfolio-PDF's zijn twee
+  // verschillende dingen die in natuurlijk Nederlands bijna identiek
+  // klinken ("ik heb al wat geschreven" → bedoelt de draft;
+  // "ik heb een portfolio" → kan PDF OF draft zijn). Zonder expliciete
+  // routing leunt het model standaard op searchPriorPortfolio zodra de
+  // kandidaat een eerdere upload heeft, ook wanneer ze over de draft
+  // in deze sessie praten. Deze zin lost dat op door te benoemen wat
+  // er nu in de draft staat en de juiste tool per zinstrigger te
+  // koppelen.
+  const draftLine = (() => {
+    const draft = input.draftState;
+    if (!draft || draft.charCount === 0) {
+      return "- Draft: nog leeg (0 karakters). Als de kandidaat zegt 'ik heb iets geschreven' of 'ik heb een portfolio' → bedoelen ze een eerdere PDF-upload, niet de draft. Roep searchPriorPortfolio aan. De draft in DEZE sessie bestaat nog niet.";
+    }
+    const editor =
+      draft.lastEditedBy === "coach"
+        ? "jou (de coach)"
+        : draft.lastEditedBy === "user"
+          ? "de kandidaat zelf"
+          : "een geïmporteerd document";
+    return `- Draft: ${draft.charCount} karakters, laatst bewerkt door ${editor}. Als de kandidaat zegt 'wat ik heb geschreven', 'mijn tekst', 'de draft', 'wat er nu staat', of iets vergelijkbaars → roep readDraft() aan (NIET searchPriorPortfolio — dat is voor eerdere PDF-uploads uit andere trajecten).`;
+  })();
+
   // Cacheable block: persona + all static session metadata + the
   // full rubric. Stable byte-for-byte across turns in the same
   // chat, so Anthropic's 5-min (or 1h, per cacheControl ttl)
@@ -274,6 +311,7 @@ ${rubricBlock}`;
 - Huidige fase: ${input.phase}
 ${priorPortfolioLine}
 ${artefactLine}
+${draftLine}
 
 ${PHASE_REMINDERS[input.phase]}`;
 

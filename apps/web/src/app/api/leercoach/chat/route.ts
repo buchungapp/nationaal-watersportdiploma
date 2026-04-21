@@ -226,12 +226,38 @@ export async function POST(req: Request) {
   //   - priorPortfolioCount drives the "call searchPriorPortfolio" hint
   //   - chatArtefactCount drives the "don't spam listArtefacten" hint
   //     (observed up to 20× redundant calls per session pre-fix)
-  const [priorSources, chatArtefacten] = await Promise.all([
+  // Draft snapshot for the system prompt: lets the coach route
+  // "wat ik heb geschreven" / "mijn tekst" / "de draft" to readDraft
+  // instead of searchPriorPortfolio (the two overlap for users who
+  // both uploaded a prior PDF AND are writing in-session — without
+  // this the model defaults to searchPriorPortfolio). Two extra
+  // queries per turn, both indexed point-lookups; cheap relative to
+  // the AI Gateway round-trip.
+  const draftStatePromise = (async () => {
+    if (!chat.portfolioId) return null;
+    const portfolio = await Leercoach.Portfolio.getById({
+      portfolioId: chat.portfolioId,
+      userId: user.id,
+    });
+    if (!portfolio || !portfolio.currentVersionId) return null;
+    const version = await Leercoach.Portfolio.getVersionById({
+      versionId: portfolio.currentVersionId,
+      userId: user.id,
+    });
+    if (!version) return null;
+    return {
+      charCount: version.content.length,
+      lastEditedBy: version.createdBy,
+    };
+  })();
+
+  const [priorSources, chatArtefacten, draftState] = await Promise.all([
     AiCorpus.listUserPriorSources({ userId: user.id }),
     AiCorpus.listArtefactsForChat({
       chatId: chat.chatId,
       userId: user.id,
     }),
+    draftStatePromise,
   ]);
   const priorPortfolioCount = priorSources.length;
   const artefactCount = chatArtefacten.length;
@@ -244,6 +270,7 @@ export async function POST(req: Request) {
       priorPortfolioCount,
       artefactCount,
       phase: chat.phase,
+      draftState,
     }),
   ]);
 
