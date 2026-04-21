@@ -81,6 +81,34 @@ const nextConfig = {
       "./src/assets/certificates/**/*",
     ],
     "/api/og": ["./src/assets/fonts/**/*"],
+    // @napi-rs/canvas must be present alongside pdfjs-dist at runtime —
+    // pdfjs-dist@5 loads it via `try { require("@napi-rs/canvas") }`,
+    // a dynamic require that Next's file tracer can't follow statically.
+    // Without these explicit hints Vercel ships pdfjs-dist to /var/task
+    // but leaves @napi-rs/canvas behind, and the require throws
+    // ReferenceError: DOMMatrix is not defined at module-load time.
+    //
+    // Path patterns cover:
+    //   - node_modules/@napi-rs/canvas          → pnpm's wrapper symlink
+    //   - node_modules/.pnpm/@napi-rs+canvas*  → the actual binaries,
+    //     including the platform-specific sub-packages
+    //     (@napi-rs+canvas-linux-x64-gnu, -linux-arm64-gnu, etc.)
+    //
+    // Applied on every route that can reach the PDF-extract pipeline:
+    // all of /leercoach, any /api/leercoach/* server action, and the
+    // /profiel/[handle]/portfolios upload flow.
+    "/profiel/[handle]/leercoach/**/*": [
+      "../../node_modules/@napi-rs/canvas/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas*/**/*",
+    ],
+    "/profiel/[handle]/portfolios/**/*": [
+      "../../node_modules/@napi-rs/canvas/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas*/**/*",
+    ],
+    "/api/leercoach/**/*": [
+      "../../node_modules/@napi-rs/canvas/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas*/**/*",
+    ],
     "/": ["./src/app/(public)/**/*.mdx"],
   },
   images: {
