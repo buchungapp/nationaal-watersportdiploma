@@ -88,26 +88,40 @@ const nextConfig = {
     // but leaves @napi-rs/canvas behind, and the require throws
     // ReferenceError: DOMMatrix is not defined at module-load time.
     //
+    // Narrow glob (@napi-rs+canvas@* and @napi-rs+canvas-linux-x64-gnu@*):
+    // a broader `@napi-rs+canvas*` pattern pulls in EVERY platform
+    // binary pnpm resolved in the lockfile (darwin-arm64, darwin-x64,
+    // linux-arm64-gnu, linux-arm64-musl, linux-arm-gnueabihf,
+    // linux-riscv64-gnu, android-arm64, win32-x64-msvc, etc.), each
+    // ~30 MB, which pushes the deployed function past Vercel's 250 MB
+    // unzipped limit. Vercel's Node runtime is Linux x64 glibc, so we
+    // only need the wrapper + the linux-x64-gnu variant.
+    //
     // Path patterns cover:
-    //   - node_modules/@napi-rs/canvas          → pnpm's wrapper symlink
-    //   - node_modules/.pnpm/@napi-rs+canvas*  → the actual binaries,
-    //     including the platform-specific sub-packages
-    //     (@napi-rs+canvas-linux-x64-gnu, -linux-arm64-gnu, etc.)
+    //   - node_modules/@napi-rs/canvas              → wrapper symlink
+    //   - .pnpm/@napi-rs+canvas@*                   → wrapper package
+    //   - .pnpm/@napi-rs+canvas-linux-x64-gnu@*     → Linux x64 binary
     //
     // Applied on every route that can reach the PDF-extract pipeline:
     // all of /leercoach, any /api/leercoach/* server action, and the
     // /profiel/[handle]/portfolios upload flow.
+    //
+    // If Vercel ever switches this project to arm64 runtimes, swap
+    // `-linux-x64-gnu` for `-linux-arm64-gnu`.
     "/profiel/[handle]/leercoach/**/*": [
       "../../node_modules/@napi-rs/canvas/**/*",
-      "../../node_modules/.pnpm/@napi-rs+canvas*/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas@*/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas-linux-x64-gnu@*/**/*",
     ],
     "/profiel/[handle]/portfolios/**/*": [
       "../../node_modules/@napi-rs/canvas/**/*",
-      "../../node_modules/.pnpm/@napi-rs+canvas*/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas@*/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas-linux-x64-gnu@*/**/*",
     ],
     "/api/leercoach/**/*": [
       "../../node_modules/@napi-rs/canvas/**/*",
-      "../../node_modules/.pnpm/@napi-rs+canvas*/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas@*/**/*",
+      "../../node_modules/.pnpm/@napi-rs+canvas-linux-x64-gnu@*/**/*",
     ],
     "/": ["./src/app/(public)/**/*.mdx"],
   },
