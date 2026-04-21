@@ -250,36 +250,8 @@
     {
       "idx": 35,
       "version": "7",
-      "when": 1776519835726,
-      "tag": "0035_closed_maverick",
-      "breakpoints": false
-    },
-    {
-      "idx": 36,
-      "version": "7",
-      "when": 1776547145550,
-      "tag": "0036_overjoyed_calypso",
-      "breakpoints": false
-    },
-    {
-      "idx": 37,
-      "version": "7",
-      "when": 1776606168378,
-      "tag": "0037_hot_wong",
-      "breakpoints": false
-    },
-    {
-      "idx": 38,
-      "version": "7",
-      "when": 1776673759260,
-      "tag": "0038_even_hellcat",
-      "breakpoints": false
-    },
-    {
-      "idx": 39,
-      "version": "7",
-      "when": 1776678898498,
-      "tag": "0039_gorgeous_paper_doll",
+      "when": 1776787945892,
+      "tag": "0035_opposite_tiger_shark",
       "breakpoints": false
     }
   ]

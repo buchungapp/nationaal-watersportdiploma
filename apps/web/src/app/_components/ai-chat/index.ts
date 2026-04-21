@@ -17,6 +17,7 @@
 //    Any `children` land between Starters and InputForm.
 
 export { AiChat, isTextPart } from "./AiChat";
+export type { AiChatErrorRetryRenderer } from "./AiChat";
 export { AiChatWindow } from "./AiChatWindow";
 export {
   AiChatContext,
@@ -38,6 +39,8 @@ export type {
   AiChatInitialMessage,
   AiChatInputSlotContext,
   AiChatPasteHandler,
+  AiChatSlashAction,
+  AiChatSlashCommand,
   AiChatStarter,
   AiChatSubmitBlock,
   AiChatWindowProps,

@@ -4,6 +4,8 @@ import { gateway } from "@ai-sdk/gateway";
 import { AiCorpus } from "@nawadi/core";
 import { generateObject } from "ai";
 import { z } from "zod";
+import { SUMMARIZATION_MODEL } from "~/lib/ai-models";
+import { captureAiTurn } from "~/lib/posthog-ai";
 import { extractPdfText, splitIntoChunks } from "../../_lib/extract";
 
 // Server-side pipeline for "kandidaat uploads a prior PvB portfolio".
@@ -137,6 +139,10 @@ function applyReplacements(
 
 export async function anonymizeText(
   rawText: string,
+  // Optional telemetry context — the offline script calls without it
+  // (attributed to "system"); the upload flow threads userId through
+  // so dashboards can count per-user anonymisation runs.
+  options: { userId?: string | null } = {},
 ): Promise<{ anonymizedText: string; redactedEntities: RedactedEntities }> {
   const redacted: RedactedEntities = {
     firstNames: [],
@@ -150,21 +156,45 @@ export async function anonymizeText(
   const dateScrubbed = regexScrubDates(rawText, redacted);
 
   // Step 2: single LLM pass for names / locations / verenigingen.
-  const { object } = await generateObject({
-    model: gateway("anthropic/claude-sonnet-4-5"),
-    schema: LlmAnonymizationSchema,
-    system: LLM_ANON_SYSTEM_PROMPT,
-    prompt: `Scan deze tekst op PII die nog niet vervangen is:\n\n---\n${dateScrubbed}\n---`,
-    temperature: 0,
-  });
+  const turnStartedAt = Date.now();
+  try {
+    const { object, usage } = await generateObject({
+      model: gateway(SUMMARIZATION_MODEL),
+      schema: LlmAnonymizationSchema,
+      system: LLM_ANON_SYSTEM_PROMPT,
+      prompt: `Scan deze tekst op PII die nog niet vervangen is:\n\n---\n${dateScrubbed}\n---`,
+      temperature: 0,
+    });
 
-  const anonymizedText = applyReplacements(
-    dateScrubbed,
-    object.replacements,
-    redacted,
-  );
+    captureAiTurn({
+      userId: options.userId ?? null,
+      callSite: "portfolio-anonymisation",
+      model: SUMMARIZATION_MODEL,
+      status: "completed",
+      durationMs: Date.now() - turnStartedAt,
+      inputTokens: usage?.inputTokens ?? null,
+      outputTokens: usage?.outputTokens ?? null,
+    });
 
-  return { anonymizedText, redactedEntities: redacted };
+    const anonymizedText = applyReplacements(
+      dateScrubbed,
+      object.replacements,
+      redacted,
+    );
+
+    return { anonymizedText, redactedEntities: redacted };
+  } catch (err) {
+    captureAiTurn({
+      userId: options.userId ?? null,
+      callSite: "portfolio-anonymisation",
+      model: SUMMARIZATION_MODEL,
+      status: "errored",
+      durationMs: Date.now() - turnStartedAt,
+      errorCode: "generate_object_failed",
+      errorMessage: err instanceof Error ? err.message : String(err),
+    });
+    throw err;
+  }
 }
 
 // ---- 2. Full pipeline ----
@@ -221,6 +251,7 @@ export async function ingestPortfolio(input: {
   const extracted = await extractPdfText(input.pdfBytes);
   const { anonymizedText, redactedEntities } = await anonymizeText(
     extracted.rawText,
+    { userId: input.userId },
   );
   const chunks = splitIntoChunks(anonymizedText);
 

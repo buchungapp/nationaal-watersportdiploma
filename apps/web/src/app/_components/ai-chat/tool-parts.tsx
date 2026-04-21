@@ -46,10 +46,19 @@ export function ToolPartRenderer({ part }: { part: ToolPart }) {
   const toolName = part.type.replace(/^tool-/, "");
 
   if (part.state === "input-streaming" || part.state === "input-available") {
+    // Phase changes execute too quickly + the stepper above the
+    // composer is the authoritative UI — a flickering busy pill
+    // adds noise without signal.
+    if (toolName === "setPhase") return null;
     return <ToolBusyPill label={humanToolLabel(toolName, "busy")} />;
   }
 
   if (part.state === "output-error") {
+    // setPhase errors are almost always Zod-validation retries the
+    // model handles itself — don't surface them to the user as angry
+    // cards. Same idea for other "housekeeping" tools could apply
+    // later; for now just the one.
+    if (toolName === "setPhase") return null;
     return (
       <ToolErrorPill
         label={humanToolLabel(toolName, "error")}
@@ -61,6 +70,15 @@ export function ToolPartRenderer({ part }: { part: ToolPart }) {
   if (part.state === "output-available") {
     if (toolName === "searchBewijsExamples") {
       return <SearchBewijsExamplesOutput output={part.output} />;
+    }
+    if (toolName === "setPhase") {
+      return <SetPhaseOutput output={part.output} />;
+    }
+    if (toolName === "saveDraft") {
+      return <SaveDraftOutput output={part.output} />;
+    }
+    if (toolName === "readDraft") {
+      return <ReadDraftOutput output={part.output} />;
     }
     // Generic done-card fallback for tools we don't specifically render.
     return (
@@ -130,6 +148,225 @@ function SearchBewijsExamplesOutput({ output }: { output: unknown }) {
       <span className="italic text-slate-600">{parsed.criteriumTitel}</span>
     </div>
   );
+}
+
+// ---- setPhase ----
+
+type SetPhaseResult = {
+  ok: true;
+  phase: "verkennen" | "ordenen" | "concept" | "verfijnen";
+};
+
+const PHASE_LABEL: Record<SetPhaseResult["phase"], string> = {
+  verkennen: "Verkennen",
+  ordenen: "Ordenen",
+  concept: "Concept",
+  verfijnen: "Verfijnen",
+};
+
+// The phase selector used to live in the chat toolbar but was removed
+// — picking a phase looked like navigation while really sending a
+// scripted message the coach could refuse, a UX lie. Phase still
+// shapes coach behaviour internally (via the system prompt) but is
+// no longer user-controllable. This renderer is now the ONLY surface
+// where the user sees the phase concept: a compact divider marking
+// the moment a transition happens, so the user understands "the
+// coaching style just shifted" without needing to track a label in
+// the toolbar.
+function SetPhaseOutput({ output }: { output: unknown }) {
+  const parsed = parseSetPhaseOutput(output);
+  if (!parsed) return null;
+  return (
+    <div
+      className="my-3 flex items-center gap-3 text-[11px] font-medium uppercase tracking-wide text-slate-500"
+      aria-label={`Fase gewijzigd naar ${PHASE_LABEL[parsed.phase]}`}
+    >
+      <span aria-hidden="true" className="h-px flex-1 bg-slate-200" />
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-0.5">
+        <span aria-hidden="true">→</span>
+        <span>
+          Fase:{" "}
+          <span className="font-semibold text-slate-700">
+            {PHASE_LABEL[parsed.phase]}
+          </span>
+        </span>
+      </span>
+      <span aria-hidden="true" className="h-px flex-1 bg-slate-200" />
+    </div>
+  );
+}
+
+// ---- saveDraft ----
+//
+// Replaces what was previously a giant markdown blockquote dumped
+// into the chat. The real content lives in the portfolio-version
+// table; this card is a compact pointer the kandidaat can click to
+// open the doc pane on the new version. Intent: chat stays readable,
+// drafts stay accessible.
+
+type SaveDraftResult =
+  | {
+      ok: true;
+      versionId: string;
+      versionNumber: number;
+      contentLength: number;
+      skippedNoOp: boolean;
+    }
+  | { ok: false; reason: string };
+
+function SaveDraftOutput({ output }: { output: unknown }) {
+  const parsed = parseSaveDraftOutput(output);
+  if (!parsed) return null;
+  if (!parsed.ok) {
+    return (
+      <ToolErrorPill
+        label="Draft niet opgeslagen"
+        detail={parsed.reason}
+      />
+    );
+  }
+  // A no-op (hash match) shouldn't shout — tiny muted pill instead
+  // of a "versie opgeslagen" card that'd be misleading since nothing
+  // actually changed.
+  if (parsed.skippedNoOp) {
+    return (
+      <div className="my-1 inline-flex max-w-[85%] items-baseline gap-x-1 rounded-md bg-slate-50 px-2.5 py-0.5 text-[11px] text-slate-500">
+        <span>Geen wijzigingen t.o.v. huidige versie — niets opgeslagen.</span>
+      </div>
+    );
+  }
+  // Happy path: compact card announcing the save + a rough size hint
+  // for scale. Doc pane opens on this versionId; the UI consumes
+  // `data-portfolio-version-id` so it can scroll / highlight in the
+  // history sidebar without needing a separate messaging channel.
+  const kb = Math.round(parsed.contentLength / 1000);
+  return (
+    <div
+      data-portfolio-version-id={parsed.versionId}
+      className="my-2 flex max-w-[85%] flex-col gap-1 rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-sm text-emerald-900"
+    >
+      <div className="flex items-baseline gap-2">
+        <span aria-hidden="true" className="text-emerald-600">
+          📄
+        </span>
+        <span className="font-semibold">
+          Versie {parsed.versionNumber} opgeslagen
+        </span>
+        <span className="text-[11px] text-emerald-700/80">
+          · {kb}k tekens
+        </span>
+      </div>
+      <p className="text-xs text-emerald-800/80">
+        De nieuwe draft staat klaar in de docpane. Open om te lezen of te
+        bewerken.
+      </p>
+    </div>
+  );
+}
+
+function parseSaveDraftOutput(output: unknown): SaveDraftResult | null {
+  if (output === null || typeof output !== "object") return null;
+  const o = output as Record<string, unknown>;
+  if (o.ok === false && typeof o.reason === "string") {
+    return { ok: false, reason: o.reason };
+  }
+  if (
+    o.ok === true &&
+    typeof o.versionId === "string" &&
+    typeof o.versionNumber === "number" &&
+    typeof o.contentLength === "number" &&
+    typeof o.skippedNoOp === "boolean"
+  ) {
+    return {
+      ok: true,
+      versionId: o.versionId,
+      versionNumber: o.versionNumber,
+      contentLength: o.contentLength,
+      skippedNoOp: o.skippedNoOp,
+    };
+  }
+  return null;
+}
+
+// ---- readDraft ----
+//
+// Mostly silent: the coach calls this to refresh its context before
+// revising. Users don't need a card for every read — render a tiny
+// muted pill acknowledging the lookup, same treatment as
+// searchBewijsExamples.
+
+type ReadDraftResult =
+  | {
+      ok: true;
+      hasDraft: boolean;
+      versionNumber: number;
+      createdBy: "coach" | "user" | "imported" | null;
+    }
+  | { ok: false; reason: string };
+
+function ReadDraftOutput({ output }: { output: unknown }) {
+  const parsed = parseReadDraftOutput(output);
+  if (!parsed) return null;
+  if (!parsed.ok) {
+    return <ToolErrorPill label="Draft niet geladen" detail={parsed.reason} />;
+  }
+  if (!parsed.hasDraft) {
+    return (
+      <div className="my-1 inline-flex items-baseline gap-x-1 rounded-md bg-slate-50 px-2.5 py-0.5 text-[11px] text-slate-500">
+        <span>Nog geen draft — coach ziet een leeg document.</span>
+      </div>
+    );
+  }
+  return (
+    <div className="my-1 inline-flex items-baseline gap-x-1 rounded-md bg-slate-50 px-2.5 py-0.5 text-[11px] text-slate-500">
+      <span>Huidige versie {parsed.versionNumber} gelezen</span>
+      {parsed.createdBy === "user" ? (
+        <span className="italic">(laatste edit door kandidaat)</span>
+      ) : null}
+    </div>
+  );
+}
+
+function parseReadDraftOutput(output: unknown): ReadDraftResult | null {
+  if (output === null || typeof output !== "object") return null;
+  const o = output as Record<string, unknown>;
+  if (o.ok === false && typeof o.reason === "string") {
+    return { ok: false, reason: o.reason };
+  }
+  if (
+    o.ok === true &&
+    typeof o.hasDraft === "boolean" &&
+    typeof o.versionNumber === "number"
+  ) {
+    const createdBy = o.createdBy;
+    return {
+      ok: true,
+      hasDraft: o.hasDraft,
+      versionNumber: o.versionNumber,
+      createdBy:
+        createdBy === "coach" ||
+        createdBy === "user" ||
+        createdBy === "imported"
+          ? createdBy
+          : null,
+    };
+  }
+  return null;
+}
+
+function parseSetPhaseOutput(output: unknown): SetPhaseResult | null {
+  if (output === null || typeof output !== "object") return null;
+  const o = output as Record<string, unknown>;
+  if (
+    o.ok === true &&
+    (o.phase === "verkennen" ||
+      o.phase === "ordenen" ||
+      o.phase === "concept" ||
+      o.phase === "verfijnen")
+  ) {
+    return { ok: true, phase: o.phase };
+  }
+  return null;
 }
 
 function parseSearchBewijsExamplesOutput(

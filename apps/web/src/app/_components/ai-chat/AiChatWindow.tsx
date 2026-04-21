@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AiChat } from "./AiChat";
+import { AiChat, type AiChatErrorRetryRenderer } from "./AiChat";
 import type {
   AiChatDropHandler,
   AiChatPasteHandler,
+  AiChatSlashCommand,
   AiChatSubmitBlock,
   AiChatWindowProps,
 } from "./types";
@@ -58,6 +59,57 @@ type Props = Omit<AiChatWindowProps, "slotAboveInput"> & {
    * racing ahead of the server.
    */
   submitBlock?: AiChatSubmitBlock;
+  /**
+   * Content rendered ABOVE the MessageList, at the very top of the
+   * chat frame. The leercoach uses this for the phase stepper so it
+   * sits as a persistent header over the conversation.
+   */
+  topSlot?: ReactNode;
+  /**
+   * Content rendered INSIDE the composer's rounded container, above
+   * the textarea. Leercoach renders the artefact chip strip here so
+   * attached files appear where Claude puts them — inside the
+   * composer visual, not as a separate strip above it.
+   */
+  composerPreSlot?: ReactNode;
+  /**
+   * Absolute-positioned bottom-left slot inside the composer,
+   * mirroring the built-in send button at bottom-right. Leercoach
+   * renders the "+" attach menu here.
+   */
+  composerLeftActions?: ReactNode;
+  /**
+   * Slash commands for the composer. When non-empty, typing `/` at
+   * the start of the textarea opens a keyboard-navigable popover
+   * with matching entries. See `AiChatSlashCommand`.
+   */
+  slashCommands?: AiChatSlashCommand[];
+  /**
+   * When true, the underlying useChat automatically reconnects to any
+   * in-flight stream for this chat on mount (via GET to the URL
+   * returned by `cancelEndpoint`). Pairs with a resumable server route
+   * — see AiChat.Provider's `resume` prop for the full contract.
+   *
+   * Default: false.
+   */
+  resume?: boolean;
+  /**
+   * Builds the URL for the per-chat resume / cancel endpoint. When
+   * present, the Stop button additionally fires DELETE to this URL so
+   * the server can abort the LLM stream (survives client disconnect);
+   * when `resume` is true it's also used as the reconnect GET.
+   *
+   * Omit for consumers that don't have a resumable backend.
+   */
+  cancelEndpoint?: (chatId: string) => string;
+  /**
+   * Optional override for the retry button inside the error banner.
+   * Called with the current error; return non-null to replace the
+   * default "Probeer opnieuw" with a domain-specific action (e.g.
+   * leercoach's "Comprimeer en probeer opnieuw" when context limit
+   * is hit). Return null to let the default retry render.
+   */
+  errorRetryRenderer?: AiChatErrorRetryRenderer;
 };
 
 export function AiChatWindow({
@@ -71,6 +123,13 @@ export function AiChatWindow({
   handlePaste,
   handleDrop,
   submitBlock,
+  topSlot,
+  composerPreSlot,
+  composerLeftActions,
+  slashCommands,
+  resume,
+  cancelEndpoint,
+  errorRetryRenderer,
   className,
   children,
 }: Props) {
@@ -84,13 +143,21 @@ export function AiChatWindow({
       handlePaste={handlePaste}
       handleDrop={handleDrop}
       submitBlock={submitBlock}
+      resume={resume}
+      cancelEndpoint={cancelEndpoint}
     >
       <AiChat.Frame className={className}>
+        {topSlot}
         <AiChat.MessageList emptyState={emptyState} />
-        <AiChat.ErrorBanner />
+        <AiChat.ErrorBanner renderRetryAction={errorRetryRenderer} />
         <AiChat.Starters />
         {children}
-        <AiChat.InputForm placeholder={placeholder} />
+        <AiChat.InputForm
+          placeholder={placeholder}
+          topChildren={composerPreSlot}
+          leftActions={composerLeftActions}
+          slashCommands={slashCommands}
+        />
       </AiChat.Frame>
     </AiChat.Provider>
   );

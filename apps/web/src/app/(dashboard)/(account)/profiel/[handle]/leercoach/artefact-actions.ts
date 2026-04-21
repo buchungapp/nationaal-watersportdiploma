@@ -8,6 +8,7 @@ import {
   type ArtefactType,
   ingestArtefact,
 } from "./_lib/artefact-pipeline";
+import { requireLeercoachEnabled } from "./_lib/require-leercoach-enabled";
 
 // Server actions for the chat-scoped artefact upload flow. Three
 // concerns live here:
@@ -101,6 +102,8 @@ function deriveLabel(input: {
 export async function uploadArtefactAction(
   formData: FormData,
 ): Promise<UploadArtefactResult> {
+  await requireLeercoachEnabled();
+
   const chatIdRaw = formData.get("chatId");
   const chatId = typeof chatIdRaw === "string" ? chatIdRaw : null;
   if (!chatId) {
@@ -262,6 +265,7 @@ export async function revokeArtefactAction(input: {
   chatId: string;
   handle: string;
 }): Promise<{ ok: boolean; reason?: string }> {
+  await requireLeercoachEnabled();
   const ctx = await requireChatOwnership(input.chatId);
   if (!ctx) {
     return { ok: false, reason: "Chat niet gevonden." };

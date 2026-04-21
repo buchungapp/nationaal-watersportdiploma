@@ -23,6 +23,8 @@ import { createHash } from "node:crypto";
 import { gateway } from "@ai-sdk/gateway";
 import { AiCorpus } from "@nawadi/core";
 import { generateText } from "ai";
+import { SUMMARIZATION_MODEL } from "~/lib/ai-models";
+import { captureAiTurn } from "~/lib/posthog-ai";
 import {
   extractDocxText,
   extractImageText,
@@ -58,7 +60,7 @@ export type IngestArtefactResult = {
 
 // ---- Summary generation ----
 
-const SUMMARY_MODEL = "anthropic/claude-sonnet-4-5";
+// Model id centralized in ~/lib/ai-models as SUMMARIZATION_MODEL.
 
 const SUMMARY_PROMPT = `Je krijgt de tekst van een artefact dat een kandidaat heeft geüpload aan hun digitale leercoach (opleidingsplan, WhatsApp-transcript, e-mail, notitie, …).
 
@@ -69,18 +71,46 @@ Schrijf een samenvatting van 1 tot 3 zinnen in het Nederlands. Beschrijf KORT:
 
 Geef ALLEEN de samenvatting terug, geen preamble zoals "Dit document gaat over:". Maximaal 60 woorden.`;
 
-async function generateSummary(text: string): Promise<string> {
+async function generateSummary(
+  text: string,
+  telemetry: { userId: string; chatId: string },
+): Promise<string> {
   // Truncate very long artefacten before summarising — the first ~8k
   // chars are usually enough to characterise the document, and we
   // don't want to blow the context window / bill for the whole thing.
   const truncated = text.slice(0, 8000);
-  const { text: summary } = await generateText({
-    model: gateway(SUMMARY_MODEL),
-    system: SUMMARY_PROMPT,
-    prompt: truncated,
-    temperature: 0.2,
-  });
-  return stripControlChars(summary).trim();
+  const turnStartedAt = Date.now();
+  try {
+    const { text: summary, usage } = await generateText({
+      model: gateway(SUMMARIZATION_MODEL),
+      system: SUMMARY_PROMPT,
+      prompt: truncated,
+      temperature: 0.2,
+    });
+    captureAiTurn({
+      userId: telemetry.userId,
+      chatId: telemetry.chatId,
+      callSite: "artefact-summary",
+      model: SUMMARIZATION_MODEL,
+      status: "completed",
+      durationMs: Date.now() - turnStartedAt,
+      inputTokens: usage?.inputTokens ?? null,
+      outputTokens: usage?.outputTokens ?? null,
+    });
+    return stripControlChars(summary).trim();
+  } catch (err) {
+    captureAiTurn({
+      userId: telemetry.userId,
+      chatId: telemetry.chatId,
+      callSite: "artefact-summary",
+      model: SUMMARIZATION_MODEL,
+      status: "errored",
+      durationMs: Date.now() - turnStartedAt,
+      errorCode: "generate_text_failed",
+      errorMessage: err instanceof Error ? err.message : String(err),
+    });
+    throw err;
+  }
 }
 
 // ---- Main pipeline ----
@@ -116,6 +146,7 @@ export async function ingestArtefact(
     const { rawText: extracted } = await extractImageText(
       input.bytes,
       input.mimeType,
+      { userId: input.userId, chatId: input.chatId },
     );
     rawText = extracted;
     artefactType = "image";
@@ -138,7 +169,10 @@ export async function ingestArtefact(
 
   // --- 3. Summary + hash (parallel — independent) ---
   const [summary, sourceHash] = await Promise.all([
-    generateSummary(rawText),
+    generateSummary(rawText, {
+      userId: input.userId,
+      chatId: input.chatId,
+    }),
     Promise.resolve(createHash("sha256").update(rawText).digest("hex")),
   ]);
 

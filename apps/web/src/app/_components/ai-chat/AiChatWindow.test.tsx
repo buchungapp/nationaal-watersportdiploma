@@ -285,14 +285,91 @@ describe("AiChatWindow — input + submission", () => {
     expect(mockStop).toHaveBeenCalledTimes(1);
   });
 
-  test("Enter during stream cancels instead of sending", async () => {
+  test("Enter during stream queues the message instead of sending or stopping", async () => {
     const user = userEvent.setup();
-    setChatState({ status: "streaming" });
+    // Streaming only happens after the user's first message is posted —
+    // seed one so the MessageList renders its non-empty path (where
+    // the queued bubble lives).
+    setChatState({
+      status: "streaming",
+      messages: [
+        {
+          id: "m1",
+          role: "user",
+          parts: [{ type: "text", text: "eerste vraag" }],
+        },
+      ],
+    });
     renderWindow();
     const textarea = screen.getByRole("textbox");
     textarea.focus();
     await user.keyboard("iets nieuws{Enter}");
-    expect(mockStop).toHaveBeenCalledTimes(1);
+    // Queue is local state — no network call, no stream-abort. The
+    // message gets flushed via sendMessage when status flips back to
+    // "ready" (covered in its own test).
+    expect(mockSendMessage).not.toHaveBeenCalled();
+    expect(mockStop).not.toHaveBeenCalled();
+    // UI confirms the queued bubble renders with the typed text.
+    expect(screen.getByText("iets nieuws")).toBeInTheDocument();
+    expect(screen.getByText(/staat in de wachtrij/i)).toBeInTheDocument();
+  });
+
+  test("Queued message flushes via sendMessage when status returns to ready", async () => {
+    const user = userEvent.setup();
+    setChatState({
+      status: "streaming",
+      messages: [
+        {
+          id: "m1",
+          role: "user",
+          parts: [{ type: "text", text: "eerste vraag" }],
+        },
+      ],
+    });
+    const { rerender } = renderWindow();
+    const textarea = screen.getByRole("textbox");
+    textarea.focus();
+    await user.keyboard("bericht twee{Enter}");
+    expect(mockSendMessage).not.toHaveBeenCalled();
+
+    // Simulate the stream completing on the useChat side.
+    setChatState({ status: "ready" });
+    rerender(
+      <AiChatWindow
+        chatId="test-chat-id"
+        initialMessages={[]}
+        apiEndpoint="/api/test-chat"
+      />,
+    );
+    // The flush is deferred to a microtask; wait for it.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(mockSendMessage).toHaveBeenCalledTimes(1);
+    expect(mockSendMessage).toHaveBeenCalledWith({ text: "bericht twee" });
+  });
+
+  test("Queued message can be cancelled via the × button before flush", async () => {
+    const user = userEvent.setup();
+    setChatState({
+      status: "streaming",
+      messages: [
+        {
+          id: "m1",
+          role: "user",
+          parts: [{ type: "text", text: "eerste vraag" }],
+        },
+      ],
+    });
+    renderWindow();
+    const textarea = screen.getByRole("textbox");
+    textarea.focus();
+    await user.keyboard("nee toch niet{Enter}");
+    expect(screen.getByText("nee toch niet")).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: /uit de wachtrij/i }),
+    );
+    expect(screen.queryByText("nee toch niet")).toBeNull();
     expect(mockSendMessage).not.toHaveBeenCalled();
   });
 

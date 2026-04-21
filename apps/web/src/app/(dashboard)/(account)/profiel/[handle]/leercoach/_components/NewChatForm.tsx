@@ -1,16 +1,24 @@
 "use client";
 
 import { unstable_rethrow } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { parseKerntaakTitel } from "../../_lib/format-kerntaak";
 import { createChatAction } from "../actions";
+
+type Richting = "instructeur" | "leercoach" | "pvb_beoordelaar";
 
 type ProfielOption = {
   id: string;
   titel: string;
-  richting: "instructeur" | "leercoach" | "pvb_beoordelaar";
+  richting: Richting;
   niveauRang: number;
   kerntaken: Array<{ id: string; titel: string; rang: number }>;
+};
+
+type InstructieGroepOption = {
+  id: string;
+  title: string;
+  richting: Richting;
 };
 
 type ScopeChoice =
@@ -21,11 +29,22 @@ type ScopeChoice =
 export function NewChatForm({
   handle,
   profielen,
+  instructieGroepen,
 }: {
   handle: string;
   profielen: ProfielOption[];
+  /**
+   * Full list of instructiegroepen. The picker filters by the chosen
+   * profiel's richting at render time — only instructeur profielen
+   * surface the picker, so leercoach / pvb_beoordelaar flows never
+   * see the empty-list UX.
+   */
+  instructieGroepen: InstructieGroepOption[];
 }) {
   const [profielId, setProfielId] = useState<string | null>(null);
+  const [instructieGroepId, setInstructieGroepId] = useState<string | null>(
+    null,
+  );
   const [scopeChoice, setScopeChoice] = useState<ScopeChoice | null>(null);
   const [selectedKerntaken, setSelectedKerntaken] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -36,6 +55,21 @@ export function NewChatForm({
   // Q1 rule: N3 always uses full_profiel, no picker required.
   const needsScopePicker = profiel ? profiel.niveauRang >= 4 : false;
 
+  // Instructiegroep picker only applies to richting=instructeur — leercoach
+  // and pvb_beoordelaar don't have instructiegroepen in the NWD catalog.
+  const needsInstructieGroep = profiel?.richting === "instructeur";
+
+  // Filtered options for the picker. Memoised so the list order is
+  // stable across re-renders (PostgreSQL ORDER BY title in the list
+  // helper already sorts alphabetically).
+  const availableInstructieGroepen = useMemo(
+    () =>
+      profiel
+        ? instructieGroepen.filter((g) => g.richting === profiel.richting)
+        : [],
+    [profiel, instructieGroepen],
+  );
+
   // Effective scope: N3 is auto-set; N4/N5 follows the user's choice.
   const effectiveScope: ScopeChoice | null = (() => {
     if (!profiel) return null;
@@ -43,7 +77,10 @@ export function NewChatForm({
     return scopeChoice;
   })();
 
-  const canSubmit = profiel !== undefined && effectiveScope !== null;
+  const canSubmit =
+    profiel !== undefined &&
+    effectiveScope !== null &&
+    (!needsInstructieGroep || instructieGroepId !== null);
 
   function handleSubmit() {
     if (!profiel || !effectiveScope) return;
@@ -53,6 +90,7 @@ export function NewChatForm({
         await createChatAction({
           profielId: profiel.id,
           scope: effectiveScope,
+          instructieGroepId: needsInstructieGroep ? instructieGroepId : null,
           handle,
         });
         // Redirect is handled inside createChatAction via `redirect()`.
@@ -80,6 +118,7 @@ export function NewChatForm({
           value={profielId ?? ""}
           onChange={(e) => {
             setProfielId(e.target.value || null);
+            setInstructieGroepId(null);
             setScopeChoice(null);
             setSelectedKerntaken([]);
           }}
@@ -94,11 +133,47 @@ export function NewChatForm({
         </select>
       </section>
 
-      {/* Step 2: scope (only for N4/N5) */}
+      {/* Instructiegroep picker (only for richting=instructeur). Rendered
+          between profiel and scope because it affects identity more than
+          scope does — "Instructeur 5 — Jeugdzeilen" vs "— Jachtvaren"
+          are separate portfolios entirely, while scope is a within-profile
+          drill-down. */}
+      {profiel && needsInstructieGroep ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-600">
+            Stap 2 · Instructiegroep
+          </h2>
+          <p className="text-sm text-slate-600">
+            Op welke instructiegroep is dit portfolio gericht? Je kunt later
+            een apart portfolio starten voor een andere groep.
+          </p>
+          {availableInstructieGroepen.length === 0 ? (
+            <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              Geen instructiegroepen beschikbaar voor dit profiel. Neem
+              contact op met de NWD als dit onverwacht is.
+            </p>
+          ) : (
+            <select
+              value={instructieGroepId ?? ""}
+              onChange={(e) => setInstructieGroepId(e.target.value || null)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            >
+              <option value="">Kies een instructiegroep…</option>
+              {availableInstructieGroepen.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.title}
+                </option>
+              ))}
+            </select>
+          )}
+        </section>
+      ) : null}
+
+      {/* Step 2/3: scope (only for N4/N5) */}
       {profiel && needsScopePicker ? (
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-600">
-            Stap 2 · Scope
+            {needsInstructieGroep ? "Stap 3 · Scope" : "Stap 2 · Scope"}
           </h2>
           <div className="flex flex-col gap-2">
             <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-3 cursor-pointer hover:border-blue-300">

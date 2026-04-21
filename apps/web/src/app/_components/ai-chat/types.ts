@@ -7,7 +7,41 @@ export type AiChatInitialMessage = {
   id: string;
   role: "user" | "assistant" | "system";
   parts: unknown[]; // AI SDK UIMessage parts, jsonb-safe
+  /**
+   * Optional compaction bookkeeping. Present when the server has
+   * collapsed older messages into a summary. AiChat treats this as
+   * an opaque blob — the `kind` discriminator decides the UI
+   * treatment inside `MessageItem`. Consumers that don't compact
+   * simply omit it.
+   */
+  compaction?: AiChatCompactionInfo;
 };
+
+/**
+ * Per-message compaction bookkeeping. Three states:
+ *   - absent / undefined: ordinary conversation turn.
+ *   - { kind: "summary", ... }: synthetic summary row replacing a
+ *     range of earlier messages. Rendered as a divider-banner.
+ *   - { kind: "folded", ... }: an older turn that's been folded
+ *     into a summary. Still visible in the UI (faded) so the user
+ *     can read history; the model doesn't see it.
+ */
+export type AiChatCompactionInfo =
+  | {
+      kind: "summary";
+      /** How many messages got folded into this summary row. */
+      messageCount: number;
+      /** ISO timestamps of the compacted range (for hover tooltip). */
+      fromCreatedAt: string;
+      toCreatedAt: string;
+      /** Rough estimate of tokens dropped from the model's context. */
+      tokensSaved: number;
+    }
+  | {
+      kind: "folded";
+      /** Id of the summary row that replaces this message model-side. */
+      summaryMessageId: string;
+    };
 
 export type AiChatStarter = {
   label: string;
@@ -67,6 +101,44 @@ export type AiChatDropHandler = (
  * understands why it's greyed out.
  */
 export type AiChatSubmitBlock = { reason: string } | null;
+
+/**
+ * Consumer-supplied slash-command definition. When the textarea
+ * content starts with `/`, the InputForm opens a floating menu
+ * filtered by the characters after the slash. Selecting a command
+ * either fills the textarea with a template (kind: "template") or
+ * dispatches a built-in client action (kind: "action", actionId).
+ *
+ * The built-in action surface is deliberately small + typed — add
+ * new actionId values here when new use-cases appear. Consumers
+ * can't register arbitrary closures because the slash-menu lives
+ * INSIDE the AiChat context, but consumer command lists are
+ * defined OUTSIDE it; a typed id is the bridge.
+ */
+export type AiChatSlashAction = "regenerate";
+
+export type AiChatSlashCommand = {
+  /** Identifier after the slash, e.g. "concept" for `/concept`. Lower-case. Match is case-insensitive. */
+  trigger: string;
+  /** Short human label for the menu row. */
+  label: string;
+  /** One-line description below the label. Optional. */
+  description?: string;
+} & (
+  | {
+      kind: "template";
+      /**
+       * Text to replace the textarea content with on select. Cursor
+       * lands at the end. A trailing space invites the user to add
+       * a parameter (e.g. "Schrijf een concept voor werkproces ").
+       */
+      template: string;
+    }
+  | {
+      kind: "action";
+      actionId: AiChatSlashAction;
+    }
+);
 
 export type AiChatWindowProps = {
   /** Stable chat identifier. Also used as the useChat hook id. */

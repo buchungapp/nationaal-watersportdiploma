@@ -1,5 +1,6 @@
 "use client";
 
+import { TrashIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { unstable_rethrow } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -13,10 +14,14 @@ type Props = {
 };
 
 // One row in the chat list. Renders as a link to the chat; the delete
-// button lives inside the row (stopPropagation on click so it doesn't
-// navigate). Two-click pattern prevents accidental deletions without
-// a full modal: first click reveals "Weet je zeker?" and the actual
-// delete button; second click soft-deletes the chat.
+// affordance lives inside the row (stopPropagation on click so it
+// doesn't navigate). Two-click pattern prevents accidental deletions
+// without a full modal: first click on the trash icon reveals the
+// explicit "Verwijder / Annuleer" pair; second click soft-deletes.
+//
+// Visual weight: the trash icon is small + muted in idle state —
+// only lights up on hover and (of course) during the confirm flow.
+// Keeps the row's visual rhythm about the CONTENT, not the delete.
 export function SessionRow({ handle, chatId, title, subtitle }: Props) {
   const [confirming, setConfirming] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -50,11 +55,15 @@ export function SessionRow({ handle, chatId, title, subtitle }: Props) {
     setConfirming(false);
   }
 
+  // Padding-right grows when the confirm UI is expanded so the two
+  // buttons have room without running over the title text.
+  const rowPaddingRight = confirming ? "pr-44" : "pr-14";
+
   return (
-    <div className="relative">
+    <div className="relative group">
       <Link
         href={`/profiel/${handle}/leercoach/chat/${chatId}`}
-        className="block rounded-xl border border-zinc-200 bg-white p-4 pr-32 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
+        className={`block rounded-xl border border-zinc-200 bg-white p-4 ${rowPaddingRight} transition-colors hover:border-branding-light/40 hover:bg-branding-light/5`}
       >
         <div className="flex flex-col">
           <span className="font-semibold text-slate-900">{title}</span>
@@ -62,9 +71,10 @@ export function SessionRow({ handle, chatId, title, subtitle }: Props) {
         </div>
       </Link>
 
-      {/* Delete UI lives in an absolutely-positioned overlay so it sits
-          on top of the Link without breaking the click-anywhere-to-open
-          default. */}
+      {/* Delete affordance — absolutely positioned so it sits on top of
+          the Link without breaking click-anywhere-to-open. In idle
+          state it's a small muted trash icon that only foregrounds on
+          hover; when confirming, it expands into the explicit pair. */}
       <div className="absolute inset-y-0 right-3 flex items-center gap-2">
         {confirming ? (
           <>
@@ -90,9 +100,10 @@ export function SessionRow({ handle, chatId, title, subtitle }: Props) {
             type="button"
             onClick={handleConfirmRequest}
             aria-label="Verwijder deze sessie"
-            className="rounded-lg border border-transparent bg-transparent px-2 py-1.5 text-xs font-medium text-slate-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+            title="Verwijderen"
+            className="inline-flex size-8 items-center justify-center rounded-lg text-slate-400 opacity-0 transition-[color,background-color,opacity] group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus:opacity-100"
           >
-            Verwijder
+            <TrashIcon aria-hidden="true" className="size-4" />
           </button>
         )}
       </div>

@@ -13,9 +13,11 @@ import "server-only";
 // All extractors run server-side (see the `server-only` import).
 
 import { gateway } from "@ai-sdk/gateway";
+import { captureAiTurn } from "~/lib/posthog-ai";
 import { generateText } from "ai";
 import mammoth from "mammoth";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { VISION_MODEL } from "~/lib/ai-models";
 
 /** Strip characters Postgres rejects in `text` columns (U+0000) and
  *  other non-semantic C0 controls pdfjs occasionally passes through
@@ -71,7 +73,7 @@ export async function extractDocxText(
 
 // ---- Image (via vision model) ----
 
-const IMAGE_TRANSCRIPTION_MODEL = "anthropic/claude-sonnet-4-5";
+// Model id centralized in ~/lib/ai-models as VISION_MODEL.
 
 const IMAGE_TRANSCRIPTION_PROMPT = `Je transcribeert een afbeelding naar platte tekst zodat een digitale leercoach er later naar kan zoeken.
 
@@ -103,27 +105,57 @@ Geef ALLEEN de transcriptie terug, geen preamble zoals "Hier is de transcriptie:
 export async function extractImageText(
   bytes: Uint8Array,
   mimeType: string,
+  // Optional telemetry context — when the caller has an authenticated
+  // user + chat in scope it can thread them through so the PostHog
+  // event lands on the right distinct_id. Absent → attributed to
+  // "system" sentinel (see posthog-ai helper).
+  options: { userId?: string | null; chatId?: string | null } = {},
 ): Promise<{ rawText: string; charCount: number }> {
-  const { text } = await generateText({
-    model: gateway(IMAGE_TRANSCRIPTION_MODEL),
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: IMAGE_TRANSCRIPTION_PROMPT },
-          {
-            type: "image",
-            // ai-sdk accepts a Uint8Array directly + a mediaType hint.
-            image: bytes,
-            mediaType: mimeType,
-          },
-        ],
-      },
-    ],
-    temperature: 0,
-  });
-  const rawText = stripControlChars(text);
-  return { rawText, charCount: rawText.length };
+  const turnStartedAt = Date.now();
+  try {
+    const { text, usage } = await generateText({
+      model: gateway(VISION_MODEL),
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: IMAGE_TRANSCRIPTION_PROMPT },
+            {
+              type: "image",
+              // ai-sdk accepts a Uint8Array directly + a mediaType hint.
+              image: bytes,
+              mediaType: mimeType,
+            },
+          ],
+        },
+      ],
+      temperature: 0,
+    });
+    const rawText = stripControlChars(text);
+    captureAiTurn({
+      userId: options.userId ?? null,
+      chatId: options.chatId ?? null,
+      callSite: "profile-extract",
+      model: VISION_MODEL,
+      status: "completed",
+      durationMs: Date.now() - turnStartedAt,
+      inputTokens: usage?.inputTokens ?? null,
+      outputTokens: usage?.outputTokens ?? null,
+    });
+    return { rawText, charCount: rawText.length };
+  } catch (err) {
+    captureAiTurn({
+      userId: options.userId ?? null,
+      chatId: options.chatId ?? null,
+      callSite: "profile-extract",
+      model: VISION_MODEL,
+      status: "errored",
+      durationMs: Date.now() - turnStartedAt,
+      errorCode: "generate_text_failed",
+      errorMessage: err instanceof Error ? err.message : String(err),
+    });
+    throw err;
+  }
 }
 
 // ---- Chunk split ----

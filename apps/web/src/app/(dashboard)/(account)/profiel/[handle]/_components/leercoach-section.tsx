@@ -17,6 +17,7 @@ import {
   StackedLayoutCardDisclosureChevron,
 } from "~/app/(dashboard)/_components/stacked-layout";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { leercoachEnabled } from "~/lib/flags";
 import { getUserOrThrow } from "~/lib/nwd";
 import { ScrollableGridList } from "./scrollable-grid-list";
 
@@ -28,7 +29,13 @@ import { ScrollableGridList } from "./scrollable-grid-list";
 // Only rendered for persons that pass the instructor-ish role gate
 // (parent page owns that check); this component assumes visibility
 // already implies access.
-export function LeercoachSection({ handle }: { handle: string }) {
+//
+// Additionally gated by the `leercoach-enabled` PostHog flag — when
+// disabled we render nothing (neither the card nor its CTAs), matching
+// the 404 behaviour of every /leercoach page. Async so we can await
+// the flag server-side and avoid a client-side flash.
+export async function LeercoachSection({ handle }: { handle: string }) {
+  if (!(await leercoachEnabled())) return null;
   return (
     <StackedLayoutCardDisclosure
       defaultOpen
@@ -62,9 +69,12 @@ export function LeercoachSection({ handle }: { handle: string }) {
               <ChatBubbleLeftRightIcon data-slot="icon" />
               Open leercoach
             </Button>
-            <Button href={`/profiel/${handle}/leercoach/new`} outline>
+            <Button
+              href={`/profiel/${handle}/leercoach/portfolio/nieuw`}
+              outline
+            >
               <PlusIcon data-slot="icon" />
-              Nieuwe sessie
+              Nieuw portfolio
             </Button>
           </div>
           <Text>
@@ -157,8 +167,10 @@ function scopeLabel(
   scope:
     | { type: "full_profiel" }
     | { type: "kerntaak"; kerntaakCode: string }
-    | { type: "kerntaken"; kerntaakCodes: string[] },
+    | { type: "kerntaken"; kerntaakCodes: string[] }
+    | null,
 ): string {
+  if (scope === null) return "Vraag-sessie";
   switch (scope.type) {
     case "full_profiel":
       return "Hele profiel";

@@ -3610,8 +3610,10 @@ export const listKssKwalificatieprofielenWithOnderdelen = cache(
   },
 );
 
-// Public, no-auth read helpers used by the portfolio-helper-sandbox route.
-// They only expose rubric data that is already public in the offered kwalificaties.
+// Read helpers for KSS rubric data (werkprocessen + beoordelingscriteria
+// below). Originally written for the portfolio-helper-sandbox, now
+// consumed by the leercoach's rubric loader. Only exposes data that
+// is already public in the offered kwalificaties.
 export const listKssWerkprocessenByKerntaakId = cache(
   async (kerntaakId: string) => {
     return makeRequest(async () => {

@@ -30,12 +30,12 @@ import { join } from "node:path";
 import { withDatabase } from "@nawadi/core";
 import pg from "pg";
 import { Agent, setGlobalDispatcher } from "undici";
-import { runDraftGeneration } from "../../src/app/(public)/portfolio-helper-sandbox/generator.ts";
-import type { Question } from "../../src/app/(public)/portfolio-helper-sandbox/schemas.ts";
+import { runDraftGeneration } from "./portfolio-generator/generator.ts";
+import type { Question } from "./portfolio-generator/schemas.ts";
 import type {
   RubricTree,
   RubricWerkproces,
-} from "../../src/app/(public)/portfolio-helper-sandbox/types.ts";
+} from "./portfolio-generator/types.ts";
 import {
   concretenessPer100,
   loadRubricByProfielTitel,

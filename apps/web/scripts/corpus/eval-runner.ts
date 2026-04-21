@@ -37,20 +37,22 @@ setGlobalDispatcher(
     connectTimeout: 30_000,
   }),
 );
-import {
-  MODEL_ID,
-  runDraftGeneration,
-} from "../../src/app/(public)/portfolio-helper-sandbox/generator.ts";
-import type { Question } from "../../src/app/(public)/portfolio-helper-sandbox/schemas.ts";
+import { runDraftGeneration } from "./portfolio-generator/generator.ts";
+
+// Pinned model id — eval reports log this alongside results; bumping
+// here invalidates comparability with prior eval runs. Update
+// deliberately when producing a new model-comparison baseline.
+const MODEL_ID = "anthropic/claude-sonnet-4-5";
+import type { Question } from "./portfolio-generator/schemas.ts";
 import {
   runThinAnswerGate,
   truncateAnswersToWords,
-} from "../../src/app/(public)/portfolio-helper-sandbox/thin-answer-gate.ts";
+} from "./portfolio-generator/thin-answer-gate.ts";
 import type {
   RubricCriterium,
   RubricTree,
   RubricWerkproces,
-} from "../../src/app/(public)/portfolio-helper-sandbox/types.ts";
+} from "./portfolio-generator/types.ts";
 import {
   ANONYMIZED_DIR,
   type AnonymizedPortfolio,
@@ -630,7 +632,12 @@ Reconstrueer de ruwe kandidaat-input:`,
   };
   if (input.thinAnswerGate) {
     log(`  thin-answer gate ON: grading ${answers.length} answers...`);
-    const gateResult = await runThinAnswerGate({ questions, answers, tree });
+    const gateResult = await runThinAnswerGate({
+      questions,
+      answers,
+      tree,
+      modelId: MODEL_ID,
+    });
     thinGateTelemetry = {
       enabled: true,
       ...gateResult.stats,
@@ -670,6 +677,7 @@ Reconstrueer de ruwe kandidaat-input:`,
     answers,
     retrievalFraming,
     retrievalMode,
+    modelId: MODEL_ID,
     retrieveForWerkproces: retrievalEnabled
       ? async (criteriumIds) => {
           retrievalCallsIssued += criteriumIds.length;

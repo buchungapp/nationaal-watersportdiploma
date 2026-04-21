@@ -1,9 +1,15 @@
 import "server-only";
-import { AiCorpus } from "@nawadi/core";
+import { AiCorpus, Leercoach } from "@nawadi/core";
 import { tool } from "ai";
 import { z } from "zod";
 import type { ChatScope } from "./chat-context";
 import { loadLeercoachRubric, resolveCriteriumWithinScope } from "./rubric";
+
+// Max size of a draft the coach can save in one tool call. 40k chars
+// is roughly 15-20 pages of portfolio prose — well above the real-
+// world ceiling (~12 pages) but bounded so a malformed call can't
+// blow up the DB row or downstream exports.
+const MAX_DRAFT_CONTENT_CHARS = 40_000;
 
 // Tool factory: returns a Tool instance bound to a specific chat context.
 // Factory pattern (not a bare `export const tool()`) mirrors
@@ -18,7 +24,15 @@ type ToolContext = {
   profielId: string;
   scope: ChatScope;
   userId: string;
-  /** Required by the artefact tools; the other tools ignore it. */
+  /** Required by the artefact tools + setPhase. */
+  chatId: string;
+};
+
+// Minimal context for Q&A-sessies — no profiel-bound tools apply, so
+// the only thing the factory needs is userId + chatId (for future
+// user-context / KB-search tools that don't require a profiel).
+type QAToolContext = {
+  userId: string;
   chatId: string;
 };
 
@@ -337,6 +351,263 @@ export function createReadArtefactTool(context: ToolContext) {
   });
 }
 
+// ---- setPhase ----
+//
+// Shifts the chat's workflow phase. The model calls this both when
+// it decides a transition is warranted (e.g. enough STAR material
+// on the table to start drafting) and when it agrees with a user's
+// request to move. Phase only changes via this tool — never directly
+// from the UI — so the model always has a chance to push back.
+
+const setPhaseInputSchema = z.object({
+  phase: z
+    .enum(["verkennen", "ordenen", "concept", "verfijnen"])
+    .describe(
+      "De nieuwe fase. Volgorde: verkennen → ordenen → concept → verfijnen. Terugschakelen mag altijd.",
+    ),
+});
+
+type SetPhaseOutput = {
+  ok: true;
+  phase: "verkennen" | "ordenen" | "concept" | "verfijnen";
+};
+
+export function createSetPhaseTool(context: ToolContext) {
+  return tool({
+    description: [
+      "Schakelt de chat naar een andere workflow-fase.",
+      "Roep aan wanneer je zelf besluit dat de huidige fase zijn werk heeft gedaan (bv. genoeg STAR-materiaal verzameld → van verkennen naar ordenen; een STAR-compleet verhaal voor een werkproces → van ordenen naar concept; concept geschreven → naar verfijnen).",
+      "Roep OOK aan wanneer je instemt met een verzoek van de kandidaat ('laten we naar concept'). Als je denkt dat ze te vroeg zijn: roep NIET aan, blijf in huidige fase en leg specifiek uit wat je nog mist.",
+      "Terugschakelen (bv. concept → ordenen) gaat zonder weerstand — zeg 'oké, waar wil je op terugkomen?' en call de tool.",
+      "Na de tool-call: begin meteen het gedrag van de nieuwe fase in dezelfde turn (niet wachten tot volgende beurt).",
+    ].join(" "),
+    inputSchema: setPhaseInputSchema,
+    execute: async (input): Promise<SetPhaseOutput> => {
+      await Leercoach.Chat.updatePhase({
+        chatId: context.chatId,
+        userId: context.userId,
+        phase: input.phase,
+      });
+      // No cache to invalidate — the chat page's `getById` reads the
+      // row fresh on every server render. The client sentinel in
+      // ChatShell calls `router.refresh()` after each streamed
+      // response, which re-runs the server component and picks up
+      // the new phase.
+      return { ok: true, phase: input.phase };
+    },
+  });
+}
+
+// ---- Portfolio draft tools ----
+//
+// Two tools that give the coach structured access to the kandidaat's
+// portfolio document (distinct from chat messages):
+//
+//   readDraft()            — return the current latest version's
+//                            content + metadata.
+//   saveDraft({ content,
+//               changeNote? }) — commit a new version, attributed to
+//                                the coach, linked back to the chat
+//                                message that produced it.
+//
+// The coach is expected to call readDraft BEFORE producing a revised
+// portfolio, so it's revising the authoritative state rather than a
+// stale snapshot that might not match what the user last saw. It
+// calls saveDraft AFTER producing the revision — chat then shows a
+// compact "Versie N opgeslagen" card instead of the giant blockquote
+// pattern we had pre-portfolio-model.
+
+type PortfolioToolContext = ToolContext & {
+  /**
+   * Active portfolio id for this chat. Resolved server-side before
+   * the tool is built; null when the chat predates the portfolio
+   * model (shouldn't happen for new chats). When null, save/read
+   * both return graceful "no portfolio attached" errors instead of
+   * crashing the stream.
+   */
+  portfolioId: string | null;
+  /**
+   * Message id currently being produced by the coach. Threaded
+   * through to `created_by_message_id` on the new version so the
+   * version timeline links back to the chat turn. Provided by the
+   * chat route's per-turn context; null if not yet known.
+   */
+  currentMessageId: string | null;
+};
+
+const saveDraftInputSchema = z.object({
+  content: z
+    .string()
+    .min(1)
+    .max(MAX_DRAFT_CONTENT_CHARS)
+    .describe(
+      "Volledige markdown-tekst van de nieuwe draftversie. Dit is het HELE portfolio-document zoals het er nu uit ziet — geen delta, geen patch. Gebruik markdown (headings, lijsten, blockquotes) zodat de editor het goed kan renderen.",
+    ),
+  changeNote: z
+    .string()
+    .max(500)
+    .optional()
+    .describe(
+      "Korte samenvatting (max 1-2 zinnen) van wat er veranderd is ten opzichte van de vorige versie. Toont in de history-sidebar naast deze versie. Bijvoorbeeld: 'Kerntaak 5.3 herschreven in eerste persoon, inleiding ingekort'.",
+    ),
+});
+
+type SaveDraftOutput =
+  | {
+      ok: true;
+      versionId: string;
+      versionNumber: number;
+      contentLength: number;
+      skippedNoOp: boolean;
+    }
+  | { ok: false; reason: string };
+
+export function createSaveDraftTool(context: PortfolioToolContext) {
+  return tool({
+    description: [
+      "Slaat een nieuwe versie van het portfolio-document op en attribueert die aan jou (de coach).",
+      "Roep aan NA het produceren van een volledige draft of herziening in de concept- of verfijnfase — dus niet per werkproces, maar voor het hele document in één keer.",
+      "Vermijd mini-versies bij losse voorbeelden of coaching; die horen in de chat zelf, niet als draft-commit.",
+      "De UI toont een compacte 'Versie N opgeslagen' kaart in de chat; de kandidaat kan de nieuwe versie direct in de docpane openen.",
+    ].join(" "),
+    inputSchema: saveDraftInputSchema,
+    execute: async (input): Promise<SaveDraftOutput> => {
+      if (!context.portfolioId) {
+        return {
+          ok: false,
+          reason:
+            "Geen portfolio aan deze chat gekoppeld. Dit is een legacy-chat die nog geen docmodel heeft.",
+        };
+      }
+      try {
+        const { versionId, created } = await Leercoach.Portfolio.saveVersion({
+          portfolioId: context.portfolioId,
+          userId: context.userId,
+          content: input.content,
+          createdBy: "coach",
+          createdByMessageId: context.currentMessageId ?? undefined,
+          changeNote: input.changeNote,
+        });
+        // Approximate "version number" for the card: count how many
+        // versions the portfolio has now. Not a stable identifier —
+        // UI shows it as "versie 4" for human reference; actual
+        // permalinks use versionId.
+        const versions = await Leercoach.Portfolio.listVersions({
+          portfolioId: context.portfolioId,
+          userId: context.userId,
+          limit: 100,
+        });
+        return {
+          ok: true,
+          versionId,
+          versionNumber: versions.length,
+          contentLength: input.content.length,
+          skippedNoOp: !created,
+        };
+      } catch (err) {
+        return {
+          ok: false,
+          reason: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+  });
+}
+
+const readDraftInputSchema = z.object({
+  // No arguments — the tool implicitly reads the current latest
+  // version of the attached portfolio. Kept as a structured schema
+  // (empty object) instead of `z.void()` so the JSON-schema export
+  // matches the other tools.
+});
+
+type ReadDraftOutput =
+  | {
+      ok: true;
+      hasDraft: boolean;
+      versionId: string | null;
+      versionNumber: number;
+      createdBy: "coach" | "user" | "imported" | null;
+      createdAt: string | null;
+      content: string;
+      contentLength: number;
+    }
+  | { ok: false; reason: string };
+
+export function createReadDraftTool(context: PortfolioToolContext) {
+  return tool({
+    description: [
+      "Haalt de laatste versie van het portfolio-document op zoals de kandidaat het nu ziet (inclusief eventuele edits van de kandidaat zelf).",
+      "Roep PROACTIEF aan in de concept- of verfijnfase voordat je een herziening schrijft — zo bouw je voort op wat er nu staat, niet op een verouderde versie.",
+      "Output bevat de volledige markdown-tekst + metadata (wie de laatste versie schreef: coach of user).",
+    ].join(" "),
+    inputSchema: readDraftInputSchema,
+    execute: async (): Promise<ReadDraftOutput> => {
+      if (!context.portfolioId) {
+        return {
+          ok: false,
+          reason:
+            "Geen portfolio aan deze chat gekoppeld. Dit is een legacy-chat die nog geen docmodel heeft.",
+        };
+      }
+      try {
+        const portfolio = await Leercoach.Portfolio.getById({
+          portfolioId: context.portfolioId,
+          userId: context.userId,
+        });
+        if (!portfolio) {
+          return {
+            ok: false,
+            reason: "Portfolio niet gevonden.",
+          };
+        }
+        if (!portfolio.currentVersionId) {
+          return {
+            ok: true,
+            hasDraft: false,
+            versionId: null,
+            versionNumber: 0,
+            createdBy: null,
+            createdAt: null,
+            content: "",
+            contentLength: 0,
+          };
+        }
+        const version = await Leercoach.Portfolio.getVersionById({
+          versionId: portfolio.currentVersionId,
+          userId: context.userId,
+        });
+        if (!version) {
+          return {
+            ok: false,
+            reason: "Versie niet gevonden.",
+          };
+        }
+        const versions = await Leercoach.Portfolio.listVersions({
+          portfolioId: context.portfolioId,
+          userId: context.userId,
+          limit: 100,
+        });
+        return {
+          ok: true,
+          hasDraft: true,
+          versionId: version.versionId,
+          versionNumber: versions.length,
+          createdBy: version.createdBy,
+          createdAt: version.createdAt,
+          content: version.content,
+          contentLength: version.content.length,
+        };
+      } catch (err) {
+        return {
+          ok: false,
+          reason: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+  });
+}
+
 /**
  * Build the full tools object for a chat. Adding more tools later
  * (proposeBewijsDraft, etc.) extends this record.
@@ -346,13 +617,32 @@ export function createReadArtefactTool(context: ToolContext) {
  * always expose it and let the tool itself return a helpful "nothing
  * uploaded yet" message — simpler than conditional tool construction.
  */
-export function buildLeercoachTools(context: ToolContext) {
+export function buildLeercoachTools(
+  context: ToolContext & {
+    portfolioId: string | null;
+    currentMessageId: string | null;
+  },
+) {
   return {
     searchBewijsExamples: createSearchBewijsExamplesTool(context),
     searchPriorPortfolio: createSearchPriorPortfolioTool(context),
     listArtefacten: createListArtefactenTool(context),
     readArtefact: createReadArtefactTool(context),
+    setPhase: createSetPhaseTool(context),
+    readDraft: createReadDraftTool(context),
+    saveDraft: createSaveDraftTool(context),
   };
 }
 
+// Tool set for Q&A-sessies. Currently empty — new KSS/diplomalijn/KB
+// tools land here in a follow-up step. Returns the same shape as
+// buildLeercoachTools so callers can destructure/spread uniformly,
+// but with none of the portfolio-bound tools. Kept as a separate
+// function (rather than a null-branching buildLeercoachTools) so
+// type narrowing at call sites is explicit.
+export function buildQATools(_context: QAToolContext) {
+  return {} as const;
+}
+
 export type LeercoachTools = ReturnType<typeof buildLeercoachTools>;
+export type QATools = ReturnType<typeof buildQATools>;

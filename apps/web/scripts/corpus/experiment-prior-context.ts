@@ -33,17 +33,19 @@ import { generateObject } from "ai";
 import pg from "pg";
 import { Agent, setGlobalDispatcher } from "undici";
 import { z } from "zod";
-import {
-  runDraftGeneration,
-  MODEL_ID,
-} from "../../src/app/(public)/portfolio-helper-sandbox/generator.ts";
-import { buildDraftPrompt } from "../../src/app/(public)/portfolio-helper-sandbox/prompts.ts";
-import type { Question } from "../../src/app/(public)/portfolio-helper-sandbox/schemas.ts";
+import { runDraftGeneration } from "./portfolio-generator/generator.ts";
+
+// Pinned model id — eval reproducibility trumps bleeding-edge. Bump
+// deliberately when comparing new-model results against historical
+// baselines.
+const MODEL_ID = "anthropic/claude-sonnet-4-5";
+import { buildDraftPrompt } from "./portfolio-generator/prompts.ts";
+import type { Question } from "./portfolio-generator/schemas.ts";
 import type {
   RubricCriterium,
   RubricTree,
   RubricWerkproces,
-} from "../../src/app/(public)/portfolio-helper-sandbox/types.ts";
+} from "./portfolio-generator/types.ts";
 import {
   concretenessPer100,
   loadRubricByProfielTitel,
@@ -296,6 +298,7 @@ async function main() {
     tree,
     questions,
     answers,
+    modelId: MODEL_ID,
   });
   console.log(
     `  generated ${baselineResult.drafts.length} werkproces drafts in ${((Date.now() - baselineStart) / 1000).toFixed(1)}s`,
@@ -311,6 +314,7 @@ async function main() {
     questions,
     answers,
     systemPromptExtra: priorFragment,
+    modelId: MODEL_ID,
   });
   console.log(
     `  generated ${experimentalResult.drafts.length} werkproces drafts in ${((Date.now() - expStart) / 1000).toFixed(1)}s`,

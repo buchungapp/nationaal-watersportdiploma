@@ -15,6 +15,7 @@
 
 import { createContext, use } from "react";
 import type {
+  AiChatCompactionInfo,
   AiChatDropHandler,
   AiChatInputSlotContext,
   AiChatPasteHandler,
@@ -26,6 +27,12 @@ export type AiChatMessage = {
   id: string;
   role: "user" | "assistant" | "system";
   parts: unknown[];
+  /**
+   * Optional compaction bookkeeping — see AiChatCompactionInfo.
+   * Preserved from the initial messages; not produced during a live
+   * streaming turn (new messages from the stream never carry this).
+   */
+  compaction?: AiChatCompactionInfo;
 };
 
 export type AiChatState = {
@@ -36,6 +43,17 @@ export type AiChatState = {
   error: Error | undefined;
   /** Starter chips to render while no user turn has been sent. */
   starters: AiChatStarter[];
+  /**
+   * A message the user composed while the previous turn was still
+   * streaming. Held in local state until the stream ends (status
+   * returns to "ready"), then automatically fired via sendMessage.
+   * Null when nothing is queued — the common case.
+   *
+   * The UI renders this as a dimmed user bubble at the end of the
+   * message list with a cancel affordance, so the user sees that the
+   * send happened and can undo it before the flush.
+   */
+  queuedMessage: { text: string } | null;
 };
 
 export type AiChatActions = {
@@ -50,6 +68,35 @@ export type AiChatActions = {
    * Used by the cancel button + Esc shortcut in the InputForm.
    */
   stop: () => void;
+  /**
+   * Re-request an assistant response for the current message history.
+   * Used by the ErrorBanner's "Probeer opnieuw" button: when an error
+   * killed the stream (rate limit, insufficient funds, transient 5xx)
+   * the user can retry without re-typing.
+   *
+   * Delegates to useChat's `regenerate()`, which handles both "retry
+   * last assistant message" and "resend last user message" cases
+   * depending on what's in the history.
+   */
+  regenerate: () => void;
+  /**
+   * Dismiss the current error without retrying. Used by the close (X)
+   * button on the ErrorBanner.
+   */
+  clearError: () => void;
+  /**
+   * Stash a message to be sent the moment the in-flight stream
+   * finishes. Called by `submitCurrentInput` when `isLoading` is
+   * true. Single-slot: a second queue call replaces the first —
+   * matches user intent (they're refining what they want to send
+   * next, not queueing a list).
+   */
+  queueMessage: (input: { text: string }) => void;
+  /**
+   * Drop a queued message before it fires. Used by the × affordance
+   * on the queued-bubble UI.
+   */
+  cancelQueuedMessage: () => void;
   /**
    * Consumer-supplied paste handler. Called by the InputForm when the
    * clipboard carries an image or a large-enough text block to promote

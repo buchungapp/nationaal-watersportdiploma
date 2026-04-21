@@ -12,7 +12,7 @@ import {
 //   - /profiel/[handle]/portfolios (upload dialog's profiel picker)
 //   - /profiel/[handle]/leercoach/chat/[id] (same dialog, seeded with
 //     the current chat's profielId)
-//   - /profiel/[handle]/leercoach/new (session scope picker)
+//   - /profiel/[handle]/leercoach/portfolio/nieuw (portfolio scope picker)
 //
 // Filtering rules:
 //   1. A `kerntaakOnderdeel` has `type: "portfolio" | "praktijk"`. A
