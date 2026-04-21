@@ -6,12 +6,21 @@ settings:
 
 catalogs:
   default:
+    '@tsconfig/node22':
+      specifier: 22.0.5
+      version: 22.0.5
     '@types/node':
       specifier: 22.15.3
       version: 22.15.3
+    drizzle-kit:
+      specifier: 0.31.8
+      version: 0.31.8
     nuqs:
       specifier: 2.4.3
       version: 2.4.3
+    react:
+      specifier: 19.2.4
+      version: 19.2.4
     typescript:
       specifier: 5.8.3
       version: 5.8.3
@@ -306,6 +315,9 @@ importers:
       p-limit:
         specifier: 7.2.0
         version: 7.2.0
+      pdfjs-dist:
+        specifier: ^5.6.205
+        version: 5.6.205
       pdfkit:
         specifier: 0.16.0
         version: 0.16.0
@@ -8569,6 +8581,9 @@ packages:
     engines: {node: ^18.17.0 || >=20.5.0}
     hasBin: true
 
+  node-readable-to-web-readable-stream@0.4.2:
+    resolution: {integrity: sha512-/cMZNI34v//jUTrI+UIo4ieHAB5EZRY/+7OmXZgBxaWBMcW2tGdceIw06RFxWxrKZ5Jp3sI2i5TsRo+CBhtVLQ==}
+
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
 
@@ -8847,6 +8862,10 @@ packages:
   pdfjs-dist@5.4.296:
     resolution: {integrity: sha512-DlOzet0HO7OEnmUmB6wWGJrrdvbyJKftI1bhMitK7O2N8W2gc757yyYBbINy9IDafXAV9wmKr9t7xsTaNKRG5Q==}
     engines: {node: '>=20.16.0 || >=22.3.0'}
+
+  pdfjs-dist@5.6.205:
+    resolution: {integrity: sha512-tlUj+2IDa7G1SbvBNN74UHRLJybZDWYom+k6p5KIZl7huBvsA4APi6mKL+zCxd3tLjN5hOOEE9Tv7VdzO88pfg==}
+    engines: {node: '>=20.19.0 || >=22.13.0 || >=24'}
 
   pdfkit@0.16.0:
     resolution: {integrity: sha512-oXMxkIqXH4uTAtohWdYA41i/f6i2ReB78uhgizN8H4hJEpgR3/Xjy3iu2InNAuwCIabN3PVs8P1D6G4+W2NH0A==}
@@ -20512,6 +20531,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  node-readable-to-web-readable-stream@0.4.2:
+    optional: true
+
   node-releases@2.0.27: {}
 
   nopt@8.1.0:
@@ -20810,6 +20832,11 @@ snapshots:
   pdfjs-dist@5.4.296:
     optionalDependencies:
       '@napi-rs/canvas': 0.1.99
+
+  pdfjs-dist@5.6.205:
+    optionalDependencies:
+      '@napi-rs/canvas': 0.1.99
+      node-readable-to-web-readable-stream: 0.4.2
 
   pdfkit@0.16.0:
     dependencies:
