@@ -56,12 +56,25 @@ export async function GET(
       break;
     case "ready":
       // sourceId is set by the final workflow step in lockstep with
-      // status='ready', so this should always be present — but fall
-      // back safely if something raced.
-      body = {
-        status: "ready",
-        sourceId: job.sourceId ?? "",
-      };
+      // status='ready', so this should always be present. If it's
+      // missing, something's wrong upstream (schema drift, partial
+      // write, rollback mid-commit) — surface it as a failure rather
+      // than returning an empty string. Returning "" here was tripping
+      // the client's `!readySourceId` guard, dropping onSuccess
+      // silently and leaving the dialog stuck on "Klaar." with no
+      // auto-dismiss (bugbot finding).
+      if (!job.sourceId) {
+        body = {
+          status: "failed",
+          errorMessage:
+            "Verwerking is afgerond, maar de verwijzing naar het document ontbreekt. Probeer opnieuw of neem contact op met ondersteuning.",
+        };
+      } else {
+        body = {
+          status: "ready",
+          sourceId: job.sourceId,
+        };
+      }
       break;
     case "failed":
       body = {

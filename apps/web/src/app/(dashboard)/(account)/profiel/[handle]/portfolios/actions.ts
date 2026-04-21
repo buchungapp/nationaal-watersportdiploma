@@ -222,20 +222,46 @@ export async function uploadPortfolioAction(
   }
 
   // Step 2: create the upload_job row. This is the pollable handle
-  // the client uses to track completion.
-  const { jobId } = await Leercoach.UploadJob.create({
-    userId: user.authUserId,
-    kind: "portfolio",
-    blobPath,
-    label,
-    metadata: {
-      profielId,
-      richting: resolved.richting,
-      niveauRang: resolved.niveauRang,
-      coverage,
-      consentShared,
-    },
-  });
+  // the client uses to track completion. If the insert fails, we
+  // must clean up the blob we just uploaded — otherwise the Storage
+  // bucket accumulates orphans that no job row references and no
+  // revoke flow can reach (bugbot finding).
+  let jobId: string;
+  try {
+    const created = await Leercoach.UploadJob.create({
+      userId: user.authUserId,
+      kind: "portfolio",
+      blobPath,
+      label,
+      metadata: {
+        profielId,
+        richting: resolved.richting,
+        niveauRang: resolved.niveauRang,
+        coverage,
+        consentShared,
+      },
+    });
+    jobId = created.jobId;
+  } catch (err) {
+    console.error("Portfolio upload_job create failed", err);
+    // Best-effort cleanup — we don't want a cleanup failure to mask
+    // the original error from the user, so swallow any throw here.
+    try {
+      await deletePortfolioOriginal(blobPath);
+    } catch (cleanupErr) {
+      console.error(
+        `Failed to clean up orphaned Storage blob at ${blobPath}`,
+        cleanupErr,
+      );
+    }
+    return {
+      ok: false,
+      reason:
+        err instanceof Error
+          ? `Uploaden mislukt: ${err.message}`
+          : "Uploaden mislukt.",
+    };
+  }
 
   // Step 3: fire the workflow. On failure (QStash outage), flip the
   // job to 'failed' so the UI can surface it. We still return ok:true
