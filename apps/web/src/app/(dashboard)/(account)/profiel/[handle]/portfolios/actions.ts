@@ -239,6 +239,12 @@ export async function uploadPortfolioAction(
         niveauRang: resolved.niveauRang,
         coverage,
         consentShared,
+        // Handle is stashed here so the workflow's mark-ready +
+        // failure paths can revalidate the user's portfolio/leercoach
+        // pages when the async pipeline finishes (bugbot finding: the
+        // old sync flow did this at the end of ingest, the async flow
+        // lost it).
+        handle,
       },
     });
     jobId = created.jobId;

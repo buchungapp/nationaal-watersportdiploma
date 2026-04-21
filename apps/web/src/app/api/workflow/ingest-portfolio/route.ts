@@ -1,11 +1,36 @@
 import { AiCorpus, Leercoach } from "@nawadi/core";
 import { serve } from "@upstash/workflow/nextjs";
+import { revalidatePath } from "next/cache";
 import { createHash } from "node:crypto";
 import { anonymizeText } from "~/app/(dashboard)/(account)/profiel/[handle]/portfolios/_lib/portfolio-pipeline";
 import { extractPdfText, splitIntoChunks } from "~/app/(dashboard)/(account)/profiel/[handle]/_lib/extract";
 import {
   downloadPortfolioOriginal,
 } from "~/lib/portfolio-storage";
+
+// Revalidate the pages that render portfolio data for a given user.
+// Called from the workflow's terminal steps (mark-ready + failure
+// path) so the UI picks up the new portfolio or the failure state
+// the next time the user navigates. Matches the path set the old
+// synchronous ingestPortfolio used to revalidate — we lost those
+// calls when the action stopped waiting for the pipeline, so the
+// workflow takes ownership of them now (bugbot finding).
+function revalidatePortfolioPathsFor(handle: string | null): void {
+  if (!handle) return;
+  try {
+    revalidatePath(`/profiel/${handle}/portfolios`);
+    revalidatePath(`/profiel/${handle}/leercoach`);
+    revalidatePath(`/profiel/${handle}`);
+  } catch (err) {
+    // revalidatePath can throw when called outside a request context
+    // under certain edge cases; don't let that corrupt an otherwise
+    // successful workflow run.
+    console.warn(
+      "[workflow/ingest-portfolio] revalidatePath threw; continuing.",
+      err,
+    );
+  }
+}
 
 // Durable portfolio-ingest pipeline.
 //
@@ -217,6 +242,9 @@ export const { POST } = serve<Payload>(
         status: "ready",
         sourceId: ingested.sourceId,
       });
+      const metadata = (job.metadata as Record<string, unknown>) ?? {};
+      const handle = typeof metadata.handle === "string" ? metadata.handle : null;
+      revalidatePortfolioPathsFor(handle);
     });
   },
   {
@@ -251,6 +279,13 @@ export const { POST } = serve<Payload>(
               ? failResponse.slice(0, 2000)
               : `Workflow failed with status ${failStatus}`,
         });
+        // Revalidate the user's pages so the failure state replaces
+        // any stale "still processing" cached render.
+        const metadata =
+          (current?.metadata as Record<string, unknown>) ?? {};
+        const handle =
+          typeof metadata.handle === "string" ? metadata.handle : null;
+        revalidatePortfolioPathsFor(handle);
       } catch (markErr) {
         console.error(
           `[workflow/ingest-portfolio] failureFunction markFailed threw (jobId=${payload.jobId})`,

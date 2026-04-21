@@ -225,6 +225,9 @@ export function useUploadPortfolioForm({
     setJobId(null);
     setSubmitError(null);
     submittedSnapshotRef.current = null;
+    // Re-enable polling for the next submission — a previous error
+    // on this form shouldn't permanently disable the poll.
+    pollDisabledRef.current = false;
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -254,20 +257,41 @@ export function useUploadPortfolioForm({
     | { status: "ready"; sourceId: string }
     | { status: "failed"; errorMessage: string };
 
+  // Tracks whether the status endpoint has errored. Needed because
+  // SWR's `refreshInterval` callback only receives the latest DATA,
+  // not the latest error — without this ref, a persistent fetch
+  // failure (e.g. expired auth returning 401 on every poll) would
+  // keep `latest` undefined, keep `!latest` true, and keep polling
+  // forever in the background even though the UI's failed state is
+  // already final (bugbot finding). `shouldRetryOnError: false`
+  // only disables SWR's internal backoff retry, NOT the refreshInterval
+  // timer. The ref flips on the first error via `onError` and the
+  // interval function returns 0, stopping the poll.
+  const pollDisabledRef = useRef(false);
   const { data: statusData, error: statusError } = useSWR<StatusResponse>(
     jobId ? `/api/upload-job/${jobId}/status` : null,
     fetchUploadJobStatus as (url: string) => Promise<StatusResponse>,
     {
-      refreshInterval: (latest) =>
-        !latest || latest.status === "pending" || latest.status === "processing"
-          ? POLL_INTERVAL_MS
-          : 0,
+      refreshInterval: (latest) => {
+        if (pollDisabledRef.current) return 0;
+        if (
+          !latest ||
+          latest.status === "pending" ||
+          latest.status === "processing"
+        ) {
+          return POLL_INTERVAL_MS;
+        }
+        return 0;
+      },
       // Status is a monotonic state machine — re-fetching on focus
       // gains nothing and just adds noise.
       revalidateOnFocus: false,
       // SWR's built-in error retry would mask terminal failures
       // behind extra fetches; we want to surface them immediately.
       shouldRetryOnError: false,
+      onError: () => {
+        pollDisabledRef.current = true;
+      },
     },
   );
 
@@ -354,6 +378,9 @@ export function useUploadPortfolioForm({
     // Reset any previous failure so re-submits don't show stale state.
     setSubmitError(null);
     setJobId(null);
+    // Re-enable polling — a previous job's error must not permanently
+    // disable the fresh submission we're about to fire.
+    pollDisabledRef.current = false;
 
     // Freeze the values we'll hand to onSuccess when the job completes.
     // Fields are disabled during polling (see `isWorkflowRunning`), but
