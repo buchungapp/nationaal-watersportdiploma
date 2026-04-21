@@ -277,12 +277,28 @@ export async function uploadPortfolioAction(
     });
   } catch (err) {
     console.error("Failed to trigger ingest-portfolio workflow", err);
-    await Leercoach.UploadJob.updateStatus({
-      jobId,
-      status: "failed",
-      errorMessage:
-        err instanceof Error ? err.message : "Workflow trigger failed",
-    });
+    // Defensive inner try: if the DB is also having a bad day, the
+    // updateStatus throw would propagate out of this server action
+    // unhandled — the client's startTransition callback doesn't
+    // catch, so the user would see nothing and the job row would
+    // stay stuck on its pre-catch state with no workflow running
+    // (bugbot finding). Logging + continuing keeps the `ok:true`
+    // return path intact; the polling UI will see either 'failed'
+    // (if the updateStatus succeeded) or 'pending' → eventual
+    // timeout (if it didn't) — either way the user gets feedback.
+    try {
+      await Leercoach.UploadJob.updateStatus({
+        jobId,
+        status: "failed",
+        errorMessage:
+          err instanceof Error ? err.message : "Workflow trigger failed",
+      });
+    } catch (markErr) {
+      console.error(
+        `Failed to mark upload_job ${jobId} as failed after workflow trigger failure`,
+        markErr,
+      );
+    }
   }
 
   if (handle) {
