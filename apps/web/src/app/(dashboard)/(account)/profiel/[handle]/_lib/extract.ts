@@ -5,10 +5,16 @@ import "server-only";
 // `{ rawText, pageCount? }`. The *pipeline* layer decides what to do
 // with the extracted text (anonymise it, chunk it, store it, …).
 //
-// Why here and not in each pipeline: PDF extraction is the single
-// heaviest dep in this app (pdfjs-dist + its fake-worker plumbing).
-// Keeping the extractors in one module means one server-external
-// hoist in next.config and one place to evolve when we add formats.
+// PDF extraction uses `unpdf` — a purpose-built serverless-Node
+// wrapper around pdfjs-dist. Why unpdf over pdfjs-dist directly:
+//
+//   - pdfjs-dist@5 references browser globals (DOMMatrix / ImageData /
+//     Path2D) at module-load time. On Vercel's Node serverless it
+//     either needs @napi-rs/canvas as a polyfill (adds ~30 MB linux
+//     binary + fragile outputFileTracingIncludes hints) or crashes.
+//   - unpdf ships pre-patched pdfjs builds with the DOM references
+//     stubbed out, no native binaries, no tracing hints needed.
+//   - Same extraction quality; strictly less ceremony.
 //
 // All extractors run server-side (see the `server-only` import).
 
@@ -16,7 +22,7 @@ import { gateway } from "@ai-sdk/gateway";
 import { captureAiTurn } from "~/lib/posthog-ai";
 import { generateText } from "ai";
 import mammoth from "mammoth";
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { extractText, getDocumentProxy } from "unpdf";
 import { VISION_MODEL } from "~/lib/ai-models";
 
 /** Strip characters Postgres rejects in `text` columns (U+0000) and
@@ -34,22 +40,18 @@ export function stripControlChars(input: string): string {
 export async function extractPdfText(
   bytes: Uint8Array,
 ): Promise<{ rawText: string; pageCount: number; charCount: number }> {
-  const doc = await pdfjs.getDocument({ data: bytes }).promise;
-  const parts: string[] = [];
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item) => ("str" in item ? item.str : ""))
-      .join(" ");
-    parts.push(pageText);
-  }
+  // mergePages: false → returns text[] with one entry per page so we
+  // can interleave our own "--- PAGE BREAK ---" separator (matches
+  // the previous pdfjs-dist output shape exactly; downstream
+  // chunking + anonymisation rely on the separator).
+  const pdf = await getDocumentProxy(bytes);
+  const { text, totalPages } = await extractText(pdf, { mergePages: false });
   const rawText = stripControlChars(
-    parts.join("\n\n--- PAGE BREAK ---\n\n"),
+    text.join("\n\n--- PAGE BREAK ---\n\n"),
   );
   return {
     rawText,
-    pageCount: doc.numPages,
+    pageCount: totalPages,
     charCount: rawText.length,
   };
 }
