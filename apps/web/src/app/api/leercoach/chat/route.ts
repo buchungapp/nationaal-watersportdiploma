@@ -52,6 +52,14 @@ export const maxDuration = 60;
 // Model id centralized in ~/lib/ai-models so a single swap flips the
 // whole chat stack. See CHAT_MODEL for the role rationale.
 
+// RFC 4122-style UUID matcher. Used below to validate client-supplied
+// message ids before handing them to Leercoach.Message.save (which
+// enforces uuidSchema via Zod). Clients with cached pre-PR-440 JS
+// bundles still ship nanoid-style "msg_xxx" ids — we mint a fresh
+// UUID server-side rather than 500 on the save.
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 // Body shape produced by the client's DefaultChatTransport. Discriminated
 // on `trigger` — zod-like parsing inline instead of a zod schema so we
 // keep the route dependency-lean.
@@ -181,12 +189,29 @@ export async function POST(req: Request) {
       const idx = messages.findIndex((m) => m.id === body.messageId);
       if (idx !== -1) messages = messages.slice(0, idx);
     }
+    // Defensive id validation. The client's useChat config sets
+    // `generateId: () => crypto.randomUUID()` (PR #440), but clients
+    // with cached pre-fix JS bundles keep shipping nanoid-style ids
+    // like "msg_4h3jk2h4" — which Zod rejects because the message
+    // column is uuid NOT NULL. When we see a non-UUID from the
+    // client, we mint a server-side UUID instead of failing the save.
+    //
+    // The UPSERT semantics on Message.save mean this is still safe
+    // on retry: a second submit with the SAME server-generated UUID
+    // lands as an update, not a duplicate. The trade-off is a slight
+    // drift between the client's in-memory id (msg_xxx) and what's
+    // persisted (UUID-xxx) — on a refresh the client rehydrates
+    // from the DB and the ids realign.
+    const incomingId = body.message.id;
+    const savedMessageId = UUID_RE.test(incomingId)
+      ? incomingId
+      : crypto.randomUUID();
     // Persist the user turn synchronously so a mid-stream refresh
     // still shows what they typed. The save mutation UPSERTs on the
     // id we pass — so a retried submit with the same id is a no-op
     // insert + redundant update, not a duplicate row.
     await Leercoach.Message.save({
-      id: body.message.id,
+      id: savedMessageId,
       chatId: chat.chatId,
       role: "user",
       parts: body.message.parts as Array<{
@@ -194,7 +219,15 @@ export async function POST(req: Request) {
         [k: string]: unknown;
       }>,
     });
-    messages = [...messages, body.message];
+    messages = [
+      ...messages,
+      // Swap the client's id for the server-generated UUID in the
+      // in-memory `messages` array so the model's history view is
+      // consistent with what's in the DB. If we left the nanoid id
+      // here, a subsequent regenerate-message keyed on this id
+      // wouldn't find a matching row.
+      { ...body.message, id: savedMessageId } as UIMessage,
+    ];
   } else {
     // regenerate-message: truncate to the message just before the
     // target (or before the last assistant if no messageId). The
