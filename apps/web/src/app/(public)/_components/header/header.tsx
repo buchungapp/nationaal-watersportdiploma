@@ -40,7 +40,7 @@ export default function Header() {
               },
               {
                 label: "Erkenningen",
-                href: "/partners",
+                href: "/erkenningen",
                 description: "Hoe wordt de NWD-diplomalijn erkend?",
               },
             ],
