@@ -147,6 +147,17 @@ export type UseUploadPriorPortfolioFormOptions = {
 // way.
 const POLL_INTERVAL_MS = 2000;
 
+// Client-side hard ceiling on how long we'll keep the user in the
+// "Verwerken…" state. Comfortably above the realistic worst case for
+// a portfolio ingest (30-60s typical, up to ~4 minutes for a very
+// large PDF), but short enough to give a silently stalled workflow
+// a definite UX exit (bugbot finding: without a ceiling, a lost
+// QStash webhook would keep the user polling forever with no escape).
+// The workflow itself has step-level retries from Upstash, so by the
+// time we hit this we're firmly in "something is actually broken"
+// territory — surface a failure so the user can retry.
+const POLL_TIMEOUT_MS = 10 * 60 * 1000;
+
 export function useUploadPortfolioForm({
   open,
   handle,
@@ -171,6 +182,11 @@ export function useUploadPortfolioForm({
   //     polling says it failed. UI can offer "retry" specifically.
   const [jobId, setJobId] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Flipped by a setTimeout when polling exceeds POLL_TIMEOUT_MS —
+  // gives the user an escape hatch from a silently-stalled workflow
+  // (bugbot finding). Nulling jobId on reset/re-submit clears the
+  // timer via the effect cleanup.
+  const [pollTimedOut, setPollTimedOut] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Snapshot of the form values that were actually submitted. Freezes
@@ -216,6 +232,20 @@ export function useUploadPortfolioForm({
     setCoverage({ type: "full_profiel" });
   }, [profielId]);
 
+  // Start a watchdog the moment a jobId is set. If the workflow
+  // finishes (statusData flips to 'ready'/'failed') the useSWR cache
+  // returns a terminal state first and the state machine renders the
+  // result — this timer fires only in the pathological case where
+  // the workflow has gone dark. Cleanup on jobId change (reset /
+  // re-submit) clears the pending timer.
+  useEffect(() => {
+    if (!jobId) return;
+    const timer = setTimeout(() => {
+      setPollTimedOut(true);
+    }, POLL_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [jobId]);
+
   const reset = useCallback(() => {
     setFile(null);
     setLabel("");
@@ -224,6 +254,7 @@ export function useUploadPortfolioForm({
     setConsentShared(false);
     setJobId(null);
     setSubmitError(null);
+    setPollTimedOut(false);
     submittedSnapshotRef.current = null;
     // Re-enable polling for the next submission — a previous error
     // on this form shouldn't permanently disable the poll.
@@ -269,7 +300,9 @@ export function useUploadPortfolioForm({
   // interval function returns 0, stopping the poll.
   const pollDisabledRef = useRef(false);
   const { data: statusData, error: statusError } = useSWR<StatusResponse>(
-    jobId ? `/api/upload-job/${jobId}/status` : null,
+    // Key goes null once the watchdog trips so SWR stops polling
+    // even if the refreshInterval below is somehow still running.
+    jobId && !pollTimedOut ? `/api/upload-job/${jobId}/status` : null,
     fetchUploadJobStatus as (url: string) => Promise<StatusResponse>,
     {
       refreshInterval: (latest) => {
@@ -308,6 +341,14 @@ export function useUploadPortfolioForm({
       return { kind: "failed", jobId: null, errorMessage: submitError };
     }
     if (!jobId) return { kind: "idle" };
+    if (pollTimedOut) {
+      return {
+        kind: "failed",
+        jobId,
+        errorMessage:
+          "Verwerken duurt ongewoon lang. De achtergrond­taak is mogelijk nog bezig, maar je kunt dit venster sluiten en later in je portfolio’s kijken.",
+      };
+    }
     if (statusError) {
       return {
         kind: "failed",
@@ -378,6 +419,7 @@ export function useUploadPortfolioForm({
     // Reset any previous failure so re-submits don't show stale state.
     setSubmitError(null);
     setJobId(null);
+    setPollTimedOut(false);
     // Re-enable polling — a previous job's error must not permanently
     // disable the fresh submission we're about to fire.
     pollDisabledRef.current = false;
