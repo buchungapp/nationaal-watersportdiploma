@@ -199,6 +199,17 @@ export default withPostHogConfig(withMDX(nextConfig), {
   host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   envId: process.env.POSTHOG_ENV_ID,
   sourcemaps: {
-    enabled: false,
+    // Upload sourcemaps at build time so PostHog's Error Tracking
+    // symbolicates stack frames back to real file paths + line
+    // numbers instead of the minified `chunks/_4ca4fe68._.js:158`
+    // references that make prod errors hostile to diagnose.
+    //
+    // `deleteAfterUpload` defaults to true — maps are uploaded to
+    // PostHog then deleted from the deployed bundle, so end users
+    // never fetch them from our domain. If we ever want external
+    // contributors to debug prod via devtools, flip that to false
+    // in a follow-up (low risk given the repo is open source, but
+    // no reason to ship the extra bytes by default).
+    enabled: true,
   },
 });
