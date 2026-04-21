@@ -117,28 +117,6 @@ export async function downloadPortfolioOriginal(
 }
 
 /**
- * Mint a signed URL for the user to download their own original.
- * Short-lived (5 minutes) — the user clicks → browser downloads →
- * URL expires. Not used in this PR but wired up now so the eventual
- * "Download origineel" button is a one-line addition.
- */
-export async function signPortfolioDownloadUrl(
-  path: string,
-  expiresInSeconds = 300,
-): Promise<string> {
-  const supabase = getServiceClient();
-  const { data, error } = await supabase.storage
-    .from(PORTFOLIO_UPLOADS_BUCKET)
-    .createSignedUrl(path, expiresInSeconds);
-  if (error || !data) {
-    throw new Error(
-      `Failed to sign download URL (path=${path}): ${error?.message ?? "unknown"}`,
-    );
-  }
-  return data.signedUrl;
-}
-
-/**
  * Delete the original from Storage. Called by the revoke flow so the
  * user's right to erasure (GDPR) is honoured end-to-end: revoking
  * removes both the searchable anonymised chunks AND the raw bytes.

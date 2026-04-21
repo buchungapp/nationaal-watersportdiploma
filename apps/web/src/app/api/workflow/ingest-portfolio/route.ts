@@ -99,13 +99,19 @@ export const { POST } = serve<Payload>(
     // untouched (no flip back to 'failed' via failureFunction).
     if (job.alreadyReady) return;
 
-    // Step 2: mark processing. Separated from load-job so the load
-    // step's return value is purely informational and the state
-    // mutation lives in its own replayable unit.
+    // Step 2: mark processing + record our own workflowRunId. The
+    // server action used to write the runId from its side right after
+    // `triggerIngestPortfolio`, but that raced with this very step —
+    // a slow action / fast workflow would regress 'processing' back
+    // to 'pending', and the client's SWR poll would chase a status
+    // the workflow had already moved past. Writing it here, in
+    // lockstep with the 'processing' transition, eliminates the race
+    // (bugbot finding).
     await context.run("mark-processing", async () => {
       await Leercoach.UploadJob.updateStatus({
         jobId,
         status: "processing",
+        workflowRunId: context.workflowRunId,
       });
     });
 

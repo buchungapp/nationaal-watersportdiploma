@@ -35,26 +35,28 @@ function getClient(): Client {
 /**
  * Trigger the portfolio-ingest workflow with the given jobId. The
  * workflow route at `/api/workflow/ingest-portfolio` picks up the
- * payload, loads the upload_job row, and runs the 5-step pipeline.
+ * payload, loads the upload_job row, and runs the 6-step pipeline.
  *
- * Returns the QStash workflow run id — we stash it on the upload_job
- * row so ops can deep-link into Upstash's console for debugging.
+ * The workflow writes its own `workflowRunId` onto the upload_job
+ * row from within its `mark-processing` step (via
+ * `context.workflowRunId`). The caller intentionally does not stash
+ * the runId from the trigger response itself — an action-side write
+ * would race the workflow's state machine and could regress a
+ * 'processing'/'ready' row back to 'pending'.
  *
  * Failure of this trigger call is rare (QStash outage) but surfaces
  * as a thrown error the caller must handle — the upload_job row
  * already exists at this point, and the action flips its status to
  * 'failed' on error so the UI shows a retry affordance.
  */
-export async function triggerIngestPortfolio(
-  jobId: string,
-): Promise<{ workflowRunId: string }> {
+export async function triggerIngestPortfolio(jobId: string): Promise<void> {
   const client = getClient();
   const webhookUrl = new URL(
     "/api/workflow/ingest-portfolio",
     BASE_URL,
   ).toString();
 
-  const result = await client.trigger({
+  await client.trigger({
     url: webhookUrl,
     body: { jobId },
     // Retry count for the initial invocation. Step-level retries are
@@ -62,11 +64,4 @@ export async function triggerIngestPortfolio(
     // call to the webhook failed" retry.
     retries: 3,
   });
-
-  // SDK returns either a single workflowRunId or an array when
-  // multiple headers collapse. Normalise to the first id.
-  const workflowRunId = Array.isArray(result.workflowRunId)
-    ? (result.workflowRunId[0] ?? "")
-    : result.workflowRunId;
-  return { workflowRunId };
 }

@@ -269,23 +269,23 @@ export async function uploadPortfolioAction(
   // the error — better than a jarring inline error after the upload
   // already "happened".
   //
-  // Two distinct try-blocks on purpose (bugbot finding): a shared
-  // catch would treat "trigger succeeded, updateStatus failed" as
-  // "workflow failed", flipping the row to 'failed' even though
-  // QStash is actively processing the job. The workflow would then
-  // write 'ready' at its own pace, but by then the client's SWR
-  // polling has already seen 'failed' and stopped — the user sees a
-  // false-failure banner for an upload that actually succeeded.
-  let workflowRunId: string | null = null;
+  // We deliberately do NOT write `status`/`workflowRunId` from here
+  // on success. The workflow runs asynchronously, and by the time an
+  // action-side updateStatus call executes the workflow may already
+  // have advanced to 'processing' (or even 'ready' for a very fast
+  // job). Overwriting with status='pending' would regress the row,
+  // the client's SWR poll would keep seeing 'pending', and the
+  // upload would appear stuck forever (bugbot finding). The workflow
+  // writes its own runId in its `mark-processing` step via
+  // `context.workflowRunId`, eliminating the race entirely.
   try {
-    const triggered = await triggerIngestPortfolio(jobId);
-    workflowRunId = triggered.workflowRunId;
+    await triggerIngestPortfolio(jobId);
   } catch (err) {
     console.error("Failed to trigger ingest-portfolio workflow", err);
     // Trigger genuinely failed — no workflow is running — so marking
     // the row as 'failed' is the correct outcome. Inner try around
     // updateStatus so a DB hiccup on the mark-failed path doesn't
-    // propagate unhandled (bugbot finding).
+    // propagate unhandled.
     try {
       await Leercoach.UploadJob.updateStatus({
         jobId,
@@ -296,25 +296,6 @@ export async function uploadPortfolioAction(
     } catch (markErr) {
       console.error(
         `Failed to mark upload_job ${jobId} as failed after workflow trigger failure`,
-        markErr,
-      );
-    }
-  }
-
-  // Trigger succeeded — record the workflowRunId for debugging + flip
-  // the row to 'pending' so the UI moves out of its creation state.
-  // A failure here must NOT touch the row's status: the workflow is
-  // already in flight and will write 'ready'/'failed' on its own.
-  if (workflowRunId !== null) {
-    try {
-      await Leercoach.UploadJob.updateStatus({
-        jobId,
-        status: "pending",
-        workflowRunId,
-      });
-    } catch (markErr) {
-      console.error(
-        `Failed to record workflowRunId for upload_job ${jobId}; workflow is running but the row still shows no runId.`,
         markErr,
       );
     }
