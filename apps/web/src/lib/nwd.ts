@@ -3610,6 +3610,28 @@ export const listKssKwalificatieprofielenWithOnderdelen = cache(
   },
 );
 
+// Read helpers for KSS rubric data (werkprocessen + beoordelingscriteria
+// below). Originally written for the portfolio-helper-sandbox, now
+// consumed by the leercoach's rubric loader. Only exposes data that
+// is already public in the offered kwalificaties.
+export const listKssWerkprocessenByKerntaakId = cache(
+  async (kerntaakId: string) => {
+    return makeRequest(async () => {
+      return await KSS.Kwalificatieprofiel.listWerkprocessen({ kerntaakId });
+    });
+  },
+);
+
+export const listKssBeoordelingscriteriaByWerkprocesId = cache(
+  async (werkprocesId: string) => {
+    return makeRequest(async () => {
+      return await KSS.Kwalificatieprofiel.listBeoordelingscriteria({
+        werkprocesId,
+      });
+    });
+  },
+);
+
 export const listKssKwalificatieprofielen = cache(
   async (filter?: {
     richting?: "instructeur" | "leercoach" | "pvb_beoordelaar";

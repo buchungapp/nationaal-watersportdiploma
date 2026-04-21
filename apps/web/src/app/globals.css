@@ -6,6 +6,14 @@
 @import "./style/destructive.css";
 @import "./style/utilities.css";
 
+/*
+ * Tell Tailwind to scan streamdown's compiled JS for utility classes used
+ * in its prestyled markdown elements. Without this, Tailwind v4 purges the
+ * classes at build time and Streamdown renders unstyled. Required per the
+ * streamdown docs (https://streamdown.ai/docs#tailwind-v4).
+ */
+@source "../../node_modules/streamdown/dist/*.js";
+
 @config "../../tailwind.config.ts";
 
 @plugin "@tailwindcss/typography";

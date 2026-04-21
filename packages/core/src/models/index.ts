@@ -1,13 +1,16 @@
+export * as AiCorpus from "./ai-corpus/index.js";
 export * as ApiKey from "./api-key/index.js";
 export * as Certificate from "./certificate/index.js";
 export * as Cohort from "./cohort/index.js";
 export * as Course from "./course/index.js";
 export * as Curriculum from "./curriculum/index.js";
 export * as KSS from "./kss/index.js";
+export * as Leercoach from "./leercoach/index.js";
 export * as Location from "./location/index.js";
 export * as Logbook from "./logbook/index.js";
 export * as Marketing from "./marketing/index.js";
 export * as Platform from "./platform/index.js";
+export * as PortfolioScoring from "./portfolio-scoring/index.js";
 export * as Pvb from "./pvb/index.js";
 export * as Student from "./student/index.js";
 export * as User from "./user/index.js";
