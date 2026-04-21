@@ -149,6 +149,14 @@ function Provider({
     id: chatId,
     messages: initialMessages as UIMessage[],
     resume,
+    // Override the AI SDK's default id generator (nanoid-style,
+    // e.g. "msg_4h3jk2h4") with a real UUID. The server's leercoach
+    // message table stores `id uuid NOT NULL` and core's Zod schema
+    // enforces uuidSchema, so non-UUID ids from the client's submit
+    // path throw `Invalid uuid` on save. `crypto.randomUUID()` is
+    // available in every modern browser + every Node runtime we
+    // target, so no polyfill needed.
+    generateId: () => crypto.randomUUID(),
     transport: new DefaultChatTransport({
       api: apiEndpoint,
       // Trigger-aware body shape required by resumable streams: the

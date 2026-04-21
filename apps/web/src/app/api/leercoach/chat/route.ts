@@ -404,7 +404,11 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
-    generateMessageId: generateId,
+    // crypto.randomUUID() instead of the AI SDK's default `generateId`
+    // (nanoid-style). leercoach_message.id is `uuid NOT NULL`; the
+    // assistant response saved in onFinish below must match that
+    // format or the Zod uuidSchema in Message.save throws.
+    generateMessageId: () => crypto.randomUUID(),
     onFinish: async ({ responseMessage, isContinuation }) => {
       // `responseMessage` is the single new-or-extended assistant
       // message for this turn (see AI SDK's UIMessageStreamOnFinish
