@@ -66,6 +66,14 @@ const nextConfig = {
     // Used server-side by the portfolio ingest pipeline to extract PDF
     // text before anonymisation.
     "pdfjs-dist",
+    // @napi-rs/canvas ships platform-specific native binaries (.node
+    // files). Turbopack can't bundle those; loading it at runtime via
+    // node_modules keeps the native dispatch intact. pdfjs-dist@5.x
+    // auto-detects @napi-rs/canvas and uses it to polyfill DOMMatrix /
+    // ImageData / Path2D — without this pair, server actions on any
+    // route that transitively imports the extract pipeline crash at
+    // module-load with "ReferenceError: DOMMatrix is not defined".
+    "@napi-rs/canvas",
   ],
   outputFileTracingIncludes: {
     "/api/export/certificate/pdf/**/*": [
