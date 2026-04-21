@@ -75,7 +75,7 @@ const faqItems: FaqItem[] = [
     question:
       "Ik heb mijn instructeurskwalificatie via CWO behaald — moet ik die opnieuw halen bij het NWD?",
     answer:
-      "Nee. KSS-kwalificaties zijn onderdeel van een landelijk systeem en horen bij jou als persoon, niet bij een specifieke opleidingsroute. Als je je instructeursstatus op een erkende manier hebt behaald, blijft die automatisch geldig bij zowel NWD-vaarscholen als de Watersport Academy. Wel geldt: vanaf 1 januari 2026 kun je je kwalificatie alleen inzetten op door het Watersportverbond erkende opleidingslocaties, en nieuwe of hogere instructeurskwalificaties kun je uitsluitend daar behalen.",
+      "Heb je je kwalificatie vóór 1 januari 2026 via een toen door het Watersportverbond erkende locatie behaald? Dan niet. KSS-kwalificaties zijn onderdeel van een landelijk systeem en horen bij jou als persoon, niet bij een specifieke opleidingsroute. Je instructeursstatus blijft in dat geval automatisch geldig bij zowel NWD-vaarscholen als de Watersport Academy. Vanaf 1 januari 2026 kun je je kwalificatie wel alleen nog inzetten op door het Watersportverbond erkende opleidingslocaties, en nieuwe of hogere instructeurskwalificaties kun je uitsluitend daar behalen.",
   },
   {
     question: "Worden NWD-diploma's internationaal erkend?",
