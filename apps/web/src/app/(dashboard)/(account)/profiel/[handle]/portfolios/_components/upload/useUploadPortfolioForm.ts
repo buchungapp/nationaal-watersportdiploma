@@ -24,11 +24,18 @@
 //   - submit() returns fast (~1s) with a jobId from the upload action.
 //     The heavy work (PDF extract + LLM anonymisation + chunk + store)
 //     runs in an Upstash Workflow in the background.
-//   - This hook polls /api/upload-job/:id/status every 2s while the
-//     workflow runs; terminal status ('ready' or 'failed') stops polling
-//     and fires onSuccess / populates the error state.
+//   - SWR drives the status polling. The key flips from null → the
+//     status URL the instant jobId is set, and `refreshInterval`
+//     returns 2000 until the row reaches a terminal status, at which
+//     point it returns 0 and SWR stops fetching. UI state is derived
+//     purely from SWR's cache + submitError — no setState-in-effect
+//     shenanigans, no AbortController plumbing, no setTimeout chains.
+//     When the dialog unmounts, SWR's own cleanup cancels in-flight
+//     requests.
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import useSWR from "swr";
+import { jsonFetcher } from "~/lib/swr";
 import { uploadPortfolioAction } from "../../actions";
 
 export type PortfolioRichting = "instructeur" | "leercoach" | "pvb_beoordelaar";
@@ -131,12 +138,15 @@ export function useUploadPortfolioForm({
   // New: opt-in consent for using the anonymised version to improve
   // the model for other kandidaten. Default OFF — explicit opt-in only.
   const [consentShared, setConsentShared] = useState(false);
-  const [state, setState] = useState<UploadState>({ kind: "idle" });
+  // Two separate failure surfaces so we can distinguish:
+  //   - submitError: the action itself rejected (validation, Storage
+  //     upload failure) BEFORE creating a job. No jobId to poll.
+  //   - jobId + SWR error / job.status='failed': the job exists and
+  //     polling says it failed. UI can offer "retry" specifically.
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // Stable reference so the polling effect's cleanup cancels the
-  // correct in-flight fetch when the hook unmounts mid-request.
-  const pollAbortRef = useRef<AbortController | null>(null);
 
   // Seed React state from a preselected file (drop-zone path). The
   // native <input type="file"> is hidden in the fields component, so
@@ -177,12 +187,13 @@ export function useUploadPortfolioForm({
     setProfielId(defaultProfielId ?? "");
     setCoverage({ type: "full_profiel" });
     setConsentShared(false);
-    setState({ kind: "idle" });
+    setJobId(null);
+    setSubmitError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    pollAbortRef.current?.abort();
-    pollAbortRef.current = null;
+    // SWR's polling stops automatically when its key goes null (the
+    // jobId reset above). No manual cleanup needed.
   }, [defaultProfielId]);
 
   function toggleKerntaak(code: string, checked: boolean) {
@@ -196,92 +207,104 @@ export function useUploadPortfolioForm({
     });
   }
 
-  // Poll the workflow's status endpoint while the job is in flight.
-  // Effect hook re-fires whenever `state.kind` transitions into a
-  // polling state; cleanup aborts the in-flight fetch + stops the
-  // timer chain if the consumer closes the dialog.
-  useEffect(() => {
-    if (state.kind !== "pending" && state.kind !== "processing") {
-      return;
+  // SWR drives the polling. When jobId is null the key is null → no
+  // fetch. When jobId is set, SWR polls on the returned interval
+  // function; once status hits a terminal state (ready/failed) the
+  // interval goes to 0 and SWR stops polling. Unmount / dialog close
+  // stops it too (SWR handles its own cleanup — no AbortController
+  // plumbing, no setTimeout chain).
+  type StatusResponse =
+    | { status: "pending" | "processing" }
+    | { status: "ready"; sourceId: string }
+    | { status: "failed"; errorMessage: string };
+
+  const { data: statusData, error: statusError } = useSWR<StatusResponse>(
+    jobId ? `/api/upload-job/${jobId}/status` : null,
+    jsonFetcher,
+    {
+      refreshInterval: (latest) =>
+        !latest || latest.status === "pending" || latest.status === "processing"
+          ? POLL_INTERVAL_MS
+          : 0,
+      // Status is a monotonic state machine — re-fetching on focus
+      // gains nothing and just adds noise.
+      revalidateOnFocus: false,
+      // SWR's built-in error retry would mask terminal failures
+      // behind extra fetches; we want to surface them immediately.
+      shouldRetryOnError: false,
+    },
+  );
+
+  // Derive the UI state machine from the three independent signals:
+  //   - submitError: action threw before a job was created
+  //   - jobId + statusData/statusError: async job exists and we're
+  //     polling its status
+  // This replaces the old setState-in-effect pattern — now state is
+  // purely derived, which means it can never drift from the source
+  // of truth (SWR's cache) and there's no manual reconciliation
+  // needed on every poll tick.
+  const state: UploadState = (() => {
+    if (submitError) {
+      return { kind: "failed", jobId: null, errorMessage: submitError };
     }
-    const jobId = state.jobId;
-    const abort = new AbortController();
-    pollAbortRef.current = abort;
+    if (!jobId) return { kind: "idle" };
+    if (statusError) {
+      return {
+        kind: "failed",
+        jobId,
+        errorMessage:
+          statusError instanceof Error
+            ? `Status ophalen mislukt: ${statusError.message}`
+            : "Status ophalen mislukt.",
+      };
+    }
+    if (!statusData) {
+      // jobId is set but the first poll hasn't returned yet. Treat
+      // as 'pending' so the UI already shows the spinner.
+      return { kind: "pending", jobId };
+    }
+    switch (statusData.status) {
+      case "pending":
+      case "processing":
+        return { kind: statusData.status, jobId };
+      case "ready":
+        return { kind: "ready", jobId, sourceId: statusData.sourceId };
+      case "failed":
+        return { kind: "failed", jobId, errorMessage: statusData.errorMessage };
+    }
+  })();
 
-    let cancelled = false;
-    const poll = async () => {
-      if (cancelled) return;
-      try {
-        const res = await fetch(`/api/upload-job/${jobId}/status`, {
-          signal: abort.signal,
-          cache: "no-store",
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const body = (await res.json()) as
-          | { status: "pending" | "processing" }
-          | { status: "ready"; sourceId: string }
-          | { status: "failed"; errorMessage: string };
-
-        if (cancelled) return;
-        switch (body.status) {
-          case "pending":
-          case "processing":
-            setState({ kind: body.status, jobId });
-            setTimeout(poll, POLL_INTERVAL_MS);
-            break;
-          case "ready":
-            setState({ kind: "ready", jobId, sourceId: body.sourceId });
-            onSuccess?.({
-              jobId,
-              sourceId: body.sourceId,
-              niveauRang: selectedProfiel?.niveauRang ?? null,
-              label: label.trim(),
-            });
-            break;
-          case "failed":
-            setState({
-              kind: "failed",
-              jobId,
-              errorMessage: body.errorMessage,
-            });
-            break;
-        }
-      } catch (err) {
-        // AbortError fires on cleanup — silent.
-        if (err instanceof DOMException && err.name === "AbortError") return;
-        if (cancelled) return;
-        setState({
-          kind: "failed",
-          jobId,
-          errorMessage:
-            err instanceof Error
-              ? `Status ophalen mislukt: ${err.message}`
-              : "Status ophalen mislukt.",
-        });
-      }
-    };
-    // First poll fires immediately — the action's return races ahead
-    // of the first workflow step, so the first poll usually sees
-    // status='pending' or 'processing' right away, which renders the
-    // right UI. No initial delay.
-    void poll();
-
-    return () => {
-      cancelled = true;
-      abort.abort();
-    };
-    // selectedProfiel + label are captured for the onSuccess callback
-    // only; re-running the effect on every label keystroke would
-    // cancel+restart polling mid-job. Intentionally omitted from deps.
-    // biome-ignore lint/correctness/useExhaustiveDependencies: see above
-  }, [state.kind, state.kind === "pending" || state.kind === "processing" ? state.jobId : null, onSuccess]);
+  // Notify parent on terminal success. The effect fires exactly when
+  // the derived state transitions into 'ready' (source id is
+  // immutable per job, so the dep list never re-fires mid-session).
+  // This is a legitimate "sync to external system" useEffect —
+  // notifying the parent of a state change, not orchestrating the
+  // fetch itself.
+  const readySourceId = state.kind === "ready" ? state.sourceId : null;
+  useEffect(() => {
+    if (!readySourceId || !jobId) return;
+    onSuccess?.({
+      jobId,
+      sourceId: readySourceId,
+      niveauRang: selectedProfiel?.niveauRang ?? null,
+      label: label.trim(),
+    });
+    // selectedProfiel + label + jobId are captured at the transition
+    // render; they're stable during polling (form isn't re-editable
+    // after submit), so omitting them from deps is correct — we only
+    // want this to fire on the ready transition.
+    // biome-ignore lint/correctness/useExhaustiveDependencies: see comment
+  }, [readySourceId]);
 
   function submit() {
     if (!file || !selectedProfiel) return;
     if (coverage.type === "kerntaken" && coverage.kerntaakCodes.length === 0)
       return;
 
-    setState({ kind: "idle" });
+    // Reset any previous failure so re-submits don't show stale state.
+    setSubmitError(null);
+    setJobId(null);
+
     const formData = new FormData();
     formData.append("file", file);
     formData.append("handle", handle);
@@ -293,17 +316,12 @@ export function useUploadPortfolioForm({
     startTransition(async () => {
       const r = await uploadPortfolioAction(formData);
       if (r.ok) {
-        // Kick polling. Transitions isPending off instantly; the
-        // polling effect takes over rendering state from here.
-        setState({ kind: "pending", jobId: r.jobId });
+        // Setting jobId flips SWR's key from null → a real URL, which
+        // triggers the first fetch and the refreshInterval function.
+        // From here the derived `state` takes over driving the UI.
+        setJobId(r.jobId);
       } else {
-        // The action itself rejected (validation, Storage upload
-        // failure, etc.). No jobId to poll — show the error inline.
-        setState({
-          kind: "failed",
-          jobId: null,
-          errorMessage: r.reason,
-        });
+        setSubmitError(r.reason);
       }
     });
   }
