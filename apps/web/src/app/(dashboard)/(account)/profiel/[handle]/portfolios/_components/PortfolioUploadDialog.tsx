@@ -64,22 +64,21 @@ export function PortfolioUploadDialog({
     preselectedFile,
     onSuccess: (ctx) => {
       onSuccess?.(ctx);
+      // Clear form state after a successful upload. Both consumers
+      // (PortfolioUpload.Provider + PortfolioDropZone) keep the dialog
+      // always-mounted via the `open` prop pattern, so without an
+      // explicit reset the next reopen would show stale banner + the
+      // previous file/profiel selection (bugbot finding).
+      form.reset();
       onClose();
     },
   });
 
-  // Block close while the async workflow is in flight. `form.isPending`
-  // is the `useTransition` flag, which only covers the ~1s the server
-  // action itself is running. Once the action returns, the job still
-  // goes through SWR-driven polling in states 'pending' → 'processing'
-  // → 'ready'. If we let the dialog close during polling, `form.reset()`
-  // clears `jobId`, which stops SWR, which means the onSuccess callback
-  // never fires — the auto-send chat message is silently dropped
-  // (bugbot finding). Guard both cancel-click and backdrop/Escape here.
-  const isWorkflowRunning =
-    form.isPending ||
-    form.state.kind === "pending" ||
-    form.state.kind === "processing";
+  // `isWorkflowRunning` lives on the form hook now (true during the
+  // useTransition action AND the SWR-driven polling phase). We read
+  // it here to gate the close affordance so the onSuccess callback
+  // can't be dropped by an early reset.
+  const { isWorkflowRunning } = form;
 
   function handleClose() {
     if (isWorkflowRunning) return;

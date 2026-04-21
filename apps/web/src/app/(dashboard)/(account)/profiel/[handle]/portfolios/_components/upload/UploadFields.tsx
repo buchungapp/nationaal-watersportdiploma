@@ -40,7 +40,13 @@ const RICHTING_OPTIONS: PortfolioRichting[] = [
 ];
 
 export function UploadFields({ form, idPrefix }: Props) {
-  const disabled = form.isPending;
+  // Use `isWorkflowRunning` — not just `isPending` — so fields stay
+  // disabled during the 30-60s SWR polling phase too. Otherwise the
+  // user can edit profiel/label/consent after the server action
+  // returns but before the workflow finishes, and the onSuccess
+  // callback would close over the edited values instead of the
+  // submitted ones (bugbot finding).
+  const disabled = form.isWorkflowRunning;
 
   function handlePickClick() {
     form.fileInputRef.current?.click();

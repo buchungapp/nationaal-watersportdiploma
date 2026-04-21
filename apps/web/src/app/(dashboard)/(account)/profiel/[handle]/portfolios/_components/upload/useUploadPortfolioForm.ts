@@ -173,6 +173,15 @@ export function useUploadPortfolioForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Snapshot of the form values that were actually submitted. Freezes
+  // the values `onSuccess` hands to the parent so they can't drift if
+  // UI state is mutated between submit and the 'ready' transition
+  // (bugbot finding — the ready-effect closed over live `selectedProfiel`
+  // + `label`, so any edit during polling would poison the callback).
+  const submittedSnapshotRef = useRef<{
+    niveauRang: number | null;
+    label: string;
+  } | null>(null);
 
   // Seed React state from a preselected file (drop-zone path). The
   // native <input type="file"> is hidden in the fields component, so
@@ -215,6 +224,7 @@ export function useUploadPortfolioForm({
     setConsentShared(false);
     setJobId(null);
     setSubmitError(null);
+    submittedSnapshotRef.current = null;
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -319,16 +329,20 @@ export function useUploadPortfolioForm({
   const readySourceId = state.kind === "ready" ? state.sourceId : null;
   useEffect(() => {
     if (!readySourceId || !jobId) return;
+    // Read from the submit-time snapshot, not the current form state —
+    // see `submittedSnapshotRef`. Falls back to live values only if the
+    // snapshot is missing (shouldn't happen; submit() always sets it).
+    const snapshot = submittedSnapshotRef.current;
     onSuccess?.({
       jobId,
       sourceId: readySourceId,
-      niveauRang: selectedProfiel?.niveauRang ?? null,
-      label: label.trim(),
+      niveauRang: snapshot?.niveauRang ?? selectedProfiel?.niveauRang ?? null,
+      label: snapshot?.label ?? label.trim(),
     });
-    // selectedProfiel + label + jobId are captured at the transition
-    // render; they're stable during polling (form isn't re-editable
-    // after submit), so omitting them from deps is correct — we only
-    // want this to fire on the ready transition.
+    // Intentionally fire only on the 'ready' transition. The snapshot
+    // ref makes the other values deterministic, so we don't need them
+    // in deps; we specifically don't want this to re-fire if the user
+    // edits label/profielId after the job is ready.
     // biome-ignore lint/correctness/useExhaustiveDependencies: see comment
   }, [readySourceId]);
 
@@ -340,6 +354,17 @@ export function useUploadPortfolioForm({
     // Reset any previous failure so re-submits don't show stale state.
     setSubmitError(null);
     setJobId(null);
+
+    // Freeze the values we'll hand to onSuccess when the job completes.
+    // Fields are disabled during polling (see `isWorkflowRunning`), but
+    // this ref makes that a belt-and-braces contract — even if a future
+    // caller forgets to respect the disabled state, the callback
+    // receives the submitted values, not whatever's in state when the
+    // job happens to flip to 'ready'.
+    submittedSnapshotRef.current = {
+      niveauRang: selectedProfiel.niveauRang,
+      label: label.trim(),
+    };
 
     const formData = new FormData();
     formData.append("file", file);
@@ -365,15 +390,18 @@ export function useUploadPortfolioForm({
   const coverageComplete =
     coverage.type === "full_profiel" ||
     (coverage.type === "kerntaken" && coverage.kerntaakCodes.length > 0);
+  // True while *anything* async is happening — the useTransition flag
+  // for the server action, OR the SWR-driven polling of a running job.
+  // Consumers use this to disable inputs + close affordances so the
+  // form values match what we actually sent to the server (bugbot
+  // finding: fields remained editable during the 30-60s polling phase).
+  const isWorkflowRunning =
+    isPending || state.kind === "pending" || state.kind === "processing";
   const canSubmit =
     file !== null &&
     selectedProfiel !== null &&
     coverageComplete &&
-    !isPending &&
-    // Don't let the user submit while a previous upload is still in
-    // flight — reset first, or close + reopen the dialog.
-    state.kind !== "pending" &&
-    state.kind !== "processing";
+    !isWorkflowRunning;
 
   return {
     // form state
@@ -383,6 +411,7 @@ export function useUploadPortfolioForm({
     coverage,
     consentShared,
     isPending,
+    isWorkflowRunning,
     canSubmit,
     selectedProfiel,
     profielen,
