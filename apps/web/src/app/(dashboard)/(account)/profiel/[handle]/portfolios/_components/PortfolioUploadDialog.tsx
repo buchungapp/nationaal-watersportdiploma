@@ -68,8 +68,21 @@ export function PortfolioUploadDialog({
     },
   });
 
+  // Block close while the async workflow is in flight. `form.isPending`
+  // is the `useTransition` flag, which only covers the ~1s the server
+  // action itself is running. Once the action returns, the job still
+  // goes through SWR-driven polling in states 'pending' → 'processing'
+  // → 'ready'. If we let the dialog close during polling, `form.reset()`
+  // clears `jobId`, which stops SWR, which means the onSuccess callback
+  // never fires — the auto-send chat message is silently dropped
+  // (bugbot finding). Guard both cancel-click and backdrop/Escape here.
+  const isWorkflowRunning =
+    form.isPending ||
+    form.state.kind === "pending" ||
+    form.state.kind === "processing";
+
   function handleClose() {
-    if (form.isPending) return;
+    if (isWorkflowRunning) return;
     form.reset();
     onClose();
   }
@@ -103,7 +116,7 @@ export function PortfolioUploadDialog({
               <button
                 type="button"
                 onClick={handleClose}
-                disabled={form.isPending}
+                disabled={isWorkflowRunning}
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Annuleer
@@ -113,7 +126,7 @@ export function PortfolioUploadDialog({
                 disabled={!form.canSubmit}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {form.isPending
+                {isWorkflowRunning
                   ? "Bezig met verwerken…"
                   : "Upload + anonimiseer"}
               </button>

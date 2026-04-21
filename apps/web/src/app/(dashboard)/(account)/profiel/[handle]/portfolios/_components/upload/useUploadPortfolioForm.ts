@@ -35,8 +35,34 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import useSWR from "swr";
-import { jsonFetcher } from "~/lib/swr";
 import { uploadPortfolioAction } from "../../actions";
+
+// Local fetcher specifically for the upload-job status endpoint.
+// The shared `~/lib/swr` jsonFetcher doesn't check `res.ok`, so
+// 401/404/500 bodies (typically `{ error: "..." }`) would slip
+// through as `data` instead of throwing — which SWR routes into
+// `data` and our downstream state-derivation `switch` would miss,
+// crashing the component with `state.kind` undefined (bugbot
+// finding). Throwing here puts non-2xx responses on SWR's `error`
+// channel and the state-derivation renders the "failed" branch
+// correctly.
+async function fetchUploadJobStatus(url: string): Promise<unknown> {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    let detail: string | null = null;
+    try {
+      const body = (await res.json()) as { error?: string };
+      detail = typeof body.error === "string" ? body.error : null;
+    } catch {
+      // Body wasn't JSON — fall back to the HTTP status line.
+    }
+    throw new Error(
+      detail ??
+        `Status ophalen mislukt (HTTP ${res.status} ${res.statusText}).`,
+    );
+  }
+  return res.json();
+}
 
 export type PortfolioRichting = "instructeur" | "leercoach" | "pvb_beoordelaar";
 
@@ -220,7 +246,7 @@ export function useUploadPortfolioForm({
 
   const { data: statusData, error: statusError } = useSWR<StatusResponse>(
     jobId ? `/api/upload-job/${jobId}/status` : null,
-    jsonFetcher,
+    fetchUploadJobStatus as (url: string) => Promise<StatusResponse>,
     {
       refreshInterval: (latest) =>
         !latest || latest.status === "pending" || latest.status === "processing"
@@ -271,6 +297,16 @@ export function useUploadPortfolioForm({
         return { kind: "ready", jobId, sourceId: statusData.sourceId };
       case "failed":
         return { kind: "failed", jobId, errorMessage: statusData.errorMessage };
+      default:
+        // Defensive: if the server ever returns an unexpected shape
+        // (e.g. a schema drift we didn't anticipate), don't let the
+        // IIFE return `undefined` and crash the component tree —
+        // surface it as a failure the user can at least see.
+        return {
+          kind: "failed",
+          jobId,
+          errorMessage: "Onverwacht statusantwoord van de server.",
+        };
     }
   })();
 

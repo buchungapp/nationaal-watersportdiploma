@@ -28,12 +28,14 @@ import {
 //
 // Pipeline shape (mirrors the old synchronous ingestPortfolio):
 //
-//   1. mark-processing  — flip upload_job.status to 'processing'
-//   2. extract          — fetch bytes from Storage, run unpdf
-//   3. anonymise        — LLM scrub of names/locations/verenigingen
-//   4. ingest           — dedup, chunk, upsert into ai_corpus; link
+//   1. load-job         — fetch upload_job row, detect replay of a
+//                          completed run, short-circuit if so
+//   2. mark-processing  — flip upload_job.status to 'processing'
+//   3. extract          — fetch bytes from Storage, run unpdf
+//   4. anonymise        — LLM scrub of names/locations/verenigingen
+//   5. ingest           — dedup, chunk, upsert into ai_corpus; link
 //                          source.original_storage_path to the blob
-//   5. mark-ready       — flip upload_job.status to 'ready', set
+//   6. mark-ready       — flip upload_job.status to 'ready', set
 //                          upload_job.sourceId
 //
 // Retries: each step is retried automatically by @upstash/workflow
@@ -71,36 +73,43 @@ export const { POST } = serve<Payload>(
   async (context) => {
     const { jobId } = context.requestPayload;
 
-    // Step 1: mark processing. Also validates that the job exists
-    // before we spend compute on it. Returns the job metadata so the
-    // next steps don't need to re-query.
-    const job = await context.run("mark-processing", async () => {
+    // Step 1: load job and detect replay. Validates the job exists
+    // before we spend compute on it. Returns an `alreadyReady` flag
+    // so a replay of a completed job short-circuits below without
+    // throwing — the previous implementation threw to signal replay,
+    // which tripped the workflow's `failureFunction` and corrupted
+    // the job's status from 'ready' back to 'failed' (bugbot finding).
+    const job = await context.run("load-job", async () => {
       const found = await Leercoach.UploadJob.getByIdAsWorkflow({ jobId });
       if (!found) {
         throw new Error(
           `upload_job ${jobId} not found — aborting workflow.`,
         );
       }
-      if (found.status === "ready") {
-        // Replay of a completed job. Short-circuit by throwing a
-        // distinguishable error the runtime-done short-circuit catches
-        // below. Simpler than a special return type that threads all
-        // the way through subsequent steps.
-        throw new Error("ALREADY_READY");
-      }
-      await Leercoach.UploadJob.updateStatus({
-        jobId,
-        status: "processing",
-      });
       return {
+        alreadyReady: found.status === "ready",
         userId: found.userId,
         blobPath: found.blobPath,
         label: found.label,
         metadata: found.metadata,
       };
     });
+    // Replay short-circuit: the job is already marked ready in the DB,
+    // so there is nothing left to do. Returning here leaves the row
+    // untouched (no flip back to 'failed' via failureFunction).
+    if (job.alreadyReady) return;
 
-    // Step 2: fetch bytes + extract text. unpdf runs in Node
+    // Step 2: mark processing. Separated from load-job so the load
+    // step's return value is purely informational and the state
+    // mutation lives in its own replayable unit.
+    await context.run("mark-processing", async () => {
+      await Leercoach.UploadJob.updateStatus({
+        jobId,
+        status: "processing",
+      });
+    });
+
+    // Step 3: fetch bytes + extract text. unpdf runs in Node
     // serverless cleanly — no canvas / DOMMatrix quirks — but we
     // still isolate it in its own step because it can run several
     // seconds for large PDFs and we want clean retry semantics if
@@ -111,7 +120,7 @@ export const { POST } = serve<Payload>(
       return { rawText, pageCount, charCount };
     });
 
-    // Step 3: LLM anonymisation. This is the long pole — regularly
+    // Step 4: LLM anonymisation. This is the long pole — regularly
     // 30-60s for a real portfolio. Having it in its own step means a
     // retry on provider flakiness doesn't re-run extract, and the
     // full-blown timeout ceiling applies per-step, not to the whole
@@ -125,7 +134,7 @@ export const { POST } = serve<Payload>(
       },
     );
 
-    // Step 4: chunk + upsert into ai_corpus. Same logic as the old
+    // Step 5: chunk + upsert into ai_corpus. Same logic as the old
     // inline ingestPortfolio, just running in a durable context.
     // source.original_storage_path records the raw blob so we can
     // offer the user a "download my original" affordance later.
@@ -191,7 +200,7 @@ export const { POST } = serve<Payload>(
       return { sourceId: result.sourceId };
     });
 
-    // Step 5: mark job as ready + wire the sourceId so the status
+    // Step 6: mark job as ready + wire the sourceId so the status
     // endpoint can return it. Separate step so a bug in the ingest
     // step's DB write doesn't conflate with the UI-facing "done"
     // signal — the upload_job's status change is the atomic commit
@@ -213,6 +222,21 @@ export const { POST } = serve<Payload>(
       const payload = context.requestPayload as Payload | undefined;
       if (!payload?.jobId) return;
       try {
+        // Defensive re-read: even though the main handler now
+        // short-circuits on a replay instead of throwing, we still
+        // guard against any future path that could fire this
+        // callback for a job the DB already marks 'ready' (e.g. a
+        // late callback racing a successful run). Flipping 'ready'
+        // → 'failed' would corrupt a known-good result.
+        const current = await Leercoach.UploadJob.getByIdAsWorkflow({
+          jobId: payload.jobId,
+        });
+        if (current?.status === "ready") {
+          console.warn(
+            `[workflow/ingest-portfolio] failureFunction fired for already-ready job ${payload.jobId}; skipping status flip.`,
+          );
+          return;
+        }
         await Leercoach.UploadJob.updateStatus({
           jobId: payload.jobId,
           status: "failed",
