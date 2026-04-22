@@ -85,13 +85,14 @@ async function loadFromAiCorpus(
        WHERE source_identifier = $1 AND revoked_at IS NULL`,
       [sourceIdentifier],
     );
-    if (res.rows.length === 0) {
+    const row = res.rows[0];
+    if (!row) {
       throw new Error(`No source ${sourceIdentifier} in ai_corpus.`);
     }
     return {
       sourceIdentifier,
-      content: res.rows[0]?.content,
-      niveau: res.rows[0]?.niveauRang,
+      content: row.content,
+      niveau: row.niveauRang,
     };
   } finally {
     await client.end();

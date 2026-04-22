@@ -15,7 +15,10 @@ export function parseKerntaakTitel(titel: string): {
   label: string;
 } {
   const m = titel.match(TITEL_PATTERN);
-  if (m) return { code: m[1]!, label: m[2]?.trim() };
+  // Both captures are required by the pattern, so m[1]/m[2] are
+  // defined whenever `m` is truthy. Non-null assertion satisfies the
+  // compiler without a redundant runtime check.
+  if (m) return { code: m[1]!, label: m[2]!.trim() };
   return { code: null, label: titel };
 }
 
@@ -33,6 +36,8 @@ export function parseWerkprocesTitel(titel: string): {
   label: string;
 } {
   const m = titel.match(WERKPROCES_TITEL_PATTERN);
-  if (m) return { code: m[1]!, label: m[2]?.trim() };
+  // See parseKerntaakTitel above — both captures required by the
+  // regex, non-null assertion is safe when `m` is truthy.
+  if (m) return { code: m[1]!, label: m[2]!.trim() };
   return { code: null, label: titel };
 }

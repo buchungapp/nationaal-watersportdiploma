@@ -8,7 +8,11 @@ import watersportverbond from "./_assets/watersportverbond.png";
 
 interface PartnerCardProps {
   name: string;
-  role: string;
+  /**
+   * Optional short role label shown next to the name (e.g.
+   * "Licentiehouder"). Card still renders cleanly when omitted.
+   */
+  role?: string;
   logo: StaticImageData;
   logoAlt: string;
   children: ReactNode;
@@ -34,9 +38,11 @@ function PartnerCard({
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h2 className="text-2xl font-bold text-slate-900">{name}</h2>
-        <span className="rounded-full bg-branding-dark/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-branding-dark">
-          {role}
-        </span>
+        {role ? (
+          <span className="rounded-full bg-branding-dark/5 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-branding-dark">
+            {role}
+          </span>
+        ) : null}
       </div>
       <div className="space-y-3 text-base leading-relaxed text-slate-600">
         {children}
