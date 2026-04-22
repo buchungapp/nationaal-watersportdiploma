@@ -20,6 +20,13 @@ import { createClient } from "~/lib/supabase/server";
 //          ~1s and uses to abort streamText server-side. This keeps all
 //          LLM-abort logic in one place and survives client disconnects.
 
+// Matches the POST /chat ceiling (300s). The resumed stream replays
+// whatever the original producer wrote, so if the producer is still
+// running we may need to keep this connection open almost as long as
+// the original turn. Leaving it at Vercel's 15s default was clipping
+// legitimate resumes for long coaching turns.
+export const maxDuration = 300;
+
 let _redis: Redis | null = null;
 function getRedis(): Redis {
   if (_redis) return _redis;
