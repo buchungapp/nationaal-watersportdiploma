@@ -704,13 +704,18 @@ export function createListKssProfielenTool(_context: QAToolContext) {
     inputSchema: listKssProfielenInputSchema,
     execute: async (input): Promise<ListKssProfielenOutput> => {
       const niveaus = await listKssNiveaus();
+      const targetNiveaus = input.niveauRang
+        ? niveaus.filter((n) => n.rang === input.niveauRang)
+        : niveaus;
+      const profielLists = await Promise.all(
+        targetNiveaus.map((niveau) =>
+          listKssKwalificatieprofielenWithOnderdelen(niveau.id),
+        ),
+      );
       const hits: KssProfielSummary[] = [];
-      for (const niveau of niveaus) {
-        if (input.niveauRang && niveau.rang !== input.niveauRang) continue;
-        const profielen = await listKssKwalificatieprofielenWithOnderdelen(
-          niveau.id,
-        );
-        for (const p of profielen) {
+      for (let i = 0; i < targetNiveaus.length; i++) {
+        const niveau = targetNiveaus[i]!;
+        for (const p of profielLists[i]!) {
           if (input.richting && p.richting !== input.richting) continue;
           hits.push({
             profielId: p.id,
