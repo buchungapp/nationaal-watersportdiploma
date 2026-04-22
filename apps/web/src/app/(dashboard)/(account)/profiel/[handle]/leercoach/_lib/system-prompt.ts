@@ -257,7 +257,7 @@ ${criteriaBlock}`;
   const artefactLine =
     input.artefactCount > 0
       ? `- Chat-materiaal: ${input.artefactCount} artefact${input.artefactCount === 1 ? "" : "en"} in deze sessie geüpload (aantekeningen, screenshots, e.d.). Roep listArtefacten of readArtefact alleen aan wanneer de kandidaat naar dit materiaal verwijst of wanneer je een bewijs-paragraaf gaat schrijven waarin hun eigen aantekeningen verwerkt moeten worden.`
-      : "- Chat-materiaal: nog geen artefacten in deze sessie. Roep listArtefacten NIET aan om dit te \"controleren\" — je weet al dat de lijst leeg is. Als de kandidaat aangeeft materiaal te hebben, verwijs ze naar het + menu onder het chatvenster.";
+      : '- Chat-materiaal: nog geen artefacten in deze sessie. Roep listArtefacten NIET aan om dit te "controleren" — je weet al dat de lijst leeg is. Als de kandidaat aangeeft materiaal te hebben, verwijs ze naar het + menu onder het chatvenster.';
 
   // Draft-awareness routing rule. The chat's portfolio-document and
   // the kandidaat's eerder geüploade portfolio-PDF's zijn twee

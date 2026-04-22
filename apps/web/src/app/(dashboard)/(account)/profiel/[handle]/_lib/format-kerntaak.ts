@@ -15,7 +15,7 @@ export function parseKerntaakTitel(titel: string): {
   label: string;
 } {
   const m = titel.match(TITEL_PATTERN);
-  if (m) return { code: m[1]!, label: m[2]!.trim() };
+  if (m) return { code: m[1]!, label: m[2]?.trim() };
   return { code: null, label: titel };
 }
 
@@ -33,6 +33,6 @@ export function parseWerkprocesTitel(titel: string): {
   label: string;
 } {
   const m = titel.match(WERKPROCES_TITEL_PATTERN);
-  if (m) return { code: m[1]!, label: m[2]!.trim() };
+  if (m) return { code: m[1]!, label: m[2]?.trim() };
   return { code: null, label: titel };
 }

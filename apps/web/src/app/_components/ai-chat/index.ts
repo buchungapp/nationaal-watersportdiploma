@@ -16,14 +16,9 @@
 // 2. AiChatWindow — thin wrapper that renders the default composition.
 //    Any `children` land between Starters and InputForm.
 
-export { AiChat, isTextPart } from "./AiChat";
 export type { AiChatErrorRetryRenderer } from "./AiChat";
+export { AiChat, isTextPart } from "./AiChat";
 export { AiChatWindow } from "./AiChatWindow";
-export {
-  AiChatContext,
-  useAiChatContext,
-  useAiChatInputSlot,
-} from "./context";
 export type {
   AiChatActions,
   AiChatContextValue,
@@ -31,9 +26,14 @@ export type {
   AiChatMeta,
   AiChatState,
 } from "./context";
+export {
+  AiChatContext,
+  useAiChatContext,
+  useAiChatInputSlot,
+} from "./context";
 export { SimpleMarkdown } from "./markdown";
-export { isToolPart, ToolPartRenderer } from "./tool-parts";
 export type { ToolPart } from "./tool-parts";
+export { isToolPart, ToolPartRenderer } from "./tool-parts";
 export type {
   AiChatDropHandler,
   AiChatInitialMessage,

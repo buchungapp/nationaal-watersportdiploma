@@ -338,9 +338,7 @@ function ChatInner({
         // editor gets full width. The stream still runs; the user is
         // one toggle away from the conversation. Only makes sense
         // when there IS a doc — otherwise we'd render an empty shell.
-        initialChatOpen={
-          initialFocus === "doc" && portfolio !== null ? false : true
-        }
+        initialChatOpen={!(initialFocus === "doc" && portfolio !== null)}
       >
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <UnifiedToolbar

@@ -102,7 +102,10 @@ export const leercoachChat = leercoachSchema.table(
     // Cleared at the start of the next POST so a stale cancel doesn't
     // kill the next turn.
     activeStreamId: text("active_stream_id"),
-    canceledAt: timestamp("canceled_at", { withTimezone: true, mode: "string" }),
+    canceledAt: timestamp("canceled_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
     // Links this chat to the portfolio document it's producing drafts
     // for. Resolved at chat-creation time via find-or-create on
     // (user_id, profiel_id, scope) in leercoach.portfolio. Nullable

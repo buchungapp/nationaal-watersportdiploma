@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { DocumentTextIcon } from "@heroicons/react/20/solid";
+import Link from "next/link";
 
 // Mirrors LeercoachPortfolioScope from packages/core/src/models/
 // leercoach/portfolio.ts — kept inline here (rather than imported as

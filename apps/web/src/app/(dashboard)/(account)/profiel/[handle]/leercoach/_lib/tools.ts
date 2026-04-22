@@ -714,8 +714,10 @@ export function createListKssProfielenTool(_context: QAToolContext) {
       );
       const hits: KssProfielSummary[] = [];
       for (let i = 0; i < targetNiveaus.length; i++) {
-        const niveau = targetNiveaus[i]!;
-        for (const p of profielLists[i]!) {
+        const niveau = targetNiveaus[i];
+        const profielen = profielLists[i];
+        if (niveau === undefined || profielen === undefined) continue;
+        for (const p of profielen) {
           if (input.richting && p.richting !== input.richting) continue;
           hits.push({
             profielId: p.id,

@@ -25,18 +25,18 @@
 // needs it doesn't pull the whole context.
 
 import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from "@headlessui/react";
+import {
   ArrowUpTrayIcon,
   DocumentIcon,
   DocumentTextIcon,
   PhotoIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
-import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  DialogTitle,
-} from "@headlessui/react";
 import { unstable_rethrow } from "next/navigation";
 import {
   type ChangeEvent,
@@ -85,18 +85,15 @@ function Provider({
   initialArtefacten,
   children,
 }: ProviderProps) {
-  const [artefacten, setArtefacten] = useState<ArtefactRow[]>(
-    initialArtefacten,
-  );
+  const [artefacten, setArtefacten] =
+    useState<ArtefactRow[]>(initialArtefacten);
   const [pending, setPending] = useState<PendingArtefactChip[]>([]);
   // Staged = uploaded in this session, not yet committed via message
   // send. ChipStrip renders only these; `commitStaged()` clears the
   // set when the user sends. Initial value is empty so page reloads
   // start with a clean composer even if artefacten already exist in
   // the chat (they're reachable via the leercoach's tool).
-  const [stagedIds, setStagedIds] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [stagedIds, setStagedIds] = useState<Set<string>>(() => new Set());
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -168,8 +165,7 @@ function Provider({
     async ({ file, labelOverride }) => {
       const artefactType = artefactTypeFromFile(file);
       const displayLabel =
-        labelOverride ??
-        file.name.replace(/\.(pdf|docx|png|jpe?g|webp)$/i, "");
+        labelOverride ?? file.name.replace(/\.(pdf|docx|png|jpe?g|webp)$/i, "");
       await runUpload({
         pending: {
           pendingId: makePendingId(),
@@ -225,9 +221,7 @@ function Provider({
       // Optimistic remove — snap back if the server rejects. Staged
       // set prunes in the same transition so the chip disappears
       // immediately.
-      setArtefacten((prev) =>
-        prev.filter((a) => a.artefactId !== artefactId),
-      );
+      setArtefacten((prev) => prev.filter((a) => a.artefactId !== artefactId));
       setStagedIds((prev) => {
         if (!prev.has(artefactId)) return prev;
         const next = new Set(prev);
@@ -341,23 +335,7 @@ function Provider({
   const value = useMemo<ArtefactContextValue>(
     () => ({ state, actions, meta }),
     // biome-ignore lint/correctness/useExhaustiveDependencies: explicit listing is clearer than memoising every field
-    [
-      artefacten,
-      pending,
-      stagedIds,
-      error,
-      dialogOpen,
-      uploadFile,
-      uploadText,
-      revoke,
-      dismissError,
-      openDialog,
-      closeDialog,
-      commitStaged,
-      handlePaste,
-      handleDrop,
-      submitBlock,
-    ],
+    [actions, meta, state],
   );
 
   return <ArtefactContext value={value}>{children}</ArtefactContext>;
@@ -595,10 +573,9 @@ function UploadDialog() {
               Materiaal toevoegen
             </DialogTitle>
             <p className="text-sm text-slate-600">
-              Upload een document (PDF, DOCX) of afbeelding (PNG, JPG,
-              WEBP) dat je in deze sessie wil gebruiken. Alleen jij en de
-              digitale leercoach zien ’m — andere gebruikers krijgen
-              nooit toegang.
+              Upload een document (PDF, DOCX) of afbeelding (PNG, JPG, WEBP) dat
+              je in deze sessie wil gebruiken. Alleen jij en de digitale
+              leercoach zien ’m — andere gebruikers krijgen nooit toegang.
             </p>
 
             <div className="flex flex-col gap-2">
@@ -683,9 +660,7 @@ function makePendingId(): string {
   return `pending-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function artefactTypeFromFile(
-  file: File,
-): "pdf" | "docx" | "image" | "text" {
+function artefactTypeFromFile(file: File): "pdf" | "docx" | "image" | "text" {
   const mime = file.type;
   const name = file.name.toLowerCase();
   if (mime === "application/pdf" || name.endsWith(".pdf")) return "pdf";

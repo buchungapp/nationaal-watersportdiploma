@@ -18,12 +18,9 @@ import { generateObject } from "ai";
 import pg from "pg";
 import { Agent, setGlobalDispatcher } from "undici";
 import { z } from "zod";
-import { concretenessPer100, wordCount } from "./eval-runner.ts";
 import { EVAL_MATRIX } from "./eval-matrix.config.ts";
-import {
-  ANONYMIZED_DIR,
-  type AnonymizedPortfolio,
-} from "./shared.ts";
+import { concretenessPer100, wordCount } from "./eval-runner.ts";
+import { ANONYMIZED_DIR, type AnonymizedPortfolio } from "./shared.ts";
 
 // Same timeout posture as eval; extraction on 25k-word portfolios exceeds
 // undici's default headers timeout.
@@ -145,7 +142,9 @@ const GoldenPairsSchema = z.object({
 async function extractPairs(args: {
   portfolioText: string;
   rubric: RubricContext;
-}): Promise<Array<{ criteriumId: string; werkprocesId: string; bewijs: string }>> {
+}): Promise<
+  Array<{ criteriumId: string; werkprocesId: string; bewijs: string }>
+> {
   const { portfolioText, rubric } = args;
 
   const criteriaList = rubric.criteria
@@ -249,7 +248,8 @@ async function ingestOne(entry: MatrixEntry): Promise<{
   if (pairs.length === 0) {
     return {
       skipped: true,
-      reason: "No pairs extracted — portfolio may not match the profiel rubric.",
+      reason:
+        "No pairs extracted — portfolio may not match the profiel rubric.",
     };
   }
 
@@ -324,7 +324,9 @@ await withDatabase({ connectionString: PGURI }, async () => {
         skipped += 1;
         console.log(`  SKIPPED: ${result.reason}`);
       } else if (result.reason) {
-        console.log(`  (already ingested, source_hash matched) sourceId=${result.sourceId}`);
+        console.log(
+          `  (already ingested, source_hash matched) sourceId=${result.sourceId}`,
+        );
       } else {
         inserted += 1;
         chunks += result.chunkCount ?? 0;

@@ -150,9 +150,7 @@ export const AiChatContext = createContext<AiChatContextValue | null>(null);
 export function useAiChatContext(): AiChatContextValue {
   const ctx = use(AiChatContext);
   if (!ctx) {
-    throw new Error(
-      "AiChat components must be used inside <AiChat.Provider>.",
-    );
+    throw new Error("AiChat components must be used inside <AiChat.Provider>.");
   }
   return ctx;
 }

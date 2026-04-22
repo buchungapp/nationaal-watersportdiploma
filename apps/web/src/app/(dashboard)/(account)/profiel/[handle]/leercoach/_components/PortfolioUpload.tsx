@@ -77,14 +77,7 @@ function Provider({
   const value = useMemo<PortfolioUploadContextValue>(
     () => ({ state, actions }),
     // biome-ignore lint/correctness/useExhaustiveDependencies: explicit listing for clarity
-    [
-      dialogOpen,
-      pendingSuccess,
-      openDialog,
-      closeDialog,
-      notifySuccess,
-      clearPendingSuccess,
-    ],
+    [actions, state],
   );
 
   return (

@@ -10,7 +10,7 @@
 // and mirror the pattern used by AiCorpus.
 
 export * as Chat from "./chat.js";
+export { leercoachChatScopeSchema } from "./chat.js";
 export * as Message from "./message.js";
 export * as Portfolio from "./portfolio.js";
-export { leercoachChatScopeSchema } from "./chat.js";
 export { leercoachPortfolioScopeSchema } from "./portfolio.js";

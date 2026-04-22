@@ -247,9 +247,9 @@ export default function Page() {
               licentiehouder in Nederland. Die autoriteit is opgebouwd uit drie
               licentiegevers: World Sailing (internationaal), NOC*NSF via de
               Kwalificatiestructuur Sport (ministerieel), en het NLQF
-              (overheidserkenning met Europese EQF-waarde). Het Watersportverbond
-              delegeert die licentie aan het NWD-opleidingssysteem en aan de
-              Watersport Academy.
+              (overheidserkenning met Europese EQF-waarde). Het
+              Watersportverbond delegeert die licentie aan het
+              NWD-opleidingssysteem en aan de Watersport Academy.
             </p>
             <p className="text-sm text-slate-500">
               Voor de eigenvaardigheidsdiploma's is de NWD-lijn door het

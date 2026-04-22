@@ -8,8 +8,7 @@ import {
   type UIMessage,
 } from "ai";
 import { Redis } from "ioredis";
-import { after } from "next/server";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createResumableStreamContext } from "resumable-stream/ioredis";
 import throttle from "throttleit";
 import { buildSystemPrompt } from "~/app/(dashboard)/(account)/profiel/[handle]/leercoach/_lib/system-prompt";
@@ -151,7 +150,9 @@ export async function POST(req: Request) {
   // current trigger's delta. This also means tool-step messages from
   // prior partial turns are included — exactly what the model needs
   // to continue coherently.
-  const persisted = await Leercoach.Message.getByChatId({ chatId: chat.chatId });
+  const persisted = await Leercoach.Message.getByChatId({
+    chatId: chat.chatId,
+  });
   // Compaction filter: skip rows that have been folded into a summary.
   // They're still in the DB for UI display + audit, but the model
   // never sees them again — the summary row carries their gist. The
@@ -334,7 +335,9 @@ export async function POST(req: Request) {
       role: "system" as const,
       content: systemPrompt.cacheable,
       providerOptions: {
-        anthropic: { cacheControl: { type: "ephemeral" as const, ttl: "1h" as const } },
+        anthropic: {
+          cacheControl: { type: "ephemeral" as const, ttl: "1h" as const },
+        },
       },
     },
     ...(systemPrompt.dynamic

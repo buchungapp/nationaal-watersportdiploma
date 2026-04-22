@@ -90,10 +90,7 @@ export async function POST(
 
   const parsed = bodySchema.safeParse(await req.json());
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Ongeldige body." },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Ongeldige body." }, { status: 400 });
   }
 
   const [messages, rubric] = await Promise.all([

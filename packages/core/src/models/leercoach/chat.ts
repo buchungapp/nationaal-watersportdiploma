@@ -159,9 +159,7 @@ export const createPortfolioChat = wrapCommand(
         .then((r) => r[0]);
 
       if (!portfolio) {
-        throw new Error(
-          "Portfolio niet gevonden of niet van deze gebruiker.",
-        );
+        throw new Error("Portfolio niet gevonden of niet van deze gebruiker.");
       }
 
       const inserted = await tx

@@ -4,8 +4,8 @@
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { shouldExpand, truncateAnswersToWords } from "./thin-answer-gate.ts";
 import type { AnswerGrade } from "./thin-answer-gate.ts";
+import { shouldExpand, truncateAnswersToWords } from "./thin-answer-gate.ts";
 
 function mockGrade(overrides: Partial<AnswerGrade>): AnswerGrade {
   return {
@@ -35,7 +35,10 @@ describe("truncateAnswersToWords", () => {
     if (!firstOut) throw new Error("Output array shrank");
     const words = firstOut.answer.trim().split(/\s+/).filter(Boolean);
     assert.equal(words.length, 10);
-    assert.match(firstOut.answer, /^In week 14 begeleidde ik een groep van zes/);
+    assert.match(
+      firstOut.answer,
+      /^In week 14 begeleidde ik een groep van zes/,
+    );
   });
 
   it("leaves short answers unchanged", () => {
@@ -53,9 +56,16 @@ describe("truncateAnswersToWords", () => {
 
   it("preserves questionId ordering and identity", () => {
     const answers = [
-      { questionId: "q1", answer: "one two three four five six seven eight nine ten" },
+      {
+        questionId: "q1",
+        answer: "one two three four five six seven eight nine ten",
+      },
       { questionId: "q2", answer: "short" },
-      { questionId: "q3", answer: "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda" },
+      {
+        questionId: "q3",
+        answer:
+          "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda",
+      },
     ];
     const out = truncateAnswersToWords(answers, 5);
     assert.deepEqual(

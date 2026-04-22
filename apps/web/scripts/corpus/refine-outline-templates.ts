@@ -272,5 +272,7 @@ Verfijn nu de beschrijvingen van bovenstaande wrapper-secties op basis van wat j
     totalRefined += 1;
   }
 
-  console.log(`\nDone. ${totalRefined} profielen refined, ${totalSkipped} skipped.`);
+  console.log(
+    `\nDone. ${totalRefined} profielen refined, ${totalSkipped} skipped.`,
+  );
 });

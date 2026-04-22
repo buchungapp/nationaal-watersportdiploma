@@ -22,7 +22,7 @@ export function buildOpeningMessage(ctx: ResolvedChatContext): string {
     "Voordat we beginnen, een paar dingen om te weten:",
     "- Ik schrijf jouw portfolio **niet** voor je. Mijn rol is om de juiste vragen te stellen, op blinde vlekken te wijzen, en voorbeelden uit vergelijkbare portfolio's aan te dragen als dat helpt.",
     "- Alles wat je hier typt wordt opgeslagen, dus je kunt deze sessie altijd later weer oppakken.",
-    "- Op elk moment kun je zeggen \"ik heb hier geen idee over\" of \"kun je een voorbeeld laten zien\" — dat is waar ik voor ben.",
+    '- Op elk moment kun je zeggen "ik heb hier geen idee over" of "kun je een voorbeeld laten zien" — dat is waar ik voor ben.',
     "",
     "**Waar sta je nu?** Kies wat het meest bij jou past:",
     "1. **Leg me eerst uit wat dit portfolio moet zijn** — ik wil snappen hoe het is opgebouwd, wat een beoordelaar zoekt, en waar ik heen werk.",

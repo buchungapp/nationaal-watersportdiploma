@@ -18,7 +18,10 @@ afterEach(() => {
 describe("isToolPart", () => {
   test("matches `tool-<name>` parts", () => {
     expect(
-      isToolPart({ type: "tool-searchBewijsExamples", state: "output-available" }),
+      isToolPart({
+        type: "tool-searchBewijsExamples",
+        state: "output-available",
+      }),
     ).toBe(true);
   });
 
@@ -66,9 +69,7 @@ describe("ToolPartRenderer — busy state", () => {
         }}
       />,
     );
-    expect(
-      screen.getByText(/zoekt voorbeelden/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/zoekt voorbeelden/i)).toBeInTheDocument();
   });
 });
 
@@ -114,9 +115,7 @@ describe("ToolPartRenderer — searchBewijsExamples success", () => {
     // examples come from other kandidaten's anonymised portfolios
     // and the model is supposed to paraphrase, not let the user
     // read + copy the text verbatim.
-    expect(
-      screen.queryByText(/in week 14 gaf ik een training/i),
-    ).toBeNull();
+    expect(screen.queryByText(/in week 14 gaf ik een training/i)).toBeNull();
     expect(
       screen.queryByText(/tijdens de sbf-week observeerde ik/i),
     ).toBeNull();
@@ -202,7 +201,9 @@ describe("ToolPartRenderer — error state", () => {
         }}
       />,
     );
-    expect(screen.getByText(/voorbeelden ophalen mislukt/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/voorbeelden ophalen mislukt/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/gateway timeout/i)).toBeInTheDocument();
   });
 });
@@ -219,7 +220,9 @@ describe("ToolPartRenderer — unknown tool fallback", () => {
       />,
     );
     // Falls back to the camelCase→spaced pattern.
-    expect(screen.getByText(/voert propose bewijs draft uit/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/voert propose bewijs draft uit/i),
+    ).toBeInTheDocument();
   });
 
   test("generic disclosure opens to show raw input/output JSON", async () => {

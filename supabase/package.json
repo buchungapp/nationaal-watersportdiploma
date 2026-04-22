@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "supabase start -x realtime,pgadmin-schema-diff,migra,edge-runtime,vector",
+    "start": "supabase start -x realtime,pgadmin-schema-diff,migra,edge-runtime",
     "stop": "supabase stop",
     "reset": "supabase db reset",
     "link": "supabase link --project-ref $SUPABASE_PROJECT_REF",

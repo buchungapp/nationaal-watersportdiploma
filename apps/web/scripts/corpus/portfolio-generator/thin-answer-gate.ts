@@ -187,7 +187,8 @@ async function expandAnswer(args: {
   modelId: string;
 }): Promise<string> {
   const { question, originalAnswer, grade } = args;
-  const followUp = grade.followUpPrompt ?? "Kun je daar een concreet voorbeeld bij geven?";
+  const followUp =
+    grade.followUpPrompt ?? "Kun je daar een concreet voorbeeld bij geven?";
   const missing = grade.missingAngle ?? "meer concreetheid";
 
   const { object } = await generateObject({
@@ -299,7 +300,9 @@ export async function runThinAnswerGate(args: {
   const expandMs = Date.now() - expandStart;
 
   // Build final answer set.
-  const expandedById = new Map(expansions.map((e) => [e.questionId, e] as const));
+  const expandedById = new Map(
+    expansions.map((e) => [e.questionId, e] as const),
+  );
   const augmentedAnswers: RawAnswer[] = answers.map((a) => {
     const exp = expandedById.get(a.questionId);
     if (!exp) return a;
@@ -330,7 +333,10 @@ export function truncateAnswersToWords(
   return answers.map((a) => {
     const words = a.answer.trim().split(/\s+/).filter(Boolean);
     if (words.length <= maxWords) return a;
-    return { questionId: a.questionId, answer: words.slice(0, maxWords).join(" ") };
+    return {
+      questionId: a.questionId,
+      answer: words.slice(0, maxWords).join(" "),
+    };
   });
 }
 

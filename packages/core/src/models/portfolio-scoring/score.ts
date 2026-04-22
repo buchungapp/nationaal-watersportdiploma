@@ -97,10 +97,7 @@ export function concretenessPer100(s: string): number {
  * is worse (more AI-tell).
  */
 export function antiTellCount(s: string): number {
-  return ANTI_TELLS.reduce(
-    (sum, re) => sum + (s.match(re)?.length ?? 0),
-    0,
-  );
+  return ANTI_TELLS.reduce((sum, re) => sum + (s.match(re)?.length ?? 0), 0);
 }
 
 /**
@@ -150,9 +147,8 @@ export function compareBewijs(
   const concretenessRatio =
     gold.concretenessPer100 === 0
       ? 0
-      : Math.round(
-          (gen.concretenessPer100 / gold.concretenessPer100) * 1000,
-        ) / 10;
+      : Math.round((gen.concretenessPer100 / gold.concretenessPer100) * 1000) /
+        10;
   return {
     ...gen,
     lengthDeltaPct,

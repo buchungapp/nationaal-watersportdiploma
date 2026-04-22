@@ -8,8 +8,8 @@ import {
   listKssNiveaus,
 } from "~/lib/nwd";
 import {
-  ingestPortfolio,
   type CoverageScope,
+  ingestPortfolio,
   type PortfolioRichting,
 } from "./_lib/portfolio-pipeline";
 

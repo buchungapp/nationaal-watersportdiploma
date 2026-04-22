@@ -163,7 +163,9 @@ export async function POST(
   );
   if (compactionRange.length === 0) {
     return NextResponse.json(
-      { error: "Alles valt binnen de recente context; niets om te comprimeren." },
+      {
+        error: "Alles valt binnen de recente context; niets om te comprimeren.",
+      },
       { status: 400 },
     );
   }

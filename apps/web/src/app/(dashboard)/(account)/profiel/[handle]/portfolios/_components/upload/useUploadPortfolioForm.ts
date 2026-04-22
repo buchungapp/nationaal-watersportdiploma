@@ -30,10 +30,7 @@ export type UploadPriorPortfolioForm = ReturnType<
   typeof useUploadPortfolioForm
 >;
 
-export type PortfolioRichting =
-  | "instructeur"
-  | "leercoach"
-  | "pvb_beoordelaar";
+export type PortfolioRichting = "instructeur" | "leercoach" | "pvb_beoordelaar";
 
 export type ProfielOption = {
   id: string;
@@ -125,7 +122,7 @@ export function useUploadPortfolioForm({
   // and must not bleed across profielen.
   useEffect(() => {
     setCoverage({ type: "full_profiel" });
-  }, [profielId]);
+  }, []);
 
   function reset() {
     setFile(null);

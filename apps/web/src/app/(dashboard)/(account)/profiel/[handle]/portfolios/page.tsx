@@ -43,10 +43,12 @@ export default async function PortfoliosPage(props: {
         </TextLink>
         <Heading>Jouw eerdere portfolio's</Heading>
         <Text className="max-w-prose">
-          Hier zie je wat je eerder hebt geüpload. Voeg een nieuwe toe door
-          een PDF op het drop-veld hieronder te slepen, of upload tijdens een
+          Hier zie je wat je eerder hebt geüpload. Voeg een nieuwe toe door een
+          PDF op het drop-veld hieronder te slepen, of upload tijdens een
           leercoach-sessie via de{" "}
-          <span className="font-mono text-xs">📎 Eerder portfolio uploaden</span>
+          <span className="font-mono text-xs">
+            📎 Eerder portfolio uploaden
+          </span>
           -knop boven het invoerveld.
         </Text>
       </div>

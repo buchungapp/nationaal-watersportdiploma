@@ -30,17 +30,17 @@ import { join } from "node:path";
 import { withDatabase } from "@nawadi/core";
 import pg from "pg";
 import { Agent, setGlobalDispatcher } from "undici";
+import {
+  concretenessPer100,
+  loadRubricByProfielTitel,
+  wordCount,
+} from "./eval-runner.ts";
 import { runDraftGeneration } from "./portfolio-generator/generator.ts";
 import type { Question } from "./portfolio-generator/schemas.ts";
 import type {
   RubricTree,
   RubricWerkproces,
 } from "./portfolio-generator/types.ts";
-import {
-  concretenessPer100,
-  loadRubricByProfielTitel,
-  wordCount,
-} from "./eval-runner.ts";
 import {
   ANONYMIZED_DIR,
   type AnonymizedPortfolio,
@@ -97,7 +97,10 @@ async function loadPriorText(sourceIdentifier: string): Promise<{
   }
 }
 
-function loadFromAnonymizedFile(filename: string, niveau: number): {
+function loadFromAnonymizedFile(
+  filename: string,
+  niveau: number,
+): {
   content: string;
   niveau: number;
 } {
@@ -116,7 +119,13 @@ function splitParagraphs(
     .map((raw, i) => {
       const trimmed = raw.trim();
       const wc = trimmed.split(/\s+/).filter(Boolean).length;
-      return { source, niveau, paragraphIndex: i, text: trimmed, wordCount: wc };
+      return {
+        source,
+        niveau,
+        paragraphIndex: i,
+        text: trimmed,
+        wordCount: wc,
+      };
     })
     .filter((p) => p.wordCount >= 60 && p.wordCount <= 500);
 }
@@ -127,25 +136,162 @@ function splitParagraphs(
 // content words (domain terms like "cursist", "training", "begeleidt") to
 // dominate the score.
 const DUTCH_STOPWORDS = new Set([
-  "aan", "als", "dat", "deze", "die", "dit", "door", "een", "en", "er",
-  "geen", "had", "hebben", "heeft", "het", "hier", "hij", "hun", "iets",
-  "ik", "in", "is", "je", "kan", "kon", "laten", "mag", "me", "meer",
-  "men", "met", "mijn", "moet", "naar", "niet", "nog", "nu", "of", "om",
-  "ons", "onze", "op", "ook", "over", "per", "te", "toch", "toen", "uit",
-  "van", "veel", "voor", "waar", "was", "wat", "we", "weer", "wel",
-  "werd", "wij", "worden", "wordt", "ze", "zich", "zo", "zou", "zowel",
-  "zich", "zijn", "zo", "zoals", "zodat", "er", "die", "dat", "bij",
-  "maar", "als", "of", "dus", "dan", "al", "alle", "elke", "elk",
-  "onze", "hun", "jouw", "jullie", "hen", "hem", "haar", "hij", "zij",
-  "kun", "kan", "moet", "mogen", "willen", "gaan", "doen", "doet",
-  "gedaan", "gaat", "ging", "word", "wordt", "werden", "geworden",
-  "heb", "hebt", "heeft", "had", "hadden", "gehad", "ben", "bent",
-  "bent", "was", "waren", "geweest", "zou", "zouden", "kan", "kon",
-  "konden", "gekund", "iemand", "iets", "niets", "weinig", "alles",
-  "ander", "andere", "anders", "zelf", "zelfde", "dezelfde",
-  "tijdens", "vooral", "daarbij", "daarmee", "hierbij", "hiermee",
-  "waarbij", "waarmee", "waarvoor", "waaruit", "waarin", "waarop",
-  "daarover", "hierover", "over", "tot", "tussen", "vanuit",
+  "aan",
+  "als",
+  "dat",
+  "deze",
+  "die",
+  "dit",
+  "door",
+  "een",
+  "en",
+  "er",
+  "geen",
+  "had",
+  "hebben",
+  "heeft",
+  "het",
+  "hier",
+  "hij",
+  "hun",
+  "iets",
+  "ik",
+  "in",
+  "is",
+  "je",
+  "kan",
+  "kon",
+  "laten",
+  "mag",
+  "me",
+  "meer",
+  "men",
+  "met",
+  "mijn",
+  "moet",
+  "naar",
+  "niet",
+  "nog",
+  "nu",
+  "of",
+  "om",
+  "ons",
+  "onze",
+  "op",
+  "ook",
+  "over",
+  "per",
+  "te",
+  "toch",
+  "toen",
+  "uit",
+  "van",
+  "veel",
+  "voor",
+  "waar",
+  "was",
+  "wat",
+  "we",
+  "weer",
+  "wel",
+  "werd",
+  "wij",
+  "worden",
+  "wordt",
+  "ze",
+  "zich",
+  "zo",
+  "zou",
+  "zowel",
+  "zich",
+  "zijn",
+  "zo",
+  "zoals",
+  "zodat",
+  "er",
+  "die",
+  "dat",
+  "bij",
+  "maar",
+  "als",
+  "of",
+  "dus",
+  "dan",
+  "al",
+  "alle",
+  "elke",
+  "elk",
+  "onze",
+  "hun",
+  "jouw",
+  "jullie",
+  "hen",
+  "hem",
+  "haar",
+  "hij",
+  "zij",
+  "kun",
+  "kan",
+  "moet",
+  "mogen",
+  "willen",
+  "gaan",
+  "doen",
+  "doet",
+  "gedaan",
+  "gaat",
+  "ging",
+  "word",
+  "wordt",
+  "werden",
+  "geworden",
+  "heb",
+  "hebt",
+  "heeft",
+  "had",
+  "hadden",
+  "gehad",
+  "ben",
+  "bent",
+  "bent",
+  "was",
+  "waren",
+  "geweest",
+  "zou",
+  "zouden",
+  "kan",
+  "kon",
+  "konden",
+  "gekund",
+  "iemand",
+  "iets",
+  "niets",
+  "weinig",
+  "alles",
+  "ander",
+  "andere",
+  "anders",
+  "zelf",
+  "zelfde",
+  "dezelfde",
+  "tijdens",
+  "vooral",
+  "daarbij",
+  "daarmee",
+  "hierbij",
+  "hiermee",
+  "waarbij",
+  "waarmee",
+  "waarvoor",
+  "waaruit",
+  "waarin",
+  "waarop",
+  "daarover",
+  "hierover",
+  "over",
+  "tot",
+  "tussen",
+  "vanuit",
 ]);
 
 function tokenize(text: string): string[] {
@@ -196,7 +342,12 @@ function pickTop3(
   // If we couldn't fill 3 with positive scores, just take best remaining.
   if (picks.length < 3) {
     for (const { p } of scored) {
-      if (picks.find((x) => x.source === p.source && x.paragraphIndex === p.paragraphIndex)) continue;
+      if (
+        picks.find(
+          (x) => x.source === p.source && x.paragraphIndex === p.paragraphIndex,
+        )
+      )
+        continue;
       picks.push(p);
       if (picks.length === 3) break;
     }
@@ -239,8 +390,16 @@ async function main() {
 
   // Load Maurits Misana's prior portfolios.
   const priorSources = [
-    { content: (await loadPriorText("seed:alle_niveau_3_maurits")).content, source: "maurits_n3", niveau: 3 },
-    { content: loadFromAnonymizedFile("4.1_maurits.json", 4).content, source: "maurits_4.1", niveau: 4 },
+    {
+      content: (await loadPriorText("seed:alle_niveau_3_maurits")).content,
+      source: "maurits_n3",
+      niveau: 3,
+    },
+    {
+      content: loadFromAnonymizedFile("4.1_maurits.json", 4).content,
+      source: "maurits_4.1",
+      niveau: 4,
+    },
   ];
 
   const allParagraphs = priorSources.flatMap((s) =>
@@ -322,7 +481,11 @@ async function main() {
   type RunResult = {
     werkprocesId: string;
     werkprocesTitel: string;
-    drafts: Array<{ criteriumId: string; criteriumTitel: string; bewijs: string }>;
+    drafts: Array<{
+      criteriumId: string;
+      criteriumTitel: string;
+      bewijs: string;
+    }>;
   };
 
   async function runPerWerkproces(
@@ -355,14 +518,18 @@ async function main() {
     };
   }
 
-  console.log(`\nGenerating baseline (no prior context) — ${werkprocessenWithAnswers.length} werkprocessen in parallel...`);
+  console.log(
+    `\nGenerating baseline (no prior context) — ${werkprocessenWithAnswers.length} werkprocessen in parallel...`,
+  );
   const baselineStart = Date.now();
   const baselineResults = await Promise.all(
     werkprocessenWithAnswers.map((wp) => runPerWerkproces(wp, undefined)),
   );
   console.log(`  done in ${((Date.now() - baselineStart) / 1000).toFixed(1)}s`);
 
-  console.log(`\nGenerating experimental v2 (raw-paragraph few-shot per werkproces)...`);
+  console.log(
+    `\nGenerating experimental v2 (raw-paragraph few-shot per werkproces)...`,
+  );
   const expStart = Date.now();
   const experimentalResults = await Promise.all(
     werkprocessenWithAnswers.map((wp) => {
@@ -375,10 +542,14 @@ async function main() {
 
   // Flatten + index for side-by-side.
   const baselineByCrit = new Map(
-    baselineResults.flatMap((r) => r.drafts.map((d) => [d.criteriumId, d] as const)),
+    baselineResults.flatMap((r) =>
+      r.drafts.map((d) => [d.criteriumId, d] as const),
+    ),
   );
   const expByCrit = new Map(
-    experimentalResults.flatMap((r) => r.drafts.map((d) => [d.criteriumId, d] as const)),
+    experimentalResults.flatMap((r) =>
+      r.drafts.map((d) => [d.criteriumId, d] as const),
+    ),
   );
 
   type Row = {
@@ -423,7 +594,9 @@ async function main() {
   const avg = (xs: Array<number | null>): number => {
     const nums = xs.filter((n): n is number => n !== null && !Number.isNaN(n));
     if (nums.length === 0) return 0;
-    return Math.round((nums.reduce((s, n) => s + n, 0) / nums.length) * 10) / 10;
+    return (
+      Math.round((nums.reduce((s, n) => s + n, 0) / nums.length) * 10) / 10
+    );
   };
 
   const summary = {
@@ -444,7 +617,9 @@ async function main() {
   mkdirSync(reportDir, { recursive: true });
 
   const lines: string[] = [];
-  lines.push(`# Experiment v2: prior-portfolio RAW paragraphs as few-shot (Maurits N3+N4.1 → N5.1)\n`);
+  lines.push(
+    `# Experiment v2: prior-portfolio RAW paragraphs as few-shot (Maurits N3+N4.1 → N5.1)\n`,
+  );
   lines.push(
     `Generated: ${new Date().toISOString()}  ·  golden cached, same rawAnswers for both runs\n`,
   );
@@ -464,8 +639,12 @@ async function main() {
   lines.push(`## Metrics summary\n`);
   lines.push(`| Variant | Avg words | Avg concreteness |`);
   lines.push(`|---|---|---|`);
-  lines.push(`| Golden (real bewijs) | ${summary.goldenAvgWc} | ${summary.goldenAvgConc} |`);
-  lines.push(`| Baseline (no prior context) | ${summary.baselineAvgWc} | ${summary.baselineAvgConc} |`);
+  lines.push(
+    `| Golden (real bewijs) | ${summary.goldenAvgWc} | ${summary.goldenAvgConc} |`,
+  );
+  lines.push(
+    `| Baseline (no prior context) | ${summary.baselineAvgWc} | ${summary.baselineAvgConc} |`,
+  );
   lines.push(
     `| **Experimental v2 (raw-paragraph few-shot)** | **${summary.experimentalAvgWc}** | **${summary.experimentalAvgConc}** |`,
   );

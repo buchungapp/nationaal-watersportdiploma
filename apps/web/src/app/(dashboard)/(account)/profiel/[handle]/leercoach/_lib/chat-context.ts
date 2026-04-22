@@ -59,7 +59,7 @@ export async function resolveChatContext(input: {
   let niveauRang: number | null = null;
   const resolvedKerntaken: ResolvedKerntaak[] = [];
 
-  outer: for (const niveau of niveaus) {
+  for (const niveau of niveaus) {
     const profielen = await listKssKwalificatieprofielenWithOnderdelen(
       niveau.id,
     );
@@ -84,7 +84,7 @@ export async function resolveChatContext(input: {
           titel,
         });
       }
-      break outer;
+      break;
     }
   }
 
@@ -98,7 +98,10 @@ export async function resolveChatContext(input: {
   };
 }
 
-function describeScope(scope: ChatScope, kerntaken: ResolvedKerntaak[]): string {
+function describeScope(
+  scope: ChatScope,
+  kerntaken: ResolvedKerntaak[],
+): string {
   switch (scope.type) {
     case "full_profiel":
       return "je volledige portfolio";
@@ -114,9 +117,7 @@ function describeScope(scope: ChatScope, kerntaken: ResolvedKerntaak[]): string 
       if (kerntaken.length > 0) {
         const parts = kerntaken.map((c) => {
           const code = c.displayCode ?? c.code;
-          return c.displayLabel
-            ? `${code} (${c.displayLabel})`
-            : code;
+          return c.displayLabel ? `${code} (${c.displayLabel})` : code;
         });
         return `kerntaken ${parts.join(", ")}`;
       }
@@ -132,9 +133,7 @@ function describeScope(scope: ChatScope, kerntaken: ResolvedKerntaak[]): string 
  * list row; the full titel is visible inside the chat view.
  */
 export function buildChatTitle(ctx: ResolvedChatContext): string {
-  const prefix = ctx.niveauRang
-    ? `${ctx.profielTitel}`
-    : ctx.profielTitel;
+  const prefix = ctx.niveauRang ? `${ctx.profielTitel}` : ctx.profielTitel;
   const scopePart = (() => {
     switch (ctx.scope.type) {
       case "full_profiel":

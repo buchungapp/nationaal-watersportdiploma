@@ -22,11 +22,14 @@ import { useStickyScroll } from "./use-sticky-scroll";
 // jsdom doesn't implement layout. Swap in number-backed properties so we
 // can drive the "scrolled away from bottom" vs "at the bottom" behaviour
 // by assigning to el.scrollHeight / clientHeight / scrollTop directly.
-function installScrollGeometry(el: HTMLElement, geometry: {
-  scrollHeight: number;
-  clientHeight: number;
-  scrollTop?: number;
-}) {
+function installScrollGeometry(
+  el: HTMLElement,
+  geometry: {
+    scrollHeight: number;
+    clientHeight: number;
+    scrollTop?: number;
+  },
+) {
   Object.defineProperty(el, "scrollHeight", {
     configurable: true,
     value: geometry.scrollHeight,
@@ -35,7 +38,8 @@ function installScrollGeometry(el: HTMLElement, geometry: {
     configurable: true,
     value: geometry.clientHeight,
   });
-  let scrollTop = geometry.scrollTop ?? geometry.scrollHeight - geometry.clientHeight;
+  let scrollTop =
+    geometry.scrollTop ?? geometry.scrollHeight - geometry.clientHeight;
   Object.defineProperty(el, "scrollTop", {
     configurable: true,
     get() {

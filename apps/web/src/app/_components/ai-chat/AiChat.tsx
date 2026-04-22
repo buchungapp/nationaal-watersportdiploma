@@ -137,55 +137,52 @@ function Provider({
 }: ProviderProps) {
   const [inputValue, setInputValue] = useState("");
 
-  const {
-    messages,
-    sendMessage,
-    status,
-    error,
-    stop,
-    regenerate,
-    clearError,
-  } = useChat({
-    id: chatId,
-    messages: initialMessages as UIMessage[],
-    resume,
-    // Override the AI SDK's default id generator (nanoid-style,
-    // e.g. "msg_4h3jk2h4") with a real UUID. The server's leercoach
-    // message table stores `id uuid NOT NULL` and core's Zod schema
-    // enforces uuidSchema, so non-UUID ids from the client's submit
-    // path throw `Invalid uuid` on save. `crypto.randomUUID()` is
-    // available in every modern browser + every Node runtime we
-    // target, so no polyfill needed.
-    generateId: () => crypto.randomUUID(),
-    transport: new DefaultChatTransport({
-      api: apiEndpoint,
-      // Trigger-aware body shape required by resumable streams: the
-      // server rebuilds history from the DB, so we only send the
-      // latest delta (or just the messageId for regenerate). This
-      // matches the Vercel reference example at
-      // examples/next/app/api/chat/route.ts.
-      //
-      // The non-resumable path (older leercoach callers, hypothetical
-      // future consumers) can tolerate the same shape — the server
-      // interprets `submit-message` identically either way.
-      prepareSendMessagesRequest: ({ id, messages: msgs, trigger, messageId }) => {
-        switch (trigger) {
-          case "regenerate-message":
-            return { body: { id, trigger, messageId } };
-          case "submit-message":
-          default:
-            return {
-              body: {
-                id,
-                trigger: "submit-message",
-                message: msgs[msgs.length - 1],
-                messageId,
-              },
-            };
-        }
-      },
-    }),
-  });
+  const { messages, sendMessage, status, error, stop, regenerate, clearError } =
+    useChat({
+      id: chatId,
+      messages: initialMessages as UIMessage[],
+      resume,
+      // Override the AI SDK's default id generator (nanoid-style,
+      // e.g. "msg_4h3jk2h4") with a real UUID. The server's leercoach
+      // message table stores `id uuid NOT NULL` and core's Zod schema
+      // enforces uuidSchema, so non-UUID ids from the client's submit
+      // path throw `Invalid uuid` on save. `crypto.randomUUID()` is
+      // available in every modern browser + every Node runtime we
+      // target, so no polyfill needed.
+      generateId: () => crypto.randomUUID(),
+      transport: new DefaultChatTransport({
+        api: apiEndpoint,
+        // Trigger-aware body shape required by resumable streams: the
+        // server rebuilds history from the DB, so we only send the
+        // latest delta (or just the messageId for regenerate). This
+        // matches the Vercel reference example at
+        // examples/next/app/api/chat/route.ts.
+        //
+        // The non-resumable path (older leercoach callers, hypothetical
+        // future consumers) can tolerate the same shape — the server
+        // interprets `submit-message` identically either way.
+        prepareSendMessagesRequest: ({
+          id,
+          messages: msgs,
+          trigger,
+          messageId,
+        }) => {
+          switch (trigger) {
+            case "regenerate-message":
+              return { body: { id, trigger, messageId } };
+            default:
+              return {
+                body: {
+                  id,
+                  trigger: "submit-message",
+                  message: msgs[msgs.length - 1],
+                  messageId,
+                },
+              };
+          }
+        },
+      }),
+    });
 
   useEffect(() => {
     if (error && onError) onError(error);
@@ -327,7 +324,10 @@ function Provider({
 function Frame({
   children,
   className,
-}: { children: ReactNode; className?: string }) {
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const { handleDrop } = useAiChatContext().actions;
   const [dragActive, setDragActive] = useState(false);
   // Counter handles the Safari/Chrome quirk where dragleave fires when
@@ -348,6 +348,7 @@ function Frame({
   }
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: file-drop target; drag events only (not keyboard-operable like a control)
     <div
       // Frame is intentionally chrome-less (no border / rounded /
       // shadow / own background). The consumer owns the outer card
@@ -508,7 +509,9 @@ function MessageItem({
   const isUser = message.role === "user";
 
   if (message.compaction?.kind === "summary") {
-    return <CompactionSummaryItem info={message.compaction} parts={message.parts} />;
+    return (
+      <CompactionSummaryItem info={message.compaction} parts={message.parts} />
+    );
   }
 
   const folded = message.compaction?.kind === "folded";
@@ -520,7 +523,11 @@ function MessageItem({
           chat area. */}
       <div
         className={`flex max-w-[85%] flex-col gap-1 ${folded ? "opacity-55" : ""}`}
-        title={folded ? "Samengevat — dit bericht wordt niet meer meegestuurd naar de coach." : undefined}
+        title={
+          folded
+            ? "Samengevat — dit bericht wordt niet meer meegestuurd naar de coach."
+            : undefined
+        }
       >
         <div
           ref={bubbleRef}
@@ -573,7 +580,10 @@ function CompactionSummaryItem({
     for (const p of parts) {
       if (isTextPart(p)) chunks.push(p.text);
     }
-    return chunks.join("").replace(/<\/?summary>/g, "").trim();
+    return chunks
+      .join("")
+      .replace(/<\/?summary>/g, "")
+      .trim();
   }, [parts]);
 
   return (
@@ -844,7 +854,7 @@ function RenderMessageParts({ parts }: { parts: unknown }) {
         if (isStepMarkerPart(part)) return null;
         return (
           <pre
-            key={`other-${i}`}
+            key={JSON.stringify(part)}
             className="mt-2 whitespace-pre-wrap rounded bg-slate-50 p-2 text-xs text-slate-700"
           >
             {JSON.stringify(part, null, 2)}
@@ -1055,8 +1065,7 @@ function InputForm({
             c.trigger.toLowerCase().includes(slashQuery) ||
             c.label.toLowerCase().includes(slashQuery),
         );
-  const slashMenuOpen =
-    slashQuery !== null && filteredSlashCommands.length > 0;
+  const slashMenuOpen = slashQuery !== null && filteredSlashCommands.length > 0;
   const [slashHighlightRaw, setSlashHighlight] = useState(0);
   // Clamp the highlight to the current filter length every render.
   // Avoids a synchronous setState-in-effect (flagged by
@@ -1161,95 +1170,95 @@ function InputForm({
           </div>
         ) : null}
         <textarea
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onPaste={onTextareaPaste}
-        onKeyDown={(e) => {
-          // ---- Slash menu (highest priority; grabs keys before
-          //      any of the submit/stop/shift+enter handlers) ----
-          if (slashMenuOpen) {
-            if (e.key === "ArrowDown") {
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onPaste={onTextareaPaste}
+          onKeyDown={(e) => {
+            // ---- Slash menu (highest priority; grabs keys before
+            //      any of the submit/stop/shift+enter handlers) ----
+            if (slashMenuOpen) {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setSlashHighlight((i) =>
+                  Math.min(i + 1, filteredSlashCommands.length - 1),
+                );
+                return;
+              }
+              if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setSlashHighlight((i) => Math.max(i - 1, 0));
+                return;
+              }
+              if (e.key === "Enter" || e.key === "Tab") {
+                e.preventDefault();
+                const cmd = filteredSlashCommands[slashHighlight];
+                if (cmd) applySlashCommand(cmd);
+                return;
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                // Clear the slash prefix — user bailed on the command.
+                setInputValue("");
+                return;
+              }
+              // Any other key (letters, backspace, etc.) falls through
+              // to the textarea, refining the filter via onChange.
+            }
+            // Esc aborts the in-flight stream. Works whether the textarea
+            // is empty or not, so a user who accidentally hit Enter can
+            // immediately cancel without first clearing their input.
+            if (e.key === "Escape" && isLoading) {
               e.preventDefault();
-              setSlashHighlight((i) =>
-                Math.min(i + 1, filteredSlashCommands.length - 1),
-              );
+              stop();
               return;
             }
-            if (e.key === "ArrowUp") {
+            if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
-              setSlashHighlight((i) => Math.max(i - 1, 0));
-              return;
+              if (submitBlocked) {
+                // Swallow the Enter: the form isn't ready to submit.
+                // The user sees the disabled button + tooltip as the
+                // explanation. Typing continues uninterrupted.
+                return;
+              }
+              // Idle → send. Streaming → queue. `submitCurrentInput`
+              // owns that branch, so Enter is the same "commit my turn"
+              // gesture either way.
+              submitCurrentInput();
             }
-            if (e.key === "Enter" || e.key === "Tab") {
-              e.preventDefault();
-              const cmd = filteredSlashCommands[slashHighlight];
-              if (cmd) applySlashCommand(cmd);
-              return;
-            }
-            if (e.key === "Escape") {
-              e.preventDefault();
-              // Clear the slash prefix — user bailed on the command.
-              setInputValue("");
-              return;
-            }
-            // Any other key (letters, backspace, etc.) falls through
-            // to the textarea, refining the filter via onChange.
-          }
-          // Esc aborts the in-flight stream. Works whether the textarea
-          // is empty or not, so a user who accidentally hit Enter can
-          // immediately cancel without first clearing their input.
-          if (e.key === "Escape" && isLoading) {
-            e.preventDefault();
-            stop();
-            return;
-          }
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            if (submitBlocked) {
-              // Swallow the Enter: the form isn't ready to submit.
-              // The user sees the disabled button + tooltip as the
-              // explanation. Typing continues uninterrupted.
-              return;
-            }
-            // Idle → send. Streaming → queue. `submitCurrentInput`
-            // owns that branch, so Enter is the same "commit my turn"
-            // gesture either way.
-            submitCurrentInput();
-          }
-        }}
-        placeholder={placeholder}
-        rows={1}
-        // Keep the textarea usable during streaming so the user can
-        // start drafting their next message while the model finishes
-        // (or abort mid-stream and edit).
-        //
-        // Auto-grow: `field-sizing-content` makes the element track its
-        // own content height (Tailwind 4 utility, CSS spec). `rows={1}`
-        // sets the empty-state baseline to a single line so the inlined
-        // action button sits naturally beside the placeholder — a
-        // higher row count leaves a big empty gap to the button's
-        // opposite corner. `max-h-64` caps at ~16rem so a runaway
-        // paste doesn't take over the chat area — internal scroll
-        // kicks in past that. `resize-none` disables the manual drag
-        // handle since content drives size. `pr-12` leaves room for
-        // the 32px icon button bottom-right.
-        // `touch-manipulation` removes the ~300 ms double-tap-zoom
-        // delay mobile browsers add to ordinary tap targets —
-        // noticeable friction in a chat where each message is a
-        // deliberate submit.
-        //
-        // Padding: `pr-12` always reserves space for the send button
-        // bottom-right. `pl-12` is conditional on `leftActions` so the
-        // textarea stays flush-left when no left-action slot is used.
-        // No rounded corners on the textarea itself — the parent
-        // Frame owns the chat card's rounding now; adding them here
-        // would fight the bottom edge of the card at the composer
-        // floor.
-        className={`block w-full resize-none field-sizing-content max-h-64 touch-manipulation overflow-y-auto overscroll-contain bg-transparent py-3 ${
-          leftActions ? "pl-12" : "pl-3"
-        } pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none`}
-      />
-      {/* Icon button sits in the bottom-right corner. 32px square
+          }}
+          placeholder={placeholder}
+          rows={1}
+          // Keep the textarea usable during streaming so the user can
+          // start drafting their next message while the model finishes
+          // (or abort mid-stream and edit).
+          //
+          // Auto-grow: `field-sizing-content` makes the element track its
+          // own content height (Tailwind 4 utility, CSS spec). `rows={1}`
+          // sets the empty-state baseline to a single line so the inlined
+          // action button sits naturally beside the placeholder — a
+          // higher row count leaves a big empty gap to the button's
+          // opposite corner. `max-h-64` caps at ~16rem so a runaway
+          // paste doesn't take over the chat area — internal scroll
+          // kicks in past that. `resize-none` disables the manual drag
+          // handle since content drives size. `pr-12` leaves room for
+          // the 32px icon button bottom-right.
+          // `touch-manipulation` removes the ~300 ms double-tap-zoom
+          // delay mobile browsers add to ordinary tap targets —
+          // noticeable friction in a chat where each message is a
+          // deliberate submit.
+          //
+          // Padding: `pr-12` always reserves space for the send button
+          // bottom-right. `pl-12` is conditional on `leftActions` so the
+          // textarea stays flush-left when no left-action slot is used.
+          // No rounded corners on the textarea itself — the parent
+          // Frame owns the chat card's rounding now; adding them here
+          // would fight the bottom edge of the card at the composer
+          // floor.
+          className={`block w-full resize-none field-sizing-content max-h-64 touch-manipulation overflow-y-auto overscroll-contain bg-transparent py-3 ${
+            leftActions ? "pl-12" : "pl-3"
+          } pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none`}
+        />
+        {/* Icon button sits in the bottom-right corner. 32px square
           (size-8) fits cleanly inside a single-line input without
           poking above/below the baseline — a text-sized button was
           too tall for this layout.

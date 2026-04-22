@@ -144,13 +144,13 @@ export function NewChatForm({
             Stap 2 · Instructiegroep
           </h2>
           <p className="text-sm text-slate-600">
-            Op welke instructiegroep is dit portfolio gericht? Je kunt later
-            een apart portfolio starten voor een andere groep.
+            Op welke instructiegroep is dit portfolio gericht? Je kunt later een
+            apart portfolio starten voor een andere groep.
           </p>
           {availableInstructieGroepen.length === 0 ? (
             <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-              Geen instructiegroepen beschikbaar voor dit profiel. Neem
-              contact op met de NWD als dit onverwacht is.
+              Geen instructiegroepen beschikbaar voor dit profiel. Neem contact
+              op met de NWD als dit onverwacht is.
             </p>
           ) : (
             <select
@@ -181,9 +181,7 @@ export function NewChatForm({
                 type="radio"
                 name="scope"
                 checked={scopeChoice?.type === "full_profiel"}
-                onChange={() =>
-                  setScopeChoice({ type: "full_profiel" })
-                }
+                onChange={() => setScopeChoice({ type: "full_profiel" })}
                 className="mt-1"
               />
               <span>

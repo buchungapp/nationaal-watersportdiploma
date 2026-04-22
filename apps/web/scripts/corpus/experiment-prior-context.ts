@@ -39,18 +39,13 @@ import { runDraftGeneration } from "./portfolio-generator/generator.ts";
 // deliberately when comparing new-model results against historical
 // baselines.
 const MODEL_ID = "anthropic/claude-sonnet-4-5";
-import { buildDraftPrompt } from "./portfolio-generator/prompts.ts";
-import type { Question } from "./portfolio-generator/schemas.ts";
-import type {
-  RubricCriterium,
-  RubricTree,
-  RubricWerkproces,
-} from "./portfolio-generator/types.ts";
+
 import {
   concretenessPer100,
   loadRubricByProfielTitel,
   wordCount,
 } from "./eval-runner.ts";
+import type { Question } from "./portfolio-generator/schemas.ts";
 import {
   ANONYMIZED_DIR,
   type AnonymizedPortfolio,
@@ -95,8 +90,8 @@ async function loadFromAiCorpus(
     }
     return {
       sourceIdentifier,
-      content: res.rows[0]!.content,
-      niveau: res.rows[0]!.niveauRang,
+      content: res.rows[0]?.content,
+      niveau: res.rows[0]?.niveauRang,
     };
   } finally {
     await client.end();
@@ -158,11 +153,17 @@ const PriorContextSchema = z.object({
     ),
   professionalIdentity: z
     .string()
-    .describe("One-paragraph summary of how this kandidaat sees themselves professionally."),
+    .describe(
+      "One-paragraph summary of how this kandidaat sees themselves professionally.",
+    ),
 });
 
 async function extractPriorContext(args: {
-  priorPortfolios: Array<{ sourceIdentifier: string; content: string; niveau: number }>;
+  priorPortfolios: Array<{
+    sourceIdentifier: string;
+    content: string;
+    niveau: number;
+  }>;
 }): Promise<z.infer<typeof PriorContextSchema>> {
   const corpus = args.priorPortfolios
     .sort((a, b) => a.niveau - b.niveau)
@@ -248,10 +249,7 @@ async function main() {
   );
 
   // Load the Maurits 5.1 golden cache (built in Stage E)
-  const goldenPath = join(
-    GOLDEN_DIR,
-    `5.1_maurits__Instructeur_5.json`,
-  );
+  const goldenPath = join(GOLDEN_DIR, `5.1_maurits__Instructeur_5.json`);
   if (!existsSync(goldenPath)) {
     throw new Error(
       `No golden cache for 5.1_maurits. Run corpus:eval alle_niveau_3_bob.json or similar first to build caches.`,
@@ -290,9 +288,7 @@ async function main() {
   }));
 
   // Run TWO draft generations: baseline (no context) + experimental (with context)
-  console.log(
-    "\nRunning draft generation (baseline — no prior context)...",
-  );
+  console.log("\nRunning draft generation (baseline — no prior context)...");
   const baselineStart = Date.now();
   const baselineResult = await runDraftGeneration({
     tree,
@@ -374,7 +370,9 @@ async function main() {
   const avg = (xs: Array<number | null>): number => {
     const nums = xs.filter((n): n is number => n !== null && !Number.isNaN(n));
     if (nums.length === 0) return 0;
-    return Math.round((nums.reduce((s, n) => s + n, 0) / nums.length) * 10) / 10;
+    return (
+      Math.round((nums.reduce((s, n) => s + n, 0) / nums.length) * 10) / 10
+    );
   };
 
   const summary = {

@@ -97,7 +97,10 @@ async function loadAllProfielenWithWerkprocessen(): Promise<
       `,
     );
 
-    const byProfiel = new Map<string, ProfielRow & { werkprocessen: WerkprocesRow[] }>();
+    const byProfiel = new Map<
+      string,
+      ProfielRow & { werkprocessen: WerkprocesRow[] }
+    >();
     for (const row of res.rows) {
       if (!byProfiel.has(row.profielId)) {
         byProfiel.set(row.profielId, {
@@ -201,7 +204,7 @@ function buildOutlineFromProfiel(
       werkprocessenByKerntaak.set(wp.kerntaakId, []);
       kerntaakOrder.push(wp.kerntaakId);
     }
-    werkprocessenByKerntaak.get(wp.kerntaakId)!.push(wp);
+    werkprocessenByKerntaak.get(wp.kerntaakId)?.push(wp);
   }
 
   for (const kerntaakId of kerntaakOrder) {
@@ -276,9 +279,7 @@ console.log("Building outline templates for every populated profiel...");
 
 await withDatabase({ connectionString: PGURI }, async () => {
   const profielen = await loadAllProfielenWithWerkprocessen();
-  const withWerkprocessen = profielen.filter(
-    (p) => p.werkprocessen.length > 0,
-  );
+  const withWerkprocessen = profielen.filter((p) => p.werkprocessen.length > 0);
   console.log(
     `Found ${withWerkprocessen.length} populated profielen (skipping ${profielen.length - withWerkprocessen.length} stubs).`,
   );

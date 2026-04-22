@@ -89,11 +89,10 @@ export function PortfolioUploadDialog({
             </DialogTitle>
             <p className="text-sm text-slate-600">
               De PDF wordt server-side geanonimiseerd (namen, locaties,
-              verenigingen, datums worden eruit gehaald) voordat iets
-              opgeslagen wordt. Alleen jij ziet de geanonimiseerde tekst;
-              de digitale leercoach gebruikt ’m als context in jouw
-              sessies. Een menselijke leercoach, instructeur of
-              beoordelaar heeft géén toegang.
+              verenigingen, datums worden eruit gehaald) voordat iets opgeslagen
+              wordt. Alleen jij ziet de geanonimiseerde tekst; de digitale
+              leercoach gebruikt ’m als context in jouw sessies. Een menselijke
+              leercoach, instructeur of beoordelaar heeft géén toegang.
             </p>
 
             <UploadFields form={form} idPrefix="prior-dialog" />
@@ -113,7 +112,9 @@ export function PortfolioUploadDialog({
                 disabled={!form.canSubmit}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {form.isPending ? "Bezig met verwerken…" : "Upload + anonimiseer"}
+                {form.isPending
+                  ? "Bezig met verwerken…"
+                  : "Upload + anonimiseer"}
               </button>
             </div>
           </form>

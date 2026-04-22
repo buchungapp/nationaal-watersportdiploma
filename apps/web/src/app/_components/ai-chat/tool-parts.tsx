@@ -123,10 +123,7 @@ function SearchBewijsExamplesOutput({ output }: { output: unknown }) {
   }
   if (!parsed.ok) {
     return (
-      <ToolErrorPill
-        label="Geen voorbeelden gevonden"
-        detail={parsed.reason}
-      />
+      <ToolErrorPill label="Geen voorbeelden gevonden" detail={parsed.reason} />
     );
   }
 
@@ -177,8 +174,8 @@ function SetPhaseOutput({ output }: { output: unknown }) {
   const parsed = parseSetPhaseOutput(output);
   if (!parsed) return null;
   return (
-    <div
-      className="my-3 flex items-center gap-3 text-[11px] font-medium uppercase tracking-wide text-slate-500"
+    <fieldset
+      className="my-3 flex min-w-0 items-center gap-3 border-0 p-0 text-[11px] font-medium uppercase tracking-wide text-slate-500"
       aria-label={`Fase gewijzigd naar ${PHASE_LABEL[parsed.phase]}`}
     >
       <span aria-hidden="true" className="h-px flex-1 bg-slate-200" />
@@ -192,7 +189,7 @@ function SetPhaseOutput({ output }: { output: unknown }) {
         </span>
       </span>
       <span aria-hidden="true" className="h-px flex-1 bg-slate-200" />
-    </div>
+    </fieldset>
   );
 }
 
@@ -219,10 +216,7 @@ function SaveDraftOutput({ output }: { output: unknown }) {
   if (!parsed) return null;
   if (!parsed.ok) {
     return (
-      <ToolErrorPill
-        label="Draft niet opgeslagen"
-        detail={parsed.reason}
-      />
+      <ToolErrorPill label="Draft niet opgeslagen" detail={parsed.reason} />
     );
   }
   // A no-op (hash match) shouldn't shout — tiny muted pill instead
@@ -252,9 +246,7 @@ function SaveDraftOutput({ output }: { output: unknown }) {
         <span className="font-semibold">
           Versie {parsed.versionNumber} opgeslagen
         </span>
-        <span className="text-[11px] text-emerald-700/80">
-          · {kb}k tekens
-        </span>
+        <span className="text-[11px] text-emerald-700/80">· {kb}k tekens</span>
       </div>
       <p className="text-xs text-emerald-800/80">
         De nieuwe draft staat klaar in de docpane. Open om te lezen of te
@@ -389,7 +381,14 @@ function parseSearchBewijsExamplesOutput(
       criteriumTitel: o.criteriumTitel,
       examples: (o.examples as unknown[])
         .filter(
-          (e): e is { content: string; wordCount: number; concretenessScore: number | null; sourceRef: string } =>
+          (
+            e,
+          ): e is {
+            content: string;
+            wordCount: number;
+            concretenessScore: number | null;
+            sourceRef: string;
+          } =>
             e !== null &&
             typeof e === "object" &&
             typeof (e as { content: unknown }).content === "string",
@@ -419,10 +418,7 @@ function ToolBusyPill({ label }: { label: string }) {
   );
 }
 
-function ToolErrorPill({
-  label,
-  detail,
-}: { label: string; detail: string }) {
+function ToolErrorPill({ label, detail }: { label: string; detail: string }) {
   return (
     <div className="my-1 inline-flex max-w-[85%] flex-col gap-0.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
       <span className="font-semibold">{label}</span>
@@ -504,7 +500,10 @@ function humanToolLabel(
   const match = labels[toolName];
   if (match) return match[phase];
   // Fallback: humanize the camelCase tool name.
-  const human = toolName.replace(/([A-Z])/g, " $1").toLowerCase().trim();
+  const human = toolName
+    .replace(/([A-Z])/g, " $1")
+    .toLowerCase()
+    .trim();
   return phase === "busy"
     ? `Voert ${human} uit…`
     : phase === "error"

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { ProfielOption } from "./upload/useUploadPortfolioForm";
 import { PortfolioUploadDialog } from "./PortfolioUploadDialog";
+import type { ProfielOption } from "./upload/useUploadPortfolioForm";
 
 // Drop-zone + click-to-upload affordance on the management page.
 // Opens the shared PortfolioUploadDialog with a dropped/selected
@@ -148,8 +148,8 @@ function EmptyDropZone({
         Sleep hier een PDF, of klik om te kiezen
       </p>
       <p className="text-sm text-slate-600">
-        Heb je een eerder PvB-portfolio liggen? Upload hem hier en je
-        leercoach kan er tijdens sessies naar verwijzen.
+        Heb je een eerder PvB-portfolio liggen? Upload hem hier en je leercoach
+        kan er tijdens sessies naar verwijzen.
       </p>
       <p className="text-xs text-slate-500">
         PDF · max 15 MB · wordt server-side geanonimiseerd voor opslag

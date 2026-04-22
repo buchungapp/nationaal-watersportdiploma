@@ -149,9 +149,7 @@ export async function editPortfolioAction(
   // user can toggle the chat pane open anytime to begin a
   // conversation, and the coach has full context from the portfolio.
 
-  redirect(
-    `/profiel/${input.handle}/leercoach/chat/${chatId}?focus=doc`,
-  );
+  redirect(`/profiel/${input.handle}/leercoach/chat/${chatId}?focus=doc`);
 }
 
 // createPortfolioChatAction — called from the portfolio detail page's

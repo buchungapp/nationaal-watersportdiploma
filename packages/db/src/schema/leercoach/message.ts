@@ -69,10 +69,7 @@ export const leercoachMessage = leercoachSchema.table(
       enum: ["user", "assistant", "system"],
     }).notNull(),
     parts: jsonb("parts").$type<LeercoachMessagePart[]>().notNull(),
-    attachments: jsonb("attachments")
-      .$type<unknown[]>()
-      .default([])
-      .notNull(),
+    attachments: jsonb("attachments").$type<unknown[]>().default([]).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .defaultNow()
       .notNull(),

@@ -59,7 +59,10 @@ export const outlineTemplate = aiCorpusSchema.table(
     sections: jsonb("sections").$type<OutlineSection[]>().notNull(),
     // Notes: free-form metadata about how this template was produced
     // (e.g. "deterministic from rubric", "refined via LLM pass against corpus").
-    notes: jsonb("notes").$type<Record<string, unknown>>().default({}).notNull(),
+    notes: jsonb("notes")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
     generatedAt: timestamp("generated_at", {
       withTimezone: true,
       mode: "string",
