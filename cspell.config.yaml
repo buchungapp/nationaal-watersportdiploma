@@ -94,6 +94,60 @@ words:
   - Wytse
   - ylqt
   - Zabcdefghijkmnpqrstvwxyz
+  - Advertiseer
+  - affordances
+  - anonimiseer
+  - anonymised
+  - Anonymised
+  - Artefacts
+  - attribueert
+  - behaviour
+  - Capitalisation
+  - centralised
+  - chunker
+  - criteri
+  - crits
+  - dedup
+  - Dedup
+  - defence
+  - draftversie
+  - eigenvaardigheidsdiploma's
+  - fragm
+  - geattribueerd
+  - geflagd
+  - GPAL
+  - HNSW
+  - hnsw
+  - jaars
+  - localised
+  - memoising
+  - organisation
+  - parcourtje
+  - Pdfs
+  - pgvector
+  - psql
+  - rangs
+  - recognisable
+  - recognised
+  - Resumability
+  - sanitised
+  - serialise
+  - Serialise
+  - serialisers
+  - serialises
+  - Shiki
+  - shouty
+  - summarised
+  - symbolicates
+  - synthesised
+  - throttleit
+  - tokenised
+  - Transcribeer
+  - uncompacted
+  - unpdf
+  - unredacted
+  - Uturn
+  - wordprocessingml
 ignoreWords:
   - TERMS
   - transform

@@ -1,19 +1,19 @@
-import { Leercoach } from "@nawadi/core";
 import {
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
   PlusIcon,
 } from "@heroicons/react/20/solid";
+import { Leercoach } from "@nawadi/core";
 import type { Metadata } from "next";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { requireInstructorPerson } from "../_lib/require-instructor-person";
-import { requireLeercoachEnabled } from "./_lib/require-leercoach-enabled";
-import { createQAChatAction } from "./actions";
 import { PortfolioCard } from "./_components/PortfolioCard";
 import { SessionRow } from "./_components/SessionRow";
+import { requireLeercoachEnabled } from "./_lib/require-leercoach-enabled";
+import { createQAChatAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Leercoach",
@@ -56,9 +56,9 @@ export default async function LeercoachLandingPage(props: {
           <Badge color="amber">Experimenteel</Badge>
         </div>
         <Text className="max-w-prose">
-          Stel vragen over de KSS, diplomalijn, of werk aan een
-          PvB-portfolio. Je leercoach is er voor beide — losse vragen én
-          het opbouwen van een volledig portfolio. Eerder werk kun je{" "}
+          Stel vragen over de KSS, diplomalijn, of werk aan een PvB-portfolio.
+          Je leercoach is er voor beide — losse vragen én het opbouwen van een
+          volledig portfolio. Eerder werk kun je{" "}
           <TextLink href={`/profiel/${handle}/portfolios`}>hier</TextLink>{" "}
           uploaden.
         </Text>
@@ -72,10 +72,7 @@ export default async function LeercoachLandingPage(props: {
             Stel een vraag
           </Button>
         </form>
-        <Button
-          href={`/profiel/${handle}/leercoach/portfolio/nieuw`}
-          outline
-        >
+        <Button href={`/profiel/${handle}/leercoach/portfolio/nieuw`} outline>
           <PlusIcon data-slot="icon" />
           Nieuw portfolio
         </Button>
@@ -92,8 +89,8 @@ export default async function LeercoachLandingPage(props: {
                 Nog geen portfolio-concept.
               </Text>
               <Text className="text-zinc-600">
-                Start een portfolio-sessie om stap voor stap naar een
-                indienbare versie toe te werken.
+                Start een portfolio-sessie om stap voor stap naar een indienbare
+                versie toe te werken.
               </Text>
             </div>
           </div>
@@ -128,8 +125,7 @@ export default async function LeercoachLandingPage(props: {
               </Text>
               <Text className="text-zinc-600">
                 Klik op &ldquo;Stel een vraag&rdquo; om te beginnen — ideaal
-                voor losse KSS-vragen of om te verkennen wat een niveau
-                inhoudt.
+                voor losse KSS-vragen of om te verkennen wat een niveau inhoudt.
               </Text>
             </div>
           </div>

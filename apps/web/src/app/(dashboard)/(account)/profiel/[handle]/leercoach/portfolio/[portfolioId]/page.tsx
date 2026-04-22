@@ -1,25 +1,22 @@
-import { KSS, Leercoach } from "@nawadi/core";
 import {
   ChatBubbleLeftRightIcon,
   DocumentTextIcon,
   PencilSquareIcon,
   PlusIcon,
 } from "@heroicons/react/20/solid";
+import { KSS, Leercoach } from "@nawadi/core";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SimpleMarkdown } from "~/app/_components/ai-chat/markdown";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Heading, Subheading } from "~/app/(dashboard)/_components/heading";
 import { Text, TextLink } from "~/app/(dashboard)/_components/text";
-import { SimpleMarkdown } from "~/app/_components/ai-chat/markdown";
 import { requireInstructorPerson } from "../../../_lib/require-instructor-person";
-import {
-  createPortfolioChatAction,
-  editPortfolioAction,
-} from "../../actions";
+import { SessionRow } from "../../_components/SessionRow";
 import { requireLeercoachEnabled } from "../../_lib/require-leercoach-enabled";
 import { loadLeercoachRubric } from "../../_lib/rubric";
-import { SessionRow } from "../../_components/SessionRow";
+import { createPortfolioChatAction, editPortfolioAction } from "../../actions";
 
 export const metadata: Metadata = {
   title: "Portfolio-concept · leercoach",
@@ -119,9 +116,7 @@ export default async function PortfolioDetailPage(props: {
   // Meta row: quick-scan facts that sit below the subtitle. Kept small
   // and text-only so the eye lands on the concept card next.
   const metaParts: string[] = [];
-  metaParts.push(
-    chats.length === 1 ? "1 sessie" : `${chats.length} sessies`,
-  );
+  metaParts.push(chats.length === 1 ? "1 sessie" : `${chats.length} sessies`);
   metaParts.push(
     versions.length === 1 ? "1 versie" : `${versions.length} versies`,
   );
@@ -165,16 +160,11 @@ export default async function PortfolioDetailPage(props: {
     <div className="flex flex-col gap-8">
       {/* ── Hero (full-width) ──────────────────────────────────────── */}
       <div className="flex flex-col gap-2">
-        <TextLink
-          href={`/profiel/${handle}/leercoach`}
-          className="text-sm"
-        >
+        <TextLink href={`/profiel/${handle}/leercoach`} className="text-sm">
           ← Terug naar leercoach
         </TextLink>
         <Heading>{headerTitle}</Heading>
-        {subtitle ? (
-          <Text className="text-slate-600">{subtitle}</Text>
-        ) : null}
+        {subtitle ? <Text className="text-slate-600">{subtitle}</Text> : null}
         <Text className="text-xs text-slate-500">{meta}</Text>
       </div>
 
@@ -225,7 +215,7 @@ export default async function PortfolioDetailPage(props: {
             )}
           </div>
 
-          {currentVersion && currentVersion.content.trim() ? (
+          {currentVersion?.content.trim() ? (
             <div className="relative overflow-hidden rounded-xl border border-zinc-200 bg-white">
               {/* Scrollable container. max-h-[60vh] is a "long enough
                   to read, short enough to stay with the page"
@@ -247,8 +237,8 @@ export default async function PortfolioDetailPage(props: {
             <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-zinc-200 bg-white p-8 text-center">
               <DocumentTextIcon className="size-8 text-zinc-400" />
               <Text className="text-zinc-600">
-                Nog geen inhoud. Start een sessie om een eerste concept uit
-                te werken.
+                Nog geen inhoud. Start een sessie om een eerste concept uit te
+                werken.
               </Text>
             </div>
           )}
@@ -321,7 +311,9 @@ function scopeLabel(
   }
 }
 
-function richtingLabel(r: "instructeur" | "leercoach" | "pvb_beoordelaar"): string {
+function richtingLabel(
+  r: "instructeur" | "leercoach" | "pvb_beoordelaar",
+): string {
   switch (r) {
     case "instructeur":
       return "Instructeur";

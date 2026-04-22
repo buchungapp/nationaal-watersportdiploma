@@ -17,23 +17,19 @@ mkdirSync(REPORTS_DIR, { recursive: true });
 
 const files = readdirSync(ANONYMIZED_DIR).filter((f) => f.endsWith(".json"));
 if (files.length === 0) {
-  console.error(
-    "No anonymized files found. Run extract + anonymize first.",
-  );
+  console.error("No anonymized files found. Run extract + anonymize first.");
   process.exit(1);
 }
 
 const portfolios = files.map(
   (f) =>
-    JSON.parse(readFileSync(join(ANONYMIZED_DIR, f), "utf8")) as AnonymizedPortfolio,
+    JSON.parse(
+      readFileSync(join(ANONYMIZED_DIR, f), "utf8"),
+    ) as AnonymizedPortfolio,
 );
 
 const wordCount = (s: string): number =>
-  s
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .filter(Boolean).length;
+  s.replace(/\s+/g, " ").trim().split(" ").filter(Boolean).length;
 
 const niveauBuckets = new Map<string, AnonymizedPortfolio[]>();
 for (const p of portfolios) {
@@ -59,7 +55,10 @@ function stats(numbers: number[]): {
     return { min: 0, p25: 0, median: 0, p75: 0, max: 0, mean: 0 };
   const sorted = [...numbers].sort((a, b) => a - b);
   const pick = (q: number): number => {
-    const idx = Math.max(0, Math.min(sorted.length - 1, Math.floor(q * sorted.length)));
+    const idx = Math.max(
+      0,
+      Math.min(sorted.length - 1, Math.floor(q * sorted.length)),
+    );
     return sorted[idx] ?? 0;
   };
   const mean = sorted.reduce((s, n) => s + n, 0) / sorted.length;

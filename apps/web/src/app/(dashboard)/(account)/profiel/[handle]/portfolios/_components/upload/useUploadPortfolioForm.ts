@@ -30,10 +30,7 @@ export type UploadPriorPortfolioForm = ReturnType<
   typeof useUploadPortfolioForm
 >;
 
-export type PortfolioRichting =
-  | "instructeur"
-  | "leercoach"
-  | "pvb_beoordelaar";
+export type PortfolioRichting = "instructeur" | "leercoach" | "pvb_beoordelaar";
 
 export type ProfielOption = {
   id: string;
@@ -123,6 +120,7 @@ export function useUploadPortfolioForm({
   // Whenever the profiel changes, reset coverage — kerntaakCodes
   // carry numeric strings tied to the previous profiel's kerntaken
   // and must not bleed across profielen.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: profielId is intentional; Biome thinks the dep is unnecessary
   useEffect(() => {
     setCoverage({ type: "full_profiel" });
   }, [profielId]);

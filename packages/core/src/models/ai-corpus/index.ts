@@ -9,8 +9,8 @@ import {
   isNull,
   notInArray,
   or,
-  sql,
   type SQLWrapper,
+  sql,
 } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
@@ -32,11 +32,7 @@ const domainSchema = z.enum([
   "artefact",
 ]);
 const consentLevelSchema = z.enum(["seed", "opt_in_shared", "user_only"]);
-const richtingSchema = z.enum([
-  "instructeur",
-  "leercoach",
-  "pvb_beoordelaar",
-]);
+const richtingSchema = z.enum(["instructeur", "leercoach", "pvb_beoordelaar"]);
 
 const publicConsentLevels: Array<"seed" | "opt_in_shared"> = [
   "seed",
@@ -223,9 +219,7 @@ export const getChunksForCriterium = wrapQuery(
       ];
       if (visibilityClause) whereClauses.push(visibilityClause);
       if (input.excludeSourceIds.length > 0) {
-        whereClauses.push(
-          notInArray(s.chunk.sourceId, input.excludeSourceIds),
-        );
+        whereClauses.push(notInArray(s.chunk.sourceId, input.excludeSourceIds));
       }
 
       const rows = await query
@@ -248,8 +242,7 @@ export const getChunksForCriterium = wrapQuery(
         sourceId: r.sourceId,
         content: r.content,
         wordCount: r.wordCount,
-        qualityScore:
-          r.qualityScore === null ? null : Number(r.qualityScore),
+        qualityScore: r.qualityScore === null ? null : Number(r.qualityScore),
         sourceIdentifier: r.sourceIdentifier,
       }));
     },
@@ -364,9 +357,10 @@ export const listUserPriorSources = wrapQuery(
         // persist a known shape from the upload pipeline. Parse via
         // the schema so stale/legacy rows without a coverage field
         // yield null rather than crashing the listing query.
-        coverage: coverageScopeSchema.safeParse(
-          (src.metadata as { coverage?: unknown })?.coverage ?? null,
-        ).data ?? null,
+        coverage:
+          coverageScopeSchema.safeParse(
+            (src.metadata as { coverage?: unknown })?.coverage ?? null,
+          ).data ?? null,
         charCount: src.charCount,
         pageCount: src.pageCount,
         createdAt: src.createdAt,
@@ -448,103 +442,99 @@ export const getUserPriorChunksOutput = z.array(
  */
 export const getUserPriorChunks = wrapQuery(
   "aiCorpus.chunk.getUserPrior",
-  withZod(
-    getUserPriorChunksInput,
-    getUserPriorChunksOutput,
-    async (input) => {
-      const query = useQuery();
+  withZod(getUserPriorChunksInput, getUserPriorChunksOutput, async (input) => {
+    const query = useQuery();
 
-      const whereClauses: SQLWrapper[] = [
-        eq(s.source.consentLevel, "user_only"),
-        eq(s.source.contributedByUserId, input.userId),
-        isNull(s.source.revokedAt),
-      ];
+    const whereClauses: SQLWrapper[] = [
+      eq(s.source.consentLevel, "user_only"),
+      eq(s.source.contributedByUserId, input.userId),
+      isNull(s.source.revokedAt),
+    ];
 
-      // Tier ordering via boolean `ORDER BY <expr> DESC` (true first).
-      const profielTierOrder = input.scopeProfielId
-        ? sql`(${s.source.profielId} = ${input.scopeProfielId}) desc`
-        : sql`true`;
-      const richtingTierOrder = input.scopeRichting
-        ? sql`(${s.source.richting} = ${input.scopeRichting}) desc`
-        : sql`true`;
+    // Tier ordering via boolean `ORDER BY <expr> DESC` (true first).
+    const profielTierOrder = input.scopeProfielId
+      ? sql`(${s.source.profielId} = ${input.scopeProfielId}) desc`
+      : sql`true`;
+    const richtingTierOrder = input.scopeRichting
+      ? sql`(${s.source.richting} = ${input.scopeRichting}) desc`
+      : sql`true`;
 
-      // Fetch ALL candidate chunks (no SQL-side LIMIT) so the
-      // diversification step has the full set to draw from. The
-      // bounded user-upload model makes this safe in practice.
-      const rows = await query
-        .select({
-          chunkId: s.chunk.id,
-          sourceId: s.chunk.sourceId,
-          sourceIdentifier: s.source.sourceIdentifier,
-          profielId: s.source.profielId,
-          richting: s.source.richting,
-          niveauRang: s.source.niveauRang,
-          content: s.chunk.content,
-          wordCount: s.chunk.wordCount,
-          createdAt: s.source.createdAt,
-        })
-        .from(s.chunk)
-        .innerJoin(s.source, eq(s.source.id, s.chunk.sourceId))
-        .where(and(...whereClauses))
-        .orderBy(
-          profielTierOrder,
-          richtingTierOrder,
-          desc(s.source.createdAt),
-          s.chunk.createdAt,
-        );
+    // Fetch ALL candidate chunks (no SQL-side LIMIT) so the
+    // diversification step has the full set to draw from. The
+    // bounded user-upload model makes this safe in practice.
+    const rows = await query
+      .select({
+        chunkId: s.chunk.id,
+        sourceId: s.chunk.sourceId,
+        sourceIdentifier: s.source.sourceIdentifier,
+        profielId: s.source.profielId,
+        richting: s.source.richting,
+        niveauRang: s.source.niveauRang,
+        content: s.chunk.content,
+        wordCount: s.chunk.wordCount,
+        createdAt: s.source.createdAt,
+      })
+      .from(s.chunk)
+      .innerJoin(s.source, eq(s.source.id, s.chunk.sourceId))
+      .where(and(...whereClauses))
+      .orderBy(
+        profielTierOrder,
+        richtingTierOrder,
+        desc(s.source.createdAt),
+        s.chunk.createdAt,
+      );
 
-      // Group by sourceId while preserving the tier-sorted source
-      // order. The Map keeps insertion order, so the first time we
-      // see a source dictates its queue position in the round-robin.
-      const bySource = new Map<string, typeof rows>();
-      for (const r of rows) {
-        const existing = bySource.get(r.sourceId);
-        if (existing) existing.push(r);
-        else bySource.set(r.sourceId, [r]);
+    // Group by sourceId while preserving the tier-sorted source
+    // order. The Map keeps insertion order, so the first time we
+    // see a source dictates its queue position in the round-robin.
+    const bySource = new Map<string, typeof rows>();
+    for (const r of rows) {
+      const existing = bySource.get(r.sourceId);
+      if (existing) existing.push(r);
+      else bySource.set(r.sourceId, [r]);
+    }
+
+    // Round-robin across source queues until we hit maxResults or
+    // run out of chunks. Round N takes the Nth chunk from every
+    // source that has one.
+    const queues = Array.from(bySource.values());
+    const diversified: (typeof rows)[number][] = [];
+    for (
+      let round = 0;
+      diversified.length < input.maxResults && queues.some((q) => q[round]);
+      round++
+    ) {
+      for (const queue of queues) {
+        if (diversified.length >= input.maxResults) break;
+        const chunk = queue[round];
+        if (chunk) diversified.push(chunk);
       }
+    }
 
-      // Round-robin across source queues until we hit maxResults or
-      // run out of chunks. Round N takes the Nth chunk from every
-      // source that has one.
-      const queues = Array.from(bySource.values());
-      const diversified: (typeof rows)[number][] = [];
-      for (
-        let round = 0;
-        diversified.length < input.maxResults && queues.some((q) => q[round]);
-        round++
-      ) {
-        for (const queue of queues) {
-          if (diversified.length >= input.maxResults) break;
-          const chunk = queue[round];
-          if (chunk) diversified.push(chunk);
-        }
-      }
-
-      // Classify each row by match tightness so the LLM can weight
-      // content vs. style-only observations.
-      const scopeProfielId = input.scopeProfielId;
-      const scopeRichting = input.scopeRichting;
-      return diversified.map((r) => {
-        const matchQuality: "profiel" | "richting" | "other" =
-          scopeProfielId && r.profielId === scopeProfielId
-            ? "profiel"
-            : scopeRichting && r.richting === scopeRichting
-              ? "richting"
-              : "other";
-        return {
-          chunkId: r.chunkId,
-          sourceId: r.sourceId,
-          sourceIdentifier: r.sourceIdentifier,
-          profielId: r.profielId,
-          richting: r.richting,
-          niveauRang: r.niveauRang,
-          matchQuality,
-          content: r.content,
-          wordCount: r.wordCount,
-        };
-      });
-    },
-  ),
+    // Classify each row by match tightness so the LLM can weight
+    // content vs. style-only observations.
+    const scopeProfielId = input.scopeProfielId;
+    const scopeRichting = input.scopeRichting;
+    return diversified.map((r) => {
+      const matchQuality: "profiel" | "richting" | "other" =
+        scopeProfielId && r.profielId === scopeProfielId
+          ? "profiel"
+          : scopeRichting && r.richting === scopeRichting
+            ? "richting"
+            : "other";
+      return {
+        chunkId: r.chunkId,
+        sourceId: r.sourceId,
+        sourceIdentifier: r.sourceIdentifier,
+        profielId: r.profielId,
+        richting: r.richting,
+        niveauRang: r.niveauRang,
+        matchQuality,
+        content: r.content,
+        wordCount: r.wordCount,
+      };
+    });
+  }),
 );
 
 export const revokeUserPriorSourceInput = z.object({
@@ -665,7 +655,8 @@ export const listArtefactsForChat = wrapQuery(
           summary?: unknown;
         };
         const artefactType = (() => {
-          const t = typeof meta.artefactType === "string" ? meta.artefactType : "";
+          const t =
+            typeof meta.artefactType === "string" ? meta.artefactType : "";
           return t === "pdf" || t === "docx" || t === "image" ? t : "text";
         })();
         return {
@@ -723,104 +714,97 @@ export const getArtefactChunksOutput = z.object({
  */
 export const getArtefactChunks = wrapQuery(
   "aiCorpus.chunk.getArtefact",
-  withZod(
-    getArtefactChunksInput,
-    getArtefactChunksOutput,
-    async (input) => {
-      const query = useQuery();
+  withZod(getArtefactChunksInput, getArtefactChunksOutput, async (input) => {
+    const query = useQuery();
 
-      const sourceRow = await query
-        .select({
-          id: s.source.id,
-          metadata: s.source.metadata,
-        })
-        .from(s.source)
-        .where(
-          and(
-            eq(s.source.id, input.artefactId),
-            eq(s.source.domain, "artefact"),
-            eq(s.source.contributedByUserId, input.userId),
-            isNull(s.source.revokedAt),
-          ),
-        )
-        .then((r) => r[0]);
+    const sourceRow = await query
+      .select({
+        id: s.source.id,
+        metadata: s.source.metadata,
+      })
+      .from(s.source)
+      .where(
+        and(
+          eq(s.source.id, input.artefactId),
+          eq(s.source.domain, "artefact"),
+          eq(s.source.contributedByUserId, input.userId),
+          isNull(s.source.revokedAt),
+        ),
+      )
+      .then((r) => r[0]);
 
-      if (!sourceRow) {
-        return {
-          artefactId: input.artefactId,
-          label: "",
-          artefactType: "text" as const,
-          summary: "",
-          totalChunks: 0,
-          chunks: [],
-        };
-      }
-
-      const allChunks = await query
-        .select({
-          id: s.chunk.id,
-          content: s.chunk.content,
-          wordCount: s.chunk.wordCount,
-          createdAt: s.chunk.createdAt,
-        })
-        .from(s.chunk)
-        .where(eq(s.chunk.sourceId, sourceRow.id))
-        .orderBy(s.chunk.createdAt);
-
-      const meta = sourceRow.metadata as {
-        label?: unknown;
-        artefactType?: unknown;
-        summary?: unknown;
-      };
-      const label =
-        typeof meta.label === "string" ? meta.label : "Artefact";
-      const artefactType = (() => {
-        const t =
-          typeof meta.artefactType === "string" ? meta.artefactType : "";
-        return t === "pdf" || t === "docx" || t === "image" ? t : "text";
-      })();
-      const summary =
-        typeof meta.summary === "string" ? meta.summary : "";
-
-      // Rank by number of case-insensitive matches of the query.
-      // Ties break on insertion order (already sorted that way).
-      const ranked = (() => {
-        if (!input.query) return allChunks;
-        const needle = input.query.toLowerCase();
-        const withScore = allChunks
-          .map((c) => {
-            const hay = c.content.toLowerCase();
-            let score = 0;
-            let idx = 0;
-            while ((idx = hay.indexOf(needle, idx)) !== -1) {
-              score++;
-              idx += needle.length;
-            }
-            return { chunk: c, score };
-          })
-          .filter((x) => x.score > 0)
-          .sort((a, b) => b.score - a.score);
-        // Fall back to insertion order when the query matches nothing —
-        // better to return SOMETHING than to claim the artefact is empty.
-        return withScore.length > 0
-          ? withScore.map((x) => x.chunk)
-          : allChunks;
-      })();
-
+    if (!sourceRow) {
       return {
-        artefactId: sourceRow.id,
-        label,
-        artefactType,
-        summary,
-        totalChunks: allChunks.length,
-        chunks: ranked.slice(0, input.maxResults).map((c) => ({
-          chunkId: c.id,
-          content: c.content,
-          wordCount: c.wordCount,
-        })),
+        artefactId: input.artefactId,
+        label: "",
+        artefactType: "text" as const,
+        summary: "",
+        totalChunks: 0,
+        chunks: [],
       };
-    },
-  ),
+    }
+
+    const allChunks = await query
+      .select({
+        id: s.chunk.id,
+        content: s.chunk.content,
+        wordCount: s.chunk.wordCount,
+        createdAt: s.chunk.createdAt,
+      })
+      .from(s.chunk)
+      .where(eq(s.chunk.sourceId, sourceRow.id))
+      .orderBy(s.chunk.createdAt);
+
+    const meta = sourceRow.metadata as {
+      label?: unknown;
+      artefactType?: unknown;
+      summary?: unknown;
+    };
+    const label = typeof meta.label === "string" ? meta.label : "Artefact";
+    const artefactType = (() => {
+      const t = typeof meta.artefactType === "string" ? meta.artefactType : "";
+      return t === "pdf" || t === "docx" || t === "image" ? t : "text";
+    })();
+    const summary = typeof meta.summary === "string" ? meta.summary : "";
+
+    // Rank by number of case-insensitive matches of the query.
+    // Ties break on insertion order (already sorted that way).
+    const ranked = (() => {
+      if (!input.query) return allChunks;
+      const needle = input.query.toLowerCase();
+      const withScore = allChunks
+        .map((c) => {
+          const hay = c.content.toLowerCase();
+          let score = 0;
+          let idx = 0;
+          for (;;) {
+            const found = hay.indexOf(needle, idx);
+            if (found === -1) break;
+            score++;
+            idx = found + needle.length;
+          }
+          return { chunk: c, score };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score);
+      // Fall back to insertion order when the query matches nothing —
+      // better to return SOMETHING than to claim the artefact is empty.
+      return withScore.length > 0 ? withScore.map((x) => x.chunk) : allChunks;
+    })();
+
+    return {
+      artefactId: sourceRow.id,
+      label,
+      artefactType,
+      summary,
+      totalChunks: allChunks.length,
+      chunks: ranked.slice(0, input.maxResults).map((c) => ({
+        chunkId: c.id,
+        content: c.content,
+        wordCount: c.wordCount,
+      })),
+    };
+  }),
 );
 
 export const revokeArtefactInput = z.object({

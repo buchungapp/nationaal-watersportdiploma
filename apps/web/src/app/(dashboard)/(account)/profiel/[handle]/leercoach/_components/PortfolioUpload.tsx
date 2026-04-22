@@ -74,9 +74,9 @@ function Provider({
     clearPendingSuccess,
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: track field values, not { state, actions } object identity
   const value = useMemo<PortfolioUploadContextValue>(
     () => ({ state, actions }),
-    // biome-ignore lint/correctness/useExhaustiveDependencies: explicit listing for clarity
     [
       dialogOpen,
       pendingSuccess,

@@ -133,9 +133,7 @@ function PriorRow({
     <li className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate font-semibold text-slate-900">
-            {title}
-          </span>
+          <span className="truncate font-semibold text-slate-900">{title}</span>
           {coverageLabel ? (
             <span className="inline-flex items-center rounded-md bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800">
               {coverageLabel}

@@ -10,10 +10,7 @@ import {
   uuid,
   vector,
 } from "drizzle-orm/pg-core";
-import {
-  beoordelingscriterium,
-  werkproces,
-} from "../kss/toetsdocument.js";
+import { beoordelingscriterium, werkproces } from "../kss/toetsdocument.js";
 import { aiCorpusSchema } from "./schema.js";
 import { source } from "./source.js";
 

@@ -1,8 +1,7 @@
 import { Leercoach } from "@nawadi/core";
 import { UI_MESSAGE_STREAM_HEADERS } from "ai";
 import { Redis } from "ioredis";
-import { after } from "next/server";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createResumableStreamContext } from "resumable-stream/ioredis";
 import { leercoachEnabled } from "~/lib/flags";
 import { createClient } from "~/lib/supabase/server";

@@ -9,7 +9,7 @@
 // Run:
 //   pnpm -C apps/web corpus:eval:history
 
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { REPORTS_DIR } from "./shared.ts";
 
@@ -103,7 +103,8 @@ for (const name of dirs) {
         return {
           runs: n,
           skippedCount: 0,
-          avgLengthDeltaPct: Math.round((sum("avgLengthDeltaPct") / n) * 10) / 10,
+          avgLengthDeltaPct:
+            Math.round((sum("avgLengthDeltaPct") / n) * 10) / 10,
           avgGoldenConcreteness:
             Math.round((sum("avgGoldenConcreteness") / n) * 10) / 10,
           avgGeneratedConcreteness:
@@ -117,8 +118,7 @@ for (const name of dirs) {
     const concRatio =
       summary.avgGoldenConcreteness > 0
         ? Math.round(
-            (summary.avgGeneratedConcreteness /
-              summary.avgGoldenConcreteness) *
+            (summary.avgGeneratedConcreteness / summary.avgGoldenConcreteness) *
               1000,
           ) / 10
         : 0;
@@ -169,9 +169,7 @@ lines.push(``);
 lines.push(
   `| Ran | Tag | Retrieval | Runs (skip) | Length Δ | Conc golden→gen (ratio) | Coverage | Anti | Meta | Wall | Synth wc | Ret wc | Ret conc | Matrix dir |`,
 );
-lines.push(
-  `|---|---|---|---|---|---|---|---|---|---|---|---|---|---|`,
-);
+lines.push(`|---|---|---|---|---|---|---|---|---|---|---|---|---|---|`);
 for (const r of rows) {
   const ran = r.ranAt.replace("T", " ").slice(0, 16);
   const len = `${r.lengthDelta > 0 ? "+" : ""}${r.lengthDelta}%`;

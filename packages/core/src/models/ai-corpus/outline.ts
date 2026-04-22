@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
@@ -111,33 +111,29 @@ export const upsertOutlineTemplate = wrapCommand(
 /** Get the highest-version template for a profiel, or null if none exists. */
 export const getOutlineTemplate = wrapQuery(
   "aiCorpus.outlineTemplate.get",
-  withZod(
-    getOutlineTemplateInput,
-    getOutlineTemplateOutput,
-    async (input) => {
-      const query = useQuery();
-      const row = await query
-        .select({
-          id: s.outlineTemplate.id,
-          profielId: s.outlineTemplate.profielId,
-          version: s.outlineTemplate.version,
-          sections: s.outlineTemplate.sections,
-          generatedAt: s.outlineTemplate.generatedAt,
-        })
-        .from(s.outlineTemplate)
-        .where(eq(s.outlineTemplate.profielId, input.profielId))
-        .orderBy(desc(s.outlineTemplate.version))
-        .limit(1)
-        .then((r) => r[0]);
+  withZod(getOutlineTemplateInput, getOutlineTemplateOutput, async (input) => {
+    const query = useQuery();
+    const row = await query
+      .select({
+        id: s.outlineTemplate.id,
+        profielId: s.outlineTemplate.profielId,
+        version: s.outlineTemplate.version,
+        sections: s.outlineTemplate.sections,
+        generatedAt: s.outlineTemplate.generatedAt,
+      })
+      .from(s.outlineTemplate)
+      .where(eq(s.outlineTemplate.profielId, input.profielId))
+      .orderBy(desc(s.outlineTemplate.version))
+      .limit(1)
+      .then((r) => r[0]);
 
-      if (!row) return null;
-      return {
-        templateId: row.id,
-        profielId: row.profielId,
-        version: row.version,
-        sections: row.sections,
-        generatedAt: row.generatedAt,
-      };
-    },
-  ),
+    if (!row) return null;
+    return {
+      templateId: row.id,
+      profielId: row.profielId,
+      version: row.version,
+      sections: row.sections,
+      generatedAt: row.generatedAt,
+    };
+  }),
 );

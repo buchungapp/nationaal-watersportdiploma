@@ -213,9 +213,7 @@ export function PromoteToPortfolioDialog({
                       type="radio"
                       name="promote-scope"
                       checked={scopeChoice?.type === "full_profiel"}
-                      onChange={() =>
-                        setScopeChoice({ type: "full_profiel" })
-                      }
+                      onChange={() => setScopeChoice({ type: "full_profiel" })}
                       className="mt-1"
                     />
                     <span>
@@ -280,9 +278,7 @@ export function PromoteToPortfolioDialog({
                                 onChange={(e) => {
                                   const next = e.target.checked
                                     ? [...selectedKerntaken, id]
-                                    : selectedKerntaken.filter(
-                                        (c) => c !== id,
-                                      );
+                                    : selectedKerntaken.filter((c) => c !== id);
                                   setSelectedKerntaken(next);
                                   if (next.length === 1) {
                                     setScopeChoice({

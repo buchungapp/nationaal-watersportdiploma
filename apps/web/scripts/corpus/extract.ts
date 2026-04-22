@@ -37,10 +37,9 @@ async function extractOne(file: string): Promise<ExtractedPortfolio> {
       .join(" ");
     parts.push(pageText);
   }
-  const rawText = parts.join("\n\n--- PAGE BREAK ---\n\n").replace(
-    C0_STRIPPER,
-    "",
-  );
+  const rawText = parts
+    .join("\n\n--- PAGE BREAK ---\n\n")
+    .replace(C0_STRIPPER, "");
   return {
     sourceFile: file,
     parsed: parseFilename(file),

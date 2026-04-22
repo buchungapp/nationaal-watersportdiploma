@@ -42,9 +42,7 @@ export async function saveUserPortfolioVersionAction(input: {
   // Only revalidate on a real insert — no-op saves don't need a
   // cache bust.
   if (result.created) {
-    revalidatePath(
-      `/profiel/${input.handle}/leercoach/chat/${input.chatId}`,
-    );
+    revalidatePath(`/profiel/${input.handle}/leercoach/chat/${input.chatId}`);
   }
   return result;
 }
@@ -67,9 +65,7 @@ export async function labelPortfolioVersionAction(input: {
     userId: user.authUserId,
     label: input.label,
   });
-  revalidatePath(
-    `/profiel/${input.handle}/leercoach/chat/${input.chatId}`,
-  );
+  revalidatePath(`/profiel/${input.handle}/leercoach/chat/${input.chatId}`);
 }
 
 /**
@@ -104,8 +100,6 @@ export async function revertPortfolioToVersionAction(input: {
       target.createdAt,
     ).toLocaleString("nl-NL")}).`,
   });
-  revalidatePath(
-    `/profiel/${input.handle}/leercoach/chat/${input.chatId}`,
-  );
+  revalidatePath(`/profiel/${input.handle}/leercoach/chat/${input.chatId}`);
   return { versionId };
 }

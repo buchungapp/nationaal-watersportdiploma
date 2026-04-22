@@ -72,9 +72,7 @@ export type AiChatInputSlotContext = {
  * proceed.
  */
 export type AiChatPasteHandler = (
-  input:
-    | { kind: "text"; content: string }
-    | { kind: "image"; file: File },
+  input: { kind: "text"; content: string } | { kind: "image"; file: File },
 ) => boolean | Promise<boolean>;
 
 /**
@@ -88,9 +86,7 @@ export type AiChatPasteHandler = (
  * the consumer decides whether to upload all of them, only the first,
  * or reject mixed-type drops.
  */
-export type AiChatDropHandler = (
-  files: File[],
-) => boolean | Promise<boolean>;
+export type AiChatDropHandler = (files: File[]) => boolean | Promise<boolean>;
 
 /**
  * Consumer-supplied submit gate. When non-null, the InputForm

@@ -32,7 +32,11 @@ try {
   const kssSeed = path.resolve(__dirname, "..", "supabase", "kss-dev-seed.sql");
   if (fs.existsSync(kssSeed)) {
     console.log("Applying KSS dev seed (supabase/kss-dev-seed.sql)...");
-    cp.execFileSync("psql", [PGURI, "-v", "ON_ERROR_STOP=1", "-f", kssSeed], options);
+    cp.execFileSync(
+      "psql",
+      [PGURI, "-v", "ON_ERROR_STOP=1", "-f", kssSeed],
+      options,
+    );
     console.log("KSS dev seed applied successfully");
   } else {
     console.log(

@@ -59,10 +59,7 @@ describe("isNearBottom", () => {
   it("returns true when the whole container fits in the viewport (no scroll needed)", () => {
     // scrollHeight == clientHeight, scrollTop=0 → distance=0
     assert.equal(
-      isNearBottom(
-        { scrollHeight: 400, scrollTop: 0, clientHeight: 400 },
-        80,
-      ),
+      isNearBottom({ scrollHeight: 400, scrollTop: 0, clientHeight: 400 }, 80),
       true,
     );
   });

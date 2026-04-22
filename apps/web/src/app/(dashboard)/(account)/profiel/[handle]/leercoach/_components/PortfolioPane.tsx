@@ -56,9 +56,7 @@ export function PortfolioPane({
   chatId,
 }: Props) {
   const [tab, setTab] = useState<Tab>("edit");
-  const [previewVersionId, setPreviewVersionId] = useState<string | null>(
-    null,
-  );
+  const [previewVersionId, setPreviewVersionId] = useState<string | null>(null);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -326,9 +324,7 @@ function HistoryView({
                   <>
                     <button
                       type="button"
-                      onClick={() =>
-                        label(current.versionId, current.label)
-                      }
+                      onClick={() => label(current.versionId, current.label)}
                       disabled={isPending}
                       className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
                     >

@@ -88,9 +88,7 @@ const TEXT_MESSAGE = (
   parts: [{ type: "text", text }],
 });
 
-function renderWindow(
-  overrides?: Partial<Parameters<typeof AiChatWindow>[0]>,
-) {
+function renderWindow(overrides?: Partial<Parameters<typeof AiChatWindow>[0]>) {
   return render(
     <AiChatWindow
       chatId="test-chat-id"
@@ -110,9 +108,7 @@ describe("AiChatWindow — empty state", () => {
   test("renders a custom emptyState when the consumer provides one", () => {
     renderWindow({ emptyState: <p>My custom welcome</p> });
     expect(screen.getByText("My custom welcome")).toBeInTheDocument();
-    expect(
-      screen.queryByText(/klaar om te beginnen/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/klaar om te beginnen/i)).not.toBeInTheDocument();
   });
 });
 
@@ -366,9 +362,7 @@ describe("AiChatWindow — input + submission", () => {
     await user.keyboard("nee toch niet{Enter}");
     expect(screen.getByText("nee toch niet")).toBeInTheDocument();
 
-    await user.click(
-      screen.getByRole("button", { name: /uit de wachtrij/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /uit de wachtrij/i }));
     expect(screen.queryByText("nee toch niet")).toBeNull();
     expect(mockSendMessage).not.toHaveBeenCalled();
   });

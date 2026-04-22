@@ -25,9 +25,13 @@ if (!fileArg || !profielTitelArg) {
 }
 
 const thinGate = flags.includes("--thin-gate");
-const forceThinRaw = flags.find((f) => f.startsWith("--force-thin="))?.split("=")[1];
+const forceThinRaw = flags
+  .find((f) => f.startsWith("--force-thin="))
+  ?.split("=")[1];
 const forceThin =
-  forceThinRaw && Number.isFinite(Number(forceThinRaw)) && Number(forceThinRaw) > 0
+  forceThinRaw &&
+  Number.isFinite(Number(forceThinRaw)) &&
+  Number(forceThinRaw) > 0
     ? Math.floor(Number(forceThinRaw))
     : null;
 

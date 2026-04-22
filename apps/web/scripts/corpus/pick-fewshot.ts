@@ -25,7 +25,7 @@ import {
   CORPUS_ROOT,
 } from "./shared.ts";
 
-const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
+const _SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 
 const [, , fileArg, idxArg, outFileArg] = process.argv;
 
@@ -127,8 +127,7 @@ const { object } = await generateObject({
 const fewShotDir = join(CORPUS_ROOT, "few-shot");
 mkdirSync(fewShotDir, { recursive: true });
 
-const outName =
-  outFileArg ?? `${fileArg.replace(/\.json$/, "")}-p${idx}.md`;
+const outName = outFileArg ?? `${fileArg.replace(/\.json$/, "")}-p${idx}.md`;
 const outPath = join(fewShotDir, outName);
 
 const body = `# Few-shot candidate: ${fileArg} · para #${idx}
@@ -161,4 +160,6 @@ writeFileSync(outPath, body);
 console.log(`Wrote ${outPath}`);
 console.log(`  Suitability: ${object.suitabilityScore}/10`);
 console.log(`  Risks flagged: ${object.remainingRisks.length}`);
-console.log(`  flagged_for_review: ${object.remainingRisks.filter((r) => r.action === "flagged_for_review").length}`);
+console.log(
+  `  flagged_for_review: ${object.remainingRisks.filter((r) => r.action === "flagged_for_review").length}`,
+);

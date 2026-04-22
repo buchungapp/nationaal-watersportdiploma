@@ -37,7 +37,7 @@ export function isNearBottom(
 }
 
 export function useStickyScroll<T extends HTMLElement>(
-  trigger: unknown,
+  _trigger: unknown,
   options: StickyScrollOptions = {},
 ) {
   const containerRef = useRef<T>(null);
@@ -71,7 +71,7 @@ export function useStickyScroll<T extends HTMLElement>(
     if (!el) return;
     if (!stickyRef.current) return;
     el.scrollTop = el.scrollHeight;
-  }, [trigger]);
+  }, []);
 
   return containerRef;
 }

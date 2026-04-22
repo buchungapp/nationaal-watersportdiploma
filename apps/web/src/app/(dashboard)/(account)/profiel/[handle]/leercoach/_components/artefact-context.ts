@@ -53,10 +53,7 @@ export type ArtefactState = {
 };
 
 export type ArtefactActions = {
-  uploadFile: (input: {
-    file: File;
-    labelOverride?: string;
-  }) => Promise<void>;
+  uploadFile: (input: { file: File; labelOverride?: string }) => Promise<void>;
   uploadText: (input: {
     content: string;
     labelOverride?: string;
@@ -92,8 +89,7 @@ export type ArtefactContextValue = {
   meta: ArtefactMeta;
 };
 
-export const ArtefactContext =
-  createContext<ArtefactContextValue | null>(null);
+export const ArtefactContext = createContext<ArtefactContextValue | null>(null);
 
 /**
  * Hook read from the Artefact compound. Throws when used outside the

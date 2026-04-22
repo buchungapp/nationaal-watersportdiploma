@@ -29,7 +29,9 @@ export function RefreshOnAssistantResponse() {
 
   useEffect(() => {
     if (status !== "ready") return;
-    const assistantCount = messages.filter((m) => m.role === "assistant").length;
+    const assistantCount = messages.filter(
+      (m) => m.role === "assistant",
+    ).length;
     if (assistantCount === lastAssistantCount.current) return;
     lastAssistantCount.current = assistantCount;
     router.refresh();

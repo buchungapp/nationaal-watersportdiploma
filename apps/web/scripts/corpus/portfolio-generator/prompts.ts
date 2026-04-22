@@ -1,4 +1,8 @@
-import { FEW_SHOT_EXAMPLES, type FewShotExample, renderFewShotFragment } from "./few-shot.ts";
+import {
+  FEW_SHOT_EXAMPLES,
+  type FewShotExample,
+  renderFewShotFragment,
+} from "./few-shot.ts";
 import type { Question, WerkprocesDraft } from "./schemas";
 import type { RubricTree } from "./types";
 
@@ -140,11 +144,15 @@ export function buildDraftPrompt(args: {
   // so we never ship fewer than 3 few-shot slots.
   const dynamicFewShotExamples: FewShotExample[] | null = (() => {
     if (retrievalMode !== "fewshot") return null;
-    if (!retrievedChunks || retrievedChunks.size === 0) return FEW_SHOT_EXAMPLES;
+    if (!retrievedChunks || retrievedChunks.size === 0)
+      return FEW_SHOT_EXAMPLES;
     const dedupKey = (chunk: RetrievedChunkForPrompt) =>
       `${chunk.sourceIdentifier}::${chunk.content.slice(0, 80)}`;
     const seen = new Set<string>();
-    const flattened: Array<{ chunk: RetrievedChunkForPrompt; criteriumId: string }> = [];
+    const flattened: Array<{
+      chunk: RetrievedChunkForPrompt;
+      criteriumId: string;
+    }> = [];
     for (const [criteriumId, chunks] of retrievedChunks.entries()) {
       for (const chunk of chunks) {
         const key = dedupKey(chunk);
@@ -239,7 +247,9 @@ ${extraAnswers
   // — in that mode the retrieved chunks already surface as system-prompt
   // few-shot examples and duplicating them here would swamp the user prompt.
   const inspirationBlocks =
-    retrievalMode === "inspiration" && retrievedChunks && retrievedChunks.size > 0
+    retrievalMode === "inspiration" &&
+    retrievedChunks &&
+    retrievedChunks.size > 0
       ? (() => {
           const perCriteriumEntries: string[] = [];
           for (const c of werkproces.criteria) {

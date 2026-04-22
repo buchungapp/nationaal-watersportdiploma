@@ -49,16 +49,13 @@ export default async function NewPortfolioPage(props: {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <TextLink
-          href={`/profiel/${handle}/leercoach`}
-          className="text-sm"
-        >
+        <TextLink href={`/profiel/${handle}/leercoach`} className="text-sm">
           ← Terug naar leercoach
         </TextLink>
         <Heading>Nieuw portfolio-traject</Heading>
         <Text className="max-w-prose">
-          Kies het kwalificatieprofiel waar je aan gaat werken. Op niveau 4 en
-          5 mag je kiezen of je je hele profiel doorloopt of je op één kerntaak
+          Kies het kwalificatieprofiel waar je aan gaat werken. Op niveau 4 en 5
+          mag je kiezen of je je hele profiel doorloopt of je op één kerntaak
           richt. Je kunt later altijd meer sessies aan hetzelfde portfolio
           koppelen.
         </Text>

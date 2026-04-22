@@ -11,21 +11,16 @@
 // Usage:
 //   pnpm -C apps/web corpus:eval:matrix [--concurrency=2]
 
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { withDatabase } from "@nawadi/core";
 import pLimit from "p-limit";
+import { EVAL_MATRIX, type MatrixEntry } from "./eval-matrix.config.ts";
 import {
   type EvalAggregates,
   type EvalResult,
   runEval,
 } from "./eval-runner.ts";
-import { EVAL_MATRIX, type MatrixEntry } from "./eval-matrix.config.ts";
 import { REPORTS_DIR } from "./shared.ts";
 
 const PGURI =
@@ -43,16 +38,13 @@ const CONCURRENCY = Math.max(1, Math.min(5, Number(concurrencyArg) || 2));
 // via `--retrieval` or `EVAL_ENABLE_RETRIEVAL=true` when running a Stage B
 // ablation. Keeps the Stage A noise floor measurement clean.
 const RETRIEVAL_ENABLED =
-  args.includes("--retrieval") ||
-  process.env.EVAL_ENABLE_RETRIEVAL === "true";
+  args.includes("--retrieval") || process.env.EVAL_ENABLE_RETRIEVAL === "true";
 // Stage B ablation knobs.
 const RETRIEVAL_MAX_RESULTS = Math.max(
   1,
   Math.min(
     10,
-    Number(
-      args.find((a) => a.startsWith("--top="))?.split("=")[1] ?? "2",
-    ),
+    Number(args.find((a) => a.startsWith("--top="))?.split("=")[1] ?? "2"),
   ),
 );
 const RETRIEVAL_FRAMING: "strict" | "loose" = args.includes("--loose")
@@ -114,7 +106,7 @@ if (existsSync(latestAggPath)) {
     console.log(
       `Loaded baseline from ${latestAggPath} (${baseline.length} entries)`,
     );
-  } catch (e) {
+  } catch (_e) {
     console.warn(
       `Could not parse ${latestAggPath}; continuing without baseline.`,
     );
@@ -134,80 +126,81 @@ const results: Array<EvalResult & { entry: MatrixEntry }> = await withDatabase(
     Promise.all(
       EVAL_MATRIX.map((entry) =>
         limit(async () => {
-      const log = (line: string) => console.log(`[${entry.portfolio}] ${line}`);
-      log(`starting... (profiel: ${entry.profielTitel})`);
-      try {
-        const r = await runEval({
-          portfolioFile: entry.portfolio,
-          profielTitel: entry.profielTitel,
-          outputDir: matrixDir,
-          tag: TAG_ARG,
-          log,
-          retrievalEnabled: RETRIEVAL_ENABLED,
-          retrievalMaxResults: RETRIEVAL_MAX_RESULTS,
-          retrievalFraming: RETRIEVAL_FRAMING,
-          retrievalMode: RETRIEVAL_MODE,
-          thinAnswerGate: THIN_GATE_ENABLED,
-          forceThinAnswers: FORCE_THIN_ANSWERS,
-        });
-        log(
-          r.skipped
-            ? `SKIPPED: ${r.skipped.reason}`
-            : `done in ${(r.aggregates.totalMs / 1000).toFixed(1)}s`,
-        );
-        return { ...r, entry };
-      } catch (e) {
-        const reason = e instanceof Error ? e.message : String(e);
-        log(`FAILED: ${reason}`);
-        return {
-          portfolioFile: entry.portfolio,
-          profielTitel: entry.profielTitel,
-          pageCount: 0,
-          charCount: 0,
-          niveauRang: entry.niveau,
-          aggregates: {
-            pairsExtracted: 0,
-            pairsCovered: 0,
-            pairsMissing: 0,
-            coverageRatio: 0,
-            avgGoldenWc: 0,
-            avgGeneratedWc: 0,
-            avgLengthDeltaPct: 0,
-            avgGoldenConcreteness: 0,
-            avgGeneratedConcreteness: 0,
-            totalGoldenAntiTells: 0,
-            totalGeneratedAntiTells: 0,
-            totalGeneratedMetaCoda: 0,
-            goldenSource: "freshly_extracted" as const,
-            extractionMs: 0,
-            synthesisMs: 0,
-            draftMs: 0,
-            totalMs: 0,
-            avgSynthAnswerWc: 0,
-            retrievalEnabled: false,
-            retrievalCallsIssued: 0,
-            retrievalChunksReturned: 0,
-            avgRetrievedChunkWc: 0,
-            avgRetrievedChunkConcreteness: 0,
-            thinGateEnabled: false,
-            thinGateTotalAnswers: 0,
-            thinGateHeuristicThinCount: 0,
-            thinGateLlmFlaggedCount: 0,
-            thinGateExpandedCount: 0,
-            thinGateGradeMs: 0,
-            thinGateExpandMs: 0,
-            forceThinAnswers: null,
-            avgAnswerWcAfterGate: 0,
-          },
-          pairs: [],
-          reportPath: "",
-          skipped: { reason: reason },
-          entry,
-        };
-      }
-    }),
-  ),
-),
+          const log = (line: string) =>
+            console.log(`[${entry.portfolio}] ${line}`);
+          log(`starting... (profiel: ${entry.profielTitel})`);
+          try {
+            const r = await runEval({
+              portfolioFile: entry.portfolio,
+              profielTitel: entry.profielTitel,
+              outputDir: matrixDir,
+              tag: TAG_ARG,
+              log,
+              retrievalEnabled: RETRIEVAL_ENABLED,
+              retrievalMaxResults: RETRIEVAL_MAX_RESULTS,
+              retrievalFraming: RETRIEVAL_FRAMING,
+              retrievalMode: RETRIEVAL_MODE,
+              thinAnswerGate: THIN_GATE_ENABLED,
+              forceThinAnswers: FORCE_THIN_ANSWERS,
+            });
+            log(
+              r.skipped
+                ? `SKIPPED: ${r.skipped.reason}`
+                : `done in ${(r.aggregates.totalMs / 1000).toFixed(1)}s`,
+            );
+            return { ...r, entry };
+          } catch (e) {
+            const reason = e instanceof Error ? e.message : String(e);
+            log(`FAILED: ${reason}`);
+            return {
+              portfolioFile: entry.portfolio,
+              profielTitel: entry.profielTitel,
+              pageCount: 0,
+              charCount: 0,
+              niveauRang: entry.niveau,
+              aggregates: {
+                pairsExtracted: 0,
+                pairsCovered: 0,
+                pairsMissing: 0,
+                coverageRatio: 0,
+                avgGoldenWc: 0,
+                avgGeneratedWc: 0,
+                avgLengthDeltaPct: 0,
+                avgGoldenConcreteness: 0,
+                avgGeneratedConcreteness: 0,
+                totalGoldenAntiTells: 0,
+                totalGeneratedAntiTells: 0,
+                totalGeneratedMetaCoda: 0,
+                goldenSource: "freshly_extracted" as const,
+                extractionMs: 0,
+                synthesisMs: 0,
+                draftMs: 0,
+                totalMs: 0,
+                avgSynthAnswerWc: 0,
+                retrievalEnabled: false,
+                retrievalCallsIssued: 0,
+                retrievalChunksReturned: 0,
+                avgRetrievedChunkWc: 0,
+                avgRetrievedChunkConcreteness: 0,
+                thinGateEnabled: false,
+                thinGateTotalAnswers: 0,
+                thinGateHeuristicThinCount: 0,
+                thinGateLlmFlaggedCount: 0,
+                thinGateExpandedCount: 0,
+                thinGateGradeMs: 0,
+                thinGateExpandMs: 0,
+                forceThinAnswers: null,
+                avgAnswerWcAfterGate: 0,
+              },
+              pairs: [],
+              reportPath: "",
+              skipped: { reason: reason },
+              entry,
+            };
+          }
+        }),
+      ),
+    ),
 );
 const runElapsedMs = Date.now() - runStartedAt;
 
@@ -225,7 +218,7 @@ function findBaseline(
   );
 }
 
-function fmtDelta(current: number, prev: number | null, unit = ""): string {
+function _fmtDelta(current: number, prev: number | null, unit = ""): string {
   if (prev === null) return `${current}${unit}`;
   const diff = Math.round((current - prev) * 10) / 10;
   const sign = diff > 0 ? "+" : "";
@@ -233,7 +226,7 @@ function fmtDelta(current: number, prev: number | null, unit = ""): string {
   return `${current}${unit} (Δ ${sign}${diff}${unit}${emoji})`;
 }
 
-function numberOrZero(n: number | null | undefined): number {
+function _numberOrZero(n: number | null | undefined): number {
   return n ?? 0;
 }
 
@@ -273,12 +266,14 @@ for (const r of ranResults) {
   byNiveau.set(n, current);
 }
 for (const [, agg] of byNiveau) {
-  agg.avgLengthDeltaPct = Math.round((agg.avgLengthDeltaPct / agg.runs) * 10) / 10;
+  agg.avgLengthDeltaPct =
+    Math.round((agg.avgLengthDeltaPct / agg.runs) * 10) / 10;
   agg.avgGoldenConcreteness =
     Math.round((agg.avgGoldenConcreteness / agg.runs) * 10) / 10;
   agg.avgGeneratedConcreteness =
     Math.round((agg.avgGeneratedConcreteness / agg.runs) * 10) / 10;
-  agg.avgCoverageRatio = Math.round((agg.avgCoverageRatio / agg.runs) * 10) / 10;
+  agg.avgCoverageRatio =
+    Math.round((agg.avgCoverageRatio / agg.runs) * 10) / 10;
 }
 
 const lines: string[] = [];
@@ -317,9 +312,7 @@ for (const r of results) {
     lines.push(
       `| N${r.entry.niveau} | ${r.entry.portfolio} | ⏭ SKIPPED | — | — | — | — | — | — | — |`,
     );
-    lines.push(
-      `|  |  | _${r.skipped.reason}_ |  |  |  |  |  |  |  |`,
-    );
+    lines.push(`|  |  | _${r.skipped.reason}_ |  |  |  |  |  |  |  |`);
     continue;
   }
   const agg = r.aggregates;
@@ -352,7 +345,10 @@ const matrixAvg = {
     runnable.length === 0
       ? 0
       : Math.round(
-          (runnable.reduce((s, r) => s + r.aggregates.avgGoldenConcreteness, 0) /
+          (runnable.reduce(
+            (s, r) => s + r.aggregates.avgGoldenConcreteness,
+            0,
+          ) /
             runnable.length) *
             10,
         ) / 10,
@@ -392,9 +388,7 @@ lines.push(`| Runs | ${matrixAvg.runs} |`);
 lines.push(
   `| Avg length Δ | ${matrixAvg.avgLengthDeltaPct > 0 ? "+" : ""}${matrixAvg.avgLengthDeltaPct}% |`,
 );
-lines.push(
-  `| Avg golden concreteness | ${matrixAvg.avgGoldenConcreteness} |`,
-);
+lines.push(`| Avg golden concreteness | ${matrixAvg.avgGoldenConcreteness} |`);
 lines.push(
   `| Avg generated concreteness | ${matrixAvg.avgGeneratedConcreteness} |`,
 );
@@ -406,9 +400,8 @@ lines.push(``);
 // Pipeline-stage telemetry — Stage E visibility into intermediates.
 // When numbers move between runs, these tell you which stage moved.
 const pipe = {
-  cachedCount: runnable.filter(
-    (r) => r.aggregates.goldenSource === "cached",
-  ).length,
+  cachedCount: runnable.filter((r) => r.aggregates.goldenSource === "cached")
+    .length,
   freshCount: runnable.filter(
     (r) => r.aggregates.goldenSource === "freshly_extracted",
   ).length,
@@ -440,10 +433,7 @@ const pipe = {
     runnable.length === 0
       ? 0
       : Math.round(
-          (runnable.reduce(
-            (s, r) => s + r.aggregates.avgRetrievedChunkWc,
-            0,
-          ) /
+          (runnable.reduce((s, r) => s + r.aggregates.avgRetrievedChunkWc, 0) /
             runnable.length) *
             10,
         ) / 10,
@@ -472,9 +462,7 @@ lines.push(`| Avg synth-answer words | ${pipe.avgSynthAnswerWc} |`);
 lines.push(
   `| Retrieval calls (criteria queried) | ${pipe.totalRetrievalCalls} |`,
 );
-lines.push(
-  `| Retrieval chunks returned | ${pipe.totalChunksReturned} |`,
-);
+lines.push(`| Retrieval chunks returned | ${pipe.totalChunksReturned} |`);
 lines.push(
   `| Avg retrieved chunk words | ${pipe.avgRetrievedChunkWc > 0 ? pipe.avgRetrievedChunkWc : "—"} |`,
 );

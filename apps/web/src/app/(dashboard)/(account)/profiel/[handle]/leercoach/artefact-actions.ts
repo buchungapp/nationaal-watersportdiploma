@@ -4,10 +4,7 @@ import { AiCorpus, Leercoach } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 import { getUserOrThrow } from "~/lib/nwd";
-import {
-  type ArtefactType,
-  ingestArtefact,
-} from "./_lib/artefact-pipeline";
+import { type ArtefactType, ingestArtefact } from "./_lib/artefact-pipeline";
 import { requireLeercoachEnabled } from "./_lib/require-leercoach-enabled";
 
 // Server actions for the chat-scoped artefact upload flow. Three
@@ -82,9 +79,7 @@ function deriveLabel(input: {
       input.content.split(/\r?\n/).find((l) => l.trim().length > 0) ?? "";
     const trimmed = firstLine.trim();
     if (trimmed.length === 0) return "Geplakte tekst";
-    return trimmed.length > 40
-      ? `${trimmed.slice(0, 40).trim()}…`
-      : trimmed;
+    return trimmed.length > 40 ? `${trimmed.slice(0, 40).trim()}…` : trimmed;
   }
   return "Artefact";
 }
@@ -140,8 +135,7 @@ export async function uploadArtefactAction(
           reason: `Tekst is te lang (${content.length} tekens). Max ${MAX_TEXT_CHARS}.`,
         };
       }
-      const label =
-        userLabel ?? deriveLabel({ kind: "text", content });
+      const label = userLabel ?? deriveLabel({ kind: "text", content });
       const result = await ingestArtefact({
         userId: ctx.userId,
         chatId,
@@ -150,9 +144,7 @@ export async function uploadArtefactAction(
         label,
       });
       if (handle) {
-        revalidatePath(
-          `/profiel/${handle}/leercoach/chat/${chatId}`,
-        );
+        revalidatePath(`/profiel/${handle}/leercoach/chat/${chatId}`);
       }
       return {
         ok: true,
@@ -201,7 +193,8 @@ export async function uploadArtefactAction(
     }
 
     const bytes = new Uint8Array(await file.arrayBuffer());
-    const label = userLabel ?? deriveLabel({ kind: "file", filename: file.name });
+    const label =
+      userLabel ?? deriveLabel({ kind: "file", filename: file.name });
 
     const pipelineInput =
       effectiveMime === "application/pdf"
@@ -274,8 +267,6 @@ export async function revokeArtefactAction(input: {
     artefactId: input.artefactId,
     userId: ctx.userId,
   });
-  revalidatePath(
-    `/profiel/${input.handle}/leercoach/chat/${input.chatId}`,
-  );
+  revalidatePath(`/profiel/${input.handle}/leercoach/chat/${input.chatId}`);
   return { ok: true };
 }

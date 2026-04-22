@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-} from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   ArrowLeftIcon,
   EllipsisHorizontalIcon,
@@ -101,7 +96,9 @@ export function ChatToolbar({
       </div>
 
       {phaseSlot ? <div className="shrink-0">{phaseSlot}</div> : null}
-      {actionsSlot ? <div className="flex shrink-0 items-center gap-1.5">{actionsSlot}</div> : null}
+      {actionsSlot ? (
+        <div className="flex shrink-0 items-center gap-1.5">{actionsSlot}</div>
+      ) : null}
     </header>
   );
 }

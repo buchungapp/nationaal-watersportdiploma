@@ -41,11 +41,7 @@ export type LeercoachPortfolioScope = z.infer<
   typeof leercoachPortfolioScopeSchema
 >;
 
-const portfolioVersionCreatedBySchema = z.enum([
-  "coach",
-  "user",
-  "imported",
-]);
+const portfolioVersionCreatedBySchema = z.enum(["coach", "user", "imported"]);
 
 export type LeercoachPortfolioVersionCreatedBy = z.infer<
   typeof portfolioVersionCreatedBySchema

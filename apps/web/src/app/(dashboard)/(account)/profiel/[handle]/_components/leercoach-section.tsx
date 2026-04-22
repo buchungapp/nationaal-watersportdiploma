@@ -1,14 +1,11 @@
+import { ChatBubbleLeftRightIcon, PlusIcon } from "@heroicons/react/20/solid";
 import { Leercoach } from "@nawadi/core";
-import {
-  ChatBubbleLeftRightIcon,
-  PlusIcon,
-} from "@heroicons/react/20/solid";
 import { Suspense } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
-  gridContainer,
   GridListItem,
+  gridContainer,
 } from "~/app/(dashboard)/_components/grid-list-v2";
 import { Subheading } from "~/app/(dashboard)/_components/heading";
 import { Link } from "~/app/(dashboard)/_components/link";
@@ -50,8 +47,8 @@ export async function LeercoachSection({ handle }: { handle: string }) {
             <StackedLayoutCardDisclosureChevron />
           </div>
           <Text>
-            Je digitale leercoach. Stel vragen, bespreek werkprocessen, en
-            bouw je PvB-portfolio stap voor stap op.
+            Je digitale leercoach. Stel vragen, bespreek werkprocessen, en bouw
+            je PvB-portfolio stap voor stap op.
           </Text>
         </>
       }

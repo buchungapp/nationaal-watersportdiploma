@@ -32,9 +32,9 @@ function useCompact({ chatId }: { chatId: string }) {
           method: "POST",
         });
         if (!res.ok) {
-          const body = (await res.json().catch(() => null)) as
-            | { error?: string }
-            | null;
+          const body = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
           setError(body?.error ?? `HTTP ${res.status}`);
           return;
         }
@@ -123,8 +123,8 @@ export function CompactWarnBanner({ chatId }: { chatId: string }) {
       className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"
     >
       <span className="flex-1 min-w-0">
-        Dit gesprek nadert de limiet. Comprimeer nu om verder te
-        kunnen zonder je concepten te verliezen.
+        Dit gesprek nadert de limiet. Comprimeer nu om verder te kunnen zonder
+        je concepten te verliezen.
         {error ? (
           <span className="mt-0.5 block text-xs font-medium text-red-700">
             {error}
@@ -139,7 +139,10 @@ export function CompactWarnBanner({ chatId }: { chatId: string }) {
           className="inline-flex items-center gap-1 rounded-md border border-amber-400 bg-white px-2 py-1 text-xs font-semibold text-amber-900 shadow-sm transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? (
-            <ArrowPathIcon className="size-3.5 animate-spin" aria-hidden="true" />
+            <ArrowPathIcon
+              className="size-3.5 animate-spin"
+              aria-hidden="true"
+            />
           ) : null}
           <span>{isPending ? "Comprimeren…" : "Nu comprimeren"}</span>
         </button>
@@ -234,18 +237,13 @@ function CompactAndRetryButton({
         {isPending ? (
           <ArrowPathIcon className="size-3.5 animate-spin" aria-hidden="true" />
         ) : (
-          <ArchiveBoxArrowDownIcon
-            aria-hidden="true"
-            className="size-3.5"
-          />
+          <ArchiveBoxArrowDownIcon aria-hidden="true" className="size-3.5" />
         )}
         <span>
           {isPending ? "Comprimeren…" : "Comprimeer en probeer opnieuw"}
         </span>
       </button>
-      {error ? (
-        <span className="text-[11px] text-red-700">{error}</span>
-      ) : null}
+      {error ? <span className="text-[11px] text-red-700">{error}</span> : null}
     </div>
   );
 }

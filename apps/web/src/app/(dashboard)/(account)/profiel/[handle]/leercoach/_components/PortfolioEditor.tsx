@@ -37,10 +37,10 @@
 //   - First-child margin reset so the doc opens flush with the pane
 //     top instead of a stack of default-margin padding.
 
+import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { Markdown } from "@tiptap/markdown";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
-import { CheckCircleIcon } from "@heroicons/react/20/solid";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { saveUserPortfolioVersionAction } from "../portfolio-actions";
 
@@ -225,6 +225,7 @@ export function PortfolioEditor({
 
   return (
     <div className="relative flex h-full flex-col bg-stone-50">
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: scroll container; captures Ctrl/Cmd+S to save (TipTap is inside) */}
       <div
         onKeyDown={handleKeyDown}
         className="flex-1 overflow-y-auto overscroll-contain"

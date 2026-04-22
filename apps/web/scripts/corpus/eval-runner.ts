@@ -37,12 +37,14 @@ setGlobalDispatcher(
     connectTimeout: 30_000,
   }),
 );
+
 import { runDraftGeneration } from "./portfolio-generator/generator.ts";
 
 // Pinned model id — eval reports log this alongside results; bumping
 // here invalidates comparability with prior eval runs. Update
 // deliberately when producing a new model-comparison baseline.
 const MODEL_ID = "anthropic/claude-sonnet-4-5";
+
 import type { Question } from "./portfolio-generator/schemas.ts";
 import {
   runThinAnswerGate,
@@ -561,7 +563,9 @@ Reconstrueer de ruwe kandidaat-input:`,
       synthesisMs,
     };
     saveGolden(cache);
-    log(`  golden cached at ${goldenCachePath(input.portfolioFile, tree.profielTitel).split("/").slice(-3).join("/")}`);
+    log(
+      `  golden cached at ${goldenCachePath(input.portfolioFile, tree.profielTitel).split("/").slice(-3).join("/")}`,
+    );
   } else {
     log(
       `  loaded ${cache.pairs.length} golden pairs from cache (built ${cache.builtAt.slice(0, 16)}; extraction+synthesis skipped)`,
@@ -602,9 +606,13 @@ Reconstrueer de ruwe kandidaat-input:`,
   // Off by default; only used for thin-answer-gate ablations.
   const forceThinN = input.forceThinAnswers ?? null;
   if (forceThinN !== null && forceThinN > 0) {
-    const before = answers.map((a) => a.answer.trim().split(/\s+/).filter(Boolean).length);
+    const before = answers.map(
+      (a) => a.answer.trim().split(/\s+/).filter(Boolean).length,
+    );
     answers = truncateAnswersToWords(answers, forceThinN);
-    const after = answers.map((a) => a.answer.trim().split(/\s+/).filter(Boolean).length);
+    const after = answers.map(
+      (a) => a.answer.trim().split(/\s+/).filter(Boolean).length,
+    );
     log(
       `  force-thin=${forceThinN} applied: avg words ${Math.round(before.reduce((s, n) => s + n, 0) / Math.max(1, before.length))} → ${Math.round(after.reduce((s, n) => s + n, 0) / Math.max(1, after.length))}`,
     );
@@ -758,7 +766,9 @@ Reconstrueer de ruwe kandidaat-input:`,
       generatedAntiTells: generatedBewijs
         ? antiTellCount(generatedBewijs)
         : null,
-      generatedMetaCoda: generatedBewijs ? metaCodaCount(generatedBewijs) : null,
+      generatedMetaCoda: generatedBewijs
+        ? metaCodaCount(generatedBewijs)
+        : null,
     };
   });
 
@@ -815,15 +825,18 @@ Reconstrueer de ruwe kandidaat-input:`,
   mkdirSync(reportDir, { recursive: true });
   const reportName = `eval-${input.portfolioFile.replace(/\.json$/, "")}${input.tag ? `-${input.tag}` : ""}-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}.md`;
   const reportPath = join(reportDir, reportName);
-  writeFileSync(reportPath, renderPortfolioReport({
-    portfolioFile: input.portfolioFile,
-    profielTitel: tree.profielTitel,
-    pageCount: portfolio.pageCount,
-    charCount: portfolio.charCount,
-    aggregates,
-    pairs,
-    failures: draftResult.failedWerkprocessen.map((f) => f.reason),
-  }));
+  writeFileSync(
+    reportPath,
+    renderPortfolioReport({
+      portfolioFile: input.portfolioFile,
+      profielTitel: tree.profielTitel,
+      pageCount: portfolio.pageCount,
+      charCount: portfolio.charCount,
+      aggregates,
+      pairs,
+      failures: draftResult.failedWerkprocessen.map((f) => f.reason),
+    }),
+  );
 
   return {
     portfolioFile: input.portfolioFile,
@@ -906,9 +919,7 @@ function renderPortfolioReport(args: {
   lines.push(
     `| Anti-tells | ${agg.totalGoldenAntiTells} | ${agg.totalGeneratedAntiTells} | |`,
   );
-  lines.push(
-    `| Meta-coda | — | ${agg.totalGeneratedMetaCoda} | should be 0 |`,
-  );
+  lines.push(`| Meta-coda | — | ${agg.totalGeneratedMetaCoda} | should be 0 |`);
   lines.push(``);
   lines.push(
     `## Timings\n\n- Extraction: ${(agg.extractionMs / 1000).toFixed(1)}s\n- Answer synth: ${(agg.synthesisMs / 1000).toFixed(1)}s\n- Draft generation: ${(agg.draftMs / 1000).toFixed(1)}s\n- Total: ${(agg.totalMs / 1000).toFixed(1)}s\n`,

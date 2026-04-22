@@ -98,7 +98,6 @@ export default function Page() {
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <PartnerCard
             name="Watersportverbond"
-            role="Licentiehouder"
             logo={watersportverbond}
             logoAlt="Koninklijk Nederlands Watersportverbond"
             links={[
@@ -126,7 +125,6 @@ export default function Page() {
 
           <PartnerCard
             name="Buchung"
-            role="Techniek & marketing"
             logo={buchung}
             logoAlt="Buchung"
             links={[
@@ -143,15 +141,15 @@ export default function Page() {
             <p>
               Buchung ontwikkelt en onderhoudt de volledige technische
               infrastructuur van het Nationaal Watersportdiploma — van de
-              publieke website tot het opleidingsplatform waarop instructeurs
-              en vaarscholen werken — en verzorgt daarnaast de marketing voor
-              het NWD.
+              publieke website tot het opleidingsplatform waarop instructeurs en
+              vaarscholen werken — en verzorgt daarnaast de marketing voor het
+              NWD.
             </p>
             <p>
-              De broncode van het NWD-platform is open source en vrij in te
-              zien en te gebruiken via nationaalwatersportdiploma.dev. Daarmee
-              is de techniek achter het diplomasysteem transparant en toetsbaar
-              voor de hele sector.
+              De broncode van het NWD-platform is open source en vrij in te zien
+              en te gebruiken via nationaalwatersportdiploma.dev. Daarmee is de
+              techniek achter het diplomasysteem transparant en toetsbaar voor
+              de hele sector.
             </p>
           </PartnerCard>
         </div>

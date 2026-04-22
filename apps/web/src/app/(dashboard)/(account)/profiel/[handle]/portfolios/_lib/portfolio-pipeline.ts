@@ -255,9 +255,7 @@ export async function ingestPortfolio(input: {
   );
   const chunks = splitIntoChunks(anonymizedText);
 
-  const sourceHash = createHash("sha256")
-    .update(anonymizedText)
-    .digest("hex");
+  const sourceHash = createHash("sha256").update(anonymizedText).digest("hex");
 
   const sourceIdentifier = `user:${input.userId}:${sourceHash.slice(0, 12)}`;
 

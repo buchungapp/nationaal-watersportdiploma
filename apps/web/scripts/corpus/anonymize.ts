@@ -32,7 +32,9 @@ mkdirSync(ANONYMIZED_DIR, { recursive: true });
 
 // Gateway reads AI_GATEWAY_API_KEY from env. Fall back to a direct ANTHROPIC_API_KEY
 // check so the script is forgiving during the transition.
-const hasLlm = !!(process.env.AI_GATEWAY_API_KEY || process.env.ANTHROPIC_API_KEY);
+const hasLlm = !!(
+  process.env.AI_GATEWAY_API_KEY || process.env.ANTHROPIC_API_KEY
+);
 if (!hasLlm) {
   console.warn(
     "No AI_GATEWAY_API_KEY (or ANTHROPIC_API_KEY) set — running regex-only pass. Set the key in apps/web/.env.local and re-run for thorough coverage.",
@@ -77,7 +79,8 @@ function regexScrub(
   const namesToScrub = new Set<string>();
   if (filenameName && filenameName !== "unknown") {
     namesToScrub.add(
-      filenameName.charAt(0).toUpperCase() + filenameName.slice(1).toLowerCase(),
+      filenameName.charAt(0).toUpperCase() +
+        filenameName.slice(1).toLowerCase(),
     );
   }
   for (const n of KNOWN_DUTCH_NAMES) namesToScrub.add(n);
@@ -150,7 +153,12 @@ REGELS:
 async function llmPass(regexScrubbed: string): Promise<
   Array<{
     find: string;
-    category: "first_name" | "location" | "vereniging" | "date_year" | "other_pii";
+    category:
+      | "first_name"
+      | "location"
+      | "vereniging"
+      | "date_year"
+      | "other_pii";
   }>
 > {
   const { object } = await generateObject({
@@ -170,7 +178,9 @@ function applyLlmReplacements(
 ): string {
   let out = text;
   // Sort longest-first so shorter substrings don't eat into longer ones (e.g. "Jade" vs "Jadestraat").
-  const sorted = [...replacements].sort((a, b) => b.find.length - a.find.length);
+  const sorted = [...replacements].sort(
+    (a, b) => b.find.length - a.find.length,
+  );
   for (const r of sorted) {
     if (!out.includes(r.find)) continue;
     const token = categoryToToken(r.category);
@@ -292,7 +302,9 @@ console.log(
 // Cleanup: if every anonymized file passed the LLM pass, wipe the extracted/
 // directory so the unredacted raw text doesn't sit on disk next to the clean
 // outputs. Re-running corpus:extract rebuilds it in ~20 seconds.
-const anonFiles = readdirSync(ANONYMIZED_DIR).filter((f) => f.endsWith(".json"));
+const anonFiles = readdirSync(ANONYMIZED_DIR).filter((f) =>
+  f.endsWith(".json"),
+);
 const allCleanRegexPlusLlm = anonFiles.every((f) => {
   try {
     const parsed = JSON.parse(

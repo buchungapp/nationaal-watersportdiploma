@@ -75,9 +75,7 @@ export async function loadLeercoachRubric(
 
     const werkprocessen = await Promise.all(
       werkprocessenFlat.map(async ({ wp, kerntaakCode, kerntaakTitel }) => {
-        const criteria = await listKssBeoordelingscriteriaByWerkprocesId(
-          wp.id,
-        );
+        const criteria = await listKssBeoordelingscriteriaByWerkprocesId(wp.id);
         return {
           id: wp.id,
           kerntaakId: wp.kerntaakId,
@@ -114,9 +112,10 @@ export async function loadLeercoachRubric(
  *   - kerntaak: only the werkprocessen of the single kerntaak
  *   - kerntaken: only the werkprocessen of those kerntaken
  */
-export function filterWerkprocessenByScope<
-  T extends { kerntaakCode: string },
->(werkprocessen: T[], scope: ChatScope): T[] {
+export function filterWerkprocessenByScope<T extends { kerntaakCode: string }>(
+  werkprocessen: T[],
+  scope: ChatScope,
+): T[] {
   switch (scope.type) {
     case "full_profiel":
       return werkprocessen;
@@ -148,7 +147,10 @@ export function resolveCriteriumWithinScope(input: {
   werkproces: LeercoachWerkproces;
   criterium: LeercoachCriterium;
 } | null {
-  const scoped = filterWerkprocessenByScope(input.rubric.werkprocessen, input.scope);
+  const scoped = filterWerkprocessenByScope(
+    input.rubric.werkprocessen,
+    input.scope,
+  );
   const werkproces = scoped.find((w) => w.rang === input.werkprocesRang);
   if (!werkproces) return null;
   const criterium = werkproces.criteria.find(

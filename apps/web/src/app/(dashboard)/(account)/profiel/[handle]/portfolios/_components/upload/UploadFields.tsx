@@ -55,15 +55,13 @@ export function UploadFields({ form, idPrefix }: Props) {
     profielen: form.profielen
       .filter((p) => p.richting === richting)
       .sort(
-        (a, b) =>
-          a.niveauRang - b.niveauRang || a.titel.localeCompare(b.titel),
+        (a, b) => a.niveauRang - b.niveauRang || a.titel.localeCompare(b.titel),
       ),
   })).filter((g) => g.profielen.length > 0);
 
   const kerntakenSorted =
-    form.selectedProfiel?.kerntaken
-      .slice()
-      .sort((a, b) => a.rang - b.rang) ?? [];
+    form.selectedProfiel?.kerntaken.slice().sort((a, b) => a.rang - b.rang) ??
+    [];
 
   return (
     <>
@@ -204,8 +202,7 @@ export function UploadFields({ form, idPrefix }: Props) {
               </p>
               {kerntakenSorted.length === 0 ? (
                 <p className="text-sm text-slate-600">
-                  Dit profiel heeft geen aparte kerntaken — kies “Hele
-                  profiel”.
+                  Dit profiel heeft geen aparte kerntaken — kies “Hele profiel”.
                 </p>
               ) : (
                 kerntakenSorted.map((k) => {
@@ -238,9 +235,7 @@ export function UploadFields({ form, idPrefix }: Props) {
                       />
                       <span>
                         <span className="font-medium text-slate-900">
-                          {displayCode
-                            ? `Kerntaak ${displayCode}`
-                            : "Kerntaak"}
+                          {displayCode ? `Kerntaak ${displayCode}` : "Kerntaak"}
                         </span>{" "}
                         <span className="text-slate-600">— {label}</span>
                       </span>

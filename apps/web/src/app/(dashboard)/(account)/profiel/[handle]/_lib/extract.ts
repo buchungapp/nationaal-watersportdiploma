@@ -19,11 +19,11 @@ import "server-only";
 // All extractors run server-side (see the `server-only` import).
 
 import { gateway } from "@ai-sdk/gateway";
-import { captureAiTurn } from "~/lib/posthog-ai";
 import { generateText } from "ai";
 import mammoth from "mammoth";
 import { extractText, getDocumentProxy } from "unpdf";
 import { VISION_MODEL } from "~/lib/ai-models";
+import { captureAiTurn } from "~/lib/posthog-ai";
 
 /** Strip characters Postgres rejects in `text` columns (U+0000) and
  *  other non-semantic C0 controls pdfjs occasionally passes through
@@ -46,9 +46,7 @@ export async function extractPdfText(
   // chunking + anonymisation rely on the separator).
   const pdf = await getDocumentProxy(bytes);
   const { text, totalPages } = await extractText(pdf, { mergePages: false });
-  const rawText = stripControlChars(
-    text.join("\n\n--- PAGE BREAK ---\n\n"),
-  );
+  const rawText = stripControlChars(text.join("\n\n--- PAGE BREAK ---\n\n"));
   return {
     rawText,
     pageCount: totalPages,

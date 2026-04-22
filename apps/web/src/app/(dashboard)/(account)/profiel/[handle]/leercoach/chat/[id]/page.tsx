@@ -35,7 +35,8 @@ export default async function LeercoachChatPage(props: {
   // an opaque hint into ChatShell and ignored when the chat has no
   // portfolio attached.
   const searchParams = await props.searchParams;
-  const initialFocus = searchParams.focus === "doc" ? ("doc" as const) : undefined;
+  const initialFocus =
+    searchParams.focus === "doc" ? ("doc" as const) : undefined;
   await requireLeercoachEnabled();
   const { user } = await requireInstructorPerson(handle);
 
@@ -214,16 +215,14 @@ function buildInitialMessages(
     role: "user" | "assistant" | "system";
     parts: unknown[];
     compactedIntoId: string | null;
-    compactionMetadata:
-      | {
-          kind: "summary";
-          messageCount: number;
-          fromCreatedAt: string;
-          toCreatedAt: string;
-          tokensSaved: number;
-          preservedDraftMessageId: string | null;
-        }
-      | null;
+    compactionMetadata: {
+      kind: "summary";
+      messageCount: number;
+      fromCreatedAt: string;
+      toCreatedAt: string;
+      tokensSaved: number;
+      preservedDraftMessageId: string | null;
+    } | null;
   }>,
 ): AiChatInitialMessage[] {
   return rows.map((m) => {

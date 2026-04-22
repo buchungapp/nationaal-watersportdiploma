@@ -8,12 +8,7 @@
 // Mirrors the send button's size (size-8) + position (bottom-1
 // left-1.5) so the composer is visually balanced left-to-right.
 
-import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-} from "@headlessui/react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   DocumentIcon,
   PaperClipIcon,
@@ -85,8 +80,8 @@ export function AttachmentMenu() {
                   Eerder portfolio uploaden
                 </span>
                 <span className="text-xs text-slate-500">
-                  PvB-portfolio van een lager niveau, voor
-                  stijl-matching + inhoud.
+                  PvB-portfolio van een lager niveau, voor stijl-matching +
+                  inhoud.
                 </span>
               </span>
             </button>

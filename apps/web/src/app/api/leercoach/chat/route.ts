@@ -8,8 +8,7 @@ import {
   type UIMessage,
 } from "ai";
 import { Redis } from "ioredis";
-import { after } from "next/server";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createResumableStreamContext } from "resumable-stream/ioredis";
 import throttle from "throttleit";
 import { buildSystemPrompt } from "~/app/(dashboard)/(account)/profiel/[handle]/leercoach/_lib/system-prompt";
@@ -151,7 +150,9 @@ export async function POST(req: Request) {
   // current trigger's delta. This also means tool-step messages from
   // prior partial turns are included — exactly what the model needs
   // to continue coherently.
-  const persisted = await Leercoach.Message.getByChatId({ chatId: chat.chatId });
+  const persisted = await Leercoach.Message.getByChatId({
+    chatId: chat.chatId,
+  });
   // Compaction filter: skip rows that have been folded into a summary.
   // They're still in the DB for UI display + audit, but the model
   // never sees them again — the summary row carries their gist. The
@@ -226,12 +227,38 @@ export async function POST(req: Request) {
   //   - priorPortfolioCount drives the "call searchPriorPortfolio" hint
   //   - chatArtefactCount drives the "don't spam listArtefacten" hint
   //     (observed up to 20× redundant calls per session pre-fix)
-  const [priorSources, chatArtefacten] = await Promise.all([
+  // Draft snapshot for the system prompt: lets the coach route
+  // "wat ik heb geschreven" / "mijn tekst" / "de draft" to readDraft
+  // instead of searchPriorPortfolio (the two overlap for users who
+  // both uploaded a prior PDF AND are writing in-session — without
+  // this the model defaults to searchPriorPortfolio). Two extra
+  // queries per turn, both indexed point-lookups; cheap relative to
+  // the AI Gateway round-trip.
+  const draftStatePromise = (async () => {
+    if (!chat.portfolioId) return null;
+    const portfolio = await Leercoach.Portfolio.getById({
+      portfolioId: chat.portfolioId,
+      userId: user.id,
+    });
+    if (!portfolio || !portfolio.currentVersionId) return null;
+    const version = await Leercoach.Portfolio.getVersionById({
+      versionId: portfolio.currentVersionId,
+      userId: user.id,
+    });
+    if (!version) return null;
+    return {
+      charCount: version.content.length,
+      lastEditedBy: version.createdBy,
+    };
+  })();
+
+  const [priorSources, chatArtefacten, draftState] = await Promise.all([
     AiCorpus.listUserPriorSources({ userId: user.id }),
     AiCorpus.listArtefactsForChat({
       chatId: chat.chatId,
       userId: user.id,
     }),
+    draftStatePromise,
   ]);
   const priorPortfolioCount = priorSources.length;
   const artefactCount = chatArtefacten.length;
@@ -244,6 +271,7 @@ export async function POST(req: Request) {
       priorPortfolioCount,
       artefactCount,
       phase: chat.phase,
+      draftState,
     }),
   ]);
 
@@ -307,7 +335,9 @@ export async function POST(req: Request) {
       role: "system" as const,
       content: systemPrompt.cacheable,
       providerOptions: {
-        anthropic: { cacheControl: { type: "ephemeral" as const, ttl: "1h" as const } },
+        anthropic: {
+          cacheControl: { type: "ephemeral" as const, ttl: "1h" as const },
+        },
       },
     },
     ...(systemPrompt.dynamic

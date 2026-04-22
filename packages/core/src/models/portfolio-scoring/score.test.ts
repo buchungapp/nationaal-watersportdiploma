@@ -35,7 +35,8 @@ test("concretenessPer100 counts anonymization tokens", () => {
   // 5 words, 1 token → 1/5 = 20 per 100
   assert.equal(concretenessPer100("Ik gaf les aan [KANDIDAAT]"), 20);
   // All 6 token types (12 total words: 6 tokens + 6 connectors)
-  const allTokens = "ik [KANDIDAAT] bij [LOCATIE] met [VERENIGING] op [DATUM] over [PII] en [ID]";
+  const allTokens =
+    "ik [KANDIDAAT] bij [LOCATIE] met [VERENIGING] op [DATUM] over [PII] en [ID]";
   const wc = wordCount(allTokens);
   assert.equal(wc, 12);
   // 6 tokens / 12 words * 100 = 50 per 100
@@ -93,7 +94,8 @@ test("metaCodaCount detects meta-summarising sentence endings", () => {
 });
 
 test("scoreBewijs returns all four primitives in one call", () => {
-  const s = "In week 14 zorgde ik voor een goede les met [KANDIDAAT]. Dit laat zien dat ik het kan.";
+  const s =
+    "In week 14 zorgde ik voor een goede les met [KANDIDAAT]. Dit laat zien dat ik het kan.";
   const score = scoreBewijs(s);
   assert.ok(score.wordCount > 0);
   assert.ok(score.concretenessPer100 > 0);
