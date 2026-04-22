@@ -269,14 +269,19 @@ export async function uploadPortfolioAction(
     };
   }
 
-  // Step 3: fire the workflow. On failure (QStash outage), flip the
-  // job to 'failed' so the UI can surface it. We still return ok:true
-  // with jobId so the client lands on the polling UI which then shows
-  // the error — better than a jarring inline error after the upload
-  // already "happened".
+  // Step 3: fire the workflow. On failure (QStash outage), no workflow
+  // is running, so there's nothing for the client to poll — we return
+  // `{ ok: false }` so the submit() path sets submitError and the
+  // "failed" banner shows immediately. The row is best-effort marked
+  // as 'failed' and the Storage blob cleaned up so we don't leave
+  // orphan state; but if those cleanup calls ALSO fail, the client
+  // still gets actionable inline feedback (bugbot finding — returning
+  // ok:true here relied on the row flipping to 'failed' and the
+  // client's SWR polling picking it up, which silently degraded into
+  // a 10-minute spinner if the mark-failed write ALSO failed).
   //
-  // We deliberately do NOT write `status`/`workflowRunId` from here
-  // on success. The workflow runs asynchronously, and by the time an
+  // We deliberately do NOT write `status`/`workflowRunId` on trigger
+  // success. The workflow runs asynchronously, and by the time an
   // action-side updateStatus call executes the workflow may already
   // have advanced to 'processing' (or even 'ready' for a very fast
   // job). Overwriting with status='pending' would regress the row,
@@ -288,10 +293,9 @@ export async function uploadPortfolioAction(
     await triggerIngestPortfolio(jobId);
   } catch (err) {
     console.error("Failed to trigger ingest-portfolio workflow", err);
-    // Trigger genuinely failed — no workflow is running — so marking
-    // the row as 'failed' is the correct outcome. Inner try around
-    // updateStatus so a DB hiccup on the mark-failed path doesn't
-    // propagate unhandled.
+    // Best-effort mark the row 'failed' so ops + any later revisit
+    // sees the real terminal state. Don't let a DB hiccup here mask
+    // the user-visible error.
     try {
       await Leercoach.UploadJob.updateStatus({
         jobId,
@@ -305,6 +309,23 @@ export async function uploadPortfolioAction(
         markErr,
       );
     }
+    // Best-effort blob cleanup — the row is dead, so the bytes are
+    // unreachable and should not linger in Storage.
+    try {
+      await deletePortfolioOriginal(blobPath);
+    } catch (cleanupErr) {
+      console.error(
+        `Failed to clean up Storage blob at ${blobPath} after trigger failure`,
+        cleanupErr,
+      );
+    }
+    return {
+      ok: false,
+      reason:
+        err instanceof Error
+          ? `Uploaden mislukt: ${err.message}`
+          : "Uploaden mislukt — workflow kon niet starten.",
+    };
   }
 
   if (handle) {

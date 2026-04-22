@@ -1,5 +1,5 @@
 import { schema as s } from "@nawadi/db";
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { useQuery, withTransaction } from "../../contexts/index.js";
 import {
@@ -228,44 +228,3 @@ export const updateStatus = wrapCommand(
   }),
 );
 
-// ---- List recent jobs for a user ----
-//
-// Nice-to-have for a "my uploads" dashboard; not wired into the UI
-// yet. Included here so the surface is complete when the time comes.
-
-export const listUploadJobsByUserIdInput = z.object({
-  userId: uuidSchema,
-  limit: z.number().int().min(1).max(100).default(20),
-});
-
-export const listByUserId = wrapQuery(
-  "leercoach.uploadJob.listByUserId",
-  withZod(
-    listUploadJobsByUserIdInput,
-    z.array(getUploadJobByIdOutput.unwrap()),
-    async (input) => {
-      const query = useQuery();
-      const rows = await query
-        .select()
-        .from(s.leercoachUploadJob)
-        .where(eq(s.leercoachUploadJob.userId, input.userId))
-        .orderBy(desc(s.leercoachUploadJob.createdAt))
-        .limit(input.limit);
-      return rows.map((row) => ({
-        jobId: row.id,
-        userId: row.userId,
-        kind: row.kind,
-        status: row.status,
-        blobPath: row.blobPath,
-        label: row.label,
-        metadata: row.metadata,
-        workflowRunId: row.workflowRunId,
-        sourceId: row.sourceId,
-        errorMessage: row.errorMessage,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-        completedAt: row.completedAt,
-      }));
-    },
-  ),
-);
