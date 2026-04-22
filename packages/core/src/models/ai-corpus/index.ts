@@ -260,9 +260,12 @@ export const getChunksForCriterium = wrapQuery(
 //
 // Helpers for the "kandidaat uploads their prior PvB portfolios as
 // reference material" flow. Access is strictly user-scoped:
-// consent_level must be "user_only" AND contributedByUserId must match.
-// No cross-user visibility here; the public retrieval helper above is
-// the only path that returns seed + opt_in_shared chunks.
+// contributedByUserId must match, and consent is either "user_only"
+// (private to this user) OR "opt_in_shared" (user let us reuse the
+// content across users, but it's still _their_ upload and must appear
+// in their own management + leercoach views). No cross-user visibility
+// here; the public retrieval helper above is the only path that
+// returns seed + other users' opt_in_shared chunks.
 
 export const listUserPriorSourcesInput = z.object({
   userId: uuidSchema,
@@ -327,7 +330,12 @@ export const listUserPriorSources = wrapQuery(
         .from(s.source)
         .where(
           and(
-            eq(s.source.consentLevel, "user_only"),
+            // Include BOTH consent tiers the user could have picked at
+            // upload time — `user_only` (private) and `opt_in_shared`
+            // (shareable). Both are still _their_ upload, so both must
+            // appear in their own management view. Consent only gates
+            // cross-user visibility, not self-visibility.
+            inArray(s.source.consentLevel, ["user_only", "opt_in_shared"]),
             eq(s.source.contributedByUserId, input.userId),
             isNull(s.source.revokedAt),
           ),
@@ -453,7 +461,11 @@ export const getUserPriorChunks = wrapQuery(
     const query = useQuery();
 
     const whereClauses: SQLWrapper[] = [
-      eq(s.source.consentLevel, "user_only"),
+      // See listUserPriorSources for the full rationale: consent only
+      // gates cross-user visibility, not self-visibility. A user's own
+      // `opt_in_shared` uploads are still _theirs_ and must flow into
+      // their own leercoach context, not just their `user_only` ones.
+      inArray(s.source.consentLevel, ["user_only", "opt_in_shared"]),
       eq(s.source.contributedByUserId, input.userId),
       isNull(s.source.revokedAt),
     ];
@@ -621,7 +633,12 @@ export const revokeUserPriorSource = wrapCommand(
         .where(
           and(
             eq(s.source.id, input.sourceId),
-            eq(s.source.consentLevel, "user_only"),
+            // User can revoke ANY of their own prior-portfolio sources
+            // regardless of consent tier — "I shared it with you" isn't
+            // a trap the user can't get out of. Both `user_only` and
+            // `opt_in_shared` belong to this user; either is revocable
+            // (GDPR right to erasure extends to opt-in shares too).
+            inArray(s.source.consentLevel, ["user_only", "opt_in_shared"]),
             eq(s.source.contributedByUserId, input.userId),
           ),
         );
