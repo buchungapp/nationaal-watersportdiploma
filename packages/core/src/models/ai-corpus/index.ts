@@ -62,6 +62,12 @@ export const upsertSourceWithChunksInput = z.object({
     // chat_id is required when domain === "artefact" (caller enforces).
     // Leave null for every other domain.
     chatId: uuidSchema.nullable(),
+    /**
+     * Path in Supabase Storage to the original un-anonymised file.
+     * Null for text-only sources + legacy rows that predate durable
+     * ingest. Used by the "download my original" flow.
+     */
+    originalStoragePath: z.string().nullable().default(null),
     metadata: z.record(z.unknown()).default({}),
     charCount: z.number().int().nonnegative(),
     pageCount: z.number().int().nullable(),
@@ -147,6 +153,7 @@ export const upsertSourceWithChunks = wrapCommand(
             richting: input.source.richting,
             niveauRang: input.source.niveauRang,
             chatId: input.source.chatId,
+            originalStoragePath: input.source.originalStoragePath,
             metadata: input.source.metadata,
             charCount: input.source.charCount,
             pageCount: input.source.pageCount,
@@ -535,6 +542,63 @@ export const getUserPriorChunks = wrapQuery(
       };
     });
   }),
+);
+
+// ---- Read: single prior source, user-scoped ----
+//
+// Rare path — used by the revoke flow so it can look up the Storage
+// blob path before deleting the row. Returns null for rows owned by
+// another user to prevent cross-user probing.
+
+export const getUserPriorSourceByIdInput = z.object({
+  userId: uuidSchema,
+  sourceId: uuidSchema,
+});
+
+export const getUserPriorSourceByIdOutput = z
+  .object({
+    sourceId: uuidSchema,
+    sourceIdentifier: z.string(),
+    charCount: z.number().int(),
+    originalStoragePath: z.string().nullable(),
+    revokedAt: z.string().nullable(),
+  })
+  .nullable();
+
+export const getUserPriorSourceById = wrapQuery(
+  "aiCorpus.source.getUserPriorById",
+  withZod(
+    getUserPriorSourceByIdInput,
+    getUserPriorSourceByIdOutput,
+    async (input) => {
+      const query = useQuery();
+      const row = await query
+        .select({
+          id: s.source.id,
+          sourceIdentifier: s.source.sourceIdentifier,
+          charCount: s.source.charCount,
+          originalStoragePath: s.source.originalStoragePath,
+          revokedAt: s.source.revokedAt,
+        })
+        .from(s.source)
+        .where(
+          and(
+            eq(s.source.id, input.sourceId),
+            eq(s.source.contributedByUserId, input.userId),
+          ),
+        )
+        .limit(1)
+        .then((r) => r[0]);
+      if (!row) return null;
+      return {
+        sourceId: row.id,
+        sourceIdentifier: row.sourceIdentifier,
+        charCount: row.charCount,
+        originalStoragePath: row.originalStoragePath,
+        revokedAt: row.revokedAt,
+      };
+    },
+  ),
 );
 
 export const revokeUserPriorSourceInput = z.object({

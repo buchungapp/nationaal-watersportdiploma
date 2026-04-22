@@ -13,4 +13,5 @@ export * as Chat from "./chat.js";
 export { leercoachChatScopeSchema } from "./chat.js";
 export * as Message from "./message.js";
 export * as Portfolio from "./portfolio.js";
+export * as UploadJob from "./upload-job.js";
 export { leercoachPortfolioScopeSchema } from "./portfolio.js";

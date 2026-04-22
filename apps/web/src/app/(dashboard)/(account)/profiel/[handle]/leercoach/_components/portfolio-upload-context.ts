@@ -18,13 +18,13 @@
 // sendMessage dependency stays inside AiChatWindow.
 
 import { createContext, use } from "react";
-import type { UploadPriorPortfolioResult } from "../../portfolios/actions";
+import type { UploadSuccessCtx } from "../../portfolios/_components/upload/useUploadPortfolioForm";
 
-export type PortfolioUploadSuccessCtx = {
-  result: Extract<UploadPriorPortfolioResult, { ok: true }>;
-  niveauRang: number | null;
-  label: string;
-};
+// Re-export under the compound's name so consumers outside the
+// portfolio flow see a PortfolioUpload-shaped name. Structurally
+// identical; the durable-ingest refactor moved the canonical type
+// into the upload-form hook.
+export type PortfolioUploadSuccessCtx = UploadSuccessCtx;
 
 export type PortfolioUploadState = {
   dialogOpen: boolean;

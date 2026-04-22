@@ -6,11 +6,12 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import type { UploadPriorPortfolioResult } from "../actions";
+import { useRouter } from "next/navigation";
 import { UploadFields } from "./upload/UploadFields";
 import { UploadResultBanner } from "./upload/UploadResultBanner";
 import {
   type ProfielOption,
+  type UploadSuccessCtx,
   useUploadPortfolioForm,
 } from "./upload/useUploadPortfolioForm";
 
@@ -32,12 +33,13 @@ export type PortfolioUploadDialogProps = {
   handle: string;
   open: boolean;
   onClose: () => void;
-  /** Called after a successful upload — caller composes its follow-up (chat auto-send, toast, revalidate). */
-  onSuccess?: (ctx: {
-    result: Extract<UploadPriorPortfolioResult, { ok: true }>;
-    niveauRang: number | null;
-    label: string;
-  }) => void;
+  /**
+   * Called after the async workflow completes successfully — caller
+   * composes its follow-up (chat auto-send, toast, revalidate). Not
+   * called on failure; consumers can read `form.state.kind === "failed"`
+   * if they need to react.
+   */
+  onSuccess?: (ctx: UploadSuccessCtx) => void;
   /** Pre-populate the file input (e.g. from a drag-drop on the caller). */
   preselectedFile?: File | null;
   /** Full list of kwalificatieprofielen for the scope picker. */
@@ -55,6 +57,7 @@ export function PortfolioUploadDialog({
   profielen,
   defaultProfielId,
 }: PortfolioUploadDialogProps) {
+  const router = useRouter();
   const form = useUploadPortfolioForm({
     open,
     handle,
@@ -63,12 +66,35 @@ export function PortfolioUploadDialog({
     preselectedFile,
     onSuccess: (ctx) => {
       onSuccess?.(ctx);
+      // Clear form state after a successful upload. Both consumers
+      // (PortfolioUpload.Provider + PortfolioDropZone) keep the dialog
+      // always-mounted via the `open` prop pattern, so without an
+      // explicit reset the next reopen would show stale banner + the
+      // previous file/profiel selection (bugbot finding).
+      form.reset();
+      // Belt-and-braces cache refresh. The workflow's mark-ready step
+      // calls `revalidatePath`, but that runs inside a QStash webhook
+      // callback — bugbot flagged this as potentially flaky because
+      // Upstash's SDK wraps the request in its own signature/replay
+      // handling, which may or may not play nicely with Next.js's
+      // internal cache-invalidation plumbing. `router.refresh()` here
+      // forces the current route segment to re-fetch on the client's
+      // side, so even if the workflow's revalidate silently degraded,
+      // the user's immediate view of /profiel/:handle/portfolios is
+      // fresh.
+      router.refresh();
       onClose();
     },
   });
 
+  // `isWorkflowRunning` lives on the form hook now (true during the
+  // useTransition action AND the SWR-driven polling phase). We read
+  // it here to gate the close affordance so the onSuccess callback
+  // can't be dropped by an early reset.
+  const { isWorkflowRunning } = form;
+
   function handleClose() {
-    if (form.isPending) return;
+    if (isWorkflowRunning) return;
     form.reset();
     onClose();
   }
@@ -96,13 +122,13 @@ export function PortfolioUploadDialog({
             </p>
 
             <UploadFields form={form} idPrefix="prior-dialog" />
-            <UploadResultBanner result={form.result} />
+            <UploadResultBanner state={form.state} />
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={handleClose}
-                disabled={form.isPending}
+                disabled={isWorkflowRunning}
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Annuleer
@@ -112,7 +138,7 @@ export function PortfolioUploadDialog({
                 disabled={!form.canSubmit}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {form.isPending
+                {isWorkflowRunning
                   ? "Bezig met verwerken…"
                   : "Upload + anonimiseer"}
               </button>

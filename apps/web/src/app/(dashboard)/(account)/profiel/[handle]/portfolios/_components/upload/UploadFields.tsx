@@ -40,7 +40,13 @@ const RICHTING_OPTIONS: PortfolioRichting[] = [
 ];
 
 export function UploadFields({ form, idPrefix }: Props) {
-  const disabled = form.isPending;
+  // Use `isWorkflowRunning` — not just `isPending` — so fields stay
+  // disabled during the 30-60s SWR polling phase too. Otherwise the
+  // user can edit profiel/label/consent after the server action
+  // returns but before the workflow finishes, and the onSuccess
+  // callback would close over the edited values instead of the
+  // submitted ones (bugbot finding).
+  const disabled = form.isWorkflowRunning;
 
   function handlePickClick() {
     form.fileInputRef.current?.click();
@@ -265,6 +271,50 @@ export function UploadFields({ form, idPrefix }: Props) {
           maxLength={80}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
+      </div>
+
+      {/* Data-handling disclosure + opt-in checkbox. Transparent by
+          default: the user is told both WHAT we keep (original stays
+          in their account) and WHAT they can optionally share (the
+          anonymised version, for model improvement). Default is
+          opt-out — only the anonymised version used for their own
+          coaching sessions, nothing shared. */}
+      <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <div className="flex flex-col gap-1 text-sm text-slate-700">
+          <p className="font-semibold text-slate-900">
+            Bewaren en verbeteren
+          </p>
+          <p className="text-slate-600">
+            We bewaren je originele portfolio veilig onder je account,
+            zodat je hem later altijd terug kunt vinden of downloaden.
+            Alleen jij hebt er toegang toe.
+          </p>
+          <p className="text-slate-600">
+            Daarnaast maken we een geanonimiseerde versie: namen,
+            plaatsen, verenigingen en datums vervangen we door
+            generieke labels.
+          </p>
+        </div>
+
+        <label className="flex cursor-pointer items-start gap-2 text-sm text-slate-700">
+          <input
+            type="checkbox"
+            checked={form.consentShared}
+            onChange={(e) => form.setConsentShared(e.target.checked)}
+            disabled={disabled}
+            className="mt-0.5"
+          />
+          <span>
+            <span className="font-medium text-slate-900">
+              Ik geef toestemming dat de geanonimiseerde versie
+              gebruikt wordt om de digitale leercoach voor andere
+              kandidaten te verbeteren.
+            </span>
+            <span className="mt-0.5 block text-xs text-slate-500">
+              Optioneel — je originele blijft sowieso privé.
+            </span>
+          </span>
+        </label>
       </div>
     </>
   );

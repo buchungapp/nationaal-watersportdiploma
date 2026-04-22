@@ -125,11 +125,14 @@ function AutoSendBridge() {
 
   useEffect(() => {
     if (!pendingSuccess) return;
-    const { result, niveauRang } = pendingSuccess;
+    const { niveauRang } = pendingSuccess;
     const niveauLabel = niveauRang ? `niveau-${niveauRang} ` : "";
-    const message = result.alreadyIngested
-      ? `Ik heb mijn ${niveauLabel}portfolio geüpload — maar ik zie dat dezelfde versie er al stond, dus niets nieuws toegevoegd.`
-      : `Ik heb zojuist mijn ${niveauLabel}portfolio geüpload (${result.pageCount} pagina's, ${result.chunkCount} fragmenten). Neem even de tijd om erin te kijken, dan kunnen we daarna bespreken hoe we dit gebruiken.`;
+    // Single message shape since the async workflow doesn't surface
+    // "already ingested" vs "fresh" to the client — the dedup check
+    // lives inside the workflow's ingest step. If we ever want to
+    // re-introduce that distinction, extend the status endpoint to
+    // return a { freshInsert: boolean } flag from the source insert.
+    const message = `Ik heb zojuist mijn ${niveauLabel}portfolio geüpload. Neem even de tijd om erin te kijken, dan kunnen we daarna bespreken hoe we dit gebruiken.`;
     sendMessage({ text: message });
     clearPendingSuccess();
   }, [pendingSuccess, sendMessage, clearPendingSuccess]);
