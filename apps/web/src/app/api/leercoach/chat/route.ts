@@ -46,7 +46,17 @@ import { createClient } from "~/lib/supabase/server";
 // the assistant message fully persisted when they return. See the
 // GET route in ./[id]/stream/route.ts for the reconnect path.
 
-export const maxDuration = 60;
+// Vercel serverless ceiling. Large coaching turns (long history + one
+// or more tool calls that edit the portfolio draft) can exceed a minute
+// of wall-clock on the LLM side; observed production turn: the function
+// was killed at 60s with "Task timed out after 60 seconds" and the
+// client's auto-resume then failed with resumable-stream's 1s "Timeout
+// waiting for ack" because the producer never set its done-sentinel.
+// 300s is Vercel Pro's hard max; we're nowhere near needing it for a
+// healthy turn, but it removes the ceiling as a failure mode while we
+// invest in shrinking turn duration via compaction / tool-output
+// truncation / smaller model for draft edits.
+export const maxDuration = 300;
 
 // Model id centralized in ~/lib/ai-models so a single swap flips the
 // whole chat stack. See CHAT_MODEL for the role rationale.
