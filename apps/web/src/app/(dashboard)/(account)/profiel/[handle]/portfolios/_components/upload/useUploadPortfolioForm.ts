@@ -198,6 +198,15 @@ export function useUploadPortfolioForm({
     niveauRang: number | null;
     label: string;
   } | null>(null);
+  // Latest-wins ref over the caller's `onSuccess`. The ready-effect
+  // below only depends on `readySourceId` (to fire exactly once on
+  // the terminal transition), so if we closed over `onSuccess`
+  // directly a caller that re-creates the callback each render
+  // (typical when it closes over `onClose`) could end up firing the
+  // stale version (bugbot finding). Synced in render, read in effect
+  // at call time — always the freshest reference.
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   // Seed React state from a preselected file (drop-zone path). The
   // native <input type="file"> is hidden in the fields component, so
@@ -398,7 +407,9 @@ export function useUploadPortfolioForm({
     // see `submittedSnapshotRef`. Falls back to live values only if the
     // snapshot is missing (shouldn't happen; submit() always sets it).
     const snapshot = submittedSnapshotRef.current;
-    onSuccess?.({
+    // Read via ref so we always call the freshest callback, even if
+    // the caller re-creates it each render (see onSuccessRef comment).
+    onSuccessRef.current?.({
       jobId,
       sourceId: readySourceId,
       niveauRang: snapshot?.niveauRang ?? selectedProfiel?.niveauRang ?? null,

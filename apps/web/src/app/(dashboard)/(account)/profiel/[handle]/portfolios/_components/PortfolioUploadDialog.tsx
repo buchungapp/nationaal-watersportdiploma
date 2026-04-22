@@ -6,6 +6,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
+import { useRouter } from "next/navigation";
 import { UploadFields } from "./upload/UploadFields";
 import { UploadResultBanner } from "./upload/UploadResultBanner";
 import {
@@ -56,6 +57,7 @@ export function PortfolioUploadDialog({
   profielen,
   defaultProfielId,
 }: PortfolioUploadDialogProps) {
+  const router = useRouter();
   const form = useUploadPortfolioForm({
     open,
     handle,
@@ -70,6 +72,17 @@ export function PortfolioUploadDialog({
       // explicit reset the next reopen would show stale banner + the
       // previous file/profiel selection (bugbot finding).
       form.reset();
+      // Belt-and-braces cache refresh. The workflow's mark-ready step
+      // calls `revalidatePath`, but that runs inside a QStash webhook
+      // callback — bugbot flagged this as potentially flaky because
+      // Upstash's SDK wraps the request in its own signature/replay
+      // handling, which may or may not play nicely with Next.js's
+      // internal cache-invalidation plumbing. `router.refresh()` here
+      // forces the current route segment to re-fetch on the client's
+      // side, so even if the workflow's revalidate silently degraded,
+      // the user's immediate view of /profiel/:handle/portfolios is
+      // fresh.
+      router.refresh();
       onClose();
     },
   });
