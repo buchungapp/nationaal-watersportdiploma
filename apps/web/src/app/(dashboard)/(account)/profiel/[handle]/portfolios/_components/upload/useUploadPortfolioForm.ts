@@ -309,13 +309,19 @@ export function useUploadPortfolioForm({
   // interval function returns 0, stopping the poll.
   const pollDisabledRef = useRef(false);
   const { data: statusData, error: statusError } = useSWR<StatusResponse>(
-    // Key goes null once the watchdog trips so SWR stops polling
-    // even if the refreshInterval below is somehow still running.
-    jobId && !pollTimedOut ? `/api/upload-job/${jobId}/status` : null,
+    // Key stays bound to jobId alone so any already-cached terminal
+    // response survives the polling-stop (bugbot round-11 finding:
+    // when the key went null on timeout, a `ready` response arriving
+    // in the same React batch was discarded and the user saw the
+    // timeout banner despite the server actually succeeding). Polling
+    // is stopped via `refreshInterval` + `pollDisabledRef` /
+    // `pollTimedOut` — NOT via the key.
+    jobId ? `/api/upload-job/${jobId}/status` : null,
     fetchUploadJobStatus as (url: string) => Promise<StatusResponse>,
     {
       refreshInterval: (latest) => {
         if (pollDisabledRef.current) return 0;
+        if (pollTimedOut) return 0;
         if (
           !latest ||
           latest.status === "pending" ||
@@ -350,6 +356,23 @@ export function useUploadPortfolioForm({
       return { kind: "failed", jobId: null, errorMessage: submitError };
     }
     if (!jobId) return { kind: "idle" };
+    // Server truth wins over any client-side heuristic (bugbot
+    // round-11 finding: if a `ready` response arrives in the same
+    // React batch as the polling watchdog trips, the client-side
+    // timeout banner used to mask it — the user saw "timed out" for
+    // a job that had actually succeeded). Check terminal statusData
+    // BEFORE `pollTimedOut` and BEFORE `statusError` so the cached
+    // final value always takes precedence.
+    if (statusData?.status === "ready") {
+      return { kind: "ready", jobId, sourceId: statusData.sourceId };
+    }
+    if (statusData?.status === "failed") {
+      return {
+        kind: "failed",
+        jobId,
+        errorMessage: statusData.errorMessage,
+      };
+    }
     if (pollTimedOut) {
       return {
         kind: "failed",
@@ -373,14 +396,12 @@ export function useUploadPortfolioForm({
       // as 'pending' so the UI already shows the spinner.
       return { kind: "pending", jobId };
     }
+    // Non-terminal statuses only reach this point — terminal ones
+    // (`ready` / `failed`) were handled by the early returns above.
     switch (statusData.status) {
       case "pending":
       case "processing":
         return { kind: statusData.status, jobId };
-      case "ready":
-        return { kind: "ready", jobId, sourceId: statusData.sourceId };
-      case "failed":
-        return { kind: "failed", jobId, errorMessage: statusData.errorMessage };
       default:
         // Defensive: if the server ever returns an unexpected shape
         // (e.g. a schema drift we didn't anticipate), don't let the
