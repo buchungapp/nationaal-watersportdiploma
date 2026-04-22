@@ -332,10 +332,26 @@ function Provider({
 
   const meta: ArtefactMeta = { handlePaste, handleDrop, submitBlock };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: track primitives and stable callbacks, not `state`/`actions`/`meta` object identity
   const value = useMemo<ArtefactContextValue>(
     () => ({ state, actions, meta }),
-    // biome-ignore lint/correctness/useExhaustiveDependencies: explicit listing is clearer than memoising every field
-    [actions, meta, state],
+    [
+      artefacten,
+      pending,
+      stagedIds,
+      error,
+      dialogOpen,
+      uploadFile,
+      uploadText,
+      revoke,
+      dismissError,
+      openDialog,
+      closeDialog,
+      commitStaged,
+      handlePaste,
+      handleDrop,
+      submitBlock,
+    ],
   );
 
   return <ArtefactContext value={value}>{children}</ArtefactContext>;

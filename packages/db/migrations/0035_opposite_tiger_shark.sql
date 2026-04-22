@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
 CREATE SCHEMA "ai_corpus";
 
 CREATE SCHEMA "leercoach";
