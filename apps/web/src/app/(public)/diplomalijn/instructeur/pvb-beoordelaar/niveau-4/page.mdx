@@ -1,5 +1,9 @@
+import { KssCompetentieTree } from "../../_components/kss-tree";
+import { QualificationProfile } from "../../_components/qualification-profile";
+
 export const page = {
   title: "PvB-beoordelaar 4 (B4)",
+  description: "Afnemen van PvB's voor niveau 1 t/m 3",
 };
 
 export const metadata = {
@@ -7,5 +11,36 @@ export const metadata = {
   description: page.description,
 };
 
-Een PvB-beoordelaar 4 (B4) is binnen de leslocatie verantwoordelijk voor het
-afnemen van PvB’s voor instructeurs 1, 2 en 3.
+<QualificationProfile
+  role="beoordelaar"
+  level="B4"
+  title="PvB-beoordelaar 4"
+  subtitle="Afnemen van PvB's voor niveau 1 t/m 3"
+  description="Een PvB-beoordelaar 4 is binnen de eigen opleidingslocatie verantwoordelijk voor het afnemen van PvB's voor Instructeurs 1, 2 en 3. Door het 'vier-ogen principe' werkt de beoordelaar samen met de Leercoach: beiden moeten goedkeuring geven voor het afronden van een kandidaat."
+  minAge={18}
+  prerequisites={[
+    "In het bezit zijn van Leercoach 4 in de desbetreffende discipline",
+  ]}
+  pvbs={[
+    {
+      code: "4.7",
+      title: "Afnemen van PvB's",
+      type: "Portfoliobeoordeling",
+    },
+  ]}
+  permissions={[
+    "Afnemen van PvB's voor Instructeurs 1, 2 en 3 binnen de eigen opleidingslocatie",
+    "Valideren/aftekenen van beoordelingsformulieren voor Wal/Waterhulp 1",
+    "Samenwerken met Leercoach volgens het vier-ogen principe",
+  ]}
+  skillLevel={null}
+  additionalInfo="De beoordelaar 4 voert de taken zelfstandig uit en is verantwoordelijk voor de kwaliteit van de beoordeling en de verslaglegging."
+/>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={4} richting="pvb_beoordelaar" />

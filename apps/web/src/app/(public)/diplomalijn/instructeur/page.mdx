@@ -1,6 +1,11 @@
+import { DoorstroomSchema } from "./_components/doorstroom-schema";
+import { RoleNavigator } from "./_components/role-navigator";
+import { CategoryCard, RoleOverviewCard } from "./_components/role-overview";
+
 export const page = {
   title: "Introductie",
   order: 1,
+  description: "Kaderopleidingen volgens de Kwalificatiestructuur Sport (KSS)",
 };
 
 export const metadata = {
@@ -12,9 +17,118 @@ De NWD Diplomalijn voor instructeurs voldoet volledig aan de licentie-eisen van
 het Watersportverbond en World Sailing. Deze eisen zijn vastgelegd in de
 Kwalificatiestructuur Sport (KSS).
 
+## Wat past bij jou?
+
+<RoleNavigator />
+
 Elke NWD locatie is gelicenseerd om de instructeursdiploma's te verzorgen. Je
 kunt dus bij elke NWD locatie starten met je instructeursopleiding.
 
 Het NWD heeft speciaal voor instructeurs een logische opbouw in
-eigenvaardigheidsniveau's (A, B en C) en daarnaast krijg je een opleiding op het
-gebied van lesgeefmethodiek. Dat tezamen maakt jou een echte instructeur.
+eigenvaardigheidsniveau's (A, B en C) en daarnaast krijg je een opleiding op
+het gebied van lesgeefmethodiek. Dat tezamen maakt jou een echte instructeur.
+
+## Wat is de Kwalificatiestructuur Sport (KSS)?
+
+De KSS is een landelijk raamwerk dat door NOC\*NSF samen met de sportbonden is
+ontwikkeld en waarborgt dat opleidingen in de sport vergelijkbaar en
+herkenbaar zijn en voldoen aan vastgestelde kwaliteitscriteria. In de KSS zijn
+de verschillende functies met de bijbehorende competenties (kennis,
+vaardigheden en houding) beschreven en worden deze eenduidig getoetst.
+
+Zo weten sporters, verenigingen, maar ook cursisten en opleidingslocaties dat
+een opgeleide instructeur (of ander type kaderlid) overal in Nederland
+hetzelfde kwaliteitsniveau heeft.
+
+## Drie kwalificatieprofielen
+
+Binnen de kaderopleidingen zijn er drie verschillende functies, elk met hun
+eigen kwalificatieprofielen en verantwoordelijkheden:
+
+<div className="not-prose mt-4 grid gap-2">
+  <RoleOverviewCard
+    role="instructeur"
+    label="Instructeur"
+    href="/diplomalijn/instructeur/niveau-1"
+    levels={["I1", "I2", "I3", "I4", "I5"]}
+  />
+  <RoleOverviewCard
+    role="leercoach"
+    label="Leercoach"
+    href="/diplomalijn/instructeur/leercoach/niveau-4"
+    levels={["L4", "L5"]}
+  />
+  <RoleOverviewCard
+    role="beoordelaar"
+    label="PvB-beoordelaar"
+    href="/diplomalijn/instructeur/pvb-beoordelaar/niveau-4"
+    levels={["B4", "B5"]}
+  />
+</div>
+
+## Cursuscategorieën
+
+Een KSS-kwalificatie is verbonden aan een specifieke **cursus**, niet alleen
+aan een discipline. Cursussen worden ingedeeld op basis van drie
+categorieën:
+
+<div className="not-prose mt-4 grid gap-3">
+  <CategoryCard
+    title="Leeftijdscategorieën"
+    defaultRole="instructeur"
+    chips={[
+      { label: "Jeugd" },
+      { label: "Jongeren" },
+      { label: "(Jong) Volwassenen" },
+    ]}
+  />
+  <CategoryCard
+    title="Doelgroepcategorieën"
+    defaultRole="leercoach"
+    chips={[{ label: "Consument" }, { label: "Instructeur" }]}
+  />
+  <CategoryCard
+    title="Vaarwatercategorieën"
+    defaultRole="beoordelaar"
+    chips={[
+      { label: "Binnenwater" },
+      { label: "Ruim Binnenwater" },
+      { label: "Waddenzee en Zeeuwse Stromen" },
+      { label: "Zee" },
+    ]}
+  />
+</div>
+
+<div className="not-prose mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
+  <h4 className="text-base font-semibold text-slate-900">
+    Kwalificaties zijn cursusgebonden
+  </h4>
+  <p className="mt-2 text-sm text-slate-600">Dit betekent dat een kwalificatie specifiek is voor de combinatie van discipline, leeftijdscategorie en vaarwater. Voorbeelden:</p>
+  <ul className="mt-3 space-y-2 text-sm text-slate-600">
+    <li className="flex items-start gap-2">
+      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-branding-light" />
+      <span>
+        <strong>I3 Kielboot Jeugd</strong> is niet hetzelfde als{" "}
+        <strong>I3 Kielboot Volwassenen</strong>
+      </span>
+    </li>
+    <li className="flex items-start gap-2">
+      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-branding-light" />
+      <span>
+        <strong>I4 Jachtzeilen Binnenwater</strong> is anders dan{" "}
+        <strong>I4 Jachtzeilen Zee</strong>
+      </span>
+    </li>
+  </ul>
+  <p className="mt-3 text-sm text-slate-600">Dit geldt zowel voor eigenvaardigheidsdiploma's (NWD) als voor instructeurskwalificaties. Bij uitbreiding naar een andere cursus binnen dezelfde <a href="/diplomalijn/instructeur/instructiegroepen" className="text-branding-light hover:underline">instructiegroep</a> gelden specifieke vrijstellingsregelingen.</p>
+</div>
+
+## Doorstroomschema
+
+Het onderstaande schema geeft een totaaloverzicht van alle instructeursniveaus
+en functies die er zijn binnen de watersportopleidingen. Klik op een
+kwalificatieprofiel om de details te bekijken.
+
+<div className="not-prose mt-4">
+  <DoorstroomSchema />
+</div>
