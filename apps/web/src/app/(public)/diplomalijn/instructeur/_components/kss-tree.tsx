@@ -10,6 +10,7 @@ import {
   type PublicKssWerkproces,
   type PublicRichting,
 } from "~/lib/kss-public";
+import { KssTreeControls } from "./kss-tree-controls";
 
 type Role = "instructeur" | "leercoach" | "beoordelaar";
 
@@ -304,7 +305,8 @@ export async function KssCompetentieTree({
     );
   }
   return (
-    <div className="not-prose flex flex-col gap-8">
+    <div className="not-prose flex flex-col gap-6">
+      <KssTreeControls />
       {profielen.map((profiel) => (
         <ProfielBlock key={profiel.id} profiel={profiel} />
       ))}
