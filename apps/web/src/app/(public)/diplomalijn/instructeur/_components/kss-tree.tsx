@@ -66,18 +66,21 @@ function WerkprocesCard({
   const t = roleTokens[role];
   const criteriaCount = werkproces.beoordelingscriteria.length;
   return (
-    <details className="group rounded-lg border border-slate-200 bg-white">
-      <summary className="flex cursor-pointer list-none items-start gap-3 p-4 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
+    <details className="group rounded-lg border border-slate-200 bg-white transition-colors open:border-slate-300 open:shadow-sm">
+      <summary className="flex cursor-pointer list-none items-start gap-3 p-4 transition-colors hover:bg-slate-100/60 focus-visible:bg-slate-100/60 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
         <span
           className={`mt-1 inline-flex size-1.5 shrink-0 rounded-full ${t.dot}`}
         />
         <div className="min-w-0 flex-1">
-          <h4 className="text-sm font-semibold text-slate-900">
+          <h4 className="text-base font-semibold leading-snug text-slate-900">
             {werkproces.titel}
           </h4>
           {werkproces.resultaat && (
-            <p className="mt-1 text-sm text-slate-600">
-              <span className="font-medium text-slate-700">Resultaat:</span>{" "}
+            <p className="mt-1.5 text-sm text-slate-600">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Resultaat
+              </span>
+              <br />
               {werkproces.resultaat}
             </p>
           )}
@@ -102,7 +105,7 @@ function WerkprocesCard({
         </div>
         <svg
           aria-hidden="true"
-          className="mt-1 size-4 shrink-0 text-slate-400 transition-transform group-open:rotate-90"
+          className="mt-1 size-4 shrink-0 text-slate-400 transition-transform duration-200 ease-out group-open:rotate-90 group-hover:text-slate-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -189,24 +192,16 @@ function KerntaakBlock({
     <section
       className={`rounded-2xl border ${t.softBorder} ${t.soft} p-5 sm:p-6`}
     >
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h3 className="text-lg font-semibold text-slate-900">
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h3 className="text-lg font-semibold leading-tight text-slate-900">
             {kerntaak.titel}
           </h3>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            {kerntaak.type === "verplicht" ? (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${t.chip}`}
-              >
-                Verplicht
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
-                Facultatief
-              </span>
-            )}
-          </div>
+          {kerntaak.type === "facultatief" && (
+            <span className="inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">
+              Facultatief
+            </span>
+          )}
         </div>
         <div className="shrink-0 text-xs text-slate-500">
           {kerntaak.werkprocessen.length} werkprocessen · {totalCriteria}{" "}
@@ -215,7 +210,9 @@ function KerntaakBlock({
       </header>
 
       {(hasPortfolio || hasPraktijk) && (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <div
+          className={`mt-3 grid gap-2 ${hasPortfolio && hasPraktijk ? "sm:grid-cols-2" : ""}`}
+        >
           {hasPortfolio && (
             <OnderdeelSummary
               type="portfolio"
@@ -258,17 +255,28 @@ function ProfielBlock({ profiel }: { profiel: PublicKssProfiel }) {
   return (
     <div className="flex flex-col gap-4">
       <div
-        className={`flex flex-col gap-2 rounded-xl border ${t.softBorder} bg-white p-5 ring-1 ${t.ring}`}
+        className={`flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border ${t.softBorder} bg-white px-5 py-3 ring-1 ${t.ring}`}
       >
-        <div className="flex flex-wrap items-center gap-2">
-          <IdentificationIcon className="size-5 text-slate-500" />
-          <h2 className="text-base font-semibold text-slate-900">
+        <div className="flex items-center gap-2">
+          <IdentificationIcon
+            className="size-4 text-slate-500"
+            aria-hidden="true"
+          />
+          <p className="text-sm font-medium text-slate-700">
             Kwalificatieprofiel {profiel.titel}
-          </h2>
+          </p>
         </div>
-        <p className="text-sm text-slate-600">
-          {totalKerntaken} kerntaak{totalKerntaken === 1 ? "" : "en"} ·{" "}
-          {totalWerkprocessen} werkprocessen · {totalCriteria} beoordelingscriteria
+        <p className="text-xs text-slate-500">
+          <span className="font-semibold text-slate-700">
+            {totalKerntaken}
+          </span>{" "}
+          kerntaak{totalKerntaken === 1 ? "" : "en"} ·{" "}
+          <span className="font-semibold text-slate-700">
+            {totalWerkprocessen}
+          </span>{" "}
+          werkprocessen ·{" "}
+          <span className="font-semibold text-slate-700">{totalCriteria}</span>{" "}
+          beoordelingscriteria
         </p>
       </div>
       <div className="flex flex-col gap-4">
