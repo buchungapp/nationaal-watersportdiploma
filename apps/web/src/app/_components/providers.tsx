@@ -60,12 +60,18 @@ export function CommonProviders({ children }: { children?: React.ReactNode }) {
 }
 
 function SessionProvider({ children }: PropsWithChildren) {
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const posthog = usePostHog();
   const lastIdentifiedRef = useRef<string | null>(null);
 
+  const userId = session?.user?.id ?? null;
+  const email = session?.user?.email;
+
   useEffect(() => {
-    const userId = session?.user?.id ?? null;
+    // Don't touch PostHog while Better Auth is revalidating — a brief
+    // null blip during refetch would otherwise reset the visitor ID.
+    if (isPending) return;
+
     const lastIdentified = lastIdentifiedRef.current;
 
     if (!userId) {
@@ -77,10 +83,10 @@ function SessionProvider({ children }: PropsWithChildren) {
     }
 
     if (userId !== lastIdentified) {
-      posthog.identify(userId, { email: session?.user?.email });
+      posthog.identify(userId, { email });
       lastIdentifiedRef.current = userId;
     }
-  }, [posthog, session]);
+  }, [posthog, isPending, userId, email]);
 
   return <>{children}</>;
 }
