@@ -1,5 +1,11 @@
+import { CalendarIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
+import { InfoCard } from "../../_components/info-card";
+import { KssCompetentieTree } from "../../_components/kss-tree";
+import { QualificationProfile } from "../../_components/qualification-profile";
+
 export const page = {
   title: "Leercoach 5 (L5)",
+  description: "Eindverantwoordelijk voor opleidingstraject",
 };
 
 export const metadata = {
@@ -7,7 +13,68 @@ export const metadata = {
   description: page.description,
 };
 
-Een Leercoach 5 (L5) is binnen de leslocatie eindverantwoordelijk voor de
-ontwikkeling van het opleidingstraject en de opleiding van instructeurs 4,
-leercoaches 4 en PvB-beoordelaars 4. Daarmee is de L5 eindverantwoordelijk voor
-de kwaliteit van de vaaropleidingen op de leslocatie.
+<QualificationProfile
+  role="leercoach"
+  level="L5"
+  title="Leercoach 5"
+  subtitle="Eindverantwoordelijk voor opleidingstraject"
+  description="Een Leercoach 5 is binnen de leslocatie eindverantwoordelijk voor de ontwikkeling van het opleidingstraject en de opleiding van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4. Daarmee is de Leercoach 5 dus eindverantwoordelijk voor de kwaliteit van de vaar- en kaderopleidingen op de opleidingslocatie."
+  minAge={18}
+  prerequisites={[
+    "In het bezit zijn van Beoordelaar 4 (dus ook Leercoach 4) in de desbetreffende discipline",
+    "In het bezit zijn van Instructeur 4 in de desbetreffende discipline",
+  ]}
+  pvbs={[
+    {
+      code: "5.3",
+      title: "Ontwikkelen opleidingsprogramma's",
+      type: "Portfoliobeoordeling en Assessment",
+    },
+    {
+      code: "5.4",
+      title: "Coachen van cursisten",
+      type: "Praktijk- en Portfoliobeoordeling",
+    },
+    {
+      code: "5.5",
+      title: "Samenwerken begeleidingsteam en onderhouden contacten",
+      type: "Portfoliobeoordeling en Assessment",
+    },
+  ]}
+  permissions={[
+    "Eindverantwoordelijk voor de ontwikkeling van het opleidingstraject",
+    "Opleiding van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4",
+    "Eindverantwoordelijk voor de kwaliteit van vaar- en kaderopleidingen op de opleidingslocatie",
+  ]}
+  skillLevel={null}
+  additionalInfo="Afronding van Leercoach 5 gebeurt onder direct toezicht van de opleidingskundige van het Watersportverbond. Een geldige VOG-verklaring is vereist."
+/>
+
+<div className="not-prose mt-8 space-y-4">
+  <InfoCard
+    tone="leercoach"
+    emphasis
+    icon={<InformationCircleIcon className="size-5" />}
+    title="Centrale opleiding"
+  >
+    <p>Jaarlijks worden de opleidingen voor Instructeur 5, Leercoach 5 en PvB-beoordelaar 5 modulair aangeboden door de Watersport Academy. Deze opleidingen beginnen meestal in februari en de afrondingsdag is in november.</p>
+    <p>Je kunt deelnemen aan deze opleidingen wanneer je in het bezit bent van de kwalificatie Instructeur 4 en/of Beoordelaar 4. De opleidingen hebben als doel om je zo veel mogelijk andere werkwijzen te laten zien om zo je competenties nog verder te verbreden.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="leercoach"
+    icon={<CalendarIcon className="size-5" />}
+    title="Her- en bijscholing"
+  >
+    <p>De kwalificatie Leercoach 5 is een licentie. Deze blijft geldig zolang je eens in de twee jaar de her- en bijscholingsdag voor niveau 5 volgt en de Watersport Academy de licentie niet heeft ingetrokken.</p>
+    <p>Een verlopen licentie kan worden geactiveerd na het volgen van de her- en bijscholingsdag. Wanneer de licentie langer dan 4 jaar verlopen is, kan de Watersport Academy aanvullende eisen stellen.</p>
+  </InfoCard>
+</div>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={5} richting="leercoach" />

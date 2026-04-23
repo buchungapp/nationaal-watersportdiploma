@@ -1,5 +1,11 @@
+import { CalendarIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
+import { InfoCard } from "../_components/info-card";
+import { KssCompetentieTree } from "../_components/kss-tree";
+import { QualificationProfile } from "../_components/qualification-profile";
+
 export const page = {
   title: "Instructeur 5 (I5)",
+  description: "Hoogste instructeursniveau",
 };
 
 export const metadata = {
@@ -7,5 +13,54 @@ export const metadata = {
   description: page.description,
 };
 
-Een Instructeur 5 (I5) kan lesgeven aan zeer vergevorderde zeilers en
-bijbehorende vaardigheden vaststellen.
+<QualificationProfile
+  role="instructeur"
+  level="I5"
+  title="Instructeur 5"
+  subtitle="Hoogste instructeursniveau"
+  description="Een Instructeur 5 geeft les/training in de eigen vaardigheid van Instructeurs 4 in opleiding en is bevoegd om samen met een tweede Instructeur 5 vast te stellen of de kandidaat op het vereiste niveau is. De les/training mag zelf gepland worden maar moet binnen de gestelde termijn aangemeld worden bij de Watersport Academy."
+  minAge={18}
+  prerequisites={[
+    "In het bezit zijn van Instructeur 4 in de desbetreffende discipline",
+  ]}
+  pvbs={[
+    {
+      code: "5.1",
+      title: "Geven van lessen",
+      type: "Praktijk- en Portfoliobeoordeling",
+    },
+  ]}
+  permissions={[
+    "Training geven aan Instructeur 4 in opleiding in de eigen vaardigheid",
+    "Samen met een tweede Instructeur 5 vaststellen of een kandidaat op NWD C niveau zit",
+  ]}
+  skillLevel="C"
+/>
+
+<div className="not-prose mt-8 space-y-4">
+  <InfoCard
+    tone="instructeur"
+    emphasis
+    icon={<InformationCircleIcon className="size-5" />}
+    title="Centrale opleiding"
+  >
+    <p>Jaarlijks worden de opleidingen voor Instructeur 5, Leercoach 5 en PvB-beoordelaar 5 modulair aangeboden door de Watersport Academy. Deze opleidingen beginnen meestal in februari en de afrondingsdag is in november. De organisatie is in handen van de Watersport Academy cursusstaf, bijgestaan door een aantal leercoaches en experts.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="instructeur"
+    icon={<CalendarIcon className="size-5" />}
+    title="Her- en bijscholing"
+  >
+    <p>De kwalificatie Instructeur 5 is een licentie. Deze blijft geldig zolang je eens in de twee jaar de her- en bijscholingsdag voor niveau 5 volgt en de Watersport Academy de licentie niet heeft ingetrokken. De gehele her- en bijscholingsdag dient gevolgd te worden (een dagdeel is niet voldoende).</p>
+    <p>De her- en bijscholingsdagen vinden afwisselend de laatste zondag van november en de laatste zaterdag van januari plaats in de even jaren.</p>
+  </InfoCard>
+</div>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={5} richting="instructeur" />

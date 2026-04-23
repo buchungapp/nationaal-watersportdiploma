@@ -1,9 +1,16 @@
+import {
+  AcademicCapIcon,
+  ArrowsRightLeftIcon,
+  ExclamationTriangleIcon,
+  LightBulbIcon,
+} from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { InfoCard } from "../_components/info-card";
 import instructeursEigenvaardigheid from "./_assets/instructeurs-eigenvaardigheid.png";
 
 export const page = {
   title: "Overgang CWO",
-  order: 2,
+  order: 7,
 };
 
 export const metadata = {
@@ -22,10 +29,81 @@ specifieke vaardigheden waaronder de zeiler en de instructeur zich ontwikkelen.
 De eindtermen van elk individueel diploma zijn hetzelfde tussen NWD en CWO, maar
 de richtlijnen (omstandigheden) verschillen.
 
-De niveaus zijn op de volgende manier te vergelijken:
+## Eigenvaardigheid — NWD A/B/C vs. CWO-niveaus
 
-<Image className="rounded-none" src={instructeursEigenvaardigheid} alt="" />
+<Image className="rounded-none" src={instructeursEigenvaardigheid} alt="Vergelijking tussen NWD A/B/C en CWO-niveaus voor eigenvaardigheid" />
 
-Voor het stuk didiactiek (instructeursvaardigheid), leercoaches en
+Voor het stuk didactiek (instructeursvaardigheid), leercoaches en
 PvB-beoordelaars volgen we de structuur van de Kwalificatie Structuur Sport
 (KSS) en zijn de lijnen van de CWO en het NWD dus gelijk.
+
+## Waarom deze scheiding?
+
+<div className="not-prose mt-4 grid gap-3 md:grid-cols-2">
+  <InfoCard
+    tone="instructeur"
+    icon={<ArrowsRightLeftIcon className="size-5" />}
+    title="CWO-model"
+  >
+    <p>Consumentenlijn en instructeurslijn lopen in elkaar over. Een zeiler die CWO IV heeft kan via een korte bijscholing doorstromen naar CWO Instructeur.</p>
+    <p className="rounded-lg bg-slate-50 p-3 text-slate-600">Voordeel: lage drempel. Nadeel: lesgeven en zelf zeilen worden als één vaardigheid gemeten.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="instructeur"
+    icon={<ArrowsRightLeftIcon className="size-5" />}
+    title="NWD-model"
+  >
+    <p>Eigenvaardigheid (NWD A/B/C) en didactische bekwaamheid (I2/I3/I4/I5 via KSS) zijn twee aparte sporen. Je wordt apart getoetst op <em>kunnen zeilen</em> en <em>kunnen lesgeven</em>.</p>
+    <p className="rounded-lg bg-slate-50 p-3 text-slate-600">Voordeel: duidelijker wat iemand werkelijk beheerst. Nadeel: twee aparte examenmomenten per niveau.</p>
+  </InfoCard>
+</div>
+
+## Wat betekent dit in de praktijk?
+
+<div className="not-prose mt-4 space-y-3">
+  <InfoCard
+    tone="instructeur"
+    icon={<AcademicCapIcon className="size-5" />}
+    title="Scenario 1 — Huidige CWO-instructeur"
+  >
+    <p>Je hebt CWO Instructeur 2 en wilt de overstap maken naar het NWD. In de meeste gevallen betekent dit: een NWD A-vaardigheidsexamen (voor de eigenvaardigheid) plus een PvB voor I2 (voor de didactische kant). De precieze vrijstellingen verschillen per instructiegroep — vraag dit na bij je opleidingslocatie.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="instructeur"
+    icon={<AcademicCapIcon className="size-5" />}
+    title="Scenario 2 — Pas begonnen zeiler"
+  >
+    <p>Je begint net met lesgeven en wilt direct het NWD-pad volgen. Dan doe je gewoon de NWD-instructeursopleiding op je locatie — er is geen &ldquo;omzetting&rdquo; nodig. Start bij I2 (of I1 als wal-/waterhulp).</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="leercoach"
+    icon={<AcademicCapIcon className="size-5" />}
+    title="Scenario 3 — CWO Hoofdinstructeur / Trainer"
+  >
+    <p>Voor Leercoach- en beoordelaarsrollen geldt de KSS-structuur, die voor CWO en NWD identiek is. Als je in het verleden de CWO-opleiding voor kaderfuncties hebt gevolgd, wordt je CWO-certificering door het NWD meestal als gelijkwaardig erkend. De Watersport Academy bekijkt dit per geval.</p>
+  </InfoCard>
+</div>
+
+<div className="not-prose mt-6">
+  <InfoCard
+    tone="instructeur"
+    emphasis
+    icon={<ExclamationTriangleIcon className="size-5" />}
+    title="Overgangsregeling is per-locatie"
+  >
+    <p>Omdat CWO-certificaten variëren in leeftijd en inhoud, wordt de overgang per kandidaat en per opleidingslocatie beoordeeld. Neem contact op met je NWD-locatie voor een concrete inschatting van je route.</p>
+  </InfoCard>
+</div>
+
+<div className="not-prose mt-6">
+  <InfoCard
+    tone="leercoach"
+    icon={<LightBulbIcon className="size-5" />}
+    title="Belangrijkste verschil in 1 zin"
+  >
+    <p>CWO mengt &ldquo;wat je kunt&rdquo; en &ldquo;wat je leert&rdquo; in één lijn. NWD splitst dit in twee aparte lijnen zodat beide apart aantoonbaar zijn.</p>
+  </InfoCard>
+</div>

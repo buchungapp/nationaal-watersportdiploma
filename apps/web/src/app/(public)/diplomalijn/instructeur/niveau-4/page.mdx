@@ -1,5 +1,9 @@
+import { KssCompetentieTree } from "../_components/kss-tree";
+import { QualificationProfile } from "../_components/qualification-profile";
+
 export const page = {
   title: "Instructeur 4 (I4)",
+  description: "Opleider van instructeurs",
 };
 
 export const metadata = {
@@ -7,5 +11,41 @@ export const metadata = {
   description: page.description,
 };
 
-Een Instructeur 4 (I4) kan lesgeven aan vergevorderde zeilers en kan de
-eigenvaardigheidsopleidingen aan NWD instructeurs verzorgen.
+<QualificationProfile
+  role="instructeur"
+  level="I4"
+  title="Instructeur 4"
+  subtitle="Opleider van instructeurs"
+  description="Een Instructeur 4 geeft les/training in de eigen vaardigheid van Instructeurs 3 in opleiding en is bevoegd om deze middels een examen te toetsen. Dit niveau vormt de brug tussen het lesgeven aan cursisten en het opleiden van andere instructeurs."
+  minAge={18}
+  prerequisites={[
+    "In het bezit zijn van Instructeur 3 in de desbetreffende discipline",
+    "In het bezit zijn van Klein Vaarbewijs I (KVB-I)",
+  ]}
+  pvbs={[
+    {
+      code: "4.1",
+      title: "Geven van trainingen",
+      type: "Praktijk- en Portfoliobeoordeling",
+    },
+    {
+      code: "4.8",
+      title: "Afnemen van vaardigheidstoetsen",
+      type: "Praktijkbeoordeling",
+    },
+  ]}
+  permissions={[
+    "Training geven aan Instructeur 3 in opleiding in de eigen vaardigheid",
+    "Examineren van NWD B",
+  ]}
+  skillLevel="C"
+  additionalInfo="NWD C moet worden vastgesteld door twee Instructeurs 5. Indien een discipline geen NWD C heeft, geldt er geen aanvullende eigenvaardigheidseis voor de Instructeur 4."
+/>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={4} richting="instructeur" />

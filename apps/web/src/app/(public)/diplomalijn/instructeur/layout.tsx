@@ -55,7 +55,7 @@ export default async function Layout({
             }}
           />
         </div>
-        <Prose className="max-w-prose" data-mdx-content>
+        <Prose className="max-w-4xl" data-mdx-content>
           {children}
         </Prose>
       </div>

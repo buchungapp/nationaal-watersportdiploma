@@ -1,0 +1,146 @@
+import {
+  CheckCircleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import { InfoCard } from "../_components/info-card";
+
+export const page = {
+  title: "Eigen Vaardigheid",
+  order: 2,
+  description:
+    "Over de eigenvaardigheid van instructeurs en het NWD C traject",
+};
+
+export const metadata = {
+  title: page.title,
+  description: page.description,
+};
+
+## Wat is eigen vaardigheid?
+
+Eigen vaardigheid (EV) verwijst naar het persoonlijke vaardigheidsniveau van
+een instructeur in de discipline waarin hij of zij lesgeeft. Het is essentieel
+dat een instructeur zelf bekwaam is in de sport om effectief les te kunnen
+geven en veiligheid te waarborgen.
+
+Voor instructeursniveaus 2, 3 en 4 gelden specifieke eigenvaardigheidseisen.
+Deze worden behaald via de NWD-diploma's (NWD A, NWD B en NWD C), waarbij C
+het hoogste niveau is.
+
+## NWD-niveaus
+
+<div className="not-prose mt-4 grid gap-3">
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-light/70 bg-white p-4">
+    <div className="flex items-center gap-3">
+      <span className="rounded-full bg-branding-light/15 px-2.5 py-0.5 font-mono text-xs font-semibold text-branding-dark">
+        NWD A
+      </span>
+      <span className="text-sm font-semibold text-slate-900">
+        Vereist voor Instructeur 2
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">Het basisniveau eigen vaardigheid. De instructeur beheerst de fundamentele technieken van de discipline en kan deze veilig demonstreren aan beginnende sporters.</p>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-light bg-white p-4">
+    <div className="flex items-center gap-3">
+      <span className="rounded-full bg-branding-light/20 px-2.5 py-0.5 font-mono text-xs font-semibold text-branding-dark">
+        NWD B
+      </span>
+      <span className="text-sm font-semibold text-slate-900">
+        Vereist voor Instructeur 3
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">Het gevorderde niveau eigen vaardigheid. De instructeur beheerst uitgebreidere technieken en kan lesgeven aan sporters die naar een hoger niveau willen doorstromen.</p>
+  </div>
+
+  <div className="rounded-xl border border-slate-200 border-l-4 border-l-branding-dark bg-white p-4">
+    <div className="flex items-center gap-3">
+      <span className="rounded-full bg-branding-dark/15 px-2.5 py-0.5 font-mono text-xs font-semibold text-branding-dark">
+        NWD C
+      </span>
+      <span className="text-sm font-semibold text-slate-900">
+        Vereist voor Instructeur 4
+      </span>
+    </div>
+    <p className="mt-2 text-sm text-slate-600">Het hoogste niveau eigen vaardigheid. De instructeur is een expert in de discipline en kan NWD B-examens afnemen. Dit niveau moet worden vastgesteld door twee Instructeurs 5.</p>
+  </div>
+</div>
+
+<p className="mt-4 text-sm italic text-slate-500">Let op: indien een discipline geen niveau C heeft, geldt er geen aanvullende eigenvaardigheidseis voor de Instructeur 4.</p>
+
+## Hoe behaal je eigen vaardigheid?
+
+### NWD A en NWD B
+
+Deze niveaus worden behaald door het afleggen van de bijbehorende NWD
+vaardigheidsexamens (NWD A en NWD B).
+
+### NWD C
+
+Het NWD C niveau is het hoogste vaardigheidsniveau en vereist een apart
+traject. Dit niveau wordt vastgesteld door twee Instructeurs 5 die gezamenlijk
+beoordelen of de kandidaat het vereiste niveau beheerst.
+
+NWD C kan alleen worden behaald tijdens speciale **NWD C afrondingsweekenden**
+die meerdere keren per jaar worden georganiseerd. Tijdens deze weekenden komen
+instructeurs van verschillende zeilscholen samen om te zeilen en van elkaar te
+leren.
+
+## Het NWD C Traject
+
+<div className="not-prose relative mt-4">
+  <div className="absolute bottom-8 left-4 top-8 w-0.5 bg-slate-200" />
+  <ol className="space-y-6">
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-branding-light text-sm font-semibold text-white">
+        1
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">
+          Interne training
+        </h4>
+        <p className="mt-1 text-sm text-slate-600">De kandidaat traint intern bij de eigen opleidingslocatie onder begeleiding van een Instructeur 5 om de vaardigheden naar het hoogste niveau te brengen.</p>
+      </div>
+    </li>
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-branding-light text-sm font-semibold text-white">
+        2
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">
+          NWD C afrondingsweekend
+        </h4>
+        <p className="mt-1 text-sm text-slate-600">De kandidaat neemt deel aan een NWD C afrondingsweekend waar instructeurs van verschillende zeilscholen samenkomen. Hier wordt het NWD C afgerond en leren deelnemers ook van elkaar.</p>
+      </div>
+    </li>
+    <li className="flex gap-4">
+      <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+        <CheckCircleIcon className="size-5" />
+      </div>
+      <div className="pt-1">
+        <h4 className="text-sm font-semibold text-slate-900">
+          Beoordeling en registratie
+        </h4>
+        <p className="mt-1 text-sm text-slate-600">Twee Instructeurs 5 beoordelen of de kandidaat het NWD C-niveau beheerst. Het NWD C kent geen vaste examenvorm en kan op verschillende manieren worden beoordeeld (gedurende het weekend, als examen, etc.).</p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+## Overzicht eigenvaardigheid per niveau
+
+<div className="not-prose mt-4 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+  <table className="w-full text-sm"><thead className="bg-slate-50"><tr><th className="px-4 py-2 text-left font-semibold text-slate-700">Niveau</th><th className="px-4 py-2 text-left font-semibold text-slate-700">Eigen vaardigheid</th><th className="px-4 py-2 text-left font-semibold text-slate-700">Hoe te behalen</th></tr></thead><tbody><tr className="border-t border-slate-100"><td className="px-4 py-2 font-medium text-slate-900">I1</td><td className="px-4 py-2 text-slate-600">Geen vereiste</td><td className="px-4 py-2 text-slate-500">—</td></tr><tr className="border-t border-slate-100"><td className="px-4 py-2 font-medium text-slate-900">I2</td><td className="px-4 py-2"><span className="rounded-full bg-branding-light/15 px-2.5 py-0.5 font-mono text-xs font-semibold text-branding-dark">NWD A</span></td><td className="px-4 py-2 text-slate-600">NWD A-examen</td></tr><tr className="border-t border-slate-100"><td className="px-4 py-2 font-medium text-slate-900">I3</td><td className="px-4 py-2"><span className="rounded-full bg-branding-light/20 px-2.5 py-0.5 font-mono text-xs font-semibold text-branding-dark">NWD B</span></td><td className="px-4 py-2 text-slate-600">NWD B-examen</td></tr><tr className="border-t border-slate-100"><td className="px-4 py-2 font-medium text-slate-900">I4</td><td className="px-4 py-2"><span className="rounded-full bg-branding-dark/15 px-2.5 py-0.5 font-mono text-xs font-semibold text-branding-dark">NWD C</span></td><td className="px-4 py-2 text-slate-600">Vastgesteld door 2× I5</td></tr><tr className="border-t border-slate-100"><td className="px-4 py-2 font-medium text-slate-900">I5</td><td className="px-4 py-2 text-slate-600">Geen extra vereiste</td><td className="px-4 py-2 text-slate-600">I4 + aanvullende opleiding</td></tr></tbody></table>
+</div>
+
+<div className="not-prose mt-8">
+  <InfoCard
+    tone="instructeur"
+    emphasis
+    icon={<InformationCircleIcon className="size-5" />}
+    title="Klein Vaarbewijs I (KVB-I)"
+  >
+    <p>Voor Instructeur 4 is naast NWD C ook het Klein Vaarbewijs I (KVB-I) vereist. Dit is een wettelijk vereist vaarbewijs voor het besturen van motorvaartuigen en staat los van de eigenvaardigheid in de discipline.</p>
+  </InfoCard>
+</div>

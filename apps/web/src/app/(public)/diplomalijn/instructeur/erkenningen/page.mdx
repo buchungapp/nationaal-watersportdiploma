@@ -1,7 +1,17 @@
+import {
+  AcademicCapIcon,
+  ArrowTopRightOnSquareIcon,
+  ChevronRightIcon,
+  GlobeAltIcon,
+  ShieldCheckIcon,
+  TrophyIcon,
+} from "@heroicons/react/24/outline";
+import { InfoCard } from "../_components/info-card";
+
 export const page = {
   title: "Erkenningen",
-  order: 3,
-
+  order: 5,
+  description: "Landelijke en internationale erkenning van kaderopleidingen",
 };
 
 export const metadata = {
@@ -9,12 +19,182 @@ export const metadata = {
   description: page.description,
 };
 
-Het Koninklijk Nederlands Watersportverbond (Watersportverbond) waarborgt als
-autoriteit en licentiehouder binnen de watersportsector de kwaliteit van alle
-watersportopleidingen in Nederland, onder andere voor consumenten en
-instructeurs maar ook voor trainers en officials. Met ingang van 2024 werkt het
-Watersportverbond samen met het Nationaal Watersportdiploma (NWD).
+De kaderopleidingen van de Watersport Academy maken deel uit van een
+landelijke én internationale structuur van erkenningen. Dit garandeert dat
+onze opleidingen van hoge kwaliteit zijn en zowel nationaal als internationaal
+worden erkend.
 
-Het Watersportverbond verzorgt hierbij de licentie en erkenning voor de
-opleidingen van het NWD. Het NWD opleidingssysteem als geheel is daarmee
-nationaal en internationaal erkend.
+Let op: de NWD-eigenvaardigheidsdiploma's (NWD 1 t/m 4 en NWD A/B/C) zijn zelf
+niet wettelijk gelicentieerd. De onderstaande erkenningen gelden voor de
+kaderopleidingen (instructeurs, leercoaches en PvB-beoordelaars).
+
+<div className="not-prose mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+  <h3 className="text-base font-semibold text-slate-900">
+    Partijen in de erkenningen
+  </h3>
+  <ul className="mt-4 flex flex-col gap-1">
+    {[
+      { name: "NCP NLQF / EQF", href: "#nlqf" },
+      { name: "NOC*NSF", href: "#nocnsf" },
+      { name: "World Sailing", href: "#worldsailing" },
+      { name: "Watersportverbond", href: "#watersportverbond" },
+      { name: "Erkende opleidingslocaties", href: "#opleidingslocaties" },
+    ].map((item, i) => (
+      <a
+        key={item.name}
+        href={item.href}
+        className="group flex items-center gap-3 rounded-lg p-2 -mx-2 transition-colors hover:bg-white"
+      >
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-branding-light text-xs font-bold text-white">
+          {i + 1}
+        </span>
+        <span className="text-sm text-slate-700 transition-colors group-hover:text-branding-dark">
+          {item.name}
+        </span>
+        <ChevronRightIcon className="ml-auto size-4 text-slate-400 transition-all group-hover:translate-x-0.5 group-hover:text-branding-dark" />
+      </a>
+    ))}
+  </ul>
+</div>
+
+## Erkenningspartijen
+
+<div id="nlqf" className="not-prose mt-4 scroll-mt-20">
+  <InfoCard
+    tone="instructeur"
+    icon={<AcademicCapIcon className="size-5" />}
+    title="NCP NLQF"
+  >
+    <p className="text-xs text-slate-500">Nationaal Coördinatiepunt Nederlands Kwalificatie Raamwerk</p>
+    <p>Het NCP NLQF heeft één doel: zorgen dat iedereen kan zien wat een diploma of certificaat écht waard is, door het qua niveau vergelijkbaar te maken. De opleidingen van het NOC\*NSF zijn ingeschaald in het NLQF.</p>
+    <p className="rounded-lg bg-slate-50 p-3 text-slate-600">Het NCP NLQF biedt geen kwaliteitsgarantie en levert puur een vergelijkingsschaal m.b.t. opleidingen. De opleiding van het NOC\*NSF is privaat en niet gereguleerd door het NCP NLQF of het ministerie van OCW.</p>
+  </InfoCard>
+</div>
+
+<div id="nocnsf" className="not-prose mt-3 scroll-mt-20">
+  <InfoCard
+    tone="instructeur"
+    icon={<TrophyIcon className="size-5" />}
+    title="NOC*NSF"
+  >
+    <p className="text-xs text-slate-500">Nationaal Olympisch Comité \* Nederlandse Sport Federatie</p>
+    <p>Het NOC\*NSF is de Nederlandse sportkoepel waar alle individuele sportbonden bij zijn aangesloten, waaronder ook het Koninklijk Watersportverbond. Van elke sportbond wordt als onderdeel van de minimale kwaliteitseisen verwacht dat de opleidingen voldoen aan een kwalificatiestructuur.</p>
+    <p className="rounded-lg bg-slate-50 p-3 text-slate-600">De KSS onderscheidt vier samenhangende lijnen voor trainer-coaches, officials, instructeurs en opleiders. Elke lijn bestaat uit één of meerdere niveaus, die door het NLQF worden ingeschaald. Het NOC\*NSF bepaalt de eisen per kwalificatie en is de licenserende instantie.</p>
+  </InfoCard>
+</div>
+
+<div id="worldsailing" className="not-prose mt-3 scroll-mt-20">
+  <InfoCard
+    tone="leercoach"
+    icon={<GlobeAltIcon className="size-5" />}
+    title="World Sailing"
+  >
+    <p className="text-xs text-slate-500">Internationale Zeilersfederatie</p>
+    <p>World Sailing Member National Authorities (MNA's), zoals het Koninklijk Watersportverbond, die een National Training Program (NTP) hebben, kunnen bij World Sailing een &quot;World Sailing Recognised Training&quot; aanvragen.</p>
+    <p className="rounded-lg bg-slate-50 p-3 text-slate-600">Deze erkenning geeft een raamwerk waaraan het NTP getoetst en ingeschaald kan worden naar internationale &quot;best practices&quot;. De erkenning bestrijkt 5 hoofdgebieden: duurzaamheid, veiligheid, programma-inhoud, programma-uitvoering en behoud van prestatienormen. De erkenning is 4 jaar geldig.</p>
+  </InfoCard>
+</div>
+
+<div id="watersportverbond" className="not-prose mt-3 scroll-mt-20">
+  <InfoCard
+    tone="beoordelaar"
+    icon={<ShieldCheckIcon className="size-5" />}
+    title="Watersportverbond"
+  >
+    <p className="text-xs text-slate-500">Koninklijk Nederlands Watersportverbond</p>
+    <p>De opleidingen volgen de eisen zoals gesteld door NOC\*NSF, World Sailing en de International Canoe Federation. Het Watersportverbond heeft de KSS-structuur van het NOC\*NSF uitgewerkt naar kwalificatieprofielen voor de watersport.</p>
+    <p className="rounded-lg bg-slate-50 p-3 text-slate-600">Het Watersportverbond delegeert de opleidingen van KSS-kwalificaties tot niveau 5 aan erkende opleidingslocaties. De beoordeling van PvB's tot niveau 4 wordt ook gedelegeerd. Voor niveau 5 en de afname van PvB's niveau 4/5 worden externe beoordelaars ingezet namens de Toetsingscommissie.</p>
+  </InfoCard>
+</div>
+
+## NLQF / EQF-niveaus
+
+De kwalificaties zijn ingeschaald in het Nederlands Kwalificatie Raamwerk
+(NLQF) en het Europees Kwalificatie Raamwerk (EQF), waardoor ze internationaal
+vergelijkbaar zijn. De volledige inschaling van alle kwalificaties is te
+vinden in de NLQF-database.
+
+Let op: Instructeur 1 (Wal/Waterhulp) is niet ingeschaald in het NLQF omdat
+dit een assisterende rol betreft zonder sporttechnische instructiebevoegdheid.
+
+<a
+  href="https://nlqf.nl/nlqf-database"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="mt-2 inline-flex items-center gap-2 text-sm text-branding-light hover:underline"
+>
+  Bekijk NLQF-database
+  <ArrowTopRightOnSquareIcon className="size-4" />
+</a>
+
+## World Sailing Recognised Training
+
+Het Watersportverbond is een erkende Member National Authority (MNA) met
+&quot;World Sailing Recognised Training&quot; op haar National Training
+Program. Deze erkenning bestrijkt zowel consumenten- als instructeursdiploma's
+en wordt elke 4 jaar hernieuwd.
+
+De erkenning/toetsing bestrijkt 5 hoofdgebieden:
+
+<div className="not-prose mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+  {[
+    "Duurzaamheid",
+    "Veiligheid",
+    "Programma-inhoud",
+    "Programma-uitvoering",
+    "Prestatienormen",
+  ].map((gebied) => (
+    <div
+      key={gebied}
+      className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center"
+    >
+      <span className="text-xs font-medium text-slate-700">{gebied}</span>
+    </div>
+  ))}
+</div>
+
+<h2 id="opleidingslocaties" className="scroll-mt-20">
+  Erkende opleidingslocaties
+</h2>
+
+Erkende opleidingslocaties zijn aangesloten bij de Watersport Academy en mogen
+onder haar vlag consumenten- en instructeursopleidingen aanbieden. Om erkend
+te worden, moet worden voldaan aan kwaliteitseisen op het gebied van:
+
+<div className="not-prose mt-4 grid gap-3 sm:grid-cols-2">
+  {[
+    "Opgeleide en gekwalificeerde instructeurs",
+    "Naleven van veiligheidsprotocollen",
+    "Veilige en goed onderhouden accommodatie",
+    "Goed onderhouden vloot",
+  ].map((eis) => (
+    <div
+      key={eis}
+      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3"
+    >
+      <ShieldCheckIcon className="size-4 shrink-0 text-branding-light" />
+      <span className="text-sm text-slate-700">{eis}</span>
+    </div>
+  ))}
+</div>
+
+<div className="not-prose mt-6 flex flex-wrap gap-4">
+  <a
+    href="https://nocnsf.nl/sportbonden/vereniging-en-organisatie/minimale-kwaliteitseisen/eis-kss"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-2 text-sm text-branding-light hover:underline"
+  >
+    Meer over KSS op NOC\*NSF
+    <ArrowTopRightOnSquareIcon className="size-4" />
+  </a>
+  <a
+    href="https://www.world.sailing/training"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center gap-2 text-sm text-branding-light hover:underline"
+  >
+    World Sailing Training
+    <ArrowTopRightOnSquareIcon className="size-4" />
+  </a>
+</div>
