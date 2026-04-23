@@ -1,7 +1,7 @@
 import { Leercoach } from "@nawadi/core";
 import { NextResponse } from "next/server";
+import { getSession } from "~/lib/auth/server";
 import { leercoachEnabled } from "~/lib/flags";
-import { createClient } from "~/lib/supabase/server";
 
 // Fetch a single historical portfolio version's full content. Called
 // by the history sidebar's preview pane (which only receives version
@@ -24,17 +24,14 @@ export async function GET(
 
   const { id: portfolioId, versionId } = await ctx.params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
   }
 
   const version = await Leercoach.Portfolio.getVersionById({
     versionId,
-    userId: user.id,
+    userId: session.user.id,
   });
   if (!version) {
     return NextResponse.json(

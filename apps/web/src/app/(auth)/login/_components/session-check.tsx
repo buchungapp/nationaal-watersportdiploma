@@ -1,13 +1,11 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { createClient } from "~/lib/supabase/server";
+import { getSession } from "~/lib/auth/server";
 
 async function SessionCheckLogic() {
-  const supabase = await createClient();
+  const session = await getSession();
 
-  const { data } = await supabase.auth.getUser();
-
-  if (data.user) {
+  if (session) {
     redirect("/profiel?_cacheBust=1");
   }
 

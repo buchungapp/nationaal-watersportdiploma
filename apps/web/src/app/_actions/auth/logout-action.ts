@@ -1,6 +1,7 @@
 "use server";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { createClient } from "~/lib/supabase/server";
+import { auth } from "~/lib/auth/server";
 import { actionClientWithMeta } from "../safe-action";
 
 export const logoutAction = actionClientWithMeta
@@ -8,13 +9,7 @@ export const logoutAction = actionClientWithMeta
     name: "auth.logout",
   })
   .action(async () => {
-    const supabase = await createClient();
-
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      throw error;
-    }
+    await auth().api.signOut({ headers: await headers() });
 
     redirect("/");
   });

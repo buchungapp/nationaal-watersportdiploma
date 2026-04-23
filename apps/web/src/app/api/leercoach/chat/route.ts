@@ -17,9 +17,9 @@ import {
   buildQATools,
 } from "~/app/(dashboard)/(account)/profiel/[handle]/leercoach/_lib/tools";
 import { CHAT_MODEL } from "~/lib/ai-models";
+import { getSession } from "~/lib/auth/server";
 import { leercoachEnabled } from "~/lib/flags";
 import { captureAiTurn, flushAiTelemetry } from "~/lib/posthog-ai";
-import { createClient } from "~/lib/supabase/server";
 
 // Chat API for /leercoach — streaming text completions via AI Gateway
 // with tool-call support AND resumable streams over Upstash/ioredis.
@@ -122,13 +122,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
   }
+  const user = session.user;
 
   const body = parseBody(await req.json());
   if (!body) {

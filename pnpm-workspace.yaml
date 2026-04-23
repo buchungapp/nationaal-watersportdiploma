@@ -2,6 +2,7 @@ packages:
   - generated/*
   - packages/lib
   - packages/db
+  - packages/emails
   - packages/core
   - packages/scripts
   - apps/api-server

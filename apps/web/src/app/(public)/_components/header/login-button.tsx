@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getSession } from "~/utils/auth/session";
+import { getSession } from "~/lib/auth/server";
 import { TekstButton } from "../style/buttons";
 
 function LoginButton() {

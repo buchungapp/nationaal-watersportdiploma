@@ -3,8 +3,8 @@ import { UI_MESSAGE_STREAM_HEADERS } from "ai";
 import { Redis } from "ioredis";
 import { after, NextResponse } from "next/server";
 import { createResumableStreamContext } from "resumable-stream/ioredis";
+import { getSession } from "~/lib/auth/server";
 import { leercoachEnabled } from "~/lib/flags";
-import { createClient } from "~/lib/supabase/server";
 
 // Resumable-stream reconnect + cancel endpoints for a single chat.
 //
@@ -50,17 +50,14 @@ export async function GET(
 
   const { id } = await ctx.params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
   }
 
   const chat = await Leercoach.Chat.getById({
     chatId: id,
-    userId: user.id,
+    userId: session.user.id,
   });
   if (!chat) {
     return NextResponse.json({ error: "Chat niet gevonden." }, { status: 404 });
@@ -105,11 +102,8 @@ export async function DELETE(
 
   const { id } = await ctx.params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
   }
 
@@ -117,12 +111,12 @@ export async function DELETE(
   // depth against someone probing chat ids.
   const chat = await Leercoach.Chat.getById({
     chatId: id,
-    userId: user.id,
+    userId: session.user.id,
   });
   if (!chat) {
     return NextResponse.json({ error: "Chat niet gevonden." }, { status: 404 });
   }
 
-  await Leercoach.Chat.markCanceled({ chatId: id, userId: user.id });
+  await Leercoach.Chat.markCanceled({ chatId: id, userId: session.user.id });
   return new Response(null, { status: 200 });
 }

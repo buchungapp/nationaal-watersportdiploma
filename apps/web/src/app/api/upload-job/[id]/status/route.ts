@@ -1,6 +1,6 @@
 import { Leercoach } from "@nawadi/core";
 import { NextResponse } from "next/server";
-import { createClient } from "~/lib/supabase/server";
+import { getSession } from "~/lib/auth/server";
 
 // Pollable status endpoint for upload jobs. The PortfolioUploadDialog
 // hits this every ~2s after submitting an upload, stops once the
@@ -29,17 +29,14 @@ export async function GET(
 ) {
   const { id: jobId } = await ctx.params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
   }
 
   const job = await Leercoach.UploadJob.getById({
     jobId,
-    userId: user.id,
+    userId: session.user.id,
   });
   if (!job) {
     return NextResponse.json(
