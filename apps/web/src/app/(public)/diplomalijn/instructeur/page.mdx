@@ -1,6 +1,5 @@
 import { DoorstroomSchema } from "./_components/doorstroom-schema";
-import { RoleNavigator } from "./_components/role-navigator";
-import { CategoryCard, RoleOverviewCard } from "./_components/role-overview";
+import { TwoSporen } from "./_components/two-sporen";
 
 export const page = {
   title: "Introductie",
@@ -13,122 +12,65 @@ export const metadata = {
   description: page.description,
 };
 
-De NWD Diplomalijn voor instructeurs voldoet volledig aan de licentie-eisen van
-het Watersportverbond en World Sailing. Deze eisen zijn vastgelegd in de
-Kwalificatiestructuur Sport (KSS).
+De instructeurslijn van het NWD is een landelijk erkende kaderopleiding
+volgens de Kwalificatiestructuur Sport (KSS), ontwikkeld in samenwerking met
+het [Watersportverbond](/diplomalijn/instructeur/erkenningen#watersportverbond)
+en [World Sailing](/diplomalijn/instructeur/erkenningen#worldsailing). Elke
+erkende NWD-locatie mag instructeurs opleiden.
 
-## Wat past bij jou?
+## Twee sporen, apart getoetst
 
-<RoleNavigator />
+Waar andere systemen "wat je kunt" en "hoe je lesgeeft" in één lijn meten,
+splitst het NWD deze in twee aparte sporen. Je wordt apart getoetst op
+beide — een instructeur is zowel een goede zeiler als een goede lesgever, en
+beide verdienen hun eigen moment van bewijs.
 
-Elke NWD locatie is gelicenseerd om de instructeursdiploma's te verzorgen. Je
-kunt dus bij elke NWD locatie starten met je instructeursopleiding.
+<TwoSporen />
 
-Het NWD heeft speciaal voor instructeurs een logische opbouw in
-eigenvaardigheidsniveau's (A, B en C) en daarnaast krijg je een opleiding op
-het gebied van lesgeefmethodiek. Dat tezamen maakt jou een echte instructeur.
+Kom je vanuit de CWO? [Bekijk de overgangsregeling →](/diplomalijn/instructeur/overgang-cwo)
 
-## Wat is de Kwalificatiestructuur Sport (KSS)?
+## De diplomalijn in één schema
 
-De KSS is een landelijk raamwerk dat door NOC\*NSF samen met de sportbonden is
-ontwikkeld en waarborgt dat opleidingen in de sport vergelijkbaar en
-herkenbaar zijn en voldoen aan vastgestelde kwaliteitscriteria. In de KSS zijn
-de verschillende functies met de bijbehorende competenties (kennis,
-vaardigheden en houding) beschreven en worden deze eenduidig getoetst.
-
-Zo weten sporters, verenigingen, maar ook cursisten en opleidingslocaties dat
-een opgeleide instructeur (of ander type kaderlid) overal in Nederland
-hetzelfde kwaliteitsniveau heeft.
-
-## Drie kwalificatieprofielen
-
-Binnen de kaderopleidingen zijn er drie verschillende functies, elk met hun
-eigen kwalificatieprofielen en verantwoordelijkheden:
-
-<div className="not-prose mt-4 grid gap-2">
-  <RoleOverviewCard
-    role="instructeur"
-    label="Instructeur"
-    href="/diplomalijn/instructeur/niveau-1"
-    levels={["I1", "I2", "I3", "I4", "I5"]}
-  />
-  <RoleOverviewCard
-    role="leercoach"
-    label="Leercoach"
-    href="/diplomalijn/instructeur/leercoach/niveau-4"
-    levels={["L4", "L5"]}
-  />
-  <RoleOverviewCard
-    role="beoordelaar"
-    label="PvB-beoordelaar"
-    href="/diplomalijn/instructeur/pvb-beoordelaar/niveau-4"
-    levels={["B4", "B5"]}
-  />
-</div>
-
-## Cursuscategorieën
-
-Een KSS-kwalificatie is verbonden aan een specifieke **cursus**, niet alleen
-aan een discipline. Cursussen worden ingedeeld op basis van drie
-categorieën:
-
-<div className="not-prose mt-4 grid gap-3">
-  <CategoryCard
-    title="Leeftijdscategorieën"
-    defaultRole="instructeur"
-    chips={[
-      { label: "Jeugd" },
-      { label: "Jongeren" },
-      { label: "(Jong) Volwassenen" },
-    ]}
-  />
-  <CategoryCard
-    title="Doelgroepcategorieën"
-    defaultRole="leercoach"
-    chips={[{ label: "Consument" }, { label: "Instructeur" }]}
-  />
-  <CategoryCard
-    title="Vaarwatercategorieën"
-    defaultRole="beoordelaar"
-    chips={[
-      { label: "Binnenwater" },
-      { label: "Ruim Binnenwater" },
-      { label: "Waddenzee en Zeeuwse Stromen" },
-      { label: "Zee" },
-    ]}
-  />
-</div>
-
-<div className="not-prose mt-6 rounded-xl border border-slate-200 bg-slate-50 p-5">
-  <h4 className="text-base font-semibold text-slate-900">
-    Kwalificaties zijn cursusgebonden
-  </h4>
-  <p className="mt-2 text-sm text-slate-600">Dit betekent dat een kwalificatie specifiek is voor de combinatie van discipline, leeftijdscategorie en vaarwater. Voorbeelden:</p>
-  <ul className="mt-3 space-y-2 text-sm text-slate-600">
-    <li className="flex items-start gap-2">
-      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-branding-light" />
-      <span>
-        <strong>I3 Kielboot Jeugd</strong> is niet hetzelfde als{" "}
-        <strong>I3 Kielboot Volwassenen</strong>
-      </span>
-    </li>
-    <li className="flex items-start gap-2">
-      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-branding-light" />
-      <span>
-        <strong>I4 Jachtzeilen Binnenwater</strong> is anders dan{" "}
-        <strong>I4 Jachtzeilen Zee</strong>
-      </span>
-    </li>
-  </ul>
-  <p className="mt-3 text-sm text-slate-600">Dit geldt zowel voor eigenvaardigheidsdiploma's (NWD) als voor instructeurskwalificaties. Bij uitbreiding naar een andere cursus binnen dezelfde <a href="/diplomalijn/instructeur/instructiegroepen" className="text-branding-light hover:underline">instructiegroep</a> gelden specifieke vrijstellingsregelingen.</p>
-</div>
-
-## Doorstroomschema
-
-Het onderstaande schema geeft een totaaloverzicht van alle instructeursniveaus
-en functies die er zijn binnen de watersportopleidingen. Klik op een
-kwalificatieprofiel om de details te bekijken.
+Klik een niveau om de kerntaken, werkprocessen en beoordelingscriteria te
+bekijken. L4/L5 (leercoach) en B4/B5 (beoordelaar) hebben hun eigen route
+vanaf Instructeur 3 en 4.
 
 <div className="not-prose mt-4">
   <DoorstroomSchema />
 </div>
+
+## Drie begrippen die je veel tegenkomt
+
+<div className="not-prose mt-4 grid gap-3 md:grid-cols-3">
+  <a
+    href="/diplomalijn/instructeur/instructiegroepen"
+    className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
+  >
+    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Cursusgebondenheid</p>
+    <p className="text-sm text-slate-700"><strong className="text-slate-900">I3 Kielboot Jeugd</strong> is niet hetzelfde als <strong className="text-slate-900">I3 Kielboot Volwassenen</strong>. Elke kwalificatie is gekoppeld aan discipline, leeftijdscategorie en vaarwater.</p>
+    <span className="mt-auto text-xs font-semibold text-branding-dark group-hover:underline">Meer over instructiegroepen →</span>
+  </a>
+  <a
+    href="/diplomalijn/instructeur/vrijstellingen"
+    className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
+  >
+    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Vrijstellingen</p>
+    <p className="text-sm text-slate-700">Binnen dezelfde instructiegroep hoef je een behaald PvB-kerntaak-onderdeel niet opnieuw te doen wanneer je uitbreidt naar een andere cursus.</p>
+    <span className="mt-auto text-xs font-semibold text-branding-dark group-hover:underline">Vrijstellingsregels →</span>
+  </a>
+  <a
+    href="/diplomalijn/instructeur/vrijstellingen#her-en-bijscholing-voor-niveau-5"
+    className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-5 transition-colors hover:border-branding-light/40 hover:bg-branding-light/5"
+  >
+    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Licentie op niveau 5</p>
+    <p className="text-sm text-slate-700">I5, L5 en B5 zijn licenties. Ze blijven geldig zolang je eens per twee jaar de her-/bijscholingsdag volgt bij de Watersport Academy.</p>
+    <span className="mt-auto text-xs font-semibold text-branding-dark group-hover:underline">Her-/bijscholing →</span>
+  </a>
+</div>
+
+## Waar kan ik starten?
+
+Bij elke <a href="/vaarlocaties" className="text-branding-light hover:underline">erkende NWD-locatie</a>
+kun je een instructeursopleiding starten. Opleidingsduur, beschikbare
+disciplines en leercoaches verschillen per locatie. Kies een locatie in de
+buurt en informeer naar de mogelijkheden.
