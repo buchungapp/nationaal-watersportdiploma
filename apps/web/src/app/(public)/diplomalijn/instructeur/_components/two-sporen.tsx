@@ -117,15 +117,15 @@ export function TwoSporen() {
       <SpoorCard
         tone="neutral"
         kicker="Spoor 2"
-        title="Kaderlijn"
-        lede="Hoe je anderen opleidt, begeleidt en toetst."
+        title="Didactiek"
+        lede="Hoe je dat aan anderen overdraagt."
         badges={[
           { label: "I1 – I5", variant: "instructeur" },
           { label: "L4 – L5", variant: "leercoach" },
           { label: "B4 – B5", variant: "beoordelaar" },
         ]}
         toets="Proef van Bekwaamheid (PvB) per kerntaak — portfolio en/of praktijk, beoordeeld volgens het vier-ogen-principe."
-        context="Volgt de Kwalificatiestructuur Sport (KSS) van NOC*NSF, geborgd door het Watersportverbond en World Sailing."
+        context="De kaderlijn volgens de Kwalificatiestructuur Sport (KSS), geborgd door het Watersportverbond en World Sailing."
         href="/diplomalijn/instructeur/pvbs"
         ctaLabel="Meer over PvB's"
       />
