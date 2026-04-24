@@ -193,7 +193,7 @@ export default function Page() {
       <h3>Leercoach</h3>
       <p>
         Als externe leercoach begeleid je deelnemers aan de centraal
-        georganiseerde <strong>niveau&nbsp;5-opleiderscursus</strong>
+        georganiseerde <strong>niveau&nbsp;5-opleiderscursus</strong>{" "}
         (Leercoach&nbsp;5 of Beoordelaar&nbsp;5) met plaatsbezoeken voor
         observatie, feedback en reflectie. De vergoeding hieronder geldt
         voor bezoeken vanuit die cursus — niet voor begeleiding die een
@@ -208,9 +208,9 @@ export default function Page() {
         </thead>
         <tbody>
           <tr>
-            <td>Bezoek</td>
+            <td>Bezoek (dagtarief)</td>
             <td>
-              <strong>€100</strong>
+              <strong>€100</strong> per dag
             </td>
           </tr>
           <tr>
