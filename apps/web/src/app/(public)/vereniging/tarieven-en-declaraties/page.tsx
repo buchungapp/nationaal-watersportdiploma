@@ -9,14 +9,14 @@ export async function generateMetadata(
   const parentOpenGraph = (await parent).openGraph;
 
   return {
-    title: "Tarieven",
+    title: "Tarieven en declaraties",
     alternates: {
-      canonical: "/vereniging/tarieven",
+      canonical: "/vereniging/tarieven-en-declaraties",
     },
     openGraph: {
       ...parentOpenGraph,
-      title: "Tarieven",
-      url: "/vereniging/tarieven",
+      title: "Tarieven en declaraties",
+      url: "/vereniging/tarieven-en-declaraties",
     },
   };
 }
@@ -36,11 +36,15 @@ export default function Page() {
       </div>
 
       <p>
-        Op deze pagina vind je alle tarieven overzichtelijk bij elkaar. Kies
-        wat voor jou van toepassing is:
+        Op deze pagina vind je eerst hoe je je vergoeding declareert, en
+        daarna alle tarieven overzichtelijk bij elkaar:
       </p>
 
       <ul>
+        <li>
+          <Link href="#declaraties">Declaraties indienen</Link> — hoe en waar
+          dien je je vergoeding en reiskosten in?
+        </li>
         <li>
           <Link href="#vergoedingen">
             Vergoedingen voor vrijwilligers en uitvoerders
@@ -68,6 +72,27 @@ export default function Page() {
           onkostenvergoedingen en bevatten geen btw.
         </p>
       </blockquote>
+
+      <h2 id="declaraties">Declaraties indienen</h2>
+      <p>
+        Vergoedingen en reiskosten dien je achteraf in bij de penningmeester
+        via{" "}
+        <CopyToClipboard
+          value="penningmeester@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
+          penningmeester
+          <wbr />
+          @nationaalwatersportdiploma.nl
+        </CopyToClipboard>
+        . Vermeld in je declaratie:
+      </p>
+      <ul>
+        <li>de verrichte activiteit (rol en context);</li>
+        <li>de datum waarop de activiteit plaatsvond;</li>
+        <li>de gemaakte reiskosten (kilometers of OV-kosten);</li>
+        <li>je IBAN en de tenaamstelling van de rekening.</li>
+      </ul>
 
       <h2 id="vergoedingen">Vergoedingen voor vrijwilligers en uitvoerders</h2>
       <p>
@@ -237,27 +262,6 @@ export default function Page() {
         vergoeding omdat je in een commissie zit, maar wel voor het concrete
         werk dat je vanuit die rol uitvoert.
       </p>
-
-      <h3>Declareren</h3>
-      <p>
-        Vergoedingen en reiskosten dien je achteraf in bij de penningmeester
-        via{" "}
-        <CopyToClipboard
-          value="penningmeester@nationaalwatersportdiploma.nl"
-          className="break-words underline"
-        >
-          penningmeester
-          <wbr />
-          @nationaalwatersportdiploma.nl
-        </CopyToClipboard>
-        . Vermeld in je declaratie:
-      </p>
-      <ul>
-        <li>de verrichte activiteit (rol en context);</li>
-        <li>de datum waarop de activiteit plaatsvond;</li>
-        <li>de gemaakte reiskosten (kilometers of OV-kosten);</li>
-        <li>je IBAN en de tenaamstelling van de rekening.</li>
-      </ul>
 
       <h2 id="locaties">Kosten voor aangesloten locaties</h2>
       <p>

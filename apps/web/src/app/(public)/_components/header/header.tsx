@@ -82,10 +82,10 @@ export default function Header() {
                 href: "/vereniging/kwaliteitscommissie",
               },
               {
-                label: "Tarieven",
-                href: "/vereniging/tarieven",
+                label: "Tarieven en declaraties",
+                href: "/vereniging/tarieven-en-declaraties",
                 description:
-                  "Vergoedingen, locatiekosten en opleidingskosten",
+                  "Declareren, vergoedingen, locatiekosten en opleidingskosten",
               },
               {
                 label: "Statuten en reglementen",

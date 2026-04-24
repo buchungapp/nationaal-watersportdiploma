@@ -35,10 +35,10 @@ export const verenigingsPages: (Page & { slug: string })[] = [
       "De kwaliteitscommissie bewaakt de kwaliteit van aangesloten locaties bij het Nationaal Watersportdiploma.",
   },
   {
-    title: "Tarieven",
-    slug: "tarieven",
+    title: "Tarieven en declaraties",
+    slug: "tarieven-en-declaraties",
     description:
-      "Overzicht van vergoedingen voor vrijwilligers, kosten voor aangesloten locaties en opleidingskosten voor deelnemers.",
+      "Hoe je vergoedingen declareert en het overzicht van vergoedingen voor vrijwilligers, kosten voor aangesloten locaties en opleidingskosten voor deelnemers.",
   },
   {
     title: "Statuten en reglementen",
