@@ -1,5 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+import CopyToClipboard from "~/app/(public)/_components/style/copy-to-clipboard";
 
 export async function generateMetadata(
   _props: unknown,
@@ -236,6 +237,27 @@ export default function Page() {
         vergoeding omdat je in een commissie zit, maar wel voor het concrete
         werk dat je vanuit die rol uitvoert.
       </p>
+
+      <h3>Declareren</h3>
+      <p>
+        Vergoedingen en reiskosten dien je achteraf in bij de penningmeester
+        via{" "}
+        <CopyToClipboard
+          value="penningmeester@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
+          penningmeester
+          <wbr />
+          @nationaalwatersportdiploma.nl
+        </CopyToClipboard>
+        . Vermeld in je declaratie:
+      </p>
+      <ul>
+        <li>de verrichte activiteit (rol en context);</li>
+        <li>de datum waarop de activiteit plaatsvond;</li>
+        <li>de gemaakte reiskosten (kilometers of OV-kosten);</li>
+        <li>je IBAN en de tenaamstelling van de rekening.</li>
+      </ul>
 
       <h2 id="locaties">Kosten voor aangesloten locaties</h2>
       <p>
