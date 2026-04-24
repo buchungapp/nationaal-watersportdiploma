@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-require-imports, no-eval */
-const _require = eval("require") as NodeRequire;
-const { OTLPTraceExporter } = _require("@opentelemetry/exporter-trace-otlp-http");
-const { SimpleSpanProcessor } = _require("@opentelemetry/sdk-trace-node");
-const { registerOTel } = _require("@vercel/otel");
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { registerOTel } from "@vercel/otel";
 
 registerOTel({
   serviceName: "web",
