@@ -97,7 +97,7 @@ export default function Page() {
           <tr>
             <td>Losse PvB-afname (praktijk plus portfolio&apos;s)</td>
             <td>
-              <strong>€100</strong> per PvB
+              <strong>€100</strong>
             </td>
           </tr>
           <tr>
