@@ -113,11 +113,9 @@ export default function Page() {
         </tbody>
       </table>
       <p>
-        Bij een <strong>clusteraanvraag</strong> neem je meerdere praktijk-PvB&apos;s
-        op dezelfde dag en locatie af. Het dagtarief van €150 is een vast
-        all-in bedrag voor die dag, ongeacht hoeveel PvB&apos;s je in het
-        cluster afneemt. Omdat reistijd en voorbereiding worden gedeeld,
-        levert een cluster zo meer op dan losse afnames.
+        Een <strong>clusteraanvraag</strong> betreft meerdere praktijk-PvB&apos;s
+        op dezelfde dag en locatie. Het dagtarief van €150 geldt voor de hele
+        dag, ongeacht het aantal afnames.
       </p>
 
       <h3>Controleur</h3>
