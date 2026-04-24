@@ -27,10 +27,16 @@ export default async function Page(props: {
     notFound();
   }
 
-  const [programs, curricula] = await Promise.all([
+  const [allPrograms, curricula] = await Promise.all([
     listProgramsForCourse(course.id),
     listCurriculaByDiscipline(discipline.id),
   ]);
+
+  // Consumenten-pagina: alleen consumentenniveaus (1 t/m 4). Instructeurs-
+  // eigenvaardigheid (NWD A/B/C, rang >= 5 wanneer die in de DB komen) hoort
+  // thuis onder /diplomalijn/instructeur/eigenvaardigheid en moet hier niet
+  // opduiken.
+  const programs = allPrograms.filter((program) => program.degree.rang <= 4);
 
   const relevantCurricula = curricula.filter((curriculum) =>
     programs.some((program) => program.id === curriculum.programId),
