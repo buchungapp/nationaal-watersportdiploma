@@ -92,6 +92,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/vereniging/tarieven",
+        destination: "/vereniging/tarieven-en-declaraties",
+        permanent: true,
+      },
+      {
         source: "/faq-instructeur",
         destination:
           "/actueel/3yHwZSTf-een-nieuw-tijdperk-voor-jou-als-instructeur-met-het-nwd",
