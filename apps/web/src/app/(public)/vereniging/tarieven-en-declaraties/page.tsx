@@ -1,5 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+import CopyToClipboard from "~/app/(public)/_components/style/copy-to-clipboard";
 
 export async function generateMetadata(
   _props: unknown,
@@ -8,14 +9,14 @@ export async function generateMetadata(
   const parentOpenGraph = (await parent).openGraph;
 
   return {
-    title: "Tarieven",
+    title: "Tarieven en declaraties",
     alternates: {
-      canonical: "/vereniging/tarieven",
+      canonical: "/vereniging/tarieven-en-declaraties",
     },
     openGraph: {
       ...parentOpenGraph,
-      title: "Tarieven",
-      url: "/vereniging/tarieven",
+      title: "Tarieven en declaraties",
+      url: "/vereniging/tarieven-en-declaraties",
     },
   };
 }
@@ -35,11 +36,15 @@ export default function Page() {
       </div>
 
       <p>
-        Op deze pagina vind je alle tarieven overzichtelijk bij elkaar. Kies
-        wat voor jou van toepassing is:
+        Op deze pagina vind je eerst hoe je je vergoeding declareert, en
+        daarna alle tarieven overzichtelijk bij elkaar:
       </p>
 
       <ul>
+        <li>
+          <Link href="#declaraties">Declaraties indienen</Link> — hoe en waar
+          dien je je vergoeding en reiskosten in?
+        </li>
         <li>
           <Link href="#vergoedingen">
             Vergoedingen voor vrijwilligers en uitvoerders
@@ -68,6 +73,27 @@ export default function Page() {
         </p>
       </blockquote>
 
+      <h2 id="declaraties">Declaraties indienen</h2>
+      <p>
+        Vergoedingen en reiskosten dien je achteraf in bij de penningmeester
+        via{" "}
+        <CopyToClipboard
+          value="penningmeester@nationaalwatersportdiploma.nl"
+          className="break-words underline"
+        >
+          penningmeester
+          <wbr />
+          @nationaalwatersportdiploma.nl
+        </CopyToClipboard>
+        . Vermeld in je declaratie:
+      </p>
+      <ul>
+        <li>de verrichte activiteit (rol en context);</li>
+        <li>de datum én de vaarlocatie waar de activiteit plaatsvond;</li>
+        <li>de gemaakte reiskosten (kilometers of OV-kosten);</li>
+        <li>je IBAN en de tenaamstelling van de rekening.</li>
+      </ul>
+
       <h2 id="vergoedingen">Vergoedingen voor vrijwilligers en uitvoerders</h2>
       <p>
         Het NWD werkt met onafhankelijke externen en vrijwilligers die taken
@@ -95,15 +121,15 @@ export default function Page() {
         </thead>
         <tbody>
           <tr>
-            <td>PvB-afname (praktijk plus portfolio&apos;s)</td>
+            <td>Losse PvB-afname (praktijk plus portfolio&apos;s)</td>
             <td>
               <strong>€100</strong>
             </td>
           </tr>
           <tr>
-            <td>Afname bij een clusteraanvraag</td>
+            <td>Clusteraanvraag — dagtarief</td>
             <td>
-              <strong>€150</strong>
+              <strong>€150</strong> per dag
             </td>
           </tr>
           <tr>
@@ -113,9 +139,9 @@ export default function Page() {
         </tbody>
       </table>
       <p>
-        Bij een <strong>clusteraanvraag</strong> neem je meerdere praktijk-PvB&apos;s
-        op dezelfde dag en locatie af. Omdat reistijd en voorbereiding worden
-        gedeeld, ligt de vergoeding per dag hoger.
+        Een <strong>clusteraanvraag</strong> betreft meerdere praktijk-PvB&apos;s
+        op dezelfde dag en locatie. Het dagtarief van €150 geldt voor de hele
+        dag, ongeacht het aantal afnames.
       </p>
 
       <h3>Controleur</h3>
@@ -192,8 +218,12 @@ export default function Page() {
 
       <h3>Leercoach</h3>
       <p>
-        Als externe leercoach begeleid je kandidaten in hun opleidingstraject
-        met plaatsbezoeken voor observatie, feedback en reflectie.
+        Als externe leercoach begeleid je deelnemers aan de centraal
+        georganiseerde <strong>niveau&nbsp;5-opleiderscursus</strong>{" "}
+        (Leercoach&nbsp;5 of Beoordelaar&nbsp;5) met plaatsbezoeken voor
+        observatie, feedback en reflectie. De vergoeding hieronder geldt
+        voor bezoeken vanuit die cursus — niet voor begeleiding die een
+        vaarlocatie zelf inzet bij lagere niveaus.
       </p>
       <table>
         <thead>
@@ -204,9 +234,9 @@ export default function Page() {
         </thead>
         <tbody>
           <tr>
-            <td>Bezoek</td>
+            <td>Bezoek (dagtarief)</td>
             <td>
-              <strong>€100</strong>
+              <strong>€100</strong> per dag
             </td>
           </tr>
           <tr>
