@@ -194,8 +194,12 @@ export default function Page() {
 
       <h3>Leercoach</h3>
       <p>
-        Als externe leercoach begeleid je kandidaten in hun opleidingstraject
-        met plaatsbezoeken voor observatie, feedback en reflectie.
+        Als externe leercoach begeleid je deelnemers aan de centraal
+        georganiseerde <strong>niveau&nbsp;5-opleiderscursus</strong>
+        (Leercoach&nbsp;5 of Beoordelaar&nbsp;5) met plaatsbezoeken voor
+        observatie, feedback en reflectie. De vergoeding hieronder geldt
+        voor bezoeken vanuit die cursus — niet voor begeleiding die een
+        vaarlocatie zelf inzet bij lagere niveaus.
       </p>
       <table>
         <thead>
