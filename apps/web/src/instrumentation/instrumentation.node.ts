@@ -1,23 +1,9 @@
-// Use eval("require") so Turbopack cannot statically analyse the
-// module specifiers.  These packages are in serverExternalPackages
-// and will be resolved by Node.js at runtime.
-/* eslint-disable @typescript-eslint/no-require-imports, no-eval */
-const _require = eval("require") as NodeRequire;
-
-const {
-  getNodeAutoInstrumentations,
-} = _require("@opentelemetry/auto-instrumentations-node");
-const { OTLPTraceExporter } = _require("@opentelemetry/exporter-trace-otlp-http");
-const {
-  resourceFromAttributes,
-} = _require("@opentelemetry/resources");
-const { NodeSDK } = _require("@opentelemetry/sdk-node");
-const {
-  SimpleSpanProcessor,
-} = _require("@opentelemetry/sdk-trace-node");
-const {
-  ATTR_SERVICE_NAME,
-} = _require("@opentelemetry/semantic-conventions");
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 
 const sdk = new NodeSDK({
   resource: resourceFromAttributes({
