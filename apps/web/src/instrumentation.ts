@@ -2,7 +2,17 @@ import type { Instrumentation } from "next";
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./instrumentation/instrumentation.node.ts");
+    try {
+      await import("./instrumentation/instrumentation.node.ts");
+    } catch (e) {
+      if (process.env.NODE_ENV !== "development") {
+        throw e;
+      }
+      console.warn(
+        "OpenTelemetry instrumentation skipped (not available in dev):",
+        (e as Error).message,
+      );
+    }
     return;
   }
 
