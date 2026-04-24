@@ -47,7 +47,7 @@ const phases: Phase[] = [
   {
     icon: ClipboardDocumentCheckIcon,
     label: "Beoordeling",
-    body: "Per kerntaak-onderdeel een uitslag: portfolio wordt schriftelijk beoordeeld, praktijk wordt live geobserveerd. Het vier-ogen-principe geldt — de beoordelaar en leercoach moeten beiden akkoord zijn.",
+    body: "Per kerntaak-onderdeel een uitslag: portfolio wordt schriftelijk beoordeeld, praktijk wordt live geobserveerd en een assessment kan beide combineren in een reflectiegesprek. Het vier-ogen-principe geldt — de beoordelaar en leercoach moeten beiden akkoord zijn.",
     actors: ["Beoordelaar", "Leercoach"],
     status: "in_beoordeling",
   },

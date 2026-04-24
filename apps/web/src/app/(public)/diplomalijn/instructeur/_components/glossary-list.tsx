@@ -120,18 +120,18 @@ const entries: Entry[] = [
     term: "Eigenvaardigheid",
     aka: ["EV"],
     scope: "instructeur",
-    body: "Het persoonlijke vaardigheidsniveau van een instructeur in de discipline. Voor I2, I3 en I4 geldt respectievelijk NWD A, NWD B en NWD C. Vastgesteld via vaardigheidsexamens of (voor NWD C) door twee Instructeurs 5.",
+    body: "Het persoonlijke vaardigheidsniveau van een instructeur in de discipline. Voor I2, I3 en I4 geldt respectievelijk NWD A, NWD B en NWD C. Vastgesteld via eigenvaardigheidsexamens of (voor NWD C) door twee Instructeurs 5.",
     seeAlso: ["NWD A", "NWD B", "NWD C"],
   },
   {
     term: "NWD A",
     scope: "instructeur",
-    body: "Basisniveau eigenvaardigheid. Vereist voor Instructeur 2. Behaald via het NWD A-vaardigheidsexamen.",
+    body: "Basisniveau eigenvaardigheid. Vereist voor Instructeur 2. Behaald via het NWD A-eigenvaardigheidsexamen.",
   },
   {
     term: "NWD B",
     scope: "instructeur",
-    body: "Gevorderd niveau eigenvaardigheid. Vereist voor Instructeur 3. Behaald via het NWD B-vaardigheidsexamen.",
+    body: "Gevorderd niveau eigenvaardigheid. Vereist voor Instructeur 3. Behaald via het NWD B-eigenvaardigheidsexamen.",
   },
   {
     term: "NWD C",

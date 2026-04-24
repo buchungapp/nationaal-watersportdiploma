@@ -109,7 +109,7 @@ export function TwoSporen() {
           { label: "NWD B", variant: "instructeur" },
           { label: "NWD C", variant: "instructeur" },
         ]}
-        toets="Vaardigheidsexamen (NWD A, B) of afrondingsweekend met twee Instructeurs 5 (NWD C)."
+        toets="Eigenvaardigheidsexamen (NWD A, B) of afrondingsweekend met twee Instructeurs 5 (NWD C)."
         context="Cursusgebonden — NWD A Kielboot geldt niet voor Catamaran."
         href="/diplomalijn/instructeur/eigenvaardigheid"
         ctaLabel="Meer over eigenvaardigheid"
@@ -124,7 +124,7 @@ export function TwoSporen() {
           { label: "L4 – L5", variant: "leercoach" },
           { label: "B4 – B5", variant: "beoordelaar" },
         ]}
-        toets="Proef van Bekwaamheid (PvB) per kerntaak — portfolio en/of praktijk, beoordeeld volgens het vier-ogen-principe."
+        toets="Proef van Bekwaamheid (PvB) per kerntaak — portfolio, praktijk en/of assessment, beoordeeld volgens het vier-ogen-principe."
         context="De kaderlijn volgens de Kwalificatiestructuur Sport (KSS), geborgd door het Watersportverbond en World Sailing."
         href="/diplomalijn/instructeur/pvbs"
         ctaLabel="Meer over PvB's"
