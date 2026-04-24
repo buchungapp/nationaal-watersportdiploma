@@ -45,10 +45,13 @@ export function buildErrorContextProps(error: unknown): Record<string, unknown> 
     error_chain: chain.map((e) => `${e.name}: ${e.message}`).join(" ← "),
   };
 
-  const failingQuery = (error as { failingQuery?: unknown })?.failingQuery;
-  if (typeof failingQuery === "string") {
-    props.failing_query = failingQuery;
-  }
+  // `failingQuery` / `failingQueryKind` are stamped by wrapQuery / wrapCommand
+  // (packages/core). When Next.js or React wraps the CoreError before
+  // `onRequestError` fires, the breadcrumb sits on a cause, not the outer
+  // error — so walk the chain, taking the first value we encounter.
+  const failing = findAnnotation(error);
+  if (failing.query) props.failing_query = failing.query;
+  if (failing.kind) props.failing_query_kind = failing.kind;
 
   const digest = (error as { digest?: unknown })?.digest;
   if (typeof digest === "string") {
@@ -56,6 +59,34 @@ export function buildErrorContextProps(error: unknown): Record<string, unknown> 
   }
 
   return props;
+}
+
+function findAnnotation(error: unknown): {
+  query?: string;
+  kind?: string;
+} {
+  const seen = new Set<unknown>();
+  let current: unknown = error;
+  let depth = 0;
+  while (
+    current !== null &&
+    current !== undefined &&
+    !seen.has(current) &&
+    depth < MAX_CHAIN_DEPTH
+  ) {
+    seen.add(current);
+    depth += 1;
+    const query = (current as { failingQuery?: unknown }).failingQuery;
+    const kind = (current as { failingQueryKind?: unknown }).failingQueryKind;
+    if (typeof query === "string" || typeof kind === "string") {
+      return {
+        query: typeof query === "string" ? query : undefined,
+        kind: typeof kind === "string" ? kind : undefined,
+      };
+    }
+    current = (current as { cause?: unknown }).cause;
+  }
+  return {};
 }
 
 const HANDLE_PATTERNS: Array<{ key: string; re: RegExp }> = [
