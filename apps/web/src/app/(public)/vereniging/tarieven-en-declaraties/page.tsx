@@ -89,7 +89,7 @@ export default function Page() {
       </p>
       <ul>
         <li>de verrichte activiteit (rol en context);</li>
-        <li>de datum waarop de activiteit plaatsvond;</li>
+        <li>de datum én de vaarlocatie waar de activiteit plaatsvond;</li>
         <li>de gemaakte reiskosten (kilometers of OV-kosten);</li>
         <li>je IBAN en de tenaamstelling van de rekening.</li>
       </ul>
