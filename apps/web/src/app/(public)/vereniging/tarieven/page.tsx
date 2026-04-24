@@ -95,15 +95,15 @@ export default function Page() {
         </thead>
         <tbody>
           <tr>
-            <td>PvB-afname (praktijk plus portfolio&apos;s)</td>
+            <td>Losse PvB-afname (praktijk plus portfolio&apos;s)</td>
             <td>
-              <strong>€100</strong>
+              <strong>€100</strong> per PvB
             </td>
           </tr>
           <tr>
-            <td>Afname bij een clusteraanvraag</td>
+            <td>Clusteraanvraag — dagtarief</td>
             <td>
-              <strong>€150</strong>
+              <strong>€150</strong> per dag
             </td>
           </tr>
           <tr>
@@ -114,8 +114,10 @@ export default function Page() {
       </table>
       <p>
         Bij een <strong>clusteraanvraag</strong> neem je meerdere praktijk-PvB&apos;s
-        op dezelfde dag en locatie af. Omdat reistijd en voorbereiding worden
-        gedeeld, ligt de vergoeding per dag hoger.
+        op dezelfde dag en locatie af. Het dagtarief van €150 is een vast
+        all-in bedrag voor die dag, ongeacht hoeveel PvB&apos;s je in het
+        cluster afneemt. Omdat reistijd en voorbereiding worden gedeeld,
+        levert een cluster zo meer op dan losse afnames.
       </p>
 
       <h3>Controleur</h3>
