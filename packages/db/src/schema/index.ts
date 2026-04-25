@@ -1,4 +1,5 @@
 export * from "./ai_corpus/index.js";
+export * from "./api-audit-log.js";
 export * from "./authn.js";
 export * from "./better-auth.js";
 export * from "./authz.js";

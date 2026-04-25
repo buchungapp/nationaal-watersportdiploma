@@ -1016,3 +1016,311 @@ export const mergePersons = wrapCommand(
     },
   ),
 );
+
+const LOOKUP_FUZZY_THRESHOLD = 0.4;
+const LOOKUP_TOMBSTONE_MAX_DEPTH = 5;
+
+const lookupCandidateSchema = z.object({
+  id: uuidSchema,
+  handle: z.string(),
+  firstName: z.string(),
+  lastNamePrefix: z.string().nullable(),
+  lastName: z.string().nullable(),
+  dateOfBirth: z.string().nullable(),
+  email: z.string().email().nullable(),
+  similarity: z.number().min(0).max(1).nullable(),
+});
+
+const lookupResultSchema = z.object({
+  match: z.enum(["strict", "fuzzy", "none"]),
+  candidate: lookupCandidateSchema.nullable(),
+  candidates: z.array(lookupCandidateSchema),
+});
+
+export type LookupCandidate = z.infer<typeof lookupCandidateSchema>;
+export type LookupResult = z.infer<typeof lookupResultSchema>;
+
+export const lookup = wrapQuery(
+  "user.person.lookup",
+  withZod(
+    z
+      .object({
+        vaarschoolId: uuidSchema,
+        handle: z.string().trim().min(1).optional(),
+        email: z.string().trim().email().optional(),
+        firstName: z.string().trim().min(1).optional(),
+        lastNamePrefix: z.string().trim().optional(),
+        lastName: z.string().trim().min(1).optional(),
+        dateOfBirth: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD")
+          .optional(),
+        limit: z.number().int().min(1).max(20).default(5),
+      })
+      .refine(
+        (input) =>
+          input.handle ||
+          input.email ||
+          (input.firstName && input.lastName) ||
+          input.dateOfBirth,
+        {
+          message:
+            "Provide at least one of: handle, email, firstName+lastName, or dateOfBirth",
+        },
+      ),
+    lookupResultSchema,
+    async (input) => {
+      return withTransaction(async (tx) => {
+        const linkExists = exists(
+          tx
+            .select({ one: sql`1` })
+            .from(s.personLocationLink)
+            .where(
+              and(
+                eq(s.personLocationLink.personId, s.person.id),
+                eq(s.personLocationLink.locationId, input.vaarschoolId),
+                eq(s.personLocationLink.status, "linked"),
+              ),
+            ),
+        );
+
+        const followTombstone = async (
+          startId: string,
+        ): Promise<string | null> => {
+          let currentId = startId;
+          for (let i = 0; i < LOOKUP_TOMBSTONE_MAX_DEPTH; i++) {
+            const [row] = await tx
+              .select({
+                id: s.person.id,
+                merged: s.person.mergedIntoPersonId,
+              })
+              .from(s.person)
+              .where(eq(s.person.id, currentId));
+            if (!row) return null;
+            if (!row.merged) return row.id;
+            currentId = row.merged;
+          }
+          return null;
+        };
+
+        const baseColumns = {
+          id: s.person.id,
+          handle: s.person.handle,
+          firstName: s.person.firstName,
+          lastNamePrefix: s.person.lastNamePrefix,
+          lastName: s.person.lastName,
+          dateOfBirth: s.person.dateOfBirth,
+          email: s.user.email,
+        } as const;
+
+        const findStrictMatch = async (): Promise<LookupCandidate | null> => {
+          const strictConditions: (SQL | undefined)[] = [
+            isNull(s.person.deletedAt),
+            isNull(s.person.mergedIntoPersonId),
+            linkExists,
+          ];
+
+          if (input.handle) {
+            const [row] = await tx
+              .select(baseColumns)
+              .from(s.person)
+              .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+              .where(
+                and(
+                  ...strictConditions,
+                  eq(s.person.handle, input.handle.toLowerCase()),
+                ),
+              )
+              .limit(1);
+            if (row) {
+              return {
+                id: row.id,
+                // biome-ignore lint/style/noNonNullAssertion: handle present when matched
+                handle: row.handle!,
+                firstName: row.firstName,
+                lastNamePrefix: row.lastNamePrefix,
+                lastName: row.lastName,
+                dateOfBirth: row.dateOfBirth,
+                email: row.email,
+                similarity: null,
+              };
+            }
+          }
+
+          if (input.email) {
+            const [row] = await tx
+              .select(baseColumns)
+              .from(s.person)
+              .innerJoin(s.user, eq(s.person.userId, s.user.authUserId))
+              .where(
+                and(
+                  ...strictConditions,
+                  eq(
+                    sql`LOWER(${s.user.email})`,
+                    input.email.toLowerCase(),
+                  ),
+                ),
+              )
+              .limit(1);
+            if (row) {
+              return {
+                id: row.id,
+                // biome-ignore lint/style/noNonNullAssertion: handle is set
+                handle: row.handle!,
+                firstName: row.firstName,
+                lastNamePrefix: row.lastNamePrefix,
+                lastName: row.lastName,
+                dateOfBirth: row.dateOfBirth,
+                email: row.email,
+                similarity: null,
+              };
+            }
+          }
+
+          if (input.firstName && input.lastName && input.dateOfBirth) {
+            const [row] = await tx
+              .select(baseColumns)
+              .from(s.person)
+              .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+              .where(
+                and(
+                  ...strictConditions,
+                  eq(
+                    sql`LOWER(${s.person.firstName})`,
+                    input.firstName.toLowerCase(),
+                  ),
+                  eq(
+                    sql`LOWER(${s.person.lastName})`,
+                    input.lastName.toLowerCase(),
+                  ),
+                  eq(s.person.dateOfBirth, input.dateOfBirth),
+                ),
+              )
+              .limit(1);
+            if (row) {
+              return {
+                id: row.id,
+                // biome-ignore lint/style/noNonNullAssertion: handle is set
+                handle: row.handle!,
+                firstName: row.firstName,
+                lastNamePrefix: row.lastNamePrefix,
+                lastName: row.lastName,
+                dateOfBirth: row.dateOfBirth,
+                email: row.email,
+                similarity: null,
+              };
+            }
+          }
+
+          return null;
+        };
+
+        const strictCandidate = await findStrictMatch();
+        if (strictCandidate) {
+          const canonicalId = await followTombstone(strictCandidate.id);
+          if (canonicalId && canonicalId !== strictCandidate.id) {
+            const [row] = await tx
+              .select(baseColumns)
+              .from(s.person)
+              .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+              .where(eq(s.person.id, canonicalId))
+              .limit(1);
+            if (row) {
+              return {
+                match: "strict" as const,
+                candidate: {
+                  id: row.id,
+                  // biome-ignore lint/style/noNonNullAssertion: handle is set
+                  handle: row.handle!,
+                  firstName: row.firstName,
+                  lastNamePrefix: row.lastNamePrefix,
+                  lastName: row.lastName,
+                  dateOfBirth: row.dateOfBirth,
+                  email: row.email,
+                  similarity: null,
+                },
+                candidates: [],
+              };
+            }
+          }
+          return {
+            match: "strict" as const,
+            candidate: strictCandidate,
+            candidates: [],
+          };
+        }
+
+        if (!input.firstName && !input.lastName) {
+          return {
+            match: "none" as const,
+            candidate: null,
+            candidates: [],
+          };
+        }
+
+        const fuzzyTerm = [
+          input.firstName ?? "",
+          input.lastNamePrefix ?? "",
+          input.lastName ?? "",
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .trim();
+
+        if (!fuzzyTerm) {
+          return {
+            match: "none" as const,
+            candidate: null,
+            candidates: [],
+          };
+        }
+
+        await tx.execute(
+          sql`SET LOCAL pg_trgm.similarity_threshold = ${LOOKUP_FUZZY_THRESHOLD}`,
+        );
+
+        const trgmTarget = sql`(
+          COALESCE(${s.person.firstName}, '') || ' ' ||
+          COALESCE(${s.person.lastNamePrefix}, '') || ' ' ||
+          COALESCE(${s.person.lastName}, '')
+        )`;
+
+        const fuzzyRows = await tx
+          .select({
+            ...baseColumns,
+            similarity: sql<number>`similarity(${trgmTarget}, ${fuzzyTerm})`,
+          })
+          .from(s.person)
+          .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+          .where(
+            and(
+              isNull(s.person.deletedAt),
+              isNull(s.person.mergedIntoPersonId),
+              linkExists,
+              sql`${trgmTarget} % ${fuzzyTerm}`,
+            ),
+          )
+          .orderBy(sql`similarity(${trgmTarget}, ${fuzzyTerm}) DESC`)
+          .limit(input.limit);
+
+        const candidates = fuzzyRows.map((row) => ({
+          id: row.id,
+          // biome-ignore lint/style/noNonNullAssertion: handle is set
+          handle: row.handle!,
+          firstName: row.firstName,
+          lastNamePrefix: row.lastNamePrefix,
+          lastName: row.lastName,
+          dateOfBirth: row.dateOfBirth,
+          email: row.email,
+          similarity: typeof row.similarity === "number" ? row.similarity : null,
+        }));
+
+        return {
+          match: candidates.length > 0 ? ("fuzzy" as const) : ("none" as const),
+          candidate: null,
+          candidates,
+        };
+      });
+    },
+  ),
+);

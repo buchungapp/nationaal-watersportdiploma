@@ -67,6 +67,7 @@ export const person = pgTable(
     birthCountry: char("birth_country", { length: 2 }).references(
       () => country.alpha_2,
     ),
+    mergedIntoPersonId: uuid("merged_into_person_id"),
     ...timestamps,
     _metadata: jsonb("_metadata"),
   },
@@ -78,19 +79,33 @@ export const person = pgTable(
     ),
     index("person_idx_name_search").using(
       "gin",
-      sql`to_tsvector('simple', 
-        COALESCE(${table.firstName}, '') || ' ' || 
-        COALESCE(${table.lastNamePrefix}, '') || ' ' || 
+      sql`to_tsvector('simple',
+        COALESCE(${table.firstName}, '') || ' ' ||
+        COALESCE(${table.lastNamePrefix}, '') || ' ' ||
         COALESCE(${table.lastName}, '')
       )`,
     ),
+    index("person_idx_first_last_trgm").using(
+      "gin",
+      sql`(
+        COALESCE(${table.firstName}, '') || ' ' ||
+        COALESCE(${table.lastNamePrefix}, '') || ' ' ||
+        COALESCE(${table.lastName}, '')
+      ) gin_trgm_ops`,
+    ),
     index("person_idx_user_id").on(table.userId),
     index("person_idx_is_primary").on(table.isPrimary),
+    index("person_idx_merged_into").on(table.mergedIntoPersonId),
     foreignKey({
       columns: [table.userId],
       foreignColumns: [user.authUserId],
       name: "person_user_id_fk",
     }),
+    foreignKey({
+      columns: [table.mergedIntoPersonId],
+      foreignColumns: [table.id],
+      name: "person_merged_into_person_id_fk",
+    }).onDelete("set null"),
     uniqueIndex("unq_primary_person")
       .on(table.userId, table.isPrimary)
       .where(sql`${table.isPrimary} = true`),
@@ -187,6 +202,7 @@ export const personLocationLink = pgTable(
       columns: [table.personId, table.locationId],
       name: "person_location_link_pk",
     }),
+    index("person_location_link_idx_location_id").on(table.locationId),
     foreignKey({
       columns: [table.personId],
       foreignColumns: [person.id],

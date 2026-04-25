@@ -8,7 +8,12 @@ export {
 export {
   createBetterAuthOptions,
   getBetterAuth,
+  PUBLIC_API_AUDIENCE,
+  PUBLIC_API_SCOPES,
+  VAARSCHOOL_CLAIM,
+  VENDOR_CLAIM,
   type BetterAuthInstance,
+  type PublicApiScope,
   type Session,
 } from "./runtime.js";
 export {
