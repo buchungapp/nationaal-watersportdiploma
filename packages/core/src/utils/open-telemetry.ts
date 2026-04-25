@@ -14,6 +14,7 @@ type TracerFunction = <R, A extends unknown[]>(
 
 const createWrapper = (
   getTracer: () => opentelemetry.Tracer,
+  kind: "query" | "command",
 ): TracerFunction => {
   return (name, task) => {
     return async (...args) => {
@@ -44,6 +45,11 @@ const createWrapper = (
             return result;
           } catch (error) {
             const coreError = CoreError.fromUnknown(error);
+            // Tag the deepest (innermost) operation that failed. If an outer
+            // wrapper re-catches, we keep the inner name so reporters surface
+            // the actual culprit, not the top-level handler.
+            coreError.failingQuery ??= name;
+            coreError.failingQueryKind ??= kind;
             span.recordException(coreError);
 
             throw coreError;
@@ -56,5 +62,8 @@ const createWrapper = (
   };
 };
 
-export const wrapCommand: TracerFunction = createWrapper(getCommandTracer);
-export const wrapQuery: TracerFunction = createWrapper(getQueryTracer);
+export const wrapCommand: TracerFunction = createWrapper(
+  getCommandTracer,
+  "command",
+);
+export const wrapQuery: TracerFunction = createWrapper(getQueryTracer, "query");

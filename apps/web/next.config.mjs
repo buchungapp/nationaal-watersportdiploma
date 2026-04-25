@@ -202,7 +202,10 @@ const withMDX = nextMDX({
 export default withPostHogConfig(withMDX(nextConfig), {
   personalApiKey: process.env.POSTHOG_API_KEY,
   host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-  envId: process.env.POSTHOG_ENV_ID,
+  // v1.9+ renamed `envId` → `projectId`; accept either env var for a
+  // graceful Vercel rollout (old env var still wins on fresh deploys
+  // until POSTHOG_PROJECT_ID is set).
+  projectId: process.env.POSTHOG_PROJECT_ID ?? process.env.POSTHOG_ENV_ID,
   sourcemaps: {
     // Upload sourcemaps at build time so PostHog's Error Tracking
     // symbolicates stack frames back to real file paths + line
@@ -215,6 +218,12 @@ export default withPostHogConfig(withMDX(nextConfig), {
     // contributors to debug prod via devtools, flip that to false
     // in a follow-up (low risk given the repo is open source, but
     // no reason to ship the extra bytes by default).
+    //
+    // Plugin ≥ 1.9.0 handles both webpack and Turbopack builds (Next
+    // ≥ 15.4.1 required; we're on 16.x). Server-side stack frames in
+    // `/_next/server/chunks/**` now get symbolicated too — the bug that
+    // originally showed up as `chunks/ssr/_30fa50cb._.js:158:99644` was
+    // a server render error with no source map coverage.
     enabled: true,
   },
 });

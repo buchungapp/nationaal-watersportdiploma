@@ -43,7 +43,6 @@
     "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@nawadi/api": "workspace:*",
     "@nawadi/core": "workspace:*",
     "@nawadi/db": "workspace:*",
     "@tsconfig/node22": "catalog:",

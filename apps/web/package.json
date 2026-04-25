@@ -52,7 +52,7 @@
     "@opentelemetry/sdk-node": "0.211.0",
     "@opentelemetry/sdk-trace-node": "2.5.0",
     "@opentelemetry/semantic-conventions": "1.28.0",
-    "@posthog/nextjs-config": "1.0.2",
+    "@posthog/nextjs-config": "1.9.8",
     "@react-email/components": "^1.0.12",
     "@react-email/render": "^2.0.7",
     "@react-google-maps/api": "2.20.8",

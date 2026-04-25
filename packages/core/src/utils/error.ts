@@ -49,6 +49,15 @@ export enum CoreErrorType {
  * extended to contain more information about validation or constraint validation.
  */
 export class CoreError extends Error {
+  /**
+   * Set by `wrapQuery` / `wrapCommand` to the operation name so error
+   * reporters (e.g. PostHog) can surface which DB call blew up without
+   * parsing stack traces. Inner operation wins — an outer wrapper will
+   * not overwrite a value set by a deeper wrapper.
+   */
+  public failingQuery?: string;
+  public failingQueryKind?: "query" | "command";
+
   constructor(
     public readonly type: CoreErrorType,
     options?: ErrorOptions & { cause?: unknown },
