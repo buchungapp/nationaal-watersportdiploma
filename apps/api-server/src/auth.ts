@@ -1,6 +1,6 @@
 import { Auth, useDatabase } from "@nawadi/core";
 import { schema as s } from "@nawadi/db";
-import { eq, gt, isNull, or } from "drizzle-orm";
+import { eq, gt, isNull, or } from "@nawadi/db/drizzle";
 import { type JWK, type JWTPayload, jwtVerify } from "jose";
 import { createLocalJWKSet } from "jose";
 
