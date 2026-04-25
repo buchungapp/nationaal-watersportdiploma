@@ -66,7 +66,7 @@ export default function Page() {
       <blockquote>
         <p>
           Reiskosten worden in alle gevallen uniform vergoed met{" "}
-          <strong>€0,21 per kilometer</strong> of werkelijke OV-kosten. Kosten
+          <strong>€0,23 per kilometer</strong> of werkelijke OV-kosten. Kosten
           voor locaties en deelnemers zijn <strong>exclusief btw</strong>;
           vergoedingen aan vrijwilligers en uitvoerders zijn
           onkostenvergoedingen en bevatten geen btw.
@@ -134,7 +134,7 @@ export default function Page() {
           </tr>
           <tr>
             <td>Reiskosten</td>
-            <td>€0,21/km of OV</td>
+            <td>€0,23/km of OV</td>
           </tr>
         </tbody>
       </table>
@@ -176,7 +176,7 @@ export default function Page() {
           </tr>
           <tr>
             <td>Reiskosten</td>
-            <td>€0,21/km of OV</td>
+            <td>€0,23/km of OV</td>
           </tr>
         </tbody>
       </table>
@@ -211,7 +211,7 @@ export default function Page() {
           </tr>
           <tr>
             <td>Reiskosten</td>
-            <td>€0,21/km of OV</td>
+            <td>€0,23/km of OV</td>
           </tr>
         </tbody>
       </table>
@@ -241,7 +241,7 @@ export default function Page() {
           </tr>
           <tr>
             <td>Reiskosten</td>
-            <td>€0,21/km of OV</td>
+            <td>€0,23/km of OV</td>
           </tr>
         </tbody>
       </table>
