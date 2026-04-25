@@ -6,27 +6,25 @@ import { withTestEnvironment } from "../testing/index.js";
 
 test("open-id authentication", () =>
   withTestEnvironment({ isolation: "supabase" }, async ({ baseUrl }) => {
-    const supabaseClient = core.useSupabaseClient();
-
-    const createUserResult = await supabaseClient.auth.admin.createUser({
-      email: "test@test.test",
-      email_confirm: true,
-      password: "supersecret",
+    const email = "test@test.test";
+    const user = await core.Auth.getOrCreateUser({
+      email,
+      displayName: "test user",
     });
-    assert.ifError(createUserResult.error);
 
-    const authUserItem = createUserResult.data.user;
-    assert(authUserItem != null);
-
-    const signInResult = await supabaseClient.auth.signInWithPassword({
-      email: "test@test.test",
-      password: "supersecret",
+    const auth = core.Auth.getBetterAuth();
+    const otp = await auth.api.createVerificationOTP({
+      body: { email, type: "sign-in" },
     });
-    assert.ifError(signInResult.error);
-    const sessionItem = signInResult.data.session;
-    assert(sessionItem != null);
+    assert(typeof otp === "string");
 
-    const token = sessionItem.access_token;
+    const signInResponse = await auth.api.signInEmailOTP({
+      body: { email, otp },
+      asResponse: true,
+    });
+
+    const token = signInResponse.headers.get("set-auth-token");
+    assert(token, "Better Auth session token missing from response");
 
     const result = await api.client.me(
       {
@@ -40,5 +38,5 @@ test("open-id authentication", () =>
     assert(result.status === 200);
 
     const meItem = await result.entity();
-    assert.equal(meItem.id, authUserItem.id);
+    assert.equal(meItem.id, user.id);
   }));

@@ -11,7 +11,7 @@ import {
 import { SUMMARIZATION_MODEL } from "~/lib/ai-models";
 import { leercoachEnabled } from "~/lib/flags";
 import { captureAiTurn, flushAiTelemetry } from "~/lib/posthog-ai";
-import { createClient } from "~/lib/supabase/server";
+import { getSession } from "~/lib/auth/server";
 
 // Compaction endpoint — collapses older messages into a single
 // Haiku-generated summary so long leercoach sessions stay under the
@@ -123,13 +123,11 @@ export async function POST(
     );
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const session = await getSession();
+  if (!session) {
     return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
   }
+  const user = session.user;
 
   const { id: chatId } = await ctx.params;
   const chat = await Leercoach.Chat.getById({ chatId, userId: user.id });

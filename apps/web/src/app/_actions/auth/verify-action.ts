@@ -1,9 +1,11 @@
 "use server";
+import { Auth } from "@nawadi/core";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { createClient } from "~/lib/supabase/server";
+import { auth } from "~/lib/auth/server";
 import { actionClientWithMeta } from "../safe-action";
 
 const verifySchema = zfd.formData({
@@ -19,17 +21,12 @@ export const verifyAction = actionClientWithMeta
   })
   .bindArgsSchemas(verifyArgsSchema)
   .action(async ({ parsedInput: data, bindArgsParsedInputs: [email] }) => {
-    const supabase = await createClient();
-
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: data.otp,
-      type: "email",
+    await auth().api.signInEmailOTP({
+      body: { email, otp: data.otp },
+      headers: await headers(),
     });
 
-    if (error) {
-      throw error;
-    }
+    await Auth.getOrCreateUser({ email });
 
     revalidatePath("/", "layout");
     redirect("/profiel?_cacheBust=1");

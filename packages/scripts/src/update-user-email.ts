@@ -1,9 +1,4 @@
-import {
-  User,
-  useSupabaseClient,
-  withDatabase,
-  withSupabaseClient,
-} from "@nawadi/core";
+import { Auth, User, withDatabase } from "@nawadi/core";
 import "dotenv/config";
 import assert from "node:assert";
 import inquirer from "inquirer";
@@ -45,64 +40,27 @@ async function main() {
     throw new Error("Current email does not match");
   }
 
-  const supabase = useSupabaseClient();
-
-  const { data: userData } = await supabase.auth.admin.getUserById(
-    user.authUserId,
-  );
-
-  if (!userData) {
-    throw new Error("User not found");
-  }
-
-  if (userData.user?.email !== row.email) {
-    throw new Error("Current email does not match");
-  }
-
-  await supabase.auth.admin.updateUserById(user.authUserId, {
+  await Auth.updateUserEmail({
+    userId: row.authUserId,
     email: row.newEmail,
   });
-
-  await supabase
-    .from("user")
-    .update({
-      email: row.newEmail,
-    })
-    .eq("auth_user_id", user.authUserId);
 }
 
 const pgUri = process.env.PGURI;
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 assert(pgUri, "PGURI environment variable is required");
-assert(
-  supabaseUrl,
-  "NEXT_PUBLIC_SUPABASE_URL environment variable is required",
-);
-assert(
-  supabaseKey,
-  "SUPABASE_SERVICE_ROLE_KEY environment variable is required",
-);
 
-withSupabaseClient(
+withDatabase(
   {
-    url: supabaseUrl,
-    serviceRoleKey: supabaseKey,
+    connectionString: pgUri,
   },
-  () =>
-    withDatabase(
-      {
-        connectionString: pgUri,
-      },
-      async () => await main(),
-    )
-      .then(() => {
-        console.log("Done!");
-        process.exit(0);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        process.exit(1);
-      }),
-);
+  async () => await main(),
+)
+  .then(() => {
+    console.log("Done!");
+    process.exit(0);
+  })
+  .catch((error) => {
+    console.error("Error:", error);
+    process.exit(1);
+  });

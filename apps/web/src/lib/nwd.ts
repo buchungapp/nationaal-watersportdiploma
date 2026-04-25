@@ -1,5 +1,6 @@
 import type { RedisConfiguration, SupabaseConfiguration } from "@nawadi/core";
 import {
+  Auth,
   Certificate,
   Cohort,
   Course,
@@ -17,8 +18,7 @@ import {
   withTransaction,
 } from "@nawadi/core";
 import slugify from "@sindresorhus/slugify";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
@@ -181,34 +181,15 @@ async function makeRequest<T>(cb: () => Promise<T>) {
 export const getUserOrThrow = cache(async () => {
   const cookieStore = await cookies();
 
-  invariant(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    "Missing NEXT_PUBLIC_SUPABASE_URL",
-  );
-  invariant(
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    "Missing NEXT_PUBLIC_SUPABASE_ANON_KEY",
-  );
+  const session = await Auth.getBetterAuth().api.getSession({
+    headers: await headers(),
+  });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-      },
-    },
-  );
-
-  const userResponse = await supabase.auth.getUser();
-
-  if (userResponse.error != null) {
+  if (!session?.user) {
     redirect("/login");
   }
 
-  const { user: authUser } = userResponse.data;
+  const authUser = session.user;
 
   return makeRequest(async () => {
     // Check for impersonation

@@ -1,0 +1,14 @@
+{
+  "extends": "@tsconfig/node22",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./out",
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM"],
+    "composite": true,
+    "declaration": true
+  },
+  "include": ["src/**/*"]
+}

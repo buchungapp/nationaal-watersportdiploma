@@ -15,8 +15,8 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { _usersTable } from "../uncontrolled_schema/auth.js";
 import { timestamps } from "../utils/sql.js";
+import { betterAuthUser } from "./better-auth.js";
 import { location } from "./location.js";
 import { country } from "./platform.js";
 
@@ -43,7 +43,7 @@ export const user = pgTable(
     ),
     foreignKey({
       columns: [table.authUserId],
-      foreignColumns: [_usersTable.id],
+      foreignColumns: [betterAuthUser.id],
       name: "user_auth_user_id_fk",
     }),
   ],

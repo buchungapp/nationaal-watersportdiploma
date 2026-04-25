@@ -1,13 +1,12 @@
 "use client";
 
-import type { Session } from "@supabase/supabase-js";
 import posthog from "posthog-js";
 import { PostHogProvider, usePostHog } from "posthog-js/react";
 import type { PropsWithChildren } from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Provider as BalancerProvider } from "react-wrap-balancer";
 import { BASE_URL } from "~/constants";
-import { createClient } from "~/lib/supabase/client";
+import { useSession } from "~/lib/auth/client";
 import { invariant } from "~/utils/invariant";
 
 if (typeof window !== "undefined") {
@@ -60,39 +59,36 @@ export function CommonProviders({ children }: { children?: React.ReactNode }) {
   );
 }
 
-const SessionContext = createContext<{
-  session: Session | null;
-}>({ session: null });
-
 function SessionProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null);
+  const { data: session, isPending } = useSession();
   const posthog = usePostHog();
+  const lastIdentifiedRef = useRef<string | null>(null);
+
+  const userId = session?.user?.id ?? null;
+  const email = session?.user?.email;
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = createClient().auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
-        setSession(null);
+    // Don't touch PostHog while Better Auth is revalidating — a brief
+    // null blip during refetch would otherwise reset the visitor ID.
+    if (isPending) return;
+
+    const lastIdentified = lastIdentifiedRef.current;
+
+    if (!userId) {
+      if (lastIdentified !== null) {
         posthog.reset();
-      } else if (session) {
-        setSession(session);
-        posthog.identify(session.user.id, {
-          email: session.user.email,
-        });
+        lastIdentifiedRef.current = null;
       }
-    });
+      return;
+    }
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [posthog]);
+    if (userId !== lastIdentified) {
+      posthog.identify(userId, { email });
+      lastIdentifiedRef.current = userId;
+    }
+  }, [posthog, isPending, userId, email]);
 
-  return (
-    <SessionContext.Provider value={{ session }}>
-      {children}
-    </SessionContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export function MarketingProviders({

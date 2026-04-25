@@ -1,14 +1,11 @@
-import { User, useSupabaseClient } from "@nawadi/core";
+import { User, useQuery } from "@nawadi/core";
+import { schema as s } from "@nawadi/db";
 import { LOCATION_ID } from "./location.js";
 
 export async function deleteUsers() {
-  const supabase = useSupabaseClient();
-  const users = await supabase.auth.admin.listUsers();
-  const userIds = users.data.users.map((user) => user.id);
-
-  await Promise.all(
-    userIds.map((userId) => supabase.auth.admin.deleteUser(userId)),
-  );
+  const query = useQuery();
+  await query.delete(s.user);
+  await query.delete(s.betterAuthUser);
 }
 
 export async function addUsers() {
