@@ -1,5 +1,16 @@
+import {
+  CalendarIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/24/outline";
+import { InfoCard } from "../../_components/info-card";
+import { KssCompetentieTree } from "../../_components/kss-tree";
+import { QualificationProfile } from "../../_components/qualification-profile";
+
 export const page = {
   title: "PvB-beoordelaar 5 (B5)",
+  order: 305,
+  description: "Externe beoordelaar namens Watersport Academy",
 };
 
 export const metadata = {
@@ -7,5 +18,65 @@ export const metadata = {
   description: page.description,
 };
 
-Een PvB-beoordelaar 5 (B5) heeft als taak om PvB’s van instructeurs 4,
-leercoaches 4 en PvB-beoordelaars 4 af te nemen.
+<QualificationProfile
+  role="beoordelaar"
+  level="B5"
+  title="PvB-beoordelaar 5"
+  subtitle="Externe beoordelaar namens Watersport Academy"
+  description="Een PvB-beoordelaar 5 heeft als taak om namens de Watersport Academy PvB's van Instructeurs 4, Leercoaches 4 en PvB-beoordelaars 4 af te nemen. Deze externe beoordelaar wordt door de Watersport Academy toegewezen aan kandidaten en mag niet actief zijn op dezelfde opleidingslocatie als de kandidaat."
+  minAge={18}
+  prerequisites={[
+    "In het bezit zijn van Leercoach 5 in de desbetreffende discipline",
+  ]}
+  pvbs={[
+    {
+      code: "5.7",
+      title: "Afnemen van PvB's",
+      type: "Portfoliobeoordeling",
+    },
+  ]}
+  permissions={[
+    "Afnemen van PvB's voor Instructeurs 4 namens de Watersport Academy",
+    "Afnemen van PvB's voor Leercoaches 4 namens de Watersport Academy",
+    "Afnemen van PvB's voor PvB-beoordelaars 4 namens de Watersport Academy",
+    "Landelijke kwaliteitsborging van niveau 4 kwalificaties",
+  ]}
+  skillLevel={null}
+/>
+
+<div className="not-prose mt-8 space-y-4">
+  <InfoCard
+    tone="beoordelaar"
+    emphasis
+    icon={<InformationCircleIcon className="size-5" />}
+    title="Centrale opleiding"
+  >
+    <p>Jaarlijks worden de opleidingen voor Instructeur 5, Leercoach 5 en PvB-beoordelaar 5 modulair aangeboden door de Watersport Academy.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="beoordelaar"
+    icon={<ExclamationTriangleIcon className="size-5" />}
+    title="Kwaliteitsborging"
+  >
+    <p>Vanuit de Watersport Academy wordt toezicht gehouden op de kwaliteit van de kaderopleidingen en bijbehorende toetsing. Een afgevaardigde van de Watersport Academy kan onaangekondigd een PvB bijwonen.</p>
+    <p>Mocht het oordeel van de afgevaardigde afwijken van het oordeel van de PvB-beoordelaar, dan beslist de afgevaardigde en vervalt de door de PvB-beoordelaar vastgestelde uitslag.</p>
+  </InfoCard>
+
+  <InfoCard
+    tone="beoordelaar"
+    icon={<CalendarIcon className="size-5" />}
+    title="Her- en bijscholing"
+  >
+    <p>De kwalificatie PvB-beoordelaar 5 is een licentie. Deze blijft geldig zolang je eens in de twee jaar de her- en bijscholingsdag voor niveau 5 volgt en de Watersport Academy de licentie niet heeft ingetrokken.</p>
+    <p>Indien er zwaarwegende redenen zijn waarom de her- en bijscholingsdag niet of slechts ten dele wordt bijgewoond, kan contact worden opgenomen met de medewerkers van de Watersport Academy. In overleg kan naar een passende oplossing worden gezocht.</p>
+  </InfoCard>
+</div>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={5} richting="pvb_beoordelaar" />

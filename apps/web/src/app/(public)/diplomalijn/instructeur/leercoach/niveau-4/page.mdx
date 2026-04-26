@@ -1,5 +1,10 @@
+import { KssCompetentieTree } from "../../_components/kss-tree";
+import { QualificationProfile } from "../../_components/qualification-profile";
+
 export const page = {
   title: "Leercoach 4 (L4)",
+  order: 204,
+  description: "Opleider van instructeurs 1 t/m 3",
 };
 
 export const metadata = {
@@ -7,5 +12,42 @@ export const metadata = {
   description: page.description,
 };
 
-Een Leercoach 4 (L4) is binnen de leslocatie verantwoordelijk voor het
-opleidingstraject en de opleiding van instructeurs 1, 2 en 3.
+<QualificationProfile
+  role="leercoach"
+  level="L4"
+  title="Leercoach 4"
+  subtitle="Opleider van instructeurs 1 t/m 3"
+  description="De Leercoach 4 is op de eigen opleidingslocatie verantwoordelijk voor het opleiden van Instructeurs 1 tot en met 3 en zorgt voor kennisoverdracht en begeleiding in de praktijk en ontwikkeling van de didactische-, leidinggevende- en toetsingsvaardigheden."
+  minAge={18}
+  prerequisites={[
+    "In het bezit zijn van Instructeur 3 in de desbetreffende discipline",
+  ]}
+  pvbs={[
+    {
+      code: "4.4",
+      title: "Bevordering competentieontwikkeling sportkader",
+      type: "Praktijk- en Portfoliobeoordeling",
+    },
+    {
+      code: "4.5",
+      title: "Samenwerken begeleidingsteam en onderhouden contacten",
+      type: "Portfoliobeoordeling",
+    },
+  ]}
+  permissions={[
+    "Opleiden van Instructeurs 1 tot en met 3 op de eigen opleidingslocatie",
+    "Kennisoverdracht en begeleiding in de praktijk",
+    "Ontwikkeling van didactische-, leidinggevende- en toetsingsvaardigheden",
+    "Ondersteuning bij het opbouwen van portfolio's van kandidaten",
+  ]}
+  skillLevel={null}
+  additionalInfo="De Leercoach 4 is verantwoordelijk dat de cursist zijn praktijkopdrachten kan uitvoeren in de voorgeschreven context."
+/>
+
+## Competentieprofiel
+
+De kerntaken, werkprocessen en beoordelingscriteria hieronder komen direct uit
+het officiële KSS-kwalificatieprofiel. Klik een werkproces aan om de
+beoordelingscriteria te bekijken.
+
+<KssCompetentieTree rang={4} richting="leercoach" />
