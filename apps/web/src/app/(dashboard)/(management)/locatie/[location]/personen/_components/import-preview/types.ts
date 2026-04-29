@@ -16,6 +16,9 @@ export type ParsedPersonRow = {
 export type ParseError = {
   rowIndex: number;
   error: string;
+  // Raw cell values from the row, in COLUMN_MAPPING order. Echoed back
+  // to the operator so they can see what they pasted vs. what failed.
+  values: string[];
 };
 
 export type CandidateMatch = {
@@ -70,6 +73,10 @@ export type GroupDecision =
       kind: "different_people";
       // Per-row decisions inside the override panel.
       perRow: Record<number, RowDecision>;
+      // True only after the operator clicks "Bevestig" in override mode.
+      // Auto-seeded defaults and intermediate clicks keep this false so
+      // the group still counts as a blocker.
+      confirmed: boolean;
     };
 
 // Row status taxonomy from the design doc. Drives which row variant

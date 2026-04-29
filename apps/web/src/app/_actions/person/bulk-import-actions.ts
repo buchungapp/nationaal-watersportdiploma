@@ -76,7 +76,7 @@ type PreviewParseResult =
       previewToken: string;
       attempt: 1 | 2 | 3;
       parsedRows: ParsedPersonRow[];
-      parseErrors: { rowIndex: number; error: string }[];
+      parseErrors: { rowIndex: number; error: string; values: string[] }[];
       matches: unknown;
     };
 
@@ -145,7 +145,7 @@ function parseRowsTolerant(
   countries: z.infer<typeof countriesSchema>,
 ): {
   parsedRows: ParsedPersonRow[];
-  parseErrors: { rowIndex: number; error: string }[];
+  parseErrors: { rowIndex: number; error: string; values: string[] }[];
 } {
   if (!csvData || !csvData.rows) {
     throw new Error("Geen data gevonden.");
@@ -179,15 +179,21 @@ function parseRowsTolerant(
   const allowedCountries = new Set(countries.map((c) => c.code));
 
   const parsedRows: ParsedPersonRow[] = [];
-  const parseErrors: { rowIndex: number; error: string }[] = [];
+  const parseErrors: {
+    rowIndex: number;
+    error: string;
+    values: string[];
+  }[] = [];
 
   filteredData.forEach((row, rowIndex) => {
     const sortedRow = indices.map((index) => row[index]);
+    const rawValues = sortedRow.map((v) => v ?? "");
     const parsed = personRowSchema.safeParse(sortedRow);
     if (!parsed.success) {
       parseErrors.push({
         rowIndex,
         error: JSON.stringify(parsed.error.flatten().fieldErrors),
+        values: rawValues,
       });
       return;
     }
@@ -204,6 +210,7 @@ function parseRowsTolerant(
       parseErrors.push({
         rowIndex,
         error: `Ongeldige landcode: ${birthCountry}`,
+        values: rawValues,
       });
       return;
     }

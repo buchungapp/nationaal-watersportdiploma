@@ -34,7 +34,15 @@ export const CrossRowGroupCard = memo(function CrossRowGroupCard({
 }) {
   const ctx = assertPreviewContext(use(BulkImportPreviewContext));
   const groupKey = deriveGroupKey(group.rowIndices);
-  const decision = ctx.state.groupDecisions.get(groupKey);
+  const rawDecision = ctx.state.groupDecisions.get(groupKey);
+  // Only treat the group as resolved when there's a definitive decision —
+  // an un-confirmed different_people draft from the override panel still
+  // needs the operator's Bevestig click.
+  const decision =
+    rawDecision?.kind === "same_person" ||
+    (rawDecision?.kind === "different_people" && rawDecision.confirmed)
+      ? rawDecision
+      : null;
   const [open, setOpen] = useState(false);
 
   // The shared candidate is the highest-scoring matched existing person

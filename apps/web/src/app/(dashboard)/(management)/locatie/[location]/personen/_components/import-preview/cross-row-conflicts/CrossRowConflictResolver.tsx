@@ -65,6 +65,20 @@ export const CrossRowConflictResolver = memo(
       onClose();
     };
 
+    const onConfirmDifferentPeople = () => {
+      // Re-dispatch with confirmed: true. perRow already populated via the
+      // override panel's auto-seed + click handlers.
+      const current = ctx.state.groupDecisions.get(groupKey);
+      const perRow =
+        current?.kind === "different_people" ? current.perRow : {};
+      ctx.actions.setGroupDecision(groupKey, {
+        kind: "different_people",
+        perRow,
+        confirmed: true,
+      });
+      onClose();
+    };
+
     const candidateName = sharedCandidate
       ? [
           sharedCandidate.firstName,
@@ -129,7 +143,11 @@ export const CrossRowConflictResolver = memo(
             <Button color="branding-orange" onClick={onConfirmSamePerson}>
               Bevestig — zelfde persoon
             </Button>
-          ) : null}
+          ) : (
+            <Button color="branding-orange" onClick={onConfirmDifferentPeople}>
+              Bevestig — verschillende profielen
+            </Button>
+          )}
         </DialogActions>
 
         <div className="mt-3 flex items-center justify-between text-xs">
@@ -299,20 +317,31 @@ function DifferentPeopleOverride({
   };
   const profileLetters = groupRows.map((_, i) => String.fromCharCode(65 + i));
 
-  // Initialize defaults the first time this override is opened.
+  // Seed defaults for any row that doesn't yet have a perRow decision —
+  // gives every row a default profile letter so the chips look picked.
+  // Stays confirmed: false so the parent card doesn't flip to "Opgelost"
+  // until the operator clicks Bevestig.
   useEffect(() => {
-    if (groupDecision?.kind === "different_people") return;
-    const seed: Record<number, RowDecision> = {};
+    const next: Record<number, RowDecision> = { ...perRow };
+    let changed = false;
     for (const r of groupRows) {
-      seed[r.rowIndex] = {
-        kind: "create_new",
-        shareNewPersonWithGroup: profileKey(letterFor(r.rowIndex)),
-      };
+      if (!next[r.rowIndex]) {
+        next[r.rowIndex] = {
+          kind: "create_new",
+          shareNewPersonWithGroup: profileKey(letterFor(r.rowIndex)),
+        };
+        changed = true;
+      }
     }
-    ctx.actions.setGroupDecision(groupKey, {
-      kind: "different_people",
-      perRow: seed,
-    });
+    if (changed) {
+      ctx.actions.setGroupDecision(groupKey, {
+        kind: "different_people",
+        perRow: next,
+        confirmed: groupDecision?.kind === "different_people"
+          ? groupDecision.confirmed
+          : false,
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupKey]);
 
@@ -320,13 +349,19 @@ function DifferentPeopleOverride({
     ctx.actions.setGroupDecision(groupKey, {
       kind: "different_people",
       perRow: { ...perRow, [rowIndex]: decision },
+      // Tweaking a row reverts the group to draft state — operator must
+      // click Bevestig again.
+      confirmed: false,
     });
   };
 
-  // Selected profile letter for a row, derived from its decision.
+  // Selected profile letter for a row, derived from its decision. Falls
+  // back to the row's default letter so chips look pre-selected even
+  // before the seed effect runs (first paint).
   const selectedLetter = (rowIndex: number): string | null => {
     const d = perRow[rowIndex];
-    if (d?.kind !== "create_new") return null;
+    if (!d) return letterFor(rowIndex);
+    if (d.kind !== "create_new") return null;
     const key = d.shareNewPersonWithGroup;
     if (!key) return null;
     const prefix = `${groupKey}_profile_`;

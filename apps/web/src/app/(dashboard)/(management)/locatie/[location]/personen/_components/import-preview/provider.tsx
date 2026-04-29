@@ -216,9 +216,13 @@ export function classifyRow(
   if (inGroup) {
     const groupKey = deriveGroupKey(inGroup.rowIndices);
     const groupDecision = groupDecisions.get(groupKey);
-    // Once the operator picks "different people", the row leaves the
-    // group and behaves as an individual row.
-    if (groupDecision?.kind !== "different_people") {
+    // Once the operator picks AND CONFIRMS "different people", the row
+    // leaves the group and behaves as an individual row. While the
+    // override panel is open with un-confirmed drafts, keep rendering
+    // the row inside the group card.
+    const isConfirmedSplit =
+      groupDecision?.kind === "different_people" && groupDecision.confirmed;
+    if (!isConfirmedSplit) {
       return {
         status: "in-cross-row-group",
         groupKey,
@@ -254,7 +258,16 @@ function computeBlockers(state: State): BlockerSummary {
   // or different_people for that group.
   for (const group of preview.matches.crossRowGroups) {
     const key = deriveGroupKey(group.rowIndices);
-    if (!groupDecisions.has(key)) unresolvedCrossRowGroups += 1;
+    const dec = groupDecisions.get(key);
+    if (!dec) {
+      unresolvedCrossRowGroups += 1;
+      continue;
+    }
+    // different_people stays a blocker until the operator clicks Bevestig
+    // in the override panel — auto-seeded drafts shouldn't count as solved.
+    if (dec.kind === "different_people" && !dec.confirmed) {
+      unresolvedCrossRowGroups += 1;
+    }
   }
 
   // Ambiguous matches: rows with ≥2 candidates above threshold and no
