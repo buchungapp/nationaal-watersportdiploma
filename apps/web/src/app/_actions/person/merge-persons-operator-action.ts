@@ -2,7 +2,7 @@
 
 import { useQuery as gebruikQuery, User } from "@nawadi/core";
 import { schema as s } from "@nawadi/db";
-import { and, count, eq, isNull, ne } from "@nawadi/db/drizzle";
+import { and, count, eq, isNotNull, isNull, ne } from "@nawadi/db/drizzle";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
@@ -83,7 +83,15 @@ export const searchOperatorPersonsAction = actionClientWithMeta
 // rather than imported to keep the auth boundary obvious.
 async function getPersonStats(personId: string) {
   const query = gebruikQuery();
-  const [actorR, locationR, certR, logR, roleR, kwalR] = await Promise.all([
+  const [
+    actorR,
+    locationR,
+    curriculumR,
+    issuedCertR,
+    logR,
+    roleR,
+    kwalR,
+  ] = await Promise.all([
     query
       .select({ count: count() })
       .from(s.actor)
@@ -104,6 +112,24 @@ async function getPersonStats(personId: string) {
       .from(s.studentCurriculum)
       .where(eq(s.studentCurriculum.personId, personId))
       .then((r) => r[0]?.count ?? 0),
+    // Real issued certificates (s.certificate.issuedAt IS NOT NULL) joined
+    // through student_curriculum. The earlier `certificateCount` field
+    // counted curriculum starts, which is misleading for the operator
+    // dialog — operators care about diploma's, not in-progress courses.
+    query
+      .select({ count: count() })
+      .from(s.certificate)
+      .innerJoin(
+        s.studentCurriculum,
+        eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
+      )
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, personId),
+          isNotNull(s.certificate.issuedAt),
+        ),
+      )
+      .then((r) => r[0]?.count ?? 0),
     query
       .select({ count: count() })
       .from(s.logbook)
@@ -123,7 +149,10 @@ async function getPersonStats(personId: string) {
   return {
     actorCount: actorR,
     locationCount: locationR,
-    certificateCount: certR,
+    // Curriculum starts ("Cursusinschrijvingen") — kept for sysadmin
+    // surfaces. Operator dialog renders issuedCertificateCount instead.
+    certificateCount: curriculumR,
+    issuedCertificateCount: issuedCertR,
     logbookCount: logR,
     roleCount: roleR,
     kwalificatieCount: kwalR,
