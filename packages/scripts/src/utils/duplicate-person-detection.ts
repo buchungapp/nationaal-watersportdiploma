@@ -66,9 +66,70 @@ type DuplicatePersonRow = {
 export function buildDuplicatePersonQuery(args: {
   threshold: number;
   limit: number;
+  cohortId?: string;
 }): SQL {
+  const cohortCandidateFilter = args.cohortId
+    ? sql`
+        AND (
+          EXISTS (
+            SELECT 1
+            FROM cohort_person_ids cpi
+            WHERE cpi.id = p.id
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM cohort_persons cp
+            WHERE cp.id <> p.id
+              AND cp.user_id IS NOT NULL
+              AND cp.user_id = p.user_id
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM cohort_persons cp
+            WHERE cp.id <> p.id
+              AND cp.date_of_birth IS NOT NULL
+              AND p.date_of_birth IS NOT NULL
+              AND ABS(cp.date_of_birth::date - p.date_of_birth::date) <= 365
+          )
+        )
+      `
+    : sql``;
+  const scopedPairFilter = args.cohortId
+    ? sql`AND (p1.in_scope OR p2.in_scope)`
+    : sql``;
+
   return sql`
-    WITH normalized_persons AS (
+    WITH cohort_person_ids AS (
+      ${
+        args.cohortId
+          ? sql`
+              SELECT DISTINCT a.person_id AS id
+              FROM cohort_allocation ca
+              INNER JOIN actor a ON a.id = ca.actor_id
+              INNER JOIN cohort c ON c.id = ca.cohort_id
+              WHERE ca.cohort_id = ${args.cohortId}
+                AND ca.deleted_at IS NULL
+                AND a.deleted_at IS NULL
+                AND a.person_id IS NOT NULL
+                AND c.deleted_at IS NULL
+            `
+          : sql`SELECT NULL::uuid AS id WHERE FALSE`
+      }
+    ),
+    cohort_persons AS (
+      SELECT
+        p.id,
+        p.user_id,
+        p.first_name,
+        p.last_name,
+        p.last_name_prefix,
+        p.date_of_birth
+      FROM person p
+      INNER JOIN cohort_person_ids cpi ON cpi.id = p.id
+      WHERE p.deleted_at IS NULL
+        AND p.first_name IS NOT NULL
+    ),
+    normalized_persons AS (
       SELECT
         p.id,
         p.handle,
@@ -82,6 +143,11 @@ export function buildDuplicatePersonQuery(args: {
         p.created_at,
         p.deleted_at,
         u.email,
+        EXISTS (
+          SELECT 1
+          FROM cohort_person_ids cpi
+          WHERE cpi.id = p.id
+        ) AS in_scope,
         TRIM(CONCAT(
           COALESCE(p.first_name, ''),
           ' ',
@@ -101,6 +167,7 @@ export function buildDuplicatePersonQuery(args: {
       LEFT JOIN "user" u ON p.user_id = u.auth_user_id
       WHERE p.deleted_at IS NULL
         AND p.first_name IS NOT NULL
+        ${cohortCandidateFilter}
     ),
     same_user_matches AS (
       SELECT
@@ -170,7 +237,9 @@ export function buildDuplicatePersonQuery(args: {
           ELSE 0
         END AS score
       FROM normalized_persons p1
-      JOIN normalized_persons p2 ON p1.user_id = p2.user_id AND p1.id < p2.id
+      JOIN normalized_persons p2 ON p1.user_id = p2.user_id
+        AND p1.id < p2.id
+        ${scopedPairFilter}
       WHERE p1.user_id IS NOT NULL
         AND (
           p1.first_norm = p2.first_norm
@@ -234,6 +303,7 @@ export function buildDuplicatePersonQuery(args: {
         END AS score
       FROM normalized_persons p1
       JOIN normalized_persons p2 ON p1.id < p2.id
+        ${scopedPairFilter}
         AND p1.first_norm <> ''
         AND p1.first_norm = p2.first_norm
         AND (
@@ -273,15 +343,77 @@ export async function findDuplicatePersonPairs(
   args: {
     threshold?: number;
     limit?: number;
+    cohortId?: string;
   } = {},
 ): Promise<DuplicatePersonPair[]> {
   const threshold = args.threshold ?? DEFAULT_ANALYZE_THRESHOLD;
   const limit = args.limit ?? DEFAULT_LIMIT;
   const result = await database.execute(
-    buildDuplicatePersonQuery({ threshold, limit }),
+    buildDuplicatePersonQuery({ threshold, limit, cohortId: args.cohortId }),
   );
 
   return (result.rows as unknown as DuplicatePersonRow[]).map(mapRowToPair);
+}
+
+export async function countCohortPersons(
+  database: Database,
+  cohortId: string,
+): Promise<number> {
+  const result = await database.execute(sql`
+    SELECT COUNT(DISTINCT a.person_id)::int AS count
+    FROM cohort_allocation ca
+    INNER JOIN actor a ON a.id = ca.actor_id
+    INNER JOIN cohort c ON c.id = ca.cohort_id
+    INNER JOIN person p ON p.id = a.person_id
+    WHERE ca.cohort_id = ${cohortId}
+      AND ca.deleted_at IS NULL
+      AND a.deleted_at IS NULL
+      AND a.person_id IS NOT NULL
+      AND c.deleted_at IS NULL
+      AND p.deleted_at IS NULL
+  `);
+
+  const row = result.rows[0] as { count?: number | string } | undefined;
+  return Number(row?.count ?? 0);
+}
+
+export async function findStudentCurriculumConflictPairKeys(
+  database: Database,
+  pairs: DuplicatePersonPair[],
+): Promise<Set<string>> {
+  if (pairs.length === 0) {
+    return new Set();
+  }
+
+  const pairValues = pairs.map(
+    (pair) => sql`(${pair.persons[0].id}::uuid, ${pair.persons[1].id}::uuid)`,
+  );
+
+  const result = await database.execute(sql`
+    WITH pairs(person_id1, person_id2) AS (
+      VALUES ${sql.join(pairValues, sql`, `)}
+    )
+    SELECT person_id1::text, person_id2::text
+    FROM pairs
+    WHERE EXISTS (
+      SELECT 1
+      FROM student_curriculum sc1
+      INNER JOIN student_curriculum sc2
+        ON sc1.curriculum_id = sc2.curriculum_id
+        AND sc1.gear_type_id = sc2.gear_type_id
+      WHERE sc1.person_id = person_id1
+        AND sc2.person_id = person_id2
+    )
+  `);
+
+  return new Set(
+    (
+      result.rows as {
+        person_id1: string;
+        person_id2: string;
+      }[]
+    ).map((row) => buildPersonPairKey(row.person_id1, row.person_id2)),
+  );
 }
 
 export function chooseDefaultMerge(pair: DuplicatePersonPair): {
@@ -365,6 +497,14 @@ export function formatPerson(person: DuplicatePerson): string {
   const primary = person.isPrimary ? "primary" : "not primary";
 
   return `${person.fullName} (${dob}) ${handle} [${email}, ${primary}] ${person.id}`;
+}
+
+export function buildDuplicatePersonPairKey(pair: DuplicatePersonPair): string {
+  return buildPersonPairKey(pair.persons[0].id, pair.persons[1].id);
+}
+
+function buildPersonPairKey(personId1: string, personId2: string): string {
+  return [personId1, personId2].sort().join(":");
 }
 
 function mapRowToPair(row: DuplicatePersonRow): DuplicatePersonPair {

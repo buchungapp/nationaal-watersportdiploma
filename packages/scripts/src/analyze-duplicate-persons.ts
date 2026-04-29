@@ -4,6 +4,7 @@ import "dotenv/config";
 import assert from "node:assert";
 import { sql } from "drizzle-orm";
 import {
+  countCohortPersons,
   DEFAULT_ANALYZE_THRESHOLD,
   DEFAULT_LIMIT,
   findDuplicatePersonPairs,
@@ -14,6 +15,7 @@ type Options = {
   threshold: number;
   limit: number;
   json: boolean;
+  cohortId?: string;
 };
 
 async function main() {
@@ -23,10 +25,22 @@ async function main() {
 
   await withDatabase({ connectionString: pgUri }, async () => {
     const database = useDatabase();
-    const pairs = await findDuplicatePersonPairs(database, options);
+    const cohortPersonCount = options.cohortId
+      ? await countCohortPersons(database, options.cohortId)
+      : null;
+    const pairs =
+      cohortPersonCount === 0
+        ? []
+        : await findDuplicatePersonPairs(database, options);
 
     if (options.json) {
-      console.log(JSON.stringify({ options, pairs }, null, 2));
+      console.log(
+        JSON.stringify(
+          { options, scope: { cohortPersonCount }, pairs },
+          null,
+          2,
+        ),
+      );
       return;
     }
 
@@ -50,6 +64,10 @@ async function main() {
     console.log("=========================");
     console.log(`Threshold: ${options.threshold}`);
     console.log(`Limit: ${options.limit}`);
+    if (options.cohortId) {
+      console.log(`Cohort ID: ${options.cohortId}`);
+      console.log(`Active persons in cohort: ${cohortPersonCount}`);
+    }
     console.log("");
     console.log("Database statistics:");
     console.log(`- Total persons: ${stats.total_persons}`);
@@ -113,6 +131,10 @@ function parseOptions(args: string[]): Options {
       options.limit = parsePositiveInteger(value, "limit");
       continue;
     }
+    if ((name === "--cohort-id" || name === "--cohort") && value) {
+      options.cohortId = parseUuid(value, "cohort-id");
+      continue;
+    }
 
     if (arg === "--help" || arg === "-h") {
       printHelp();
@@ -133,6 +155,17 @@ function parsePositiveInteger(value: string, name: string) {
   return parsed;
 }
 
+function parseUuid(value: string, name: string) {
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value,
+    )
+  ) {
+    throw new Error(`--${name} must be a UUID`);
+  }
+  return value;
+}
+
 function printHelp() {
   console.log(`
 Usage:
@@ -141,6 +174,7 @@ Usage:
 Options:
   --threshold=N  Minimum score to show. Default: ${DEFAULT_ANALYZE_THRESHOLD}
   --limit=N      Maximum number of pairs. Default: ${DEFAULT_LIMIT}
+  --cohort-id=ID Only compare pairs where at least one person is allocated to this cohort.
   --json         Print raw JSON output.
 `);
 }
