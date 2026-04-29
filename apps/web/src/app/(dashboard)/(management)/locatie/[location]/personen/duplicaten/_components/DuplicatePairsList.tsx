@@ -64,13 +64,13 @@ export function DuplicatePairsList({
     <>
       <Text className="!text-sm">
         {pairs.length} {pairs.length === 1 ? "paar profielen" : "paren profielen"}{" "}
-        die op dezelfde persoon kunnen wijzen. Hoogste score eerst.
+        die op dezelfde persoon kunnen wijzen. Sterkste matches eerst.
       </Text>
 
       <Table className="mt-4">
         <TableHead>
           <TableRow>
-            <TableHeader>Score</TableHeader>
+            <TableHeader>Mate van overeenkomst</TableHeader>
             <TableHeader>Primair profiel</TableHeader>
             <TableHeader>Mogelijk duplicaat</TableHeader>
             <TableHeader />
@@ -125,12 +125,8 @@ function ScoreBadge({ score }: { score: number }) {
   const color: Parameters<typeof Badge>[0]["color"] =
     score >= 200 ? "blue" : score >= 150 ? "amber" : "zinc";
   const label =
-    score >= 200 ? "Exact" : score >= 150 ? "Sterke match" : "Mogelijk";
-  return (
-    <Badge color={color}>
-      {label} · {score}
-    </Badge>
-  );
+    score >= 200 ? "Exacte match" : score >= 150 ? "Sterke match" : "Mogelijke match";
+  return <Badge color={color}>{label}</Badge>;
 }
 
 function PersonCell({ person }: { person: Person }) {

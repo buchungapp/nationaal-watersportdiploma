@@ -66,7 +66,7 @@ export const CrossRowGroupCard = memo(function CrossRowGroupCard({
   return (
     <>
       <article
-        aria-label={`Cross-row groep van ${group.rowIndices.length} rijen`}
+        aria-label={`${group.rowIndices.length} rijen die mogelijk dezelfde persoon zijn`}
         className={
           "rounded-lg border bg-white shadow-sm dark:bg-zinc-900 " +
           (decision

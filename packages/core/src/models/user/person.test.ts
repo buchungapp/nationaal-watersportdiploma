@@ -1851,9 +1851,9 @@ test("findCandidateMatchesInLocation surfaces a strong-band match for an exact p
     const cand = row.candidates[0]!;
     assert.equal(cand.personId, existingPersonId);
     assert.ok(cand.score >= 200, `expected score >= 200, got ${cand.score}`);
-    assert.ok(cand.reasons.includes("same first name"));
-    assert.ok(cand.reasons.includes("same last name"));
-    assert.ok(cand.reasons.includes("same birth date"));
+    assert.ok(cand.reasons.includes("zelfde voornaam"));
+    assert.ok(cand.reasons.includes("zelfde achternaam"));
+    assert.ok(cand.reasons.includes("zelfde geboortedatum"));
     assert.equal(cand.isAlreadyInTargetCohort, false);
   }));
 

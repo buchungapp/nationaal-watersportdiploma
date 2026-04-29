@@ -434,8 +434,9 @@ function SubmitForm({
                 <TableCell className="space-x-2">
                   {item.value
                     .filter((val) => !!val)
-                    .map((value) => (
-                      <Code key={value}>{String(value)}</Code>
+                    .map((value, valueIndex) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: example data only, position is the natural identity
+                      <Code key={valueIndex}>{String(value)}</Code>
                     ))}
                 </TableCell>
                 <TableCell>

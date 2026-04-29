@@ -60,26 +60,26 @@ export function PreviewFooter({
               >
                 {blockers.unresolvedCrossRowGroups > 0 ? (
                   <Text className="!text-xs">
-                    · {blockers.unresolvedCrossRowGroups} cross-row{" "}
+                    ·{" "}
                     {blockers.unresolvedCrossRowGroups === 1
-                      ? "groep"
-                      : "groups"}{" "}
-                    op te lossen
+                      ? "1 groep rijen die mogelijk dezelfde persoon zijn"
+                      : `${blockers.unresolvedCrossRowGroups} groepen rijen die mogelijk dezelfde persoon zijn`}
                   </Text>
                 ) : null}
                 {blockers.unresolvedAmbiguousMatches > 0 ? (
                   <Text className="!text-xs">
-                    · {blockers.unresolvedAmbiguousMatches} ambigue{" "}
+                    ·{" "}
                     {blockers.unresolvedAmbiguousMatches === 1
-                      ? "match"
-                      : "matches"}{" "}
-                    — kies één
+                      ? "1 rij met meerdere mogelijke profielen"
+                      : `${blockers.unresolvedAmbiguousMatches} rijen met meerdere mogelijke profielen`}
                   </Text>
                 ) : null}
                 {blockers.parseErrors > 0 ? (
                   <Text className="!text-xs">
-                    · {blockers.parseErrors}{" "}
-                    {blockers.parseErrors === 1 ? "rij" : "rijen"} met fout
+                    ·{" "}
+                    {blockers.parseErrors === 1
+                      ? "1 rij die we niet konden lezen"
+                      : `${blockers.parseErrors} rijen die we niet konden lezen`}
                   </Text>
                 ) : null}
               </div>

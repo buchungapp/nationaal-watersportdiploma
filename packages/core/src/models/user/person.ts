@@ -1034,38 +1034,44 @@ export const findCandidateMatchesInLocation = wrapQuery(
             )} AS score,
             ARRAY_REMOVE(ARRAY[
               CASE WHEN pa.first_norm <> '' AND pa.first_norm = lp.first_norm
-                   THEN 'same first name' END,
+                   THEN 'zelfde voornaam' END,
               CASE WHEN (pa.full_last_norm <> '' AND pa.full_last_norm = lp.full_last_norm)
                        OR (pa.last_norm <> '' AND pa.last_norm = lp.last_norm)
-                   THEN 'same last name' END,
+                   THEN 'zelfde achternaam' END,
               CASE WHEN pa.dob IS NOT NULL AND lp.date_of_birth IS NOT NULL
                        AND pa.dob = lp.date_of_birth
-                   THEN 'same birth date'
+                   THEN 'zelfde geboortedatum'
                    WHEN pa.dob IS NOT NULL AND lp.date_of_birth IS NOT NULL
                        AND ABS(pa.dob - lp.date_of_birth) <= 7
-                   THEN 'close birth date' END,
+                   THEN 'geboortedatum binnen een week' END,
               CASE WHEN pa.birth_city_norm <> ''
                        AND pa.birth_city_norm = lp.birth_city_norm
-                   THEN 'same birth city' END
+                   THEN 'zelfde geboorteplaats' END
             ], NULL) AS reasons,
             ${targetCohortFilter} AS is_already_in_target_cohort
           FROM pasted pa
           INNER JOIN location_persons lp
-            -- Prefilter to keep the cross-product manageable: require either
-            -- same DOB (within a year) OR same first name (or prefix).
+            -- Prefilter MUST mirror the pair-finder's join: name signal AND
+            -- last-name signal AND DOB-within-year. Without all three the
+            -- scoreNameBirthPair formula's last-name "fallback 50" falsely
+            -- gives 100+ to pairs that share only a birth city, and
+            -- non-matches (e.g. Lars Peters appearing under Adam de Vries
+            -- because both live in Amsterdam) leak into the preview.
             ON (
-              (pa.dob IS NOT NULL
-                AND lp.date_of_birth IS NOT NULL
-                AND ABS(pa.dob - lp.date_of_birth) <= 365)
-              OR (
-                pa.first_norm <> ''
-                AND (
-                  pa.first_norm = lp.first_norm
-                  OR (LENGTH(pa.first_norm) >= 3
-                      AND LENGTH(lp.first_norm) >= 3
-                      AND LEFT(pa.first_norm, 3) = LEFT(lp.first_norm, 3))
-                )
+              pa.first_norm <> ''
+              AND (
+                pa.first_norm = lp.first_norm
+                OR (LENGTH(pa.first_norm) >= 3
+                    AND LENGTH(lp.first_norm) >= 3
+                    AND LEFT(pa.first_norm, 3) = LEFT(lp.first_norm, 3))
               )
+              AND (
+                (pa.full_last_norm <> '' AND pa.full_last_norm = lp.full_last_norm)
+                OR (pa.last_norm <> '' AND pa.last_norm = lp.last_norm)
+              )
+              AND pa.dob IS NOT NULL
+              AND lp.date_of_birth IS NOT NULL
+              AND ABS(pa.dob - lp.date_of_birth) <= 365
             )
         ),
         person_aggregates AS (
@@ -1213,6 +1219,14 @@ export const findCandidateMatchesInLocation = wrapQuery(
             OR (LENGTH(p1.first_norm) >= 3
                 AND LENGTH(p2.first_norm) >= 3
                 AND LEFT(p1.first_norm, 3) = LEFT(p2.first_norm, 3))
+          )
+          -- Last-name signal required for the same reason as the
+          -- existing-match prefilter: scoreNameBirthPair's fallback 50
+          -- otherwise gives 100+ to two unrelated people sharing only a
+          -- birth city and a close DOB.
+          AND (
+            (p1.full_last_norm <> '' AND p1.full_last_norm = p2.full_last_norm)
+            OR (p1.last_norm <> '' AND p1.last_norm = p2.last_norm)
           )
           AND p1.dob IS NOT NULL
           AND p2.dob IS NOT NULL

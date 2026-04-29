@@ -271,11 +271,14 @@ function computeBlockers(state: State): BlockerSummary {
 
   const parseErrors = preview.parseErrors.length;
 
+  // Parse errors auto-default to skip — they don't block submit. They
+  // surface in the header summary as informational ("rijen die we niet
+  // konden lezen — worden overgeslagen") so the operator knows what
+  // happens, but the button stays enabled.
   return {
     unresolvedCrossRowGroups,
     unresolvedAmbiguousMatches,
     parseErrors,
-    total:
-      unresolvedCrossRowGroups + unresolvedAmbiguousMatches + parseErrors,
+    total: unresolvedCrossRowGroups + unresolvedAmbiguousMatches,
   };
 }

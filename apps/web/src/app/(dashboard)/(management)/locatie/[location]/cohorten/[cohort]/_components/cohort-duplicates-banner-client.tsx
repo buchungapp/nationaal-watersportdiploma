@@ -105,7 +105,7 @@ export function CohortDuplicatesBannerClient({
           <Table className="mt-4">
             <TableHead>
               <TableRow>
-                <TableHeader>Score</TableHeader>
+                <TableHeader>Mate van overeenkomst</TableHeader>
                 <TableHeader>Primair</TableHeader>
                 <TableHeader>Duplicaat</TableHeader>
                 <TableHeader />
@@ -118,7 +118,7 @@ export function CohortDuplicatesBannerClient({
                     <Badge
                       color={pair.score >= 200 ? "blue" : "amber"}
                     >
-                      {pair.score}
+                      {pair.score >= 200 ? "Exacte match" : "Sterke match"}
                     </Badge>
                   </TableCell>
                   <TableCell>

@@ -27,30 +27,28 @@ export function PreviewHeader() {
       ) : (
         <>
           <Text className="!text-sm">
-            {blockerCount} {blockerCount === 1 ? "vraag" : "vragen"} om
-            aandacht:
+            Even controleren voor je doorgaat:
           </Text>
           <ul className="mt-1 ml-2 list-inside list-disc text-zinc-700 dark:text-zinc-300">
             {blockers.unresolvedCrossRowGroups > 0 ? (
               <li>
-                {blockers.unresolvedCrossRowGroups} cross-row{" "}
-                {blockers.unresolvedCrossRowGroups === 1 ? "groep" : "groups"}{" "}
-                op te lossen
+                {blockers.unresolvedCrossRowGroups === 1
+                  ? "1 groep rijen die mogelijk dezelfde persoon zijn"
+                  : `${blockers.unresolvedCrossRowGroups} groepen rijen die mogelijk dezelfde persoon zijn`}
               </li>
             ) : null}
             {blockers.unresolvedAmbiguousMatches > 0 ? (
               <li>
-                {blockers.unresolvedAmbiguousMatches} ambigue{" "}
                 {blockers.unresolvedAmbiguousMatches === 1
-                  ? "match"
-                  : "matches"}{" "}
-                — kies één
+                  ? "1 rij met meerdere mogelijke profielen — kies welk profiel hierbij hoort"
+                  : `${blockers.unresolvedAmbiguousMatches} rijen met meerdere mogelijke profielen — kies welk profiel erbij hoort`}
               </li>
             ) : null}
             {blockers.parseErrors > 0 ? (
               <li>
-                {blockers.parseErrors}{" "}
-                {blockers.parseErrors === 1 ? "rij" : "rijen"} met fout
+                {blockers.parseErrors === 1
+                  ? "1 rij die we niet konden lezen — wordt overgeslagen"
+                  : `${blockers.parseErrors} rijen die we niet konden lezen — worden overgeslagen`}
               </li>
             ) : null}
           </ul>
