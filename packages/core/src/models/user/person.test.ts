@@ -2720,3 +2720,345 @@ test("commitBulkImport: 3 different-people create_new (no group) → 3 createPer
       "Different-people mode should call createPerson per row",
     );
   }));
+
+test("listDuplicatePairsInLocation surfaces a strong match within the location", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "list-pairs-loc",
+      name: "List Pairs Location",
+    });
+    const { id: adamA } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: adamB } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({ personId: adamA, locationId: location.id });
+    await User.Person.linkToLocation({ personId: adamB, locationId: location.id });
+
+    const pairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      threshold: 100,
+      limit: 50,
+    });
+
+    assert.equal(pairs.length, 1);
+    const pair = pairs[0]!;
+    const ids = [pair.primary.id, pair.duplicate.id].sort();
+    assert.deepEqual(ids, [adamA, adamB].sort());
+    assert.ok(pair.score >= 100);
+  }));
+
+test("listDuplicatePairsInLocation excludes persons whose link is revoked (GDPR)", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "list-pairs-revoked-loc",
+      name: "List Pairs Revoked Location",
+    });
+    const { id: adamA } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: adamB } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({ personId: adamA, locationId: location.id });
+    // adamB linked but revoked
+    await query.insert(s.personLocationLink).values({
+      personId: adamB,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const pairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      threshold: 100,
+    });
+    assert.equal(pairs.length, 0);
+  }));
+
+test("listDuplicatePairsInLocation with cohortId only returns pairs inside that cohort", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "list-pairs-cohort-loc",
+      name: "List Pairs Cohort Location",
+    });
+    const { id: adamA } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: adamB } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({ personId: adamA, locationId: location.id });
+    await User.Person.linkToLocation({ personId: adamB, locationId: location.id });
+
+    const cohortInside = await Cohort.create({
+      handle: "inside-cohort",
+      label: "Inside",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const cohortOutside = await Cohort.create({
+      handle: "outside-cohort",
+      label: "Outside",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    // Allocate both Adams into cohortInside via student actors.
+    for (const personId of [adamA, adamB]) {
+      const actor = await User.Actor.upsert({
+        type: "student",
+        personId,
+        locationId: location.id,
+      });
+      await query.insert(s.cohortAllocation).values({
+        cohortId: cohortInside.id,
+        actorId: actor.id,
+      });
+    }
+
+    const insidePairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      cohortId: cohortInside.id,
+      threshold: 100,
+    });
+    assert.equal(insidePairs.length, 1);
+
+    const outsidePairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      cohortId: cohortOutside.id,
+      threshold: 100,
+    });
+    assert.equal(outsidePairs.length, 0);
+  }));
+
+test("mergePersons writes a personMergeAudit row when auditMetadata provided", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "merge-audit-loc",
+      name: "Merge Audit Location",
+    });
+    const { id: primaryId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Primary",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: duplicateId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Duplicate",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: operatorId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Audit",
+    });
+    await User.Person.linkToLocation({
+      personId: primaryId,
+      locationId: location.id,
+    });
+    await User.Person.linkToLocation({
+      personId: duplicateId,
+      locationId: location.id,
+    });
+
+    await User.Person.mergePersons({
+      personId: duplicateId,
+      targetPersonId: primaryId,
+      auditMetadata: {
+        performedByPersonId: operatorId,
+        locationId: location.id,
+        source: "personen_page",
+        score: 175,
+        reasons: ["same first name", "same birth date"],
+      },
+    });
+
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.targetPersonId, primaryId));
+    assert.equal(audits.length, 1);
+    const audit = audits[0]!;
+    assert.equal(audit.decisionKind, "merge");
+    assert.equal(audit.source, "personen_page");
+    assert.equal(audit.score, 175);
+    assert.deepEqual(audit.reasons, ["same first name", "same birth date"]);
+    assert.equal(audit.sourcePersonId, duplicateId);
+    assert.equal(audit.performedByPersonId, operatorId);
+  }));
+
+test("mergePersons without auditMetadata does NOT write an audit row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "merge-no-audit-loc",
+      name: "Merge No Audit Location",
+    });
+    const { id: primaryId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Primary",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: duplicateId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Duplicate",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: primaryId,
+      locationId: location.id,
+    });
+
+    await User.Person.mergePersons({
+      personId: duplicateId,
+      targetPersonId: primaryId,
+    });
+
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.targetPersonId, primaryId));
+    assert.equal(audits.length, 0);
+  }));
+
+test("isInLocationScope returns true for linked-active, false for revoked or absent", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "scope-loc",
+      name: "Scope Location",
+    });
+    const otherLocation = await Location.create({
+      handle: "scope-other-loc",
+      name: "Scope Other Location",
+    });
+
+    const { id: linkedActiveId } = await User.Person.getOrCreate({
+      firstName: "Linked",
+      lastName: "Active",
+    });
+    await User.Person.linkToLocation({
+      personId: linkedActiveId,
+      locationId: location.id,
+    });
+
+    const { id: revokedId } = await User.Person.getOrCreate({
+      firstName: "Revoked",
+      lastName: "Person",
+    });
+    await query.insert(s.personLocationLink).values({
+      personId: revokedId,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const { id: outsiderId } = await User.Person.getOrCreate({
+      firstName: "Outsider",
+      lastName: "Person",
+    });
+    await User.Person.linkToLocation({
+      personId: outsiderId,
+      locationId: otherLocation.id,
+    });
+
+    assert.equal(
+      await User.Person.isInLocationScope({
+        personId: linkedActiveId,
+        locationId: location.id,
+      }),
+      true,
+    );
+    assert.equal(
+      await User.Person.isInLocationScope({
+        personId: revokedId,
+        locationId: location.id,
+      }),
+      false,
+    );
+    assert.equal(
+      await User.Person.isInLocationScope({
+        personId: outsiderId,
+        locationId: location.id,
+      }),
+      false,
+    );
+  }));
+
+test("searchForAutocompleteInLocation only returns linked-active persons", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const locationA = await Location.create({
+      handle: "search-loc-a",
+      name: "Search Location A",
+    });
+    const locationB = await Location.create({
+      handle: "search-loc-b",
+      name: "Search Location B",
+    });
+
+    const { id: insideId } = await User.Person.getOrCreate({
+      firstName: "Inside",
+      lastName: "Adam",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: insideId,
+      locationId: locationA.id,
+    });
+
+    const { id: outsideId } = await User.Person.getOrCreate({
+      firstName: "Outside",
+      lastName: "Adam",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({
+      personId: outsideId,
+      locationId: locationB.id,
+    });
+
+    const { id: revokedId } = await User.Person.getOrCreate({
+      firstName: "Revoked",
+      lastName: "Adam",
+      dateOfBirth: "2010-05-14",
+    });
+    await query.insert(s.personLocationLink).values({
+      personId: revokedId,
+      locationId: locationA.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const found = await User.Person.searchForAutocompleteInLocation({
+      q: "Adam",
+      locationId: locationA.id,
+    });
+    const ids = found.map((p) => p.id);
+    assert.ok(ids.includes(insideId));
+    assert.ok(!ids.includes(outsideId), "outsider must not appear");
+    assert.ok(!ids.includes(revokedId), "revoked must not appear");
+  }));

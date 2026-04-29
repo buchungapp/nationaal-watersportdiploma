@@ -122,11 +122,9 @@ export const personMergeAudit = pgTable(
       foreignColumns: [location.id],
       name: "person_merge_audit_location_id_fk",
     }),
-    foreignKey({
-      columns: [table.sourcePersonId],
-      foreignColumns: [person.id],
-      name: "person_merge_audit_source_person_id_fk",
-    }),
+    // NOTE: no FK on sourcePersonId. The merge engine deletes the source
+    // person row, so audit forensics must outlive that reference. We
+    // record the UUID for traceability; the live row is gone.
     foreignKey({
       columns: [table.targetPersonId],
       foreignColumns: [person.id],

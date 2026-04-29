@@ -1,11 +1,12 @@
 "use client";
 
 import { useAction } from "next-safe-action/hooks";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 import { useFormInput } from "~/app/_actions/hooks/useFormInput";
 import { createPersonForLocationAction } from "~/app/_actions/person/create-person-action";
+import { DedupHint } from "~/app/_components/persons/dedup-hint";
 import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -124,6 +125,17 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
     ),
   });
 
+  // Local mirror of the operator's typed values, just for the dedup hint.
+  // The form itself stays uncontrolled (defaultValue + name) so existing
+  // submit / validation behavior is preserved verbatim.
+  const [hintInputs, setHintInputs] = useState({
+    firstName: "",
+    lastName: "",
+    lastNamePrefix: "",
+    dateOfBirth: "",
+    email: "",
+  });
+
   return (
     <Dialog open={isOpen} onClose={closeDialog}>
       <DialogTitle>Persoon toevoegen</DialogTitle>
@@ -143,6 +155,12 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     required
                     minLength={1}
                     defaultValue={getInputValue("firstName")}
+                    onChange={(e) =>
+                      setHintInputs((prev) => ({
+                        ...prev,
+                        firstName: e.target.value,
+                      }))
+                    }
                   />
                 </Field>
                 <Field>
@@ -151,6 +169,12 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     name="lastNamePrefix"
                     invalid={!!result.validationErrors?.lastNamePrefix}
                     defaultValue={getInputValue("lastNamePrefix")}
+                    onChange={(e) =>
+                      setHintInputs((prev) => ({
+                        ...prev,
+                        lastNamePrefix: e.target.value,
+                      }))
+                    }
                   />
                 </Field>
                 <Field>
@@ -161,6 +185,12 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     required
                     minLength={1}
                     defaultValue={getInputValue("lastName")}
+                    onChange={(e) =>
+                      setHintInputs((prev) => ({
+                        ...prev,
+                        lastName: e.target.value,
+                      }))
+                    }
                   />
                 </Field>
               </div>
@@ -174,6 +204,12 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     invalid={!!result.validationErrors?.email}
                     required
                     defaultValue={getInputValue("email")}
+                    onChange={(e) =>
+                      setHintInputs((prev) => ({
+                        ...prev,
+                        email: e.target.value,
+                      }))
+                    }
                   />
                 </Field>
                 <Field className="sm:col-span-2">
@@ -184,9 +220,24 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                     invalid={!!result.validationErrors?.dateOfBirth}
                     required
                     defaultValue={getInputValue("dateOfBirth")}
+                    onChange={(e) =>
+                      setHintInputs((prev) => ({
+                        ...prev,
+                        dateOfBirth: e.target.value,
+                      }))
+                    }
                   />
                 </Field>
               </div>
+
+              <DedupHint
+                locationId={locationId}
+                firstName={hintInputs.firstName}
+                lastName={hintInputs.lastName}
+                lastNamePrefix={hintInputs.lastNamePrefix}
+                dateOfBirth={hintInputs.dateOfBirth}
+                email={hintInputs.email}
+              />
 
               <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                 <Field>
