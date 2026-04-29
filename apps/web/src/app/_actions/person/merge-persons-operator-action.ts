@@ -83,69 +83,62 @@ export const searchOperatorPersonsAction = actionClientWithMeta
 // rather than imported to keep the auth boundary obvious.
 async function getPersonStats(personId: string) {
   const query = gebruikQuery();
-  const [
-    actorR,
-    locationR,
-    curriculumR,
-    issuedCertR,
-    logR,
-    roleR,
-    kwalR,
-  ] = await Promise.all([
-    query
-      .select({ count: count() })
-      .from(s.actor)
-      .where(and(eq(s.actor.personId, personId), isNull(s.actor.deletedAt)))
-      .then((r) => r[0]?.count ?? 0),
-    query
-      .select({ count: count() })
-      .from(s.personLocationLink)
-      .where(
-        and(
-          eq(s.personLocationLink.personId, personId),
-          eq(s.personLocationLink.status, "linked"),
-        ),
-      )
-      .then((r) => r[0]?.count ?? 0),
-    query
-      .select({ count: count() })
-      .from(s.studentCurriculum)
-      .where(eq(s.studentCurriculum.personId, personId))
-      .then((r) => r[0]?.count ?? 0),
-    // Real issued certificates (s.certificate.issuedAt IS NOT NULL) joined
-    // through student_curriculum. The earlier `certificateCount` field
-    // counted curriculum starts, which is misleading for the operator
-    // dialog — operators care about diploma's, not in-progress courses.
-    query
-      .select({ count: count() })
-      .from(s.certificate)
-      .innerJoin(
-        s.studentCurriculum,
-        eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
-      )
-      .where(
-        and(
-          eq(s.studentCurriculum.personId, personId),
-          isNotNull(s.certificate.issuedAt),
-        ),
-      )
-      .then((r) => r[0]?.count ?? 0),
-    query
-      .select({ count: count() })
-      .from(s.logbook)
-      .where(eq(s.logbook.personId, personId))
-      .then((r) => r[0]?.count ?? 0),
-    query
-      .select({ count: count() })
-      .from(s.personRole)
-      .where(eq(s.personRole.personId, personId))
-      .then((r) => r[0]?.count ?? 0),
-    query
-      .select({ count: count() })
-      .from(s.persoonKwalificatie)
-      .where(eq(s.persoonKwalificatie.personId, personId))
-      .then((r) => r[0]?.count ?? 0),
-  ]);
+  const [actorR, locationR, curriculumR, issuedCertR, logR, roleR, kwalR] =
+    await Promise.all([
+      query
+        .select({ count: count() })
+        .from(s.actor)
+        .where(and(eq(s.actor.personId, personId), isNull(s.actor.deletedAt)))
+        .then((r) => r[0]?.count ?? 0),
+      query
+        .select({ count: count() })
+        .from(s.personLocationLink)
+        .where(
+          and(
+            eq(s.personLocationLink.personId, personId),
+            eq(s.personLocationLink.status, "linked"),
+          ),
+        )
+        .then((r) => r[0]?.count ?? 0),
+      query
+        .select({ count: count() })
+        .from(s.studentCurriculum)
+        .where(eq(s.studentCurriculum.personId, personId))
+        .then((r) => r[0]?.count ?? 0),
+      // Real issued certificates (s.certificate.issuedAt IS NOT NULL) joined
+      // through student_curriculum. The earlier `certificateCount` field
+      // counted curriculum starts, which is misleading for the operator
+      // dialog — operators care about diploma's, not in-progress courses.
+      query
+        .select({ count: count() })
+        .from(s.certificate)
+        .innerJoin(
+          s.studentCurriculum,
+          eq(s.studentCurriculum.id, s.certificate.studentCurriculumId),
+        )
+        .where(
+          and(
+            eq(s.studentCurriculum.personId, personId),
+            isNotNull(s.certificate.issuedAt),
+          ),
+        )
+        .then((r) => r[0]?.count ?? 0),
+      query
+        .select({ count: count() })
+        .from(s.logbook)
+        .where(eq(s.logbook.personId, personId))
+        .then((r) => r[0]?.count ?? 0),
+      query
+        .select({ count: count() })
+        .from(s.personRole)
+        .where(eq(s.personRole.personId, personId))
+        .then((r) => r[0]?.count ?? 0),
+      query
+        .select({ count: count() })
+        .from(s.persoonKwalificatie)
+        .where(eq(s.persoonKwalificatie.personId, personId))
+        .then((r) => r[0]?.count ?? 0),
+    ]);
   return {
     actorCount: actorR,
     locationCount: locationR,

@@ -132,8 +132,7 @@ export default async function Page(props: {
   }
 
   return (
-    <>
-      <StudentsTable
+    <StudentsTable
       view={instructorAllocation ? parsedSq.overzicht : null}
       students={searchedStudents}
       totalItems={searchedStudents.length}
@@ -162,6 +161,5 @@ export default async function Page(props: {
         )
       }
     />
-    </>
   );
 }

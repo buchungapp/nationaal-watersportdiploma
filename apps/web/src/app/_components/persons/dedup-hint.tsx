@@ -44,7 +44,10 @@ export function DedupHint({
   useEffect(() => {
     setHidden(false);
     if (!debounced.firstName || debounced.firstName.length < 2) return;
-    if (!debounced.dateOfBirth || !/^\d{4}-\d{2}-\d{2}$/.test(debounced.dateOfBirth))
+    if (
+      !debounced.dateOfBirth ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(debounced.dateOfBirth)
+    )
       return;
     hint.execute({
       locationId,
@@ -62,12 +65,15 @@ export function DedupHint({
     debounced.lastNamePrefix,
     debounced.dateOfBirth,
     debounced.email,
+    hint.execute,
+    locationId,
   ]);
 
   const candidates = hint.result.data?.candidates ?? [];
   if (hidden || candidates.length === 0) return null;
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: `<output>` is for form values, this is a non-form status panel — `role="status"` is the correct ARIA mapping for live-region announcements
     <div
       className="mt-2 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/10"
       role="status"
@@ -94,7 +100,9 @@ export function DedupHint({
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-medium">{fullName}</span>
                   <Badge color={c.score >= 200 ? "blue" : "amber"}>
-                    {c.score >= 200 ? "Vrijwel zeker dezelfde" : "Mogelijk dezelfde"}
+                    {c.score >= 200
+                      ? "Vrijwel zeker dezelfde"
+                      : "Mogelijk dezelfde"}
                   </Badge>
                 </div>
                 <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">
@@ -108,8 +116,8 @@ export function DedupHint({
           })}
           <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">
             Bestaat deze persoon al? Open in plaats daarvan het bestaande
-            profiel via de personenlijst. Toch nieuw aanmaken? Vul het
-            formulier af en klik op opslaan.
+            profiel via de personenlijst. Toch nieuw aanmaken? Vul het formulier
+            af en klik op opslaan.
           </Text>
           <button
             type="button"

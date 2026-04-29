@@ -2,10 +2,7 @@
 
 import { use } from "react";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
-import {
-  assertPreviewContext,
-  BulkImportPreviewContext,
-} from "./context";
+import { assertPreviewContext, BulkImportPreviewContext } from "./context";
 
 // Top-of-preview summary the operator scans first. Reads only meta —
 // blocker counts, total row count — so it doesn't re-render when row
@@ -26,9 +23,7 @@ export function PreviewHeader() {
         </Text>
       ) : (
         <>
-          <Text className="!text-sm">
-            Even controleren voor je doorgaat:
-          </Text>
+          <Text className="!text-sm">Even controleren voor je doorgaat:</Text>
           <ul className="mt-1 ml-2 list-inside list-disc text-zinc-700 dark:text-zinc-300">
             {blockers.unresolvedCrossRowGroups > 0 ? (
               <li>

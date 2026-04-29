@@ -21,7 +21,7 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { Strong, Text } from "~/app/(dashboard)/_components/text";
+import { Text } from "~/app/(dashboard)/_components/text";
 
 // Operator-facing merge confirm dialog. Renders a side-by-side
 // per-field diff (GitHub-PR-style) so the operator can see at a glance
@@ -107,7 +107,13 @@ export function OperatorMergeConfirmDialog({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, effectivePrimaryId, effectiveDuplicateId, locationId]);
+  }, [
+    open,
+    effectivePrimaryId,
+    effectiveDuplicateId,
+    locationId,
+    preflight.execute,
+  ]);
 
   const data = preflight.result.data;
   const isLoading = preflight.status === "executing" || !data;
@@ -423,4 +429,3 @@ function DiffRowView({ row }: { row: DiffRow }) {
     </>
   );
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { OperatorMergeConfirmDialog } from "~/app/_components/persons/operator-merge-confirm-dialog";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
@@ -12,7 +13,6 @@ import {
   TableRow,
 } from "~/app/(dashboard)/_components/table";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
-import { OperatorMergeConfirmDialog } from "~/app/_components/persons/operator-merge-confirm-dialog";
 
 type Person = {
   id: string;
@@ -71,8 +71,9 @@ export function DuplicatePairsList({
   return (
     <>
       <Text className="!text-sm">
-        {pairs.length} {pairs.length === 1 ? "paar profielen" : "paren profielen"}{" "}
-        die op dezelfde persoon kunnen wijzen. Sterkste matches eerst.
+        {pairs.length}{" "}
+        {pairs.length === 1 ? "paar profielen" : "paren profielen"} die op
+        dezelfde persoon kunnen wijzen. Sterkste matches eerst.
       </Text>
 
       <Table className="mt-4">
@@ -147,7 +148,9 @@ function PersonCell({ person }: { person: Person }) {
     .join(" ");
   return (
     <div className="space-y-0.5">
-      <div className="font-medium text-zinc-950 dark:text-white">{fullName}</div>
+      <div className="font-medium text-zinc-950 dark:text-white">
+        {fullName}
+      </div>
       <div className="text-xs text-zinc-600 dark:text-zinc-400">
         {person.dateOfBirth ?? "—"}
         {person.email ? ` · ${person.email}` : ""}

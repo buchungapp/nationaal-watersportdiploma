@@ -41,11 +41,7 @@ async function Pairs({
     limit: 200,
   });
   return (
-    <DuplicatePairsList
-      pairs={pairs}
-      locationId={location.id}
-      scope="cohort"
-    />
+    <DuplicatePairsList pairs={pairs} locationId={location.id} scope="cohort" />
   );
 }
 
@@ -56,20 +52,19 @@ export default async function Page(props: {
   // route 404s.
   if (!(await operatorIdentityWorkflowEnabled())) notFound();
 
-  const { location: locationHandle, cohort: cohortHandle } =
-    await props.params;
+  const { location: locationHandle, cohort: cohortHandle } = await props.params;
   return (
     <div>
       <Heading>Mogelijke duplicaten in dit cohort</Heading>
       <Text className="mt-2 max-w-2xl">
-        Verschillende profielen die in dit cohort zitten en mogelijk
-        dezelfde persoon zijn. Beoordeel een paar door op "Beoordeel" te
-        klikken — je ziet daar de details en kunt samenvoegen.
+        Verschillende profielen die in dit cohort zitten en mogelijk dezelfde
+        persoon zijn. Beoordeel een paar door op "Beoordeel" te klikken — je
+        ziet daar de details en kunt samenvoegen.
       </Text>
       <Text className="mt-2 max-w-2xl !text-xs !text-zinc-500">
-        Let op: dit gaat over dubbele <strong>profielen</strong>, niet
-        over een persoon die meerdere curricula in dit cohort doet — dat
-        is normaal en wordt hier niet getoond.
+        Let op: dit gaat over dubbele <strong>profielen</strong>, niet over een
+        persoon die meerdere curricula in dit cohort doet — dat is normaal en
+        wordt hier niet getoond.
       </Text>
       <div className="mt-6">
         <Suspense
@@ -79,10 +74,7 @@ export default async function Page(props: {
             </Text>
           }
         >
-          <Pairs
-            locationHandle={locationHandle}
-            cohortHandle={cohortHandle}
-          />
+          <Pairs locationHandle={locationHandle} cohortHandle={cohortHandle} />
         </Suspense>
       </div>
     </div>

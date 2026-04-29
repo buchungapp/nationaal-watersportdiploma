@@ -2,8 +2,8 @@
 
 import { memo, use } from "react";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { BulkImportPreviewContext, assertPreviewContext } from "../context";
-import { RowFrame, RowPasted, RowDecisionRadios } from "../primitives";
+import { assertPreviewContext, BulkImportPreviewContext } from "../context";
+import { RowDecisionRadios, RowFrame, RowPasted } from "../primitives";
 import type { CandidateMatch, ParsedPersonRow } from "../types";
 
 // Row with ≥2 candidates above the weak threshold. Never preselects —

@@ -71,7 +71,7 @@ function parseArgs(argv: string[]): Args {
 
 // Marker email domain. Easy to spot in the DB and to clean up later.
 const FIXTURE_DOMAIN = "@nwd-bulk-import-fixture.test";
-const FIXTURE_HANDLE_TAG = "bulk-import-fixture";
+const _FIXTURE_HANDLE_TAG = "bulk-import-fixture";
 
 const FIXTURES = {
   adam: {
@@ -465,10 +465,10 @@ function buildTsv(): string {
   return [header.join("\t"), ...rows.map((r) => r.join("\t"))].join("\n");
 }
 
-async function cleanup(locationId: string) {
+async function cleanup(_locationId: string) {
   const { useQuery } = await import("@nawadi/core");
   const { schema: s } = await import("@nawadi/db");
-  const { eq, like } = await import("@nawadi/db/drizzle");
+  const { like } = await import("@nawadi/db/drizzle");
   const query = useQuery();
 
   // Find all persons whose user_id has a fixture-domain email.
@@ -481,7 +481,7 @@ async function cleanup(locationId: string) {
   // Persons we created via getOrCreate without a user (eva, lisaB, sarah)
   // are recognizable by their (firstName, lastName, dateOfBirth) trio.
   // Hardcode the fixture set — these matchers are dev-only.
-  const nonEmailFixtures = [
+  const _nonEmailFixtures = [
     { firstName: "Eva", lastName: "Janssen", dateOfBirth: "2008-03-22" },
     { firstName: "Lisa", lastName: "Bakker", dateOfBirth: "2009-07-16" },
     { firstName: "Sarah", lastName: "Boer", dateOfBirth: "2010-12-30" },
@@ -511,7 +511,9 @@ async function main() {
   const ids = await seedAll(locationId);
 
   console.log("\n→ Adam diploma seeden (best-effort)...");
-  await seedDiplomaForAdam(ids.adam!, locationId);
+  if (ids.adam) {
+    await seedDiplomaForAdam(ids.adam, locationId);
+  }
 
   console.log("\n→ Demo-cohort met duplicaten seeden...");
   const cohort = await seedDuplicateDemoCohort(locationId, ids);
@@ -533,7 +535,9 @@ async function main() {
   if (args.clipboard) {
     try {
       execSync("pbcopy", { input: tsv });
-      console.log("✓ Op klembord geplakt — open de bulk-import dialog en plak.");
+      console.log(
+        "✓ Op klembord geplakt — open de bulk-import dialog en plak.",
+      );
     } catch (err) {
       console.warn(
         "Could not copy to clipboard (pbcopy unavailable):",
@@ -579,19 +583,20 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 assert(pgUri, "PGURI environment variable is required");
-assert(supabaseUrl, "NEXT_PUBLIC_SUPABASE_URL environment variable is required");
+assert(
+  supabaseUrl,
+  "NEXT_PUBLIC_SUPABASE_URL environment variable is required",
+);
 assert(
   supabaseKey,
   "SUPABASE_SERVICE_ROLE_KEY environment variable is required",
 );
 
-withSupabaseClient(
-  { url: supabaseUrl, serviceRoleKey: supabaseKey },
-  () =>
-    withDatabase({ connectionString: pgUri }, () => main())
-      .then(() => process.exit(0))
-      .catch((error) => {
-        console.error("Error:", error);
-        process.exit(1);
-      }),
+withSupabaseClient({ url: supabaseUrl, serviceRoleKey: supabaseKey }, () =>
+  withDatabase({ connectionString: pgUri }, () => main())
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error("Error:", error);
+      process.exit(1);
+    }),
 );

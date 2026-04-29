@@ -93,6 +93,7 @@ export function LayoutTabsClient({
             <span>{tab.name}</span>
             {tab.showDot ? (
               <span
+                role="img"
                 aria-label="Vraagt aandacht"
                 title="Mogelijk dubbele profielen in dit cohort"
                 className="inline-block size-2 rounded-full bg-branding-orange"

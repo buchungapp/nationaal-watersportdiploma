@@ -4,10 +4,7 @@ import dayjs from "dayjs";
 import { use } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
-import {
-  assertPreviewContext,
-  BulkImportPreviewContext,
-} from "./context";
+import { assertPreviewContext, BulkImportPreviewContext } from "./context";
 import type { CandidateMatch, ParsedPersonRow, RowStatus } from "./types";
 
 // Compound primitives consumed by every row variant. Each consumes the
@@ -152,11 +149,7 @@ export function RowCandidate({
   const allMatch = diff ? diff.every((f) => f.match) : false;
 
   const scoreColor: Parameters<typeof Badge>[0]["color"] =
-    candidate.score >= 200
-      ? "blue"
-      : candidate.score >= 150
-        ? "amber"
-        : "zinc";
+    candidate.score >= 200 ? "blue" : candidate.score >= 150 ? "amber" : "zinc";
   // Label honors what the operator can actually see: when every visible
   // field matches we drop the "vrijwel zeker" hedge — the data is
   // identical, no caveat needed. The hedge only kicks in when the
@@ -171,8 +164,11 @@ export function RowCandidate({
         ? "Mogelijk dezelfde"
         : "Lijkt erop";
 
+  // Render <label> when there's an embedded radio control, else a <div>
+  // — keeps a11y happy and avoids a label without an associated control.
+  const Wrapper = showRadio ? "label" : "div";
   return (
-    <label
+    <Wrapper
       className={
         "flex cursor-pointer gap-3 rounded-md border p-3 transition-colors " +
         (selected
@@ -213,7 +209,7 @@ export function RowCandidate({
           {lastDiploma ? ` · Laatste diploma: ${lastDiploma}` : ""}
         </Text>
       </div>
-    </label>
+    </Wrapper>
   );
 }
 
@@ -237,9 +233,12 @@ function computeDiff(
   pasted: ParsedPersonRow,
   cand: CandidateMatch,
 ): DiffField[] {
-  const norm = (s: string | null | undefined) =>
-    (s ?? "").trim().toLowerCase();
-  const pastedFullName = [pasted.firstName, pasted.lastNamePrefix, pasted.lastName]
+  const norm = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
+  const pastedFullName = [
+    pasted.firstName,
+    pasted.lastNamePrefix,
+    pasted.lastName,
+  ]
     .filter(Boolean)
     .join(" ");
   const candFullName = [cand.firstName, cand.lastNamePrefix, cand.lastName]
@@ -264,9 +263,7 @@ function computeDiff(
     // sub-24h gap that truncates to 0 days.
     const pastedYmd = dayjs(pasted.dateOfBirth).format("YYYY-MM-DD");
     const candYmd = dayjs(cand.dateOfBirth).format("YYYY-MM-DD");
-    const diffDays = Math.abs(
-      dayjs(pastedYmd).diff(dayjs(candYmd), "day"),
-    );
+    const diffDays = Math.abs(dayjs(pastedYmd).diff(dayjs(candYmd), "day"));
     if (diffDays === 1) dobNote = "1 dag verschil";
     else if (diffDays <= 7) dobNote = `${diffDays} dagen verschil`;
     else if (diffDays <= 365)

@@ -5,10 +5,7 @@ import { use, useState } from "react";
 import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Text } from "~/app/(dashboard)/_components/text";
-import {
-  assertPreviewContext,
-  BulkImportPreviewContext,
-} from "./context";
+import { assertPreviewContext, BulkImportPreviewContext } from "./context";
 import type { RowDecision } from "./types";
 
 // Sticky footer rendering the Confirm-and-import button + blocker chip.

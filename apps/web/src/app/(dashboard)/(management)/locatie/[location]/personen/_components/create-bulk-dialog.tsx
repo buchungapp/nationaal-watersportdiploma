@@ -1,7 +1,7 @@
 "use client";
 
 import { useAction } from "next-safe-action/hooks";
-import { useRef, useState } from "react";
+import { use, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   commitBulkImportAction,
@@ -44,23 +44,17 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/(dashboard)/_components/table";
-import {
-  Code,
-  Strong,
-  Text,
-  TextLink,
-} from "~/app/(dashboard)/_components/text";
+import { Code, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { Textarea } from "~/app/(dashboard)/_components/textarea";
 import dayjs from "~/lib/dayjs";
 import type { ActorType } from "~/lib/nwd";
 import { invariant } from "~/utils/invariant";
-import { use } from "react";
 import {
   assertPreviewContext,
   BulkImportPreviewContext,
 } from "./import-preview/context";
-import { BulkImportPreviewProvider } from "./import-preview/provider";
 import { PreviewStep } from "./import-preview/PreviewStep";
+import { BulkImportPreviewProvider } from "./import-preview/provider";
 import type {
   PreviewMatches,
   PreviewModel,
@@ -125,10 +119,11 @@ export default function Wrapper(props: Props) {
   );
 }
 
-type ImportRoles = ("student" | "instructor" | "location_admin")[] & [
-  "student" | "instructor" | "location_admin",
-  ...("student" | "instructor" | "location_admin")[],
-];
+type ImportRoles = ("student" | "instructor" | "location_admin")[] &
+  [
+    "student" | "instructor" | "location_admin",
+    ...("student" | "instructor" | "location_admin")[],
+  ];
 
 function CreateDialog({
   locationId,
@@ -357,8 +352,16 @@ function SubmitForm({
         return;
       }
       const r = result as
-        | { kind: "committed"; createdPersonIds: string[]; linkedPersonIds: string[] }
-        | { kind: "preview_invalidated"; attempt: 2 | 3; updatedMatches: PreviewMatches }
+        | {
+            kind: "committed";
+            createdPersonIds: string[];
+            linkedPersonIds: string[];
+          }
+        | {
+            kind: "preview_invalidated";
+            attempt: 2 | 3;
+            updatedMatches: PreviewMatches;
+          }
         | { kind: "preview_invalidated_max"; message: string };
 
       if (r.kind === "committed") {
@@ -395,7 +398,9 @@ function SubmitForm({
       const validationMsg = error.validationErrors
         ? JSON.stringify(error.validationErrors)
         : undefined;
-      setErrorMessage(serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE);
+      setErrorMessage(
+        serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE,
+      );
     },
   });
 

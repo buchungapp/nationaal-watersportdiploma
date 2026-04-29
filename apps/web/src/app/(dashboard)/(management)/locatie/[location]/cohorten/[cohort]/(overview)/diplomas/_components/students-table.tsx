@@ -105,9 +105,7 @@ const columns = [
       // operator running end-of-cohort issuance investigates rather
       // than leaving the student without their expected new diploma.
       const moduleStatus = row.original.studentCurriculum?.moduleStatus ?? [];
-      const hasProgress = moduleStatus.some(
-        (m) => m.completedCompetencies > 0,
-      );
+      const hasProgress = moduleStatus.some((m) => m.completedCompetencies > 0);
       const isBlocked =
         moduleStatus.length > 0 &&
         hasProgress &&
@@ -197,11 +195,10 @@ const columns = [
     (row) => {
       if (!row.studentCurriculum) return undefined;
 
-      const electiveModulesIssuable =
-        row.studentCurriculum.moduleStatus.filter(
-          ({ module: { type }, newlyIssuable }) =>
-            type === "optional" && newlyIssuable,
-        ).length;
+      const electiveModulesIssuable = row.studentCurriculum.moduleStatus.filter(
+        ({ module: { type }, newlyIssuable }) =>
+          type === "optional" && newlyIssuable,
+      ).length;
 
       return electiveModulesIssuable;
     },

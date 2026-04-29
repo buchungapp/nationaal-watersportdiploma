@@ -74,8 +74,7 @@ export const ParseErrorRow = memo(function ParseErrorRow({
     <RowFrame rowIndex={parseError.rowIndex} status="parse-error">
       <div className="space-y-3">
         <Text className="!text-sm">
-          <Strong>Wordt overgeslagen.</Strong> Deze rij konden we niet
-          lezen
+          <Strong>Wordt overgeslagen.</Strong> Deze rij konden we niet lezen
           {fields.length > 0 ? (
             <>
               {" — "}probleem in:{" "}
@@ -122,10 +121,9 @@ export const ParseErrorRow = memo(function ParseErrorRow({
           </dl>
         ) : null}
         <Text className="!text-xs !text-zinc-500">
-          Wil je deze persoon toch toevoegen? Sluit de dialoog, corrigeer
-          de rij in je bron (Excel/Google Sheets) en plak opnieuw. De
-          andere rijen kunnen gewoon doorgaan — deze rij blokkeert de
-          import niet.
+          Wil je deze persoon toch toevoegen? Sluit de dialoog, corrigeer de rij
+          in je bron (Excel/Google Sheets) en plak opnieuw. De andere rijen
+          kunnen gewoon doorgaan — deze rij blokkeert de import niet.
         </Text>
       </div>
     </RowFrame>

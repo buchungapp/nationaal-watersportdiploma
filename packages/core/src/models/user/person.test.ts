@@ -1718,7 +1718,7 @@ test("user.person.linkToLocation creates a fresh active link", () =>
         ),
       );
     assert.equal(links.length, 1);
-    assert.equal(links[0]!.status, "linked");
+    assert.equal(links[0]?.status, "linked");
   }));
 
 test("user.person.linkToLocation is idempotent on already-linked", () =>
@@ -1845,9 +1845,11 @@ test("findCandidateMatchesInLocation surfaces a strong-band match for an exact p
     });
 
     assert.equal(result.matchesByRow.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
     const row = result.matchesByRow[0]!;
     assert.equal(row.rowIndex, 0);
     assert.equal(row.candidates.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
     const cand = row.candidates[0]!;
     assert.equal(cand.personId, existingPersonId);
     assert.ok(cand.score >= 200, `expected score >= 200, got ${cand.score}`);
@@ -1974,8 +1976,8 @@ test("findCandidateMatchesInLocation forms a cross-row group when 2 rows resolve
     });
 
     assert.equal(result.crossRowGroups.length, 1);
-    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [3, 17]);
-    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, [
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [3, 17]);
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, [
       existingPersonId,
     ]);
   }));
@@ -2011,7 +2013,10 @@ test("findCandidateMatchesInLocation forms a 3-way cross-row group", () =>
     });
 
     assert.equal(result.crossRowGroups.length, 1);
-    assert.deepEqual(result.crossRowGroups[0]!.rowIndices.sort((a, b) => a - b), [3, 17, 22]);
+    assert.deepEqual(
+      result.crossRowGroups[0]?.rowIndices.sort((a, b) => a - b),
+      [3, 17, 22],
+    );
   }));
 
 test("previewBulkImport persists a snapshot row and returns the model", () =>
@@ -2062,10 +2067,10 @@ test("previewBulkImport persists a snapshot row and returns the model", () =>
       .from(s.bulkImportPreview)
       .where(eq(s.bulkImportPreview.token, preview.previewToken));
     assert.equal(stored.length, 1);
-    assert.equal(stored[0]!.status, "active");
-    assert.equal(stored[0]!.attempt, 1);
-    assert.equal(stored[0]!.locationId, location.id);
-    assert.equal(stored[0]!.createdByPersonId, operatorPersonId);
+    assert.equal(stored[0]?.status, "active");
+    assert.equal(stored[0]?.attempt, 1);
+    assert.equal(stored[0]?.locationId, location.id);
+    assert.equal(stored[0]?.createdByPersonId, operatorPersonId);
   }));
 
 test("commitBulkImport applies use_existing decision and writes audit row", () =>
@@ -2127,19 +2132,23 @@ test("commitBulkImport applies use_existing decision and writes audit row", () =
     const audits = await query
       .select()
       .from(s.personMergeAudit)
-      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
     assert.equal(audits.length, 1);
-    assert.equal(audits[0]!.decisionKind, "use_existing");
-    assert.equal(audits[0]!.targetPersonId, existingPersonId);
-    assert.equal(audits[0]!.source, "bulk_import_preview");
-    assert.deepEqual(audits[0]!.presentedCandidatePersonIds, [existingPersonId]);
+    assert.equal(audits[0]?.decisionKind, "use_existing");
+    assert.equal(audits[0]?.targetPersonId, existingPersonId);
+    assert.equal(audits[0]?.source, "bulk_import_preview");
+    assert.deepEqual(audits[0]?.presentedCandidatePersonIds, [
+      existingPersonId,
+    ]);
 
     // Preview row marked committed
     const previewAfter = await query
       .select()
       .from(s.bulkImportPreview)
       .where(eq(s.bulkImportPreview.token, preview.previewToken));
-    assert.equal(previewAfter[0]!.status, "committed");
+    assert.equal(previewAfter[0]?.status, "committed");
 
     // Actor created for student role
     const actors = await query
@@ -2217,7 +2226,9 @@ test("commitBulkImport rejects use_existing for personId outside GDPR scope", ()
     const audits = await query
       .select()
       .from(s.personMergeAudit)
-      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
     assert.equal(audits.length, 0);
   }));
 
@@ -2309,17 +2320,15 @@ test("cleanupExpiredBulkImportPreviews deletes expired active rows", () =>
     });
 
     // Manually backdate one row.
-    await query
-      .insert(s.bulkImportPreview)
-      .values({
-        locationId: location.id,
-        createdByPersonId: operatorPersonId,
-        detectionSnapshot: {},
-        rowsParsed: { candidates: [], roles: ["student"] },
-        attempt: 1,
-        status: "active",
-        expiresAt: dayjs().subtract(2, "hour").toISOString(),
-      });
+    await query.insert(s.bulkImportPreview).values({
+      locationId: location.id,
+      createdByPersonId: operatorPersonId,
+      detectionSnapshot: {},
+      rowsParsed: { candidates: [], roles: ["student"] },
+      attempt: 1,
+      status: "active",
+      expiresAt: dayjs().subtract(2, "hour").toISOString(),
+    });
 
     const result = await User.Person.cleanupExpiredBulkImportPreviews({});
     assert.equal(result.activeExpired, 1);
@@ -2360,10 +2369,10 @@ test("findCandidateMatchesInLocation detects paste-vs-paste groups even with NO 
 
     // But the cross-row group fires from paste-vs-paste similarity alone.
     assert.equal(result.crossRowGroups.length, 1);
-    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [3, 17, 22]);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [3, 17, 22]);
     // Empty when there's no existing match — caller knows to default to
     // "create one new person, link all three rows to it."
-    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, []);
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, []);
   }));
 
 test("findCandidateMatchesInLocation merges paste-pair edges with existing-match edges", () =>
@@ -2425,10 +2434,10 @@ test("findCandidateMatchesInLocation merges paste-pair edges with existing-match
     });
 
     assert.equal(result.crossRowGroups.length, 1);
-    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [3, 17, 22]);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [3, 17, 22]);
     // Existing Adam still shows up in the shared set because rows 3, 17,
     // and 22 all strong-match him.
-    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, [
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, [
       existingAdamId,
     ]);
   }));
@@ -2480,8 +2489,8 @@ test("findCandidateMatchesInLocation: 2 paste rows similar to each other but not
     assert.equal(result.matchesByRow.length, 0);
     // But the paste-vs-paste edge forms a group.
     assert.equal(result.crossRowGroups.length, 1);
-    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [0, 1]);
-    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, []);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [0, 1]);
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, []);
   }));
 
 test("commitBulkImport: 3 rows targeting same existing person → 3 cohort allocations sharing one actor, 3 audit rows", () =>
@@ -2563,7 +2572,7 @@ test("commitBulkImport: 3 rows targeting same existing person → 3 cohort alloc
     assert.equal(
       allocations.length,
       3,
-      "Expected 3 cohort_allocations, got " + allocations.length,
+      `Expected 3 cohort_allocations, got ${allocations.length}`,
     );
     // All point to the same actor.
     const actorIds = new Set(allocations.map((a) => a.actor.id));
@@ -2577,7 +2586,9 @@ test("commitBulkImport: 3 rows targeting same existing person → 3 cohort alloc
     const audits = await query
       .select()
       .from(s.personMergeAudit)
-      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
     assert.equal(audits.length, 3);
     for (const audit of audits) {
       assert.equal(audit.decisionKind, "use_existing");
@@ -2617,16 +2628,14 @@ test("commitBulkImport: cross-row create_new group with shareNewPersonWithGroup 
     // Stub createPerson — track invocations.
     let createPersonCalls = 0;
     const fakePersonId = "00000000-0000-0000-0000-0000000000aa";
-    await query
-      .insert(s.person)
-      .values({
-        id: fakePersonId,
-        handle: "stub-adam",
-        firstName: "Adam",
-        lastName: "Vries",
-        lastNamePrefix: "de",
-        dateOfBirth: "2010-05-12",
-      });
+    await query.insert(s.person).values({
+      id: fakePersonId,
+      handle: "stub-adam",
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
 
     const result = await User.Person.commitBulkImport({
       previewToken: preview.previewToken,
@@ -2655,7 +2664,9 @@ test("commitBulkImport: cross-row create_new group with shareNewPersonWithGroup 
     const audits = await query
       .select()
       .from(s.personMergeAudit)
-      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
     assert.equal(audits.length, 3);
     for (const audit of audits) {
       assert.equal(audit.decisionKind, "create_new");
@@ -2748,8 +2759,14 @@ test("listDuplicatePairsInLocation surfaces a strong match within the location",
       lastNamePrefix: "de",
       dateOfBirth: "2010-05-13",
     });
-    await User.Person.linkToLocation({ personId: adamA, locationId: location.id });
-    await User.Person.linkToLocation({ personId: adamB, locationId: location.id });
+    await User.Person.linkToLocation({
+      personId: adamA,
+      locationId: location.id,
+    });
+    await User.Person.linkToLocation({
+      personId: adamB,
+      locationId: location.id,
+    });
 
     const pairs = await User.Person.listDuplicatePairsInLocation({
       locationId: location.id,
@@ -2758,6 +2775,7 @@ test("listDuplicatePairsInLocation surfaces a strong match within the location",
     });
 
     assert.equal(pairs.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
     const pair = pairs[0]!;
     const ids = [pair.primary.id, pair.duplicate.id].sort();
     assert.deepEqual(ids, [adamA, adamB].sort());
@@ -2783,7 +2801,10 @@ test("listDuplicatePairsInLocation excludes persons whose link is revoked (GDPR)
       lastNamePrefix: "de",
       dateOfBirth: "2010-05-13",
     });
-    await User.Person.linkToLocation({ personId: adamA, locationId: location.id });
+    await User.Person.linkToLocation({
+      personId: adamA,
+      locationId: location.id,
+    });
     // adamB linked but revoked
     await query.insert(s.personLocationLink).values({
       personId: adamB,
@@ -2818,8 +2839,14 @@ test("listDuplicatePairsInLocation with cohortId only returns pairs inside that 
       lastNamePrefix: "de",
       dateOfBirth: "2010-05-13",
     });
-    await User.Person.linkToLocation({ personId: adamA, locationId: location.id });
-    await User.Person.linkToLocation({ personId: adamB, locationId: location.id });
+    await User.Person.linkToLocation({
+      personId: adamA,
+      locationId: location.id,
+    });
+    await User.Person.linkToLocation({
+      personId: adamB,
+      locationId: location.id,
+    });
 
     const cohortInside = await Cohort.create({
       handle: "inside-cohort",
@@ -2911,6 +2938,7 @@ test("mergePersons writes a personMergeAudit row when auditMetadata provided", (
       .from(s.personMergeAudit)
       .where(eq(s.personMergeAudit.targetPersonId, primaryId));
     assert.equal(audits.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
     const audit = audits[0]!;
     assert.equal(audit.decisionKind, "merge");
     assert.equal(audit.source, "personen_page");
@@ -3308,9 +3336,7 @@ test("commitBulkImport: cross-row same_person → N allocations, each with that 
       3,
       `Expected 3 cohort_allocations, got ${allocations.length}`,
     );
-    const tagSets = allocations
-      .map((a) => [...a.tags].sort().join(","))
-      .sort();
+    const tagSets = allocations.map((a) => [...a.tags].sort().join(",")).sort();
     assert.deepStrictEqual(
       tagSets,
       ["dinsdag", "optimist", "zondag-recital"],

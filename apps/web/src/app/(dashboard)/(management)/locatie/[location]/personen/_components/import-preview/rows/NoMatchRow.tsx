@@ -19,8 +19,8 @@ export const NoMatchRow = memo(function NoMatchRow({
       <div className="space-y-2">
         <RowPasted row={row} />
         <Text className="!text-xs !text-zinc-500">
-          Geen overeenkomende persoon gevonden in jouw locatie. Wordt
-          aangemaakt als nieuw profiel.
+          Geen overeenkomende persoon gevonden in jouw locatie. Wordt aangemaakt
+          als nieuw profiel.
         </Text>
       </div>
     </RowFrame>

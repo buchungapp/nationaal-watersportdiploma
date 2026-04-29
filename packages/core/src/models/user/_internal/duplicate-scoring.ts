@@ -50,8 +50,7 @@ export type NormalizedPersonColumns = {
 // Pure, side-effect-free SQL expressions. Reused as both the score-CASE
 // guards and the match-reason flags returned to the UI.
 
-export const sameFirstName = (a: SQL, b: SQL) =>
-  sql<boolean>`${a} = ${b}`;
+export const sameFirstName = (a: SQL, b: SQL) => sql<boolean>`${a} = ${b}`;
 
 export const similarFirstNamePrefix = (a: SQL, b: SQL) =>
   sql<boolean>`LENGTH(${a}) >= 3 AND LENGTH(${b}) >= 3 AND LEFT(${a}, 3) = LEFT(${b}, 3)`;

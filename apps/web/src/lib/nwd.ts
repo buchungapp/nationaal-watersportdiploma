@@ -4689,7 +4689,6 @@ export const createBulkPvbs = async ({
   });
 };
 
-
 export async function previewBulkImport({
   locationId,
   roles,
@@ -4855,17 +4854,15 @@ function findCandidateForCreate(
       birthCountry: string;
     }
   >,
-):
-  | {
-      email: string;
-      firstName: string;
-      lastNamePrefix: string | null;
-      lastName: string;
-      dateOfBirth: string;
-      birthCity: string;
-      birthCountry: string;
-    }
-  | null {
+): {
+  email: string;
+  firstName: string;
+  lastNamePrefix: string | null;
+  lastName: string;
+  dateOfBirth: string;
+  birthCity: string;
+  birthCountry: string;
+} | null {
   const match = Object.values(byRowIndex).find(
     (row) =>
       row.firstName === input.firstName &&

@@ -155,6 +155,21 @@ words:
   - alnum
   - DSLT
   - repointing
+  - exfiltration
+  - recognise
+  - placeofbirth
+  - countryofbirth
+  - syns
+  - gstack
+  - GSTACK
+  - cand
+  - trgm
+  - devex
+  - evals
+  - devries
+  - adamovic
+  - scur
+  - Vires
 ignoreWords:
   - TERMS
   - transform

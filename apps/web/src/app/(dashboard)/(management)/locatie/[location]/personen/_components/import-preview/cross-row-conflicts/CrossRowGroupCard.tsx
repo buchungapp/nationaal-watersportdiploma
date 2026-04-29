@@ -1,8 +1,11 @@
 "use client";
 
-import { CheckCircleIcon, ExclamationTriangleIcon } from "@heroicons/react/20/solid";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/20/solid";
 import dayjs from "dayjs";
-import { memo, useState, use } from "react";
+import { memo, use, useState } from "react";
 import { Badge } from "~/app/(dashboard)/_components/badge";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
@@ -11,11 +14,7 @@ import {
   BulkImportPreviewContext,
   deriveGroupKey,
 } from "../context";
-import type {
-  CandidateMatch,
-  CrossRowGroup,
-  ParsedPersonRow,
-} from "../types";
+import type { CandidateMatch, CrossRowGroup, ParsedPersonRow } from "../types";
 import { CrossRowConflictResolver } from "./CrossRowConflictResolver";
 
 // Card shown in the preview list for a cross-row group. Renders ONCE for

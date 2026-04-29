@@ -216,11 +216,6 @@ type ParsedCandidate = {
   email: string | null;
 };
 
-type ParseError = {
-  rowIndex: number;
-  error: string;
-};
-
 type ImportRoles = ("student" | "instructor" | "location_admin")[];
 
 type DetectionSnapshotEntry = {
@@ -228,9 +223,12 @@ type DetectionSnapshotEntry = {
   topScore: number;
 };
 
-const buildDetectionSnapshot = (
-  matches: { matchesByRow: { rowIndex: number; candidates: { personId: string; score: number }[] }[] },
-): Record<string, DetectionSnapshotEntry> => {
+const buildDetectionSnapshot = (matches: {
+  matchesByRow: {
+    rowIndex: number;
+    candidates: { personId: string; score: number }[];
+  }[];
+}): Record<string, DetectionSnapshotEntry> => {
   const snap: Record<string, DetectionSnapshotEntry> = {};
   for (const row of matches.matchesByRow) {
     const sortedIds = row.candidates
@@ -464,7 +462,10 @@ export const commitBulkImport = wrapCommand(
       // but we reverify in case the link was revoked between preview and
       // commit, and as defense-in-depth against crafted payloads.
       const useExistingPersonIds = Object.values(input.decisions)
-        .filter((d): d is { kind: "use_existing"; personId: string } => d.kind === "use_existing")
+        .filter(
+          (d): d is { kind: "use_existing"; personId: string } =>
+            d.kind === "use_existing",
+        )
         .map((d) => d.personId);
 
       if (useExistingPersonIds.length > 0) {
@@ -479,7 +480,9 @@ export const commitBulkImport = wrapCommand(
             ),
           );
         const allowedSet = new Set(allowed.map((r) => r.personId));
-        const invalid = useExistingPersonIds.filter((id) => !allowedSet.has(id));
+        const invalid = useExistingPersonIds.filter(
+          (id) => !allowedSet.has(id),
+        );
         if (invalid.length > 0) {
           throw new Error(
             `GDPR-grenscontrole afgewezen voor persoon ID(s): ${invalid.join(", ")}`,
@@ -520,8 +523,7 @@ export const commitBulkImport = wrapCommand(
             .where(eq(s.bulkImportPreview.token, previewRow.token));
           return {
             kind: "preview_invalidated_max" as const,
-            message:
-              "Roster veranderde te vaak — plak opnieuw",
+            message: "Roster veranderde te vaak — plak opnieuw",
           };
         }
         await query
@@ -550,256 +552,259 @@ export const commitBulkImport = wrapCommand(
       // duplicate-link races at the DB level.
       const result = await withTransaction(
         async () => {
-        const tx = useQuery();
-        const createdPersonIds: string[] = [];
-        const linkedPersonIds: string[] = [];
+          const tx = useQuery();
+          const createdPersonIds: string[] = [];
+          const linkedPersonIds: string[] = [];
 
-        // ── Pre-pass: assign personIds for every actionable row ──────
-        //
-        // Three sources:
-        //   1. use_existing → personId is on the decision
-        //   2. create_new with shareNewPersonWithGroup set → call
-        //      createPerson ONCE per group, assign the result to every
-        //      row in the group
-        //   3. create_new without shareNewPersonWithGroup → call
-        //      createPerson per row (different-people / ungrouped case)
+          // ── Pre-pass: assign personIds for every actionable row ──────
+          //
+          // Three sources:
+          //   1. use_existing → personId is on the decision
+          //   2. create_new with shareNewPersonWithGroup set → call
+          //      createPerson ONCE per group, assign the result to every
+          //      row in the group
+          //   3. create_new without shareNewPersonWithGroup → call
+          //      createPerson per row (different-people / ungrouped case)
 
-        const personIdByRow = new Map<number, string>();
-        const createdGroupPersonIds = new Map<string, string>();
+          const personIdByRow = new Map<number, string>();
+          const createdGroupPersonIds = new Map<string, string>();
 
-        // First, handle shared-new-person groups.
-        const rowsByGroup = new Map<string, number[]>();
-        for (const candidate of candidates) {
-          const decision = input.decisions[candidate.rowIndex.toString()];
-          if (
-            decision?.kind === "create_new" &&
-            decision.shareNewPersonWithGroup
-          ) {
-            const key = decision.shareNewPersonWithGroup;
-            if (!rowsByGroup.has(key)) rowsByGroup.set(key, []);
-            // biome-ignore lint/style/noNonNullAssertion: Map.has guard above
-            rowsByGroup.get(key)!.push(candidate.rowIndex);
+          // First, handle shared-new-person groups.
+          const rowsByGroup = new Map<string, number[]>();
+          for (const candidate of candidates) {
+            const decision = input.decisions[candidate.rowIndex.toString()];
+            if (
+              decision?.kind === "create_new" &&
+              decision.shareNewPersonWithGroup
+            ) {
+              const key = decision.shareNewPersonWithGroup;
+              if (!rowsByGroup.has(key)) rowsByGroup.set(key, []);
+              // biome-ignore lint/style/noNonNullAssertion: Map.has guard above
+              rowsByGroup.get(key)!.push(candidate.rowIndex);
+            }
           }
-        }
 
-        for (const [groupKey, rowIndices] of rowsByGroup.entries()) {
-          if (!input.createPerson) {
-            throw new Error(
-              "createPerson factory not provided — caller must supply it for create_new decisions",
-            );
-          }
-          // Use the first row in the group as the representative person input.
-          // The cross-row group means all rows are "the same person", so
-          // any row's pasted data is acceptable; first wins for determinism.
-          const representativeRow = candidates.find(
-            (c) => c.rowIndex === rowIndices[0],
-          );
-          if (!representativeRow) {
-            throw new Error(
-              `Cross-row group ${groupKey} references row ${rowIndices[0]} which is missing from the preview`,
-            );
-          }
-          const created = await input.createPerson({
-            firstName: representativeRow.firstName,
-            lastName: representativeRow.lastName,
-            lastNamePrefix: representativeRow.lastNamePrefix,
-            dateOfBirth: representativeRow.dateOfBirth,
-            birthCity: representativeRow.birthCity,
-            birthCountry: representativeRow.birthCountry,
-            email: representativeRow.email,
-          });
-          createdGroupPersonIds.set(groupKey, created.personId);
-          createdPersonIds.push(created.personId);
-          for (const rowIndex of rowIndices) {
-            personIdByRow.set(rowIndex, created.personId);
-          }
-        }
-
-        // Then, ungrouped create_new + use_existing assignments.
-        for (const candidate of candidates) {
-          const rowIndex = candidate.rowIndex;
-          if (personIdByRow.has(rowIndex)) continue;
-          const decision = input.decisions[rowIndex.toString()];
-          if (!decision || decision.kind === "skip") continue;
-          if (decision.kind === "use_existing") {
-            personIdByRow.set(rowIndex, decision.personId);
-          } else if (decision.kind === "create_new") {
-            // No group → per-row createPerson (operator declared "different
-            // people" or this row is genuinely independent).
+          for (const [groupKey, rowIndices] of rowsByGroup.entries()) {
             if (!input.createPerson) {
               throw new Error(
                 "createPerson factory not provided — caller must supply it for create_new decisions",
               );
             }
-            const created = await input.createPerson({
-              firstName: candidate.firstName,
-              lastName: candidate.lastName,
-              lastNamePrefix: candidate.lastNamePrefix,
-              dateOfBirth: candidate.dateOfBirth,
-              birthCity: candidate.birthCity,
-              birthCountry: candidate.birthCountry,
-              email: candidate.email,
-            });
-            createdPersonIds.push(created.personId);
-            personIdByRow.set(rowIndex, created.personId);
-          }
-        }
-
-        // ── Main pass: link/actor/allocate per UNIQUE personId, audit per row ──
-        //
-        // Operations are deduplicated by personId so that 3 rows targeting
-        // the same person produce 1 link + 1 actor per role + 1 cohort
-        // allocation. Audit rows are still written per ORIGINAL pasted row
-        // so the forensics trail captures every operator decision.
-
-        const processedPersonIds = new Set<string>();
-        // Cache resolved student-actor id per personId so we don't repeat
-        // the lookup for every paste row that targets the same person.
-        const studentActorIdByPersonId = new Map<string, string>();
-
-        for (const candidate of candidates) {
-          const rowIndex = candidate.rowIndex;
-          const decision = input.decisions[rowIndex.toString()];
-          if (!decision || decision.kind === "skip") continue;
-          const targetPersonId = personIdByRow.get(rowIndex);
-          if (!targetPersonId) continue;
-
-          const candidateMatches =
-            refreshedMatches.matchesByRow.find(
-              (m) => m.rowIndex === rowIndex,
-            )?.candidates ?? [];
-          const presentedIds = candidateMatches.map((c) => c.personId);
-
-          // ── Per-personId work (link, actor) — runs ONCE per commit ──
-          //
-          // The Person, the location-link, and the per-role Actor row
-          // are facts about the human, not the paste row. They're
-          // idempotent in shape and de-duped here. Cohort allocations
-          // are NOT in this block: each paste row is its own intent
-          // ("Adam in optimist", "Adam in dinsdag") and gets its own
-          // allocation below.
-          if (!processedPersonIds.has(targetPersonId)) {
-            if (decision.kind === "use_existing") {
-              // linkToLocation throws on revoked/removed; defense-in-depth.
-              await linkToLocation({
-                personId: targetPersonId,
-                locationId: previewRow.locationId,
-              });
+            // Use the first row in the group as the representative person input.
+            // The cross-row group means all rows are "the same person", so
+            // any row's pasted data is acceptable; first wins for determinism.
+            const representativeRow = candidates.find(
+              (c) => c.rowIndex === rowIndices[0],
+            );
+            if (!representativeRow) {
+              throw new Error(
+                `Cross-row group ${groupKey} references row ${rowIndices[0]} which is missing from the preview`,
+              );
             }
-            // For create_new the createPersonForLocation callback already
-            // wired up the link via its existing semantics; nothing extra.
+            const created = await input.createPerson({
+              firstName: representativeRow.firstName,
+              lastName: representativeRow.lastName,
+              lastNamePrefix: representativeRow.lastNamePrefix,
+              dateOfBirth: representativeRow.dateOfBirth,
+              birthCity: representativeRow.birthCity,
+              birthCountry: representativeRow.birthCountry,
+              email: representativeRow.email,
+            });
+            createdGroupPersonIds.set(groupKey, created.personId);
+            createdPersonIds.push(created.personId);
+            for (const rowIndex of rowIndices) {
+              personIdByRow.set(rowIndex, created.personId);
+            }
+          }
 
-            for (const role of roles) {
-              await tx
-                .insert(s.actor)
-                .values({
+          // Then, ungrouped create_new + use_existing assignments.
+          for (const candidate of candidates) {
+            const rowIndex = candidate.rowIndex;
+            if (personIdByRow.has(rowIndex)) continue;
+            const decision = input.decisions[rowIndex.toString()];
+            if (!decision || decision.kind === "skip") continue;
+            if (decision.kind === "use_existing") {
+              personIdByRow.set(rowIndex, decision.personId);
+            } else if (decision.kind === "create_new") {
+              // No group → per-row createPerson (operator declared "different
+              // people" or this row is genuinely independent).
+              if (!input.createPerson) {
+                throw new Error(
+                  "createPerson factory not provided — caller must supply it for create_new decisions",
+                );
+              }
+              const created = await input.createPerson({
+                firstName: candidate.firstName,
+                lastName: candidate.lastName,
+                lastNamePrefix: candidate.lastNamePrefix,
+                dateOfBirth: candidate.dateOfBirth,
+                birthCity: candidate.birthCity,
+                birthCountry: candidate.birthCountry,
+                email: candidate.email,
+              });
+              createdPersonIds.push(created.personId);
+              personIdByRow.set(rowIndex, created.personId);
+            }
+          }
+
+          // ── Main pass: link/actor/allocate per UNIQUE personId, audit per row ──
+          //
+          // Operations are deduplicated by personId so that 3 rows targeting
+          // the same person produce 1 link + 1 actor per role + 1 cohort
+          // allocation. Audit rows are still written per ORIGINAL pasted row
+          // so the forensics trail captures every operator decision.
+
+          const processedPersonIds = new Set<string>();
+          // Cache resolved student-actor id per personId so we don't repeat
+          // the lookup for every paste row that targets the same person.
+          const studentActorIdByPersonId = new Map<string, string>();
+
+          for (const candidate of candidates) {
+            const rowIndex = candidate.rowIndex;
+            const decision = input.decisions[rowIndex.toString()];
+            if (!decision || decision.kind === "skip") continue;
+            const targetPersonId = personIdByRow.get(rowIndex);
+            if (!targetPersonId) continue;
+
+            const candidateMatches =
+              refreshedMatches.matchesByRow.find((m) => m.rowIndex === rowIndex)
+                ?.candidates ?? [];
+            const presentedIds = candidateMatches.map((c) => c.personId);
+
+            // ── Per-personId work (link, actor) — runs ONCE per commit ──
+            //
+            // The Person, the location-link, and the per-role Actor row
+            // are facts about the human, not the paste row. They're
+            // idempotent in shape and de-duped here. Cohort allocations
+            // are NOT in this block: each paste row is its own intent
+            // ("Adam in optimist", "Adam in dinsdag") and gets its own
+            // allocation below.
+            if (!processedPersonIds.has(targetPersonId)) {
+              if (decision.kind === "use_existing") {
+                // linkToLocation throws on revoked/removed; defense-in-depth.
+                await linkToLocation({
                   personId: targetPersonId,
                   locationId: previewRow.locationId,
-                  type: role,
-                })
-                .onConflictDoUpdate({
-                  target: [
-                    s.actor.type,
-                    s.actor.personId,
-                    s.actor.locationId,
-                  ],
-                  set: { deletedAt: null, createdAt: sql`NOW()` },
                 });
+              }
+              // For create_new the createPersonForLocation callback already
+              // wired up the link via its existing semantics; nothing extra.
+
+              for (const role of roles) {
+                await tx
+                  .insert(s.actor)
+                  .values({
+                    personId: targetPersonId,
+                    locationId: previewRow.locationId,
+                    type: role,
+                  })
+                  .onConflictDoUpdate({
+                    target: [
+                      s.actor.type,
+                      s.actor.personId,
+                      s.actor.locationId,
+                    ],
+                    set: { deletedAt: null, createdAt: sql`NOW()` },
+                  });
+              }
+
+              if (previewRow.targetCohortId) {
+                const studentActor = await tx
+                  .select({ id: s.actor.id })
+                  .from(s.actor)
+                  .where(
+                    and(
+                      eq(s.actor.personId, targetPersonId),
+                      eq(s.actor.locationId, previewRow.locationId),
+                      eq(s.actor.type, "student"),
+                      isNull(s.actor.deletedAt),
+                    ),
+                  )
+                  .then(possibleSingleRow);
+                if (studentActor) {
+                  studentActorIdByPersonId.set(targetPersonId, studentActor.id);
+                }
+              }
+
+              if (decision.kind === "use_existing") {
+                linkedPersonIds.push(targetPersonId);
+              }
+              processedPersonIds.add(targetPersonId);
             }
 
+            // ── Per-row cohort allocation ──
+            //
+            // Each paste row produces its own cohort_allocation, even
+            // when multiple rows target the same person. The operator's
+            // mental model: each row is one course / sub-group within
+            // the cohort, and tags on that row describe THAT enrollment.
+            // Three rows of Adam with three different Tag values →
+            // 1 Person row, 1 Actor row, 3 cohort_allocations (each with
+            // its own tags).
+            //
+            // PG treats NULL studentCurriculumId as distinct in the
+            // partial unique index, so multiple NULL-curriculum
+            // allocations per (cohort, actor) coexist by design.
             if (previewRow.targetCohortId) {
-              const studentActor = await tx
-                .select({ id: s.actor.id })
-                .from(s.actor)
-                .where(
-                  and(
-                    eq(s.actor.personId, targetPersonId),
-                    eq(s.actor.locationId, previewRow.locationId),
-                    eq(s.actor.type, "student"),
-                    isNull(s.actor.deletedAt),
-                  ),
-                )
-                .then(possibleSingleRow);
-              if (studentActor) {
-                studentActorIdByPersonId.set(targetPersonId, studentActor.id);
+              const studentActorId =
+                studentActorIdByPersonId.get(targetPersonId);
+              if (studentActorId) {
+                const rowTags =
+                  input.tagsByRowIndex?.[rowIndex.toString()] ?? [];
+                const cleanTags = (() => {
+                  const seen = new Set<string>();
+                  const out: string[] = [];
+                  for (const t of rowTags) {
+                    const trimmed = t.trim();
+                    if (!trimmed) continue;
+                    if (seen.has(trimmed)) continue;
+                    seen.add(trimmed);
+                    out.push(trimmed);
+                  }
+                  return out;
+                })();
+                await tx
+                  .insert(s.cohortAllocation)
+                  .values({
+                    cohortId: previewRow.targetCohortId,
+                    actorId: studentActorId,
+                    ...(cleanTags.length > 0 ? { tags: cleanTags } : {}),
+                  })
+                  .onConflictDoNothing();
               }
             }
 
-            if (decision.kind === "use_existing") {
-              linkedPersonIds.push(targetPersonId);
-            }
-            processedPersonIds.add(targetPersonId);
+            // Audit per ORIGINAL row (every operator decision is captured).
+            await tx.insert(s.personMergeAudit).values({
+              performedByPersonId: input.performedByPersonId,
+              locationId: previewRow.locationId,
+              targetPersonId,
+              decisionKind:
+                decision.kind === "use_existing"
+                  ? "use_existing"
+                  : "create_new",
+              presentedCandidatePersonIds:
+                presentedIds.length > 0 ? presentedIds : null,
+              source: "bulk_import_preview",
+              bulkImportPreviewToken: previewRow.token,
+            });
           }
 
-          // ── Per-row cohort allocation ──
-          //
-          // Each paste row produces its own cohort_allocation, even
-          // when multiple rows target the same person. The operator's
-          // mental model: each row is one course / sub-group within
-          // the cohort, and tags on that row describe THAT enrollment.
-          // Three rows of Adam with three different Tag values →
-          // 1 Person row, 1 Actor row, 3 cohort_allocations (each with
-          // its own tags).
-          //
-          // PG treats NULL studentCurriculumId as distinct in the
-          // partial unique index, so multiple NULL-curriculum
-          // allocations per (cohort, actor) coexist by design.
-          if (previewRow.targetCohortId) {
-            const studentActorId = studentActorIdByPersonId.get(targetPersonId);
-            if (studentActorId) {
-              const rowTags = input.tagsByRowIndex?.[rowIndex.toString()] ?? [];
-              const cleanTags = (() => {
-                const seen = new Set<string>();
-                const out: string[] = [];
-                for (const t of rowTags) {
-                  const trimmed = t.trim();
-                  if (!trimmed) continue;
-                  if (seen.has(trimmed)) continue;
-                  seen.add(trimmed);
-                  out.push(trimmed);
-                }
-                return out;
-              })();
-              await tx
-                .insert(s.cohortAllocation)
-                .values({
-                  cohortId: previewRow.targetCohortId,
-                  actorId: studentActorId,
-                  ...(cleanTags.length > 0 ? { tags: cleanTags } : {}),
-                })
-                .onConflictDoNothing();
-            }
-          }
+          await tx
+            .update(s.bulkImportPreview)
+            .set({
+              status: "committed",
+              committedAt: sql`NOW()`,
+            })
+            .where(eq(s.bulkImportPreview.token, previewRow.token));
 
-          // Audit per ORIGINAL row (every operator decision is captured).
-          await tx.insert(s.personMergeAudit).values({
-            performedByPersonId: input.performedByPersonId,
-            locationId: previewRow.locationId,
-            targetPersonId,
-            decisionKind:
-              decision.kind === "use_existing" ? "use_existing" : "create_new",
-            presentedCandidatePersonIds:
-              presentedIds.length > 0 ? presentedIds : null,
-            source: "bulk_import_preview",
-            bulkImportPreviewToken: previewRow.token,
-          });
-        }
-
-        await tx
-          .update(s.bulkImportPreview)
-          .set({
-            status: "committed",
-            committedAt: sql`NOW()`,
-          })
-          .where(eq(s.bulkImportPreview.token, previewRow.token));
-
-        return {
-          kind: "committed" as const,
-          createdPersonIds,
-          linkedPersonIds,
-        };
-      },
-      { isolationLevel: "read committed" },
+          return {
+            kind: "committed" as const,
+            createdPersonIds,
+            linkedPersonIds,
+          };
+        },
+        { isolationLevel: "read committed" },
       );
 
       return result;
@@ -2407,11 +2412,7 @@ export const mergePersons = wrapCommand(
         .object({
           performedByPersonId: uuidSchema,
           locationId: uuidSchema,
-          source: z.enum([
-            "personen_page",
-            "cohort_view",
-            "sysadmin",
-          ]),
+          source: z.enum(["personen_page", "cohort_view", "sysadmin"]),
           score: z.number().int().optional(),
           reasons: z.array(z.string()).optional(),
         })

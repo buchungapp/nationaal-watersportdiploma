@@ -1,8 +1,11 @@
 "use client";
 
-import { ExclamationTriangleIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
+import {
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/20/solid";
 import dayjs from "dayjs";
-import { memo, useState, use } from "react";
+import { memo, use, useState } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -10,13 +13,12 @@ import {
   DialogBody,
   DialogTitle,
 } from "~/app/(dashboard)/_components/dialog";
-import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
+import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import {
   assertPreviewContext,
   BulkImportPreviewContext,
   deriveGroupKey,
 } from "../context";
-import { RowDecisionRadios } from "../primitives";
 import type {
   CandidateMatch,
   CrossRowGroup,
@@ -28,173 +30,170 @@ import type {
 // safe outcome ("zelfde persoon"). Override path: secondary text-link
 // reveals per-row decisions for the rare twin/cousin case.
 
-export const CrossRowConflictResolver = memo(
-  function CrossRowConflictResolver({
-    open,
-    onClose,
-    group,
-    parsedRows,
-    sharedCandidate,
-  }: {
-    open: boolean;
-    onClose: () => void;
-    group: CrossRowGroup;
-    parsedRows: ParsedPersonRow[];
-    // null when paste-only group — operator confirms creating ONE shared
-    // new person for the group.
-    sharedCandidate: CandidateMatch | null;
-  }) {
-    const ctx = assertPreviewContext(use(BulkImportPreviewContext));
-    const groupKey = deriveGroupKey(group.rowIndices);
-    const existingDecision = ctx.state.groupDecisions.get(groupKey);
-    const hasCohort = Boolean(ctx.meta.targetCohortId);
-    const [showOverride, setShowOverride] = useState(
-      existingDecision?.kind === "different_people",
-    );
+export const CrossRowConflictResolver = memo(function CrossRowConflictResolver({
+  open,
+  onClose,
+  group,
+  parsedRows,
+  sharedCandidate,
+}: {
+  open: boolean;
+  onClose: () => void;
+  group: CrossRowGroup;
+  parsedRows: ParsedPersonRow[];
+  // null when paste-only group — operator confirms creating ONE shared
+  // new person for the group.
+  sharedCandidate: CandidateMatch | null;
+}) {
+  const ctx = assertPreviewContext(use(BulkImportPreviewContext));
+  const groupKey = deriveGroupKey(group.rowIndices);
+  const existingDecision = ctx.state.groupDecisions.get(groupKey);
+  const hasCohort = Boolean(ctx.meta.targetCohortId);
+  const [showOverride, setShowOverride] = useState(
+    existingDecision?.kind === "different_people",
+  );
 
-    const groupRows = parsedRows.filter((r) =>
-      group.rowIndices.includes(r.rowIndex),
-    );
-    const targetPersonId = sharedCandidate?.personId ?? null;
+  const groupRows = parsedRows.filter((r) =>
+    group.rowIndices.includes(r.rowIndex),
+  );
+  const targetPersonId = sharedCandidate?.personId ?? null;
 
-    const onConfirmSamePerson = () => {
-      ctx.actions.setGroupDecision(groupKey, {
-        kind: "same_person",
-        targetPersonId,
-      });
-      onClose();
-    };
+  const onConfirmSamePerson = () => {
+    ctx.actions.setGroupDecision(groupKey, {
+      kind: "same_person",
+      targetPersonId,
+    });
+    onClose();
+  };
 
-    const onConfirmDifferentPeople = () => {
-      // Materialize defaults for any row the operator didn't explicitly
-      // touch. Each unspecified row gets its own profile letter (A, B,
-      // C…) → server creates one new person per letter. Done here at
-      // confirm time rather than via a mount-time useEffect (anti-
-      // pattern: pushing state up via Effect).
-      const current = ctx.state.groupDecisions.get(groupKey);
-      const existing =
-        current?.kind === "different_people" ? current.perRow : {};
-      const perRow: Record<number, RowDecision> = { ...existing };
-      group.rowIndices.forEach((rowIndex, i) => {
-        if (!perRow[rowIndex]) {
-          const letter = String.fromCharCode(65 + i);
-          perRow[rowIndex] = {
-            kind: "create_new",
-            shareNewPersonWithGroup: `${groupKey}_profile_${letter}`,
-          };
-        }
-      });
-      ctx.actions.setGroupDecision(groupKey, {
-        kind: "different_people",
-        perRow,
-        confirmed: true,
-      });
-      onClose();
-    };
+  const onConfirmDifferentPeople = () => {
+    // Materialize defaults for any row the operator didn't explicitly
+    // touch. Each unspecified row gets its own profile letter (A, B,
+    // C…) → server creates one new person per letter. Done here at
+    // confirm time rather than via a mount-time useEffect (anti-
+    // pattern: pushing state up via Effect).
+    const current = ctx.state.groupDecisions.get(groupKey);
+    const existing = current?.kind === "different_people" ? current.perRow : {};
+    const perRow: Record<number, RowDecision> = { ...existing };
+    group.rowIndices.forEach((rowIndex, i) => {
+      if (!perRow[rowIndex]) {
+        const letter = String.fromCharCode(65 + i);
+        perRow[rowIndex] = {
+          kind: "create_new",
+          shareNewPersonWithGroup: `${groupKey}_profile_${letter}`,
+        };
+      }
+    });
+    ctx.actions.setGroupDecision(groupKey, {
+      kind: "different_people",
+      perRow,
+      confirmed: true,
+    });
+    onClose();
+  };
 
-    const candidateName = sharedCandidate
-      ? [
-          sharedCandidate.firstName,
-          sharedCandidate.lastNamePrefix,
-          sharedCandidate.lastName,
-        ]
-          .filter(Boolean)
-          .join(" ")
-      : null;
+  const candidateName = sharedCandidate
+    ? [
+        sharedCandidate.firstName,
+        sharedCandidate.lastNamePrefix,
+        sharedCandidate.lastName,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    : null;
 
-    const candidateDob = sharedCandidate?.dateOfBirth
-      ? dayjs(sharedCandidate.dateOfBirth).format("DD-MM-YYYY")
-      : null;
+  const candidateDob = sharedCandidate?.dateOfBirth
+    ? dayjs(sharedCandidate.dateOfBirth).format("DD-MM-YYYY")
+    : null;
 
-    return (
-      <Dialog open={open} onClose={onClose} size="2xl">
-        <div className="flex items-start gap-3">
-          {sharedCandidate ? (
-            <InformationCircleIcon className="size-6 shrink-0 text-branding-dark" />
-          ) : (
-            <ExclamationTriangleIcon className="size-6 shrink-0 text-branding-orange" />
-          )}
-          <DialogTitle>
-            {group.rowIndices.length} rijen lijken dezelfde persoon te zijn
-          </DialogTitle>
-        </div>
-        <DialogBody>
-          {sharedCandidate ? (
-            <FocusProfile
-              name={candidateName ?? "Onbekend"}
-              dob={candidateDob ?? "—"}
-              email={null}
-              certificateCount={sharedCandidate.certificateCount}
-              lastDiplomaIssuedAt={sharedCandidate.lastDiplomaIssuedAt}
-            />
-          ) : (
-            <NewProfileBanner row={groupRows[0]} />
-          )}
-
-          <Outcome
-            group={group}
-            isPasteOnly={!sharedCandidate}
-            hasCohort={hasCohort}
+  return (
+    <Dialog open={open} onClose={onClose} size="2xl">
+      <div className="flex items-start gap-3">
+        {sharedCandidate ? (
+          <InformationCircleIcon className="size-6 shrink-0 text-branding-dark" />
+        ) : (
+          <ExclamationTriangleIcon className="size-6 shrink-0 text-branding-orange" />
+        )}
+        <DialogTitle>
+          {group.rowIndices.length} rijen lijken dezelfde persoon te zijn
+        </DialogTitle>
+      </div>
+      <DialogBody>
+        {sharedCandidate ? (
+          <FocusProfile
+            name={candidateName ?? "Onbekend"}
+            dob={candidateDob ?? "—"}
+            email={null}
+            certificateCount={sharedCandidate.certificateCount}
+            lastDiplomaIssuedAt={sharedCandidate.lastDiplomaIssuedAt}
           />
+        ) : (
+          <NewProfileBanner row={groupRows[0]} />
+        )}
 
-          <PastedRowsList rows={groupRows} />
+        <Outcome
+          group={group}
+          isPasteOnly={!sharedCandidate}
+          hasCohort={hasCohort}
+        />
 
-          {showOverride ? (
-            <DifferentPeopleOverride
-              groupKey={groupKey}
-              groupRows={groupRows}
-              sharedCandidate={sharedCandidate}
-            />
-          ) : null}
-        </DialogBody>
+        <PastedRowsList rows={groupRows} />
 
-        <DialogActions>
-          <Button plain onClick={onClose}>
-            Annuleren
+        {showOverride ? (
+          <DifferentPeopleOverride
+            groupKey={groupKey}
+            groupRows={groupRows}
+            sharedCandidate={sharedCandidate}
+          />
+        ) : null}
+      </DialogBody>
+
+      <DialogActions>
+        <Button plain onClick={onClose}>
+          Annuleren
+        </Button>
+        {!showOverride ? (
+          <Button color="branding-orange" onClick={onConfirmSamePerson}>
+            Bevestig — zelfde persoon
           </Button>
-          {!showOverride ? (
-            <Button color="branding-orange" onClick={onConfirmSamePerson}>
-              Bevestig — zelfde persoon
-            </Button>
-          ) : (
-            <Button color="branding-orange" onClick={onConfirmDifferentPeople}>
-              Bevestig — verschillende profielen
-            </Button>
-          )}
-        </DialogActions>
+        ) : (
+          <Button color="branding-orange" onClick={onConfirmDifferentPeople}>
+            Bevestig — verschillende profielen
+          </Button>
+        )}
+      </DialogActions>
 
-        <div className="mt-3 flex items-center justify-between text-xs">
-          {!showOverride ? (
-            <button
-              type="button"
-              onClick={() => setShowOverride(true)}
-              className="text-branding-dark underline-offset-2 hover:underline"
-            >
-              Het zijn verschillende personen — bijv. tweelingen
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowOverride(false)}
-              className="text-zinc-600 underline-offset-2 hover:underline dark:text-zinc-400"
-            >
-              ← Toch zelfde persoon
-            </button>
-          )}
+      <div className="mt-3 flex items-center justify-between text-xs">
+        {!showOverride ? (
           <button
             type="button"
-            onClick={() => {
-              onClose();
-            }}
-            className="text-zinc-500 underline-offset-2 hover:underline"
+            onClick={() => setShowOverride(true)}
+            className="text-branding-dark underline-offset-2 hover:underline"
           >
-            Plak opnieuw
+            Het zijn verschillende personen — bijv. tweelingen
           </button>
-        </div>
-      </Dialog>
-    );
-  },
-);
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowOverride(false)}
+            className="text-zinc-600 underline-offset-2 hover:underline dark:text-zinc-400"
+          >
+            ← Toch zelfde persoon
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+          }}
+          className="text-zinc-500 underline-offset-2 hover:underline"
+        >
+          Plak opnieuw
+        </button>
+      </div>
+    </Dialog>
+  );
+});
 
 function FocusProfile({
   name,
@@ -275,8 +274,8 @@ function Outcome({
       {hasCohort ? (
         <Text className="!text-sm !text-zinc-500">
           Eén cohortplek per rij — zo behoudt elke regel z'n eigen tags
-          (bijvoorbeeld voor verschillende cursussen of subgroepen). Wil je
-          ze juist samenvoegen tot één plek? Dat kan na de import via de
+          (bijvoorbeeld voor verschillende cursussen of subgroepen). Wil je ze
+          juist samenvoegen tot één plek? Dat kan na de import via de
           cohortpagina.
         </Text>
       ) : null}
@@ -372,9 +371,7 @@ function DifferentPeopleOverride({
       <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">
         Geef elke rij een profielletter. Rijen met dezelfde letter delen één
         profiel; verschillende letters worden verschillende profielen.
-        {sharedCandidate
-          ? " Of koppel een rij aan het bestaande profiel."
-          : ""}
+        {sharedCandidate ? " Of koppel een rij aan het bestaande profiel." : ""}
       </Text>
       <div className="mt-3 space-y-2">
         {groupRows.map((r) => {
@@ -482,7 +479,8 @@ function ProfileSummary({
   return (
     <Text className="!mt-3 !text-xs !text-zinc-600 dark:!text-zinc-400">
       <Strong className="!text-xs">
-        Resultaat: {distinct} {distinct === 1 ? "nieuw profiel" : "nieuwe profielen"}
+        Resultaat: {distinct}{" "}
+        {distinct === 1 ? "nieuw profiel" : "nieuwe profielen"}
       </Strong>
       {" — "}
       {[...byLetter.entries()]

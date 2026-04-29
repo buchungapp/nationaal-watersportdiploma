@@ -1,24 +1,24 @@
 "use client";
 
-import { use, useMemo, useState } from "react";
 import { Disclosure } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { Strong, Text } from "~/app/(dashboard)/_components/text";
+import { use, useMemo } from "react";
+import { Strong } from "~/app/(dashboard)/_components/text";
 import {
   assertPreviewContext,
   BulkImportPreviewContext,
   deriveGroupKey,
 } from "./context";
+import { CrossRowGroupCard } from "./cross-row-conflicts/CrossRowGroupCard";
 import { PreviewFooter } from "./PreviewFooter";
 import { PreviewHeader } from "./PreviewHeader";
 import { classifyRow } from "./provider";
-import { StatusLegend } from "./StatusLegend";
-import { CrossRowGroupCard } from "./cross-row-conflicts/CrossRowGroupCard";
 import { AlreadyInCohortRow } from "./rows/AlreadyInCohortRow";
 import { MultiMatchRow } from "./rows/MultiMatchRow";
 import { NoMatchRow } from "./rows/NoMatchRow";
 import { ParseErrorRow } from "./rows/ParseErrorRow";
 import { SingleMatchRow } from "./rows/SingleMatchRow";
+import { StatusLegend } from "./StatusLegend";
 import type { CandidateMatch } from "./types";
 
 // The preview list orchestrator. Maps each row index to the right variant
@@ -84,11 +84,7 @@ export function PreviewStep({
     // Parsed rows by classification.
     for (const r of preview.parsedRows) {
       if (groupedRowIndices.has(r.rowIndex)) continue;
-      const cls = classifyRow(
-        r.rowIndex,
-        preview,
-        ctx.state.groupDecisions,
-      );
+      const cls = classifyRow(r.rowIndex, preview, ctx.state.groupDecisions);
       const bucket =
         cls.status === "multi-match"
           ? 2
@@ -124,8 +120,10 @@ export function PreviewStep({
     (item) => item.kind === "row" && item.bucket >= 5,
   );
 
-  const headItems = goodTailStart === -1 ? renderItems : renderItems.slice(0, goodTailStart);
-  const tailItems = goodTailStart === -1 ? [] : renderItems.slice(goodTailStart);
+  const headItems =
+    goodTailStart === -1 ? renderItems : renderItems.slice(0, goodTailStart);
+  const tailItems =
+    goodTailStart === -1 ? [] : renderItems.slice(goodTailStart);
   const tailNoMatch = tailItems.filter(
     (item) => item.kind === "row" && item.bucket === 6,
   ).length;
@@ -149,7 +147,9 @@ export function PreviewStep({
       <StatusLegend />
 
       <div className="space-y-3">
-        {headItems.map((item, idx) => renderItem(item, idx, preview, candidatesByRow))}
+        {headItems.map((item, idx) =>
+          renderItem(item, idx, preview, candidatesByRow),
+        )}
       </div>
 
       {tailItems.length > 0 ? (
@@ -188,7 +188,7 @@ function renderItem(
   item:
     | { kind: "group"; groupIndex: number }
     | { kind: "row"; rowIndex: number; bucket: number },
-  key: number,
+  _key: number,
   preview: ReturnType<typeof assertPreviewContext>["state"]["preview"],
   candidatesByRow: Map<number, CandidateMatch[]>,
 ): React.ReactNode {
@@ -205,9 +205,13 @@ function renderItem(
     );
   }
   // Row variants
-  const parseError = preview.parseErrors.find((e) => e.rowIndex === item.rowIndex);
+  const parseError = preview.parseErrors.find(
+    (e) => e.rowIndex === item.rowIndex,
+  );
   if (parseError) {
-    return <ParseErrorRow key={`err-${item.rowIndex}`} parseError={parseError} />;
+    return (
+      <ParseErrorRow key={`err-${item.rowIndex}`} parseError={parseError} />
+    );
   }
   const row = preview.parsedRows.find((r) => r.rowIndex === item.rowIndex);
   if (!row) return null;
@@ -237,11 +241,13 @@ function renderItem(
   const top = candidates[0]?.score ?? 0;
   const status =
     top >= 200 ? "perfect-match" : top >= 150 ? "strong-match" : "weak-match";
+  const candidate = candidates[0];
+  if (!candidate) return null;
   return (
     <SingleMatchRow
       key={`row-${item.rowIndex}`}
       row={row}
-      candidate={candidates[0]!}
+      candidate={candidate}
       status={status}
     />
   );

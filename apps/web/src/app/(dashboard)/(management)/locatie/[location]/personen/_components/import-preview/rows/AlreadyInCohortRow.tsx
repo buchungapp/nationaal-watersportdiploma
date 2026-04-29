@@ -3,10 +3,7 @@
 import { memo, use } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
-import {
-  assertPreviewContext,
-  BulkImportPreviewContext,
-} from "../context";
+import { assertPreviewContext, BulkImportPreviewContext } from "../context";
 import { RowFrame, RowPasted } from "../primitives";
 import type { CandidateMatch, ParsedPersonRow } from "../types";
 
@@ -32,7 +29,8 @@ export const AlreadyInCohortRow = memo(function AlreadyInCohortRow({
   // Operator-overridden state: explicit use_existing on a row whose
   // status is already-in-cohort means "yes, add another allocation".
   const isOverridden =
-    decision?.kind === "use_existing" && decision.personId === candidate.personId;
+    decision?.kind === "use_existing" &&
+    decision.personId === candidate.personId;
 
   const fullName = [
     candidate.firstName,
@@ -64,8 +62,8 @@ export const AlreadyInCohortRow = memo(function AlreadyInCohortRow({
             <Text className="!text-sm !text-zinc-700 dark:!text-zinc-300">
               <Strong>Extra cohortplek wordt aangemaakt.</Strong>{" "}
               <span className="font-medium">{fullName}</span> staat al in dit
-              cohort, maar je hebt aangegeven dat dit een tweede cursus is —
-              er komt een extra plek bij{" "}
+              cohort, maar je hebt aangegeven dat dit een tweede cursus is — er
+              komt een extra plek bij{" "}
               {row.tags.length > 0
                 ? `met tags: ${row.tags.join(", ")}`
                 : "(geen tags)"}

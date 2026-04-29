@@ -329,10 +329,7 @@ export function IssueCertificateDialog({
           <Button plain onClick={closeDialog}>
             Annuleren
           </Button>
-          <Button
-            type="submit"
-            disabled={isPending || issuable.length === 0}
-          >
+          <Button type="submit" disabled={isPending || issuable.length === 0}>
             {isPending ? <Spinner className="text-white" /> : null}
             {blocked.length > 0
               ? `Doorgaan met ${issuable.length} ${
@@ -377,6 +374,7 @@ export function RemoveCertificateDialog({
       null,
       cohortId,
       // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
+      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
       rows.map((row) => row.certificate?.id!),
     ),
     {
@@ -509,6 +507,7 @@ function DownloadCertificatesDialog({
     downloadCertificatesAction.bind(
       null,
       // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: all rows have a certificate, when action is executed
+      // biome-ignore lint/style/noNonNullAssertion: all rows have a certificate, when action is executed
       rows.map((row) => row.certificate?.handle!),
     ),
     {

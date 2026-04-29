@@ -9,7 +9,6 @@ import {
 } from "./context";
 import type {
   CandidateMatch,
-  CrossRowGroup,
   GroupDecision,
   PreviewModel,
   RoleSelection,
@@ -215,7 +214,9 @@ export function BulkImportPreviewProvider({
   );
 
   return (
-    <BulkImportPreviewContext value={value}>{children}</BulkImportPreviewContext>
+    <BulkImportPreviewContext value={value}>
+      {children}
+    </BulkImportPreviewContext>
   );
 }
 
@@ -284,7 +285,10 @@ export function classifyRow(
 
 function computeBlockers(
   preview: PreviewModel,
-  filtered: { decisions: Map<number, RowDecision>; groupDecisions: Map<string, GroupDecision> },
+  filtered: {
+    decisions: Map<number, RowDecision>;
+    groupDecisions: Map<string, GroupDecision>;
+  },
 ): BlockerSummary {
   const { decisions, groupDecisions } = filtered;
   let unresolvedCrossRowGroups = 0;

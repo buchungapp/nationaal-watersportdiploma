@@ -19,8 +19,22 @@ import {
 // seeding tables.
 async function scoreOne(
   pair: {
-    a: { firstNorm: string; lastNorm: string; fullLastNorm: string; dob: string | null; birthCityNorm: string; userId: string | null };
-    b: { firstNorm: string; lastNorm: string; fullLastNorm: string; dob: string | null; birthCityNorm: string; userId: string | null };
+    a: {
+      firstNorm: string;
+      lastNorm: string;
+      fullLastNorm: string;
+      dob: string | null;
+      birthCityNorm: string;
+      userId: string | null;
+    };
+    b: {
+      firstNorm: string;
+      lastNorm: string;
+      fullLastNorm: string;
+      dob: string | null;
+      birthCityNorm: string;
+      userId: string | null;
+    };
   },
   expr: "sameUserPair" | "nameBirthPair",
 ): Promise<number> {
@@ -114,8 +128,22 @@ test("scoreSameUserPair: only first name matches → base + 50 = 100", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "", fullLastNorm: "", dob: null, birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "", fullLastNorm: "", dob: null, birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "",
+          fullLastNorm: "",
+          dob: null,
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "",
+          fullLastNorm: "",
+          dob: null,
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "sameUserPair",
     );
@@ -126,8 +154,22 @@ test("scoreSameUserPair: prefix-only first-name match scores 20", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adamson", lastNorm: "", fullLastNorm: "", dob: null, birthCityNorm: "", userId: null },
-        b: { firstNorm: "adamovic", lastNorm: "", fullLastNorm: "", dob: null, birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adamson",
+          lastNorm: "",
+          fullLastNorm: "",
+          dob: null,
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adamovic",
+          lastNorm: "",
+          fullLastNorm: "",
+          dob: null,
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "sameUserPair",
     );
@@ -139,8 +181,22 @@ test("scoreSameUserPair: birth-date within 1 day scores 40", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-13", birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-13",
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "sameUserPair",
     );
@@ -152,8 +208,22 @@ test("scoreSameUserPair: birth-date within 7 days scores 30", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-19", birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-19",
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "sameUserPair",
     );
@@ -165,8 +235,22 @@ test("scoreSameUserPair: same year, different month scores 20", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-01-12", birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-08-30", birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-01-12",
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-08-30",
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "sameUserPair",
     );
@@ -178,8 +262,22 @@ test("scoreSameUserPair: empty city does not score", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "sameUserPair",
     );
@@ -191,8 +289,22 @@ test("scoreNameBirthPair: exact match (assumes upstream first/last/dob filter pa
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "amsterdam", userId: "00000000-0000-0000-0000-000000000001" },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "amsterdam", userId: "00000000-0000-0000-0000-000000000002" },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "amsterdam",
+          userId: "00000000-0000-0000-0000-000000000001",
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "amsterdam",
+          userId: "00000000-0000-0000-0000-000000000002",
+        },
       },
       "nameBirthPair",
     );
@@ -206,8 +318,22 @@ test("scoreNameBirthPair: dob within 1 day → 50 + 0 sameDateBonus + 60 last + 
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-13", birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-13",
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "nameBirthPair",
     );
@@ -218,8 +344,22 @@ test("scoreNameBirthPair: adjacent year (e.g. 2010 vs 2011) scores 15", () =>
   withTestTransaction(async () => {
     const score = await scoreOne(
       {
-        a: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2010-05-12", birthCityNorm: "", userId: null },
-        b: { firstNorm: "adam", lastNorm: "vries", fullLastNorm: "devries", dob: "2011-08-30", birthCityNorm: "", userId: null },
+        a: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2010-05-12",
+          birthCityNorm: "",
+          userId: null,
+        },
+        b: {
+          firstNorm: "adam",
+          lastNorm: "vries",
+          fullLastNorm: "devries",
+          dob: "2011-08-30",
+          birthCityNorm: "",
+          userId: null,
+        },
       },
       "nameBirthPair",
     );
@@ -229,13 +369,22 @@ test("scoreNameBirthPair: adjacent year (e.g. 2010 vs 2011) scores 15", () =>
 
 test("scoreFirstName: exact wins over prefix", () =>
   withTestTransaction(async () => {
-    const expr = scoreFirstName(sql`'adam'::text`, sql`'adam'::text`, { exact: 50, prefix: 20 });
+    const expr = scoreFirstName(sql`'adam'::text`, sql`'adam'::text`, {
+      exact: 50,
+      prefix: 20,
+    });
     assert.strictEqual(Number(await evalSql(expr)), 50);
 
-    const expr2 = scoreFirstName(sql`'adamson'::text`, sql`'adamovic'::text`, { exact: 50, prefix: 20 });
+    const expr2 = scoreFirstName(sql`'adamson'::text`, sql`'adamovic'::text`, {
+      exact: 50,
+      prefix: 20,
+    });
     assert.strictEqual(Number(await evalSql(expr2)), 20);
 
-    const expr3 = scoreFirstName(sql`'eva'::text`, sql`'lisa'::text`, { exact: 50, prefix: 20 });
+    const expr3 = scoreFirstName(sql`'eva'::text`, sql`'lisa'::text`, {
+      exact: 50,
+      prefix: 20,
+    });
     assert.strictEqual(Number(await evalSql(expr3)), 0);
   }));
 
@@ -262,7 +411,13 @@ test("scoreLastName: with-prefix variant beats loose", () =>
 
 test("scoreBirthDate: descending bands work as documented", () =>
   withTestTransaction(async () => {
-    const weights = { exact: 60, withinOne: 45, withinSeven: 35, sameYear: 25, adjacentYear: 15 };
+    const weights = {
+      exact: 60,
+      withinOne: 45,
+      withinSeven: 35,
+      sameYear: 25,
+      adjacentYear: 15,
+    };
     const tests: Array<[string | null, string | null, number]> = [
       ["2010-05-12", "2010-05-12", 60],
       ["2010-05-12", "2010-05-13", 45],
@@ -274,13 +429,13 @@ test("scoreBirthDate: descending bands work as documented", () =>
     ];
 
     for (const [a, b, expected] of tests) {
-      const expr = scoreBirthDate(
-        sql`${a}::date`,
-        sql`${b}::date`,
-        weights,
-      );
+      const expr = scoreBirthDate(sql`${a}::date`, sql`${b}::date`, weights);
       const got = Number(await evalSql(expr));
-      assert.strictEqual(got, expected, `dob(${a}, ${b}) expected ${expected} got ${got}`);
+      assert.strictEqual(
+        got,
+        expected,
+        `dob(${a}, ${b}) expected ${expected} got ${got}`,
+      );
     }
   }));
 
@@ -289,7 +444,11 @@ test("scoreBirthCity: empty-string city does not score (existing semantics)", ()
     const expr = scoreBirthCity(sql`''::text`, sql`''::text`, 10);
     assert.strictEqual(Number(await evalSql(expr)), 0);
 
-    const expr2 = scoreBirthCity(sql`'amsterdam'::text`, sql`'amsterdam'::text`, 10);
+    const expr2 = scoreBirthCity(
+      sql`'amsterdam'::text`,
+      sql`'amsterdam'::text`,
+      10,
+    );
     assert.strictEqual(Number(await evalSql(expr2)), 10);
   }));
 
@@ -298,7 +457,10 @@ test("similarFirstNamePrefix: requires LENGTH ≥ 3 on both sides", () =>
     const expr = similarFirstNamePrefix(sql`'ad'::text`, sql`'ad'::text`);
     assert.strictEqual(await evalSql(expr), false);
 
-    const expr2 = similarFirstNamePrefix(sql`'adamson'::text`, sql`'adamovic'::text`);
+    const expr2 = similarFirstNamePrefix(
+      sql`'adamson'::text`,
+      sql`'adamovic'::text`,
+    );
     assert.strictEqual(await evalSql(expr2), true);
   }));
 

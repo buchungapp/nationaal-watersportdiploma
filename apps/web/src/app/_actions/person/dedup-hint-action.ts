@@ -1,6 +1,6 @@
 "use server";
 
-import { useRedisClient, User, withRedisClient } from "@nawadi/core";
+import { User, useRedisClient, withRedisClient } from "@nawadi/core";
 import { z } from "zod";
 import {
   getPrimaryPerson,
@@ -28,7 +28,7 @@ import { actionClientWithMeta } from "../safe-action";
 // expiration is automatic and gradual.
 
 const RATE_LIMIT_PER_MINUTE = 10;
-const WINDOW_SECONDS = 60;
+const _WINDOW_SECONDS = 60;
 const SAFETY_TTL = 90; // a touch longer than the window
 
 async function checkRateLimit(personId: string): Promise<void> {

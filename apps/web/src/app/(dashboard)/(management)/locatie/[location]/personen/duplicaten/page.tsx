@@ -3,7 +3,10 @@ import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
 import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
-import { listLocationDuplicatePairs, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listLocationDuplicatePairs,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { DuplicatePairsList } from "./_components/DuplicatePairsList";
 
 export const dynamic = "force-dynamic";

@@ -62,9 +62,9 @@ export function LayoutTabsFallback() {
     >
       {/* TODO: href="#" is not a nice solution, but it works for now */}
       {/* Fallback shows the tab list before flags resolve — the Duplicaten
-        * tab is included optimistically; if the flag is off it'll vanish
-        * once LayoutTabsContent finishes loading. The brief flash is
-        * acceptable for an internal admin route. */}
+       * tab is included optimistically; if the flag is off it'll vanish
+       * once LayoutTabsContent finishes loading. The brief flash is
+       * acceptable for an internal admin route. */}
       {[
         { name: "Cursisten" },
         { name: "Diploma's" },
