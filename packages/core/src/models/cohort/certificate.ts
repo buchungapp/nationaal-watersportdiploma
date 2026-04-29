@@ -68,7 +68,8 @@ export const listStatus = wrapQuery(
       const canonicalCompetency = query.$with("canonical_competency").as(
         query
           .selectDistinct({
-            studentCurriculumId: s.studentCompletedCompetency.studentCurriculumId,
+            studentCurriculumId:
+              s.studentCompletedCompetency.studentCurriculumId,
             competencyId: s.studentCompletedCompetency.competencyId,
           })
           .from(s.studentCompletedCompetency)
@@ -78,10 +79,7 @@ export const listStatus = wrapQuery(
           )
           .where(
             and(
-              eq(
-                s.studentCompletedCompetency.isMergeConflictDuplicate,
-                false,
-              ),
+              eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
               isNull(s.studentCompletedCompetency.deletedAt),
               isNull(s.certificate.deletedAt),
               isNotNull(s.certificate.issuedAt),
@@ -113,8 +111,7 @@ export const listStatus = wrapQuery(
           // canonical (otherwise the issuance produces nothing new).
           // Drives the `geblokkeerd` row state and the diplomas-tab
           // count under option d.
-          newlyIssuable:
-            sql<boolean>`(
+          newlyIssuable: sql<boolean>`(
               COUNT(${s.curriculumCompetency.id}) FILTER (
                 WHERE COALESCE(${latestProgress.progress}, 0) >= 100
                    OR ${canonicalCompetency.competencyId} IS NOT NULL
@@ -151,10 +148,7 @@ export const listStatus = wrapQuery(
         .leftJoin(
           canonicalCompetency,
           and(
-            eq(
-              canonicalCompetency.studentCurriculumId,
-              s.studentCurriculum.id,
-            ),
+            eq(canonicalCompetency.studentCurriculumId, s.studentCurriculum.id),
             eq(canonicalCompetency.competencyId, s.curriculumCompetency.id),
           ),
         )

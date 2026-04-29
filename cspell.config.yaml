@@ -152,6 +152,9 @@ words:
   - unredacted
   - Uturn
   - wordprocessingml
+  - alnum
+  - DSLT
+  - repointing
 ignoreWords:
   - TERMS
   - transform

@@ -789,7 +789,7 @@ test("user.person.mergePersons skips soft-deleted target curriculum and migrates
       `Expected exactly 1 live curriculum on target after merge, got ${liveCurriculaForTarget.length}`,
     );
     assert.equal(
-      liveCurriculaForTarget[0]!.id,
+      liveCurriculaForTarget[0]?.id,
       sourceStudentCurriculumId,
       "Live curriculum on target should be the migrated source — not the previously-deleted target curriculum",
     );
@@ -806,7 +806,7 @@ test("user.person.mergePersons skips soft-deleted target curriculum and migrates
         ),
       );
     assert.equal(reachableCertificates.length, 1);
-    assert.equal(reachableCertificates[0]!.id, sourceCertificateId);
+    assert.equal(reachableCertificates[0]?.id, sourceCertificateId);
 
     // The originally-deleted target curriculum should still exist as
     // soft-deleted — we don't resurrect or hard-delete it; it just
@@ -820,7 +820,7 @@ test("user.person.mergePersons skips soft-deleted target curriculum and migrates
       .where(eq(s.studentCurriculum.id, targetStudentCurriculumId));
     assert.equal(deletedTargetCurriculum.length, 1);
     assert.ok(
-      deletedTargetCurriculum[0]!.deletedAt,
+      deletedTargetCurriculum[0]?.deletedAt,
       "Deleted target curriculum should remain soft-deleted, untouched by the merge",
     );
   }));
@@ -1378,7 +1378,7 @@ test("student.curriculum.listProgressByPersonId picks canonical (non-merge-dupli
       `Expected one module to surface, got ${personEntry.modules.length}`,
     );
     assert.equal(
-      personEntry.modules[0]!.certificateId,
+      personEntry.modules[0]?.certificateId,
       newerCertId,
       "Module should reference the canonical (newer) certificate, not the merge-conflict duplicate (older one)",
     );

@@ -1516,19 +1516,14 @@ export const mergePersons = wrapCommand(
           .update(s.pvbBeoordelaarBeschikbaarheid)
           .set({ beoordelaarId: input.targetPersonId })
           .where(
-            eq(
-              s.pvbBeoordelaarBeschikbaarheid.beoordelaarId,
-              input.personId,
-            ),
+            eq(s.pvbBeoordelaarBeschikbaarheid.beoordelaarId, input.personId),
           );
 
         // pvb_leercoach_toestemming.leercoach_id — no unique on column.
         await tx
           .update(s.pvbLeercoachToestemming)
           .set({ leercoachId: input.targetPersonId })
-          .where(
-            eq(s.pvbLeercoachToestemming.leercoachId, input.personId),
-          );
+          .where(eq(s.pvbLeercoachToestemming.leercoachId, input.personId));
 
         await tx.delete(s.person).where(eq(s.person.id, input.personId));
       });
