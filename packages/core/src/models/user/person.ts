@@ -876,6 +876,15 @@ export const mergePersons = wrapCommand(
           await tx.delete(s.actor).where(eq(s.actor.personId, input.personId));
         }
 
+        // Both queries filter to live (non-soft-deleted) curricula. A
+        // soft-deleted target curriculum at the same (curriculumId,
+        // gearTypeId) as a live source curriculum would otherwise be
+        // detected as a "conflict" — the merge would then move active
+        // certs + completed competencies onto the deleted target,
+        // burying source's live data. The partial unique index
+        // (migration 0038) lets us safely UPDATE the source's personId
+        // to the target without colliding on the index slot still
+        // held by the deleted row.
         const sourceStudentCurricula = await tx
           .select({
             id: s.studentCurriculum.id,
@@ -884,7 +893,12 @@ export const mergePersons = wrapCommand(
             createdAt: s.studentCurriculum.createdAt,
           })
           .from(s.studentCurriculum)
-          .where(eq(s.studentCurriculum.personId, input.personId));
+          .where(
+            and(
+              eq(s.studentCurriculum.personId, input.personId),
+              isNull(s.studentCurriculum.deletedAt),
+            ),
+          );
 
         const targetStudentCurricula = await tx
           .select({
@@ -894,7 +908,12 @@ export const mergePersons = wrapCommand(
             createdAt: s.studentCurriculum.createdAt,
           })
           .from(s.studentCurriculum)
-          .where(eq(s.studentCurriculum.personId, input.targetPersonId));
+          .where(
+            and(
+              eq(s.studentCurriculum.personId, input.targetPersonId),
+              isNull(s.studentCurriculum.deletedAt),
+            ),
+          );
 
         const targetCurriculumByIdentity = new Map<
           string,

@@ -43,11 +43,14 @@ export const studentCurriculum = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex("student_curriculum_unq_identity_gear_curriculum").on(
-      table.personId,
-      table.curriculumId,
-      table.gearTypeId,
-    ),
+    // Partial unique index: only one LIVE student_curriculum per
+    // (person, curriculum, gear). Soft-deleted rows don't occupy the
+    // unique slot, which lets the merge code skip them and lets a
+    // re-enrolment after a soft delete proceed cleanly. Mirrors the
+    // pattern on cohort_allocation's unique index.
+    uniqueIndex("student_curriculum_unq_identity_gear_curriculum")
+      .on(table.personId, table.curriculumId, table.gearTypeId)
+      .where(sql`${table.deletedAt} IS NULL`),
     index("student_curriculum_idx_person").on(table.personId),
     foreignKey({
       columns: [table.curriculumId, table.gearTypeId],
