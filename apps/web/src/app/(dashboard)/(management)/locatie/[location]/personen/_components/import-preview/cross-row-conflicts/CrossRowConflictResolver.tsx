@@ -2,7 +2,7 @@
 
 import { ExclamationTriangleIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
 import dayjs from "dayjs";
-import { memo, useState, use } from "react";
+import { memo, useEffect, useState, use } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -287,11 +287,51 @@ function DifferentPeopleOverride({
   const perRow =
     groupDecision?.kind === "different_people" ? groupDecision.perRow : {};
 
+  // Each row in the group gets its own default profile letter (A, B, C…).
+  // Two rows on the same letter → shareNewPersonWithGroup matches → server
+  // creates ONE person and links both rows to it. Default = each row on
+  // its own letter (= the original "different people" behavior). Operator
+  // merges by clicking another row's letter.
+  const profileKey = (letter: string) => `${groupKey}_profile_${letter}`;
+  const letterFor = (rowIndex: number) => {
+    const i = groupRows.findIndex((r) => r.rowIndex === rowIndex);
+    return String.fromCharCode(65 + Math.max(0, i));
+  };
+  const profileLetters = groupRows.map((_, i) => String.fromCharCode(65 + i));
+
+  // Initialize defaults the first time this override is opened.
+  useEffect(() => {
+    if (groupDecision?.kind === "different_people") return;
+    const seed: Record<number, RowDecision> = {};
+    for (const r of groupRows) {
+      seed[r.rowIndex] = {
+        kind: "create_new",
+        shareNewPersonWithGroup: profileKey(letterFor(r.rowIndex)),
+      };
+    }
+    ctx.actions.setGroupDecision(groupKey, {
+      kind: "different_people",
+      perRow: seed,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupKey]);
+
   const setRow = (rowIndex: number, decision: RowDecision) => {
     ctx.actions.setGroupDecision(groupKey, {
       kind: "different_people",
       perRow: { ...perRow, [rowIndex]: decision },
     });
+  };
+
+  // Selected profile letter for a row, derived from its decision.
+  const selectedLetter = (rowIndex: number): string | null => {
+    const d = perRow[rowIndex];
+    if (d?.kind !== "create_new") return null;
+    const key = d.shareNewPersonWithGroup;
+    if (!key) return null;
+    const prefix = `${groupKey}_profile_`;
+    if (!key.startsWith(prefix)) return null;
+    return key.slice(prefix.length);
   };
 
   return (
@@ -300,9 +340,11 @@ function DifferentPeopleOverride({
         Per rij beslissen — verschillende personen
       </Strong>
       <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">
-        Voor elke rij: wil je deze koppelen aan{" "}
-        {sharedCandidate ? "het bestaande profiel" : "een (eigen) nieuw profiel"}
-        , of een ander profiel?
+        Geef elke rij een profielletter. Rijen met dezelfde letter delen één
+        profiel; verschillende letters worden verschillende profielen.
+        {sharedCandidate
+          ? " Of koppel een rij aan het bestaande profiel."
+          : ""}
       </Text>
       <div className="mt-3 space-y-2">
         {groupRows.map((r) => {
@@ -310,6 +352,9 @@ function DifferentPeopleOverride({
           const name = [r.firstName, r.lastNamePrefix, r.lastName]
             .filter(Boolean)
             .join(" ");
+          const isUseExisting = decision?.kind === "use_existing";
+          const isSkip = decision?.kind === "skip";
+          const sel = selectedLetter(r.rowIndex);
           return (
             <div
               key={r.rowIndex}
@@ -318,7 +363,7 @@ function DifferentPeopleOverride({
               <div className="font-medium">
                 Rij {r.rowIndex + 1}: {name}
               </div>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 {sharedCandidate ? (
                   <button
                     type="button"
@@ -330,7 +375,7 @@ function DifferentPeopleOverride({
                     }
                     className={
                       "rounded border px-2 py-1 text-xs " +
-                      (decision?.kind === "use_existing"
+                      (isUseExisting
                         ? "border-branding-dark bg-branding-light/10"
                         : "border-zinc-950/10 hover:bg-zinc-50")
                     }
@@ -338,18 +383,28 @@ function DifferentPeopleOverride({
                     Koppel aan bestaand profiel
                   </button>
                 ) : null}
-                <button
-                  type="button"
-                  onClick={() => setRow(r.rowIndex, { kind: "create_new" })}
-                  className={
-                    "rounded border px-2 py-1 text-xs " +
-                    (decision?.kind === "create_new"
-                      ? "border-branding-dark bg-branding-light/10"
-                      : "border-zinc-950/10 hover:bg-zinc-50")
-                  }
-                >
-                  Maak nieuw profiel
-                </button>
+                <span className="text-xs text-zinc-500">Profiel:</span>
+                {profileLetters.map((letter) => (
+                  <button
+                    key={letter}
+                    type="button"
+                    onClick={() =>
+                      setRow(r.rowIndex, {
+                        kind: "create_new",
+                        shareNewPersonWithGroup: profileKey(letter),
+                      })
+                    }
+                    className={
+                      "rounded border px-2 py-1 text-xs font-mono " +
+                      (sel === letter
+                        ? "border-branding-dark bg-branding-light/10"
+                        : "border-zinc-950/10 hover:bg-zinc-50")
+                    }
+                    aria-label={`Profiel ${letter}`}
+                  >
+                    {letter}
+                  </button>
+                ))}
                 <button
                   type="button"
                   onClick={() =>
@@ -360,7 +415,7 @@ function DifferentPeopleOverride({
                   }
                   className={
                     "rounded border px-2 py-1 text-xs " +
-                    (decision?.kind === "skip"
+                    (isSkip
                       ? "border-zinc-950 bg-zinc-100"
                       : "border-zinc-950/10 hover:bg-zinc-50")
                   }
@@ -372,6 +427,42 @@ function DifferentPeopleOverride({
           );
         })}
       </div>
+      <ProfileSummary groupRows={groupRows} selectedLetter={selectedLetter} />
     </div>
+  );
+}
+
+function ProfileSummary({
+  groupRows,
+  selectedLetter,
+}: {
+  groupRows: ParsedPersonRow[];
+  selectedLetter: (rowIndex: number) => string | null;
+}) {
+  const byLetter = new Map<string, number[]>();
+  for (const r of groupRows) {
+    const l = selectedLetter(r.rowIndex);
+    if (!l) continue;
+    if (!byLetter.has(l)) byLetter.set(l, []);
+    // biome-ignore lint/style/noNonNullAssertion: just set above
+    byLetter.get(l)!.push(r.rowIndex);
+  }
+  const distinct = byLetter.size;
+  if (distinct === 0) return null;
+  return (
+    <Text className="!mt-3 !text-xs !text-zinc-600 dark:!text-zinc-400">
+      <Strong className="!text-xs">
+        Resultaat: {distinct} {distinct === 1 ? "nieuw profiel" : "nieuwe profielen"}
+      </Strong>
+      {" — "}
+      {[...byLetter.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(
+          ([letter, rows]) =>
+            `${letter}: rij ${rows.map((i) => i + 1).join(" + ")}`,
+        )
+        .join(" · ")}
+      .
+    </Text>
   );
 }
