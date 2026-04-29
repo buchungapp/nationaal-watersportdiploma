@@ -28,6 +28,7 @@ import {
   wrapCommand,
   wrapQuery,
 } from "../../utils/index.js";
+import * as DuplicateScoring from "./_internal/duplicate-scoring.js";
 import { insertSchema, personSchema } from "./person.schema.js";
 import { getOrCreateFromEmail } from "./user.js";
 import { selectSchema } from "./user.schema.js";
@@ -189,6 +190,409 @@ export const createLocationLink = wrapCommand(
         });
 
       return;
+    },
+  ),
+);
+
+/**
+ * Operator-driven location link primitive used by the import preview commit
+ * path. Differs from `createLocationLink` in policy: a previously revoked or
+ * removed link is NEVER silently re-linked. Re-linking after a revoke is a
+ * GDPR consent regression — the revoke was an active operator decision (or a
+ * data-subject withdrawal). Operators must escalate to NWD/sysadmin for the
+ * re-link, who handle it with proper consent record.
+ *
+ *   no existing link  → insert with status='linked'
+ *   linked active     → no-op (idempotent)
+ *   revoked / removed → THROW with operator-facing policy message
+ */
+export const linkToLocation = wrapCommand(
+  "user.person.linkToLocation",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      locationId: uuidSchema,
+    }),
+    z.void(),
+    async (input) => {
+      const query = useQuery();
+
+      const existing = await query
+        .select({ status: s.personLocationLink.status })
+        .from(s.personLocationLink)
+        .where(
+          and(
+            eq(s.personLocationLink.personId, input.personId),
+            eq(s.personLocationLink.locationId, input.locationId),
+          ),
+        )
+        .then(possibleSingleRow);
+
+      if (existing?.status === "linked") {
+        return;
+      }
+
+      if (existing?.status === "revoked" || existing?.status === "removed") {
+        throw new Error(
+          "Deze persoon was eerder verwijderd. Neem contact op met NWD om opnieuw toe te voegen.",
+        );
+      }
+
+      await query.insert(s.personLocationLink).values({
+        personId: input.personId,
+        locationId: input.locationId,
+        status: "linked",
+        permissionLevel: "none",
+      });
+
+      return;
+    },
+  ),
+);
+
+/**
+ * Score a set of pasted candidate rows against the operator's location's
+ * linked-active persons. Returns matches grouped by row index plus the
+ * cross-row groups (when ≥2 rows resolve to the same existing person above
+ * threshold).
+ *
+ * The query is GDPR-scoped at the database level: only persons with
+ * `personLocationLink.status='linked'` for `locationId` and `deletedAt IS NULL`
+ * are scoreable. Operators do not see persons they shouldn't.
+ *
+ * Aggregates (cert count, last diploma date) are computed in the same SQL
+ * via LEFT JOIN over already-matched persons — one round trip per call. The
+ * full per-person history (cohort labels, certificate handles, etc.) is
+ * fetched lazily by the UI's history side panel.
+ */
+export const findCandidateMatchesInLocation = wrapQuery(
+  "user.person.findCandidateMatchesInLocation",
+  withZod(
+    z.object({
+      locationId: uuidSchema,
+      targetCohortId: uuidSchema.optional(),
+      candidates: z
+        .array(
+          z.object({
+            rowIndex: z.number().int().nonnegative(),
+            firstName: z.string(),
+            lastName: z.string().nullable(),
+            lastNamePrefix: z.string().nullable(),
+            dateOfBirth: z.string(), // YYYY-MM-DD
+            birthCity: z.string(),
+            email: z.string().nullable(),
+          }),
+        )
+        .max(200),
+    }),
+    z.object({
+      matchesByRow: z.array(
+        z.object({
+          rowIndex: z.number().int(),
+          candidates: z.array(
+            z.object({
+              personId: z.string().uuid(),
+              score: z.number(),
+              reasons: z.array(z.string()),
+              firstName: z.string(),
+              lastName: z.string().nullable(),
+              lastNamePrefix: z.string().nullable(),
+              dateOfBirth: z.string().nullable(),
+              birthCity: z.string().nullable(),
+              certificateCount: z.number().int(),
+              lastDiplomaIssuedAt: z.string().nullable(),
+              isAlreadyInTargetCohort: z.boolean(),
+            }),
+          ),
+        }),
+      ),
+      crossRowGroups: z.array(
+        z.object({
+          rowIndices: z.array(z.number().int()),
+          sharedCandidatePersonIds: z.array(z.string().uuid()),
+        }),
+      ),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      if (input.candidates.length === 0) {
+        return { matchesByRow: [], crossRowGroups: [] };
+      }
+
+      // Build the VALUES list of pasted candidates for the CTE. Each row
+      // becomes (row_index, first_name, last_name, last_name_prefix,
+      // date_of_birth, birth_city). Email isn't used in scoring v1 (no userId
+      // boost path) but kept available for future similarity work.
+      const valuesRows = input.candidates.map(
+        (c) =>
+          sql`(${c.rowIndex}::int, ${c.firstName}::text, ${c.lastName}::text, ${c.lastNamePrefix}::text, ${c.dateOfBirth}::date, ${c.birthCity}::text)`,
+      );
+
+      const targetCohortFilter = input.targetCohortId
+        ? sql`(
+            SELECT EXISTS (
+              SELECT 1
+              FROM cohort_allocation ca
+              INNER JOIN actor a ON a.id = ca.actor_id
+              WHERE ca.cohort_id = ${input.targetCohortId}::uuid
+                AND ca.deleted_at IS NULL
+                AND a.deleted_at IS NULL
+                AND a.person_id = lp.id
+            )
+          )`
+        : sql`FALSE`;
+
+      const NORMALIZE = (col: SQL) => sql`
+        LOWER(REGEXP_REPLACE(COALESCE(${col}, ''), '[^[:alnum:]]+', '', 'g'))
+      `;
+
+      const stmt = sql`
+        WITH pasted AS (
+          SELECT
+            v.row_index,
+            v.first_name AS raw_first_name,
+            v.last_name AS raw_last_name,
+            v.last_name_prefix AS raw_last_name_prefix,
+            v.date_of_birth AS dob,
+            v.birth_city AS raw_birth_city,
+            ${NORMALIZE(sql`v.first_name`)} AS first_norm,
+            ${NORMALIZE(sql`v.last_name`)} AS last_norm,
+            ${NORMALIZE(
+              sql`TRIM(CONCAT(
+                COALESCE(v.last_name_prefix, ''),
+                CASE WHEN v.last_name_prefix IS NOT NULL THEN ' ' ELSE '' END,
+                COALESCE(v.last_name, '')
+              ))`,
+            )} AS full_last_norm,
+            ${NORMALIZE(sql`v.birth_city`)} AS birth_city_norm,
+            NULL::uuid AS user_id
+          FROM (VALUES ${sql.join(valuesRows, sql`, `)})
+            AS v(row_index, first_name, last_name, last_name_prefix, date_of_birth, birth_city)
+        ),
+        location_persons AS (
+          SELECT
+            p.id,
+            p.first_name,
+            p.last_name,
+            p.last_name_prefix,
+            p.date_of_birth,
+            p.birth_city,
+            p.user_id,
+            ${NORMALIZE(sql`p.first_name`)} AS first_norm,
+            ${NORMALIZE(sql`p.last_name`)} AS last_norm,
+            ${NORMALIZE(
+              sql`TRIM(CONCAT(
+                COALESCE(p.last_name_prefix, ''),
+                CASE WHEN p.last_name_prefix IS NOT NULL THEN ' ' ELSE '' END,
+                COALESCE(p.last_name, '')
+              ))`,
+            )} AS full_last_norm,
+            ${NORMALIZE(sql`p.birth_city`)} AS birth_city_norm
+          FROM person p
+          INNER JOIN person_location_link pll
+            ON pll.person_id = p.id
+          WHERE pll.location_id = ${input.locationId}::uuid
+            AND pll.status = 'linked'
+            AND p.deleted_at IS NULL
+            AND p.first_name IS NOT NULL
+        ),
+        scored AS (
+          SELECT
+            pa.row_index,
+            lp.id AS person_id,
+            lp.first_name,
+            lp.last_name,
+            lp.last_name_prefix,
+            lp.date_of_birth::text AS date_of_birth,
+            lp.birth_city,
+            -- Use the name+birth scoring branch: pasted candidates have no
+            -- user_id, so the same-user branch is never applicable.
+            ${DuplicateScoring.scoreNameBirthPair(
+              {
+                firstNorm: sql`pa.first_norm`,
+                lastNorm: sql`pa.last_norm`,
+                fullLastNorm: sql`pa.full_last_norm`,
+                dateOfBirth: sql`pa.dob`,
+                birthCityNorm: sql`pa.birth_city_norm`,
+                userId: sql`pa.user_id`,
+              },
+              {
+                firstNorm: sql`lp.first_norm`,
+                lastNorm: sql`lp.last_norm`,
+                fullLastNorm: sql`lp.full_last_norm`,
+                dateOfBirth: sql`lp.date_of_birth`,
+                birthCityNorm: sql`lp.birth_city_norm`,
+                userId: sql`lp.user_id`,
+              },
+            )} AS score,
+            ARRAY_REMOVE(ARRAY[
+              CASE WHEN pa.first_norm <> '' AND pa.first_norm = lp.first_norm
+                   THEN 'same first name' END,
+              CASE WHEN (pa.full_last_norm <> '' AND pa.full_last_norm = lp.full_last_norm)
+                       OR (pa.last_norm <> '' AND pa.last_norm = lp.last_norm)
+                   THEN 'same last name' END,
+              CASE WHEN pa.dob IS NOT NULL AND lp.date_of_birth IS NOT NULL
+                       AND pa.dob = lp.date_of_birth
+                   THEN 'same birth date'
+                   WHEN pa.dob IS NOT NULL AND lp.date_of_birth IS NOT NULL
+                       AND ABS(pa.dob - lp.date_of_birth) <= 7
+                   THEN 'close birth date' END,
+              CASE WHEN pa.birth_city_norm <> ''
+                       AND pa.birth_city_norm = lp.birth_city_norm
+                   THEN 'same birth city' END
+            ], NULL) AS reasons,
+            ${targetCohortFilter} AS is_already_in_target_cohort
+          FROM pasted pa
+          INNER JOIN location_persons lp
+            -- Prefilter to keep the cross-product manageable: require either
+            -- same DOB (within a year) OR same first name (or prefix).
+            ON (
+              (pa.dob IS NOT NULL
+                AND lp.date_of_birth IS NOT NULL
+                AND ABS(pa.dob - lp.date_of_birth) <= 365)
+              OR (
+                pa.first_norm <> ''
+                AND (
+                  pa.first_norm = lp.first_norm
+                  OR (LENGTH(pa.first_norm) >= 3
+                      AND LENGTH(lp.first_norm) >= 3
+                      AND LEFT(pa.first_norm, 3) = LEFT(lp.first_norm, 3))
+                )
+              )
+            )
+        ),
+        person_aggregates AS (
+          SELECT
+            sc.person_id,
+            COUNT(DISTINCT cert.id) FILTER (
+              WHERE cert.deleted_at IS NULL AND cert.issued_at IS NOT NULL
+            )::int AS certificate_count,
+            MAX(cert.issued_at) FILTER (
+              WHERE cert.deleted_at IS NULL AND cert.issued_at IS NOT NULL
+            ) AS last_diploma_issued_at
+          FROM scored sc
+          LEFT JOIN student_curriculum scur ON scur.person_id = sc.person_id
+          LEFT JOIN certificate cert ON cert.student_curriculum_id = scur.id
+          GROUP BY sc.person_id
+        )
+        SELECT
+          scored.row_index,
+          scored.person_id,
+          scored.first_name,
+          scored.last_name,
+          scored.last_name_prefix,
+          scored.date_of_birth,
+          scored.birth_city,
+          scored.score::int AS score,
+          scored.reasons,
+          scored.is_already_in_target_cohort,
+          COALESCE(agg.certificate_count, 0)::int AS certificate_count,
+          agg.last_diploma_issued_at
+        FROM scored
+        LEFT JOIN person_aggregates agg ON agg.person_id = scored.person_id
+        WHERE scored.score >= ${DuplicateScoring.SCORE_THRESHOLDS.weak}
+        ORDER BY scored.row_index ASC, scored.score DESC, scored.person_id ASC
+      `;
+
+      const result = await query.execute(stmt);
+      type Row = {
+        row_index: number;
+        person_id: string;
+        first_name: string;
+        last_name: string | null;
+        last_name_prefix: string | null;
+        date_of_birth: string | null;
+        birth_city: string | null;
+        score: number;
+        reasons: string[];
+        is_already_in_target_cohort: boolean;
+        certificate_count: number;
+        last_diploma_issued_at: string | null;
+      };
+      const rows = result.rows as unknown as Row[];
+
+      const byRow = new Map<
+        number,
+        Array<{
+          personId: string;
+          score: number;
+          reasons: string[];
+          firstName: string;
+          lastName: string | null;
+          lastNamePrefix: string | null;
+          dateOfBirth: string | null;
+          birthCity: string | null;
+          certificateCount: number;
+          lastDiplomaIssuedAt: string | null;
+          isAlreadyInTargetCohort: boolean;
+        }>
+      >();
+
+      for (const r of rows) {
+        if (!byRow.has(r.row_index)) {
+          byRow.set(r.row_index, []);
+        }
+        // biome-ignore lint/style/noNonNullAssertion: Map.has guard above
+        byRow.get(r.row_index)!.push({
+          personId: r.person_id,
+          score: Number(r.score),
+          reasons: r.reasons ?? [],
+          firstName: r.first_name,
+          lastName: r.last_name,
+          lastNamePrefix: r.last_name_prefix,
+          dateOfBirth: r.date_of_birth,
+          birthCity: r.birth_city,
+          certificateCount: Number(r.certificate_count),
+          lastDiplomaIssuedAt: r.last_diploma_issued_at,
+          isAlreadyInTargetCohort: r.is_already_in_target_cohort,
+        });
+      }
+
+      // Cross-row group detection. A group is a personId that appears in
+      // ≥2 rows' candidate sets, scored at or above the strong threshold.
+      // (Below "strong" the match is "possible" and shouldn't force a
+      // conflict resolution — operator can resolve weak matches case-by-case.)
+      const personToRows = new Map<string, number[]>();
+      for (const [rowIndex, candidates] of byRow.entries()) {
+        for (const c of candidates) {
+          if (c.score < DuplicateScoring.SCORE_THRESHOLDS.strong) continue;
+          if (!personToRows.has(c.personId)) {
+            personToRows.set(c.personId, []);
+          }
+          // biome-ignore lint/style/noNonNullAssertion: Map.has guard above
+          personToRows.get(c.personId)!.push(rowIndex);
+        }
+      }
+
+      // Merge groups: rows that share at least one strong-match person form a
+      // single group. (Triplet case: rows A, B, C all match person X → one
+      // group with rowIndices [A, B, C], sharedCandidatePersonIds [X].)
+      const groups: Array<{
+        rowIndices: number[];
+        sharedCandidatePersonIds: string[];
+      }> = [];
+      const groupKeyFor = new Map<string, number>(); // canonical row-set -> group index
+      for (const [personId, rowIndices] of personToRows.entries()) {
+        if (rowIndices.length < 2) continue;
+        const key = [...new Set(rowIndices)].sort((a, b) => a - b).join(",");
+        const existing = groupKeyFor.get(key);
+        if (existing !== undefined) {
+          groups[existing]!.sharedCandidatePersonIds.push(personId);
+        } else {
+          groupKeyFor.set(key, groups.length);
+          groups.push({
+            rowIndices: [...new Set(rowIndices)].sort((a, b) => a - b),
+            sharedCandidatePersonIds: [personId],
+          });
+        }
+      }
+
+      const matchesByRow = Array.from(byRow.entries())
+        .map(([rowIndex, candidates]) => ({ rowIndex, candidates }))
+        .sort((a, b) => a.rowIndex - b.rowIndex);
+
+      return { matchesByRow, crossRowGroups: groups };
     },
   ),
 );
@@ -1531,4 +1935,4 @@ export const mergePersons = wrapCommand(
   ),
 );
 
-export * as DuplicateScoring from "./_internal/duplicate-scoring.js";
+export { DuplicateScoring };

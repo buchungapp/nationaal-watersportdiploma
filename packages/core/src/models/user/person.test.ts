@@ -2,7 +2,7 @@ import assert from "node:assert";
 import test from "node:test";
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { useQuery, withTestTransaction } from "../../contexts/index.js";
 import {
   Certificate,
@@ -1692,4 +1692,324 @@ test("student.curriculum.listCompletedCompetenciesById excludes merge-conflict d
       0,
       "Flagged merge-conflict duplicate row must NOT be returned — it is not canonical",
     );
+  }));
+
+test("user.person.linkToLocation creates a fresh active link", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-fresh-location",
+      name: "Link Fresh Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Fresh",
+    });
+
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+
+    const links = await query
+      .select({ status: s.personLocationLink.status })
+      .from(s.personLocationLink)
+      .where(
+        and(
+          eq(s.personLocationLink.personId, personId),
+          eq(s.personLocationLink.locationId, location.id),
+        ),
+      );
+    assert.equal(links.length, 1);
+    assert.equal(links[0]!.status, "linked");
+  }));
+
+test("user.person.linkToLocation is idempotent on already-linked", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-idem-location",
+      name: "Link Idem Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Idem",
+    });
+
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+
+    const links = await query
+      .select({ status: s.personLocationLink.status })
+      .from(s.personLocationLink)
+      .where(
+        and(
+          eq(s.personLocationLink.personId, personId),
+          eq(s.personLocationLink.locationId, location.id),
+        ),
+      );
+    assert.equal(links.length, 1);
+  }));
+
+test("user.person.linkToLocation throws when existing link is revoked", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-revoked-location",
+      name: "Link Revoked Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Revoked",
+    });
+
+    await query.insert(s.personLocationLink).values({
+      personId,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    await assert.rejects(
+      User.Person.linkToLocation({ personId, locationId: location.id }),
+      /eerder verwijderd/,
+    );
+  }));
+
+test("user.person.linkToLocation throws when existing link is removed", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-removed-location",
+      name: "Link Removed Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Removed",
+    });
+
+    await query.insert(s.personLocationLink).values({
+      personId,
+      locationId: location.id,
+      status: "removed",
+      permissionLevel: "none",
+    });
+
+    await assert.rejects(
+      User.Person.linkToLocation({ personId, locationId: location.id }),
+      /eerder verwijderd/,
+    );
+  }));
+
+test("findCandidateMatchesInLocation returns empty for empty input", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-empty-location",
+      name: "Find Empty Location",
+    });
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [],
+    });
+    assert.deepEqual(result, { matchesByRow: [], crossRowGroups: [] });
+  }));
+
+test("findCandidateMatchesInLocation surfaces a strong-band match for an exact paste", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-exact-location",
+      name: "Find Exact Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+      birthCity: "Amsterdam",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.matchesByRow.length, 1);
+    const row = result.matchesByRow[0]!;
+    assert.equal(row.rowIndex, 0);
+    assert.equal(row.candidates.length, 1);
+    const cand = row.candidates[0]!;
+    assert.equal(cand.personId, existingPersonId);
+    assert.ok(cand.score >= 200, `expected score >= 200, got ${cand.score}`);
+    assert.ok(cand.reasons.includes("same first name"));
+    assert.ok(cand.reasons.includes("same last name"));
+    assert.ok(cand.reasons.includes("same birth date"));
+    assert.equal(cand.isAlreadyInTargetCohort, false);
+  }));
+
+test("findCandidateMatchesInLocation does NOT surface a person whose link is revoked (GDPR)", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "find-revoked-location",
+      name: "Find Revoked Location",
+    });
+    const { id: revokedPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await query.insert(s.personLocationLink).values({
+      personId: revokedPersonId,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.matchesByRow.length, 0);
+  }));
+
+test("findCandidateMatchesInLocation does NOT surface a soft-deleted person", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "find-deleted-location",
+      name: "Find Deleted Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+    await query
+      .update(s.person)
+      .set({ deletedAt: sql`NOW()` })
+      .where(eq(s.person.id, personId));
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.matchesByRow.length, 0);
+  }));
+
+test("findCandidateMatchesInLocation forms a cross-row group when 2 rows resolve to the same person", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-group-location",
+      name: "Find Group Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 3,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+        {
+          rowIndex: 17,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: null, // missing prefix on this paste, still a strong match
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [3, 17]);
+    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, [
+      existingPersonId,
+    ]);
+  }));
+
+test("findCandidateMatchesInLocation forms a 3-way cross-row group", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-triplet-location",
+      name: "Find Triplet Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [3, 17, 22].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "",
+        email: null,
+      })),
+    });
+
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]!.rowIndices.sort((a, b) => a - b), [3, 17, 22]);
   }));
