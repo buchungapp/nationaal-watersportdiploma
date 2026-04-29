@@ -95,7 +95,7 @@ export function PreviewFooter({
               Bezig met importeren…
             </span>
           ) : (
-            `Bevestigen en importeren — ${personenToImport} personen`
+            `Bevestigen en importeren — ${personenToImport} ${personenToImport === 1 ? "persoon" : "personen"}`
           )}
         </Button>
       </div>
