@@ -12,7 +12,8 @@
     "clean": "rm -rf out && tsc --build --clean",
     "test": "node --test ./out/**/*.test.js",
     "persons:duplicates:analyze": "tsx src/analyze-duplicate-persons.ts",
-    "persons:duplicates:merge": "tsx src/batch-merge-duplicates.ts"
+    "persons:duplicates:merge": "tsx src/batch-merge-duplicates.ts",
+    "dev:seed-bulk-import": "tsx src/seed-bulk-import-fixtures.ts"
   },
   "dependencies": {
     "@nawadi/core": "workspace:^",
