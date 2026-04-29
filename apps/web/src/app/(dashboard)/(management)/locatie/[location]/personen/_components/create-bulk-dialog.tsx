@@ -345,9 +345,17 @@ function SubmitForm({
         return;
       }
     },
-    onError: () => {
+    onError: ({ error }) => {
       setCommitting(false);
-      setErrorMessage(DEFAULT_SERVER_ERROR_MESSAGE);
+      // Surface the real server-side message during development (and any
+      // validation issues from next-safe-action) instead of swallowing
+      // them under the generic fallback. Production users still see the
+      // friendly fallback if no message is available.
+      const serverMsg = error.serverError;
+      const validationMsg = error.validationErrors
+        ? JSON.stringify(error.validationErrors)
+        : undefined;
+      setErrorMessage(serverMsg ?? validationMsg ?? DEFAULT_SERVER_ERROR_MESSAGE);
     },
   });
 

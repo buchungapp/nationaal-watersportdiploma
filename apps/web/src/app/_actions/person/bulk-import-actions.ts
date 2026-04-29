@@ -232,7 +232,14 @@ function parseRowsTolerant(
 // ─── Commit ───────────────────────────────────────────────────────────────
 
 const decisionSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("create_new") }),
+  z.object({
+    kind: z.literal("create_new"),
+    // Optional grouping key — rows with the same key collapse to ONE
+    // newly-created Person at commit time. Used by the cross-row
+    // resolver's "same person" + paste-only flow and the override
+    // panel's per-row profile buckets.
+    shareNewPersonWithGroup: z.string().optional(),
+  }),
   z.object({ kind: z.literal("use_existing"), personId: z.string().uuid() }),
   z.object({
     kind: z.literal("skip"),
