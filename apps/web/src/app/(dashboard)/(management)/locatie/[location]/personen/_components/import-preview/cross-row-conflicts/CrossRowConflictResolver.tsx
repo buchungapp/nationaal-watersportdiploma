@@ -231,13 +231,13 @@ function Outcome({
   return (
     <div className="mt-4 space-y-2">
       <Text>
-        Bij bevestigen wordt{" "}
+        De {group.rowIndices.length} rijen verwijzen naar dezelfde persoon. Bij
+        bevestigen wordt{" "}
         <Strong>
           {profileSummary}
           {cohortSummary}
         </Strong>
-        . De {group.rowIndices.length} rijen verwijzen naar dezelfde persoon —
-        geen dubbele profielen.
+        .
       </Text>
       {hasCohort ? (
         <Text className="!text-sm !text-zinc-500">
