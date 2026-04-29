@@ -1,13 +1,17 @@
 #!/usr/bin/env tsx
 import {
+  Cohort,
   Course,
   Curriculum,
   Location,
   Student,
   User,
+  useQuery,
   withDatabase,
   withSupabaseClient,
 } from "@nawadi/core";
+import { schema as s } from "@nawadi/db";
+import { and, eq, isNull } from "@nawadi/db/drizzle";
 import "dotenv/config";
 import assert from "node:assert";
 import { execSync } from "node:child_process";
@@ -205,6 +209,99 @@ async function seedAll(locationId: string): Promise<Record<string, string>> {
     );
   }
   return ids;
+}
+
+// Creates a cohort and allocates the seeded persons to it. The two
+// Lisa Bakker variants (DOBs 1 day apart, same name + last name) end
+// up as a strong-match duplicate pair within the cohort — exactly what
+// the cohort duplicaten page and overview banner are designed to
+// surface. Idempotent: re-runs reuse the same handle.
+async function seedDuplicateDemoCohort(
+  locationId: string,
+  personIds: Record<string, string>,
+): Promise<{ cohortId: string; cohortHandle: string; created: boolean }> {
+  const cohortHandle = "duplicate-demo";
+  const existing = await Cohort.byIdOrHandle({
+    handle: cohortHandle,
+    locationId,
+  });
+  let cohortId = existing?.id;
+  let created = false;
+
+  if (!cohortId) {
+    const now = Date.now();
+    const cohort = await Cohort.create({
+      handle: cohortHandle,
+      label: "Duplicaten demo",
+      locationId,
+      accessStartTime: new Date(now - 86_400_000).toISOString(),
+      accessEndTime: new Date(now + 180 * 86_400_000).toISOString(),
+    });
+    cohortId = cohort.id;
+    created = true;
+  }
+
+  // Allocate the persons whose duplicate scoring will trip the banner.
+  // Lisa A + Lisa B share name and have a 1-day DOB delta → strong
+  // match. Adam, Eva, Sarah are control rows that should NOT appear
+  // as duplicates of each other.
+  const personKeysToAllocate: (keyof typeof personIds)[] = [
+    "adam",
+    "eva",
+    "lisaA",
+    "lisaB",
+    "sarah",
+  ];
+
+  const query = useQuery();
+
+  for (const key of personKeysToAllocate) {
+    const personId = personIds[key];
+    if (!personId) continue;
+
+    const studentActor = await query
+      .select({ id: s.actor.id })
+      .from(s.actor)
+      .where(
+        and(
+          eq(s.actor.personId, personId),
+          eq(s.actor.locationId, locationId),
+          eq(s.actor.type, "student"),
+          isNull(s.actor.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    if (!studentActor) {
+      console.warn(`  · No student actor for ${key} — skipping allocation.`);
+      continue;
+    }
+
+    // onConflictDoNothing on the partial unique (cohort, actor, NULL)
+    // protects against re-runs. PG treats NULL as distinct so naive
+    // INSERT would happily create duplicates; we don't want that here.
+    const alreadyAllocated = await query
+      .select({ id: s.cohortAllocation.id })
+      .from(s.cohortAllocation)
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.cohortAllocation.actorId, studentActor.id),
+          isNull(s.cohortAllocation.studentCurriculumId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    if (!alreadyAllocated) {
+      await query.insert(s.cohortAllocation).values({
+        cohortId,
+        actorId: studentActor.id,
+      });
+    }
+  }
+
+  return { cohortId, cohortHandle, created };
 }
 
 async function seedDiplomaForAdam(personId: string, locationId: string) {
@@ -415,6 +512,18 @@ async function main() {
 
   console.log("\n→ Adam diploma seeden (best-effort)...");
   await seedDiplomaForAdam(ids.adam!, locationId);
+
+  console.log("\n→ Demo-cohort met duplicaten seeden...");
+  const cohort = await seedDuplicateDemoCohort(locationId, ids);
+  console.log(
+    `  ${cohort.created ? "✓ Cohort aangemaakt" : "✓ Cohort bestond al"}: '${cohort.cohortHandle}' (${cohort.cohortId})`,
+  );
+  console.log(
+    "  ↳ Lisa Bakker (15-07-2009) en Lisa Bakker (16-07-2009) zijn beide gealloceerd",
+  );
+  console.log(
+    "    → /locatie/<locatie>/cohorten/duplicate-demo zou een 'mogelijk dezelfde' duplicate-paar moeten tonen",
+  );
 
   console.log("\n→ TSV genereren...\n");
   const tsv = buildTsv();
