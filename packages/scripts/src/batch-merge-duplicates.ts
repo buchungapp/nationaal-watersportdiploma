@@ -6,7 +6,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import inquirer from "inquirer";
 import {
-  buildDuplicatePersonPairKey,
   chooseDefaultMerge,
   countCohortPersons,
   DEFAULT_AUTO_MERGE_THRESHOLD,
@@ -14,7 +13,6 @@ import {
   DEFAULT_MERGE_THRESHOLD,
   type DuplicatePersonPair,
   findDuplicatePersonPairs,
-  findStudentCurriculumConflictPairKeys,
   formatPerson,
   isAutoMergeSafe,
 } from "./utils/duplicate-person-detection.js";
@@ -54,11 +52,6 @@ async function main() {
             limit: options.limit,
             cohortId: options.cohortId,
           });
-    const curriculumConflictKeys = await findStudentCurriculumConflictPairKeys(
-      database,
-      pairs,
-    );
-
     console.log("Batch duplicate person merge");
     console.log("============================");
     console.log(`Mode: ${options.execute ? "execute" : "dry run"}`);
@@ -79,7 +72,7 @@ async function main() {
     console.log(`Found ${pairs.length} duplicate pairs.`);
 
     if (!options.execute) {
-      printDryRun(pairs, options, curriculumConflictKeys);
+      printDryRun(pairs, options);
       return;
     }
 
@@ -115,23 +108,13 @@ async function main() {
       }
 
       const plan = chooseDefaultMerge(pair);
-      const mergeBlockers = getMergeBlockers(pair, curriculumConflictKeys);
-      const auto =
-        mergeBlockers.length > 0
-          ? { safe: false, reason: mergeBlockers.join(", ") }
-          : isAutoMergeSafe(pair, options.autoThreshold);
+      const auto = isAutoMergeSafe(pair, options.autoThreshold);
       let keep = plan.keep;
       let shouldMerge = auto.safe;
 
       console.log("");
       printPair(pair, index + 1, pairs.length);
       console.log(`Default: keep record ${plan.keep + 1} (${plan.reason})`);
-
-      if (mergeBlockers.length > 0) {
-        console.log(`Skip: ${auto.reason}`);
-        skippedCount++;
-        continue;
-      }
 
       if (auto.safe) {
         console.log(`Auto-merge: ${auto.reason}`);
@@ -230,11 +213,7 @@ async function main() {
   });
 }
 
-function printDryRun(
-  pairs: DuplicatePersonPair[],
-  options: Options,
-  curriculumConflictKeys: Set<string>,
-) {
+function printDryRun(pairs: DuplicatePersonPair[], options: Options) {
   console.log("");
   console.log("Dry-run plan:");
   console.log("Use --execute to actually merge records.");
@@ -242,34 +221,22 @@ function printDryRun(
 
   let autoCount = 0;
   let reviewCount = 0;
-  let blockedCount = 0;
 
   for (const [index, pair] of pairs.entries()) {
     const plan = chooseDefaultMerge(pair);
-    const mergeBlockers = getMergeBlockers(pair, curriculumConflictKeys);
-    const auto =
-      mergeBlockers.length > 0
-        ? { safe: false, reason: mergeBlockers.join(", ") }
-        : isAutoMergeSafe(pair, options.autoThreshold);
-    if (mergeBlockers.length > 0) blockedCount++;
-    else if (auto.safe) autoCount++;
+    const auto = isAutoMergeSafe(pair, options.autoThreshold);
+    if (auto.safe) autoCount++;
     else reviewCount++;
 
     printPair(pair, index + 1, pairs.length);
     console.log(`Default: keep record ${plan.keep + 1} (${plan.reason})`);
-    console.log(
-      `Action: ${mergeBlockers.length > 0 ? "blocked" : auto.safe ? "auto-merge candidate" : auto.reason}`,
-    );
-    if (mergeBlockers.length > 0) {
-      console.log(`Blockers: ${mergeBlockers.join(", ")}`);
-    }
+    console.log(`Action: ${auto.safe ? "auto-merge candidate" : auto.reason}`);
     console.log("");
   }
 
   console.log("Dry-run summary:");
   console.log(`- Auto-merge candidates: ${autoCount}`);
   console.log(`- Manual review needed: ${reviewCount}`);
-  console.log(`- Blocked by known merge constraints: ${blockedCount}`);
 }
 
 function printPair(pair: DuplicatePersonPair, index: number, total: number) {
@@ -351,19 +318,6 @@ function parseUuid(value: string, name: string) {
     throw new Error(`--${name} must be a UUID`);
   }
   return value;
-}
-
-function getMergeBlockers(
-  pair: DuplicatePersonPair,
-  curriculumConflictKeys: Set<string>,
-): string[] {
-  const blockers: string[] = [];
-
-  if (curriculumConflictKeys.has(buildDuplicatePersonPairKey(pair))) {
-    blockers.push("student curriculum conflict requires a merge fix first");
-  }
-
-  return blockers;
 }
 
 async function writeErrorReport(errorReports: ErrorReport[]) {

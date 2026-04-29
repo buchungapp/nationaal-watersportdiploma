@@ -381,45 +381,6 @@ export async function countCohortPersons(
   return Number(row?.count ?? 0);
 }
 
-export async function findStudentCurriculumConflictPairKeys(
-  database: Database,
-  pairs: DuplicatePersonPair[],
-): Promise<Set<string>> {
-  if (pairs.length === 0) {
-    return new Set();
-  }
-
-  const pairValues = pairs.map(
-    (pair) => sql`(${pair.persons[0].id}::uuid, ${pair.persons[1].id}::uuid)`,
-  );
-
-  const result = await database.execute(sql`
-    WITH pairs(person_id1, person_id2) AS (
-      VALUES ${sql.join(pairValues, sql`, `)}
-    )
-    SELECT person_id1::text, person_id2::text
-    FROM pairs
-    WHERE EXISTS (
-      SELECT 1
-      FROM student_curriculum sc1
-      INNER JOIN student_curriculum sc2
-        ON sc1.curriculum_id = sc2.curriculum_id
-        AND sc1.gear_type_id = sc2.gear_type_id
-      WHERE sc1.person_id = person_id1
-        AND sc2.person_id = person_id2
-    )
-  `);
-
-  return new Set(
-    (
-      result.rows as {
-        person_id1: string;
-        person_id2: string;
-      }[]
-    ).map((row) => buildPersonPairKey(row.person_id1, row.person_id2)),
-  );
-}
-
 export function chooseDefaultMerge(pair: DuplicatePersonPair): {
   keep: 0 | 1;
   merge: 0 | 1;
@@ -501,14 +462,6 @@ export function formatPerson(person: DuplicatePerson): string {
   const primary = person.isPrimary ? "primary" : "not primary";
 
   return `${person.fullName} (${dob}) ${handle} [${email}, ${primary}] ${person.id}`;
-}
-
-export function buildDuplicatePersonPairKey(pair: DuplicatePersonPair): string {
-  return buildPersonPairKey(pair.persons[0].id, pair.persons[1].id);
-}
-
-function buildPersonPairKey(personId1: string, personId2: string): string {
-  return [personId1, personId2].sort().join(":");
 }
 
 function mapRowToPair(row: DuplicatePersonRow): DuplicatePersonPair {
