@@ -97,18 +97,24 @@ const columns = [
         return <Code>{value}</Code>;
       }
 
-      // Blocked rows: cohort progress is recorded but every potentially
-      // complete module is already canonical from an earlier diploma —
-      // there is nothing new to issue. The most common cause is a recent
-      // person merge that folded a duplicate's allocation into a profile
-      // that already carries the diploma. Surface this loudly so an
-      // operator running end-of-cohort issuance investigates rather
+      // Blocked rows: at least one module is fully complete on the cohort
+      // side, but every such module is already canonical from an earlier
+      // diploma — there is nothing new to issue. The most common cause is
+      // a recent person merge that folded a duplicate's allocation into a
+      // profile that already carries the diploma. Surface this loudly so
+      // an operator running end-of-cohort issuance investigates rather
       // than leaving the student without their expected new diploma.
+      // Partial progress (e.g. 3/5 competencies in one module) is NOT
+      // blocked — keep the badge off those rows.
       const moduleStatus = row.original.studentCurriculum?.moduleStatus ?? [];
-      const hasProgress = moduleStatus.some((m) => m.completedCompetencies > 0);
+      const hasFullyCompleteModule = moduleStatus.some(
+        (m) =>
+          m.totalCompetencies > 0 &&
+          m.completedCompetencies === m.totalCompetencies,
+      );
       const isBlocked =
         moduleStatus.length > 0 &&
-        hasProgress &&
+        hasFullyCompleteModule &&
         !moduleStatus.some((m) => m.newlyIssuable);
 
       if (isBlocked) {

@@ -64,19 +64,26 @@ export default async function Page(props: {
           //   uitgegeven       — diploma already issued for this allocation
           //   klaar-voor-uitgifte — at least one module would mint new
           //                       canonical content right now
-          //   geblokkeerd      — has cohort progress but every potentially-
-          //                       complete module is already canonical from
-          //                       an earlier cert (typically post-merge);
-          //                       issuance would produce nothing
-          //   geen-voortgang   — no progress, no cert
+          //   geblokkeerd      — at least one module is fully complete on
+          //                       the cohort side BUT every such module is
+          //                       already canonical from an earlier cert
+          //                       (typically post-merge); issuance would
+          //                       produce nothing. Partial progress (e.g.
+          //                       3/5 competencies) is NOT geblokkeerd —
+          //                       those students are simply not done yet
+          //                       and belong in geen-voortgang.
+          //   geen-voortgang   — no fully-complete module, no cert
           const isIssued = !!student.certificate;
           const moduleStatus = student.studentCurriculum?.moduleStatus ?? [];
           const isReady = moduleStatus.some((module) => module.newlyIssuable);
-          const hasProgress = moduleStatus.some(
-            (module) => module.completedCompetencies > 0,
+          const hasFullyCompleteModule = moduleStatus.some(
+            (module) =>
+              module.totalCompetencies > 0 &&
+              module.completedCompetencies === module.totalCompetencies,
           );
-          const isBlocked = !isIssued && !isReady && hasProgress;
-          const isNoProgress = !isIssued && !isReady && !hasProgress;
+          const isBlocked = !isIssued && !isReady && hasFullyCompleteModule;
+          const isNoProgress =
+            !isIssued && !isReady && !hasFullyCompleteModule;
 
           return (
             (parsedSq.weergave.includes("uitgegeven") && isIssued) ||
