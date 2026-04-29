@@ -250,8 +250,14 @@ function computeDiff(
     cand.dateOfBirth &&
     norm(pastedDob) !== norm(candDob)
   ) {
+    // Format both as YYYY-MM-DD strings so dayjs parses them at the same
+    // local-midnight reference — diffing a Date (parsed in local TZ)
+    // against a YYYY-MM-DD string (parsed at local midnight) leaves a
+    // sub-24h gap that truncates to 0 days.
+    const pastedYmd = dayjs(pasted.dateOfBirth).format("YYYY-MM-DD");
+    const candYmd = dayjs(cand.dateOfBirth).format("YYYY-MM-DD");
     const diffDays = Math.abs(
-      dayjs(pasted.dateOfBirth).diff(dayjs(cand.dateOfBirth), "day"),
+      dayjs(pastedYmd).diff(dayjs(candYmd), "day"),
     );
     if (diffDays === 1) dobNote = "1 dag verschil";
     else if (diffDays <= 7) dobNote = `${diffDays} dagen verschil`;
