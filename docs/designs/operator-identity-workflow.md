@@ -170,8 +170,8 @@ reason arrays, `db.$with()` for CTEs without a session, selection mixing
     }
 
     type CrossRowGroup = {
-      rowIndices: number[],   // 2 or more rows with overlapping candidate sets
-      sharedCandidatePersonIds: string[],
+      rowIndices: number[],   // 2 or more rows in one connected component
+      sharedCandidatePersonIds: string[],   // empty for paste-only groups
     }
 ```
 
@@ -181,9 +181,20 @@ in the same query via `LEFT JOIN` over `certificate` and `cohort_allocation` —
 one round trip, no N+1.
 
 **Cross-row group detection runs server-side** as part of
-`findCandidateMatchesInLocation`. Returning the groups (not deriving them
-client-side) means the preview model carries the conflict structure in one
-serialized payload — keeping `server-serialization` slim.
+`findCandidateMatchesInLocation` and uses TWO edge sources:
+
+1. **Existing-match edges:** rows that strong-match (≥150) the same existing
+   person in the operator's location are connected.
+2. **Paste-vs-paste edges:** rows that strong-match each other (regardless of
+   any existing match) are connected. This catches the case where a brand-new
+   Adam was pasted three times — without paste-vs-paste detection each row
+   would default to "create new" and produce three duplicate Person records.
+   Exactly the bug this whole flow is supposed to prevent.
+
+The two edge sets are merged via union-find: rows form one connected group if
+they share *any* strong-match path, existing or paste-only. Empty
+`sharedCandidatePersonIds` signals a paste-only group — the UI defaults to
+"create one new person, link all rows to it."
 
 #### 3. New person primitives (additions, not refactors — P0-C)
 
@@ -505,36 +516,139 @@ with `decisionKind='create_new'`, `presentedCandidatePersonIds=[Adam.id]`,
 | **Multiple matches** | any ≥100 | None preselected | Pick one, or "create new" |
 | **Already in target cohort** | match exists, allocation exists | "Skip" preselected | Click to confirm |
 | **Parse error** | n/a | "Skip" forced | Fix paste or skip |
-| **Cross-row group** (N rows → same person) | n/a | Submit blocked | Resolve via modal |
+| **Cross-row group** (N rows → same person) | n/a | Submit blocked | Confirm "same person" or override to "different people" |
 
-### N-way cross-row conflicts (P1-F)
+### N-way cross-row groups
 
-Detected server-side: any group of 2+ rows whose candidate sets share at least
-one personId above threshold. The detection emits one group entry per shared
-candidate (so a row can appear in multiple groups if it overlaps multiple
-existing persons).
+Detected server-side from two edge sources (see Architecture §2):
 
-UI:
+1. **Existing-match edges** — rows that strong-match the same existing person.
+2. **Paste-vs-paste edges** — rows that strong-match each other regardless of
+   existing-person matches.
+
+Both sources flow through the same union-find component builder, producing one
+connected group per "probably-same-person" cluster. A group can have:
+
+- `sharedCandidatePersonIds: [existingId]` — the rows match an existing roster
+  member. UX defaults to "link all rows to that existing person."
+- `sharedCandidatePersonIds: []` — paste-only group (no existing match). UX
+  defaults to "create one new person, link all rows to it."
+
+### UX framing: "same person by default"
+
+The default operator outcome is **always "treat the rows as the same person."**
+This is the safe outcome — one personId, all roles applied, no duplicate Person
+records (which is the entire reason this feature exists). The "different
+people" path is the rare exception (twins, cousins) and is reachable as a
+secondary text-link, not a primary button.
+
+**Why this matters:** the previous design proposed three equal-weight options
+including "Verschillende personen — maak nieuwe profielen." That option, if
+clicked on a real same-person case, creates the exact duplicate-Person bug the
+whole feature is supposed to prevent. Default UX must lead the operator into
+the safe outcome with one click.
+
+UI for an existing-match group (3 rows → existing Adam de Vries):
 
 ```
-  ⚠ Conflict — 3 rijen lijken hetzelfde profiel te zijn.
+  ⓘ 3 rijen lijken dezelfde persoon te zijn.
 
-      Rij  3: pasted "Adam de Vries, 12-05-2010, adam@gmail.com"
-      Rij 17: pasted "Adam Vries, 12-05-2010, parent@gmail.com"
-      Rij 22: pasted "A. de Vries, 12-05-2010"
+      Adam de Vries, 12-05-2010, adam@gmail.com
+      4 diploma's · Laatste cohort: Zomer 2025
 
-      Alle drie kunnen worden gekoppeld aan: Adam de Vries (bestaand).
+      Bij bevestigen wordt 1 profiel voor Adam gebruikt en 1 cohortplek
+      aangemaakt. De 3 rijen die je plakte verwijzen naar dezelfde persoon
+      — geen dubbele profielen.
 
-      Hetzelfde profiel of toch verschillende personen?
+      Wil je Adam aan meerdere cursussen binnen dit cohort koppelen? Dat
+      doe je na de import via de cohortpagina.
 
-      [ Zelfde persoon — koppel rij 3, sla 17 en 22 over ]
-      [ Verschillende personen — maak nieuw profiel voor 17 en 22 ]
-      [ Aangepast — kies per rij ]
-      [ Plak opnieuw ]
+      De 3 rijen die we als dezelfde persoon behandelen:
+        Rij  3: "Adam de Vries, 12-05-2010, adam@gmail.com"
+        Rij 17: "Adam Vries, 12-05-2010, parent@gmail.com"
+        Rij 22: "A. de Vries, 12-05-2010"
+
+  [ Annuleren ]                  [ Bevestig — zelfde persoon (primary) ]
+
+      Het zijn verschillende personen — bijv. tweelingen
+      Plak opnieuw
 ```
 
-"Aangepast" expands to per-row decisions inside the modal. Submit blocked
-until every group is resolved.
+UI for a paste-only group (3 rows → no existing match, brand-new Adam pasted
+three times):
+
+```
+  ⓘ 3 rijen lijken dezelfde persoon te zijn.
+
+      Adam de Vries, 12-05-2010
+      (nieuw profiel — bestaat nog niet in jouw roster)
+
+      Bij bevestigen wordt 1 nieuw profiel aangemaakt voor Adam en 1
+      cohortplek aangemaakt. De 3 rijen verwijzen naar dezelfde persoon
+      — geen dubbele profielen.
+
+      Wil je Adam aan meerdere cursussen binnen dit cohort koppelen? Dat
+      doe je na de import via de cohortpagina.
+
+      De 3 rijen die we als dezelfde persoon behandelen:
+        Rij  3, 17, 22
+
+  [ Annuleren ]                  [ Bevestig — zelfde persoon (primary) ]
+
+      Het zijn verschillende personen — bijv. tweelingen
+      Plak opnieuw
+```
+
+### Commit-time dedup (when operator confirms "same person")
+
+The decisions API carries a `shareNewPersonWithGroup?: string` field on
+`create_new` decisions. When the operator clicks "Bevestig — zelfde persoon"
+on a same-person group:
+
+- For a group whose match is an existing person: each row in the group gets
+  `{ kind: 'use_existing', personId: <existingId> }`. All rows share the
+  same `personId`.
+- For a paste-only group (no existing match): each row gets
+  `{ kind: 'create_new', shareNewPersonWithGroup: <groupId> }`. The
+  `groupId` ties the rows together so `commitBulkImport` calls
+  `createPerson` exactly **once** for the group instead of once per row.
+
+`commitBulkImport` then deduplicates the per-personId work:
+
+- One `linkToLocation` per unique `personId`.
+- One `Actor.upsert` per `(personId, role)` pair.
+- One `cohort_allocation` per `(personId, cohortId)` pair (the partial
+  unique index treats NULL `studentCurriculumId` as DISTINCT under default
+  PG semantics, so the dedup is enforced in JS via a `processedPersonIds`
+  set).
+- One `personMergeAudit` row **per original pasted row** — every operator
+  decision is captured even when the underlying work was deduplicated.
+
+If the operator instead picks "Het zijn verschillende personen" and uses
+the per-row override panel: rows get individual `create_new` decisions with
+no `shareNewPersonWithGroup`. `commitBulkImport` calls `createPerson` per
+row, producing N separate Person records. This is the rare twin case.
+
+### Multi-course / multi-curriculum within one cohort
+
+The bulk-import CSV carries person + cohort fields. It does NOT carry
+`studentCurriculumId`. So when an operator wants Adam in cohort X under
+multiple curricula (e.g., two distinct courses), the import flow handles
+the bare cohort placement once and the curriculum assignment happens
+afterwards via the cohort page. The "1 cohortplek aangemaakt" copy in the
+modal reflects this: the import gets Adam *into* the cohort, not into N
+distinct curricula. Multiple-curriculum enrollment is an explicit
+post-import action.
+
+**Secondary path — "Het zijn verschillende personen":** clicking the text-link
+expands a per-row override panel. Operator picks per-row whether each row is
+the same person, a different person (create new), or skip. This is the rare
+twin/cousin case. Once the operator commits via the override panel, the
+primary "same person" affordance disappears for that group — the override is
+the explicit signal.
+
+Submit blocked until every group has been confirmed (either via the primary
+button or via the override panel).
 
 ### Race guard at submit (3-retry semantics, persisted)
 
@@ -575,9 +689,14 @@ detection snapshot. Survives serverless cold starts. Cleaned up by cron after
 | Possible match | Mogelijk dezelfde persoon |
 | Multiple matches | Meerdere mogelijke matches |
 | Already in cohort | Zit al in dit cohort |
+| Confirm — same person | Bevestig — zelfde persoon |
+| They are different people — e.g. twins | Het zijn verschillende personen — bijv. tweelingen |
 | Same person | Zelfde persoon |
 | Different people | Verschillende personen |
 | Custom (per-row choice) | Aangepast |
+| On confirm, Adam is added once to this cohort. All 3 placements work via this one profile — no duplicate profiles. | Bij bevestigen wordt Adam 1 keer aan dit cohort toegevoegd. Alle 3 cohortplekken die je beschreef werken via dit ene profiel — geen dubbele profielen. |
+| Rows linked to this profile | De rijen die op dit profiel gekoppeld worden |
+| New profile — doesn't exist in your roster yet | Nieuw profiel — bestaat nog niet in jouw roster |
 | View full history | Bekijk volledige geschiedenis |
 | Cancel | Annuleren |
 | Confirm and import | Bevestigen en importeren |

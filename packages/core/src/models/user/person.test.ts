@@ -2331,3 +2331,392 @@ test("cleanupExpiredBulkImportPreviews deletes expired active rows", () =>
       .where(eq(s.bulkImportPreview.token, fresh.previewToken));
     assert.equal(fresh_after.length, 1);
   }));
+
+test("findCandidateMatchesInLocation detects paste-vs-paste groups even with NO existing match", () =>
+  withTestTransaction(async () => {
+    // Brand-new Adam pasted three times. No existing person in the location.
+    // The detection must still flag this as a cross-row group, otherwise
+    // each row would default to "create new" → 3 duplicate Person records.
+    const location = await Location.create({
+      handle: "find-paste-only-location",
+      name: "Find Paste-Only Location",
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [3, 17, 22].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "",
+        email: null,
+      })),
+    });
+
+    // No existing matches surface — the location is empty.
+    assert.equal(result.matchesByRow.length, 0);
+
+    // But the cross-row group fires from paste-vs-paste similarity alone.
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [3, 17, 22]);
+    // Empty when there's no existing match — caller knows to default to
+    // "create one new person, link all three rows to it."
+    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, []);
+  }));
+
+test("findCandidateMatchesInLocation merges paste-pair edges with existing-match edges", () =>
+  withTestTransaction(async () => {
+    // Setup: location has Adam de Vries linked-active. Operator pastes 3 rows:
+    //   row 3: Adam de Vries (matches existing Adam)
+    //   row 17: Adam de Vries (matches existing Adam)
+    //   row 22: similar enough to row 3/17 (paste-vs-paste) but doesn't strong-match existing
+    //           because data differs (e.g., DOB year off by 1).
+    // Expectation: all three rows form one connected group. Row 22 is in the
+    // group via the paste-pair edge to rows 3/17, even though it doesn't
+    // strong-match the existing Adam directly.
+    const location = await Location.create({
+      handle: "find-mixed-edges-location",
+      name: "Find Mixed Edges Location",
+    });
+    const { id: existingAdamId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingAdamId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 3,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+        {
+          rowIndex: 17,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+        {
+          rowIndex: 22,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [3, 17, 22]);
+    // Existing Adam still shows up in the shared set because rows 3, 17,
+    // and 22 all strong-match him.
+    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, [
+      existingAdamId,
+    ]);
+  }));
+
+test("findCandidateMatchesInLocation: 2 paste rows similar to each other but not to existing", () =>
+  withTestTransaction(async () => {
+    // Setup: location has Eva. Operator pastes 2 rows for a brand-new Adam.
+    // Eva is irrelevant — Adam doesn't match her. But the 2 Adam rows match
+    // each other.
+    const location = await Location.create({
+      handle: "find-paste-only-2way-location",
+      name: "Find Paste-Only 2-way Location",
+    });
+    const { id: evaId } = await User.Person.getOrCreate({
+      firstName: "Eva",
+      lastName: "Janssen",
+      dateOfBirth: "2008-03-22",
+    });
+    await User.Person.linkToLocation({
+      personId: evaId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+        {
+          rowIndex: 1,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    // No existing-person matches for either row.
+    assert.equal(result.matchesByRow.length, 0);
+    // But the paste-vs-paste edge forms a group.
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]!.rowIndices, [0, 1]);
+    assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, []);
+  }));
+
+test("commitBulkImport: 3 rows targeting same existing person → 1 cohort allocation, 3 audit rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-dedup-existing-location",
+      name: "Commit Dedup Existing Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "dedup-cohort",
+      label: "Dedup Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Dedup",
+    });
+
+    // 3 paste rows for the same Adam — operator confirmed "same person".
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [3, 17, 22].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "Amsterdam",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    const result = await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "3": { kind: "use_existing", personId: existingPersonId },
+        "17": { kind: "use_existing", personId: existingPersonId },
+        "22": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    assert.equal(
+      (result as { kind: "committed"; linkedPersonIds: string[] }).kind,
+      "committed",
+    );
+
+    // Cohort allocation: ONE row, despite 3 paste decisions.
+    const allocations = await query
+      .select()
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      );
+    assert.equal(
+      allocations.length,
+      1,
+      "Expected 1 cohort_allocation, got " + allocations.length,
+    );
+
+    // Audit: 3 rows (one per pasted CSV row), all decisionKind=use_existing.
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+    assert.equal(audits.length, 3);
+    for (const audit of audits) {
+      assert.equal(audit.decisionKind, "use_existing");
+      assert.equal(audit.targetPersonId, existingPersonId);
+    }
+  }));
+
+test("commitBulkImport: cross-row create_new group with shareNewPersonWithGroup → 1 person, 1 audit per row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-dedup-new-location",
+      name: "Commit Dedup New Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "DedupNew",
+    });
+
+    // Paste 3 rows for the same brand-new Adam, no existing match.
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [0, 1, 2].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "Amsterdam",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    // Stub createPerson — track invocations.
+    let createPersonCalls = 0;
+    const fakePersonId = "00000000-0000-0000-0000-0000000000aa";
+    await query
+      .insert(s.person)
+      .values({
+        id: fakePersonId,
+        handle: "stub-adam",
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+      });
+
+    const result = await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "create_new", shareNewPersonWithGroup: "g1" },
+        "1": { kind: "create_new", shareNewPersonWithGroup: "g1" },
+        "2": { kind: "create_new", shareNewPersonWithGroup: "g1" },
+      },
+      createPerson: async () => {
+        createPersonCalls += 1;
+        return { personId: fakePersonId };
+      },
+    });
+
+    assert.equal(
+      (result as { kind: "committed"; createdPersonIds: string[] }).kind,
+      "committed",
+    );
+    assert.equal(
+      createPersonCalls,
+      1,
+      `Expected createPerson called 1x for shared group, got ${createPersonCalls}`,
+    );
+
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+    assert.equal(audits.length, 3);
+    for (const audit of audits) {
+      assert.equal(audit.decisionKind, "create_new");
+      assert.equal(audit.targetPersonId, fakePersonId);
+    }
+  }));
+
+test("commitBulkImport: 3 different-people create_new (no group) → 3 createPerson calls", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-different-people-location",
+      name: "Commit Different People Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "DiffPeople",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [0, 1, 2].map((rowIndex) => ({
+        rowIndex,
+        firstName: `Person${rowIndex}`,
+        lastName: "Test",
+        lastNamePrefix: null,
+        dateOfBirth: "2010-05-12",
+        birthCity: "",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    let createPersonCalls = 0;
+    const fakeIds = [
+      "00000000-0000-0000-0000-0000000000a1",
+      "00000000-0000-0000-0000-0000000000a2",
+      "00000000-0000-0000-0000-0000000000a3",
+    ];
+    for (let i = 0; i < 3; i++) {
+      await query.insert(s.person).values({
+        id: fakeIds[i],
+        handle: `stub-${i}`,
+        firstName: `Person${i}`,
+        lastName: "Test",
+        dateOfBirth: "2010-05-12",
+      });
+    }
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "create_new" },
+        "1": { kind: "create_new" },
+        "2": { kind: "create_new" },
+      },
+      createPerson: async () => {
+        const id = fakeIds[createPersonCalls];
+        createPersonCalls += 1;
+        // biome-ignore lint/style/noNonNullAssertion: stub bounded by indices
+        return { personId: id! };
+      },
+    });
+
+    assert.equal(
+      createPersonCalls,
+      3,
+      "Different-people mode should call createPerson per row",
+    );
+  }));

@@ -361,7 +361,16 @@ export const previewBulkImport = wrapCommand(
 );
 
 const rowDecisionSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("create_new") }),
+  z.object({
+    kind: z.literal("create_new"),
+    // When set, multiple rows in the same cross-row group all default to
+    // creating ONE shared new person. Operator confirmed "same person" on
+    // the group; without this flag the server would call createPerson per
+    // row and produce N duplicate Person records — the very bug this whole
+    // flow is meant to prevent. Rows in "different people" mode (the twins
+    // override) leave this unset, getting per-row createPerson calls.
+    shareNewPersonWithGroup: z.string().optional(),
+  }),
   z.object({ kind: z.literal("use_existing"), personId: uuidSchema }),
   z.object({
     kind: z.literal("skip"),
@@ -530,17 +539,78 @@ export const commitBulkImport = wrapCommand(
         const createdPersonIds: string[] = [];
         const linkedPersonIds: string[] = [];
 
+        // ── Pre-pass: assign personIds for every actionable row ──────
+        //
+        // Three sources:
+        //   1. use_existing → personId is on the decision
+        //   2. create_new with shareNewPersonWithGroup set → call
+        //      createPerson ONCE per group, assign the result to every
+        //      row in the group
+        //   3. create_new without shareNewPersonWithGroup → call
+        //      createPerson per row (different-people / ungrouped case)
+
+        const personIdByRow = new Map<number, string>();
+        const createdGroupPersonIds = new Map<string, string>();
+
+        // First, handle shared-new-person groups.
+        const rowsByGroup = new Map<string, number[]>();
         for (const candidate of candidates) {
           const decision = input.decisions[candidate.rowIndex.toString()];
+          if (
+            decision?.kind === "create_new" &&
+            decision.shareNewPersonWithGroup
+          ) {
+            const key = decision.shareNewPersonWithGroup;
+            if (!rowsByGroup.has(key)) rowsByGroup.set(key, []);
+            // biome-ignore lint/style/noNonNullAssertion: Map.has guard above
+            rowsByGroup.get(key)!.push(candidate.rowIndex);
+          }
+        }
+
+        for (const [groupKey, rowIndices] of rowsByGroup.entries()) {
+          if (!input.createPerson) {
+            throw new Error(
+              "createPerson factory not provided — caller must supply it for create_new decisions",
+            );
+          }
+          // Use the first row in the group as the representative person input.
+          // The cross-row group means all rows are "the same person", so
+          // any row's pasted data is acceptable; first wins for determinism.
+          const representativeRow = candidates.find(
+            (c) => c.rowIndex === rowIndices[0],
+          );
+          if (!representativeRow) {
+            throw new Error(
+              `Cross-row group ${groupKey} references row ${rowIndices[0]} which is missing from the preview`,
+            );
+          }
+          const created = await input.createPerson({
+            firstName: representativeRow.firstName,
+            lastName: representativeRow.lastName,
+            lastNamePrefix: representativeRow.lastNamePrefix,
+            dateOfBirth: representativeRow.dateOfBirth,
+            birthCity: representativeRow.birthCity,
+            birthCountry: representativeRow.birthCountry,
+            email: representativeRow.email,
+          });
+          createdGroupPersonIds.set(groupKey, created.personId);
+          createdPersonIds.push(created.personId);
+          for (const rowIndex of rowIndices) {
+            personIdByRow.set(rowIndex, created.personId);
+          }
+        }
+
+        // Then, ungrouped create_new + use_existing assignments.
+        for (const candidate of candidates) {
+          const rowIndex = candidate.rowIndex;
+          if (personIdByRow.has(rowIndex)) continue;
+          const decision = input.decisions[rowIndex.toString()];
           if (!decision || decision.kind === "skip") continue;
-
-          const candidateMatches =
-            refreshedMatches.matchesByRow.find(
-              (m) => m.rowIndex === candidate.rowIndex,
-            )?.candidates ?? [];
-          const presentedIds = candidateMatches.map((c) => c.personId);
-
-          if (decision.kind === "create_new") {
+          if (decision.kind === "use_existing") {
+            personIdByRow.set(rowIndex, decision.personId);
+          } else if (decision.kind === "create_new") {
+            // No group → per-row createPerson (operator declared "different
+            // people" or this row is genuinely independent).
             if (!input.createPerson) {
               throw new Error(
                 "createPerson factory not provided — caller must supply it for create_new decisions",
@@ -556,48 +626,69 @@ export const commitBulkImport = wrapCommand(
               email: candidate.email,
             });
             createdPersonIds.push(created.personId);
-
-            await tx.insert(s.personMergeAudit).values({
-              performedByPersonId: input.performedByPersonId,
-              locationId: previewRow.locationId,
-              targetPersonId: created.personId,
-              decisionKind: "create_new",
-              presentedCandidatePersonIds:
-                presentedIds.length > 0 ? presentedIds : null,
-              source: "bulk_import_preview",
-              bulkImportPreviewToken: previewRow.token,
-            });
-            continue;
+            personIdByRow.set(rowIndex, created.personId);
           }
+        }
 
-          if (decision.kind === "use_existing") {
-            // linkToLocation throws on revoked/removed; re-check is fine.
-            await linkToLocation({
-              personId: decision.personId,
-              locationId: previewRow.locationId,
-            });
+        // ── Main pass: link/actor/allocate per UNIQUE personId, audit per row ──
+        //
+        // Operations are deduplicated by personId so that 3 rows targeting
+        // the same person produce 1 link + 1 actor per role + 1 cohort
+        // allocation. Audit rows are still written per ORIGINAL pasted row
+        // so the forensics trail captures every operator decision.
+
+        const processedPersonIds = new Set<string>();
+
+        for (const candidate of candidates) {
+          const rowIndex = candidate.rowIndex;
+          const decision = input.decisions[rowIndex.toString()];
+          if (!decision || decision.kind === "skip") continue;
+          const targetPersonId = personIdByRow.get(rowIndex);
+          if (!targetPersonId) continue;
+
+          const candidateMatches =
+            refreshedMatches.matchesByRow.find(
+              (m) => m.rowIndex === rowIndex,
+            )?.candidates ?? [];
+          const presentedIds = candidateMatches.map((c) => c.personId);
+
+          // Per-personId work runs ONCE per commit.
+          if (!processedPersonIds.has(targetPersonId)) {
+            if (decision.kind === "use_existing") {
+              // linkToLocation throws on revoked/removed; defense-in-depth.
+              await linkToLocation({
+                personId: targetPersonId,
+                locationId: previewRow.locationId,
+              });
+            }
+            // For create_new the createPersonForLocation callback already
+            // wired up the link via its existing semantics; nothing extra.
+
             for (const role of roles) {
               await tx
                 .insert(s.actor)
                 .values({
-                  personId: decision.personId,
+                  personId: targetPersonId,
                   locationId: previewRow.locationId,
                   type: role,
                 })
                 .onConflictDoUpdate({
-                  target: [s.actor.type, s.actor.personId, s.actor.locationId],
+                  target: [
+                    s.actor.type,
+                    s.actor.personId,
+                    s.actor.locationId,
+                  ],
                   set: { deletedAt: null, createdAt: sql`NOW()` },
                 });
             }
 
-            // Cohort allocation if a target cohort was specified.
             if (previewRow.targetCohortId) {
               const studentActor = await tx
                 .select({ id: s.actor.id })
                 .from(s.actor)
                 .where(
                   and(
-                    eq(s.actor.personId, decision.personId),
+                    eq(s.actor.personId, targetPersonId),
                     eq(s.actor.locationId, previewRow.locationId),
                     eq(s.actor.type, "student"),
                     isNull(s.actor.deletedAt),
@@ -605,6 +696,11 @@ export const commitBulkImport = wrapCommand(
                 )
                 .then(possibleSingleRow);
               if (studentActor) {
+                // Idempotency on cohort_allocation: NULL studentCurriculumId
+                // is treated as DISTINCT by PG default unique semantics, so
+                // we can't rely on the partial unique index alone. The
+                // processedPersonIds guard above prevents duplicate inserts
+                // when 3 rows target the same person.
                 await tx
                   .insert(s.cohortAllocation)
                   .values({
@@ -615,19 +711,24 @@ export const commitBulkImport = wrapCommand(
               }
             }
 
-            linkedPersonIds.push(decision.personId);
-
-            await tx.insert(s.personMergeAudit).values({
-              performedByPersonId: input.performedByPersonId,
-              locationId: previewRow.locationId,
-              targetPersonId: decision.personId,
-              decisionKind: "use_existing",
-              presentedCandidatePersonIds:
-                presentedIds.length > 0 ? presentedIds : null,
-              source: "bulk_import_preview",
-              bulkImportPreviewToken: previewRow.token,
-            });
+            if (decision.kind === "use_existing") {
+              linkedPersonIds.push(targetPersonId);
+            }
+            processedPersonIds.add(targetPersonId);
           }
+
+          // Audit per ORIGINAL row (every operator decision is captured).
+          await tx.insert(s.personMergeAudit).values({
+            performedByPersonId: input.performedByPersonId,
+            locationId: previewRow.locationId,
+            targetPersonId,
+            decisionKind:
+              decision.kind === "use_existing" ? "use_existing" : "create_new",
+            presentedCandidatePersonIds:
+              presentedIds.length > 0 ? presentedIds : null,
+            source: "bulk_import_preview",
+            bulkImportPreviewToken: previewRow.token,
+          });
         }
 
         await tx
@@ -1054,14 +1155,142 @@ export const findCandidateMatchesInLocation = wrapQuery(
         });
       }
 
-      // Cross-row group detection. A group is a personId that appears in
-      // ≥2 rows' candidate sets, scored at or above the strong threshold.
-      // (Below "strong" the match is "possible" and shouldn't force a
-      // conflict resolution — operator can resolve weak matches case-by-case.)
+      // ── Paste-vs-paste similarity detection ────────────────────────
+      //
+      // The above query catches rows that match the SAME existing person.
+      // It misses the equally-important case: 2+ pasted rows that look like
+      // each other but no existing person matches (e.g., operator pasted
+      // brand-new Adam three times). Without this pass, all three rows
+      // would default to "create new" and produce three duplicate Person
+      // records — exactly the bug this whole flow is supposed to prevent.
+
+      const pastePairsStmt = sql`
+        WITH pasted AS (
+          SELECT
+            v.row_index,
+            ${NORMALIZE(sql`v.first_name`)} AS first_norm,
+            ${NORMALIZE(sql`v.last_name`)} AS last_norm,
+            ${NORMALIZE(
+              sql`TRIM(CONCAT(
+                COALESCE(v.last_name_prefix, ''),
+                CASE WHEN v.last_name_prefix IS NOT NULL THEN ' ' ELSE '' END,
+                COALESCE(v.last_name, '')
+              ))`,
+            )} AS full_last_norm,
+            v.date_of_birth AS dob,
+            ${NORMALIZE(sql`v.birth_city`)} AS birth_city_norm,
+            NULL::uuid AS user_id
+          FROM (VALUES ${sql.join(valuesRows, sql`, `)})
+            AS v(row_index, first_name, last_name, last_name_prefix, date_of_birth, birth_city)
+        )
+        SELECT
+          p1.row_index AS row_index_a,
+          p2.row_index AS row_index_b,
+          ${DuplicateScoring.scoreNameBirthPair(
+            {
+              firstNorm: sql`p1.first_norm`,
+              lastNorm: sql`p1.last_norm`,
+              fullLastNorm: sql`p1.full_last_norm`,
+              dateOfBirth: sql`p1.dob`,
+              birthCityNorm: sql`p1.birth_city_norm`,
+              userId: sql`p1.user_id`,
+            },
+            {
+              firstNorm: sql`p2.first_norm`,
+              lastNorm: sql`p2.last_norm`,
+              fullLastNorm: sql`p2.full_last_norm`,
+              dateOfBirth: sql`p2.dob`,
+              birthCityNorm: sql`p2.birth_city_norm`,
+              userId: sql`p2.user_id`,
+            },
+          )}::int AS score
+        FROM pasted p1
+        JOIN pasted p2
+          ON p1.row_index < p2.row_index
+          AND p1.first_norm <> ''
+          AND (
+            p1.first_norm = p2.first_norm
+            OR (LENGTH(p1.first_norm) >= 3
+                AND LENGTH(p2.first_norm) >= 3
+                AND LEFT(p1.first_norm, 3) = LEFT(p2.first_norm, 3))
+          )
+          AND p1.dob IS NOT NULL
+          AND p2.dob IS NOT NULL
+          AND ABS(p1.dob - p2.dob) <= 365
+        WHERE
+          ${DuplicateScoring.scoreNameBirthPair(
+            {
+              firstNorm: sql`p1.first_norm`,
+              lastNorm: sql`p1.last_norm`,
+              fullLastNorm: sql`p1.full_last_norm`,
+              dateOfBirth: sql`p1.dob`,
+              birthCityNorm: sql`p1.birth_city_norm`,
+              userId: sql`p1.user_id`,
+            },
+            {
+              firstNorm: sql`p2.first_norm`,
+              lastNorm: sql`p2.last_norm`,
+              fullLastNorm: sql`p2.full_last_norm`,
+              dateOfBirth: sql`p2.dob`,
+              birthCityNorm: sql`p2.birth_city_norm`,
+              userId: sql`p2.user_id`,
+            },
+          )} >= ${DuplicateScoring.SCORE_THRESHOLDS.strong}
+      `;
+
+      const pasteEdges =
+        input.candidates.length >= 2
+          ? ((await query.execute(pastePairsStmt)).rows as unknown as {
+              row_index_a: number;
+              row_index_b: number;
+              score: number;
+            }[])
+          : [];
+
+      // ── Cross-row group detection (union-find over both edge sources) ──
+      //
+      // A "cross-row group" is a connected component of pasted rows where
+      // each pair is linked by either:
+      //   (a) sharing a strong-match (≥150) against the same existing
+      //       person, OR
+      //   (b) directly scoring ≥150 against each other (paste-vs-paste).
+      //
+      // The default UX is "treat as the same person" — link all rows in
+      // the group to one personId (existing or newly created). The operator
+      // can override per-row if they're genuinely different people (twins).
+
+      const parent = new Map<number, number>();
+      const find = (x: number): number => {
+        let root = x;
+        while (parent.get(root) !== root) {
+          // biome-ignore lint/style/noNonNullAssertion: ensured by ensure() below
+          root = parent.get(root)!;
+        }
+        let cur = x;
+        while (cur !== root) {
+          // biome-ignore lint/style/noNonNullAssertion: ensured by ensure() below
+          const next = parent.get(cur)!;
+          parent.set(cur, root);
+          cur = next;
+        }
+        return root;
+      };
+      const union = (a: number, b: number) => {
+        const ra = find(a);
+        const rb = find(b);
+        if (ra !== rb) parent.set(ra, rb);
+      };
+      const ensure = (x: number) => {
+        if (!parent.has(x)) parent.set(x, x);
+      };
+
+      // Edges from existing-person matches: rows sharing a strong-match
+      // existing personId.
       const personToRows = new Map<string, number[]>();
       for (const [rowIndex, candidates] of byRow.entries()) {
         for (const c of candidates) {
           if (c.score < DuplicateScoring.SCORE_THRESHOLDS.strong) continue;
+          ensure(rowIndex);
           if (!personToRows.has(c.personId)) {
             personToRows.set(c.personId, []);
           }
@@ -1069,28 +1298,53 @@ export const findCandidateMatchesInLocation = wrapQuery(
           personToRows.get(c.personId)!.push(rowIndex);
         }
       }
+      for (const rowIndices of personToRows.values()) {
+        for (let i = 1; i < rowIndices.length; i++) {
+          // biome-ignore lint/style/noNonNullAssertion: bounded by length
+          union(rowIndices[0]!, rowIndices[i]!);
+        }
+      }
 
-      // Merge groups: rows that share at least one strong-match person form a
-      // single group. (Triplet case: rows A, B, C all match person X → one
-      // group with rowIndices [A, B, C], sharedCandidatePersonIds [X].)
+      // Edges from paste-vs-paste similarity.
+      for (const edge of pasteEdges) {
+        ensure(edge.row_index_a);
+        ensure(edge.row_index_b);
+        union(edge.row_index_a, edge.row_index_b);
+      }
+
+      // Build group descriptors: connected components with ≥2 rows.
+      const componentToRows = new Map<number, Set<number>>();
+      for (const rowIndex of parent.keys()) {
+        const root = find(rowIndex);
+        if (!componentToRows.has(root)) {
+          componentToRows.set(root, new Set());
+        }
+        // biome-ignore lint/style/noNonNullAssertion: Map.has guard above
+        componentToRows.get(root)!.add(rowIndex);
+      }
+
       const groups: Array<{
         rowIndices: number[];
         sharedCandidatePersonIds: string[];
       }> = [];
-      const groupKeyFor = new Map<string, number>(); // canonical row-set -> group index
-      for (const [personId, rowIndices] of personToRows.entries()) {
-        if (rowIndices.length < 2) continue;
-        const key = [...new Set(rowIndices)].sort((a, b) => a - b).join(",");
-        const existing = groupKeyFor.get(key);
-        if (existing !== undefined) {
-          groups[existing]!.sharedCandidatePersonIds.push(personId);
-        } else {
-          groupKeyFor.set(key, groups.length);
-          groups.push({
-            rowIndices: [...new Set(rowIndices)].sort((a, b) => a - b),
-            sharedCandidatePersonIds: [personId],
-          });
+      for (const memberSet of componentToRows.values()) {
+        if (memberSet.size < 2) continue;
+        const rowIndices = [...memberSet].sort((a, b) => a - b);
+        // Collect all strong-match existing personIds across the group's
+        // rows (deduplicated). Empty array when this is a paste-only group
+        // (no existing match — operator just typed the same person twice).
+        const sharedIds = new Set<string>();
+        for (const rowIndex of rowIndices) {
+          const candidates = byRow.get(rowIndex) ?? [];
+          for (const c of candidates) {
+            if (c.score < DuplicateScoring.SCORE_THRESHOLDS.strong) continue;
+            sharedIds.add(c.personId);
+          }
         }
+        groups.push({
+          rowIndices,
+          sharedCandidatePersonIds: [...sharedIds].sort(),
+        });
       }
 
       const matchesByRow = Array.from(byRow.entries())
