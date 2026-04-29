@@ -32,7 +32,7 @@ export default async function Page(props: {
         <Suspense
           fallback={
             <Text className="!text-sm !text-zinc-600 dark:!text-zinc-400">
-              Pares profielen worden berekend...
+              Profielen worden vergeleken...
             </Text>
           }
         >

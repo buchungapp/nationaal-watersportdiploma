@@ -53,8 +53,7 @@ export function DuplicatePairsList({
       <div className="rounded-md border border-zinc-950/10 bg-zinc-50 p-8 text-center dark:border-white/10 dark:bg-zinc-900/50">
         <Strong>Geen mogelijke duplicaten gevonden — netjes!</Strong>
         <Text className="!text-sm !text-zinc-600 dark:!text-zinc-400">
-          Er zijn geen pares profielen in jouw locatie die op dezelfde persoon
-          lijken.
+          Geen profielen in jouw locatie die op dezelfde persoon lijken.
         </Text>
       </div>
     );
