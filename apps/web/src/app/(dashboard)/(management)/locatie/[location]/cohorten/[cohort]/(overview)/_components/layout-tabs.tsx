@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import {
+  listLocationDuplicatePairs,
   listPrivilegesForCohort,
   listRolesForLocation,
   retrieveCohortByHandle,
@@ -25,7 +26,26 @@ async function LayoutTabsContent(props: Props) {
     listPrivilegesForCohort(cohort.id),
   ]);
 
-  return <LayoutTabsClient personRoles={roles} personPrivileges={privileges} />;
+  // Only location_admins can act on duplicates, so only they need the
+  // count. Fetched here (not in page.tsx) so the dot indicator on the
+  // Duplicaten tab is consistent across all four sub-routes — Cursisten,
+  // Diploma's, Instructeurs, Duplicaten.
+  const duplicatesCount = roles.includes("location_admin")
+    ? await listLocationDuplicatePairs({
+        locationId: location.id,
+        cohortId: cohort.id,
+        threshold: 150,
+        limit: 50,
+      }).then((pairs) => pairs.length)
+    : 0;
+
+  return (
+    <LayoutTabsClient
+      personRoles={roles}
+      personPrivileges={privileges}
+      duplicatesCount={duplicatesCount}
+    />
+  );
 }
 
 export function LayoutTabsFallback() {
@@ -36,15 +56,10 @@ export function LayoutTabsFallback() {
     >
       {/* TODO: href="#" is not a nice solution, but it works for now */}
       {[
-        {
-          name: "Cursisten",
-        },
-        {
-          name: "Diploma's",
-        },
-        {
-          name: "Instructeurs",
-        },
+        { name: "Cursisten" },
+        { name: "Diploma's" },
+        { name: "Instructeurs" },
+        { name: "Duplicaten" },
       ].map((tab) => (
         <NextLink
           key={tab.name}

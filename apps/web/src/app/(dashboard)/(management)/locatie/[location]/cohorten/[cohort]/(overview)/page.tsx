@@ -2,9 +2,7 @@ import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
 import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
-import { Suspense } from "react";
 import { TextLink } from "~/app/(dashboard)/_components/text";
-import { CohortDuplicatesBanner } from "../_components/cohort-duplicates-banner";
 import {
   isInstructorInCohort,
   listPrivilegesForCohort,
@@ -61,11 +59,6 @@ export default async function Page(props: {
   ]);
 
   const isCohortAdmin = permissions.length > 0;
-  // The duplicates banner reads location-wide pair data and only needs
-  // location_admin (not cohort-admin) to fetch — gate the banner on
-  // that, otherwise location admins lose visibility into cohorts they
-  // don't directly own.
-  const isLocationAdmin = locationRoles.includes("location_admin");
   const defaultView =
     !!instructorAllocation && !isCohortAdmin ? "geclaimd" : "allen";
 
@@ -140,16 +133,6 @@ export default async function Page(props: {
 
   return (
     <>
-      {isLocationAdmin ? (
-        <Suspense fallback={null}>
-          <CohortDuplicatesBanner
-            locationId={location.id}
-            cohortId={cohort.id}
-            locationHandle={params.location}
-            cohortHandle={params.cohort}
-          />
-        </Suspense>
-      ) : null}
       <StudentsTable
       view={instructorAllocation ? parsedSq.overzicht : null}
       students={searchedStudents}
