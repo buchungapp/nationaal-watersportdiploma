@@ -15,6 +15,7 @@ out/
 out-*/
 generated/
 coverage/
+merge-errors-*.txt
 
 !.vscode/
 !.github/
