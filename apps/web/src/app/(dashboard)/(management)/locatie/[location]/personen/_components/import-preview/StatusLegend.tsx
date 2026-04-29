@@ -13,27 +13,27 @@ const ITEMS: Array<{
   {
     color: "zinc",
     label: "Nieuw",
-    copy: "Geen match — wordt als nieuw profiel aangemaakt.",
+    copy: "Geen bestaand profiel gevonden — er wordt een nieuw profiel aangemaakt.",
   },
   {
     color: "amber",
-    label: "Waarschijnlijk dezelfde",
-    copy: "Sterke match — bevestig of override per rij.",
+    label: "Mogelijk dezelfde",
+    copy: "Lijkt op een bestaand profiel — bevestig of kies een ander profiel.",
   },
   {
     color: "blue",
-    label: "Exacte match",
-    copy: "Score ≥ 200 — kies expliciet (twin-guard).",
+    label: "Vrijwel zeker dezelfde",
+    copy: "Naam én geboortedatum komen overeen met een bestaand profiel — bevestig om het bestaande profiel te gebruiken.",
   },
   {
     color: "branding-light",
-    label: "Dezelfde persoon — rij in groep",
-    copy: "Meerdere rijen lijken dezelfde persoon — los op via de groep-modal.",
+    label: "Meerdere rijen, dezelfde persoon",
+    copy: "Meerdere rijen lijken dezelfde persoon — open de groep om te bevestigen.",
   },
   {
     color: "red",
     label: "Fout in rij",
-    copy: "CSV-rij parseert niet — corrigeer of sla over.",
+    copy: "Deze rij konden we niet lezen — wordt overgeslagen, blokkeert de import niet.",
   },
 ];
 

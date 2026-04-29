@@ -94,7 +94,7 @@ export function DedupHint({
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-medium">{fullName}</span>
                   <Badge color={c.score >= 200 ? "blue" : "amber"}>
-                    {c.score >= 200 ? "Exact" : "Sterke match"}
+                    {c.score >= 200 ? "Vrijwel zeker dezelfde" : "Mogelijk dezelfde"}
                   </Badge>
                 </div>
                 <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">

@@ -47,6 +47,7 @@ export const CrossRowConflictResolver = memo(
     const ctx = assertPreviewContext(use(BulkImportPreviewContext));
     const groupKey = deriveGroupKey(group.rowIndices);
     const existingDecision = ctx.state.groupDecisions.get(groupKey);
+    const hasCohort = Boolean(ctx.meta.targetCohortId);
     const [showOverride, setShowOverride] = useState(
       existingDecision?.kind === "different_people",
     );
@@ -106,6 +107,7 @@ export const CrossRowConflictResolver = memo(
           <Outcome
             group={group}
             isPasteOnly={!sharedCandidate}
+            hasCohort={hasCohort}
           />
 
           <PastedRowsList rows={groupRows} />
@@ -216,26 +218,33 @@ function NewProfileBanner({ row }: { row: ParsedPersonRow | undefined }) {
 function Outcome({
   group,
   isPasteOnly,
+  hasCohort,
 }: {
   group: CrossRowGroup;
   isPasteOnly: boolean;
+  hasCohort: boolean;
 }) {
+  const profileSummary = isPasteOnly
+    ? "1 nieuw profiel aangemaakt voor deze persoon"
+    : "1 bestaand profiel gebruikt";
+  const cohortSummary = hasCohort ? " en 1 cohortplek aangemaakt" : "";
   return (
     <div className="mt-4 space-y-2">
       <Text>
         Bij bevestigen wordt{" "}
         <Strong>
-          {isPasteOnly
-            ? "1 nieuw profiel aangemaakt voor deze persoon en 1 cohortplek aangemaakt"
-            : "1 profiel gebruikt en 1 cohortplek aangemaakt"}
+          {profileSummary}
+          {cohortSummary}
         </Strong>
         . De {group.rowIndices.length} rijen verwijzen naar dezelfde persoon —
         geen dubbele profielen.
       </Text>
-      <Text className="!text-sm !text-zinc-500">
-        Wil je deze persoon aan meerdere cursussen binnen dit cohort koppelen?
-        Dat doe je na de import via de cohortpagina.
-      </Text>
+      {hasCohort ? (
+        <Text className="!text-sm !text-zinc-500">
+          Wil je deze persoon aan meerdere cursussen binnen dit cohort
+          koppelen? Dat doe je na de import via de cohortpagina.
+        </Text>
+      ) : null}
     </div>
   );
 }

@@ -125,7 +125,11 @@ function ScoreBadge({ score }: { score: number }) {
   const color: Parameters<typeof Badge>[0]["color"] =
     score >= 200 ? "blue" : score >= 150 ? "amber" : "zinc";
   const label =
-    score >= 200 ? "Exacte match" : score >= 150 ? "Sterke match" : "Mogelijke match";
+    score >= 200
+      ? "Vrijwel zeker dezelfde"
+      : score >= 150
+        ? "Mogelijk dezelfde"
+        : "Lijkt erop";
   return <Badge color={color}>{label}</Badge>;
 }
 

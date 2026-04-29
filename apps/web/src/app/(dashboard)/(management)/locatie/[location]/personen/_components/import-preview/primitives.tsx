@@ -23,13 +23,13 @@ import type { CandidateMatch, ParsedPersonRow, RowStatus } from "./types";
 
 export const STATUS_BADGE_LABELS: Record<RowStatus, string> = {
   "no-match": "Nieuw",
-  "weak-match": "Mogelijke match",
-  "strong-match": "Waarschijnlijk dezelfde",
-  "perfect-match": "Exacte match",
-  "multi-match": "Meerdere mogelijke matches",
+  "weak-match": "Lijkt op een bestaand profiel",
+  "strong-match": "Mogelijk dezelfde",
+  "perfect-match": "Vrijwel zeker dezelfde",
+  "multi-match": "Meerdere mogelijke profielen",
   "already-in-cohort": "Zit al in dit cohort",
   "parse-error": "Fout in rij",
-  "in-cross-row-group": "Dezelfde persoon — rij in groep",
+  "in-cross-row-group": "Meerdere rijen, dezelfde persoon",
 };
 
 const STATUS_BADGE_COLORS: Record<
@@ -154,10 +154,10 @@ export function RowCandidate({
         : "zinc";
   const scoreLabel =
     candidate.score >= 200
-      ? "Exacte match"
+      ? "Vrijwel zeker dezelfde"
       : candidate.score >= 150
-        ? "Sterke match"
-        : "Mogelijke match";
+        ? "Mogelijk dezelfde"
+        : "Lijkt erop";
 
   return (
     <label

@@ -118,7 +118,7 @@ export function CohortDuplicatesBannerClient({
                     <Badge
                       color={pair.score >= 200 ? "blue" : "amber"}
                     >
-                      {pair.score >= 200 ? "Exacte match" : "Sterke match"}
+                      {pair.score >= 200 ? "Vrijwel zeker dezelfde" : "Mogelijk dezelfde"}
                     </Badge>
                   </TableCell>
                   <TableCell>
