@@ -2,7 +2,7 @@
 
 import { ExclamationTriangleIcon, InformationCircleIcon } from "@heroicons/react/20/solid";
 import dayjs from "dayjs";
-import { memo, useEffect, useState, use } from "react";
+import { memo, useState, use } from "react";
 import { Button } from "~/app/(dashboard)/_components/button";
 import {
   Dialog,
@@ -66,11 +66,24 @@ export const CrossRowConflictResolver = memo(
     };
 
     const onConfirmDifferentPeople = () => {
-      // Re-dispatch with confirmed: true. perRow already populated via the
-      // override panel's auto-seed + click handlers.
+      // Materialize defaults for any row the operator didn't explicitly
+      // touch. Each unspecified row gets its own profile letter (A, B,
+      // C…) → server creates one new person per letter. Done here at
+      // confirm time rather than via a mount-time useEffect (anti-
+      // pattern: pushing state up via Effect).
       const current = ctx.state.groupDecisions.get(groupKey);
-      const perRow =
+      const existing =
         current?.kind === "different_people" ? current.perRow : {};
+      const perRow: Record<number, RowDecision> = { ...existing };
+      group.rowIndices.forEach((rowIndex, i) => {
+        if (!perRow[rowIndex]) {
+          const letter = String.fromCharCode(65 + i);
+          perRow[rowIndex] = {
+            kind: "create_new",
+            shareNewPersonWithGroup: `${groupKey}_profile_${letter}`,
+          };
+        }
+      });
       ctx.actions.setGroupDecision(groupKey, {
         kind: "different_people",
         perRow,
@@ -310,40 +323,18 @@ function DifferentPeopleOverride({
   // creates ONE person and links both rows to it. Default = each row on
   // its own letter (= the original "different people" behavior). Operator
   // merges by clicking another row's letter.
+  //
+  // Defaults are NOT pre-dispatched into state — selectedLetter falls
+  // back to the default during render, and the parent's onConfirm fills
+  // in defaults atomically when the operator clicks Bevestig. Per the
+  // React docs' "You Might Not Need an Effect": pushing default state
+  // up to the parent on mount is the anti-pattern this avoids.
   const profileKey = (letter: string) => `${groupKey}_profile_${letter}`;
   const letterFor = (rowIndex: number) => {
     const i = groupRows.findIndex((r) => r.rowIndex === rowIndex);
     return String.fromCharCode(65 + Math.max(0, i));
   };
   const profileLetters = groupRows.map((_, i) => String.fromCharCode(65 + i));
-
-  // Seed defaults for any row that doesn't yet have a perRow decision —
-  // gives every row a default profile letter so the chips look picked.
-  // Stays confirmed: false so the parent card doesn't flip to "Opgelost"
-  // until the operator clicks Bevestig.
-  useEffect(() => {
-    const next: Record<number, RowDecision> = { ...perRow };
-    let changed = false;
-    for (const r of groupRows) {
-      if (!next[r.rowIndex]) {
-        next[r.rowIndex] = {
-          kind: "create_new",
-          shareNewPersonWithGroup: profileKey(letterFor(r.rowIndex)),
-        };
-        changed = true;
-      }
-    }
-    if (changed) {
-      ctx.actions.setGroupDecision(groupKey, {
-        kind: "different_people",
-        perRow: next,
-        confirmed: groupDecision?.kind === "different_people"
-          ? groupDecision.confirmed
-          : false,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupKey]);
 
   const setRow = (rowIndex: number, decision: RowDecision) => {
     ctx.actions.setGroupDecision(groupKey, {
