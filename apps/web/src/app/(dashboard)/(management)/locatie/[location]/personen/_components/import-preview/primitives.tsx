@@ -148,20 +148,28 @@ export function RowCandidate({
   const lastDiploma = candidate.lastDiplomaIssuedAt
     ? dayjs(candidate.lastDiplomaIssuedAt).format("MMM YYYY")
     : null;
+  const diff = pastedRow ? computeDiff(pastedRow, candidate) : null;
+  const allMatch = diff ? diff.every((f) => f.match) : false;
+
   const scoreColor: Parameters<typeof Badge>[0]["color"] =
     candidate.score >= 200
       ? "blue"
       : candidate.score >= 150
         ? "amber"
         : "zinc";
+  // Label honors what the operator can actually see: when every visible
+  // field matches we drop the "vrijwel zeker" hedge — the data is
+  // identical, no caveat needed. The hedge only kicks in when the
+  // backend score is high but the visible fields don't fully agree
+  // (e.g. matched-on-email but differing birthplace).
   const scoreLabel =
     candidate.score >= 200
-      ? "Vrijwel zeker dezelfde"
+      ? allMatch
+        ? "Dezelfde persoon"
+        : "Vrijwel zeker dezelfde"
       : candidate.score >= 150
         ? "Mogelijk dezelfde"
         : "Lijkt erop";
-
-  const diff = pastedRow ? computeDiff(pastedRow, candidate) : null;
 
   return (
     <label
