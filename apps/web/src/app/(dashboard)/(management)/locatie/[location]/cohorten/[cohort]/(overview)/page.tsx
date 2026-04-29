@@ -28,14 +28,17 @@ export default async function Page(props: {
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  const cohortPromise = retrieveLocationByHandle(params.location).then(
-    (location) =>
-      retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
-        if (!cohort) {
-          notFound();
-        }
-        return cohort;
-      }),
+  // Single location lookup — `retrieveLocationByHandle` is "use cache"
+  // annotated, but sharing the promise here makes the dedup explicit and
+  // saves the framework an extra cache check on the parallel callers.
+  const locationPromise = retrieveLocationByHandle(params.location);
+  const cohortPromise = locationPromise.then((location) =>
+    retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
+      if (!cohort) {
+        notFound();
+      }
+      return cohort;
+    }),
   );
 
   const [
@@ -50,12 +53,10 @@ export default async function Page(props: {
     cohortPromise.then((cohort) =>
       listStudentsWithCurriculaByCohortId(cohort.id),
     ),
-    retrieveLocationByHandle(params.location),
+    locationPromise,
     cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
     cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
-    retrieveLocationByHandle(params.location).then((loc) =>
-      listRolesForLocation(loc.id),
-    ),
+    locationPromise.then((loc) => listRolesForLocation(loc.id)),
   ]);
 
   const isCohortAdmin = permissions.length > 0;
