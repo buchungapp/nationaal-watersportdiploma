@@ -256,16 +256,9 @@ function buildDiff(primary: Person, duplicate: Person): DiffRow[] {
     note: emailNote,
   });
 
-  // Handle: always different by design (auto-generated, unique). Keep
-  // it informational so the operator can spot which row is which, but
-  // don't flag as a "conflict".
-  rows.push({
-    label: "Handle",
-    primary: primary.handle ? `@${primary.handle}` : "—",
-    duplicate: duplicate.handle ? `@${duplicate.handle}` : "—",
-    match: true,
-    note: "Automatisch gegenereerd — verschilt altijd.",
-  });
+  // Handle is auto-generated and always differs — not a useful diff
+  // row. It surfaces inline in the column headers instead, so the
+  // operator can still tell the rows apart at a glance.
 
   return rows;
 }
@@ -282,13 +275,23 @@ function DiffTable({
     <div className="overflow-hidden rounded-md border border-zinc-950/10 dark:border-white/10">
       <div className="grid grid-cols-[8.5rem_1fr_1fr] bg-zinc-100 text-xs font-medium text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
         <div className="px-3 py-2">Veld</div>
-        <div className="border-l border-zinc-950/10 px-3 py-2 dark:border-white/10">
-          Primair
-          <span className="ml-1 text-zinc-500 font-normal">(blijft)</span>
+        <div className="flex flex-wrap items-baseline gap-x-1.5 border-l border-zinc-950/10 px-3 py-2 dark:border-white/10">
+          <span>Primair</span>
+          <span className="text-zinc-500 font-normal">(blijft)</span>
+          {primary.handle ? (
+            <span className="ml-auto font-mono text-[11px] font-normal text-zinc-500">
+              @{primary.handle}
+            </span>
+          ) : null}
         </div>
-        <div className="border-l border-zinc-950/10 px-3 py-2 dark:border-white/10">
-          Duplicaat
-          <span className="ml-1 text-zinc-500 font-normal">(verdwijnt)</span>
+        <div className="flex flex-wrap items-baseline gap-x-1.5 border-l border-zinc-950/10 px-3 py-2 dark:border-white/10">
+          <span>Duplicaat</span>
+          <span className="text-zinc-500 font-normal">(verdwijnt)</span>
+          {duplicate.handle ? (
+            <span className="ml-auto font-mono text-[11px] font-normal text-zinc-500">
+              @{duplicate.handle}
+            </span>
+          ) : null}
         </div>
       </div>
       {rows.map((row) => (
