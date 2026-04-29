@@ -1712,6 +1712,392 @@ export const searchForAutocomplete = wrapQuery(
   ),
 );
 
+// Location-scoped autocomplete search. Identical to searchForAutocomplete
+// but constrained to persons with an active personLocationLink for the
+// given location. Used by operator-facing merge flows where GDPR
+// enforces location boundary.
+export const searchForAutocompleteInLocation = wrapQuery(
+  "user.person.searchForAutocompleteInLocation",
+  withZod(
+    z.object({
+      q: z.string().min(1),
+      locationId: uuidSchema,
+      limit: z.number().int().positive().default(10),
+      excludePersonId: uuidSchema.optional(),
+    }),
+    z.array(
+      personSchema.pick({
+        id: true,
+        handle: true,
+        firstName: true,
+        lastNamePrefix: true,
+        lastName: true,
+        email: true,
+        dateOfBirth: true,
+        userId: true,
+        isPrimary: true,
+      }),
+    ),
+    async ({ q, locationId, limit, excludePersonId }) => {
+      const query = useQuery();
+
+      const whereClausules: (SQL | undefined)[] = [
+        sql`
+          (
+            setweight(to_tsvector('simple',
+              COALESCE(${s.user.email}, '')
+            ), 'A') ||
+            setweight(to_tsvector('simple',
+              COALESCE(split_part(${s.user.email}, '@', 1), '')
+            ), 'B') ||
+            setweight(to_tsvector('simple',
+              COALESCE(split_part(${s.user.email}, '@', 2), '')
+            ), 'C') ||
+            setweight(to_tsvector('simple', COALESCE(${s.person.handle}, '')), 'B') ||
+            setweight(to_tsvector('simple',
+              COALESCE(${s.person.firstName}, '') || ' ' ||
+              COALESCE(${s.person.lastNamePrefix}, '') || ' ' ||
+              COALESCE(${s.person.lastName}, '')
+            ), 'A')
+          ) @@ to_tsquery('simple', ${formatSearchTerms(q, "and")})
+        `,
+        isNull(s.person.deletedAt),
+        excludePersonId ? ne(s.person.id, excludePersonId) : undefined,
+        eq(s.personLocationLink.locationId, locationId),
+        eq(s.personLocationLink.status, "linked"),
+      ];
+
+      const persons = await query
+        .select({
+          id: s.person.id,
+          handle: s.person.handle,
+          firstName: s.person.firstName,
+          lastNamePrefix: s.person.lastNamePrefix,
+          lastName: s.person.lastName,
+          email: s.user.email,
+          dateOfBirth: s.person.dateOfBirth,
+          userId: s.person.userId,
+          isPrimary: s.person.isPrimary,
+        })
+        .from(s.person)
+        .innerJoin(
+          s.personLocationLink,
+          eq(s.personLocationLink.personId, s.person.id),
+        )
+        .leftJoin(s.user, eq(s.person.userId, s.user.authUserId))
+        .where(and(...whereClausules))
+        .limit(limit);
+
+      return persons.map((person) => ({
+        ...person,
+        // biome-ignore lint/style/noNonNullAssertion: intentional
+        handle: person.handle!,
+      }));
+    },
+  ),
+);
+
+// List duplicate-pair candidates within a single location. Reuses the
+// pair-finder algorithm via shared scoring fragments. Operator-facing —
+// scope is enforced via personLocationLink linked-active. Optionally
+// further constrained to persons allocated to a specific cohort.
+export const listDuplicatePairsInLocation = wrapQuery(
+  "user.person.listDuplicatePairsInLocation",
+  withZod(
+    z.object({
+      locationId: uuidSchema,
+      // When set, only pairs where BOTH persons are allocated to this
+      // cohort are returned. Drives the cohort-banner "duplicates in
+      // this cohort" surface.
+      cohortId: uuidSchema.optional(),
+      threshold: z
+        .number()
+        .int()
+        .min(0)
+        .default(DuplicateScoring.DEFAULT_ANALYZE_THRESHOLD),
+      limit: z.number().int().positive().max(500).default(200),
+    }),
+    z.array(
+      z.object({
+        score: z.number().int(),
+        primary: z.object({
+          id: z.string().uuid(),
+          firstName: z.string().nullable(),
+          lastNamePrefix: z.string().nullable(),
+          lastName: z.string().nullable(),
+          dateOfBirth: z.string().nullable(),
+          email: z.string().nullable(),
+          isPrimary: z.boolean(),
+          createdAt: z.string(),
+        }),
+        duplicate: z.object({
+          id: z.string().uuid(),
+          firstName: z.string().nullable(),
+          lastNamePrefix: z.string().nullable(),
+          lastName: z.string().nullable(),
+          dateOfBirth: z.string().nullable(),
+          email: z.string().nullable(),
+          isPrimary: z.boolean(),
+          createdAt: z.string(),
+        }),
+      }),
+    ),
+    async ({ locationId, cohortId, threshold, limit }) => {
+      const query = useQuery();
+
+      const NORM = (col: SQL) => sql`
+        LOWER(REGEXP_REPLACE(COALESCE(${col}, ''), '[^[:alnum:]]+', '', 'g'))
+      `;
+
+      const cohortFilter = cohortId
+        ? sql`AND EXISTS (
+            SELECT 1
+            FROM cohort_allocation ca
+            INNER JOIN actor a ON a.id = ca.actor_id
+            WHERE ca.cohort_id = ${cohortId}::uuid
+              AND ca.deleted_at IS NULL
+              AND a.deleted_at IS NULL
+              AND a.person_id = p.id
+          )`
+        : sql``;
+
+      const stmt = sql`
+        WITH location_persons AS (
+          SELECT
+            p.id, p.handle, p.first_name, p.last_name, p.last_name_prefix,
+            p.date_of_birth, p.birth_city, p.is_primary, p.created_at,
+            p.user_id, u.email,
+            ${NORM(sql`p.first_name`)} AS first_norm,
+            ${NORM(sql`p.last_name`)} AS last_norm,
+            ${NORM(
+              sql`TRIM(CONCAT(
+                COALESCE(p.last_name_prefix, ''),
+                CASE WHEN p.last_name_prefix IS NOT NULL THEN ' ' ELSE '' END,
+                COALESCE(p.last_name, '')
+              ))`,
+            )} AS full_last_norm,
+            ${NORM(sql`p.birth_city`)} AS birth_city_norm
+          FROM person p
+          INNER JOIN person_location_link pll
+            ON pll.person_id = p.id
+          LEFT JOIN "user" u ON p.user_id = u.auth_user_id
+          WHERE pll.location_id = ${locationId}::uuid
+            AND pll.status = 'linked'
+            AND p.deleted_at IS NULL
+            AND p.first_name IS NOT NULL
+            ${cohortFilter}
+        ),
+        same_user_pairs AS (
+          SELECT
+            p1.id AS id1, p1.first_name AS fn1, p1.last_name AS ln1,
+            p1.last_name_prefix AS lnp1, p1.date_of_birth::text AS dob1,
+            p1.email AS email1, p1.is_primary AS prim1,
+            p1.created_at AS created_at1,
+            p2.id AS id2, p2.first_name AS fn2, p2.last_name AS ln2,
+            p2.last_name_prefix AS lnp2, p2.date_of_birth::text AS dob2,
+            p2.email AS email2, p2.is_primary AS prim2,
+            p2.created_at AS created_at2,
+            ${DuplicateScoring.scoreSameUserPair(
+              {
+                firstNorm: sql`p1.first_norm`,
+                lastNorm: sql`p1.last_norm`,
+                fullLastNorm: sql`p1.full_last_norm`,
+                dateOfBirth: sql`p1.date_of_birth`,
+                birthCityNorm: sql`p1.birth_city_norm`,
+                userId: sql`p1.user_id`,
+              },
+              {
+                firstNorm: sql`p2.first_norm`,
+                lastNorm: sql`p2.last_norm`,
+                fullLastNorm: sql`p2.full_last_norm`,
+                dateOfBirth: sql`p2.date_of_birth`,
+                birthCityNorm: sql`p2.birth_city_norm`,
+                userId: sql`p2.user_id`,
+              },
+            )}::int AS score
+          FROM location_persons p1
+          INNER JOIN location_persons p2
+            ON p1.id < p2.id
+            AND p1.user_id IS NOT NULL
+            AND p1.user_id = p2.user_id
+            AND (
+              p1.first_norm = p2.first_norm
+              OR (LENGTH(p1.first_norm) >= 3
+                  AND LENGTH(p2.first_norm) >= 3
+                  AND LEFT(p1.first_norm, 3) = LEFT(p2.first_norm, 3))
+            )
+        ),
+        name_birth_pairs AS (
+          SELECT
+            p1.id AS id1, p1.first_name AS fn1, p1.last_name AS ln1,
+            p1.last_name_prefix AS lnp1, p1.date_of_birth::text AS dob1,
+            p1.email AS email1, p1.is_primary AS prim1,
+            p1.created_at AS created_at1,
+            p2.id AS id2, p2.first_name AS fn2, p2.last_name AS ln2,
+            p2.last_name_prefix AS lnp2, p2.date_of_birth::text AS dob2,
+            p2.email AS email2, p2.is_primary AS prim2,
+            p2.created_at AS created_at2,
+            ${DuplicateScoring.scoreNameBirthPair(
+              {
+                firstNorm: sql`p1.first_norm`,
+                lastNorm: sql`p1.last_norm`,
+                fullLastNorm: sql`p1.full_last_norm`,
+                dateOfBirth: sql`p1.date_of_birth`,
+                birthCityNorm: sql`p1.birth_city_norm`,
+                userId: sql`p1.user_id`,
+              },
+              {
+                firstNorm: sql`p2.first_norm`,
+                lastNorm: sql`p2.last_norm`,
+                fullLastNorm: sql`p2.full_last_norm`,
+                dateOfBirth: sql`p2.date_of_birth`,
+                birthCityNorm: sql`p2.birth_city_norm`,
+                userId: sql`p2.user_id`,
+              },
+            )}::int AS score
+          FROM location_persons p1
+          INNER JOIN location_persons p2
+            ON p1.id < p2.id
+            AND p1.first_norm <> ''
+            AND p1.first_norm = p2.first_norm
+            AND (
+              p1.full_last_norm <> '' AND p1.full_last_norm = p2.full_last_norm
+              OR p1.last_norm <> '' AND p1.last_norm = p2.last_norm
+            )
+            AND p1.date_of_birth IS NOT NULL
+            AND p2.date_of_birth IS NOT NULL
+            AND ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 365
+            AND (p1.user_id IS NULL OR p2.user_id IS NULL OR p1.user_id <> p2.user_id)
+        ),
+        all_pairs AS (
+          SELECT * FROM same_user_pairs
+          UNION ALL
+          SELECT * FROM name_birth_pairs
+        ),
+        ranked AS (
+          SELECT
+            *,
+            ROW_NUMBER() OVER (
+              PARTITION BY LEAST(id1, id2), GREATEST(id1, id2)
+              ORDER BY score DESC
+            ) AS pair_rank
+          FROM all_pairs
+          WHERE score >= ${threshold}
+        )
+        SELECT *
+        FROM ranked
+        WHERE pair_rank = 1
+        ORDER BY score DESC, created_at1 ASC
+        LIMIT ${limit}
+      `;
+
+      const result = await query.execute(stmt);
+      type Row = {
+        id1: string;
+        fn1: string | null;
+        ln1: string | null;
+        lnp1: string | null;
+        dob1: string | null;
+        email1: string | null;
+        prim1: boolean;
+        created_at1: string;
+        id2: string;
+        fn2: string | null;
+        ln2: string | null;
+        lnp2: string | null;
+        dob2: string | null;
+        email2: string | null;
+        prim2: boolean;
+        created_at2: string;
+        score: number;
+      };
+      const rows = result.rows as unknown as Row[];
+
+      // Convention: sort the pair so the "primary" candidate is the one
+      // most likely to be kept in a merge. Primary > userId > older.
+      return rows.map((r) => {
+        const pickPrimary = (): "1" | "2" => {
+          if (r.prim1 && !r.prim2) return "1";
+          if (!r.prim1 && r.prim2) return "2";
+          if (r.email1 && !r.email2) return "1";
+          if (!r.email1 && r.email2) return "2";
+          return new Date(r.created_at1).getTime() <=
+            new Date(r.created_at2).getTime()
+            ? "1"
+            : "2";
+        };
+        const which = pickPrimary();
+        const a = which === "1" ? r : flipSides(r);
+        return {
+          score: Number(r.score),
+          primary: {
+            id: a.id1,
+            firstName: a.fn1,
+            lastNamePrefix: a.lnp1,
+            lastName: a.ln1,
+            dateOfBirth: a.dob1,
+            email: a.email1,
+            isPrimary: a.prim1,
+            createdAt: a.created_at1,
+          },
+          duplicate: {
+            id: a.id2,
+            firstName: a.fn2,
+            lastNamePrefix: a.lnp2,
+            lastName: a.ln2,
+            dateOfBirth: a.dob2,
+            email: a.email2,
+            isPrimary: a.prim2,
+            createdAt: a.created_at2,
+          },
+        };
+      });
+    },
+  ),
+);
+
+function flipSides<R extends Record<string, unknown>>(r: R): R {
+  const next: Record<string, unknown> = { ...r };
+  for (const k of Object.keys(r)) {
+    if (k.endsWith("1")) {
+      const k2 = `${k.slice(0, -1)}2`;
+      next[k] = (r as Record<string, unknown>)[k2];
+      next[k2] = (r as Record<string, unknown>)[k];
+    }
+  }
+  return next as R;
+}
+
+// Verify a personId is in the operator's GDPR scope (linked-active to the
+// given location). Helper used by operator merge actions for defense-in-
+// depth — the underlying mergePersons engine doesn't enforce scope, so the
+// action must.
+export const isInLocationScope = wrapQuery(
+  "user.person.isInLocationScope",
+  withZod(
+    z.object({
+      personId: uuidSchema,
+      locationId: uuidSchema,
+    }),
+    z.boolean(),
+    async ({ personId, locationId }) => {
+      const query = useQuery();
+      const result = await query
+        .select({ id: s.personLocationLink.personId })
+        .from(s.personLocationLink)
+        .where(
+          and(
+            eq(s.personLocationLink.personId, personId),
+            eq(s.personLocationLink.locationId, locationId),
+            eq(s.personLocationLink.status, "linked"),
+          ),
+        )
+        .limit(1);
+      return result.length > 0;
+    },
+  ),
+);
+
 export const listLocationsByRole = wrapQuery(
   "user.person.listLocationsByRole",
   withZod(
@@ -1942,6 +2328,24 @@ export const mergePersons = wrapCommand(
     z.object({
       personId: uuidSchema,
       targetPersonId: uuidSchema,
+      // Optional audit metadata. When provided, mergePersons writes one
+      // person_merge_audit row inside the same transaction. Operator-driven
+      // surfaces (personen_page, cohort_view) and the sysadmin path all use
+      // this. Bulk import has its own audit shape so it doesn't go through
+      // here.
+      auditMetadata: z
+        .object({
+          performedByPersonId: uuidSchema,
+          locationId: uuidSchema,
+          source: z.enum([
+            "personen_page",
+            "cohort_view",
+            "sysadmin",
+          ]),
+          score: z.number().int().optional(),
+          reasons: z.array(z.string()).optional(),
+        })
+        .optional(),
     }),
     async (input) => {
       return await withTransaction(async (tx) => {
@@ -2689,6 +3093,21 @@ export const mergePersons = wrapCommand(
           .where(eq(s.pvbLeercoachToestemming.leercoachId, input.personId));
 
         await tx.delete(s.person).where(eq(s.person.id, input.personId));
+
+        // Audit row — written inside the same transaction so a bug + missing
+        // audit is impossible (rollback removes both, commit keeps both).
+        if (input.auditMetadata) {
+          await tx.insert(s.personMergeAudit).values({
+            performedByPersonId: input.auditMetadata.performedByPersonId,
+            locationId: input.auditMetadata.locationId,
+            sourcePersonId: input.personId,
+            targetPersonId: input.targetPersonId,
+            decisionKind: "merge",
+            score: input.auditMetadata.score ?? null,
+            reasons: input.auditMetadata.reasons ?? null,
+            source: input.auditMetadata.source,
+          });
+        }
       });
     },
   ),

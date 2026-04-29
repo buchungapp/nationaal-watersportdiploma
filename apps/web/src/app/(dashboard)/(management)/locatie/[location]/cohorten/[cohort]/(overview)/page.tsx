@@ -2,7 +2,9 @@ import FlexSearch from "flexsearch";
 
 import { notFound } from "next/navigation";
 import { createLoader, parseAsString, parseAsStringLiteral } from "nuqs/server";
+import { Suspense } from "react";
 import { TextLink } from "~/app/(dashboard)/_components/text";
+import { CohortDuplicatesBanner } from "../_components/cohort-duplicates-banner";
 import {
   isInstructorInCohort,
   listPrivilegesForCohort,
@@ -123,7 +125,16 @@ export default async function Page(props: {
   }
 
   return (
-    <StudentsTable
+    <>
+      {isCohortAdmin ? (
+        <Suspense fallback={null}>
+          <CohortDuplicatesBanner
+            locationId={location.id}
+            cohortId={cohort.id}
+          />
+        </Suspense>
+      ) : null}
+      <StudentsTable
       view={instructorAllocation ? parsedSq.overzicht : null}
       students={searchedStudents}
       totalItems={searchedStudents.length}
@@ -153,5 +164,6 @@ export default async function Page(props: {
         )
       }
     />
+    </>
   );
 }

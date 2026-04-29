@@ -167,6 +167,18 @@ async function isActiveActorTypeInLocation({
   return true as const;
 }
 
+// Exported wrapper around the private isActiveActorTypeInLocation so that
+// server actions outside this module (operator merge actions) can enforce
+// the same auth check without re-implementing the listLocationsByRole
+// + match logic.
+export async function isActiveActorTypeInLocationServerHelper(args: {
+  personId: string;
+  locationId: string;
+  actorType: Exclude<ActorType, "pvb_beoordelaar">[];
+}) {
+  return isActiveActorTypeInLocation(args);
+}
+
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
     return await withSupabaseClient(supabaseConfig, async () => {
@@ -4854,4 +4866,33 @@ function findCandidateForCreate(
       row.dateOfBirth === input.dateOfBirth,
   );
   return match ?? null;
+}
+
+export async function listLocationDuplicatePairs({
+  locationId,
+  cohortId,
+  threshold,
+  limit,
+}: {
+  locationId: string;
+  cohortId?: string;
+  threshold?: number;
+  limit?: number;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: operator.id,
+    });
+
+    return User.Person.listDuplicatePairsInLocation({
+      locationId,
+      cohortId,
+      threshold,
+      limit,
+    });
+  });
 }
