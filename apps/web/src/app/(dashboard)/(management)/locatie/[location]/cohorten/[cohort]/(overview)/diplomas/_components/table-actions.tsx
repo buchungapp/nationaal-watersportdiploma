@@ -222,9 +222,19 @@ export function IssueCertificateDialog({
   // the operator knows who didn't get a diploma and why.
   const issuable: typeof rows = [];
   const blocked: typeof rows = [];
+  // Rows with no curriculum linked to the allocation are NOT "blocked by an
+  // earlier diploma" — they're a different problem entirely (operator forgot
+  // to assign a curriculum). Bucket separately so the dialog copy doesn't
+  // misattribute the cause.
+  const noCurriculum: typeof rows = [];
   for (const row of rows) {
-    const moduleStatus = row.studentCurriculum?.moduleStatus ?? [];
-    const hasIssuable = moduleStatus.some((m) => m.newlyIssuable);
+    if (!row.studentCurriculum) {
+      noCurriculum.push(row);
+      continue;
+    }
+    const hasIssuable = row.studentCurriculum.moduleStatus.some(
+      (m) => m.newlyIssuable,
+    );
     if (hasIssuable) {
       issuable.push(row);
     } else {
@@ -289,6 +299,30 @@ export function IssueCertificateDialog({
             </div>
           ) : null}
 
+          {noCurriculum.length > 0 ? (
+            <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/10">
+              <Text className="!text-sm font-medium text-amber-900 dark:text-amber-200">
+                {noCurriculum.length === 1
+                  ? "1 cursist heeft nog geen curriculum"
+                  : `${noCurriculum.length} cursisten hebben nog geen curriculum`}
+              </Text>
+              <Text className="mt-1 !text-xs !text-amber-800 dark:!text-amber-300">
+                Zonder gekoppeld curriculum kan er geen diploma worden
+                uitgegeven. Open de cursist en koppel eerst een curriculum.
+              </Text>
+              <ul className="mt-2 space-y-0.5">
+                {noCurriculum.map((row) => (
+                  <li
+                    key={row.id}
+                    className="text-xs text-amber-900 dark:text-amber-200"
+                  >
+                    • {fullName(row.person)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           {issuable.length > 0 ? (
             <Text className="!text-sm">
               {issuable.length === 1
@@ -331,7 +365,7 @@ export function IssueCertificateDialog({
           </Button>
           <Button type="submit" disabled={isPending || issuable.length === 0}>
             {isPending ? <Spinner className="text-white" /> : null}
-            {blocked.length > 0
+            {blocked.length > 0 || noCurriculum.length > 0
               ? `Doorgaan met ${issuable.length} ${
                   issuable.length === 1 ? "diploma" : "diploma's"
                 }`
