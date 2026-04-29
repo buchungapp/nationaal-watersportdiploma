@@ -2484,7 +2484,7 @@ test("findCandidateMatchesInLocation: 2 paste rows similar to each other but not
     assert.deepEqual(result.crossRowGroups[0]!.sharedCandidatePersonIds, []);
   }));
 
-test("commitBulkImport: 3 rows targeting same existing person → 1 cohort allocation, 3 audit rows", () =>
+test("commitBulkImport: 3 rows targeting same existing person → 3 cohort allocations sharing one actor, 3 audit rows", () =>
   withTestTransaction(async () => {
     const query = useQuery();
     const location = await Location.create({
@@ -2546,7 +2546,9 @@ test("commitBulkImport: 3 rows targeting same existing person → 1 cohort alloc
       "committed",
     );
 
-    // Cohort allocation: ONE row, despite 3 paste decisions.
+    // Cohort allocations: 3 rows → 3 allocations, all sharing the same
+    // actor (one Person, one Actor for student role). Each pasted row
+    // is a distinct intent; allocations are not deduped.
     const allocations = await query
       .select()
       .from(s.cohortAllocation)
@@ -2560,8 +2562,15 @@ test("commitBulkImport: 3 rows targeting same existing person → 1 cohort alloc
       );
     assert.equal(
       allocations.length,
+      3,
+      "Expected 3 cohort_allocations, got " + allocations.length,
+    );
+    // All point to the same actor.
+    const actorIds = new Set(allocations.map((a) => a.actor.id));
+    assert.equal(
+      actorIds.size,
       1,
-      "Expected 1 cohort_allocation, got " + allocations.length,
+      `Expected one actor across all 3 allocations, got ${actorIds.size}`,
     );
 
     // Audit: 3 rows (one per pasted CSV row), all decisionKind=use_existing.
@@ -3219,12 +3228,12 @@ test("commitBulkImport: empty tagsByRowIndex → no tags column written", () =>
     );
   }));
 
-test("commitBulkImport: cross-row same_person aggregates tags across rows", () =>
+test("commitBulkImport: cross-row same_person → N allocations, each with that row's own tags", () =>
   withTestTransaction(async () => {
     const query = useQuery();
     const location = await Location.create({
-      handle: "commit-tag-aggr-location",
-      name: "Commit Tag Aggregate Location",
+      handle: "commit-tag-perrow-location",
+      name: "Commit Tag Per Row Location",
     });
     const { id: existingPersonId } = await User.Person.getOrCreate({
       firstName: "Aggregate",
@@ -3236,18 +3245,20 @@ test("commitBulkImport: cross-row same_person aggregates tags across rows", () =
       locationId: location.id,
     });
     const { id: cohortId } = await Cohort.create({
-      handle: "tag-aggr-cohort",
-      label: "Tag Aggregate Cohort",
+      handle: "tag-perrow-cohort",
+      label: "Tag Per Row Cohort",
       locationId: location.id,
       accessStartTime: dayjs().subtract(1, "day").toISOString(),
       accessEndTime: dayjs().add(30, "day").toISOString(),
     });
     const { id: operatorPersonId } = await User.Person.getOrCreate({
-      firstName: "AggrOperator",
+      firstName: "PerRowOperator",
       lastName: "X",
     });
 
-    // 3 paste rows, all same person, each with different tags.
+    // 3 paste rows for the same Adam, each with its own tag set.
+    // Operator's mental model: each row is one course/sub-group →
+    // 3 allocations, NOT a single allocation with merged tags.
     const preview = await User.Person.previewBulkImport({
       locationId: location.id,
       performedByPersonId: operatorPersonId,
@@ -3274,13 +3285,13 @@ test("commitBulkImport: cross-row same_person aggregates tags across rows", () =
         "2": { kind: "use_existing", personId: existingPersonId },
       },
       tagsByRowIndex: {
-        "0": ["alpha", "beta"],
-        "1": ["beta", "gamma"],
-        "2": ["delta"],
+        "0": ["optimist"],
+        "1": ["dinsdag"],
+        "2": ["zondag-recital"],
       },
     });
 
-    const allocation = await query
+    const allocations = await query
       .select({ tags: s.cohortAllocation.tags })
       .from(s.cohortAllocation)
       .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
@@ -3290,13 +3301,19 @@ test("commitBulkImport: cross-row same_person aggregates tags across rows", () =
           eq(s.actor.personId, existingPersonId),
           isNull(s.cohortAllocation.deletedAt),
         ),
-      )
-      .then((rows) => rows[0]);
+      );
 
-    assert.ok(allocation, "Expected one cohort_allocation");
+    assert.equal(
+      allocations.length,
+      3,
+      `Expected 3 cohort_allocations, got ${allocations.length}`,
+    );
+    const tagSets = allocations
+      .map((a) => [...a.tags].sort().join(","))
+      .sort();
     assert.deepStrictEqual(
-      [...allocation.tags].sort(),
-      ["alpha", "beta", "delta", "gamma"],
-      `Expected union of tags across rows, got ${JSON.stringify(allocation.tags)}`,
+      tagSets,
+      ["dinsdag", "optimist", "zondag-recital"],
+      `Expected each allocation to carry its own row's tags, got ${JSON.stringify(tagSets)}`,
     );
   }));

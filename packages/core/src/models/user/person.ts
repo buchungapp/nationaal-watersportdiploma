@@ -653,6 +653,9 @@ export const commitBulkImport = wrapCommand(
         // so the forensics trail captures every operator decision.
 
         const processedPersonIds = new Set<string>();
+        // Cache resolved student-actor id per personId so we don't repeat
+        // the lookup for every paste row that targets the same person.
+        const studentActorIdByPersonId = new Map<string, string>();
 
         for (const candidate of candidates) {
           const rowIndex = candidate.rowIndex;
@@ -667,7 +670,14 @@ export const commitBulkImport = wrapCommand(
             )?.candidates ?? [];
           const presentedIds = candidateMatches.map((c) => c.personId);
 
-          // Per-personId work runs ONCE per commit.
+          // ── Per-personId work (link, actor) — runs ONCE per commit ──
+          //
+          // The Person, the location-link, and the per-role Actor row
+          // are facts about the human, not the paste row. They're
+          // idempotent in shape and de-duped here. Cohort allocations
+          // are NOT in this block: each paste row is its own intent
+          // ("Adam in optimist", "Adam in dinsdag") and gets its own
+          // allocation below.
           if (!processedPersonIds.has(targetPersonId)) {
             if (decision.kind === "use_existing") {
               // linkToLocation throws on revoked/removed; defense-in-depth.
@@ -711,44 +721,7 @@ export const commitBulkImport = wrapCommand(
                 )
                 .then(possibleSingleRow);
               if (studentActor) {
-                // Aggregate tags across every row in the group that
-                // targets this personId. Cross-row "same person" sends
-                // 3 rows pointing at one personId — operator's intent is
-                // typically to union the tags. trim + dedup. Empty tag
-                // values are silently dropped.
-                const aggregatedTags = new Set<string>();
-                if (input.tagsByRowIndex) {
-                  for (const c of candidates) {
-                    if (personIdByRow.get(c.rowIndex) !== targetPersonId) {
-                      continue;
-                    }
-                    const rowTags =
-                      input.tagsByRowIndex[c.rowIndex.toString()] ?? [];
-                    for (const t of rowTags) {
-                      const trimmed = t.trim();
-                      if (trimmed) aggregatedTags.add(trimmed);
-                    }
-                  }
-                }
-                const tagsArray =
-                  aggregatedTags.size > 0
-                    ? Array.from(aggregatedTags)
-                    : null;
-                // Idempotency on cohort_allocation: NULL studentCurriculumId
-                // is treated as DISTINCT by PG default unique semantics, so
-                // we can't rely on the partial unique index alone. The
-                // processedPersonIds guard above prevents duplicate inserts
-                // when 3 rows target the same person. AlreadyInCohortRow
-                // auto-skip handles the prior-allocation case, so we can
-                // safely no-op on conflict here.
-                await tx
-                  .insert(s.cohortAllocation)
-                  .values({
-                    cohortId: previewRow.targetCohortId,
-                    actorId: studentActor.id,
-                    ...(tagsArray ? { tags: tagsArray } : {}),
-                  })
-                  .onConflictDoNothing();
+                studentActorIdByPersonId.set(targetPersonId, studentActor.id);
               }
             }
 
@@ -756,6 +729,46 @@ export const commitBulkImport = wrapCommand(
               linkedPersonIds.push(targetPersonId);
             }
             processedPersonIds.add(targetPersonId);
+          }
+
+          // ── Per-row cohort allocation ──
+          //
+          // Each paste row produces its own cohort_allocation, even
+          // when multiple rows target the same person. The operator's
+          // mental model: each row is one course / sub-group within
+          // the cohort, and tags on that row describe THAT enrollment.
+          // Three rows of Adam with three different Tag values →
+          // 1 Person row, 1 Actor row, 3 cohort_allocations (each with
+          // its own tags).
+          //
+          // PG treats NULL studentCurriculumId as distinct in the
+          // partial unique index, so multiple NULL-curriculum
+          // allocations per (cohort, actor) coexist by design.
+          if (previewRow.targetCohortId) {
+            const studentActorId = studentActorIdByPersonId.get(targetPersonId);
+            if (studentActorId) {
+              const rowTags = input.tagsByRowIndex?.[rowIndex.toString()] ?? [];
+              const cleanTags = (() => {
+                const seen = new Set<string>();
+                const out: string[] = [];
+                for (const t of rowTags) {
+                  const trimmed = t.trim();
+                  if (!trimmed) continue;
+                  if (seen.has(trimmed)) continue;
+                  seen.add(trimmed);
+                  out.push(trimmed);
+                }
+                return out;
+              })();
+              await tx
+                .insert(s.cohortAllocation)
+                .values({
+                  cohortId: previewRow.targetCohortId,
+                  actorId: studentActorId,
+                  ...(cleanTags.length > 0 ? { tags: cleanTags } : {}),
+                })
+                .onConflictDoNothing();
+            }
           }
 
           // Audit per ORIGINAL row (every operator decision is captured).

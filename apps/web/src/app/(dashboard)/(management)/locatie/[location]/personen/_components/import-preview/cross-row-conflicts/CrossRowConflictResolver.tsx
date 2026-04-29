@@ -255,15 +255,17 @@ function Outcome({
   isPasteOnly: boolean;
   hasCohort: boolean;
 }) {
+  const n = group.rowIndices.length;
   const profileSummary = isPasteOnly
     ? "1 nieuw profiel aangemaakt voor deze persoon"
     : "1 bestaand profiel gebruikt";
-  const cohortSummary = hasCohort ? " en 1 cohortplek aangemaakt" : "";
+  const cohortSummary = hasCohort
+    ? ` en ${n} cohortplek${n === 1 ? "" : "ken"} aangemaakt (één per rij)`
+    : "";
   return (
     <div className="mt-4 space-y-2">
       <Text>
-        De {group.rowIndices.length} rijen verwijzen naar dezelfde persoon. Bij
-        bevestigen wordt{" "}
+        De {n} rijen verwijzen naar dezelfde persoon. Bij bevestigen wordt{" "}
         <Strong>
           {profileSummary}
           {cohortSummary}
@@ -272,8 +274,10 @@ function Outcome({
       </Text>
       {hasCohort ? (
         <Text className="!text-sm !text-zinc-500">
-          Wil je deze persoon aan meerdere cursussen binnen dit cohort
-          koppelen? Dat doe je na de import via de cohortpagina.
+          Eén cohortplek per rij — zo behoudt elke regel z'n eigen tags
+          (bijvoorbeeld voor verschillende cursussen of subgroepen). Wil je
+          ze juist samenvoegen tot één plek? Dat kan na de import via de
+          cohortpagina.
         </Text>
       ) : null}
     </div>
