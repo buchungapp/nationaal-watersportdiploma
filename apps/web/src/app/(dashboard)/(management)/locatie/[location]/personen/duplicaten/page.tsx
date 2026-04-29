@@ -1,6 +1,8 @@
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import { listLocationDuplicatePairs, retrieveLocationByHandle } from "~/lib/nwd";
 import { DuplicatePairsList } from "./_components/DuplicatePairsList";
 
@@ -19,6 +21,11 @@ async function Pairs({ locationHandle }: { locationHandle: string }) {
 export default async function Page(props: {
   params: Promise<{ location: string }>;
 }) {
+  // Gate behind operator-identity-workflow. When off, the route 404s
+  // — same pattern as /leercoach pages so direct-link visits don't
+  // leak the new UI to users who shouldn't see it yet.
+  if (!(await operatorIdentityWorkflowEnabled())) notFound();
+
   const { location: locationHandle } = await props.params;
   return (
     <div>

@@ -1,6 +1,7 @@
 import NextLink from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listLocationDuplicatePairs,
   listPrivilegesForCohort,
@@ -21,29 +22,34 @@ async function LayoutTabsContent(props: Props) {
     notFound();
   }
 
-  const [roles, privileges] = await Promise.all([
+  const [roles, privileges, identityWorkflowOn] = await Promise.all([
     listRolesForLocation(location.id),
     listPrivilegesForCohort(cohort.id),
+    operatorIdentityWorkflowEnabled(),
   ]);
 
   // Only location_admins can act on duplicates, so only they need the
   // count. Fetched here (not in page.tsx) so the dot indicator on the
   // Duplicaten tab is consistent across all four sub-routes — Cursisten,
-  // Diploma's, Instructeurs, Duplicaten.
-  const duplicatesCount = roles.includes("location_admin")
-    ? await listLocationDuplicatePairs({
-        locationId: location.id,
-        cohortId: cohort.id,
-        threshold: 150,
-        limit: 50,
-      }).then((pairs) => pairs.length)
-    : 0;
+  // Diploma's, Instructeurs, Duplicaten. The Duplicaten tab itself is
+  // gated on the operator-identity-workflow flag — when off, no count
+  // is fetched and the client hides the tab entirely.
+  const duplicatesCount =
+    identityWorkflowOn && roles.includes("location_admin")
+      ? await listLocationDuplicatePairs({
+          locationId: location.id,
+          cohortId: cohort.id,
+          threshold: 150,
+          limit: 50,
+        }).then((pairs) => pairs.length)
+      : 0;
 
   return (
     <LayoutTabsClient
       personRoles={roles}
       personPrivileges={privileges}
       duplicatesCount={duplicatesCount}
+      duplicatesTabEnabled={identityWorkflowOn}
     />
   );
 }
@@ -55,6 +61,10 @@ export function LayoutTabsFallback() {
       aria-label="Tabs"
     >
       {/* TODO: href="#" is not a nice solution, but it works for now */}
+      {/* Fallback shows the tab list before flags resolve — the Duplicaten
+        * tab is included optimistically; if the flag is off it'll vanish
+        * once LayoutTabsContent finishes loading. The brief flash is
+        * acceptable for an internal admin route. */}
       {[
         { name: "Cursisten" },
         { name: "Diploma's" },

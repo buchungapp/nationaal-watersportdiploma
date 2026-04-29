@@ -8,6 +8,7 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import CreateBulkDialog from "./create-bulk-dialog";
+import CreateBulkDialogLegacy from "./create-bulk-dialog-legacy";
 import CreateSingleDialog from "./create-single-dialog";
 
 type DialogStates = "single" | "bulk" | null;
@@ -66,20 +67,36 @@ export function DialogsClient(props: {
   locationId: string;
   cohortId: string;
   countries: { code: string; name: string }[];
+  // Same gate semantics as the personen DialogsClient: flag on → new
+  // dedup-aware preview pipeline, flag off → legacy stateful action
+  // that adds students one by one. Tag column support, "already in
+  // cohort" auto-skip, and cross-row dedup live only on the new path.
+  useNewBulkImport: boolean;
 }) {
   const { isOpen, setIsOpen } = useDialog();
 
   return (
     <>
-      <CreateBulkDialog
-        locationId={props.locationId}
-        cohortId={props.cohortId}
-        countries={props.countries}
-        isOpen={isOpen === "bulk"}
-        setIsOpen={(next) => {
-          setIsOpen(next ? "bulk" : null);
-        }}
-      />
+      {props.useNewBulkImport ? (
+        <CreateBulkDialog
+          locationId={props.locationId}
+          cohortId={props.cohortId}
+          countries={props.countries}
+          isOpen={isOpen === "bulk"}
+          setIsOpen={(next) => {
+            setIsOpen(next ? "bulk" : null);
+          }}
+        />
+      ) : (
+        <CreateBulkDialogLegacy
+          locationId={props.locationId}
+          cohortId={props.cohortId}
+          isOpen={isOpen === "bulk"}
+          setIsOpen={(next) => {
+            setIsOpen(next ? "bulk" : null);
+          }}
+        />
+      )}
       <CreateSingleDialog
         locationId={props.locationId}
         cohortId={props.cohortId}

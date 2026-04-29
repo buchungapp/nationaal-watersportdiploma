@@ -22,6 +22,44 @@ import posthog from "./posthog";
 //      or the flag doesn't exist, the app stays off until ops adds
 //      it intentionally.
 
+export const operatorIdentityWorkflowEnabled: Flag<boolean> = flag({
+  key: "operator-identity-workflow",
+  async decide() {
+    // Dev bypass: always on locally so the new bulk-import preview
+    // pipeline + duplicate-management surfaces are exercised by every
+    // engineer without flipping a switch.
+    if (process.env.NODE_ENV === "development") return true;
+
+    // Both surfaces require an authenticated operator. If we can't
+    // identify the user, treat as off — they can't reach the gated
+    // routes through the legitimate UI anyway, this is just defense
+    // in depth.
+    const user = await getUserOrThrow().catch(() => null);
+    if (!user) return false;
+
+    try {
+      const enabled = await posthog.getFeatureFlag(
+        "operator-identity-workflow",
+        user.authUserId,
+      );
+      return enabled === true;
+    } catch (err) {
+      console.error(
+        "[flags] operator-identity-workflow PostHog lookup failed",
+        err,
+      );
+      return false;
+    }
+  },
+  defaultValue: false,
+  description:
+    "Gates the new operator identity workflow: bulk-import dedup preview (personen + cohort), the cohort/personen Duplicaten pages, and the dedup hint on single-person create. When off, the legacy bulk-import flows are used and the duplicate-management surfaces are hidden.",
+  options: [
+    { value: true, label: "Enabled" },
+    { value: false, label: "Disabled" },
+  ],
+});
+
 export const leercoachEnabled: Flag<boolean> = flag({
   key: "leercoach-enabled",
   async decide() {

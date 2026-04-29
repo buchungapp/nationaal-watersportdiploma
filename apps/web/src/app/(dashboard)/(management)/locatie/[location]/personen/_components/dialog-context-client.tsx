@@ -8,6 +8,7 @@ import {
   DropdownLabel,
 } from "~/app/(dashboard)/_components/dropdown";
 import CreateBulkDialog from "./create-bulk-dialog";
+import CreateBulkDialogLegacy from "./create-bulk-dialog-legacy";
 import CreateSingleDialog from "./create-single-dialog";
 
 const DialogContext = createContext<{
@@ -61,24 +62,41 @@ export function DialogButtons() {
 export function DialogsClient(props: {
   countries: { code: string; name: string }[];
   locationId: string;
+  // When the operator-identity-workflow flag is on, render the new
+  // dedup-aware bulk dialog. When off, fall back to the legacy
+  // stateful flow that ships every row straight through to
+  // createPersonsAction. Decided server-side; no client-side fetch.
+  useNewBulkImport: boolean;
 }) {
   const { isOpen, setIsOpen } = useDialog();
+  const { useNewBulkImport, ...sharedProps } = props;
 
   return (
     <>
-      <CreateBulkDialog
-        {...props}
-        isOpen={isOpen === "bulk"}
-        setIsOpen={(next) => {
-          setIsOpen(next ? "bulk" : null);
-        }}
-      />
+      {useNewBulkImport ? (
+        <CreateBulkDialog
+          {...sharedProps}
+          isOpen={isOpen === "bulk"}
+          setIsOpen={(next) => {
+            setIsOpen(next ? "bulk" : null);
+          }}
+        />
+      ) : (
+        <CreateBulkDialogLegacy
+          {...sharedProps}
+          isOpen={isOpen === "bulk"}
+          setIsOpen={(next) => {
+            setIsOpen(next ? "bulk" : null);
+          }}
+        />
+      )}
       <CreateSingleDialog
-        {...props}
+        {...sharedProps}
         isOpen={isOpen === "single"}
         close={() => {
           setIsOpen(null);
         }}
+        showDedupHint={useNewBulkImport}
       />
     </>
   );

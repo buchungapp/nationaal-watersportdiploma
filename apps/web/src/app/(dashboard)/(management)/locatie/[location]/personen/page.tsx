@@ -8,6 +8,7 @@ import {
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { TextLink } from "~/app/(dashboard)/_components/text";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listPersonsForLocationWithPagination,
   retrieveLocationByHandle,
@@ -92,6 +93,11 @@ async function DuplicatesLink({
 }: {
   params: Promise<{ location: string }>;
 }) {
+  // Hidden when the operator-identity-workflow flag is off — same flag
+  // gates the /personen/duplicaten route itself, so this entry point
+  // would otherwise lead to a 404.
+  if (!(await operatorIdentityWorkflowEnabled())) return null;
+
   const { location } = await params;
   return (
     <div className="mt-2 text-sm">

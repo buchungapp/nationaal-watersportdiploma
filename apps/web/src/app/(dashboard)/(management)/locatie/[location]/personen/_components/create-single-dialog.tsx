@@ -69,6 +69,11 @@ interface Props {
   countries: { code: string; name: string }[];
   isOpen: boolean;
   close: () => void;
+  // Flag-gated: render the live dedup hint as the operator types.
+  // Default false so existing callers (which haven't been updated)
+  // keep their original behaviour without the hint until the parent
+  // explicitly opts in.
+  showDedupHint?: boolean;
 }
 
 export default function Wrapper(props: Props) {
@@ -87,7 +92,13 @@ export default function Wrapper(props: Props) {
   );
 }
 
-function CreateDialog({ locationId, isOpen, close, countries }: Props) {
+function CreateDialog({
+  locationId,
+  isOpen,
+  close,
+  countries,
+  showDedupHint,
+}: Props) {
   const closeDialog = () => {
     close();
     reset();
@@ -230,14 +241,16 @@ function CreateDialog({ locationId, isOpen, close, countries }: Props) {
                 </Field>
               </div>
 
-              <DedupHint
-                locationId={locationId}
-                firstName={hintInputs.firstName}
-                lastName={hintInputs.lastName}
-                lastNamePrefix={hintInputs.lastNamePrefix}
-                dateOfBirth={hintInputs.dateOfBirth}
-                email={hintInputs.email}
-              />
+              {showDedupHint ? (
+                <DedupHint
+                  locationId={locationId}
+                  firstName={hintInputs.firstName}
+                  lastName={hintInputs.lastName}
+                  lastNamePrefix={hintInputs.lastNamePrefix}
+                  dateOfBirth={hintInputs.dateOfBirth}
+                  email={hintInputs.email}
+                />
+              ) : null}
 
               <div className="gap-8 sm:gap-4 grid grid-cols-1 sm:grid-cols-2">
                 <Field>

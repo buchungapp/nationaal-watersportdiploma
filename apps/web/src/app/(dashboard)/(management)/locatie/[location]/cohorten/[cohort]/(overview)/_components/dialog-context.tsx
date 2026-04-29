@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listCountries,
   retrieveCohortByHandle,
@@ -13,9 +14,10 @@ type DialogsProps = {
 
 async function DialogsContent(props: DialogsProps) {
   const params = await props.params;
-  const [location, countries] = await Promise.all([
+  const [location, countries, useNewBulkImport] = await Promise.all([
     retrieveLocationByHandle(params.location),
     listCountries(),
+    operatorIdentityWorkflowEnabled(),
   ]);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
@@ -28,6 +30,7 @@ async function DialogsContent(props: DialogsProps) {
       locationId={location.id}
       cohortId={cohort.id}
       countries={countries.map((c) => ({ code: c.code, name: c.name }))}
+      useNewBulkImport={useNewBulkImport}
     />
   );
 }

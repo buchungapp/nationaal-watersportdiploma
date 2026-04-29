@@ -11,6 +11,7 @@ export function LayoutTabsClient({
   personRoles,
   personPrivileges,
   duplicatesCount,
+  duplicatesTabEnabled,
 }: {
   personRoles: ActorType[];
   personPrivileges: z.infer<typeof enums.Privilege>[];
@@ -19,6 +20,9 @@ export function LayoutTabsClient({
   // tab still renders (so location admins can navigate there), just
   // without the indicator.
   duplicatesCount: number;
+  // Feature flag (operator-identity-workflow) routed via the parent.
+  // When false, the Duplicaten tab is hidden entirely.
+  duplicatesTabEnabled: boolean;
 }) {
   const params = useParams();
   const segments = useSelectedLayoutSegments();
@@ -65,8 +69,9 @@ export function LayoutTabsClient({
           href: `/locatie/${params.location}/cohorten/${params.cohort}/duplicaten`,
           // Acting on a duplicate (merging persons) requires
           // location_admin server-side, so only show the tab to people
-          // who can actually do something with what they find.
-          enabled: hasRole(["location_admin"]),
+          // who can actually do something with what they find — and
+          // only when the operator-identity-workflow flag is on.
+          enabled: duplicatesTabEnabled && hasRole(["location_admin"]),
           current: segments[0] === "duplicaten",
           showDot: duplicatesCount > 0,
         },

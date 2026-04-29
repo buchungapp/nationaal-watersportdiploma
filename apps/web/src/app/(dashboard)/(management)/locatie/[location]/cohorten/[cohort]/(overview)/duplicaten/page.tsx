@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
 import { Text } from "~/app/(dashboard)/_components/text";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listLocationDuplicatePairs,
   retrieveCohortByHandle,
@@ -51,6 +52,10 @@ async function Pairs({
 export default async function Page(props: {
   params: Promise<{ location: string; cohort: string }>;
 }) {
+  // Same gate as /personen/duplicaten — feature flag off means this
+  // route 404s.
+  if (!(await operatorIdentityWorkflowEnabled())) notFound();
+
   const { location: locationHandle, cohort: cohortHandle } =
     await props.params;
   return (
