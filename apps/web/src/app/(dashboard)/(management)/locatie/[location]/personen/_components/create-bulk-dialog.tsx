@@ -394,6 +394,9 @@ function SubmitForm({
           {raceBanner ? (
             <ErrorMessage className="mb-4">{raceBanner}</ErrorMessage>
           ) : null}
+          {errorMessage ? (
+            <ErrorMessage className="mb-4">{errorMessage}</ErrorMessage>
+          ) : null}
           <CommitConsumer
             previewModel={previewModel}
             roles={roles}
@@ -403,6 +406,7 @@ function SubmitForm({
             onCommit={(payload) => {
               setCommitting(true);
               setRaceBanner(null);
+              setErrorMessage(null);
               commitExec.execute(payload);
             }}
           />

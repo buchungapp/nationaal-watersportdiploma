@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 import {
   type BlockerSummary,
   BulkImportPreviewContext,
@@ -147,6 +147,16 @@ export function BulkImportPreviewProvider({
   );
 
   const reset = useCallback(() => dispatch({ type: "reset" }), []);
+
+  // When the parent swaps in a fresh preview (e.g. after a race-detected
+  // refresh from the server), propagate it into our reducer so consumers
+  // see the new matches/parsedRows. Reducer's "refresh" action already
+  // garbage-collects decisions whose rowIndex disappeared.
+  useEffect(() => {
+    if (initialPreview.previewToken !== state.preview.previewToken) {
+      dispatch({ type: "refresh", preview: initialPreview });
+    }
+  }, [initialPreview, state.preview.previewToken]);
 
   // Derived meta: blocker counts, canSubmit boolean. Computed here once
   // per state change so consumers (the sticky footer chip, the disabled

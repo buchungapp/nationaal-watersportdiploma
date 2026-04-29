@@ -2,6 +2,7 @@
 
 import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 import { use, useState } from "react";
+import Spinner from "~/app/_components/spinner";
 import { Button } from "~/app/(dashboard)/_components/button";
 import { Text } from "~/app/(dashboard)/_components/text";
 import {
@@ -91,7 +92,14 @@ export function PreviewFooter({
           disabled={!canSubmit || submitting}
           onClick={onSubmit}
         >
-          {submitting ? "Importeren…" : `Bevestigen en importeren — ${personenToImport} personen`}
+          {submitting ? (
+            <span className="inline-flex items-center gap-2">
+              <Spinner size="sm" className="text-white" />
+              Bezig met importeren…
+            </span>
+          ) : (
+            `Bevestigen en importeren — ${personenToImport} personen`
+          )}
         </Button>
       </div>
     </div>
