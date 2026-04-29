@@ -117,6 +117,10 @@ function parseOptions(args: string[]): Options {
   };
 
   for (const arg of args) {
+    if (arg === "--") {
+      continue;
+    }
+
     if (arg === "--json") {
       options.json = true;
       continue;

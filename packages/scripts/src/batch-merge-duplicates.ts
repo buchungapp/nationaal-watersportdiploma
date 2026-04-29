@@ -292,6 +292,10 @@ function parseOptions(args: string[]): Options {
   };
 
   for (const arg of args) {
+    if (arg === "--") {
+      continue;
+    }
+
     if (arg === "--execute") {
       options.execute = true;
       continue;
