@@ -124,6 +124,8 @@ async function createCurriculumFixture(prefix: string) {
   return {
     curriculumId,
     gearTypeId,
+    module1Id,
+    module2Id,
     curriculumCompetency1Id,
     curriculumCompetency2Id,
   };
@@ -1211,34 +1213,36 @@ test("user.person.mergePersons repoints PVB counterparty refs when source was be
       })
     ).id;
 
-    // Set up a minimal pvb_aanvraag. Picking the tiniest valid FK
-    // chain: kandidaat = otherPerson, leercoach = source.
-    // Find any course/kerntaak rows to satisfy FKs.
-    const courses = await query.select({ id: s.course.id }).from(s.course).limit(1);
-    const kerntaken = await query
-      .select({ id: s.kerntaak.id })
-      .from(s.kerntaak)
-      .limit(1);
-    if (courses.length === 0 || kerntaken.length === 0) {
-      // Skip silently if dev DB lacks KSS seed data; covered by
-      // sweep-mode tests in the future. Keep the regression assertion
-      // narrow.
-      return;
-    }
-
-    const [{ id: pvbAanvraagId }] = await query
+    // Step 1: minimal pvb_aanvraag with otherPerson as kandidaat. The
+    // table's actual columns are id/handle/kandidaatId/locatieId/type/
+    // opmerkingen — no kerntaakId or leercoachId here (those concerns
+    // live on pvbLeercoachToestemming and the per-onderdeel rows).
+    const pvbAanvraagInsert = await query
       .insert(s.pvbAanvraag)
       .values({
-        handle: `pvb-${Date.now()}`,
+        handle: `pvb-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         kandidaatId: otherPersonId,
         locatieId: location.id,
-        leercoachId: sourcePersonId,
-        kerntaakId: kerntaken[0]!.id,
         type: "intern",
         opmerkingen: null,
-        aangemaaktDoor: otherActorId,
       })
       .returning({ id: s.pvbAanvraag.id });
+    const pvbAanvraagId = pvbAanvraagInsert[0]?.id;
+    assert.ok(pvbAanvraagId, "Should have created the pvb_aanvraag");
+
+    // Step 2: leercoach_toestemming pointing at the source person as
+    // leercoach. After merge, leercoach_id must repoint to target.
+    const toestemmingInsert = await query
+      .insert(s.pvbLeercoachToestemming)
+      .values({
+        pvbAanvraagId,
+        leercoachId: sourcePersonId,
+        status: "gevraagd",
+        aangemaaktDoor: otherActorId,
+      })
+      .returning({ id: s.pvbLeercoachToestemming.id });
+    const toestemmingId = toestemmingInsert[0]?.id;
+    assert.ok(toestemmingId, "Should have created the toestemming row");
 
     await User.Person.mergePersons({
       personId: sourcePersonId,
@@ -1247,20 +1251,25 @@ test("user.person.mergePersons repoints PVB counterparty refs when source was be
 
     const updated = await query
       .select({
-        leercoachId: s.pvbAanvraag.leercoachId,
-        kandidaatId: s.pvbAanvraag.kandidaatId,
+        leercoachId: s.pvbLeercoachToestemming.leercoachId,
       })
-      .from(s.pvbAanvraag)
-      .where(eq(s.pvbAanvraag.id, pvbAanvraagId))
+      .from(s.pvbLeercoachToestemming)
+      .where(eq(s.pvbLeercoachToestemming.id, toestemmingId))
       .then((rows) => rows[0]);
-    assert.ok(updated, "PVB aanvraag should still exist");
+    assert.ok(updated, "Toestemming row should still exist");
     assert.equal(
       updated.leercoachId,
       targetPersonId,
       "leercoach_id should now reference target person, not the deleted source",
     );
+
+    const aanvraag = await query
+      .select({ kandidaatId: s.pvbAanvraag.kandidaatId })
+      .from(s.pvbAanvraag)
+      .where(eq(s.pvbAanvraag.id, pvbAanvraagId))
+      .then((rows) => rows[0]);
     assert.equal(
-      updated.kandidaatId,
+      aanvraag?.kandidaatId,
       otherPersonId,
       "kandidaat_id should be untouched (third-party person)",
     );
@@ -1373,4 +1382,232 @@ test("student.curriculum.listProgressByPersonId picks canonical (non-merge-dupli
       newerCertId,
       "Module should reference the canonical (newer) certificate, not the merge-conflict duplicate (older one)",
     );
+  }));
+
+// REGRESSION (option d, post-merge issuance): the diplomas-tab module
+// status must expose `newlyIssuable` so the UI can distinguish modules
+// where the cohort run would mint a fresh diploma from modules that
+// are already fully canonical via an earlier certificate. Without this
+// the operator sees a "klaar voor uitgifte" row that, on click, would
+// silently produce a partial diploma — which is the exact silent-
+// corruption scenario we want to surface as `geblokkeerd` instead.
+test("cohort.certificate.listStatus exposes newlyIssuable per module (canonical vs new)", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "newly-issuable-loc",
+      name: "Newly Issuable Test Location",
+    });
+
+    const fixture = await createCurriculumFixture("newly-issuable");
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "NewlyIssuable",
+      lastName: "Student",
+    });
+    await User.Person.createLocationLink({
+      personId,
+      locationId: location.id,
+    });
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId: fixture.curriculumId,
+      gearTypeId: fixture.gearTypeId,
+    });
+
+    // Issue an earlier cert that covers competency 1 only — module 1
+    // becomes fully canonical, module 2 is still untouched.
+    const { id: earlierCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: earlierCertId,
+      studentCurriculumId,
+      competencyId: fixture.curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: earlierCertId,
+      visibleFrom: dayjs().subtract(1, "day").toISOString(),
+    });
+
+    // Now spin up a cohort with the same student. Cohort progress hits
+    // BOTH competencies (instructor re-ticks comp1 too) so both modules
+    // satisfy the cohort-side completion criterion. The newlyIssuable
+    // flag is what tells them apart.
+    const { id: cohortId } = await Cohort.create({
+      label: "Issuable Cohort",
+      handle: "issuable-cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    const { id: studentActorId } = await User.Actor.upsert({
+      personId,
+      locationId: location.id,
+      type: "student",
+    });
+
+    await Cohort.Allocation.create({
+      cohortId,
+      actorId: studentActorId,
+      studentCurriculumId,
+    });
+
+    const { id: instructorPersonId } = await User.Person.getOrCreate({
+      firstName: "Issuable",
+      lastName: "Instructor",
+    });
+    await User.Person.createLocationLink({
+      personId: instructorPersonId,
+      locationId: location.id,
+    });
+
+    // Find the allocation we just created so we can post progress.
+    const status = await Cohort.Certificate.listStatus({ cohortId });
+    const studentRow = status.find((row) => row.person.id === personId);
+    assert.ok(studentRow, "Expected the student to appear in cohort status");
+
+    await Cohort.StudentProgress.upsertProgress({
+      cohortAllocationId: studentRow.id,
+      competencyProgress: [
+        { competencyId: fixture.curriculumCompetency1Id, progress: 100 },
+        { competencyId: fixture.curriculumCompetency2Id, progress: 100 },
+      ],
+      createdBy: instructorPersonId,
+    });
+
+    const finalStatus = await Cohort.Certificate.listStatus({ cohortId });
+    const finalStudent = finalStatus.find((row) => row.person.id === personId);
+    assert.ok(finalStudent?.studentCurriculum);
+    const moduleStatuses = finalStudent.studentCurriculum.moduleStatus;
+
+    const module1 = moduleStatuses.find(
+      (m) => m.module.id === fixture.module1Id,
+    );
+    const module2 = moduleStatuses.find(
+      (m) => m.module.id === fixture.module2Id,
+    );
+    assert.ok(module1, "Module 1 should appear in the status");
+    assert.ok(module2, "Module 2 should appear in the status");
+
+    // Module 1: comp1 is already canonical. Cohort progress is 100 but
+    // there is nothing NEW to issue here. newlyIssuable must be false.
+    assert.equal(
+      module1.newlyIssuable,
+      false,
+      "Module 1 is fully canonical from earlier cert — issuance would mint nothing new",
+    );
+
+    // Module 2: comp2 is at 100 in this cohort and has no canonical
+    // record yet. This is the only module the cohort run can produce a
+    // fresh diploma for.
+    assert.equal(
+      module2.newlyIssuable,
+      true,
+      "Module 2 has a fresh competency at 100 with no canonical row — newly issuable",
+    );
+  }));
+
+// REGRESSION (option d, fully-redundant cohort run): when every
+// competency the cohort would issue is already canonical, every
+// module's newlyIssuable is false. This is the `geblokkeerd` row state
+// the diplomas tab needs to render as "kan geen diploma uitreiken — al
+// eerder behaald."
+test("cohort.certificate.listStatus newlyIssuable=false for all modules when fully redundant", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "fully-redundant-loc",
+      name: "Fully Redundant Cohort Location",
+    });
+
+    const fixture = await createCurriculumFixture("fully-redundant");
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "FullyRedundant",
+      lastName: "Student",
+    });
+    await User.Person.createLocationLink({
+      personId,
+      locationId: location.id,
+    });
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId: fixture.curriculumId,
+      gearTypeId: fixture.gearTypeId,
+    });
+
+    // Earlier cert covers BOTH competencies — the curriculum is fully
+    // canonical. Any subsequent cohort run on the same curriculum has
+    // nothing new to issue.
+    const { id: earlierCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: earlierCertId,
+      studentCurriculumId,
+      competencyId: [
+        fixture.curriculumCompetency1Id,
+        fixture.curriculumCompetency2Id,
+      ],
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: earlierCertId,
+      visibleFrom: dayjs().subtract(1, "day").toISOString(),
+    });
+
+    const { id: cohortId } = await Cohort.create({
+      label: "Redundant Cohort",
+      handle: "redundant-cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    const { id: studentActorId } = await User.Actor.upsert({
+      personId,
+      locationId: location.id,
+      type: "student",
+    });
+    await Cohort.Allocation.create({
+      cohortId,
+      actorId: studentActorId,
+      studentCurriculumId,
+    });
+
+    const { id: instructorPersonId } = await User.Person.getOrCreate({
+      firstName: "Redundant",
+      lastName: "Instructor",
+    });
+    await User.Person.createLocationLink({
+      personId: instructorPersonId,
+      locationId: location.id,
+    });
+
+    const initial = await Cohort.Certificate.listStatus({ cohortId });
+    const studentRow = initial.find((row) => row.person.id === personId);
+    assert.ok(studentRow);
+
+    await Cohort.StudentProgress.upsertProgress({
+      cohortAllocationId: studentRow.id,
+      competencyProgress: [
+        { competencyId: fixture.curriculumCompetency1Id, progress: 100 },
+        { competencyId: fixture.curriculumCompetency2Id, progress: 100 },
+      ],
+      createdBy: instructorPersonId,
+    });
+
+    const finalStatus = await Cohort.Certificate.listStatus({ cohortId });
+    const finalStudent = finalStatus.find((row) => row.person.id === personId);
+    assert.ok(finalStudent?.studentCurriculum);
+    for (const module of finalStudent.studentCurriculum.moduleStatus) {
+      assert.equal(
+        module.newlyIssuable,
+        false,
+        `Module ${module.module.id} should be fully redundant — every comp already canonical`,
+      );
+    }
   }));
