@@ -9,6 +9,7 @@ import {
 } from "~/app/_actions/person/bulk-import-actions";
 import {
   COLUMN_MAPPING,
+  COLUMN_MAPPING_WITH_TAG,
   type CSVData,
   SELECT_LABEL,
 } from "~/app/_actions/person/person-bulk-csv-mappings";
@@ -91,6 +92,21 @@ interface Props {
   countries: { code: string; name: string }[];
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
+  // ── Variant props (defaults match the personen-page flow) ────────────
+  // When set, skips the role picker and uses these roles unconditionally.
+  // Cohort variant passes ["student"]; personen variant leaves undefined.
+  fixedRoles?: ImportRoles;
+  // Cohort variant passes the cohort id; the preview/commit flow then
+  // surfaces "already-in-cohort" rows and tags travel with the
+  // cohort_allocation row.
+  targetCohortId?: string;
+  // When true, the column-mapping dropdown includes "Tag" — the operator
+  // can map N columns as Tag and those values become per-row tags
+  // applied to each cohort_allocation. Cohort variant only.
+  enableTags?: boolean;
+  // Localized title + success toast wording for the variant.
+  dialogTitle?: string;
+  successToast?: (count: number) => string;
 }
 
 export default function Wrapper(props: Props) {
@@ -114,7 +130,17 @@ type ImportRoles = ("student" | "instructor" | "location_admin")[] & [
   ...("student" | "instructor" | "location_admin")[],
 ];
 
-function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
+function CreateDialog({
+  locationId,
+  isOpen,
+  setIsOpen,
+  countries,
+  fixedRoles,
+  targetCohortId,
+  enableTags = false,
+  dialogTitle = "Personen toevoegen (bulk)",
+  successToast = (n) => `${n} ${n === 1 ? "persoon" : "personen"} toegevoegd.`,
+}: Props) {
   const [isUpload, setIsUpload] = useState(true);
   const [data, setData] = useState<CSVData>({ labels: null, rows: null });
 
@@ -126,9 +152,12 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
     const formData = new FormData(event.currentTarget);
     const raw = formData.get("data") as string;
-    const selected = ROLES.filter((role) =>
-      formData.has(`role-${role.type}`),
-    ).map((role) => role.type);
+    // Cohort variant skips the role picker and uses fixedRoles.
+    const selected = fixedRoles
+      ? [...fixedRoles]
+      : ROLES.filter((role) => formData.has(`role-${role.type}`)).map(
+          (role) => role.type,
+        );
 
     if (selected.length < 1) {
       setHasSelectedRole(false);
@@ -165,7 +194,7 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
 
   return (
     <Dialog open={isOpen} onClose={setIsOpen} size="5xl">
-      <DialogTitle>Personen toevoegen (bulk)</DialogTitle>
+      <DialogTitle>{dialogTitle}</DialogTitle>
 
       {isUpload ? (
         <form onSubmit={handleSubmit}>
@@ -192,31 +221,33 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
               <Textarea name="data" required />
             </Fieldset>
 
-            <Fieldset className="mt-6">
-              <Legend>Rollen</Legend>
-              <Text>
-                Welke rol(len) vervullen deze personen in jullie locatie?
-              </Text>
-              {!hasSelectedRole && (
-                <ErrorMessage>
-                  Selecteer minimaal één rol voor de personen.
-                </ErrorMessage>
-              )}
-              <CheckboxGroup>
-                {ROLES.map((role) => (
-                  <CheckboxField key={role.type}>
-                    <Checkbox
-                      name={`role-${role.type}`}
-                      defaultChecked={
-                        "defaultChecked" in role && role.defaultChecked
-                      }
-                    />
-                    <Label>{role.label}</Label>
-                    <Description>{role.description}</Description>
-                  </CheckboxField>
-                ))}
-              </CheckboxGroup>
-            </Fieldset>
+            {fixedRoles ? null : (
+              <Fieldset className="mt-6">
+                <Legend>Rollen</Legend>
+                <Text>
+                  Welke rol(len) vervullen deze personen in jullie locatie?
+                </Text>
+                {!hasSelectedRole && (
+                  <ErrorMessage>
+                    Selecteer minimaal één rol voor de personen.
+                  </ErrorMessage>
+                )}
+                <CheckboxGroup>
+                  {ROLES.map((role) => (
+                    <CheckboxField key={role.type}>
+                      <Checkbox
+                        name={`role-${role.type}`}
+                        defaultChecked={
+                          "defaultChecked" in role && role.defaultChecked
+                        }
+                      />
+                      <Label>{role.label}</Label>
+                      <Description>{role.description}</Description>
+                    </CheckboxField>
+                  ))}
+                </CheckboxGroup>
+              </Fieldset>
+            )}
           </DialogBody>
           <DialogActions>
             <Button plain onClick={() => setIsOpen(false)}>
@@ -234,6 +265,9 @@ function CreateDialog({ locationId, isOpen, setIsOpen, countries }: Props) {
           // biome-ignore lint/style/noNonNullAssertion: roles is set when upload is completed
           roles={roles!}
           locationId={locationId}
+          targetCohortId={targetCohortId}
+          enableTags={enableTags}
+          successToast={successToast}
           close={() => setIsOpen(false)}
         />
       )}
@@ -248,12 +282,18 @@ function SubmitForm({
   roles,
   locationId,
   countries,
+  targetCohortId,
+  enableTags,
+  successToast,
   close,
 }: {
   data: CSVData;
   roles: ImportRoles;
   locationId: string;
   countries: { code: string; name: string }[];
+  targetCohortId?: string;
+  enableTags?: boolean;
+  successToast: (count: number) => string;
   close: () => void;
 }) {
   const [step, setStep] = useState<Step>("mapping");
@@ -278,7 +318,7 @@ function SubmitForm({
     roles,
     data,
     countries,
-    undefined, // targetCohortId — Phase 2.5 doesn't support cohort selection here
+    targetCohortId,
   );
 
   const previewExec = useAction(previewBound, {
@@ -323,7 +363,7 @@ function SubmitForm({
 
       if (r.kind === "committed") {
         const total = r.createdPersonIds.length + r.linkedPersonIds.length;
-        toast.success(`${total} ${total === 1 ? "persoon" : "personen"} toegevoegd.`);
+        toast.success(successToast(total));
         close();
         return;
       }
@@ -459,7 +499,10 @@ function SubmitForm({
                     className="min-w-48"
                   >
                     <option value={SELECT_LABEL}>{SELECT_LABEL}</option>
-                    {COLUMN_MAPPING.map((column) => (
+                    {(enableTags
+                      ? COLUMN_MAPPING_WITH_TAG
+                      : COLUMN_MAPPING
+                    ).map((column) => (
                       <option key={column} value={column}>
                         {column}
                       </option>
@@ -521,6 +564,7 @@ function CommitConsumer({
         dateOfBirth: string;
         birthCity: string;
         birthCountry: string;
+        tags?: string[];
       }
     >;
   }) => void;
@@ -542,6 +586,7 @@ function CommitConsumer({
         dateOfBirth: string;
         birthCity: string;
         birthCountry: string;
+        tags?: string[];
       }
     > = {};
     for (const row of previewModel.parsedRows) {
@@ -553,6 +598,7 @@ function CommitConsumer({
         dateOfBirth: dayjs(row.dateOfBirth).format("YYYY-MM-DD"),
         birthCity: row.birthCity,
         birthCountry: row.birthCountry,
+        ...(row.tags && row.tags.length > 0 ? { tags: row.tags } : {}),
       };
     }
     onCommit({

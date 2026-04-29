@@ -3062,3 +3062,241 @@ test("searchForAutocompleteInLocation only returns linked-active persons", () =>
     assert.ok(!ids.includes(outsideId), "outsider must not appear");
     assert.ok(!ids.includes(revokedId), "revoked must not appear");
   }));
+
+test("commitBulkImport: tagsByRowIndex applied to cohort_allocation.tags", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-tags-location",
+      name: "Commit Tags Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Tagged",
+      lastName: "Bakker",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "tagged-cohort",
+      label: "Tagged Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "TagOperator",
+      lastName: "X",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Tagged",
+          lastName: "Bakker",
+          lastNamePrefix: null,
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+      tagsByRowIndex: {
+        "0": ["optimist", "tuesday-group"],
+      },
+    });
+
+    const allocation = await query
+      .select({ tags: s.cohortAllocation.tags })
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    assert.ok(allocation, "Expected one cohort_allocation");
+    assert.deepStrictEqual(
+      [...allocation.tags].sort(),
+      ["optimist", "tuesday-group"],
+      `Expected both tags applied, got ${JSON.stringify(allocation.tags)}`,
+    );
+  }));
+
+test("commitBulkImport: empty tagsByRowIndex → no tags column written", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-no-tags-location",
+      name: "Commit No Tags Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Untagged",
+      lastName: "Bakker",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "untagged-cohort",
+      label: "Untagged Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "NoTagOperator",
+      lastName: "X",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Untagged",
+          lastName: "Bakker",
+          lastNamePrefix: null,
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    // No tagsByRowIndex passed.
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    const allocation = await query
+      .select({ tags: s.cohortAllocation.tags })
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    assert.ok(allocation, "Expected one cohort_allocation");
+    assert.deepStrictEqual(
+      allocation.tags,
+      [],
+      "Expected no tags applied when tagsByRowIndex omitted",
+    );
+  }));
+
+test("commitBulkImport: cross-row same_person aggregates tags across rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-tag-aggr-location",
+      name: "Commit Tag Aggregate Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Aggregate",
+      lastName: "Bakker",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "tag-aggr-cohort",
+      label: "Tag Aggregate Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "AggrOperator",
+      lastName: "X",
+    });
+
+    // 3 paste rows, all same person, each with different tags.
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [0, 1, 2].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Aggregate",
+        lastName: "Bakker",
+        lastNamePrefix: null,
+        dateOfBirth: "2010-05-12",
+        birthCity: "Amsterdam",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+        "1": { kind: "use_existing", personId: existingPersonId },
+        "2": { kind: "use_existing", personId: existingPersonId },
+      },
+      tagsByRowIndex: {
+        "0": ["alpha", "beta"],
+        "1": ["beta", "gamma"],
+        "2": ["delta"],
+      },
+    });
+
+    const allocation = await query
+      .select({ tags: s.cohortAllocation.tags })
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    assert.ok(allocation, "Expected one cohort_allocation");
+    assert.deepStrictEqual(
+      [...allocation.tags].sort(),
+      ["alpha", "beta", "delta", "gamma"],
+      `Expected union of tags across rows, got ${JSON.stringify(allocation.tags)}`,
+    );
+  }));

@@ -423,6 +423,11 @@ export const commitBulkImport = wrapCommand(
         )
         .returns(z.promise(z.object({ personId: z.string().uuid() })))
         .optional(),
+      // Optional cohort-allocation tags per row (rowIndex → tags[]).
+      // Applied after the cohort_allocation insert, so only relevant when
+      // the preview was created with targetCohortId set. Tags travel
+      // with the allocation, not the person.
+      tagsByRowIndex: z.record(z.string(), z.array(z.string())).optional(),
     }),
     z.unknown(),
     async (input) => {
@@ -706,16 +711,42 @@ export const commitBulkImport = wrapCommand(
                 )
                 .then(possibleSingleRow);
               if (studentActor) {
+                // Aggregate tags across every row in the group that
+                // targets this personId. Cross-row "same person" sends
+                // 3 rows pointing at one personId — operator's intent is
+                // typically to union the tags. trim + dedup. Empty tag
+                // values are silently dropped.
+                const aggregatedTags = new Set<string>();
+                if (input.tagsByRowIndex) {
+                  for (const c of candidates) {
+                    if (personIdByRow.get(c.rowIndex) !== targetPersonId) {
+                      continue;
+                    }
+                    const rowTags =
+                      input.tagsByRowIndex[c.rowIndex.toString()] ?? [];
+                    for (const t of rowTags) {
+                      const trimmed = t.trim();
+                      if (trimmed) aggregatedTags.add(trimmed);
+                    }
+                  }
+                }
+                const tagsArray =
+                  aggregatedTags.size > 0
+                    ? Array.from(aggregatedTags)
+                    : null;
                 // Idempotency on cohort_allocation: NULL studentCurriculumId
                 // is treated as DISTINCT by PG default unique semantics, so
                 // we can't rely on the partial unique index alone. The
                 // processedPersonIds guard above prevents duplicate inserts
-                // when 3 rows target the same person.
+                // when 3 rows target the same person. AlreadyInCohortRow
+                // auto-skip handles the prior-allocation case, so we can
+                // safely no-op on conflict here.
                 await tx
                   .insert(s.cohortAllocation)
                   .values({
                     cohortId: previewRow.targetCohortId,
                     actorId: studentActor.id,
+                    ...(tagsArray ? { tags: tagsArray } : {}),
                   })
                   .onConflictDoNothing();
               }

@@ -4749,13 +4749,14 @@ export async function commitBulkImport({
   roles,
   decisions,
   candidateInputsByRowIndex,
+  tagsByRowIndex,
 }: {
   previewToken: string;
   locationId: string;
   roles: ActorType[];
   decisions: Record<
     string,
-    | { kind: "create_new" }
+    | { kind: "create_new"; shareNewPersonWithGroup?: string }
     | { kind: "use_existing"; personId: string }
     | {
         kind: "skip";
@@ -4776,8 +4777,13 @@ export async function commitBulkImport({
       dateOfBirth: string;
       birthCity: string;
       birthCountry: string;
+      tags?: string[];
     }
   >;
+  // Optional rowIndex → tags[]. When the preview targets a cohort,
+  // these are applied as cohort_allocation.tags after the allocation
+  // insert. Pass-through to core commitBulkImport.
+  tagsByRowIndex?: Record<string, string[]>;
 }) {
   return makeRequest(async () => {
     const authUser = await getUserOrThrow();
@@ -4801,6 +4807,7 @@ export async function commitBulkImport({
       previewToken,
       performedByPersonId: operator.id,
       decisions,
+      tagsByRowIndex,
       createPerson: async (input) => {
         const candidate = findCandidateForCreate(
           input,

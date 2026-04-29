@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/(dashboard)/_components/table";
-import { Strong, Text } from "~/app/(dashboard)/_components/text";
+import { Strong, Text, TextLink } from "~/app/(dashboard)/_components/text";
 import { OperatorMergeConfirmDialog } from "~/app/_components/persons/operator-merge-confirm-dialog";
 
 type Person = {
@@ -45,9 +45,13 @@ type Pair = {
 export function CohortDuplicatesBannerClient({
   pairs,
   locationId,
+  fullViewHref,
 }: {
   pairs: Pair[];
   locationId: string;
+  // URL of the full duplicaten page for this cohort. Banner shows top
+  // 50 strong+ pairs; the page shows everything from threshold 100.
+  fullViewHref: string;
 }) {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState<{
@@ -146,6 +150,9 @@ export function CohortDuplicatesBannerClient({
           </Table>
         </DialogBody>
         <DialogActions>
+          <TextLink href={fullViewHref} className="!text-sm mr-auto">
+            Bekijk alle (incl. zwakkere matches) →
+          </TextLink>
           <Button plain onClick={() => setOpen(false)}>
             Sluiten
           </Button>

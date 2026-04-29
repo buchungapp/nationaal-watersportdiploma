@@ -11,9 +11,13 @@ import { CohortDuplicatesBannerClient } from "./cohort-duplicates-banner-client"
 export async function CohortDuplicatesBanner({
   locationId,
   cohortId,
+  locationHandle,
+  cohortHandle,
 }: {
   locationId: string;
   cohortId: string;
+  locationHandle: string;
+  cohortHandle: string;
 }) {
   const pairs = await listLocationDuplicatePairs({
     locationId,
@@ -32,6 +36,7 @@ export async function CohortDuplicatesBanner({
         duplicate: p.duplicate,
       }))}
       locationId={locationId}
+      fullViewHref={`/locatie/${locationHandle}/cohorten/${cohortHandle}/duplicaten`}
     />
   );
 }

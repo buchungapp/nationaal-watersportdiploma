@@ -131,6 +131,8 @@ export default async function Page(props: {
           <CohortDuplicatesBanner
             locationId={location.id}
             cohortId={cohort.id}
+            locationHandle={params.location}
+            cohortHandle={params.cohort}
           />
         </Suspense>
       ) : null}

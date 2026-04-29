@@ -11,6 +11,9 @@ export type ParsedPersonRow = {
   dateOfBirth: Date;
   birthCity: string;
   birthCountry: string;
+  // Tags collected from "Tag" columns in the cohort variant. Empty
+  // array when no Tag columns mapped (personen-page variant always).
+  tags: string[];
 };
 
 export type ParseError = {

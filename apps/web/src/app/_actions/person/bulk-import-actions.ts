@@ -64,6 +64,10 @@ type ParsedPersonRow = {
   dateOfBirth: Date;
   birthCity: string;
   birthCountry: string;
+  // Tags collected from any columns the operator mapped to "Tag" — only
+  // populated when the dialog is using COLUMN_MAPPING_WITH_TAG (cohort
+  // variant). Empty when the column mapping has no Tag entry.
+  tags: string[];
 };
 
 type PreviewParseResult =
@@ -151,17 +155,44 @@ function parseRowsTolerant(
     throw new Error("Geen data gevonden.");
   }
 
-  const selectedFields = Object.values(indexToColumnSelection).filter(
-    (item) => item !== SELECT_LABEL,
-  );
-  const notSelectedIndices = Object.entries(indexToColumnSelection)
-    .filter(([_, value]) => value === SELECT_LABEL)
-    // biome-ignore lint/style/noNonNullAssertion: intentional
+  // Operator may map any column to "Niet importeren" (skip), to one of
+  // the COLUMN_MAPPING targets, or to "Tag" (cohort variant only — N
+  // tag columns get collected as per-row tags[]).
+  const tagIndices = Object.entries(indexToColumnSelection)
+    .filter(([_, value]) => value === "Tag")
+    // biome-ignore lint/style/noNonNullAssertion: include-column-N format
     .map(([key]) => Number.parseInt(key.split("-").pop()!, 10));
 
-  const filteredData = csvData.rows.map((item) =>
-    item.filter((_, index) => !notSelectedIndices.includes(index)),
+  const selectedFields = Object.values(indexToColumnSelection).filter(
+    (item) => item !== SELECT_LABEL && item !== "Tag",
   );
+  const skippedIndices = new Set(
+    Object.entries(indexToColumnSelection)
+      .filter(([_, value]) => value === SELECT_LABEL || value === "Tag")
+      // biome-ignore lint/style/noNonNullAssertion: include-column-N format
+      .map(([key]) => Number.parseInt(key.split("-").pop()!, 10)),
+  );
+
+  const filteredData = csvData.rows.map((item) =>
+    item.filter((_, index) => !skippedIndices.has(index)),
+  );
+
+  // Per-row tags pulled from the original CSV rows (before filtering),
+  // trimmed + non-empty + deduplicated. Empty when no Tag columns mapped.
+  const tagsPerRow: string[][] = csvData.rows.map((row) => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const idx of tagIndices) {
+      const v = row[idx];
+      if (typeof v !== "string") continue;
+      const trimmed = v.trim();
+      if (!trimmed) continue;
+      if (seen.has(trimmed)) continue;
+      seen.add(trimmed);
+      out.push(trimmed);
+    }
+    return out;
+  });
 
   const requiredColumns = COLUMN_MAPPING;
   const missingFields = requiredColumns.filter(
@@ -216,6 +247,7 @@ function parseRowsTolerant(
     }
     parsedRows.push({
       rowIndex,
+      tags: tagsPerRow[rowIndex] ?? [],
       email,
       firstName,
       lastNamePrefix,
@@ -271,6 +303,11 @@ const commitInputSchema = z.object({
       dateOfBirth: z.string(),
       birthCity: z.string(),
       birthCountry: z.string(),
+      // Optional cohort-allocation tags applied per row after the
+      // allocation insert. Empty / missing → no setAllocationTags call.
+      // Capped per row + per tag length to keep operator paste payloads
+      // bounded.
+      tags: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
     }),
   ),
 });
@@ -279,12 +316,25 @@ export const commitBulkImportAction = actionClientWithMeta
   .metadata({ name: "person.commit-bulk-import" })
   .inputSchema(commitInputSchema)
   .action(async ({ parsedInput }) => {
+    // Extract tags from the candidate inputs into a separate map; core
+    // commitBulkImport applies them after each cohort_allocation insert.
+    const tagsByRowIndex: Record<string, string[]> = {};
+    for (const [rowIndex, ci] of Object.entries(
+      parsedInput.candidateInputsByRowIndex,
+    )) {
+      if (ci.tags && ci.tags.length > 0) {
+        tagsByRowIndex[rowIndex] = ci.tags;
+      }
+    }
+
     const result = await commitBulkImport({
       previewToken: parsedInput.previewToken,
       locationId: parsedInput.locationId,
       roles: parsedInput.roles,
       decisions: parsedInput.decisions,
       candidateInputsByRowIndex: parsedInput.candidateInputsByRowIndex,
+      tagsByRowIndex:
+        Object.keys(tagsByRowIndex).length > 0 ? tagsByRowIndex : undefined,
     });
 
     revalidatePath("/locatie/[location]/personen", "page");
