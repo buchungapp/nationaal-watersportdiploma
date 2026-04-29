@@ -378,54 +378,64 @@ function StatsRoll({
   primary: Stats;
   duplicate: Stats;
 }) {
+  // One <table> instead of per-row <div grid>s — that way column widths
+  // are shared across header + rows. The earlier grid-per-row layout
+  // sized each column to its own content, so the headers (wide words)
+  // and the body cells (single digits) drifted apart.
   return (
     <div className="mt-4">
       <Strong className="!text-sm">Wat verhuist naar het primaire profiel</Strong>
       <div className="mt-2 overflow-hidden rounded-md border border-zinc-950/10 dark:border-white/10">
-        <div className="grid grid-cols-[1fr_auto_auto_auto] bg-zinc-100 text-xs font-medium text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
-          <div className="px-3 py-2">Soort</div>
-          <div className="border-l border-zinc-950/10 px-3 py-2 text-right dark:border-white/10">
-            Primair
-          </div>
-          <div className="border-l border-zinc-950/10 px-3 py-2 text-right dark:border-white/10">
-            Duplicaat
-          </div>
-          <div className="border-l border-zinc-950/10 px-3 py-2 text-right dark:border-white/10">
-            Na merge
-          </div>
-        </div>
-        {STAT_LABELS.map(({ key, singular, plural }) => {
-          const p = primary[key];
-          const d = duplicate[key];
-          const total = p + d;
-          const moved = d > 0;
-          return (
-            <div
-              key={key}
-              className="grid grid-cols-[1fr_auto_auto_auto] border-t border-zinc-950/5 bg-white text-sm dark:border-white/5 dark:bg-zinc-900/30"
-            >
-              <div className="px-3 py-2 text-zinc-700 dark:text-zinc-300">
-                {total === 1 ? singular : plural}
-              </div>
-              <div className="border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums text-zinc-700 dark:border-white/5 dark:text-zinc-300">
-                {p}
-              </div>
-              <div
-                className={
-                  "border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums dark:border-white/5 " +
-                  (moved
-                    ? "font-medium text-amber-700 dark:text-amber-300"
-                    : "text-zinc-500")
-                }
-              >
-                {d}
-              </div>
-              <div className="border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums font-medium text-zinc-900 dark:border-white/5 dark:text-zinc-100">
-                {total}
-              </div>
-            </div>
-          );
-        })}
+        <table className="w-full text-sm">
+          <thead className="bg-zinc-100 text-xs font-medium text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
+            <tr>
+              <th className="px-3 py-2 text-left font-medium">Soort</th>
+              <th className="w-20 border-l border-zinc-950/10 px-3 py-2 text-right font-medium dark:border-white/10">
+                Primair
+              </th>
+              <th className="w-20 border-l border-zinc-950/10 px-3 py-2 text-right font-medium dark:border-white/10">
+                Duplicaat
+              </th>
+              <th className="w-20 border-l border-zinc-950/10 px-3 py-2 text-right font-medium dark:border-white/10">
+                Na merge
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {STAT_LABELS.map(({ key, singular, plural }) => {
+              const p = primary[key];
+              const d = duplicate[key];
+              const total = p + d;
+              const moved = d > 0;
+              return (
+                <tr
+                  key={key}
+                  className="border-t border-zinc-950/5 bg-white dark:border-white/5 dark:bg-zinc-900/30"
+                >
+                  <td className="px-3 py-2 text-zinc-700 dark:text-zinc-300">
+                    {total === 1 ? singular : plural}
+                  </td>
+                  <td className="border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums text-zinc-700 dark:border-white/5 dark:text-zinc-300">
+                    {p}
+                  </td>
+                  <td
+                    className={
+                      "border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums dark:border-white/5 " +
+                      (moved
+                        ? "font-medium text-amber-700 dark:text-amber-300"
+                        : "text-zinc-500")
+                    }
+                  >
+                    {d}
+                  </td>
+                  <td className="border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums font-medium text-zinc-900 dark:border-white/5 dark:text-zinc-100">
+                    {total}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
