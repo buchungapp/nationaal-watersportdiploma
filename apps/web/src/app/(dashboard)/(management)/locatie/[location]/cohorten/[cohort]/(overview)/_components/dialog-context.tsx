@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { retrieveCohortByHandle, retrieveLocationByHandle } from "~/lib/nwd";
+import {
+  listCountries,
+  retrieveCohortByHandle,
+  retrieveLocationByHandle,
+} from "~/lib/nwd";
 import { DialogsClient } from "./dialog-context-client";
 
 type DialogsProps = {
@@ -9,14 +13,23 @@ type DialogsProps = {
 
 async function DialogsContent(props: DialogsProps) {
   const params = await props.params;
-  const location = await retrieveLocationByHandle(params.location);
+  const [location, countries] = await Promise.all([
+    retrieveLocationByHandle(params.location),
+    listCountries(),
+  ]);
   const cohort = await retrieveCohortByHandle(params.cohort, location.id);
 
   if (!cohort) {
     notFound();
   }
 
-  return <DialogsClient locationId={location.id} cohortId={cohort.id} />;
+  return (
+    <DialogsClient
+      locationId={location.id}
+      cohortId={cohort.id}
+      countries={countries.map((c) => ({ code: c.code, name: c.name }))}
+    />
+  );
 }
 
 export function Dialogs(props: DialogsProps) {

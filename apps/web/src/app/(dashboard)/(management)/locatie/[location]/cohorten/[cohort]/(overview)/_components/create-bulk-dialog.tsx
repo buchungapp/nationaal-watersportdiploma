@@ -1,8 +1,6 @@
 "use client";
 
-import useSWR from "swr";
 import PersonenBulkDialog from "../../../../personen/_components/create-bulk-dialog";
-import { listCountries } from "../_actions/fetch";
 
 // Cohort-side bulk-import dialog. Thin wrapper around the personen-page
 // dialog with cohort-specific props:
@@ -14,13 +12,13 @@ import { listCountries } from "../_actions/fetch";
 //   - enableTags=true → operator can map N CSV columns to "Tag" and
 //     those values land on each cohort_allocation
 //
-// Country list is fetched here via SWR (the personen variant gets it
-// from the parent server component; cohort variant doesn't have that
-// shape so we fetch client-side).
+// Countries arrive as a prop from the server component
+// (dialog-context.tsx) — no client-side SWR waterfall.
 
 interface Props {
   locationId: string;
   cohortId: string;
+  countries: { code: string; name: string }[];
   isOpen: boolean;
   setIsOpen: (value: boolean) => void;
 }
@@ -28,15 +26,10 @@ interface Props {
 export default function CreateBulkDialog({
   locationId,
   cohortId,
+  countries,
   isOpen,
   setIsOpen,
 }: Props) {
-  const { data: countries } = useSWR("countries", listCountries);
-
-  if (!countries) {
-    return null;
-  }
-
   return (
     <PersonenBulkDialog
       locationId={locationId}

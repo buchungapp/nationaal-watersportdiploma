@@ -62,20 +62,27 @@ export function DialogButtons() {
   );
 }
 
-export function DialogsClient(props: { locationId: string; cohortId: string }) {
+export function DialogsClient(props: {
+  locationId: string;
+  cohortId: string;
+  countries: { code: string; name: string }[];
+}) {
   const { isOpen, setIsOpen } = useDialog();
 
   return (
     <>
       <CreateBulkDialog
-        {...props}
+        locationId={props.locationId}
+        cohortId={props.cohortId}
+        countries={props.countries}
         isOpen={isOpen === "bulk"}
         setIsOpen={(next) => {
           setIsOpen(next ? "bulk" : null);
         }}
       />
       <CreateSingleDialog
-        {...props}
+        locationId={props.locationId}
+        cohortId={props.cohortId}
         isOpen={isOpen === "single"}
         setIsOpen={(next) => {
           setIsOpen(next ? "single" : null);
