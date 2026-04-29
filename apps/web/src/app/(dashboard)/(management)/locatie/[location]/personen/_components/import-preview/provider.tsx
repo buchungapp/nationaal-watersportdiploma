@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import {
   type BlockerSummary,
   BulkImportPreviewContext,
@@ -22,16 +22,30 @@ import type {
 const STRONG_THRESHOLD = 150;
 const PERFECT_THRESHOLD = 200;
 
+// Reducer owns ONLY operator decisions. The preview itself is a prop on
+// the provider — it can change between renders (race-recovery refresh from
+// the server) and we read the latest prop straight through, deriving the
+// effective decision maps from prop+raw-state during render. No useEffect
+// to sync, per the React docs' "You Might Not Need an Effect" guidance.
 type State = {
-  preview: PreviewModel;
   decisions: Map<number, RowDecision>;
   groupDecisions: Map<string, GroupDecision>;
 };
 
 type Action =
-  | { type: "set_row"; rowIndex: number; decision: RowDecision }
-  | { type: "set_group"; groupKey: string; decision: GroupDecision }
-  | { type: "refresh"; preview: PreviewModel }
+  | {
+      type: "set_row";
+      rowIndex: number;
+      decision: RowDecision;
+    }
+  | {
+      type: "set_group";
+      groupKey: string;
+      decision: GroupDecision;
+      // Caller passes the current preview so the reducer can lower a
+      // group decision to its per-row decisions atomically.
+      preview: PreviewModel;
+    }
   | { type: "reset" };
 
 function reducer(state: State, action: Action): State {
@@ -49,7 +63,7 @@ function reducer(state: State, action: Action): State {
       // "same person", every row in the group gets the same use_existing
       // (or shared create_new) decision.
       const rowDecisions = new Map(state.decisions);
-      const group = state.preview.matches.crossRowGroups.find(
+      const group = action.preview.matches.crossRowGroups.find(
         (g) => deriveGroupKey(g.rowIndices) === action.groupKey,
       );
       if (group) {
@@ -76,34 +90,10 @@ function reducer(state: State, action: Action): State {
           }
         }
       }
-      return { ...state, groupDecisions, decisions: rowDecisions };
-    }
-    case "refresh": {
-      // Keep decisions whose rowIndex still appears in the new preview.
-      // Drop the rest — the rows changed, the operator's prior choice
-      // may not apply.
-      const validRowIndices = new Set(
-        action.preview.parsedRows.map((r) => r.rowIndex),
-      );
-      const decisions = new Map<number, RowDecision>();
-      for (const [rowIndex, decision] of state.decisions) {
-        if (validRowIndices.has(rowIndex)) decisions.set(rowIndex, decision);
-      }
-      // Same for group decisions — re-derive group keys against new groups.
-      const validGroupKeys = new Set(
-        action.preview.matches.crossRowGroups.map((g) =>
-          deriveGroupKey(g.rowIndices),
-        ),
-      );
-      const groupDecisions = new Map<string, GroupDecision>();
-      for (const [key, dec] of state.groupDecisions) {
-        if (validGroupKeys.has(key)) groupDecisions.set(key, dec);
-      }
-      return { preview: action.preview, decisions, groupDecisions };
+      return { groupDecisions, decisions: rowDecisions };
     }
     case "reset":
       return {
-        preview: state.preview,
         decisions: new Map(),
         groupDecisions: new Map(),
       };
@@ -123,8 +113,7 @@ export function BulkImportPreviewProvider({
   roles: RoleSelection;
   children: React.ReactNode;
 }) {
-  const [state, dispatch] = useReducer(reducer, {
-    preview: initialPreview,
+  const [rawState, dispatch] = useReducer(reducer, {
     decisions: new Map(),
     groupDecisions: new Map(),
   });
@@ -137,32 +126,47 @@ export function BulkImportPreviewProvider({
 
   const setGroupDecision = useCallback(
     (groupKey: string, decision: GroupDecision) =>
-      dispatch({ type: "set_group", groupKey, decision }),
-    [],
-  );
-
-  const refreshPreview = useCallback(
-    (next: PreviewModel) => dispatch({ type: "refresh", preview: next }),
-    [],
+      dispatch({
+        type: "set_group",
+        groupKey,
+        decision,
+        preview: initialPreview,
+      }),
+    [initialPreview],
   );
 
   const reset = useCallback(() => dispatch({ type: "reset" }), []);
 
-  // When the parent swaps in a fresh preview (e.g. after a race-detected
-  // refresh from the server), propagate it into our reducer so consumers
-  // see the new matches/parsedRows. Reducer's "refresh" action already
-  // garbage-collects decisions whose rowIndex disappeared.
-  useEffect(() => {
-    if (initialPreview.previewToken !== state.preview.previewToken) {
-      dispatch({ type: "refresh", preview: initialPreview });
+  // Garbage-collect decisions that no longer apply to the current preview.
+  // Calculated during render — the parent can swap previewModel after a
+  // race-detected refresh and consumers see a consistent view in one pass,
+  // no useEffect needed (per the React docs' "You Might Not Need an
+  // Effect" — synchronizing state with props belongs in render).
+  const filtered = useMemo(() => {
+    const validRowIndices = new Set(
+      initialPreview.parsedRows.map((r) => r.rowIndex),
+    );
+    const decisions = new Map<number, RowDecision>();
+    for (const [rowIndex, decision] of rawState.decisions) {
+      if (validRowIndices.has(rowIndex)) decisions.set(rowIndex, decision);
     }
-  }, [initialPreview, state.preview.previewToken]);
+    const validGroupKeys = new Set(
+      initialPreview.matches.crossRowGroups.map((g) =>
+        deriveGroupKey(g.rowIndices),
+      ),
+    );
+    const groupDecisions = new Map<string, GroupDecision>();
+    for (const [key, dec] of rawState.groupDecisions) {
+      if (validGroupKeys.has(key)) groupDecisions.set(key, dec);
+    }
+    return { decisions, groupDecisions };
+  }, [initialPreview, rawState]);
 
   // Derived meta: blocker counts, canSubmit boolean. Computed here once
   // per state change so consumers (the sticky footer chip, the disabled
   // submit button) read primitives, not subscribe to the whole map.
   const meta = useMemo(() => {
-    const blockers = computeBlockers(state);
+    const blockers = computeBlockers(initialPreview, filtered);
     return {
       locationId,
       targetCohortId,
@@ -171,24 +175,23 @@ export function BulkImportPreviewProvider({
       blockers,
       canSubmit: blockers.total === 0,
     };
-  }, [state, locationId, targetCohortId, roles]);
+  }, [initialPreview, filtered, locationId, targetCohortId, roles]);
 
   const value: BulkImportPreviewContextValue = useMemo(
     () => ({
       state: {
-        preview: state.preview,
-        decisions: state.decisions,
-        groupDecisions: state.groupDecisions,
+        preview: initialPreview,
+        decisions: filtered.decisions,
+        groupDecisions: filtered.groupDecisions,
       },
       actions: {
         setRowDecision,
         setGroupDecision,
-        refreshPreview,
         reset,
       },
       meta,
     }),
-    [state, setRowDecision, setGroupDecision, refreshPreview, reset, meta],
+    [initialPreview, filtered, setRowDecision, setGroupDecision, reset, meta],
   );
 
   return (
@@ -259,8 +262,11 @@ export function classifyRow(
   return { status: "weak-match", candidates };
 }
 
-function computeBlockers(state: State): BlockerSummary {
-  const { preview, decisions, groupDecisions } = state;
+function computeBlockers(
+  preview: PreviewModel,
+  filtered: { decisions: Map<number, RowDecision>; groupDecisions: Map<string, GroupDecision> },
+): BlockerSummary {
+  const { decisions, groupDecisions } = filtered;
   let unresolvedCrossRowGroups = 0;
   let unresolvedAmbiguousMatches = 0;
 

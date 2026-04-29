@@ -25,7 +25,6 @@ export type BulkImportPreviewContextValue = {
   actions: {
     setRowDecision: (rowIndex: number, decision: RowDecision) => void;
     setGroupDecision: (groupKey: string, decision: GroupDecision) => void;
-    refreshPreview: (next: PreviewModel) => void;
     reset: () => void;
   };
   meta: {
