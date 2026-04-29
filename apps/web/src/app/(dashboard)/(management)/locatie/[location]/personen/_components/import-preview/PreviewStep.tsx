@@ -125,6 +125,21 @@ export function PreviewStep({
 
   const headItems = goodTailStart === -1 ? renderItems : renderItems.slice(0, goodTailStart);
   const tailItems = goodTailStart === -1 ? [] : renderItems.slice(goodTailStart);
+  const tailNoMatch = tailItems.filter(
+    (item) => item.kind === "row" && item.bucket === 6,
+  ).length;
+  const tailAlreadyInCohort = tailItems.filter(
+    (item) => item.kind === "row" && item.bucket === 5,
+  ).length;
+  const tailLabel = (() => {
+    if (tailNoMatch > 0 && tailAlreadyInCohort === 0) {
+      return `${tailNoMatch} ${tailNoMatch === 1 ? "rij wordt" : "rijen worden"} als nieuw profiel aangemaakt — bekijk`;
+    }
+    if (tailAlreadyInCohort > 0 && tailNoMatch === 0) {
+      return `${tailAlreadyInCohort} ${tailAlreadyInCohort === 1 ? "rij die al in dit cohort zit" : "rijen die al in dit cohort zitten"} — bekijk`;
+    }
+    return `${tailItems.length} rijen die geen aandacht vragen — bekijk`;
+  })();
 
   return (
     <div className="space-y-4">
@@ -141,9 +156,7 @@ export function PreviewStep({
           {({ open }) => (
             <>
               <Disclosure.Button className="flex w-full items-center justify-between rounded-md border border-zinc-950/10 bg-zinc-50 px-4 py-3 text-left text-sm hover:bg-zinc-100 dark:border-white/10 dark:bg-zinc-900/50 dark:hover:bg-zinc-900">
-                <Strong>
-                  {tailItems.length} rijen kunnen worden aangemaakt — bekijk
-                </Strong>
+                <Strong>{tailLabel}</Strong>
                 <ChevronDownIcon
                   className={
                     "size-5 text-zinc-500 transition-transform " +
