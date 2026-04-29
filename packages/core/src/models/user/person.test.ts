@@ -822,3 +822,106 @@ test("user.person.mergePersons skips soft-deleted target curriculum and migrates
       "Deleted target curriculum should remain soft-deleted, untouched by the merge",
     );
   }));
+
+// REGRESSION (Bugbot review on PR #461): the canonical-certificate
+// ranking in withModulesRanked must NOT pick a merge-conflict
+// duplicate row even when its certificate was issued earlier than the
+// canonical one. ROW_NUMBER orders by certificate.issuedAt ASC; if the
+// duplicate isn't filtered out, an old historical record could outrank
+// the canonical one and become the displayed certificate.
+test("student.curriculum.listProgressByPersonId picks canonical (non-merge-duplicate) certificate even when duplicate was issued earlier", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "modules-rank-canon-location",
+      name: "Modules Rank Canonical Location",
+    });
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Canonical",
+      lastName: "Pick",
+    });
+    await User.Person.createLocationLink({ personId, locationId: location.id });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("modules-rank-canon");
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    // Older certificate — represents a pre-merge record. Its completion
+    // row will be marked isMergeConflictDuplicate=true to simulate the
+    // post-merge state.
+    const { id: olderCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: olderCertId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: olderCertId,
+      visibleFrom: dayjs().subtract(1, "year").toISOString(),
+    });
+    // Backdate the issuedAt so the older cert sorts first under ASC.
+    await query
+      .update(s.certificate)
+      .set({ issuedAt: dayjs().subtract(1, "year").toISOString() })
+      .where(eq(s.certificate.id, olderCertId));
+    // Mark the older completion row as the merge-conflict duplicate.
+    await query
+      .update(s.studentCompletedCompetency)
+      .set({ isMergeConflictDuplicate: true })
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            studentCurriculumId,
+          ),
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            curriculumCompetency1Id,
+          ),
+          eq(s.studentCompletedCompetency.certificateId, olderCertId),
+        ),
+      );
+
+    // Newer certificate — the canonical post-merge record.
+    const { id: newerCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: newerCertId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: newerCertId,
+      visibleFrom: dayjs().toISOString(),
+    });
+
+    const progress = await Student.Curriculum.listProgressByPersonId({
+      personId,
+    });
+
+    // Expect exactly one studentCurriculum entry for our person.
+    const personEntry = progress.find((row) => row.personId === personId);
+    assert.ok(personEntry, "Expected a progress entry for the test person");
+    assert.equal(
+      personEntry.modules.length,
+      1,
+      `Expected one module to surface, got ${personEntry.modules.length}`,
+    );
+    assert.equal(
+      personEntry.modules[0]!.certificateId,
+      newerCertId,
+      "Module should reference the canonical (newer) certificate, not the merge-conflict duplicate (older one)",
+    );
+  }));

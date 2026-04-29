@@ -457,6 +457,15 @@ export const listProgressByPersonId = wrapQuery(
               inArray(s.studentCurriculum.personId, personIds),
               isNull(s.studentCurriculum.deletedAt),
               isNull(s.studentCompletedCompetency.deletedAt),
+              // Exclude merge-conflict duplicate completion rows from
+              // the canonical ranking. They're preserved as historical
+              // records (cf. partial unique
+              // student_completed_competency_unq_active_non_merge), but
+              // must not participate in ROW_NUMBER OVER (... ORDER BY
+              // certificate.issued_at ASC) — otherwise an old duplicate
+              // could outrank the canonical row and become the
+              // displayed certificate for that module.
+              eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
               isNull(s.certificate.deletedAt),
               input.filters.respectCertificateVisibility
                 ? lte(s.certificate.visibleFrom, sql`now()`)
