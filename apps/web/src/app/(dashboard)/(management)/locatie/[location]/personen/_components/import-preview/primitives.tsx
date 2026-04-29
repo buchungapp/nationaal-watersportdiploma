@@ -124,11 +124,16 @@ export function RowPasted({ row }: { row: ParsedPersonRow }) {
 
 export function RowCandidate({
   candidate,
+  pastedRow,
   selected,
   onSelect,
   showRadio = true,
 }: {
   candidate: CandidateMatch;
+  // When provided, the card shows an inline field-by-field diff between
+  // what the operator pasted and what's on the existing profile, so
+  // small differences (DOB off by a day, different city) jump out.
+  pastedRow?: ParsedPersonRow;
   selected: boolean;
   onSelect?: () => void;
   showRadio?: boolean;
@@ -140,9 +145,6 @@ export function RowCandidate({
   ]
     .filter(Boolean)
     .join(" ");
-  const dob = candidate.dateOfBirth
-    ? dayjs(candidate.dateOfBirth).format("DD-MM-YYYY")
-    : "—";
   const lastDiploma = candidate.lastDiplomaIssuedAt
     ? dayjs(candidate.lastDiplomaIssuedAt).format("MMM YYYY")
     : null;
@@ -158,6 +160,8 @@ export function RowCandidate({
       : candidate.score >= 150
         ? "Mogelijk dezelfde"
         : "Lijkt erop";
+
+  const diff = pastedRow ? computeDiff(pastedRow, candidate) : null;
 
   return (
     <label
@@ -184,21 +188,126 @@ export function RowCandidate({
           </span>
           <Badge color={scoreColor}>{scoreLabel}</Badge>
         </div>
-        <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">
-          {dob}
-          {candidate.certificateCount > 0
-            ? ` · ${candidate.certificateCount} diploma${candidate.certificateCount === 1 ? "" : "'s"}`
-            : " · Geen diploma's"}
-          {lastDiploma ? ` · Laatste diploma: ${lastDiploma}` : ""}
-          {candidate.birthCity ? ` · ${candidate.birthCity}` : ""}
-        </Text>
-        {candidate.reasons.length > 0 ? (
-          <Text className="!text-xs !text-zinc-500 dark:!text-zinc-500">
-            {candidate.reasons.join(" · ")}
+        {diff ? (
+          <CandidateDiff diff={diff} />
+        ) : (
+          <Text className="!text-xs !text-zinc-600 dark:!text-zinc-400">
+            {candidate.dateOfBirth
+              ? dayjs(candidate.dateOfBirth).format("DD-MM-YYYY")
+              : "—"}
+            {candidate.birthCity ? ` · ${candidate.birthCity}` : ""}
           </Text>
-        ) : null}
+        )}
+        <Text className="!text-xs !text-zinc-500 dark:!text-zinc-500">
+          {candidate.certificateCount > 0
+            ? `${candidate.certificateCount} diploma${candidate.certificateCount === 1 ? "" : "'s"}`
+            : "Geen diploma's"}
+          {lastDiploma ? ` · Laatste diploma: ${lastDiploma}` : ""}
+        </Text>
       </div>
     </label>
+  );
+}
+
+// ─── Candidate diff ────────────────────────────────────────────────────────
+//
+// Per-field comparison between pasted CSV row and existing profile.
+// Each field is one row: label, value, ✓ or warning. Mismatches show
+// the pasted value next to the candidate's value so the operator can
+// eyeball the difference without glancing back at the "Geplakt:" line
+// above.
+
+type DiffField = {
+  label: string;
+  pasted: string;
+  candidate: string;
+  match: boolean;
+  note?: string;
+};
+
+function computeDiff(
+  pasted: ParsedPersonRow,
+  cand: CandidateMatch,
+): DiffField[] {
+  const norm = (s: string | null | undefined) =>
+    (s ?? "").trim().toLowerCase();
+  const pastedFullName = [pasted.firstName, pasted.lastNamePrefix, pasted.lastName]
+    .filter(Boolean)
+    .join(" ");
+  const candFullName = [cand.firstName, cand.lastNamePrefix, cand.lastName]
+    .filter(Boolean)
+    .join(" ");
+  const pastedDob = pasted.dateOfBirth
+    ? dayjs(pasted.dateOfBirth).format("DD-MM-YYYY")
+    : "";
+  const candDob = cand.dateOfBirth
+    ? dayjs(cand.dateOfBirth).format("DD-MM-YYYY")
+    : "";
+
+  let dobNote: string | undefined;
+  if (
+    pasted.dateOfBirth &&
+    cand.dateOfBirth &&
+    norm(pastedDob) !== norm(candDob)
+  ) {
+    const diffDays = Math.abs(
+      dayjs(pasted.dateOfBirth).diff(dayjs(cand.dateOfBirth), "day"),
+    );
+    if (diffDays === 1) dobNote = "1 dag verschil";
+    else if (diffDays <= 7) dobNote = `${diffDays} dagen verschil`;
+    else if (diffDays <= 365)
+      dobNote = `${Math.round(diffDays / 30)} maand(en) verschil`;
+  }
+
+  return [
+    {
+      label: "Naam",
+      pasted: pastedFullName || "—",
+      candidate: candFullName || "—",
+      match: norm(pastedFullName) === norm(candFullName),
+    },
+    {
+      label: "Geboortedatum",
+      pasted: pastedDob || "—",
+      candidate: candDob || "—",
+      match: norm(pastedDob) === norm(candDob) && pastedDob !== "",
+      note: dobNote,
+    },
+    {
+      label: "Geboorteplaats",
+      pasted: pasted.birthCity || "—",
+      candidate: cand.birthCity || "—",
+      match:
+        norm(pasted.birthCity) === norm(cand.birthCity) &&
+        Boolean(pasted.birthCity || cand.birthCity),
+    },
+  ];
+}
+
+function CandidateDiff({ diff }: { diff: DiffField[] }) {
+  return (
+    <ul className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 text-xs">
+      {diff.map((f) => (
+        <li key={f.label} className="contents">
+          <span className="text-zinc-500">{f.label}</span>
+          <span
+            className={
+              f.match
+                ? "text-zinc-700 dark:text-zinc-300"
+                : "text-amber-700 dark:text-amber-400"
+            }
+          >
+            {f.candidate}
+            {!f.match ? (
+              <span className="ml-1 text-zinc-500 dark:text-zinc-400">
+                ⚠ jij plakte: <span className="font-medium">{f.pasted}</span>
+                {f.note ? <> ({f.note})</> : null}
+              </span>
+            ) : null}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -221,6 +330,9 @@ export function RowDecisionRadios({
 }) {
   const ctx = assertPreviewContext(use(BulkImportPreviewContext));
   const decision = ctx.state.decisions.get(rowIndex);
+  const pastedRow = ctx.state.preview.parsedRows.find(
+    (r) => r.rowIndex === rowIndex,
+  );
 
   const selectedPersonId =
     decision?.kind === "use_existing" ? decision.personId : null;
@@ -248,6 +360,7 @@ export function RowDecisionRadios({
         <RowCandidate
           key={c.personId}
           candidate={c}
+          pastedRow={pastedRow}
           selected={selectedPersonId === c.personId}
           onSelect={() =>
             ctx.actions.setRowDecision(rowIndex, {
