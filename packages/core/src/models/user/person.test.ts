@@ -1611,3 +1611,85 @@ test("cohort.certificate.listStatus newlyIssuable=false for all modules when ful
       );
     }
   }));
+
+// REGRESSION (Bugbot review on PR #461 — round 4): listCompletedCompetenciesById
+// must filter `isMergeConflictDuplicate = true`. Without the filter, a flagged
+// historical row from a merge gets returned as if it were canonical, which
+// poisons consumers that ask "what has this student already proven?" — most
+// notably the cohort issuance pre-filter, which would silently drop a competency
+// from the new certificate (or surface a spurious "geen nieuwe competenties"
+// error) even though no canonical row exists.
+test("student.curriculum.listCompletedCompetenciesById excludes merge-conflict duplicate rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "list-completed-merge-dup-loc",
+      name: "List Completed Merge Dup Location",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("list-completed-merge-dup");
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "ListCompleted",
+      lastName: "MergeDup",
+    });
+    await User.Person.createLocationLink({
+      personId,
+      locationId: location.id,
+    });
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    // Issue a canonical cert covering competency 1.
+    const { id: certificateId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId,
+      visibleFrom: dayjs().subtract(1, "day").toISOString(),
+    });
+
+    // Sanity check: canonical row is returned.
+    const before = await Student.Curriculum.listCompletedCompetenciesById({
+      id: studentCurriculumId,
+    });
+    assert.equal(
+      before.length,
+      1,
+      "Canonical row should be returned before flagging",
+    );
+
+    // Flag the row as a merge-conflict duplicate, simulating the
+    // post-merge state where source's competency landed on target's
+    // curriculum but was flagged because target already had Z.
+    await query
+      .update(s.studentCompletedCompetency)
+      .set({ isMergeConflictDuplicate: true })
+      .where(
+        eq(
+          s.studentCompletedCompetency.studentCurriculumId,
+          studentCurriculumId,
+        ),
+      );
+
+    const after = await Student.Curriculum.listCompletedCompetenciesById({
+      id: studentCurriculumId,
+    });
+    assert.equal(
+      after.length,
+      0,
+      "Flagged merge-conflict duplicate row must NOT be returned — it is not canonical",
+    );
+  }));

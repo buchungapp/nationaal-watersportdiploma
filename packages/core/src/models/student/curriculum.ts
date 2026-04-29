@@ -127,6 +127,19 @@ export const listCompletedCompetenciesById = wrapQuery(
           and(
             eq(s.studentCompletedCompetency.studentCurriculumId, input.id),
             isNull(s.studentCompletedCompetency.deletedAt),
+            // Exclude merge-conflict duplicate completion rows. The
+            // partial unique index `student_completed_competency_unq_
+            // active_non_merge` defines canonical rows as
+            // `is_merge_conflict_duplicate = false AND deleted_at IS
+            // NULL`. Without this filter, callers asking "what
+            // competencies has this student already proven?" can
+            // receive a flagged historical row and treat it as
+            // canonical — which is wrong for issuance pre-flight
+            // (would silently drop the comp) and wrong for the
+            // course-card "already done" badge consistency. Same
+            // semantics as `withModulesRanked` and
+            // `completeCompetency`'s existence check.
+            eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
             exists(
               query
                 .select({ id: sql`1` })
