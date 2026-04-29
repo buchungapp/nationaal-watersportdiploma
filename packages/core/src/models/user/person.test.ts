@@ -2013,3 +2013,321 @@ test("findCandidateMatchesInLocation forms a 3-way cross-row group", () =>
     assert.equal(result.crossRowGroups.length, 1);
     assert.deepEqual(result.crossRowGroups[0]!.rowIndices.sort((a, b) => a - b), [3, 17, 22]);
   }));
+
+test("previewBulkImport persists a snapshot row and returns the model", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "preview-bulk-location",
+      name: "Preview Bulk Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "One",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    assert.ok(preview.previewToken);
+    assert.equal(preview.attempt, 1);
+
+    const stored = await query
+      .select()
+      .from(s.bulkImportPreview)
+      .where(eq(s.bulkImportPreview.token, preview.previewToken));
+    assert.equal(stored.length, 1);
+    assert.equal(stored[0]!.status, "active");
+    assert.equal(stored[0]!.attempt, 1);
+    assert.equal(stored[0]!.locationId, location.id);
+    assert.equal(stored[0]!.createdByPersonId, operatorPersonId);
+  }));
+
+test("commitBulkImport applies use_existing decision and writes audit row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-use-existing-location",
+      name: "Commit Use Existing Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Two",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    const result = await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    const committed = result as {
+      kind: "committed";
+      linkedPersonIds: string[];
+    };
+    assert.equal(committed.kind, "committed");
+    assert.deepEqual(committed.linkedPersonIds, [existingPersonId]);
+
+    // Audit row written
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+    assert.equal(audits.length, 1);
+    assert.equal(audits[0]!.decisionKind, "use_existing");
+    assert.equal(audits[0]!.targetPersonId, existingPersonId);
+    assert.equal(audits[0]!.source, "bulk_import_preview");
+    assert.deepEqual(audits[0]!.presentedCandidatePersonIds, [existingPersonId]);
+
+    // Preview row marked committed
+    const previewAfter = await query
+      .select()
+      .from(s.bulkImportPreview)
+      .where(eq(s.bulkImportPreview.token, preview.previewToken));
+    assert.equal(previewAfter[0]!.status, "committed");
+
+    // Actor created for student role
+    const actors = await query
+      .select()
+      .from(s.actor)
+      .where(
+        and(
+          eq(s.actor.personId, existingPersonId),
+          eq(s.actor.locationId, location.id),
+          eq(s.actor.type, "student"),
+        ),
+      );
+    assert.equal(actors.length, 1);
+  }));
+
+test("commitBulkImport rejects use_existing for personId outside GDPR scope", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-gdpr-location",
+      name: "Commit GDPR Location",
+    });
+    const otherLocation = await Location.create({
+      handle: "commit-gdpr-other-location",
+      name: "Commit GDPR Other Location",
+    });
+    const { id: outsiderPersonId } = await User.Person.getOrCreate({
+      firstName: "Outside",
+      lastName: "Person",
+      dateOfBirth: "2010-05-12",
+    });
+    // Outsider linked only to OTHER location.
+    await User.Person.linkToLocation({
+      personId: outsiderPersonId,
+      locationId: otherLocation.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Three",
+    });
+
+    // Preview is empty (nothing in our location), but operator crafts a
+    // payload claiming to use_existing on the outsider's id. Commit must
+    // reject server-side.
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Outside",
+          lastName: "Person",
+          lastNamePrefix: null,
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    await assert.rejects(
+      User.Person.commitBulkImport({
+        previewToken: preview.previewToken,
+        performedByPersonId: operatorPersonId,
+        decisions: {
+          "0": { kind: "use_existing", personId: outsiderPersonId },
+        },
+      }),
+      /GDPR-grenscontrole/,
+    );
+
+    // No audit row written for the rejected attempt
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken));
+    assert.equal(audits.length, 0);
+  }));
+
+test("commitBulkImport refuses a committed preview", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "commit-twice-location",
+      name: "Commit Twice Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Four",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [],
+    });
+
+    // First commit: empty decisions (no rows) — succeeds, marks committed.
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {},
+    });
+
+    await assert.rejects(
+      User.Person.commitBulkImport({
+        previewToken: preview.previewToken,
+        performedByPersonId: operatorPersonId,
+        decisions: {},
+      }),
+      /al verwerkt|geblokkeerd/,
+    );
+  }));
+
+test("commitBulkImport refuses a preview owned by a different operator", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "commit-wrong-owner-location",
+      name: "Commit Wrong Owner Location",
+    });
+    const { id: operatorAId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "A",
+    });
+    const { id: operatorBId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "B",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorAId,
+      roles: ["student"],
+      candidates: [],
+    });
+
+    await assert.rejects(
+      User.Person.commitBulkImport({
+        previewToken: preview.previewToken,
+        performedByPersonId: operatorBId,
+        decisions: {},
+      }),
+      /hoort niet bij deze gebruiker/,
+    );
+  }));
+
+test("cleanupExpiredBulkImportPreviews deletes expired active rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "cleanup-location",
+      name: "Cleanup Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Cleanup",
+    });
+
+    // Create one fresh row (won't expire) and one already-expired row.
+    const fresh = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [],
+    });
+
+    // Manually backdate one row.
+    await query
+      .insert(s.bulkImportPreview)
+      .values({
+        locationId: location.id,
+        createdByPersonId: operatorPersonId,
+        detectionSnapshot: {},
+        rowsParsed: { candidates: [], roles: ["student"] },
+        attempt: 1,
+        status: "active",
+        expiresAt: dayjs().subtract(2, "hour").toISOString(),
+      });
+
+    const result = await User.Person.cleanupExpiredBulkImportPreviews({});
+    assert.equal(result.activeExpired, 1);
+
+    // Fresh row is still there.
+    const fresh_after = await query
+      .select()
+      .from(s.bulkImportPreview)
+      .where(eq(s.bulkImportPreview.token, fresh.previewToken));
+    assert.equal(fresh_after.length, 1);
+  }));

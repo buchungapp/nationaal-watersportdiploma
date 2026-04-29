@@ -194,6 +194,511 @@ export const createLocationLink = wrapCommand(
   ),
 );
 
+// ─── Bulk import preview / commit ──────────────────────────────────────────
+//
+// Operator-facing flow for paste-CSV-into-cohort. The preview action scores
+// pasted candidates against the location's roster, persists a preview row
+// (the snapshot used for race-guard at commit time), and returns the model
+// the UI renders. The commit action takes per-row decisions, re-runs
+// detection in-transaction (race guard with hard 3-retry cap), applies the
+// decisions, and writes audit rows.
+
+const BULK_IMPORT_PREVIEW_TTL_MINUTES = 60;
+
+type ParsedCandidate = {
+  rowIndex: number;
+  firstName: string;
+  lastName: string | null;
+  lastNamePrefix: string | null;
+  dateOfBirth: string;
+  birthCity: string;
+  birthCountry: string;
+  email: string | null;
+};
+
+type ParseError = {
+  rowIndex: number;
+  error: string;
+};
+
+type ImportRoles = ("student" | "instructor" | "location_admin")[];
+
+type DetectionSnapshotEntry = {
+  matchPersonIds: string[];
+  topScore: number;
+};
+
+const buildDetectionSnapshot = (
+  matches: { matchesByRow: { rowIndex: number; candidates: { personId: string; score: number }[] }[] },
+): Record<string, DetectionSnapshotEntry> => {
+  const snap: Record<string, DetectionSnapshotEntry> = {};
+  for (const row of matches.matchesByRow) {
+    const sortedIds = row.candidates
+      .map((c) => c.personId)
+      .sort((a, b) => a.localeCompare(b));
+    snap[row.rowIndex.toString()] = {
+      matchPersonIds: sortedIds,
+      topScore: row.candidates[0]?.score ?? 0,
+    };
+  }
+  return snap;
+};
+
+const snapshotsDiverge = (
+  before: Record<string, DetectionSnapshotEntry>,
+  after: Record<string, DetectionSnapshotEntry>,
+): boolean => {
+  const keys = new Set([...Object.keys(before), ...Object.keys(after)]);
+  for (const k of keys) {
+    const a = before[k];
+    const b = after[k];
+    const aIds = a?.matchPersonIds ?? [];
+    const bIds = b?.matchPersonIds ?? [];
+    if (aIds.length !== bIds.length) return true;
+    for (let i = 0; i < aIds.length; i++) {
+      if (aIds[i] !== bIds[i]) return true;
+    }
+  }
+  return false;
+};
+
+export const previewBulkImport = wrapCommand(
+  "user.person.previewBulkImport",
+  withZod(
+    z.object({
+      locationId: uuidSchema,
+      performedByPersonId: uuidSchema,
+      targetCohortId: uuidSchema.optional(),
+      roles: z
+        .array(z.enum(["student", "instructor", "location_admin"]))
+        .nonempty(),
+      candidates: z.array(
+        z.object({
+          rowIndex: z.number().int().nonnegative(),
+          firstName: z.string(),
+          lastName: z.string().nullable(),
+          lastNamePrefix: z.string().nullable(),
+          dateOfBirth: z.string(),
+          birthCity: z.string(),
+          birthCountry: z.string(),
+          email: z.string().nullable(),
+        }),
+      ),
+      parseErrors: z
+        .array(
+          z.object({
+            rowIndex: z.number().int().nonnegative(),
+            error: z.string(),
+          }),
+        )
+        .default([]),
+    }),
+    z.object({
+      previewToken: z.string().uuid(),
+      attempt: z.number().int(),
+      matches: z.unknown(), // shape is the findCandidateMatchesInLocation result
+      parseErrors: z.array(
+        z.object({ rowIndex: z.number().int(), error: z.string() }),
+      ),
+      candidates: z.array(z.unknown()),
+    }),
+    async (input) => {
+      const query = useQuery();
+
+      const matches =
+        input.candidates.length > 0
+          ? await findCandidateMatchesInLocation({
+              locationId: input.locationId,
+              targetCohortId: input.targetCohortId,
+              candidates: input.candidates.map((c) => ({
+                rowIndex: c.rowIndex,
+                firstName: c.firstName,
+                lastName: c.lastName,
+                lastNamePrefix: c.lastNamePrefix,
+                dateOfBirth: c.dateOfBirth,
+                birthCity: c.birthCity,
+                email: c.email,
+              })),
+            })
+          : { matchesByRow: [], crossRowGroups: [] };
+
+      const snapshot = buildDetectionSnapshot(matches);
+
+      const expiresAt = dayjs()
+        .add(BULK_IMPORT_PREVIEW_TTL_MINUTES, "minute")
+        .toISOString();
+
+      const [row] = await query
+        .insert(s.bulkImportPreview)
+        .values({
+          locationId: input.locationId,
+          createdByPersonId: input.performedByPersonId,
+          targetCohortId: input.targetCohortId,
+          detectionSnapshot: snapshot,
+          rowsParsed: {
+            candidates: input.candidates,
+            roles: input.roles,
+          },
+          attempt: 1,
+          status: "active",
+          expiresAt,
+        })
+        .returning({ token: s.bulkImportPreview.token });
+
+      if (!row) {
+        throw new Error("Failed to persist bulk import preview row");
+      }
+
+      return {
+        previewToken: row.token,
+        attempt: 1,
+        matches,
+        parseErrors: input.parseErrors,
+        candidates: input.candidates,
+      };
+    },
+  ),
+);
+
+const rowDecisionSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("create_new") }),
+  z.object({ kind: z.literal("use_existing"), personId: uuidSchema }),
+  z.object({
+    kind: z.literal("skip"),
+    reason: z
+      .enum([
+        "cohort_conflict",
+        "cross_row_conflict",
+        "parse_error",
+        "operator",
+      ])
+      .default("operator"),
+  }),
+]);
+
+export type BulkImportRowDecision = z.infer<typeof rowDecisionSchema>;
+
+/**
+ * Commit a bulk import preview. Race-guards against concurrent location edits
+ * (3 attempts), GDPR-rechecks every use_existing personId server-side, opens
+ * a transaction, applies each row decision, writes audit rows, marks the
+ * preview committed.
+ *
+ * IMPORTANT: this function does NOT call createPersonForLocation directly —
+ * it expects the caller (web layer) to provide a `createPerson` callback for
+ * the create_new branch. This keeps core free of the auth-context and
+ * Supabase wiring that lives in `lib/nwd.ts`.
+ */
+export const commitBulkImport = wrapCommand(
+  "user.person.commitBulkImport",
+  withZod(
+    z.object({
+      previewToken: z.string().uuid(),
+      performedByPersonId: uuidSchema,
+      decisions: z.record(z.string(), rowDecisionSchema),
+      // Caller-supplied factory for the create_new path. Kept callback-shaped
+      // so the web layer can plug in `createPersonForLocation` (which carries
+      // its own makeRequest+auth context) without core depending on it.
+      createPerson: z
+        .function()
+        .args(
+          z.object({
+            firstName: z.string(),
+            lastName: z.string().nullable(),
+            lastNamePrefix: z.string().nullable(),
+            dateOfBirth: z.string(),
+            birthCity: z.string(),
+            birthCountry: z.string(),
+            email: z.string().nullable(),
+          }),
+        )
+        .returns(z.promise(z.object({ personId: z.string().uuid() })))
+        .optional(),
+    }),
+    z.unknown(),
+    async (input) => {
+      const query = useQuery();
+
+      const previewRow = await query
+        .select()
+        .from(s.bulkImportPreview)
+        .where(eq(s.bulkImportPreview.token, input.previewToken))
+        .then(possibleSingleRow);
+
+      if (!previewRow) {
+        throw new Error("Preview niet gevonden of verlopen");
+      }
+      if (previewRow.status !== "active") {
+        throw new Error("Preview is al verwerkt of geblokkeerd");
+      }
+      if (previewRow.createdByPersonId !== input.performedByPersonId) {
+        throw new Error("Preview hoort niet bij deze gebruiker");
+      }
+      if (dayjs(previewRow.expiresAt).isBefore(dayjs())) {
+        throw new Error("Preview verlopen — plak opnieuw");
+      }
+
+      const stored = previewRow.rowsParsed as {
+        candidates: ParsedCandidate[];
+        roles: ImportRoles;
+      };
+      const candidates = stored.candidates ?? [];
+      const roles = stored.roles ?? ["student"];
+
+      // GDPR re-check: every use_existing personId must currently belong to
+      // the linked-active set for this location. The preview already filtered,
+      // but we reverify in case the link was revoked between preview and
+      // commit, and as defense-in-depth against crafted payloads.
+      const useExistingPersonIds = Object.values(input.decisions)
+        .filter((d): d is { kind: "use_existing"; personId: string } => d.kind === "use_existing")
+        .map((d) => d.personId);
+
+      if (useExistingPersonIds.length > 0) {
+        const allowed = await query
+          .select({ personId: s.personLocationLink.personId })
+          .from(s.personLocationLink)
+          .where(
+            and(
+              eq(s.personLocationLink.locationId, previewRow.locationId),
+              eq(s.personLocationLink.status, "linked"),
+              inArray(s.personLocationLink.personId, useExistingPersonIds),
+            ),
+          );
+        const allowedSet = new Set(allowed.map((r) => r.personId));
+        const invalid = useExistingPersonIds.filter((id) => !allowedSet.has(id));
+        if (invalid.length > 0) {
+          throw new Error(
+            `GDPR-grenscontrole afgewezen voor persoon ID(s): ${invalid.join(", ")}`,
+          );
+        }
+      }
+
+      // Race guard: re-run detection, compare against stored snapshot.
+      const refreshedMatches =
+        candidates.length > 0
+          ? await findCandidateMatchesInLocation({
+              locationId: previewRow.locationId,
+              targetCohortId: previewRow.targetCohortId ?? undefined,
+              candidates: candidates.map((c) => ({
+                rowIndex: c.rowIndex,
+                firstName: c.firstName,
+                lastName: c.lastName,
+                lastNamePrefix: c.lastNamePrefix,
+                dateOfBirth: c.dateOfBirth,
+                birthCity: c.birthCity,
+                email: c.email,
+              })),
+            })
+          : { matchesByRow: [], crossRowGroups: [] };
+
+      const oldSnapshot = previewRow.detectionSnapshot as Record<
+        string,
+        DetectionSnapshotEntry
+      >;
+      const newSnapshot = buildDetectionSnapshot(refreshedMatches);
+
+      if (snapshotsDiverge(oldSnapshot, newSnapshot)) {
+        const nextAttempt = previewRow.attempt + 1;
+        if (nextAttempt > 3) {
+          await query
+            .update(s.bulkImportPreview)
+            .set({ status: "invalidated_max" })
+            .where(eq(s.bulkImportPreview.token, previewRow.token));
+          return {
+            kind: "preview_invalidated_max" as const,
+            message:
+              "Roster veranderde te vaak — plak opnieuw",
+          };
+        }
+        await query
+          .update(s.bulkImportPreview)
+          .set({
+            attempt: nextAttempt,
+            detectionSnapshot: newSnapshot,
+          })
+          .where(eq(s.bulkImportPreview.token, previewRow.token));
+        return {
+          kind: "preview_invalidated" as const,
+          attempt: nextAttempt as 2 | 3,
+          updatedMatches: refreshedMatches,
+        };
+      }
+
+      // No race — apply decisions inside a transaction.
+      const result = await withTransaction(async () => {
+        const tx = useQuery();
+        const createdPersonIds: string[] = [];
+        const linkedPersonIds: string[] = [];
+
+        for (const candidate of candidates) {
+          const decision = input.decisions[candidate.rowIndex.toString()];
+          if (!decision || decision.kind === "skip") continue;
+
+          const candidateMatches =
+            refreshedMatches.matchesByRow.find(
+              (m) => m.rowIndex === candidate.rowIndex,
+            )?.candidates ?? [];
+          const presentedIds = candidateMatches.map((c) => c.personId);
+
+          if (decision.kind === "create_new") {
+            if (!input.createPerson) {
+              throw new Error(
+                "createPerson factory not provided — caller must supply it for create_new decisions",
+              );
+            }
+            const created = await input.createPerson({
+              firstName: candidate.firstName,
+              lastName: candidate.lastName,
+              lastNamePrefix: candidate.lastNamePrefix,
+              dateOfBirth: candidate.dateOfBirth,
+              birthCity: candidate.birthCity,
+              birthCountry: candidate.birthCountry,
+              email: candidate.email,
+            });
+            createdPersonIds.push(created.personId);
+
+            await tx.insert(s.personMergeAudit).values({
+              performedByPersonId: input.performedByPersonId,
+              locationId: previewRow.locationId,
+              targetPersonId: created.personId,
+              decisionKind: "create_new",
+              presentedCandidatePersonIds:
+                presentedIds.length > 0 ? presentedIds : null,
+              source: "bulk_import_preview",
+              bulkImportPreviewToken: previewRow.token,
+            });
+            continue;
+          }
+
+          if (decision.kind === "use_existing") {
+            // linkToLocation throws on revoked/removed; re-check is fine.
+            await linkToLocation({
+              personId: decision.personId,
+              locationId: previewRow.locationId,
+            });
+            for (const role of roles) {
+              await tx
+                .insert(s.actor)
+                .values({
+                  personId: decision.personId,
+                  locationId: previewRow.locationId,
+                  type: role,
+                })
+                .onConflictDoUpdate({
+                  target: [s.actor.type, s.actor.personId, s.actor.locationId],
+                  set: { deletedAt: null, createdAt: sql`NOW()` },
+                });
+            }
+
+            // Cohort allocation if a target cohort was specified.
+            if (previewRow.targetCohortId) {
+              const studentActor = await tx
+                .select({ id: s.actor.id })
+                .from(s.actor)
+                .where(
+                  and(
+                    eq(s.actor.personId, decision.personId),
+                    eq(s.actor.locationId, previewRow.locationId),
+                    eq(s.actor.type, "student"),
+                    isNull(s.actor.deletedAt),
+                  ),
+                )
+                .then(possibleSingleRow);
+              if (studentActor) {
+                await tx
+                  .insert(s.cohortAllocation)
+                  .values({
+                    cohortId: previewRow.targetCohortId,
+                    actorId: studentActor.id,
+                  })
+                  .onConflictDoNothing();
+              }
+            }
+
+            linkedPersonIds.push(decision.personId);
+
+            await tx.insert(s.personMergeAudit).values({
+              performedByPersonId: input.performedByPersonId,
+              locationId: previewRow.locationId,
+              targetPersonId: decision.personId,
+              decisionKind: "use_existing",
+              presentedCandidatePersonIds:
+                presentedIds.length > 0 ? presentedIds : null,
+              source: "bulk_import_preview",
+              bulkImportPreviewToken: previewRow.token,
+            });
+          }
+        }
+
+        await tx
+          .update(s.bulkImportPreview)
+          .set({
+            status: "committed",
+            committedAt: sql`NOW()`,
+          })
+          .where(eq(s.bulkImportPreview.token, previewRow.token));
+
+        return {
+          kind: "committed" as const,
+          createdPersonIds,
+          linkedPersonIds,
+        };
+      });
+
+      return result;
+    },
+  ),
+);
+
+/**
+ * Cleanup helper for the bulk_import_preview table. Called by the cron job:
+ * deletes active rows past their TTL and committed/invalidated rows older
+ * than 30 days (forensics window).
+ *
+ * Returns the count of deleted rows for telemetry.
+ */
+export const cleanupExpiredBulkImportPreviews = wrapCommand(
+  "user.person.cleanupExpiredBulkImportPreviews",
+  withZod(
+    z.object({}).optional(),
+    z.object({
+      activeExpired: z.number().int(),
+      historicalPurged: z.number().int(),
+    }),
+    async () => {
+      const query = useQuery();
+
+      const activeDeleted = await query
+        .delete(s.bulkImportPreview)
+        .where(
+          and(
+            eq(s.bulkImportPreview.status, "active"),
+            sql`${s.bulkImportPreview.expiresAt} < NOW()`,
+          ),
+        )
+        .returning({ token: s.bulkImportPreview.token });
+
+      const historicalDeleted = await query
+        .delete(s.bulkImportPreview)
+        .where(
+          and(
+            inArray(s.bulkImportPreview.status, [
+              "committed",
+              "invalidated_max",
+            ]),
+            sql`${s.bulkImportPreview.createdAt} < NOW() - INTERVAL '30 days'`,
+          ),
+        )
+        .returning({ token: s.bulkImportPreview.token });
+
+      return {
+        activeExpired: activeDeleted.length,
+        historicalPurged: historicalDeleted.length,
+      };
+    },
+  ),
+);
+
 /**
  * Operator-driven location link primitive used by the import preview commit
  * path. Differs from `createLocationLink` in policy: a previously revoked or

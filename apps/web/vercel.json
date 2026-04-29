@@ -3,5 +3,11 @@
     "src/app/**/*": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-bulk-import-previews",
+      "schedule": "0 * * * *"
+    }
+  ]
 }
