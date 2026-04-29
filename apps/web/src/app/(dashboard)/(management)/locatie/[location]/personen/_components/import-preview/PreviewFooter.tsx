@@ -71,8 +71,8 @@ export function PreviewFooter({
                   <Text className="!text-xs">
                     ·{" "}
                     {blockers.unresolvedAmbiguousMatches === 1
-                      ? "1 rij met meerdere mogelijke profielen"
-                      : `${blockers.unresolvedAmbiguousMatches} rijen met meerdere mogelijke profielen`}
+                      ? "1 rij die om een keuze vraagt"
+                      : `${blockers.unresolvedAmbiguousMatches} rijen die om een keuze vragen`}
                   </Text>
                 ) : null}
                 {blockers.parseErrors > 0 ? (

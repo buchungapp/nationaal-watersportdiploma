@@ -306,16 +306,27 @@ function computeBlockers(
     }
   }
 
-  // Ambiguous matches: rows with ≥2 candidates above threshold and no
-  // decision yet (and not part of a resolved cross-row group).
+  // Ambiguous matches: rows that need an explicit operator decision.
+  // Two cases qualify:
+  //   1. ≥2 candidates above threshold (classic multi-match)
+  //   2. Single perfect-match (score >= 200) — twin-guard requires
+  //      explicit confirmation since exact name + DOB could be a twin.
+  // Rows in a cross-row group are tracked under the cross-row blocker
+  // count instead.
   for (const match of preview.matches.matchesByRow) {
     const inGroup = preview.matches.crossRowGroups.find((g) =>
       g.rowIndices.includes(match.rowIndex),
     );
-    if (inGroup) continue; // tracked under cross-row blocker
-    if (match.candidates.length < 2) continue;
+    if (inGroup) continue;
     if (decisions.has(match.rowIndex)) continue;
-    unresolvedAmbiguousMatches += 1;
+    if (match.candidates.length >= 2) {
+      unresolvedAmbiguousMatches += 1;
+      continue;
+    }
+    const top = match.candidates[0];
+    if (top && top.score >= PERFECT_THRESHOLD && !top.isAlreadyInTargetCohort) {
+      unresolvedAmbiguousMatches += 1;
+    }
   }
 
   const parseErrors = preview.parseErrors.length;

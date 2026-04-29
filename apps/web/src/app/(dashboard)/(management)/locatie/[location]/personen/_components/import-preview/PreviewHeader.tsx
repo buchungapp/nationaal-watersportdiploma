@@ -40,8 +40,8 @@ export function PreviewHeader() {
             {blockers.unresolvedAmbiguousMatches > 0 ? (
               <li>
                 {blockers.unresolvedAmbiguousMatches === 1
-                  ? "1 rij met meerdere mogelijke profielen — kies welk profiel hierbij hoort"
-                  : `${blockers.unresolvedAmbiguousMatches} rijen met meerdere mogelijke profielen — kies welk profiel erbij hoort`}
+                  ? "1 rij die om een keuze vraagt — kies welk profiel erbij hoort"
+                  : `${blockers.unresolvedAmbiguousMatches} rijen die om een keuze vragen — kies welk profiel erbij hoort`}
               </li>
             ) : null}
             {blockers.parseErrors > 0 ? (
