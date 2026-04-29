@@ -823,6 +823,188 @@ test("user.person.mergePersons skips soft-deleted target curriculum and migrates
     );
   }));
 
+// REGRESSION (Bugbot review on PR #461 — round 2): merge must also
+// migrate SOFT-DELETED source curricula. The previous round added
+// isNull(deletedAt) on both source/target queries, but that caused
+// soft-deleted source curricula to be skipped entirely. They still
+// reference source.person_id via student_curriculum_link_person_id_fk,
+// so the end-of-merge tx.delete(s.person) tripped a FK violation and
+// rolled the whole merge back.
+test("user.person.mergePersons migrates soft-deleted source curriculum so end-of-merge person delete succeeds", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-deleted-source-location",
+      name: "Merge Deleted Source Location",
+    });
+
+    const { curriculumId, gearTypeId } = await createCurriculumFixture(
+      "merge-deleted-source",
+    );
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "DeletedSource",
+        lastName: "Target",
+      }),
+      User.Person.getOrCreate({
+        firstName: "DeletedSource",
+        lastName: "Source",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // Source had a curriculum. It was soft-deleted at some point (e.g.
+    // the operator dropped the enrollment, or it was migrated through
+    // an earlier merge). Target has no curriculum.
+    const { id: sourceStudentCurriculumId } = await Student.Curriculum.start({
+      personId: sourcePersonId,
+      curriculumId,
+      gearTypeId,
+    });
+    await query
+      .update(s.studentCurriculum)
+      .set({ deletedAt: dayjs().subtract(60, "day").toISOString() })
+      .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId));
+
+    // Merge must complete without FK violation.
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    // The deleted curriculum should now belong to target (still soft-
+    // deleted — we didn't resurrect it, just changed its ownership).
+    const movedCurriculum = await query
+      .select({
+        personId: s.studentCurriculum.personId,
+        deletedAt: s.studentCurriculum.deletedAt,
+      })
+      .from(s.studentCurriculum)
+      .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId))
+      .then((rows) => rows[0]);
+    assert.ok(movedCurriculum, "Source curriculum should still exist");
+    assert.equal(
+      movedCurriculum.personId,
+      targetPersonId,
+      "Soft-deleted source curriculum should now reference target person",
+    );
+    assert.ok(
+      movedCurriculum.deletedAt,
+      "Soft-deleted curriculum should remain soft-deleted after migration",
+    );
+
+    // Source person should be hard-deleted.
+    const sourcePersonRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, sourcePersonId));
+    assert.equal(sourcePersonRows.length, 0, "Source person must be deleted");
+  }));
+
+// REGRESSION combined: source has a soft-deleted curriculum, target
+// has a LIVE curriculum at the same identity. Source-deleted shouldn't
+// conflict with target-live (partial unique index = live-only). The
+// soft-deleted source must still migrate via personId update.
+test("user.person.mergePersons handles deleted source + live target at same identity", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-deleted-source-live-target-loc",
+      name: "Merge Deleted Source vs Live Target Location",
+    });
+
+    const { curriculumId, gearTypeId } = await createCurriculumFixture(
+      "merge-deleted-source-live-target",
+    );
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "DSLT",
+        lastName: "Target",
+      }),
+      User.Person.getOrCreate({
+        firstName: "DSLT",
+        lastName: "Source",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // Source has a soft-deleted curriculum.
+    const { id: sourceStudentCurriculumId } = await Student.Curriculum.start({
+      personId: sourcePersonId,
+      curriculumId,
+      gearTypeId,
+    });
+    await query
+      .update(s.studentCurriculum)
+      .set({ deletedAt: dayjs().subtract(30, "day").toISOString() })
+      .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId));
+
+    // Target has a LIVE curriculum at the same identity.
+    const { id: targetStudentCurriculumId } = await Student.Curriculum.start({
+      personId: targetPersonId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    // Both curricula should still exist on target — the live one
+    // canonical, the deleted one preserved for history.
+    const allCurricula = await query
+      .select({
+        id: s.studentCurriculum.id,
+        deletedAt: s.studentCurriculum.deletedAt,
+      })
+      .from(s.studentCurriculum)
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, targetPersonId),
+          eq(s.studentCurriculum.curriculumId, curriculumId),
+          eq(s.studentCurriculum.gearTypeId, gearTypeId),
+        ),
+      );
+    assert.equal(
+      allCurricula.length,
+      2,
+      `Expected both curricula on target (live + deleted), got ${allCurricula.length}`,
+    );
+    const liveCount = allCurricula.filter((c) => c.deletedAt == null).length;
+    assert.equal(liveCount, 1, "Exactly one curriculum should be live");
+    const liveId = allCurricula.find((c) => c.deletedAt == null)?.id;
+    assert.equal(
+      liveId,
+      targetStudentCurriculumId,
+      "Live curriculum should be the original target curriculum",
+    );
+  }));
+
 // REGRESSION (Bugbot review on PR #461): the canonical-certificate
 // ranking in withModulesRanked must NOT pick a merge-conflict
 // duplicate row even when its certificate was issued earlier than the

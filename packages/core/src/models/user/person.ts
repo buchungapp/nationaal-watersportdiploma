@@ -876,29 +876,42 @@ export const mergePersons = wrapCommand(
           await tx.delete(s.actor).where(eq(s.actor.personId, input.personId));
         }
 
-        // Both queries filter to live (non-soft-deleted) curricula. A
-        // soft-deleted target curriculum at the same (curriculumId,
-        // gearTypeId) as a live source curriculum would otherwise be
-        // detected as a "conflict" — the merge would then move active
-        // certs + completed competencies onto the deleted target,
-        // burying source's live data. The partial unique index
-        // (migration 0038) lets us safely UPDATE the source's personId
-        // to the target without colliding on the index slot still
-        // held by the deleted row.
-        const sourceStudentCurricula = await tx
+        // Conflict detection runs LIVE-only on both sides:
+        //   - A soft-deleted target curriculum at the same
+        //     (curriculumId, gearTypeId) as a live source curriculum
+        //     used to be picked up as a "conflict", which buried
+        //     source's live data behind the deleted target. The partial
+        //     unique index (`student_curriculum_unq_identity_gear_curriculum
+        //     WHERE deleted_at IS NULL`) lets us safely UPDATE the
+        //     source's personId to the target without colliding.
+        //   - A soft-deleted source curriculum still references
+        //     `source.person_id` via `student_curriculum_link_person_id_fk`,
+        //     so it must ALSO migrate to the target — otherwise the
+        //     end-of-merge `tx.delete(s.person)` trips an FK violation
+        //     and rolls the whole merge back. The migration is a plain
+        //     UPDATE; the deleted row stays deleted, just under the
+        //     target person's id.
+        //
+        // So we load source curricula in two buckets (live, deleted),
+        // load only LIVE target curricula (deleted target is invisible
+        // by design), match by identity LIVE×LIVE only, and migrate
+        // the rest by personId UPDATE.
+        const allSourceStudentCurricula = await tx
           .select({
             id: s.studentCurriculum.id,
             curriculumId: s.studentCurriculum.curriculumId,
             gearTypeId: s.studentCurriculum.gearTypeId,
             createdAt: s.studentCurriculum.createdAt,
+            deletedAt: s.studentCurriculum.deletedAt,
           })
           .from(s.studentCurriculum)
-          .where(
-            and(
-              eq(s.studentCurriculum.personId, input.personId),
-              isNull(s.studentCurriculum.deletedAt),
-            ),
-          );
+          .where(eq(s.studentCurriculum.personId, input.personId));
+        const sourceStudentCurricula = allSourceStudentCurricula.filter(
+          (c) => c.deletedAt == null,
+        );
+        const deletedSourceStudentCurriculumIds = allSourceStudentCurricula
+          .filter((c) => c.deletedAt != null)
+          .map((c) => c.id);
 
         const targetStudentCurricula = await tx
           .select({
@@ -935,7 +948,12 @@ export const mergePersons = wrapCommand(
           targetStudentCurriculumId: string;
         }[] = [];
 
-        const nonConflictingStudentCurriculumIds: string[] = [];
+        // Soft-deleted source curricula skip conflict detection (their
+        // "live" identity slot is already empty per the partial index)
+        // and just migrate by personId.
+        const nonConflictingStudentCurriculumIds: string[] = [
+          ...deletedSourceStudentCurriculumIds,
+        ];
 
         for (const sourceStudentCurriculum of sourceStudentCurricula) {
           const matchingTargetStudentCurriculum =
