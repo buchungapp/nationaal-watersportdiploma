@@ -505,6 +505,115 @@ with `decisionKind='create_new'`, `presentedCandidatePersonIds=[Adam.id]`,
 
 ## Import preview UX
 
+### Information hierarchy at preview open
+
+The operator's first scan is the header summary. Surfaces what needs attention,
+in order:
+
+```
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ Bulk import — preview                                            │
+  │                                                                  │
+  │  30 rijen geanalyseerd · 4 vragen om aandacht                    │
+  │  ├─ 2 cross-row groups op te lossen                              │
+  │  ├─ 1 ambigue match (≥2 kandidaten) — kies één                   │
+  │  └─ 1 rij met fout in de paste                                   │
+  │                                                                  │
+  │  De andere 26 rijen kunnen direct geïmporteerd worden.            │
+  └──────────────────────────────────────────────────────────────────┘
+```
+
+**Row sort order in the preview list** — blockers float to the top so the
+operator's eyes land on what needs them:
+
+1. Cross-row groups (each renders once, not per-row)
+2. Parse errors
+3. Ambiguous matches (≥2 candidates above weak threshold)
+4. Strong matches needing confirmation
+5. "All good" rows (no match, will create new) — collapsed by default with a
+   header "26 rijen kunnen worden aangemaakt — bekijk"
+
+**Sticky footer with submit affordance.** The Confirm-and-import button lives
+in a persistent footer (sticky bottom of the dialog), not at the end of the
+list. With 30 rows the operator never has to scroll to find submit.
+
+When blockers exist:
+
+```
+  [ Annuleren ]                        [ ⚠ 4 vragen om aandacht  Bevestigen en importeren ]
+                                            ^ disabled, chip count
+```
+
+When all blockers resolved:
+
+```
+  [ Annuleren ]                        [ Bevestigen en importeren — 28 personen ]
+                                            ^ enabled, primary action
+```
+
+Hovering the disabled chip shows a tooltip listing the blockers with anchor
+links (clicking a blocker scrolls to that row).
+
+### Interaction state coverage
+
+Every state the operator can be in, with the visible UI for each:
+
+| Surface | Loading | Empty | Error | Success | Partial |
+|---|---|---|---|---|---|
+| Bulk preview action | Skeleton rows + "Matches zoeken..." spinner | n/a (preview always has rows) | Toast + retry button | Renders rows | n/a |
+| Per-row "Bekijk volledige geschiedenis" | Inline skeleton in side panel | "Geen geschiedenis voor deze persoon" | "Kon geschiedenis niet laden — Probeer opnieuw" | Side panel renders cohorts + diplomas | n/a |
+| Commit action | Submit → spinner + "Importeren..." | n/a | Banner above rows: "Roster veranderde tijdens je review — bekijk de gemarkeerde rijen" (race guard fired) | Modal closes, toast: "8 personen aan cohort toegevoegd" | After 4th-strike: blocking message "Roster veranderde te vaak — plak opnieuw" with re-paste affordance |
+| Personen duplicates view | Skeleton list | "Geen mogelijke duplicaten gevonden — netjes!" + illustration | Standard error UI | List renders with merge buttons | n/a |
+| Cohort duplicates banner | n/a (server-rendered) | Banner absent | n/a | Banner visible above roster | n/a |
+| Single-create dedup hint | Inline skeleton next to name field while operator types | n/a (no match = no hint) | Silent (rate limit hit, no hint shown) | Inline match suggestion appears | n/a |
+
+### User journey storyboard
+
+```
+  T0   Operator opens "Bulk import" in personen page
+       UI: empty modal with paste textarea, role checkbox group
+       EMOTION: routine, low attention
+
+  T1   Operator pastes CSV, clicks "Volgende"
+       UI: skeleton rows, "Matches zoeken..." spinner (~1-2s)
+       EMOTION: anticipation
+
+  T2   Preview renders
+       UI: header summary "30 rijen, 4 vragen om aandacht"
+           rows sorted with blockers at top
+           sticky footer disabled with chip "4 vragen om aandacht"
+       EMOTION: focus on what needs them
+
+  T3a  Cross-row group click → modal opens
+       UI: focal Adam profile, outcome copy, primary "Bevestig — zelfde persoon"
+       EMOTION: relief — the safe outcome is the obvious click
+
+  T3b  Rare twin case → "Het zijn verschillende personen" expands
+       UI: per-row override panel inside the modal
+       EMOTION: deliberate — operator knows they're overriding
+
+  T4   All blockers resolved
+       UI: chip clears, footer button becomes "Bevestigen en importeren — 28 personen"
+       EMOTION: confidence
+
+  T5   Submit → spinner → toast → modal closes → personen list refreshes
+       EMOTION: done
+
+  Tx   Edge: operator clicks Cancel mid-review
+       UI: confirm "Weet je zeker dat je wilt annuleren? Je beslissingen
+            gaan verloren."
+            On yes: modal closes, bulk_import_preview row marked invalidated
+            (server action handles this immediately so cron doesn't see a
+            stale active row).
+       EMOTION: guarded against accidental loss of work
+```
+
+**Time-horizon design:**
+
+- **5-second visceral:** the operator should immediately understand "30 rijen geanalyseerd, 4 vragen om aandacht" — the count, the action, the work.
+- **5-minute behavioral:** confirms one cross-row group with one click, glances at the ambiguous match, fixes the parse error. Done.
+- **5-year reflective:** "Bulk import is the part of NWD that I don't dread anymore. It tells me what's wrong, I tell it what to do, it never creates duplicates."
+
 ### Per-row status taxonomy
 
 | Status | Score | Default action | Operator must |
@@ -677,6 +786,74 @@ The `bulk_import_preview` row carries the `attempt` counter and the original
 detection snapshot. Survives serverless cold starts. Cleaned up by cron after
 1 hour or on commit.
 
+## Catalyst component mapping
+
+No DESIGN.md exists in the project; the de-facto vocabulary is the Catalyst
+component set under `apps/web/src/app/(dashboard)/_components/`. Each new UI
+element maps to an existing Catalyst component:
+
+| UI element | Component path |
+|---|---|
+| Bulk import dialog frame | `(dashboard)/_components/dialog.tsx` |
+| Status badge (cross-row, parse error, etc.) | `(dashboard)/_components/badge.tsx` |
+| Score-band chip on candidate | `(dashboard)/_components/badge.tsx` (small variant, color="zinc" weak / "amber" strong / "blue" perfect) |
+| Row card | div with Tailwind border + spacing — no card primitive in Catalyst |
+| Radio selection per candidate | `(dashboard)/_components/fieldset.tsx` (Radio / RadioGroup) |
+| Modal action buttons | `(dashboard)/_components/button.tsx` (color="primary" for orange, color="zinc" / outline for cancel) |
+| Race-guard banner inside the dialog | `(dashboard)/_components/alert.tsx` (color="amber") |
+| Personen duplicates list | `(dashboard)/_components/table.tsx` |
+| Empty state copy | `(dashboard)/_components/heading.tsx` + `text.tsx` |
+| Cohort banner above roster | new — propose `RosterAlert` component, color=info, dismissible |
+| History side panel | `(dashboard)/_components/disclosure.tsx` (right-aligned, full-height) |
+| Toast on commit success | existing `sonner` pattern (see `create-bulk-dialog.tsx`) |
+| Inline single-create dedup hint | inline `Text` block beneath the name fieldset |
+
+## Responsive + accessibility
+
+### Responsive
+
+Operators are desktop. Bulk import preview deliberately does not support
+mobile. Below 1024px viewport, show:
+
+```
+  ⓘ Bulk import werkt het beste op desktop (≥ 1024px). Open dit scherm op
+    een groter beeldscherm of voeg personen één voor één toe.
+```
+
+Other operator surfaces (personen page, cohort view) follow existing
+responsive patterns from the dashboard layout — these aren't new.
+
+### Accessibility baseline
+
+- **Keyboard nav order** in bulk import preview: header summary → first
+  blocker row → its primary action → next row → ... → footer submit. Tab
+  cycle should never trap the operator in a row's expanded history panel.
+- **Screen reader announcements** for each candidate card:
+  "Kandidaat 1 van 2: Adam de Vries, geboortedatum 12 mei 2010, score 175
+  sterk, 4 diploma's, laatste cohort Zomer 2025." Score band conveyed via
+  the word "sterk" / "zwak" / "perfect", not just the badge color.
+- **Touch targets** ≥ 44px on radio buttons, action buttons, dismiss
+  affordances. Catalyst defaults already pass.
+- **Color contrast** ≥ 4.5:1 on body text. NWD orange (#FF8000) on white is
+  ~3:1 — marginal — so we use orange only on filled buttons (white text on
+  orange ≥ 4.5:1) and never as body text on white.
+- **Cross-row resolver modal** uses `role="dialog"`, focus traps within,
+  initial focus on the primary "Bevestig — zelfde persoon" button (the safe
+  default). Escape closes with the same confirm-cancel guard the journey
+  storyboard describes.
+
+## Resolved design decisions
+
+These were unresolved when the review opened; surfacing them here so the
+implementer doesn't re-litigate during Lane D:
+
+| # | Decision | Resolved as | Why |
+|---|---|---|---|
+| 1 | History side panel: slide-in, modal, or inline expand? | Slide-in from right, 480px wide, full-height, preview list visible behind it | Modal hides context. Inline expand makes rows jump and breaks the sort-by-priority order. |
+| 2 | Confirm-and-import disabled state copy | Sticky footer with chip "⚠ 4 vragen om aandacht" + tooltip listing blockers with anchor jumps | Operator sees the count immediately; tooltip is the recovery affordance. |
+| 3 | Row that's both parse-error AND in a cross-row group | Parse-error wins. Drop the row from the cross-row group. | Can't act on a row whose data doesn't parse. |
+| 4 | Cohort banner placement | Above the roster table, full-width, dismissible with "Ik los het later op" (sets a per-operator-per-cohort dismissal flag for 7 days) | Operator might not be ready to fix immediately; respect their flow. |
+
 ## UI copy register
 
 | English (design) | Dutch (UI) |
@@ -697,6 +874,21 @@ detection snapshot. Survives serverless cold starts. Cleaned up by cron after
 | On confirm, Adam is added once to this cohort. All 3 placements work via this one profile — no duplicate profiles. | Bij bevestigen wordt Adam 1 keer aan dit cohort toegevoegd. Alle 3 cohortplekken die je beschreef werken via dit ene profiel — geen dubbele profielen. |
 | Rows linked to this profile | De rijen die op dit profiel gekoppeld worden |
 | New profile — doesn't exist in your roster yet | Nieuw profiel — bestaat nog niet in jouw roster |
+| 30 rows analyzed · 4 issues to resolve | 30 rijen geanalyseerd · 4 vragen om aandacht |
+| 2 cross-row groups to resolve | 2 cross-row groups op te lossen |
+| 1 ambiguous match (≥2 candidates) — pick one | 1 ambigue match (≥2 kandidaten) — kies één |
+| 1 row with paste error | 1 rij met fout in de paste |
+| The other 26 rows can be imported directly | De andere 26 rijen kunnen direct geïmporteerd worden |
+| Confirm and import — 28 people | Bevestigen en importeren — 28 personen |
+| ⚠ 4 issues to resolve | ⚠ 4 vragen om aandacht |
+| Are you sure you want to cancel? Your decisions will be lost. | Weet je zeker dat je wilt annuleren? Je beslissingen gaan verloren. |
+| 8 people added to cohort | 8 personen aan cohort toegevoegd |
+| No possible duplicates found — looking good! | Geen mogelijke duplicaten gevonden — netjes! |
+| I'll handle it later | Ik los het later op |
+| Bulk import works best on desktop (≥1024px). Open this screen on a larger display or add people one by one. | Bulk import werkt het beste op desktop (≥ 1024px). Open dit scherm op een groter beeldscherm of voeg personen één voor één toe. |
+| Looking for matches… | Matches zoeken… |
+| Importing… | Importeren… |
+| 26 rows can be created — review | 26 rijen kunnen worden aangemaakt — bekijk |
 | View full history | Bekijk volledige geschiedenis |
 | Cancel | Annuleren |
 | Confirm and import | Bevestigen en importeren |
@@ -920,6 +1112,13 @@ Per outside-voice P0-C, the following stay untouched in this PR:
   `person_merge_audit` with `source='sysadmin'`).
 - `lib/nwd.ts` `createPersonForLocation` — unchanged.
 
+## Approved Mockups
+
+| Screen/Section | Mockup Path | Direction | Notes |
+|---|---|---|---|
+| Multi-match resolver row | `~/.gstack/projects/buchungapp-nationaal-watersportdiploma/designs/operator-bulk-import-preview-20260429/multi-match/variant-D.png` | Calmer score-band hierarchy, equal-weight candidate cards, score badges as small muted chips | Score differentiated by reason text + chip color, not by competing card chrome |
+| Cross-row conflict resolver | `~/.gstack/projects/buchungapp-nationaal-watersportdiploma/designs/operator-bulk-import-preview-20260429/cross-row/variant-F.png` | "Same person by default" framing, primary "Bevestig — zelfde persoon", secondary text-link "Het zijn verschillende personen — bijv. tweelingen" | Outcome copy: "1 profiel ... 1 cohortplek aangemaakt", multi-course post-import hint |
+
 ## GSTACK REVIEW REPORT
 
 | Review | Trigger | Why | Runs | Status | Findings |
@@ -927,8 +1126,8 @@ Per outside-voice P0-C, the following stay untouched in this PR:
 | CEO Review | `/plan-ceo-review` | Scope & strategy | 1 | informal | scope reframed from cure-only to prevention+repair; GDPR boundary set |
 | Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) | 11 issues, 0 critical gaps, all decisions applied |
 | Outside Voice | `/codex` (fallback: claude subagent) | Independent 2nd opinion | 1 | CLEAR | 3 P0 + 5 P1 + 3 P2 found; 9 absorbed, 2 rejected (P2-I diff-view → defer v1.5, P2-K full collapse → keep reduced split) |
-| Design Review | `/plan-design-review` | UI/UX gaps | 0 | — | recommended next |
+| Design Review | `/plan-design-review` | UI/UX gaps | 1 | CLEAR | initial 6.5/10 → 8.5/10; mockups approved (multi-match D, cross-row F); 4 unresolved decisions resolved; cross-row reframing prevented duplicate-person bug; paste-vs-paste detection added |
 | DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | not applicable (operator-facing) |
 
 **UNRESOLVED:** 0
-**VERDICT:** ENG + OUTSIDE-VOICE CLEARED — ready for `/plan-design-review` on the multi-match resolver, then implementation.
+**VERDICT:** ENG + DESIGN + OUTSIDE-VOICE CLEARED — ready for Lane D implementation.
