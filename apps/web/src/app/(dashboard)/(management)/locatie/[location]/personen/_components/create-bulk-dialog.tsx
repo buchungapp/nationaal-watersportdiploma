@@ -263,12 +263,13 @@ function SubmitForm({
   const [raceBanner, setRaceBanner] = useState<string | null>(null);
 
   // Default column-mapping suggestions inferred from header text.
+  // Uses normalize + synonym table so common variants ("Tussenvoegsel"
+  // vs "Tussenvoegsels", English headers like "Email", DOB shorthand)
+  // resolve to the right target without operator intervention.
   const defaultMapping: Record<string, string> = {};
   data.labels?.forEach((item, index) => {
     defaultMapping[`include-column-${index}`] =
-      COLUMN_MAPPING.find((col) =>
-        item?.label.toLowerCase().startsWith(col.toLowerCase()),
-      ) ?? SELECT_LABEL;
+      guessColumn(item?.label ?? "") ?? SELECT_LABEL;
   });
 
   const previewBound = previewBulkImportAction.bind(
@@ -558,4 +559,98 @@ function CommitConsumer({
       submitting={committing}
     />
   );
+}
+
+// Header-to-target column matcher. Uses normalized synonym lookup so
+// common variants ("E-mail", "tussenvoegsel" vs the plural target,
+// "DOB", "Last name") map to the right COLUMN_MAPPING entry without
+// the operator having to fix the dropdown manually.
+//
+// Hoisted to module scope so the regexes / sets are built once.
+const COLUMN_SYNONYMS: Record<(typeof COLUMN_MAPPING)[number], string[]> = {
+  "E-mailadres": [
+    "email",
+    "emailadres",
+    "e-mail",
+    "e-mailadres",
+    "mail",
+    "mailadres",
+  ],
+  Voornaam: ["voornaam", "voornamen", "firstname", "first", "given name"],
+  Tussenvoegsels: [
+    "tussenvoegsel",
+    "tussenvoegsels",
+    "tussen",
+    "middlename",
+    "middle",
+    "infix",
+  ],
+  Achternaam: [
+    "achternaam",
+    "achternamen",
+    "lastname",
+    "last",
+    "surname",
+    "familienaam",
+    "family name",
+  ],
+  Geboortedatum: [
+    "geboortedatum",
+    "dob",
+    "birthdate",
+    "dateofbirth",
+    "date of birth",
+    "geboorte datum",
+  ],
+  Geboorteplaats: [
+    "geboorteplaats",
+    "birthplace",
+    "placeofbirth",
+    "place of birth",
+    "geboorte plaats",
+    "stad",
+    "city",
+  ],
+  Geboorteland: [
+    "geboorteland",
+    "birthcountry",
+    "countryofbirth",
+    "country of birth",
+    "geboorte land",
+    "land",
+    "country",
+  ],
+};
+
+function normalizeHeader(s: string): string {
+  return s
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "") // strip combining marks (diacritics)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+const COLUMN_NORMALIZED_SYNONYMS: Array<{
+  target: (typeof COLUMN_MAPPING)[number];
+  syns: string[];
+}> = COLUMN_MAPPING.map((target) => ({
+  target,
+  syns: [target, ...(COLUMN_SYNONYMS[target] ?? [])]
+    .map(normalizeHeader)
+    .filter(Boolean),
+}));
+
+function guessColumn(header: string): (typeof COLUMN_MAPPING)[number] | null {
+  const h = normalizeHeader(header);
+  if (!h) return null;
+  // 1. Exact synonym match.
+  for (const { target, syns } of COLUMN_NORMALIZED_SYNONYMS) {
+    if (syns.includes(h)) return target;
+  }
+  // 2. Bidirectional substring — handles "tussenvoegsel" vs "tussenvoegsels"
+  //    and "geboortedatumlid" vs "geboortedatum" without mis-binding.
+  for (const { target, syns } of COLUMN_NORMALIZED_SYNONYMS) {
+    if (syns.some((s) => h.includes(s) || s.includes(h))) return target;
+  }
+  return null;
 }
