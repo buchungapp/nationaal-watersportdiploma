@@ -209,7 +209,7 @@ function NewProfileBanner({ row }: { row: ParsedPersonRow | undefined }) {
         {dayjs(row.dateOfBirth).format("DD-MM-YYYY")}
       </Text>
       <Text className="!text-xs !text-zinc-500 italic">
-        Nieuw profiel — bestaat nog niet in jouw roster.
+        Nieuw profiel — bestaat nog niet bij jouw locatie.
       </Text>
     </div>
   );
