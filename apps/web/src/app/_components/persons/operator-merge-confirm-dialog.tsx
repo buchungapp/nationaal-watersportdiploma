@@ -1,6 +1,9 @@
 "use client";
 
-import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/20/solid";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { toast } from "sonner";
@@ -19,14 +22,35 @@ import {
 } from "~/app/(dashboard)/_components/dialog";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
 
-// Operator-facing merge confirm dialog. Purpose-built for the
-// duplicates-view + cohort-banner flows where the operator clicks a
-// pre-computed pair (no search-and-pick needed). Loads preflight on open,
-// shows stats + warnings, executes merge on confirm.
+// Operator-facing merge confirm dialog. Renders a side-by-side
+// per-field diff (GitHub-PR-style) so the operator can see at a glance
+// which attributes match and which differ before committing the
+// (irreversible) merge.
 //
-// Distinct from the secretariaat merge dialog (apps/web/src/app/(dashboard)/
-// (management)/secretariaat/gebruikers/_components/merge-persons-dialog.tsx)
-// which has a sysadmin search-and-pick UX. Sysadmin dialog stays untouched.
+// Distinct from the secretariaat merge dialog
+// (apps/web/src/app/(dashboard)/(management)/secretariaat/gebruikers/
+// _components/merge-persons-dialog.tsx) which has a sysadmin search-
+// and-pick UX. Sysadmin dialog stays untouched.
+
+type Person = {
+  firstName: string | null;
+  lastNamePrefix: string | null;
+  lastName: string | null;
+  dateOfBirth: string | null;
+  birthCity?: string | null;
+  birthCountry?: { code: string; name: string } | null;
+  email?: string | null;
+  handle: string | null;
+};
+
+type Stats = {
+  actorCount: number;
+  locationCount: number;
+  certificateCount: number;
+  logbookCount: number;
+  roleCount: number;
+  kwalificatieCount: number;
+};
 
 export function OperatorMergeConfirmDialog({
   open,
@@ -73,7 +97,7 @@ export function OperatorMergeConfirmDialog({
   const isMerging = merge.status === "executing";
 
   return (
-    <Dialog open={open} onClose={onClose} size="2xl">
+    <Dialog open={open} onClose={onClose} size="3xl">
       <DialogTitle>Profielen samenvoegen</DialogTitle>
       <DialogBody>
         {isLoading ? (
@@ -83,20 +107,13 @@ export function OperatorMergeConfirmDialog({
           </div>
         ) : (
           <>
-            <Text className="!text-sm">
-              <Strong>Primair profiel</Strong> (blijft bestaan):
-            </Text>
-            <PersonSummary
-              person={data.primary.person}
-              stats={data.primary.stats}
+            <DiffTable
+              primary={data.primary.person}
+              duplicate={data.duplicate.person}
             />
-
-            <Text className="mt-4 !text-sm">
-              <Strong>Duplicaat</Strong> (wordt samengevoegd in primair):
-            </Text>
-            <PersonSummary
-              person={data.duplicate.person}
-              stats={data.duplicate.stats}
+            <StatsRoll
+              primary={data.primary.stats}
+              duplicate={data.duplicate.stats}
             />
 
             {data.warnings.length > 0 ? (
@@ -149,54 +166,267 @@ export function OperatorMergeConfirmDialog({
   );
 }
 
-function PersonSummary({
-  person,
-  stats,
-}: {
-  person: {
-    firstName: string | null;
-    lastNamePrefix: string | null;
-    lastName: string | null;
-    dateOfBirth: string | null;
-    handle: string | null;
-  };
-  stats: {
-    actorCount: number;
-    locationCount: number;
-    certificateCount: number;
-    logbookCount: number;
-    roleCount: number;
-    kwalificatieCount: number;
-  };
-}) {
-  const fullName = [person.firstName, person.lastNamePrefix, person.lastName]
-    .filter(Boolean)
+// ─── Per-field diff table ──────────────────────────────────────────────
+//
+// Side-by-side comparison of identity fields. Each row is one field;
+// matching values get a neutral row + ✓; differing values get an
+// amber tint + ⚠. Empty/null on one side and a value on the other is
+// an "informational" diff (will be picked up automatically) — shown
+// the same as a regular diff so the operator can see what's about to
+// flow into the primary profile.
+
+type DiffRow = {
+  label: string;
+  primary: string;
+  duplicate: string;
+  match: boolean;
+  // Optional note for non-conflict diffs ("primair krijgt deze waarde",
+  // "automatisch gegenereerd", etc).
+  note?: string;
+};
+
+function fullName(p: Person): string {
+  return [p.firstName, p.lastNamePrefix, p.lastName]
+    .filter((part) => part != null && part !== "")
     .join(" ");
+}
+
+function fmt(v: string | null | undefined): string {
+  if (v == null || v === "") return "—";
+  return v;
+}
+
+function buildDiff(primary: Person, duplicate: Person): DiffRow[] {
+  const rows: DiffRow[] = [];
+
+  const primName = fullName(primary);
+  const dupName = fullName(duplicate);
+  rows.push({
+    label: "Naam",
+    primary: primName || "—",
+    duplicate: dupName || "—",
+    match: primName.toLowerCase() === dupName.toLowerCase(),
+  });
+
+  rows.push({
+    label: "Geboortedatum",
+    primary: fmt(primary.dateOfBirth),
+    duplicate: fmt(duplicate.dateOfBirth),
+    match:
+      Boolean(primary.dateOfBirth) &&
+      primary.dateOfBirth === duplicate.dateOfBirth,
+  });
+
+  rows.push({
+    label: "Geboorteplaats",
+    primary: fmt(primary.birthCity),
+    duplicate: fmt(duplicate.birthCity),
+    match:
+      (primary.birthCity ?? "").trim().toLowerCase() ===
+      (duplicate.birthCity ?? "").trim().toLowerCase(),
+  });
+
+  const primCountry = primary.birthCountry?.name ?? null;
+  const dupCountry = duplicate.birthCountry?.name ?? null;
+  rows.push({
+    label: "Geboorteland",
+    primary: fmt(primCountry),
+    duplicate: fmt(dupCountry),
+    match:
+      primary.birthCountry?.code ===
+      duplicate.birthCountry?.code,
+  });
+
+  // E-mail: only the primary's email is preserved post-merge. If the
+  // duplicate has a different email, that signal is lost — flag it.
+  const primEmail = (primary.email ?? "").trim().toLowerCase();
+  const dupEmail = (duplicate.email ?? "").trim().toLowerCase();
+  let emailNote: string | undefined;
+  if (primEmail && dupEmail && primEmail !== dupEmail) {
+    emailNote = "Het e-mailadres van het duplicaat verdwijnt na samenvoegen.";
+  } else if (!primEmail && dupEmail) {
+    emailNote =
+      "Primair heeft geen e-mailadres — het duplicaat-e-mailadres verdwijnt na samenvoegen.";
+  }
+  rows.push({
+    label: "E-mail",
+    primary: fmt(primary.email),
+    duplicate: fmt(duplicate.email),
+    match: primEmail === dupEmail,
+    note: emailNote,
+  });
+
+  // Handle: always different by design (auto-generated, unique). Keep
+  // it informational so the operator can spot which row is which, but
+  // don't flag as a "conflict".
+  rows.push({
+    label: "Handle",
+    primary: primary.handle ? `@${primary.handle}` : "—",
+    duplicate: duplicate.handle ? `@${duplicate.handle}` : "—",
+    match: true,
+    note: "Automatisch gegenereerd — verschilt altijd.",
+  });
+
+  return rows;
+}
+
+function DiffTable({
+  primary,
+  duplicate,
+}: {
+  primary: Person;
+  duplicate: Person;
+}) {
+  const rows = buildDiff(primary, duplicate);
   return (
-    <div className="rounded-md border border-zinc-950/10 bg-zinc-50 p-3 text-sm dark:border-white/10 dark:bg-zinc-900/50">
-      <Strong className="!text-base">{fullName}</Strong>
-      <Text className="!text-sm !text-zinc-600 dark:!text-zinc-400">
-        {person.dateOfBirth ?? "—"}
-        {person.handle ? ` · @${person.handle}` : ""}
-      </Text>
-      <ul className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-zinc-700 dark:text-zinc-400">
-        <li>
-          {stats.actorCount} {stats.actorCount === 1 ? "actor" : "actoren"}
-        </li>
-        <li>
-          {stats.locationCount}{" "}
-          {stats.locationCount === 1 ? "locatie" : "locaties"}
-        </li>
-        <li>
-          {stats.certificateCount}{" "}
-          {stats.certificateCount === 1 ? "diploma" : "diploma's"}
-        </li>
-        <li>{stats.logbookCount} logboek</li>
-        <li>
-          {stats.roleCount} {stats.roleCount === 1 ? "rol" : "rollen"}
-        </li>
-        <li>{stats.kwalificatieCount} kwalificaties</li>
-      </ul>
+    <div className="overflow-hidden rounded-md border border-zinc-950/10 dark:border-white/10">
+      <div className="grid grid-cols-[8.5rem_1fr_1fr] bg-zinc-100 text-xs font-medium text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
+        <div className="px-3 py-2">Veld</div>
+        <div className="border-l border-zinc-950/10 px-3 py-2 dark:border-white/10">
+          Primair
+          <span className="ml-1 text-zinc-500 font-normal">(blijft)</span>
+        </div>
+        <div className="border-l border-zinc-950/10 px-3 py-2 dark:border-white/10">
+          Duplicaat
+          <span className="ml-1 text-zinc-500 font-normal">(verdwijnt)</span>
+        </div>
+      </div>
+      {rows.map((row) => (
+        <DiffRowView key={row.label} row={row} />
+      ))}
+    </div>
+  );
+}
+
+function DiffRowView({ row }: { row: DiffRow }) {
+  const isConflict = !row.match;
+  return (
+    <>
+      <div
+        className={
+          "grid grid-cols-[8.5rem_1fr_1fr] border-t border-zinc-950/5 text-sm dark:border-white/5 " +
+          (isConflict
+            ? "bg-amber-50/60 dark:bg-amber-900/10"
+            : "bg-white dark:bg-zinc-900/30")
+        }
+      >
+        <div className="flex items-center gap-1.5 px-3 py-2 text-zinc-700 dark:text-zinc-300">
+          {isConflict ? (
+            <ExclamationTriangleIcon className="size-4 text-amber-600" />
+          ) : (
+            <CheckCircleIcon className="size-4 text-emerald-600" />
+          )}
+          <span className="font-medium">{row.label}</span>
+        </div>
+        <div className="border-l border-zinc-950/5 px-3 py-2 font-mono text-xs text-zinc-800 dark:border-white/5 dark:text-zinc-200">
+          {row.primary}
+        </div>
+        <div
+          className={
+            "border-l border-zinc-950/5 px-3 py-2 font-mono text-xs dark:border-white/5 " +
+            (isConflict
+              ? "text-amber-900 dark:text-amber-200"
+              : "text-zinc-800 dark:text-zinc-200")
+          }
+        >
+          {row.duplicate}
+        </div>
+      </div>
+      {row.note ? (
+        <div
+          className={
+            "grid grid-cols-[8.5rem_1fr] border-t border-zinc-950/5 text-xs italic dark:border-white/5 " +
+            (isConflict
+              ? "bg-amber-50/40 dark:bg-amber-900/5"
+              : "bg-zinc-50 dark:bg-zinc-900/20")
+          }
+        >
+          <div />
+          <div className="col-span-1 px-3 py-1.5 text-zinc-600 dark:text-zinc-400">
+            {row.note}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+// ─── Stats roll-up ─────────────────────────────────────────────────────
+//
+// Counts on each side + the post-merge total. After merge, every entity
+// from the duplicate (actors, certificates, allocations, logbook,
+// roles, qualifications) attaches to the primary, so the totals are
+// straightforward sums.
+
+const STAT_LABELS: Array<{
+  key: keyof Stats;
+  singular: string;
+  plural: string;
+}> = [
+  { key: "certificateCount", singular: "diploma", plural: "diploma's" },
+  { key: "actorCount", singular: "actor", plural: "actoren" },
+  { key: "locationCount", singular: "locatie", plural: "locaties" },
+  { key: "roleCount", singular: "rol", plural: "rollen" },
+  { key: "kwalificatieCount", singular: "kwalificatie", plural: "kwalificaties" },
+  { key: "logbookCount", singular: "logboek-item", plural: "logboek-items" },
+];
+
+function StatsRoll({
+  primary,
+  duplicate,
+}: {
+  primary: Stats;
+  duplicate: Stats;
+}) {
+  return (
+    <div className="mt-4">
+      <Strong className="!text-sm">Wat verhuist naar het primaire profiel</Strong>
+      <div className="mt-2 overflow-hidden rounded-md border border-zinc-950/10 dark:border-white/10">
+        <div className="grid grid-cols-[1fr_auto_auto_auto] bg-zinc-100 text-xs font-medium text-zinc-700 dark:bg-zinc-800/60 dark:text-zinc-300">
+          <div className="px-3 py-2">Soort</div>
+          <div className="border-l border-zinc-950/10 px-3 py-2 text-right dark:border-white/10">
+            Primair
+          </div>
+          <div className="border-l border-zinc-950/10 px-3 py-2 text-right dark:border-white/10">
+            Duplicaat
+          </div>
+          <div className="border-l border-zinc-950/10 px-3 py-2 text-right dark:border-white/10">
+            Na merge
+          </div>
+        </div>
+        {STAT_LABELS.map(({ key, singular, plural }) => {
+          const p = primary[key];
+          const d = duplicate[key];
+          const total = p + d;
+          const moved = d > 0;
+          return (
+            <div
+              key={key}
+              className="grid grid-cols-[1fr_auto_auto_auto] border-t border-zinc-950/5 bg-white text-sm dark:border-white/5 dark:bg-zinc-900/30"
+            >
+              <div className="px-3 py-2 text-zinc-700 dark:text-zinc-300">
+                {total === 1 ? singular : plural}
+              </div>
+              <div className="border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums text-zinc-700 dark:border-white/5 dark:text-zinc-300">
+                {p}
+              </div>
+              <div
+                className={
+                  "border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums dark:border-white/5 " +
+                  (moved
+                    ? "font-medium text-amber-700 dark:text-amber-300"
+                    : "text-zinc-500")
+                }
+              >
+                {d}
+              </div>
+              <div className="border-l border-zinc-950/5 px-3 py-2 text-right tabular-nums font-medium text-zinc-900 dark:border-white/5 dark:text-zinc-100">
+                {total}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
