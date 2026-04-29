@@ -873,6 +873,81 @@ export const mergePersons = wrapCommand(
               .where(eq(s.cohortAllocation.id, cohortAllocation.id));
           }
 
+          // ── Repoint counterparty actor refs ────────────────────────
+          //
+          // The cohort_allocation.actor_id repointing above was a
+          // special case — it walked one table and matched per-row. In
+          // practice many other tables also reference an actor.id as a
+          // counterparty (instructor of someone else's allocation,
+          // creator of a PVB event, etc). Without repointing them too,
+          // the source-actor `tx.delete(s.actor)` below would trip a
+          // FK violation and roll the merge back.
+          //
+          // Generalize: build a sourceActorId → targetActorId map
+          // (matched by type + locationId), then issue per-source
+          // UPDATEs across every table that holds a counterparty
+          // reference. Per-source loops keep the SQL trivial; in the
+          // merge call site there are typically a handful of source
+          // actors, so the roundtrip cost is negligible.
+          const actorIdMap = new Map<string, string>();
+          for (const sourceActor of actors) {
+            const matches = targetPersonActors.filter(
+              (a) =>
+                a.locationId === sourceActor.locationId &&
+                a.type === sourceActor.type,
+            );
+            if (matches.length === 1 && matches[0]) {
+              actorIdMap.set(sourceActor.id, matches[0].id);
+            }
+          }
+
+          for (const [srcActorId, tgtActorId] of actorIdMap) {
+            // cohort_allocation.instructor_id — instructor for someone
+            // else's allocation (counterparty to the student).
+            await tx
+              .update(s.cohortAllocation)
+              .set({ instructorId: tgtActorId })
+              .where(eq(s.cohortAllocation.instructorId, srcActorId));
+
+            // media.actor_id — author/uploader.
+            await tx
+              .update(s.media)
+              .set({ actorId: tgtActorId })
+              .where(eq(s.media.actorId, srcActorId));
+
+            // KSS qualification — recorder of the qualification.
+            await tx
+              .update(s.persoonKwalificatie)
+              .set({ toegevoegdDoor: tgtActorId })
+              .where(eq(s.persoonKwalificatie.toegevoegdDoor, srcActorId));
+
+            // PVB audit-trail tables — actor that triggered the event/
+            // status change. None of these have unique constraints on
+            // `aangemaakt_door`, so a plain UPDATE is safe even if the
+            // source actor's events end up adjacent to target's.
+            await tx
+              .update(s.pvbAanvraagStatus)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(eq(s.pvbAanvraagStatus.aangemaaktDoor, srcActorId));
+            await tx
+              .update(s.pvbGebeurtenis)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(eq(s.pvbGebeurtenis.aangemaaktDoor, srcActorId));
+            await tx
+              .update(s.pvbLeercoachToestemming)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(eq(s.pvbLeercoachToestemming.aangemaaktDoor, srcActorId));
+            await tx
+              .update(s.pvbBeoordelaarBeschikbaarheidStatus)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(
+                eq(
+                  s.pvbBeoordelaarBeschikbaarheidStatus.aangemaaktDoor,
+                  srcActorId,
+                ),
+              );
+          }
+
           await tx.delete(s.actor).where(eq(s.actor.personId, input.personId));
         }
 
@@ -1395,6 +1470,65 @@ export const mergePersons = wrapCommand(
           }
           // If no other person exists, user account becomes orphaned (accepted risk)
         }
+
+        // ── Repoint person counterparty FKs across the KSS schema ──
+        //
+        // PVB tables hold person-level references for kandidaat /
+        // beoordelaar / leercoach roles. If the source person was any
+        // of those on someone else's record, the row still references
+        // source.id at this point — and the `tx.delete(s.person)` below
+        // would trip a FK violation. Migrate them to target.
+        //
+        // For tables with a unique constraint that includes the
+        // migrated column (just `pvb_onderdeel`), we delete the source-
+        // side rows that would conflict with target's existing rows
+        // first. The "duplicate" is precisely a same-human scenario
+        // (source and target are merging exactly because they're the
+        // same human) so the delete drops a redundant record, not real
+        // information.
+        await tx
+          .update(s.pvbAanvraag)
+          .set({ kandidaatId: input.targetPersonId })
+          .where(eq(s.pvbAanvraag.kandidaatId, input.personId));
+
+        // pvb_onderdeel.beoordelaar_id has unique on
+        // (pvb_aanvraag_id, kerntaak_onderdeel_id, beoordelaar_id).
+        // Drop source-side rows that would collide with existing
+        // target-side rows on the same (aanvraag, kerntaak_onderdeel)
+        // pair, then migrate the rest.
+        await tx.execute(sql`
+          DELETE FROM ${s.pvbOnderdeel}
+          WHERE ${s.pvbOnderdeel.beoordelaarId} = ${input.personId}
+            AND (${s.pvbOnderdeel.pvbAanvraagId}, ${s.pvbOnderdeel.kerntaakOnderdeelId}) IN (
+              SELECT ${s.pvbOnderdeel.pvbAanvraagId}, ${s.pvbOnderdeel.kerntaakOnderdeelId}
+              FROM ${s.pvbOnderdeel}
+              WHERE ${s.pvbOnderdeel.beoordelaarId} = ${input.targetPersonId}
+            )
+        `);
+        await tx
+          .update(s.pvbOnderdeel)
+          .set({ beoordelaarId: input.targetPersonId })
+          .where(eq(s.pvbOnderdeel.beoordelaarId, input.personId));
+
+        // pvb_beoordelaar_beschikbaarheid.beoordelaar_id — no unique
+        // constraint on the column, plain UPDATE.
+        await tx
+          .update(s.pvbBeoordelaarBeschikbaarheid)
+          .set({ beoordelaarId: input.targetPersonId })
+          .where(
+            eq(
+              s.pvbBeoordelaarBeschikbaarheid.beoordelaarId,
+              input.personId,
+            ),
+          );
+
+        // pvb_leercoach_toestemming.leercoach_id — no unique on column.
+        await tx
+          .update(s.pvbLeercoachToestemming)
+          .set({ leercoachId: input.targetPersonId })
+          .where(
+            eq(s.pvbLeercoachToestemming.leercoachId, input.personId),
+          );
 
         await tx.delete(s.person).where(eq(s.person.id, input.personId));
       });
