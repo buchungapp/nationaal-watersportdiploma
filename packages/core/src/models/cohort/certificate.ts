@@ -1,5 +1,13 @@
 import { schema as s } from "@nawadi/db";
-import { and, asc, eq, getTableColumns, isNull, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  isNull,
+  sql,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { useQuery } from "../../contexts/index.js";
@@ -48,8 +56,39 @@ export const listStatus = wrapQuery(
           .where(eq(rankedSq.rn, 1)),
       );
 
+      // Competencies the student has already proven on a previously
+      // issued certificate for the same student curriculum. We use
+      // these to compute `newlyIssuable` per module: a module that's
+      // partly already canonical and partly newly cohort-complete is
+      // still "issuable now" — the new certificate would cover only
+      // the not-yet-canonical part (competentiegericht opleiden), and
+      // `issueCertificatesInCohort` filters accordingly. Without this
+      // CTE the diplomas tab can't tell the operator whether a click
+      // on "Diploma uitreiken" will actually mint anything new.
+      const canonicalCompetency = query.$with("canonical_competency").as(
+        query
+          .selectDistinct({
+            studentCurriculumId:
+              s.studentCompletedCompetency.studentCurriculumId,
+            competencyId: s.studentCompletedCompetency.competencyId,
+          })
+          .from(s.studentCompletedCompetency)
+          .innerJoin(
+            s.certificate,
+            eq(s.certificate.id, s.studentCompletedCompetency.certificateId),
+          )
+          .where(
+            and(
+              eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
+              isNull(s.studentCompletedCompetency.deletedAt),
+              isNull(s.certificate.deletedAt),
+              isNotNull(s.certificate.issuedAt),
+            ),
+          ),
+      );
+
       const moduleStatusQuery = query
-        .with(latestProgress)
+        .with(latestProgress, canonicalCompetency)
         .select({
           studentCurriculumId: s.studentCurriculum.id,
           module: {
@@ -66,6 +105,22 @@ export const listStatus = wrapQuery(
             sql<number>`COUNT(${s.curriculumCompetency.id}) FILTER (WHERE COALESCE(${latestProgress.progress}, 0) < 100)`.mapWith(
               Number,
             ),
+          // Module is "issuable right now" iff every competency is
+          // either at cohort-progress=100 or already canonical, AND at
+          // least one competency is cohort-progress=100 but not yet
+          // canonical (otherwise the issuance produces nothing new).
+          // Drives the `geblokkeerd` row state and the diplomas-tab
+          // count under option d.
+          newlyIssuable: sql<boolean>`(
+              COUNT(${s.curriculumCompetency.id}) FILTER (
+                WHERE COALESCE(${latestProgress.progress}, 0) >= 100
+                   OR ${canonicalCompetency.competencyId} IS NOT NULL
+              ) = COUNT(${s.curriculumCompetency.id})
+              AND COUNT(${s.curriculumCompetency.id}) FILTER (
+                WHERE COALESCE(${latestProgress.progress}, 0) >= 100
+                  AND ${canonicalCompetency.competencyId} IS NULL
+              ) > 0
+            )`.mapWith(Boolean),
         })
         .from(s.studentCurriculum)
         .innerJoin(
@@ -88,6 +143,13 @@ export const listStatus = wrapQuery(
               s.curriculumCompetency.id,
             ),
             eq(s.cohortAllocation.id, latestProgress.cohortAllocationId),
+          ),
+        )
+        .leftJoin(
+          canonicalCompetency,
+          and(
+            eq(canonicalCompetency.studentCurriculumId, s.studentCurriculum.id),
+            eq(canonicalCompetency.competencyId, s.curriculumCompetency.id),
           ),
         )
         .groupBy(s.studentCurriculum.id, s.module.id)
@@ -256,6 +318,7 @@ export const listStatus = wrapQuery(
                   totalCompetencies: status.totalCompetencies,
                   completedCompetencies: status.completedCompetencies,
                   uncompletedCompetencies: status.uncompletedCompetencies,
+                  newlyIssuable: status.newlyIssuable,
                 })),
               }
             : null,

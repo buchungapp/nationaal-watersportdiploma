@@ -127,6 +127,19 @@ export const listCompletedCompetenciesById = wrapQuery(
           and(
             eq(s.studentCompletedCompetency.studentCurriculumId, input.id),
             isNull(s.studentCompletedCompetency.deletedAt),
+            // Exclude merge-conflict duplicate completion rows. The
+            // partial unique index `student_completed_competency_unq_
+            // active_non_merge` defines canonical rows as
+            // `is_merge_conflict_duplicate = false AND deleted_at IS
+            // NULL`. Without this filter, callers asking "what
+            // competencies has this student already proven?" can
+            // receive a flagged historical row and treat it as
+            // canonical — which is wrong for issuance pre-flight
+            // (would silently drop the comp) and wrong for the
+            // course-card "already done" badge consistency. Same
+            // semantics as `withModulesRanked` and
+            // `completeCompetency`'s existence check.
+            eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
             exists(
               query
                 .select({ id: sql`1` })
@@ -404,9 +417,9 @@ export const listProgressByPersonId = wrapQuery(
         ? input.personId
         : [input.personId];
 
-      const withModules = query.$with("modules").as(
+      const withModulesRanked = query.$with("modules_ranked").as(
         query
-          .selectDistinct({
+          .select({
             personId: aliasedColumn(
               s.studentCurriculum.personId,
               "modules_person_id",
@@ -423,6 +436,12 @@ export const listProgressByPersonId = wrapQuery(
               s.certificate.id,
               "modules_certificate_id",
             ),
+            rank: sql<number>`ROW_NUMBER() OVER (
+              PARTITION BY ${s.studentCurriculum.id}, ${s.curriculumCompetency.moduleId}
+              ORDER BY ${s.certificate.issuedAt} ASC, ${s.certificate.id} ASC
+            )`
+              .mapWith(Number)
+              .as("modules_rank"),
           })
           .from(s.studentCurriculum)
           .innerJoin(
@@ -451,12 +470,33 @@ export const listProgressByPersonId = wrapQuery(
               inArray(s.studentCurriculum.personId, personIds),
               isNull(s.studentCurriculum.deletedAt),
               isNull(s.studentCompletedCompetency.deletedAt),
+              // Exclude merge-conflict duplicate completion rows from
+              // the canonical ranking. They're preserved as historical
+              // records (cf. partial unique
+              // student_completed_competency_unq_active_non_merge), but
+              // must not participate in ROW_NUMBER OVER (... ORDER BY
+              // certificate.issued_at ASC) — otherwise an old duplicate
+              // could outrank the canonical row and become the
+              // displayed certificate for that module.
+              eq(s.studentCompletedCompetency.isMergeConflictDuplicate, false),
               isNull(s.certificate.deletedAt),
               input.filters.respectCertificateVisibility
                 ? lte(s.certificate.visibleFrom, sql`now()`)
                 : undefined,
             ),
           ),
+      );
+
+      const withModules = query.$with("modules").as(
+        query
+          .select({
+            personId: withModulesRanked.personId,
+            studentCurriculumId: withModulesRanked.studentCurriculumId,
+            moduleId: withModulesRanked.moduleId,
+            certificateId: withModulesRanked.certificateId,
+          })
+          .from(withModulesRanked)
+          .where(eq(withModulesRanked.rank, 1)),
       );
 
       const withModulesAgg = query.$with("modules_agg").as(
@@ -526,7 +566,7 @@ export const listProgressByPersonId = wrapQuery(
       );
 
       const rows = await query
-        .with(withModules, withModulesAgg, withCertificates)
+        .with(withModulesRanked, withModules, withModulesAgg, withCertificates)
         .select({
           personId: s.studentCurriculum.personId,
           studentCurriculumId: s.studentCurriculum.id,

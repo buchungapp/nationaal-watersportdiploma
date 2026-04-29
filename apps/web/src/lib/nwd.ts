@@ -1541,22 +1541,53 @@ export const issueCertificatesInCohort = async ({
             throw new Error("Curriculum not found");
           }
 
-          const { id: certificateId } =
-            await Student.Certificate.startCertificate({
-              locationId: cohort.locationId,
-              studentCurriculumId: allocation.studentCurriculum.id,
-            });
-
           const competencyIds = curriculum.modules
             .filter(({ id }) =>
               completedModules.some(({ module }) => module.id === id),
             )
             .flatMap(({ competencies }) => competencies.map(({ id }) => id));
 
+          // Subtract competencies the student has already proven via an
+          // earlier issued certificate on this curriculum. Re-recording
+          // them would violate the partial unique index
+          // student_completed_competency_unq_active_non_merge — the
+          // database guarantees one canonical record per
+          // (studentCurriculum, competency). This filter lets the
+          // cohort issue a *partial* diploma covering only what's new,
+          // matching the competentiegericht-opleiden model.
+          const alreadyProven =
+            await Student.Curriculum.listCompletedCompetenciesById({
+              id: allocation.studentCurriculum.id,
+            });
+          const alreadyProvenIds = new Set(
+            alreadyProven.map((row) => row.competencyId),
+          );
+          const newCompetencyIds = competencyIds.filter(
+            (id) => !alreadyProvenIds.has(id),
+          );
+
+          if (newCompetencyIds.length === 0) {
+            // Pre-flight modal in #462 should keep operators from
+            // landing here, but if a race lets it through, fail with
+            // a recognizable name so the UI can map it to the
+            // "geblokkeerd" row state instead of a generic 500.
+            const err = new Error(
+              "Cohort produceert geen nieuwe competenties voor deze cursist — alle voltooide competenties zijn al eerder behaald.",
+            );
+            err.name = "CohortIssuanceBlockedError";
+            throw err;
+          }
+
+          const { id: certificateId } =
+            await Student.Certificate.startCertificate({
+              locationId: cohort.locationId,
+              studentCurriculumId: allocation.studentCurriculum.id,
+            });
+
           await Student.Certificate.completeCompetency({
             certificateId,
             studentCurriculumId: allocation.studentCurriculum.id,
-            competencyId: competencyIds,
+            competencyId: newCompetencyIds,
           });
 
           await Student.Certificate.completeCertificate({

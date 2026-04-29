@@ -260,6 +260,13 @@
       "when": 1776803414976,
       "tag": "0036_uneven_amphibian",
       "breakpoints": false
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1777482808664,
+      "tag": "0037_yielding_ogun",
+      "breakpoints": false
     }
   ]
 }

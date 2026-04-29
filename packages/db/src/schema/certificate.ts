@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
+  boolean,
   foreignKey,
   index,
   jsonb,
@@ -42,11 +43,14 @@ export const studentCurriculum = pgTable(
     ...timestamps,
   },
   (table) => [
-    uniqueIndex("student_curriculum_unq_identity_gear_curriculum").on(
-      table.personId,
-      table.curriculumId,
-      table.gearTypeId,
-    ),
+    // Partial unique index: only one LIVE student_curriculum per
+    // (person, curriculum, gear). Soft-deleted rows don't occupy the
+    // unique slot, which lets the merge code skip them and lets a
+    // re-enrolment after a soft delete proceed cleanly. Mirrors the
+    // pattern on cohort_allocation's unique index.
+    uniqueIndex("student_curriculum_unq_identity_gear_curriculum")
+      .on(table.personId, table.curriculumId, table.gearTypeId)
+      .where(sql`${table.deletedAt} IS NULL`),
     index("student_curriculum_idx_person").on(table.personId),
     foreignKey({
       columns: [table.curriculumId, table.gearTypeId],
@@ -133,13 +137,25 @@ export const studentCompletedCompetency = pgTable(
     studentCurriculumId: uuid("student_curriculum_id").notNull(),
     competencyId: uuid("curriculum_module_competency_id").notNull(),
     certificateId: uuid("certificate_id").notNull(),
+    isMergeConflictDuplicate: boolean("is_merge_conflict_duplicate")
+      .notNull()
+      .default(false),
     ...timestamps,
   },
   (table) => [
     primaryKey({
-      columns: [table.studentCurriculumId, table.competencyId],
+      columns: [
+        table.studentCurriculumId,
+        table.competencyId,
+        table.certificateId,
+      ],
       name: "student_completed_competency_pk",
     }),
+    uniqueIndex("student_completed_competency_unq_active_non_merge")
+      .on(table.studentCurriculumId, table.competencyId)
+      .where(
+        sql`${table.isMergeConflictDuplicate} = false AND ${table.deletedAt} IS NULL`,
+      ),
     foreignKey({
       columns: [table.studentCurriculumId],
       foreignColumns: [studentCurriculum.id],

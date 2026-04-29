@@ -801,94 +801,547 @@ export const mergePersons = wrapCommand(
           throw new Error("One or both persons not found");
         }
 
-        await Promise.all([
-          // Transfer actors
-          (async () => {
-            const actors = await tx
-              .select({
-                id: s.actor.id,
-                type: s.actor.type,
-                locationId: s.actor.locationId,
-              })
-              .from(s.actor)
-              .where(eq(s.actor.personId, input.personId));
+        // Transfer actors first so allocations point to the target person's actors.
+        const actors = await tx
+          .select({
+            id: s.actor.id,
+            type: s.actor.type,
+            locationId: s.actor.locationId,
+          })
+          .from(s.actor)
+          .where(eq(s.actor.personId, input.personId));
 
-            if (actors.length > 0) {
-              await tx
-                .insert(s.actor)
-                .values(
-                  actors.map((actor) => ({
-                    ...actor,
-                    id: undefined,
-                    personId: input.targetPersonId,
-                  })),
-                )
-                .onConflictDoNothing();
+        if (actors.length > 0) {
+          await tx
+            .insert(s.actor)
+            .values(
+              actors.map((actor) => ({
+                ...actor,
+                id: undefined,
+                personId: input.targetPersonId,
+              })),
+            )
+            .onConflictDoNothing();
 
-              const [targetPersonActors, cohortAllocationsToUpdate] =
-                await Promise.all([
-                  tx
-                    .select({
-                      id: s.actor.id,
-                      type: s.actor.type,
-                      locationId: s.actor.locationId,
-                    })
-                    .from(s.actor)
-                    .where(eq(s.actor.personId, input.targetPersonId)),
-                  tx
-                    .select({
-                      id: s.cohortAllocation.id,
-                      actorId: s.cohortAllocation.actorId,
-                    })
-                    .from(s.cohortAllocation)
-                    .where(
-                      inArray(
-                        s.cohortAllocation.actorId,
-                        actors.map((actor) => actor.id),
-                      ),
-                    ),
-                ]);
+          const [targetPersonActors, cohortAllocationsToUpdate] =
+            await Promise.all([
+              tx
+                .select({
+                  id: s.actor.id,
+                  type: s.actor.type,
+                  locationId: s.actor.locationId,
+                })
+                .from(s.actor)
+                .where(eq(s.actor.personId, input.targetPersonId)),
+              tx
+                .select({
+                  id: s.cohortAllocation.id,
+                  actorId: s.cohortAllocation.actorId,
+                })
+                .from(s.cohortAllocation)
+                .where(
+                  inArray(
+                    s.cohortAllocation.actorId,
+                    actors.map((actor) => actor.id),
+                  ),
+                ),
+            ]);
 
-              for (const cohortAllocation of cohortAllocationsToUpdate) {
-                const currentActor = actors.find(
-                  (actor) => actor.id === cohortAllocation.actorId,
-                );
+          for (const cohortAllocation of cohortAllocationsToUpdate) {
+            const currentActor = actors.find(
+              (actor) => actor.id === cohortAllocation.actorId,
+            );
 
-                if (!currentActor) {
-                  throw new Error("Actor not found");
-                }
-
-                const targetActor = targetPersonActors.filter(
-                  (actor) =>
-                    actor.locationId === currentActor.locationId &&
-                    actor.type === currentActor.type,
-                );
-
-                if (targetActor.length !== 1) {
-                  throw new Error("Target actor not found");
-                }
-
-                await tx
-                  .update(s.cohortAllocation)
-                  // biome-ignore lint/style/noNonNullAssertion: intentional
-                  .set({ actorId: targetActor[0]!.id })
-                  .where(eq(s.cohortAllocation.id, cohortAllocation.id));
-              }
-
-              await tx
-                .delete(s.actor)
-                .where(eq(s.actor.personId, input.personId));
+            if (!currentActor) {
+              throw new Error("Actor not found");
             }
-          })(),
 
-          // Transfer student curricula
-          tx
+            const targetActor = targetPersonActors.filter(
+              (actor) =>
+                actor.locationId === currentActor.locationId &&
+                actor.type === currentActor.type,
+            );
+
+            if (targetActor.length !== 1) {
+              throw new Error("Target actor not found");
+            }
+
+            await tx
+              .update(s.cohortAllocation)
+              // biome-ignore lint/style/noNonNullAssertion: intentional
+              .set({ actorId: targetActor[0]!.id })
+              .where(eq(s.cohortAllocation.id, cohortAllocation.id));
+          }
+
+          // ── Repoint counterparty actor refs ────────────────────────
+          //
+          // The cohort_allocation.actor_id repointing above was a
+          // special case — it walked one table and matched per-row. In
+          // practice many other tables also reference an actor.id as a
+          // counterparty (instructor of someone else's allocation,
+          // creator of a PVB event, etc). Without repointing them too,
+          // the source-actor `tx.delete(s.actor)` below would trip a
+          // FK violation and roll the merge back.
+          //
+          // Generalize: build a sourceActorId → targetActorId map
+          // (matched by type + locationId), then issue per-source
+          // UPDATEs across every table that holds a counterparty
+          // reference. Per-source loops keep the SQL trivial; in the
+          // merge call site there are typically a handful of source
+          // actors, so the roundtrip cost is negligible.
+          const actorIdMap = new Map<string, string>();
+          for (const sourceActor of actors) {
+            const matches = targetPersonActors.filter(
+              (a) =>
+                a.locationId === sourceActor.locationId &&
+                a.type === sourceActor.type,
+            );
+            if (matches.length === 1 && matches[0]) {
+              actorIdMap.set(sourceActor.id, matches[0].id);
+            }
+          }
+
+          for (const [srcActorId, tgtActorId] of actorIdMap) {
+            // cohort_allocation.instructor_id — instructor for someone
+            // else's allocation (counterparty to the student).
+            await tx
+              .update(s.cohortAllocation)
+              .set({ instructorId: tgtActorId })
+              .where(eq(s.cohortAllocation.instructorId, srcActorId));
+
+            // media.actor_id — author/uploader.
+            await tx
+              .update(s.media)
+              .set({ actorId: tgtActorId })
+              .where(eq(s.media.actorId, srcActorId));
+
+            // KSS qualification — recorder of the qualification.
+            await tx
+              .update(s.persoonKwalificatie)
+              .set({ toegevoegdDoor: tgtActorId })
+              .where(eq(s.persoonKwalificatie.toegevoegdDoor, srcActorId));
+
+            // PVB audit-trail tables — actor that triggered the event/
+            // status change. None of these have unique constraints on
+            // `aangemaakt_door`, so a plain UPDATE is safe even if the
+            // source actor's events end up adjacent to target's.
+            await tx
+              .update(s.pvbAanvraagStatus)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(eq(s.pvbAanvraagStatus.aangemaaktDoor, srcActorId));
+            await tx
+              .update(s.pvbGebeurtenis)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(eq(s.pvbGebeurtenis.aangemaaktDoor, srcActorId));
+            await tx
+              .update(s.pvbLeercoachToestemming)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(eq(s.pvbLeercoachToestemming.aangemaaktDoor, srcActorId));
+            await tx
+              .update(s.pvbBeoordelaarBeschikbaarheidStatus)
+              .set({ aangemaaktDoor: tgtActorId })
+              .where(
+                eq(
+                  s.pvbBeoordelaarBeschikbaarheidStatus.aangemaaktDoor,
+                  srcActorId,
+                ),
+              );
+          }
+
+          await tx.delete(s.actor).where(eq(s.actor.personId, input.personId));
+        }
+
+        // Conflict detection runs LIVE-only on both sides:
+        //   - A soft-deleted target curriculum at the same
+        //     (curriculumId, gearTypeId) as a live source curriculum
+        //     used to be picked up as a "conflict", which buried
+        //     source's live data behind the deleted target. The partial
+        //     unique index (`student_curriculum_unq_identity_gear_curriculum
+        //     WHERE deleted_at IS NULL`) lets us safely UPDATE the
+        //     source's personId to the target without colliding.
+        //   - A soft-deleted source curriculum still references
+        //     `source.person_id` via `student_curriculum_link_person_id_fk`,
+        //     so it must ALSO migrate to the target — otherwise the
+        //     end-of-merge `tx.delete(s.person)` trips an FK violation
+        //     and rolls the whole merge back. The migration is a plain
+        //     UPDATE; the deleted row stays deleted, just under the
+        //     target person's id.
+        //
+        // So we load source curricula in two buckets (live, deleted),
+        // load only LIVE target curricula (deleted target is invisible
+        // by design), match by identity LIVE×LIVE only, and migrate
+        // the rest by personId UPDATE.
+        const allSourceStudentCurricula = await tx
+          .select({
+            id: s.studentCurriculum.id,
+            curriculumId: s.studentCurriculum.curriculumId,
+            gearTypeId: s.studentCurriculum.gearTypeId,
+            createdAt: s.studentCurriculum.createdAt,
+            deletedAt: s.studentCurriculum.deletedAt,
+          })
+          .from(s.studentCurriculum)
+          .where(eq(s.studentCurriculum.personId, input.personId));
+        const sourceStudentCurricula = allSourceStudentCurricula.filter(
+          (c) => c.deletedAt == null,
+        );
+        const deletedSourceStudentCurriculumIds = allSourceStudentCurricula
+          .filter((c) => c.deletedAt != null)
+          .map((c) => c.id);
+
+        const targetStudentCurricula = await tx
+          .select({
+            id: s.studentCurriculum.id,
+            curriculumId: s.studentCurriculum.curriculumId,
+            gearTypeId: s.studentCurriculum.gearTypeId,
+            createdAt: s.studentCurriculum.createdAt,
+          })
+          .from(s.studentCurriculum)
+          .where(
+            and(
+              eq(s.studentCurriculum.personId, input.targetPersonId),
+              isNull(s.studentCurriculum.deletedAt),
+            ),
+          );
+
+        const targetCurriculumByIdentity = new Map<
+          string,
+          {
+            id: string;
+            curriculumId: string;
+            gearTypeId: string;
+            createdAt: string;
+          }
+        >(
+          targetStudentCurricula.map((curriculum) => [
+            `${curriculum.curriculumId}:${curriculum.gearTypeId}`,
+            curriculum,
+          ]),
+        );
+
+        const conflictingCurriculumPairs: {
+          sourceStudentCurriculumId: string;
+          targetStudentCurriculumId: string;
+        }[] = [];
+
+        // Soft-deleted source curricula skip conflict detection (their
+        // "live" identity slot is already empty per the partial index)
+        // and just migrate by personId.
+        const nonConflictingStudentCurriculumIds: string[] = [
+          ...deletedSourceStudentCurriculumIds,
+        ];
+
+        for (const sourceStudentCurriculum of sourceStudentCurricula) {
+          const matchingTargetStudentCurriculum =
+            targetCurriculumByIdentity.get(
+              `${sourceStudentCurriculum.curriculumId}:${sourceStudentCurriculum.gearTypeId}`,
+            );
+
+          if (!matchingTargetStudentCurriculum) {
+            nonConflictingStudentCurriculumIds.push(sourceStudentCurriculum.id);
+            continue;
+          }
+
+          conflictingCurriculumPairs.push({
+            sourceStudentCurriculumId: sourceStudentCurriculum.id,
+            targetStudentCurriculumId: matchingTargetStudentCurriculum.id,
+          });
+        }
+
+        if (nonConflictingStudentCurriculumIds.length > 0) {
+          await tx
             .update(s.studentCurriculum)
             .set({
               personId: input.targetPersonId,
             })
-            .where(eq(s.studentCurriculum.personId, input.personId)),
+            .where(
+              inArray(
+                s.studentCurriculum.id,
+                nonConflictingStudentCurriculumIds,
+              ),
+            );
+        }
 
+        for (const {
+          sourceStudentCurriculumId,
+          targetStudentCurriculumId,
+        } of conflictingCurriculumPairs) {
+          const targetCompletedCompetencies = await tx
+            .select({
+              competencyId: s.studentCompletedCompetency.competencyId,
+            })
+            .from(s.studentCompletedCompetency)
+            .where(
+              and(
+                eq(
+                  s.studentCompletedCompetency.studentCurriculumId,
+                  targetStudentCurriculumId,
+                ),
+                eq(
+                  s.studentCompletedCompetency.isMergeConflictDuplicate,
+                  false,
+                ),
+                isNull(s.studentCompletedCompetency.deletedAt),
+              ),
+            );
+
+          if (targetCompletedCompetencies.length > 0) {
+            await tx
+              .update(s.studentCompletedCompetency)
+              .set({
+                isMergeConflictDuplicate: true,
+              })
+              .where(
+                and(
+                  eq(
+                    s.studentCompletedCompetency.studentCurriculumId,
+                    sourceStudentCurriculumId,
+                  ),
+                  inArray(
+                    s.studentCompletedCompetency.competencyId,
+                    targetCompletedCompetencies.map(
+                      (competency) => competency.competencyId,
+                    ),
+                  ),
+                  isNull(s.studentCompletedCompetency.deletedAt),
+                ),
+              );
+          }
+
+          await Promise.all([
+            tx
+              .update(s.studentCompletedCompetency)
+              .set({
+                studentCurriculumId: targetStudentCurriculumId,
+              })
+              .where(
+                eq(
+                  s.studentCompletedCompetency.studentCurriculumId,
+                  sourceStudentCurriculumId,
+                ),
+              ),
+            tx
+              .update(s.certificate)
+              .set({
+                studentCurriculumId: targetStudentCurriculumId,
+              })
+              .where(
+                eq(
+                  s.certificate.studentCurriculumId,
+                  sourceStudentCurriculumId,
+                ),
+              ),
+          ]);
+
+          const [sourceAllocations, targetAllocations] = await Promise.all([
+            tx
+              .select({
+                id: s.cohortAllocation.id,
+                cohortId: s.cohortAllocation.cohortId,
+                actorId: s.cohortAllocation.actorId,
+                createdAt: s.cohortAllocation.createdAt,
+              })
+              .from(s.cohortAllocation)
+              .where(
+                and(
+                  eq(
+                    s.cohortAllocation.studentCurriculumId,
+                    sourceStudentCurriculumId,
+                  ),
+                  isNull(s.cohortAllocation.deletedAt),
+                ),
+              ),
+            tx
+              .select({
+                id: s.cohortAllocation.id,
+                cohortId: s.cohortAllocation.cohortId,
+                actorId: s.cohortAllocation.actorId,
+                createdAt: s.cohortAllocation.createdAt,
+              })
+              .from(s.cohortAllocation)
+              .where(
+                and(
+                  eq(
+                    s.cohortAllocation.studentCurriculumId,
+                    targetStudentCurriculumId,
+                  ),
+                  isNull(s.cohortAllocation.deletedAt),
+                ),
+              ),
+          ]);
+
+          const targetAllocationByIdentity = new Map<
+            string,
+            {
+              id: string;
+              cohortId: string;
+              actorId: string;
+              createdAt: string;
+            }
+          >(
+            targetAllocations.map((allocation) => [
+              `${allocation.cohortId}:${allocation.actorId}`,
+              allocation,
+            ]),
+          );
+
+          for (const sourceAllocation of sourceAllocations) {
+            const collidingTargetAllocation = targetAllocationByIdentity.get(
+              `${sourceAllocation.cohortId}:${sourceAllocation.actorId}`,
+            );
+
+            if (!collidingTargetAllocation) {
+              await tx
+                .update(s.cohortAllocation)
+                .set({
+                  studentCurriculumId: targetStudentCurriculumId,
+                })
+                .where(eq(s.cohortAllocation.id, sourceAllocation.id));
+              continue;
+            }
+
+            const [sourceHasLinkedCertificates, targetHasLinkedCertificates] =
+              await Promise.all([
+                tx
+                  .select({
+                    count: countDistinct(s.certificate.id),
+                  })
+                  .from(s.certificate)
+                  .where(
+                    and(
+                      eq(s.certificate.cohortAllocationId, sourceAllocation.id),
+                      isNull(s.certificate.deletedAt),
+                    ),
+                  )
+                  .then((rows) => Number(rows[0]?.count ?? 0) > 0),
+                tx
+                  .select({
+                    count: countDistinct(s.certificate.id),
+                  })
+                  .from(s.certificate)
+                  .where(
+                    and(
+                      eq(
+                        s.certificate.cohortAllocationId,
+                        collidingTargetAllocation.id,
+                      ),
+                      isNull(s.certificate.deletedAt),
+                    ),
+                  )
+                  .then((rows) => Number(rows[0]?.count ?? 0) > 0),
+              ]);
+
+            let winnerAllocation = sourceAllocation;
+            let loserAllocation = collidingTargetAllocation;
+
+            if (sourceHasLinkedCertificates !== targetHasLinkedCertificates) {
+              if (targetHasLinkedCertificates) {
+                winnerAllocation = collidingTargetAllocation;
+                loserAllocation = sourceAllocation;
+              }
+            } else if (
+              dayjs(sourceAllocation.createdAt).isAfter(
+                collidingTargetAllocation.createdAt,
+              ) ||
+              (dayjs(sourceAllocation.createdAt).isSame(
+                collidingTargetAllocation.createdAt,
+              ) &&
+                sourceAllocation.id > collidingTargetAllocation.id)
+            ) {
+              winnerAllocation = collidingTargetAllocation;
+              loserAllocation = sourceAllocation;
+            }
+
+            const winnerProgressCompetencies = await tx
+              .selectDistinct({
+                competencyId: s.studentCohortProgress.competencyId,
+              })
+              .from(s.studentCohortProgress)
+              .where(
+                eq(
+                  s.studentCohortProgress.cohortAllocationId,
+                  winnerAllocation.id,
+                ),
+              );
+
+            if (winnerProgressCompetencies.length > 0) {
+              await tx.delete(s.studentCohortProgress).where(
+                and(
+                  eq(
+                    s.studentCohortProgress.cohortAllocationId,
+                    loserAllocation.id,
+                  ),
+                  inArray(
+                    s.studentCohortProgress.competencyId,
+                    winnerProgressCompetencies.map(
+                      (competency) => competency.competencyId,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            await tx
+              .update(s.studentCohortProgress)
+              .set({
+                cohortAllocationId: winnerAllocation.id,
+              })
+              .where(
+                eq(
+                  s.studentCohortProgress.cohortAllocationId,
+                  loserAllocation.id,
+                ),
+              );
+
+            await Promise.all([
+              tx
+                .update(s.certificate)
+                .set({
+                  cohortAllocationId: null,
+                })
+                .where(
+                  and(
+                    eq(s.certificate.cohortAllocationId, loserAllocation.id),
+                    isNull(s.certificate.deletedAt),
+                  ),
+                ),
+              tx
+                .update(s.cohortAllocation)
+                .set({
+                  deletedAt: new Date().toISOString(),
+                  updatedAt: sql`NOW()`,
+                  studentCurriculumId: targetStudentCurriculumId,
+                })
+                .where(eq(s.cohortAllocation.id, loserAllocation.id)),
+            ]);
+
+            if (winnerAllocation.id === sourceAllocation.id) {
+              await tx
+                .update(s.cohortAllocation)
+                .set({
+                  studentCurriculumId: targetStudentCurriculumId,
+                })
+                .where(eq(s.cohortAllocation.id, winnerAllocation.id));
+            }
+          }
+
+          await tx
+            .update(s.cohortAllocation)
+            .set({
+              studentCurriculumId: targetStudentCurriculumId,
+            })
+            .where(
+              eq(
+                s.cohortAllocation.studentCurriculumId,
+                sourceStudentCurriculumId,
+              ),
+            );
+
+          await tx
+            .delete(s.studentCurriculum)
+            .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId));
+        }
+
+        await Promise.all([
           // Transfer location links
           (async () => {
             const links = await tx
@@ -926,6 +1379,13 @@ export const mergePersons = wrapCommand(
               personId: input.targetPersonId,
             })
             .where(eq(s.logbook.personId, input.personId)),
+
+          tx
+            .update(s.studentCohortProgress)
+            .set({
+              createdBy: input.targetPersonId,
+            })
+            .where(eq(s.studentCohortProgress.createdBy, input.personId)),
 
           // Transfer person roles (PK: personId + roleId)
           (async () => {
@@ -1010,6 +1470,60 @@ export const mergePersons = wrapCommand(
           }
           // If no other person exists, user account becomes orphaned (accepted risk)
         }
+
+        // ── Repoint person counterparty FKs across the KSS schema ──
+        //
+        // PVB tables hold person-level references for kandidaat /
+        // beoordelaar / leercoach roles. If the source person was any
+        // of those on someone else's record, the row still references
+        // source.id at this point — and the `tx.delete(s.person)` below
+        // would trip a FK violation. Migrate them to target.
+        //
+        // For tables with a unique constraint that includes the
+        // migrated column (just `pvb_onderdeel`), we delete the source-
+        // side rows that would conflict with target's existing rows
+        // first. The "duplicate" is precisely a same-human scenario
+        // (source and target are merging exactly because they're the
+        // same human) so the delete drops a redundant record, not real
+        // information.
+        await tx
+          .update(s.pvbAanvraag)
+          .set({ kandidaatId: input.targetPersonId })
+          .where(eq(s.pvbAanvraag.kandidaatId, input.personId));
+
+        // pvb_onderdeel.beoordelaar_id has unique on
+        // (pvb_aanvraag_id, kerntaak_onderdeel_id, beoordelaar_id).
+        // Drop source-side rows that would collide with existing
+        // target-side rows on the same (aanvraag, kerntaak_onderdeel)
+        // pair, then migrate the rest.
+        await tx.execute(sql`
+          DELETE FROM ${s.pvbOnderdeel}
+          WHERE ${s.pvbOnderdeel.beoordelaarId} = ${input.personId}
+            AND (${s.pvbOnderdeel.pvbAanvraagId}, ${s.pvbOnderdeel.kerntaakOnderdeelId}) IN (
+              SELECT ${s.pvbOnderdeel.pvbAanvraagId}, ${s.pvbOnderdeel.kerntaakOnderdeelId}
+              FROM ${s.pvbOnderdeel}
+              WHERE ${s.pvbOnderdeel.beoordelaarId} = ${input.targetPersonId}
+            )
+        `);
+        await tx
+          .update(s.pvbOnderdeel)
+          .set({ beoordelaarId: input.targetPersonId })
+          .where(eq(s.pvbOnderdeel.beoordelaarId, input.personId));
+
+        // pvb_beoordelaar_beschikbaarheid.beoordelaar_id — no unique
+        // constraint on the column, plain UPDATE.
+        await tx
+          .update(s.pvbBeoordelaarBeschikbaarheid)
+          .set({ beoordelaarId: input.targetPersonId })
+          .where(
+            eq(s.pvbBeoordelaarBeschikbaarheid.beoordelaarId, input.personId),
+          );
+
+        // pvb_leercoach_toestemming.leercoach_id — no unique on column.
+        await tx
+          .update(s.pvbLeercoachToestemming)
+          .set({ leercoachId: input.targetPersonId })
+          .where(eq(s.pvbLeercoachToestemming.leercoachId, input.personId));
 
         await tx.delete(s.person).where(eq(s.person.id, input.personId));
       });

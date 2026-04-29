@@ -1,0 +1,1695 @@
+import assert from "node:assert";
+import test from "node:test";
+import { schema as s } from "@nawadi/db";
+import dayjs from "dayjs";
+import { and, eq, inArray, isNull } from "drizzle-orm";
+import { useQuery, withTestTransaction } from "../../contexts/index.js";
+import {
+  Certificate,
+  Cohort,
+  Course,
+  Curriculum,
+  Location,
+  Student,
+  User,
+} from "../index.js";
+
+async function createCurriculumFixture(prefix: string) {
+  const createDiscipline = Course.Discipline.create({
+    title: `${prefix}-discipline`,
+    handle: `${prefix}-discipline`,
+  });
+
+  // Random rang above the default-seeded range (degrees 1-4 land in
+  // every fresh dev DB via pnpm initialize) but inside smallint
+  // bounds. Without this the fixture collides on degree_rang_index
+  // whenever the seeds have already run.
+  const randomRang = 1000 + Math.floor(Math.random() * 30_000);
+  const createDegree = Course.Degree.create({
+    title: `${prefix}-degree`,
+    handle: `${prefix}-degree`,
+    rang: randomRang,
+  });
+
+  const [{ id: disciplineId }, { id: degreeId }] = await Promise.all([
+    createDiscipline,
+    createDegree,
+  ]);
+
+  const { id: courseId } = await Course.create({
+    title: `${prefix}-course`,
+    handle: `${prefix}-course`,
+    disciplineId,
+  });
+
+  const { id: programId } = await Course.Program.create({
+    handle: `${prefix}-program`,
+    title: `${prefix}-program`,
+    degreeId,
+    courseId,
+  });
+
+  const [{ id: module1Id }, { id: module2Id }] = await Promise.all([
+    Course.Module.create({
+      title: `${prefix}-module-1`,
+      handle: `${prefix}-module-1`,
+      weight: 1,
+    }),
+    Course.Module.create({
+      title: `${prefix}-module-2`,
+      handle: `${prefix}-module-2`,
+      weight: 2,
+    }),
+  ]);
+
+  const [{ id: competency1Id }, { id: competency2Id }] = await Promise.all([
+    Course.Competency.create({
+      type: "knowledge",
+      title: `${prefix}-competency-1`,
+      handle: `${prefix}-competency-1`,
+      weight: 1,
+    }),
+    Course.Competency.create({
+      type: "skill",
+      title: `${prefix}-competency-2`,
+      handle: `${prefix}-competency-2`,
+      weight: 2,
+    }),
+  ]);
+
+  const { id: gearTypeId } = await Curriculum.GearType.create({
+    title: `${prefix}-gear`,
+    handle: `${prefix}-gear`,
+  });
+
+  const { id: curriculumId } = await Curriculum.create({
+    programId,
+    revision: "A",
+  });
+
+  await Promise.all([
+    Curriculum.start({
+      curriculumId,
+      startedAt: dayjs().subtract(1, "day").toISOString(),
+    }),
+    Curriculum.GearType.linkToCurriculum({ curriculumId, gearTypeId }),
+    Curriculum.linkModule({
+      curriculumId,
+      moduleId: module1Id,
+    }),
+    Curriculum.linkModule({
+      curriculumId,
+      moduleId: module2Id,
+    }),
+  ]);
+
+  const [{ id: curriculumCompetency1Id }, { id: curriculumCompetency2Id }] =
+    await Promise.all([
+      Curriculum.Competency.create({
+        curriculumId,
+        moduleId: module1Id,
+        competencyId: competency1Id,
+        isRequired: true,
+        requirement: `${prefix}-requirement-1`,
+      }),
+      Curriculum.Competency.create({
+        curriculumId,
+        moduleId: module2Id,
+        competencyId: competency2Id,
+        isRequired: true,
+        requirement: `${prefix}-requirement-2`,
+      }),
+    ]);
+
+  return {
+    curriculumId,
+    gearTypeId,
+    module1Id,
+    module2Id,
+    curriculumCompetency1Id,
+    curriculumCompetency2Id,
+  };
+}
+
+test("student.certificate.completeCompetency prevents duplicate completion in normal flow", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "dup-location",
+      name: "Duplicate Guard Location",
+    });
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Duplicate",
+      lastName: "Guard",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("duplicate-guard");
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    const { id: certificateId1 } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: certificateId1,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    await Student.Certificate.completeCertificate({
+      certificateId: certificateId1,
+      visibleFrom: dayjs().toISOString(),
+    });
+
+    const { id: certificateId2 } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+
+    await assert.rejects(
+      Student.Certificate.completeCompetency({
+        certificateId: certificateId2,
+        studentCurriculumId,
+        competencyId: curriculumCompetency1Id,
+      }),
+      /already completed for this student curriculum/,
+    );
+  }));
+
+test("student.certificate.completeCompetency ignores merge-conflict duplicates in normal duplicate guard", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-dup-location",
+      name: "Merge Duplicate Guard Location",
+    });
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Merge",
+      lastName: "Duplicate",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("merge-duplicate-guard");
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    const { id: firstCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: firstCertificateId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    await query
+      .update(s.studentCompletedCompetency)
+      .set({ isMergeConflictDuplicate: true })
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            studentCurriculumId,
+          ),
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            curriculumCompetency1Id,
+          ),
+        ),
+      );
+
+    const { id: secondCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: secondCertificateId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    const completedCompetencies = await query
+      .select({
+        isMergeConflictDuplicate:
+          s.studentCompletedCompetency.isMergeConflictDuplicate,
+      })
+      .from(s.studentCompletedCompetency)
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            studentCurriculumId,
+          ),
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            curriculumCompetency1Id,
+          ),
+          isNull(s.studentCompletedCompetency.deletedAt),
+        ),
+      );
+
+    assert.equal(completedCompetencies.length, 2);
+    assert.equal(
+      completedCompetencies.filter((row) => row.isMergeConflictDuplicate)
+        .length,
+      1,
+    );
+  }));
+
+test("user.person.mergePersons keeps a canonical completion when target only has merge-conflict duplicate rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-canonical-location",
+      name: "Merge Canonical Location",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("merge-canonical");
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "Canonical",
+        lastName: "Target",
+      }),
+      User.Person.getOrCreate({
+        firstName: "Canonical",
+        lastName: "Source",
+      }),
+    ]);
+
+    const [
+      { id: targetStudentCurriculumId },
+      { id: sourceStudentCurriculumId },
+    ] = await Promise.all([
+      Student.Curriculum.start({
+        personId: targetPersonId,
+        curriculumId,
+        gearTypeId,
+      }),
+      Student.Curriculum.start({
+        personId: sourcePersonId,
+        curriculumId,
+        gearTypeId,
+      }),
+    ]);
+
+    const { id: targetCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId: targetStudentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: targetCertificateId,
+      studentCurriculumId: targetStudentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    await query
+      .update(s.studentCompletedCompetency)
+      .set({ isMergeConflictDuplicate: true })
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            targetStudentCurriculumId,
+          ),
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            curriculumCompetency1Id,
+          ),
+        ),
+      );
+
+    const { id: sourceCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId: sourceStudentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: sourceCertificateId,
+      studentCurriculumId: sourceStudentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    const canonicalRows = await query
+      .select({
+        isMergeConflictDuplicate:
+          s.studentCompletedCompetency.isMergeConflictDuplicate,
+      })
+      .from(s.studentCompletedCompetency)
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            targetStudentCurriculumId,
+          ),
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            curriculumCompetency1Id,
+          ),
+          isNull(s.studentCompletedCompetency.deletedAt),
+        ),
+      );
+
+    assert.equal(canonicalRows.length, 2);
+    assert.equal(
+      canonicalRows.filter((row) => !row.isMergeConflictDuplicate).length,
+      1,
+    );
+  }));
+
+test("user.person.mergePersons preserves overlapping certificates and resolves cohort allocation collisions", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-location",
+      name: "Merge Location",
+    });
+
+    const {
+      curriculumId,
+      gearTypeId,
+      curriculumCompetency1Id,
+      curriculumCompetency2Id,
+    } = await createCurriculumFixture("merge-conflict");
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "Target",
+        lastName: "Person",
+      }),
+      User.Person.getOrCreate({
+        firstName: "Source",
+        lastName: "Person",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    const [{ id: targetActorId }, { id: sourceActorId }] = await Promise.all([
+      User.Actor.upsert({
+        personId: targetPersonId,
+        locationId: location.id,
+        type: "student",
+      }),
+      User.Actor.upsert({
+        personId: sourcePersonId,
+        locationId: location.id,
+        type: "student",
+      }),
+    ]);
+
+    const [
+      { id: targetStudentCurriculumId },
+      { id: sourceStudentCurriculumId },
+    ] = await Promise.all([
+      Student.Curriculum.start({
+        personId: targetPersonId,
+        curriculumId,
+        gearTypeId,
+      }),
+      Student.Curriculum.start({
+        personId: sourcePersonId,
+        curriculumId,
+        gearTypeId,
+      }),
+    ]);
+
+    const { id: cohortId } = await Cohort.create({
+      handle: "merge-cohort",
+      label: "Merge Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(1, "day").toISOString(),
+    });
+
+    const [{ id: targetAllocationId }, { id: sourceAllocationId }] =
+      await Promise.all([
+        Cohort.Allocation.create({
+          actorId: targetActorId,
+          cohortId,
+          studentCurriculumId: targetStudentCurriculumId,
+          tags: [],
+        }),
+        Cohort.Allocation.create({
+          actorId: sourceActorId,
+          cohortId,
+          studentCurriculumId: sourceStudentCurriculumId,
+          tags: [],
+        }),
+      ]);
+
+    const { id: targetCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId: targetStudentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: targetCertificateId,
+      studentCurriculumId: targetStudentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+
+    await Student.Certificate.completeCertificate({
+      certificateId: targetCertificateId,
+      visibleFrom: dayjs().toISOString(),
+    });
+
+    await Certificate.assignToCohortAllocation({
+      certificateId: targetCertificateId,
+      cohortAllocationId: targetAllocationId,
+    });
+
+    const { id: sourceCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId: sourceStudentCurriculumId,
+      });
+
+    await Student.Certificate.completeCompetency({
+      certificateId: sourceCertificateId,
+      studentCurriculumId: sourceStudentCurriculumId,
+      competencyId: [curriculumCompetency1Id, curriculumCompetency2Id],
+    });
+
+    await Student.Certificate.completeCertificate({
+      certificateId: sourceCertificateId,
+      visibleFrom: dayjs().toISOString(),
+    });
+
+    await Certificate.assignToCohortAllocation({
+      certificateId: sourceCertificateId,
+      cohortAllocationId: sourceAllocationId,
+    });
+
+    await Promise.all([
+      Cohort.StudentProgress.upsertProgress({
+        cohortAllocationId: targetAllocationId,
+        competencyProgress: [
+          {
+            competencyId: curriculumCompetency1Id,
+            progress: 100,
+          },
+        ],
+        createdBy: targetPersonId,
+      }),
+      Cohort.StudentProgress.upsertProgress({
+        cohortAllocationId: sourceAllocationId,
+        competencyProgress: [
+          {
+            competencyId: curriculumCompetency1Id,
+            progress: 100,
+          },
+          {
+            competencyId: curriculumCompetency2Id,
+            progress: 100,
+          },
+        ],
+        createdBy: sourcePersonId,
+      }),
+    ]);
+
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    const canonicalCurricula = await query
+      .select({
+        id: s.studentCurriculum.id,
+      })
+      .from(s.studentCurriculum)
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, targetPersonId),
+          eq(s.studentCurriculum.curriculumId, curriculumId),
+          eq(s.studentCurriculum.gearTypeId, gearTypeId),
+        ),
+      );
+
+    assert.equal(canonicalCurricula.length, 1);
+    const canonicalStudentCurriculumId = canonicalCurricula[0]?.id;
+    assert.ok(canonicalStudentCurriculumId);
+
+    const certificatesAfterMerge = await query
+      .select({
+        id: s.certificate.id,
+        studentCurriculumId: s.certificate.studentCurriculumId,
+        cohortAllocationId: s.certificate.cohortAllocationId,
+      })
+      .from(s.certificate)
+      .where(
+        inArray(s.certificate.id, [targetCertificateId, sourceCertificateId]),
+      );
+
+    assert.equal(certificatesAfterMerge.length, 2);
+    for (const certificate of certificatesAfterMerge) {
+      assert.equal(
+        certificate.studentCurriculumId,
+        canonicalStudentCurriculumId,
+      );
+    }
+
+    const completedCompetencies = await query
+      .select({
+        competencyId: s.studentCompletedCompetency.competencyId,
+        certificateId: s.studentCompletedCompetency.certificateId,
+        isMergeConflictDuplicate:
+          s.studentCompletedCompetency.isMergeConflictDuplicate,
+      })
+      .from(s.studentCompletedCompetency)
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            canonicalStudentCurriculumId,
+          ),
+          isNull(s.studentCompletedCompetency.deletedAt),
+        ),
+      );
+
+    const competency1Rows = completedCompetencies.filter(
+      (row) => row.competencyId === curriculumCompetency1Id,
+    );
+    assert.equal(competency1Rows.length, 2);
+    assert.equal(
+      competency1Rows.filter((row) => row.isMergeConflictDuplicate).length,
+      1,
+    );
+
+    const competency2Rows = completedCompetencies.filter(
+      (row) => row.competencyId === curriculumCompetency2Id,
+    );
+    assert.equal(competency2Rows.length, 1);
+    assert.equal(competency2Rows[0]?.isMergeConflictDuplicate, false);
+
+    const activeAllocations = await query
+      .select({
+        id: s.cohortAllocation.id,
+      })
+      .from(s.cohortAllocation)
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.cohortAllocation.actorId, targetActorId),
+          eq(
+            s.cohortAllocation.studentCurriculumId,
+            canonicalStudentCurriculumId,
+          ),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      );
+
+    assert.equal(activeAllocations.length, 1);
+    const activeAllocationId = activeAllocations[0]?.id;
+    assert.ok(activeAllocationId);
+
+    const linkedCertificates = certificatesAfterMerge.filter(
+      (certificate) => certificate.cohortAllocationId === activeAllocationId,
+    );
+    const unlinkedCertificates = certificatesAfterMerge.filter(
+      (certificate) => certificate.cohortAllocationId === null,
+    );
+
+    assert.equal(linkedCertificates.length, 1);
+    assert.equal(unlinkedCertificates.length, 1);
+
+    const mergedProgressRows = await query
+      .select({
+        competencyId: s.studentCohortProgress.competencyId,
+        createdBy: s.studentCohortProgress.createdBy,
+      })
+      .from(s.studentCohortProgress)
+      .where(
+        eq(s.studentCohortProgress.cohortAllocationId, activeAllocationId),
+      );
+
+    assert.equal(mergedProgressRows.length, 2);
+    const competencyIds = mergedProgressRows.map((row) => row.competencyId);
+    assert.equal(
+      competencyIds.filter((id) => id === curriculumCompetency1Id).length,
+      1,
+    );
+    assert.equal(
+      competencyIds.filter((id) => id === curriculumCompetency2Id).length,
+      1,
+    );
+    assert.deepEqual(
+      Array.from(new Set(mergedProgressRows.map((row) => row.createdBy))),
+      [targetPersonId],
+    );
+
+    const sourcePersonRows = await query
+      .select({
+        id: s.person.id,
+      })
+      .from(s.person)
+      .where(eq(s.person.id, sourcePersonId));
+
+    assert.equal(sourcePersonRows.length, 0);
+  }));
+
+// REGRESSION (Bugbot review on PR #461): merge must NOT treat a soft-
+// deleted target curriculum as a conflict against a live source
+// curriculum. Before the fix, the queries didn't filter deleted_at,
+// so the merge would move source's certificates onto the deleted
+// target curriculum and delete the source — burying live data behind
+// a soft-deleted parent.
+test("user.person.mergePersons skips soft-deleted target curriculum and migrates source as live", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-deleted-target-location",
+      name: "Merge Deleted Target Location",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("merge-deleted-target");
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "DeletedTarget",
+        lastName: "Person",
+      }),
+      User.Person.getOrCreate({
+        firstName: "LiveSource",
+        lastName: "Person",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // Target had a curriculum at (curriculumId, gearTypeId) but it was
+    // soft-deleted (e.g. an old failed attempt). Source has a LIVE
+    // curriculum at the same identity.
+    const { id: targetStudentCurriculumId } = await Student.Curriculum.start({
+      personId: targetPersonId,
+      curriculumId,
+      gearTypeId,
+    });
+    await query
+      .update(s.studentCurriculum)
+      .set({ deletedAt: dayjs().subtract(30, "day").toISOString() })
+      .where(eq(s.studentCurriculum.id, targetStudentCurriculumId));
+
+    const { id: sourceStudentCurriculumId } = await Student.Curriculum.start({
+      personId: sourcePersonId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    // Issue a certificate against the SOURCE's live curriculum.
+    const { id: sourceCertificateId } =
+      await Student.Certificate.startCertificate({
+        locationId: location.id,
+        studentCurriculumId: sourceStudentCurriculumId,
+      });
+    await Student.Certificate.completeCompetency({
+      certificateId: sourceCertificateId,
+      studentCurriculumId: sourceStudentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: sourceCertificateId,
+      visibleFrom: dayjs().toISOString(),
+    });
+
+    // Merge source into target.
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    // Source's curriculum should now belong to target — and be LIVE
+    // (not buried under the soft-deleted target curriculum).
+    const liveCurriculaForTarget = await query
+      .select({
+        id: s.studentCurriculum.id,
+      })
+      .from(s.studentCurriculum)
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, targetPersonId),
+          eq(s.studentCurriculum.curriculumId, curriculumId),
+          eq(s.studentCurriculum.gearTypeId, gearTypeId),
+          isNull(s.studentCurriculum.deletedAt),
+        ),
+      );
+    assert.equal(
+      liveCurriculaForTarget.length,
+      1,
+      `Expected exactly 1 live curriculum on target after merge, got ${liveCurriculaForTarget.length}`,
+    );
+    assert.equal(
+      liveCurriculaForTarget[0]?.id,
+      sourceStudentCurriculumId,
+      "Live curriculum on target should be the migrated source — not the previously-deleted target curriculum",
+    );
+
+    // The source's certificate should still be reachable through the
+    // live curriculum.
+    const reachableCertificates = await query
+      .select({ id: s.certificate.id })
+      .from(s.certificate)
+      .where(
+        and(
+          eq(s.certificate.studentCurriculumId, sourceStudentCurriculumId),
+          isNull(s.certificate.deletedAt),
+        ),
+      );
+    assert.equal(reachableCertificates.length, 1);
+    assert.equal(reachableCertificates[0]?.id, sourceCertificateId);
+
+    // The originally-deleted target curriculum should still exist as
+    // soft-deleted — we don't resurrect or hard-delete it; it just
+    // doesn't participate in the merge.
+    const deletedTargetCurriculum = await query
+      .select({
+        id: s.studentCurriculum.id,
+        deletedAt: s.studentCurriculum.deletedAt,
+      })
+      .from(s.studentCurriculum)
+      .where(eq(s.studentCurriculum.id, targetStudentCurriculumId));
+    assert.equal(deletedTargetCurriculum.length, 1);
+    assert.ok(
+      deletedTargetCurriculum[0]?.deletedAt,
+      "Deleted target curriculum should remain soft-deleted, untouched by the merge",
+    );
+  }));
+
+// REGRESSION (Bugbot review on PR #461 — round 2): merge must also
+// migrate SOFT-DELETED source curricula. The previous round added
+// isNull(deletedAt) on both source/target queries, but that caused
+// soft-deleted source curricula to be skipped entirely. They still
+// reference source.person_id via student_curriculum_link_person_id_fk,
+// so the end-of-merge tx.delete(s.person) tripped a FK violation and
+// rolled the whole merge back.
+test("user.person.mergePersons migrates soft-deleted source curriculum so end-of-merge person delete succeeds", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-deleted-source-location",
+      name: "Merge Deleted Source Location",
+    });
+
+    const { curriculumId, gearTypeId } = await createCurriculumFixture(
+      "merge-deleted-source",
+    );
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "DeletedSource",
+        lastName: "Target",
+      }),
+      User.Person.getOrCreate({
+        firstName: "DeletedSource",
+        lastName: "Source",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // Source had a curriculum. It was soft-deleted at some point (e.g.
+    // the operator dropped the enrollment, or it was migrated through
+    // an earlier merge). Target has no curriculum.
+    const { id: sourceStudentCurriculumId } = await Student.Curriculum.start({
+      personId: sourcePersonId,
+      curriculumId,
+      gearTypeId,
+    });
+    await query
+      .update(s.studentCurriculum)
+      .set({ deletedAt: dayjs().subtract(60, "day").toISOString() })
+      .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId));
+
+    // Merge must complete without FK violation.
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    // The deleted curriculum should now belong to target (still soft-
+    // deleted — we didn't resurrect it, just changed its ownership).
+    const movedCurriculum = await query
+      .select({
+        personId: s.studentCurriculum.personId,
+        deletedAt: s.studentCurriculum.deletedAt,
+      })
+      .from(s.studentCurriculum)
+      .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId))
+      .then((rows) => rows[0]);
+    assert.ok(movedCurriculum, "Source curriculum should still exist");
+    assert.equal(
+      movedCurriculum.personId,
+      targetPersonId,
+      "Soft-deleted source curriculum should now reference target person",
+    );
+    assert.ok(
+      movedCurriculum.deletedAt,
+      "Soft-deleted curriculum should remain soft-deleted after migration",
+    );
+
+    // Source person should be hard-deleted.
+    const sourcePersonRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, sourcePersonId));
+    assert.equal(sourcePersonRows.length, 0, "Source person must be deleted");
+  }));
+
+// REGRESSION combined: source has a soft-deleted curriculum, target
+// has a LIVE curriculum at the same identity. Source-deleted shouldn't
+// conflict with target-live (partial unique index = live-only). The
+// soft-deleted source must still migrate via personId update.
+test("user.person.mergePersons handles deleted source + live target at same identity", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-deleted-source-live-target-loc",
+      name: "Merge Deleted Source vs Live Target Location",
+    });
+
+    const { curriculumId, gearTypeId } = await createCurriculumFixture(
+      "merge-deleted-source-live-target",
+    );
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "DSLT",
+        lastName: "Target",
+      }),
+      User.Person.getOrCreate({
+        firstName: "DSLT",
+        lastName: "Source",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // Source has a soft-deleted curriculum.
+    const { id: sourceStudentCurriculumId } = await Student.Curriculum.start({
+      personId: sourcePersonId,
+      curriculumId,
+      gearTypeId,
+    });
+    await query
+      .update(s.studentCurriculum)
+      .set({ deletedAt: dayjs().subtract(30, "day").toISOString() })
+      .where(eq(s.studentCurriculum.id, sourceStudentCurriculumId));
+
+    // Target has a LIVE curriculum at the same identity.
+    const { id: targetStudentCurriculumId } = await Student.Curriculum.start({
+      personId: targetPersonId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    // Both curricula should still exist on target — the live one
+    // canonical, the deleted one preserved for history.
+    const allCurricula = await query
+      .select({
+        id: s.studentCurriculum.id,
+        deletedAt: s.studentCurriculum.deletedAt,
+      })
+      .from(s.studentCurriculum)
+      .where(
+        and(
+          eq(s.studentCurriculum.personId, targetPersonId),
+          eq(s.studentCurriculum.curriculumId, curriculumId),
+          eq(s.studentCurriculum.gearTypeId, gearTypeId),
+        ),
+      );
+    assert.equal(
+      allCurricula.length,
+      2,
+      `Expected both curricula on target (live + deleted), got ${allCurricula.length}`,
+    );
+    const liveCount = allCurricula.filter((c) => c.deletedAt == null).length;
+    assert.equal(liveCount, 1, "Exactly one curriculum should be live");
+    const liveId = allCurricula.find((c) => c.deletedAt == null)?.id;
+    assert.equal(
+      liveId,
+      targetStudentCurriculumId,
+      "Live curriculum should be the original target curriculum",
+    );
+  }));
+
+// REGRESSION (Bugbot round 3 audit): mergePersons must repoint
+// counterparty actor references too. Source's actor.id can be used
+// as instructor on someone else's cohort_allocation (and as
+// `aangemaakt_door` on PVB tables, `toegevoegd_door` on
+// persoon_kwalificatie, etc.). Without repointing, the source-actor
+// delete tripped a FK violation and rolled the merge back.
+test("user.person.mergePersons repoints cohort_allocation.instructor_id when source actor was someone else's instructor", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-instructor-counterparty-loc",
+      name: "Merge Instructor Counterparty Location",
+    });
+
+    const { curriculumId, gearTypeId } = await createCurriculumFixture(
+      "merge-instructor-counterparty",
+    );
+
+    const [
+      { id: targetPersonId },
+      { id: sourcePersonId },
+      { id: studentPersonId },
+    ] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "InstructorMergeTarget",
+        lastName: "X",
+      }),
+      User.Person.getOrCreate({
+        firstName: "InstructorMergeSource",
+        lastName: "X",
+      }),
+      User.Person.getOrCreate({
+        firstName: "StudentForInstructorMerge",
+        lastName: "X",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: studentPersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // Source has an INSTRUCTOR actor in this location. Target has the
+    // same role pre-existing too (so the type+location-matched mapping
+    // resolves cleanly). Student has a STUDENT actor.
+    const [
+      { id: sourceInstructorActorId },
+      { id: targetInstructorActorId },
+      { id: studentActorId },
+    ] = await Promise.all([
+      User.Actor.upsert({
+        personId: sourcePersonId,
+        locationId: location.id,
+        type: "instructor",
+      }),
+      User.Actor.upsert({
+        personId: targetPersonId,
+        locationId: location.id,
+        type: "instructor",
+      }),
+      User.Actor.upsert({
+        personId: studentPersonId,
+        locationId: location.id,
+        type: "student",
+      }),
+    ]);
+
+    const { id: studentStudentCurriculumId } = await Student.Curriculum.start({
+      personId: studentPersonId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    const { id: cohortId } = await Cohort.create({
+      handle: "instructor-counterparty-cohort",
+      label: "Instructor Counterparty Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    const { id: studentAllocationId } = await Cohort.Allocation.create({
+      actorId: studentActorId,
+      cohortId,
+      studentCurriculumId: studentStudentCurriculumId,
+      tags: [],
+    });
+
+    // Set source's instructor actor as the student's instructor.
+    await query
+      .update(s.cohortAllocation)
+      .set({ instructorId: sourceInstructorActorId })
+      .where(eq(s.cohortAllocation.id, studentAllocationId));
+
+    // Merge source → target. Without the repoint fix, the
+    // tx.delete(s.actor) inside mergePersons would fail FK-violation
+    // on cohort_allocation.instructor_id.
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    // The student's allocation now has the instructor pointing at
+    // target's instructor actor (matched by type + locationId).
+    const finalAllocation = await query
+      .select({
+        instructorId: s.cohortAllocation.instructorId,
+      })
+      .from(s.cohortAllocation)
+      .where(eq(s.cohortAllocation.id, studentAllocationId))
+      .then((rows) => rows[0]);
+    assert.ok(finalAllocation, "Student allocation should still exist");
+    assert.equal(
+      finalAllocation.instructorId,
+      targetInstructorActorId,
+      "instructor_id should now reference target's instructor actor, not the deleted source one",
+    );
+
+    // Source person was hard-deleted.
+    const sourcePersonRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, sourcePersonId));
+    assert.equal(sourcePersonRows.length, 0);
+  }));
+
+// REGRESSION (Bugbot round 3 audit, person-side): mergePersons must
+// repoint person counterparty references in PVB tables. If source was
+// a beoordelaar / leercoach / kandidaat anywhere, the row still
+// references source.id and the end-of-merge person delete would FK-
+// violate.
+test("user.person.mergePersons repoints PVB counterparty refs when source was beoordelaar / leercoach / kandidaat", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "merge-pvb-counterparty-loc",
+      name: "Merge PVB Counterparty Location",
+    });
+
+    const [{ id: targetPersonId }, { id: sourcePersonId }] = await Promise.all([
+      User.Person.getOrCreate({
+        firstName: "PvbMergeTarget",
+        lastName: "X",
+      }),
+      User.Person.getOrCreate({
+        firstName: "PvbMergeSource",
+        lastName: "X",
+      }),
+    ]);
+
+    await Promise.all([
+      User.Person.createLocationLink({
+        personId: targetPersonId,
+        locationId: location.id,
+      }),
+      User.Person.createLocationLink({
+        personId: sourcePersonId,
+        locationId: location.id,
+      }),
+    ]);
+
+    // pvb_beoordelaar_beschikbaarheid only requires pvb_aanvraag +
+    // pvb_voorstel_datum + person (beoordelaar). We can shortcut by
+    // just inserting the minimum needed FK chain. Skip: out of scope
+    // for this regression — for the ALL-PVB-tables sweep, a fuller
+    // fixture in a future PR makes sense.
+    //
+    // For this test we exercise the simplest person-counterparty FK
+    // path that doesn't need full PVB scaffolding: directly INSERT
+    // the row needed to verify the UPDATE sweep.
+
+    // Simulate "source was the leercoach on someone else's
+    // toestemming": insert a minimal pvb_aanvraag (kandidaat=target so
+    // the FK from `kandidaat_id` is valid), then a pvb_leercoach_
+    // toestemming with `leercoach_id=source`. After merge, leercoach_id
+    // must point at target.
+    const otherPersonId = (
+      await User.Person.getOrCreate({
+        firstName: "PvbKandidaat",
+        lastName: "X",
+      })
+    ).id;
+    await User.Person.createLocationLink({
+      personId: otherPersonId,
+      locationId: location.id,
+    });
+    const otherActorId = (
+      await User.Actor.upsert({
+        personId: otherPersonId,
+        locationId: location.id,
+        type: "student",
+      })
+    ).id;
+
+    // Step 1: minimal pvb_aanvraag with otherPerson as kandidaat. The
+    // table's actual columns are id/handle/kandidaatId/locatieId/type/
+    // opmerkingen — no kerntaakId or leercoachId here (those concerns
+    // live on pvbLeercoachToestemming and the per-onderdeel rows).
+    const pvbAanvraagInsert = await query
+      .insert(s.pvbAanvraag)
+      .values({
+        handle: `pvb-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        kandidaatId: otherPersonId,
+        locatieId: location.id,
+        type: "intern",
+        opmerkingen: null,
+      })
+      .returning({ id: s.pvbAanvraag.id });
+    const pvbAanvraagId = pvbAanvraagInsert[0]?.id;
+    assert.ok(pvbAanvraagId, "Should have created the pvb_aanvraag");
+
+    // Step 2: leercoach_toestemming pointing at the source person as
+    // leercoach. After merge, leercoach_id must repoint to target.
+    const toestemmingInsert = await query
+      .insert(s.pvbLeercoachToestemming)
+      .values({
+        pvbAanvraagId,
+        leercoachId: sourcePersonId,
+        status: "gevraagd",
+        aangemaaktDoor: otherActorId,
+      })
+      .returning({ id: s.pvbLeercoachToestemming.id });
+    const toestemmingId = toestemmingInsert[0]?.id;
+    assert.ok(toestemmingId, "Should have created the toestemming row");
+
+    await User.Person.mergePersons({
+      personId: sourcePersonId,
+      targetPersonId,
+    });
+
+    const updated = await query
+      .select({
+        leercoachId: s.pvbLeercoachToestemming.leercoachId,
+      })
+      .from(s.pvbLeercoachToestemming)
+      .where(eq(s.pvbLeercoachToestemming.id, toestemmingId))
+      .then((rows) => rows[0]);
+    assert.ok(updated, "Toestemming row should still exist");
+    assert.equal(
+      updated.leercoachId,
+      targetPersonId,
+      "leercoach_id should now reference target person, not the deleted source",
+    );
+
+    const aanvraag = await query
+      .select({ kandidaatId: s.pvbAanvraag.kandidaatId })
+      .from(s.pvbAanvraag)
+      .where(eq(s.pvbAanvraag.id, pvbAanvraagId))
+      .then((rows) => rows[0]);
+    assert.equal(
+      aanvraag?.kandidaatId,
+      otherPersonId,
+      "kandidaat_id should be untouched (third-party person)",
+    );
+
+    const sourcePersonRows = await query
+      .select({ id: s.person.id })
+      .from(s.person)
+      .where(eq(s.person.id, sourcePersonId));
+    assert.equal(sourcePersonRows.length, 0, "Source person must be deleted");
+  }));
+
+// REGRESSION (Bugbot review on PR #461): the canonical-certificate
+// ranking in withModulesRanked must NOT pick a merge-conflict
+// duplicate row even when its certificate was issued earlier than the
+// canonical one. ROW_NUMBER orders by certificate.issuedAt ASC; if the
+// duplicate isn't filtered out, an old historical record could outrank
+// the canonical one and become the displayed certificate.
+test("student.curriculum.listProgressByPersonId picks canonical (non-merge-duplicate) certificate even when duplicate was issued earlier", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "modules-rank-canon-location",
+      name: "Modules Rank Canonical Location",
+    });
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Canonical",
+      lastName: "Pick",
+    });
+    await User.Person.createLocationLink({ personId, locationId: location.id });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("modules-rank-canon");
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    // Older certificate — represents a pre-merge record. Its completion
+    // row will be marked isMergeConflictDuplicate=true to simulate the
+    // post-merge state.
+    const { id: olderCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: olderCertId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: olderCertId,
+      visibleFrom: dayjs().subtract(1, "year").toISOString(),
+    });
+    // Backdate the issuedAt so the older cert sorts first under ASC.
+    await query
+      .update(s.certificate)
+      .set({ issuedAt: dayjs().subtract(1, "year").toISOString() })
+      .where(eq(s.certificate.id, olderCertId));
+    // Mark the older completion row as the merge-conflict duplicate.
+    await query
+      .update(s.studentCompletedCompetency)
+      .set({ isMergeConflictDuplicate: true })
+      .where(
+        and(
+          eq(
+            s.studentCompletedCompetency.studentCurriculumId,
+            studentCurriculumId,
+          ),
+          eq(
+            s.studentCompletedCompetency.competencyId,
+            curriculumCompetency1Id,
+          ),
+          eq(s.studentCompletedCompetency.certificateId, olderCertId),
+        ),
+      );
+
+    // Newer certificate — the canonical post-merge record.
+    const { id: newerCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: newerCertId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: newerCertId,
+      visibleFrom: dayjs().toISOString(),
+    });
+
+    const progress = await Student.Curriculum.listProgressByPersonId({
+      personId,
+    });
+
+    // Expect exactly one studentCurriculum entry for our person.
+    const personEntry = progress.find((row) => row.personId === personId);
+    assert.ok(personEntry, "Expected a progress entry for the test person");
+    assert.equal(
+      personEntry.modules.length,
+      1,
+      `Expected one module to surface, got ${personEntry.modules.length}`,
+    );
+    assert.equal(
+      personEntry.modules[0]?.certificateId,
+      newerCertId,
+      "Module should reference the canonical (newer) certificate, not the merge-conflict duplicate (older one)",
+    );
+  }));
+
+// REGRESSION (option d, post-merge issuance): the diplomas-tab module
+// status must expose `newlyIssuable` so the UI can distinguish modules
+// where the cohort run would mint a fresh diploma from modules that
+// are already fully canonical via an earlier certificate. Without this
+// the operator sees a "klaar voor uitgifte" row that, on click, would
+// silently produce a partial diploma — which is the exact silent-
+// corruption scenario we want to surface as `geblokkeerd` instead.
+test("cohort.certificate.listStatus exposes newlyIssuable per module (canonical vs new)", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "newly-issuable-loc",
+      name: "Newly Issuable Test Location",
+    });
+
+    const fixture = await createCurriculumFixture("newly-issuable");
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "NewlyIssuable",
+      lastName: "Student",
+    });
+    await User.Person.createLocationLink({
+      personId,
+      locationId: location.id,
+    });
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId: fixture.curriculumId,
+      gearTypeId: fixture.gearTypeId,
+    });
+
+    // Issue an earlier cert that covers competency 1 only — module 1
+    // becomes fully canonical, module 2 is still untouched.
+    const { id: earlierCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: earlierCertId,
+      studentCurriculumId,
+      competencyId: fixture.curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: earlierCertId,
+      visibleFrom: dayjs().subtract(1, "day").toISOString(),
+    });
+
+    // Now spin up a cohort with the same student. Cohort progress hits
+    // BOTH competencies (instructor re-ticks comp1 too) so both modules
+    // satisfy the cohort-side completion criterion. The newlyIssuable
+    // flag is what tells them apart.
+    const { id: cohortId } = await Cohort.create({
+      label: "Issuable Cohort",
+      handle: "issuable-cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    const { id: studentActorId } = await User.Actor.upsert({
+      personId,
+      locationId: location.id,
+      type: "student",
+    });
+
+    await Cohort.Allocation.create({
+      cohortId,
+      actorId: studentActorId,
+      studentCurriculumId,
+    });
+
+    const { id: instructorPersonId } = await User.Person.getOrCreate({
+      firstName: "Issuable",
+      lastName: "Instructor",
+    });
+    await User.Person.createLocationLink({
+      personId: instructorPersonId,
+      locationId: location.id,
+    });
+
+    // Find the allocation we just created so we can post progress.
+    const status = await Cohort.Certificate.listStatus({ cohortId });
+    const studentRow = status.find((row) => row.person.id === personId);
+    assert.ok(studentRow, "Expected the student to appear in cohort status");
+
+    await Cohort.StudentProgress.upsertProgress({
+      cohortAllocationId: studentRow.id,
+      competencyProgress: [
+        { competencyId: fixture.curriculumCompetency1Id, progress: 100 },
+        { competencyId: fixture.curriculumCompetency2Id, progress: 100 },
+      ],
+      createdBy: instructorPersonId,
+    });
+
+    const finalStatus = await Cohort.Certificate.listStatus({ cohortId });
+    const finalStudent = finalStatus.find((row) => row.person.id === personId);
+    assert.ok(finalStudent?.studentCurriculum);
+    const moduleStatuses = finalStudent.studentCurriculum.moduleStatus;
+
+    const module1 = moduleStatuses.find(
+      (m) => m.module.id === fixture.module1Id,
+    );
+    const module2 = moduleStatuses.find(
+      (m) => m.module.id === fixture.module2Id,
+    );
+    assert.ok(module1, "Module 1 should appear in the status");
+    assert.ok(module2, "Module 2 should appear in the status");
+
+    // Module 1: comp1 is already canonical. Cohort progress is 100 but
+    // there is nothing NEW to issue here. newlyIssuable must be false.
+    assert.equal(
+      module1.newlyIssuable,
+      false,
+      "Module 1 is fully canonical from earlier cert — issuance would mint nothing new",
+    );
+
+    // Module 2: comp2 is at 100 in this cohort and has no canonical
+    // record yet. This is the only module the cohort run can produce a
+    // fresh diploma for.
+    assert.equal(
+      module2.newlyIssuable,
+      true,
+      "Module 2 has a fresh competency at 100 with no canonical row — newly issuable",
+    );
+  }));
+
+// REGRESSION (option d, fully-redundant cohort run): when every
+// competency the cohort would issue is already canonical, every
+// module's newlyIssuable is false. This is the `geblokkeerd` row state
+// the diplomas tab needs to render as "kan geen diploma uitreiken — al
+// eerder behaald."
+test("cohort.certificate.listStatus newlyIssuable=false for all modules when fully redundant", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "fully-redundant-loc",
+      name: "Fully Redundant Cohort Location",
+    });
+
+    const fixture = await createCurriculumFixture("fully-redundant");
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "FullyRedundant",
+      lastName: "Student",
+    });
+    await User.Person.createLocationLink({
+      personId,
+      locationId: location.id,
+    });
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId: fixture.curriculumId,
+      gearTypeId: fixture.gearTypeId,
+    });
+
+    // Earlier cert covers BOTH competencies — the curriculum is fully
+    // canonical. Any subsequent cohort run on the same curriculum has
+    // nothing new to issue.
+    const { id: earlierCertId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId: earlierCertId,
+      studentCurriculumId,
+      competencyId: [
+        fixture.curriculumCompetency1Id,
+        fixture.curriculumCompetency2Id,
+      ],
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId: earlierCertId,
+      visibleFrom: dayjs().subtract(1, "day").toISOString(),
+    });
+
+    const { id: cohortId } = await Cohort.create({
+      label: "Redundant Cohort",
+      handle: "redundant-cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    const { id: studentActorId } = await User.Actor.upsert({
+      personId,
+      locationId: location.id,
+      type: "student",
+    });
+    await Cohort.Allocation.create({
+      cohortId,
+      actorId: studentActorId,
+      studentCurriculumId,
+    });
+
+    const { id: instructorPersonId } = await User.Person.getOrCreate({
+      firstName: "Redundant",
+      lastName: "Instructor",
+    });
+    await User.Person.createLocationLink({
+      personId: instructorPersonId,
+      locationId: location.id,
+    });
+
+    const initial = await Cohort.Certificate.listStatus({ cohortId });
+    const studentRow = initial.find((row) => row.person.id === personId);
+    assert.ok(studentRow);
+
+    await Cohort.StudentProgress.upsertProgress({
+      cohortAllocationId: studentRow.id,
+      competencyProgress: [
+        { competencyId: fixture.curriculumCompetency1Id, progress: 100 },
+        { competencyId: fixture.curriculumCompetency2Id, progress: 100 },
+      ],
+      createdBy: instructorPersonId,
+    });
+
+    const finalStatus = await Cohort.Certificate.listStatus({ cohortId });
+    const finalStudent = finalStatus.find((row) => row.person.id === personId);
+    assert.ok(finalStudent?.studentCurriculum);
+    for (const module of finalStudent.studentCurriculum.moduleStatus) {
+      assert.equal(
+        module.newlyIssuable,
+        false,
+        `Module ${module.module.id} should be fully redundant — every comp already canonical`,
+      );
+    }
+  }));
+
+// REGRESSION (Bugbot review on PR #461 — round 4): listCompletedCompetenciesById
+// must filter `isMergeConflictDuplicate = true`. Without the filter, a flagged
+// historical row from a merge gets returned as if it were canonical, which
+// poisons consumers that ask "what has this student already proven?" — most
+// notably the cohort issuance pre-filter, which would silently drop a competency
+// from the new certificate (or surface a spurious "geen nieuwe competenties"
+// error) even though no canonical row exists.
+test("student.curriculum.listCompletedCompetenciesById excludes merge-conflict duplicate rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+
+    const location = await Location.create({
+      handle: "list-completed-merge-dup-loc",
+      name: "List Completed Merge Dup Location",
+    });
+
+    const { curriculumId, gearTypeId, curriculumCompetency1Id } =
+      await createCurriculumFixture("list-completed-merge-dup");
+
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "ListCompleted",
+      lastName: "MergeDup",
+    });
+    await User.Person.createLocationLink({
+      personId,
+      locationId: location.id,
+    });
+
+    const { id: studentCurriculumId } = await Student.Curriculum.start({
+      personId,
+      curriculumId,
+      gearTypeId,
+    });
+
+    // Issue a canonical cert covering competency 1.
+    const { id: certificateId } = await Student.Certificate.startCertificate({
+      locationId: location.id,
+      studentCurriculumId,
+    });
+    await Student.Certificate.completeCompetency({
+      certificateId,
+      studentCurriculumId,
+      competencyId: curriculumCompetency1Id,
+    });
+    await Student.Certificate.completeCertificate({
+      certificateId,
+      visibleFrom: dayjs().subtract(1, "day").toISOString(),
+    });
+
+    // Sanity check: canonical row is returned.
+    const before = await Student.Curriculum.listCompletedCompetenciesById({
+      id: studentCurriculumId,
+    });
+    assert.equal(
+      before.length,
+      1,
+      "Canonical row should be returned before flagging",
+    );
+
+    // Flag the row as a merge-conflict duplicate, simulating the
+    // post-merge state where source's competency landed on target's
+    // curriculum but was flagged because target already had Z.
+    await query
+      .update(s.studentCompletedCompetency)
+      .set({ isMergeConflictDuplicate: true })
+      .where(
+        eq(
+          s.studentCompletedCompetency.studentCurriculumId,
+          studentCurriculumId,
+        ),
+      );
+
+    const after = await Student.Curriculum.listCompletedCompetenciesById({
+      id: studentCurriculumId,
+    });
+    assert.equal(
+      after.length,
+      0,
+      "Flagged merge-conflict duplicate row must NOT be returned — it is not canonical",
+    );
+  }));

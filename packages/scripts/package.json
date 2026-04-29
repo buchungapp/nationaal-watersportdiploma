@@ -10,7 +10,9 @@
     "dev": "tsc --watch",
     "watch": "tsc --watch",
     "clean": "rm -rf out && tsc --build --clean",
-    "test": "node --test ./out/**/*.test.js"
+    "test": "node --test ./out/**/*.test.js",
+    "persons:duplicates:analyze": "tsx src/analyze-duplicate-persons.ts",
+    "persons:duplicates:merge": "tsx src/batch-merge-duplicates.ts"
   },
   "dependencies": {
     "@nawadi/core": "workspace:^",
