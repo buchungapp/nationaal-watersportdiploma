@@ -1530,3 +1530,5 @@ export const mergePersons = wrapCommand(
     },
   ),
 );
+
+export * as DuplicateScoring from "./_internal/duplicate-scoring.js";
