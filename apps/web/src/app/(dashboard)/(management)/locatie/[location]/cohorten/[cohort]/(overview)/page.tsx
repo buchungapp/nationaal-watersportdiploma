@@ -40,18 +40,32 @@ export default async function Page(props: {
       }),
   );
 
-  const [cohort, students, location, instructorAllocation, permissions] =
-    await Promise.all([
-      cohortPromise,
-      cohortPromise.then((cohort) =>
-        listStudentsWithCurriculaByCohortId(cohort.id),
-      ),
-      retrieveLocationByHandle(params.location),
-      cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
-      cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
-    ]);
+  const [
+    cohort,
+    students,
+    location,
+    instructorAllocation,
+    permissions,
+    locationRoles,
+  ] = await Promise.all([
+    cohortPromise,
+    cohortPromise.then((cohort) =>
+      listStudentsWithCurriculaByCohortId(cohort.id),
+    ),
+    retrieveLocationByHandle(params.location),
+    cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
+    cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
+    retrieveLocationByHandle(params.location).then((loc) =>
+      listRolesForLocation(loc.id),
+    ),
+  ]);
 
   const isCohortAdmin = permissions.length > 0;
+  // The duplicates banner reads location-wide pair data and only needs
+  // location_admin (not cohort-admin) to fetch — gate the banner on
+  // that, otherwise location admins lose visibility into cohorts they
+  // don't directly own.
+  const isLocationAdmin = locationRoles.includes("location_admin");
   const defaultView =
     !!instructorAllocation && !isCohortAdmin ? "geclaimd" : "allen";
 
@@ -126,7 +140,7 @@ export default async function Page(props: {
 
   return (
     <>
-      {isCohortAdmin ? (
+      {isLocationAdmin ? (
         <Suspense fallback={null}>
           <CohortDuplicatesBanner
             locationId={location.id}
@@ -146,8 +160,7 @@ export default async function Page(props: {
       studentsProgressPromise={studentProgress([
         ...new Set(searchedStudents.map((student) => student.person.id)),
       ])}
-      // TODO: this can be optimized
-      locationRoles={await listRolesForLocation(location.id)}
+      locationRoles={locationRoles}
       noOptionsLabel={
         parsedSq.query && parsedSq.query.length > 2 ? (
           "Geen resultaten gevonden"
