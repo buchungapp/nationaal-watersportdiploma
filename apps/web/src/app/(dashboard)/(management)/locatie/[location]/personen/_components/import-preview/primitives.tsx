@@ -71,7 +71,7 @@ export function RowFrame({
 }) {
   return (
     <article
-      aria-label={`Rij ${rowIndex}, status: ${STATUS_BADGE_LABELS[status]}`}
+      aria-label={`Rij ${rowIndex + 1}, status: ${STATUS_BADGE_LABELS[status]}`}
       className="rounded-lg border border-zinc-950/10 bg-white shadow-sm dark:border-white/10 dark:bg-zinc-900"
     >
       <header className="flex items-center justify-between gap-3 border-b border-zinc-950/5 px-4 py-3 dark:border-white/5">

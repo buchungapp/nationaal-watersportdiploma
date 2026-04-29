@@ -724,8 +724,20 @@ function guessColumn(
   }
   // 2. Bidirectional substring — handles "tussenvoegsel" vs "tussenvoegsels"
   //    and "geboortedatumlid" vs "geboortedatum" without mis-binding.
+  //    Length floor on the shorter side prevents short generic headers like
+  //    "naam" from matching "voornaam"/"achternaam" by accident — the loose
+  //    synonym list above already covers the standalone short cases.
+  const MIN_SUBSTRING_LEN = 6;
   for (const { target, syns } of COLUMN_NORMALIZED_SYNONYMS) {
-    if (syns.some((s) => h.includes(s) || s.includes(h))) return target;
+    if (
+      syns.some(
+        (s) =>
+          (h.includes(s) && s.length >= MIN_SUBSTRING_LEN) ||
+          (s.includes(h) && h.length >= MIN_SUBSTRING_LEN),
+      )
+    ) {
+      return target;
+    }
   }
   return null;
 }
