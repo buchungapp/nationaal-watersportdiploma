@@ -271,15 +271,8 @@
     {
       "idx": 38,
       "version": "7",
-      "when": 1777460691185,
-      "tag": "0038_pale_blacklash",
-      "breakpoints": false
-    },
-    {
-      "idx": 39,
-      "version": "7",
-      "when": 1777474000000,
-      "tag": "0039_drop_audit_source_person_fk",
+      "when": 1777483280903,
+      "tag": "0038_daily_next_avengers",
       "breakpoints": false
     }
   ]

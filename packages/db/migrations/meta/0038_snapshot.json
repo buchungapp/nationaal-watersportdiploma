@@ -1,6 +1,6 @@
 {
-  "id": "2f4a938d-83bb-4bb9-9731-5e1a6ed83898",
-  "prevId": "4aa7a36d-44a4-4304-a517-1f4465554e89",
+  "id": "6f42f525-5d17-430f-95a0-dfb417a8b364",
+  "prevId": "adb9e4d0-5f7f-4cd7-94ca-6d4af987d80e",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -732,19 +732,6 @@
           "tableTo": "location",
           "columnsFrom": [
             "location_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "person_merge_audit_source_person_id_fk": {
-          "name": "person_merge_audit_source_person_id_fk",
-          "tableFrom": "person_merge_audit",
-          "tableTo": "person",
-          "columnsFrom": [
-            "source_person_id"
           ],
           "columnsTo": [
             "id"
@@ -2008,6 +1995,7 @@
             }
           ],
           "isUnique": true,
+          "where": "\"student_curriculum\".\"deleted_at\" IS NULL",
           "concurrently": false,
           "method": "btree",
           "with": {}

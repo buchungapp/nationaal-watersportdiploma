@@ -35,7 +35,6 @@ ALTER TABLE "bulk_import_preview" ADD CONSTRAINT "bulk_import_preview_created_by
 ALTER TABLE "bulk_import_preview" ADD CONSTRAINT "bulk_import_preview_target_cohort_id_fk" FOREIGN KEY ("target_cohort_id") REFERENCES "public"."cohort"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "person_merge_audit" ADD CONSTRAINT "person_merge_audit_performed_by_person_id_fk" FOREIGN KEY ("performed_by_person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "person_merge_audit" ADD CONSTRAINT "person_merge_audit_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;
-ALTER TABLE "person_merge_audit" ADD CONSTRAINT "person_merge_audit_source_person_id_fk" FOREIGN KEY ("source_person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "person_merge_audit" ADD CONSTRAINT "person_merge_audit_target_person_id_fk" FOREIGN KEY ("target_person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;
 ALTER TABLE "person_merge_audit" ADD CONSTRAINT "person_merge_audit_bulk_import_preview_token_fk" FOREIGN KEY ("bulk_import_preview_token") REFERENCES "public"."bulk_import_preview"("token") ON DELETE no action ON UPDATE no action;
 CREATE INDEX "bulk_import_preview_expires_at_idx" ON "bulk_import_preview" USING btree ("expires_at") WHERE status = 'active';
