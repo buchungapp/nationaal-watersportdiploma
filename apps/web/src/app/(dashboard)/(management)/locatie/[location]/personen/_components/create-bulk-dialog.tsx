@@ -441,6 +441,7 @@ function SubmitForm({
       <BulkImportPreviewProvider
         initialPreview={previewModel}
         locationId={locationId}
+        targetCohortId={targetCohortId}
         roles={roles}
       >
         <DialogBody>
