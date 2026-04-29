@@ -286,6 +286,10 @@ export function buildDuplicatePersonQuery(args: {
           AND p1.birth_city_norm = p2.birth_city_norm AS same_birth_city,
         50 +
         CASE
+          WHEN p1.date_of_birth = p2.date_of_birth THEN 30
+          ELSE 0
+        END +
+        CASE
           WHEN p1.full_last_norm <> '' AND p1.full_last_norm = p2.full_last_norm THEN 60
           ELSE 50
         END +
@@ -563,8 +567,11 @@ function buildMatchReasons(row: DuplicatePersonRow): string[] {
 
 function buildRiskFlags(row: DuplicatePersonRow): string[] {
   const flags: string[] = [];
+  const hasDifferentLinkedUsers = Boolean(
+    row.user_id1 && row.user_id2 && row.user_id1 !== row.user_id2,
+  );
 
-  if (row.user_id1 && row.user_id2 && row.user_id1 !== row.user_id2) {
+  if (hasDifferentLinkedUsers) {
     flags.push("different linked users");
   }
 
@@ -576,7 +583,12 @@ function buildRiskFlags(row: DuplicatePersonRow): string[] {
     flags.push("missing birth date");
   }
 
-  if (row.email1 && row.email2 && row.email1 !== row.email2) {
+  if (
+    !hasDifferentLinkedUsers &&
+    row.email1 &&
+    row.email2 &&
+    row.email1 !== row.email2
+  ) {
     flags.push("different emails");
   }
 
