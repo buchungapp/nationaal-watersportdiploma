@@ -533,8 +533,18 @@ export const commitBulkImport = wrapCommand(
         };
       }
 
-      // No race — apply decisions inside a transaction.
-      const result = await withTransaction(async () => {
+      // No race — apply decisions inside a transaction. Using READ
+      // COMMITTED rather than the default SERIALIZABLE: the createPerson
+      // callback creates a Supabase auth.users row on a separate
+      // connection (via the admin API), and a SERIALIZABLE snapshot
+      // can't see that row when the subsequent public.user FK check
+      // runs — manifests as a "user_auth_user_id_fk" violation. Race-
+      // safety here is already covered by (a) the preview-token
+      // detection-snapshot check above and (b) DB unique constraints
+      // on person_location_link / cohort_allocation that prevent
+      // duplicate-link races at the DB level.
+      const result = await withTransaction(
+        async () => {
         const tx = useQuery();
         const createdPersonIds: string[] = [];
         const linkedPersonIds: string[] = [];
@@ -744,7 +754,9 @@ export const commitBulkImport = wrapCommand(
           createdPersonIds,
           linkedPersonIds,
         };
-      });
+      },
+      { isolationLevel: "read committed" },
+      );
 
       return result;
     },
