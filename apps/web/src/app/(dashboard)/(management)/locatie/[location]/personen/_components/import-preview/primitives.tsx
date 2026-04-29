@@ -288,9 +288,10 @@ function computeDiff(
       label: "Geboorteplaats",
       pasted: pasted.birthCity || "—",
       candidate: cand.birthCity || "—",
-      match:
-        norm(pasted.birthCity) === norm(cand.birthCity) &&
-        Boolean(pasted.birthCity || cand.birthCity),
+      // Two empty values are not a mismatch — they're "both unknown,"
+      // which the operator shouldn't see as a warning. Match when the
+      // normalized strings agree (covers both-empty and both-equal).
+      match: norm(pasted.birthCity) === norm(cand.birthCity),
     },
   ];
 }

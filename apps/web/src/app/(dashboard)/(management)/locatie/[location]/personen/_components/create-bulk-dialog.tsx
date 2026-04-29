@@ -304,7 +304,7 @@ function SubmitForm({
   const defaultMapping: Record<string, string> = {};
   data.labels?.forEach((item, index) => {
     defaultMapping[`include-column-${index}`] =
-      guessColumn(item?.label ?? "") ?? SELECT_LABEL;
+      guessColumn(item?.label ?? "", { enableTags }) ?? SELECT_LABEL;
   });
 
   const previewBound = previewBulkImportAction.bind(
@@ -703,9 +703,20 @@ const COLUMN_NORMALIZED_SYNONYMS: Array<{
     .filter(Boolean),
 }));
 
-function guessColumn(header: string): (typeof COLUMN_MAPPING)[number] | null {
+function guessColumn(
+  header: string,
+  options: { enableTags?: boolean } = {},
+): (typeof COLUMN_MAPPING_WITH_TAG)[number] | null {
   const h = normalizeHeader(header);
   if (!h) return null;
+  // 0. Cohort variant: any header that normalizes to start with "tag"
+  //    auto-maps to the Tag column. This preserves the legacy behaviour
+  //    where headers like "Tag Groep A", "Tag 1", "tags" all bound to
+  //    Tag without operator intervention. Keep this first so it doesn't
+  //    fight the substring rules below.
+  if (options.enableTags && h.startsWith("tag")) {
+    return "Tag";
+  }
   // 1. Exact synonym match.
   for (const { target, syns } of COLUMN_NORMALIZED_SYNONYMS) {
     if (syns.includes(h)) return target;

@@ -65,13 +65,19 @@ export function PreviewStep({
 
     // Rows in their priority bucket. Rows that are part of an UNRESOLVED
     // cross-row group are skipped (rendered via the group card instead).
+    // The release condition must match `classifyRow` in provider.ts: rows
+    // only leave the group once "different_people" is BOTH picked AND
+    // confirmed. Without the `confirmed` check, an unconfirmed draft (e.g.
+    // operator opened the override panel, picked profiles, then cancelled)
+    // makes PreviewStep render the rows individually while classifyRow
+    // still reports them as in-cross-row-group — causing visual duplication.
     const groupedRowIndices = new Set<number>();
     for (const g of preview.matches.crossRowGroups) {
       const groupKey = deriveGroupKey(g.rowIndices);
       const decision = ctx.state.groupDecisions.get(groupKey);
-      // Once "different_people" is picked, rows leave the group and render
-      // individually so the operator can configure each.
-      if (decision?.kind !== "different_people") {
+      const isConfirmedSplit =
+        decision?.kind === "different_people" && decision.confirmed;
+      if (!isConfirmedSplit) {
         for (const rowIndex of g.rowIndices) groupedRowIndices.add(rowIndex);
       }
     }
