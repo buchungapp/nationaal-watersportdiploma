@@ -39,7 +39,13 @@ async function Pairs({
     threshold: 100,
     limit: 200,
   });
-  return <DuplicatePairsList pairs={pairs} locationId={location.id} />;
+  return (
+    <DuplicatePairsList
+      pairs={pairs}
+      locationId={location.id}
+      scope="cohort"
+    />
+  );
 }
 
 export default async function Page(props: {

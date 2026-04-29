@@ -39,9 +39,16 @@ type Pair = {
 export function DuplicatePairsList({
   pairs,
   locationId,
+  scope = "location",
 }: {
   pairs: Pair[];
   locationId: string;
+  // The pair-finder accepts an optional cohortId filter. Empty-state
+  // copy needs to reflect what was actually searched, otherwise the
+  // operator on a cohort duplicaten page misreads it as "no duplicates
+  // in the whole location" when we only checked this cohort's
+  // members.
+  scope?: "location" | "cohort";
 }) {
   const [target, setTarget] = useState<{
     primaryId: string;
@@ -53,7 +60,9 @@ export function DuplicatePairsList({
       <div className="rounded-md border border-zinc-950/10 bg-zinc-50 p-8 text-center dark:border-white/10 dark:bg-zinc-900/50">
         <Strong>Geen mogelijke duplicaten gevonden — netjes!</Strong>
         <Text className="!text-sm !text-zinc-600 dark:!text-zinc-400">
-          Geen profielen in jouw locatie die op dezelfde persoon lijken.
+          {scope === "cohort"
+            ? "Geen profielen in dit cohort die op dezelfde persoon lijken."
+            : "Geen profielen in jouw locatie die op dezelfde persoon lijken."}
         </Text>
       </div>
     );
