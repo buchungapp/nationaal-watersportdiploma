@@ -20,6 +20,7 @@ const searchParamsParser = createLoader({
     parseAsStringLiteral([
       "uitgegeven",
       "klaar-voor-uitgifte",
+      "geblokkeerd",
       "geen-voortgang",
     ] as const),
   ),
@@ -59,20 +60,31 @@ export default async function Page(props: {
             throw new Error("Unexpected missing parsedSq.weergave");
           }
 
+          // Classification (option d):
+          //   uitgegeven       — diploma already issued for this allocation
+          //   klaar-voor-uitgifte — at least one module would mint new
+          //                       canonical content right now
+          //   geblokkeerd      — has cohort progress but every potentially-
+          //                       complete module is already canonical from
+          //                       an earlier cert (typically post-merge);
+          //                       issuance would produce nothing
+          //   geen-voortgang   — no progress, no cert
           const isIssued = !!student.certificate;
-          const isReady =
-            student.studentCurriculum?.moduleStatus.some(
-              (module) => module.uncompletedCompetencies < 1,
-            ) ?? false;
+          const moduleStatus = student.studentCurriculum?.moduleStatus ?? [];
+          const isReady = moduleStatus.some((module) => module.newlyIssuable);
+          const hasProgress = moduleStatus.some(
+            (module) => module.completedCompetencies > 0,
+          );
+          const isBlocked = !isIssued && !isReady && hasProgress;
+          const isNoProgress = !isIssued && !isReady && !hasProgress;
 
           return (
             (parsedSq.weergave.includes("uitgegeven") && isIssued) ||
             (parsedSq.weergave.includes("klaar-voor-uitgifte") &&
               !isIssued &&
               isReady) ||
-            (parsedSq.weergave.includes("geen-voortgang") &&
-              !isIssued &&
-              !isReady)
+            (parsedSq.weergave.includes("geblokkeerd") && isBlocked) ||
+            (parsedSq.weergave.includes("geen-voortgang") && isNoProgress)
           );
         })
       : students;

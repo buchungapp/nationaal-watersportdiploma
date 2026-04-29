@@ -59,6 +59,7 @@ import type { Student } from "./students-table";
 interface Props {
   rows: {
     id: string;
+    person: Student["person"];
     certificate: Student["certificate"];
     studentCurriculum: Student["studentCurriculum"];
   }[];
@@ -81,14 +82,16 @@ export function ActionButtons(props: Props) {
     return !!row.studentCurriculum;
   });
 
-  const allRowsHaveACurriculumWithAtLeastOneModule = props.rows.every((row) => {
+  // Bulk issue is meaningful when at least one selected row would
+  // actually mint a new diploma. A row that's "complete" only via
+  // earlier canonical certificates produces nothing — filtered out by
+  // issueCertificatesInCohort and surfaced as `geblokkeerd`. We allow
+  // the dropdown to open as long as at least ONE row has something
+  // issuable; the dialog itself runs the preflight breakdown and only
+  // submits issuable rows.
+  const someRowHasIssuableModule = props.rows.some((row) => {
     if (!row.studentCurriculum) return false;
-
-    const completedModules = row.studentCurriculum.moduleStatus.filter(
-      (status) => status.completedCompetencies === status.totalCompetencies,
-    ).length;
-
-    return completedModules > 0;
+    return row.studentCurriculum.moduleStatus.some((m) => m.newlyIssuable);
   });
 
   return (
@@ -97,18 +100,14 @@ export function ActionButtons(props: Props) {
         <DropdownItem
           onClick={() => setIsDialogOpen("issue")}
           disabled={
-            !(
-              noneRowsHaveIssuedCertificates &&
-              allRowsHaveACurriculumWithAtLeastOneModule
-            )
+            !(noneRowsHaveIssuedCertificates && someRowHasIssuableModule)
           }
           title={
-            !(
-              noneRowsHaveIssuedCertificates &&
-              allRowsHaveACurriculumWithAtLeastOneModule
-            )
-              ? "Niet alle cursisten hebben minimaal één module afgerond"
-              : undefined
+            !noneRowsHaveIssuedCertificates
+              ? "Eén of meer cursisten hebben al een uitgegeven diploma"
+              : !someRowHasIssuableModule
+                ? "Geen van de cursisten heeft een module die nu nog uitgereikt kan worden"
+                : undefined
           }
         >
           <DropdownLabel>Diploma's uitgeven</DropdownLabel>
@@ -191,6 +190,16 @@ function issueCertificatesInCohortErrorMessage(
   return null;
 }
 
+function fullName(person: {
+  firstName: string | null;
+  lastNamePrefix: string | null;
+  lastName: string | null;
+}): string {
+  return [person.firstName, person.lastNamePrefix, person.lastName]
+    .filter(Boolean)
+    .join(" ");
+}
+
 export function IssueCertificateDialog({
   rows,
   cohortId,
@@ -204,6 +213,25 @@ export function IssueCertificateDialog({
 }) {
   const [delayVisibility, setDelayVisibility] = useState(!!defaultVisibleFrom);
 
+  // Pre-flight: split the selection into rows that will produce a new
+  // diploma vs rows where the cohort run is fully redundant (every
+  // would-be-completed module is already canonical from an earlier
+  // certificate). The blocked rows would be filtered server-side and
+  // throw inside the transaction, rolling back the entire bulk — so we
+  // exclude them from the submission and surface them in the dialog so
+  // the operator knows who didn't get a diploma and why.
+  const issuable: typeof rows = [];
+  const blocked: typeof rows = [];
+  for (const row of rows) {
+    const moduleStatus = row.studentCurriculum?.moduleStatus ?? [];
+    const hasIssuable = moduleStatus.some((m) => m.newlyIssuable);
+    if (hasIssuable) {
+      issuable.push(row);
+    } else {
+      blocked.push(row);
+    }
+  }
+
   const closeDialog = () => {
     close();
     reset();
@@ -213,7 +241,7 @@ export function IssueCertificateDialog({
     issueCertificatesInCohortAction.bind(
       null,
       cohortId,
-      rows.map((row) => row.id),
+      issuable.map((row) => row.id),
     ),
     {
       onSuccess: () => {
@@ -235,7 +263,41 @@ export function IssueCertificateDialog({
         <AlertTitle>Diploma's uitgeven</AlertTitle>
 
         <AlertBody>
-          <CheckboxField>
+          {blocked.length > 0 ? (
+            <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/10">
+              <Text className="!text-sm font-medium text-amber-900 dark:text-amber-200">
+                {blocked.length === 1
+                  ? "1 cursist krijgt geen nieuw diploma"
+                  : `${blocked.length} cursisten krijgen geen nieuw diploma`}
+              </Text>
+              <Text className="mt-1 !text-xs !text-amber-800 dark:!text-amber-300">
+                Voor deze cursisten zijn alle af te ronden competenties al via
+                eerdere diploma's behaald. Controleer hun inschrijving na
+                samenvoegen — meestal komt dit voor na het samenvoegen van
+                profielen.
+              </Text>
+              <ul className="mt-2 space-y-0.5">
+                {blocked.map((row) => (
+                  <li
+                    key={row.id}
+                    className="text-xs text-amber-900 dark:text-amber-200"
+                  >
+                    • {fullName(row.person)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {issuable.length > 0 ? (
+            <Text className="!text-sm">
+              {issuable.length === 1
+                ? "1 cursist krijgt een diploma."
+                : `${issuable.length} cursisten krijgen een diploma.`}
+            </Text>
+          ) : null}
+
+          <CheckboxField className="mt-4">
             <Checkbox
               checked={delayVisibility}
               onChange={() => setDelayVisibility(!delayVisibility)}
@@ -267,9 +329,16 @@ export function IssueCertificateDialog({
           <Button plain onClick={closeDialog}>
             Annuleren
           </Button>
-          <Button type="submit" disabled={isPending}>
+          <Button
+            type="submit"
+            disabled={isPending || issuable.length === 0}
+          >
             {isPending ? <Spinner className="text-white" /> : null}
-            Uitgeven
+            {blocked.length > 0
+              ? `Doorgaan met ${issuable.length} ${
+                  issuable.length === 1 ? "diploma" : "diploma's"
+                }`
+              : "Uitgeven"}
           </Button>
         </AlertActions>
       </form>
