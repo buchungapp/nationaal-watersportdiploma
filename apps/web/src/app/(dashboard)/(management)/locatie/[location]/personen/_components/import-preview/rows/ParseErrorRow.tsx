@@ -1,8 +1,7 @@
 "use client";
 
-import { memo, useEffect, use } from "react";
+import { memo } from "react";
 import { Strong, Text } from "~/app/(dashboard)/_components/text";
-import { BulkImportPreviewContext, assertPreviewContext } from "../context";
 import { RowFrame } from "../primitives";
 import type { ParseError } from "../types";
 
@@ -67,19 +66,6 @@ export const ParseErrorRow = memo(function ParseErrorRow({
 }: {
   parseError: ParseError;
 }) {
-  const ctx = assertPreviewContext(use(BulkImportPreviewContext));
-  const decision = ctx.state.decisions.get(parseError.rowIndex);
-
-  useEffect(() => {
-    if (!decision) {
-      ctx.actions.setRowDecision(parseError.rowIndex, {
-        kind: "skip",
-        reason: "parse_error",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parseError.rowIndex]);
-
   const { fields, failedIndices, hint } = humanizeError(parseError.error);
   const values = parseError.values ?? [];
   const hasAnyValue = values.some((v) => v && v.trim().length > 0);

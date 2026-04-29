@@ -137,11 +137,17 @@ export function BulkImportPreviewProvider({
 
   const reset = useCallback(() => dispatch({ type: "reset" }), []);
 
-  // Garbage-collect decisions that no longer apply to the current preview.
+  // Garbage-collect decisions that no longer apply to the current preview,
+  // then merge in auto-defaults for rows the operator hasn't touched.
   // Calculated during render — the parent can swap previewModel after a
   // race-detected refresh and consumers see a consistent view in one pass,
   // no useEffect needed (per the React docs' "You Might Not Need an
-  // Effect" — synchronizing state with props belongs in render).
+  // Effect" — synchronizing state with props, AND filling in default
+  // state, both belong in render rather than in mount-time Effects).
+  //
+  // Defaults: no-match → create_new; already-in-cohort → skip(cohort);
+  // single strong-match → use_existing(top candidate); parse-error →
+  // skip(parse_error). Operator's explicit choice always wins.
   const filtered = useMemo(() => {
     const validRowIndices = new Set(
       initialPreview.parsedRows.map((r) => r.rowIndex),
@@ -159,6 +165,20 @@ export function BulkImportPreviewProvider({
     for (const [key, dec] of rawState.groupDecisions) {
       if (validGroupKeys.has(key)) groupDecisions.set(key, dec);
     }
+
+    // Auto-defaults for rows without an explicit operator decision.
+    for (const row of initialPreview.parsedRows) {
+      if (decisions.has(row.rowIndex)) continue;
+      const cls = classifyRow(row.rowIndex, initialPreview, groupDecisions);
+      const def = computeDefaultDecision(cls);
+      if (def) decisions.set(row.rowIndex, def);
+    }
+    // Parse-error rows live in parseErrors, not parsedRows.
+    for (const pe of initialPreview.parseErrors) {
+      if (decisions.has(pe.rowIndex)) continue;
+      decisions.set(pe.rowIndex, { kind: "skip", reason: "parse_error" });
+    }
+
     return { decisions, groupDecisions };
   }, [initialPreview, rawState]);
 
@@ -310,4 +330,40 @@ function computeBlockers(
     parseErrors,
     total: unresolvedCrossRowGroups + unresolvedAmbiguousMatches,
   };
+}
+
+// Auto-default for a row based on its classification. Returns null when
+// the operator must explicitly decide (multi-match, weak-match, perfect-
+// match awaiting confirmation, in-cross-row-group). Pure function — used
+// by the provider during render to fill in the decision map without a
+// mount-time Effect.
+function computeDefaultDecision(
+  cls: ReturnType<typeof classifyRow>,
+): RowDecision | null {
+  switch (cls.status) {
+    case "no-match":
+      return { kind: "create_new" };
+    case "already-in-cohort":
+      return { kind: "skip", reason: "cohort_conflict" };
+    case "strong-match":
+      // Single strong match → preselect the candidate. The operator can
+      // still override via the candidate radios.
+      if (cls.candidates.length === 1 && cls.candidates[0]) {
+        return {
+          kind: "use_existing",
+          personId: cls.candidates[0].personId,
+        };
+      }
+      return null;
+    case "perfect-match":
+      // Twin-guard: perfect-match (score >= 200) deliberately does NOT
+      // preselect. Exact name + DOB could be twins/family; the row
+      // variant tells the operator to "kies expliciet".
+      return null;
+    case "weak-match":
+    case "multi-match":
+    case "in-cross-row-group":
+    case "parse-error":
+      return null;
+  }
 }

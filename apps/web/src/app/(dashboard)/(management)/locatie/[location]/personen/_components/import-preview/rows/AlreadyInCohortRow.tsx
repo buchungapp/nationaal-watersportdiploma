@@ -1,15 +1,14 @@
 "use client";
 
-import { memo, useEffect, use } from "react";
+import { memo } from "react";
 import { Text } from "~/app/(dashboard)/_components/text";
-import { BulkImportPreviewContext, assertPreviewContext } from "../context";
 import { RowFrame, RowPasted } from "../primitives";
 import type { CandidateMatch, ParsedPersonRow } from "../types";
 
 // Match exists, but the matched person is already in the target cohort.
-// Default behaviour is "skip" — adding them again would collide on the
-// cohort_allocation unique index. Operator can override via the cross-row
-// flow if needed (rare).
+// Default behaviour is "skip" — provider injects that default during
+// render. Adding them again would collide on the cohort_allocation
+// unique index. Operator can override via the cross-row flow if needed.
 
 export const AlreadyInCohortRow = memo(function AlreadyInCohortRow({
   row,
@@ -18,19 +17,6 @@ export const AlreadyInCohortRow = memo(function AlreadyInCohortRow({
   row: ParsedPersonRow;
   candidate: CandidateMatch;
 }) {
-  const ctx = assertPreviewContext(use(BulkImportPreviewContext));
-  const decision = ctx.state.decisions.get(row.rowIndex);
-
-  useEffect(() => {
-    if (!decision) {
-      ctx.actions.setRowDecision(row.rowIndex, {
-        kind: "skip",
-        reason: "cohort_conflict",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row.rowIndex]);
-
   const fullName = [
     candidate.firstName,
     candidate.lastNamePrefix,

@@ -335,12 +335,10 @@ export function RowDecisionRadios({
   rowIndex,
   candidates,
   allowCreateNew = true,
-  preselectStrongMatch = false,
 }: {
   rowIndex: number;
   candidates: CandidateMatch[];
   allowCreateNew?: boolean;
-  preselectStrongMatch?: boolean;
 }) {
   const ctx = assertPreviewContext(use(BulkImportPreviewContext));
   const decision = ctx.state.decisions.get(rowIndex);
@@ -352,21 +350,9 @@ export function RowDecisionRadios({
     decision?.kind === "use_existing" ? decision.personId : null;
   const isCreateNew = decision?.kind === "create_new";
 
-  // Auto-preselect "use existing" for strong-match single rows on first
-  // render if the operator hasn't chosen yet.
-  if (
-    preselectStrongMatch &&
-    !decision &&
-    candidates.length === 1 &&
-    candidates[0] &&
-    candidates[0].score >= 150 &&
-    candidates[0].score < 200
-  ) {
-    ctx.actions.setRowDecision(rowIndex, {
-      kind: "use_existing",
-      personId: candidates[0].personId,
-    });
-  }
+  // Auto-preselect for strong/perfect single matches lives in the
+  // provider's filtered useMemo (see computeDefaultDecision), not here.
+  // Doing it here as setState-during-render is a React anti-pattern.
 
   return (
     <div className="space-y-2">

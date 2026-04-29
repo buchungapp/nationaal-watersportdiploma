@@ -36,7 +36,6 @@ export const SingleMatchRow = memo(function SingleMatchRow({
           rowIndex={row.rowIndex}
           candidates={[candidate]}
           allowCreateNew
-          preselectStrongMatch={status === "strong-match"}
         />
         {!decision ? (
           <Text className="!text-xs !text-zinc-500">
