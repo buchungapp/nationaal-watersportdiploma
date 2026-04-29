@@ -7,6 +7,7 @@ import { Strong, Text } from "~/app/(dashboard)/_components/text";
 import {
   assertPreviewContext,
   BulkImportPreviewContext,
+  deriveGroupKey,
 } from "./context";
 import { PreviewFooter } from "./PreviewFooter";
 import { PreviewHeader } from "./PreviewHeader";
@@ -66,7 +67,7 @@ export function PreviewStep({
     // cross-row group are skipped (rendered via the group card instead).
     const groupedRowIndices = new Set<number>();
     for (const g of preview.matches.crossRowGroups) {
-      const groupKey = g.rowIndices.sort((a, b) => a - b).join("-");
+      const groupKey = deriveGroupKey(g.rowIndices);
       const decision = ctx.state.groupDecisions.get(groupKey);
       // Once "different_people" is picked, rows leave the group and render
       // individually so the operator can configure each.

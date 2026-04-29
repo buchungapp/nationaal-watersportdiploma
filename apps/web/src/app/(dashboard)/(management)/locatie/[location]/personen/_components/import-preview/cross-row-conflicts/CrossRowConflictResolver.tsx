@@ -123,7 +123,7 @@ export const CrossRowConflictResolver = memo(
             <FocusProfile
               name={candidateName ?? "Onbekend"}
               dob={candidateDob ?? "—"}
-              email={sharedCandidate.dateOfBirth ?? null}
+              email={null}
               certificateCount={sharedCandidate.certificateCount}
               lastDiplomaIssuedAt={sharedCandidate.lastDiplomaIssuedAt}
             />

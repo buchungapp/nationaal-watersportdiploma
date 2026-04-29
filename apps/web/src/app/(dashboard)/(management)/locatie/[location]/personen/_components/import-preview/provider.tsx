@@ -307,10 +307,16 @@ function computeBlockers(
   }
 
   // Ambiguous matches: rows that need an explicit operator decision.
-  // Two cases qualify:
+  // Three cases qualify:
   //   1. ≥2 candidates above threshold (classic multi-match)
   //   2. Single perfect-match (score >= 200) — twin-guard requires
   //      explicit confirmation since exact name + DOB could be a twin.
+  //   3. Single weak-match (score < STRONG_THRESHOLD) — the system isn't
+  //      confident enough to preselect "use existing" but a candidate
+  //      surfaced. Without explicit operator input the SingleMatchRow
+  //      shows "Maak een keuze om verder te gaan" but submit was
+  //      silently allowing through, dropping the row from the commit
+  //      payload entirely. Bugbot caught this on PR #462.
   // Rows in a cross-row group are tracked under the cross-row blocker
   // count instead.
   for (const match of preview.matches.matchesByRow) {
@@ -324,7 +330,10 @@ function computeBlockers(
       continue;
     }
     const top = match.candidates[0];
-    if (top && top.score >= PERFECT_THRESHOLD && !top.isAlreadyInTargetCohort) {
+    if (!top || top.isAlreadyInTargetCohort) continue;
+    if (top.score >= PERFECT_THRESHOLD) {
+      unresolvedAmbiguousMatches += 1;
+    } else if (top.score < STRONG_THRESHOLD) {
       unresolvedAmbiguousMatches += 1;
     }
   }
