@@ -1,124 +1,280 @@
 ---
 title: "Hoe ga je om met dubbele personen in een cohort?"
 publishedAt: "2026-04-29"
-lastUpdatedAt: "2026-04-29"
+lastUpdatedAt: "2026-04-30"
 summary:
-  "Leer hoe je mogelijke dubbele personen in een cohort herkent, welke gevallen
-  je zelf veilig kunt oplossen en wanneer je hulp van NWD nodig hebt."
+  "Leer hoe het systeem dubbele personen herkent, waar je ze in de app
+  tegenkomt, wat er bij een samenvoeging precies gebeurt met diploma's en
+  voortgang, en wanneer je beter NWD om hulp vraagt."
 ---
 
-Soms lijkt dezelfde cursist twee keer in een cohort te staan. Dat kan gebeuren
-na een bulkimport, bijvoorbeeld doordat dezelfde persoon met een andere
-schrijfwijze, geboortedatum of e-mailadres is aangeleverd.
+Soms lijkt dezelfde cursist twee keer op te duiken: één keer met een typefout
+in de naam, één keer met een ander e-mailadres, of via twee verschillende
+ouder-accounts. Dat heet een **duplicaat**. De app helpt je die te herkennen
+voordat ze problemen veroorzaken — bijvoorbeeld voordat je per ongeluk een
+tweede diploma uitreikt op een profiel dat het diploma al heeft.
 
-Een dubbele persoon samenvoegen is gevoeliger dan een typefout herstellen. Een
-persoon kan diploma's, voortgang, certificaten, logboekregels en gekoppelde
-gebruikers hebben. Controleer daarom altijd eerst of het echt om dezelfde
-persoon gaat.
+Dit artikel legt uit:
 
-## Waar let je op?
+- hoe het NWD over diploma's en cursisten denkt (zodat je begrijpt waarom
+  "samenvoegen" in onze app belangrijk is);
+- op welke vier plekken je duplicaten in de app tegenkomt;
+- wat er precies met diploma's, voortgang en cohortplekken gebeurt zodra je
+  bevestigt dat het dezelfde persoon is;
+- wanneer een dubbel profiel juist géén probleem is;
+- wanneer je iets niet zelf moet doen en NWD om hulp vraagt.
 
-Vergelijk minimaal deze gegevens:
+## Hoe het NWD over diploma's en cursisten denkt
 
-1. Voornaam en achternaam.
-2. Geboortedatum.
-3. Geboorteplaats, als die bekend is.
-4. Het e-mailadres of de gekoppelde gebruiker.
-5. De voortgang, diploma's en certificaten die al op beide profielen staan.
+Voordat je gaat samenvoegen helpt het om te weten hoe wij naar opleidingen
+kijken. Dit is **competentiegericht opleiden**: je krijgt geen diploma voor
+"de hele cursus", maar voor de competenties die je hebt aangetoond.
 
-Gebruik de geboortedatum als belangrijkste controle naast de naam. Alleen
-dezelfde naam is niet genoeg om personen samen te voegen.
+Dat heeft twee gevolgen die belangrijk zijn voor duplicaatbeheer:
 
-## Veelvoorkomende situaties
+1. **Eén persoon kan meerdere diploma's hebben voor dezelfde cursus.** Iemand
+   die in één cohort de basismodules afrondt en in een later cohort de
+   keuzemodules, krijgt twee diploma's — geen duplicaat, gewoon de manier
+   waarop competentiegericht opleiden werkt. Diploma 1 dekt de basismodules,
+   diploma 2 dekt de keuzemodules.
+2. **Dezelfde competentie kan maar één keer "vers" worden uitgereikt.** Als
+   een cursist competentie X al via een eerder diploma heeft, wordt X niet
+   nogmaals op een nieuw diploma gezet. Het systeem ziet X als al bewezen, en
+   een tweede uitgifte voor diezelfde X zou betekenisloos zijn.
 
-### Zelfde naam en dezelfde geboortedatum
+Wat hieruit volgt is belangrijk: **dezelfde cursist tegenkomen in twee cohorten
+voor dezelfde cursus is normaal**. Pas als één **persoon** twee verschillende
+profielen heeft (door een typefout, een nieuwe inschrijving, een ouderaccount-
+wissel) — dan heb je een duplicaat dat je wilt samenvoegen.
 
-Dit is meestal een sterke aanwijzing dat het om dezelfde persoon gaat. Controleer
-nog steeds of er geen tweede cursist met dezelfde naam in je groep zit.
+## Waar je duplicaten in de app tegenkomt
 
-Als beide profielen aan jouw vaarlocatie of cohort gekoppeld zijn, kan dit in
-veel gevallen samengevoegd worden. De voortgang, diploma's en certificaten worden
-dan bewaard op het profiel dat overblijft.
+Sinds de update van april 2026 verschijnen duplicaat-signalen op vier plekken.
+Je hoeft niet zelf te zoeken; de app brengt mogelijke matches naar je toe.
 
-### Zelfde persoon, maar verschillend e-mailadres
+### 1. Het tabblad "Duplicaten" op de personenpagina
 
-Dit komt vaak voor bij jeugdleden. De ene inschrijving gebruikt bijvoorbeeld het
-e-mailadres van ouder 1 en de andere inschrijving het e-mailadres van ouder 2.
-Dat betekent niet automatisch dat het twee verschillende personen zijn.
+Op `/locatie/<jouw-locatie>/personen/duplicaten` zie je een lijst van paren
+binnen jouw vaarlocatie waarvan het systeem denkt dat het hetzelfde profiel
+is. Per paar zie je een primair profiel (oudste of meest gebruikte) en een
+duplicaat-profiel, plus per profiel hoeveel diploma's, cohortplekken en
+gekoppelde gebruikers eraan hangen.
 
-Controleer in dit geval vooral naam, geboortedatum en eventueel geboorteplaats.
-Als beide gekoppelde gebruikers al bij jouw vaarlocatie horen, kan samenvoegen
-toegestaan zijn. Als een van de profielen niet aan jouw vaarlocatie gekoppeld is,
-vraag dan hulp aan NWD.
+<Image
+  src={"/images/vaarlocatie-app/duplicaten-personen-tab.png"}
+  width={2880}
+  height={1508}
+  alt="De Duplicaten-tab op de personenpagina toont paren binnen jouw locatie."
+/>
 
-### Zelfde naam, maar andere geboortedatum
+### 2. Het tabblad "Duplicaten" op een cohort
 
-Voeg deze profielen niet zomaar samen. Een verkeerde geboortedatum kan een
-typefout zijn, maar het kan ook om twee verschillende cursisten gaan.
+Hetzelfde principe, maar dan beperkt tot één cohort:
+`/locatie/<jouw-locatie>/cohorten/<cohort>/duplicaten`. Zie je het cohort-
+overzicht en staat er een oranje stip naast het tabblad **Duplicaten**, dan
+verwacht het systeem dat er minstens één paar in dit cohort zit dat aandacht
+nodig heeft. De stip verdwijnt zodra alle paren bevestigd of weggeklikt zijn.
 
-Controleer eerst de originele inschrijving of vraag de cursist of ouder om
-bevestiging. Corrigeer alleen de geboortedatum als je zeker weet welk profiel de
-juiste persoon is.
+<Image
+  src={"/images/vaarlocatie-app/duplicaten-cohort-tab.png"}
+  width={2880}
+  height={1508}
+  alt="Tabblad Duplicaten in een cohort, met oranje aandachtsstip."
+/>
 
-### Een profiel heeft al een diploma of certificaat
+### 3. Tijdens het aanmaken van één enkele cursist
 
-Wees extra zorgvuldig als een van de profielen al een diploma, certificaat of
-afgeronde voortgang heeft. Bij een juiste samenvoeging blijft deze geschiedenis
-bewaard, maar bij een verkeerde samenvoeging kan persoonlijke informatie bij de
-verkeerde persoon terechtkomen.
+In het _Cursist toevoegen_-dialoogje verschijnt zodra je voornaam, achternaam
+en geboortedatum hebt ingevuld een gele balk **"Lijkt op een bestaand
+profiel..."** als het systeem in jouw locatie een match vindt met een score
+van minimaal 150 (de "waarschijnlijk dezelfde persoon"-grens). Je kunt direct
+klikken om het bestaande profiel te gebruiken in plaats van een nieuw aan te
+maken.
 
-Twijfel je? Niet samenvoegen. Vraag NWD om mee te kijken.
+<Image
+  src={"/images/vaarlocatie-app/dedup-hint-single-create.png"}
+  width={2880}
+  height={1508}
+  alt="Inline duplicaat-suggestie in het cursist-toevoegen-dialoogje."
+/>
 
-### Twee verschillende gekoppelde gebruikers
+### 4. In de import-preview bij bulkimport
 
-Verschillende gekoppelde gebruikers zijn op zichzelf geen reden om samenvoegen te
-blokkeren. Het kan bijvoorbeeld gaan om dezelfde cursist met twee ouderaccounts.
+Als je een TSV/CSV plakt om meerdere cursisten tegelijk toe te voegen, krijg
+je vóór het opslaan een preview-overzicht. Per regel zie je een status:
 
-De belangrijke grens is toegang: beide gebruikers en beide profielen moeten bij
-jouw vaarlocatie horen. Als dat niet zo is, mag je de profielen niet zelf
-samenvoegen.
+- **Geen match** — er is nog geen profiel; de regel maakt een nieuw profiel.
+- **Mogelijk dezelfde** (zwakke match) — kandidaat zichtbaar, geen
+  vooraf-selectie. Jij kiest expliciet "bestaand profiel gebruiken" of "toch
+  nieuw aanmaken".
+- **Waarschijnlijk dezelfde** (sterke match) — kandidaat staat voorgevinkt op
+  "bestaand profiel gebruiken". Jij kunt het overrulen.
+- **Zelfde persoon** (perfect match: zelfde naam + geboortedatum) — het
+  systeem laat het bewust open omdat exact dezelfde naam + geboortedatum ook
+  een tweeling kan zijn. Je moet expliciet kiezen.
+- **Meerdere kandidaten** — je krijgt een keuzelijst.
+- **Al in dit cohort** — de cursist staat er al; standaard wordt deze regel
+  overgeslagen.
+- **Plakkers in deze import lijken op elkaar** — twee of meer regels in jouw
+  paste verwijzen naar dezelfde persoon. Je krijgt een aparte dialoog om te
+  bevestigen of het inderdaad één persoon is, of om elke regel toch z'n
+  eigen profiel te geven.
+
+<Image
+  src={"/images/vaarlocatie-app/bulk-import-preview.png"}
+  width={2880}
+  height={1508}
+  alt="Bulk-import preview met per-regel status en inline kandidaatkaarten."
+/>
+
+## De samenvoeg-dialoog
+
+Klik je op een paar (in de Duplicaten-tab of via de cohortbanner), dan krijg
+je een dialoog die de twee profielen veld-voor-veld naast elkaar zet — net als
+een diff-weergave in code review. Per veld zie je een groen vinkje als de
+waarden overeenkomen, of een oranje waarschuwing als ze verschillen.
+
+<Image
+  src={"/images/vaarlocatie-app/operator-merge-dialog.png"}
+  width={2880}
+  height={1508}
+  alt="Samenvoegdialoog met per-veld diff tussen primair en duplicaat profiel."
+/>
+
+Belangrijke knoppen in deze dialoog:
+
+- **Wissel primair en duplicaat** (rechtsboven) — handig als je denkt dat het
+  systeem het verkeerde profiel als hoofdprofiel heeft aangewezen,
+  bijvoorbeeld omdat het duplicaat juist het profiel met de meeste diploma's
+  is.
+- **Bevestigen — samenvoegen** — voert de samenvoeging uit. Daarna is het
+  duplicaat-profiel weg en zit alle voortgang/diploma's op het primaire
+  profiel.
+
+De dialoog laat ook waarschuwingen zien als één van de profielen een
+gekoppelde gebruiker heeft of als die gebruiker na samenvoegen geen profiel
+meer over heeft. Lees deze waarschuwingen aandachtig — een gebruiker zonder
+profiel kan niet meer inloggen, en dat moet via NWD hersteld worden.
+
+## Wat gebeurt er precies tijdens een samenvoeging?
+
+Goed om te weten, ook als je niets technisch hoeft te doen:
+
+- **Diploma's, certificaten en logboekregels** van het duplicaat verhuizen
+  naar het primaire profiel. Geen verlies.
+- **Voortgang in cohorten** verhuist mee, inclusief welke instructeur op
+  welke datum welke competentie heeft afgevinkt — de tijdlijn blijft intact.
+- **Cohortplekken** verhuizen mee. Als beide profielen toevallig in hetzelfde
+  cohort zaten, blijft één plek over (de oudste of de plek met diploma)
+  en wordt de andere zachtjes gearchiveerd.
+- **Competenties die al op een eerder diploma stonden** worden niet dubbel
+  gemarkeerd. Dit is de competentiegericht-opleiden-regel uit het begin: één
+  competentie, één geldige uitgifte. Het systeem registreert het oude
+  diploma als historisch bewijs en gebruikt het primaire diploma als
+  canonieke bron.
+- **Gekoppelde gebruikers**: het account van het primaire profiel blijft
+  actief; het account van het duplicaat verliest zijn koppeling. Als dat
+  account daardoor geen enkel profiel meer heeft, kan het niet meer inloggen
+  en moet je NWD vragen het te herstellen.
+
+## Het scenario "Geblokkeerd" op de diploma's-tab
+
+Op de diploma's-tab van een cohort zie je per cursist hoeveel modules klaar
+zijn voor uitgifte. Sinds de update kun je daar ook een vierde status zien:
+**Geblokkeerd**.
+
+<Image
+  src={"/images/vaarlocatie-app/diplomas-tab-geblokkeerd.png"}
+  width={2880}
+  height={1508}
+  alt="Diploma's-tab met geblokkeerd-filter en oranje badge op een rij."
+/>
+
+Een rij is geblokkeerd als _alle_ competenties in de afgeronde modules van
+deze cursist al via een eerder diploma zijn behaald. Het cohort kan voor deze
+cursist dus geen nieuw diploma minten — er is letterlijk niets nieuws om uit
+te reiken.
+
+In de praktijk komt dit vooral voor **na een samenvoeging**: het duplicaat-
+profiel had voortgang in dit cohort, het primaire profiel had de bijbehorende
+competenties al via een eerder diploma. Wat te doen:
+
+1. Filter de diploma's-tab op **Geblokkeerd** om de getroffen cursisten te
+   zien.
+2. Open de cursistenkaart en kijk welke diploma's er al zijn. In veel gevallen
+   is het correct dat de cursist niets nieuws krijgt: de cohort-deelname was
+   bijvoorbeeld een opfrisronde.
+3. Wil je toch nog modules afronden in dit cohort? Voeg dan competenties toe
+   die nog niet op een eerder diploma stonden (bijvoorbeeld via Kernmodules
+   afronden), zodat er wél nieuwe inhoud is voor het diploma.
+
+Klik je op **Diploma's uitreiken** voor een selectie waar geblokkeerde rijen
+in zitten, dan krijg je vóór het uitreiken een overzicht: zoveel cursisten
+krijgen wel een diploma, en zoveel krijgen er geen — met de reden ernaast
+("alle competenties al eerder behaald" of "nog geen curriculum gekoppeld").
+De geblokkeerde rijen worden uit de uitgifte gefilterd; je krijgt nooit per
+ongeluk een leeg of overlappend diploma.
+
+## Wanneer is "dezelfde persoon" géén duplicaat?
+
+Niet elk dubbel-aanvoelend geval is een merge-geval. Een paar veelvoorkomende
+situaties waarbij je niets hoeft te doen:
+
+### Dezelfde cursist in meerdere cohorten van dezelfde cursus
+
+Volkomen normaal. Iemand kan dit jaar de basis doen en volgend jaar de
+gevorderden, allebei voor "Kielboot CWO 3" maar in verschillende cohorten.
+Dat is twee cursusinschrijvingen, één persoon, geen duplicaat.
+
+### Eén cursist met twee diploma's voor dezelfde cursus
+
+Ook normaal. Diploma 1 dekt de modules die in cohort A zijn afgerond, diploma
+2 dekt de modules uit cohort B. Geen duplicaat, gewoon competentiegericht
+opleiden.
+
+### Twee verschillende cursisten met dezelfde voor- en achternaam
+
+Twee broers, twee neefjes, of een naamgenoot uit de buurt. **Niet samenvoegen**
+zonder de geboortedatum (en bij gelijke geboortedatum: de geboorteplaats of
+e-mailadres) te controleren. Het systeem duwt zulke "perfect match"-rijen
+expres niet door — jij beslist.
 
 ## Wanneer niet zelf samenvoegen?
 
 Voeg profielen niet zelf samen als:
 
 - je alleen de naam herkent, maar geboortedatum of geboorteplaats afwijkt;
-- een profiel niet gekoppeld is aan jouw vaarlocatie;
+- een profiel niet aan jouw vaarlocatie gekoppeld is — het systeem laat het
+  ook niet toe, maar ga er ook niet omheen door rare imports te doen;
 - je vermoedt dat het om twee familieleden met dezelfde naam gaat;
-- een profiel gegevens bevat die duidelijk niet bij jouw cursist horen;
+- een profiel gegevens bevat die duidelijk niet bij jouw cursist horen
+  (zoals een totaal andere geboorteplaats of een diploma dat hier niet kan
+  passen);
 - een ouder, cursist of collega aangeeft dat de gegevens niet kloppen;
-- je niet kunt uitleggen waarom je zeker weet dat het dezelfde persoon is.
+- je niet aan een collega kunt uitleggen waarom je zeker weet dat het
+  dezelfde persoon is.
 
-In deze gevallen is het beter om NWD te vragen om te helpen. Stuur nooit meer
-persoonsgegevens mee dan nodig is. Vermeld bij voorkeur de profielnummers of
-cohortnaam en leg kort uit waarom je denkt dat er sprake is van een duplicaat.
-
-## Duplicaten voorkomen bij bulkimport
-
-Bij een bulkimport probeert het systeem bestaande personen te herkennen. Je
-helpt het systeem door de gegevens in de import zo consequent mogelijk te houden.
-
-Let vooral op:
-
-- gebruik dezelfde schrijfwijze van voor- en achternaam;
-- vul geboortedata consequent in;
-- verwijder extra spaties uit namen en geboorteplaatsen;
-- gebruik geen tijdelijk of fictief e-mailadres om snel verder te kunnen;
-- controleer de import vooraf op dubbele regels.
-
-Maak geen nieuw profiel aan om een bestaand profiel te "repareren". Pas liever
-de gegevens van het bestaande profiel aan, of vraag NWD om hulp als je niet zeker
-weet welk profiel het juiste is.
+In deze gevallen vraag je NWD om mee te kijken via
+[info@nationaalwatersportdiploma.nl](mailto:info@nationaalwatersportdiploma.nl).
+Vermeld de profielnummers (de korte handle, bijv. `@xyz123ab`) en/of de
+cohortnaam, en leg in één zin uit waarom je twijfelt. Stuur niet meer
+persoonsgegevens mee dan nodig.
 
 ## Praktische werkwijze
 
-1. Open het cohort waarin je het duplicaat ziet.
-2. Zoek beide profielen op en vergelijk de persoonsgegevens.
-3. Controleer of beide profielen bij jouw vaarlocatie horen.
-4. Controleer voortgang, diploma's en certificaten.
-5. Los eenvoudige typefouten op door het juiste profiel te bewerken.
-6. Voeg alleen samen als je zeker weet dat het om dezelfde persoon gaat.
-7. Vraag NWD om hulp bij twijfel of bij profielen buiten jouw vaarlocatie.
+1. Open de **Duplicaten**-tab op je personenpagina of op het betreffende
+   cohort.
+2. Vergelijk het paar in de samenvoeg-dialoog veld voor veld.
+3. Twijfel je over één veld? Klik weg en zoek het juiste antwoord op
+   (cursist bellen, papieren formulier opzoeken). Niet gokken.
+4. Heeft een van de profielen een gekoppelde gebruiker? Lees de waarschuwing
+   in de dialoog en handel volgens het advies.
+5. Bevestig samenvoegen alleen als alle velden óf overeenkomen óf duidelijk
+   uit te leggen verschillen (typefout, ouder-mailadres) zijn.
+6. Komt na een samenvoeging een rij in **Geblokkeerd** terecht op de
+   diploma's-tab? Dat is meestal correct gedrag — controleer of de cursist
+   inderdaad alles al heeft, of voeg eventueel nog ontbrekende competenties
+   toe.
 
 ## Veelgestelde vragen
 
@@ -126,23 +282,43 @@ weet welk profiel het juiste is.
 <Faq question="Mag ik samenvoegen als beide profielen een ander e-mailadres hebben?">
 Ja, dat kan in sommige gevallen. Verschillende e-mailadressen komen vaak voor
 bij jeugdleden of ouderaccounts. Controleer wel altijd naam, geboortedatum en
-toegang tot jouw vaarlocatie.
+of beide profielen aan jouw vaarlocatie gekoppeld zijn.
 </Faq>
 
 <Faq question="Waarom mag ik niet samenvoegen op naam alleen?">
-Omdat twee verschillende personen dezelfde naam kunnen hebben. Bij een verkeerde
-samenvoeging kunnen diploma's, voortgang of accountgegevens bij de verkeerde
-persoon terechtkomen.
+Omdat twee verschillende personen dezelfde naam kunnen hebben. Bij een
+verkeerde samenvoeging kunnen diploma's, voortgang of accountgegevens bij de
+verkeerde persoon terechtkomen.
 </Faq>
 
-<Faq question="Wat gebeurt er met diploma's en certificaten na samenvoegen?">
+<Faq question="Wat gebeurt er met diploma's na samenvoegen?">
 Bij een juiste samenvoeging blijven diploma's, certificaten en afgeronde
-competenties bewaard op het profiel dat overblijft.
+competenties bewaard op het profiel dat overblijft. Competenties die al op een
+eerder diploma stonden worden niet dubbel gemarkeerd — competentiegericht
+opleiden gaat uit van één canonieke uitgifte per competentie.
+</Faq>
+
+<Faq question="Mijn cursist heeft twee diploma's voor dezelfde cursus — is dat een fout?">
+Niet automatisch. Bij competentiegericht opleiden krijgt iemand een diploma
+voor de competenties die op dat moment zijn aangetoond. Wie in cohort 1 de
+basismodules afrondt en in cohort 2 de keuzemodules, krijgt terecht twee
+diploma's. Pas als beide diploma's exact dezelfde modules dekken is er iets
+geks aan de hand — meld dat dan bij NWD.
+</Faq>
+
+<Faq question="Waarom staat een cursist als 'Geblokkeerd' op de diploma's-tab?">
+Omdat alle competenties in de modules die deze cursist in dit cohort heeft
+afgerond, al via een eerder diploma zijn uitgereikt. Het cohort kan voor deze
+cursist geen nieuw diploma met nieuwe inhoud minten. Vaak is dit het juiste
+gedrag (de cursist had het al), soms wil je nog extra competenties laten
+afvinken zodat er wél nieuwe inhoud is. Zie de sectie "Het scenario
+Geblokkeerd" hierboven.
 </Faq>
 
 <Faq question="Wat moet ik doen als ik twijfel?">
 Niet samenvoegen. Vraag NWD om mee te kijken via
 [info@nationaalwatersportdiploma.nl](mailto:info@nationaalwatersportdiploma.nl)
-en vermeld alleen de gegevens die nodig zijn om het duplicaat te vinden.
+en vermeld alleen de profielnummers en de cohortnaam. Wij kijken vanuit het
+secretariaat mee zonder dat je extra persoonsgegevens hoeft door te sturen.
 </Faq>
 </dl>
