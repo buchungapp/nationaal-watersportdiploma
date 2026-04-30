@@ -103,12 +103,28 @@ export function PreviewFooter({
   );
 }
 
+// Count DISTINCT persons that will exist after the import — must match
+// what the server commits. Server-side dedup rules (mirrored here):
+//   • use_existing rows pointing to the same personId → 1 person
+//   • create_new rows sharing a shareNewPersonWithGroup → 1 person
+//   • create_new rows without a group key → 1 person each
+//   • skip → 0
+// Counting raw rows over-reports the button label whenever the operator
+// merges rows into shared groups or picks the same existing person twice.
 function countToImport(decisions: ReadonlyMap<number, RowDecision>): number {
-  let n = 0;
+  const existingPersonIds = new Set<string>();
+  const sharedGroupKeys = new Set<string>();
+  let standaloneNewCount = 0;
   for (const decision of decisions.values()) {
-    if (decision.kind === "create_new" || decision.kind === "use_existing") {
-      n += 1;
+    if (decision.kind === "use_existing") {
+      existingPersonIds.add(decision.personId);
+    } else if (decision.kind === "create_new") {
+      if (decision.shareNewPersonWithGroup) {
+        sharedGroupKeys.add(decision.shareNewPersonWithGroup);
+      } else {
+        standaloneNewCount += 1;
+      }
     }
   }
-  return n;
+  return existingPersonIds.size + sharedGroupKeys.size + standaloneNewCount;
 }

@@ -12,6 +12,12 @@ import { DuplicatePairsList } from "../../../../personen/duplicaten/_components/
 
 export const dynamic = "force-dynamic";
 
+// Shared with the cohort layout's Duplicaten-tab dot indicator
+// (layout-tabs.tsx). Both must use the same threshold so the dot
+// fires exactly when this page has pairs to show.
+export const COHORT_DUPLICATE_THRESHOLD = 100;
+export const COHORT_DUPLICATE_LIMIT = 200;
+
 // Mirrors the location-wide duplicates view but scoped to persons
 // allocated to THIS cohort. Powered by the same pair-finder via
 // listDuplicatePairsInLocation({ cohortId }) — server-side already
@@ -37,8 +43,8 @@ async function Pairs({
   const pairs = await listLocationDuplicatePairs({
     locationId: location.id,
     cohortId: cohort.id,
-    threshold: 100,
-    limit: 200,
+    threshold: COHORT_DUPLICATE_THRESHOLD,
+    limit: COHORT_DUPLICATE_LIMIT,
   });
   return (
     <DuplicatePairsList pairs={pairs} locationId={location.id} scope="cohort" />

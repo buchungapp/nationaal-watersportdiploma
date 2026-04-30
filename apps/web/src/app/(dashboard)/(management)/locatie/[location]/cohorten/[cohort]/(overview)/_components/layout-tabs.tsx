@@ -9,6 +9,7 @@ import {
   retrieveCohortByHandle,
   retrieveLocationByHandle,
 } from "~/lib/nwd";
+import { COHORT_DUPLICATE_THRESHOLD } from "../duplicaten/page";
 import { LayoutTabsClient } from "./layout-tabs-client";
 
 type Props = { params: Promise<{ location: string; cohort: string }> };
@@ -34,13 +35,17 @@ async function LayoutTabsContent(props: Props) {
   // Diploma's, Instructeurs, Duplicaten. The Duplicaten tab itself is
   // gated on the operator-identity-workflow flag — when off, no count
   // is fetched and the client hides the tab entirely.
+  // Only need to know whether ANY pair would show on the Duplicaten
+  // page — the client just renders a dot, not a count. limit: 1 keeps
+  // the query cheap. Threshold MUST match the page so the dot fires
+  // exactly when the page has pairs.
   const duplicatesCount =
     identityWorkflowOn && roles.includes("location_admin")
       ? await listLocationDuplicatePairs({
           locationId: location.id,
           cohortId: cohort.id,
-          threshold: 150,
-          limit: 50,
+          threshold: COHORT_DUPLICATE_THRESHOLD,
+          limit: 1,
         }).then((pairs) => pairs.length)
       : 0;
 
