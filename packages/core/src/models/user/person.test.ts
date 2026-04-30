@@ -2,7 +2,7 @@ import assert from "node:assert";
 import test from "node:test";
 import { schema as s } from "@nawadi/db";
 import dayjs from "dayjs";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { useQuery, withTestTransaction } from "../../contexts/index.js";
 import {
   Certificate,
@@ -1691,5 +1691,1655 @@ test("student.curriculum.listCompletedCompetenciesById excludes merge-conflict d
       after.length,
       0,
       "Flagged merge-conflict duplicate row must NOT be returned — it is not canonical",
+    );
+  }));
+
+test("user.person.linkToLocation creates a fresh active link", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-fresh-location",
+      name: "Link Fresh Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Fresh",
+    });
+
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+
+    const links = await query
+      .select({ status: s.personLocationLink.status })
+      .from(s.personLocationLink)
+      .where(
+        and(
+          eq(s.personLocationLink.personId, personId),
+          eq(s.personLocationLink.locationId, location.id),
+        ),
+      );
+    assert.equal(links.length, 1);
+    assert.equal(links[0]?.status, "linked");
+  }));
+
+test("user.person.linkToLocation is idempotent on already-linked", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-idem-location",
+      name: "Link Idem Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Idem",
+    });
+
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+
+    const links = await query
+      .select({ status: s.personLocationLink.status })
+      .from(s.personLocationLink)
+      .where(
+        and(
+          eq(s.personLocationLink.personId, personId),
+          eq(s.personLocationLink.locationId, location.id),
+        ),
+      );
+    assert.equal(links.length, 1);
+  }));
+
+test("user.person.linkToLocation throws when existing link is revoked", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-revoked-location",
+      name: "Link Revoked Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Revoked",
+    });
+
+    await query.insert(s.personLocationLink).values({
+      personId,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    await assert.rejects(
+      User.Person.linkToLocation({ personId, locationId: location.id }),
+      /eerder verwijderd/,
+    );
+  }));
+
+test("user.person.linkToLocation throws when existing link is removed", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "link-removed-location",
+      name: "Link Removed Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Link",
+      lastName: "Removed",
+    });
+
+    await query.insert(s.personLocationLink).values({
+      personId,
+      locationId: location.id,
+      status: "removed",
+      permissionLevel: "none",
+    });
+
+    await assert.rejects(
+      User.Person.linkToLocation({ personId, locationId: location.id }),
+      /eerder verwijderd/,
+    );
+  }));
+
+test("findCandidateMatchesInLocation returns empty for empty input", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-empty-location",
+      name: "Find Empty Location",
+    });
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [],
+    });
+    assert.deepEqual(result, { matchesByRow: [], crossRowGroups: [] });
+  }));
+
+test("findCandidateMatchesInLocation surfaces a strong-band match for an exact paste", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-exact-location",
+      name: "Find Exact Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+      birthCity: "Amsterdam",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.matchesByRow.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
+    const row = result.matchesByRow[0]!;
+    assert.equal(row.rowIndex, 0);
+    assert.equal(row.candidates.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
+    const cand = row.candidates[0]!;
+    assert.equal(cand.personId, existingPersonId);
+    assert.ok(cand.score >= 200, `expected score >= 200, got ${cand.score}`);
+    assert.ok(cand.reasons.includes("zelfde voornaam"));
+    assert.ok(cand.reasons.includes("zelfde achternaam"));
+    assert.ok(cand.reasons.includes("zelfde geboortedatum"));
+    assert.equal(cand.isAlreadyInTargetCohort, false);
+  }));
+
+test("findCandidateMatchesInLocation does NOT surface a person whose link is revoked (GDPR)", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "find-revoked-location",
+      name: "Find Revoked Location",
+    });
+    const { id: revokedPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await query.insert(s.personLocationLink).values({
+      personId: revokedPersonId,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.matchesByRow.length, 0);
+  }));
+
+test("findCandidateMatchesInLocation does NOT surface a soft-deleted person", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "find-deleted-location",
+      name: "Find Deleted Location",
+    });
+    const { id: personId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({ personId, locationId: location.id });
+    await query
+      .update(s.person)
+      .set({ deletedAt: sql`NOW()` })
+      .where(eq(s.person.id, personId));
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.matchesByRow.length, 0);
+  }));
+
+test("findCandidateMatchesInLocation forms a cross-row group when 2 rows resolve to the same person", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-group-location",
+      name: "Find Group Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 3,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+        {
+          rowIndex: 17,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: null, // missing prefix on this paste, still a strong match
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [3, 17]);
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, [
+      existingPersonId,
+    ]);
+  }));
+
+test("findCandidateMatchesInLocation forms a 3-way cross-row group", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "find-triplet-location",
+      name: "Find Triplet Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [3, 17, 22].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "",
+        email: null,
+      })),
+    });
+
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(
+      result.crossRowGroups[0]?.rowIndices.sort((a, b) => a - b),
+      [3, 17, 22],
+    );
+  }));
+
+test("previewBulkImport persists a snapshot row and returns the model", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "preview-bulk-location",
+      name: "Preview Bulk Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "One",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    assert.ok(preview.previewToken);
+    assert.equal(preview.attempt, 1);
+
+    const stored = await query
+      .select()
+      .from(s.bulkImportPreview)
+      .where(eq(s.bulkImportPreview.token, preview.previewToken));
+    assert.equal(stored.length, 1);
+    assert.equal(stored[0]?.status, "active");
+    assert.equal(stored[0]?.attempt, 1);
+    assert.equal(stored[0]?.locationId, location.id);
+    assert.equal(stored[0]?.createdByPersonId, operatorPersonId);
+  }));
+
+test("commitBulkImport applies use_existing decision and writes audit row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-use-existing-location",
+      name: "Commit Use Existing Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Two",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    const result = await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    const committed = result as {
+      kind: "committed";
+      linkedPersonIds: string[];
+    };
+    assert.equal(committed.kind, "committed");
+    assert.deepEqual(committed.linkedPersonIds, [existingPersonId]);
+
+    // Audit row written
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
+    assert.equal(audits.length, 1);
+    assert.equal(audits[0]?.decisionKind, "use_existing");
+    assert.equal(audits[0]?.targetPersonId, existingPersonId);
+    assert.equal(audits[0]?.source, "bulk_import_preview");
+    assert.deepEqual(audits[0]?.presentedCandidatePersonIds, [
+      existingPersonId,
+    ]);
+
+    // Preview row marked committed
+    const previewAfter = await query
+      .select()
+      .from(s.bulkImportPreview)
+      .where(eq(s.bulkImportPreview.token, preview.previewToken));
+    assert.equal(previewAfter[0]?.status, "committed");
+
+    // Actor created for student role
+    const actors = await query
+      .select()
+      .from(s.actor)
+      .where(
+        and(
+          eq(s.actor.personId, existingPersonId),
+          eq(s.actor.locationId, location.id),
+          eq(s.actor.type, "student"),
+        ),
+      );
+    assert.equal(actors.length, 1);
+  }));
+
+test("commitBulkImport rejects use_existing for personId outside GDPR scope", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-gdpr-location",
+      name: "Commit GDPR Location",
+    });
+    const otherLocation = await Location.create({
+      handle: "commit-gdpr-other-location",
+      name: "Commit GDPR Other Location",
+    });
+    const { id: outsiderPersonId } = await User.Person.getOrCreate({
+      firstName: "Outside",
+      lastName: "Person",
+      dateOfBirth: "2010-05-12",
+    });
+    // Outsider linked only to OTHER location.
+    await User.Person.linkToLocation({
+      personId: outsiderPersonId,
+      locationId: otherLocation.id,
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Three",
+    });
+
+    // Preview is empty (nothing in our location), but operator crafts a
+    // payload claiming to use_existing on the outsider's id. Commit must
+    // reject server-side.
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Outside",
+          lastName: "Person",
+          lastNamePrefix: null,
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    await assert.rejects(
+      User.Person.commitBulkImport({
+        previewToken: preview.previewToken,
+        performedByPersonId: operatorPersonId,
+        decisions: {
+          "0": { kind: "use_existing", personId: outsiderPersonId },
+        },
+      }),
+      /GDPR-grenscontrole/,
+    );
+
+    // No audit row written for the rejected attempt
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
+    assert.equal(audits.length, 0);
+  }));
+
+test("commitBulkImport refuses a committed preview", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "commit-twice-location",
+      name: "Commit Twice Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Four",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [],
+    });
+
+    // First commit: empty decisions (no rows) — succeeds, marks committed.
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {},
+    });
+
+    await assert.rejects(
+      User.Person.commitBulkImport({
+        previewToken: preview.previewToken,
+        performedByPersonId: operatorPersonId,
+        decisions: {},
+      }),
+      /al verwerkt|geblokkeerd/,
+    );
+  }));
+
+test("commitBulkImport refuses a preview owned by a different operator", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "commit-wrong-owner-location",
+      name: "Commit Wrong Owner Location",
+    });
+    const { id: operatorAId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "A",
+    });
+    const { id: operatorBId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "B",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorAId,
+      roles: ["student"],
+      candidates: [],
+    });
+
+    await assert.rejects(
+      User.Person.commitBulkImport({
+        previewToken: preview.previewToken,
+        performedByPersonId: operatorBId,
+        decisions: {},
+      }),
+      /hoort niet bij deze gebruiker/,
+    );
+  }));
+
+test("cleanupExpiredBulkImportPreviews deletes expired active rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "cleanup-location",
+      name: "Cleanup Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Cleanup",
+    });
+
+    // Create one fresh row (won't expire) and one already-expired row.
+    const fresh = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [],
+    });
+
+    // Manually backdate one row.
+    await query.insert(s.bulkImportPreview).values({
+      locationId: location.id,
+      createdByPersonId: operatorPersonId,
+      detectionSnapshot: {},
+      rowsParsed: { candidates: [], roles: ["student"] },
+      attempt: 1,
+      status: "active",
+      expiresAt: dayjs().subtract(2, "hour").toISOString(),
+    });
+
+    const result = await User.Person.cleanupExpiredBulkImportPreviews({});
+    assert.equal(result.activeExpired, 1);
+
+    // Fresh row is still there.
+    const fresh_after = await query
+      .select()
+      .from(s.bulkImportPreview)
+      .where(eq(s.bulkImportPreview.token, fresh.previewToken));
+    assert.equal(fresh_after.length, 1);
+  }));
+
+test("findCandidateMatchesInLocation detects paste-vs-paste groups even with NO existing match", () =>
+  withTestTransaction(async () => {
+    // Brand-new Adam pasted three times. No existing person in the location.
+    // The detection must still flag this as a cross-row group, otherwise
+    // each row would default to "create new" → 3 duplicate Person records.
+    const location = await Location.create({
+      handle: "find-paste-only-location",
+      name: "Find Paste-Only Location",
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [3, 17, 22].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "",
+        email: null,
+      })),
+    });
+
+    // No existing matches surface — the location is empty.
+    assert.equal(result.matchesByRow.length, 0);
+
+    // But the cross-row group fires from paste-vs-paste similarity alone.
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [3, 17, 22]);
+    // Empty when there's no existing match — caller knows to default to
+    // "create one new person, link all three rows to it."
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, []);
+  }));
+
+test("findCandidateMatchesInLocation merges paste-pair edges with existing-match edges", () =>
+  withTestTransaction(async () => {
+    // Setup: location has Adam de Vries linked-active. Operator pastes 3 rows:
+    //   row 3: Adam de Vries (matches existing Adam)
+    //   row 17: Adam de Vries (matches existing Adam)
+    //   row 22: similar enough to row 3/17 (paste-vs-paste) but doesn't strong-match existing
+    //           because data differs (e.g., DOB year off by 1).
+    // Expectation: all three rows form one connected group. Row 22 is in the
+    // group via the paste-pair edge to rows 3/17, even though it doesn't
+    // strong-match the existing Adam directly.
+    const location = await Location.create({
+      handle: "find-mixed-edges-location",
+      name: "Find Mixed Edges Location",
+    });
+    const { id: existingAdamId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingAdamId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 3,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          email: null,
+        },
+        {
+          rowIndex: 17,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+        {
+          rowIndex: 22,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [3, 17, 22]);
+    // Existing Adam still shows up in the shared set because rows 3, 17,
+    // and 22 all strong-match him.
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, [
+      existingAdamId,
+    ]);
+  }));
+
+test("findCandidateMatchesInLocation: 2 paste rows similar to each other but not to existing", () =>
+  withTestTransaction(async () => {
+    // Setup: location has Eva. Operator pastes 2 rows for a brand-new Adam.
+    // Eva is irrelevant — Adam doesn't match her. But the 2 Adam rows match
+    // each other.
+    const location = await Location.create({
+      handle: "find-paste-only-2way-location",
+      name: "Find Paste-Only 2-way Location",
+    });
+    const { id: evaId } = await User.Person.getOrCreate({
+      firstName: "Eva",
+      lastName: "Janssen",
+      dateOfBirth: "2008-03-22",
+    });
+    await User.Person.linkToLocation({
+      personId: evaId,
+      locationId: location.id,
+    });
+
+    const result = await User.Person.findCandidateMatchesInLocation({
+      locationId: location.id,
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+        {
+          rowIndex: 1,
+          firstName: "Adam",
+          lastName: "Vries",
+          lastNamePrefix: "de",
+          dateOfBirth: "2010-05-12",
+          birthCity: "",
+          email: null,
+        },
+      ],
+    });
+
+    // No existing-person matches for either row.
+    assert.equal(result.matchesByRow.length, 0);
+    // But the paste-vs-paste edge forms a group.
+    assert.equal(result.crossRowGroups.length, 1);
+    assert.deepEqual(result.crossRowGroups[0]?.rowIndices, [0, 1]);
+    assert.deepEqual(result.crossRowGroups[0]?.sharedCandidatePersonIds, []);
+  }));
+
+test("commitBulkImport: 3 rows targeting same existing person → 3 cohort allocations sharing one actor, 3 audit rows", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-dedup-existing-location",
+      name: "Commit Dedup Existing Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "dedup-cohort",
+      label: "Dedup Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Dedup",
+    });
+
+    // 3 paste rows for the same Adam — operator confirmed "same person".
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [3, 17, 22].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "Amsterdam",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    const result = await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "3": { kind: "use_existing", personId: existingPersonId },
+        "17": { kind: "use_existing", personId: existingPersonId },
+        "22": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    assert.equal(
+      (result as { kind: "committed"; linkedPersonIds: string[] }).kind,
+      "committed",
+    );
+
+    // Cohort allocations: 3 rows → 3 allocations, all sharing the same
+    // actor (one Person, one Actor for student role). Each pasted row
+    // is a distinct intent; allocations are not deduped.
+    const allocations = await query
+      .select()
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      );
+    assert.equal(
+      allocations.length,
+      3,
+      `Expected 3 cohort_allocations, got ${allocations.length}`,
+    );
+    // All point to the same actor.
+    const actorIds = new Set(allocations.map((a) => a.actor.id));
+    assert.equal(
+      actorIds.size,
+      1,
+      `Expected one actor across all 3 allocations, got ${actorIds.size}`,
+    );
+
+    // Audit: 3 rows (one per pasted CSV row), all decisionKind=use_existing.
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
+    assert.equal(audits.length, 3);
+    for (const audit of audits) {
+      assert.equal(audit.decisionKind, "use_existing");
+      assert.equal(audit.targetPersonId, existingPersonId);
+    }
+  }));
+
+test("commitBulkImport: cross-row create_new group with shareNewPersonWithGroup → 1 person, 1 audit per row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-dedup-new-location",
+      name: "Commit Dedup New Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "DedupNew",
+    });
+
+    // Paste 3 rows for the same brand-new Adam, no existing match.
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [0, 1, 2].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Adam",
+        lastName: "Vries",
+        lastNamePrefix: "de",
+        dateOfBirth: "2010-05-12",
+        birthCity: "Amsterdam",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    // Stub createPerson — track invocations.
+    let createPersonCalls = 0;
+    const fakePersonId = "00000000-0000-0000-0000-0000000000aa";
+    await query.insert(s.person).values({
+      id: fakePersonId,
+      handle: "stub-adam",
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+
+    const result = await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "create_new", shareNewPersonWithGroup: "g1" },
+        "1": { kind: "create_new", shareNewPersonWithGroup: "g1" },
+        "2": { kind: "create_new", shareNewPersonWithGroup: "g1" },
+      },
+      createPerson: async () => {
+        createPersonCalls += 1;
+        return { personId: fakePersonId };
+      },
+    });
+
+    assert.equal(
+      (result as { kind: "committed"; createdPersonIds: string[] }).kind,
+      "committed",
+    );
+    assert.equal(
+      createPersonCalls,
+      1,
+      `Expected createPerson called 1x for shared group, got ${createPersonCalls}`,
+    );
+
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(
+        eq(s.personMergeAudit.bulkImportPreviewToken, preview.previewToken),
+      );
+    assert.equal(audits.length, 3);
+    for (const audit of audits) {
+      assert.equal(audit.decisionKind, "create_new");
+      assert.equal(audit.targetPersonId, fakePersonId);
+    }
+  }));
+
+test("commitBulkImport: 3 different-people create_new (no group) → 3 createPerson calls", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-different-people-location",
+      name: "Commit Different People Location",
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "DiffPeople",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      roles: ["student"],
+      candidates: [0, 1, 2].map((rowIndex) => ({
+        rowIndex,
+        firstName: `Person${rowIndex}`,
+        lastName: "Test",
+        lastNamePrefix: null,
+        dateOfBirth: "2010-05-12",
+        birthCity: "",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    let createPersonCalls = 0;
+    const fakeIds = [
+      "00000000-0000-0000-0000-0000000000a1",
+      "00000000-0000-0000-0000-0000000000a2",
+      "00000000-0000-0000-0000-0000000000a3",
+    ];
+    for (let i = 0; i < 3; i++) {
+      await query.insert(s.person).values({
+        id: fakeIds[i],
+        handle: `stub-${i}`,
+        firstName: `Person${i}`,
+        lastName: "Test",
+        dateOfBirth: "2010-05-12",
+      });
+    }
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "create_new" },
+        "1": { kind: "create_new" },
+        "2": { kind: "create_new" },
+      },
+      createPerson: async () => {
+        const id = fakeIds[createPersonCalls];
+        createPersonCalls += 1;
+        // biome-ignore lint/style/noNonNullAssertion: stub bounded by indices
+        return { personId: id! };
+      },
+    });
+
+    assert.equal(
+      createPersonCalls,
+      3,
+      "Different-people mode should call createPerson per row",
+    );
+  }));
+
+test("listDuplicatePairsInLocation surfaces a strong match within the location", () =>
+  withTestTransaction(async () => {
+    const location = await Location.create({
+      handle: "list-pairs-loc",
+      name: "List Pairs Location",
+    });
+    const { id: adamA } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: adamB } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({
+      personId: adamA,
+      locationId: location.id,
+    });
+    await User.Person.linkToLocation({
+      personId: adamB,
+      locationId: location.id,
+    });
+
+    const pairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      threshold: 100,
+      limit: 50,
+    });
+
+    assert.equal(pairs.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
+    const pair = pairs[0]!;
+    const ids = [pair.primary.id, pair.duplicate.id].sort();
+    assert.deepEqual(ids, [adamA, adamB].sort());
+    assert.ok(pair.score >= 100);
+  }));
+
+test("listDuplicatePairsInLocation excludes persons whose link is revoked (GDPR)", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "list-pairs-revoked-loc",
+      name: "List Pairs Revoked Location",
+    });
+    const { id: adamA } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: adamB } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({
+      personId: adamA,
+      locationId: location.id,
+    });
+    // adamB linked but revoked
+    await query.insert(s.personLocationLink).values({
+      personId: adamB,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const pairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      threshold: 100,
+    });
+    assert.equal(pairs.length, 0);
+  }));
+
+test("listDuplicatePairsInLocation with cohortId only returns pairs inside that cohort", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "list-pairs-cohort-loc",
+      name: "List Pairs Cohort Location",
+    });
+    const { id: adamA } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: adamB } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Vries",
+      lastNamePrefix: "de",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({
+      personId: adamA,
+      locationId: location.id,
+    });
+    await User.Person.linkToLocation({
+      personId: adamB,
+      locationId: location.id,
+    });
+
+    const cohortInside = await Cohort.create({
+      handle: "inside-cohort",
+      label: "Inside",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const cohortOutside = await Cohort.create({
+      handle: "outside-cohort",
+      label: "Outside",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+
+    // Allocate both Adams into cohortInside via student actors.
+    for (const personId of [adamA, adamB]) {
+      const actor = await User.Actor.upsert({
+        type: "student",
+        personId,
+        locationId: location.id,
+      });
+      await query.insert(s.cohortAllocation).values({
+        cohortId: cohortInside.id,
+        actorId: actor.id,
+      });
+    }
+
+    const insidePairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      cohortId: cohortInside.id,
+      threshold: 100,
+    });
+    assert.equal(insidePairs.length, 1);
+
+    const outsidePairs = await User.Person.listDuplicatePairsInLocation({
+      locationId: location.id,
+      cohortId: cohortOutside.id,
+      threshold: 100,
+    });
+    assert.equal(outsidePairs.length, 0);
+  }));
+
+test("mergePersons writes a personMergeAudit row when auditMetadata provided", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "merge-audit-loc",
+      name: "Merge Audit Location",
+    });
+    const { id: primaryId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Primary",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: duplicateId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Duplicate",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: operatorId } = await User.Person.getOrCreate({
+      firstName: "Operator",
+      lastName: "Audit",
+    });
+    await User.Person.linkToLocation({
+      personId: primaryId,
+      locationId: location.id,
+    });
+    await User.Person.linkToLocation({
+      personId: duplicateId,
+      locationId: location.id,
+    });
+
+    await User.Person.mergePersons({
+      personId: duplicateId,
+      targetPersonId: primaryId,
+      auditMetadata: {
+        performedByPersonId: operatorId,
+        locationId: location.id,
+        source: "personen_page",
+        score: 175,
+        reasons: ["same first name", "same birth date"],
+      },
+    });
+
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.targetPersonId, primaryId));
+    assert.equal(audits.length, 1);
+    // biome-ignore lint/style/noNonNullAssertion: bounded by length assertion above
+    const audit = audits[0]!;
+    assert.equal(audit.decisionKind, "merge");
+    assert.equal(audit.source, "personen_page");
+    assert.equal(audit.score, 175);
+    assert.deepEqual(audit.reasons, ["same first name", "same birth date"]);
+    assert.equal(audit.sourcePersonId, duplicateId);
+    assert.equal(audit.performedByPersonId, operatorId);
+  }));
+
+test("mergePersons without auditMetadata does NOT write an audit row", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "merge-no-audit-loc",
+      name: "Merge No Audit Location",
+    });
+    const { id: primaryId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Primary",
+      dateOfBirth: "2010-05-12",
+    });
+    const { id: duplicateId } = await User.Person.getOrCreate({
+      firstName: "Adam",
+      lastName: "Duplicate",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: primaryId,
+      locationId: location.id,
+    });
+
+    await User.Person.mergePersons({
+      personId: duplicateId,
+      targetPersonId: primaryId,
+    });
+
+    const audits = await query
+      .select()
+      .from(s.personMergeAudit)
+      .where(eq(s.personMergeAudit.targetPersonId, primaryId));
+    assert.equal(audits.length, 0);
+  }));
+
+test("isInLocationScope returns true for linked-active, false for revoked or absent", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "scope-loc",
+      name: "Scope Location",
+    });
+    const otherLocation = await Location.create({
+      handle: "scope-other-loc",
+      name: "Scope Other Location",
+    });
+
+    const { id: linkedActiveId } = await User.Person.getOrCreate({
+      firstName: "Linked",
+      lastName: "Active",
+    });
+    await User.Person.linkToLocation({
+      personId: linkedActiveId,
+      locationId: location.id,
+    });
+
+    const { id: revokedId } = await User.Person.getOrCreate({
+      firstName: "Revoked",
+      lastName: "Person",
+    });
+    await query.insert(s.personLocationLink).values({
+      personId: revokedId,
+      locationId: location.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const { id: outsiderId } = await User.Person.getOrCreate({
+      firstName: "Outsider",
+      lastName: "Person",
+    });
+    await User.Person.linkToLocation({
+      personId: outsiderId,
+      locationId: otherLocation.id,
+    });
+
+    assert.equal(
+      await User.Person.isInLocationScope({
+        personId: linkedActiveId,
+        locationId: location.id,
+      }),
+      true,
+    );
+    assert.equal(
+      await User.Person.isInLocationScope({
+        personId: revokedId,
+        locationId: location.id,
+      }),
+      false,
+    );
+    assert.equal(
+      await User.Person.isInLocationScope({
+        personId: outsiderId,
+        locationId: location.id,
+      }),
+      false,
+    );
+  }));
+
+test("searchForAutocompleteInLocation only returns linked-active persons", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const locationA = await Location.create({
+      handle: "search-loc-a",
+      name: "Search Location A",
+    });
+    const locationB = await Location.create({
+      handle: "search-loc-b",
+      name: "Search Location B",
+    });
+
+    const { id: insideId } = await User.Person.getOrCreate({
+      firstName: "Inside",
+      lastName: "Adam",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: insideId,
+      locationId: locationA.id,
+    });
+
+    const { id: outsideId } = await User.Person.getOrCreate({
+      firstName: "Outside",
+      lastName: "Adam",
+      dateOfBirth: "2010-05-13",
+    });
+    await User.Person.linkToLocation({
+      personId: outsideId,
+      locationId: locationB.id,
+    });
+
+    const { id: revokedId } = await User.Person.getOrCreate({
+      firstName: "Revoked",
+      lastName: "Adam",
+      dateOfBirth: "2010-05-14",
+    });
+    await query.insert(s.personLocationLink).values({
+      personId: revokedId,
+      locationId: locationA.id,
+      status: "revoked",
+      permissionLevel: "none",
+    });
+
+    const found = await User.Person.searchForAutocompleteInLocation({
+      q: "Adam",
+      locationId: locationA.id,
+    });
+    const ids = found.map((p) => p.id);
+    assert.ok(ids.includes(insideId));
+    assert.ok(!ids.includes(outsideId), "outsider must not appear");
+    assert.ok(!ids.includes(revokedId), "revoked must not appear");
+  }));
+
+test("commitBulkImport: tagsByRowIndex applied to cohort_allocation.tags", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-tags-location",
+      name: "Commit Tags Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Tagged",
+      lastName: "Bakker",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "tagged-cohort",
+      label: "Tagged Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "TagOperator",
+      lastName: "X",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Tagged",
+          lastName: "Bakker",
+          lastNamePrefix: null,
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+      tagsByRowIndex: {
+        "0": ["optimist", "tuesday-group"],
+      },
+    });
+
+    const allocation = await query
+      .select({ tags: s.cohortAllocation.tags })
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    assert.ok(allocation, "Expected one cohort_allocation");
+    assert.deepStrictEqual(
+      [...allocation.tags].sort(),
+      ["optimist", "tuesday-group"],
+      `Expected both tags applied, got ${JSON.stringify(allocation.tags)}`,
+    );
+  }));
+
+test("commitBulkImport: empty tagsByRowIndex → no tags column written", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-no-tags-location",
+      name: "Commit No Tags Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Untagged",
+      lastName: "Bakker",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "untagged-cohort",
+      label: "Untagged Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "NoTagOperator",
+      lastName: "X",
+    });
+
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [
+        {
+          rowIndex: 0,
+          firstName: "Untagged",
+          lastName: "Bakker",
+          lastNamePrefix: null,
+          dateOfBirth: "2010-05-12",
+          birthCity: "Amsterdam",
+          birthCountry: "nl",
+          email: null,
+        },
+      ],
+    });
+
+    // No tagsByRowIndex passed.
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+      },
+    });
+
+    const allocation = await query
+      .select({ tags: s.cohortAllocation.tags })
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      )
+      .then((rows) => rows[0]);
+
+    assert.ok(allocation, "Expected one cohort_allocation");
+    assert.deepStrictEqual(
+      allocation.tags,
+      [],
+      "Expected no tags applied when tagsByRowIndex omitted",
+    );
+  }));
+
+test("commitBulkImport: cross-row same_person → N allocations, each with that row's own tags", () =>
+  withTestTransaction(async () => {
+    const query = useQuery();
+    const location = await Location.create({
+      handle: "commit-tag-perrow-location",
+      name: "Commit Tag Per Row Location",
+    });
+    const { id: existingPersonId } = await User.Person.getOrCreate({
+      firstName: "Aggregate",
+      lastName: "Bakker",
+      dateOfBirth: "2010-05-12",
+    });
+    await User.Person.linkToLocation({
+      personId: existingPersonId,
+      locationId: location.id,
+    });
+    const { id: cohortId } = await Cohort.create({
+      handle: "tag-perrow-cohort",
+      label: "Tag Per Row Cohort",
+      locationId: location.id,
+      accessStartTime: dayjs().subtract(1, "day").toISOString(),
+      accessEndTime: dayjs().add(30, "day").toISOString(),
+    });
+    const { id: operatorPersonId } = await User.Person.getOrCreate({
+      firstName: "PerRowOperator",
+      lastName: "X",
+    });
+
+    // 3 paste rows for the same Adam, each with its own tag set.
+    // Operator's mental model: each row is one course/sub-group →
+    // 3 allocations, NOT a single allocation with merged tags.
+    const preview = await User.Person.previewBulkImport({
+      locationId: location.id,
+      performedByPersonId: operatorPersonId,
+      targetCohortId: cohortId,
+      roles: ["student"],
+      candidates: [0, 1, 2].map((rowIndex) => ({
+        rowIndex,
+        firstName: "Aggregate",
+        lastName: "Bakker",
+        lastNamePrefix: null,
+        dateOfBirth: "2010-05-12",
+        birthCity: "Amsterdam",
+        birthCountry: "nl",
+        email: null,
+      })),
+    });
+
+    await User.Person.commitBulkImport({
+      previewToken: preview.previewToken,
+      performedByPersonId: operatorPersonId,
+      decisions: {
+        "0": { kind: "use_existing", personId: existingPersonId },
+        "1": { kind: "use_existing", personId: existingPersonId },
+        "2": { kind: "use_existing", personId: existingPersonId },
+      },
+      tagsByRowIndex: {
+        "0": ["optimist"],
+        "1": ["dinsdag"],
+        "2": ["zondag-recital"],
+      },
+    });
+
+    const allocations = await query
+      .select({ tags: s.cohortAllocation.tags })
+      .from(s.cohortAllocation)
+      .innerJoin(s.actor, eq(s.actor.id, s.cohortAllocation.actorId))
+      .where(
+        and(
+          eq(s.cohortAllocation.cohortId, cohortId),
+          eq(s.actor.personId, existingPersonId),
+          isNull(s.cohortAllocation.deletedAt),
+        ),
+      );
+
+    assert.equal(
+      allocations.length,
+      3,
+      `Expected 3 cohort_allocations, got ${allocations.length}`,
+    );
+    const tagSets = allocations.map((a) => [...a.tags].sort().join(",")).sort();
+    assert.deepStrictEqual(
+      tagSets,
+      ["dinsdag", "optimist", "zondag-recital"],
+      `Expected each allocation to carry its own row's tags, got ${JSON.stringify(tagSets)}`,
     );
   }));

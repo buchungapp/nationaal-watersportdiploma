@@ -91,9 +91,41 @@ const columns = [
   columnHelper.accessor("certificate.handle", {
     id: "diploma",
     header: "Diploma",
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
       const value = getValue();
-      return value ? <Code>{getValue()}</Code> : null;
+      if (value) {
+        return <Code>{value}</Code>;
+      }
+
+      // Blocked rows: at least one module is fully complete on the cohort
+      // side, but every such module is already canonical from an earlier
+      // diploma — there is nothing new to issue. The most common cause is
+      // a recent person merge that folded a duplicate's allocation into a
+      // profile that already carries the diploma. Surface this loudly so
+      // an operator running end-of-cohort issuance investigates rather
+      // than leaving the student without their expected new diploma.
+      // Partial progress (e.g. 3/5 competencies in one module) is NOT
+      // blocked — keep the badge off those rows.
+      const moduleStatus = row.original.studentCurriculum?.moduleStatus ?? [];
+      const hasFullyCompleteModule = moduleStatus.some(
+        (m) =>
+          m.totalCompetencies > 0 &&
+          m.completedCompetencies === m.totalCompetencies,
+      );
+      const isBlocked =
+        moduleStatus.length > 0 &&
+        hasFullyCompleteModule &&
+        !moduleStatus.some((m) => m.newlyIssuable);
+
+      if (isBlocked) {
+        return (
+          <Badge color="amber" title="Klik op de regel voor uitleg.">
+            Geblokkeerd
+          </Badge>
+        );
+      }
+
+      return null;
     },
     enableSorting: false,
   }),
@@ -129,12 +161,16 @@ const columns = [
     (row) => {
       if (!row.studentCurriculum) return undefined;
 
-      const coreModulesCompleted = row.studentCurriculum.moduleStatus.filter(
-        ({ module: { type }, completedCompetencies, totalCompetencies }) =>
-          type === "required" && completedCompetencies === totalCompetencies,
+      // Count modules where issuing the certificate right now would
+      // mint at least one new canonical competency. A module that's
+      // already fully canonical from an earlier diploma doesn't count
+      // — there is nothing to issue for it. See option d.
+      const coreModulesIssuable = row.studentCurriculum.moduleStatus.filter(
+        ({ module: { type }, newlyIssuable }) =>
+          type === "required" && newlyIssuable,
       ).length;
 
-      return coreModulesCompleted;
+      return coreModulesIssuable;
     },
     {
       id: "kernmodules",
@@ -152,12 +188,7 @@ const columns = [
         return (
           <div className="flex items-center gap-x-1.5">
             <span className="font-medium text-zinc-950">
-              {
-                coreModules.filter(
-                  (status) =>
-                    status.completedCompetencies === status.totalCompetencies,
-                ).length
-              }
+              {coreModules.filter((status) => status.newlyIssuable).length}
             </span>
             <span className="text-zinc-500">/</span>
             <span className="text-zinc-950">{coreModules.length}</span>
@@ -170,13 +201,12 @@ const columns = [
     (row) => {
       if (!row.studentCurriculum) return undefined;
 
-      const electiveModulesCompleted =
-        row.studentCurriculum.moduleStatus.filter(
-          ({ module: { type }, completedCompetencies, totalCompetencies }) =>
-            type === "optional" && completedCompetencies === totalCompetencies,
-        ).length;
+      const electiveModulesIssuable = row.studentCurriculum.moduleStatus.filter(
+        ({ module: { type }, newlyIssuable }) =>
+          type === "optional" && newlyIssuable,
+      ).length;
 
-      return electiveModulesCompleted;
+      return electiveModulesIssuable;
     },
     {
       id: "keuzemodules",
@@ -195,12 +225,7 @@ const columns = [
         return (
           <div className="flex items-center gap-x-1.5">
             <span className="font-medium text-zinc-950">
-              {
-                electiveModules.filter(
-                  (status) =>
-                    status.completedCompetencies === status.totalCompetencies,
-                ).length
-              }
+              {electiveModules.filter((status) => status.newlyIssuable).length}
             </span>
             <span className="text-zinc-500">/</span>
             <span className="text-zinc-950">{electiveModules.length}</span>
@@ -310,6 +335,7 @@ export default function StudentsTable({
     Record<
       string,
       {
+        person: Student["person"];
         certificate: Student["certificate"];
         studentCurriculum: Student["studentCurriculum"];
       }
@@ -336,6 +362,8 @@ export default function StudentsTable({
                 ? // biome-ignore lint/style/noNonNullAssertion: intentional
                   rowSelection[key]!
                 : {
+                    // biome-ignore lint/style/noNonNullAssertion: intentional
+                    person: student!.person,
                     // biome-ignore lint/style/noNonNullAssertion: intentional
                     certificate: student!.certificate,
                     // biome-ignore lint/style/noNonNullAssertion: intentional

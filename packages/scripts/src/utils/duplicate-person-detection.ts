@@ -1,9 +1,12 @@
+import { User } from "@nawadi/core";
 import type { Database } from "@nawadi/db";
 import { type SQL, sql } from "drizzle-orm";
 
-export const DEFAULT_ANALYZE_THRESHOLD = 100;
-export const DEFAULT_MERGE_THRESHOLD = 150;
-export const DEFAULT_AUTO_MERGE_THRESHOLD = 180;
+export const {
+  DEFAULT_ANALYZE_THRESHOLD,
+  DEFAULT_MERGE_THRESHOLD,
+  DEFAULT_AUTO_MERGE_THRESHOLD,
+} = User.Person.DuplicateScoring;
 export const DEFAULT_LIMIT = 1000;
 
 export type DuplicatePerson = {
@@ -63,6 +66,18 @@ type DuplicatePersonRow = {
   same_birth_city: boolean;
 };
 
+// Build the column-reference set for each side of the self-join. The
+// scoring fragments accept `SQL` arguments and embed them into composite
+// expressions, so we wrap each column with `sql` to feed the templates.
+const cols = (alias: "p1" | "p2") => ({
+  firstNorm: sql`${sql.raw(alias)}.first_norm`,
+  lastNorm: sql`${sql.raw(alias)}.last_norm`,
+  fullLastNorm: sql`${sql.raw(alias)}.full_last_norm`,
+  dateOfBirth: sql`${sql.raw(alias)}.date_of_birth`,
+  birthCityNorm: sql`${sql.raw(alias)}.birth_city_norm`,
+  userId: sql`${sql.raw(alias)}.user_id`,
+});
+
 export function buildDuplicatePersonQuery(args: {
   threshold: number;
   limit: number;
@@ -97,6 +112,10 @@ export function buildDuplicatePersonQuery(args: {
   const scopedPairFilter = args.cohortId
     ? sql`AND (p1.in_scope OR p2.in_scope)`
     : sql``;
+
+  const p1 = cols("p1");
+  const p2 = cols("p2");
+  const D = User.Person.DuplicateScoring;
 
   return sql`
     WITH cohort_person_ids AS (
@@ -196,59 +215,20 @@ export function buildDuplicatePersonQuery(args: {
         p2.birth_city AS birth_city2,
         p2.created_at AS created_at2,
         TRUE AS same_user,
-        p1.first_norm = p2.first_norm AS same_first_name,
-        LEFT(p1.first_norm, 3) = LEFT(p2.first_norm, 3) AS similar_first_name,
-        p1.full_last_norm = p2.full_last_norm OR p1.last_norm = p2.last_norm AS same_last_name,
-        p1.date_of_birth IS NOT NULL
-          AND p1.date_of_birth = p2.date_of_birth AS same_birth_date,
-        p1.date_of_birth IS NOT NULL
-          AND p2.date_of_birth IS NOT NULL
-          AND ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 7 AS close_birth_date,
-        p1.birth_city_norm <> ''
-          AND p1.birth_city_norm = p2.birth_city_norm AS same_birth_city,
-        50 +
-        CASE
-          WHEN p1.first_norm = p2.first_norm THEN 50
-          WHEN LENGTH(p1.first_norm) >= 3
-            AND LENGTH(p2.first_norm) >= 3
-            AND LEFT(p1.first_norm, 3) = LEFT(p2.first_norm, 3) THEN 20
-          ELSE 0
-        END +
-        CASE
-          WHEN p1.full_last_norm <> '' AND p1.full_last_norm = p2.full_last_norm THEN 50
-          WHEN p1.last_norm <> '' AND p1.last_norm = p2.last_norm THEN 40
-          ELSE 0
-        END +
-        CASE
-          WHEN p1.date_of_birth IS NOT NULL AND p1.date_of_birth = p2.date_of_birth THEN 50
-          WHEN p1.date_of_birth IS NOT NULL
-            AND p2.date_of_birth IS NOT NULL
-            AND ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 1 THEN 40
-          WHEN p1.date_of_birth IS NOT NULL
-            AND p2.date_of_birth IS NOT NULL
-            AND ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 7 THEN 30
-          WHEN p1.date_of_birth IS NOT NULL
-            AND p2.date_of_birth IS NOT NULL
-            AND EXTRACT(YEAR FROM p1.date_of_birth::date) = EXTRACT(YEAR FROM p2.date_of_birth::date) THEN 20
-          ELSE 0
-        END +
-        CASE
-          WHEN p1.birth_city_norm <> '' AND p1.birth_city_norm = p2.birth_city_norm THEN 10
-          ELSE 0
-        END AS score
+        ${D.sameFirstName(p1.firstNorm, p2.firstNorm)} AS same_first_name,
+        ${D.similarFirstNamePrefixLoose(p1.firstNorm, p2.firstNorm)} AS similar_first_name,
+        (${D.sameLastNameWithPrefix(p1.fullLastNorm, p2.fullLastNorm)} OR ${D.sameLastNameLoose(p1.lastNorm, p2.lastNorm)}) AS same_last_name,
+        ${D.sameBirthDate(p1.dateOfBirth, p2.dateOfBirth)} AS same_birth_date,
+        ${D.closeBirthDate(p1.dateOfBirth, p2.dateOfBirth, 7)} AS close_birth_date,
+        ${D.sameBirthCity(p1.birthCityNorm, p2.birthCityNorm)} AS same_birth_city,
+        ${D.scoreSameUserPair(p1, p2)} AS score
       FROM normalized_persons p1
       JOIN normalized_persons p2 ON p1.user_id = p2.user_id
         AND p1.id < p2.id
         ${scopedPairFilter}
       WHERE p1.user_id IS NOT NULL
-        AND (
-          p1.first_norm = p2.first_norm
-          OR (
-            LENGTH(p1.first_norm) >= 3
-            AND LENGTH(p2.first_norm) >= 3
-            AND LEFT(p1.first_norm, 3) = LEFT(p2.first_norm, 3)
-          )
-        )
+        AND (${D.sameFirstName(p1.firstNorm, p2.firstNorm)}
+             OR ${D.similarFirstNamePrefix(p1.firstNorm, p2.firstNorm)})
     ),
     name_birth_matches AS (
       SELECT
@@ -276,35 +256,14 @@ export function buildDuplicatePersonQuery(args: {
         p2.date_of_birth AS date_of_birth2,
         p2.birth_city AS birth_city2,
         p2.created_at AS created_at2,
-        p1.user_id IS NOT NULL AND p1.user_id = p2.user_id AS same_user,
-        p1.first_norm = p2.first_norm AS same_first_name,
+        ${D.sameUser(p1.userId, p2.userId)} AS same_user,
+        ${D.sameFirstName(p1.firstNorm, p2.firstNorm)} AS same_first_name,
         FALSE AS similar_first_name,
-        p1.full_last_norm = p2.full_last_norm OR p1.last_norm = p2.last_norm AS same_last_name,
-        p1.date_of_birth = p2.date_of_birth AS same_birth_date,
-        ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 7 AS close_birth_date,
-        p1.birth_city_norm <> ''
-          AND p1.birth_city_norm = p2.birth_city_norm AS same_birth_city,
-        50 +
-        CASE
-          WHEN p1.date_of_birth = p2.date_of_birth THEN 30
-          ELSE 0
-        END +
-        CASE
-          WHEN p1.full_last_norm <> '' AND p1.full_last_norm = p2.full_last_norm THEN 60
-          ELSE 50
-        END +
-        CASE
-          WHEN p1.date_of_birth = p2.date_of_birth THEN 60
-          WHEN ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 1 THEN 45
-          WHEN ABS(p1.date_of_birth::date - p2.date_of_birth::date) <= 7 THEN 35
-          WHEN EXTRACT(YEAR FROM p1.date_of_birth::date) = EXTRACT(YEAR FROM p2.date_of_birth::date) THEN 25
-          WHEN ABS(EXTRACT(YEAR FROM p1.date_of_birth::date) - EXTRACT(YEAR FROM p2.date_of_birth::date)) = 1 THEN 15
-          ELSE 0
-        END +
-        CASE
-          WHEN p1.birth_city_norm <> '' AND p1.birth_city_norm = p2.birth_city_norm THEN 10
-          ELSE 0
-        END AS score
+        (${D.sameLastNameWithPrefix(p1.fullLastNorm, p2.fullLastNorm)} OR ${D.sameLastNameLoose(p1.lastNorm, p2.lastNorm)}) AS same_last_name,
+        ${D.sameBirthDate(p1.dateOfBirth, p2.dateOfBirth)} AS same_birth_date,
+        ${D.closeBirthDate(p1.dateOfBirth, p2.dateOfBirth, 7)} AS close_birth_date,
+        ${D.sameBirthCity(p1.birthCityNorm, p2.birthCityNorm)} AS same_birth_city,
+        ${D.scoreNameBirthPair(p1, p2)} AS score
       FROM normalized_persons p1
       JOIN normalized_persons p2 ON p1.id < p2.id
         ${scopedPairFilter}

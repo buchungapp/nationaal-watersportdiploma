@@ -20,6 +20,7 @@ const searchParamsParser = createLoader({
     parseAsStringLiteral([
       "uitgegeven",
       "klaar-voor-uitgifte",
+      "geblokkeerd",
       "geen-voortgang",
     ] as const),
   ),
@@ -59,20 +60,38 @@ export default async function Page(props: {
             throw new Error("Unexpected missing parsedSq.weergave");
           }
 
+          // Classification (option d):
+          //   uitgegeven       — diploma already issued for this allocation
+          //   klaar-voor-uitgifte — at least one module would mint new
+          //                       canonical content right now
+          //   geblokkeerd      — at least one module is fully complete on
+          //                       the cohort side BUT every such module is
+          //                       already canonical from an earlier cert
+          //                       (typically post-merge); issuance would
+          //                       produce nothing. Partial progress (e.g.
+          //                       3/5 competencies) is NOT geblokkeerd —
+          //                       those students are simply not done yet
+          //                       and belong in geen-voortgang.
+          //   geen-voortgang   — no fully-complete module, no cert
           const isIssued = !!student.certificate;
-          const isReady =
-            student.studentCurriculum?.moduleStatus.some(
-              (module) => module.uncompletedCompetencies < 1,
-            ) ?? false;
+          const moduleStatus = student.studentCurriculum?.moduleStatus ?? [];
+          const isReady = moduleStatus.some((module) => module.newlyIssuable);
+          const hasFullyCompleteModule = moduleStatus.some(
+            (module) =>
+              module.totalCompetencies > 0 &&
+              module.completedCompetencies === module.totalCompetencies,
+          );
+          const isBlocked = !isIssued && !isReady && hasFullyCompleteModule;
+          const isNoProgress =
+            !isIssued && !isReady && !hasFullyCompleteModule;
 
           return (
             (parsedSq.weergave.includes("uitgegeven") && isIssued) ||
             (parsedSq.weergave.includes("klaar-voor-uitgifte") &&
               !isIssued &&
               isReady) ||
-            (parsedSq.weergave.includes("geen-voortgang") &&
-              !isIssued &&
-              !isReady)
+            (parsedSq.weergave.includes("geblokkeerd") && isBlocked) ||
+            (parsedSq.weergave.includes("geen-voortgang") && isNoProgress)
           );
         })
       : students;

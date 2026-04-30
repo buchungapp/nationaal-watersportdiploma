@@ -45,6 +45,17 @@ export async function addUsers() {
     personId: adminPerson.id,
   });
 
+  // Mark Jan as the primary profile of the admin account. Without this,
+  // operator-facing surfaces (bulk import preview, /personen/duplicaten,
+  // cohort banner) gate the operator out because getPrimaryPerson(authUser)
+  // resolves to no person. The dashboard exposes a "Maak hoofdprofiel"
+  // button for this, but a fresh seed should land in a usable state for
+  // dev without that manual click.
+  await User.setPrimaryPerson({
+    userId: adminUser.id,
+    personId: adminPerson.id,
+  });
+
   // Instructor
   const instructorUser = await User.getOrCreateFromEmail({
     email: "emma@zeilschool-de-optimist.nl",
@@ -69,6 +80,12 @@ export async function addUsers() {
   await User.Actor.upsert({
     locationId: LOCATION_ID,
     type: "instructor",
+    personId: instructorPerson.id,
+  });
+
+  // Same primary-profile fix for Emma so the instructor surfaces work.
+  await User.setPrimaryPerson({
+    userId: instructorUser.id,
     personId: instructorPerson.id,
   });
 

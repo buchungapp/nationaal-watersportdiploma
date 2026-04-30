@@ -267,6 +267,13 @@
       "when": 1777482808664,
       "tag": "0037_yielding_ogun",
       "breakpoints": false
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1777483280903,
+      "tag": "0038_daily_next_avengers",
+      "breakpoints": false
     }
   ]
 }

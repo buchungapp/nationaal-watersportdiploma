@@ -28,26 +28,36 @@ export default async function Page(props: {
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
-  const cohortPromise = retrieveLocationByHandle(params.location).then(
-    (location) =>
-      retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
-        if (!cohort) {
-          notFound();
-        }
-        return cohort;
-      }),
+  // Single location lookup — `retrieveLocationByHandle` is "use cache"
+  // annotated, but sharing the promise here makes the dedup explicit and
+  // saves the framework an extra cache check on the parallel callers.
+  const locationPromise = retrieveLocationByHandle(params.location);
+  const cohortPromise = locationPromise.then((location) =>
+    retrieveCohortByHandle(params.cohort, location.id).then((cohort) => {
+      if (!cohort) {
+        notFound();
+      }
+      return cohort;
+    }),
   );
 
-  const [cohort, students, location, instructorAllocation, permissions] =
-    await Promise.all([
-      cohortPromise,
-      cohortPromise.then((cohort) =>
-        listStudentsWithCurriculaByCohortId(cohort.id),
-      ),
-      retrieveLocationByHandle(params.location),
-      cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
-      cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
-    ]);
+  const [
+    cohort,
+    students,
+    location,
+    instructorAllocation,
+    permissions,
+    locationRoles,
+  ] = await Promise.all([
+    cohortPromise,
+    cohortPromise.then((cohort) =>
+      listStudentsWithCurriculaByCohortId(cohort.id),
+    ),
+    locationPromise,
+    cohortPromise.then((cohort) => isInstructorInCohort(cohort.id)),
+    cohortPromise.then((cohort) => listPrivilegesForCohort(cohort.id)),
+    locationPromise.then((loc) => listRolesForLocation(loc.id)),
+  ]);
 
   const isCohortAdmin = permissions.length > 0;
   const defaultView =
@@ -133,8 +143,7 @@ export default async function Page(props: {
       studentsProgressPromise={studentProgress([
         ...new Set(searchedStudents.map((student) => student.person.id)),
       ])}
-      // TODO: this can be optimized
-      locationRoles={await listRolesForLocation(location.id)}
+      locationRoles={locationRoles}
       noOptionsLabel={
         parsedSq.query && parsedSq.query.length > 2 ? (
           "Geen resultaten gevonden"

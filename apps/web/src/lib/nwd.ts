@@ -167,6 +167,18 @@ async function isActiveActorTypeInLocation({
   return true as const;
 }
 
+// Exported wrapper around the private isActiveActorTypeInLocation so that
+// server actions outside this module (operator merge actions) can enforce
+// the same auth check without re-implementing the listLocationsByRole
+// + match logic.
+export async function isActiveActorTypeInLocationServerHelper(args: {
+  personId: string;
+  locationId: string;
+  actorType: Exclude<ActorType, "pvb_beoordelaar">[];
+}) {
+  return isActiveActorTypeInLocation(args);
+}
+
 async function makeRequest<T>(cb: () => Promise<T>) {
   try {
     return await withSupabaseClient(supabaseConfig, async () => {
@@ -4676,3 +4688,215 @@ export const createBulkPvbs = async ({
     };
   });
 };
+
+export async function previewBulkImport({
+  locationId,
+  roles,
+  csvCandidates,
+  parseErrors,
+  targetCohortId,
+}: {
+  locationId: string;
+  roles: ActorType[];
+  csvCandidates: Array<{
+    rowIndex: number;
+    email: string | null;
+    firstName: string;
+    lastNamePrefix: string | null;
+    lastName: string | null;
+    dateOfBirth: string; // YYYY-MM-DD
+    birthCity: string;
+    birthCountry: string;
+  }>;
+  parseErrors: Array<{ rowIndex: number; error: string }>;
+  targetCohortId?: string;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: operator.id,
+    });
+
+    const filteredRoles = roles.filter(
+      (r): r is "student" | "instructor" | "location_admin" =>
+        r === "student" || r === "instructor" || r === "location_admin",
+    );
+    if (filteredRoles.length === 0) {
+      throw new Error("At least one role required");
+    }
+
+    return User.Person.previewBulkImport({
+      locationId,
+      performedByPersonId: operator.id,
+      targetCohortId,
+      roles: filteredRoles as [
+        "student" | "instructor" | "location_admin",
+        ...("student" | "instructor" | "location_admin")[],
+      ],
+      candidates: csvCandidates,
+      parseErrors,
+    });
+  });
+}
+
+export async function commitBulkImport({
+  previewToken,
+  locationId,
+  roles,
+  decisions,
+  candidateInputsByRowIndex,
+  tagsByRowIndex,
+}: {
+  previewToken: string;
+  locationId: string;
+  roles: ActorType[];
+  decisions: Record<
+    string,
+    | { kind: "create_new"; shareNewPersonWithGroup?: string }
+    | { kind: "use_existing"; personId: string }
+    | {
+        kind: "skip";
+        reason?:
+          | "cohort_conflict"
+          | "cross_row_conflict"
+          | "parse_error"
+          | "operator";
+      }
+  >;
+  candidateInputsByRowIndex: Record<
+    string,
+    {
+      email: string;
+      firstName: string;
+      lastNamePrefix: string | null;
+      lastName: string;
+      dateOfBirth: string;
+      birthCity: string;
+      birthCountry: string;
+      tags?: string[];
+    }
+  >;
+  // Optional rowIndex → tags[]. When the preview targets a cohort,
+  // these are applied as cohort_allocation.tags after the allocation
+  // insert. Pass-through to core commitBulkImport.
+  tagsByRowIndex?: Record<string, string[]>;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: operator.id,
+    });
+
+    const filteredRoles = roles.filter(
+      (r): r is "student" | "instructor" | "location_admin" =>
+        r === "student" || r === "instructor" || r === "location_admin",
+    );
+    if (filteredRoles.length === 0) {
+      throw new Error("At least one role required");
+    }
+    const rolesNonEmpty = filteredRoles as [ActorType, ...ActorType[]];
+
+    return User.Person.commitBulkImport({
+      previewToken,
+      performedByPersonId: operator.id,
+      decisions,
+      tagsByRowIndex,
+      createPerson: async (input) => {
+        const candidate = findCandidateForCreate(
+          input,
+          candidateInputsByRowIndex,
+        );
+        if (!candidate) {
+          throw new Error(
+            "Kon de pasted rij niet terugvinden — neem contact op met NWD",
+          );
+        }
+        const created = await createPersonForLocation(
+          locationId,
+          rolesNonEmpty,
+          {
+            email: candidate.email,
+            firstName: candidate.firstName,
+            lastNamePrefix: candidate.lastNamePrefix,
+            lastName: candidate.lastName,
+            dateOfBirth: new Date(candidate.dateOfBirth),
+            birthCity: candidate.birthCity,
+            birthCountry: candidate.birthCountry,
+          },
+        );
+        return { personId: created.id };
+      },
+    });
+  });
+}
+
+function findCandidateForCreate(
+  input: {
+    firstName: string;
+    lastName: string | null;
+    dateOfBirth: string;
+  },
+  byRowIndex: Record<
+    string,
+    {
+      email: string;
+      firstName: string;
+      lastName: string;
+      dateOfBirth: string;
+      lastNamePrefix: string | null;
+      birthCity: string;
+      birthCountry: string;
+    }
+  >,
+): {
+  email: string;
+  firstName: string;
+  lastNamePrefix: string | null;
+  lastName: string;
+  dateOfBirth: string;
+  birthCity: string;
+  birthCountry: string;
+} | null {
+  const match = Object.values(byRowIndex).find(
+    (row) =>
+      row.firstName === input.firstName &&
+      row.lastName === (input.lastName ?? "") &&
+      row.dateOfBirth === input.dateOfBirth,
+  );
+  return match ?? null;
+}
+
+export async function listLocationDuplicatePairs({
+  locationId,
+  cohortId,
+  threshold,
+  limit,
+}: {
+  locationId: string;
+  cohortId?: string;
+  threshold?: number;
+  limit?: number;
+}) {
+  return makeRequest(async () => {
+    const authUser = await getUserOrThrow();
+    const operator = await getPrimaryPerson(authUser);
+    await isActiveActorTypeInLocation({
+      actorType: ["location_admin"],
+      locationId,
+      personId: operator.id,
+    });
+
+    return User.Person.listDuplicatePairsInLocation({
+      locationId,
+      cohortId,
+      threshold,
+      limit,
+    });
+  });
+}

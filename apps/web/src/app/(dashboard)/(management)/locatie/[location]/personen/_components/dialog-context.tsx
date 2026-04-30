@@ -5,15 +5,17 @@ import {
   DropdownButton,
   DropdownMenu,
 } from "~/app/(dashboard)/_components/dropdown";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import { listCountries, retrieveLocationByHandle } from "~/lib/nwd";
 import { DialogButtons, DialogsClient } from "./dialog-context-client";
 
 type DialogsProps = { params: Promise<{ location: string }> };
 
 async function DialogsContent(props: DialogsProps) {
-  const [location, countries] = await Promise.all([
+  const [location, countries, useNewBulkImport] = await Promise.all([
     props.params.then(({ location }) => retrieveLocationByHandle(location)),
     listCountries(),
+    operatorIdentityWorkflowEnabled(),
   ]);
 
   return (
@@ -27,7 +29,11 @@ async function DialogsContent(props: DialogsProps) {
           <DialogButtons />
         </DropdownMenu>
       </Dropdown>
-      <DialogsClient locationId={location.id} countries={countries} />
+      <DialogsClient
+        locationId={location.id}
+        countries={countries}
+        useNewBulkImport={useNewBulkImport}
+      />
     </>
   );
 }

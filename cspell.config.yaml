@@ -152,9 +152,25 @@ words:
   - unredacted
   - Uturn
   - wordprocessingml
+  - aandachtsstip
   - alnum
   - DSLT
   - repointing
+  - exfiltration
+  - recognise
+  - placeofbirth
+  - countryofbirth
+  - syns
+  - gstack
+  - GSTACK
+  - cand
+  - trgm
+  - devex
+  - evals
+  - devries
+  - adamovic
+  - scur
+  - Vires
 ignoreWords:
   - TERMS
   - transform

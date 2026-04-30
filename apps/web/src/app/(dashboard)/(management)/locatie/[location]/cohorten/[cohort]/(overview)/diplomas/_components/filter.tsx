@@ -19,6 +19,7 @@ import {
 const options = [
   "uitgegeven",
   "klaar-voor-uitgifte",
+  "geblokkeerd",
   "geen-voortgang",
 ] as const;
 
@@ -69,6 +70,19 @@ export function FilterSelect() {
             <Description>
               Toon regels die nog geen diploma hebben, maar wel minimaal één
               afgeronde module.
+            </Description>
+          </CheckboxField>
+
+          <CheckboxField>
+            <Checkbox
+              onClick={() => toggleValue("geblokkeerd")}
+              checked={query?.includes("geblokkeerd")}
+            />
+            <Label>Geblokkeerd</Label>
+            <Description>
+              Voortgang is geboekt, maar elke afgeronde module is al via een
+              eerder diploma behaald — er is niets nieuws uit te reiken.
+              Controleer de inschrijving.
             </Description>
           </CheckboxField>
 

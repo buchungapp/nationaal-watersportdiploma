@@ -7,6 +7,8 @@ import {
 } from "nuqs/server";
 import { Suspense } from "react";
 import { Heading } from "~/app/(dashboard)/_components/heading";
+import { TextLink } from "~/app/(dashboard)/_components/text";
+import { operatorIdentityWorkflowEnabled } from "~/lib/flags";
 import {
   listPersonsForLocationWithPagination,
   retrieveLocationByHandle,
@@ -67,6 +69,7 @@ export default function Page(props: {
       <div className="flex flex-wrap justify-between items-end gap-4">
         <div className="sm:flex-1 max-sm:w-full">
           <Heading>Personen</Heading>
+          <DuplicatesLink params={props.params} />
           <div className="flex gap-4 mt-4 max-w-xl">
             <Search placeholder="Doorzoek personen..." />
             <FilterSelect />
@@ -82,5 +85,25 @@ export default function Page(props: {
         <PersonsTable params={props.params} searchParams={props.searchParams} />
       </Suspense>
     </DialogWrapper>
+  );
+}
+
+async function DuplicatesLink({
+  params,
+}: {
+  params: Promise<{ location: string }>;
+}) {
+  // Hidden when the operator-identity-workflow flag is off — same flag
+  // gates the /personen/duplicaten route itself, so this entry point
+  // would otherwise lead to a 404.
+  if (!(await operatorIdentityWorkflowEnabled())) return null;
+
+  const { location } = await params;
+  return (
+    <div className="mt-2 text-sm">
+      <TextLink href={`/locatie/${location}/personen/duplicaten`}>
+        Mogelijke duplicaten beoordelen →
+      </TextLink>
+    </div>
   );
 }
